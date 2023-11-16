@@ -27,13 +27,13 @@ namespace ESM
 
         struct SkillBonus
         {
-            int mSkill; // SkillEnum
-            int mBonus;
+            int32_t mSkill; // SkillEnum
+            int32_t mBonus;
         };
 
         struct MaleFemale
         {
-            int mMale, mFemale;
+            int32_t mMale, mFemale;
 
             int getValue(bool male) const;
         };
@@ -63,13 +63,13 @@ namespace ESM
             // as 'height' times 128. This has not been tested yet.
             MaleFemaleF mHeight, mWeight;
 
-            int mFlags; // 0x1 - playable, 0x2 - beast race
+            int32_t mFlags; // 0x1 - playable, 0x2 - beast race
 
         }; // Size = 140 bytes
 
         RADTstruct mData;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         std::string mName, mDescription;
         RefId mId;
         SpellList mPowers;

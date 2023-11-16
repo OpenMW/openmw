@@ -279,6 +279,7 @@ namespace fx
         rt.mTarget->setSourceType(GL_UNSIGNED_BYTE);
         rt.mTarget->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         rt.mTarget->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        rt.mTarget->setName(std::string(mBlockName));
 
         while (!isNext<Lexer::Close_bracket>() && !isNext<Lexer::Eof>())
         {
@@ -312,6 +313,8 @@ namespace fx
                 rt.mTarget->setSourceFormat(parseSourceFormat());
             else if (key == "mipmaps")
                 rt.mMipMap = parseBool();
+            else if (key == "clear_color")
+                rt.mClearColor = parseVec<osg::Vec4f, Lexer::Vec4>();
             else
                 error(Misc::StringUtils::format("unexpected key '%s'", std::string(key)));
 
@@ -797,9 +800,6 @@ namespace fx
         if (!pass)
             pass = std::make_shared<fx::Pass>();
 
-        bool clear = true;
-        osg::Vec4f clearColor = { 1, 1, 1, 1 };
-
         while (!isNext<Lexer::Eof>())
         {
             expect<Lexer::Literal>("invalid key in block header");
@@ -843,10 +843,6 @@ namespace fx
                 if (blendEq != osg::BlendEquation::FUNC_ADD)
                     pass->mBlendEq = blendEq;
             }
-            else if (key == "clear")
-                clear = parseBool();
-            else if (key == "clear_color")
-                clearColor = parseVec<osg::Vec4f, Lexer::Vec4>();
             else
                 error(Misc::StringUtils::format("unrecognized key '%s' in block header", std::string(key)));
 
@@ -863,9 +859,6 @@ namespace fx
             if (std::holds_alternative<Lexer::Close_Parenthesis>(mToken))
                 return;
         }
-
-        if (clear)
-            pass->mClearColor = clearColor;
 
         error("malformed block header");
     }

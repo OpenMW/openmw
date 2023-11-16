@@ -242,7 +242,7 @@ vec3 viewNormal = normalize(gl_NormalMatrix * normal);
     matSpec *= specStrength;
     if (matSpec != vec3(0.0))
     {
-        gl_FragData[0].xyz += getSpecular(viewNormal, viewVec, shininess, matSpec) * shadowing;
+        gl_FragData[0].xyz += matSpec * getSpecular(viewNormal, passViewPos, shininess, shadowing);
     }
 
     gl_FragData[0] = applyFogAtPos(gl_FragData[0], passViewPos, far);

@@ -77,6 +77,7 @@ namespace Nif
         RC_BSBound,
         RC_BSBoneLODExtraData,
         RC_BSClothExtraData,
+        RC_BSCollisionQueryProxyExtraData,
         RC_BSConnectPointChildren,
         RC_BSConnectPointParents,
         RC_BSDecalPlacementVectorExtraData,

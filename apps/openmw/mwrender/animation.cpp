@@ -1235,9 +1235,11 @@ namespace MWRender
             mRootController->setEnabled(enable);
             if (enable)
             {
-                mRootController->setRotate(osg::Quat(mLegsYawRadians, osg::Vec3f(0, 0, 1))
-                    * osg::Quat(mBodyPitchRadians, osg::Vec3f(1, 0, 0)));
+                osg::Quat legYaw = osg::Quat(mLegsYawRadians, osg::Vec3f(0, 0, 1));
+                mRootController->setRotate(legYaw * osg::Quat(mBodyPitchRadians, osg::Vec3f(1, 0, 0)));
                 yawOffset = mLegsYawRadians;
+                // When yawing the root, also update the accumulated movement.
+                movement = legYaw * movement;
             }
         }
         if (mSpineController)

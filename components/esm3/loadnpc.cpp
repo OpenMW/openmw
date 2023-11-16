@@ -82,7 +82,7 @@ namespace ESM
                     break;
                 case fourCC("FLAG"):
                     hasFlags = true;
-                    int flags;
+                    int32_t flags;
                     esm.getHT(flags);
                     mFlags = flags & 0xFF;
                     mBloodType = ((flags >> 8) & 0xFF) >> 2;

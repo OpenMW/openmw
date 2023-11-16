@@ -22,13 +22,19 @@ namespace MWRender
     class PingPongCanvas : public osg::Geometry
     {
     public:
-        PingPongCanvas(Shader::ShaderManager& shaderManager);
+        PingPongCanvas(
+            Shader::ShaderManager& shaderManager, const std::shared_ptr<LuminanceCalculator>& luminanceCalculator);
 
         void drawGeometry(osg::RenderInfo& renderInfo) const;
 
         void drawImplementation(osg::RenderInfo& renderInfo) const override;
 
         void dirty() { mDirty = true; }
+
+        void setDirtyAttachments(const std::vector<fx::Types::RenderTarget>& attachments)
+        {
+            mDirtyAttachments = attachments;
+        }
 
         const fx::DispatchArray& getPasses() { return mPasses; }
 
@@ -65,11 +71,12 @@ namespace MWRender
         osg::ref_ptr<osg::Texture> mTextureNormals;
 
         mutable bool mDirty = false;
+        mutable std::vector<fx::Types::RenderTarget> mDirtyAttachments;
         mutable osg::ref_ptr<osg::Viewport> mRenderViewport;
         mutable osg::ref_ptr<osg::FrameBufferObject> mMultiviewResolveFramebuffer;
         mutable osg::ref_ptr<osg::FrameBufferObject> mDestinationFBO;
         mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
-        mutable LuminanceCalculator mLuminanceCalculator;
+        mutable std::shared_ptr<LuminanceCalculator> mLuminanceCalculator;
     };
 }
 

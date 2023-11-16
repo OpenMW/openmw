@@ -280,8 +280,9 @@ namespace Terrain
     QuadTreeWorld::QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
         Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask,
         int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize,
-        bool debugChunks, ESM::RefId worldspace)
-        : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, worldspace, preCompileMask, borderMask)
+        bool debugChunks, ESM::RefId worldspace, double expiryDelay)
+        : TerrainGrid(
+            parent, compileRoot, resourceSystem, storage, nodeMask, worldspace, expiryDelay, preCompileMask, borderMask)
         , mViewDataMap(new ViewDataMap)
         , mQuadTreeBuilt(false)
         , mLodFactor(lodFactor)

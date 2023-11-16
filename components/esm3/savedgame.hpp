@@ -20,7 +20,7 @@ namespace ESM
 
         std::vector<std::string> mContentFiles;
         std::string mPlayerName;
-        int mPlayerLevel;
+        int32_t mPlayerLevel;
 
         // ID of class
         ESM::RefId mPlayerClassId;
@@ -34,7 +34,7 @@ namespace ESM
         std::string mDescription;
         std::vector<char> mScreenshot; // raw jpg-encoded data
 
-        int mCurrentDay = 0;
+        int32_t mCurrentDay = 0;
         float mCurrentHealth = 0;
         float mMaximumHealth = 0;
 

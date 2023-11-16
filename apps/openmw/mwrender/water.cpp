@@ -265,7 +265,8 @@ namespace MWRender
             camera->setNodeMask(Mask_RenderToTexture);
 
             if (Settings::water().mRefractionScale != 1) // TODO: to be removed with issue #5709
-                SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
+                SceneUtil::ShadowManager::disableShadowsForStateSet(
+                    Settings::shadows(), *camera->getOrCreateStateSet());
         }
 
         void apply(osg::Camera* camera) override
@@ -341,7 +342,7 @@ namespace MWRender
             camera->addChild(mClipCullNode);
             camera->setNodeMask(Mask_RenderToTexture);
 
-            SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
+            SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *camera->getOrCreateStateSet());
         }
 
         void apply(osg::Camera* camera) override

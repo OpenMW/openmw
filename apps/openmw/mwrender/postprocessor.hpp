@@ -204,7 +204,7 @@ namespace MWRender
 
         void createObjectsForFrame(size_t frameId);
 
-        void dirtyTechniques();
+        void dirtyTechniques(bool dirtyAttachments = false);
 
         void update(size_t frameId);
 

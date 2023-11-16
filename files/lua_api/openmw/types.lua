@@ -16,6 +16,12 @@
 -- @return #number
 
 ---
+-- Check if the given actor is dead.
+-- @function [parent=#Actor] isDead
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
 -- Agent bounds to be used for pathfinding functions.
 -- @function [parent=#Actor] getPathfindingAgentBounds
 -- @param openmw.core#GameObject actor
@@ -959,7 +965,6 @@
 -- Whether teleportation for this player is enabled.
 -- @function [parent=#Player] isTeleportingEnabled
 -- @param openmw.core#GameObject player
--- @param #boolean player
 -- @return #boolean
 
 ---

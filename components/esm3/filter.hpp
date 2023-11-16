@@ -17,7 +17,7 @@ namespace ESM
 
         static constexpr std::string_view getRecordType() { return "Filter"; }
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
 
         std::string mDescription;

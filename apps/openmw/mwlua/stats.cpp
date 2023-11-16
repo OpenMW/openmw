@@ -457,6 +457,9 @@ namespace MWLua
                 return nullptr;
             return &*rec.mSchool;
         });
+        skillT["attribute"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string {
+            return ESM::Attribute::indexToRefId(rec.mData.mAttribute).serializeText();
+        });
 
         auto schoolT = context.mLua->sol().new_usertype<ESM::MagicSchool>("MagicSchool");
         schoolT[sol::meta_function::to_string]

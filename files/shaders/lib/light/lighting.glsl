@@ -90,15 +90,47 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
     }
 }
 
-vec3 getSpecular(vec3 viewNormal, vec3 viewDirection, float shininess, vec3 matSpec)
+float calcSpecIntensity(vec3 viewNormal, vec3 viewDir, float shininess, vec3 lightDir)
 {
-    vec3 lightDir = normalize(lcalcPosition(0));
-    float NdotL = dot(viewNormal, lightDir);
-    if (NdotL <= 0.0)
-        return vec3(0.0);
-    vec3 halfVec = normalize(lightDir - viewDirection);
-    float NdotH = dot(viewNormal, halfVec);
-    return pow(max(NdotH, 0.0), max(1e-4, shininess)) * lcalcSpecular(0).xyz * matSpec;
+    if (dot(viewNormal, lightDir) > 0.0)
+    {
+        vec3 halfVec = normalize(lightDir - viewDir);
+        float NdotH = max(dot(viewNormal, halfVec), 0.0);
+        return pow(NdotH, shininess);
+    }
+
+    return 0.0;
+}
+
+vec3 getSpecular(vec3 viewNormal, vec3 viewPos, float shininess, float shadowing)
+{
+    shininess = max(shininess, 1e-4);
+    vec3 viewDir = normalize(viewPos);
+    vec3 specularLight = lcalcSpecular(0).xyz * calcSpecIntensity(viewNormal, viewDir, shininess, normalize(lcalcPosition(0)));
+    specularLight *= shadowing;
+
+    for (int i = @startLight; i < @endLight; ++i)
+    {
+#if @lightingMethodUBO
+        int lightIndex = PointLightIndex[i];
+#else
+        int lightIndex = i;
+#endif
+
+        vec3 lightPos = lcalcPosition(lightIndex) - viewPos;
+        float lightDistance = length(lightPos);
+
+#if !@lightingMethodFFP
+        if (lightDistance > lcalcRadius(lightIndex) * 2.0)
+            continue;
+#endif
+
+        float illumination = lcalcIllumination(lightIndex, lightDistance);
+        float intensity = calcSpecIntensity(viewNormal, viewDir, shininess, normalize(lightPos));
+        specularLight += lcalcSpecular(lightIndex).xyz * intensity * illumination;
+    }
+
+    return specularLight;
 }
 
 #endif

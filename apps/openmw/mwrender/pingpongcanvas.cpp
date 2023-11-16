@@ -10,9 +10,11 @@
 
 namespace MWRender
 {
-    PingPongCanvas::PingPongCanvas(Shader::ShaderManager& shaderManager)
+    PingPongCanvas::PingPongCanvas(
+        Shader::ShaderManager& shaderManager, const std::shared_ptr<LuminanceCalculator>& luminanceCalculator)
         : mFallbackStateSet(new osg::StateSet)
         , mMultiviewResolveStateSet(new osg::StateSet)
+        , mLuminanceCalculator(luminanceCalculator)
     {
         setUseDisplayList(false);
         setUseVertexBufferObjects(true);
@@ -26,8 +28,7 @@ namespace MWRender
 
         addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, 3));
 
-        mLuminanceCalculator = LuminanceCalculator(shaderManager);
-        mLuminanceCalculator.disable();
+        mLuminanceCalculator->disable();
 
         Shader::ShaderManager::DefineMap defines;
         Stereo::shaderStereoDefines(defines);
@@ -142,7 +143,7 @@ namespace MWRender
                         .getTexture());
             }
 
-            mLuminanceCalculator.dirty(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
+            mLuminanceCalculator->dirty(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
 
             if (Stereo::getStereo())
                 mRenderViewport
@@ -158,11 +159,11 @@ namespace MWRender
                 { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT2_EXT },
                 { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT } } };
 
-        (mAvgLum) ? mLuminanceCalculator.enable() : mLuminanceCalculator.disable();
+        (mAvgLum) ? mLuminanceCalculator->enable() : mLuminanceCalculator->disable();
 
         // A histogram based approach is superior way to calculate scene luminance. Using mipmaps is more broadly
         // supported, so that's what we use for now.
-        mLuminanceCalculator.draw(*this, renderInfo, state, ext, frameId);
+        mLuminanceCalculator->draw(*this, renderInfo, state, ext, frameId);
 
         auto buffer = buffers[0];
 
@@ -195,6 +196,39 @@ namespace MWRender
             }
         };
 
+        // When textures are created (or resized) we need to either dirty them and/or clear them.
+        // Otherwise, there will be undefined behavior when reading from a texture that has yet to be written to in a
+        // later pass.
+        for (const auto& attachment : mDirtyAttachments)
+        {
+            const auto [w, h]
+                = attachment.mSize.get(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
+
+            attachment.mTarget->setTextureSize(w, h);
+            if (attachment.mMipMap)
+                attachment.mTarget->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+            attachment.mTarget->dirtyTextureObject();
+
+            osg::ref_ptr<osg::FrameBufferObject> fbo = new osg::FrameBufferObject;
+
+            fbo->setAttachment(
+                osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(attachment.mTarget));
+            fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+
+            glViewport(0, 0, attachment.mTarget->getTextureWidth(), attachment.mTarget->getTextureHeight());
+            state.haveAppliedAttribute(osg::StateAttribute::VIEWPORT);
+            glClearColor(attachment.mClearColor.r(), attachment.mClearColor.g(), attachment.mClearColor.b(),
+                attachment.mClearColor.a());
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            if (attachment.mTarget->getNumMipmapLevels() > 0)
+            {
+                state.setActiveTextureUnit(0);
+                state.applyTextureAttribute(0, attachment.mTarget);
+                ext->glGenerateMipmap(GL_TEXTURE_2D);
+            }
+        }
+
         for (const size_t& index : filtered)
         {
             const auto& node = mPasses[index];
@@ -202,8 +236,8 @@ namespace MWRender
             node.mRootStateSet->setTextureAttribute(PostProcessor::Unit_Depth, mTextureDepth);
 
             if (mAvgLum)
-                node.mRootStateSet->setTextureAttribute(
-                    PostProcessor::TextureUnits::Unit_EyeAdaptation, mLuminanceCalculator.getLuminanceTexture(frameId));
+                node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_EyeAdaptation,
+                    mLuminanceCalculator->getLuminanceTexture(frameId));
 
             if (mTextureNormals)
                 node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_Normals, mTextureNormals);
@@ -238,6 +272,23 @@ namespace MWRender
 
                 if (pass.mRenderTarget)
                 {
+                    if (mDirtyAttachments.size() > 0)
+                    {
+                        const auto [w, h]
+                            = pass.mSize.get(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
+
+                        // Custom render targets must be shared between frame ids, so it's impossible to double buffer
+                        // without expensive copies. That means the only thread-safe place to resize is in the draw
+                        // thread.
+                        osg::Texture2D* texture = const_cast<osg::Texture2D*>(dynamic_cast<const osg::Texture2D*>(
+                            pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
+                                .getTexture()));
+
+                        texture->setTextureSize(w, h);
+                        texture->setNumMipmapLevels(pass.mRenderTexture->getNumMipmapLevels());
+                        texture->dirtyTextureObject();
+                    }
+
                     pass.mRenderTarget->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
 
                     if (pass.mRenderTexture->getNumMipmapLevels() > 0)
@@ -311,5 +362,7 @@ namespace MWRender
         {
             bindDestinationFbo();
         }
+
+        mDirtyAttachments.clear();
     }
 }

@@ -231,7 +231,7 @@ namespace Nif
                 info.read(nif);
         }
 
-        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+        if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO4)
             nif->skip(12); // Unknown
 
         if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 2) && nif->get<bool>() && hasData)
@@ -420,8 +420,8 @@ namespace Nif
         {
             nif->read(mRotationSpeedVariation);
 
-            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
-                nif->skip(5); // Unknown
+            if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO4)
+                nif->skip(17); // Unknown
 
             nif->read(mRotationAngle);
             nif->read(mRotationAngleVariation);

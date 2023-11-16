@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_NAVIGATOR_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_NAVIGATOR_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
 #include <components/settings/navmeshrendermode.hpp>
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>

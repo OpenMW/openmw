@@ -58,7 +58,8 @@ namespace Nif
 
     struct NiSpotLight : public NiPointLight
     {
-        float mCutoff;
+        float mOuterSpotAngle;
+        float mInnerSpotAngle{ 0.f };
         float mExponent;
         void read(NIFStream* nif) override;
     };

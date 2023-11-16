@@ -12,7 +12,6 @@
 #include <osg/StateSet>
 
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/clearcolor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/settings/values.hpp>
 #include <components/stereo/multiview.hpp>
@@ -190,6 +189,11 @@ mat4 omw_InvProjectionMatrix()
 #endif
     }
 
+    vec3 omw_GetNormalsWorldSpace(vec2 uv)
+    {
+        return (vec4(omw_GetNormals(uv), 0.0) * omw.viewMatrix).rgb;
+    }
+
     vec3 omw_GetWorldPosFromUV(vec2 uv)
     {
         float depth = omw_GetDepth(uv);
@@ -321,9 +325,6 @@ float omw_EstimateFogCoverageFromUV(vec2 uv)
 
         if (mBlendEq)
             stateSet->setAttributeAndModes(new osg::BlendEquation(mBlendEq.value()));
-
-        if (mClearColor)
-            stateSet->setAttributeAndModes(new SceneUtil::ClearColor(mClearColor.value(), GL_COLOR_BUFFER_BIT));
     }
 
     void Pass::dirty()
@@ -339,7 +340,7 @@ float omw_EstimateFogCoverageFromUV(vec2 uv)
         if (mCompiled)
             return;
 
-        mLegacyGLSL = technique.getGLSLVersion() != 330;
+        mLegacyGLSL = technique.getGLSLVersion() < 330;
 
         if (mType == Type::Pixel)
         {

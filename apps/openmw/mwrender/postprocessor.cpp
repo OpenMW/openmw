@@ -118,9 +118,14 @@ namespace MWRender
         , mUsePostProcessing(Settings::postProcessing().mEnabled)
         , mSamples(Settings::video().mAntialiasing)
         , mPingPongCull(new PingPongCull(this))
-        , mCanvases({ new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager()),
-              new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager()) })
     {
+        auto& shaderManager = mRendering.getResourceSystem()->getSceneManager()->getShaderManager();
+
+        std::shared_ptr<LuminanceCalculator> luminanceCalculator = std::make_shared<LuminanceCalculator>(shaderManager);
+
+        for (auto& canvas : mCanvases)
+            canvas = new PingPongCanvas(shaderManager, luminanceCalculator);
+
         mHUDCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         mHUDCamera->setRenderOrder(osg::Camera::POST_RENDER);
         mHUDCamera->setClearColor(osg::Vec4(0.45, 0.45, 0.14, 1.0));
@@ -139,8 +144,7 @@ namespace MWRender
         if (Settings::shaders().mSoftParticles || Settings::postProcessing().mTransparentPostpass)
         {
             mTransparentDepthPostPass
-                = new TransparentDepthBinCallback(mRendering.getResourceSystem()->getSceneManager()->getShaderManager(),
-                    Settings::postProcessing().mTransparentPostpass);
+                = new TransparentDepthBinCallback(shaderManager, Settings::postProcessing().mTransparentPostpass);
             osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
         }
 
@@ -211,25 +215,14 @@ namespace MWRender
         if (Stereo::getStereo())
             Stereo::Manager::instance().screenResolutionChanged();
 
-        auto width = renderWidth();
-        auto height = renderHeight();
-        for (auto& technique : mTechniques)
-        {
-            for (auto& [name, rt] : technique->getRenderTargetsMap())
-            {
-                const auto [w, h] = rt.mSize.get(width, height);
-                rt.mTarget->setTextureSize(w, h);
-            }
-        }
-
         size_t frameId = frame() % 2;
 
         createObjectsForFrame(frameId);
 
         mRendering.updateProjectionMatrix();
-        mRendering.setScreenRes(width, height);
+        mRendering.setScreenRes(renderWidth(), renderHeight());
 
-        dirtyTechniques();
+        dirtyTechniques(true);
 
         mDirty = true;
         mDirtyFrameId = !frameId;
@@ -534,7 +527,7 @@ namespace MWRender
         mCanvases[frameId]->dirty();
     }
 
-    void PostProcessor::dirtyTechniques()
+    void PostProcessor::dirtyTechniques(bool dirtyAttachments)
     {
         size_t frameId = frame() % 2;
 
@@ -547,6 +540,8 @@ namespace MWRender
         mHDR = false;
         mNormals = false;
         mPassLights = false;
+
+        std::vector<fx::Types::RenderTarget> attachmentsToDirty;
 
         for (const auto& technique : mTechniques)
         {
@@ -613,8 +608,6 @@ namespace MWRender
                         uniform->mName.c_str(), *type, uniform->getNumElements()));
             }
 
-            std::unordered_map<osg::Texture2D*, osg::Texture2D*> renderTargetCache;
-
             for (const auto& pass : technique->getPasses())
             {
                 int subTexUnit = texUnit;
@@ -626,32 +619,39 @@ namespace MWRender
 
                 if (!pass->getTarget().empty())
                 {
-                    const auto& rt = technique->getRenderTargetsMap()[pass->getTarget()];
-
-                    const auto [w, h] = rt.mSize.get(renderWidth(), renderHeight());
-
-                    subPass.mRenderTexture = new osg::Texture2D(*rt.mTarget);
-                    renderTargetCache[rt.mTarget] = subPass.mRenderTexture;
-                    subPass.mRenderTexture->setTextureSize(w, h);
-                    subPass.mRenderTexture->setName(std::string(pass->getTarget()));
-
-                    if (rt.mMipMap)
-                        subPass.mRenderTexture->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+                    auto& renderTarget = technique->getRenderTargetsMap()[pass->getTarget()];
+                    subPass.mSize = renderTarget.mSize;
+                    subPass.mRenderTexture = renderTarget.mTarget;
+                    subPass.mMipMap = renderTarget.mMipMap;
 
                     subPass.mRenderTarget = new osg::FrameBufferObject;
                     subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
                         osg::FrameBufferAttachment(subPass.mRenderTexture));
+
+                    const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
                     subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
+
+                    if (std::find_if(attachmentsToDirty.cbegin(), attachmentsToDirty.cend(),
+                            [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
+                        == attachmentsToDirty.cend())
+                    {
+                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
+                    }
                 }
 
-                for (const auto& whitelist : pass->getRenderTargets())
+                for (const auto& name : pass->getRenderTargets())
                 {
-                    auto it = technique->getRenderTargetsMap().find(whitelist);
-                    if (it != technique->getRenderTargetsMap().end() && renderTargetCache[it->second.mTarget])
+                    auto& renderTarget = technique->getRenderTargetsMap()[name];
+                    subPass.mStateSet->setTextureAttribute(subTexUnit, renderTarget.mTarget);
+                    subPass.mStateSet->addUniform(new osg::Uniform(name.c_str(), subTexUnit));
+
+                    if (std::find_if(attachmentsToDirty.cbegin(), attachmentsToDirty.cend(),
+                            [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
+                        == attachmentsToDirty.cend())
                     {
-                        subPass.mStateSet->setTextureAttribute(subTexUnit, renderTargetCache[it->second.mTarget]);
-                        subPass.mStateSet->addUniform(new osg::Uniform(std::string(it->first).c_str(), subTexUnit++));
+                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
                     }
+                    subTexUnit++;
                 }
 
                 node.mPasses.emplace_back(std::move(subPass));
@@ -668,6 +668,9 @@ namespace MWRender
             hud->updateTechniques();
 
         mRendering.getSkyManager()->setSunglare(sunglare);
+
+        if (dirtyAttachments)
+            mCanvases[frameId]->setDirtyAttachments(attachmentsToDirty);
     }
 
     PostProcessor::Status PostProcessor::enableTechnique(
@@ -681,7 +684,7 @@ namespace MWRender
         int pos = std::min<int>(location.value_or(mTechniques.size()), mTechniques.size());
 
         mTechniques.insert(mTechniques.begin() + pos, technique);
-        dirtyTechniques();
+        dirtyTechniques(Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug);
 
         return Status_Toggled;
     }
@@ -774,7 +777,7 @@ namespace MWRender
         for (auto& technique : mTemplates)
             technique->compile();
 
-        dirtyTechniques();
+        dirtyTechniques(true);
     }
 
     void PostProcessor::disableDynamicShaders()

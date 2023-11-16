@@ -16,10 +16,10 @@ namespace ESM
 
     struct AIData
     {
-        unsigned short mHello; // This is the base value for greeting distance [0, 65535]
+        uint16_t mHello; // This is the base value for greeting distance [0, 65535]
         unsigned char mFight, mFlee, mAlarm; // These are probabilities [0, 100]
         char mU1, mU2, mU3; // Unknown values
-        int mServices; // See the Services enum
+        int32_t mServices; // See the Services enum
 
         void blank();
         ///< Set record to default state (does not touch the ID).
@@ -27,8 +27,8 @@ namespace ESM
 
     struct AIWander
     {
-        short mDistance;
-        short mDuration;
+        int16_t mDistance;
+        int16_t mDuration;
         unsigned char mTimeOfDay;
         unsigned char mIdle[8];
         unsigned char mShouldRepeat;
@@ -44,7 +44,7 @@ namespace ESM
     struct AITarget
     {
         float mX, mY, mZ;
-        short mDuration;
+        int16_t mDuration;
         NAME32 mId;
         unsigned char mShouldRepeat;
         unsigned char mPadding;

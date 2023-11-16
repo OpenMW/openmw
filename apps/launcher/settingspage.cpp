@@ -191,6 +191,7 @@ bool Launcher::SettingsPage::loadSettings()
         }
         loadSettingBool(Settings::game().mTurnToMovementDirection, *turnToMovementDirectionCheckBox);
         loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
+        loadSettingBool(Settings::game().mPlayerMovementIgnoresAnimation, *playerMovementIgnoresAnimationCheckBox);
 
         distantLandCheckBox->setCheckState(
             Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging ? Qt::Checked : Qt::Unchecked);
@@ -338,6 +339,7 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*shieldSheathingCheckBox, Settings::game().mShieldSheathing);
         saveSettingBool(*turnToMovementDirectionCheckBox, Settings::game().mTurnToMovementDirection);
         saveSettingBool(*smoothMovementCheckBox, Settings::game().mSmoothMovement);
+        saveSettingBool(*playerMovementIgnoresAnimationCheckBox, Settings::game().mPlayerMovementIgnoresAnimation);
 
         const bool wantDistantLand = distantLandCheckBox->checkState() == Qt::Checked;
         if (wantDistantLand != (Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging))

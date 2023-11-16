@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADERS_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADERS_H
 
-#include "components/sceneutil/lightingmethod.hpp"
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/sceneutil/lightingmethod.hpp>
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>

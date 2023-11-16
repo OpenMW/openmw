@@ -344,6 +344,12 @@ namespace MWLua
             playerScripts->uiModeChanged(argId, false);
     }
 
+    void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)
+    {
+        MWBase::Environment::get().getWorldModel()->registerPtr(object);
+        mEngineEvents.addToQueue(EngineEvents::OnUseItem{ getId(actor), getId(object), force });
+    }
+
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
         mObjectLists.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.

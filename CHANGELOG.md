@@ -14,6 +14,7 @@
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
+    Bug #5062: Root bone rotations for NPC animation don't work the same as for creature animation
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5280: Unskinned shapes in skinned equipment are rendered in the wrong place
     Bug #5371: Keyframe animation tracks are used for any file that begins with an X
@@ -24,6 +25,7 @@
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6025: Subrecords cannot overlap records
     Bug #6027: Collisionshape becomes spiderweb-like when the mesh is too complex
+    Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
     Bug #6313: Followers with high Fight can turn hostile
     Bug #6427: Enemy health bar disappears before damaging effect ends
@@ -68,6 +70,7 @@
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
+    Bug #7380: NiZBufferProperty issue
     Bug #7413: Generated wilderness cells don't spawn fish
     Bug #7415: Unbreakable lock discrepancies
     Bug #7428: AutoCalc flag is not used to calculate enchantment costs
@@ -90,11 +93,15 @@
     Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
     Bug #7642: Items in repair and recharge menus aren't sorted alphabetically
     Bug #7647: NPC walk cycle bugs after greeting player
+    Bug #7654: Tooltips for enchantments with invalid effects cause crashes
     Bug #7660: Some inconsistencies regarding Invisibility breaking
+    Bug #7675: Successful lock spell doesn't produce a sound
+    Bug #7679: Scene luminance value flashes when toggling shaders
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts
+    Feature #6188: Specular lighting from point light sources
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds

@@ -109,6 +109,12 @@ namespace Nif
     {
         BSSFlag1_Specular = 0x00000001,
         BSSFlag1_Decal = 0x04000000,
+        BSSFlag1_DepthTest = 0x80000000,
+    };
+
+    enum BSShaderFlags2
+    {
+        BSSFlag2_DepthWrite = 0x00000001,
     };
 
     struct BSSPParallaxParams
@@ -140,6 +146,8 @@ namespace Nif
         // Shader-specific flag methods must be handled on per-record basis
         bool specular() const { return mShaderFlags1 & BSSFlag1_Specular; }
         bool decal() const { return mShaderFlags1 & BSSFlag1_Decal; }
+        bool depthTest() const { return mShaderFlags1 & BSSFlag1_DepthTest; }
+        bool depthWrite() const { return mShaderFlags2 & BSSFlag2_DepthWrite; }
     };
 
     struct BSShaderLightingProperty : BSShaderProperty
@@ -287,15 +295,15 @@ namespace Nif
     {
         BSShaderTextureSetPtr mTextureSet;
         osg::Vec3f mEmissive;
-        float mEmissiveMult;
+        float mEmissiveMult{ 1.f };
         std::string mRootMaterial;
-        uint32_t mClamp;
-        float mAlpha;
+        uint32_t mClamp{ 3 };
+        float mAlpha{ 1.f };
         float mRefractionStrength;
         float mGlossiness{ 80.f };
         float mSmoothness{ 1.f };
         osg::Vec3f mSpecular;
-        float mSpecStrength;
+        float mSpecStrength{ 1.f };
         std::array<float, 2> mLightingEffects;
         float mSubsurfaceRolloff;
         float mRimlightPower;

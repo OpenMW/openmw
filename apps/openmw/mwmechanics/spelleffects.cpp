@@ -932,6 +932,9 @@ namespace MWMechanics
                 if (target.getCellRef().getLockLevel()
                     < magnitude) // If the door is not already locked to a higher value, lock it to spell magnitude
                 {
+                    MWBase::Environment::get().getSoundManager()->playSound3D(
+                        target, ESM::RefId::stringRefId("Open Lock"), 1.f, 1.f);
+
                     if (caster == getPlayer())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
                     target.getCellRef().lock(magnitude);

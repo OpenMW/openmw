@@ -79,28 +79,28 @@ namespace ESM
 
         struct NPDTstruct52
         {
-            short mLevel;
+            int16_t mLevel;
             unsigned char mStrength, mIntelligence, mWillpower, mAgility, mSpeed, mEndurance, mPersonality, mLuck;
 
             // mSkill can grow up to 200, it must be unsigned
             std::array<unsigned char, Skill::Length> mSkills;
 
             char mUnknown1;
-            unsigned short mHealth, mMana, mFatigue;
+            uint16_t mHealth, mMana, mFatigue;
             unsigned char mDisposition, mReputation, mRank;
             char mUnknown2;
-            int mGold;
+            int32_t mGold;
         }; // 52 bytes
 
         // Structure for autocalculated characters.
         //  This is only used for load and save operations.
         struct NPDTstruct12
         {
-            short mLevel;
+            int16_t mLevel;
             // see above
             unsigned char mDisposition, mReputation, mRank;
             char mUnknown1, mUnknown2, mUnknown3;
-            int mGold;
+            int32_t mGold;
         }; // 12 bytes
 #pragma pack(pop)
 
@@ -111,7 +111,7 @@ namespace ESM
 
         int getFactionRank() const; /// wrapper for mNpdt*, -1 = no rank
 
-        int mBloodType;
+        int32_t mBloodType;
         unsigned char mFlags;
 
         InventoryList mInventory;
@@ -125,7 +125,7 @@ namespace ESM
 
         AIPackageList mAiPackage;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mRace, mClass, mFaction, mScript;
         std::string mModel, mName;
 

@@ -39,6 +39,6 @@ namespace MWMechanics
     {
         const MagicEffects& magicEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
         return (magicEffects.getOrDefault(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
-            || (magicEffects.getOrDefault(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
+            || (magicEffects.getOrDefault(ESM::MagicEffect::Chameleon).getMagnitude() >= 75);
     }
 }
