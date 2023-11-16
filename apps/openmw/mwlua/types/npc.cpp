@@ -83,7 +83,7 @@ namespace MWLua
         addActorServicesBindings<ESM::NPC>(record, context);
 
         npc["classes"] = initCoreClassBindings(context);
-        
+
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
