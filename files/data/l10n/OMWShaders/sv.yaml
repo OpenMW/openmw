@@ -34,6 +34,7 @@ DisplayDepthFactorName: "Färgfaktor"
 DisplayDepthFactorDescription: "Avgör korrelation mellan djupvärdet på pixeln och dess producerade färg. Högre värden ger ljusare bild."
 DisplayDepthName: "Visualisera djupbufferten."
 DisplayNormalsName: "Visualisera normalvektorer" # på engelska står det "pass normals", finns bättre översättning?
+NormalsInWorldSpace: "Visa normalvektorer enligt världens koordinatsystem"
 ContrastLevelDescription: "Kontrastnivå"
 ContrastLevelName: "Kontrast"
 GammaLevelDescription: "Gammanivå"
