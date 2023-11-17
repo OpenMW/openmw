@@ -454,7 +454,7 @@ int MWMechanics::Alchemy::addIngredient(const MWWorld::Ptr& ingredient)
 
 void MWMechanics::Alchemy::removeIngredient(size_t index)
 {
-    if (index >= 0 && index < mIngredients.size())
+    if (index < mIngredients.size())
     {
         mIngredients[index] = MWWorld::Ptr();
         updateEffects();
@@ -472,7 +472,7 @@ void MWMechanics::Alchemy::addApparatus(const MWWorld::Ptr& apparatus)
 
 void MWMechanics::Alchemy::removeApparatus(size_t index)
 {
-    if (index >= 0 && index < mTools.size())
+    if (index < mTools.size())
     {
         mTools[index] = MWWorld::Ptr();
         updateEffects();
