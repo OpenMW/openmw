@@ -69,11 +69,6 @@ namespace LuaUi
             return parseExternal(mExternal, name, defaultValue);
         }
 
-        void onCoordChange(const std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>>& callback)
-        {
-            mOnCoordChange = callback;
-        }
-
         virtual MyGUI::IntSize calculateSize();
         virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
         MyGUI::IntCoord calculateCoord();
@@ -175,8 +170,6 @@ namespace LuaUi
         void mouseRelease(MyGUI::Widget*, int, int, MyGUI::MouseButton);
         void focusGain(MyGUI::Widget*, MyGUI::Widget*);
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
-
-        std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>> mOnCoordChange;
 
         void updateVisible();
     };

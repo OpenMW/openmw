@@ -19,8 +19,13 @@ namespace LuaUi
         mContainer = MyGUI::Gui::getInstancePtr()->createWidget<LuaContainer>(
             "", MyGUI::IntCoord(), MyGUI::Align::Default, "", "");
         mContainer->initialize(luaState, mContainer, false);
-        mContainer->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord) { setSize(coord.size()); });
+        mContainer->widget()->eventChangeCoord += MyGUI::newDelegate(this, &LuaAdapter::containerChangedCoord);
         mContainer->widget()->attachToWidget(this);
+    }
+
+    void LuaAdapter::containerChangedCoord(MyGUI::Widget*)
+    {
+        setSize(mContainer->getSize());
     }
 
     void LuaAdapter::attach(const std::shared_ptr<Element>& element)

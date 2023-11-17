@@ -42,8 +42,6 @@ namespace LuaUi
         clearCallbacks();
         clearEvents(mWidget);
 
-        mOnCoordChange.reset();
-
         for (WidgetExtension* w : mChildren)
             w->deinitialize();
         for (WidgetExtension* w : mTemplateChildren)
@@ -264,8 +262,6 @@ namespace LuaUi
         if (oldCoord != newCoord)
             mWidget->setCoord(newCoord);
         updateChildrenCoord();
-        if (oldCoord != newCoord && mOnCoordChange.has_value())
-            mOnCoordChange.value()(this, newCoord);
     }
 
     void WidgetExtension::setProperties(const sol::object& props)
