@@ -122,10 +122,10 @@ namespace MWMechanics
         void addApparatus(const MWWorld::Ptr& apparatus);
         ///< Add apparatus into the appropriate slot.
 
-        void removeIngredient(int index);
+        void removeIngredient(size_t index);
         ///< Remove ingredient from slot (calling this function on an empty slot is a no-op).
 
-        void removeApparatus(int index);
+        void removeApparatus(size_t index);
         ///< Remove apparatus from slot.
 
         std::string suggestPotionName();

@@ -452,9 +452,9 @@ int MWMechanics::Alchemy::addIngredient(const MWWorld::Ptr& ingredient)
     return slot;
 }
 
-void MWMechanics::Alchemy::removeIngredient(int index)
+void MWMechanics::Alchemy::removeIngredient(size_t index)
 {
-    if (index >= 0 && index < static_cast<int>(mIngredients.size()))
+    if (index >= 0 && index < mIngredients.size())
     {
         mIngredients[index] = MWWorld::Ptr();
         updateEffects();
@@ -470,9 +470,9 @@ void MWMechanics::Alchemy::addApparatus(const MWWorld::Ptr& apparatus)
     updateEffects();
 }
 
-void MWMechanics::Alchemy::removeApparatus(int index)
+void MWMechanics::Alchemy::removeApparatus(size_t index)
 {
-    if (index >= 0 && index < static_cast<int>(mTools.size()))
+    if (index >= 0 && index < mTools.size())
     {
         mTools[index] = MWWorld::Ptr();
         updateEffects();

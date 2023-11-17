@@ -147,12 +147,12 @@ namespace MWGui
         }
 
         // remove ingredient slots that have been fully used up
-        for (int i = 0; i < 4; ++i)
+        for (size_t i = 0; i < mIngredients.size(); ++i)
             if (mIngredients[i]->isUserString("ToolTipType"))
             {
                 MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
                 if (ingred.getRefData().getCount() == 0)
-                    removeIngredient(mIngredients[i]);
+                    mAlchemy->removeIngredient(i);
             }
 
         updateFilters();
@@ -295,7 +295,8 @@ namespace MWGui
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
     {
-        removeIngredient(_sender);
+        size_t i = std::distance(mIngredients.begin(), std::find(mIngredients.begin(), mIngredients.end(), _sender));
+        mAlchemy->removeIngredient(i);
         update();
     }
 
@@ -330,10 +331,10 @@ namespace MWGui
 
     void AlchemyWindow::onApparatusSelected(MyGUI::Widget* _sender)
     {
+        size_t i = std::distance(mApparatus.begin(), std::find(mApparatus.begin(), mApparatus.end(), _sender));
         if (_sender->getUserData<MWWorld::Ptr>()->isEmpty()) // if this apparatus slot is empty
         {
             std::string title;
-            size_t i = std::distance(mApparatus.begin(), std::find(mApparatus.begin(), mApparatus.end(), _sender));
             switch (i)
             {
                 case ESM::Apparatus::AppaType::MortarPestle:
@@ -361,7 +362,17 @@ namespace MWGui
             mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyAlchemyTools);
         }
         else
-            removeApparatus(_sender);
+        {
+            const auto& widget = mApparatus[i];
+            mAlchemy->removeApparatus(i);
+
+            if (widget->getChildCount())
+                MyGUI::Gui::getInstance().destroyWidget(widget->getChildAt(0));
+
+            widget->clearUserStrings();
+            widget->setItem(MWWorld::Ptr());
+            widget->setUserData(MWWorld::Ptr());
+        }
 
         update();
     }
@@ -457,35 +468,6 @@ namespace MWGui
         std::vector<MyGUI::Widget*> effectItems;
         effectsWidget->createEffectWidgets(effectItems, mEffectsBox, coord, false, 0);
         effectsWidget->setCoord(coord);
-    }
-
-    void AlchemyWindow::removeIngredient(MyGUI::Widget* ingredient)
-    {
-        for (int i = 0; i < mIngredients.size(); ++i)
-            if (mIngredients[i] == ingredient)
-                mAlchemy->removeIngredient(i);
-
-        update();
-    }
-
-    void AlchemyWindow::removeApparatus(MyGUI::Widget* apparatus)
-    {
-        for (size_t i = 0; i < mApparatus.size(); ++i)
-        {
-            if (mApparatus[i] == apparatus)
-            {
-                const auto& widget = mApparatus[i];
-                mAlchemy->removeApparatus(i);
-
-                if (widget->getChildCount())
-                    MyGUI::Gui::getInstance().destroyWidget(widget->getChildAt(0));
-
-                widget->clearUserStrings();
-                widget->setItem(MWWorld::Ptr());
-                widget->setUserData(MWWorld::Ptr());
-                break;
-            }
-        }
     }
 
     void AlchemyWindow::addRepeatController(MyGUI::Widget* widget)

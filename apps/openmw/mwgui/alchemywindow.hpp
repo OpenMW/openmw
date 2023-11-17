@@ -88,9 +88,6 @@ namespace MWGui
 
         void onSelectedItem(int index);
 
-        void removeIngredient(MyGUI::Widget* ingredient);
-        void removeApparatus(MyGUI::Widget* ingredient);
-
         void onItemSelected(MWWorld::Ptr item);
         void onItemCancel();
 
