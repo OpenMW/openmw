@@ -9,6 +9,7 @@ namespace LuaUi
         : mForcePosition(false)
         , mForceSize(false)
         , mPropagateEvents(true)
+        , mVisible(true)
         , mLua(nullptr)
         , mWidget(nullptr)
         , mSlot(this)
@@ -92,10 +93,9 @@ namespace LuaUi
     {
         // workaround for MyGUI bug
         // parent visibility doesn't affect added children
-        MyGUI::Widget* widget = this->widget();
-        MyGUI::Widget* parent = widget->getParent();
-        bool inheritedVisible = widget->getVisible() && (parent == nullptr || parent->getInheritedVisible());
-        widget->setVisible(inheritedVisible);
+        MyGUI::Widget* parent = widget()->getParent();
+        bool inheritedVisible = mVisible && (parent == nullptr || parent->getInheritedVisible());
+        widget()->setVisible(inheritedVisible);
     }
 
     void WidgetExtension::attach(WidgetExtension* ext)
@@ -278,7 +278,8 @@ namespace LuaUi
         mRelativeCoord = propertyValue("relativePosition", MyGUI::FloatPoint());
         mRelativeCoord = propertyValue("relativeSize", MyGUI::FloatSize());
         mAnchor = propertyValue("anchor", MyGUI::FloatSize());
-        mWidget->setVisible(propertyValue("visible", true));
+        mVisible = propertyValue("visible", true);
+        mWidget->setVisible(mVisible);
         mWidget->setPointer(propertyValue("pointer", std::string("arrow")));
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));

@@ -135,6 +135,7 @@ namespace LuaUi
         MyGUI::FloatSize mAnchor;
 
         bool mPropagateEvents;
+        bool mVisible; // used to implement updateVisible
 
     private:
         // use lua_State* instead of sol::state_view because MyGUI requires a default constructor
