@@ -421,6 +421,7 @@ namespace MWGui
 
         mSpellBox->setUserString("ToolTipType", "Spell");
         mSpellBox->setUserString("Spell", spellId.serialize());
+        mSpellBox->setUserData(MyGUI::Any::Null);
 
         // use the icon of the first effect
         const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
@@ -491,6 +492,7 @@ namespace MWGui
         mSpellStatus->setProgressPosition(0);
         mSpellImage->setItem(MWWorld::Ptr());
         mSpellBox->clearUserStrings();
+        mSpellBox->setUserData(MyGUI::Any::Null);
     }
 
     void HUD::unsetSelectedWeapon()
@@ -520,6 +522,7 @@ namespace MWGui
         mWeapBox->setUserString("ToolTipLayout", "HandToHandToolTip");
         mWeapBox->setUserString("Caption_HandToHandText", itemName);
         mWeapBox->setUserString("ImageTexture_HandToHandImage", icon);
+        mWeapBox->setUserData(MyGUI::Any::Null);
     }
 
     void HUD::setCrosshairVisible(bool visible)
@@ -671,7 +674,9 @@ namespace MWGui
         mSpellImage->setIcon(std::string());
 
         mWeapBox->clearUserStrings();
+        mWeapBox->setUserData(MyGUI::Any::Null);
         mSpellBox->clearUserStrings();
+        mSpellBox->setUserData(MyGUI::Any::Null);
     }
 
     void HUD::customMarkerCreated(MyGUI::Widget* marker)
