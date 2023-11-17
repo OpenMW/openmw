@@ -679,10 +679,11 @@ namespace NifOsg
 
                     // String markers may contain important information
                     // affecting the entire subtree of this obj
-                    if (sd->mData == "MRK" && !Loader::getShowMarkers())
+                    if (sd->mData == "MRK")
                     {
                         // Marker objects. These meshes are only visible in the editor.
-                        args.mHasMarkers = true;
+                        if (!Loader::getShowMarkers() && args.mRootNode == node)
+                            args.mHasMarkers = true;
                     }
                     else if (sd->mData == "BONE")
                     {
@@ -696,8 +697,12 @@ namespace NifOsg
                 }
                 else if (e->recType == Nif::RC_BSXFlags)
                 {
+                    if (args.mRootNode != node)
+                        continue;
+
                     auto bsxFlags = static_cast<const Nif::NiIntegerExtraData*>(e.getPtr());
-                    if (bsxFlags->mData & 32) // Editor marker flag
+                    // Marker objects.
+                    if (!Loader::getShowMarkers() && (bsxFlags->mData & 32))
                         args.mHasMarkers = true;
                 }
             }
