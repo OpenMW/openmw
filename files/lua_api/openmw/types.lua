@@ -1880,6 +1880,9 @@
 --- Functions for @{#ESM4Ingredient} objects
 -- @field [parent=#types] #ESM4Ingredient ESM4Ingredient
 
+--- Functions for @{#ESM4ItemMod} objects
+-- @field [parent=#types] #ESM4ItemMod ESM4ItemMod
+
 --- Functions for @{#ESM4Light} objects
 -- @field [parent=#types] #ESM4Light ESM4Light
 
