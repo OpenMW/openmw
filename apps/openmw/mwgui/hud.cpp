@@ -669,9 +669,7 @@ namespace MWGui
         mSpellStatus->setProgressPosition(0);
 
         mWeapImage->setItem(MWWorld::Ptr());
-        mWeapImage->setIcon(std::string());
         mSpellImage->setItem(MWWorld::Ptr());
-        mSpellImage->setIcon(std::string());
 
         mWeapBox->clearUserStrings();
         mWeapBox->setUserData(MyGUI::Any::Null);
