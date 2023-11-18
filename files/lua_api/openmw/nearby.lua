@@ -108,22 +108,22 @@
 
 ---
 -- @type NAVIGATOR_FLAGS
--- @field [parent=#NAVIGATOR_FLAGS] #number Walk allow agent to walk on the ground area;
--- @field [parent=#NAVIGATOR_FLAGS] #number Swim allow agent to swim on the water surface;
--- @field [parent=#NAVIGATOR_FLAGS] #number OpenDoor allow agent to open doors on the way;
--- @field [parent=#NAVIGATOR_FLAGS] #number UsePathgrid allow agent to use predefined pathgrid imported from ESM files.
+-- @field [parent=#NAVIGATOR_FLAGS] #number Walk Allow agent to walk on the ground area.
+-- @field [parent=#NAVIGATOR_FLAGS] #number Swim Allow agent to swim on the water surface.
+-- @field [parent=#NAVIGATOR_FLAGS] #number OpenDoor Allow agent to open doors on the way.
+-- @field [parent=#NAVIGATOR_FLAGS] #number UsePathgrid Allow agent to use predefined pathgrid imported from ESM files.
 
 ---
 -- @type COLLISION_SHAPE_TYPE
 -- @field [parent=#COLLISION_SHAPE_TYPE] #number Aabb Axis-Aligned Bounding Box is used for NPC and symmetric
--- Creatures;
+-- Creatures.
 -- @field [parent=#COLLISION_SHAPE_TYPE] #number RotatingBox is used for Creatures with big difference in width and
--- height;
+-- height.
 -- @field [parent=#COLLISION_SHAPE_TYPE] #number Cylinder is used for NPC and symmetric Creatures.
 
 ---
 -- @type FIND_PATH_STATUS
--- @field [parent=#FIND_PATH_STATUS] #number Success Path is found;
+-- @field [parent=#FIND_PATH_STATUS] #number Success Path is found.
 -- @field [parent=#FIND_PATH_STATUS] #number PartialPath Last path point is not a destination but a nearest position
 -- among found;
 -- @field [parent=#FIND_PATH_STATUS] #number NavMeshNotFound Provided `agentBounds` don't have corresponding navigation
@@ -135,16 +135,52 @@
 -- @field [parent=#FIND_PATH_STATUS] #number EndPolygonNotFound `destination` position is too far from available
 -- navigation mesh. The status may appear when navigation mesh is not fully generated or position is outside of covered
 -- area;
--- @field [parent=#FIND_PATH_STATUS] #number TargetPolygonNotFound adjusted `destination` position is too far from available
--- navigation mesh. The status may appear when navigation mesh is not fully generated or position is outside of covered
--- area;
+-- @field [parent=#FIND_PATH_STATUS] #number TargetPolygonNotFound adjusted `destination` position is too far from
+-- available navigation mesh. The status may appear when navigation mesh is not fully generated or position is outside
+-- of covered area;
 -- @field [parent=#FIND_PATH_STATUS] #number MoveAlongSurfaceFailed Found path couldn't be smoothed due to imperfect
 -- algorithm implementation or bad navigation mesh data;
 -- @field [parent=#FIND_PATH_STATUS] #number FindPathOverPolygonsFailed Path over navigation mesh from `source` to
 -- `destination` does not exist or navigation mesh is not fully generated to provide the path;
 -- @field [parent=#FIND_PATH_STATUS] #number InitNavMeshQueryFailed Couldn't initialize required data due to bad input
 -- or bad navigation mesh data.
--- @field [parent=#FIND_PATH_STATUS] #number FindStraightPathFailed Couldn't map path over polygons into world coordinates.
+-- @field [parent=#FIND_PATH_STATUS] #number FindStraightPathFailed Couldn't map path over polygons into world
+-- coordinates.
+
+---
+-- A table of parameters identifying navmesh
+-- @type AgentBounds
+-- @field [parent=#AgentBounds] #COLLISION_SHAPE_TYPE shapeType.
+-- @field [parent=#AgentBounds] openmw.util#Vector3 halfExtents.
+
+---
+-- A table of parameters to specify relative path cost per each area type
+-- @type AreaCosts
+-- @field [parent=#AreaCosts] #number ground Value >= 0, used in combination with @{#NAVIGATOR_FLAGS.Walk} (default: 1).
+-- @field [parent=#AreaCosts] #number water Value >= 0, used in combination with @{#NAVIGATOR_FLAGS.Swim} (default: 1).
+-- @field [parent=#AreaCosts] #number door Value >= 0, used in combination with @{#NAVIGATOR_FLAGS.OpenDoor}
+-- (default: 2).
+-- @field [parent=#AreaCosts] #number pathgrid Value >= 0, used in combination with @{#NAVIGATOR_FLAGS.UsePathgrid}
+-- (default: 1).
+
+---
+-- A table of parameters for @{#nearby.findPath}
+-- @type FindPathOptions
+-- @field [parent=#FindPathOptions] #AgentBounds agentBounds identifies which navmesh to use.
+-- @field [parent=#FindPathOptions] #number includeFlags allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS}
+-- values (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} + @{#NAVIGATOR_FLAGS.OpenDoor}
+-- + @{#NAVIGATOR_FLAGS.UsePathgrid}).
+-- @field [parent=#FindPathOptions] #AreaCosts areaCosts a table defining relative cost for each type of area.
+-- @field [parent=#FindPathOptions] #number destinationTolerance a floating point number representing maximum allowed
+-- distance between destination and a nearest point on the navigation mesh in addition to agent size (default: 1).
+
+---
+-- A table of parameters for @{#nearby.findRandomPointAroundCircle} and @{#nearby.castNavigationRay}
+-- @type NavMeshOptions
+-- @field [parent=#NavMeshOptions] #AgentBounds agentBounds Identifies which navmesh to use.
+-- @field [parent=#NavMeshOptions] #number includeFlags Allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS}
+-- values (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} + @{#NAVIGATOR_FLAGS.OpenDoor}
+-- + @{#NAVIGATOR_FLAGS.UsePathgrid}).
 
 ---
 -- Find path over navigation mesh from source to destination with given options. Result is unstable since navigation
@@ -152,24 +188,7 @@
 -- @function [parent=#nearby] findPath
 -- @param openmw.util#Vector3 source Initial path position.
 -- @param openmw.util#Vector3 destination Final path position.
--- @param #table options An optional table with additional optional arguments. Can contain:
---
---   * `agentBounds` - a table identifying which navmesh to use, can contain:
---
---     * `shapeType` - one of @{#COLLISION_SHAPE_TYPE} values;
---     * `halfExtents` - @{openmw.util#Vector3} defining agent bounds size;
---   * `includeFlags` - allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS} values
---     (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} +
---     @{#NAVIGATOR_FLAGS.OpenDoor} + @{#NAVIGATOR_FLAGS.UsePathgrid});
---   * `areaCosts` - a table defining relative cost for each type of area, can contain:
---
---     * `ground` - a floating point number >= 0, used in combination with @{#NAVIGATOR_FLAGS.Walk} (default: 1);
---     * `water` - a floating point number >= 0, used in combination with @{#NAVIGATOR_FLAGS.Swim} (default: 1);
---     * `door` - a floating point number >= 0, used in combination with @{#NAVIGATOR_FLAGS.OpenDoor} (default: 2);
---     * `pathgrid` - a floating point number >= 0, used in combination with @{#NAVIGATOR_FLAGS.UsePathgrid}
---       (default: 1);
---   * `destinationTolerance` - a floating point number representing maximum allowed distance between destination and a
---     nearest point on the navigation mesh in addition to agent size (default: 1);
+-- @param #FindPathOptions options An optional table with additional optional arguments.
 -- @return #FIND_PATH_STATUS
 -- @return #list<openmw.util#Vector3>
 -- @usage local status, path = nearby.findPath(source, destination)
@@ -189,15 +208,7 @@
 -- @function [parent=#nearby] findRandomPointAroundCircle
 -- @param openmw.util#Vector3 position Center of the search circle.
 -- @param #number maxRadius Approximate maximum search distance.
--- @param #table options An optional table with additional optional arguments. Can contain:
---
---   * `agentBounds` - a table identifying which navmesh to use, can contain:
---
---     * `shapeType` - one of @{#COLLISION_SHAPE_TYPE} values;
---     * `halfExtents` - @{openmw.util#Vector3} defining agent bounds size;
---   * `includeFlags` - allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS} values
---     (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} +
---     @{#NAVIGATOR_FLAGS.OpenDoor} + @{#NAVIGATOR_FLAGS.UsePathgrid});
+-- @param #NavMeshOptions options An optional table with additional optional arguments.
 -- @return openmw.util#Vector3, #nil
 -- @usage local position = nearby.findRandomPointAroundCircle(position, maxRadius)
 -- @usage local position = nearby.findRandomPointAroundCircle(position, maxRadius, {
@@ -213,15 +224,7 @@
 -- @function [parent=#nearby] castNavigationRay
 -- @param openmw.util#Vector3 from Initial ray position.
 -- @param openmw.util#Vector3 to Target ray position.
--- @param #table options An optional table with additional optional arguments. Can contain:
---
---   * `agentBounds` - a table identifying which navmesh to use, can contain:
---
---     * `shapeType` - one of @{#COLLISION_SHAPE_TYPE} values;
---     * `halfExtents` - @{openmw.util#Vector3} defining agent bounds size;
---   * `includeFlags` - allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS} values
---     (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} +
---     @{#NAVIGATOR_FLAGS.OpenDoor} + @{#NAVIGATOR_FLAGS.UsePathgrid});
+-- @param #NavMeshOptions options An optional table with additional optional arguments.
 -- @return openmw.util#Vector3, #nil
 -- @usage local position = nearby.castNavigationRay(from, to)
 -- @usage local position = nearby.castNavigationRay(from, to, {
