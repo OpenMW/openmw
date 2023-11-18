@@ -714,11 +714,12 @@ bool MWState::StateManager::confirmLoading(const std::vector<std::string_view>& 
     message
         += l10n->formatMessage("MissingContentFilesListCopy", { "files" }, { static_cast<int>(missingFiles.size()) });
 
+    int selectedButton = -1;
     while (true)
     {
         auto windowManager = MWBase::Environment::get().getWindowManager();
-        windowManager->interactiveMessageBox(message, buttons, true);
-        int selectedButton = windowManager->readPressedButton();
+        windowManager->interactiveMessageBox(message, buttons, true, selectedButton);
+        selectedButton = windowManager->readPressedButton();
         if (selectedButton == 0)
             break;
 

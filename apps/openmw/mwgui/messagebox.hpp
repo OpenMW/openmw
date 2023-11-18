@@ -25,8 +25,8 @@ namespace MWGui
         void onFrame(float frameDuration);
         void createMessageBox(std::string_view message, bool stat = false);
         void removeStaticMessageBox();
-        bool createInteractiveMessageBox(
-            std::string_view message, const std::vector<std::string>& buttons, bool immediate = false);
+        bool createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons,
+            bool immediate = false, int defaultFocus = -1);
         bool isInteractiveMessageBox();
 
         int getMessagesCount();
@@ -93,7 +93,7 @@ namespace MWGui
     {
     public:
         InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
-            const std::vector<std::string>& buttons, bool immediate);
+            const std::vector<std::string>& buttons, bool immediate, int defaultFocus);
         void mousePressed(MyGUI::Widget* _widget);
         int readPressedButton();
 
@@ -112,6 +112,7 @@ namespace MWGui
         std::vector<MyGUI::Button*> mButtons;
 
         int mButtonPressed;
+        int mDefaultFocus;
         bool mImmediate;
     };
 

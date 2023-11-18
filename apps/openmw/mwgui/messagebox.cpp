@@ -126,7 +126,7 @@ namespace MWGui
     }
 
     bool MessageBoxManager::createInteractiveMessageBox(
-        std::string_view message, const std::vector<std::string>& buttons, bool immediate)
+        std::string_view message, const std::vector<std::string>& buttons, bool immediate, int defaultFocus)
     {
         if (mInterMessageBoxe != nullptr)
         {
@@ -134,7 +134,8 @@ namespace MWGui
             mInterMessageBoxe->setVisible(false);
         }
 
-        mInterMessageBoxe = std::make_unique<InteractiveMessageBox>(*this, std::string{ message }, buttons, immediate);
+        mInterMessageBoxe
+            = std::make_unique<InteractiveMessageBox>(*this, std::string{ message }, buttons, immediate, defaultFocus);
         mLastButtonPressed = -1;
 
         return true;
@@ -215,12 +216,13 @@ namespace MWGui
     }
 
     InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
-        const std::vector<std::string>& buttons, bool immediate)
+        const std::vector<std::string>& buttons, bool immediate, int defaultFocus)
         : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode()
                 ? "openmw_interactive_messagebox_notransp.layout"
                 : "openmw_interactive_messagebox.layout")
         , mMessageBoxManager(parMessageBoxManager)
         , mButtonPressed(-1)
+        , mDefaultFocus(defaultFocus)
         , mImmediate(immediate)
     {
         int textPadding = 10; // padding between text-widget and main-widget
@@ -378,6 +380,9 @@ namespace MWGui
     MyGUI::Widget* InteractiveMessageBox::getDefaultKeyFocus()
     {
         std::vector<std::string> keywords{ "sOk", "sYes" };
+        if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
+            return mButtons[mDefaultFocus];
+
         for (MyGUI::Button* button : mButtons)
         {
             for (const std::string& keyword : keywords)
