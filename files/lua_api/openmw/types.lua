@@ -878,6 +878,31 @@
 -- @param openmw.core#GameObject actor
 -- @return #number
 
+--- @{#Classes}: Class Data
+-- @field [parent=#NPC] #Classes classes
+
+---
+-- A read-only list of all @{#ClassRecord}s in the world database.
+-- @field [parent=#Classes] #list<#ClassRecord> records
+
+---
+-- Returns a read-only @{#ClassRecord}
+-- @function [parent=#Classes] record
+-- @param #string recordId
+-- @return #ClassRecord
+
+---
+-- Class data record
+-- @type ClassRecord
+-- @field #string id Class id
+-- @field #string name Class name
+-- @field #list<#string> attributes A read-only list containing the specialized attributes of the class.
+-- @field #list<#string> majorSkills A read-only list containing the major skills of the class.
+-- @field #list<#string> minorSkills A read-only list containing the minor skills of the class.
+-- @field #string description Class description
+-- @field #boolean isPlayable True if the player can play as this class
+-- @field #string specialization Class specialization. Either combat, magic, or stealth.
+
 ---
 -- Whether the NPC or player is in the werewolf form at the moment.
 -- @function [parent=#NPC] isWerewolf
