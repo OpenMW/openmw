@@ -2306,6 +2306,7 @@ namespace MWMechanics
                 jumpstate = JumpState_None;
             }
 
+            updateAnimQueue();
             if (mAnimQueue.empty() || inwater || (sneak && mIdleState != CharState_SpecialIdle))
             {
                 if (inwater)
@@ -2315,8 +2316,8 @@ namespace MWMechanics
                 else
                     idlestate = CharState_Idle;
             }
-            else
-                updateAnimQueue();
+            else if (!mAnimQueue.empty())
+                idlestate = CharState_SpecialIdle;
 
             if (!mSkipAnim)
             {
