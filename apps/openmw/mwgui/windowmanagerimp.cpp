@@ -746,7 +746,7 @@ namespace MWGui
     void WindowManager::interactiveMessageBox(
         std::string_view message, const std::vector<std::string>& buttons, bool block)
     {
-        mMessageBoxManager->createInteractiveMessageBox(message, buttons);
+        mMessageBoxManager->createInteractiveMessageBox(message, buttons, block);
         updateVisible();
 
         if (block)
@@ -779,6 +779,8 @@ namespace MWGui
 
                 frameRateLimiter.limit();
             }
+
+            mMessageBoxManager->resetInteractiveMessageBox();
         }
     }
 

@@ -46,6 +46,20 @@ namespace MWGui
         mLastButtonPressed = -1;
     }
 
+    void MessageBoxManager::resetInteractiveMessageBox()
+    {
+        if (mInterMessageBoxe)
+        {
+            mInterMessageBoxe->setVisible(false);
+            mInterMessageBoxe.reset();
+        }
+    }
+
+    void MessageBoxManager::setLastButtonPressed(int index)
+    {
+        mLastButtonPressed = index;
+    }
+
     void MessageBoxManager::onFrame(float frameDuration)
     {
         for (auto it = mMessageBoxes.begin(); it != mMessageBoxes.end();)
@@ -112,7 +126,7 @@ namespace MWGui
     }
 
     bool MessageBoxManager::createInteractiveMessageBox(
-        std::string_view message, const std::vector<std::string>& buttons)
+        std::string_view message, const std::vector<std::string>& buttons, bool immediate)
     {
         if (mInterMessageBoxe != nullptr)
         {
@@ -120,7 +134,7 @@ namespace MWGui
             mInterMessageBoxe->setVisible(false);
         }
 
-        mInterMessageBoxe = std::make_unique<InteractiveMessageBox>(*this, std::string{ message }, buttons);
+        mInterMessageBoxe = std::make_unique<InteractiveMessageBox>(*this, std::string{ message }, buttons, immediate);
         mLastButtonPressed = -1;
 
         return true;
@@ -200,13 +214,14 @@ namespace MWGui
         mMainWidget->setVisible(value);
     }
 
-    InteractiveMessageBox::InteractiveMessageBox(
-        MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
+    InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
+        const std::vector<std::string>& buttons, bool immediate)
         : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode()
                 ? "openmw_interactive_messagebox_notransp.layout"
                 : "openmw_interactive_messagebox.layout")
         , mMessageBoxManager(parMessageBoxManager)
         , mButtonPressed(-1)
+        , mImmediate(immediate)
     {
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
@@ -393,6 +408,12 @@ namespace MWGui
             {
                 mButtonPressed = index;
                 mMessageBoxManager.onButtonPressed(mButtonPressed);
+                if (!mImmediate)
+                    return;
+
+                mMessageBoxManager.setLastButtonPressed(mButtonPressed);
+                MWBase::Environment::get().getInputManager()->changeInputMode(
+                    MWBase::Environment::get().getWindowManager()->isGuiMode());
                 return;
             }
             index++;
