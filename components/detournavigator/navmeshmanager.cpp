@@ -177,7 +177,6 @@ namespace DetourNavigator
         const std::map<osg::Vec2i, ChangeType>& changedTiles)
     {
         std::map<osg::Vec2i, ChangeType> tilesToPost = changedTiles;
-        std::map<osg::Vec2i, ChangeType> tilesToPost1;
         {
             const auto locked = cached->lockConst();
             const auto& navMesh = locked->getImpl();
