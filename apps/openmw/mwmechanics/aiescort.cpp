@@ -30,8 +30,6 @@ namespace MWMechanics
         , mZ(z)
         , mDuration(duration)
         , mRemainingDuration(static_cast<float>(duration))
-        , mCellX(std::numeric_limits<int>::max())
-        , mCellY(std::numeric_limits<int>::max())
     {
         mTargetActorRefId = actorId;
     }
@@ -45,8 +43,6 @@ namespace MWMechanics
         , mZ(z)
         , mDuration(duration)
         , mRemainingDuration(static_cast<float>(duration))
-        , mCellX(std::numeric_limits<int>::max())
-        , mCellY(std::numeric_limits<int>::max())
     {
         mTargetActorRefId = actorId;
     }
@@ -59,8 +55,6 @@ namespace MWMechanics
         , mZ(escort->mData.mZ)
         , mDuration(escort->mData.mDuration)
         , mRemainingDuration(escort->mRemainingDuration)
-        , mCellX(std::numeric_limits<int>::max())
-        , mCellY(std::numeric_limits<int>::max())
     {
         mTargetActorRefId = escort->mTargetId;
         mTargetActorId = escort->mTargetActorId;
@@ -96,6 +90,19 @@ namespace MWMechanics
 
         if ((leaderPos - followerPos).length2() <= mMaxDist * mMaxDist)
         {
+            // TESCS allows the creation of Escort packages without a specific destination
+            constexpr float nowhere = std::numeric_limits<float>::max();
+            if (mX == nowhere || mY == nowhere)
+                return true;
+            if (mZ == nowhere)
+            {
+                if (mCellId.empty()
+                    && ESM::positionToExteriorCellLocation(mX, mY)
+                        == actor.getCell()->getCell()->getExteriorCellLocation())
+                    return false;
+                return true;
+            }
+
             const osg::Vec3f dest(mX, mY, mZ);
             if (pathTo(actor, dest, duration, characterController.getSupportedMovementDirections(), maxHalfExtent))
             {
