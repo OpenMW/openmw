@@ -368,6 +368,8 @@ void MWMechanics::Alchemy::setAlchemist(const MWWorld::Ptr& npc)
 
     mTools.resize(4);
 
+    std::vector<MWWorld::Ptr> prevTools(mTools);
+
     std::fill(mTools.begin(), mTools.end(), MWWorld::Ptr());
 
     mEffects.clear();
@@ -383,6 +385,12 @@ void MWMechanics::Alchemy::setAlchemist(const MWWorld::Ptr& npc)
 
         if (type < 0 || type >= static_cast<int>(mTools.size()))
             throw std::runtime_error("invalid apparatus type");
+
+        if (prevTools[type] == *iter)
+            mTools[type] = *iter; // prefer the previous tool if still in the container
+
+        if (!mTools[type].isEmpty() && !prevTools[type].isEmpty() && mTools[type] == prevTools[type])
+            continue;
 
         if (!mTools[type].isEmpty())
             if (ref->mBase->mData.mQuality <= mTools[type].get<ESM::Apparatus>()->mBase->mData.mQuality)
@@ -415,7 +423,6 @@ MWMechanics::Alchemy::TIngredientsIterator MWMechanics::Alchemy::endIngredients(
 void MWMechanics::Alchemy::clear()
 {
     mAlchemist = MWWorld::Ptr();
-    mTools.clear();
     mIngredients.clear();
     mEffects.clear();
     setPotionName("");
