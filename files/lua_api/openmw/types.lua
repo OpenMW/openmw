@@ -837,14 +837,14 @@
 -- NPC.modifyFactionReputation(player, "mages guild", 5);
 
 ---
--- Expell NPC from given faction.
+-- Expel NPC from given faction.
 -- Throws an exception if there is no such faction.
 -- Note: expelled NPC still keeps his rank and reputation in faction, he just get an additonal flag for given faction.
--- @function [parent=#NPC] expell
+-- @function [parent=#NPC] expel
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
 -- @usage local NPC = require('openmw.types').NPC;
--- NPC.expell(player, "mages guild");
+-- NPC.expel(player, "mages guild");
 
 ---
 -- Clear expelling of NPC from given faction.

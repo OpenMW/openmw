@@ -265,7 +265,7 @@ namespace MWLua
             npcStats.setFactionReputation(factionId, existingReputation + value);
         };
 
-        npc["expell"] = [](Object& actor, std::string_view faction) {
+        npc["expel"] = [](Object& actor, std::string_view faction) {
             if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
                 throw std::runtime_error("Local scripts can modify only self");
 
