@@ -95,6 +95,7 @@
     Bug #7647: NPC walk cycle bugs after greeting player
     Bug #7654: Tooltips for enchantments with invalid effects cause crashes
     Bug #7660: Some inconsistencies regarding Invisibility breaking
+    Bug #7665: Alchemy menu is missing the ability to deselect and choose different qualities of an apparatus
     Bug #7675: Successful lock spell doesn't produce a sound
     Bug #7679: Scene luminance value flashes when toggling shaders
     Feature #3537: Shader-based water ripples
