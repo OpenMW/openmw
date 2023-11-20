@@ -127,6 +127,7 @@
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field
     Feature #7546: Start the game on Fredas
     Feature #7568: Uninterruptable scripted music
+    Feature #7608: Make the missing dependencies warning when loading a savegame more helpful
     Feature #7618: Show the player character's health in the save details
     Feature #7625: Add some missing console error outputs
     Feature #7634: Support NiParticleBomb

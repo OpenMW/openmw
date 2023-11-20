@@ -61,4 +61,18 @@ namespace ESM
         esm.writeHNT("MHLT", mMaximumHealth);
     }
 
+    std::vector<std::string_view> SavedGame::getMissingContentFiles(
+        const std::vector<std::string>& allContentFiles) const
+    {
+        std::vector<std::string_view> missingFiles;
+        for (const std::string& contentFile : mContentFiles)
+        {
+            if (std::find(allContentFiles.begin(), allContentFiles.end(), contentFile) == allContentFiles.end())
+            {
+                missingFiles.emplace_back(contentFile);
+            }
+        }
+
+        return missingFiles;
+    }
 }

@@ -40,6 +40,8 @@ namespace ESM
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
+
+        std::vector<std::string_view> getMissingContentFiles(const std::vector<std::string>& allContentFiles) const;
     };
 }
 

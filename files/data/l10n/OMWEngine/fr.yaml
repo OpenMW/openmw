@@ -37,10 +37,22 @@ DeleteGame: "Supprimer la partie"
 DeleteGameConfirmation: "Voulez-vous réellement supprimer cette partie sauvegardée ?"
 EmptySaveNameError: "Impossible de sauvegarder une partie lui donner un nom !"
 LoadGameConfirmation: "Voulez-vous charger cette autre partie ? Toute progression non sauvegardée sera perdue."
-MissingContentFilesConfirmation: |
+MissingContentFilesConfirmation: |-
     Les données de jeu actuellement sélectionnées ne correspondent pas à celle indiquée dans cette sauvegarde.
     Cela peut entraîner des erreurs lors du chargement, mais aussi lors de votre partie.
     Voulez-vous continuer ?
+#MissingContentFilesList: |-
+#  {files, plural,
+#    one{\n\nFound missing file: }
+#    few{\n\nFound {files} missing files:\n}
+#    other{\n\nFound {files} missing files:\n}
+#  }
+#MissingContentFilesListCopy: |-
+#  {files, plural,
+#    one{\n\nPress Copy to place its name to the clipboard.}
+#    few{\n\nPress Copy to place their names to the clipboard.}
+#    other{\n\nPress Copy to place their names to the clipboard.}
+#  }
 OverwriteGameConfirmation: "Écraser la sauvegarde précédente ?"
 
 

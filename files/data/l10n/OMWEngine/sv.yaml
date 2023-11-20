@@ -35,10 +35,22 @@ DeleteGame: "Radera spel"
 DeleteGameConfirmation: "Är du säker på att du vill radera sparfilen?"
 EmptySaveNameError: "Spelet kan inte sparas utan ett namn!"
 LoadGameConfirmation: "Vill du ladda ett sparat spel och förlora det pågående spelet?"
-MissingContentFilesConfirmation: |
+MissingContentFilesConfirmation: |-
     De valda innehållsfilerna matchar inte filerna som används av denna sparfil.
     Fel kan uppstå vid laddning eller under spel.
     Vill du fortsätta?
+#MissingContentFilesList: |-
+#  {files, plural,
+#    one{\n\nFound missing file: }
+#    few{\n\nFound {files} missing files:\n}
+#    other{\n\nFound {files} missing files:\n}
+#  }
+#MissingContentFilesListCopy: |-
+#  {files, plural,
+#    one{\n\nPress Copy to place its name to the clipboard.}
+#    few{\n\nPress Copy to place their names to the clipboard.}
+#    other{\n\nPress Copy to place their names to the clipboard.}
+#  }
 OverwriteGameConfirmation: "Är du säker på att du vill skriva över det här sparade spelet?"
 SelectCharacter: "Välj spelfigur..."
 
