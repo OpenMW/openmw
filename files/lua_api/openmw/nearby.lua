@@ -183,6 +183,17 @@
 -- + @{#NAVIGATOR_FLAGS.UsePathgrid}).
 
 ---
+-- A table of parameters for @{#nearby.findNearestNavMeshPosition}
+-- @type FindNearestNavMeshPositionOptions
+-- @field [parent=#NavMeshOptions] #AgentBounds agentBounds Identifies which navmesh to use.
+-- @field [parent=#NavMeshOptions] #number includeFlags Allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS}
+-- values (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} + @{#NAVIGATOR_FLAGS.OpenDoor}
+-- + @{#NAVIGATOR_FLAGS.UsePathgrid}).
+-- @field [parent=#NavMeshOptions] openmw.util#Vector3 searchAreaHalfExtents Defines AABB like area half extents around
+-- given position (default: (1 + 2 * CellGridRadius) * CellSize * (1, 1, 1) where CellGridRadius and depends on cell
+-- type to cover the whole active grid).
+
+---
 -- Find path over navigation mesh from source to destination with given options. Result is unstable since navigation
 -- mesh generation is asynchronous.
 -- @function [parent=#nearby] findPath
@@ -232,6 +243,24 @@
 -- })
 -- @usage local position = nearby.castNavigationRay(from, to, {
 --     agentBounds = Actor.getPathfindingAgentBounds(self),
+-- })
+
+---
+-- Finds a nearest position on navigation mesh to the given position within given search area.
+-- @function [parent=#nearby] findNearestNavMeshPosition
+-- @param openmw.util#Vector3 position Search area center.
+-- @param #FindNearestNavMeshPositionOptions options An optional table with additional optional arguments.
+-- @return openmw.util#Vector3, #nil
+-- @usage local navMeshPosition = nearby.findNearestNavMeshPosition(position)
+-- @usage local navMeshPosition = nearby.findNearestNavMeshPosition(position, {
+--     includeFlags = nearby.NAVIGATOR_FLAGS.Swim,
+-- })
+-- @usage local navMeshPosition = nearby.findNearestNavMeshPosition(position, {
+--     agentBounds = Actor.getPathfindingAgentBounds(self),
+-- })
+-- @usage local navMeshPosition = nearby.findNearestNavMeshPosition(position, {
+--     searchAreaHalfExtents = util.vector3(1000, 1000, 1000),
+--     includeFlags = nearby.NAVIGATOR_FLAGS.Walk,
 -- })
 
 return nil

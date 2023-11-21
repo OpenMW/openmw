@@ -3,11 +3,15 @@
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/misc/constants.hpp>
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwphysics/raycasting.hpp"
+#include "../mwworld/cell.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "luamanagerimp.hpp"
 #include "objectlists.hpp"
@@ -261,6 +265,39 @@ namespace MWLua
                   return DetourNavigator::raycast(
                       *MWBase::Environment::get().getWorld()->getNavigator(), agentBounds, from, to, includeFlags);
               };
+
+        api["findNearestNavMeshPosition"] = [](const osg::Vec3f& position, const sol::optional<sol::table>& options) {
+            DetourNavigator::AgentBounds agentBounds = defaultAgentBounds;
+            std::optional<osg::Vec3f> searchAreaHalfExtents;
+            DetourNavigator::Flags includeFlags = defaultIncludeFlags;
+
+            if (options.has_value())
+            {
+                if (const auto& t = options->get<sol::optional<sol::table>>("agentBounds"))
+                {
+                    if (const auto& v = t->get<sol::optional<DetourNavigator::CollisionShapeType>>("shapeType"))
+                        agentBounds.mShapeType = *v;
+                    if (const auto& v = t->get<sol::optional<osg::Vec3f>>("halfExtents"))
+                        agentBounds.mHalfExtents = *v;
+                }
+                if (const auto& v = options->get<sol::optional<osg::Vec3f>>("searchAreaHalfExtents"))
+                    searchAreaHalfExtents = *v;
+                if (const auto& v = options->get<sol::optional<DetourNavigator::Flags>>("includeFlags"))
+                    includeFlags = *v;
+            }
+
+            if (!searchAreaHalfExtents.has_value())
+            {
+                const bool isEsm4 = MWBase::Environment::get().getWorldScene()->getCurrentCell()->getCell()->isEsm4();
+                const float halfExtents = isEsm4
+                    ? (1 + 2 * Constants::ESM4CellGridRadius) * Constants::ESM4CellSizeInUnits
+                    : (1 + 2 * Constants::CellGridRadius) * Constants::CellSizeInUnits;
+                searchAreaHalfExtents = osg::Vec3f(halfExtents, halfExtents, halfExtents);
+            }
+
+            return DetourNavigator::findNearestNavMeshPosition(*MWBase::Environment::get().getWorld()->getNavigator(),
+                agentBounds, position, *searchAreaHalfExtents, includeFlags);
+        };
 
         return LuaUtil::makeReadOnly(api);
     }
