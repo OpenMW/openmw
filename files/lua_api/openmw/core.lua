@@ -161,7 +161,7 @@
 -- @field openmw.util#Transform startingRotation The object original rotation
 -- @field #string ownerRecordId NPC who owns the object (nil if missing). Global and self scripts can set the value.
 -- @field #string ownerFactionId Faction who owns the object (nil if missing). Global and self scripts can set the value.
--- @field #number ownerFactionRank Rank required to be allowed to pick up the object. Global and self scripts can set the value.
+-- @field #number ownerFactionRank Rank required to be allowed to pick up the object (`nil` if any rank is allowed). Global and self scripts can set the value.
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
 -- @field #GameObject parentContainer Container or actor that contains (or has in inventory) this object. It is nil if the object is in a cell.
 -- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
