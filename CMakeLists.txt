@@ -180,6 +180,8 @@ if (MSVC)
     # there should be no relevant downsides to having it on:
     # https://docs.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file
     add_compile_options(/bigobj)
+
+    add_compile_options(/Zc:__cplusplus)
 endif()
 
 # Set up common paths
