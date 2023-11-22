@@ -19,7 +19,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
-#include "ustring.hpp"
 
 namespace
 {
@@ -114,7 +113,8 @@ namespace MWGui
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
-        okButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+        okButton->setCaption(
+            MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
         updateRaces();
@@ -129,10 +129,10 @@ namespace MWGui
 
         if (shown)
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     void RaceDialog::onOpen()

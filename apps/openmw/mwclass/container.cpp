@@ -24,7 +24,6 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/objects.hpp"
@@ -249,7 +248,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name));
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();

@@ -379,17 +379,17 @@ namespace MWGui
 
     MyGUI::Widget* InteractiveMessageBox::getDefaultKeyFocus()
     {
-        std::vector<std::string> keywords{ "sOk", "sYes" };
         if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
             return mButtons[mDefaultFocus];
+        auto& languageManager = MyGUI::LanguageManager::getInstance();
+        std::vector<MyGUI::UString> keywords{ languageManager.replaceTags("#{sOk}"),
+            languageManager.replaceTags("#{sYes}") };
 
         for (MyGUI::Button* button : mButtons)
         {
-            for (const std::string& keyword : keywords)
+            for (const MyGUI::UString& keyword : keywords)
             {
-                if (Misc::StringUtils::ciEqual(
-                        MyGUI::LanguageManager::getInstance().replaceTags("#{" + keyword + "}").asUTF8(),
-                        button->getCaption().asUTF8()))
+                if (Misc::StringUtils::ciEqual(keyword, button->getCaption()))
                 {
                     return button;
                 }

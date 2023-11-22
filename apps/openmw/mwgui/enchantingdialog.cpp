@@ -26,7 +26,6 @@
 #include "itemwidget.hpp"
 
 #include "sortfilteritemmodel.hpp"
-#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -95,7 +94,7 @@ namespace MWGui
         else
         {
             std::string_view name = item.getClass().getName(item);
-            mName->setCaption(toUString(name));
+            mName->setCaption(MyGUI::UString(name));
             mItemBox->setItem(item);
             mItemBox->setUserString("ToolTipType", "ItemPtr");
             mItemBox->setUserData(MWWorld::Ptr(item));
@@ -115,23 +114,26 @@ namespace MWGui
         switch (mEnchanting.getCastStyle())
         {
             case ESM::Enchantment::CastOnce:
-                mTypeButton->setCaption(toUString(
+                mTypeButton->setCaption(MyGUI::UString(
                     MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce", "Cast Once")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenStrikes:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                    "sItemCastWhenStrikes", "When Strikes")));
+                mTypeButton->setCaption(
+                    MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                        "sItemCastWhenStrikes", "When Strikes")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenUsed:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                    "sItemCastWhenUsed", "When Used")));
+                mTypeButton->setCaption(
+                    MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                        "sItemCastWhenUsed", "When Used")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::ConstantEffect:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                    "sItemCastConstant", "Cast Constant")));
+                mTypeButton->setCaption(
+                    MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                        "sItemCastConstant", "Cast Constant")));
                 setConstantEffect(true);
                 break;
         }

@@ -35,7 +35,6 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
-#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -198,7 +197,7 @@ namespace MWGui
                 }
 
                 title << " (#{sLevel} " << signature.mPlayerLevel << " "
-                      << MyGUI::TextIterator::toTagsString(toUString(className)) << ")";
+                      << MyGUI::TextIterator::toTagsString(MyGUI::UString(className)) << ")";
 
                 mCharacterSelection->addItem(MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 
@@ -302,7 +301,7 @@ namespace MWGui
 
         if (mSaving)
         {
-            MWBase::Environment::get().getStateManager()->saveGame(mSaveNameEdit->getCaption().asUTF8(), mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->saveGame(mSaveNameEdit->getCaption(), mCurrentSlot);
         }
         else
         {

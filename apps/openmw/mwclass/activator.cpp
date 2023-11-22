@@ -27,7 +27,6 @@
 #include "../mwrender/vismask.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -102,8 +101,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

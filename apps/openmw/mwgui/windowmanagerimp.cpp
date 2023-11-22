@@ -117,7 +117,6 @@
 #include "tradewindow.hpp"
 #include "trainingwindow.hpp"
 #include "travelwindow.hpp"
-#include "ustring.hpp"
 #include "videowidget.hpp"
 #include "waitdialog.hpp"
 
@@ -788,8 +787,8 @@ namespace MWGui
     {
         if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never)
         {
-            MyGUI::UString text = MyGUI::LanguageManager::getInstance().replaceTags(toUString(message));
-            mDialogueWindow->addMessageBox(text.asUTF8());
+            MyGUI::UString text = MyGUI::LanguageManager::getInstance().replaceTags(MyGUI::UString(message));
+            mDialogueWindow->addMessageBox(text);
         }
         else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only)
         {
@@ -1089,7 +1088,7 @@ namespace MWGui
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
-        std::string_view tag = _tag.asUTF8();
+        std::string_view tag = _tag;
 
         std::string_view MyGuiPrefix = "setting=";
 

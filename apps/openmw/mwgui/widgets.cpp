@@ -20,8 +20,6 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include "ustring.hpp"
-
 namespace MWGui::Widgets
 {
     /* MWSkill */
@@ -135,8 +133,7 @@ namespace MWGui::Widgets
             }
             else
             {
-                MyGUI::UString name = toUString(attribute->mName);
-                mAttributeNameWidget->setCaption(name);
+                mAttributeNameWidget->setCaption(MyGUI::UString(attribute->mName));
             }
         }
         if (mAttributeValueWidget)
@@ -497,13 +494,13 @@ namespace MWGui::Widgets
         {
             std::stringstream out;
             out << mValue << "/" << mMax;
-            mBarTextWidget->setCaption(out.str().c_str());
+            mBarTextWidget->setCaption(out.str());
         }
     }
     void MWDynamicStat::setTitle(std::string_view text)
     {
         if (mTextWidget)
-            mTextWidget->setCaption(toUString(text));
+            mTextWidget->setCaption(MyGUI::UString(text));
     }
 
     MWDynamicStat::~MWDynamicStat() {}

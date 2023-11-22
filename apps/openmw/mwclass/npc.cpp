@@ -57,7 +57,6 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 namespace
 {
@@ -1089,7 +1088,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
 
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name));
         if (fullHelp && !ref->mBase->mName.empty() && ptr.getRefData().getCustomData()
             && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {

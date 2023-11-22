@@ -953,8 +953,7 @@ namespace MWGui
         widget->setUserString("Caption_MagicEffectSchool",
             "#{sSchool}: "
                 + MyGUI::TextIterator::toTagsString(
-                    store->get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mName)
-                      .asUTF8());
+                    store->get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mName));
         widget->setUserString("ImageTexture_MagicEffectImage", icon);
     }
 }

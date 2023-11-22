@@ -32,7 +32,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "tooltips.hpp"
-#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -417,7 +416,7 @@ namespace MWGui
         MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText",
             MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height),
             MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
-        groupWidget->setCaption(toUString(label));
+        groupWidget->setCaption(MyGUI::UString(label));
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
         mSkillWidgets.push_back(groupWidget);
 
@@ -433,7 +432,7 @@ namespace MWGui
 
         skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>(
             "SandText", coord1, MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
-        skillNameWidget->setCaption(toUString(text));
+        skillNameWidget->setCaption(MyGUI::UString(text));
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
 
         skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>(

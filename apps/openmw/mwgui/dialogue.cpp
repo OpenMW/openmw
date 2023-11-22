@@ -337,7 +337,7 @@ namespace MWGui
     void DialogueWindow::onTradeComplete()
     {
         MyGUI::UString message = MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}");
-        addResponse({}, message.asUTF8());
+        addResponse({}, message);
     }
 
     bool DialogueWindow::exit()

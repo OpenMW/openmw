@@ -19,7 +19,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
-#include "ustring.hpp"
 
 namespace
 {
@@ -272,7 +271,7 @@ namespace MWGui
         MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText",
             MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
-        groupWidget->setCaption(toUString(label));
+        groupWidget->setCaption(MyGUI::UString(label));
         mSkillWidgets.push_back(groupWidget);
 
         const int lineHeight = Settings::gui().mFontSize + 2;
@@ -287,7 +286,7 @@ namespace MWGui
         MyGUI::TextBox* skillValueWidget;
 
         skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
-        skillNameWidget->setCaption(toUString(text));
+        skillNameWidget->setCaption(MyGUI::UString(text));
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
         skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);

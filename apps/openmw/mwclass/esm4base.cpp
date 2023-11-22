@@ -5,7 +5,6 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -35,8 +34,7 @@ namespace MWClass
     MWGui::ToolTipInfo ESM4Impl::getToolTipInfo(std::string_view name, int count)
     {
         MWGui::ToolTipInfo info;
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         return info;
     }
 }

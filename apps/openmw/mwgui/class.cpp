@@ -20,7 +20,6 @@
 #include <components/vfs/manager.hpp>
 
 #include "tooltips.hpp"
-#include "ustring.hpp"
 
 namespace
 {
@@ -129,10 +128,10 @@ namespace MWGui
 
         if (shown)
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     void PickClassDialog::onOpen()
@@ -546,10 +545,10 @@ namespace MWGui
 
         if (shown)
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     // widget controls
@@ -869,7 +868,7 @@ namespace MWGui
         getWidget(okButton, "OKButton");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DescriptionDialog::onOkClicked);
         okButton->setCaption(
-            toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sInputMenu1", {})));
+            MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sInputMenu1", {})));
 
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);

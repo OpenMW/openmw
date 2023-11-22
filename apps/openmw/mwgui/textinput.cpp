@@ -6,8 +6,6 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 
-#include "ustring.hpp"
-
 namespace MWGui
 {
 
@@ -35,10 +33,10 @@ namespace MWGui
 
         if (shown)
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     void TextInputDialog::setTextLabel(std::string_view label)
