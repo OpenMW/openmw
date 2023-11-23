@@ -9,6 +9,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>

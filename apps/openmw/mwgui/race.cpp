@@ -4,6 +4,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollBar.h>
+#include <MyGUI_UString.h>
 
 #include <osg/Texture2D>
 

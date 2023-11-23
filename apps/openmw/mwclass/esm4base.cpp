@@ -1,6 +1,7 @@
 #include "esm4base.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 

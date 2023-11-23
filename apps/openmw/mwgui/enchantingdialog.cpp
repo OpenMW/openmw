@@ -5,6 +5,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_UString.h>
 
 #include <components/misc/strings/format.hpp>
 #include <components/settings/values.hpp>

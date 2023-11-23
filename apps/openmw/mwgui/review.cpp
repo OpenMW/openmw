@@ -6,6 +6,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>

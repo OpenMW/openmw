@@ -5,6 +5,7 @@
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_UString.h>
 
 namespace MWGui
 {

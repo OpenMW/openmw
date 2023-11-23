@@ -4,6 +4,7 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_UString.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>

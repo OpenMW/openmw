@@ -1,6 +1,7 @@
 #include "door.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/doorstate.hpp>
 #include <components/esm3/loaddoor.hpp>

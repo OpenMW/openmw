@@ -1,6 +1,7 @@
 #include "book.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadsoun.hpp>

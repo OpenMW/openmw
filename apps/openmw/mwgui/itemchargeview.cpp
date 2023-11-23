@@ -6,6 +6,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadench.hpp>
 

@@ -1,6 +1,7 @@
 #include "activator.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadcrea.hpp>

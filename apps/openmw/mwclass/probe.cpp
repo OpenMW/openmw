@@ -1,6 +1,7 @@
 #include "probe.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadprob.hpp>

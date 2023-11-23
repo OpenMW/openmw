@@ -1,6 +1,7 @@
 #include "light.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadnpc.hpp>

@@ -3,6 +3,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_LayoutManager.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 #include <MyGUI_Widget.h>
 #include <MyGUI_Window.h>
 

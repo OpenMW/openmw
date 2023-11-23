@@ -1,6 +1,7 @@
 #include "lockpick.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadnpc.hpp>

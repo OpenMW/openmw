@@ -7,6 +7,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_UString.h>
 
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>

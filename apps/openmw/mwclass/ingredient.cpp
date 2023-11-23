@@ -1,6 +1,7 @@
 #include "ingredient.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadnpc.hpp>

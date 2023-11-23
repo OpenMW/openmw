@@ -4,6 +4,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadspel.hpp>

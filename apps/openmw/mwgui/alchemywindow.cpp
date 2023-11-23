@@ -6,6 +6,7 @@
 #include <MyGUI_ControllerRepeatClick.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadappa.hpp>
 #include <components/esm3/loadingr.hpp>

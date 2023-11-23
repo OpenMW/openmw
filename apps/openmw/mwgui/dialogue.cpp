@@ -4,6 +4,7 @@
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
+#include <MyGUI_UString.h>
 #include <MyGUI_Window.h>
 
 #include <components/debug/debuglog.hpp>

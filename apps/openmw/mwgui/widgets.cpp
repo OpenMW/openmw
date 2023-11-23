@@ -6,6 +6,7 @@
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm/attr.hpp>
 #include <components/esm3/loadmgef.hpp>

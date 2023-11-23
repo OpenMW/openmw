@@ -1,6 +1,7 @@
 ﻿#include "npc.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <cassert>
 #include <memory>
