@@ -85,7 +85,7 @@ namespace MWLua
     public:
         sol::object getCurrent(const Context& context) const
         {
-            return getValue(context, mObject, &LevelStat::setValue, 0, "current",
+            return getValue(context, mObject, &LevelStat::setValue, std::monostate{}, "current",
                 [](const MWWorld::Ptr& ptr) { return ptr.getClass().getCreatureStats(ptr).getLevel(); });
         }
 
@@ -93,7 +93,7 @@ namespace MWLua
         {
             SelfObject* obj = mObject.asSelfObject();
             addStatUpdateAction(context.mLuaManager, *obj);
-            obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, 0, "current" }] = value;
+            obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, std::monostate{}, "current" }] = value;
         }
 
         sol::object getProgress(const Context& context) const

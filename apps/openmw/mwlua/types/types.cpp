@@ -191,9 +191,11 @@ namespace MWLua
 
         addActorBindings(
             addType(ObjectTypeName::Actor, { ESM::REC_INTERNAL_PLAYER, ESM::REC_CREA, ESM::REC_NPC_ }), context);
-        addItemBindings(addType(ObjectTypeName::Item,
-            { ESM::REC_ARMO, ESM::REC_BOOK, ESM::REC_CLOT, ESM::REC_INGR, ESM::REC_LIGH, ESM::REC_MISC, ESM::REC_ALCH,
-                ESM::REC_WEAP, ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA }));
+        addItemBindings(
+            addType(ObjectTypeName::Item,
+                { ESM::REC_ARMO, ESM::REC_BOOK, ESM::REC_CLOT, ESM::REC_INGR, ESM::REC_LIGH, ESM::REC_MISC,
+                    ESM::REC_ALCH, ESM::REC_WEAP, ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA }),
+            context);
         addLockableBindings(
             addType(ObjectTypeName::Lockable, { ESM::REC_CONT, ESM::REC_DOOR, ESM::REC_CONT4, ESM::REC_DOOR4 }));
 
