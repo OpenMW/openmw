@@ -467,7 +467,7 @@ namespace MWMechanics
             {
                 ESM::AITarget data = esmPackage.mTarget;
                 package = std::make_unique<MWMechanics::AiEscort>(ESM::RefId::stringRefId(data.mId.toStringView()),
-                    data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
+                    esmPackage.mCellName, data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
             }
             else if (esmPackage.mType == ESM::AI_Travel)
             {
@@ -484,7 +484,7 @@ namespace MWMechanics
             {
                 ESM::AITarget data = esmPackage.mTarget;
                 package = std::make_unique<MWMechanics::AiFollow>(ESM::RefId::stringRefId(data.mId.toStringView()),
-                    data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
+                    esmPackage.mCellName, data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
             }
 
             onPackageAdded(*package);
