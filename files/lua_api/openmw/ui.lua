@@ -228,9 +228,34 @@
 -- @type Element
 
 ---
--- Refreshes the rendered element to match the current layout state
+-- Refreshes the rendered element to match the current layout state.
+-- Refreshes positions and sizes, but not the layout of the child Elements.
 -- @function [parent=#Element] update
 -- @param self
+
+-- @usage
+-- local child = ui.create {
+--     type = ui.TYPE.Text,
+--     props = {
+--         text = 'child 1',
+--     },
+-- }
+-- local parent = ui.create {
+--     content = ui.content {
+--         child,
+--         {
+--             type = ui.TYPE.Text,
+--             props = {
+--                 text = 'parent 1',
+--             },
+--         }
+--     }
+-- }
+-- -- ...
+-- child.layout.props.text = 'child 2'
+-- parent.layout.content[2].props.text = 'parent 2'
+-- parent:update() -- will show 'parent 2', but 'child 1'
+
 
 ---
 -- Destroys the element
