@@ -556,7 +556,7 @@ target_link_libraries(components
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
 
-    ${SDL2_LIBRARIES}
+    SDL2::SDL2
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
     ${LUA_LIBRARIES}
