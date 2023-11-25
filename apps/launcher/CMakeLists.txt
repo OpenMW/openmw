@@ -77,7 +77,7 @@ if (WIN32)
 endif (WIN32)
 
 target_link_libraries(openmw-launcher
-    ${SDL2_LIBRARY_ONLY}
+    SDL2::SDL2
     ${OPENAL_LIBRARY}
     components_qt
 )
