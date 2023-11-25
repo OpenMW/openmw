@@ -1,6 +1,7 @@
 #include "creature.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/creaturestate.hpp>
 #include <components/esm3/loadclas.hpp>
@@ -45,7 +46,6 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "classmodel.hpp"
 
@@ -582,7 +582,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name));
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

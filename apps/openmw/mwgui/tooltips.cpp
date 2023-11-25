@@ -7,6 +7,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm/records.hpp>
 #include <components/l10n/manager.hpp>
@@ -953,8 +954,7 @@ namespace MWGui
         widget->setUserString("Caption_MagicEffectSchool",
             "#{sSchool}: "
                 + MyGUI::TextIterator::toTagsString(
-                    store->get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mName)
-                      .asUTF8());
+                    store->get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mName));
         widget->setUserString("ImageTexture_MagicEffectImage", icon);
     }
 }

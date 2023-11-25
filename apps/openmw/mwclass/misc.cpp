@@ -1,6 +1,7 @@
 #include "misc.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadmisc.hpp>
@@ -19,7 +20,6 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -151,8 +151,8 @@ namespace MWClass
             countString = " (" + std::to_string(count) + ")";
 
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name))
-            + MWGui::ToolTips::getCountString(count) + MWGui::ToolTips::getSoulString(ptr.getCellRef());
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count)
+            + MWGui::ToolTips::getSoulString(ptr.getCellRef());
         info.icon = ref->mBase->mIcon;
 
         std::string text;

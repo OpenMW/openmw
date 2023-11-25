@@ -4,6 +4,7 @@
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
+#include <MyGUI_UString.h>
 #include <MyGUI_Window.h>
 
 #include <components/debug/debuglog.hpp>
@@ -337,7 +338,7 @@ namespace MWGui
     void DialogueWindow::onTradeComplete()
     {
         MyGUI::UString message = MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}");
-        addResponse({}, message.asUTF8());
+        addResponse({}, message);
     }
 
     bool DialogueWindow::exit()

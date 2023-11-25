@@ -9,6 +9,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>
@@ -191,7 +192,7 @@ namespace MWGui
             // we may still want to show the label if the caller requested it
             if (mImportantLabel)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption().asUTF8());
+                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption());
                 mImportantLabel = false;
             }
         }

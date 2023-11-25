@@ -6,6 +6,7 @@
 #include <MyGUI_ControllerRepeatClick.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadappa.hpp>
 #include <components/esm3/loadingr.hpp>
@@ -28,7 +29,6 @@
 #include "itemview.hpp"
 #include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
-#include "ustring.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -164,7 +164,7 @@ namespace MWGui
         auto const& wm = MWBase::Environment::get().getWindowManager();
         std::string_view ingredient = wm->getGameSettingString("sIngredients", "Ingredients");
 
-        if (mFilterType->getCaption() == toUString(ingredient))
+        if (mFilterType->getCaption() == ingredient)
             mCurrentFilter = FilterType::ByName;
         else
             mCurrentFilter = FilterType::ByEffect;
@@ -176,17 +176,17 @@ namespace MWGui
     void AlchemyWindow::switchFilterType(MyGUI::Widget* _sender)
     {
         auto const& wm = MWBase::Environment::get().getWindowManager();
-        MyGUI::UString ingredient = toUString(wm->getGameSettingString("sIngredients", "Ingredients"));
+        std::string_view ingredient = wm->getGameSettingString("sIngredients", "Ingredients");
         auto* button = _sender->castType<MyGUI::Button>();
 
         if (button->getCaption() == ingredient)
         {
-            button->setCaption(toUString(wm->getGameSettingString("sMagicEffects", "Magic Effects")));
+            button->setCaption(MyGUI::UString(wm->getGameSettingString("sMagicEffects", "Magic Effects")));
             mCurrentFilter = FilterType::ByEffect;
         }
         else
         {
-            button->setCaption(ingredient);
+            button->setCaption(MyGUI::UString(ingredient));
             mCurrentFilter = FilterType::ByName;
         }
         mSortModel->setNameFilter({});

@@ -13,6 +13,7 @@
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_UString.h>
 #include <MyGUI_Window.h>
 
 #include <SDL_video.h>
@@ -38,7 +39,6 @@
 #include "../mwbase/world.hpp"
 
 #include "confirmationdialog.hpp"
-#include "ustring.hpp"
 
 namespace
 {
@@ -659,18 +659,17 @@ namespace MWGui
 
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
-        MyGUI::UString on = toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On"));
+        std::string_view on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
         bool newState;
         if (_sender->castType<MyGUI::Button>()->getCaption() == on)
         {
-            MyGUI::UString off
-                = toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "Off"));
-            _sender->castType<MyGUI::Button>()->setCaption(off);
+            _sender->castType<MyGUI::Button>()->setCaption(
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "Off")));
             newState = false;
         }
         else
         {
-            _sender->castType<MyGUI::Button>()->setCaption(on);
+            _sender->castType<MyGUI::Button>()->setCaption(MyGUI::UString(on));
             newState = true;
         }
 
