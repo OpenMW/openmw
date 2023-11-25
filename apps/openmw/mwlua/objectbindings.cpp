@@ -417,20 +417,23 @@ namespace MWLua
 
                 using DelayedRemovalFn = std::function<void(MWWorld::Ptr)>;
                 auto removeFn = [](const MWWorld::Ptr ptr, int countToRemove) -> std::optional<DelayedRemovalFn> {
-                    int currentCount = ptr.getRefData().getCount();
+                    int rawCount = ptr.getRefData().getCount(false);
+                    int currentCount = std::abs(rawCount);
+                    int signedCountToRemove = (rawCount < 0 ? -1 : 1) * countToRemove;
+
                     if (countToRemove <= 0 || countToRemove > currentCount)
                         throw std::runtime_error("Can't remove " + std::to_string(countToRemove) + " of "
                             + std::to_string(currentCount) + " items");
-                    ptr.getRefData().setCount(currentCount - countToRemove); // Immediately change count
+                    ptr.getRefData().setCount(rawCount - signedCountToRemove); // Immediately change count
                     if (!ptr.getContainerStore() && currentCount > countToRemove)
                         return std::nullopt;
                     // Delayed action to trigger side effects
-                    return [countToRemove](MWWorld::Ptr ptr) {
+                    return [signedCountToRemove](MWWorld::Ptr ptr) {
                         // Restore the original count
-                        ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
+                        ptr.getRefData().setCount(ptr.getRefData().getCount(false) + signedCountToRemove);
                         // And now remove properly
                         if (ptr.getContainerStore())
-                            ptr.getContainerStore()->remove(ptr, countToRemove, false);
+                            ptr.getContainerStore()->remove(ptr, std::abs(signedCountToRemove), false);
                         else
                         {
                             MWBase::Environment::get().getWorld()->disable(ptr);
