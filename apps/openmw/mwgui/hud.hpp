@@ -58,7 +58,6 @@ namespace MWGui
         MyGUI::Widget* getEffectBox() { return mEffectBox; }
 
         void setEnemy(const MWWorld::Ptr& enemy);
-        void resetEnemy();
 
         void clear() override;
 
