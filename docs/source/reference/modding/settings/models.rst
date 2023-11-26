@@ -269,7 +269,6 @@ write nif debug log
 
 :Type:		boolean
 :Range:		True/False
-:Default:	True
+:Default:	False
 
-If enabled, log the loading process of unsupported NIF files.
-:ref:`load unsupported nif files` setting must be enabled for this setting to have any effect.
+If enabled, log the loading process of NIF files.
