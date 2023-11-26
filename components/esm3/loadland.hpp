@@ -66,6 +66,13 @@ namespace ESM
             DATA_VTEX = 16
         };
 
+        enum
+        {
+            FLAG_HEIGHT = 1,
+            FLAG_COLOR = 2,
+            FLAG_TEXTURE = 4
+        };
+
         // default height to use in case there is no Land record
         static constexpr int DEFAULT_HEIGHT = -2048;
 
