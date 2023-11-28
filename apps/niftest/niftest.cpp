@@ -72,9 +72,10 @@ std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
 void readNIF(
     const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
 {
+    const std::string pathStr = Files::pathToUnicodeString(path);
     if (!quiet)
     {
-        std::cout << "Reading NIF file '" << Files::pathToUnicodeString(path) << "'";
+        std::cout << "Reading NIF file '" << pathStr << "'";
         if (!source.empty())
             std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
         std::cout << std::endl;
@@ -85,13 +86,13 @@ void readNIF(
         Nif::NIFFile file(fullPath);
         Nif::Reader reader(file);
         if (vfs != nullptr)
-            reader.parse(vfs->get(Files::pathToUnicodeString(path)));
+            reader.parse(vfs->get(pathStr));
         else
             reader.parse(Files::openConstrainedFileStream(fullPath));
     }
     catch (std::exception& e)
     {
-        std::cerr << "Error, an exception has occurred: " << e.what() << std::endl;
+        std::cerr << "Failed to read '" << pathStr << "':" << std::endl << e.what() << std::endl;
     }
 }
 
@@ -204,20 +205,20 @@ int main(int argc, char** argv)
         vfs = std::make_unique<VFS::Manager>();
         for (const std::filesystem::path& path : sources)
         {
+            const std::string pathStr = Files::pathToUnicodeString(path);
             if (!quiet)
-                std::cout << "Adding data source '" << Files::pathToUnicodeString(path) << "'" << std::endl;
+                std::cout << "Adding data source '" << pathStr << "'" << std::endl;
 
             try
             {
                 if (auto archive = makeArchive(path))
                     vfs->addArchive(std::move(archive));
                 else
-                    std::cerr << "Error: '" << Files::pathToUnicodeString(path) << "' is not an archive or directory"
-                              << std::endl;
+                    std::cerr << "Error: '" << pathStr << "' is not an archive or directory" << std::endl;
             }
             catch (std::exception& e)
             {
-                std::cerr << "Error, an exception has occurred:  " << e.what() << std::endl;
+                std::cerr << "Failed to add data source '" << pathStr << "':  " << e.what() << std::endl;
             }
         }
 
@@ -226,6 +227,7 @@ int main(int argc, char** argv)
 
     for (const auto& path : files)
     {
+        const std::string pathStr = Files::pathToUnicodeString(path);
         try
         {
             if (isNIF(path))
@@ -238,13 +240,12 @@ int main(int argc, char** argv)
             }
             else
             {
-                std::cerr << "Error: '" << Files::pathToUnicodeString(path)
-                          << "' is not a NIF file, BSA/BA2 archive, or directory" << std::endl;
+                std::cerr << "Error: '" << pathStr << "' is not a NIF file, BSA/BA2 archive, or directory" << std::endl;
             }
         }
         catch (std::exception& e)
         {
-            std::cerr << "Error, an exception has occurred:  " << e.what() << std::endl;
+            std::cerr << "Failed to read '" << pathStr << "':  " << e.what() << std::endl;
         }
     }
     return 0;
