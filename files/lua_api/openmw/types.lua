@@ -727,7 +727,7 @@
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
 -- @field #number baseGold The base barter gold of the creature
--- @field #list<#string> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 
 
 --- @{#NPC} functions
@@ -936,7 +936,7 @@
 -- @field #number baseGold The base barter gold of the NPC
 -- @field #number baseDisposition NPC's starting disposition
 -- @field #bool isMale The gender setting of the NPC
--- @field #list<#string> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #map<#string, #boolean> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 
 
 --------------------------------------------------------------------------------
@@ -959,7 +959,7 @@
 -- @function [parent=#Player] getCrimeLevel
 -- @param openmw.core#GameObject player
 -- @return #number
- 
+
 ---
 -- Whether the character generation for this player is finished.
 -- @function [parent=#Player] isCharGenFinished
@@ -1097,7 +1097,7 @@
 -- @param #ArmorRecord armor A Lua table with the fields of a ArmorRecord, with an additional field `template` that accepts a @{#ArmorRecord} as a base.
 -- @return #ArmorRecord A strongly typed Armor record.
 -- @usage local armorTemplate = types.Armor.record('orcish_cuirass')
--- local armorTable = {name = "Better Orcish Cuirass",template = armorTemplate,baseArmor = armorTemplate.baseArmor + 10} 
+-- local armorTable = {name = "Better Orcish Cuirass",template = armorTemplate,baseArmor = armorTemplate.baseArmor + 10}
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Armor.createRecordDraft(armorTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record
@@ -1224,7 +1224,7 @@
 -- @param #ClothingRecord clothing A Lua table with the fields of a ClothingRecord, with an additional field `template` that accepts a @{#ClothingRecord} as a base.
 -- @return #ClothingRecord A strongly typed clothing record.
 -- @usage local clothingTemplate = types.Clothing.record('exquisite_robe_01')
--- local clothingTable = {name = "Better Exquisite Robe",template = clothingTemplate,enchantCapacity = clothingTemplate.enchantCapacity + 10} 
+-- local clothingTable = {name = "Better Exquisite Robe",template = clothingTemplate,enchantCapacity = clothingTemplate.enchantCapacity + 10}
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Clothing.createRecordDraft(clothingTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record

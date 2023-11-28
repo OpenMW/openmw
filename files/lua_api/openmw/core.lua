@@ -265,6 +265,7 @@
 -- @function [parent=#GameObject] split
 -- @param self
 -- @param #number count The number of items to return.
+-- @return #GameObject
 -- @usage -- take 50 coins from `money` and put to the container `cont`
 -- money:split(50):moveInto(types.Container.content(cont))
 
