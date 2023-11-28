@@ -352,7 +352,7 @@ namespace MWGui
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)
         {
-            std::string str = Misc::getResolutionText(resolution.first, resolution.second);
+            std::string str = Misc::getResolutionText(resolution.first, resolution.second, "%i x %i (%i:%i)");
 
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
                 mResolutionList->addItem(str);

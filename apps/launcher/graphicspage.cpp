@@ -102,7 +102,7 @@ bool Launcher::GraphicsPage::loadSettings()
 
     const int width = Settings::video().mResolutionX;
     const int height = Settings::video().mResolutionY;
-    QString resolution = QString::number(width) + QString(" x ") + QString::number(height);
+    QString resolution = QString::number(width) + QString(" × ") + QString::number(height);
     screenComboBox->setCurrentIndex(Settings::video().mScreen);
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
@@ -189,7 +189,7 @@ void Launcher::GraphicsPage::saveSettings()
     int cHeight = 0;
     if (standardRadioButton->isChecked())
     {
-        QRegularExpression resolutionRe("^(\\d+) x (\\d+)");
+        QRegularExpression resolutionRe("^(\\d+) × (\\d+)");
         QRegularExpressionMatch match = resolutionRe.match(resolutionComboBox->currentText().simplified());
         if (match.hasMatch())
         {
@@ -289,7 +289,7 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
             return result;
         }
 
-        auto str = Misc::getResolutionText(mode.w, mode.h);
+        auto str = Misc::getResolutionText(mode.w, mode.h, "%i × %i (%i:%i)");
         result.append(QString(str.c_str()));
     }
 

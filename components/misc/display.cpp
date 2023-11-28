@@ -7,7 +7,7 @@
 
 namespace Misc
 {
-    std::string getResolutionText(int x, int y)
+    std::string getResolutionText(int x, int y, const std::string& format)
     {
         int gcd = std::gcd(x, y);
         if (gcd == 0)
@@ -77,6 +77,6 @@ namespace Misc
         if (flipped)
             std::swap(xaspect, yaspect);
 
-        return Misc::StringUtils::format("%i x %i (%i:%i)", x, y, xaspect, yaspect);
+        return Misc::StringUtils::format(format, x, y, xaspect, yaspect);
     }
 }

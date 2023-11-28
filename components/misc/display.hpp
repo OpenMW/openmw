@@ -5,7 +5,7 @@
 
 namespace Misc
 {
-    std::string getResolutionText(int x, int y);
+    std::string getResolutionText(int x, int y, const std::string& format);
 }
 
 #endif
