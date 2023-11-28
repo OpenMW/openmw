@@ -25,6 +25,8 @@ namespace LuaUi
 
         void attachElement();
         void detachElement();
+
+        void containerChangedCoord(MyGUI::Widget*);
     };
 }
 

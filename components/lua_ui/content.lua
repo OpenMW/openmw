@@ -1,12 +1,17 @@
 local M = {}
 M.__Content = true
+
+function validateContentChild(v)
+    if not (type(v) == 'table' or v.__type and v.__type.name == 'LuaUi::Element') then
+        error('Content can only contain tables and Elements')
+    end
+end
+
 M.new = function(source)
     local result = {}
     result.__nameIndex = {}
     for i, v in ipairs(source) do
-        if type(v) ~= 'table' then
-            error('Content can only contain tables')
-        end
+        validateContentChild(v)
         result[i] = v
         if type(v.name) == 'string' then
             result.__nameIndex[v.name] = i
@@ -38,9 +43,7 @@ end
 local methods = {
     insert = function(self, index, value)
         validateIndex(self, index)
-        if type(value) ~= 'table' then
-            error('Content can only contain tables')
-        end
+        validateContentChild(value)
         for i = #self, index, -1 do
             rawset(self, i + 1, rawget(self, i))
             local name = rawget(self, i + 1)
@@ -56,7 +59,7 @@ local methods = {
     indexOf = function(self, value)
         if type(value) == 'string' then
             return self.__nameIndex[value]
-        elseif type(value) == 'table' then
+        else
             for i = 1, #self do
                 if rawget(self, i) == value then
                     return i
@@ -113,10 +116,9 @@ M.__newindex = function(self, key, value)
     local index = getIndexFromKey(self, key)
     if value == nil then
         remove(self, index)
-    elseif type(value) == 'table' then
-        assign(self, index, value)
     else
-        error('Content can only contain tables')
+        validateContentChild(value)
+        assign(self, index, value)
     end
 end
 M.__tostring = function(self)

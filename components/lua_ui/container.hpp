@@ -9,6 +9,7 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaContainer)
 
+    public:
         MyGUI::IntSize calculateSize() override;
         void updateCoord() override;
 
