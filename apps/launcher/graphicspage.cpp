@@ -309,11 +309,11 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
         QString aspect = getAspect(mode.w, mode.h);
         if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10"))
         {
-            resolution.append(tr("\t(Wide ") + aspect + ")");
+            resolution.append(tr(" (Wide ") + aspect + ")");
         }
         else if (aspect == QLatin1String("4:3"))
         {
-            resolution.append(tr("\t(Standard 4:3)"));
+            resolution.append(tr(" (Standard 4:3)"));
         }
 
         result.append(resolution);
