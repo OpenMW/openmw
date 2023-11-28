@@ -2307,17 +2307,15 @@ namespace MWMechanics
             }
 
             updateAnimQueue();
-            if (mAnimQueue.empty() || inwater || (sneak && mIdleState != CharState_SpecialIdle))
-            {
-                if (inwater)
-                    idlestate = CharState_IdleSwim;
-                else if (sneak && !mInJump)
-                    idlestate = CharState_IdleSneak;
-                else
-                    idlestate = CharState_Idle;
-            }
-            else if (!mAnimQueue.empty())
+            if (!mAnimQueue.empty())
                 idlestate = CharState_SpecialIdle;
+            else if (sneak && !mInJump)
+                idlestate = CharState_IdleSneak;
+            else
+                idlestate = CharState_Idle;
+
+            if (inwater)
+                idlestate = CharState_IdleSwim;
 
             if (!mSkipAnim)
             {
