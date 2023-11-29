@@ -30,6 +30,16 @@
 -- @return #boolean
 
 ---
+-- Checks if the gamepad cursor is active. If it is active, the left stick can move the cursor, and A will be interpreted as a mouse click.
+-- @function [parent=#input] isGamepadCursorActive
+-- @return #boolean
+
+---
+-- Set if the gamepad cursor is active. If it is active, the left stick can move the cursor, and A will be interpreted as a mouse click.
+-- @function [parent=#input] setGamepadCursorActive
+-- @param #boolean value
+
+---
 -- Is `Shift` key pressed.
 -- @function [parent=#input] isShiftPressed
 -- @return #boolean
