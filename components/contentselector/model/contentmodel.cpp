@@ -7,6 +7,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QFont>
 
 #include <components/esm/format.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -164,20 +165,14 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
             return isLoadOrderError(file) ? mWarningIcon : QVariant();
         }
 
-        case Qt::BackgroundRole:
+        case Qt::FontRole:
         {
             if (isNew(file->fileName()))
             {
-                return QVariant(QColor(Qt::green));
-            }
-            return QVariant();
-        }
-
-        case Qt::ForegroundRole:
-        {
-            if (isNew(file->fileName()))
-            {
-                return QVariant(QColor(Qt::black));
+                auto font = QFont();
+                font.setBold(true);
+                font.setItalic(true);
+                return font;
             }
             return QVariant();
         }

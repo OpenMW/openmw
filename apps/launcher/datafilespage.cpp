@@ -301,12 +301,14 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         auto row = ui.directoryListWidget->count() - 1;
         auto* item = ui.directoryListWidget->item(row);
 
-        // Display new content with green background
+        // Display new content with custom formatting
         if (mNewDataDirs.contains(canonicalDirPath))
         {
             tooltip += "Will be added to the current profile\n";
-            item->setBackground(Qt::green);
-            item->setForeground(Qt::black);
+            QFont font = item->font();
+            font.setBold(true);
+            font.setItalic(true);
+            item->setFont(font);
         }
 
         // deactivate data-local and global data directory: they are always included
@@ -737,8 +739,11 @@ void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState sel
     ui.archiveListWidget->item(row)->setCheckState(selected);
     if (mKnownArchives.filter(name).isEmpty()) // XXX why contains doesn't work here ???
     {
-        ui.archiveListWidget->item(row)->setBackground(Qt::green);
-        ui.archiveListWidget->item(row)->setForeground(Qt::black);
+        auto item = ui.archiveListWidget->item(row);
+        QFont font = item->font();
+        font.setBold(true);
+        font.setItalic(true);
+        item->setFont(font);
     }
 }
 
