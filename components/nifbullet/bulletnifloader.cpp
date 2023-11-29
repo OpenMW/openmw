@@ -6,21 +6,14 @@
 #include <variant>
 #include <vector>
 
-#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
-
 #include <components/debug/debuglog.hpp>
-
+#include <components/files/conversion.hpp>
 #include <components/misc/convert.hpp>
-
 #include <components/misc/strings/algorithm.hpp>
-
-#include <components/nif/data.hpp>
 #include <components/nif/extra.hpp>
 #include <components/nif/nifstream.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/parent.hpp>
-
-#include <components/files/conversion.hpp>
 
 namespace
 {
@@ -30,111 +23,6 @@ namespace
         const std::size_t slashpos = path.find_last_of("/\\");
         const std::size_t letterPos = slashpos == std::string::npos ? 0 : slashpos + 1;
         return letterPos < path.size() && (path[letterPos] == 'x' || path[letterPos] == 'X');
-    }
-
-    bool isTypeNiGeometry(int type)
-    {
-        switch (type)
-        {
-            case Nif::RC_NiTriShape:
-            case Nif::RC_NiTriStrips:
-            case Nif::RC_BSLODTriShape:
-            case Nif::RC_BSSegmentedTriShape:
-                return true;
-        }
-        return false;
-    }
-
-    bool isTypeTriShape(int type)
-    {
-        switch (type)
-        {
-            case Nif::RC_NiTriShape:
-            case Nif::RC_BSLODTriShape:
-            case Nif::RC_BSSegmentedTriShape:
-                return true;
-        }
-
-        return false;
-    }
-
-    void prepareTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriBasedGeomData& data)
-    {
-        // FIXME: copying vertices/indices individually is unreasonable
-        const std::vector<osg::Vec3f>& vertices = data.mVertices;
-        mesh.preallocateVertices(static_cast<int>(vertices.size()));
-        for (const osg::Vec3f& vertex : vertices)
-            mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
-
-        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles) * 3);
-    }
-
-    void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)
-    {
-        prepareTriangleMesh(mesh, data);
-        const std::vector<unsigned short>& triangles = data.mTriangles;
-        for (std::size_t i = 0; i < triangles.size(); i += 3)
-            mesh.addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
-    }
-
-    void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data)
-    {
-        prepareTriangleMesh(mesh, data);
-        for (const std::vector<unsigned short>& strip : data.mStrips)
-        {
-            if (strip.size() < 3)
-                continue;
-
-            unsigned short a;
-            unsigned short b = strip[0];
-            unsigned short c = strip[1];
-            for (size_t i = 2; i < strip.size(); i++)
-            {
-                a = b;
-                b = c;
-                c = strip[i];
-                if (a == b || b == c || a == c)
-                    continue;
-                if (i % 2 == 0)
-                    mesh.addTriangleIndices(a, b, c);
-                else
-                    mesh.addTriangleIndices(a, c, b);
-            }
-        }
-    }
-
-    template <class Function>
-    auto handleNiGeometry(const Nif::NiGeometry& geometry, Function&& function)
-        -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.mData.get())))
-    {
-        if (isTypeTriShape(geometry.recType))
-        {
-            auto data = static_cast<const Nif::NiTriShapeData*>(geometry.mData.getPtr());
-            if (data->mTriangles.empty())
-                return {};
-
-            return function(static_cast<const Nif::NiTriShapeData&>(*data));
-        }
-
-        if (geometry.recType == Nif::RC_NiTriStrips)
-        {
-            auto data = static_cast<const Nif::NiTriStripsData*>(geometry.mData.getPtr());
-            if (data->mStrips.empty())
-                return {};
-
-            return function(static_cast<const Nif::NiTriStripsData&>(*data));
-        }
-
-        return {};
-    }
-
-    std::unique_ptr<btTriangleMesh> makeChildMesh(const Nif::NiGeometry& geometry)
-    {
-        return handleNiGeometry(geometry, [&](const auto& data) {
-            auto mesh = std::make_unique<btTriangleMesh>();
-            fillTriangleMesh(*mesh, data);
-            return mesh;
-        });
     }
 
 }
@@ -336,8 +224,8 @@ namespace NifBullet
                     return;
 
                 // Otherwise we'll want to notify the user.
-                Log(Debug::Info) << "RootCollisionNode is not attached to the root node in " << mShape->mFileName
-                                 << ". Treating it as a common NiTriShape.";
+                Log(Debug::Info) << "BulletNifLoader: RootCollisionNode is not attached to the root node in "
+                                 << mShape->mFileName << ". Treating it as a NiNode.";
             }
             else
             {
@@ -349,8 +237,12 @@ namespace NifBullet
         if (node.recType == Nif::RC_AvoidNode)
             args.mAvoid = true;
 
-        if ((args.mAutogenerated || args.mIsCollisionNode) && isTypeNiGeometry(node.recType))
-            handleNiTriShape(static_cast<const Nif::NiGeometry&>(node), parent, args);
+        if (args.mAutogenerated || args.mIsCollisionNode)
+        {
+            auto geometry = dynamic_cast<const Nif::NiGeometry*>(&node);
+            if (geometry)
+                handleGeometry(*geometry, parent, args);
+        }
 
         // For NiNodes, loop through children
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(&node))
@@ -367,7 +259,7 @@ namespace NifBullet
         }
     }
 
-    void BulletNifLoader::handleNiTriShape(
+    void BulletNifLoader::handleGeometry(
         const Nif::NiGeometry& niGeometry, const Nif::Parent* nodeParent, HandleNodeArgs args)
     {
         // This flag comes from BSXFlags
@@ -378,19 +270,13 @@ namespace NifBullet
         if (args.mHasTriMarkers && Misc::StringUtils::ciStartsWith(niGeometry.mName, "Tri EditorMarker"))
             return;
 
-        if (niGeometry.mData.empty() || niGeometry.mData->mVertices.empty())
-            return;
-
         if (!niGeometry.mSkin.empty())
             args.mAnimated = false;
         // TODO: handle NiSkinPartition
 
-        std::unique_ptr<btTriangleMesh> childMesh = makeChildMesh(niGeometry);
-        if (childMesh == nullptr || childMesh->getNumTriangles() == 0)
+        std::unique_ptr<btCollisionShape> childShape = niGeometry.getCollisionShape();
+        if (childShape == nullptr)
             return;
-
-        auto childShape = std::make_unique<Resource::TriangleMeshShape>(childMesh.get(), true);
-        std::ignore = childMesh.release();
 
         osg::Matrixf transform = niGeometry.mTransform.toMatrix();
         for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)

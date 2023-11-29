@@ -8,6 +8,8 @@
 
 #include "base.hpp"
 
+class btCollisionShape;
+
 namespace Nif
 {
 
@@ -146,6 +148,11 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+
+        virtual std::unique_ptr<btCollisionShape> getCollisionShape() const
+        {
+            throw std::runtime_error("NiGeometry::getCollisionShape() called on base class");
+        }
     };
 
     // Abstract triangle-based geometry
@@ -155,6 +162,7 @@ namespace Nif
 
     struct NiTriShape : NiTriBasedGeom
     {
+        std::unique_ptr<btCollisionShape> getCollisionShape() const override;
     };
 
     struct BSSegmentedTriShape : NiTriShape
@@ -175,17 +183,20 @@ namespace Nif
 
     struct NiTriStrips : NiTriBasedGeom
     {
+        std::unique_ptr<btCollisionShape> getCollisionShape() const override;
     };
 
     struct NiLines : NiTriBasedGeom
     {
+        std::unique_ptr<btCollisionShape> getCollisionShape() const override;
     };
 
     struct NiParticles : NiGeometry
     {
+        std::unique_ptr<btCollisionShape> getCollisionShape() const override;
     };
 
-    struct BSLODTriShape : NiTriBasedGeom
+    struct BSLODTriShape : NiTriShape
     {
         std::array<uint32_t, 3> mLOD;
         void read(NIFStream* nif) override;
