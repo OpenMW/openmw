@@ -49,7 +49,8 @@ namespace Terrain
 
         double timeLeft = availableTime;
 
-        while (!mCompileSet.empty() && timeLeft > 0)
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::duration<double>(availableTime);
+        while (!mCompileSet.empty() && std::chrono::steady_clock::now() < deadline)
         {
             osg::ref_ptr<CompositeMap> node = *mCompileSet.begin();
             mCompileSet.erase(node);
