@@ -99,7 +99,7 @@ namespace LuaUi
             if (parent)
             {
                 auto children = parent->children();
-                std::remove(children.begin(), children.end(), root);
+                std::erase(children, root);
                 parent->setChildren(children);
                 root->widget()->detachFromWidget();
             }
