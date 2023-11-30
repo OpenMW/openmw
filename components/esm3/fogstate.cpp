@@ -74,7 +74,7 @@ namespace ESM
             tex.mImageData.resize(imageSize);
             esm.getExact(tex.mImageData.data(), imageSize);
 
-            if (dataFormat <= MaxOldForOfWarFormatVersion)
+            if (dataFormat <= MaxOldFogOfWarFormatVersion)
                 convertFogOfWar(tex.mImageData);
 
             mFogTextures.push_back(tex);

@@ -48,10 +48,6 @@ namespace ESM
         mFlags = 0;
         esm.getHNOT(mFlags, "FLAG");
 
-        // obsolete
-        int32_t unused;
-        esm.getHNOT(unused, "LTIM");
-
         mAnimationState.load(esm);
 
         // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files

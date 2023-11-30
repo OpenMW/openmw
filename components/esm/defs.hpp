@@ -146,8 +146,6 @@ namespace ESM
 
         // format 0 - saved games
         REC_SAVE = esm3Recname("SAVE"),
-        REC_JOUR_LEGACY = esm3Recname("\xa4UOR"), // "\xa4UOR", rather than "JOUR", little oversight when magic numbers
-                                                  // were calculated by hand, needs to be supported for older files now
         REC_JOUR = esm3Recname("JOUR"),
         REC_QUES = esm3Recname("QUES"),
         REC_GSCR = esm3Recname("GSCR"),

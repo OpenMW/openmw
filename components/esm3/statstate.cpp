@@ -32,10 +32,6 @@ namespace ESM
             int32_t current = 0;
             esm.getHNOT(current, "STCU");
             mCurrent = static_cast<T>(current);
-
-            int32_t oldDamage = 0;
-            esm.getHNOT(oldDamage, "STDA");
-            mDamage = static_cast<float>(oldDamage);
         }
         else
         {

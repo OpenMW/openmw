@@ -1333,25 +1333,19 @@ namespace MWClass
 
         const ESM::NpcState& npcState = state.asNpcState();
 
-        if (state.mVersion > 0)
+        if (!ptr.getRefData().getCustomData())
         {
-            if (!ptr.getRefData().getCustomData())
+            if (npcState.mCreatureStats.mMissingACDT)
+                ensureCustomData(ptr);
+            else
             {
-                if (npcState.mCreatureStats.mMissingACDT)
-                    ensureCustomData(ptr);
-                else
-                {
-                    // Create a CustomData, but don't fill it from ESM records (not needed)
-                    auto data = std::make_unique<NpcCustomData>();
-                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
-                    data->mInventoryStore.setPtr(ptr);
-                    ptr.getRefData().setCustomData(std::move(data));
-                }
+                // Create a CustomData, but don't fill it from ESM records (not needed)
+                auto data = std::make_unique<NpcCustomData>();
+                MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+                data->mInventoryStore.setPtr(ptr);
+                ptr.getRefData().setCustomData(std::move(data));
             }
         }
-        else
-            ensureCustomData(
-                ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
 

@@ -252,16 +252,16 @@ namespace
         if (!record)
             return;
 
-        if (state.mVersion < 15)
+        if (state.mVersion <= ESM::MaxOldRestockingFormatVersion)
             fixRestocking(record, state);
-        if (state.mVersion < 17)
+        if (state.mVersion <= ESM::MaxClearModifiersFormatVersion)
         {
             if constexpr (std::is_same_v<T, ESM::Creature>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory);
             else if constexpr (std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory, &state.mNpcStats);
         }
-        else if (state.mVersion < 20)
+        else if (state.mVersion <= ESM::MaxOldCreatureStatsFormatVersion)
         {
             if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertStats(state.mCreatureStats);
