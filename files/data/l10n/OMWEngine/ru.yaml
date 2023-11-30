@@ -22,6 +22,9 @@ LoadingInProgress: "Загрузка сохранения"
 LoadingRequiresNewVersionError: |-
     Это сохранение создано более новой версией OpenMW и поэтому не может быть загружено.
     Обновите OpenMW до последней версии, чтобы загрузить этот файл.
+# LoadingRequiresOldVersionError: |-
+#     This save file was created using an older version of OpenMW in a format that is no longer supported.
+#     Load and save this file using {version} to upgrade it.
 NewGameConfirmation: "Вы хотите начать новую игру? Текущая игра будет потеряна."
 SaveGameDenied: "В данный момент игру нельзя сохранить."
 SavingInProgress: "Сохранение..."

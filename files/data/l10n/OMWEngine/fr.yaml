@@ -22,6 +22,9 @@ LoadingInProgress: "Chargement de la sauvegarde"
 LoadingRequiresNewVersionError: |-
     Ce fichier de sauvegarde provient d'une version plus récente d'OpenMW, il n'est par consequent pas supporté.
     Mettez à jour votre version d'OpenMW afin de pouvoir charger cette sauvegarde.
+# LoadingRequiresOldVersionError: |-
+#     This save file was created using an older version of OpenMW in a format that is no longer supported.
+#     Load and save this file using {version} to upgrade it.
 NewGameConfirmation: "Voulez-vous démarrer une nouvelle partie ? Toute progression non sauvegardée sera perdue."
 SaveGameDenied: "Sauvegarde impossible"
 SavingInProgress: "Sauvegarde en cours..."
