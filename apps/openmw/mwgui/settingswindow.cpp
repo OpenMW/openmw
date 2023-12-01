@@ -2,7 +2,6 @@
 
 #include <array>
 #include <iomanip>
-#include <numeric>
 #include <regex>
 
 #include <unicode/locid.h>
@@ -21,6 +20,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/lua_ui/scriptsettings.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/display.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
@@ -91,20 +91,6 @@ namespace
         if (left.first == right.first)
             return left.second > right.second;
         return left.first > right.first;
-    }
-
-    std::string getAspect(int x, int y)
-    {
-        int gcd = std::gcd(x, y);
-        if (gcd == 0)
-            return std::string();
-
-        int xaspect = x / gcd;
-        int yaspect = y / gcd;
-        // special case: 8 : 5 is usually referred to as 16:10
-        if (xaspect == 8 && yaspect == 5)
-            return "16 : 10";
-        return MyGUI::utility::toString(xaspect) + " : " + MyGUI::utility::toString(yaspect);
     }
 
     const std::string_view checkButtonType = "CheckButton";
@@ -366,11 +352,7 @@ namespace MWGui
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)
         {
-            std::string str
-                = MyGUI::utility::toString(resolution.first) + " x " + MyGUI::utility::toString(resolution.second);
-            std::string aspect = getAspect(resolution.first, resolution.second);
-            if (!aspect.empty())
-                str = str + " (" + aspect + ")";
+            std::string str = Misc::getResolutionText(resolution.first, resolution.second, "%i x %i (%i:%i)");
 
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
                 mResolutionList->addItem(str);

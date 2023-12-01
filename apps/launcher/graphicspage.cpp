@@ -2,6 +2,7 @@
 
 #include "sdlinit.hpp"
 
+#include <components/misc/display.hpp>
 #include <components/settings/values.hpp>
 
 #include <QMessageBox>
@@ -16,22 +17,6 @@
 #include <SDL_video.h>
 
 #include <array>
-#include <numeric>
-
-QString getAspect(int x, int y)
-{
-    int gcd = std::gcd(x, y);
-    if (gcd == 0)
-        return QString();
-
-    int xaspect = x / gcd;
-    int yaspect = y / gcd;
-    // special case: 8 : 5 is usually referred to as 16:10
-    if (xaspect == 8 && yaspect == 5)
-        return QString("16:10");
-
-    return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
-}
 
 Launcher::GraphicsPage::GraphicsPage(QWidget* parent)
     : QWidget(parent)
@@ -117,7 +102,7 @@ bool Launcher::GraphicsPage::loadSettings()
 
     const int width = Settings::video().mResolutionX;
     const int height = Settings::video().mResolutionY;
-    QString resolution = QString::number(width) + QString(" x ") + QString::number(height);
+    QString resolution = QString::number(width) + QString(" × ") + QString::number(height);
     screenComboBox->setCurrentIndex(Settings::video().mScreen);
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
@@ -204,7 +189,7 @@ void Launcher::GraphicsPage::saveSettings()
     int cHeight = 0;
     if (standardRadioButton->isChecked())
     {
-        QRegularExpression resolutionRe("^(\\d+) x (\\d+)");
+        QRegularExpression resolutionRe("^(\\d+) × (\\d+)");
         QRegularExpressionMatch match = resolutionRe.match(resolutionComboBox->currentText().simplified());
         if (match.hasMatch())
         {
@@ -304,19 +289,8 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
             return result;
         }
 
-        QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
-
-        QString aspect = getAspect(mode.w, mode.h);
-        if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10"))
-        {
-            resolution.append(tr(" (Wide ") + aspect + ")");
-        }
-        else if (aspect == QLatin1String("4:3"))
-        {
-            resolution.append(tr(" (Standard 4:3)"));
-        }
-
-        result.append(resolution);
+        auto str = Misc::getResolutionText(mode.w, mode.h, "%i × %i (%i:%i)");
+        result.append(QString(str.c_str()));
     }
 
     result.removeDuplicates();
