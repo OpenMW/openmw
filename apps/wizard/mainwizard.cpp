@@ -55,9 +55,9 @@ Wizard::MainWizard::MainWizard(QWidget* parent)
         &MainWizard::importerFinished);
 
     mLogError = tr(
-        "<html><head/><body><p><b>Could not open %1 for writing</b></p> \
-                   <p>Please make sure you have the right permissions \
-                   and try again.</p></body></html>");
+        "<html><head/><body><p><b>Could not open %1 for writing</b></p>"
+        "<p>Please make sure you have the right permissions "
+        "and try again.</p></body></html>");
 
     std::filesystem::create_directories(mCfgMgr.getUserConfigPath());
     std::filesystem::create_directories(mCfgMgr.getUserDataPath());
@@ -139,9 +139,9 @@ void Wizard::MainWizard::addLogText(const QString& text)
 void Wizard::MainWizard::setupGameSettings()
 {
     QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
-                    <p>Please make sure you have the right permissions \
-                    and try again.</p></body></html>"));
+        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
+           "<p>Please make sure you have the right permissions "
+           "and try again.</p></body></html>"));
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
@@ -210,9 +210,9 @@ void Wizard::MainWizard::setupLauncherSettings()
     path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
-                    <p>Please make sure you have the right permissions \
-                    and try again.</p></body></html>"));
+        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
+           "<p>Please make sure you have the right permissions "
+           "and try again.</p></body></html>"));
 
     QFile file(path);
 
@@ -427,9 +427,9 @@ void Wizard::MainWizard::writeSettings()
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<html><head/><body><p><b>Could not create %1</b></p> \
-                              <p>Please make sure you have the right permissions \
-                              and try again.</p></body></html>")
+                tr("<html><head/><body><p><b>Could not create %1</b></p>"
+                   "<p>Please make sure you have the right permissions "
+                   "and try again.</p></body></html>")
                     .arg(userPath));
             connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
             msgBox.exec();
@@ -448,9 +448,9 @@ void Wizard::MainWizard::writeSettings()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
-                          <p>Please make sure you have the right permissions \
-                          and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
+               "<p>Please make sure you have the right permissions "
+               "and try again.</p></body></html>")
                 .arg(file.fileName()));
         connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
@@ -475,9 +475,9 @@ void Wizard::MainWizard::writeSettings()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
-                          <p>Please make sure you have the right permissions \
-                          and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
+               "<p>Please make sure you have the right permissions "
+               "and try again.</p></body></html>")
                 .arg(file.fileName()));
         connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
