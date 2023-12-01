@@ -276,6 +276,7 @@ namespace MWRender
         float mUpperBodyYawRadians;
         float mLegsYawRadians;
         float mBodyPitchRadians;
+        osg::Vec3f mPreviousPosition;
 
         osg::ref_ptr<RotateController> addRotateController(std::string_view bone);
 
@@ -304,7 +305,7 @@ namespace MWRender
 
         /* Updates the position of the accum root node for the given time, and
          * returns the wanted movement vector from the previous time. */
-        void updatePosition(float oldtime, float newtime, osg::Vec3f& position);
+        void updatePosition(float oldtime, float newtime, osg::Vec3f& position, bool hasMovement);
 
         /* Resets the animation to the time of the specified start marker, without
          * moving anything, and set the end time to the specified stop marker. If

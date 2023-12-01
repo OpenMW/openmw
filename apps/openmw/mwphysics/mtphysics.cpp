@@ -25,6 +25,7 @@
 #include "../mwrender/bulletdebugdraw.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -35,6 +36,7 @@
 #include "object.hpp"
 #include "physicssystem.hpp"
 #include "projectile.hpp"
+#include "ptrholder.hpp"
 
 namespace MWPhysics
 {
@@ -193,6 +195,51 @@ namespace
                 frameData.mLastStuckPosition = actor->getLastStuckPosition();
             }
             void operator()(MWPhysics::ProjectileSimulation& /*sim*/) const {}
+        };
+
+        struct InitMovement
+        {
+            float mSteps = 1.f;
+            float mDelta = 0.f;
+            float mSimulationTime = 0.f;
+
+            // Returns how the actor or projectile wants to move between startTime and endTime
+            osg::Vec3f takeMovement(MWPhysics::PtrHolder& actor, float startTime, float endTime) const
+            {
+                osg::Vec3f movement = osg::Vec3f();
+                auto it = actor.movement().begin();
+                while (it != actor.movement().end())
+                {
+                    float start = std::max(it->simulationTimeStart, startTime);
+                    float stop = std::min(it->simulationTimeStop, endTime);
+                    movement += it->velocity * (stop - start);
+                    if (std::abs(stop - it->simulationTimeStop) < 0.0001f)
+                        it = actor.movement().erase(it);
+                    else
+                        it++;
+                }
+
+                return movement;
+            }
+
+            void operator()(auto& sim) const
+            {
+                if (mSteps == 0 || mDelta < 0.00001f)
+                    return;
+
+                auto locked = sim.lock();
+                if (!locked.has_value())
+                    return;
+
+                auto& [ptrHolder, frameDataRef] = *locked;
+
+                // Because takeMovement() returns movement instead of velocity, convert it back to velocity for the
+                // movement solver
+                osg::Vec3f velocity
+                    = takeMovement(*ptrHolder, mSimulationTime, mSimulationTime + mDelta * mSteps) / (mSteps * mDelta);
+
+                frameDataRef.get().mMovement += velocity;
+            }
         };
 
         struct PreStep
@@ -501,18 +548,18 @@ namespace MWPhysics
         return std::make_tuple(numSteps, actualDelta);
     }
 
-    void PhysicsTaskScheduler::applyQueuedMovements(float& timeAccum, std::vector<Simulation>& simulations,
-        osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    void PhysicsTaskScheduler::applyQueuedMovements(float& timeAccum, float simulationTime,
+        std::vector<Simulation>& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         assert(mSimulations != &simulations);
 
         waitForWorkers();
-        prepareWork(timeAccum, simulations, frameStart, frameNumber, stats);
+        prepareWork(timeAccum, simulationTime, simulations, frameStart, frameNumber, stats);
         if (mWorkersSync != nullptr)
             mWorkersSync->wakeUpWorkers();
     }
 
-    void PhysicsTaskScheduler::prepareWork(float& timeAccum, std::vector<Simulation>& simulations,
+    void PhysicsTaskScheduler::prepareWork(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations,
         osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
@@ -521,6 +568,9 @@ namespace MWPhysics
         MaybeExclusiveLock lock(mSimulationMutex, mLockingPolicy);
 
         double timeStart = mTimer->tick();
+
+        // The simulation time when the movement solving begins.
+        float simulationTimeStart = simulationTime - timeAccum;
 
         // start by finishing previous background computation
         if (mNumThreads != 0)
@@ -536,10 +586,15 @@ namespace MWPhysics
         timeAccum -= numSteps * newDelta;
 
         // init
-        const Visitors::InitPosition vis{ mCollisionWorld };
+        const Visitors::InitPosition initPositionVisitor{ mCollisionWorld };
         for (auto& sim : simulations)
         {
-            std::visit(vis, sim);
+            std::visit(initPositionVisitor, sim);
+        }
+        const Visitors::InitMovement initMovementVisitor{ numSteps, newDelta, simulationTimeStart };
+        for (auto& sim : simulations)
+        {
+            std::visit(initMovementVisitor, sim);
         }
         mPrevStepCount = numSteps;
         mRemainingSteps = numSteps;
@@ -552,10 +607,11 @@ namespace MWPhysics
         mNextJob.store(0, std::memory_order_release);
 
         if (mAdvanceSimulation)
+        {
+            mNextJobSimTime = simulationTimeStart + (numSteps * newDelta);
             mWorldFrameData = std::make_unique<WorldFrameData>();
-
-        if (mAdvanceSimulation)
             mBudgetCursor += 1;
+        }
 
         if (mNumThreads == 0)
         {
@@ -756,6 +812,7 @@ namespace MWPhysics
             mLockingPolicy };
         for (Simulation& sim : *mSimulations)
             std::visit(vis, sim);
+        mCurrentJobSimTime += mPhysicsDt;
     }
 
     bool PhysicsTaskScheduler::hasLineOfSight(const Actor* actor1, const Actor* actor2)
@@ -864,6 +921,10 @@ namespace MWPhysics
                 std::remove_if(mLOSCache.begin(), mLOSCache.end(), [](const LOSRequest& req) { return req.mStale; }),
                 mLOSCache.end());
         }
+
+        // On paper, mCurrentJobSimTime should have added up to mNextJobSimTime already
+        // But to avoid accumulating floating point errors, assign this anyway.
+        mCurrentJobSimTime = mNextJobSimTime;
         mTimeEnd = mTimer->tick();
         if (mWorkersSync != nullptr)
             mWorkersSync->workIsDone();
@@ -878,6 +939,9 @@ namespace MWPhysics
             std::visit(vis, sim);
         mSimulations->clear();
         mSimulations = nullptr;
+        const float interpolationFactor = std::clamp(mTimeAccum / mPhysicsDt, 0.0f, 1.0f);
+        MWBase::Environment::get().getWorld()->getTimeManager()->setPhysicsSimulationTime(
+            mCurrentJobSimTime - mPhysicsDt * (1.f - interpolationFactor));
     }
 
     // Attempt to acquire unique lock on mSimulationMutex while not all worker

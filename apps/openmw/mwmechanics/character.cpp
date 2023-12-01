@@ -2420,7 +2420,7 @@ namespace MWMechanics
                 }
 
                 if (!isMovementAnimationControlled() && !isScriptedAnimPlaying())
-                    world->queueMovement(mPtr, vec);
+                    world->queueMovement(mPtr, vec, duration);
             }
 
             movement = vec;
@@ -2493,7 +2493,7 @@ namespace MWMechanics
             }
 
             // Update movement
-            world->queueMovement(mPtr, movement);
+            world->queueMovement(mPtr, movement, duration);
         }
 
         mSkipAnim = false;

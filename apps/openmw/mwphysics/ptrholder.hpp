@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <utility>
+#include <deque>
 
 #include <osg/Vec3d>
 
@@ -13,6 +14,13 @@
 
 namespace MWPhysics
 {
+    struct Movement
+    {
+        osg::Vec3f velocity = osg::Vec3f();
+        float simulationTimeStart = 0.f; // The time at which this movement begun
+        float simulationTimeStop = 0.f; // The time at which this movement finished
+    };
+
     class PtrHolder
     {
     public:
@@ -32,9 +40,10 @@ namespace MWPhysics
 
         btCollisionObject* getCollisionObject() const { return mCollisionObject.get(); }
 
-        void setVelocity(osg::Vec3f velocity) { mVelocity = velocity; }
+        void clearMovement() { mMovement = { }; }
+        void queueMovement(osg::Vec3f velocity, float simulationTimeStart, float simulationTimeStop) { mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop }); }
 
-        osg::Vec3f velocity() { return std::exchange(mVelocity, osg::Vec3f()); }
+        std::deque<Movement>& movement() { return mMovement; }
 
         void setSimulationPosition(const osg::Vec3f& position) { mSimulationPosition = position; }
 
@@ -53,7 +62,7 @@ namespace MWPhysics
     protected:
         MWWorld::Ptr mPtr;
         std::unique_ptr<btCollisionObject> mCollisionObject;
-        osg::Vec3f mVelocity;
+        std::deque<Movement> mMovement;
         osg::Vec3f mSimulationPosition;
         osg::Vec3d mPosition;
         osg::Vec3d mPreviousPosition;

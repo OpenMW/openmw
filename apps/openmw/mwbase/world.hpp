@@ -295,7 +295,7 @@ namespace MWBase
         /// relative to \a referenceObject (but the object may be placed somewhere else if the wanted location is
         /// obstructed).
 
-        virtual void queueMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity) = 0;
+        virtual void queueMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity, float duration) = 0;
         ///< Queues movement for \a ptr (in local space), to be applied in the next call to
         /// doPhysics.
 

@@ -1448,9 +1448,9 @@ namespace MWWorld
         return placed;
     }
 
-    void World::queueMovement(const Ptr& ptr, const osg::Vec3f& velocity)
+    void World::queueMovement(const Ptr& ptr, const osg::Vec3f& velocity, float duration)
     {
-        mPhysics->queueObjectMovement(ptr, velocity);
+        mPhysics->queueObjectMovement(ptr, velocity, duration);
     }
 
     void World::updateAnimatedCollisionShape(const Ptr& ptr)

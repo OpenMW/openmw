@@ -170,6 +170,8 @@ namespace MWPhysics
         }
 
         // Now that we have the effective movement vector, apply wind forces to it
+        // TODO: This will cause instability in idle animations and other in-place animations. Should include a flag for
+        // this when queueing up movement
         if (worldData.mIsInStorm && velocity.length() > 0)
         {
             osg::Vec3f stormDirection = worldData.mStormDirection;

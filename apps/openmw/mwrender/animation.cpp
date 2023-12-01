@@ -50,6 +50,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/datetimemanager.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
 
@@ -489,12 +490,21 @@ namespace MWRender
 
     class ResetAccumRootCallback : public SceneUtil::NodeCallback<ResetAccumRootCallback, osg::MatrixTransform*>
     {
+        struct AccumulatedMovement
+        {
+            osg::Vec3f mMovement = osg::Vec3f();
+            float mSimStartTime = 0.f;
+            float mSimStopTime = 0.f;
+        };
+
     public:
         void operator()(osg::MatrixTransform* transform, osg::NodeVisitor* nv)
         {
             osg::Matrix mat = transform->getMatrix();
             osg::Vec3f position = mat.getTrans();
             position = osg::componentMultiply(mResetAxes, position);
+            // Add back the offset that the movement solver has not consumed yet
+            position += computeRemainder();
             mat.setTrans(position);
             transform->setMatrix(mat);
 
@@ -509,7 +519,35 @@ namespace MWRender
             mResetAxes.z() = accumulate.z() != 0.f ? 0.f : 1.f;
         }
 
+        void accumulate(const osg::Vec3f& movement, float dt)
+        {
+            if (dt < 0.00001f)
+                return;
+
+            float simTime = MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime();
+            mMovement.emplace_back(AccumulatedMovement{ movement, simTime, simTime + dt });
+        }
+
+        const osg::Vec3f computeRemainder()
+        {
+            float physSimTime = MWBase::Environment::get().getWorld()->getTimeManager()->getPhysicsSimulationTime();
+            // Start by erasing all movement that has been fully consumed by the physics code
+            std::erase_if(mMovement,
+                [physSimTime](const AccumulatedMovement& movement) { return movement.mSimStopTime <= physSimTime; });
+
+            // Accumulate all the movement that hasn't been consumed.
+            osg::Vec3f movement;
+            for (const auto& m : mMovement)
+            {
+                float startTime = std::max(physSimTime, m.mSimStartTime);
+                float fraction = (m.mSimStopTime - startTime) / (m.mSimStopTime - m.mSimStartTime);
+                movement += m.mMovement * fraction;
+            }
+            return movement;
+        }
+
     private:
+        std::deque<AccumulatedMovement> mMovement;
         osg::Vec3f mResetAxes;
     };
 
@@ -1129,11 +1167,27 @@ namespace MWRender
         return velocity;
     }
 
-    void Animation::updatePosition(float oldtime, float newtime, osg::Vec3f& position)
+    void Animation::updatePosition(float oldtime, float newtime, osg::Vec3f& position, bool hasMovement)
     {
         // Get the difference from the last update, and move the position
-        osg::Vec3f off = osg::componentMultiply(mAccumCtrl->getTranslation(newtime), mAccumulate);
-        position += off - osg::componentMultiply(mAccumCtrl->getTranslation(oldtime), mAccumulate);
+        osg::Vec3f offset = osg::componentMultiply(mAccumCtrl->getTranslation(newtime), mAccumulate);
+        if (!hasMovement)
+        {
+            // When animations have no velocity, the character should have zero net movement through a complete loop or
+            // animation sequence. Although any subsequence of the animation may move. This works because each sequence
+            // starts and stops with Bip01 at the same position, totaling 0 movement. This allows us to accurately move
+            // the character by just moving it from the position Bip01 was last frame to where it is this frame, without
+            // needing to accumulate anything in-between.
+            position += offset - mPreviousPosition;
+            mPreviousPosition = offset;
+        }
+        else
+        {
+            // When animations have velocity, net movement is expected. The above block would negate that movement every time
+            // the animation resets. Therefore we have to accumulate from oldtime to newtime instead, which works because 
+            // oldtime < newtime is a guarantee even when the animation has looped.
+            position += offset - osg::componentMultiply(mAccumCtrl->getTranslation(oldtime), mAccumulate);
+        }
     }
 
     osg::Vec3f Animation::runAnimation(float duration)
@@ -1151,6 +1205,7 @@ namespace MWRender
 
             const SceneUtil::TextKeyMap& textkeys = state.mSource->getTextKeys();
             auto textkey = textkeys.upperBound(state.getTime());
+            bool hasMovement = getVelocity(stateiter->first) > 0.001f;
 
             float timepassed = duration * state.mSpeedMult;
             while (state.mPlaying)
@@ -1161,13 +1216,13 @@ namespace MWRender
                     if (textkey == textkeys.end() || textkey->first > targetTime)
                     {
                         if (mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
-                            updatePosition(state.getTime(), targetTime, movement);
+                            updatePosition(state.getTime(), targetTime, movement, hasMovement);
                         state.setTime(std::min(targetTime, state.mStopTime));
                     }
                     else
                     {
                         if (mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
-                            updatePosition(state.getTime(), textkey->first, movement);
+                            updatePosition(state.getTime(), textkey->first, movement, hasMovement);
                         state.setTime(textkey->first);
                     }
 
@@ -1249,6 +1304,9 @@ namespace MWRender
                     osg::Quat(mHeadPitchRadians, osg::Vec3f(1, 0, 0)) * osg::Quat(yaw, osg::Vec3f(0, 0, 1)));
         }
 
+
+        if (mResetAccumRootCallback)
+            mResetAccumRootCallback->accumulate(movement, duration);
         return movement;
     }
 

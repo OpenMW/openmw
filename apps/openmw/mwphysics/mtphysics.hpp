@@ -46,7 +46,7 @@ namespace MWPhysics
         /// @param timeAccum accumulated time from previous run to interpolate movements
         /// @param actorsData per actor data needed to compute new positions
         /// @return new position of each actor
-        void applyQueuedMovements(float& timeAccum, std::vector<Simulation>& simulations, osg::Timer_t frameStart,
+        void applyQueuedMovements(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations, osg::Timer_t frameStart,
             unsigned int frameNumber, osg::Stats& stats);
 
         void resetSimulation(const ActorMap& actors);
@@ -87,7 +87,7 @@ namespace MWPhysics
         void afterPostSim();
         void syncWithMainThread();
         void waitForWorkers();
-        void prepareWork(float& timeAccum, std::vector<Simulation>& simulations, osg::Timer_t frameStart,
+        void prepareWork(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations, osg::Timer_t frameStart,
             unsigned int frameNumber, osg::Stats& stats);
 
         std::unique_ptr<WorldFrameData> mWorldFrameData;
@@ -96,6 +96,9 @@ namespace MWPhysics
         float mDefaultPhysicsDt;
         float mPhysicsDt;
         float mTimeAccum;
+        float mNextJobSimTime = 0.f;
+        float mCurrentJobSimTime = 0.f;
+        float mPreviousJobSimTime = 0.f;
         btCollisionWorld* mCollisionWorld;
         MWRender::DebugDrawer* mDebugDrawer;
         std::vector<LOSRequest> mLOSCache;
