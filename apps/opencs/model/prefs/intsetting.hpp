@@ -23,7 +23,7 @@ namespace CSMPrefs
         QSpinBox* mWidget;
 
     public:
-        IntSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label, int default_);
+        IntSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label, int default_);
 
         // defaults to [0, std::numeric_limits<int>::max()]
         IntSetting& setRange(int min, int max);
@@ -35,7 +35,7 @@ namespace CSMPrefs
         IntSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

@@ -21,12 +21,12 @@ namespace CSMPrefs
         QCheckBox* mWidget;
 
     public:
-        BoolSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label, bool default_);
+        BoolSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label, bool default_);
 
         BoolSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

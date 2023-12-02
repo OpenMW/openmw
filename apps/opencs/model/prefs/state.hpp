@@ -17,6 +17,11 @@
 
 class QColor;
 
+namespace Settings
+{
+    class Index;
+}
+
 namespace CSMPrefs
 {
     class IntSetting;
@@ -27,6 +32,7 @@ namespace CSMPrefs
     class ModifierSetting;
     class Setting;
     class StringSetting;
+    struct Values;
 
     /// \brief User settings state
     ///
@@ -50,42 +56,40 @@ namespace CSMPrefs
         Collection mCategories;
         Iterator mCurrentCategory;
         QMutex mMutex;
+        std::unique_ptr<Settings::Index> mIndex;
+        std::unique_ptr<Values> mValues;
 
-        // not implemented
-        State(const State&);
-        State& operator=(const State&);
-
-    private:
         void declare();
 
         void declareCategory(const std::string& key);
 
-        IntSetting& declareInt(const std::string& key, const std::string& label, int default_);
-        DoubleSetting& declareDouble(const std::string& key, const std::string& label, double default_);
+        IntSetting& declareInt(const std::string& key, const QString& label, int default_);
+        DoubleSetting& declareDouble(const std::string& key, const QString& label, double default_);
 
-        BoolSetting& declareBool(const std::string& key, const std::string& label, bool default_);
+        BoolSetting& declareBool(const std::string& key, const QString& label, bool default_);
 
-        EnumSetting& declareEnum(const std::string& key, const std::string& label, EnumValue default_);
+        EnumSetting& declareEnum(const std::string& key, const QString& label, EnumValue default_);
 
-        ColourSetting& declareColour(const std::string& key, const std::string& label, QColor default_);
+        ColourSetting& declareColour(const std::string& key, const QString& label, QColor default_);
 
-        ShortcutSetting& declareShortcut(
-            const std::string& key, const std::string& label, const QKeySequence& default_);
+        ShortcutSetting& declareShortcut(const std::string& key, const QString& label, const QKeySequence& default_);
 
-        StringSetting& declareString(const std::string& key, const std::string& label, std::string default_);
+        StringSetting& declareString(const std::string& key, const QString& label, std::string default_);
 
-        ModifierSetting& declareModifier(const std::string& key, const std::string& label, int modifier_);
+        ModifierSetting& declareModifier(const std::string& key, const QString& label, int modifier_);
 
-        void declareSeparator();
-
-        void declareSubcategory(const std::string& label);
+        void declareSubcategory(const QString& label);
 
         void setDefault(const std::string& key, const std::string& default_);
 
     public:
         State(const Files::ConfigurationManager& configurationManager);
 
+        State(const State&) = delete;
+
         ~State();
+
+        State& operator=(const State&) = delete;
 
         void save();
 

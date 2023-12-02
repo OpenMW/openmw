@@ -14,7 +14,7 @@
 #include "state.hpp"
 
 CSMPrefs::ColourSetting::ColourSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, QColor default_)
+    Category* parent, QMutex* mutex, const std::string& key, const QString& label, QColor default_)
     : Setting(parent, mutex, key, label)
     , mDefault(std::move(default_))
     , mWidget(nullptr)
@@ -27,9 +27,9 @@ CSMPrefs::ColourSetting& CSMPrefs::ColourSetting::setTooltip(const std::string& 
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::ColourSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::ColourSetting::makeWidgets(QWidget* parent)
 {
-    QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+    QLabel* label = new QLabel(getLabel(), parent);
 
     mWidget = new CSVWidget::ColorEditor(mDefault, parent);
 
@@ -42,7 +42,7 @@ std::pair<QWidget*, QWidget*> CSMPrefs::ColourSetting::makeWidgets(QWidget* pare
 
     connect(mWidget, &CSVWidget::ColorEditor::pickingFinished, this, &ColourSetting::valueChanged);
 
-    return std::make_pair(label, mWidget);
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
 }
 
 void CSMPrefs::ColourSetting::updateWidget()

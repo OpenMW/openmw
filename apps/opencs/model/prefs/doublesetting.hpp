@@ -21,8 +21,7 @@ namespace CSMPrefs
         QDoubleSpinBox* mWidget;
 
     public:
-        DoubleSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const std::string& label, double default_);
+        DoubleSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label, double default_);
 
         DoubleSetting& setPrecision(int precision);
 
@@ -36,7 +35,7 @@ namespace CSMPrefs
         DoubleSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

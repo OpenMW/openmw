@@ -19,21 +19,21 @@ class QWidget;
 
 namespace CSMPrefs
 {
-    ModifierSetting::ModifierSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label)
+    ModifierSetting::ModifierSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label)
         : Setting(parent, mutex, key, label)
         , mButton(nullptr)
         , mEditorActive(false)
     {
     }
 
-    std::pair<QWidget*, QWidget*> ModifierSetting::makeWidgets(QWidget* parent)
+    SettingWidgets ModifierSetting::makeWidgets(QWidget* parent)
     {
         int modifier = 0;
         State::get().getShortcutManager().getModifier(getKey(), modifier);
 
         QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(modifier).c_str());
 
-        QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+        QLabel* label = new QLabel(getLabel(), parent);
         QPushButton* widget = new QPushButton(text, parent);
 
         widget->setCheckable(true);
@@ -46,7 +46,7 @@ namespace CSMPrefs
 
         connect(widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
 
-        return std::make_pair(label, widget);
+        return SettingWidgets{ .mLabel = label, .mInput = widget, .mLayout = nullptr };
     }
 
     void ModifierSetting::updateWidget()

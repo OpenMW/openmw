@@ -12,7 +12,7 @@
 #include "state.hpp"
 
 CSMPrefs::StringSetting::StringSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, std::string_view default_)
+    Category* parent, QMutex* mutex, const std::string& key, const QString& label, std::string_view default_)
     : Setting(parent, mutex, key, label)
     , mDefault(default_)
     , mWidget(nullptr)
@@ -25,7 +25,7 @@ CSMPrefs::StringSetting& CSMPrefs::StringSetting::setTooltip(const std::string& 
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::StringSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::StringSetting::makeWidgets(QWidget* parent)
 {
     mWidget = new QLineEdit(QString::fromUtf8(mDefault.c_str()), parent);
 
@@ -37,7 +37,7 @@ std::pair<QWidget*, QWidget*> CSMPrefs::StringSetting::makeWidgets(QWidget* pare
 
     connect(mWidget, &QLineEdit::textChanged, this, &StringSetting::textChanged);
 
-    return std::make_pair(static_cast<QWidget*>(nullptr), mWidget);
+    return SettingWidgets{ .mLabel = nullptr, .mInput = mWidget, .mLayout = nullptr };
 }
 
 void CSMPrefs::StringSetting::updateWidget()

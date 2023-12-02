@@ -9,10 +9,19 @@
 class QWidget;
 class QColor;
 class QMutex;
+class QGridLayout;
+class QLabel;
 
 namespace CSMPrefs
 {
     class Category;
+
+    struct SettingWidgets
+    {
+        QLabel* mLabel;
+        QWidget* mInput;
+        QGridLayout* mLayout;
+    };
 
     class Setting : public QObject
     {
@@ -21,32 +30,28 @@ namespace CSMPrefs
         Category* mParent;
         QMutex* mMutex;
         std::string mKey;
-        std::string mLabel;
+        QString mLabel;
 
     protected:
         QMutex* getMutex();
 
     public:
-        Setting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label);
+        Setting(Category* parent, QMutex* mutex, const std::string& key, const QString& label);
 
         ~Setting() override = default;
 
-        /// Return label, input widget.
-        ///
-        /// \note first can be a 0-pointer, which means that the label is part of the input
-        /// widget.
-        virtual std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent);
+        virtual SettingWidgets makeWidgets(QWidget* parent) = 0;
 
         /// Updates the widget returned by makeWidgets() to the current setting.
         ///
         /// \note If make_widgets() has not been called yet then nothing happens.
-        virtual void updateWidget();
+        virtual void updateWidget() = 0;
 
         const Category* getParent() const;
 
         const std::string& getKey() const;
 
-        const std::string& getLabel() const;
+        const QString& getLabel() const { return mLabel; }
 
         int toInt() const;
 

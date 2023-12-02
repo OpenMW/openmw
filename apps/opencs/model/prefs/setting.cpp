@@ -14,7 +14,7 @@ QMutex* CSMPrefs::Setting::getMutex()
     return mMutex;
 }
 
-CSMPrefs::Setting::Setting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label)
+CSMPrefs::Setting::Setting(Category* parent, QMutex* mutex, const std::string& key, const QString& label)
     : QObject(parent->getState())
     , mParent(parent)
     , mMutex(mutex)
@@ -22,13 +22,6 @@ CSMPrefs::Setting::Setting(Category* parent, QMutex* mutex, const std::string& k
     , mLabel(label)
 {
 }
-
-std::pair<QWidget*, QWidget*> CSMPrefs::Setting::makeWidgets(QWidget* parent)
-{
-    return std::pair<QWidget*, QWidget*>(0, 0);
-}
-
-void CSMPrefs::Setting::updateWidget() {}
 
 const CSMPrefs::Category* CSMPrefs::Setting::getParent() const
 {
@@ -38,11 +31,6 @@ const CSMPrefs::Category* CSMPrefs::Setting::getParent() const
 const std::string& CSMPrefs::Setting::getKey() const
 {
     return mKey;
-}
-
-const std::string& CSMPrefs::Setting::getLabel() const
-{
-    return mLabel;
 }
 
 int CSMPrefs::Setting::toInt() const

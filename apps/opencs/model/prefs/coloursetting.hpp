@@ -29,13 +29,12 @@ namespace CSMPrefs
         CSVWidget::ColorEditor* mWidget;
 
     public:
-        ColourSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const std::string& label, QColor default_);
+        ColourSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label, QColor default_);
 
         ColourSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

@@ -13,6 +13,7 @@
 #include <apps/opencs/model/prefs/enumsetting.hpp>
 #include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/model/prefs/shortcutmanager.hpp>
+#include <apps/opencs/model/prefs/subcategory.hpp>
 
 #include <components/settings/categories.hpp>
 #include <components/settings/settings.hpp>
@@ -24,6 +25,7 @@
 #include "modifiersetting.hpp"
 #include "shortcutsetting.hpp"
 #include "stringsetting.hpp"
+#include "values.hpp"
 
 CSMPrefs::State* CSMPrefs::State::sThis = nullptr;
 
@@ -40,7 +42,6 @@ void CSMPrefs::State::declare()
         .setTooltip(
             "If a newly open top level window is showing status bars or not. "
             " Note that this does not affect existing windows.");
-    declareSeparator();
     declareBool("reuse", "Reuse Subviews", true)
         .setTooltip(
             "When a new subview is requested and a matching subview already "
@@ -58,7 +59,6 @@ void CSMPrefs::State::declare()
     declareInt("minimum-width", "Minimum subview width", 325)
         .setTooltip("Minimum width of subviews.")
         .setRange(50, 10000);
-    declareSeparator();
     EnumValue scrollbarOnly("Scrollbar Only",
         "Simple addition of scrollbars, the view window "
         "does not grow automatically.");
@@ -98,7 +98,6 @@ void CSMPrefs::State::declare()
     declareEnum("double-s", "Shift Double Click", editRecord).addValues(doubleClickValues);
     declareEnum("double-c", "Control Double Click", view).addValues(doubleClickValues);
     declareEnum("double-sc", "Shift Control Double Click", editRecordAndClose).addValues(doubleClickValues);
-    declareSeparator();
     EnumValue jumpAndSelect("Jump and Select", "Scroll new record into view and make it the selection");
     declareEnum("jump-to-added", "Action on adding or cloning a record", jumpAndSelect)
         .addValue(jumpAndSelect)
@@ -161,7 +160,6 @@ void CSMPrefs::State::declare()
     declareInt("error-height", "Initial height of the error panel", 100).setRange(100, 10000);
     declareBool("highlight-occurrences", "Highlight other occurrences of selected names", true);
     declareColour("colour-highlight", "Colour of highlighted occurrences", QColor("lightcyan"));
-    declareSeparator();
     declareColour("colour-int", "Highlight Colour: Integer Literals", QColor("darkmagenta"));
     declareColour("colour-float", "Highlight Colour: Float Literals", QColor("magenta"));
     declareColour("colour-name", "Highlight Colour: Names", QColor("grey"));
@@ -180,14 +178,12 @@ void CSMPrefs::State::declare()
 
     declareDouble("navi-wheel-factor", "Camera Zoom Sensitivity", 8).setRange(-100.0, 100.0);
     declareDouble("s-navi-sensitivity", "Secondary Camera Movement Sensitivity", 50.0).setRange(-1000.0, 1000.0);
-    declareSeparator();
 
     declareDouble("p-navi-free-sensitivity", "Free Camera Sensitivity", 1 / 650.).setPrecision(5).setRange(0.0, 1.0);
     declareBool("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
     declareDouble("navi-free-lin-speed", "Free Camera Linear Speed", 1000.0).setRange(1.0, 10000.0);
     declareDouble("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);
     declareDouble("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
-    declareSeparator();
 
     declareDouble("p-navi-orbit-sensitivity", "Orbit Camera Sensitivity", 1 / 650.).setPrecision(5).setRange(0.0, 1.0);
     declareBool("p-navi-orbit-invert", "Invert Orbit Camera Mouse Input", false);
@@ -195,7 +191,6 @@ void CSMPrefs::State::declare()
     declareDouble("navi-orbit-speed-mult", "Orbital Camera Speed Multiplier (from Modifier)", 4)
         .setRange(0.001, 1000.0);
     declareBool("navi-orbit-const-roll", "Keep camera roll constant for orbital camera", true);
-    declareSeparator();
 
     declareBool("context-select", "Context Sensitive Selection", false);
     declareDouble("drag-factor", "Mouse sensitivity during drag operations", 1.0).setRange(0.001, 100.0);
@@ -463,7 +458,7 @@ void CSMPrefs::State::declareCategory(const std::string& key)
     }
 }
 
-CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const std::string& label, int default_)
+CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const QString& label, int default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -479,8 +474,7 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const 
     return *setting;
 }
 
-CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(
-    const std::string& key, const std::string& label, double default_)
+CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(const std::string& key, const QString& label, double default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -499,7 +493,7 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(
     return *setting;
 }
 
-CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, const std::string& label, bool default_)
+CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, const QString& label, bool default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -516,8 +510,7 @@ CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, cons
     return *setting;
 }
 
-CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(
-    const std::string& key, const std::string& label, EnumValue default_)
+CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(const std::string& key, const QString& label, EnumValue default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -534,8 +527,7 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(
     return *setting;
 }
 
-CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(
-    const std::string& key, const std::string& label, QColor default_)
+CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(const std::string& key, const QString& label, QColor default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -554,7 +546,7 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(
 }
 
 CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
-    const std::string& key, const std::string& label, const QKeySequence& default_)
+    const std::string& key, const QString& label, const QKeySequence& default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -576,7 +568,7 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
 }
 
 CSMPrefs::StringSetting& CSMPrefs::State::declareString(
-    const std::string& key, const std::string& label, std::string default_)
+    const std::string& key, const QString& label, std::string default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -593,8 +585,7 @@ CSMPrefs::StringSetting& CSMPrefs::State::declareString(
     return *setting;
 }
 
-CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(
-    const std::string& key, const std::string& label, int default_)
+CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& key, const QString& label, int default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -615,24 +606,12 @@ CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(
     return *setting;
 }
 
-void CSMPrefs::State::declareSeparator()
+void CSMPrefs::State::declareSubcategory(const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    CSMPrefs::Setting* setting = new CSMPrefs::Setting(&mCurrentCategory->second, &mMutex, "", "");
-
-    mCurrentCategory->second.addSetting(setting);
-}
-
-void CSMPrefs::State::declareSubcategory(const std::string& label)
-{
-    if (mCurrentCategory == mCategories.end())
-        throw std::logic_error("no category for setting");
-
-    CSMPrefs::Setting* setting = new CSMPrefs::Setting(&mCurrentCategory->second, &mMutex, "", label);
-
-    mCurrentCategory->second.addSetting(setting);
+    mCurrentCategory->second.addSetting(new CSMPrefs::Subcategory(&mCurrentCategory->second, &mMutex, label));
 }
 
 void CSMPrefs::State::setDefault(const std::string& key, const std::string& default_)
@@ -650,13 +629,18 @@ CSMPrefs::State::State(const Files::ConfigurationManager& configurationManager)
     , mDefaultConfigFile("defaults-cs.bin")
     , mConfigurationManager(configurationManager)
     , mCurrentCategory(mCategories.end())
+    , mIndex(std::make_unique<Settings::Index>())
 {
     if (sThis)
         throw std::logic_error("An instance of CSMPRefs::State already exists");
 
     sThis = this;
 
+    Values values(*mIndex);
+
     declare();
+
+    mValues = std::make_unique<Values>(std::move(values));
 }
 
 CSMPrefs::State::~State()
