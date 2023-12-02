@@ -32,7 +32,7 @@ void ContentSelectorView::ContentSelector::buildContentModel(bool showOMWScripts
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
 {
-    ui.gameFileView->addItem("<No game file>");
+    ui.gameFileView->addItem(tr("<No game file>"));
     ui.gameFileView->setVisible(true);
 
     connect(ui.gameFileView, qOverload<int>(&ComboBox::currentIndexChanged), this,
