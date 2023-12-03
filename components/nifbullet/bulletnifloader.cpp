@@ -250,11 +250,16 @@ namespace NifBullet
             const Nif::Parent currentParent{ *ninode, parent };
             for (const auto& child : ninode->mChildren)
             {
-                if (child.empty())
-                    continue;
-
-                assert(std::find(child->mParents.begin(), child->mParents.end(), ninode) != child->mParents.end());
-                handleNode(child.get(), &currentParent, args);
+                if (!child.empty())
+                {
+                    assert(std::find(child->mParents.begin(), child->mParents.end(), ninode) != child->mParents.end());
+                    handleNode(child.get(), &currentParent, args);
+                }
+                // For NiSwitchNodes and NiFltAnimationNodes, only use the first child
+                // TODO: must synchronize with the rendering scene graph somehow
+                // Doing this for NiLODNodes is unsafe (the first level might not be the closest)
+                if (node.recType == Nif::RC_NiSwitchNode || node.recType == Nif::RC_NiFltAnimationNode)
+                    break;
             }
         }
     }
