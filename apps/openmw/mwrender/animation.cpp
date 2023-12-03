@@ -1178,8 +1178,11 @@ namespace MWRender
             // starts and stops with Bip01 at the same position, totaling 0 movement. This allows us to accurately move
             // the character by just moving it from the position Bip01 was last frame to where it is this frame, without
             // needing to accumulate anything in-between.
-            position += offset - mPreviousPosition;
-            mPreviousPosition = offset;
+            if (mPreviousAccumulatePosition)
+            {
+                position += offset - mPreviousAccumulatePosition.value();
+            }
+            mPreviousAccumulatePosition = offset;
         }
         else
         {
@@ -1190,8 +1193,11 @@ namespace MWRender
         }
     }
 
-    osg::Vec3f Animation::runAnimation(float duration)
+    osg::Vec3f Animation::runAnimation(float duration, bool accumulateMovement)
     {
+        if (!accumulateMovement)
+            mPreviousAccumulatePosition = std::nullopt;
+
         osg::Vec3f movement(0.f, 0.f, 0.f);
         AnimStateMap::iterator stateiter = mStates.begin();
         while (stateiter != mStates.end())
@@ -1215,13 +1221,13 @@ namespace MWRender
                     float targetTime = state.getTime() + timepassed;
                     if (textkey == textkeys.end() || textkey->first > targetTime)
                     {
-                        if (mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
+                        if (accumulateMovement && mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
                             updatePosition(state.getTime(), targetTime, movement, hasMovement);
                         state.setTime(std::min(targetTime, state.mStopTime));
                     }
                     else
                     {
-                        if (mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
+                        if (accumulateMovement && mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
                             updatePosition(state.getTime(), textkey->first, movement, hasMovement);
                         state.setTime(textkey->first);
                     }
@@ -1305,7 +1311,7 @@ namespace MWRender
         }
 
 
-        if (mResetAccumRootCallback)
+        if (accumulateMovement && mResetAccumRootCallback)
             mResetAccumRootCallback->accumulate(movement, duration);
         return movement;
     }

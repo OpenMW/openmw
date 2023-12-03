@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <optional>
 
 namespace ESM
 {
@@ -265,6 +266,7 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
 
         osg::Vec3f mAccumulate;
+        std::optional<osg::Vec3f> mPreviousAccumulatePosition;
 
         TextKeyListener* mTextKeyListener;
 
@@ -276,7 +278,6 @@ namespace MWRender
         float mUpperBodyYawRadians;
         float mLegsYawRadians;
         float mBodyPitchRadians;
-        osg::Vec3f mPreviousPosition;
 
         osg::ref_ptr<RotateController> addRotateController(std::string_view bone);
 
@@ -465,7 +466,7 @@ namespace MWRender
         /** Retrieves the velocity (in units per second) that the animation will move. */
         float getVelocity(std::string_view groupname) const;
 
-        virtual osg::Vec3f runAnimation(float duration);
+        virtual osg::Vec3f runAnimation(float duration, bool accumulateMovement = false);
 
         void setLoopingEnabled(std::string_view groupname, bool enabled);
 

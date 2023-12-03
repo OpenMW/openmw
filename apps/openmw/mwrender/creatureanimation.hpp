@@ -59,7 +59,7 @@ namespace MWRender
 
         void addControllers() override;
 
-        osg::Vec3f runAnimation(float duration) override;
+        osg::Vec3f runAnimation(float duration, bool accumulateMovement = false) override;
 
         /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
         /// to indicate the facing orientation of the character.

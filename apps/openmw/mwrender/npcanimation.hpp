@@ -130,7 +130,7 @@ namespace MWRender
 
         void setWeaponGroup(const std::string& group, bool relativeDuration) override;
 
-        osg::Vec3f runAnimation(float timepassed) override;
+        osg::Vec3f runAnimation(float timepassed, bool accumulateMovement = false) override;
 
         /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
         /// to indicate the facing orientation of the character.

@@ -693,9 +693,9 @@ namespace MWRender
         return std::make_unique<PartHolder>(attached);
     }
 
-    osg::Vec3f NpcAnimation::runAnimation(float timepassed)
+    osg::Vec3f NpcAnimation::runAnimation(float timepassed, bool accumulateMovement)
     {
-        osg::Vec3f ret = Animation::runAnimation(timepassed);
+        osg::Vec3f ret = Animation::runAnimation(timepassed, accumulateMovement);
 
         mHeadAnimationTime->update(timepassed);
 
