@@ -10,11 +10,11 @@
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
 
+#include <optional>
 #include <span>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <optional>
 
 namespace ESM
 {

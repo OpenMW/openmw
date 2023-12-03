@@ -1,10 +1,10 @@
 #ifndef OPENMW_MWPHYSICS_PTRHOLDER_H
 #define OPENMW_MWPHYSICS_PTRHOLDER_H
 
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <utility>
-#include <deque>
 
 #include <osg/Vec3d>
 
@@ -40,8 +40,11 @@ namespace MWPhysics
 
         btCollisionObject* getCollisionObject() const { return mCollisionObject.get(); }
 
-        void clearMovement() { mMovement = { }; }
-        void queueMovement(osg::Vec3f velocity, float simulationTimeStart, float simulationTimeStop) { mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop }); }
+        void clearMovement() { mMovement = {}; }
+        void queueMovement(osg::Vec3f velocity, float simulationTimeStart, float simulationTimeStop)
+        {
+            mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop });
+        }
 
         std::deque<Movement>& movement() { return mMovement; }
 

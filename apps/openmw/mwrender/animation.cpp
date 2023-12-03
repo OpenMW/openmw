@@ -49,8 +49,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/datetimemanager.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
 
@@ -1186,9 +1186,9 @@ namespace MWRender
         }
         else
         {
-            // When animations have velocity, net movement is expected. The above block would negate that movement every time
-            // the animation resets. Therefore we have to accumulate from oldtime to newtime instead, which works because 
-            // oldtime < newtime is a guarantee even when the animation has looped.
+            // When animations have velocity, net movement is expected. The above block would negate that movement every
+            // time the animation resets. Therefore we have to accumulate from oldtime to newtime instead, which works
+            // because oldtime < newtime is a guarantee even when the animation has looped.
             position += offset - osg::componentMultiply(mAccumCtrl->getTranslation(oldtime), mAccumulate);
         }
     }
