@@ -199,7 +199,7 @@ namespace
 
         struct InitMovement
         {
-            float mSteps = 1.f;
+            int mSteps = 0;
             float mDelta = 0.f;
             float mSimulationTime = 0.f;
 
@@ -224,7 +224,7 @@ namespace
 
             void operator()(auto& sim) const
             {
-                if (mSteps == 0 || mDelta < 0.00001f)
+                if (mSteps <= 0 || mDelta < 0.00001f)
                     return;
 
                 auto locked = sim.lock();
