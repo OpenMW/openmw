@@ -46,8 +46,8 @@ namespace MWPhysics
         /// @param timeAccum accumulated time from previous run to interpolate movements
         /// @param actorsData per actor data needed to compute new positions
         /// @return new position of each actor
-        void applyQueuedMovements(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations, osg::Timer_t frameStart,
-            unsigned int frameNumber, osg::Stats& stats);
+        void applyQueuedMovements(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations,
+            osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
         void resetSimulation(const ActorMap& actors);
 
@@ -87,8 +87,8 @@ namespace MWPhysics
         void afterPostSim();
         void syncWithMainThread();
         void waitForWorkers();
-        void prepareWork(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations, osg::Timer_t frameStart,
-            unsigned int frameNumber, osg::Stats& stats);
+        void prepareWork(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations,
+            osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
         std::unique_ptr<WorldFrameData> mWorldFrameData;
         std::vector<Simulation>* mSimulations = nullptr;
