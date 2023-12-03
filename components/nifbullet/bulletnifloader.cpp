@@ -277,7 +277,6 @@ namespace NifBullet
 
         if (!niGeometry.mSkin.empty())
             args.mAnimated = false;
-        // TODO: handle NiSkinPartition
 
         std::unique_ptr<btCollisionShape> childShape = niGeometry.getCollisionShape();
         if (childShape == nullptr)

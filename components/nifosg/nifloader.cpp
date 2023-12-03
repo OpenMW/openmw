@@ -1381,17 +1381,7 @@ namespace NifOsg
             if (!niGeometry->mSkin.empty())
             {
                 const Nif::NiSkinInstance* skin = niGeometry->mSkin.getPtr();
-                const Nif::NiSkinData* data = nullptr;
-                const Nif::NiSkinPartition* partitions = nullptr;
-                if (!skin->mData.empty())
-                {
-                    data = skin->mData.getPtr();
-                    if (!data->mPartitions.empty())
-                        partitions = data->mPartitions.getPtr();
-                }
-                if (!partitions && !skin->mPartitions.empty())
-                    partitions = skin->mPartitions.getPtr();
-
+                const Nif::NiSkinPartition* partitions = skin->getPartitions();
                 hasPartitions = partitions != nullptr;
                 if (hasPartitions)
                 {
