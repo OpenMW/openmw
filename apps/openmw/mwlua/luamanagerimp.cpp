@@ -344,6 +344,13 @@ namespace MWLua
             playerScripts->uiModeChanged(argId, false);
     }
 
+    void LuaManager::actorDied(const MWWorld::Ptr& actor)
+    {
+        if (actor.isEmpty())
+            return;
+        mLuaEvents.addLocalEvent({ getId(actor), "OnDeath", {} });
+    }
+
     void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
