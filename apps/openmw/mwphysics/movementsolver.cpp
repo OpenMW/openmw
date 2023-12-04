@@ -215,10 +215,10 @@ namespace MWPhysics
                 continue; // velocity updated, calculate nextpos again
             }
 
-            // Note, we use an epsilon of 1e-6 instead of std::numeric_limits<float>::epsilon() to avoid doing extremely 
-            // small steps. But if we make it any larger we'll start rejecting subtle movements from e.g. idle animations.
-            // Note that, although both these comparisons to 1e-6 are logically the same, they test separate floating point
-            // accuracy cases.
+            // Note, we use an epsilon of 1e-6 instead of std::numeric_limits<float>::epsilon() to avoid doing extremely
+            // small steps. But if we make it any larger we'll start rejecting subtle movements from e.g. idle
+            // animations. Note that, although both these comparisons to 1e-6 are logically the same, they test separate
+            // floating point accuracy cases.
             if (diff.length2() > 1e-6 && (newPosition - nextpos).length2() > 1e-6)
             {
                 // trace to where character would go if there were no obstructions
