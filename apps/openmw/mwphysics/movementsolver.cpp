@@ -214,7 +214,7 @@ namespace MWPhysics
                 continue; // velocity updated, calculate nextpos again
             }
 
-            if ((newPosition - nextpos).length2() > 0.00001)
+            if ((newPosition - nextpos).length2() > std::numeric_limits<float>::epsilon())
             {
                 // trace to where character would go if there were no obstructions
                 tracer.doTrace(actor.mCollisionObject, newPosition, nextpos, collisionWorld, actor.mIsOnGround);
