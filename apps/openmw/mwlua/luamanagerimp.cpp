@@ -348,7 +348,7 @@ namespace MWLua
     {
         if (actor.isEmpty())
             return;
-        mLuaEvents.addLocalEvent({ getId(actor), "OnDeath", {} });
+        mLuaEvents.addLocalEvent({ getId(actor), "Died", {} });
     }
 
     void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)

@@ -6,14 +6,14 @@ Built-in events
 Actor events
 ------------
 
-**OnDeath**
+**Died**
 
 This event is sent to an actor's local script when that actor dies.
 
 .. code-block:: Lua
 
     eventHandlers = {
-        OnDeath = function()
+        Died = function()
             print('Alas, ye hardly knew me!')
         end
     }
