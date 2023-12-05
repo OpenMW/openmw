@@ -20,6 +20,7 @@
 #include "character.hpp"
 
 #include <array>
+#include <unordered_set>
 
 #include <components/esm/records.hpp>
 #include <components/misc/mathutil.hpp>
@@ -1189,7 +1190,7 @@ namespace MWMechanics
                 if (!animPlaying)
                 {
                     int mask = MWRender::Animation::BlendMask_Torso | MWRender::Animation::BlendMask_RightArm;
-                    mAnimation->play("idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul);
+                    mAnimation->play("idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul, true);
                 }
                 else
                 {
@@ -1246,8 +1247,47 @@ namespace MWMechanics
         }
     }
 
+    bool CharacterController::isLoopingAnimation(std::string_view group) const
+    {
+        // In Morrowind, a some animation groups are always considered looping, regardless
+        // of loop start/stop keys.
+        // To be match vanilla behavior we probably only need to check this list, but we don't
+        // want to prevent modded animations with custom group names from looping either.
+        static const std::unordered_set<std::string_view> loopingAnimations = { "walkforward", "walkback", "walkleft",
+            "walkright", "swimwalkforward", "swimwalkback", "swimwalkleft", "swimwalkright", "runforward", "runback",
+            "runleft", "runright", "swimrunforward", "swimrunback", "swimrunleft", "swimrunright", "sneakforward",
+            "sneakback", "sneakleft", "sneakright", "turnleft", "turnright", "swimturnleft", "swimturnright",
+            "spellturnleft", "spellturnright", "torch", "idle", "idle2", "idle3", "idle4", "idle5", "idle6", "idle7",
+            "idle8", "idle9", "idlesneak", "idlestorm", "idleswim", "jump", "inventoryhandtohand",
+            "inventoryweapononehand", "inventoryweapontwohand", "inventoryweapontwowide" };
+        static const std::vector<std::string_view> shortGroups = getAllWeaponTypeShortGroups();
+
+        if (mAnimation && mAnimation->getTextKeyTime(std::string(group) + ": loop start") >= 0)
+            return true;
+
+        // Most looping animations have variants for each weapon type shortgroup.
+        // Just remove the shortgroup instead of enumerating all of the possible animation groupnames.
+        // Make sure we pick the longest shortgroup so e.g. "bow" doesn't get picked over "crossbow"
+        // when the shortgroup is crossbow.
+        std::size_t suffixLength = 0;
+        for (std::string_view suffix : shortGroups)
+        {
+            if (suffix.length() > suffixLength && group.ends_with(suffix))
+            {
+                suffixLength = suffix.length();
+            }
+        }
+        group.remove_suffix(suffixLength);
+
+        return loopingAnimations.count(group) > 0;
+    }
+
     bool CharacterController::updateWeaponState()
     {
+        // If the current animation is scripted, we can't do anything here.
+        if (isScriptedAnimPlaying())
+            return false;
+
         const auto world = MWBase::Environment::get().getWorld();
         auto& prng = world->getPrng();
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -1480,10 +1520,6 @@ namespace MWMechanics
             else
                 sndMgr->stopSound3D(mPtr, wolfRun);
         }
-
-        // Combat for actors with scripted animations obviously will be buggy
-        if (isScriptedAnimPlaying())
-            return forcestateupdate;
 
         float complete = 0.f;
         bool animPlaying = false;
@@ -1857,31 +1893,56 @@ namespace MWMechanics
 
         if (!mAnimation->isPlaying(mAnimQueue.front().mGroup))
         {
-            // Remove the finished animation, unless it's a scripted animation that was interrupted by e.g. a rebuild of
-            // the animation object.
-            if (mAnimQueue.size() > 1 || !mAnimQueue.front().mScripted || mAnimQueue.front().mLoopCount == 0)
+            // Playing animations through mwscript is weird. If an animation is
+            // a looping animation (idle or other cyclical animations), then they
+            // will end as expected. However, if they are non-looping animations, they
+            // will stick around forever or until another animation appears in the queue.
+            bool shouldPlayOrRestart = mAnimQueue.size() > 1;
+            if (shouldPlayOrRestart || !mAnimQueue.front().mScripted
+                || (mAnimQueue.front().mLoopCount == 0 && mAnimQueue.front().mLooping))
             {
+                mAnimation->setPlayScriptedOnly(false);
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
+                shouldPlayOrRestart = true;
             }
+            else
+                // A non-looping animation will stick around forever, so only restart if the animation
+                // actually was removed for some reason.
+                shouldPlayOrRestart = !mAnimation->getInfo(mAnimQueue.front().mGroup)
+                    && mAnimation->hasAnimation(mAnimQueue.front().mGroup);
 
-            if (!mAnimQueue.empty())
+            if (shouldPlayOrRestart)
             {
                 // Move on to the remaining items of the queue
-                bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-                mAnimation->play(mAnimQueue.front().mGroup,
-                    mAnimQueue.front().mScripted ? Priority_Scripted : Priority_Default,
-                    MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f,
-                    mAnimQueue.front().mLoopCount, loopfallback);
+                playAnimQueue();
             }
         }
         else
         {
-            mAnimQueue.front().mLoopCount = mAnimation->getCurrentLoopCount(mAnimQueue.front().mGroup);
+            float complete;
+            size_t loopcount;
+            mAnimation->getInfo(mAnimQueue.front().mGroup, &complete, nullptr, &loopcount);
+            mAnimQueue.front().mLoopCount = loopcount;
+            mAnimQueue.front().mTime = complete;
         }
 
         if (!mAnimQueue.empty())
             mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
+    }
+
+    void CharacterController::playAnimQueue(bool loopStart)
+    {
+        if (!mAnimQueue.empty())
+        {
+            clearStateAnimation(mCurrentIdle);
+            mIdleState = CharState_SpecialIdle;
+            auto priority = mAnimQueue.front().mScripted ? Priority_Scripted : Priority_Default;
+            mAnimation->setPlayScriptedOnly(mAnimQueue.front().mScripted);
+            mAnimation->play(mAnimQueue.front().mGroup, priority, MWRender::Animation::BlendMask_All, false, 1.0f,
+                (loopStart ? "loop start" : "start"), "stop", mAnimQueue.front().mTime, mAnimQueue.front().mLoopCount,
+                mAnimQueue.front().mLooping);
+        }
     }
 
     void CharacterController::update(float duration)
@@ -2455,10 +2516,11 @@ namespace MWMechanics
 
             if (iter == mAnimQueue.begin())
             {
-                anim.mLoopCount = mAnimation->getCurrentLoopCount(anim.mGroup);
                 float complete;
-                mAnimation->getInfo(anim.mGroup, &complete, nullptr);
+                size_t loopcount;
+                mAnimation->getInfo(anim.mGroup, &complete, nullptr, &loopcount);
                 anim.mTime = complete;
+                anim.mLoopCount = loopcount;
             }
             else
             {
@@ -2484,26 +2546,20 @@ namespace MWMechanics
                 entry.mGroup = iter->mGroup;
                 entry.mLoopCount = iter->mLoopCount;
                 entry.mScripted = true;
+                entry.mLooping = isLoopingAnimation(entry.mGroup);
+                entry.mTime = iter->mTime;
+                if (iter->mAbsolute)
+                {
+                    float start = mAnimation->getTextKeyTime(iter->mGroup + ": start");
+                    float stop = mAnimation->getTextKeyTime(iter->mGroup + ": stop");
+                    float time = std::clamp(iter->mTime, start, stop);
+                    entry.mTime = (time - start) / (stop - start);
+                }
 
                 mAnimQueue.push_back(entry);
             }
 
-            const ESM::AnimationState::ScriptedAnimation& anim = state.mScriptedAnims.front();
-            float complete = anim.mTime;
-            if (anim.mAbsolute)
-            {
-                float start = mAnimation->getTextKeyTime(anim.mGroup + ": start");
-                float stop = mAnimation->getTextKeyTime(anim.mGroup + ": stop");
-                float time = std::clamp(anim.mTime, start, stop);
-                complete = (time - start) / (stop - start);
-            }
-
-            clearStateAnimation(mCurrentIdle);
-            mIdleState = CharState_SpecialIdle;
-
-            bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-            mAnimation->play(anim.mGroup, Priority_Scripted, MWRender::Animation::BlendMask_All, false, 1.0f, "start",
-                "stop", complete, anim.mLoopCount, loopfallback);
+            playAnimQueue();
         }
     }
 
@@ -2516,13 +2572,14 @@ namespace MWMechanics
         if (isScriptedAnimPlaying() && !scripted)
             return true;
 
-        // If this animation is a looped animation (has a "loop start" key) that is already playing
+        bool looping = isLoopingAnimation(groupname);
+
+        // If this animation is a looped animation that is already playing
         // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
         // and remove any other animations that were queued.
         // This emulates observed behavior from the original allows the script "OutsideBanner" to animate banners
         // correctly.
-        if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname
-            && mAnimation->getTextKeyTime(mAnimQueue.front().mGroup + ": loop start") >= 0
+        if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname && looping
             && mAnimation->isPlaying(groupname))
         {
             float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup + ": loop stop");
@@ -2537,35 +2594,42 @@ namespace MWMechanics
             }
         }
 
-        count = std::max(count, 1);
+        // The loop count in vanilla is weird.
+        // if played with a count of 0, all objects play exactly once from start to stop.
+        // But if the count is x > 0, actors and non-actors behave differently. actors will loop
+        // exactly x times, while non-actors will loop x+1 instead.
+        if (mPtr.getClass().isActor())
+            count--;
+        count = std::max(count, 0);
 
         AnimationQueueEntry entry;
         entry.mGroup = groupname;
-        entry.mLoopCount = count - 1;
+        entry.mLoopCount = count;
+        entry.mTime = 0.f;
         entry.mScripted = scripted;
+        entry.mLooping = looping;
+
+        bool playImmediately = false;
 
         if (mode != 0 || mAnimQueue.empty() || !isAnimPlaying(mAnimQueue.front().mGroup))
         {
             clearAnimQueue(scripted);
 
-            clearStateAnimation(mCurrentIdle);
-
-            mIdleState = CharState_SpecialIdle;
-            bool loopfallback = entry.mGroup.starts_with("idle");
-            mAnimation->play(groupname, scripted && groupname != "idle" ? Priority_Scripted : Priority_Default,
-                MWRender::Animation::BlendMask_All, false, 1.0f, ((mode == 2) ? "loop start" : "start"), "stop", 0.0f,
-                count - 1, loopfallback);
+            playImmediately = true;
         }
         else
         {
             mAnimQueue.resize(1);
         }
 
-        // "PlayGroup idle" is a special case, used to remove to stop scripted animations playing
+        // "PlayGroup idle" is a special case, used to stop and remove scripted animations playing
         if (groupname == "idle")
             entry.mScripted = false;
 
         mAnimQueue.push_back(entry);
+
+        if (playImmediately)
+            playAnimQueue(mode == 2);
 
         return true;
     }
@@ -2577,11 +2641,10 @@ namespace MWMechanics
 
     bool CharacterController::isScriptedAnimPlaying() const
     {
+        // If the front of the anim queue is scripted, morrowind treats it as if it's
+        // still playing even if it's actually done.
         if (!mAnimQueue.empty())
-        {
-            const AnimationQueueEntry& first = mAnimQueue.front();
-            return first.mScripted && isAnimPlaying(first.mGroup);
-        }
+            return mAnimQueue.front().mScripted;
 
         return false;
     }
@@ -2611,6 +2674,7 @@ namespace MWMechanics
 
         if (clearScriptedAnims)
         {
+            mAnimation->setPlayScriptedOnly(false);
             mAnimQueue.clear();
             return;
         }
@@ -2644,6 +2708,8 @@ namespace MWMechanics
         {
             playRandomDeath();
         }
+
+        updateAnimQueue();
 
         mAnimation->runAnimation(0.f);
     }
