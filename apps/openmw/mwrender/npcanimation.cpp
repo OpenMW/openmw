@@ -923,13 +923,18 @@ namespace MWRender
 
         if (mViewMode == VM_FirstPerson)
         {
-            NodeMap::iterator found = mNodeMap.find("bip01 neck");
-            if (found != mNodeMap.end())
+            // If there is no active animation, then the bip01 neck node will not be updated each frame, and the
+            // RotateController will accumulate rotations.
+            if (mStates.size() > 0)
             {
-                osg::MatrixTransform* node = found->second.get();
-                mFirstPersonNeckController = new RotateController(mObjectRoot.get());
-                node->addUpdateCallback(mFirstPersonNeckController);
-                mActiveControllers.emplace_back(node, mFirstPersonNeckController);
+                NodeMap::iterator found = mNodeMap.find("bip01 neck");
+                if (found != mNodeMap.end())
+                {
+                    osg::MatrixTransform* node = found->second.get();
+                    mFirstPersonNeckController = new RotateController(mObjectRoot.get());
+                    node->addUpdateCallback(mFirstPersonNeckController);
+                    mActiveControllers.emplace_back(node, mFirstPersonNeckController);
+                }
             }
         }
         else if (mViewMode == VM_Normal)
