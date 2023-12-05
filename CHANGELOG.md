@@ -70,6 +70,8 @@
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
+    Bug #7354: Disabling post processing in-game causes a crash
+    Bug #7364: Post processing is not reflected in savegame previews
     Bug #7380: NiZBufferProperty issue
     Bug #7413: Generated wilderness cells don't spawn fish
     Bug #7415: Unbreakable lock discrepancies
@@ -127,12 +129,14 @@
     Feature #7477: NegativeLight Magic Effect flag
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field
     Feature #7546: Start the game on Fredas
+    Feature #7554: Controller binding for tab for menu navigation
     Feature #7568: Uninterruptable scripted music
     Feature #7608: Make the missing dependencies warning when loading a savegame more helpful
     Feature #7618: Show the player character's health in the save details
     Feature #7625: Add some missing console error outputs
     Feature #7634: Support NiParticleBomb
     Feature #7652: Sort inactive post processing shaders list properly
+    Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
     Task #5896: Do not use deprecated MyGUI properties
     Task #7113: Move from std::atoi to std::from_char
