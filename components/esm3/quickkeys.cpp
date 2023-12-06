@@ -8,9 +8,6 @@ namespace ESM
 
     void QuickKeys::load(ESMReader& esm)
     {
-        if (esm.isNextSub("KEY_"))
-            esm.getSubHeader(); // no longer used, because sub-record hierachies do not work properly in esmreader
-
         while (esm.isNextSub("TYPE"))
         {
             QuickKey key;
@@ -18,9 +15,6 @@ namespace ESM
             key.mId = esm.getHNRefId("ID__");
 
             mKeys.push_back(key);
-
-            if (esm.isNextSub("KEY_"))
-                esm.getSubHeader(); // no longer used, because sub-record hierachies do not work properly in esmreader
         }
     }
 

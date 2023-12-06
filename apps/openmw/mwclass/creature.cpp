@@ -779,32 +779,26 @@ namespace MWClass
 
         const ESM::CreatureState& creatureState = state.asCreatureState();
 
-        if (state.mVersion > 0)
+        if (!ptr.getRefData().getCustomData())
         {
-            if (!ptr.getRefData().getCustomData())
+            if (creatureState.mCreatureStats.mMissingACDT)
+                ensureCustomData(ptr);
+            else
             {
-                if (creatureState.mCreatureStats.mMissingACDT)
-                    ensureCustomData(ptr);
+                // Create a CustomData, but don't fill it from ESM records (not needed)
+                auto data = std::make_unique<CreatureCustomData>();
+
+                if (hasInventoryStore(ptr))
+                    data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
                 else
-                {
-                    // Create a CustomData, but don't fill it from ESM records (not needed)
-                    auto data = std::make_unique<CreatureCustomData>();
+                    data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
 
-                    if (hasInventoryStore(ptr))
-                        data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
-                    else
-                        data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
+                MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+                data->mContainerStore->setPtr(ptr);
 
-                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
-                    data->mContainerStore->setPtr(ptr);
-
-                    ptr.getRefData().setCustomData(std::move(data));
-                }
+                ptr.getRefData().setCustomData(std::move(data));
             }
         }
-        else
-            ensureCustomData(
-                ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
 

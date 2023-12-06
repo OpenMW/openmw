@@ -411,10 +411,25 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         ESM::ESMReader reader;
         reader.open(filepath);
 
-        if (reader.getFormatVersion() > ESM::CurrentSaveGameFormatVersion)
-            throw VersionMismatchError(
-                "This save file was created using a newer version of OpenMW and is thus not supported. Please upgrade "
-                "to the newest OpenMW version to load this file.");
+        ESM::FormatVersion version = reader.getFormatVersion();
+        if (version > ESM::CurrentSaveGameFormatVersion)
+            throw VersionMismatchError("#{OMWEngine:LoadingRequiresNewVersionError}");
+        else if (version < ESM::MinSupportedSaveGameFormatVersion)
+        {
+            const char* release;
+            // Report the last version still capable of reading this save
+            if (version <= ESM::OpenMW0_48SaveGameFormatVersion)
+                release = "OpenMW 0.48.0";
+            else
+            {
+                // Insert additional else if statements above to cover future releases
+                static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_49SaveGameFormatVersion);
+                release = "OpenMW 0.49.0";
+            }
+            auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+            std::string message = l10n->formatMessage("LoadingRequiresOldVersionError", { "version" }, { release });
+            throw VersionMismatchError(message);
+        }
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap(reader);
         reader.setContentFileMapping(&contentFileMap);
@@ -457,7 +472,6 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 break;
 
                 case ESM::REC_JOUR:
-                case ESM::REC_JOUR_LEGACY:
                 case ESM::REC_QUES:
 
                     MWBase::Environment::get().getJournal()->readRecord(reader, n.toInt());
@@ -607,11 +621,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         std::vector<std::string> buttons;
         buttons.emplace_back("#{Interface:OK}");
 
-        std::string error;
-        if (typeid(e) == typeid(VersionMismatchError))
-            error = "#{OMWEngine:LoadingFailed}: #{OMWEngine:LoadingRequiresNewVersionError}";
-        else
-            error = "#{OMWEngine:LoadingFailed}: " + std::string(e.what());
+        std::string error = "#{OMWEngine:LoadingFailed}: " + std::string(e.what());
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error, buttons);
     }

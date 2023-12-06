@@ -22,14 +22,6 @@ namespace ESM
 
             ObjectState state;
 
-            // obsolete
-            if (esm.isNextSub("SLOT"))
-            {
-                int32_t slot;
-                esm.getHT(slot);
-                mEquipmentSlots[index] = slot;
-            }
-
             state.mRef.loadId(esm, true);
             state.load(esm);
 

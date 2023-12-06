@@ -111,6 +111,7 @@
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
+    Feature #6624: Drop support for old saves
     Feature #6726: Lua API for creating new objects
     Feature #6864: Lua file access API
     Feature #6922: Improve launcher appearance

@@ -31,8 +31,6 @@ namespace ESM
 
         bool mIsWerewolf;
 
-        bool mWerewolfDeprecatedData;
-
         std::map<ESM::RefId, Faction> mFactions;
         int32_t mDisposition;
         std::array<StatState<float>, ESM::Skill::Length> mSkills;
