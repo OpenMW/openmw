@@ -156,7 +156,7 @@ Allowed options)");
               return false;
               }*/
 
-        const auto inputFiles = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
+        const auto& inputFiles = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
         info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on
                                                   // MSVC 14.26 due to implementation bugs.
         if (inputFiles.size() > 1)

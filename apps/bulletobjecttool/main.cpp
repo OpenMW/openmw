@@ -145,12 +145,12 @@ namespace
 
         config.filterOutNonExistingPaths(dataDirs);
 
-        const auto resDir = variables["resources"].as<Files::MaybeQuotedPath>();
+        const auto& resDir = variables["resources"].as<Files::MaybeQuotedPath>();
         Log(Debug::Info) << Version::getOpenmwVersionDescription();
         dataDirs.insert(dataDirs.begin(), resDir / "vfs");
-        const auto fileCollections = Files::Collections(dataDirs);
-        const auto archives = variables["fallback-archive"].as<StringsVector>();
-        const auto contentFiles = variables["content"].as<StringsVector>();
+        const Files::Collections fileCollections(dataDirs);
+        const auto& archives = variables["fallback-archive"].as<StringsVector>();
+        const auto& contentFiles = variables["content"].as<StringsVector>();
 
         Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
 
