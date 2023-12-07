@@ -1515,24 +1515,24 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
                 rig->setSourceGeometry(geom);
 
-                // Assign bone weights
-                osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
-
                 const Nif::NiSkinInstance* skin = niGeometry->mSkin.getPtr();
                 const Nif::NiSkinData* data = skin->mData.getPtr();
                 const Nif::NiAVObjectList& bones = skin->mBones;
+
+                // Assign bone weights
+                std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
+                std::vector<SceneUtil::RigGeometry::VertexWeights> influences;
+                boneInfo.resize(bones.size());
+                influences.resize(bones.size());
                 for (std::size_t i = 0; i < bones.size(); ++i)
                 {
-                    std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
-
-                    SceneUtil::RigGeometry::BoneInfluence influence;
-                    influence.mWeights = data->mBones[i].mWeights;
-                    influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
-                    influence.mBoundSphere = data->mBones[i].mBoundSphere;
-
-                    map->mData.emplace_back(boneName, influence);
+                    boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+                    boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                    boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
+                    influences[i] = data->mBones[i].mWeights;
                 }
-                rig->setInfluenceMap(map);
+                rig->setBoneInfo(std::move(boneInfo));
+                rig->setInfluences(influences);
 
                 drawable = rig;
             }
@@ -1671,29 +1671,29 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
                 rig->setSourceGeometry(geometry);
 
-                osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
-
-                auto skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
+                const Nif::BSSkinInstance* skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
                 const Nif::BSSkinBoneData* data = skin->mData.getPtr();
                 const Nif::NiAVObjectList& bones = skin->mBones;
-                std::vector<std::vector<Nif::NiSkinData::VertWeight>> vertWeights(data->mBones.size());
-                for (size_t i = 0; i < vertices.size(); i++)
-                    for (int j = 0; j < 4; j++)
-                        vertWeights[bsTriShape->mVertData[i].mBoneIndices[j]].emplace_back(
-                            i, halfToFloat(bsTriShape->mVertData[i].mBoneWeights[j]));
 
+                std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
+                std::vector<SceneUtil::RigGeometry::BoneWeights> influences;
+                boneInfo.resize(bones.size());
+                influences.resize(vertices.size());
                 for (std::size_t i = 0; i < bones.size(); ++i)
                 {
-                    std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
-
-                    SceneUtil::RigGeometry::BoneInfluence influence;
-                    influence.mWeights = vertWeights[i];
-                    influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
-                    influence.mBoundSphere = data->mBones[i].mBoundSphere;
-
-                    map->mData.emplace_back(boneName, influence);
+                    boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+                    boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                    boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
                 }
-                rig->setInfluenceMap(map);
+
+                for (size_t i = 0; i < vertices.size(); i++)
+                {
+                    const Nif::BSVertexData& vertData = bsTriShape->mVertData[i];
+                    for (int j = 0; j < 4; j++)
+                        influences[i].emplace_back(vertData.mBoneIndices[j], halfToFloat(vertData.mBoneWeights[j]));
+                }
+                rig->setBoneInfo(std::move(boneInfo));
+                rig->setInfluences(influences);
 
                 drawable = rig;
             }

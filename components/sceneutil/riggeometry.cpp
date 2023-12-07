@@ -301,25 +301,44 @@ namespace SceneUtil
         }
     }
 
-    void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
+    void RigGeometry::setBoneInfo(std::vector<BoneInfo>&& bones)
     {
-        mData = new InfluenceData;
-        mData->mBones.reserve(influenceMap->mData.size());
+        if (!mData)
+            mData = new InfluenceData;
 
-        std::unordered_map<unsigned short, std::vector<BoneWeight>> vertexToInfluences;
+        mData->mBones = std::move(bones);
+    }
+
+    void RigGeometry::setInfluences(const std::vector<VertexWeights>& influences)
+    {
+        if (!mData)
+            mData = new InfluenceData;
+
+        std::unordered_map<unsigned short, BoneWeights> vertexToInfluences;
         size_t index = 0;
-        for (const auto& [boneName, bi] : influenceMap->mData)
+        for (const auto& influence : influences)
         {
-            mData->mBones.push_back({ boneName, bi.mBoundSphere, bi.mInvBindMatrix });
-
-            for (const auto& [vertex, weight] : bi.mWeights)
+            for (const auto& [vertex, weight] : influence)
                 vertexToInfluences[vertex].emplace_back(index, weight);
             index++;
         }
 
-        std::map<std::vector<BoneWeight>, VertexList> influencesToVertices;
+        std::map<BoneWeights, VertexList> influencesToVertices;
         for (const auto& [vertex, weights] : vertexToInfluences)
             influencesToVertices[weights].emplace_back(vertex);
+
+        mData->mInfluences.reserve(influencesToVertices.size());
+        mData->mInfluences.assign(influencesToVertices.begin(), influencesToVertices.end());
+    }
+
+    void RigGeometry::setInfluences(const std::vector<BoneWeights>& influences)
+    {
+        if (!mData)
+            mData = new InfluenceData;
+
+        std::map<BoneWeights, VertexList> influencesToVertices;
+        for (size_t i = 0; i < influences.size(); i++)
+            influencesToVertices[influences[i]].emplace_back(i);
 
         mData->mInfluences.reserve(influencesToVertices.size());
         mData->mInfluences.assign(influencesToVertices.begin(), influencesToVertices.end());
