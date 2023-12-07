@@ -92,7 +92,7 @@ void CSVWorld::DragRecordTable::dropEvent(QDropEvent* event)
     if (CSVWorld::DragDropUtils::isTopicOrJournal(*event, display))
     {
         const CSMWorld::TableMimeData* tableMimeData = CSVWorld::DragDropUtils::getTableMimeData(*event);
-        for (auto universalId : tableMimeData->getData())
+        for (const auto& universalId : tableMimeData->getData())
         {
             emit createNewInfoRecord(universalId.getId());
         }

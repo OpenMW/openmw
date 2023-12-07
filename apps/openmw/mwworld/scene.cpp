@@ -69,13 +69,13 @@ namespace
 
     osg::Quat makeInverseNodeRotation(const MWWorld::Ptr& ptr)
     {
-        const auto pos = ptr.getRefData().getPosition();
+        const auto& pos = ptr.getRefData().getPosition();
         return ptr.getClass().isActor() ? makeActorOsgQuat(pos) : makeInversedOrderObjectOsgQuat(pos);
     }
 
     osg::Quat makeDirectNodeRotation(const MWWorld::Ptr& ptr)
     {
-        const auto pos = ptr.getRefData().getPosition();
+        const auto& pos = ptr.getRefData().getPosition();
         return ptr.getClass().isActor() ? makeActorOsgQuat(pos) : Misc::Convert::makeOsgQuat(pos);
     }
 
