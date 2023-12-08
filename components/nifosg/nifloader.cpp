@@ -56,6 +56,7 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
+#include "fog.hpp"
 #include "matrixtransform.hpp"
 #include "particle.hpp"
 
@@ -2495,10 +2496,35 @@ namespace NifOsg
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
                     break;
                 }
+                case Nif::RC_NiFogProperty:
+                {
+                    const Nif::NiFogProperty* fogprop = static_cast<const Nif::NiFogProperty*>(property);
+                    osg::StateSet* stateset = node->getOrCreateStateSet();
+                    // Vertex alpha mode appears to be broken
+                    if (!fogprop->vertexAlpha() && fogprop->enabled())
+                    {
+                        osg::ref_ptr<NifOsg::Fog> fog = new NifOsg::Fog;
+                        fog->setMode(osg::Fog::LINEAR);
+                        fog->setColor(osg::Vec4f(fogprop->mColour, 1.f));
+                        fog->setDepth(fogprop->mFogDepth);
+                        stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
+                        // Intentionally ignoring radial fog flag
+                        // We don't really want to override the global setting
+                    }
+                    else
+                    {
+                        osg::ref_ptr<osg::Fog> fog = new osg::Fog;
+                        // Shaders don't respect glDisable(GL_FOG)
+                        fog->setMode(osg::Fog::LINEAR);
+                        fog->setStart(10000000);
+                        fog->setEnd(10000000);
+                        stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+                    }
+                    break;
+                }
                 // unused by mw
                 case Nif::RC_NiShadeProperty:
                 case Nif::RC_NiDitherProperty:
-                case Nif::RC_NiFogProperty:
                 {
                     break;
                 }
