@@ -123,8 +123,8 @@ namespace MWLua
 
     void LuaManager::update()
     {
-        if (Settings::lua().mGcStepsPerFrame > 0)
-            lua_gc(mLua.sol(), LUA_GCSTEP, Settings::lua().mGcStepsPerFrame);
+        if (const int steps = Settings::lua().mGcStepsPerFrame; steps > 0)
+            lua_gc(mLua.sol(), LUA_GCSTEP, steps);
 
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
