@@ -179,6 +179,10 @@ namespace LuaUtil
         mSol.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32, sol::lib::string,
             sol::lib::table, sol::lib::os, sol::lib::debug);
 
+#ifndef NO_LUAJIT
+        mSol.open_libraries(sol::lib::jit);
+#endif // NO_LUAJIT
+
         mSol["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
         mSol["math"]["randomseed"] = [] {};
 
