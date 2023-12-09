@@ -158,12 +158,7 @@ void CSVRender::Cell::updateLand()
             mCellBorder = std::make_unique<CellBorder>(mCellNode, mCoordinates);
 
         mCellBorder->buildShape(esmLand);
-
-        return;
     }
-
-    // No land data
-    unloadLand();
 }
 
 void CSVRender::Cell::unloadLand()
