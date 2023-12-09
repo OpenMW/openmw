@@ -270,8 +270,6 @@ namespace
         std::vector<ESM::FormatVersion> result({
             ESM::DefaultFormatVersion,
             ESM::CurrentContentFormatVersion,
-            ESM::MaxOldWeatherFormatVersion,
-            ESM::MaxOldDeathAnimationFormatVersion,
             ESM::MaxOldFogOfWarFormatVersion,
             ESM::MaxUnoptimizedCharacterDataFormatVersion,
             ESM::MaxOldTimeLeftFormatVersion,
