@@ -19,6 +19,7 @@ namespace MWPhysics
         osg::Vec3f velocity = osg::Vec3f();
         float simulationTimeStart = 0.f; // The time at which this movement begun
         float simulationTimeStop = 0.f; // The time at which this movement finished
+        bool jump = false;
     };
 
     class PtrHolder
@@ -41,9 +42,9 @@ namespace MWPhysics
         btCollisionObject* getCollisionObject() const { return mCollisionObject.get(); }
 
         void clearMovement() { mMovement = {}; }
-        void queueMovement(osg::Vec3f velocity, float simulationTimeStart, float simulationTimeStop)
+        void queueMovement(osg::Vec3f velocity, float simulationTimeStart, float simulationTimeStop, bool jump = false)
         {
-            mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop });
+            mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop, jump });
         }
 
         std::deque<Movement>& movement() { return mMovement; }

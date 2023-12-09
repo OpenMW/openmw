@@ -210,6 +210,13 @@ namespace
                 auto it = actor.movement().begin();
                 while (it != actor.movement().end())
                 {
+                    if (it->jump)
+                    {
+                        // Adjusting inertia is instant and should not be performed over time like other movement is.
+                        it++;
+                        continue;
+                    }
+
                     float start = std::max(it->simulationTimeStart, startTime);
                     float stop = std::min(it->simulationTimeStop, endTime);
                     movement += it->velocity * (stop - start);
@@ -220,6 +227,23 @@ namespace
                 }
 
                 return movement;
+            }
+
+            std::optional<osg::Vec3f> takeInertia(MWPhysics::PtrHolder& actor, float startTime) const
+            {
+                std::optional<osg::Vec3f> inertia = std::nullopt;
+                auto it = actor.movement().begin();
+                while (it != actor.movement().end())
+                {
+                    if (it->jump && it->simulationTimeStart >= startTime)
+                    {
+                        inertia = it->velocity;
+                        it = actor.movement().erase(it);
+                    }
+                    else
+                        it++;
+                }
+                return inertia;
             }
 
             void operator()(auto& sim) const
@@ -237,8 +261,10 @@ namespace
                 // movement solver
                 osg::Vec3f velocity
                     = takeMovement(*ptrHolder, mSimulationTime, mSimulationTime + mDelta * mSteps) / (mSteps * mDelta);
+                // takeInertia() returns a velocity and should be taken over the velocity calculated above to initiate a jump
+                auto inertia = takeInertia(*ptrHolder, mSimulationTime);
 
-                frameDataRef.get().mMovement += velocity;
+                frameDataRef.get().mMovement += inertia.value_or(velocity);
             }
         };
 

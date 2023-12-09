@@ -624,12 +624,12 @@ namespace MWPhysics
         return false;
     }
 
-    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity, float duration)
+    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity, float duration, bool jump)
     {
         float start = MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime();
         ActorMap::iterator found = mActors.find(ptr.mRef);
         if (found != mActors.end())
-            found->second->queueMovement(velocity, start, start + duration);
+            found->second->queueMovement(velocity, start, start + duration, jump);
     }
 
     void PhysicsSystem::clearQueuedMovement()

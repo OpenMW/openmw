@@ -2420,7 +2420,9 @@ namespace MWMechanics
                 }
 
                 if (!isMovementAnimationControlled() && !isScriptedAnimPlaying())
-                    world->queueMovement(mPtr, vec, duration);
+                {
+                    world->queueMovement(mPtr, vec, duration, mInJump && mJumpState == JumpState_None);
+                }
             }
 
             movement = vec;
@@ -2446,7 +2448,6 @@ namespace MWMechanics
             }
         }
 
-        bool doMovementAccumulation = isMovementAnimationControlled();
         osg::Vec3f movementFromAnimation
             = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
 
@@ -2494,7 +2495,7 @@ namespace MWMechanics
             }
 
             // Update movement
-            world->queueMovement(mPtr, movement, duration);
+            world->queueMovement(mPtr, movement, duration, mInJump && mJumpState == JumpState_None);
         }
 
         mSkipAnim = false;
