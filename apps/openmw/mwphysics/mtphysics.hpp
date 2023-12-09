@@ -96,9 +96,6 @@ namespace MWPhysics
         float mDefaultPhysicsDt;
         float mPhysicsDt;
         float mTimeAccum;
-        float mNextJobSimTime = 0.f;
-        float mCurrentJobSimTime = 0.f;
-        float mPreviousJobSimTime = 0.f;
         btCollisionWorld* mCollisionWorld;
         MWRender::DebugDrawer* mDebugDrawer;
         std::vector<LOSRequest> mLOSCache;

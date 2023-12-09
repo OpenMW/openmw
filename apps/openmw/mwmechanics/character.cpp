@@ -2448,9 +2448,9 @@ namespace MWMechanics
 
         bool doMovementAccumulation = isMovementAnimationControlled();
         osg::Vec3f movementFromAnimation
-            = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration, doMovementAccumulation);
+            = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
 
-        if (mPtr.getClass().isActor() && doMovementAccumulation && !isScriptedAnimPlaying())
+        if (mPtr.getClass().isActor() && isMovementAnimationControlled() && !isScriptedAnimPlaying())
         {
             if (duration > 0.0f)
                 movementFromAnimation /= duration;

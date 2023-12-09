@@ -10,7 +10,6 @@
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
 
-#include <optional>
 #include <span>
 #include <unordered_map>
 #include <unordered_set>
@@ -266,7 +265,6 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
 
         osg::Vec3f mAccumulate;
-        std::optional<osg::Vec3f> mPreviousAccumulatePosition;
 
         TextKeyListener* mTextKeyListener;
 
@@ -306,7 +304,7 @@ namespace MWRender
 
         /* Updates the position of the accum root node for the given time, and
          * returns the wanted movement vector from the previous time. */
-        void updatePosition(float oldtime, float newtime, osg::Vec3f& position, bool hasMovement);
+        void updatePosition(float oldtime, float newtime, osg::Vec3f& position);
 
         /* Resets the animation to the time of the specified start marker, without
          * moving anything, and set the end time to the specified stop marker. If
@@ -466,7 +464,7 @@ namespace MWRender
         /** Retrieves the velocity (in units per second) that the animation will move. */
         float getVelocity(std::string_view groupname) const;
 
-        virtual osg::Vec3f runAnimation(float duration, bool accumulateMovement = false);
+        virtual osg::Vec3f runAnimation(float duration);
 
         void setLoopingEnabled(std::string_view groupname, bool enabled);
 

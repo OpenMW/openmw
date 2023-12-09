@@ -29,10 +29,6 @@ namespace MWWorld
         float getGameTimeScale() const { return mGameTimeScale; }
         void setGameTimeScale(float scale); // game time to simulation time ratio
 
-        // Physics simulation time
-        double getPhysicsSimulationTime() const { return mPhysicsSimulationTime; }
-        void setPhysicsSimulationTime(double t) { mPhysicsSimulationTime = t; }
-
         // Rendering simulation time (summary simulation time of rendering frames since application start).
         double getRenderingSimulationTime() const { return mRenderingSimulationTime; }
         void setRenderingSimulationTime(double t) { mRenderingSimulationTime = t; }
@@ -74,7 +70,6 @@ namespace MWWorld
         float mSimulationTimeScale = 1.0;
         double mRenderingSimulationTime = 0.0;
         double mSimulationTime = 0.0;
-        double mPhysicsSimulationTime = 0.0;
         bool mPaused = false;
         std::set<std::string, std::less<>> mPausedTags;
     };

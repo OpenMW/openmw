@@ -608,7 +608,6 @@ namespace MWPhysics
 
         if (mAdvanceSimulation)
         {
-            mNextJobSimTime = simulationTimeStart + (numSteps * newDelta);
             mWorldFrameData = std::make_unique<WorldFrameData>();
             mBudgetCursor += 1;
         }
@@ -812,7 +811,6 @@ namespace MWPhysics
             mLockingPolicy };
         for (Simulation& sim : *mSimulations)
             std::visit(vis, sim);
-        mCurrentJobSimTime += mPhysicsDt;
     }
 
     bool PhysicsTaskScheduler::hasLineOfSight(const Actor* actor1, const Actor* actor2)
@@ -922,9 +920,6 @@ namespace MWPhysics
                 mLOSCache.end());
         }
 
-        // On paper, mCurrentJobSimTime should have added up to mNextJobSimTime already
-        // But to avoid accumulating floating point errors, assign this anyway.
-        mCurrentJobSimTime = mNextJobSimTime;
         mTimeEnd = mTimer->tick();
         if (mWorkersSync != nullptr)
             mWorkersSync->workIsDone();
@@ -939,9 +934,6 @@ namespace MWPhysics
             std::visit(vis, sim);
         mSimulations->clear();
         mSimulations = nullptr;
-        const float interpolationFactor = std::clamp(mTimeAccum / mPhysicsDt, 0.0f, 1.0f);
-        MWBase::Environment::get().getWorld()->getTimeManager()->setPhysicsSimulationTime(
-            mCurrentJobSimTime - mPhysicsDt * (1.f - interpolationFactor));
     }
 
     // Attempt to acquire unique lock on mSimulationMutex while not all worker

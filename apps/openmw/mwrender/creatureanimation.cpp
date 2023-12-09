@@ -258,9 +258,9 @@ namespace MWRender
         WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
     }
 
-    osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration, bool accumulateMovement)
+    osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration)
     {
-        osg::Vec3f ret = Animation::runAnimation(duration, accumulateMovement);
+        osg::Vec3f ret = Animation::runAnimation(duration);
 
         WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0] + getBodyPitchRadians());
 
