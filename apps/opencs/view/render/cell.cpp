@@ -118,7 +118,7 @@ bool CSVRender::Cell::addObjects(int start, int end)
 
 void CSVRender::Cell::updateLand()
 {
-    if (!mUpdateLand || mLandDeleted)
+    if (!mUpdateLand || mLandDeleted || !mId.startsWith("#"))
         return;
 
     mUpdateLand = false;
