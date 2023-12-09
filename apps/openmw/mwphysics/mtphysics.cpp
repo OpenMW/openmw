@@ -261,7 +261,8 @@ namespace
                 // movement solver
                 osg::Vec3f velocity
                     = takeMovement(*ptrHolder, mSimulationTime, mSimulationTime + mDelta * mSteps) / (mSteps * mDelta);
-                // takeInertia() returns a velocity and should be taken over the velocity calculated above to initiate a jump
+                // takeInertia() returns a velocity and should be taken over the velocity calculated above to initiate a
+                // jump
                 auto inertia = takeInertia(*ptrHolder, mSimulationTime);
 
                 frameDataRef.get().mMovement += inertia.value_or(velocity);

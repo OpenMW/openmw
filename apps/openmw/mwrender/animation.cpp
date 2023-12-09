@@ -492,11 +492,11 @@ namespace MWRender
     public:
         void operator()(osg::MatrixTransform* transform, osg::NodeVisitor* nv)
         {
-                osg::Matrix mat = transform->getMatrix();
-                osg::Vec3f position = mat.getTrans();
-                position = osg::componentMultiply(mResetAxes, position);
-                mat.setTrans(position);
-                transform->setMatrix(mat);
+            osg::Matrix mat = transform->getMatrix();
+            osg::Vec3f position = mat.getTrans();
+            position = osg::componentMultiply(mResetAxes, position);
+            mat.setTrans(position);
+            transform->setMatrix(mat);
 
             traverse(transform, nv);
         }
@@ -1248,7 +1248,6 @@ namespace MWRender
                 mHeadController->setRotate(
                     osg::Quat(mHeadPitchRadians, osg::Vec3f(1, 0, 0)) * osg::Quat(yaw, osg::Vec3f(0, 0, 1)));
         }
-
 
         return movement;
     }
