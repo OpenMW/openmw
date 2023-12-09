@@ -103,6 +103,7 @@
     Bug #7665: Alchemy menu is missing the ability to deselect and choose different qualities of an apparatus
     Bug #7675: Successful lock spell doesn't produce a sound
     Bug #7679: Scene luminance value flashes when toggling shaders
+    Bug #7712: Casting doesn't support spells and enchantments with no effects
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION

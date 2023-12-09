@@ -524,10 +524,8 @@ namespace MWWorld
 
         const ESM::Enchantment* enchantment
             = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchantmentName);
-        if (!enchantment)
+        if (!enchantment || enchantment->mEffects.mList.empty())
             return result;
-
-        assert(enchantment->mEffects.mList.size());
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(
             enchantment->mEffects.mList.front().mEffectID);

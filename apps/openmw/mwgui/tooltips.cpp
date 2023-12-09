@@ -237,13 +237,15 @@ namespace MWGui
                         params.mNoTarget = false;
                         effects.push_back(params);
                     }
-                    if (MWMechanics::spellIncreasesSkill(
-                            spell)) // display school of spells that contribute to skill progress
+                    // display school of spells that contribute to skill progress
+                    if (MWMechanics::spellIncreasesSkill(spell))
                     {
-                        MWWorld::Ptr player = MWMechanics::getPlayer();
-                        const auto& school
-                            = store->get<ESM::Skill>().find(MWMechanics::getSpellSchool(spell, player))->mSchool;
-                        info.text = "#{sSchool}: " + MyGUI::TextIterator::toTagsString(school->mName).asUTF8();
+                        ESM::RefId id = MWMechanics::getSpellSchool(spell, MWMechanics::getPlayer());
+                        if (!id.empty())
+                        {
+                            const auto& school = store->get<ESM::Skill>().find(id)->mSchool;
+                            info.text = "#{sSchool}: " + MyGUI::TextIterator::toTagsString(school->mName).asUTF8();
+                        }
                     }
                     auto cost = focus->getUserString("SpellCost");
                     if (!cost.empty() && cost != "0")

@@ -1605,7 +1605,7 @@ namespace MWMechanics
                             effects = &spell->mEffects.mList;
                             cast.playSpellCastingEffects(spell);
                         }
-                        if (mCanCast)
+                        if (mCanCast && !effects->empty())
                         {
                             const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(
                                 effects->back().mEffectID); // use last effect of list for color of VFX_Hands
@@ -1615,18 +1615,13 @@ namespace MWMechanics
 
                             const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-                            if (!effects->empty())
-                            {
-                                if (mAnimation->getNode("Bip01 L Hand"))
-                                    mAnimation->addEffect(
-                                        Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), -1, false,
-                                        "Bip01 L Hand", effect->mParticle);
+                            if (mAnimation->getNode("Bip01 L Hand"))
+                                mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
+                                    -1, false, "Bip01 L Hand", effect->mParticle);
 
-                                if (mAnimation->getNode("Bip01 R Hand"))
-                                    mAnimation->addEffect(
-                                        Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), -1, false,
-                                        "Bip01 R Hand", effect->mParticle);
-                            }
+                            if (mAnimation->getNode("Bip01 R Hand"))
+                                mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs),
+                                    -1, false, "Bip01 R Hand", effect->mParticle);
                         }
 
                         const ESM::ENAMstruct& firstEffect = effects->at(0); // first effect used for casting animation
