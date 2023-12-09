@@ -133,32 +133,33 @@ void CSVRender::Cell::updateLand()
     // Setup land if available
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);
-    if (landIndex != -1 && !land.getRecord(mId).isDeleted())
+
+    if (landIndex == -1 || land.getRecord(mId).isDeleted())
+        return;
+
+    const ESM::Land& esmLand = land.getRecord(mId).get();
+
+    if (!esmLand.getLandData(ESM::Land::DATA_VHGT))
+        mTerrainStorage->resetHeights();
+
+    if (mTerrain)
     {
-        const ESM::Land& esmLand = land.getRecord(mId).get();
-
-        if (!esmLand.getLandData(ESM::Land::DATA_VHGT))
-            mTerrainStorage->resetHeights();
-
-        if (mTerrain)
-        {
-            mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
-            mTerrain->clearAssociatedCaches();
-        }
-        else
-        {
-            constexpr double expiryDelay = 0;
-            mTerrain = std::make_unique<Terrain::TerrainGrid>(mCellNode, mCellNode, mData.getResourceSystem().get(),
-                mTerrainStorage, Mask_Terrain, ESM::Cell::sDefaultWorldspaceId, expiryDelay);
-        }
-
-        mTerrain->loadCell(esmLand.mX, esmLand.mY);
-
-        if (!mCellBorder)
-            mCellBorder = std::make_unique<CellBorder>(mCellNode, mCoordinates);
-
-        mCellBorder->buildShape(esmLand);
+        mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+        mTerrain->clearAssociatedCaches();
     }
+    else
+    {
+        constexpr double expiryDelay = 0;
+        mTerrain = std::make_unique<Terrain::TerrainGrid>(mCellNode, mCellNode, mData.getResourceSystem().get(),
+            mTerrainStorage, Mask_Terrain, ESM::Cell::sDefaultWorldspaceId, expiryDelay);
+    }
+
+    mTerrain->loadCell(esmLand.mX, esmLand.mY);
+
+    if (!mCellBorder)
+        mCellBorder = std::make_unique<CellBorder>(mCellNode, mCoordinates);
+
+    mCellBorder->buildShape(esmLand);
 }
 
 void CSVRender::Cell::unloadLand()
