@@ -42,9 +42,6 @@ namespace ESM
         else
             mPosition = mRef.mPos;
 
-        if (esm.isNextSub("LROT"))
-            esm.skipHSub(); // local rotation, no longer used
-
         mFlags = 0;
         esm.getHNOT(mFlags, "FLAG");
 
