@@ -25,7 +25,6 @@
 #include "cellwater.hpp"
 #include "instancedragmodes.hpp"
 #include "mask.hpp"
-#include "model/world/commands.hpp"
 #include "object.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
@@ -33,6 +32,7 @@
 #include <apps/opencs/model/world/cell.hpp>
 #include <apps/opencs/model/world/cellcoordinates.hpp>
 #include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/commands.hpp>
 #include <apps/opencs/model/world/data.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/land.hpp>
