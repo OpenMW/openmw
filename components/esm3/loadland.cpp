@@ -220,7 +220,7 @@ namespace ESM
             mLandData = std::make_unique<LandData>();
 
         mLandData->mHeightOffset = 0;
-        mLandData->mHeights.fill(0);
+        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), DEFAULT_HEIGHT);
         mLandData->mMinHeight = 0;
         mLandData->mMaxHeight = 0;
         for (size_t i = 0; i < LandRecordData::sLandNumVerts; ++i)
