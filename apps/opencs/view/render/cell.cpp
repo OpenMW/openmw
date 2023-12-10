@@ -25,6 +25,7 @@
 #include "cellwater.hpp"
 #include "instancedragmodes.hpp"
 #include "mask.hpp"
+#include "model/world/commands.hpp"
 #include "object.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
@@ -131,11 +132,17 @@ void CSVRender::Cell::updateLand()
         return;
     }
 
-    // Setup land if available
-    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+    CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);
 
-    if (landIndex == -1 || land.getRecord(mId).isDeleted())
+    if (landIndex == -1)
+    {
+        CSMWorld::IdTable& landTable
+            = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Land));
+        mUndoStack.push(new CSMWorld::CreateCommand(landTable, mId.getRefIdString()));
+    }
+
+    if (land.getRecord(mId).isDeleted())
         return;
 
     const ESM::Land& esmLand = land.getRecord(mId).get();
