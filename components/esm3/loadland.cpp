@@ -204,9 +204,9 @@ namespace ESM
         if (mLandData == nullptr)
             mLandData = std::make_unique<LandData>();
 
-        mLandData->mHeights.fill(0);
-        mLandData->mMinHeight = 0;
-        mLandData->mMaxHeight = 0;
+        mLandData->mHeights.fill(DEFAULT_HEIGHT);
+        mLandData->mMinHeight = DEFAULT_HEIGHT;
+        mLandData->mMaxHeight = DEFAULT_HEIGHT;
         for (size_t i = 0; i < LandRecordData::sLandNumVerts; ++i)
         {
             mLandData->mNormals[i * 3 + 0] = 0;
