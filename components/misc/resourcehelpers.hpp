@@ -23,8 +23,8 @@ namespace Misc
     namespace ResourceHelpers
     {
         bool changeExtensionToDds(std::string& path);
-        std::string correctResourcePath(std::string_view topLevelDirectory, std::string_view resPath,
-            const VFS::Manager* vfs, const std::vector<std::string_view>& alternativeDirectories = {});
+        std::string correctResourcePath(const std::vector<std::string_view>& topLevelDirectories,
+            std::string_view resPath, const VFS::Manager* vfs);
         std::string correctTexturePath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctIconPath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(std::string_view resPath, const VFS::Manager* vfs);
