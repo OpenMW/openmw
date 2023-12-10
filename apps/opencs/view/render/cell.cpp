@@ -1,6 +1,7 @@
 #include "cell.hpp"
 
 #include <algorithm>
+#include <qundostack.h>
 #include <set>
 #include <utility>
 
@@ -171,8 +172,10 @@ void CSVRender::Cell::unloadLand()
         mCellBorder.reset();
 }
 
-CSVRender::Cell::Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::string& id, bool deleted)
+CSVRender::Cell::Cell(
+    CSMWorld::Data& data, QUndoStack& undoStack, osg::Group* rootNode, const std::string& id, bool deleted)
     : mData(data)
+    , mUndoStack(undoStack)
     , mId(ESM::RefId::stringRefId(id))
     , mDeleted(deleted)
     , mSubMode(0)

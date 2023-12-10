@@ -9,6 +9,8 @@
 #include <osg/Vec3d>
 #include <osg/ref_ptr>
 
+#include <QUndoStack>
+
 #include "../../model/world/cellcoordinates.hpp"
 #include "instancedragmodes.hpp"
 #include <components/esm/refid.hpp>
@@ -46,6 +48,7 @@ namespace CSVRender
     class Cell
     {
         CSMWorld::Data& mData;
+        QUndoStack& mUndoStack;
         ESM::RefId mId;
         osg::ref_ptr<osg::Group> mCellNode;
         std::map<std::string, Object*, Misc::StringUtils::CiComp> mObjects;
@@ -89,7 +92,8 @@ namespace CSVRender
     public:
         /// \note Deleted covers both cells that are deleted and cells that don't exist in
         /// the first place.
-        Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::string& id, bool deleted = false);
+        Cell(CSMWorld::Data& data, QUndoStack& undoStack, osg::Group* rootNode, const std::string& id,
+            bool deleted = false);
 
         ~Cell();
 
