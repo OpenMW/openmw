@@ -144,6 +144,12 @@ namespace Resource
         return stream << "}}";
     }
 
+    static std::ostream& operator<<(std::ostream& stream, const ScaledTriangleMeshShape& value)
+    {
+        return stream << "Resource::ScaledTriangleMeshShape {" << value.getLocalScaling() << ", "
+                      << value.getChildShape() << "}";
+    }
+
     static bool operator==(const CollisionBox& l, const CollisionBox& r)
     {
         const auto tie = [](const CollisionBox& v) { return std::tie(v.mExtents, v.mCenter); };
@@ -167,6 +173,10 @@ static std::ostream& operator<<(std::ostream& stream, const btCollisionShape& va
             return stream << static_cast<const btBoxShape&>(value);
         case TRIANGLE_MESH_SHAPE_PROXYTYPE:
             if (const auto casted = dynamic_cast<const Resource::TriangleMeshShape*>(&value))
+                return stream << *casted;
+            break;
+        case SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE:
+            if (const auto casted = dynamic_cast<const Resource::ScaledTriangleMeshShape*>(&value))
                 return stream << *casted;
             break;
     }
@@ -249,6 +259,12 @@ static bool operator==(const btBvhTriangleMeshShape& lhs, const btBvhTriangleMes
         && lhs.getOwnsBvh() == rhs.getOwnsBvh() && isNear(getTriangles(lhs), getTriangles(rhs));
 }
 
+static bool operator==(const btScaledBvhTriangleMeshShape& lhs, const btScaledBvhTriangleMeshShape& rhs)
+{
+    return isNear(lhs.getLocalScaling(), rhs.getLocalScaling())
+        && compareObjects(lhs.getChildShape(), rhs.getChildShape());
+}
+
 static bool operator==(const btCollisionShape& lhs, const btCollisionShape& rhs)
 {
     if (lhs.getShapeType() != rhs.getShapeType())
@@ -262,6 +278,11 @@ static bool operator==(const btCollisionShape& lhs, const btCollisionShape& rhs)
         case TRIANGLE_MESH_SHAPE_PROXYTYPE:
             if (const auto lhsCasted = dynamic_cast<const Resource::TriangleMeshShape*>(&lhs))
                 if (const auto rhsCasted = dynamic_cast<const Resource::TriangleMeshShape*>(&rhs))
+                    return *lhsCasted == *rhsCasted;
+            return false;
+        case SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE:
+            if (const auto lhsCasted = dynamic_cast<const Resource::ScaledTriangleMeshShape*>(&lhs))
+                if (const auto rhsCasted = dynamic_cast<const Resource::ScaledTriangleMeshShape*>(&rhs))
                     return *lhsCasted == *rhsCasted;
             return false;
     }
@@ -572,7 +593,9 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
 
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        auto triShape = std::make_unique<Resource::TriangleMeshShape>(triangles.release(), true);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(triShape.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -596,7 +619,9 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
 
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        auto triShape = std::make_unique<Resource::TriangleMeshShape>(triangles.release(), true);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(triShape.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -619,7 +644,9 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
 
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        auto triShape = std::make_unique<Resource::TriangleMeshShape>(triangles.release(), true);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(triShape.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -644,7 +671,9 @@ namespace
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
 
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        auto triShape = std::make_unique<Resource::TriangleMeshShape>(triangles.release(), true);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(triShape.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -669,9 +698,13 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
         triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        auto triShape = std::make_unique<Resource::TriangleMeshShape>(triangles.release(), true);
+        auto triShape2 = std::make_unique<Resource::TriangleMeshShape>(triangles2.release(), true);
+
         compound->addChildShape(
-            btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles2.release(), true));
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(triShape.release(), btVector3(1, 1, 1)));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(triShape2.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -695,7 +728,9 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        auto triShape = std::make_unique<Resource::TriangleMeshShape>(triangles.release(), true);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(triShape.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -717,9 +752,8 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
-        mesh->setLocalScaling(btVector3(3, 3, 3));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mTransform, mesh.release());
+        shape->addChildShape(mTransform, new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(3, 3, 3)));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -744,9 +778,9 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
-        mesh->setLocalScaling(btVector3(12, 12, 12));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mTransformScale4, mesh.release());
+        shape->addChildShape(
+            mTransformScale4, new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(12, 12, 12)));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -776,16 +810,14 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
-        mesh->setLocalScaling(btVector3(3, 3, 3));
 
         std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
         triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
         std::unique_ptr<Resource::TriangleMeshShape> mesh2(new Resource::TriangleMeshShape(triangles2.release(), true));
-        mesh2->setLocalScaling(btVector3(3, 3, 3));
 
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mTransform, mesh.release());
-        shape->addChildShape(mTransform, mesh2.release());
+        shape->addChildShape(mTransform, new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(3, 3, 3)));
+        shape->addChildShape(mTransform, new Resource::ScaledTriangleMeshShape(mesh2.release(), btVector3(3, 3, 3)));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -813,9 +845,9 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
-        mesh->setLocalScaling(btVector3(12, 12, 12));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mTransformScale4, mesh.release());
+        shape->addChildShape(
+            mTransformScale4, new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(12, 12, 12)));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -849,16 +881,16 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
-        mesh->setLocalScaling(btVector3(12, 12, 12));
 
         std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
         triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
         std::unique_ptr<Resource::TriangleMeshShape> mesh2(new Resource::TriangleMeshShape(triangles2.release(), true));
-        mesh2->setLocalScaling(btVector3(12, 12, 12));
 
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mTransformScale4, mesh.release());
-        shape->addChildShape(mTransformScale4, mesh2.release());
+        shape->addChildShape(
+            mTransformScale4, new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(12, 12, 12)));
+        shape->addChildShape(
+            mTransformScale4, new Resource::ScaledTriangleMeshShape(mesh2.release(), btVector3(12, 12, 12)));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 1 } };
@@ -880,14 +912,17 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
 
         std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
         triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh2(new Resource::TriangleMeshShape(triangles2.release(), true));
 
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
         compound->addChildShape(
-            btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles2.release(), true));
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh2.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -911,9 +946,11 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
 
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
         Resource::BulletShape expected;
         expected.mAvoidCollisionShape.reset(compound.release());
 
@@ -973,8 +1010,10 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1002,8 +1041,10 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1029,8 +1070,10 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1057,8 +1100,10 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1083,8 +1128,10 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1116,8 +1163,10 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1178,8 +1227,10 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         triangles->addTriangle(btVector3(1, 0, 0), btVector3(0, 1, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1267,9 +1318,10 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
-
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
@@ -1298,14 +1350,14 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles1(new btTriangleMesh(false));
         triangles1->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh1(new Resource::TriangleMeshShape(triangles1.release(), true));
-        mesh1->setLocalScaling(btVector3(8, 8, 8));
         std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
         triangles2->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh2(new Resource::TriangleMeshShape(triangles2.release(), true));
-        mesh2->setLocalScaling(btVector3(12, 12, 12));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mTransformScale2, mesh1.release());
-        shape->addChildShape(mTransformScale3, mesh2.release());
+        shape->addChildShape(
+            mTransformScale2, new Resource::ScaledTriangleMeshShape(mesh1.release(), btVector3(8, 8, 8)));
+        shape->addChildShape(
+            mTransformScale3, new Resource::ScaledTriangleMeshShape(mesh2.release(), btVector3(12, 12, 12)));
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };

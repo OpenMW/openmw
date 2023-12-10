@@ -281,7 +281,20 @@ namespace NifBullet
         osg::Matrixf transform = niGeometry.mTransform.toMatrix();
         for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
             transform *= parent->mNiNode.mTransform.toMatrix();
-        childShape->setLocalScaling(Misc::Convert::toBullet(transform.getScale()));
+
+        if (childShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
+        {
+            auto scaledShape = std::make_unique<Resource::ScaledTriangleMeshShape>(
+                static_cast<btBvhTriangleMeshShape*>(childShape.get()), Misc::Convert::toBullet(transform.getScale()));
+            std::ignore = childShape.release();
+
+            childShape = std::move(scaledShape);
+        }
+        else
+        {
+            childShape->setLocalScaling(Misc::Convert::toBullet(transform.getScale()));
+        }
+
         transform.orthoNormalize(transform);
 
         btTransform trans;
