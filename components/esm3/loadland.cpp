@@ -101,23 +101,28 @@ namespace ESM
             {
                 case fourCC("VNML"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VNML;
+                    if (mFlags & DATA_VNML)
+                        mDataTypes |= DATA_VNML;
                     break;
                 case fourCC("VHGT"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VHGT;
+                    if (mFlags & DATA_VHGT)
+                        mDataTypes |= DATA_VHGT;
                     break;
                 case fourCC("WNAM"):
-                    esm.getHT(mWnam);
-                    mDataTypes |= DATA_WNAM;
+                    esm.getHExact(mWnam.data(), mWnam.size());
+                    if (mFlags & DATA_WNAM)
+                        mDataTypes |= DATA_WNAM;
                     break;
                 case fourCC("VCLR"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VCLR;
+                    if (mFlags & DATA_VCLR)
+                        mDataTypes |= DATA_VCLR;
                     break;
                 case fourCC("VTEX"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VTEX;
+                    if (mFlags & DATA_VCLR)
+                        mDataTypes |= DATA_VTEX;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
