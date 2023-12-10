@@ -304,14 +304,6 @@ namespace Shader
         if (node.getUserValue(Misc::OsgUserValues::sXSoftEffect, softEffect) && softEffect)
             mRequirements.back().mSoftParticles = true;
 
-        int applyMode;
-        // Oblivion parallax
-        if (node.getUserValue("applyMode", applyMode) && applyMode == 4)
-        {
-            mRequirements.back().mShaderRequired = true;
-            mRequirements.back().mDiffuseHeight = true;
-        }
-
         // Make sure to disregard any state that came from a previous call to createProgram
         osg::ref_ptr<AddedState> addedState = getAddedState(*stateset);
 
@@ -359,7 +351,17 @@ namespace Shader
                                 normalMap = texture;
                             }
                             else if (texName == "diffuseMap")
+                            {
+                                int applyMode;
+                                // Oblivion parallax
+                                if (node.getUserValue("applyMode", applyMode) && applyMode == 4)
+                                {
+                                    mRequirements.back().mShaderRequired = true;
+                                    mRequirements.back().mDiffuseHeight = true;
+                                    mRequirements.back().mTexStageRequiringTangents = unit;
+                                }
                                 diffuseMap = texture;
+                            }
                             else if (texName == "specularMap")
                                 specularMap = texture;
                             else if (texName == "bumpMap")
