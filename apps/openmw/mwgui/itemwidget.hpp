@@ -58,7 +58,7 @@ namespace MWGui
     {
         MYGUI_RTTI_DERIVED(SpellWidget)
     public:
-        void setSpellIcon(const std::string& icon);
+        void setSpellIcon(std::string_view icon);
     };
 
 }

@@ -423,17 +423,21 @@ namespace MWGui
         mSpellBox->setUserString("Spell", spellId.serialize());
         mSpellBox->setUserData(MyGUI::Any::Null);
 
-        // use the icon of the first effect
-        const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-            spell->mEffects.mList.front().mEffectID);
-
-        std::string icon = effect->mIcon;
-        std::replace(icon.begin(), icon.end(), '/', '\\');
-        int slashPos = icon.rfind('\\');
-        icon.insert(slashPos + 1, "b_");
-        icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
-
-        mSpellImage->setSpellIcon(icon);
+        if (!spell->mEffects.mList.empty())
+        {
+            // use the icon of the first effect
+            const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
+                spell->mEffects.mList.front().mEffectID);
+            std::string icon = effect->mIcon;
+            std::replace(icon.begin(), icon.end(), '/', '\\');
+            size_t slashPos = icon.rfind('\\');
+            icon.insert(slashPos + 1, "b_");
+            icon = Misc::ResourceHelpers::correctIconPath(
+                icon, MWBase::Environment::get().getResourceSystem()->getVFS());
+            mSpellImage->setSpellIcon(icon);
+        }
+        else
+            mSpellImage->setSpellIcon({});
     }
 
     void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)

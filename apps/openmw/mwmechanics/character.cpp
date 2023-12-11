@@ -1605,18 +1605,19 @@ namespace MWMechanics
                             effects = &spell->mEffects.mList;
                             cast.playSpellCastingEffects(spell);
                         }
-                        if (mCanCast)
+                        if (!effects->empty())
                         {
-                            const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(
-                                effects->back().mEffectID); // use last effect of list for color of VFX_Hands
-
-                            const ESM::Static* castStatic
-                                = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
-
-                            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
-                            if (!effects->empty())
+                            if (mCanCast)
                             {
+                                const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(
+                                    effects->back().mEffectID); // use last effect of list for color of VFX_Hands
+
+                                const ESM::Static* castStatic
+                                    = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
+
+                                const VFS::Manager* const vfs
+                                    = MWBase::Environment::get().getResourceSystem()->getVFS();
+
                                 if (mAnimation->getNode("Bip01 L Hand"))
                                     mAnimation->addEffect(
                                         Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), -1, false,
@@ -1627,44 +1628,44 @@ namespace MWMechanics
                                         Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), -1, false,
                                         "Bip01 R Hand", effect->mParticle);
                             }
-                        }
+                            // first effect used for casting animation
+                            const ESM::ENAMstruct& firstEffect = effects->front();
 
-                        const ESM::ENAMstruct& firstEffect = effects->at(0); // first effect used for casting animation
-
-                        std::string startKey;
-                        std::string stopKey;
-                        if (isRandomAttackAnimation(mCurrentWeapon))
-                        {
-                            startKey = "start";
-                            stopKey = "stop";
-                            if (mCanCast)
-                                world->castSpell(
-                                    mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
-                            mCastingManualSpell = false;
-                            mCanCast = false;
-                        }
-                        else
-                        {
-                            switch (firstEffect.mRange)
+                            std::string startKey;
+                            std::string stopKey;
+                            if (isRandomAttackAnimation(mCurrentWeapon))
                             {
-                                case 0:
-                                    mAttackType = "self";
-                                    break;
-                                case 1:
-                                    mAttackType = "touch";
-                                    break;
-                                case 2:
-                                    mAttackType = "target";
-                                    break;
+                                startKey = "start";
+                                stopKey = "stop";
+                                if (mCanCast)
+                                    world->castSpell(
+                                        mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
+                                mCastingManualSpell = false;
+                                mCanCast = false;
+                            }
+                            else
+                            {
+                                switch (firstEffect.mRange)
+                                {
+                                    case 0:
+                                        mAttackType = "self";
+                                        break;
+                                    case 1:
+                                        mAttackType = "touch";
+                                        break;
+                                    case 2:
+                                        mAttackType = "target";
+                                        break;
+                                }
+
+                                startKey = mAttackType + " start";
+                                stopKey = mAttackType + " stop";
                             }
 
-                            startKey = mAttackType + " start";
-                            stopKey = mAttackType + " stop";
+                            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false,
+                                1, startKey, stopKey, 0.0f, 0);
+                            mUpperBodyState = UpperBodyState::Casting;
                         }
-
-                        mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false, 1,
-                            startKey, stopKey, 0.0f, 0);
-                        mUpperBodyState = UpperBodyState::Casting;
                     }
                     else
                     {
