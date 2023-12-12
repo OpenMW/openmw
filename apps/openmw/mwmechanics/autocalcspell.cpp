@@ -74,7 +74,8 @@ namespace MWMechanics
             ESM::RefId school;
             float skillTerm;
             calcWeakestSchool(&spell, actorSkills, school, skillTerm);
-            assert(!school.empty());
+            if (school.empty())
+                continue;
             SchoolCaps& cap = schoolCaps[school];
 
             if (cap.mReachedLimit && spellCost <= cap.mMinCost)
