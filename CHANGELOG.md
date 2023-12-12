@@ -105,6 +105,7 @@
     Bug #7679: Scene luminance value flashes when toggling shaders
     Bug #7712: Casting doesn't support spells and enchantments with no effects
     Feature #3537: Shader-based water ripples
+    Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts

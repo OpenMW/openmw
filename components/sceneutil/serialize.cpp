@@ -3,6 +3,7 @@
 #include <osgDB/ObjectWrapper>
 #include <osgDB/Registry>
 
+#include <components/nifosg/fog.hpp>
 #include <components/nifosg/matrixtransform.hpp>
 
 #include <components/sceneutil/morphgeometry.hpp>
@@ -123,6 +124,19 @@ namespace SceneUtil
         }
     };
 
+    class FogSerializer : public osgDB::ObjectWrapper
+    {
+    public:
+        FogSerializer()
+            : osgDB::ObjectWrapper(
+                createInstanceFunc<osg::Fog>, "NifOsg::Fog", "osg::Object osg::StateAttribute osg::Fog NifOsg::Fog")
+        {
+            addSerializer(new osgDB::PropByValSerializer<NifOsg::Fog, float>(
+                              "Depth", 1.f, &NifOsg::Fog::getDepth, &NifOsg::Fog::setDepth),
+                osgDB::BaseSerializer::RW_FLOAT);
+        }
+    };
+
     osgDB::ObjectWrapper* makeDummySerializer(const std::string& classname)
     {
         return new osgDB::ObjectWrapper(createInstanceFunc<osg::DummyObject>, classname, "osg::Object");
@@ -153,6 +167,7 @@ namespace SceneUtil
             mgr->addWrapper(new LightManagerSerializer);
             mgr->addWrapper(new CameraRelativeTransformSerializer);
             mgr->addWrapper(new MatrixTransformSerializer);
+            mgr->addWrapper(new FogSerializer);
 
             // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of
             // vertex data that would make the file large and hard to read.

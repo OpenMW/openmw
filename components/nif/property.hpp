@@ -461,11 +461,22 @@ namespace Nif
 
     struct NiFogProperty : NiProperty
     {
+        enum Flags : uint16_t
+        {
+            Enabled = 0x02,
+            Radial = 0x08,
+            VertexAlpha = 0x10,
+        };
+
         uint16_t mFlags;
         float mFogDepth;
         osg::Vec3f mColour;
 
         void read(NIFStream* nif) override;
+
+        bool enabled() const { return mFlags & Flags::Enabled; }
+        bool radial() const { return mFlags & Flags::Radial; }
+        bool vertexAlpha() const { return mFlags & Flags::VertexAlpha; }
     };
 
     struct NiMaterialProperty : NiProperty
