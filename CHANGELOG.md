@@ -140,6 +140,7 @@
     Bug #7676: Incorrect magic effect order in alchemy
     Bug #7679: Scene luminance value flashes when toggling shaders
     Bug #7685: Corky sometimes doesn't follow Llovyn Andus
+    Bug #7707: (OpenCS): New landscape records do not contain appropriate flags
     Bug #7712: Casting doesn't support spells and enchantments with no effects
     Bug #7721: CS: Special Chars Not Allowed in IDs
     Bug #7723: Assaulting vampires and werewolves shouldn't be a crime

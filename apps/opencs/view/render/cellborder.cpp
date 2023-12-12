@@ -47,9 +47,6 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
 {
     const ESM::Land::LandData* landData = esmLand.getLandData(ESM::Land::DATA_VHGT);
 
-    if (!landData)
-        return;
-
     mBaseNode->removeChild(mBorderGeometry);
     mBorderGeometry = new osg::Geometry();
 
@@ -62,20 +59,40 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
         Traverse the cell border counter-clockwise starting at the SW corner vertex (0, 0).
         Each loop starts at a corner vertex and ends right before the next corner vertex.
     */
-    for (; x < ESM::Land::LAND_SIZE - 1; ++x)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+    if (landData)
+    {
+        for (; x < ESM::Land::LAND_SIZE - 1; ++x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    x = ESM::Land::LAND_SIZE - 1;
-    for (; y < ESM::Land::LAND_SIZE - 1; ++y)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+        x = ESM::Land::LAND_SIZE - 1;
+        for (; y < ESM::Land::LAND_SIZE - 1; ++y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    y = ESM::Land::LAND_SIZE - 1;
-    for (; x > 0; --x)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+        y = ESM::Land::LAND_SIZE - 1;
+        for (; x > 0; --x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    x = 0;
-    for (; y > 0; --y)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+        x = 0;
+        for (; y > 0; --y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+    }
+    else
+    {
+        for (; x < ESM::Land::LAND_SIZE - 1; ++x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+
+        x = ESM::Land::LAND_SIZE - 1;
+        for (; y < ESM::Land::LAND_SIZE - 1; ++y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+
+        y = ESM::Land::LAND_SIZE - 1;
+        for (; x > 0; --x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+
+        x = 0;
+        for (; y > 0; --y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+    }
 
     mBorderGeometry->setVertexArray(vertices);
 
