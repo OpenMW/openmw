@@ -1,7 +1,6 @@
 #include "cell.hpp"
 
 #include <algorithm>
-#include <qundostack.h>
 #include <set>
 #include <utility>
 
@@ -146,9 +145,6 @@ void CSVRender::Cell::updateLand()
         return;
 
     const ESM::Land& esmLand = land.getRecord(mId).get();
-
-    if (!esmLand.getLandData(ESM::Land::DATA_VHGT))
-        mTerrainStorage->resetHeights();
 
     if (mTerrain)
     {
