@@ -34,18 +34,17 @@ namespace CSMPrefs
         EnumValues& add(const std::string& value, const std::string& tooltip);
     };
 
-    class EnumSetting : public Setting
+    class EnumSetting final : public TypedSetting<std::string>
     {
         Q_OBJECT
 
         std::string mTooltip;
-        EnumValue mDefault;
         EnumValues mValues;
         QComboBox* mWidget;
 
     public:
-        EnumSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const QString& label, const EnumValue& default_);
+        explicit EnumSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
 
         EnumSetting& setTooltip(const std::string& tooltip);
 

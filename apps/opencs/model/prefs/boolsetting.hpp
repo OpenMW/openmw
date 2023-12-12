@@ -12,16 +12,16 @@ namespace CSMPrefs
 {
     class Category;
 
-    class BoolSetting : public Setting
+    class BoolSetting final : public TypedSetting<bool>
     {
         Q_OBJECT
 
         std::string mTooltip;
-        bool mDefault;
         QCheckBox* mWidget;
 
     public:
-        BoolSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label, bool default_);
+        explicit BoolSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
 
         BoolSetting& setTooltip(const std::string& tooltip);
 

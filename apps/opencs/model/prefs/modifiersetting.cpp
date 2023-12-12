@@ -19,8 +19,9 @@ class QWidget;
 
 namespace CSMPrefs
 {
-    ModifierSetting::ModifierSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label)
-        : Setting(parent, mutex, key, label)
+    ModifierSetting::ModifierSetting(
+        Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+        : TypedSetting(parent, mutex, key, label, index)
         , mButton(nullptr)
         , mEditorActive(false)
     {
@@ -53,7 +54,7 @@ namespace CSMPrefs
     {
         if (mButton)
         {
-            const std::string& shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
+            const std::string& shortcut = getValue();
 
             int modifier;
             State::get().getShortcutManager().convertFromString(shortcut, modifier);
@@ -131,15 +132,7 @@ namespace CSMPrefs
     void ModifierSetting::storeValue(int modifier)
     {
         State::get().getShortcutManager().setModifier(getKey(), modifier);
-
-        // Convert to string and assign
-        std::string value = State::get().getShortcutManager().convertToString(modifier);
-
-        {
-            QMutexLocker lock(getMutex());
-            Settings::Manager::setString(getKey(), getParent()->getKey(), value);
-        }
-
+        setValue(State::get().getShortcutManager().convertToString(modifier));
         getParent()->getState()->update(*this);
     }
 

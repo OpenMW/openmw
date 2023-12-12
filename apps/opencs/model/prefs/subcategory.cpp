@@ -6,8 +6,8 @@ namespace CSMPrefs
 {
     class Category;
 
-    Subcategory::Subcategory(Category* parent, QMutex* mutex, const QString& label)
-        : Setting(parent, mutex, "", label)
+    Subcategory::Subcategory(Category* parent, QMutex* mutex, const QString& label, Settings::Index& index)
+        : Setting(parent, mutex, "", label, index)
     {
     }
 

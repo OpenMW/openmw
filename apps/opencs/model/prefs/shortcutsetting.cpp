@@ -18,8 +18,9 @@
 
 namespace CSMPrefs
 {
-    ShortcutSetting::ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label)
-        : Setting(parent, mutex, key, label)
+    ShortcutSetting::ShortcutSetting(
+        Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+        : TypedSetting(parent, mutex, key, label, index)
         , mButton(nullptr)
         , mEditorActive(false)
         , mEditorPos(0)
@@ -57,7 +58,7 @@ namespace CSMPrefs
     {
         if (mButton)
         {
-            const std::string& shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
+            const std::string shortcut = getValue();
 
             QKeySequence sequence;
             State::get().getShortcutManager().convertFromString(shortcut, sequence);
@@ -170,15 +171,7 @@ namespace CSMPrefs
     void ShortcutSetting::storeValue(const QKeySequence& sequence)
     {
         State::get().getShortcutManager().setSequence(getKey(), sequence);
-
-        // Convert to string and assign
-        std::string value = State::get().getShortcutManager().convertToString(sequence);
-
-        {
-            QMutexLocker lock(getMutex());
-            Settings::Manager::setString(getKey(), getParent()->getKey(), value);
-        }
-
+        setValue(State::get().getShortcutManager().convertToString(sequence));
         getParent()->getState()->update(*this);
     }
 

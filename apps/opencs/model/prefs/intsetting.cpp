@@ -15,11 +15,10 @@
 #include "state.hpp"
 
 CSMPrefs::IntSetting::IntSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const QString& label, int default_)
-    : Setting(parent, mutex, key, label)
+    Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+    : TypedSetting(parent, mutex, key, label, index)
     , mMin(0)
     , mMax(std::numeric_limits<int>::max())
-    , mDefault(default_)
     , mWidget(nullptr)
 {
 }
@@ -55,7 +54,7 @@ CSMPrefs::SettingWidgets CSMPrefs::IntSetting::makeWidgets(QWidget* parent)
 
     mWidget = new QSpinBox(parent);
     mWidget->setRange(mMin, mMax);
-    mWidget->setValue(mDefault);
+    mWidget->setValue(getValue());
 
     if (!mTooltip.empty())
     {
@@ -72,17 +71,11 @@ CSMPrefs::SettingWidgets CSMPrefs::IntSetting::makeWidgets(QWidget* parent)
 void CSMPrefs::IntSetting::updateWidget()
 {
     if (mWidget)
-    {
-        mWidget->setValue(Settings::Manager::getInt(getKey(), getParent()->getKey()));
-    }
+        mWidget->setValue(getValue());
 }
 
 void CSMPrefs::IntSetting::valueChanged(int value)
 {
-    {
-        QMutexLocker lock(getMutex());
-        Settings::Manager::setInt(getKey(), getParent()->getKey(), value);
-    }
-
+    setValue(value);
     getParent()->getState()->update(*this);
 }
