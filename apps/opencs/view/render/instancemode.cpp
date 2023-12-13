@@ -205,12 +205,19 @@ CSVRender::InstanceMode::InstanceMode(
     connect(
         deleteShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::deleteSelectedInstances);
 
+    CSMPrefs::Shortcut* duplicateShortcut = new CSMPrefs::Shortcut("scene-duplicate", worldspaceWidget);
+
+    connect(
+        duplicateShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::cloneSelectedInstances);
+
     // Following classes could be simplified by using QSignalMapper, which is obsolete in Qt5.10, but not in Qt4.8 and
     // Qt5.14
     CSMPrefs::Shortcut* dropToCollisionShortcut
         = new CSMPrefs::Shortcut("scene-instance-drop-collision", worldspaceWidget);
+
     connect(dropToCollisionShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
         &InstanceMode::dropSelectedInstancesToCollision);
+
     CSMPrefs::Shortcut* dropToTerrainLevelShortcut
         = new CSMPrefs::Shortcut("scene-instance-drop-terrain", worldspaceWidget);
     connect(dropToTerrainLevelShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
@@ -1085,6 +1092,27 @@ void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
             macro.push(new CSMWorld::DeleteCommand(referencesTable, objectTag->mObject->getReferenceId()));
 
     getWorldspaceWidget().clearSelection(Mask_Reference);
+}
+
+void CSVRender::InstanceMode::cloneSelectedInstances()
+{
+    std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    if (selection.empty())
+        return;
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& referencesTable
+        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_References));
+    QUndoStack& undoStack = document.getUndoStack();
+
+    CSMWorld::CommandMacro macro(undoStack, "Clone Instances");
+    for (osg::ref_ptr<TagBase> tag : selection)
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
+        {
+            macro.push(new CSMWorld::CloneCommand(referencesTable, objectTag->mObject->getReferenceId(),
+                "ref#" + std::to_string(referencesTable.rowCount()), CSMWorld::UniversalId::Type_Reference));
+        }
+    // getWorldspaceWidget().clearSelection(Mask_Reference);
 }
 
 void CSVRender::InstanceMode::dropInstance(CSVRender::Object* object, float dropHeight)

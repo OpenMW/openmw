@@ -132,6 +132,7 @@ namespace CSVRender
 
         void subModeChanged(const std::string& id);
         void deleteSelectedInstances(bool active);
+        void cloneSelectedInstances();
         void dropSelectedInstancesToCollision();
         void dropSelectedInstancesToTerrain();
         void dropSelectedInstancesToCollisionSeparately();
