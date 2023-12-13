@@ -297,12 +297,22 @@ void CSMWorld::RefCollection::cloneRecord(
     const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
 {
     auto copy = std::make_unique<Record<CellRef>>();
+    int index = getAppendIndex(ESM::RefId(), type);
 
     copy->mModified = getRecord(origin).get();
     copy->mState = RecordBase::State_ModifiedOnly;
 
     copy->get().mId = destination;
     copy->get().mIdNum = extractIdNum(destination.getRefIdString());
+
+    if (copy->get().mRefNum.mContentFile != 0)
+    {
+        mRefIndex.insert(std::make_pair(static_cast<Record<CellRef>*>(copy.get())->get().mIdNum, index));
+        copy->get().mRefNum.mContentFile = 0;
+        copy->get().mRefNum.mIndex = index;
+    }
+    else
+        copy->get().mRefNum.mIndex = copy->get().mIdNum;
 
     insertRecord(std::move(copy), getAppendIndex(destination, type)); // call RefCollection::insertRecord()
 }
