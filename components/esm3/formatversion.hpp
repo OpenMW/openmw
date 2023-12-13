@@ -9,8 +9,6 @@ namespace ESM
 
     inline constexpr FormatVersion DefaultFormatVersion = 0;
     inline constexpr FormatVersion CurrentContentFormatVersion = 1;
-    inline constexpr FormatVersion MaxOldWeatherFormatVersion = 1;
-    inline constexpr FormatVersion MaxOldDeathAnimationFormatVersion = 2;
     inline constexpr FormatVersion MaxOldFogOfWarFormatVersion = 6;
     inline constexpr FormatVersion MaxUnoptimizedCharacterDataFormatVersion = 7;
     inline constexpr FormatVersion MaxOldTimeLeftFormatVersion = 8;
@@ -28,7 +26,7 @@ namespace ESM
     inline constexpr FormatVersion MaxActiveSpellSlotIndexFormatVersion = 27;
     inline constexpr FormatVersion CurrentSaveGameFormatVersion = 29;
 
-    inline constexpr FormatVersion MinSupportedSaveGameFormatVersion = 1;
+    inline constexpr FormatVersion MinSupportedSaveGameFormatVersion = 4;
     inline constexpr FormatVersion OpenMW0_48SaveGameFormatVersion = 21;
     inline constexpr FormatVersion OpenMW0_49SaveGameFormatVersion = CurrentSaveGameFormatVersion;
 }

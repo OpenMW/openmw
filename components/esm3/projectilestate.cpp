@@ -37,17 +37,10 @@ namespace ESM
         BaseProjectileState::load(esm);
 
         mSpellId = esm.getHNRefId("SPEL");
-        if (esm.isNextSub("SRCN")) // for backwards compatibility
-            esm.skipHSub();
-        EffectList().load(esm); // for backwards compatibility
         esm.getHNT(mSpeed, "SPED");
         if (esm.peekNextSub("ITEM"))
             mItem = esm.getFormId(true, "ITEM");
         if (esm.isNextSub("SLOT")) // for backwards compatibility
-            esm.skipHSub();
-        if (esm.isNextSub("STCK")) // for backwards compatibility
-            esm.skipHSub();
-        if (esm.isNextSub("SOUN")) // for backwards compatibility
             esm.skipHSub();
     }
 

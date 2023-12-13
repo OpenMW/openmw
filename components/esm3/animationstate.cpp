@@ -21,18 +21,7 @@ namespace ESM
             anim.mGroup = esm.getHString();
             esm.getHNOT(anim.mTime, "TIME");
             esm.getHNOT(anim.mAbsolute, "ABST");
-
-            esm.getSubNameIs("COUN");
-            // workaround bug in earlier version where size_t was used
-            esm.getSubHeader();
-            if (esm.getSubSize() == 8)
-                esm.getT(anim.mLoopCount);
-            else
-            {
-                uint32_t loopcount;
-                esm.getT(loopcount);
-                anim.mLoopCount = (uint64_t)loopcount;
-            }
+            esm.getHNT(anim.mLoopCount, "COUN");
 
             mScriptedAnims.push_back(anim);
         }

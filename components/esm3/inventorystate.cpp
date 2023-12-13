@@ -52,20 +52,17 @@ namespace ESM
             mItems.push_back(state);
         }
 
+        std::map<std::pair<ESM::RefId, std::string>, int32_t> levelledItemMap;
         // Next item is Levelled item
         while (esm.isNextSub("LEVM"))
         {
             // Get its name
             ESM::RefId id = esm.getRefId();
             int32_t count;
-            std::string parentGroup;
             // Then get its count
             esm.getHNT(count, "COUN");
-            // Old save formats don't have information about parent group; check for that
-            if (esm.isNextSub("LGRP"))
-                // Newest saves contain parent group
-                parentGroup = esm.getHString();
-            mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
+            std::string parentGroup = esm.getHNString("LGRP");
+            levelledItemMap[std::make_pair(id, parentGroup)] = count;
         }
 
         while (esm.isNextSub("MAGI"))
@@ -117,7 +114,7 @@ namespace ESM
 
         // Old saves had restocking levelled items in a special map
         // This turns items from that map into negative quantities
-        for (const auto& entry : mLevelledItemMap)
+        for (const auto& entry : levelledItemMap)
         {
             const ESM::RefId& id = entry.first.first;
             const int count = entry.second;
@@ -139,13 +136,6 @@ namespace ESM
             {
                 state.save(esm, true);
             }
-        }
-
-        for (auto it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
-        {
-            esm.writeHNRefId("LEVM", it->first.first);
-            esm.writeHNT("COUN", it->second);
-            esm.writeHNString("LGRP", it->first.second);
         }
 
         for (const auto& [id, params] : mPermanentMagicEffectMagnitudes)

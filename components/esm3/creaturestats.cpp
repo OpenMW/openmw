@@ -42,15 +42,11 @@ namespace ESM
         {
             esm.getHNOT(mDead, "DEAD");
             esm.getHNOT(mDeathAnimationFinished, "DFNT");
-            if (esm.getFormatVersion() <= MaxOldDeathAnimationFormatVersion && mDead)
-                mDeathAnimationFinished = true;
             esm.getHNOT(mDied, "DIED");
             esm.getHNOT(mMurdered, "MURD");
             esm.getHNOT(mTalkedTo, "TALK");
             esm.getHNOT(mAlarmed, "ALRM");
             esm.getHNOT(mAttacked, "ATKD");
-            if (esm.isNextSub("ATCK"))
-                esm.skipHSub(); // attackingOrSpell, no longer used
             esm.getHNOT(mKnockdown, "KNCK");
             esm.getHNOT(mKnockdownOneFrame, "KNC1");
             esm.getHNOT(mKnockdownOverOneFrame, "KNCO");
