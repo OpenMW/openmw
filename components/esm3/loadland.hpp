@@ -66,11 +66,11 @@ namespace ESM
             DATA_VTEX = 16
         };
 
-        enum
+        enum Flags
         {
-            FLAG_HEIGHT = 1,
-            FLAG_COLOR = 2,
-            FLAG_TEXTURE = 4
+            Flag_HeightsNormals = 0x1,
+            Flag_Colors = 0x2,
+            Flag_Textures = 0x4
         };
 
         // default height to use in case there is no Land record
