@@ -47,7 +47,7 @@ namespace CSMPrefs
 
         connect(widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
 
-        return SettingWidgets{ .mLabel = label, .mInput = widget, .mLayout = nullptr };
+        return SettingWidgets{ .mLabel = label, .mInput = widget };
     }
 
     void ModifierSetting::updateWidget()

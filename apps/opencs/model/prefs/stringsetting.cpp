@@ -36,7 +36,7 @@ CSMPrefs::SettingWidgets CSMPrefs::StringSetting::makeWidgets(QWidget* parent)
 
     connect(mWidget, &QLineEdit::textChanged, this, &StringSetting::textChanged);
 
-    return SettingWidgets{ .mLabel = nullptr, .mInput = mWidget, .mLayout = nullptr };
+    return SettingWidgets{ .mLabel = nullptr, .mInput = mWidget };
 }
 
 void CSMPrefs::StringSetting::updateWidget()

@@ -13,9 +13,6 @@ namespace CSMPrefs
 
     SettingWidgets Subcategory::makeWidgets(QWidget* /*parent*/)
     {
-        QGridLayout* const layout = new QGridLayout();
-        layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-
-        return SettingWidgets{ .mLabel = nullptr, .mInput = nullptr, .mLayout = layout };
+        return SettingWidgets{ .mLabel = nullptr, .mInput = nullptr };
     }
 }
