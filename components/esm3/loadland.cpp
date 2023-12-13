@@ -101,27 +101,27 @@ namespace ESM
             {
                 case fourCC("VNML"):
                     esm.skipHSub();
-                    if (mFlags & DATA_VNML)
+                    if (mFlags & Flag_HeightsNormals)
                         mDataTypes |= DATA_VNML;
                     break;
                 case fourCC("VHGT"):
                     esm.skipHSub();
-                    if (mFlags & DATA_VHGT)
+                    if (mFlags & Flag_HeightsNormals)
                         mDataTypes |= DATA_VHGT;
                     break;
                 case fourCC("WNAM"):
                     esm.getHExact(mWnam.data(), mWnam.size());
-                    if (mFlags & DATA_WNAM)
+                    if (mFlags & Flag_HeightsNormals)
                         mDataTypes |= DATA_WNAM;
                     break;
                 case fourCC("VCLR"):
                     esm.skipHSub();
-                    if (mFlags & DATA_VCLR)
+                    if (mFlags & Flag_Colors)
                         mDataTypes |= DATA_VCLR;
                     break;
                 case fourCC("VTEX"):
                     esm.skipHSub();
-                    if (mFlags & DATA_VCLR)
+                    if (mFlags & Flag_Textures)
                         mDataTypes |= DATA_VTEX;
                     break;
                 default:
