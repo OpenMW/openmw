@@ -202,8 +202,7 @@ CSVRender::InstanceMode::InstanceMode(
     connect(this, &InstanceMode::requestFocus, worldspaceWidget, &WorldspaceWidget::requestFocus);
 
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("scene-delete", worldspaceWidget);
-    connect(
-        deleteShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::deleteSelectedInstances);
+    connect(deleteShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::deleteSelectedInstances);
 
     CSMPrefs::Shortcut* duplicateShortcut = new CSMPrefs::Shortcut("scene-duplicate", worldspaceWidget);
 
@@ -1075,7 +1074,7 @@ void CSVRender::InstanceMode::handleSelectDrag(const QPoint& pos)
     mDragMode = DragMode_None;
 }
 
-void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
+void CSVRender::InstanceMode::deleteSelectedInstances()
 {
     std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
     if (selection.empty())

@@ -131,7 +131,7 @@ namespace CSVRender
     private slots:
 
         void subModeChanged(const std::string& id);
-        void deleteSelectedInstances(bool active);
+        void deleteSelectedInstances();
         void cloneSelectedInstances();
         void dropSelectedInstancesToCollision();
         void dropSelectedInstancesToTerrain();
