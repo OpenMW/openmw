@@ -40,49 +40,31 @@ uniform float far;
 #include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
 #include "fog.glsl"
+#include "compatibility/normals.glsl"
 
 void main()
 {
     vec2 adjustedUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
 
-    vec3 normal = normalize(passNormal);
-
-#if @normalMap
-    vec4 normalTex = texture2D(normalMap, adjustedUV);
-
-    vec3 normalizedNormal = normal;
-    vec3 tangent = vec3(1.0, 0.0, 0.0);
-    vec3 binormal = normalize(cross(tangent, normalizedNormal));
-    tangent = normalize(cross(normalizedNormal, binormal)); // note, now we need to re-cross to derive tangent again because it wasn't orthonormal
-    mat3 tbnTranspose = mat3(tangent, binormal, normalizedNormal);
-
-    normal = tbnTranspose * (normalTex.xyz * 2.0 - 1.0);
-#endif
-
 #if @parallax
-    vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
-    vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
-    vec3 eyeDir = normalize(cameraPos - objectPos);
-    adjustedUV += getParallaxOffset(eyeDir, tbnTranspose, normalTex.a, 1.f);
-
-    // update normal using new coordinates
-    normalTex = texture2D(normalMap, adjustedUV);
-
-    normal = tbnTranspose * (normalTex.xyz * 2.0 - 1.0);
+    adjustedUV += getParallaxOffset(transpose(normalToViewMatrix) * normalize(-passViewPos), texture2D(normalMap, adjustedUV).a, 1.f);
 #endif
-
-    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
-
     vec4 diffuseTex = texture2D(diffuseMap, adjustedUV);
     gl_FragData[0] = vec4(diffuseTex.xyz, 1.0);
+
+    vec4 diffuseColor = getDiffuseColor();
+    gl_FragData[0].a *= diffuseColor.a;
 
 #if @blendMap
     vec2 blendMapUV = (gl_TextureMatrix[1] * vec4(uv, 0.0, 1.0)).xy;
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
-    vec4 diffuseColor = getDiffuseColor();
-    gl_FragData[0].a *= diffuseColor.a;
+#if @normalMap
+    vec3 viewNormal = normalToView(texture2D(normalMap, adjustedUV).xyz * 2.0 - 1.0);
+#else
+    vec3 viewNormal = normalToView(normalize(passNormal));
+#endif
 
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 lighting;

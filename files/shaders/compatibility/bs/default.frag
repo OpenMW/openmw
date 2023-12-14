@@ -24,7 +24,6 @@ varying vec2 emissiveMapUV;
 #if @normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
 
 varying float euclideanDepth;
@@ -46,11 +45,10 @@ uniform bool useTreeAnim;
 #include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_fragment.glsl"
 #include "compatibility/fog.glsl"
+#include "compatibility/normals.glsl"
 
 void main()
 {
-    vec3 normal = normalize(passNormal);
-
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
     gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV);
@@ -65,15 +63,10 @@ void main()
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
-
-    vec3 normalizedNormal = normal;
-    vec3 normalizedTangent = normalize(passTangent.xyz);
-    vec3 binormal = cross(normalizedTangent, normalizedNormal) * passTangent.w;
-    mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
-
-    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
+    vec3 viewNormal = normalToView(normalTex.xyz * 2.0 - 1.0);
+#else
+    vec3 viewNormal = normalToView(normalize(passNormal));
 #endif
-    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
 
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 diffuseLight, ambientLight;

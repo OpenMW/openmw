@@ -37,7 +37,6 @@ varying vec2 emissiveMapUV;
 #if @normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
 
 #if @envMap
@@ -79,6 +78,9 @@ uniform float emissiveMult;
 uniform float specStrength;
 varying vec3 passViewPos;
 varying vec3 passNormal;
+#if @normalMap || @diffuseParallax
+varying vec4 passTangent;
+#endif
 
 #if @additiveBlending
 #define ADDITIVE_BLENDING
@@ -91,6 +93,7 @@ varying vec3 passNormal;
 #include "fog.glsl"
 #include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
+#include "compatibility/normals.glsl"
 
 #if @softParticles
 #include "lib/particle/soft.glsl"
@@ -113,61 +116,31 @@ void main()
     applyOcclusionDiscard(orthoDepthMapCoord, texture2D(orthoDepthMap, orthoDepthMapCoord.xy * 0.5 + 0.5).r);
 #endif
 
-    vec3 normal = normalize(passNormal);
-    vec3 viewVec = normalize(passViewPos.xyz);
+    // only offset diffuse and normal maps for now, other textures are more likely to be using a completely different UV set
+    vec2 offset = vec2(0.0);
 
-#if @normalMap
-    vec4 normalTex = texture2D(normalMap, normalMapUV);
-
-    vec3 normalizedNormal = normal;
-    vec3 normalizedTangent = normalize(passTangent.xyz);
-    vec3 binormal = cross(normalizedTangent, normalizedNormal) * passTangent.w;
-    mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
-
-    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
-#endif
-
-#if !@diffuseMap
-    gl_FragData[0] = vec4(1.0);
-#else
-    vec2 adjustedDiffuseUV = diffuseMapUV;
-
-#if @normalMap && (@parallax || @diffuseParallax)
-    vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
-    vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
-    vec3 eyeDir = normalize(cameraPos - objectPos);
+#if @parallax || @diffuseParallax
 #if @parallax
-    float height = normalTex.a;
+    float height = texture2D(normalMap, normalMapUV).a;
     float flipY = (passTangent.w > 0.0) ? -1.f : 1.f;
 #else
     float height = texture2D(diffuseMap, diffuseMapUV).a;
     // FIXME: shouldn't be necessary, but in this path false-positives are common
     float flipY = -1.f;
 #endif
-    vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, height, flipY);
-    adjustedDiffuseUV += offset; // only offset diffuse for now, other textures are more likely to be using a completely different UV set
-
-    // TODO: check not working as the same UV buffer is being bound to different targets
-    // if diffuseMapUV == normalMapUV
-#if 1
-    // fetch a new normal using updated coordinates
-    normalTex = texture2D(normalMap, adjustedDiffuseUV);
-
-    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
+    offset = getParallaxOffset(transpose(normalToViewMatrix) * normalize(-passViewPos), height, flipY);
 #endif
 
-#endif
-
-    vec4 diffuseTex = texture2D(diffuseMap, adjustedDiffuseUV);
-    gl_FragData[0].xyz = diffuseTex.xyz;
-#if !@diffuseParallax
-    gl_FragData[0].a = diffuseTex.a * coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
-#else
+#if @diffuseMap
+    gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV + offset);
+#if @diffuseParallax
     gl_FragData[0].a = 1.0;
+#else
+    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV + offset);
 #endif
+#else
+    gl_FragData[0] = vec4(1.0);
 #endif
-
-    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
 
     vec4 diffuseColor = getDiffuseColor();
     gl_FragData[0].a *= diffuseColor.a;
@@ -178,6 +151,14 @@ void main()
 #endif
 
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
+
+#if @normalMap
+    vec3 viewNormal = normalToView(texture2D(normalMap, normalMapUV + offset).xyz * 2.0 - 1.0);
+#else
+    vec3 viewNormal = normalToView(normalize(passNormal));
+#endif
+
+    vec3 viewVec = normalize(passViewPos);
 
 #if @detailMap
     gl_FragData[0].xyz *= texture2D(detailMap, detailMapUV).xyz * 2.0;

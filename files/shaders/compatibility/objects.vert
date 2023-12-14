@@ -31,7 +31,6 @@ varying vec2 emissiveMapUV;
 
 #if @normalMap
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
 
 #if @envMap
@@ -59,9 +58,13 @@ uniform float emissiveMult;
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
+#if @normalMap || @diffuseParallax
+varying vec4 passTangent;
+#endif
 
 #include "vertexcolors.glsl"
 #include "shadows_vertex.glsl"
+#include "compatibility/normals.glsl"
 
 #include "lib/light/lighting.glsl"
 #include "lib/view/depth.glsl"
@@ -84,9 +87,18 @@ void main(void)
 
     vec4 viewPos = modelToView(gl_Vertex);
     gl_ClipVertex = viewPos;
+    passColor = gl_Color;
+    passViewPos = viewPos.xyz;
+    passNormal = gl_Normal.xyz;
+    normalToViewMatrix = gl_NormalMatrix;
 
-#if (@envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
-    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+#if @normalMap || @diffuseParallax
+    passTangent = gl_MultiTexCoord7.xyzw;
+    normalToViewMatrix *= generateTangentSpace(passTangent, passNormal);
+#endif
+
+#if @envMap || !PER_PIXEL_LIGHTING || @shadows_enabled
+    vec3 viewNormal = normalToView(passNormal);
 #endif
 
 #if @envMap
@@ -118,7 +130,6 @@ void main(void)
 
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
-    passTangent = gl_MultiTexCoord7.xyzw;
 #endif
 
 #if @bumpMap
@@ -132,10 +143,6 @@ void main(void)
 #if @glossMap
     glossMapUV = (gl_TextureMatrix[@glossMapUV] * gl_MultiTexCoord@glossMapUV).xy;
 #endif
-
-    passColor = gl_Color;
-    passViewPos = viewPos.xyz;
-    passNormal = gl_Normal.xyz;
 
 #if !PER_PIXEL_LIGHTING
     vec3 diffuseLight, ambientLight;

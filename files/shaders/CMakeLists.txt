@@ -45,6 +45,7 @@ set(SHADER_FILES
     compatibility/shadowcasting.vert
     compatibility/shadowcasting.frag
     compatibility/vertexcolors.glsl
+    compatibility/normals.glsl
     compatibility/multiview_resolve.vert
     compatibility/multiview_resolve.frag
     compatibility/depthclipped.vert
