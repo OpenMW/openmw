@@ -23,7 +23,6 @@ namespace CSMPrefs
     {
         QLabel* mLabel;
         QWidget* mInput;
-        QGridLayout* mLayout;
     };
 
     class Setting : public QObject

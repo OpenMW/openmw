@@ -73,7 +73,7 @@ CSMPrefs::SettingWidgets CSMPrefs::DoubleSetting::makeWidgets(QWidget* parent)
 
     connect(mWidget, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &DoubleSetting::valueChanged);
 
-    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget };
 }
 
 void CSMPrefs::DoubleSetting::updateWidget()

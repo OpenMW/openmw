@@ -41,7 +41,7 @@ CSMPrefs::SettingWidgets CSMPrefs::ColourSetting::makeWidgets(QWidget* parent)
 
     connect(mWidget, &CSVWidget::ColorEditor::pickingFinished, this, &ColourSetting::valueChanged);
 
-    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget };
 }
 
 void CSMPrefs::ColourSetting::updateWidget()

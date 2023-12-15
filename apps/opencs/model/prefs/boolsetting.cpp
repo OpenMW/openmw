@@ -36,7 +36,7 @@ CSMPrefs::SettingWidgets CSMPrefs::BoolSetting::makeWidgets(QWidget* parent)
 
     connect(mWidget, &QCheckBox::stateChanged, this, &BoolSetting::valueChanged);
 
-    return SettingWidgets{ .mLabel = nullptr, .mInput = mWidget, .mLayout = nullptr };
+    return SettingWidgets{ .mLabel = nullptr, .mInput = mWidget };
 }
 
 void CSMPrefs::BoolSetting::updateWidget()

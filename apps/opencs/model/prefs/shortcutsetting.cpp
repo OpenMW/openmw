@@ -51,7 +51,7 @@ namespace CSMPrefs
 
         connect(widget, &QPushButton::toggled, this, &ShortcutSetting::buttonToggled);
 
-        return SettingWidgets{ .mLabel = label, .mInput = widget, .mLayout = nullptr };
+        return SettingWidgets{ .mLabel = label, .mInput = widget };
     }
 
     void ShortcutSetting::updateWidget()

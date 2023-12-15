@@ -65,7 +65,7 @@ CSMPrefs::SettingWidgets CSMPrefs::IntSetting::makeWidgets(QWidget* parent)
 
     connect(mWidget, qOverload<int>(&QSpinBox::valueChanged), this, &IntSetting::valueChanged);
 
-    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget };
 }
 
 void CSMPrefs::IntSetting::updateWidget()

@@ -106,7 +106,7 @@ CSMPrefs::SettingWidgets CSMPrefs::EnumSetting::makeWidgets(QWidget* parent)
 
     connect(mWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, &EnumSetting::valueChanged);
 
-    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget };
 }
 
 void CSMPrefs::EnumSetting::updateWidget()

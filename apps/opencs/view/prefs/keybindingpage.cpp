@@ -81,12 +81,12 @@ namespace CSVPrefs
             int next = mPageLayout->rowCount();
             mPageLayout->addWidget(widgets.mInput, next, 0, 1, 2);
         }
-        else if (widgets.mLayout != nullptr)
+        else
         {
             // Create new page
             QWidget* pageWidget = new QWidget();
-            mPageLayout = widgets.mLayout;
-            mPageLayout->setParent(pageWidget);
+            mPageLayout = new QGridLayout(pageWidget);
+            mPageLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
             mStackedLayout->addWidget(pageWidget);
 
