@@ -1,5 +1,6 @@
 #include "installationpage.hpp"
 
+#include <QComboBox>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QThread>
@@ -123,7 +124,7 @@ void Wizard::InstallationPage::startInstallation()
     mUnshield->setPath(path);
 
     // Set the right codec to use for Morrowind.ini
-    QString language(field(QLatin1String("installation.language")).toString());
+    QString language(field(QLatin1String("installation.language")).value<QComboBox*>()->currentData().toString());
 
     if (language == QLatin1String("Polish"))
     {

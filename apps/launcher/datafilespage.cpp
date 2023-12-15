@@ -164,11 +164,14 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     const QString encoding = mGameSettings.value("encoding", "win1252");
     mSelector->setEncoding(encoding);
 
-    QStringList languages;
-    languages << tr("English") << tr("French") << tr("German") << tr("Italian") << tr("Polish") << tr("Russian")
-              << tr("Spanish");
+    QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
+        { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
+        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
 
-    mSelector->languageBox()->addItems(languages);
+    for (auto lang : languages)
+    {
+        mSelector->languageBox()->addItem(lang.second, lang.first);
+    }
 
     mNewProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
     mCloneProfileDialog = new TextInputDialog(tr("Clone Content List"), tr("Content List name:"), this);
@@ -254,9 +257,17 @@ bool Launcher::DataFilesPage::loadSettings()
     if (!currentProfile.isEmpty())
         addProfile(currentProfile, true);
 
-    const int index = mSelector->languageBox()->findText(mLauncherSettings.getLanguage());
-    if (index != -1)
-        mSelector->languageBox()->setCurrentIndex(index);
+    auto language = mLauncherSettings.getLanguage();
+
+    for (int i = 0; i < mSelector->languageBox()->count(); ++i)
+    {
+        QString languageItem = mSelector->languageBox()->itemData(i).toString();
+        if (language == languageItem)
+        {
+            mSelector->languageBox()->setCurrentIndex(i);
+            break;
+        }
+    }
 
     return true;
 }
@@ -386,7 +397,7 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
     mLauncherSettings.setContentList(profileName, dirList, selectedArchivePaths(), fileNames);
     mGameSettings.setContentList(dirList, selectedArchivePaths(), fileNames);
 
-    QString language(mSelector->languageBox()->currentText());
+    QString language(mSelector->languageBox()->currentData().toString());
 
     mLauncherSettings.setLanguage(language);
 
