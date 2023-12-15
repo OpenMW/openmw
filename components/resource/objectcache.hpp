@@ -24,6 +24,7 @@
 #include <osg/Referenced>
 #include <osg/ref_ptr>
 
+#include <algorithm>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -48,48 +49,25 @@ namespace Resource
         {
         }
 
-        /** For each object in the cache which has an reference count greater than 1
-         * (and therefore referenced by elsewhere in the application) set the time stamp
-         * for that object in the cache to specified time.
-         * This would typically be called once per frame by applications which are doing database paging,
-         * and need to prune objects that are no longer required.
-         * The time used should be taken from the FrameStamp::getReferenceTime().*/
-        void updateTimeStampOfObjectsInCacheWithExternalReferences(double referenceTime)
-        {
-            // look for objects with external references and update their time stamp.
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for (typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
-            {
-                // If ref count is greater than 1, the object has an external reference.
-                // If the timestamp is yet to be initialized, it needs to be updated too.
-                if ((itr->second.mValue != nullptr && itr->second.mValue->referenceCount() > 1)
-                    || itr->second.mLastUsage == 0.0)
-                    itr->second.mLastUsage = referenceTime;
-            }
-        }
-
-        /** Removed object in the cache which have a time stamp at or before the specified expiry time.
-         * This would typically be called once per frame by applications which are doing database paging,
-         * and need to prune objects that are no longer required, and called after the a called
-         * after the call to updateTimeStampOfObjectsInCacheWithExternalReferences(expirtyTime).*/
-        void removeExpiredObjectsInCache(double expiryTime)
+        // Update last usage timestamp using referenceTime for each cache time if they are not nullptr and referenced
+        // from somewhere else. Remove items with last usage > expiryTime. Note: last usage might be updated from other
+        // places so nullptr or not references elsewhere items are not always removed.
+        void update(double referenceTime, double expiryDelay)
         {
             std::vector<osg::ref_ptr<osg::Object>> objectsToRemove;
             {
+                const double expiryTime = referenceTime - expiryDelay;
                 std::lock_guard<std::mutex> lock(_objectCacheMutex);
-                // Remove expired entries from object cache
-                typename ObjectCacheMap::iterator oitr = _objectCache.begin();
-                while (oitr != _objectCache.end())
-                {
-                    if (oitr->second.mLastUsage <= expiryTime)
-                    {
-                        if (oitr->second.mValue != nullptr)
-                            objectsToRemove.push_back(std::move(oitr->second.mValue));
-                        _objectCache.erase(oitr++);
-                    }
-                    else
-                        ++oitr;
-                }
+                std::erase_if(_objectCache, [&](auto& v) {
+                    Item& item = v.second;
+                    if ((item.mValue != nullptr && item.mValue->referenceCount() > 1) || item.mLastUsage == 0)
+                        item.mLastUsage = referenceTime;
+                    if (item.mLastUsage > expiryTime)
+                        return false;
+                    if (item.mValue != nullptr)
+                        objectsToRemove.push_back(std::move(item.mValue));
+                    return true;
+                });
             }
             // note, actual unref happens outside of the lock
             objectsToRemove.clear();

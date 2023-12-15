@@ -63,9 +63,7 @@ namespace Resource
 
             const double referenceTime = 1000;
             const double expiryDelay = 1;
-
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay);
+            cache->update(referenceTime, expiryDelay);
             EXPECT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
         }
 
@@ -92,16 +90,13 @@ namespace Resource
             const int key = 42;
             cache->addEntryToObjectCache(key, nullptr, referenceTime + expiryDelay);
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay);
+            cache->update(referenceTime, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + expiryDelay);
-            cache->removeExpiredObjectsInCache(referenceTime);
+            cache->update(referenceTime + expiryDelay, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + 2 * expiryDelay);
-            cache->removeExpiredObjectsInCache(referenceTime + expiryDelay);
+            cache->update(referenceTime + 2 * expiryDelay, expiryDelay);
             EXPECT_EQ(cache->getRefFromObjectCacheOrNone(key), std::nullopt);
         }
 
@@ -117,12 +112,10 @@ namespace Resource
             cache->addEntryToObjectCache(key, value);
             value = nullptr;
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay);
+            cache->update(referenceTime, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + expiryDelay);
-            cache->removeExpiredObjectsInCache(referenceTime);
+            cache->update(referenceTime + expiryDelay, expiryDelay);
             EXPECT_EQ(cache->getRefFromObjectCacheOrNone(key), std::nullopt);
         }
 
@@ -137,12 +130,10 @@ namespace Resource
             osg::ref_ptr<Object> value(new Object);
             cache->addEntryToObjectCache(key, value);
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay);
+            cache->update(referenceTime, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + expiryDelay);
-            cache->removeExpiredObjectsInCache(referenceTime);
+            cache->update(referenceTime + expiryDelay, expiryDelay);
             EXPECT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(value));
         }
 
@@ -158,12 +149,10 @@ namespace Resource
             cache->addEntryToObjectCache(key, value);
             value = nullptr;
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay);
+            cache->update(referenceTime + expiryDelay, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + expiryDelay / 2);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay / 2);
+            cache->update(referenceTime + expiryDelay / 2, expiryDelay);
             EXPECT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
         }
 
@@ -177,12 +166,10 @@ namespace Resource
             const int key = 42;
             cache->addEntryToObjectCache(key, nullptr);
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay);
+            cache->update(referenceTime + expiryDelay, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + expiryDelay / 2);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay / 2);
+            cache->update(referenceTime + expiryDelay / 2, expiryDelay);
             EXPECT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
         }
 
@@ -196,16 +183,13 @@ namespace Resource
             const int key = 42;
             cache->addEntryToObjectCache(key, nullptr);
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay);
+            cache->update(referenceTime, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + expiryDelay / 2);
-            cache->removeExpiredObjectsInCache(referenceTime - expiryDelay / 2);
+            cache->update(referenceTime + expiryDelay / 2, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
 
-            cache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime + expiryDelay);
-            cache->removeExpiredObjectsInCache(referenceTime);
+            cache->update(referenceTime + expiryDelay, expiryDelay);
             EXPECT_EQ(cache->getRefFromObjectCacheOrNone(key), std::nullopt);
         }
 
