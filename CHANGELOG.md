@@ -105,6 +105,8 @@
     Bug #7679: Scene luminance value flashes when toggling shaders
     Bug #7685: Corky sometimes doesn't follow Llovyn Andus
     Bug #7712: Casting doesn't support spells and enchantments with no effects
+    Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
+    Bug #7724: Guards don't help vs werewolves
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
