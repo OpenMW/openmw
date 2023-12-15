@@ -3,15 +3,13 @@
 
 #include "lighting_util.glsl"
 
-void perLightSun(out vec3 diffuseOut, vec3 viewPos, vec3 viewNormal)
+float calcLambert(vec3 viewNormal, vec3 lightDir, vec3 viewDir)
 {
-    vec3 lightDir = normalize(lcalcPosition(0));
-    float lambert = dot(viewNormal.xyz, lightDir);
-
+    float lambert = dot(viewNormal, lightDir);
 #ifndef GROUNDCOVER
     lambert = max(lambert, 0.0);
 #else
-    float eyeCosine = dot(normalize(viewPos), viewNormal.xyz);
+    float eyeCosine = dot(viewNormal, viewDir);
     if (lambert < 0.0)
     {
         lambert = -lambert;
@@ -19,46 +17,7 @@ void perLightSun(out vec3 diffuseOut, vec3 viewPos, vec3 viewNormal)
     }
     lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
-
-    diffuseOut = lcalcDiffuse(0).xyz * lambert;
-}
-
-void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal)
-{
-    vec3 lightPos = lcalcPosition(lightIndex) - viewPos;
-    float lightDistance = length(lightPos);
-
-// cull non-FFP point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
-#if !@lightingMethodFFP
-    float radius = lcalcRadius(lightIndex);
-
-    if (lightDistance > radius * 2.0)
-    {
-        ambientOut = vec3(0.0);
-        diffuseOut = vec3(0.0);
-        return;
-    }
-#endif
-
-    lightPos = normalize(lightPos);
-
-    float illumination = lcalcIllumination(lightIndex, lightDistance);
-    ambientOut = lcalcAmbient(lightIndex) * illumination;
-    float lambert = dot(viewNormal.xyz, lightPos) * illumination;
-
-#ifndef GROUNDCOVER
-    lambert = max(lambert, 0.0);
-#else
-    float eyeCosine = dot(normalize(viewPos), viewNormal.xyz);
-    if (lambert < 0.0)
-    {
-        lambert = -lambert;
-        eyeCosine = -eyeCosine;
-    }
-    lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
-#endif
-
-    diffuseOut = lcalcDiffuse(lightIndex) * lambert;
+    return lambert;
 }
 
 #if PER_PIXEL_LIGHTING
@@ -67,26 +26,38 @@ void doLighting(vec3 viewPos, vec3 viewNormal, float shadowing, out vec3 diffuse
 void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 ambientLight, out vec3 shadowDiffuse)
 #endif
 {
-    vec3 ambientOut, diffuseOut;
+    vec3 viewDir = normalize(viewPos);
 
-    perLightSun(diffuseOut, viewPos, viewNormal);
+    diffuseLight = lcalcDiffuse(0).xyz * calcLambert(viewNormal, normalize(lcalcPosition(0)), viewDir);
     ambientLight = gl_LightModel.ambient.xyz;
 #if PER_PIXEL_LIGHTING
-    diffuseLight = diffuseOut * shadowing;
+    diffuseLight *= shadowing;
 #else
-    shadowDiffuse = diffuseOut;
+    shadowDiffuse = diffuseLight;
     diffuseLight = vec3(0.0);
 #endif
 
     for (int i = @startLight; i < @endLight; ++i)
     {
 #if @lightingMethodUBO
-        perLightPoint(ambientOut, diffuseOut, PointLightIndex[i], viewPos, viewNormal);
+        int lightIndex = PointLightIndex[i];
 #else
-        perLightPoint(ambientOut, diffuseOut, i, viewPos, viewNormal);
+        int lightIndex = i;
 #endif
-        ambientLight += ambientOut;
-        diffuseLight += diffuseOut;
+        vec3 lightPos = lcalcPosition(lightIndex) - viewPos;
+        float lightDistance = length(lightPos);
+
+        // cull non-FFP point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
+#if !@lightingMethodFFP
+        if (lightDistance > lcalcRadius(lightIndex) * 2.0)
+            continue;
+#endif
+
+        vec3 lightDir = lightPos / lightDistance;
+
+        float illumination = lcalcIllumination(lightIndex, lightDistance);
+        ambientLight += lcalcAmbient(lightIndex) * illumination;
+        diffuseLight += lcalcDiffuse(lightIndex) * calcLambert(viewNormal, lightDir, viewDir) * illumination;
     }
 }
 
