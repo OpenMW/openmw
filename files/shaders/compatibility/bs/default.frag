@@ -61,34 +61,30 @@ void main()
         gl_FragData[0].a *= diffuseColor.a;
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
+    vec3 specularColor = getSpecularColor().xyz;
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
     vec3 viewNormal = normalToView(normalTex.xyz * 2.0 - 1.0);
+    specularColor *= normalTex.a;
 #else
     vec3 viewNormal = normalToView(normalize(passNormal));
 #endif
 
     float shadowing = unshadowedLightRatio(linearDepth);
-    vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    vec3 diffuse = diffuseColor.xyz * diffuseLight;
+    vec3 ambient = getAmbientColor().xyz * ambientLight;
     vec3 emission = getEmissionColor().xyz * emissiveMult;
 #if @emissiveMap
     emission *= texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
-    vec3 lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
+    vec3 lighting = diffuse + ambient + emission;
+    vec3 specular = specularColor * specularLight * specStrength;
 
     clampLightingResult(lighting);
 
-    gl_FragData[0].xyz *= lighting;
-
-    float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = getSpecularColor().xyz * specStrength;
-#if @normalMap
-    matSpec *= normalTex.a;
-#endif
-
-    if (matSpec != vec3(0.0))
-        gl_FragData[0].xyz += matSpec * getSpecular(viewNormal, passViewPos, shininess, shadowing);
+    gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
 

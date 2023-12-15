@@ -67,15 +67,17 @@ uniform float near;
 uniform float far;
 uniform float alphaRef;
 
-#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
+centroid varying vec3 passSpecular;
 centroid varying vec3 shadowDiffuseLighting;
+centroid varying vec3 shadowSpecularLighting;
 #else
 uniform float emissiveMult;
-#endif
 uniform float specStrength;
+#endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
 #if @normalMap || @diffuseParallax
@@ -200,19 +202,27 @@ void main()
 #endif
 
     float shadowing = unshadowedLightRatio(-passViewPos.z);
-    vec3 lighting;
+    vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
     lighting = passLighting + shadowDiffuseLighting * shadowing;
+    specular = passSpecular + shadowSpecularLighting * shadowing;
 #else
-    vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
-    vec3 emission = getEmissionColor().xyz * emissiveMult;
-    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
+#if @specularMap
+    vec4 specTex = texture2D(specularMap, specularMapUV);
+    float shininess = specTex.a * 255.0;
+    vec3 specularColor = specTex.xyz;
+#else
+    float shininess = gl_FrontMaterial.shininess;
+    vec3 specularColor = getSpecularColor().xyz;
+#endif
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
+    specular = specularColor * specularLight * specStrength;
 #endif
 
     clampLightingResult(lighting);
-
-    gl_FragData[0].xyz *= lighting;
+    gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
 #if @envMap && !@preLightEnv
     gl_FragData[0].xyz += envEffect;
@@ -221,21 +231,6 @@ void main()
 #if @emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
-
-#if @specularMap
-    vec4 specTex = texture2D(specularMap, specularMapUV);
-    float shininess = specTex.a * 255.0;
-    vec3 matSpec = specTex.xyz;
-#else
-    float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = getSpecularColor().xyz;
-#endif
-
-    matSpec *= specStrength;
-    if (matSpec != vec3(0.0))
-    {
-        gl_FragData[0].xyz += matSpec * getSpecular(viewNormal, passViewPos, shininess, shadowing);
-    }
 
     gl_FragData[0] = applyFogAtPos(gl_FragData[0], passViewPos, far);
 

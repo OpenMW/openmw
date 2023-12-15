@@ -13,11 +13,13 @@ varying vec2 uv;
 varying float euclideanDepth;
 varying float linearDepth;
 
-#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
+centroid varying vec3 passSpecular;
 centroid varying vec3 shadowDiffuseLighting;
+centroid varying vec3 shadowSpecularLighting;
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
@@ -54,11 +56,13 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    vec3 diffuseLight, ambientLight;
-    doLighting(viewPos.xyz, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, shadowSpecularLighting);
     passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz;
+    passSpecular = getSpecularColor().xyz * specularLight;
     clampLightingResult(passLighting);
     shadowDiffuseLighting *= getDiffuseColor().xyz;
+    shadowSpecularLighting *= getSpecularColor().xyz;
 #endif
 
     uv = gl_MultiTexCoord0.xy;
