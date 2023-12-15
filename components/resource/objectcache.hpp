@@ -180,7 +180,7 @@ namespace Resource
 
         /** call operator()(KeyType, osg::Object*) for each object in the cache. */
         template <class Functor>
-        void call(Functor& f)
+        void call(Functor&& f)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
             for (typename ObjectCacheMap::iterator it = _objectCache.begin(); it != _objectCache.end(); ++it)
