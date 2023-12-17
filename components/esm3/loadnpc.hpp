@@ -75,9 +75,6 @@ namespace ESM
             NPC_DEFAULT = 52
         };
 
-#pragma pack(push)
-#pragma pack(1)
-
         struct NPDTstruct52
         {
             int16_t mLevel;
@@ -92,18 +89,6 @@ namespace ESM
             char mUnknown2;
             int32_t mGold;
         }; // 52 bytes
-
-        // Structure for autocalculated characters.
-        //  This is only used for load and save operations.
-        struct NPDTstruct12
-        {
-            int16_t mLevel;
-            // see above
-            unsigned char mDisposition, mReputation, mRank;
-            char mUnknown1, mUnknown2, mUnknown3;
-            int32_t mGold;
-        }; // 12 bytes
-#pragma pack(pop)
 
         unsigned char mNpdtType;
         // Worth noting when saving the struct:

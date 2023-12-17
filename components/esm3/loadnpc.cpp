@@ -154,20 +154,32 @@ namespace ESM
 
         if (mNpdtType == NPC_DEFAULT)
         {
-            esm.writeHNT("NPDT", mNpdt, 52);
+            esm.startSubRecord("NPDT");
+            esm.writeT(mNpdt.mLevel);
+            esm.writeT(mNpdt.mAttributes);
+            esm.writeT(mNpdt.mSkills);
+            esm.writeT(mNpdt.mUnknown1);
+            esm.writeT(mNpdt.mHealth);
+            esm.writeT(mNpdt.mMana);
+            esm.writeT(mNpdt.mFatigue);
+            esm.writeT(mNpdt.mDisposition);
+            esm.writeT(mNpdt.mReputation);
+            esm.writeT(mNpdt.mRank);
+            esm.writeT(mNpdt.mUnknown2);
+            esm.writeT(mNpdt.mGold);
+            esm.endRecord("NPDT");
         }
         else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
         {
-            NPDTstruct12 npdt12;
-            npdt12.mLevel = mNpdt.mLevel;
-            npdt12.mDisposition = mNpdt.mDisposition;
-            npdt12.mReputation = mNpdt.mReputation;
-            npdt12.mRank = mNpdt.mRank;
-            npdt12.mUnknown1 = 0;
-            npdt12.mUnknown2 = 0;
-            npdt12.mUnknown3 = 0;
-            npdt12.mGold = mNpdt.mGold;
-            esm.writeHNT("NPDT", npdt12, 12);
+            esm.startSubRecord("NPDT");
+            esm.writeT(mNpdt.mLevel);
+            esm.writeT(mNpdt.mDisposition);
+            esm.writeT(mNpdt.mReputation);
+            esm.writeT(mNpdt.mRank);
+            constexpr char padding[] = { 0, 0, 0 };
+            esm.writeT(padding);
+            esm.writeT(mNpdt.mGold);
+            esm.endRecord("NPDT");
         }
 
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
