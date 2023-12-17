@@ -3,6 +3,7 @@
 
 #include <components/esm/esmcommon.hpp>
 #include <components/esm/util.hpp>
+#include <cstdint>
 #include <vector>
 
 namespace ESM

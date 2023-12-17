@@ -2,6 +2,7 @@
 #define OPENMW_ESSIMPORT_IMPORTSPLM_H
 
 #include <components/esm/esmcommon.hpp>
+#include <cstdint>
 #include <vector>
 
 namespace ESM

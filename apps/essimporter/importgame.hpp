@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESSIMPORT_GAME_H
 #define OPENMW_ESSIMPORT_GAME_H
 
+#include <cstdint>
+
 namespace ESM
 {
     class ESMReader;

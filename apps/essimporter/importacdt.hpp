@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESSIMPORT_ACDT_H
 #define OPENMW_ESSIMPORT_ACDT_H
 
+#include <cstdint>
 #include <string>
 
 #include "importscri.hpp"

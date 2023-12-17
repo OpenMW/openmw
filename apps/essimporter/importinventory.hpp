@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESSIMPORT_IMPORTINVENTORY_H
 #define OPENMW_ESSIMPORT_IMPORTINVENTORY_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

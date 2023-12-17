@@ -1,6 +1,7 @@
 #include "converter.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <stdexcept>
 
 #include <osgDB/WriteFile>

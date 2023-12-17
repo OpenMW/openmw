@@ -3,6 +3,8 @@
 
 #include "importscri.hpp"
 
+#include <cstdint>
+
 #include <components/esm/esmcommon.hpp>
 #include <components/esm3/loadscpt.hpp>
 

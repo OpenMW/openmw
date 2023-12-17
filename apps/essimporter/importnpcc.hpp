@@ -2,6 +2,7 @@
 #define OPENMW_ESSIMPORT_NPCC_H
 
 #include <components/esm3/aipackage.hpp>
+#include <cstdint>
 
 #include "importinventory.hpp"
 

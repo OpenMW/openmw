@@ -3,6 +3,7 @@
 
 #include "importinventory.hpp"
 #include <components/esm3/aipackage.hpp>
+#include <cstdint>
 
 namespace ESM
 {
