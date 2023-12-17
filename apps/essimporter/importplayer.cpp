@@ -19,7 +19,12 @@ namespace ESSImport
             mMNAM = esm.getHString();
         }
 
-        esm.getHNTSized<212>(mPNAM, "PNAM");
+        esm.getHNT("PNAM", mPNAM.mPlayerFlags, mPNAM.mLevelProgress, mPNAM.mSkillProgress, mPNAM.mSkillIncreases,
+            mPNAM.mTelekinesisRangeBonus, mPNAM.mVisionBonus, mPNAM.mDetectKeyMagnitude,
+            mPNAM.mDetectEnchantmentMagnitude, mPNAM.mDetectAnimalMagnitude, mPNAM.mMarkLocation.mX,
+            mPNAM.mMarkLocation.mY, mPNAM.mMarkLocation.mZ, mPNAM.mMarkLocation.mRotZ, mPNAM.mMarkLocation.mCellX,
+            mPNAM.mMarkLocation.mCellY, mPNAM.mUnknown3, mPNAM.mVerticalRotation.mData, mPNAM.mSpecIncreases,
+            mPNAM.mUnknown4);
 
         if (esm.isNextSub("SNAM"))
             esm.skipHSub();
@@ -54,7 +59,7 @@ namespace ESSImport
         if (esm.isNextSub("ENAM"))
         {
             mHasENAM = true;
-            esm.getHTSized<8>(mENAM);
+            esm.getHT(mENAM.mCellX, mENAM.mCellY);
         }
 
         if (esm.isNextSub("LNAM"))
@@ -63,7 +68,8 @@ namespace ESSImport
         while (esm.isNextSub("FNAM"))
         {
             FNAM fnam;
-            esm.getHTSized<44>(fnam);
+            esm.getHT(
+                fnam.mRank, fnam.mUnknown1, fnam.mReputation, fnam.mFlags, fnam.mUnknown2, fnam.mFactionName.mData);
             mFactions.push_back(fnam);
         }
 
@@ -71,7 +77,7 @@ namespace ESSImport
         if (esm.isNextSub("AADT")) // Attack animation data?
         {
             mHasAADT = true;
-            esm.getHTSized<44>(mAADT);
+            esm.getHT(mAADT.animGroupIndex, mAADT.mUnknown5);
         }
 
         if (esm.isNextSub("KNAM"))

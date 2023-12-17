@@ -48,14 +48,18 @@ namespace ESSImport
         if (esm.isNextSub("ACDT"))
         {
             mActorData.mHasACDT = true;
-            esm.getHTSized<264>(mActorData.mACDT);
+            esm.getHT(mActorData.mACDT.mUnknown, mActorData.mACDT.mFlags, mActorData.mACDT.mBreathMeter,
+                mActorData.mACDT.mUnknown2, mActorData.mACDT.mDynamic, mActorData.mACDT.mUnknown3,
+                mActorData.mACDT.mAttributes, mActorData.mACDT.mMagicEffects, mActorData.mACDT.mUnknown4,
+                mActorData.mACDT.mGoldPool, mActorData.mACDT.mCountDown, mActorData.mACDT.mUnknown5);
         }
 
         mActorData.mHasACSC = false;
         if (esm.isNextSub("ACSC"))
         {
             mActorData.mHasACSC = true;
-            esm.getHTSized<112>(mActorData.mACSC);
+            esm.getHT(mActorData.mACSC.mUnknown1, mActorData.mACSC.mFlags, mActorData.mACSC.mUnknown2,
+                mActorData.mACSC.mCorpseClearCountdown, mActorData.mACSC.mUnknown3);
         }
 
         if (esm.isNextSub("ACSL"))
@@ -137,7 +141,7 @@ namespace ESSImport
         if (esm.isNextSub("ANIS"))
         {
             mActorData.mHasANIS = true;
-            esm.getHTSized<8>(mActorData.mANIS);
+            esm.getHT(mActorData.mANIS.mGroupIndex, mActorData.mANIS.mUnknown, mActorData.mANIS.mTime);
         }
 
         if (esm.isNextSub("LVCR"))
@@ -155,13 +159,16 @@ namespace ESSImport
         // DATA should occur for all references, except levelled creature spawners
         // I've seen DATA *twice* on a creature record, and with the exact same content too! weird
         // alarmvoi0000.ess
-        esm.getHNOTSized<24>(mPos, "DATA");
-        esm.getHNOTSized<24>(mPos, "DATA");
+        for (int i = 0; i < 2; ++i)
+        {
+            if (esm.isNextSub("DATA"))
+                esm.getHNT("DATA", mPos.pos, mPos.rot);
+        }
 
         mDeleted = 0;
         if (esm.isNextSub("DELE"))
         {
-            unsigned int deleted;
+            uint32_t deleted;
             esm.getHT(deleted);
             mDeleted = ((deleted >> 24) & 0x2) != 0; // the other 3 bytes seem to be uninitialized garbage
         }

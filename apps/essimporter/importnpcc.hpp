@@ -21,7 +21,7 @@ namespace ESSImport
             unsigned char unknown;
             unsigned char mReputation;
             unsigned char unknown2;
-            int mIndex;
+            int32_t mIndex;
         } mNPDT;
 
         Inventory mInventory;

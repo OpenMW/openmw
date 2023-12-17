@@ -9,7 +9,7 @@ namespace ESSImport
     {
         mScript = esm.getHNOString("SCRI");
 
-        int numShorts = 0, numLongs = 0, numFloats = 0;
+        int32_t numShorts = 0, numLongs = 0, numFloats = 0;
         if (esm.isNextSub("SLCS"))
         {
             esm.getSubHeader();
@@ -23,7 +23,7 @@ namespace ESSImport
             esm.getSubHeader();
             for (int i = 0; i < numShorts; ++i)
             {
-                short val;
+                int16_t val;
                 esm.getT(val);
                 mShorts.push_back(val);
             }
@@ -35,7 +35,7 @@ namespace ESSImport
             esm.getSubHeader();
             for (int i = 0; i < numLongs; ++i)
             {
-                int val;
+                int32_t val;
                 esm.getT(val);
                 mLongs.push_back(val);
             }
