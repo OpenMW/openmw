@@ -707,10 +707,9 @@ namespace MWMechanics
             }
         }
 
-        // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
+        // Make guards go aggressive with creatures and werewolves that are in combat
         const auto world = MWBase::Environment::get().getWorld();
-        if (!aggressive && actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc()
-            && creatureStats2.getAiSequence().isInCombat())
+        if (!aggressive && actor1.getClass().isClass(actor1, "Guard") && creatureStats2.getAiSequence().isInCombat())
         {
             // Check if the creature is too far
             static const float fAlarmRadius
@@ -718,20 +717,30 @@ namespace MWMechanics
             if (sqrDist > fAlarmRadius * fAlarmRadius)
                 return;
 
-            bool followerOrEscorter = false;
-            for (const auto& package : creatureStats2.getAiSequence())
+            bool targetIsCreature = !actor2.getClass().isNpc();
+            if (targetIsCreature || actor2.getClass().getNpcStats(actor2).isWerewolf())
             {
-                // The follow package must be first or have nothing but combat before it
-                if (package->sideWithTarget())
+                bool followerOrEscorter = false;
+                // ...unless the creature has allies
+                if (targetIsCreature)
                 {
-                    followerOrEscorter = true;
-                    break;
+                    for (const auto& package : creatureStats2.getAiSequence())
+                    {
+                        // The follow package must be first or have nothing but combat before it
+                        if (package->sideWithTarget())
+                        {
+                            followerOrEscorter = true;
+                            break;
+                        }
+                        else if (package->getTypeId() != MWMechanics::AiPackageTypeId::Combat)
+                            break;
+                    }
                 }
-                else if (package->getTypeId() != MWMechanics::AiPackageTypeId::Combat)
-                    break;
+                // Morrowind also checks "known werewolf" flag, but the player is never in combat
+                // so this code is unreachable for the player
+                if (!followerOrEscorter)
+                    aggressive = true;
             }
-            if (!followerOrEscorter)
-                aggressive = true;
         }
 
         // If any of the above conditions turned actor1 aggressive towards actor2, do an awareness check. If it passes,
