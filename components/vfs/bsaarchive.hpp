@@ -48,7 +48,7 @@ namespace VFS
 
         virtual ~BsaArchive() {}
 
-        void listResources(std::map<std::string, File*>& out) override
+        void listResources(FileMap& out) override
         {
             for (auto& resource : mResources)
             {
@@ -59,7 +59,7 @@ namespace VFS
             }
         }
 
-        bool contains(const std::string& file) const override
+        bool contains(std::string_view file) const override
         {
             for (const auto& it : mResources)
             {

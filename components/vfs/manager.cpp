@@ -35,11 +35,11 @@ namespace VFS
         return getNormalized(Path::normalizeFilename(name));
     }
 
-    Files::IStreamPtr Manager::getNormalized(const std::string& normalizedName) const
+    Files::IStreamPtr Manager::getNormalized(std::string_view normalizedName) const
     {
-        std::map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
+        const auto found = mIndex.find(normalizedName);
         if (found == mIndex.end())
-            throw std::runtime_error("Resource '" + normalizedName + "' not found");
+            throw std::runtime_error("Resource '" + std::string(normalizedName) + "' not found");
         return found->second->open();
     }
 
