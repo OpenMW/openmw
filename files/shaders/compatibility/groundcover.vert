@@ -170,8 +170,9 @@ void main(void)
 #if PER_PIXEL_LIGHTING
     passViewPos = viewPos.xyz;
 #else
-    vec3 diffuseLight, ambientLight;
-    doLighting(viewPos.xyz, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
+    vec3 diffuseLight, ambientLight, specularLight;
+    vec3 unusedShadowSpecular;
+    doLighting(viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, unusedShadowSpecular);
     passLighting = diffuseLight + ambientLight;
     clampLightingResult(passLighting);
 #endif

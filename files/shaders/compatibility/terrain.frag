@@ -23,11 +23,13 @@ uniform sampler2D blendMap;
 varying float euclideanDepth;
 varying float linearDepth;
 
-#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
+centroid varying vec3 passSpecular;
 centroid varying vec3 shadowDiffuseLighting;
+centroid varying vec3 shadowSpecularLighting;
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
@@ -67,31 +69,26 @@ void main()
 #endif
 
     float shadowing = unshadowedLightRatio(linearDepth);
-    vec3 lighting;
+    vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
     lighting = passLighting + shadowDiffuseLighting * shadowing;
+    specular = passSpecular + shadowSpecularLighting * shadowing;
 #else
-    vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
+#if @specularMap
+    float shininess = 128.0; // TODO: make configurable
+    vec3 specularColor = vec3(diffuseTex.a);
+#else
+    float shininess = gl_FrontMaterial.shininess;
+    vec3 specularColor = getSpecularColor().xyz;
+#endif
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
     lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz;
+    specular = specularColor * specularLight;
 #endif
 
     clampLightingResult(lighting);
-
-    gl_FragData[0].xyz *= lighting;
-
-#if @specularMap
-    float shininess = 128.0; // TODO: make configurable
-    vec3 matSpec = vec3(diffuseTex.a);
-#else
-    float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = getSpecularColor().xyz;
-#endif
-
-    if (matSpec != vec3(0.0))
-    {
-        gl_FragData[0].xyz += matSpec * getSpecular(viewNormal, passViewPos, shininess, shadowing);
-    }
+    gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
 
