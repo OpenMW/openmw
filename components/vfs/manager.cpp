@@ -70,21 +70,13 @@ namespace VFS
         return found->second->getPath();
     }
 
-    namespace
-    {
-        bool startsWith(std::string_view text, std::string_view start)
-        {
-            return text.rfind(start, 0) == 0;
-        }
-    }
-
     Manager::RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(std::string_view path) const
     {
         if (path.empty())
             return { mIndex.begin(), mIndex.end() };
         std::string normalized = Path::normalizeFilename(path);
         const auto it = mIndex.lower_bound(normalized);
-        if (it == mIndex.end() || !startsWith(it->first, normalized))
+        if (it == mIndex.end() || !it->first.starts_with(normalized))
             return { it, it };
         ++normalized.back();
         return { it, mIndex.lower_bound(normalized) };
