@@ -59,23 +59,31 @@ namespace ESM
                     if (esm.getSubSize() == 52)
                     {
                         mNpdtType = NPC_DEFAULT;
-                        esm.getExact(&mNpdt, 52);
+                        esm.getT(mNpdt.mLevel);
+                        esm.getT(mNpdt.mAttributes);
+                        esm.getT(mNpdt.mSkills);
+                        esm.getT(mNpdt.mUnknown1);
+                        esm.getT(mNpdt.mHealth);
+                        esm.getT(mNpdt.mMana);
+                        esm.getT(mNpdt.mFatigue);
+                        esm.getT(mNpdt.mDisposition);
+                        esm.getT(mNpdt.mReputation);
+                        esm.getT(mNpdt.mRank);
+                        esm.getT(mNpdt.mUnknown2);
+                        esm.getT(mNpdt.mGold);
                     }
                     else if (esm.getSubSize() == 12)
                     {
-                        // Reading into temporary NPDTstruct12 object
-                        NPDTstruct12 npdt12;
                         mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
-                        esm.getExact(&npdt12, 12);
 
                         // Clearing the mNdpt struct to initialize all values
                         blankNpdt();
-                        // Swiching to an internal representation
-                        mNpdt.mLevel = npdt12.mLevel;
-                        mNpdt.mDisposition = npdt12.mDisposition;
-                        mNpdt.mReputation = npdt12.mReputation;
-                        mNpdt.mRank = npdt12.mRank;
-                        mNpdt.mGold = npdt12.mGold;
+                        esm.getT(mNpdt.mLevel);
+                        esm.getT(mNpdt.mDisposition);
+                        esm.getT(mNpdt.mReputation);
+                        esm.getT(mNpdt.mRank);
+                        esm.skip(3);
+                        esm.getT(mNpdt.mGold);
                     }
                     else
                         esm.fail("NPC_NPDT must be 12 or 52 bytes long");
@@ -213,8 +221,7 @@ namespace ESM
     void NPC::blankNpdt()
     {
         mNpdt.mLevel = 0;
-        mNpdt.mStrength = mNpdt.mIntelligence = mNpdt.mWillpower = mNpdt.mAgility = mNpdt.mSpeed = mNpdt.mEndurance
-            = mNpdt.mPersonality = mNpdt.mLuck = 0;
+        mNpdt.mAttributes.fill(0);
         mNpdt.mSkills.fill(0);
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;

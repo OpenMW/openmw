@@ -134,14 +134,9 @@ namespace MWMechanics
         for (size_t i = 0; i < player->mNpdt.mSkills.size(); ++i)
             npcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(player->mNpdt.mSkills[i]);
 
-        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
-        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt.mIntelligence);
-        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt.mWillpower);
-        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt.mAgility);
-        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt.mSpeed);
-        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt.mEndurance);
-        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt.mPersonality);
-        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt.mLuck);
+        for (size_t i = 0; i < player->mNpdt.mAttributes.size(); ++i)
+            npcStats.setAttribute(ESM::Attribute::indexToRefId(i), player->mNpdt.mSkills[i]);
+
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         // race

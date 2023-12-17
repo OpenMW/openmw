@@ -313,14 +313,8 @@ namespace MWClass
                 for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
                     data->mNpcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(ref->mBase->mNpdt.mSkills[i]);
 
-                data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt.mStrength);
-                data->mNpcStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mNpdt.mIntelligence);
-                data->mNpcStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mNpdt.mWillpower);
-                data->mNpcStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mNpdt.mAgility);
-                data->mNpcStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mNpdt.mSpeed);
-                data->mNpcStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mNpdt.mEndurance);
-                data->mNpcStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mNpdt.mPersonality);
-                data->mNpcStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mNpdt.mLuck);
+                for (size_t i = 0; i < ref->mBase->mNpdt.mAttributes.size(); ++i)
+                    data->mNpcStats.setAttribute(ESM::Attribute::indexToRefId(i), ref->mBase->mNpdt.mAttributes[i]);
 
                 data->mNpcStats.setHealth(ref->mBase->mNpdt.mHealth);
                 data->mNpcStats.setMagicka(ref->mBase->mNpdt.mMana);

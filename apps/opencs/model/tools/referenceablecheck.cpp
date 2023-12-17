@@ -693,22 +693,12 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     }
     else if (npc.mNpdt.mHealth != 0)
     {
-        if (npc.mNpdt.mStrength == 0)
-            messages.add(id, "Strength is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mIntelligence == 0)
-            messages.add(id, "Intelligence is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mWillpower == 0)
-            messages.add(id, "Willpower is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mAgility == 0)
-            messages.add(id, "Agility is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mSpeed == 0)
-            messages.add(id, "Speed is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mEndurance == 0)
-            messages.add(id, "Endurance is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mPersonality == 0)
-            messages.add(id, "Personality is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mLuck == 0)
-            messages.add(id, "Luck is equal to zero", "", CSMDoc::Message::Severity_Warning);
+        for (size_t i = 0; i < npc.mNpdt.mAttributes.size(); ++i)
+        {
+            if (npc.mNpdt.mAttributes[i] == 0)
+                messages.add(id, ESM::Attribute::indexToRefId(i).getRefIdString() + " is equal to zero", {},
+                    CSMDoc::Message::Severity_Warning);
+        }
     }
 
     if (level <= 0)

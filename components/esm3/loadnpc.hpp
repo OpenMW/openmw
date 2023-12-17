@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "aipackage.hpp"
+#include "components/esm/attr.hpp"
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
 #include "loadcont.hpp"
@@ -80,7 +81,7 @@ namespace ESM
         struct NPDTstruct52
         {
             int16_t mLevel;
-            unsigned char mStrength, mIntelligence, mWillpower, mAgility, mSpeed, mEndurance, mPersonality, mLuck;
+            std::array<unsigned char, Attribute::Length> mAttributes;
 
             // mSkill can grow up to 200, it must be unsigned
             std::array<unsigned char, Skill::Length> mSkills;

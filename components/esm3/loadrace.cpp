@@ -12,6 +12,7 @@ namespace ESM
         int index = ESM::Attribute::refIdToIndex(attribute);
         if (index < 0)
             return 0;
+        index *= 2;
         if (!male)
             index++;
         return mAttributeValues[static_cast<size_t>(index)];
@@ -22,6 +23,7 @@ namespace ESM
         int index = ESM::Attribute::refIdToIndex(attribute);
         if (index < 0)
             return;
+        index *= 2;
         if (!male)
             index++;
         mAttributeValues[static_cast<size_t>(index)] = value;

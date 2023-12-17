@@ -1084,14 +1084,8 @@ namespace EsmTool
             std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
 
             std::cout << "  Attributes:" << std::endl;
-            std::cout << "    Strength: " << (int)mData.mNpdt.mStrength << std::endl;
-            std::cout << "    Intelligence: " << (int)mData.mNpdt.mIntelligence << std::endl;
-            std::cout << "    Willpower: " << (int)mData.mNpdt.mWillpower << std::endl;
-            std::cout << "    Agility: " << (int)mData.mNpdt.mAgility << std::endl;
-            std::cout << "    Speed: " << (int)mData.mNpdt.mSpeed << std::endl;
-            std::cout << "    Endurance: " << (int)mData.mNpdt.mEndurance << std::endl;
-            std::cout << "    Personality: " << (int)mData.mNpdt.mPersonality << std::endl;
-            std::cout << "    Luck: " << (int)mData.mNpdt.mLuck << std::endl;
+            for (size_t i = 0; i != mData.mNpdt.mAttributes.size(); i++)
+                std::cout << "    " << attributeLabel(i) << ": " << int(mData.mNpdt.mAttributes[i]) << std::endl;
 
             std::cout << "  Skills:" << std::endl;
             for (size_t i = 0; i != mData.mNpdt.mSkills.size(); i++)
