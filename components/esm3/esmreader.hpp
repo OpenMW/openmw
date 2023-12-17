@@ -131,10 +131,10 @@ namespace ESM
         ESM::RefId getCellId();
 
         // Read data of a given type, stored in a subrecord of a given name
-        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
+        template <typename X>
         void getHNT(X& x, NAME name)
         {
-            getHNTSized<sizeof(X)>(x, name);
+            getHNT(name, x);
         }
 
         template <class... Args>
@@ -149,26 +149,11 @@ namespace ESM
         }
 
         // Optional version of getHNT
-        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
+        template <typename X>
         void getHNOT(X& x, NAME name)
         {
-            getHNOTSized<sizeof(X)>(x, name);
-        }
-
-        // Version with extra size checking, to make sure the compiler
-        // doesn't mess up our struct padding.
-        template <std::size_t size, typename X>
-        void getHNTSized(X& x, NAME name)
-        {
-            getSubNameIs(name);
-            getHTSized<size>(x);
-        }
-
-        template <std::size_t size, typename X>
-        void getHNOTSized(X& x, NAME name)
-        {
             if (isNextSub(name))
-                getHTSized<size>(x);
+                getHT(x);
         }
 
         // Get data of a given type/size, including subrecord header
@@ -185,35 +170,11 @@ namespace ESM
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
         void skipHT()
         {
-            skipHTSized<sizeof(T), T>();
-        }
-
-        // Version with extra size checking, to make sure the compiler
-        // doesn't mess up our struct padding.
-        template <std::size_t size, typename X>
-        void getHTSized(X& x)
-        {
-            getSubHeader();
-            if (mCtx.leftSub != size)
-                reportSubSizeMismatch(size, mCtx.leftSub);
-            getTSized<size>(x);
-        }
-
-        template <std::size_t size, typename T>
-        void skipHTSized()
-        {
-            static_assert(sizeof(T) == size);
+            constexpr size_t size = sizeof(T);
             getSubHeader();
             if (mCtx.leftSub != size)
                 reportSubSizeMismatch(size, mCtx.leftSub);
             skip(size);
-        }
-
-        template <std::size_t size, typename X>
-        void getTSized(X& x)
-        {
-            static_assert(sizeof(X) == size);
-            getExact(&x, size);
         }
 
         // Read a string by the given name if it is the next record.
