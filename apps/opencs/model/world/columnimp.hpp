@@ -570,19 +570,34 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            const ESM::Race::MaleFemaleF& value = mWeight ? record.get().mData.mWeight : record.get().mData.mHeight;
-
-            return mMale ? value.mMale : value.mFemale;
+            if (mWeight)
+            {
+                if (mMale)
+                    return record.get().mData.mMaleWeight;
+                return record.get().mData.mFemaleWeight;
+            }
+            if (mMale)
+                return record.get().mData.mMaleHeight;
+            return record.get().mData.mFemaleHeight;
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-
-            ESM::Race::MaleFemaleF& value = mWeight ? record2.mData.mWeight : record2.mData.mHeight;
-
-            (mMale ? value.mMale : value.mFemale) = data.toFloat();
-
+            if (mWeight)
+            {
+                if (mMale)
+                    record2.mData.mMaleWeight = data.toFloat();
+                else
+                    record2.mData.mFemaleWeight = data.toFloat();
+            }
+            else
+            {
+                if (mMale)
+                    record2.mData.mMaleHeight = data.toFloat();
+                else
+                    record2.mData.mFemaleHeight = data.toFloat();
+            }
             record.setModified(record2);
         }
 

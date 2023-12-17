@@ -13,12 +13,12 @@ namespace ESM
 
         mCellId = esm.getCellId();
 
-        esm.getHNTSized<12>(mLastKnownExteriorPosition, "LKEP");
+        esm.getHNT("LKEP", mLastKnownExteriorPosition);
 
         if (esm.isNextSub("MARK"))
         {
             mHasMark = true;
-            esm.getHTSized<24>(mMarkedPosition);
+            esm.getHT(mMarkedPosition.pos, mMarkedPosition.rot);
             mMarkedCell = esm.getCellId();
         }
         else

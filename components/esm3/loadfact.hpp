@@ -30,6 +30,9 @@ namespace ESM
         int32_t mPrimarySkill, mFavouredSkill;
 
         int32_t mFactReaction; // Reaction from faction members
+
+        void load(ESMReader& esm);
+        void save(ESMWriter& esm) const;
     };
 
     struct Faction
@@ -60,6 +63,9 @@ namespace ESM
 
             int32_t getSkill(size_t index, bool ignored = false) const;
             ///< Throws an exception for invalid values of \a index.
+
+            void load(ESMReader& esm);
+            void save(ESMWriter& esm) const;
         }; // 240 bytes
 
         FADTstruct mData;

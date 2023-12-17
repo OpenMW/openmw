@@ -11,9 +11,6 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
-#pragma pack(push)
-#pragma pack(1)
-
     struct Data
     {
         /* File format version. This is actually a float, the supported
@@ -37,8 +34,6 @@ namespace ESM
         unsigned char unknown2[4];
         NAME32 mPlayerName;
     };
-
-#pragma pack(pop)
 
     /// \brief File header record
     struct Header

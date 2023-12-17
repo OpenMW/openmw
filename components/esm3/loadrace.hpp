@@ -31,20 +31,6 @@ namespace ESM
             int32_t mBonus;
         };
 
-        struct MaleFemale
-        {
-            int32_t mMale, mFemale;
-
-            int getValue(bool male) const;
-        };
-
-        struct MaleFemaleF
-        {
-            float mMale, mFemale;
-
-            float getValue(bool male) const;
-        };
-
         enum Flags
         {
             Playable = 0x01,
@@ -57,13 +43,19 @@ namespace ESM
             std::array<SkillBonus, 7> mBonus;
 
             // Attribute values for male/female
-            std::array<MaleFemale, 8> mAttributeValues;
+            std::array<int32_t, 16> mAttributeValues;
 
             // The actual eye level height (in game units) is (probably) given
             // as 'height' times 128. This has not been tested yet.
-            MaleFemaleF mHeight, mWeight;
+            float mMaleHeight, mFemaleHeight, mMaleWeight, mFemaleWeight;
 
             int32_t mFlags; // 0x1 - playable, 0x2 - beast race
+
+            int32_t getAttribute(ESM::RefId attribute, bool male) const;
+            void setAttribute(ESM::RefId attribute, bool male, int32_t value);
+
+            void load(ESMReader& esm);
+            void save(ESMWriter& esm) const;
 
         }; // Size = 140 bytes
 

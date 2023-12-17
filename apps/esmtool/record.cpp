@@ -1169,19 +1169,23 @@ namespace EsmTool
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Flags: " << raceFlags(mData.mData.mFlags) << std::endl;
 
-        for (int i = 0; i < 2; ++i)
+        std::cout << "  Male:" << std::endl;
+        for (int j = 0; j < ESM::Attribute::Length; ++j)
         {
-            bool male = i == 0;
-
-            std::cout << (male ? "  Male:" : "  Female:") << std::endl;
-
-            for (int j = 0; j < ESM::Attribute::Length; ++j)
-                std::cout << "    " << ESM::Attribute::indexToRefId(j) << ": "
-                          << mData.mData.mAttributeValues[j].getValue(male) << std::endl;
-
-            std::cout << "    Height: " << mData.mData.mHeight.getValue(male) << std::endl;
-            std::cout << "    Weight: " << mData.mData.mWeight.getValue(male) << std::endl;
+            ESM::RefId id = ESM::Attribute::indexToRefId(j);
+            std::cout << "    " << id << ": " << mData.mData.getAttribute(id, true) << std::endl;
         }
+        std::cout << "    Height: " << mData.mData.mMaleHeight << std::endl;
+        std::cout << "    Weight: " << mData.mData.mMaleWeight << std::endl;
+
+        std::cout << "  Female:" << std::endl;
+        for (int j = 0; j < ESM::Attribute::Length; ++j)
+        {
+            ESM::RefId id = ESM::Attribute::indexToRefId(j);
+            std::cout << "    " << id << ": " << mData.mData.getAttribute(id, false) << std::endl;
+        }
+        std::cout << "    Height: " << mData.mData.mFemaleHeight << std::endl;
+        std::cout << "    Weight: " << mData.mData.mFemaleWeight << std::endl;
 
         for (const auto& bonus : mData.mData.mBonus)
             // Not all races have 7 skills.

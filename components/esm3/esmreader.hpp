@@ -333,7 +333,7 @@ namespace ESM
             mEsm->read(static_cast<char*>(x), static_cast<std::streamsize>(size));
         }
 
-        void getName(NAME& name) { getTSized<4>(name); }
+        void getName(NAME& name) { getT(name.mData); }
         void getUint(uint32_t& u) { getT(u); }
 
         std::string getMaybeFixedStringSize(std::size_t size);

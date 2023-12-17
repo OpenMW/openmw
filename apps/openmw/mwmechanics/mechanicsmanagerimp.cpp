@@ -152,13 +152,7 @@ namespace MWMechanics
             bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
             for (const ESM::Attribute& attribute : esmStore.get<ESM::Attribute>())
-            {
-                auto index = ESM::Attribute::refIdToIndex(attribute.mId);
-                assert(index >= 0);
-
-                const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[static_cast<size_t>(index)];
-                creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
-            }
+                creatureStats.setAttribute(attribute.mId, race->mData.getAttribute(attribute.mId, male));
 
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {

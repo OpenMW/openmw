@@ -45,7 +45,8 @@ namespace ESM
 
         if (esm.isNextSub("GMDT"))
         {
-            esm.getHTSized<124>(mGameData);
+            esm.getHT(mGameData.mCurrentHealth, mGameData.mMaximumHealth, mGameData.mHour, mGameData.unknown1,
+                mGameData.mCurrentCell.mData, mGameData.unknown2, mGameData.mPlayerName.mData);
         }
         if (esm.isNextSub("SCRD"))
         {
