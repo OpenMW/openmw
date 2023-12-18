@@ -1358,7 +1358,8 @@ namespace MWMechanics
 
         if (reported)
         {
-            player.getClass().getNpcStats(player).setBounty(player.getClass().getNpcStats(player).getBounty() + arg);
+            player.getClass().getNpcStats(player).setBounty(
+                std::max(0, player.getClass().getNpcStats(player).getBounty() + arg));
 
             // If committing a crime against a faction member, expell from the faction
             if (!victim.isEmpty() && victim.getClass().isNpc())
@@ -1923,7 +1924,8 @@ namespace MWMechanics
 
                 if (reported)
                 {
-                    npcStats.setBounty(npcStats.getBounty() + gmst.find("iWereWolfBounty")->mValue.getInteger());
+                    npcStats.setBounty(
+                        std::max(0, npcStats.getBounty() + gmst.find("iWereWolfBounty")->mValue.getInteger()));
                 }
             }
         }

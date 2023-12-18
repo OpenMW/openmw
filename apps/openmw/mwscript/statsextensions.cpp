@@ -445,10 +445,12 @@ namespace MWScript
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 MWWorld::Ptr player = world->getPlayerPtr();
-
-                player.getClass().getNpcStats(player).setBounty(
-                    static_cast<int>(runtime[0].mFloat) + player.getClass().getNpcStats(player).getBounty());
+                int bounty = std::max(
+                    0, static_cast<int>(runtime[0].mFloat) + player.getClass().getNpcStats(player).getBounty());
+                player.getClass().getNpcStats(player).setBounty(bounty);
                 runtime.pop();
+                if (bounty == 0)
+                    MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
             }
         };
 
