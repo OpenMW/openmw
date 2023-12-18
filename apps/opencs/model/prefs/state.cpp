@@ -396,7 +396,7 @@ void CSMPrefs::State::declare()
         "scene-select-secondary", "Secondary Select", QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
     declareShortcut(
         "scene-select-tertiary", "Tertiary Select", QKeySequence(Qt::ShiftModifier | (int)Qt::MiddleButton));
-    declareModifier("scene-speed-modifier", "Speed Modifier", Qt::Key_Shift);
+    declareModifier(mValues->mKeyBindings.mSceneSpeedModifier, "Speed Modifier");
     declareShortcut("scene-delete", "Delete Instance", QKeySequence(Qt::Key_Delete));
     declareShortcut("scene-instance-drop-terrain", "Drop to terrain level", QKeySequence(Qt::Key_G));
     declareShortcut("scene-instance-drop-collision", "Drop to collision", QKeySequence(Qt::Key_H));
@@ -553,7 +553,8 @@ CSMPrefs::StringSetting& CSMPrefs::State::declareString(
     return *setting;
 }
 
-CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& key, const QString& label, int default_)
+CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(
+    Settings::SettingValue<std::string>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -561,11 +562,11 @@ CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& k
     // Setup with actual data
     int modifier;
 
-    getShortcutManager().convertFromString(mIndex->get<std::string>(mCurrentCategory->second.getKey(), key), modifier);
-    getShortcutManager().setModifier(key, modifier);
+    getShortcutManager().convertFromString(value.get(), modifier);
+    getShortcutManager().setModifier(value.mName, modifier);
 
     CSMPrefs::ModifierSetting* setting
-        = new CSMPrefs::ModifierSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+        = new CSMPrefs::ModifierSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
     mCurrentCategory->second.addSetting(setting);
 
     return *setting;
