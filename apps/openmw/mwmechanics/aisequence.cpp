@@ -6,6 +6,8 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/aisequence.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "actorutil.hpp"
 #include "aiactivate.hpp"
@@ -365,7 +367,7 @@ namespace MWMechanics
 
         // Stop combat when a non-combat AI package is added
         if (isActualAiPackage(package.getTypeId()))
-            stopCombat();
+            MWBase::Environment::get().getMechanicsManager()->stopCombat(actor);
 
         // We should return a wandering actor back after combat, casting or pursuit.
         // The same thing for actors without AI packages.
