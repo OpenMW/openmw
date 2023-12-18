@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWPHYSICS_PTRHOLDER_H
 #define OPENMW_MWPHYSICS_PTRHOLDER_H
 
-#include <deque>
+#include <list>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -16,10 +16,10 @@ namespace MWPhysics
 {
     struct Movement
     {
-        osg::Vec3f velocity = osg::Vec3f();
-        float simulationTimeStart = 0.f; // The time at which this movement begun
-        float simulationTimeStop = 0.f; // The time at which this movement finished
-        bool jump = false;
+        osg::Vec3f mVelocity = osg::Vec3f();
+        float mSimulationTimeStart = 0.f; // The time at which this movement begun
+        float mSimulationTimeStop = 0.f; // The time at which this movement finished
+        bool mJump = false;
     };
 
     class PtrHolder
@@ -47,7 +47,7 @@ namespace MWPhysics
             mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop, jump });
         }
 
-        std::deque<Movement>& movement() { return mMovement; }
+        std::list<Movement>& movement() { return mMovement; }
 
         void setSimulationPosition(const osg::Vec3f& position) { mSimulationPosition = position; }
 
@@ -66,7 +66,7 @@ namespace MWPhysics
     protected:
         MWWorld::Ptr mPtr;
         std::unique_ptr<btCollisionObject> mCollisionObject;
-        std::deque<Movement> mMovement;
+        std::list<Movement> mMovement;
         osg::Vec3f mSimulationPosition;
         osg::Vec3d mPosition;
         osg::Vec3d mPreviousPosition;

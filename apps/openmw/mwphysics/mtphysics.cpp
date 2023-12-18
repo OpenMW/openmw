@@ -208,23 +208,16 @@ namespace
             {
                 osg::Vec3f movement = osg::Vec3f();
                 auto it = actor.movement().begin();
-                while (it != actor.movement().end())
-                {
-                    if (it->jump)
-                    {
-                        // Adjusting inertia is instant and should not be performed over time like other movement is.
-                        it++;
-                        continue;
-                    }
-
-                    float start = std::max(it->simulationTimeStart, startTime);
-                    float stop = std::min(it->simulationTimeStop, endTime);
-                    movement += it->velocity * (stop - start);
-                    if (std::abs(stop - it->simulationTimeStop) < 0.0001f)
-                        it = actor.movement().erase(it);
-                    else
-                        it++;
-                }
+                std::erase_if(actor.movement(), [&](MWPhysics::Movement& v) {
+                    if (v.mJump)
+                        return false;
+                    float start = std::max(v.mSimulationTimeStart, startTime);
+                    float stop = std::min(v.mSimulationTimeStop, endTime);
+                    movement += v.mVelocity * (stop - start);
+                    if (std::abs(stop - v.mSimulationTimeStop) < 0.0001f)
+                        return true;
+                    return false;
+                });
 
                 return movement;
             }
@@ -232,17 +225,14 @@ namespace
             std::optional<osg::Vec3f> takeInertia(MWPhysics::PtrHolder& actor, float startTime) const
             {
                 std::optional<osg::Vec3f> inertia = std::nullopt;
-                auto it = actor.movement().begin();
-                while (it != actor.movement().end())
-                {
-                    if (it->jump && it->simulationTimeStart >= startTime)
+                std::erase_if(actor.movement(), [&](MWPhysics::Movement& v) {
+                    if (v.mJump && v.mSimulationTimeStart >= startTime)
                     {
-                        inertia = it->velocity;
-                        it = actor.movement().erase(it);
+                        inertia = v.mVelocity;
+                        return true;
                     }
-                    else
-                        it++;
-                }
+                    return false;
+                });
                 return inertia;
             }
 
