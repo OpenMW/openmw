@@ -207,8 +207,7 @@ namespace
             osg::Vec3f takeMovement(MWPhysics::PtrHolder& actor, float startTime, float endTime) const
             {
                 osg::Vec3f movement = osg::Vec3f();
-                auto it = actor.movement().begin();
-                std::erase_if(actor.movement(), [&](MWPhysics::Movement& v) {
+                actor.eraseMovementIf([&](MWPhysics::Movement& v) {
                     if (v.mJump)
                         return false;
                     float start = std::max(v.mSimulationTimeStart, startTime);
@@ -225,7 +224,7 @@ namespace
             std::optional<osg::Vec3f> takeInertia(MWPhysics::PtrHolder& actor, float startTime) const
             {
                 std::optional<osg::Vec3f> inertia = std::nullopt;
-                std::erase_if(actor.movement(), [&](MWPhysics::Movement& v) {
+                actor.eraseMovementIf([&](MWPhysics::Movement& v) {
                     if (v.mJump && v.mSimulationTimeStart >= startTime)
                     {
                         inertia = v.mVelocity;

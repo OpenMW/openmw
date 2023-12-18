@@ -47,7 +47,7 @@ namespace MWPhysics
             mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop, jump });
         }
 
-        std::list<Movement>& movement() { return mMovement; }
+        void eraseMovementIf(const auto& predicate) { std::erase_if(mMovement, predicate); }
 
         void setSimulationPosition(const osg::Vec3f& position) { mSimulationPosition = position; }
 
