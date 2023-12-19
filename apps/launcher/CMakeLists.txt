@@ -35,13 +35,13 @@ set(LAUNCHER_HEADER
 
 # Headers that must be pre-processed
 set(LAUNCHER_UI
-    ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/graphicspage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/importpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/settingspage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/directorypicker.ui
+    ${CMAKE_SOURCE_DIR}/apps/launcher/ui/datafilespage.ui
+    ${CMAKE_SOURCE_DIR}/apps/launcher/ui/graphicspage.ui
+    ${CMAKE_SOURCE_DIR}/apps/launcher/ui/mainwindow.ui
+    ${CMAKE_SOURCE_DIR}/apps/launcher/ui/importpage.ui
+    ${CMAKE_SOURCE_DIR}/apps/launcher/ui/settingspage.ui
+    ${CMAKE_SOURCE_DIR}/apps/launcher/ui/directorypicker.ui
+    ${CMAKE_SOURCE_DIR}/components/contentselector/contentselector.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})

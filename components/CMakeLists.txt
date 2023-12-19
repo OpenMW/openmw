@@ -490,7 +490,7 @@ else ()
         )
 endif()
 
-set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+set (ESM_UI ${CMAKE_SOURCE_DIR}/components/contentselector/contentselector.ui
     )
 
 if (USE_QT)
