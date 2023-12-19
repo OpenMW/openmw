@@ -410,6 +410,7 @@ void CSMPrefs::State::declare()
     declareShortcut("scene-edit-abort", "Abort", QKeySequence(Qt::Key_Escape));
     declareShortcut("scene-focus-toolbar", "Toggle Toolbar Focus", QKeySequence(Qt::Key_T));
     declareShortcut("scene-render-stats", "Debug Rendering Stats", QKeySequence(Qt::Key_F3));
+    declareShortcut("scene-duplicate", "Duplicate Instance", QKeySequence(Qt::ShiftModifier | Qt::Key_C));
 
     declareSubcategory("1st/Free Camera");
     declareShortcut("free-forward", "Forward", QKeySequence(Qt::Key_W));

@@ -464,6 +464,7 @@ namespace CSMPrefs
             "scene-instance-drop-terrain-separately", "" };
         Settings::SettingValue<std::string> mSceneInstanceDropCollisionSeparately{ mIndex, sName,
             "scene-instance-drop-collision-separately", "" };
+        Settings::SettingValue<std::string> mSceneDuplicate{ mIndex, sName, "scene-duplicate", "Shift+C" };
         Settings::SettingValue<std::string> mSceneLoadCamCell{ mIndex, sName, "scene-load-cam-cell", "Keypad+5" };
         Settings::SettingValue<std::string> mSceneLoadCamEastcell{ mIndex, sName, "scene-load-cam-eastcell",
             "Keypad+6" };
