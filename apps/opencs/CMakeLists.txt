@@ -140,7 +140,7 @@ set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
 
 set (OPENCS_UI
     ${CMAKE_SOURCE_DIR}/components/contentselector/contentselector.ui
-    ${CMAKE_SOURCE_DIR}/apps/opencs/ui/filedialog.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/filedialog.ui
     )
 
 source_group (openmw-cs FILES main.cpp ${OPENCS_SRC} ${OPENCS_HDR})
