@@ -19,6 +19,7 @@
 #include "aipursue.hpp"
 #include "aitravel.hpp"
 #include "aiwander.hpp"
+#include "creaturestats.hpp"
 
 namespace MWMechanics
 {
@@ -367,7 +368,20 @@ namespace MWMechanics
 
         // Stop combat when a non-combat AI package is added
         if (isActualAiPackage(package.getTypeId()))
-            MWBase::Environment::get().getMechanicsManager()->stopCombat(actor);
+        {
+            if (package.getTypeId() == MWMechanics::AiPackageTypeId::Follow
+                || package.getTypeId() == MWMechanics::AiPackageTypeId::Escort)
+            {
+                const auto& mechanicsManager = MWBase::Environment::get().getMechanicsManager();
+                std::vector<MWWorld::Ptr> newAllies = mechanicsManager->getActorsSidingWith(package.getTarget());
+                std::vector<MWWorld::Ptr> allies = mechanicsManager->getActorsSidingWith(actor);
+                for (const auto& ally : allies)
+                    ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(newAllies);
+                for (const auto& ally : newAllies)
+                    ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(allies);
+            }
+            stopCombat();
+        }
 
         // We should return a wandering actor back after combat, casting or pursuit.
         // The same thing for actors without AI packages.
