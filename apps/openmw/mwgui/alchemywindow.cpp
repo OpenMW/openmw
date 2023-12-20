@@ -433,7 +433,7 @@ namespace MWGui
 
         mItemView->update();
 
-        std::set<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
+        std::vector<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
         Widgets::SpellEffectList list;
         unsigned int effectIndex = 0;
         for (const MWMechanics::EffectKey& effectKey : effectIds)

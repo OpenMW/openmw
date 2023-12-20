@@ -103,6 +103,7 @@
     Bug #7660: Some inconsistencies regarding Invisibility breaking
     Bug #7665: Alchemy menu is missing the ability to deselect and choose different qualities of an apparatus
     Bug #7675: Successful lock spell doesn't produce a sound
+    Bug #7676: Incorrect magic effect order in alchemy
     Bug #7679: Scene luminance value flashes when toggling shaders
     Bug #7685: Corky sometimes doesn't follow Llovyn Andus
     Bug #7712: Casting doesn't support spells and enchantments with no effects
