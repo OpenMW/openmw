@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 if [ ! -f /.dockerenv ] && [ ! -f /home/docs/omw_luadoc_docker ]; then
     echo 'This script installs lua-5.1, luarocks, and openmwluadocumentor to $HOME. Should be used only in docker.'
     exit 1
