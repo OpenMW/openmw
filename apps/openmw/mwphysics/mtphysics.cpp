@@ -25,6 +25,7 @@
 #include "../mwrender/bulletdebugdraw.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -35,6 +36,7 @@
 #include "object.hpp"
 #include "physicssystem.hpp"
 #include "projectile.hpp"
+#include "ptrholder.hpp"
 
 namespace MWPhysics
 {
@@ -193,6 +195,67 @@ namespace
                 frameData.mLastStuckPosition = actor->getLastStuckPosition();
             }
             void operator()(MWPhysics::ProjectileSimulation& /*sim*/) const {}
+        };
+
+        struct InitMovement
+        {
+            int mSteps = 0;
+            float mDelta = 0.f;
+            float mSimulationTime = 0.f;
+
+            // Returns how the actor or projectile wants to move between startTime and endTime
+            osg::Vec3f takeMovement(MWPhysics::PtrHolder& actor, float startTime, float endTime) const
+            {
+                osg::Vec3f movement = osg::Vec3f();
+                actor.eraseMovementIf([&](MWPhysics::Movement& v) {
+                    if (v.mJump)
+                        return false;
+                    float start = std::max(v.mSimulationTimeStart, startTime);
+                    float stop = std::min(v.mSimulationTimeStop, endTime);
+                    movement += v.mVelocity * (stop - start);
+                    if (std::abs(stop - v.mSimulationTimeStop) < 0.0001f)
+                        return true;
+                    return false;
+                });
+
+                return movement;
+            }
+
+            std::optional<osg::Vec3f> takeInertia(MWPhysics::PtrHolder& actor, float startTime) const
+            {
+                std::optional<osg::Vec3f> inertia = std::nullopt;
+                actor.eraseMovementIf([&](MWPhysics::Movement& v) {
+                    if (v.mJump && v.mSimulationTimeStart >= startTime)
+                    {
+                        inertia = v.mVelocity;
+                        return true;
+                    }
+                    return false;
+                });
+                return inertia;
+            }
+
+            void operator()(auto& sim) const
+            {
+                if (mSteps <= 0 || mDelta < 0.00001f)
+                    return;
+
+                auto locked = sim.lock();
+                if (!locked.has_value())
+                    return;
+
+                auto& [ptrHolder, frameDataRef] = *locked;
+
+                // Because takeMovement() returns movement instead of velocity, convert it back to velocity for the
+                // movement solver
+                osg::Vec3f velocity
+                    = takeMovement(*ptrHolder, mSimulationTime, mSimulationTime + mDelta * mSteps) / (mSteps * mDelta);
+                // takeInertia() returns a velocity and should be taken over the velocity calculated above to initiate a
+                // jump
+                auto inertia = takeInertia(*ptrHolder, mSimulationTime);
+
+                frameDataRef.get().mMovement += inertia.value_or(velocity);
+            }
         };
 
         struct PreStep
@@ -501,18 +564,18 @@ namespace MWPhysics
         return std::make_tuple(numSteps, actualDelta);
     }
 
-    void PhysicsTaskScheduler::applyQueuedMovements(float& timeAccum, std::vector<Simulation>& simulations,
-        osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    void PhysicsTaskScheduler::applyQueuedMovements(float& timeAccum, float simulationTime,
+        std::vector<Simulation>& simulations, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         assert(mSimulations != &simulations);
 
         waitForWorkers();
-        prepareWork(timeAccum, simulations, frameStart, frameNumber, stats);
+        prepareWork(timeAccum, simulationTime, simulations, frameStart, frameNumber, stats);
         if (mWorkersSync != nullptr)
             mWorkersSync->wakeUpWorkers();
     }
 
-    void PhysicsTaskScheduler::prepareWork(float& timeAccum, std::vector<Simulation>& simulations,
+    void PhysicsTaskScheduler::prepareWork(float& timeAccum, float simulationTime, std::vector<Simulation>& simulations,
         osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
@@ -521,6 +584,9 @@ namespace MWPhysics
         MaybeExclusiveLock lock(mSimulationMutex, mLockingPolicy);
 
         double timeStart = mTimer->tick();
+
+        // The simulation time when the movement solving begins.
+        float simulationTimeStart = simulationTime - timeAccum;
 
         // start by finishing previous background computation
         if (mNumThreads != 0)
@@ -536,10 +602,15 @@ namespace MWPhysics
         timeAccum -= numSteps * newDelta;
 
         // init
-        const Visitors::InitPosition vis{ mCollisionWorld };
+        const Visitors::InitPosition initPositionVisitor{ mCollisionWorld };
         for (auto& sim : simulations)
         {
-            std::visit(vis, sim);
+            std::visit(initPositionVisitor, sim);
+        }
+        const Visitors::InitMovement initMovementVisitor{ numSteps, newDelta, simulationTimeStart };
+        for (auto& sim : simulations)
+        {
+            std::visit(initMovementVisitor, sim);
         }
         mPrevStepCount = numSteps;
         mRemainingSteps = numSteps;
@@ -552,10 +623,10 @@ namespace MWPhysics
         mNextJob.store(0, std::memory_order_release);
 
         if (mAdvanceSimulation)
+        {
             mWorldFrameData = std::make_unique<WorldFrameData>();
-
-        if (mAdvanceSimulation)
             mBudgetCursor += 1;
+        }
 
         if (mNumThreads == 0)
         {
@@ -864,6 +935,7 @@ namespace MWPhysics
                 std::remove_if(mLOSCache.begin(), mLOSCache.end(), [](const LOSRequest& req) { return req.mStale; }),
                 mLOSCache.end());
         }
+
         mTimeEnd = mTimer->tick();
         if (mWorkersSync != nullptr)
             mWorkersSync->workIsDone();

@@ -383,9 +383,11 @@ namespace MWWorld
 
         float getMaxActivationDistance() const override;
 
-        void queueMovement(const Ptr& ptr, const osg::Vec3f& velocity) override;
+        void queueMovement(const Ptr& ptr, const osg::Vec3f& velocity, float duration, bool jump = false) override;
         ///< Queues movement for \a ptr (in local space), to be applied in the next call to
         /// doPhysics.
+        /// \param duration The duration this speed shall be held, starting at current simulation time
+        /// \param jump Whether the movement shall be run over time, or immediately added as inertia instead
 
         void updateAnimatedCollisionShape(const Ptr& ptr) override;
 

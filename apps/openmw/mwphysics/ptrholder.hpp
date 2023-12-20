@@ -1,6 +1,7 @@
 #ifndef OPENMW_MWPHYSICS_PTRHOLDER_H
 #define OPENMW_MWPHYSICS_PTRHOLDER_H
 
+#include <list>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -13,6 +14,14 @@
 
 namespace MWPhysics
 {
+    struct Movement
+    {
+        osg::Vec3f mVelocity = osg::Vec3f();
+        float mSimulationTimeStart = 0.f; // The time at which this movement begun
+        float mSimulationTimeStop = 0.f; // The time at which this movement finished
+        bool mJump = false;
+    };
+
     class PtrHolder
     {
     public:
@@ -32,9 +41,13 @@ namespace MWPhysics
 
         btCollisionObject* getCollisionObject() const { return mCollisionObject.get(); }
 
-        void setVelocity(osg::Vec3f velocity) { mVelocity = velocity; }
+        void clearMovement() { mMovement = {}; }
+        void queueMovement(osg::Vec3f velocity, float simulationTimeStart, float simulationTimeStop, bool jump = false)
+        {
+            mMovement.push_back(Movement{ velocity, simulationTimeStart, simulationTimeStop, jump });
+        }
 
-        osg::Vec3f velocity() { return std::exchange(mVelocity, osg::Vec3f()); }
+        void eraseMovementIf(const auto& predicate) { std::erase_if(mMovement, predicate); }
 
         void setSimulationPosition(const osg::Vec3f& position) { mSimulationPosition = position; }
 
@@ -53,7 +66,7 @@ namespace MWPhysics
     protected:
         MWWorld::Ptr mPtr;
         std::unique_ptr<btCollisionObject> mCollisionObject;
-        osg::Vec3f mVelocity;
+        std::list<Movement> mMovement;
         osg::Vec3f mSimulationPosition;
         osg::Vec3d mPosition;
         osg::Vec3d mPreviousPosition;
