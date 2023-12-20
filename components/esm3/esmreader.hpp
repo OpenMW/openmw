@@ -152,8 +152,18 @@ namespace ESM
         template <typename X>
         void getHNOT(X& x, NAME name)
         {
+            getHNOT(name, x);
+        }
+
+        template <class... Args>
+        bool getHNOT(NAME name, Args&... args)
+        {
             if (isNextSub(name))
-                getHT(x);
+            {
+                getHT(args...);
+                return true;
+            }
+            return false;
         }
 
         // Get data of a given type/size, including subrecord header

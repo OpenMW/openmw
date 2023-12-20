@@ -55,12 +55,7 @@ namespace ESSImport
         if (esm.isNextSub("NAM3"))
             esm.skipHSub();
 
-        mHasENAM = false;
-        if (esm.isNextSub("ENAM"))
-        {
-            mHasENAM = true;
-            esm.getHT(mENAM.mCellX, mENAM.mCellY);
-        }
+        mHasENAM = esm.getHNOT("ENAM", mENAM.mCellX, mENAM.mCellY);
 
         if (esm.isNextSub("LNAM"))
             esm.skipHSub();
@@ -73,12 +68,7 @@ namespace ESSImport
             mFactions.push_back(fnam);
         }
 
-        mHasAADT = false;
-        if (esm.isNextSub("AADT")) // Attack animation data?
-        {
-            mHasAADT = true;
-            esm.getHT(mAADT.animGroupIndex, mAADT.mUnknown5);
-        }
+        mHasAADT = esm.getHNOT("AADT", mAADT.animGroupIndex, mAADT.mUnknown5); // Attack animation data?
 
         if (esm.isNextSub("KNAM"))
             esm.skipHSub(); // assigned Quick Keys, I think
