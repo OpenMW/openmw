@@ -73,7 +73,7 @@ std::vector<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
             {
                 if (const auto key = toKey(*ingredient, i))
                 {
-                    if (std::ranges::find(effects, *key) != effects.end())
+                    if (std::find(effects.begin(), effects.end(), *key) != effects.end())
                         continue;
                     if (containsEffect(*ingredient2, *key))
                         effects.push_back(*key);
