@@ -124,7 +124,7 @@ void Wizard::InstallationPage::startInstallation()
     mUnshield->setPath(path);
 
     // Set the right codec to use for Morrowind.ini
-    QString language(field(QLatin1String("installation.language")).value<QComboBox*>()->currentData().toString());
+    QString language(field(QLatin1String("installation.language")).toString());
 
     if (language == QLatin1String("Polish"))
     {

@@ -9,7 +9,7 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
 
     setupUi(this);
 
-    registerField(QLatin1String("installation.language"), languageComboBox);
+    registerField(QLatin1String("installation.language"), languageComboBox, "currentData", "currentDataChanged");
 }
 
 void Wizard::LanguageSelectionPage::initializePage()

@@ -270,7 +270,7 @@ void Wizard::MainWizard::runSettingsImporter()
     arguments.append(QLatin1String("--encoding"));
 
     // Set encoding
-    QString language(field(QLatin1String("installation.language")).value<QComboBox*>()->currentData().toString());
+    QString language(field(QLatin1String("installation.language")).toString());
     if (language == QLatin1String("Polish"))
     {
         arguments.append(QLatin1String("win1250"));
@@ -391,7 +391,7 @@ void Wizard::MainWizard::reject()
 void Wizard::MainWizard::writeSettings()
 {
     // Write the encoding and language settings
-    QString language(field(QLatin1String("installation.language")).value<QComboBox*>()->currentData().toString());
+    QString language(field(QLatin1String("installation.language")).toString());
     mLauncherSettings.setLanguage(language);
 
     if (language == QLatin1String("Polish"))
