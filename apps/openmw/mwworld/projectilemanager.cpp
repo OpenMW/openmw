@@ -454,7 +454,7 @@ namespace MWWorld
             {
                 const auto npc = caster.get<ESM::NPC>()->mBase;
                 const auto race = store.get<ESM::Race>().find(npc->mRace);
-                speed *= npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+                speed *= npc->isMale() ? race->mData.mMaleWeight : race->mData.mFemaleWeight;
             }
             osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
             direction.normalize();

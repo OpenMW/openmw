@@ -92,13 +92,7 @@ namespace
         const auto& attributes = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>();
         int level = creatureStats.getLevel();
         for (const ESM::Attribute& attribute : attributes)
-        {
-            auto index = ESM::Attribute::refIdToIndex(attribute.mId);
-            assert(index >= 0);
-
-            const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[static_cast<size_t>(index)];
-            creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
-        }
+            creatureStats.setAttribute(attribute.mId, race->mData.getAttribute(attribute.mId, male));
 
         // class bonus
         const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
@@ -319,14 +313,8 @@ namespace MWClass
                 for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
                     data->mNpcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(ref->mBase->mNpdt.mSkills[i]);
 
-                data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt.mStrength);
-                data->mNpcStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mNpdt.mIntelligence);
-                data->mNpcStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mNpdt.mWillpower);
-                data->mNpcStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mNpdt.mAgility);
-                data->mNpcStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mNpdt.mSpeed);
-                data->mNpcStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mNpdt.mEndurance);
-                data->mNpcStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mNpdt.mPersonality);
-                data->mNpcStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mNpdt.mLuck);
+                for (size_t i = 0; i < ref->mBase->mNpdt.mAttributes.size(); ++i)
+                    data->mNpcStats.setAttribute(ESM::Attribute::indexToRefId(i), ref->mBase->mNpdt.mAttributes[i]);
 
                 data->mNpcStats.setHealth(ref->mBase->mNpdt.mHealth);
                 data->mNpcStats.setMagicka(ref->mBase->mNpdt.mMana);
@@ -1199,24 +1187,24 @@ namespace MWClass
         if (ptr == MWMechanics::getPlayer() && ptr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson())
         {
             if (ref->mBase->isMale())
-                scale *= race->mData.mHeight.mMale;
+                scale *= race->mData.mMaleHeight;
             else
-                scale *= race->mData.mHeight.mFemale;
+                scale *= race->mData.mFemaleHeight;
 
             return;
         }
 
         if (ref->mBase->isMale())
         {
-            scale.x() *= race->mData.mWeight.mMale;
-            scale.y() *= race->mData.mWeight.mMale;
-            scale.z() *= race->mData.mHeight.mMale;
+            scale.x() *= race->mData.mMaleWeight;
+            scale.y() *= race->mData.mMaleWeight;
+            scale.z() *= race->mData.mMaleHeight;
         }
         else
         {
-            scale.x() *= race->mData.mWeight.mFemale;
-            scale.y() *= race->mData.mWeight.mFemale;
-            scale.z() *= race->mData.mHeight.mFemale;
+            scale.x() *= race->mData.mFemaleWeight;
+            scale.y() *= race->mData.mFemaleWeight;
+            scale.z() *= race->mData.mFemaleHeight;
         }
     }
 

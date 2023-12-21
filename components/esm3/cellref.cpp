@@ -116,7 +116,7 @@ namespace ESM
                             cellRef.mTeleport = true;
                         }
                         else
-                            esm.skipHTSized<24, ESM::Position>();
+                            esm.skipHSub();
                         break;
                     case fourCC("DNAM"):
                         getHStringOrSkip(cellRef.mDestCell);
@@ -134,7 +134,7 @@ namespace ESM
                         if constexpr (load)
                             esm.getHT(cellRef.mPos.pos, cellRef.mPos.rot);
                         else
-                            esm.skipHTSized<24, decltype(cellRef.mPos)>();
+                            esm.skipHSub();
                         break;
                     case fourCC("NAM0"):
                     {

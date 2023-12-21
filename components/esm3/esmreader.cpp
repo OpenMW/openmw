@@ -263,7 +263,7 @@ namespace ESM
     {
         FormId res;
         if (wide)
-            getHNTSized<8>(res, tag);
+            getHNT(tag, res.mIndex, res.mContentFile);
         else
             getHNT(res.mIndex, tag);
         return res;
@@ -496,7 +496,8 @@ namespace ESM
             case RefIdType::FormId:
             {
                 FormId formId{};
-                getTSized<8>(formId);
+                getT(formId.mIndex);
+                getT(formId.mContentFile);
                 if (applyContentFileMapping(formId))
                     return RefId(formId);
                 else

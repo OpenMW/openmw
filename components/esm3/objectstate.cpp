@@ -32,15 +32,8 @@ namespace ESM
         mCount = 1;
         esm.getHNOT(mCount, "COUN");
 
-        if (esm.isNextSub("POS_"))
-        {
-            std::array<float, 6> pos;
-            esm.getHT(pos);
-            memcpy(mPosition.pos, pos.data(), sizeof(float) * 3);
-            memcpy(mPosition.rot, pos.data() + 3, sizeof(float) * 3);
-        }
-        else
-            mPosition = mRef.mPos;
+        mPosition = mRef.mPos;
+        esm.getHNOT("POS_", mPosition.pos, mPosition.rot);
 
         mFlags = 0;
         esm.getHNOT(mFlags, "FLAG");

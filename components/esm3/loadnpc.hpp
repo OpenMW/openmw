@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "aipackage.hpp"
+#include "components/esm/attr.hpp"
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
 #include "loadcont.hpp"
@@ -74,13 +75,10 @@ namespace ESM
             NPC_DEFAULT = 52
         };
 
-#pragma pack(push)
-#pragma pack(1)
-
         struct NPDTstruct52
         {
             int16_t mLevel;
-            unsigned char mStrength, mIntelligence, mWillpower, mAgility, mSpeed, mEndurance, mPersonality, mLuck;
+            std::array<unsigned char, Attribute::Length> mAttributes;
 
             // mSkill can grow up to 200, it must be unsigned
             std::array<unsigned char, Skill::Length> mSkills;
@@ -91,18 +89,6 @@ namespace ESM
             char mUnknown2;
             int32_t mGold;
         }; // 52 bytes
-
-        // Structure for autocalculated characters.
-        //  This is only used for load and save operations.
-        struct NPDTstruct12
-        {
-            int16_t mLevel;
-            // see above
-            unsigned char mDisposition, mReputation, mRank;
-            char mUnknown1, mUnknown2, mUnknown3;
-            int32_t mGold;
-        }; // 12 bytes
-#pragma pack(pop)
 
         unsigned char mNpdtType;
         // Worth noting when saving the struct:

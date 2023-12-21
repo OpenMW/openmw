@@ -11,17 +11,9 @@ namespace ESM
     {
         mWorldspace = esm.getHNString("SPAC");
 
-        if (esm.isNextSub("CIDX"))
-        {
-            esm.getHT(mIndex.mX, mIndex.mY);
-            mPaged = true;
-        }
-        else
-        {
-            mPaged = false;
-            mIndex.mX = 0;
-            mIndex.mY = 0;
-        }
+        mIndex.mX = 0;
+        mIndex.mY = 0;
+        mPaged = esm.getHNOT("CIDX", mIndex.mX, mIndex.mY);
     }
 
     void CellId::save(ESMWriter& esm) const

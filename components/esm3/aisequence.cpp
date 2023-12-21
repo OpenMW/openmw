@@ -15,12 +15,7 @@ namespace ESM
         {
             esm.getHNT("DATA", mData.mDistance, mData.mDuration, mData.mTimeOfDay, mData.mIdle, mData.mShouldRepeat);
             esm.getHNT("STAR", mDurationData.mRemainingDuration, mDurationData.unused); // was mStartTime
-            mStoredInitialActorPosition = false;
-            if (esm.isNextSub("POS_"))
-            {
-                mStoredInitialActorPosition = true;
-                esm.getHT(mInitialActorPosition.mValues);
-            }
+            mStoredInitialActorPosition = esm.getHNOT("POS_", mInitialActorPosition.mValues);
         }
 
         void AiWander::save(ESMWriter& esm) const

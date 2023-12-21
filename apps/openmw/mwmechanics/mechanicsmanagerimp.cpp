@@ -134,14 +134,9 @@ namespace MWMechanics
         for (size_t i = 0; i < player->mNpdt.mSkills.size(); ++i)
             npcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(player->mNpdt.mSkills[i]);
 
-        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
-        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt.mIntelligence);
-        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt.mWillpower);
-        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt.mAgility);
-        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt.mSpeed);
-        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt.mEndurance);
-        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt.mPersonality);
-        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt.mLuck);
+        for (size_t i = 0; i < player->mNpdt.mAttributes.size(); ++i)
+            npcStats.setAttribute(ESM::Attribute::indexToRefId(i), player->mNpdt.mSkills[i]);
+
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         // race
@@ -152,13 +147,7 @@ namespace MWMechanics
             bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
             for (const ESM::Attribute& attribute : esmStore.get<ESM::Attribute>())
-            {
-                auto index = ESM::Attribute::refIdToIndex(attribute.mId);
-                assert(index >= 0);
-
-                const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[static_cast<size_t>(index)];
-                creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
-            }
+                creatureStats.setAttribute(attribute.mId, race->mData.getAttribute(attribute.mId, male));
 
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {

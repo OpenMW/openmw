@@ -741,8 +741,8 @@ namespace CSMWorld
     QVariant RaceAttributeAdapter::getData(const Record<ESM::Race>& record, int subRowIndex, int subColIndex) const
     {
         ESM::Race race = record.get();
-
-        if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
+        ESM::RefId attribute = ESM::Attribute::indexToRefId(subRowIndex);
+        if (attribute.empty())
             throw std::runtime_error("index out of range");
 
         switch (subColIndex)
@@ -750,9 +750,9 @@ namespace CSMWorld
             case 0:
                 return subRowIndex;
             case 1:
-                return race.mData.mAttributeValues[subRowIndex].mMale;
+                return race.mData.getAttribute(attribute, true);
             case 2:
-                return race.mData.mAttributeValues[subRowIndex].mFemale;
+                return race.mData.getAttribute(attribute, false);
             default:
                 throw std::runtime_error("Race Attribute subcolumn index out of range");
         }
@@ -762,8 +762,8 @@ namespace CSMWorld
         Record<ESM::Race>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Race race = record.get();
-
-        if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
+        ESM::RefId attribute = ESM::Attribute::indexToRefId(subRowIndex);
+        if (attribute.empty())
             throw std::runtime_error("index out of range");
 
         switch (subColIndex)
@@ -771,10 +771,10 @@ namespace CSMWorld
             case 0:
                 return; // throw an exception here?
             case 1:
-                race.mData.mAttributeValues[subRowIndex].mMale = value.toInt();
+                race.mData.setAttribute(attribute, true, value.toInt());
                 break;
             case 2:
-                race.mData.mAttributeValues[subRowIndex].mFemale = value.toInt();
+                race.mData.setAttribute(attribute, false, value.toInt());
                 break;
             default:
                 throw std::runtime_error("Race Attribute subcolumn index out of range");

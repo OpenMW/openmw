@@ -1966,7 +1966,7 @@ namespace MWMechanics
         {
             const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
             const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);
-            float weight = npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+            float weight = npc->isMale() ? race->mData.mMaleWeight : race->mData.mFemaleWeight;
             scale *= weight;
         }
 

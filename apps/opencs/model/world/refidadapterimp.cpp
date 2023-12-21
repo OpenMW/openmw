@@ -938,30 +938,9 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData(
 
     if (subColIndex == 0)
         return subRowIndex;
-    else if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                return static_cast<int>(npcStruct.mStrength);
-            case 1:
-                return static_cast<int>(npcStruct.mIntelligence);
-            case 2:
-                return static_cast<int>(npcStruct.mWillpower);
-            case 3:
-                return static_cast<int>(npcStruct.mAgility);
-            case 4:
-                return static_cast<int>(npcStruct.mSpeed);
-            case 5:
-                return static_cast<int>(npcStruct.mEndurance);
-            case 6:
-                return static_cast<int>(npcStruct.mPersonality);
-            case 7:
-                return static_cast<int>(npcStruct.mLuck);
-            default:
-                return QVariant(); // throw an exception here?
-        }
-    else
-        return QVariant(); // throw an exception here?
+    else if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
+        return static_cast<int>(npcStruct.mAttributes[subRowIndex]);
+    return QVariant(); // throw an exception here?
 }
 
 void CSMWorld::NpcAttributesRefIdAdapter::setNestedData(
@@ -972,36 +951,8 @@ void CSMWorld::NpcAttributesRefIdAdapter::setNestedData(
     ESM::NPC npc = record.get();
     ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt;
 
-    if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                npcStruct.mStrength = static_cast<unsigned char>(value.toInt());
-                break;
-            case 1:
-                npcStruct.mIntelligence = static_cast<unsigned char>(value.toInt());
-                break;
-            case 2:
-                npcStruct.mWillpower = static_cast<unsigned char>(value.toInt());
-                break;
-            case 3:
-                npcStruct.mAgility = static_cast<unsigned char>(value.toInt());
-                break;
-            case 4:
-                npcStruct.mSpeed = static_cast<unsigned char>(value.toInt());
-                break;
-            case 5:
-                npcStruct.mEndurance = static_cast<unsigned char>(value.toInt());
-                break;
-            case 6:
-                npcStruct.mPersonality = static_cast<unsigned char>(value.toInt());
-                break;
-            case 7:
-                npcStruct.mLuck = static_cast<unsigned char>(value.toInt());
-                break;
-            default:
-                return; // throw an exception here?
-        }
+    if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
+        npcStruct.mAttributes[subRowIndex] = static_cast<unsigned char>(value.toInt());
     else
         return; // throw an exception here?
 

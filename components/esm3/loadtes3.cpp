@@ -20,10 +20,8 @@ namespace ESM
 
     void Header::load(ESMReader& esm)
     {
-        if (esm.isNextSub("FORM"))
-            esm.getHT(mFormatVersion);
-        else
-            mFormatVersion = DefaultFormatVersion;
+        mFormatVersion = DefaultFormatVersion;
+        esm.getHNOT("FORM", mFormatVersion);
 
         if (esm.isNextSub("HEDR"))
         {
@@ -43,10 +41,8 @@ namespace ESM
             mMaster.push_back(m);
         }
 
-        if (esm.isNextSub("GMDT"))
-        {
-            esm.getHTSized<124>(mGameData);
-        }
+        esm.getHNOT("GMDT", mGameData.mCurrentHealth, mGameData.mMaximumHealth, mGameData.mHour, mGameData.unknown1,
+            mGameData.mCurrentCell.mData, mGameData.unknown2, mGameData.mPlayerName.mData);
         if (esm.isNextSub("SCRD"))
         {
             esm.getSubHeader();

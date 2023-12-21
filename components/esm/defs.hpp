@@ -18,9 +18,9 @@ namespace ESM
     struct EpochTimeStamp
     {
         float mGameHour;
-        int mDay;
-        int mMonth;
-        int mYear;
+        int32_t mDay;
+        int32_t mMonth;
+        int32_t mYear;
     };
 
     // Pixel color value. Standard four-byte rr,gg,bb,aa format.
