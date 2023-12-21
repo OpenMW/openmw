@@ -63,7 +63,7 @@ namespace Terrain
 
     void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Terrain Chunk", mCache->getCacheSize());
+        Resource::reportStats("Terrain Chunk", frameNumber, mCache->getStats(), *stats);
     }
 
     void ChunkManager::clearCache()

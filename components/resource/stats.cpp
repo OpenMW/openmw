@@ -20,6 +20,8 @@
 
 #include <components/vfs/manager.hpp>
 
+#include "cachestats.hpp"
+
 namespace Resource
 {
     namespace
@@ -45,52 +47,95 @@ namespace Resource
         bool collectStatUpdate = false;
         bool collectStatEngine = false;
 
-        const std::vector<std::string> allStatNames = {
-            "FrameNumber",
-            "Compiling",
-            "WorkQueue",
-            "WorkThread",
-            "UnrefQueue",
-            "Texture",
-            "StateSet",
-            "Node",
-            "Shape",
-            "Shape Instance",
-            "Image",
-            "Nif",
-            "Keyframe",
-            "Groundcover Chunk",
-            "Object Chunk",
-            "Terrain Chunk",
-            "Terrain Texture",
-            "Land",
-            "Composite",
-            "Mechanics Actors",
-            "Mechanics Objects",
-            "Physics Actors",
-            "Physics Objects",
-            "Physics Projectiles",
-            "Physics HeightFields",
-            "Lua UsedMemory",
-            "CellPreloader Count",
-            "CellPreloader Added",
-            "CellPreloader Evicted",
-            "CellPreloader Loaded",
-            "CellPreloader Expired",
-            "NavMesh Jobs",
-            "NavMesh Waiting",
-            "NavMesh Pushed",
-            "NavMesh Processing",
-            "NavMesh DbJobs Write",
-            "NavMesh DbJobs Read",
-            "NavMesh DbCache Get",
-            "NavMesh DbCache Hit",
-            "NavMesh CacheSize",
-            "NavMesh UsedTiles",
-            "NavMesh CachedTiles",
-            "NavMesh Cache Get",
-            "NavMesh Cache Hit",
-        };
+        std::vector<std::string> generateAllStatNames()
+        {
+            constexpr std::string_view firstPage[] = {
+                "FrameNumber",
+                "",
+                "Compiling",
+                "WorkQueue",
+                "WorkThread",
+                "UnrefQueue",
+                "",
+                "Texture",
+                "StateSet",
+                "Composite",
+                "",
+                "Mechanics Actors",
+                "Mechanics Objects",
+                "",
+                "Physics Actors",
+                "Physics Objects",
+                "Physics Projectiles",
+                "Physics HeightFields",
+                "",
+                "Lua UsedMemory",
+                "",
+                "",
+                "",
+                "",
+            };
+
+            constexpr std::string_view caches[] = {
+                "Node",
+                "Shape",
+                "Shape Instance",
+                "Image",
+                "Nif",
+                "Keyframe",
+                "Groundcover Chunk",
+                "Object Chunk",
+                "Terrain Chunk",
+                "Terrain Texture",
+                "Land",
+            };
+
+            constexpr std::string_view cellPreloader[] = {
+                "CellPreloader Count",
+                "CellPreloader Added",
+                "CellPreloader Evicted",
+                "CellPreloader Loaded",
+                "CellPreloader Expired",
+            };
+
+            constexpr std::string_view navMesh[] = {
+                "NavMesh Jobs",
+                "NavMesh Waiting",
+                "NavMesh Pushed",
+                "NavMesh Processing",
+                "NavMesh DbJobs Write",
+                "NavMesh DbJobs Read",
+                "NavMesh DbCache Get",
+                "NavMesh DbCache Hit",
+                "NavMesh CacheSize",
+                "NavMesh UsedTiles",
+                "NavMesh CachedTiles",
+                "NavMesh Cache Get",
+                "NavMesh Cache Hit",
+            };
+
+            std::vector<std::string> statNames;
+
+            for (std::string_view name : firstPage)
+                statNames.emplace_back(name);
+
+            for (std::size_t i = 0; i < std::size(caches); ++i)
+            {
+                Resource::addCacheStatsAttibutes(caches[i], statNames);
+                if ((i + 1) % 5 != 0)
+                    statNames.emplace_back();
+            }
+
+            for (std::string_view name : cellPreloader)
+                statNames.emplace_back(name);
+
+            statNames.emplace_back();
+
+            for (std::string_view name : navMesh)
+                statNames.emplace_back(name);
+
+            return statNames;
+        }
 
         void setupStatCollection()
         {
@@ -258,6 +303,7 @@ namespace Resource
         , mSwitch(new osg::Switch)
         , mCamera(new osg::Camera)
         , mTextFont(getMonoFont(vfs))
+        , mStatNames(generateAllStatNames())
     {
         osg::ref_ptr<osg::StateSet> stateset = mSwitch->getOrCreateStateSet();
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -465,7 +511,7 @@ namespace Resource
         const osg::Vec4 staticTextColor(1.0, 1.0, 0.0f, 1.0);
         const osg::Vec4 dynamicTextColor(1.0, 1.0, 1.0f, 1.0);
 
-        const auto longest = std::max_element(allStatNames.begin(), allStatNames.end(),
+        const auto longest = std::max_element(mStatNames.begin(), mStatNames.end(),
             [](const std::string& lhs, const std::string& rhs) { return lhs.size() < rhs.size(); });
         const std::size_t longestSize = longest->size();
         const float statNamesWidth = longestSize * characterSize * 0.6 + 2 * backgroundMargin;
@@ -473,14 +519,14 @@ namespace Resource
         const float statHeight = pageSize * characterSize + 2 * backgroundMargin;
         const float width = statNamesWidth + backgroundSpacing + statTextWidth;
 
-        for (std::size_t offset = 0; offset < allStatNames.size(); offset += pageSize)
+        for (std::size_t offset = 0; offset < mStatNames.size(); offset += pageSize)
         {
             osg::ref_ptr<osg::Group> group = new osg::Group;
 
             group->setCullingActive(false);
 
-            const std::size_t count = std::min(allStatNames.size() - offset, pageSize);
-            std::span<const std::string> currentStatNames(allStatNames.data() + offset, count);
+            const std::size_t count = std::min(mStatNames.size() - offset, pageSize);
+            std::span<const std::string> currentStatNames(mStatNames.data() + offset, count);
             osg::Vec3 pos(statsWidth - width, statHeight - characterSize, 0.0f);
 
             group->addChild(

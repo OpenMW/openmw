@@ -20,6 +20,8 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 #define OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 
+#include "cachestats.hpp"
+
 #include <osg/Node>
 #include <osg/Referenced>
 #include <osg/ref_ptr>
@@ -29,26 +31,28 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace osg
 {
     class Object;
     class State;
     class NodeVisitor;
+    class Stats;
 }
 
 namespace Resource
 {
+    struct GenericObjectCacheItem
+    {
+        osg::ref_ptr<osg::Object> mValue;
+        double mLastUsage;
+    };
 
     template <typename KeyType>
     class GenericObjectCache : public osg::Referenced
     {
     public:
-        GenericObjectCache()
-            : osg::Referenced(true)
-        {
-        }
-
         // Update last usage timestamp using referenceTime for each cache time if they are not nullptr and referenced
         // from somewhere else. Remove items with last usage > expiryTime. Note: last usage might be updated from other
         // places so nullptr or not references elsewhere items are not always removed.
@@ -64,6 +68,7 @@ namespace Resource
                         item.mLastUsage = referenceTime;
                     if (item.mLastUsage > expiryTime)
                         return false;
+                    ++mExpired;
                     if (item.mValue != nullptr)
                         objectsToRemove.push_back(std::move(item.mValue));
                     return true;
@@ -105,34 +110,29 @@ namespace Resource
         osg::ref_ptr<osg::Object> getRefFromObjectCache(const auto& key)
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            const auto itr = mItems.find(key);
-            if (itr != mItems.end())
-                return itr->second.mValue;
-            else
-                return nullptr;
+            if (Item* const item = find(key))
+                return item->mValue;
+            return nullptr;
         }
 
         std::optional<osg::ref_ptr<osg::Object>> getRefFromObjectCacheOrNone(const auto& key)
         {
             const std::lock_guard<std::mutex> lock(mMutex);
-            const auto it = mItems.find(key);
-            if (it == mItems.end())
-                return std::nullopt;
-            return it->second.mValue;
+            if (Item* const item = find(key))
+                return item->mValue;
+            return std::nullopt;
         }
 
         /** Check if an object is in the cache, and if it is, update its usage time stamp. */
         bool checkInObjectCache(const auto& key, double timeStamp)
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            const auto itr = mItems.find(key);
-            if (itr != mItems.end())
+            if (Item* const item = find(key))
             {
-                itr->second.mLastUsage = timeStamp;
+                item->mLastUsage = timeStamp;
                 return true;
             }
-            else
-                return false;
+            return false;
         }
 
         /** call releaseGLObjects on all objects attached to the object cache.*/
@@ -162,13 +162,6 @@ namespace Resource
                 f(k, v.mValue.get());
         }
 
-        /** Get the number of objects in the cache. */
-        unsigned int getCacheSize() const
-        {
-            std::lock_guard<std::mutex> lock(mMutex);
-            return mItems.size();
-        }
-
         template <class K>
         std::optional<std::pair<KeyType, osg::ref_ptr<osg::Object>>> lowerBound(K&& key)
         {
@@ -179,21 +172,36 @@ namespace Resource
             return std::pair(it->first, it->second.mValue);
         }
 
-    protected:
-        struct Item
+        CacheStats getStats() const
         {
-            osg::ref_ptr<osg::Object> mValue;
-            double mLastUsage;
-        };
+            const std::lock_guard<std::mutex> lock(mMutex);
+            return CacheStats{
+                .mSize = mItems.size(),
+                .mGet = mGet,
+                .mHit = mHit,
+                .mExpired = mExpired,
+            };
+        }
+
+    protected:
+        using Item = GenericObjectCacheItem;
 
         std::map<KeyType, Item, std::less<>> mItems;
         mutable std::mutex mMutex;
-    };
+        std::size_t mGet = 0;
+        std::size_t mHit = 0;
+        std::size_t mExpired = 0;
 
-    class ObjectCache : public GenericObjectCache<std::string>
-    {
+        Item* find(const auto& key)
+        {
+            ++mGet;
+            const auto it = mItems.find(key);
+            if (it == mItems.end())
+                return nullptr;
+            ++mHit;
+            return &it->second;
+        }
     };
-
 }
 
 #endif

@@ -57,6 +57,7 @@ namespace Resource
         osg::ref_ptr<osg::Switch> mSwitch;
         osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<osgText::Font> mTextFont;
+        std::vector<std::string> mStatNames;
 
         void setWindowSize(int w, int h);
 

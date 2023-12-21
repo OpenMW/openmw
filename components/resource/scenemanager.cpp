@@ -1125,7 +1125,7 @@ namespace Resource
             stats->setAttribute(frameNumber, "StateSet", mSharedStateManager->getNumSharedStateSets());
         }
 
-        stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
+        Resource::reportStats("Node", frameNumber, mCache->getStats(), *stats);
     }
 
     osg::ref_ptr<Shader::ShaderVisitor> SceneManager::createShaderVisitor(const std::string& shaderPrefix)
