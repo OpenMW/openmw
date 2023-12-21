@@ -257,6 +257,7 @@ namespace MWRender
         , mRainMaxHeight(0.f)
         , mRainEntranceSpeed(1.f)
         , mRainMaxRaindrops(0)
+        , mRipples(false)
         , mWindSpeed(0.f)
         , mBaseWindSpeed(0.f)
         , mEnabled(true)
@@ -516,6 +517,11 @@ namespace MWRender
         return mRainNode != nullptr;
     }
 
+    bool SkyManager::getRainRipplesEnabled() const
+    {
+        return mRipples;
+    }
+
     float SkyManager::getPrecipitationAlpha() const
     {
         if (mEnabled && !mIsStorm && (hasRain() || mParticleNode))
@@ -630,6 +636,7 @@ namespace MWRender
         mRainMinHeight = weather.mRainMinHeight;
         mRainMaxHeight = weather.mRainMaxHeight;
         mRainSpeed = weather.mRainSpeed;
+        mRipples = weather.mRipples;
         mWindSpeed = weather.mWindSpeed;
         mBaseWindSpeed = weather.mBaseWindSpeed;
 

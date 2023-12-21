@@ -175,6 +175,7 @@ namespace MWWorld
         , mRainMaxHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Max"))
         , mParticleEffect(particleEffect)
         , mRainEffect(Fallback::Map::getBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
+        , mRipples(Fallback::Map::getBool("Weather_" + name + "_Ripples"))
         , mStormDirection(Weather::defaultDirection())
         , mCloudsMaximumPercent(Fallback::Map::getFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
         , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
@@ -1129,6 +1130,7 @@ namespace MWWorld
         mResult.mRainMinHeight = current.mRainMinHeight;
         mResult.mRainMaxHeight = current.mRainMaxHeight;
         mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
+        mResult.mRipples = current.mRipples;
 
         mResult.mParticleEffect = current.mParticleEffect;
         mResult.mRainEffect = current.mRainEffect;
@@ -1241,6 +1243,7 @@ namespace MWWorld
             mResult.mRainMinHeight = current.mRainMinHeight;
             mResult.mRainMaxHeight = current.mRainMaxHeight;
             mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
+            mResult.mRipples = current.mRipples;
         }
         else
         {
@@ -1257,6 +1260,7 @@ namespace MWWorld
             mResult.mRainMinHeight = other.mRainMinHeight;
             mResult.mRainMaxHeight = other.mRainMaxHeight;
             mResult.mRainMaxRaindrops = other.mRainMaxRaindrops;
+            mResult.mRipples = other.mRipples;
         }
     }
 }
