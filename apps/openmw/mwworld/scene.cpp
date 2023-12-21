@@ -1285,4 +1285,9 @@ namespace MWWorld
             }
         }
     }
+
+    void Scene::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        mPreloader->reportStats(frameNumber, stats);
+    }
 }
