@@ -203,8 +203,6 @@ namespace CSVRender
 
         virtual void selectGroup(const std::vector<std::string>) const = 0;
 
-        virtual void hideGroup(const std::vector<std::string>) const = 0;
-
         virtual void unhideAll() const = 0;
 
         virtual std::vector<osg::ref_ptr<TagBase>> getEdited(unsigned int elementMask) const = 0;
