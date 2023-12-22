@@ -94,7 +94,7 @@ namespace MWInput
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
             float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-            const float gamepadCursorSpeed = Settings::input().mEnableController;
+            const float gamepadCursorSpeed = Settings::input().mGamepadCursorSpeed;
             const float xMove = xAxis * dt * 1500.0f / uiScale * gamepadCursorSpeed;
             const float yMove = yAxis * dt * 1500.0f / uiScale * gamepadCursorSpeed;
 
