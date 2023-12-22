@@ -133,6 +133,7 @@ namespace CSMWorld
             Type_LandTexture,
             Type_Pathgrids,
             Type_Pathgrid,
+            Type_SelectionGroup,
             Type_StartScripts,
             Type_StartScript,
             Type_Search,

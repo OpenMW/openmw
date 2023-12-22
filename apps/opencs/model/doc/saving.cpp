@@ -25,6 +25,7 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadsscr.hpp>
+#include <components/esm3/selectiongroup.hpp>
 
 #include "../world/data.hpp"
 #include "../world/idcollection.hpp"
@@ -51,6 +52,9 @@ CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectP
 
     appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::Script>>(
         mDocument.getData().getScripts(), mState, CSMWorld::Scope_Project));
+
+    appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::SelectionGroup>>(
+        mDocument.getData().getSelectionGroups(), mState, CSMWorld::Scope_Project));
 
     appendStage(new CloseSaveStage(mState));
 

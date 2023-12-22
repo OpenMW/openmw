@@ -16,6 +16,7 @@
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/esm3/selectiongroup.hpp>
 #include <components/esm3/variant.hpp>
 
 #include <optional>
@@ -2389,6 +2390,17 @@ namespace CSMWorld
 
         QVariant get(const Record<ESM::BodyPart>& record) const override;
         void set(Record<ESM::BodyPart>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
+    struct SelectionGroupColumn : public Column<ESM::SelectionGroup>
+    {
+        SelectionGroupColumn();
+
+        QVariant get(const Record<ESM::SelectionGroup>& record) const override;
+
+        void set(Record<ESM::SelectionGroup>& record, const QVariant& data) override;
+
         bool isEditable() const override;
     };
 }
