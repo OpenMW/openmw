@@ -142,6 +142,9 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     connect(new CSMPrefs::Shortcut("scene-unhide-all", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
         &WorldspaceWidget::unhideAll);
 
+    connect(new CSMPrefs::Shortcut("scene-clear-selection", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        [this] { this->clearSelection(Mask_Reference); });
+
     mInConstructor = false;
 }
 
