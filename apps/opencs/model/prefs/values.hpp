@@ -436,15 +436,15 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mReporttableRemove{ mIndex, sName, "reporttable-remove", "Delete" };
         Settings::SettingValue<std::string> mReporttableReplace{ mIndex, sName, "reporttable-replace", "" };
         Settings::SettingValue<std::string> mReporttableRefresh{ mIndex, sName, "reporttable-refresh", "" };
-        Settings::SettingValue<std::string> mSceneNaviPrimary{ mIndex, sName, "scene-navi-primary", "LMB" };
-        Settings::SettingValue<std::string> mSceneNaviSecondary{ mIndex, sName, "scene-navi-secondary", "Ctrl+LMB" };
+        Settings::SettingValue<std::string> mSceneNaviPrimary{ mIndex, sName, "scene-navi-primary", "MMB" };
+        Settings::SettingValue<std::string> mSceneNaviSecondary{ mIndex, sName, "scene-navi-secondary", "Ctrl+MMB" };
         Settings::SettingValue<std::string> mSceneOpenPrimary{ mIndex, sName, "scene-open-primary", "Shift+LMB" };
         Settings::SettingValue<std::string> mSceneEditPrimary{ mIndex, sName, "scene-edit-primary", "RMB" };
         Settings::SettingValue<std::string> mSceneEditSecondary{ mIndex, sName, "scene-edit-secondary", "Ctrl+RMB" };
-        Settings::SettingValue<std::string> mSceneSelectPrimary{ mIndex, sName, "scene-select-primary", "MMB" };
+        Settings::SettingValue<std::string> mSceneSelectPrimary{ mIndex, sName, "scene-select-primary", "LMB" };
         Settings::SettingValue<std::string> mSceneSelectSecondary{ mIndex, sName, "scene-select-secondary",
-            "Ctrl+MMB" };
-        Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+MMB" };
+            "Ctrl+LMB" };
+        Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+LMB" };
         Settings::SettingValue<std::string> mSceneSpeedModifier{ mIndex, sName, "scene-speed-modifier", "Shift" };
         Settings::SettingValue<std::string> mSceneDelete{ mIndex, sName, "scene-delete", "Delete" };
         Settings::SettingValue<std::string> mSceneInstanceDropTerrain{ mIndex, sName, "scene-instance-drop-terrain",
