@@ -615,10 +615,15 @@ osg::ref_ptr<CSVRender::TagBase> CSVRender::Cell::getSnapTarget(unsigned int ele
 void CSVRender::Cell::selectFromGroup(const std::vector<std::string> group)
 {
     for (const auto& [_, object] : mObjects)
-        if (auto found = std::ranges::find_if(group.begin(), group.end(),
-                [&object](const std::string& id) { return object->getReferenceId() == id; });
-            found != group.end())
-            object->setSelected(true, osg::Vec4f(1, 0, 1, 1));
+    {
+        for (const auto& objectName : group)
+        {
+            if (objectName == object->getReferenceId())
+            {
+                object->setSelected(true, osg::Vec4f(1, 0, 1, 1));
+            }
+        }
+    }
 }
 
 void CSVRender::Cell::unhideAll()

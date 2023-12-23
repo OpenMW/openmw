@@ -14,8 +14,8 @@
 
 #include "editmode.hpp"
 #include "instancedragmodes.hpp"
+#include <apps/opencs/model/world/idtable.hpp>
 #include <components/esm3/selectiongroup.hpp>
-#include <model/world/idtable.hpp>
 
 class QDragEnterEvent;
 class QDropEvent;
