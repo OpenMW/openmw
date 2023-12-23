@@ -52,7 +52,6 @@ namespace DetourNavigator
                 mTop = mPrev;
                 mPrev = getTempPtrPrev(mTop);
             }
-            return;
         }
 
     private:
