@@ -63,7 +63,8 @@ namespace CSMPrefs
 
         void declareCategory(const std::string& key);
 
-        IntSetting& declareInt(const std::string& key, const QString& label, int default_);
+        IntSetting& declareInt(Settings::SettingValue<int>& value, const QString& label);
+
         DoubleSetting& declareDouble(const std::string& key, const QString& label, double default_);
 
         BoolSetting& declareBool(const std::string& key, const QString& label, bool default_);

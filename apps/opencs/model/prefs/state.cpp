@@ -32,10 +32,10 @@ CSMPrefs::State* CSMPrefs::State::sThis = nullptr;
 void CSMPrefs::State::declare()
 {
     declareCategory("Windows");
-    declareInt("default-width", "Default window width", 800)
+    declareInt(mValues->mWindows.mDefaultWidth, "Default window width")
         .setTooltip("Newly opened top-level windows will open with this width.")
         .setMin(80);
-    declareInt("default-height", "Default window height", 600)
+    declareInt(mValues->mWindows.mDefaultHeight, "Default window height")
         .setTooltip("Newly opened top-level windows will open with this height.")
         .setMin(80);
     declareBool("show-statusbar", "Show Status Bar", true)
@@ -46,7 +46,7 @@ void CSMPrefs::State::declare()
         .setTooltip(
             "When a new subview is requested and a matching subview already "
             " exist, do not open a new subview and use the existing one instead.");
-    declareInt("max-subviews", "Maximum number of subviews per top-level window", 256)
+    declareInt(mValues->mWindows.mMaxSubviews, "Maximum number of subviews per top-level window")
         .setTooltip(
             "If the maximum number is reached and a new subview is opened "
             "it will be placed into a new top-level window.")
@@ -56,7 +56,7 @@ void CSMPrefs::State::declare()
             "When a view contains only a single subview, hide the subview title "
             "bar and if this subview is closed also close the view (unless it is the last "
             "view for this document)");
-    declareInt("minimum-width", "Minimum subview width", 325)
+    declareInt(mValues->mWindows.mMinimumWidth, "Minimum subview width")
         .setTooltip("Minimum width of subviews.")
         .setRange(50, 10000);
     EnumValue scrollbarOnly("Scrollbar Only",
@@ -134,9 +134,9 @@ void CSMPrefs::State::declare()
     declareBool("ignore-base-records", "Ignore base records in verifier", false);
 
     declareCategory("Search & Replace");
-    declareInt("char-before", "Characters before search string", 10)
+    declareInt(mValues->mSearchAndReplace.mCharBefore, "Characters before search string")
         .setTooltip("Maximum number of character to display in search result before the searched text");
-    declareInt("char-after", "Characters after search string", 10)
+    declareInt(mValues->mSearchAndReplace.mCharAfter, "Characters after search string")
         .setTooltip("Maximum number of character to display in search result after the searched text");
     declareBool("auto-delete", "Delete row from result table after a successful replace", true);
 
@@ -147,17 +147,19 @@ void CSMPrefs::State::declare()
             "The current row and column numbers of the text cursor are shown at the bottom.");
     declareBool("wrap-lines", "Wrap Lines", false).setTooltip("Wrap lines longer than width of script editor.");
     declareBool("mono-font", "Use monospace font", true);
-    declareInt("tab-width", "Tab Width", 4).setTooltip("Number of characters for tab width").setRange(1, 10);
+    declareInt(mValues->mScripts.mTabWidth, "Tab Width")
+        .setTooltip("Number of characters for tab width")
+        .setRange(1, 10);
     EnumValue warningsNormal("Normal", "Report warnings as warning");
     declareEnum("warnings", "Warning Mode", warningsNormal)
         .addValue("Ignore", "Do not report warning")
         .addValue(warningsNormal)
         .addValue("Strict", "Promote warning to an error");
     declareBool("toolbar", "Show toolbar", true);
-    declareInt("compile-delay", "Delay between updating of source errors", 100)
+    declareInt(mValues->mScripts.mCompileDelay, "Delay between updating of source errors")
         .setTooltip("Delay in milliseconds")
         .setRange(0, 10000);
-    declareInt("error-height", "Initial height of the error panel", 100).setRange(100, 10000);
+    declareInt(mValues->mScripts.mErrorHeight, "Initial height of the error panel").setRange(100, 10000);
     declareBool("highlight-occurrences", "Highlight other occurrences of selected names", true);
     declareColour("colour-highlight", "Colour of highlighted occurrences", QColor("lightcyan"));
     declareColour("colour-int", "Highlight Colour: Integer Literals", QColor("darkmagenta"));
@@ -201,12 +203,12 @@ void CSMPrefs::State::declare()
     declareDouble("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
 
     declareCategory("Rendering");
-    declareInt("framerate-limit", "FPS limit", 60)
+    declareInt(mValues->mRendering.mFramerateLimit, "FPS limit")
         .setTooltip("Framerate limit in 3D preview windows. Zero value means \"unlimited\".")
         .setRange(0, 10000);
-    declareInt("camera-fov", "Camera FOV", 90).setRange(10, 170);
+    declareInt(mValues->mRendering.mCameraFov, "Camera FOV").setRange(10, 170);
     declareBool("camera-ortho", "Orthographic projection for camera", false);
-    declareInt("camera-ortho-size", "Orthographic projection size parameter", 100)
+    declareInt(mValues->mRendering.mCameraOrthoSize, "Orthographic projection size parameter")
         .setTooltip("Size of the orthographic frustum, greater value will allow the camera to see more of the world.")
         .setRange(10, 10000);
     declareDouble("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0, 1);
@@ -231,7 +233,7 @@ void CSMPrefs::State::declare()
     declareCategory("Tooltips");
     declareBool("scene", "Show Tooltips in 3D scenes", true);
     declareBool("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
-    declareInt("scene-delay", "Tooltip delay in milliseconds", 500).setMin(1);
+    declareInt(mValues->mTooltips.mSceneDelay, "Tooltip delay in milliseconds").setMin(1);
 
     EnumValue createAndInsert("Create cell and insert");
     EnumValue showAndInsert("Show cell and insert");
@@ -263,7 +265,7 @@ void CSMPrefs::State::declare()
     declareDouble("gridsnap-movement", "Grid snap size", 16);
     declareDouble("gridsnap-rotation", "Angle snap size", 15);
     declareDouble("gridsnap-scale", "Scale snap size", 0.25);
-    declareInt("distance", "Drop Distance", 50)
+    declareInt(mValues->mSceneEditing.mDistance, "Drop Distance")
         .setTooltip(
             "If an instance drop can not be placed against another object at the "
             "insert point, it will be placed by this distance from the insert point instead");
@@ -276,8 +278,8 @@ void CSMPrefs::State::declare()
     declareEnum("outside-visible-landedit", "Handling terrain edit outside of visible cells", showAndLandEdit)
         .setTooltip("Behavior of terrain editing, if land editing brush reaches an area that is not currently visible.")
         .addValues(landeditOutsideVisibleCell);
-    declareInt("texturebrush-maximumsize", "Maximum texture brush size", 50).setMin(1);
-    declareInt("shapebrush-maximumsize", "Maximum height edit brush size", 100)
+    declareInt(mValues->mSceneEditing.mTexturebrushMaximumsize, "Maximum texture brush size").setMin(1);
+    declareInt(mValues->mSceneEditing.mShapebrushMaximumsize, "Maximum height edit brush size")
         .setTooltip("Setting for the slider range of brush size in terrain height editing.")
         .setMin(1);
     declareBool("landedit-post-smoothpainting", "Smooth land after painting height", false)
@@ -459,12 +461,13 @@ void CSMPrefs::State::declareCategory(const std::string& key)
     }
 }
 
-CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const QString& label, int default_)
+CSMPrefs::IntSetting& CSMPrefs::State::declareInt(Settings::SettingValue<int>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    CSMPrefs::IntSetting* setting = new CSMPrefs::IntSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+    CSMPrefs::IntSetting* setting
+        = new CSMPrefs::IntSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
 

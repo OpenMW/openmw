@@ -15,7 +15,7 @@
 #include "state.hpp"
 
 CSMPrefs::IntSetting::IntSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+    Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index)
     : TypedSetting(parent, mutex, key, label, index)
     , mMin(0)
     , mMax(std::numeric_limits<int>::max())
