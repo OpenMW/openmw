@@ -133,6 +133,7 @@ namespace CSVRender
 
     private slots:
 
+        void setDragAxis(const char axis);
         void subModeChanged(const std::string& id);
         void deleteSelectedInstances();
         void cloneSelectedInstances();
