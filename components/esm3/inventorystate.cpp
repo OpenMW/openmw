@@ -15,7 +15,6 @@ namespace ESM
     void InventoryState::load(ESMReader& esm)
     {
         // obsolete
-        uint32_t index = 0;
         while (esm.isNextSub("IOBJ"))
         {
             esm.skipHT<int32_t>();
@@ -29,8 +28,6 @@ namespace ESM
                 continue;
 
             mItems.push_back(state);
-
-            ++index;
         }
 
         uint32_t itemsCount = 0;
