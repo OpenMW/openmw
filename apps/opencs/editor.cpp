@@ -200,6 +200,8 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
 
     dataDirs.insert(dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
+    dataDirs.insert(dataDirs.begin(), mResources / "vfs");
+
     // iterate the data directories and add them to the file dialog for loading
     mFileDialog.addFiles(dataDirs);
 
