@@ -75,6 +75,17 @@ std::string Misc::ResourceHelpers::correctResourcePath(
             needsPrefix = false;
             break;
         }
+        else
+        {
+            std::string topLevelPrefix = std::string{ potentialTopLevelDirectory } + '\\';
+            size_t topLevelPos = correctedPath.find('\\' + topLevelPrefix);
+            if (topLevelPos != std::string::npos)
+            {
+                correctedPath.erase(0, topLevelPos + 1);
+                needsPrefix = false;
+                break;
+            }
+        }
     }
     if (needsPrefix)
         correctedPath = std::string{ topLevelDirectories.front() } + '\\' + correctedPath;
