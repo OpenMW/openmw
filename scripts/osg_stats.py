@@ -350,7 +350,7 @@ def make_stats(source, key, values, precision):
         sum=fixed_float(sum(values), precision),
         mean=fixed_float(statistics.mean(values), precision),
         median=fixed_float(statistics.median(values), precision),
-        stdev=fixed_float(statistics.stdev(values), precision),
+        stdev=fixed_float(statistics.stdev(float(v) for v in values), precision),
         q95=fixed_float(numpy.quantile(values, 0.95), precision),
     )
 
