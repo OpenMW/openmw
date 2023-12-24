@@ -595,6 +595,10 @@ if (USE_QT)
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
     target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 
+    if (BUILD_LAUNCHER OR BUILD_WIZARD)
+        add_dependencies(components_qt qm-files)
+    endif()
+
     if (BUILD_WITH_CODE_COVERAGE)
         target_compile_options(components_qt PRIVATE --coverage)
         target_link_libraries(components_qt gcov)

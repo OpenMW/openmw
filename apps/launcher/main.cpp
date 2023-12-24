@@ -8,6 +8,7 @@
 
 #include <components/debug/debugging.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/qtconversion.hpp>
 #include <components/platform/platform.hpp>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -34,12 +35,22 @@ int runLauncher(int argc, char* argv[])
     {
         QApplication app(argc, argv);
 
+        QString resourcesPath(".");
+        if (!variables["resources"].empty())
+        {
+            resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
+        }
+
         // Internationalization
         QString locale = QLocale::system().name().section('_', 0, 0);
 
         QTranslator appTranslator;
-        appTranslator.load(":/translations/" + locale + ".qm");
+        appTranslator.load(resourcesPath + "/translations/launcher_" + locale + ".qm");
         app.installTranslator(&appTranslator);
+
+        QTranslator componentsAppTranslator;
+        componentsAppTranslator.load(resourcesPath + "/translations/components_" + locale + ".qm");
+        app.installTranslator(&componentsAppTranslator);
 
         Launcher::MainDialog mainWin(configurationManager);
 

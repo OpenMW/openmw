@@ -88,10 +88,6 @@ namespace NavMeshTool
                     ->composing(),
                 "set fallback BSA archives (later archives have higher priority)");
 
-            addOption("resources",
-                bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
-                "set resources directory");
-
             addOption("content",
                 bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
                 "content file(s): esm/esp, or omwgame/omwaddon/omwscripts");

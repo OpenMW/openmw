@@ -1,5 +1,11 @@
 #include <QApplication>
 #include <QDir>
+#include <QTranslator>
+
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
+#include <components/files/qtconversion.hpp>
 
 #include "mainwizard.hpp"
 
@@ -11,6 +17,11 @@
 
 int main(int argc, char* argv[])
 {
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description description;
+    Files::ConfigurationManager configurationManager;
+    configurationManager.addCommonOptions(description);
+    configurationManager.readConfiguration(variables, description, true);
 
     QApplication app(argc, argv);
 
@@ -27,6 +38,23 @@ int main(int argc, char* argv[])
     libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
     app.setLibraryPaths(libraryPaths);
 #endif
+
+    QString resourcesPath(".");
+    if (!variables["resources"].empty())
+    {
+        resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
+    }
+
+    // Internationalization
+    QString locale = QLocale::system().name().section('_', 0, 0);
+
+    QTranslator appTranslator;
+    appTranslator.load(resourcesPath + "/translations/wizard_" + locale + ".qm");
+    app.installTranslator(&appTranslator);
+
+    QTranslator componentsAppTranslator;
+    componentsAppTranslator.load(resourcesPath + "/translations/components_" + locale + ".qm");
+    app.installTranslator(&componentsAppTranslator);
 
     Wizard::MainWizard wizard;
 

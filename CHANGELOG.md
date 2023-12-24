@@ -143,6 +143,7 @@
     Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts
     Feature #6188: Specular lighting from point light sources
+    Feature #6411: Support translations in openmw-launcher
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
