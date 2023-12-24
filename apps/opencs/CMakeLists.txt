@@ -139,7 +139,6 @@ set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
     )
 
 set (OPENCS_UI
-    ${CMAKE_SOURCE_DIR}/components/contentselector/contentselector.ui
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/filedialog.ui
     )
 
