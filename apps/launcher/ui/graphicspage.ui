@@ -107,7 +107,7 @@
              <item>
               <widget class="QLabel" name="multiplyLabel">
                <property name="text">
-                <string> x </string>
+                <string> × </string>
                </property>
               </widget>
              </item>
