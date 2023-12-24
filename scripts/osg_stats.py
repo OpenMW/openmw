@@ -143,7 +143,7 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
     end_frame = min(end_frame, max(v[-1][frame_number_name] for v in sources.values()) + 1)
     for name in sources.keys():
         for key in keys:
-            result[name][key] = [0] * (end_frame - begin_frame)
+            result[name][key] = [None] * (end_frame - begin_frame)
     for name, frames in sources.items():
         for frame in frames:
             number = frame[frame_number_name]
@@ -154,7 +154,14 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
                         result[name][key][index] = frame[key]
     for name in result.keys():
         for key in keys:
-            result[name][key] = numpy.array(result[name][key])
+            prev = 0.0
+            values = result[name][key]
+            for i in range(len(values)):
+                if values[i] is not None:
+                    prev = values[i]
+                else:
+                    values[i] = prev
+            result[name][key] = numpy.array(values)
     return result, begin_frame, end_frame
 
 
