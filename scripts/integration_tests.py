@@ -13,6 +13,7 @@ parser.add_argument("--omw", type=str, default="openmw", help="path to openmw bi
 parser.add_argument(
     "--workdir", type=str, default="integration_tests_output", help="directory for temporary files and logs"
 )
+parser.add_argument("--verbose", action='store_true', help="print all openmw output")
 args = parser.parse_args()
 
 example_suite_dir = Path(args.example_suite).resolve()
@@ -78,7 +79,10 @@ def runTest(name):
     ) as process:
         quit_requested = False
         for line in process.stdout:
-            stdout_lines.append(line)
+            if args.verbose:
+                sys.stdout.write(line)
+            else:
+                stdout_lines.append(line)
             words = line.split(" ")
             if len(words) > 1 and words[1] == "E]":
                 print(line, end="")
@@ -102,7 +106,7 @@ def runTest(name):
             exit_ok = False
     if os.path.exists(config_dir / "openmw.log"):
         shutil.copyfile(config_dir / "openmw.log", work_dir / f"{name}.{time_str}.log")
-    if not exit_ok:
+    if not exit_ok and not args.verbose:
         sys.stdout.writelines(stdout_lines)
     if test_success and exit_ok:
         print(f"{name} succeeded")
