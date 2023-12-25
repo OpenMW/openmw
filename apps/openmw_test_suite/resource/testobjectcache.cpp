@@ -288,5 +288,62 @@ namespace Resource
 
             EXPECT_EQ(cache->lowerBound(4), std::nullopt);
         }
+
+        TEST(ResourceGenericObjectCacheTest, addEntryToObjectCacheShouldSupportHeterogeneousLookup)
+        {
+            osg::ref_ptr<GenericObjectCache<std::string>> cache(new GenericObjectCache<std::string>);
+            const std::string key = "key";
+            osg::ref_ptr<Object> value(new Object);
+            cache->addEntryToObjectCache(std::string_view("key"), value);
+            EXPECT_EQ(cache->getRefFromObjectCache(key), value);
+        }
+
+        TEST(ResourceGenericObjectCacheTest, addEntryToObjectCacheShouldKeyMoving)
+        {
+            osg::ref_ptr<GenericObjectCache<std::string>> cache(new GenericObjectCache<std::string>);
+            std::string key(128, 'a');
+            osg::ref_ptr<Object> value(new Object);
+            cache->addEntryToObjectCache(std::move(key), value);
+            EXPECT_EQ(key, "");
+            EXPECT_EQ(cache->getRefFromObjectCache(std::string(128, 'a')), value);
+        }
+
+        TEST(ResourceGenericObjectCacheTest, removeFromObjectCacheShouldSupportHeterogeneousLookup)
+        {
+            osg::ref_ptr<GenericObjectCache<std::string>> cache(new GenericObjectCache<std::string>);
+            const std::string key = "key";
+            osg::ref_ptr<Object> value(new Object);
+            cache->addEntryToObjectCache(key, value);
+            ASSERT_EQ(cache->getRefFromObjectCache(key), value);
+            cache->removeFromObjectCache(std::string_view("key"));
+            EXPECT_EQ(cache->getRefFromObjectCacheOrNone(key), std::nullopt);
+        }
+
+        TEST(ResourceGenericObjectCacheTest, getRefFromObjectCacheShouldSupportHeterogeneousLookup)
+        {
+            osg::ref_ptr<GenericObjectCache<std::string>> cache(new GenericObjectCache<std::string>);
+            const std::string key = "key";
+            osg::ref_ptr<Object> value(new Object);
+            cache->addEntryToObjectCache(key, value);
+            EXPECT_EQ(cache->getRefFromObjectCache(std::string_view("key")), value);
+        }
+
+        TEST(ResourceGenericObjectCacheTest, getRefFromObjectCacheOrNoneShouldSupportHeterogeneousLookup)
+        {
+            osg::ref_ptr<GenericObjectCache<std::string>> cache(new GenericObjectCache<std::string>);
+            const std::string key = "key";
+            osg::ref_ptr<Object> value(new Object);
+            cache->addEntryToObjectCache(key, value);
+            EXPECT_THAT(cache->getRefFromObjectCacheOrNone(std::string_view("key")), Optional(value));
+        }
+
+        TEST(ResourceGenericObjectCacheTest, checkInObjectCacheShouldSupportHeterogeneousLookup)
+        {
+            osg::ref_ptr<GenericObjectCache<std::string>> cache(new GenericObjectCache<std::string>);
+            const std::string key = "key";
+            osg::ref_ptr<Object> value(new Object);
+            cache->addEntryToObjectCache(key, value);
+            EXPECT_TRUE(cache->checkInObjectCache(std::string_view("key"), 0));
+        }
     }
 }

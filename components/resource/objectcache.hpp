@@ -81,14 +81,19 @@ namespace Resource
         }
 
         /** Add a key,object,timestamp triple to the Registry::ObjectCache.*/
-        void addEntryToObjectCache(const KeyType& key, osg::Object* object, double timestamp = 0.0)
+        template <class K>
+        void addEntryToObjectCache(K&& key, osg::Object* object, double timestamp = 0.0)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            _objectCache[key] = Item{ object, timestamp };
+            const auto it = _objectCache.find(key);
+            if (it == _objectCache.end())
+                _objectCache.emplace_hint(it, std::forward<K>(key), Item{ object, timestamp });
+            else
+                it->second = Item{ object, timestamp };
         }
 
         /** Remove Object from cache.*/
-        void removeFromObjectCache(const KeyType& key)
+        void removeFromObjectCache(const auto& key)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
             typename ObjectCacheMap::iterator itr = _objectCache.find(key);
@@ -97,7 +102,7 @@ namespace Resource
         }
 
         /** Get an ref_ptr<Object> from the object cache*/
-        osg::ref_ptr<osg::Object> getRefFromObjectCache(const KeyType& key)
+        osg::ref_ptr<osg::Object> getRefFromObjectCache(const auto& key)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
             typename ObjectCacheMap::iterator itr = _objectCache.find(key);
@@ -107,7 +112,7 @@ namespace Resource
                 return nullptr;
         }
 
-        std::optional<osg::ref_ptr<osg::Object>> getRefFromObjectCacheOrNone(const KeyType& key)
+        std::optional<osg::ref_ptr<osg::Object>> getRefFromObjectCacheOrNone(const auto& key)
         {
             const std::lock_guard<std::mutex> lock(_objectCacheMutex);
             const auto it = _objectCache.find(key);
@@ -117,7 +122,7 @@ namespace Resource
         }
 
         /** Check if an object is in the cache, and if it is, update its usage time stamp. */
-        bool checkInObjectCache(const KeyType& key, double timeStamp)
+        bool checkInObjectCache(const auto& key, double timeStamp)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
             typename ObjectCacheMap::iterator itr = _objectCache.find(key);
