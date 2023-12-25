@@ -96,7 +96,7 @@ namespace Resource
         void removeFromObjectCache(const auto& key)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            typename ObjectCacheMap::iterator itr = _objectCache.find(key);
+            const auto itr = _objectCache.find(key);
             if (itr != _objectCache.end())
                 _objectCache.erase(itr);
         }
@@ -105,7 +105,7 @@ namespace Resource
         osg::ref_ptr<osg::Object> getRefFromObjectCache(const auto& key)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            typename ObjectCacheMap::iterator itr = _objectCache.find(key);
+            const auto itr = _objectCache.find(key);
             if (itr != _objectCache.end())
                 return itr->second.mValue;
             else
@@ -125,7 +125,7 @@ namespace Resource
         bool checkInObjectCache(const auto& key, double timeStamp)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            typename ObjectCacheMap::iterator itr = _objectCache.find(key);
+            const auto itr = _objectCache.find(key);
             if (itr != _objectCache.end())
             {
                 itr->second.mLastUsage = timeStamp;
@@ -186,9 +186,7 @@ namespace Resource
             double mLastUsage;
         };
 
-        using ObjectCacheMap = std::map<KeyType, Item, std::less<>>;
-
-        ObjectCacheMap _objectCache;
+        std::map<KeyType, Item, std::less<>> _objectCache;
         mutable std::mutex _objectCacheMutex;
     };
 
