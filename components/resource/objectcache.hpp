@@ -57,8 +57,8 @@ namespace Resource
             std::vector<osg::ref_ptr<osg::Object>> objectsToRemove;
             {
                 const double expiryTime = referenceTime - expiryDelay;
-                std::lock_guard<std::mutex> lock(_objectCacheMutex);
-                std::erase_if(_objectCache, [&](auto& v) {
+                std::lock_guard<std::mutex> lock(mMutex);
+                std::erase_if(mItems, [&](auto& v) {
                     Item& item = v.second;
                     if ((item.mValue != nullptr && item.mValue->referenceCount() > 1) || item.mLastUsage == 0)
                         item.mLastUsage = referenceTime;
@@ -76,18 +76,18 @@ namespace Resource
         /** Remove all objects in the cache regardless of having external references or expiry times.*/
         void clear()
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            _objectCache.clear();
+            std::lock_guard<std::mutex> lock(mMutex);
+            mItems.clear();
         }
 
         /** Add a key,object,timestamp triple to the Registry::ObjectCache.*/
         template <class K>
         void addEntryToObjectCache(K&& key, osg::Object* object, double timestamp = 0.0)
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            const auto it = _objectCache.find(key);
-            if (it == _objectCache.end())
-                _objectCache.emplace_hint(it, std::forward<K>(key), Item{ object, timestamp });
+            std::lock_guard<std::mutex> lock(mMutex);
+            const auto it = mItems.find(key);
+            if (it == mItems.end())
+                mItems.emplace_hint(it, std::forward<K>(key), Item{ object, timestamp });
             else
                 it->second = Item{ object, timestamp };
         }
@@ -95,18 +95,18 @@ namespace Resource
         /** Remove Object from cache.*/
         void removeFromObjectCache(const auto& key)
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            const auto itr = _objectCache.find(key);
-            if (itr != _objectCache.end())
-                _objectCache.erase(itr);
+            std::lock_guard<std::mutex> lock(mMutex);
+            const auto itr = mItems.find(key);
+            if (itr != mItems.end())
+                mItems.erase(itr);
         }
 
         /** Get an ref_ptr<Object> from the object cache*/
         osg::ref_ptr<osg::Object> getRefFromObjectCache(const auto& key)
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            const auto itr = _objectCache.find(key);
-            if (itr != _objectCache.end())
+            std::lock_guard<std::mutex> lock(mMutex);
+            const auto itr = mItems.find(key);
+            if (itr != mItems.end())
                 return itr->second.mValue;
             else
                 return nullptr;
@@ -114,9 +114,9 @@ namespace Resource
 
         std::optional<osg::ref_ptr<osg::Object>> getRefFromObjectCacheOrNone(const auto& key)
         {
-            const std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            const auto it = _objectCache.find(key);
-            if (it == _objectCache.end())
+            const std::lock_guard<std::mutex> lock(mMutex);
+            const auto it = mItems.find(key);
+            if (it == mItems.end())
                 return std::nullopt;
             return it->second.mValue;
         }
@@ -124,9 +124,9 @@ namespace Resource
         /** Check if an object is in the cache, and if it is, update its usage time stamp. */
         bool checkInObjectCache(const auto& key, double timeStamp)
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            const auto itr = _objectCache.find(key);
-            if (itr != _objectCache.end())
+            std::lock_guard<std::mutex> lock(mMutex);
+            const auto itr = mItems.find(key);
+            if (itr != mItems.end())
             {
                 itr->second.mLastUsage = timeStamp;
                 return true;
@@ -138,16 +138,16 @@ namespace Resource
         /** call releaseGLObjects on all objects attached to the object cache.*/
         void releaseGLObjects(osg::State* state)
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for (const auto& [k, v] : _objectCache)
+            std::lock_guard<std::mutex> lock(mMutex);
+            for (const auto& [k, v] : mItems)
                 v.mValue->releaseGLObjects(state);
         }
 
         /** call node->accept(nv); for all nodes in the objectCache. */
         void accept(osg::NodeVisitor& nv)
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for (const auto& [k, v] : _objectCache)
+            std::lock_guard<std::mutex> lock(mMutex);
+            for (const auto& [k, v] : mItems)
                 if (osg::Object* const object = v.mValue.get())
                     if (osg::Node* const node = dynamic_cast<osg::Node*>(object))
                         node->accept(nv);
@@ -157,24 +157,24 @@ namespace Resource
         template <class Functor>
         void call(Functor&& f)
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for (const auto& [k, v] : _objectCache)
+            std::lock_guard<std::mutex> lock(mMutex);
+            for (const auto& [k, v] : mItems)
                 f(k, v.mValue.get());
         }
 
         /** Get the number of objects in the cache. */
         unsigned int getCacheSize() const
         {
-            std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            return _objectCache.size();
+            std::lock_guard<std::mutex> lock(mMutex);
+            return mItems.size();
         }
 
         template <class K>
         std::optional<std::pair<KeyType, osg::ref_ptr<osg::Object>>> lowerBound(K&& key)
         {
-            const std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            const auto it = _objectCache.lower_bound(std::forward<K>(key));
-            if (it == _objectCache.end())
+            const std::lock_guard<std::mutex> lock(mMutex);
+            const auto it = mItems.lower_bound(std::forward<K>(key));
+            if (it == mItems.end())
                 return std::nullopt;
             return std::pair(it->first, it->second.mValue);
         }
@@ -186,8 +186,8 @@ namespace Resource
             double mLastUsage;
         };
 
-        std::map<KeyType, Item, std::less<>> _objectCache;
-        mutable std::mutex _objectCacheMutex;
+        std::map<KeyType, Item, std::less<>> mItems;
+        mutable std::mutex mMutex;
     };
 
     class ObjectCache : public GenericObjectCache<std::string>
