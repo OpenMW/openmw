@@ -194,8 +194,6 @@ namespace Resource
             double mLastUsage;
         };
 
-        virtual ~GenericObjectCache() {}
-
         using ObjectCacheMap = std::map<KeyType, Item, std::less<>>;
 
         ObjectCacheMap _objectCache;
