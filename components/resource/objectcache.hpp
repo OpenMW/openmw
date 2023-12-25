@@ -139,26 +139,18 @@ namespace Resource
         void releaseGLObjects(osg::State* state)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for (typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
-            {
-                osg::Object* object = itr->second.mValue.get();
-                object->releaseGLObjects(state);
-            }
+            for (const auto& [k, v] : _objectCache)
+                v.mValue->releaseGLObjects(state);
         }
 
         /** call node->accept(nv); for all nodes in the objectCache. */
         void accept(osg::NodeVisitor& nv)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for (typename ObjectCacheMap::iterator itr = _objectCache.begin(); itr != _objectCache.end(); ++itr)
-            {
-                if (osg::Object* object = itr->second.mValue.get())
-                {
-                    osg::Node* node = dynamic_cast<osg::Node*>(object);
-                    if (node)
+            for (const auto& [k, v] : _objectCache)
+                if (osg::Object* const object = v.mValue.get())
+                    if (osg::Node* const node = dynamic_cast<osg::Node*>(object))
                         node->accept(nv);
-                }
-            }
         }
 
         /** call operator()(KeyType, osg::Object*) for each object in the cache. */
@@ -166,8 +158,8 @@ namespace Resource
         void call(Functor&& f)
         {
             std::lock_guard<std::mutex> lock(_objectCacheMutex);
-            for (typename ObjectCacheMap::iterator it = _objectCache.begin(); it != _objectCache.end(); ++it)
-                f(it->first, it->second.mValue.get());
+            for (const auto& [k, v] : _objectCache)
+                f(k, v.mValue.get());
         }
 
         /** Get the number of objects in the cache. */
