@@ -56,6 +56,11 @@
 -- @return #number
 
 ---
+-- Frame duration in seconds
+-- @function [parent=#core] getRealFrameDuration
+-- @return #number
+
+---
 -- Get a GMST setting from content files.
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
