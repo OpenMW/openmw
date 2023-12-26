@@ -231,7 +231,8 @@ namespace MWMechanics
 
             if (Misc::Rng::roll0to99(world->getPrng()) >= getHitChance(attacker, victim, skillValue))
             {
-                victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false);
+                victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false,
+                    MWMechanics::DamageSourceType::Ranged);
                 MWMechanics::reduceWeaponCondition(damage, false, weapon, attacker);
                 return;
             }
@@ -287,7 +288,8 @@ namespace MWMechanics
                     victim.getClass().getContainerStore(victim).add(projectile, 1);
             }
 
-            victim.getClass().onHit(victim, damage, true, projectile, attacker, hitPosition, true);
+            victim.getClass().onHit(
+                victim, damage, true, projectile, attacker, hitPosition, true, MWMechanics::DamageSourceType::Ranged);
         }
     }
 

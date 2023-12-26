@@ -599,7 +599,8 @@ namespace MWClass
         float damage = 0.0f;
         if (!success)
         {
-            othercls.onHit(victim, damage, false, weapon, ptr, osg::Vec3f(), false);
+            othercls.onHit(
+                victim, damage, false, weapon, ptr, osg::Vec3f(), false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(damage, false, weapon, ptr);
             MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
             return;
@@ -672,11 +673,12 @@ namespace MWClass
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
+        othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
     void Npc::onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const
+        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+        const MWMechanics::DamageSourceType sourceType) const
     {
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);

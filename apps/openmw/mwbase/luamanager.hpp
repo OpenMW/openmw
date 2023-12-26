@@ -61,7 +61,8 @@ namespace MWBase
 
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,
-        //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) = 0;
+        //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful,
+        //                          DamageSourceType sourceType) = 0;
 
         struct InputEvent
         {

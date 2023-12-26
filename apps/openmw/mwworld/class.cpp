@@ -124,7 +124,7 @@ namespace MWWorld
     }
 
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker,
-        const osg::Vec3f& hitPosition, bool successful) const
+        const osg::Vec3f& hitPosition, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
         throw std::runtime_error("class cannot be hit");
     }
