@@ -290,6 +290,17 @@ namespace Nif
         }
     }
 
+    const Nif::NiSkinPartition* NiSkinInstance::getPartitions() const
+    {
+        const Nif::NiSkinPartition* partitions = nullptr;
+        if (!mPartitions.empty())
+            partitions = mPartitions.getPtr();
+        else if (!mData.empty() && !mData->mPartitions.empty())
+            partitions = mData->mPartitions.getPtr();
+
+        return partitions;
+    }
+
     void BSDismemberSkinInstance::read(NIFStream* nif)
     {
         NiSkinInstance::read(nif);
