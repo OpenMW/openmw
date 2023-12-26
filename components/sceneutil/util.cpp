@@ -1,6 +1,7 @@
 #include "util.hpp"
 
 #include <algorithm>
+#include <array>
 #include <iomanip>
 #include <sstream>
 
@@ -17,6 +18,26 @@
 
 namespace SceneUtil
 {
+    namespace
+    {
+        std::array<std::string, 32> generateGlowTextureNames()
+        {
+            std::array<std::string, 32> result;
+            for (std::size_t i = 0; i < result.size(); ++i)
+            {
+                std::stringstream stream;
+                stream << "textures/magicitem/caust";
+                stream << std::setw(2);
+                stream << std::setfill('0');
+                stream << i;
+                stream << ".dds";
+                result[i] = std::move(stream).str();
+            }
+            return result;
+        }
+
+        const std::array<std::string, 32> glowTextureNames = generateGlowTextureNames();
+    }
 
     class FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
     {
@@ -197,16 +218,9 @@ namespace SceneUtil
         const osg::Vec4f& glowColor, float glowDuration)
     {
         std::vector<osg::ref_ptr<osg::Texture2D>> textures;
-        for (int i = 0; i < 32; ++i)
+        for (const std::string& name : glowTextureNames)
         {
-            std::stringstream stream;
-            stream << "textures/magicitem/caust";
-            stream << std::setw(2);
-            stream << std::setfill('0');
-            stream << i;
-            stream << ".dds";
-
-            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(stream.str());
+            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(name);
             osg::ref_ptr<osg::Texture2D> tex(new osg::Texture2D(image));
             tex->setName("envMap");
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
