@@ -77,6 +77,7 @@ namespace MWRender
         float mRainSpeed;
         float mRainEntranceSpeed;
         int mRainMaxRaindrops;
+        bool mRipples;
 
         osg::Vec3f mStormDirection;
         osg::Vec3f mNextStormDirection;
