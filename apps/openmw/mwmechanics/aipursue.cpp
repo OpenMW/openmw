@@ -12,6 +12,7 @@
 #include "actorutil.hpp"
 #include "character.hpp"
 #include "creaturestats.hpp"
+#include "npcstats.hpp"
 
 namespace MWMechanics
 {
@@ -45,6 +46,9 @@ namespace MWMechanics
             return false;
 
         if (target.getClass().getCreatureStats(target).isDead())
+            return true;
+
+        if (target.getClass().getNpcStats(target).getBounty() <= 0)
             return true;
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);

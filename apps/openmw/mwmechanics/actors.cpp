@@ -1152,7 +1152,7 @@ namespace MWMechanics
         if (npcStats.getCrimeId() != -1)
         {
             // if you've paid for your crimes and I haven't noticed
-            if (npcStats.getCrimeId() <= world->getPlayer().getCrimeId() || playerStats.getBounty() <= 0)
+            if (npcStats.getCrimeId() <= world->getPlayer().getCrimeId())
             {
                 // Calm witness down
                 if (ptr.getClass().isClass(ptr, "Guard"))
