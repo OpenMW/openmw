@@ -438,7 +438,7 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mReporttableRefresh{ mIndex, sName, "reporttable-refresh", "" };
         Settings::SettingValue<std::string> mSceneNaviPrimary{ mIndex, sName, "scene-navi-primary", "MMB" };
         Settings::SettingValue<std::string> mSceneNaviSecondary{ mIndex, sName, "scene-navi-secondary", "Ctrl+MMB" };
-        Settings::SettingValue<std::string> mSceneOpenPrimary{ mIndex, sName, "scene-open-primary", "Shift+LMB" };
+        Settings::SettingValue<std::string> mSceneOpenPrimary{ mIndex, sName, "scene-open-primary", "Shift+RMB" };
         Settings::SettingValue<std::string> mSceneEditPrimary{ mIndex, sName, "scene-edit-primary", "RMB" };
         Settings::SettingValue<std::string> mSceneEditSecondary{ mIndex, sName, "scene-edit-secondary", "Ctrl+RMB" };
         Settings::SettingValue<std::string> mSceneSelectPrimary{ mIndex, sName, "scene-select-primary", "LMB" };
