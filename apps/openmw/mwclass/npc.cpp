@@ -682,14 +682,16 @@ namespace MWClass
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         bool wasDead = stats.isDead();
 
-        // Note OnPcHitMe is not set for friendly hits.
         bool setOnPcHitMe = true;
 
         // NOTE: 'object' and/or 'attacker' may be empty.
         if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
         {
             stats.setAttacked(true);
-            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            if (MWMechanics::friendlyHit(attacker, ptr, true))
+                setOnPcHitMe = false;
+            else
+                setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet

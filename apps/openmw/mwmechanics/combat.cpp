@@ -10,6 +10,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadsoun.hpp>
 
+#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -649,4 +650,26 @@ namespace MWMechanics
 
         return std::make_pair(result, hitPos);
     }
+
+    bool friendlyHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& target, bool complain)
+    {
+        const MWWorld::Ptr& player = getPlayer();
+        if (attacker != player)
+            return false;
+
+        std::set<MWWorld::Ptr> followersAttacker;
+        MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(attacker, followersAttacker);
+        if (followersAttacker.find(target) == followersAttacker.end())
+            return false;
+
+        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
+        statsTarget.friendlyHit();
+        if (statsTarget.getFriendlyHits() >= 4)
+            return false;
+
+        if (complain)
+            MWBase::Environment::get().getDialogueManager()->say(target, ESM::RefId::stringRefId("hit"));
+        return true;
+    }
+
 }

@@ -353,16 +353,23 @@ namespace MWClass
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
 
+        // Self defense
+        bool setOnPcHitMe = true;
+
         // NOTE: 'object' and/or 'attacker' may be empty.
         if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
+        {
             stats.setAttacked(true);
 
-        // Self defense
-        bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
-
-        // No retaliation for totally static creatures (they have no movement or attacks anyway)
-        if (isMobile(ptr) && !attacker.isEmpty())
-            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            // No retaliation for totally static creatures (they have no movement or attacks anyway)
+            if (isMobile(ptr))
+            {
+                if (MWMechanics::friendlyHit(attacker, ptr, true))
+                    setOnPcHitMe = false;
+                else
+                    setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            }
+        }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet
         if (!attacker.isEmpty() && attacker.getClass().isActor())
