@@ -41,7 +41,6 @@ set(LAUNCHER_UI
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/importpage.ui
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/settingspage.ui
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/directorypicker.ui
-    ${CMAKE_SOURCE_DIR}/components/contentselector/contentselector.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
