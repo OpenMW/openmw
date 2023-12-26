@@ -59,7 +59,7 @@ namespace ContentSelectorModel
         QString description() const { return mDescription; }
         QString toolTip() const
         {
-            return sToolTip.arg(mAuthor)
+            return mTooltipTemlate.arg(mAuthor)
                 .arg(mVersion)
                 .arg(mModified.toString(Qt::ISODate))
                 .arg(mPath)
@@ -72,9 +72,16 @@ namespace ContentSelectorModel
 
     public:
         static int sPropertyCount;
-        static QString sToolTip;
 
     private:
+        QString mTooltipTemlate = tr(
+            "<b>Author:</b> %1<br/>"
+            "<b>Version:</b> %2<br/>"
+            "<b>Modified:</b> %3<br/>"
+            "<b>Path:</b><br/>%4<br/>"
+            "<br/><b>Description:</b><br/>%5<br/>"
+            "<br/><b>Dependencies: </b>%6<br/>");
+
         QString mFileName;
         QString mAuthor;
         QDateTime mModified;

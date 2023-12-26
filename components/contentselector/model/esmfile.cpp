@@ -4,13 +4,6 @@
 #include <QIODevice>
 
 int ContentSelectorModel::EsmFile::sPropertyCount = 7;
-QString ContentSelectorModel::EsmFile::sToolTip = QString(
-    "<b>Author:</b> %1<br/> \
-                                              <b>Version:</b> %2<br/> \
-                                              <b>Modified:</b> %3<br/> \
-                                              <b>Path:</b><br/>%4<br/> \
-                                              <br/><b>Description:</b><br/>%5<br/> \
-                                              <br/><b>Dependencies: </b>%6<br/>");
 
 ContentSelectorModel::EsmFile::EsmFile(const QString& fileName, ModelItem* parent)
     : ModelItem(parent)
