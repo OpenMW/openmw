@@ -690,7 +690,9 @@ namespace MWClass
         if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
         {
             stats.setAttacked(true);
-            if (MWMechanics::friendlyHit(attacker, ptr, true))
+            bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
+            bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
+            if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
                 setOnPcHitMe = false;
             else
                 setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);

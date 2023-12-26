@@ -367,7 +367,9 @@ namespace MWClass
             // No retaliation for totally static creatures (they have no movement or attacks anyway)
             if (isMobile(ptr))
             {
-                if (MWMechanics::friendlyHit(attacker, ptr, true))
+                bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
+                bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
+                if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
                     setOnPcHitMe = false;
                 else
                     setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
