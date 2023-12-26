@@ -20,6 +20,9 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "luaevents.hpp"
 #include "luamanagerimp.hpp"
 #include "types/types.hpp"

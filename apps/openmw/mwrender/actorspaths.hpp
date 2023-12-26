@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWRENDER_AGENTSPATHS_H
 #define OPENMW_MWRENDER_AGENTSPATHS_H
 
-#include <apps/openmw/mwworld/ptr.hpp>
+#include "apps/openmw/mwworld/ptr.hpp"
 
 #include <osg/ref_ptr>
 

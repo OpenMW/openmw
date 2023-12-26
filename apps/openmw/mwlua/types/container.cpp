@@ -5,7 +5,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwworld/class.hpp>
+#include "apps/openmw/mwworld/class.hpp"
 
 namespace sol
 {
