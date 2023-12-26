@@ -17,7 +17,7 @@ namespace VFS
     {
     }
 
-    void FileSystemArchive::listResources(std::map<std::string, File*>& out)
+    void FileSystemArchive::listResources(FileMap& out)
     {
         if (!mBuiltIndex)
         {
@@ -51,14 +51,12 @@ namespace VFS
         }
         else
         {
-            for (index::iterator it = mIndex.begin(); it != mIndex.end(); ++it)
-            {
-                out[it->first] = &it->second;
-            }
+            for (auto& [k, v] : mIndex)
+                out[k] = &v;
         }
     }
 
-    bool FileSystemArchive::contains(const std::string& file) const
+    bool FileSystemArchive::contains(std::string_view file) const
     {
         return mIndex.find(file) != mIndex.end();
     }

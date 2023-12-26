@@ -41,7 +41,7 @@ namespace VFS
         class RecursiveDirectoryIterator
         {
         public:
-            RecursiveDirectoryIterator(std::map<std::string, File*>::const_iterator it)
+            RecursiveDirectoryIterator(FileMap::const_iterator it)
                 : mIt(it)
             {
             }
@@ -55,7 +55,7 @@ namespace VFS
             }
 
         private:
-            std::map<std::string, File*>::const_iterator mIt;
+            FileMap::const_iterator mIt;
         };
 
         using RecursiveDirectoryRange = IteratorPair<RecursiveDirectoryIterator>;
@@ -83,7 +83,7 @@ namespace VFS
         /// Retrieve a file by name (name is already normalized).
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
-        Files::IStreamPtr getNormalized(const std::string& normalizedName) const;
+        Files::IStreamPtr getNormalized(std::string_view normalizedName) const;
 
         std::string getArchive(std::string_view name) const;
 
@@ -101,7 +101,7 @@ namespace VFS
     private:
         std::vector<std::unique_ptr<Archive>> mArchives;
 
-        std::map<std::string, File*> mIndex;
+        FileMap mIndex;
     };
 
 }
