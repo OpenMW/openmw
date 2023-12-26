@@ -145,12 +145,11 @@ namespace MWClass
             = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::RefId* creatureId = nullptr;
-        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         for (const ESM::Creature& iter : store.get<ESM::Creature>())
         {
             if (!iter.mModel.empty()
-                && Misc::StringUtils::ciEqual(model, Misc::ResourceHelpers::correctMeshPath(iter.mModel, vfs)))
+                && Misc::StringUtils::ciEqual(model, Misc::ResourceHelpers::correctMeshPath(iter.mModel)))
             {
                 creatureId = !iter.mOriginal.empty() ? &iter.mOriginal : &iter.mId;
                 break;

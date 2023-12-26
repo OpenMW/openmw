@@ -1,8 +1,6 @@
 #ifndef OPENMW_MWCLASS_CLASSMODEL_H
 #define OPENMW_MWCLASS_CLASSMODEL_H
 
-#include "../mwbase/environment.hpp"
-
 #include "../mwworld/livecellref.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -19,8 +17,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<Class>* ref = ptr.get<Class>();
 
         if (!ref->mBase->mModel.empty())
-            return Misc::ResourceHelpers::correctMeshPath(
-                ref->mBase->mModel, MWBase::Environment::get().getResourceSystem()->getVFS());
+            return Misc::ResourceHelpers::correctMeshPath(ref->mBase->mModel);
 
         return {};
     }

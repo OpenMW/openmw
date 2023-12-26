@@ -6,8 +6,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include "apps/openmw/mwworld/esmstore.hpp"
-
 namespace sol
 {
     template <>
@@ -21,9 +19,6 @@ namespace MWLua
 
     void addESM4TerminalBindings(sol::table term, const Context& context)
     {
-
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM4::Terminal>(term, context, "ESM4Terminal");
 
         sol::usertype<ESM4::Terminal> record = context.mLua->sol().new_usertype<ESM4::Terminal>("ESM4_Terminal");
@@ -38,8 +33,8 @@ namespace MWLua
         record["resultText"]
             = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string { return rec.mResultText; });
         record["name"] = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string { return rec.mFullName; });
-        record["model"] = sol::readonly_property([vfs](const ESM4::Terminal& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        record["model"] = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string {
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel);
         });
     }
 }
