@@ -16,6 +16,7 @@ set(SHADER_FILES
     lib/particle/occlusion.glsl
     lib/util/quickstep.glsl
     lib/util/coordinates.glsl
+    lib/util/distortion.glsl
     lib/core/fragment.glsl
     lib/core/fragment.h.glsl
     lib/core/fragment_multiview.glsl

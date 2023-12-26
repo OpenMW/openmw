@@ -2381,6 +2381,8 @@ namespace NifOsg
                             textureSet, texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->refraction())
+                        SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2438,6 +2440,8 @@ namespace NifOsg
                     if (texprop->treeAnim())
                         stateset->addUniform(new osg::Uniform("useTreeAnim", true));
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
+                    if (texprop->refraction())
+                        SceneUtil::setupDistortion(*node, texprop->mRefractionStrength);
                     break;
                 }
                 case Nif::RC_BSEffectShaderProperty:

@@ -29,7 +29,9 @@
 
 #include "../mwgui/postprocessorhud.hpp"
 
+#include "distortion.hpp"
 #include "pingpongcull.hpp"
+#include "renderbin.hpp"
 #include "renderingmanager.hpp"
 #include "sky.hpp"
 #include "transparentpass.hpp"
@@ -103,6 +105,8 @@ namespace
 
         return Stereo::createMultiviewCompatibleAttachment(texture);
     }
+
+    constexpr float DistortionRatio = 0.25;
 }
 
 namespace MWRender
@@ -118,6 +122,7 @@ namespace MWRender
         , mUsePostProcessing(Settings::postProcessing().mEnabled)
         , mSamples(Settings::video().mAntialiasing)
         , mPingPongCull(new PingPongCull(this))
+        , mDistortionCallback(new DistortionCallback)
     {
         auto& shaderManager = mRendering.getResourceSystem()->getSceneManager()->getShaderManager();
 
@@ -141,17 +146,44 @@ namespace MWRender
         mHUDCamera->setCullCallback(new HUDCullCallback);
         mViewer->getCamera()->addCullCallback(mPingPongCull);
 
-        if (Settings::shaders().mSoftParticles || Settings::postProcessing().mTransparentPostpass)
-        {
-            mTransparentDepthPostPass
-                = new TransparentDepthBinCallback(shaderManager, Settings::postProcessing().mTransparentPostpass);
-            osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
-        }
+        // resolves the multisampled depth buffer and optionally draws an additional depth postpass
+        mTransparentDepthPostPass
+            = new TransparentDepthBinCallback(mRendering.getResourceSystem()->getSceneManager()->getShaderManager(),
+                Settings::postProcessing().mTransparentPostpass);
+        osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
+
+        osg::ref_ptr<osgUtil::RenderBin> distortionRenderBin
+            = new osgUtil::RenderBin(osgUtil::RenderBin::SORT_BACK_TO_FRONT);
+        // This is silly to have to do, but if nothing is drawn then the drawcallback is never called and the distortion
+        // texture will never be cleared
+        osg::ref_ptr<osg::Node> dummyNodeToClear = new osg::Node;
+        dummyNodeToClear->setCullingActive(false);
+        dummyNodeToClear->getOrCreateStateSet()->setRenderBinDetails(RenderBin_Distortion, "Distortion");
+        rootNode->addChild(dummyNodeToClear);
+        distortionRenderBin->setDrawCallback(mDistortionCallback);
+        distortionRenderBin->getStateSet()->setDefine("DISTORTION", "1", osg::StateAttribute::ON);
+
+        // Give the renderbin access to the opaque depth sampler so it can write its occlusion
+        // Distorted geometry is drawn with ALWAYS depth function and depths writes disbled.
+        const int unitSoftEffect
+            = shaderManager.reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
+        distortionRenderBin->getStateSet()->addUniform(new osg::Uniform("opaqueDepthTex", unitSoftEffect));
+
+        osgUtil::RenderBin::addRenderBinPrototype("Distortion", distortionRenderBin);
+
+        auto defines = shaderManager.getGlobalDefines();
+        defines["distorionRTRatio"] = std::to_string(DistortionRatio);
+        shaderManager.setGlobalDefines(defines);
 
         createObjectsForFrame(0);
         createObjectsForFrame(1);
 
         populateTechniqueFiles();
+
+        auto distortion = loadTechnique("internal_distortion");
+        distortion->setInternal(true);
+        distortion->setLocked(true);
+        mInternalTechniques.push_back(distortion);
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
@@ -170,19 +202,6 @@ namespace MWRender
             mNormalsSupported = true;
         else
             Log(Debug::Error) << "'glDisablei' unsupported, pass normals will not be available to shaders.";
-
-        if (Settings::shaders().mSoftParticles)
-        {
-            for (int i = 0; i < 2; ++i)
-            {
-                if (Stereo::getMultiview())
-                    mTextures[i][Tex_OpaqueDepth] = new osg::Texture2DArray;
-                else
-                    mTextures[i][Tex_OpaqueDepth] = new osg::Texture2D;
-                mTextures[i][Tex_OpaqueDepth]->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-                mTextures[i][Tex_OpaqueDepth]->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-            }
-        }
 
         mGLSLVersion = ext->glslLanguageVersion * 100;
         mUBO = ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
@@ -281,17 +300,15 @@ namespace MWRender
         mCanvases[frameId]->setCalculateAvgLum(mHDR);
 
         mCanvases[frameId]->setTextureScene(getTexture(Tex_Scene, frameId));
-        if (mTransparentDepthPostPass)
-            mCanvases[frameId]->setTextureDepth(getTexture(Tex_OpaqueDepth, frameId));
-        else
-            mCanvases[frameId]->setTextureDepth(getTexture(Tex_Depth, frameId));
+        mCanvases[frameId]->setTextureDepth(getTexture(Tex_OpaqueDepth, frameId));
+        mCanvases[frameId]->setTextureDistortion(getTexture(Tex_Distortion, frameId));
 
-        if (mTransparentDepthPostPass)
-        {
-            mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
-            mTransparentDepthPostPass->mMsaaFbo[frameId] = mFbos[frameId][FBO_Multisample];
-            mTransparentDepthPostPass->mOpaqueFbo[frameId] = mFbos[frameId][FBO_OpaqueDepth];
-        }
+        mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
+        mTransparentDepthPostPass->mMsaaFbo[frameId] = mFbos[frameId][FBO_Multisample];
+        mTransparentDepthPostPass->mOpaqueFbo[frameId] = mFbos[frameId][FBO_OpaqueDepth];
+
+        mDistortionCallback->setFBO(mFbos[frameId][FBO_Distortion], frameId);
+        mDistortionCallback->setOriginalFBO(mFbos[frameId][FBO_Primary], frameId);
 
         size_t frame = cv->getTraversalNumber();
 
@@ -441,6 +458,13 @@ namespace MWRender
         textures[Tex_Normal]->setSourceFormat(GL_RGB);
         textures[Tex_Normal]->setInternalFormat(GL_RGB);
 
+        textures[Tex_Distortion]->setSourceFormat(GL_RGB);
+        textures[Tex_Distortion]->setInternalFormat(GL_RGB);
+
+        Stereo::setMultiviewCompatibleTextureSize(
+            textures[Tex_Distortion], width * DistortionRatio, height * DistortionRatio);
+        textures[Tex_Distortion]->dirtyTextureObject();
+
         auto setupDepth = [](osg::Texture* tex) {
             tex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
             tex->setSourceType(SceneUtil::AutoDepth::depthSourceType());
@@ -448,16 +472,8 @@ namespace MWRender
         };
 
         setupDepth(textures[Tex_Depth]);
-
-        if (!mTransparentDepthPostPass)
-        {
-            textures[Tex_OpaqueDepth] = nullptr;
-        }
-        else
-        {
-            setupDepth(textures[Tex_OpaqueDepth]);
-            textures[Tex_OpaqueDepth]->setName("opaqueTexMap");
-        }
+        setupDepth(textures[Tex_OpaqueDepth]);
+        textures[Tex_OpaqueDepth]->setName("opaqueTexMap");
 
         auto& fbos = mFbos[frameId];
 
@@ -487,6 +503,7 @@ namespace MWRender
                 auto normalRB = createFrameBufferAttachmentFromTemplate(
                     Usage::RENDER_BUFFER, width, height, textures[Tex_Normal], mSamples);
                 fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
+                fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
             }
             auto depthRB = createFrameBufferAttachmentFromTemplate(
                 Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
@@ -510,12 +527,13 @@ namespace MWRender
                     Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
         }
 
-        if (textures[Tex_OpaqueDepth])
-        {
-            fbos[FBO_OpaqueDepth] = new osg::FrameBufferObject;
-            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER,
-                Stereo::createMultiviewCompatibleAttachment(textures[Tex_OpaqueDepth]));
-        }
+        fbos[FBO_OpaqueDepth] = new osg::FrameBufferObject;
+        fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER,
+            Stereo::createMultiviewCompatibleAttachment(textures[Tex_OpaqueDepth]));
+
+        fbos[FBO_Distortion] = new osg::FrameBufferObject;
+        fbos[FBO_Distortion]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
+            Stereo::createMultiviewCompatibleAttachment(textures[Tex_Distortion]));
 
 #ifdef __APPLE__
         if (textures[Tex_OpaqueDepth])
@@ -575,12 +593,15 @@ namespace MWRender
             node.mRootStateSet->addUniform(new osg::Uniform("omw_SamplerLastShader", Unit_LastShader));
             node.mRootStateSet->addUniform(new osg::Uniform("omw_SamplerLastPass", Unit_LastPass));
             node.mRootStateSet->addUniform(new osg::Uniform("omw_SamplerDepth", Unit_Depth));
+            node.mRootStateSet->addUniform(new osg::Uniform("omw_SamplerDistortion", Unit_Distortion));
 
             if (mNormals)
                 node.mRootStateSet->addUniform(new osg::Uniform("omw_SamplerNormals", Unit_Normals));
 
             if (technique->getHDR())
                 node.mRootStateSet->addUniform(new osg::Uniform("omw_EyeAdaptation", Unit_EyeAdaptation));
+
+            node.mRootStateSet->addUniform(new osg::Uniform("omw_SamplerDistortion", Unit_Distortion));
 
             int texUnit = Unit_NextFree;
 
@@ -681,7 +702,7 @@ namespace MWRender
 
         disableTechnique(technique, false);
 
-        int pos = std::min<int>(location.value_or(mTechniques.size()), mTechniques.size());
+        int pos = std::min<int>(location.value_or(mTechniques.size()) + mInternalTechniques.size(), mTechniques.size());
 
         mTechniques.insert(mTechniques.begin() + pos, technique);
         dirtyTechniques(Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug);
@@ -747,6 +768,11 @@ namespace MWRender
     {
         mTechniques.clear();
 
+        for (const auto& technique : mInternalTechniques)
+        {
+            mTechniques.push_back(technique);
+        }
+
         for (const std::string& techniqueName : Settings::postProcessing().mChain.get())
         {
             if (techniqueName.empty())
@@ -764,7 +790,7 @@ namespace MWRender
 
         for (const auto& technique : mTechniques)
         {
-            if (!technique || technique->getDynamic())
+            if (!technique || technique->getDynamic() || technique->getInternal())
                 continue;
             chain.push_back(technique->getName());
         }

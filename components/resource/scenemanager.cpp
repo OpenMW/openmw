@@ -649,6 +649,7 @@ namespace Resource
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1, 1, 1, 1)));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));
             }
 
             node->setUserValue(Misc::OsgUserValues::sFileHash,

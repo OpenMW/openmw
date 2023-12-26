@@ -91,6 +91,7 @@ uniform @builtinSampler omw_SamplerLastShader;
 uniform @builtinSampler omw_SamplerLastPass;
 uniform @builtinSampler omw_SamplerDepth;
 uniform @builtinSampler omw_SamplerNormals;
+uniform @builtinSampler omw_SamplerDistortion;
 
 uniform vec4 omw_PointLights[@pointLightCount];
 uniform int omw_PointLightsCount;

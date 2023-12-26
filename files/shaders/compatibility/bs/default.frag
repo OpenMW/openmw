@@ -1,5 +1,5 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE)
+#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -26,6 +26,8 @@ uniform sampler2D normalMap;
 varying vec2 normalMapUV;
 #endif
 
+uniform sampler2D opaqueDepthTex;
+
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -38,9 +40,11 @@ uniform float alphaRef;
 uniform float emissiveMult;
 uniform float specStrength;
 uniform bool useTreeAnim;
+uniform float distortionStrength;
 
 #include "lib/light/lighting.glsl"
 #include "lib/material/alpha.glsl"
+#include "lib/util/distortion.glsl"
 
 #include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_fragment.glsl"
@@ -51,6 +55,15 @@ void main()
 {
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
+
+#if defined(DISTORTION) && DISTORTION
+    vec2 screenCoords = gl_FragCoord.xy / (screenRes * @distorionRTRatio);
+    gl_FragData[0].a = getDiffuseColor().a;
+    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords).x);
+
+    return;
+#endif
+
     gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV);
 #else
     gl_FragData[0] = vec4(1.0);

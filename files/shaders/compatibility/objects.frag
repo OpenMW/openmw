@@ -1,5 +1,5 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE)
+#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -66,6 +66,7 @@ uniform vec2 screenRes;
 uniform float near;
 uniform float far;
 uniform float alphaRef;
+uniform float distortionStrength;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
@@ -91,6 +92,7 @@ varying vec4 passTangent;
 #include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
 #include "lib/material/alpha.glsl"
+#include "lib/util/distortion.glsl"
 
 #include "fog.glsl"
 #include "vertexcolors.glsl"
@@ -100,7 +102,6 @@ varying vec4 passTangent;
 #if @softParticles
 #include "lib/particle/soft.glsl"
 
-uniform sampler2D opaqueDepthTex;
 uniform float particleSize;
 uniform bool particleFade;
 uniform float softFalloffDepth;
@@ -111,6 +112,8 @@ uniform float softFalloffDepth;
 uniform sampler2D orthoDepthMap;
 varying vec3 orthoDepthMapCoord;
 #endif
+
+uniform sampler2D opaqueDepthTex;
 
 void main()
 {
@@ -133,8 +136,17 @@ void main()
     offset = getParallaxOffset(transpose(normalToViewMatrix) * normalize(-passViewPos), height, flipY);
 #endif
 
+vec2 screenCoords = gl_FragCoord.xy / screenRes;
+
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV + offset);
+
+#if defined(DISTORTION) && DISTORTION
+    gl_FragData[0].a = getDiffuseColor().a;
+    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords / @distorionRTRatio).x);
+    return;
+#endif
+
 #if @diffuseParallax
     gl_FragData[0].a = 1.0;
 #else
@@ -234,7 +246,6 @@ void main()
 
     gl_FragData[0] = applyFogAtPos(gl_FragData[0], passViewPos, far);
 
-    vec2 screenCoords = gl_FragCoord.xy / screenRes;
 #if !defined(FORCE_OPAQUE) && @softParticles
     gl_FragData[0].a *= calcSoftParticleFade(
         viewVec,
