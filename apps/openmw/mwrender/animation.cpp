@@ -1575,7 +1575,7 @@ namespace MWRender
         // Notify that this animation has attached magic effects
         mHasMagicEffects = true;
 
-        overrideFirstRootTexture(texture, mResourceSystem, node);
+        overrideFirstRootTexture(texture, mResourceSystem, *node);
     }
 
     void Animation::removeEffect(int effectId)
