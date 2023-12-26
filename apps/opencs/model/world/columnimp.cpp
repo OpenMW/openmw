@@ -344,7 +344,7 @@ namespace CSMWorld
         QStringList selectionInfo;
         const std::vector<std::string>& instances = record.get().selectedInstances;
 
-        for (std::string instance : instances)
+        for (const std::string& instance : instances)
             selectionInfo << QString::fromStdString(instance);
         data.setValue(selectionInfo);
 
