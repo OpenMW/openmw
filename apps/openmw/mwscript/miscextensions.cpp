@@ -1346,8 +1346,10 @@ namespace MWScript
             {
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 player.getClass().getNpcStats(player).setBounty(0);
-                MWBase::Environment::get().getWorld()->confiscateStolenItems(player);
-                MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                world->confiscateStolenItems(player);
+                world->getPlayer().recordCrimeId();
+                world->getPlayer().setDrawState(MWMechanics::DrawState::Nothing);
             }
         };
 

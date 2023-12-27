@@ -23,9 +23,11 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "bookpage.hpp"
 #include "textcolours.hpp"
@@ -736,6 +738,15 @@ namespace MWGui
         bool dispositionVisible = false;
         if (!mPtr.isEmpty() && mPtr.getClass().isNpc())
         {
+            // If actor was a witness to a crime which was payed off,
+            // restore original disposition immediately.
+            MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);
+            if (npcStats.getCrimeId() != -1 && npcStats.getCrimeDispositionModifier() != 0)
+            {
+                if (npcStats.getCrimeId() <= MWBase::Environment::get().getWorld()->getPlayer().getCrimeId())
+                    npcStats.setCrimeDispositionModifier(0);
+            }
+
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(
