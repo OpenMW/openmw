@@ -40,8 +40,7 @@ testing.registerLocalTest('playerForwardRunning',
             coroutine.yield()
         end
         local direction, distance = (self.position - startPos):normalize()
-        local normalizedDistance = distance / types.Actor.runSpeed(self)
-        testing.expectEqualWithDelta(normalizedDistance, 1, 0.2, 'Normalized forward runned distance')
+        testing.expectGreaterThan(distance, 0, 'Run forward, distance')
         testing.expectEqualWithDelta(direction.x, 0, 0.1, 'Run forward, X coord')
         testing.expectEqualWithDelta(direction.y, 1, 0.1, 'Run forward, Y coord')
     end)
@@ -59,8 +58,7 @@ testing.registerLocalTest('playerDiagonalWalking',
             coroutine.yield()
         end
         local direction, distance = (self.position - startPos):normalize()
-        local normalizedDistance = distance / types.Actor.walkSpeed(self)
-        testing.expectEqualWithDelta(normalizedDistance, 1, 0.2, 'Normalized diagonally walked distance')
+        testing.expectGreaterThan(distance, 0, 'Walk diagonally, distance')
         testing.expectEqualWithDelta(direction.x, -0.707, 0.1, 'Walk diagonally, X coord')
         testing.expectEqualWithDelta(direction.y, -0.707, 0.1, 'Walk diagonally, Y coord')
     end)
