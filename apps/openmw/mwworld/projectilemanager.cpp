@@ -30,7 +30,6 @@
 #include <components/settings/values.hpp>
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
@@ -455,8 +454,7 @@ namespace MWWorld
             }
             osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
             direction.normalize();
-            float start = MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime();
-            projectile->queueMovement(direction * speed, start, start + duration);
+            projectile->setVelocity(direction * speed);
 
             update(magicBoltState, duration);
 
@@ -484,8 +482,7 @@ namespace MWWorld
             projectileState.mVelocity
                 -= osg::Vec3f(0, 0, Constants::GravityConst * Constants::UnitsPerMeter * 0.1f) * duration;
 
-            float start = MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime();
-            projectile->queueMovement(projectileState.mVelocity, start, start + duration);
+            projectile->setVelocity(projectileState.mVelocity);
 
             // rotation does not work well for throwing projectiles - their roll angle will depend on shooting
             // direction.
