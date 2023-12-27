@@ -6,10 +6,9 @@ This node must have the prefix `omw:data` and have a valid JSON object that foll
 
 .. note::
 
-    This is a new feature to inject OpenMW-specific shader effects. Only a single
-    effect is currently supported. By default, the shader effects will propogate
-    to all a node's children. Other propogation modes and effects will come with
-    future releases.
+    This is a new feature to inject OpenMW-specific shader effects. By default,
+    the shader effects will propagate to all of a node's children.
+    Other propagation modes and effects will come with future releases.
 
 
 Soft Effect
