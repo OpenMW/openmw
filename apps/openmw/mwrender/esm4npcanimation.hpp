@@ -3,6 +3,11 @@
 
 #include "animation.hpp"
 
+namespace ESM4
+{
+    struct Npc;
+}
+
 namespace MWRender
 {
     class ESM4NpcAnimation : public Animation
@@ -18,8 +23,8 @@ namespace MWRender
         void insertHeadParts(const std::vector<ESM::FormId>& partIds, std::set<uint32_t>& usedHeadPartTypes);
 
         void updateParts();
-        void updatePartsTES4();
-        void updatePartsTES5();
+        void updatePartsTES4(const ESM4::Npc& traits);
+        void updatePartsTES5(const ESM4::Npc& traits);
     };
 }
 
