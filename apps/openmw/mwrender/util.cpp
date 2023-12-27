@@ -11,41 +11,40 @@
 
 namespace MWRender
 {
-
-    class TextureOverrideVisitor : public osg::NodeVisitor
+    namespace
     {
-    public:
-        TextureOverrideVisitor(std::string_view texture, Resource::ResourceSystem* resourcesystem)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mTexture(texture)
-            , mResourcesystem(resourcesystem)
+        class TextureOverrideVisitor : public osg::NodeVisitor
         {
-        }
-
-        void apply(osg::Node& node) override
-        {
-            int index = 0;
-            osg::ref_ptr<osg::Node> nodePtr(&node);
-            if (node.getUserValue("overrideFx", index))
+        public:
+            TextureOverrideVisitor(std::string_view texture, Resource::ResourceSystem* resourcesystem)
+                : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+                , mTexture(texture)
+                , mResourcesystem(resourcesystem)
             {
-                if (index == 1)
-                    overrideTexture(mTexture, mResourcesystem, std::move(nodePtr));
             }
-            traverse(node);
-        }
-        std::string_view mTexture;
-        Resource::ResourceSystem* mResourcesystem;
-    };
 
-    void overrideFirstRootTexture(
-        std::string_view texture, Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Node> node)
-    {
-        TextureOverrideVisitor overrideVisitor(texture, resourceSystem);
-        node->accept(overrideVisitor);
+            void apply(osg::Node& node) override
+            {
+                int index = 0;
+                if (node.getUserValue("overrideFx", index))
+                {
+                    if (index == 1)
+                        overrideTexture(mTexture, mResourcesystem, node);
+                }
+                traverse(node);
+            }
+            std::string_view mTexture;
+            Resource::ResourceSystem* mResourcesystem;
+        };
     }
 
-    void overrideTexture(
-        std::string_view texture, Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Node> node)
+    void overrideFirstRootTexture(std::string_view texture, Resource::ResourceSystem* resourceSystem, osg::Node& node)
+    {
+        TextureOverrideVisitor overrideVisitor(texture, resourceSystem);
+        node.accept(overrideVisitor);
+    }
+
+    void overrideTexture(std::string_view texture, Resource::ResourceSystem* resourceSystem, osg::Node& node)
     {
         if (texture.empty())
             return;
@@ -58,14 +57,14 @@ namespace MWRender
         tex->setName("diffuseMap");
 
         osg::ref_ptr<osg::StateSet> stateset;
-        if (node->getStateSet())
-            stateset = new osg::StateSet(*node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
+        if (const osg::StateSet* const src = node.getStateSet())
+            stateset = new osg::StateSet(*src, osg::CopyOp::SHALLOW_COPY);
         else
             stateset = new osg::StateSet;
 
         stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
 
-        node->setStateSet(stateset);
+        node.setStateSet(stateset);
     }
 
     bool shouldAddMSAAIntermediateTarget()

@@ -255,7 +255,7 @@ namespace MWWorld
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);
 
-        MWRender::overrideFirstRootTexture(texture, mResourceSystem, std::move(projectile));
+        MWRender::overrideFirstRootTexture(texture, mResourceSystem, *projectile);
     }
 
     void ProjectileManager::update(State& state, float duration)
