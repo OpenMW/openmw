@@ -129,9 +129,8 @@ namespace MWLua
         record["id"]
             = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
-        });
+        record["model"] = sol::readonly_property(
+            [](const ESM::Weapon& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

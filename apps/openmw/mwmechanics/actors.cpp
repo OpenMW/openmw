@@ -211,11 +211,8 @@ namespace
                 const ESM::Static* const fx
                     = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Soul_Trap"));
                 if (fx != nullptr)
-                {
-                    const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), "",
+                    world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel), "",
                         creature.getRefData().getPosition().asVec3());
-                }
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(
                     creature.getRefData().getPosition().asVec3(), ESM::RefId::stringRefId("conjuration hit"), 1.f, 1.f);
@@ -1828,12 +1825,8 @@ namespace MWMechanics
             const ESM::Static* fx = MWBase::Environment::get().getESMStore()->get<ESM::Static>().search(
                 ESM::RefId::stringRefId("VFX_Summon_End"));
             if (fx)
-            {
-                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 MWBase::Environment::get().getWorld()->spawnEffect(
-                    Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), "",
-                    ptr.getRefData().getPosition().asVec3());
-            }
+                    Misc::ResourceHelpers::correctMeshPath(fx->mModel), "", ptr.getRefData().getPosition().asVec3());
 
             // Remove the summoned creature's summoned creatures as well
             MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);

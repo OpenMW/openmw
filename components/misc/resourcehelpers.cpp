@@ -159,7 +159,7 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string& resP
     return mdlname;
 }
 
-std::string Misc::ResourceHelpers::correctMeshPath(std::string_view resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctMeshPath(std::string_view resPath)
 {
     std::string res = "meshes\\";
     res.append(resPath);

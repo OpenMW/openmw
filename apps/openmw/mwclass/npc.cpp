@@ -431,24 +431,22 @@ namespace MWClass
         models.push_back(Settings::models().mXbaseanimfemale);
         models.push_back(Settings::models().mXbaseanim);
 
-        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         if (!npc->mBase->mModel.empty())
-            models.push_back(Misc::ResourceHelpers::correctMeshPath(npc->mBase->mModel, vfs));
+            models.push_back(Misc::ResourceHelpers::correctMeshPath(npc->mBase->mModel));
 
         if (!npc->mBase->mHead.empty())
         {
             const ESM::BodyPart* head
                 = MWBase::Environment::get().getESMStore()->get<ESM::BodyPart>().search(npc->mBase->mHead);
             if (head)
-                models.push_back(Misc::ResourceHelpers::correctMeshPath(head->mModel, vfs));
+                models.push_back(Misc::ResourceHelpers::correctMeshPath(head->mModel));
         }
         if (!npc->mBase->mHair.empty())
         {
             const ESM::BodyPart* hair
                 = MWBase::Environment::get().getESMStore()->get<ESM::BodyPart>().search(npc->mBase->mHair);
             if (hair)
-                models.push_back(Misc::ResourceHelpers::correctMeshPath(hair->mModel, vfs));
+                models.push_back(Misc::ResourceHelpers::correctMeshPath(hair->mModel));
         }
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
@@ -487,7 +485,7 @@ namespace MWClass
                     const ESM::BodyPart* part
                         = MWBase::Environment::get().getESMStore()->get<ESM::BodyPart>().search(partname);
                     if (part && !part->mModel.empty())
-                        models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel, vfs));
+                        models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel));
                 }
             }
         }
@@ -501,7 +499,7 @@ namespace MWClass
             {
                 const ESM::BodyPart* part = *it;
                 if (part && !part->mModel.empty())
-                    models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel, vfs));
+                    models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel));
             }
         }
     }

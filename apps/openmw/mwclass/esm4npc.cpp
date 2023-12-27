@@ -185,8 +185,7 @@ namespace MWClass
             model = data.mTraits->mModel;
         else
             model = data.mIsFemale ? data.mRace->mModelFemale : data.mRace->mModelMale;
-        const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        return Misc::ResourceHelpers::correctMeshPath(model, vfs);
+        return Misc::ResourceHelpers::correctMeshPath(model);
     }
 
     std::string_view ESM4Npc::getName(const MWWorld::ConstPtr& ptr) const

@@ -105,10 +105,7 @@ namespace MWMechanics
                     const ESM::Static* fx
                         = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_Start"));
                     if (fx)
-                    {
-                        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                        anim->addEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), -1, false);
-                    }
+                        anim->addEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel), -1, false);
                 }
             }
             catch (std::exception& e)

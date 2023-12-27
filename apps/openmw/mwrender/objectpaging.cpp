@@ -623,7 +623,7 @@ namespace MWRender
             std::string model = getModel(type, ref.mRefID, store);
             if (model.empty())
                 continue;
-            model = Misc::ResourceHelpers::correctMeshPath(model, mSceneManager->getVFS());
+            model = Misc::ResourceHelpers::correctMeshPath(model);
 
             if (activeGrid && type != ESM::REC_STAT)
             {

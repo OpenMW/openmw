@@ -41,7 +41,6 @@ namespace MWMechanics
         const ESM::EffectList& effects, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const
     {
         const auto world = MWBase::Environment::get().getWorld();
-        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct>> toApply;
         int index = -1;
         for (const ESM::ENAMstruct& effectInfo : effects.mList)
@@ -75,12 +74,12 @@ namespace MWMechanics
             {
                 if (effectInfo.mRange == ESM::RT_Target)
                     world->spawnEffect(
-                        Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel, vfs), texture, mHitPosition, 1.0f);
+                        Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel), texture, mHitPosition, 1.0f);
                 continue;
             }
             else
-                world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel, vfs), texture,
-                    mHitPosition, static_cast<float>(effectInfo.mArea * 2));
+                world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel), texture, mHitPosition,
+                    static_cast<float>(effectInfo.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             {
@@ -532,7 +531,6 @@ namespace MWMechanics
     {
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         std::vector<std::string> addedEffects;
-        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         for (const ESM::ENAMstruct& effectData : effects)
         {
@@ -547,15 +545,15 @@ namespace MWMechanics
 
             // check if the effect was already added
             if (std::find(addedEffects.begin(), addedEffects.end(),
-                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs))
+                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel))
                 != addedEffects.end())
                 continue;
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
             if (animation)
             {
-                animation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), effect->mIndex,
-                    false, {}, effect->mParticle);
+                animation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel), effect->mIndex, false,
+                    {}, effect->mParticle);
             }
             else
             {
@@ -585,13 +583,13 @@ namespace MWMechanics
                 }
                 scale = std::max(scale, 1.f);
                 MWBase::Environment::get().getWorld()->spawnEffect(
-                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), effect->mParticle, pos, scale);
+                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel), effect->mParticle, pos, scale);
             }
 
             if (animation && !mCaster.getClass().isActor())
                 animation->addSpellCastGlow(effect);
 
-            addedEffects.push_back(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs));
+            addedEffects.push_back(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel));
 
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
             if (!effect->mCastSound.empty())
@@ -628,11 +626,8 @@ namespace MWMechanics
         {
             // Don't play particle VFX unless the effect is new or it should be looping.
             if (playNonLooping || loop)
-            {
-                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                anim->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), magicEffect.mIndex,
-                    loop, {}, magicEffect.mParticle);
-            }
+                anim->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel), magicEffect.mIndex, loop,
+                    {}, magicEffect.mParticle);
         }
     }
 }

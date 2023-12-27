@@ -48,7 +48,7 @@
 namespace
 {
 
-    std::string getVampireHead(const ESM::RefId& race, bool female, const VFS::Manager& vfs)
+    std::string getVampireHead(const ESM::RefId& race, bool female)
     {
         static std::map<std::pair<ESM::RefId, int>, const ESM::BodyPart*> sVampireMapping;
 
@@ -78,7 +78,7 @@ namespace
         const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
         if (!bodyPart)
             return std::string();
-        return Misc::ResourceHelpers::correctMeshPath(bodyPart->mModel, &vfs);
+        return Misc::ResourceHelpers::correctMeshPath(bodyPart->mModel);
     }
 
 }
@@ -467,7 +467,7 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(headName);
             if (bp)
-                mHeadModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel, mResourceSystem->getVFS());
+                mHeadModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel);
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << headName << "'";
         }
@@ -476,12 +476,12 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(hairName);
             if (bp)
-                mHairModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel, mResourceSystem->getVFS());
+                mHairModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel);
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << hairName << "'";
         }
 
-        const std::string vampireHead = getVampireHead(mNpc->mRace, isFemale, *mResourceSystem->getVFS());
+        const std::string vampireHead = getVampireHead(mNpc->mRace, isFemale);
         if (!isWerewolf && isVampire && !vampireHead.empty())
             mHeadModel = vampireHead;
 
@@ -494,8 +494,7 @@ namespace MWRender
         std::string smodel = defaultSkeleton;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
             smodel = Misc::ResourceHelpers::correctActorModelPath(
-                Misc::ResourceHelpers::correctMeshPath(mNpc->mModel, mResourceSystem->getVFS()),
-                mResourceSystem->getVFS());
+                Misc::ResourceHelpers::correctMeshPath(mNpc->mModel), mResourceSystem->getVFS());
 
         setObjectRoot(smodel, true, true, false);
 
@@ -646,9 +645,8 @@ namespace MWRender
             if (store != inv.end() && (part = *store).getType() == ESM::Light::sRecordId)
             {
                 const ESM::Light* light = part.get<ESM::Light>()->mBase;
-                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                    Misc::ResourceHelpers::correctMeshPath(light->mModel, vfs), false, nullptr, true);
+                    Misc::ResourceHelpers::correctMeshPath(light->mModel), false, nullptr, true);
                 if (mObjectParts[ESM::PRT_Shield])
                     addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), SceneUtil::LightCommon(*light));
             }
@@ -666,13 +664,9 @@ namespace MWRender
         {
             if (mPartPriorities[part] < 1)
             {
-                const ESM::BodyPart* bodypart = parts[part];
-                if (bodypart)
-                {
-                    const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+                if (const ESM::BodyPart* bodypart = parts[part])
                     addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part), -1, 1,
-                        Misc::ResourceHelpers::correctMeshPath(bodypart->mModel, vfs));
-                }
+                        Misc::ResourceHelpers::correctMeshPath(bodypart->mModel));
             }
         }
 
@@ -901,11 +895,8 @@ namespace MWRender
             }
 
             if (bodypart)
-            {
-                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part.mPart), group, priority,
-                    Misc::ResourceHelpers::correctMeshPath(bodypart->mModel, vfs), enchantedGlow, glowColor);
-            }
+                    Misc::ResourceHelpers::correctMeshPath(bodypart->mModel), enchantedGlow, glowColor);
             else
                 reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);
         }

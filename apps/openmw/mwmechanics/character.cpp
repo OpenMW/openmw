@@ -1615,18 +1615,13 @@ namespace MWMechanics
                                 const ESM::Static* castStatic
                                     = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
 
-                                const VFS::Manager* const vfs
-                                    = MWBase::Environment::get().getResourceSystem()->getVFS();
-
                                 if (mAnimation->getNode("Bip01 L Hand"))
-                                    mAnimation->addEffect(
-                                        Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), -1, false,
-                                        "Bip01 L Hand", effect->mParticle);
+                                    mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
+                                        -1, false, "Bip01 L Hand", effect->mParticle);
 
                                 if (mAnimation->getNode("Bip01 R Hand"))
-                                    mAnimation->addEffect(
-                                        Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs), -1, false,
-                                        "Bip01 R Hand", effect->mParticle);
+                                    mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
+                                        -1, false, "Bip01 R Hand", effect->mParticle);
                             }
                             // first effect used for casting animation
                             const ESM::ENAMstruct& firstEffect = effects->front();

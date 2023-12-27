@@ -12,6 +12,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwclass/esm4npc.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -52,7 +53,7 @@ namespace MWRender
         if (model.empty())
             return;
         mResourceSystem->getSceneManager()->getInstance(
-            Misc::ResourceHelpers::correctMeshPath(model, mResourceSystem->getVFS()), mObjectRoot.get());
+            Misc::ResourceHelpers::correctMeshPath(model), mObjectRoot.get());
     }
 
     template <class Record>
