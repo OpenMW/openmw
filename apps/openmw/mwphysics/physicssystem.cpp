@@ -43,7 +43,6 @@
 #include "../mwrender/bulletdebugdraw.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/datetimemanager.hpp"
 
 #include "actor.hpp"
 #include "collisiontype.hpp"
@@ -624,20 +623,18 @@ namespace MWPhysics
         return false;
     }
 
-    void PhysicsSystem::queueObjectMovement(
-        const MWWorld::Ptr& ptr, const osg::Vec3f& velocity, float duration, bool jump)
+    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity)
     {
-        float start = MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime();
         ActorMap::iterator found = mActors.find(ptr.mRef);
         if (found != mActors.end())
-            found->second->queueMovement(velocity, start, start + duration, jump);
+            found->second->setVelocity(velocity);
     }
 
     void PhysicsSystem::clearQueuedMovement()
     {
         for (const auto& [_, actor] : mActors)
         {
-            actor->clearMovement();
+            actor->setVelocity(osg::Vec3f());
             actor->setInertialForce(osg::Vec3f());
         }
     }
@@ -725,10 +722,8 @@ namespace MWPhysics
         {
             std::vector<Simulation>& simulations = mSimulations[mSimulationsCounter++ % mSimulations.size()];
             prepareSimulation(mTimeAccum >= mPhysicsDt, simulations);
-            float simulationTime = MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime() + dt;
             // modifies mTimeAccum
-            mTaskScheduler->applyQueuedMovements(
-                mTimeAccum, simulationTime, simulations, frameStart, frameNumber, stats);
+            mTaskScheduler->applyQueuedMovements(mTimeAccum, simulations, frameStart, frameNumber, stats);
         }
     }
 
@@ -912,7 +907,7 @@ namespace MWPhysics
                         ->mValue.getFloat()))
         , mSlowFall(slowFall)
         , mRotation()
-        , mMovement()
+        , mMovement(actor.velocity())
         , mWaterlevel(waterlevel)
         , mHalfExtentsZ(actor.getHalfExtents().z())
         , mOldHeight(0)
@@ -927,7 +922,7 @@ namespace MWPhysics
 
     ProjectileFrameData::ProjectileFrameData(Projectile& projectile)
         : mPosition(projectile.getPosition())
-        , mMovement()
+        , mMovement(projectile.velocity())
         , mCaster(projectile.getCasterCollisionObject())
         , mCollisionObject(projectile.getCollisionObject())
         , mProjectile(&projectile)

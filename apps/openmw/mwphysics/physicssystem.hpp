@@ -245,8 +245,7 @@ namespace MWPhysics
 
         /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
         /// be overwritten. Valid until the next call to stepSimulation
-        void queueObjectMovement(
-            const MWWorld::Ptr& ptr, const osg::Vec3f& velocity, float duration, bool jump = false);
+        void queueObjectMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity);
 
         /// Clear the queued movements list without applying.
         void clearQueuedMovement();

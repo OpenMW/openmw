@@ -170,8 +170,6 @@ namespace MWPhysics
         }
 
         // Now that we have the effective movement vector, apply wind forces to it
-        // TODO: This will cause instability in idle animations and other in-place animations. Should include a flag for
-        // this when queueing up movement
         if (worldData.mIsInStorm && velocity.length() > 0)
         {
             osg::Vec3f stormDirection = worldData.mStormDirection;
@@ -202,8 +200,7 @@ namespace MWPhysics
 
         for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.0001f; ++iterations)
         {
-            osg::Vec3f diff = velocity * remainingTime;
-            osg::Vec3f nextpos = newPosition + diff;
+            osg::Vec3f nextpos = newPosition + velocity * remainingTime;
             bool underwater = newPosition.z() < swimlevel;
 
             // If not able to fly, don't allow to swim up into the air
@@ -215,11 +212,7 @@ namespace MWPhysics
                 continue; // velocity updated, calculate nextpos again
             }
 
-            // Note, we use an epsilon of 1e-6 instead of std::numeric_limits<float>::epsilon() to avoid doing extremely
-            // small steps. But if we make it any larger we'll start rejecting subtle movements from e.g. idle
-            // animations. Note that, although both these comparisons to 1e-6 are logically the same, they test separate
-            // floating point accuracy cases.
-            if (diff.length2() > 1e-6 && (newPosition - nextpos).length2() > 1e-6)
+            if ((newPosition - nextpos).length2() > 0.0001)
             {
                 // trace to where character would go if there were no obstructions
                 tracer.doTrace(actor.mCollisionObject, newPosition, nextpos, collisionWorld, actor.mIsOnGround);
