@@ -73,6 +73,7 @@
     Bug #7292: Weather settings for disabling or enabling snow and rain ripples don't work
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
+    Bug #7309: Sunlight scattering is visible in inappropriate situations
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
     Bug #7354: Disabling post processing in-game causes a crash
     Bug #7364: Post processing is not reflected in savegame previews
