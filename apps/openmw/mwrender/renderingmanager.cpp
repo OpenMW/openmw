@@ -693,8 +693,9 @@ namespace MWRender
         osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell.getMood().mDirectionalColor);
 
         setSunColour(diffuse, diffuse, 1.f);
-
-        const osg::Vec4f interiorSunPos = osg::Vec4f(-0.15f, 0.15f, 1.f, 0.f);
+        // This is total nonsense but it's what Morrowind uses
+        static const osg::Vec4f interiorSunPos
+            = osg::Vec4f(-1.f, osg::DegreesToRadians(45.f), osg::DegreesToRadians(45.f), 0.f);
         mPostProcessor->getStateUpdater()->setSunPos(interiorSunPos, false);
         mSunLight->setPosition(interiorSunPos);
     }
