@@ -328,6 +328,12 @@ CSMWorld::UniversalId::UniversalId(Type type, ESM::RefId id)
     throw std::logic_error("invalid RefId argument UniversalId type: " + std::to_string(type));
 }
 
+CSMWorld::UniversalId::UniversalId(Type type, const UniversalId& id)
+    : mType(type)
+    , mValue(id.mValue)
+{
+}
+
 CSMWorld::UniversalId::UniversalId(Type type, int index)
     : mType(type)
     , mValue(index)
