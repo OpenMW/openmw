@@ -842,7 +842,7 @@ namespace MWRender
                 if (type == ESM::PRT_Weapon)
                     src = mWeaponAnimationTime;
                 else
-                    src = std::make_shared<NullAnimationTime>();
+                    src = mAnimationTimePtr[0];
                 SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
                 node->accept(assignVisitor);
             }

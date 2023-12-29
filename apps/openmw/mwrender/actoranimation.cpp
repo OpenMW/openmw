@@ -314,6 +314,7 @@ namespace MWRender
         if (node == nullptr)
             return;
 
+        // This is used to avoid playing animations intended for equipped weapons on holstered weapons.
         SceneUtil::ForceControllerSourcesVisitor removeVisitor(std::make_shared<NullAnimationTime>());
         node->accept(removeVisitor);
     }
@@ -345,9 +346,7 @@ namespace MWRender
         if (mesh.empty() || boneName.empty())
             return;
 
-        // If the scabbard is not found, use a weapon mesh as fallback.
-        // Note: it is unclear how to handle time for controllers attached to bodyparts, so disable them for now.
-        // We use the similar approach for other bodyparts.
+        // If the scabbard is not found, use the weapon mesh as fallback.
         scabbardName = scabbardName.replace(scabbardName.size() - 4, 4, "_sh.nif");
         bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
         if (!mResourceSystem->getVFS()->exists(scabbardName))
