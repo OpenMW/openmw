@@ -902,7 +902,8 @@ printf "Qt ${QT_VER}... "
 	fi
 
 	cd $QT_SDK
-	add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe"
+	add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
+		-DCMAKE_PREFIX_PATH="$QT_SDK"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
 		if [ $CONFIGURATION == "Debug" ]; then
 			DLLSUFFIX="d"
@@ -929,7 +930,7 @@ printf "SDL 2.24.0... "
 		rm -rf SDL2-2.24.0
 		eval 7z x -y SDL2-devel-2.24.0-VC.zip $STRIP
 	fi
-	SDL2DIR="$(real_pwd)/SDL2-2.24.0"
+	export SDL2DIR="$(real_pwd)/SDL2-2.24.0"
 	for config in ${CONFIGURATIONS[@]}; do
 		add_runtime_dlls $config "$(pwd)/SDL2-2.24.0/lib/x${ARCHSUFFIX}/SDL2.dll"
 	done
@@ -1023,8 +1024,6 @@ printf "zlib 1.2.11... "
 	done
 	echo Done.
 }
-
-add_cmake_opts -DCMAKE_PREFIX_PATH="\"${QT_SDK};${SDL2DIR}\""
 
 echo
 cd $DEPS_INSTALL/..

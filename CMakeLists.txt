@@ -114,6 +114,7 @@ include(WholeArchive)
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
+option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 option(QT_STATIC "Link static build of Qt into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
@@ -482,6 +483,7 @@ set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 include_directories(
     BEFORE SYSTEM
     "."
+    ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
@@ -493,7 +495,7 @@ include_directories(
     ${ICU_INCLUDE_DIRS}
 )
 
-link_directories(${Boost_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
 
 if(MYGUI_STATIC)
     add_definitions(-DMYGUI_STATIC)
