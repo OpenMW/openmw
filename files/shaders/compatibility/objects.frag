@@ -169,7 +169,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 #if @normalMap
     vec3 viewNormal = normalToView(texture2D(normalMap, normalMapUV + offset).xyz * 2.0 - 1.0);
 #else
-    vec3 viewNormal = normalToView(normalize(passNormal));
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
 #endif
 
     vec3 viewVec = normalize(passViewPos);

@@ -69,7 +69,7 @@ void main(void)
 
 
 #if @shadows_enabled
-    vec3 viewNormal = normalToView(passNormal);
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
     setupShadowCoords(viewPos, viewNormal);
 #endif
 }
