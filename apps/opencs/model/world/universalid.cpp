@@ -187,6 +187,8 @@ namespace
         {
             mStream << ": " << value;
         }
+
+        void operator()(const ESM::RefId& value) const { mStream << ": " << value.toString(); }
     };
 
     struct GetTypeData
