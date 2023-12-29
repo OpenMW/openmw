@@ -7,6 +7,7 @@ file(GLOB UNITTEST_SRC_FILES
     ../openmw/mwworld/store.cpp
     ../openmw/mwworld/esmstore.cpp
     ../openmw/mwworld/timestamp.cpp
+    ../openmw/mwrender/actorutil.cpp
 
     mwworld/test_store.cpp
     mwworld/testduration.cpp
