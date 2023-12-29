@@ -6,6 +6,7 @@
 #include <osg/Stats>
 #include <set>
 
+#include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/storage.hpp>
 #include <components/lua_ui/resources.hpp>
@@ -144,6 +145,9 @@ namespace MWLua
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
         std::string formatResourceUsageStats() const override;
 
+        LuaUtil::InputAction::Registry& inputActions() { return mInputActions; }
+        LuaUtil::InputTrigger::Registry& inputTriggers() { return mInputTriggers; }
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
@@ -206,6 +210,9 @@ namespace MWLua
 
         LuaUtil::LuaStorage mGlobalStorage{ mLua.sol() };
         LuaUtil::LuaStorage mPlayerStorage{ mLua.sol() };
+
+        LuaUtil::InputAction::Registry mInputActions;
+        LuaUtil::InputTrigger::Registry mInputTriggers;
     };
 
 }
