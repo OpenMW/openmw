@@ -360,6 +360,10 @@ const std::string& CSMWorld::UniversalId::getId() const
     if (const std::string* result = std::get_if<std::string>(&mValue))
         return *result;
 
+    if (const ESM::RefId* refId = std::get_if<ESM::RefId>(&mValue))
+        if (const ESM::StringRefId* result = refId->getIf<ESM::StringRefId>())
+            return result->getValue();
+
     throw std::logic_error("invalid access to ID of " + ::toString(getArgumentType()) + " UniversalId");
 }
 
