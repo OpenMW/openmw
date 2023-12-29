@@ -109,7 +109,8 @@ Engine handler is a function defined by a script, that can be called by the engi
       | Usage example:
       | ``if id == input.CONTROLLER_BUTTON.LeftStick then ...``
   * - onInputAction(id)
-    - | `Game control <openmw_input.html##(ACTION)>`_ is pressed.
+    - | (DEPRECATED, use `registerActionHandler <openmw_input.html##(registerActionHandler)>`_)
+      | `Game control <openmw_input.html##(ACTION)>`_ is pressed.
       | Usage example:
       | ``if id == input.ACTION.ToggleWeapon then ...``
   * - onTouchPress(touchEvent)

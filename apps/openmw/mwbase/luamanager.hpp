@@ -29,6 +29,14 @@ namespace ESM
     struct LuaScripts;
 }
 
+namespace LuaUtil
+{
+    namespace InputAction
+    {
+        class Registry;
+    }
+}
+
 namespace MWBase
 {
     // \brief LuaManager is the central interface through which the engine invokes lua scripts.
