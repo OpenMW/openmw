@@ -597,7 +597,8 @@ namespace MWClass
         float damage = 0.0f;
         if (!success)
         {
-            othercls.onHit(victim, damage, false, weapon, ptr, osg::Vec3f(), false);
+            othercls.onHit(
+                victim, damage, false, weapon, ptr, osg::Vec3f(), false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(damage, false, weapon, ptr);
             MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
             return;
@@ -670,24 +671,29 @@ namespace MWClass
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
+        othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
     void Npc::onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const
+        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+        const MWMechanics::DamageSourceType sourceType) const
     {
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         bool wasDead = stats.isDead();
 
-        // Note OnPcHitMe is not set for friendly hits.
         bool setOnPcHitMe = true;
 
         // NOTE: 'object' and/or 'attacker' may be empty.
         if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
         {
             stats.setAttacked(true);
-            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
+            bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
+            if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
+                setOnPcHitMe = false;
+            else
+                setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet

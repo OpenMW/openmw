@@ -284,7 +284,8 @@ namespace MWClass
 
         if (!success)
         {
-            victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false);
+            victim.getClass().onHit(
+                victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
@@ -345,24 +346,35 @@ namespace MWClass
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
+        victim.getClass().onHit(
+            victim, damage, healthdmg, weapon, ptr, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
     void Creature::onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const
+        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+        const MWMechanics::DamageSourceType sourceType) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
 
+        // Self defense
+        bool setOnPcHitMe = true;
+
         // NOTE: 'object' and/or 'attacker' may be empty.
         if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
+        {
             stats.setAttacked(true);
 
-        // Self defense
-        bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
-
-        // No retaliation for totally static creatures (they have no movement or attacks anyway)
-        if (isMobile(ptr) && !attacker.isEmpty())
-            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            // No retaliation for totally static creatures (they have no movement or attacks anyway)
+            if (isMobile(ptr))
+            {
+                bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
+                bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
+                if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
+                    setOnPcHitMe = false;
+                else
+                    setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            }
+        }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet
         if (!attacker.isEmpty() && attacker.getClass().isActor())

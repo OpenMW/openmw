@@ -13,6 +13,8 @@
 #include "ptr.hpp"
 
 #include "../mwmechanics/aisetting.hpp"
+#include "../mwmechanics/damagesourcetype.hpp"
+
 #include <components/esm/refid.hpp>
 #include <components/esm3/loadskil.hpp>
 
@@ -142,11 +144,12 @@ namespace MWWorld
         /// (default implementation: throw an exception)
 
         virtual void onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const;
+            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+            const MWMechanics::DamageSourceType sourceType) const;
         ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
         /// true (else fatigue) by \a object (sword, arrow, etc). \a attacker specifies the
-        /// actor responsible for the attack, and \a successful specifies if the hit is
-        /// successful or not.
+        /// actor responsible for the attack. \a successful specifies if the hit is
+        /// successful or not. \a sourceType classifies the damage source.
 
         virtual void block(const Ptr& ptr) const;
         ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield

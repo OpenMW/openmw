@@ -1466,26 +1466,10 @@ namespace MWMechanics
         if (target == player || !attacker.getClass().isActor())
             return false;
 
-        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
-        if (attacker == player)
-        {
-            std::set<MWWorld::Ptr> followersAttacker;
-            getActorsSidingWith(attacker, followersAttacker);
-            if (followersAttacker.find(target) != followersAttacker.end())
-            {
-                statsTarget.friendlyHit();
-
-                if (statsTarget.getFriendlyHits() < 4)
-                {
-                    MWBase::Environment::get().getDialogueManager()->say(target, ESM::RefId::stringRefId("hit"));
-                    return false;
-                }
-            }
-        }
-
         if (canCommitCrimeAgainst(target, attacker))
             commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
 
+        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
         AiSequence& seq = statsTarget.getAiSequence();
 
         if (!attacker.isEmpty()

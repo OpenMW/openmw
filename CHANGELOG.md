@@ -103,6 +103,7 @@
     Bug #7641: loopgroup loops the animation one time too many for actors
     Bug #7642: Items in repair and recharge menus aren't sorted alphabetically
     Bug #7643: Can't enchant items with constant effect on self magic effects for non-player character
+    Bug #7646: Follower voices pain sounds when attacked with magic
     Bug #7647: NPC walk cycle bugs after greeting player
     Bug #7654: Tooltips for enchantments with invalid effects cause crashes
     Bug #7660: Some inconsistencies regarding Invisibility breaking
