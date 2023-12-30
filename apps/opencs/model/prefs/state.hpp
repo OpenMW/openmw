@@ -65,7 +65,7 @@ namespace CSMPrefs
 
         IntSetting& declareInt(Settings::SettingValue<int>& value, const QString& label);
 
-        DoubleSetting& declareDouble(const std::string& key, const QString& label, double default_);
+        DoubleSetting& declareDouble(Settings::SettingValue<double>& value, const QString& label);
 
         BoolSetting& declareBool(Settings::SettingValue<bool>& value, const QString& label);
 

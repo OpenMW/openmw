@@ -21,7 +21,7 @@ namespace CSMPrefs
 
     public:
         explicit DoubleSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
         DoubleSetting& setPrecision(int precision);
 

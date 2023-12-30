@@ -180,29 +180,36 @@ void CSMPrefs::State::declare()
 
     declareCategory("3D Scene Input");
 
-    declareDouble("navi-wheel-factor", "Camera Zoom Sensitivity", 8).setRange(-100.0, 100.0);
-    declareDouble("s-navi-sensitivity", "Secondary Camera Movement Sensitivity", 50.0).setRange(-1000.0, 1000.0);
+    declareDouble(mValues->mSceneInput.mNaviWheelFactor, "Camera Zoom Sensitivity").setRange(-100.0, 100.0);
+    declareDouble(mValues->mSceneInput.mSNaviSensitivity, "Secondary Camera Movement Sensitivity")
+        .setRange(-1000.0, 1000.0);
 
-    declareDouble("p-navi-free-sensitivity", "Free Camera Sensitivity", 1 / 650.).setPrecision(5).setRange(0.0, 1.0);
+    declareDouble(mValues->mSceneInput.mPNaviFreeSensitivity, "Free Camera Sensitivity")
+        .setPrecision(5)
+        .setRange(0.0, 1.0);
     declareBool(mValues->mSceneInput.mPNaviFreeInvert, "Invert Free Camera Mouse Input");
-    declareDouble("navi-free-lin-speed", "Free Camera Linear Speed", 1000.0).setRange(1.0, 10000.0);
-    declareDouble("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);
-    declareDouble("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
+    declareDouble(mValues->mSceneInput.mNaviFreeLinSpeed, "Free Camera Linear Speed").setRange(1.0, 10000.0);
+    declareDouble(mValues->mSceneInput.mNaviFreeRotSpeed, "Free Camera Rotational Speed").setRange(0.001, 6.28);
+    declareDouble(mValues->mSceneInput.mNaviFreeSpeedMult, "Free Camera Speed Multiplier (from Modifier)")
+        .setRange(0.001, 1000.0);
 
-    declareDouble("p-navi-orbit-sensitivity", "Orbit Camera Sensitivity", 1 / 650.).setPrecision(5).setRange(0.0, 1.0);
+    declareDouble(mValues->mSceneInput.mPNaviOrbitSensitivity, "Orbit Camera Sensitivity")
+        .setPrecision(5)
+        .setRange(0.0, 1.0);
     declareBool(mValues->mSceneInput.mPNaviOrbitInvert, "Invert Orbit Camera Mouse Input");
-    declareDouble("navi-orbit-rot-speed", "Orbital Camera Rotational Speed", 3.14 / 4).setRange(0.001, 6.28);
-    declareDouble("navi-orbit-speed-mult", "Orbital Camera Speed Multiplier (from Modifier)", 4)
+    declareDouble(mValues->mSceneInput.mNaviOrbitRotSpeed, "Orbital Camera Rotational Speed").setRange(0.001, 6.28);
+    declareDouble(mValues->mSceneInput.mNaviOrbitSpeedMult, "Orbital Camera Speed Multiplier (from Modifier)")
         .setRange(0.001, 1000.0);
     declareBool(mValues->mSceneInput.mNaviOrbitConstRoll, "Keep camera roll constant for orbital camera");
 
     declareBool(mValues->mSceneInput.mContextSelect, "Context Sensitive Selection");
-    declareDouble("drag-factor", "Mouse sensitivity during drag operations", 1.0).setRange(0.001, 100.0);
-    declareDouble("drag-wheel-factor", "Mouse wheel sensitivity during drag operations", 1.0).setRange(0.001, 100.0);
-    declareDouble("drag-shift-factor", "Shift-acceleration factor during drag operations", 4.0)
+    declareDouble(mValues->mSceneInput.mDragFactor, "Mouse sensitivity during drag operations").setRange(0.001, 100.0);
+    declareDouble(mValues->mSceneInput.mDragWheelFactor, "Mouse wheel sensitivity during drag operations")
+        .setRange(0.001, 100.0);
+    declareDouble(mValues->mSceneInput.mDragShiftFactor, "Shift-acceleration factor during drag operations")
         .setTooltip("Acceleration factor during drag operations while holding down shift")
         .setRange(0.001, 100.0);
-    declareDouble("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
+    declareDouble(mValues->mSceneInput.mRotateFactor, "Free rotation factor").setPrecision(4).setRange(0.0001, 0.1);
 
     declareCategory("Rendering");
     declareInt(mValues->mRendering.mFramerateLimit, "FPS limit")
@@ -213,7 +220,7 @@ void CSMPrefs::State::declare()
     declareInt(mValues->mRendering.mCameraOrthoSize, "Orthographic projection size parameter")
         .setTooltip("Size of the orthographic frustum, greater value will allow the camera to see more of the world.")
         .setRange(10, 10000);
-    declareDouble("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0, 1);
+    declareDouble(mValues->mRendering.mObjectMarkerAlpha, "Object Marker Transparency").setPrecision(2).setRange(0, 1);
     declareBool(mValues->mRendering.mSceneUseGradient, "Use Gradient Background");
     declareColour("scene-day-background-colour", "Day Background Colour", QColor(110, 120, 128, 255));
     declareColour("scene-day-gradient-colour", "Day Gradient  Colour", QColor(47, 51, 51, 255))
@@ -264,9 +271,9 @@ void CSMPrefs::State::declare()
     secondarySelectAction.add(SelectOnly).add(SelectAdd).add(SelectRemove).add(selectInvert);
 
     declareCategory("3D Scene Editing");
-    declareDouble("gridsnap-movement", "Grid snap size", 16);
-    declareDouble("gridsnap-rotation", "Angle snap size", 15);
-    declareDouble("gridsnap-scale", "Scale snap size", 0.25);
+    declareDouble(mValues->mSceneEditing.mGridsnapMovement, "Grid snap size");
+    declareDouble(mValues->mSceneEditing.mGridsnapRotation, "Angle snap size");
+    declareDouble(mValues->mSceneEditing.mGridsnapScale, "Scale snap size");
     declareInt(mValues->mSceneEditing.mDistance, "Drop Distance")
         .setTooltip(
             "If an instance drop can not be placed against another object at the "
@@ -286,7 +293,7 @@ void CSMPrefs::State::declare()
         .setMin(1);
     declareBool(mValues->mSceneEditing.mLandeditPostSmoothpainting, "Smooth land after painting height")
         .setTooltip("Raise and lower tools will leave bumpy finish without this option");
-    declareDouble("landedit-post-smoothstrength", "Smoothing strength (post-edit)", 0.25)
+    declareDouble(mValues->mSceneEditing.mLandeditPostSmoothstrength, "Smoothing strength (post-edit)")
         .setTooltip(
             "If smoothing land after painting height is used, this is the percentage of smooth applied afterwards. "
             "Negative values may be used to roughen instead of smooth.")
@@ -498,13 +505,13 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt(Settings::SettingValue<int>& v
     return *setting;
 }
 
-CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(const std::string& key, const QString& label, double default_)
+CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(Settings::SettingValue<double>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
     CSMPrefs::DoubleSetting* setting
-        = new CSMPrefs::DoubleSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+        = new CSMPrefs::DoubleSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
 
