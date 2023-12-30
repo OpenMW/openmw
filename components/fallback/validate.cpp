@@ -11,10 +11,8 @@ static const std::set<std::string_view> allowedKeysInt = { "LightAttenuation_Lin
     "Water_RippleFrameCount", "Water_SurfaceTileCount", "Water_SurfaceFrameCount", "Weather_Clear_Using_Precip",
     "Weather_Cloudy_Using_Precip", "Weather_Foggy_Using_Precip", "Weather_Overcast_Using_Precip",
     "Weather_Rain_Using_Precip", "Weather_Thunderstorm_Using_Precip", "Weather_Ashstorm_Using_Precip",
-    "Weather_Blight_Using_Precip", "Weather_Snow_Using_Precip", "Weather_Blizzard_Using_Precip",
-    "Weather_Clear_Ripples", "Weather_Cloudy_Ripples", "Weather_Foggy_Ripples", "Weather_Overcast_Ripples",
-    "Weather_Rain_Ripples", "Weather_Thunderstorm_Ripples", "Weather_Ashstorm_Ripples", "Weather_Blight_Ripples",
-    "Weather_Snow_Ripples", "Weather_Blizzard_Ripples" };
+    "Weather_Blight_Using_Precip", "Weather_Snow_Using_Precip", "Weather_Blizzard_Using_Precip", "Weather_Rain_Ripples",
+    "Weather_Snow_Ripples" };
 
 static const std::set<std::string_view> allowedKeysFloat = { "General_Werewolf_FOV", "Inventory_DirectionalAmbientB",
     "Inventory_DirectionalAmbientG", "Inventory_DirectionalAmbientR", "Inventory_DirectionalDiffuseB",

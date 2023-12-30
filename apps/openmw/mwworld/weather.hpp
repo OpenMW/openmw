@@ -191,8 +191,6 @@ namespace MWWorld
 
         std::string mRainEffect;
 
-        bool mRipples;
-
         osg::Vec3f mStormDirection;
 
         float mCloudsMaximumPercent;
