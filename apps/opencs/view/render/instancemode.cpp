@@ -186,6 +186,71 @@ osg::Vec3f CSVRender::InstanceMode::getMousePlaneCoords(const QPoint& point, con
     return mousePlanePoint;
 }
 
+void CSVRender::InstanceMode::saveSelectionGroup(const int group)
+{
+    QStringList strings;
+    QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+    QVariant selectionObjects;
+    CSMWorld::CommandMacro macro(undoStack, "Replace Selection Group");
+    std::string groupName = "project::" + std::to_string(group);
+
+    const auto& selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    const int selectionObjectsIndex
+        = mSelectionGroups->findColumnIndex(CSMWorld::Columns::ColumnId_SelectionGroupObjects);
+
+    if (dynamic_cast<CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
+        groupName += "-ext";
+    else
+        groupName += "-" + getWorldspaceWidget().getCellId(osg::Vec3f(0, 0, 0));
+
+    CSMWorld::CreateCommand* newGroup = new CSMWorld::CreateCommand(*mSelectionGroups, groupName);
+
+    newGroup->setType(CSMWorld::UniversalId::Type_SelectionGroup);
+
+    for (const auto& object : selection)
+        if (const CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(object.get()))
+            strings << QString::fromStdString(objectTag->mObject->getReferenceId());
+
+    selectionObjects.setValue(strings);
+
+    newGroup->addValue(selectionObjectsIndex, selectionObjects);
+
+    if (mSelectionGroups->getModelIndex(groupName, 0).row() != -1)
+        macro.push(new CSMWorld::DeleteCommand(*mSelectionGroups, groupName));
+
+    macro.push(newGroup);
+
+    getWorldspaceWidget().clearSelection(Mask_Reference);
+}
+
+void CSVRender::InstanceMode::getSelectionGroup(const int group)
+{
+    std::string groupName = "project::" + std::to_string(group);
+    std::vector<std::string> targets;
+
+    const auto& selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    const int selectionObjectsIndex
+        = mSelectionGroups->findColumnIndex(CSMWorld::Columns::ColumnId_SelectionGroupObjects);
+
+    if (dynamic_cast<CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
+        groupName += "-ext";
+    else
+        groupName += "-" + getWorldspaceWidget().getCellId(osg::Vec3f(0, 0, 0));
+
+    const QModelIndex groupSearch = mSelectionGroups->getModelIndex(groupName, selectionObjectsIndex);
+
+    if (groupSearch.row() == -1)
+        return;
+
+    for (const QString& target : groupSearch.data().toStringList())
+        targets.push_back(target.toStdString());
+
+    if (!selection.empty())
+        getWorldspaceWidget().clearSelection(Mask_Reference);
+
+    getWorldspaceWidget().selectGroup(targets);
+}
+
 CSVRender::InstanceMode::InstanceMode(
     WorldspaceWidget* worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget* parent)
     : EditMode(worldspaceWidget, QIcon(":scenetoolbar/editing-instance"), Mask_Reference | Mask_Terrain,
@@ -199,6 +264,9 @@ CSVRender::InstanceMode::InstanceMode(
     , mUnitScaleDist(1)
     , mParentNode(std::move(parentNode))
 {
+    mSelectionGroups = dynamic_cast<CSMWorld::IdTable*>(
+        worldspaceWidget->getDocument().getData().getTableModel(CSMWorld::UniversalId::Type_SelectionGroup));
+
     connect(this, &InstanceMode::requestFocus, worldspaceWidget, &WorldspaceWidget::requestFocus);
 
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("scene-delete", worldspaceWidget);
@@ -229,6 +297,14 @@ CSVRender::InstanceMode::InstanceMode(
         = new CSMPrefs::Shortcut("scene-instance-drop-terrain-separately", worldspaceWidget);
     connect(dropToTerrainLevelShortcut2, qOverload<>(&CSMPrefs::Shortcut::activated), this,
         &InstanceMode::dropSelectedInstancesToTerrainSeparately);
+
+    for (short i = 0; i <= 9; i++)
+    {
+        connect(new CSMPrefs::Shortcut("scene-group-" + std::to_string(i), worldspaceWidget),
+            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, i] { this->getSelectionGroup(i); });
+        connect(new CSMPrefs::Shortcut("scene-save-" + std::to_string(i), worldspaceWidget),
+            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, i] { this->saveSelectionGroup(i); });
+    }
 }
 
 void CSVRender::InstanceMode::activate(CSVWidget::SceneToolbar* toolbar)

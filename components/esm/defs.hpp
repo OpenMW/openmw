@@ -170,6 +170,8 @@ namespace ESM
         // format 1
         REC_FILT = esm3Recname("FILT"),
         REC_DBGP = esm3Recname("DBGP"), ///< only used in project files
+        REC_SELG = esm3Recname("SELG"),
+
         REC_LUAL = esm3Recname("LUAL"), // LuaScriptsCfg (only in omwgame or omwaddon)
 
         // format 16 - Lua scripts in saved games

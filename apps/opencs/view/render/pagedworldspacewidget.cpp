@@ -875,6 +875,18 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::
     return result;
 }
 
+void CSVRender::PagedWorldspaceWidget::selectGroup(std::vector<std::string> group) const
+{
+    for (const auto& [_, cell] : mCells)
+        cell->selectFromGroup(group);
+}
+
+void CSVRender::PagedWorldspaceWidget::unhideAll() const
+{
+    for (const auto& [_, cell] : mCells)
+        cell->unhideAll();
+}
+
 std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::getEdited(
     unsigned int elementMask) const
 {

@@ -33,6 +33,7 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadsscr.hpp>
+#include <components/esm3/selectiongroup.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/misc/algorithm.hpp>
 #include <components/to_utf8/to_utf8.hpp>
@@ -105,6 +106,7 @@ namespace CSMWorld
         IdCollection<ESM::BodyPart> mBodyParts;
         IdCollection<ESM::MagicEffect> mMagicEffects;
         IdCollection<ESM::DebugProfile> mDebugProfiles;
+        IdCollection<ESM::SelectionGroup> mSelectionGroups;
         IdCollection<ESM::SoundGenerator> mSoundGens;
         IdCollection<ESM::StartScript> mStartScripts;
         NestedInfoCollection mTopicInfos;
@@ -250,6 +252,10 @@ namespace CSMWorld
         const IdCollection<ESM::DebugProfile>& getDebugProfiles() const;
 
         IdCollection<ESM::DebugProfile>& getDebugProfiles();
+
+        const IdCollection<ESM::SelectionGroup>& getSelectionGroups() const;
+
+        IdCollection<ESM::SelectionGroup>& getSelectionGroups();
 
         const IdCollection<CSMWorld::Land>& getLand() const;
 

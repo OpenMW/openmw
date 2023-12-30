@@ -620,6 +620,10 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mDebugProfiles.addColumn(new DescriptionColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn(new ScriptColumn<ESM::DebugProfile>(ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
+    mSelectionGroups.addColumn(new StringIdColumn<ESM::SelectionGroup>);
+    mSelectionGroups.addColumn(new RecordStateColumn<ESM::SelectionGroup>);
+    mSelectionGroups.addColumn(new SelectionGroupColumn);
+
     mMetaData.appendBlankRecord(ESM::RefId::stringRefId("sys::meta"));
 
     mMetaData.addColumn(new StringIdColumn<MetaData>(true));
@@ -664,6 +668,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     addModel(new ResourceTable(&mResourcesManager.get(UniversalId::Type_Textures)), UniversalId::Type_Texture);
     addModel(new ResourceTable(&mResourcesManager.get(UniversalId::Type_Videos)), UniversalId::Type_Video);
     addModel(new IdTable(&mMetaData), UniversalId::Type_MetaData);
+    addModel(new IdTable(&mSelectionGroups), UniversalId::Type_SelectionGroup);
 
     mActorAdapter = std::make_unique<ActorAdapter>(*this);
 
@@ -906,6 +911,16 @@ const CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfile
 CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
 {
     return mDebugProfiles;
+}
+
+CSMWorld::IdCollection<ESM::SelectionGroup>& CSMWorld::Data::getSelectionGroups()
+{
+    return mSelectionGroups;
+}
+
+const CSMWorld::IdCollection<ESM::SelectionGroup>& CSMWorld::Data::getSelectionGroups() const
+{
+    return mSelectionGroups;
 }
 
 const CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand() const
@@ -1367,6 +1382,17 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
             }
 
             mDebugProfiles.load(*mReader, mBase);
+            break;
+
+        case ESM::REC_SELG:
+
+            if (!mProject)
+            {
+                unhandledRecord = true;
+                break;
+            }
+
+            mSelectionGroups.load(*mReader, mBase);
             break;
 
         default:

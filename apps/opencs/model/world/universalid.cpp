@@ -68,6 +68,7 @@ namespace
             ":./resources-video" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_DebugProfiles, "Debug Profiles",
             ":./debug-profile.png" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SelectionGroup, "Selection Groups", "" },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_RunLog, "Run Log", ":./run-log.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SoundGens, "Sound Generators",
             ":./sound-generator.png" },
