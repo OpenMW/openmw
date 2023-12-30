@@ -188,6 +188,8 @@ namespace
         {
             mStream << ": " << value;
         }
+
+        void operator()(const ESM::RefId& value) const { mStream << ": " << value.toString(); }
     };
 
     struct GetTypeData
@@ -327,6 +329,12 @@ CSMWorld::UniversalId::UniversalId(Type type, ESM::RefId id)
     throw std::logic_error("invalid RefId argument UniversalId type: " + std::to_string(type));
 }
 
+CSMWorld::UniversalId::UniversalId(Type type, const UniversalId& id)
+    : mType(type)
+    , mValue(id.mValue)
+{
+}
+
 CSMWorld::UniversalId::UniversalId(Type type, int index)
     : mType(type)
     , mValue(index)
@@ -360,6 +368,10 @@ const std::string& CSMWorld::UniversalId::getId() const
 {
     if (const std::string* result = std::get_if<std::string>(&mValue))
         return *result;
+
+    if (const ESM::RefId* refId = std::get_if<ESM::RefId>(&mValue))
+        if (const ESM::StringRefId* result = refId->getIf<ESM::StringRefId>())
+            return result->getValue();
 
     throw std::logic_error("invalid access to ID of " + ::toString(getArgumentType()) + " UniversalId");
 }

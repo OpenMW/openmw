@@ -159,6 +159,8 @@ namespace CSMWorld
         UniversalId(Type type, int index);
         ///< Using a type for a non-index-argument UniversalId will throw an exception.
 
+        UniversalId(Type type, const UniversalId& id);
+
         Class getClass() const;
 
         ArgumentType getArgumentType() const;

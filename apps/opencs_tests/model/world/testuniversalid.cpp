@@ -177,11 +177,11 @@ namespace CSMWorld
                 UniversalId::ArgumentType_Id, "Instance", "Instance: f", ":./instance.png" },
 
             Params{ UniversalId(UniversalId::Type_Reference, ESM::RefId::stringRefId("g")), UniversalId::Type_Reference,
-                UniversalId::Class_SubRecord, UniversalId::ArgumentType_RefId, "Instance", "Instance: \"g\"",
+                UniversalId::Class_SubRecord, UniversalId::ArgumentType_RefId, "Instance", "Instance: g",
                 ":./instance.png" },
             Params{ UniversalId(UniversalId::Type_Reference, ESM::RefId::index(ESM::REC_SKIL, 42)),
                 UniversalId::Type_Reference, UniversalId::Class_SubRecord, UniversalId::ArgumentType_RefId, "Instance",
-                "Instance: Index:SKIL:0x2a", ":./instance.png" },
+                "Instance: SKIL:0x2a", ":./instance.png" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ValidParams, CSMWorldUniversalIdValidPerTypeTest, ValuesIn(validParams));
