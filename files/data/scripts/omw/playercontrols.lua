@@ -208,16 +208,6 @@ end
 
 local uiControlsOverridden = false
 
-input.registerTriggerHandler('ToggleWeapon', async:callback(function()
-    if not combatAllowed() then return end
-    if Actor.stance(self) == Actor.STANCE.Weapon then
-        Actor.setStance(self, Actor.STANCE.Nothing)
-    elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Fighting) then
-        Actor.setStance(self, Actor.STANCE.Weapon)
-    end
-end))
-
-
 local function uiAllowed()
     return Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) and not uiControlsOverridden
 end
