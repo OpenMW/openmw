@@ -226,7 +226,7 @@ namespace
     {
         for (MWWorld::Ptr& ptr : mToInsert)
         {
-            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+            if (!ptr.mRef->isDeleted() && ptr.getRefData().isEnabled())
             {
                 try
                 {
@@ -648,7 +648,7 @@ namespace MWWorld
                 if (ptr.mRef->mData.mPhysicsPostponed)
                 {
                     ptr.mRef->mData.mPhysicsPostponed = false;
-                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0)
+                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mRef.getCount() > 0)
                     {
                         std::string model = getModel(ptr);
                         if (!model.empty())

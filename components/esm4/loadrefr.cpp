@@ -268,6 +268,11 @@ void ESM4::Reference::load(ESM4::Reader& reader)
 
                 break;
             }
+            case ESM4::SUB_XCNT:
+            {
+                reader.get(mCount);
+                break;
+            }
             // lighting
             case ESM4::SUB_LNAM: // lighting template formId
             case ESM4::SUB_XLIG: // struct, FOV, fade, etc
@@ -279,7 +284,6 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             //
             case ESM4::SUB_XPCI: // formId
             case ESM4::SUB_XLCM:
-            case ESM4::SUB_XCNT:
             case ESM4::SUB_ONAM:
             case ESM4::SUB_VMAD:
             case ESM4::SUB_XPRM:

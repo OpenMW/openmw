@@ -115,7 +115,7 @@ namespace MWGui
             if (!item.getClass().showsInInventory(item))
                 continue;
 
-            ItemStack newItem(item, this, item.getRefData().getCount());
+            ItemStack newItem(item, this, item.getCellRef().getCount());
 
             if (mActor.getClass().hasInventoryStore(mActor))
             {

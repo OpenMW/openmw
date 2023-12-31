@@ -120,7 +120,7 @@ namespace MWGui
                     tooltipSize = createToolTip(info, checkOwned());
                 }
                 else
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true);
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), true);
 
                 MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
                 position(tooltipPosition, tooltipSize, viewSize);
@@ -187,7 +187,7 @@ namespace MWGui
                     if (mFocusObject.isEmpty())
                         return;
 
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false, checkOwned());
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), false, checkOwned());
                 }
                 else if (type == "ItemModelIndex")
                 {
@@ -211,7 +211,7 @@ namespace MWGui
 
                     mFocusObject = item;
                     if (!mFocusObject.isEmpty())
-                        tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
+                        tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), false);
                 }
                 else if (type == "Spell")
                 {
@@ -306,7 +306,7 @@ namespace MWGui
         {
             if (!mFocusObject.isEmpty())
             {
-                MyGUI::IntSize tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true, checkOwned());
+                MyGUI::IntSize tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), true, checkOwned());
 
                 setCoord(viewSize.width / 2 - tooltipSize.width / 2,
                     std::max(0, int(mFocusToolTipY * viewSize.height - tooltipSize.height)), tooltipSize.width,

@@ -289,7 +289,7 @@ void MWMechanics::Alchemy::removeIngredients()
         {
             iter->getContainerStore()->remove(*iter, 1);
 
-            if (iter->getRefData().getCount() < 1)
+            if (iter->getCellRef().getCount() < 1)
                 *iter = MWWorld::Ptr();
         }
 
@@ -369,7 +369,7 @@ int MWMechanics::Alchemy::countPotionsToBrew() const
     for (TIngredientsIterator iter(beginIngredients()); iter != endIngredients(); ++iter)
         if (!iter->isEmpty())
         {
-            int count = iter->getRefData().getCount();
+            int count = iter->getCellRef().getCount();
             if ((count > 0 && count < toBrew) || toBrew < 0)
                 toBrew = count;
         }

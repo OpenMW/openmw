@@ -63,7 +63,7 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 {
     if (!mCachedTarget.isEmpty())
     {
-        if (mCachedTarget.getRefData().isDeleted() || !mCachedTarget.getRefData().isEnabled())
+        if (mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
             mCachedTarget = MWWorld::Ptr();
         else
             return mCachedTarget;

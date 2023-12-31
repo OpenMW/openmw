@@ -115,7 +115,7 @@ namespace MWMechanics
         if (target.isEmpty())
             return true;
 
-        if (!target.getRefData().getCount()
+        if (!target.getCellRef().getCount()
             || !target.getRefData().isEnabled() // Really we should be checking whether the target is currently
                                                 // registered with the MechanicsManager
             || target.getClass().getCreatureStats(target).isDead())
@@ -478,8 +478,7 @@ namespace MWMechanics
 
     MWWorld::Ptr AiCombat::getTarget() const
     {
-        if (mCachedTarget.isEmpty() || mCachedTarget.getRefData().isDeleted()
-            || !mCachedTarget.getRefData().isEnabled())
+        if (mCachedTarget.isEmpty() || mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
         {
             mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
         }

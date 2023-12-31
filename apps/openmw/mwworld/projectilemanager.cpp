@@ -434,7 +434,7 @@ namespace MWWorld
             MWWorld::Ptr caster = magicBoltState.getCaster();
             if (!caster.isEmpty() && caster.getClass().isActor())
             {
-                if (caster.getRefData().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
+                if (caster.getCellRef().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
                 {
                     cleanupMagicBolt(magicBoltState);
                     continue;

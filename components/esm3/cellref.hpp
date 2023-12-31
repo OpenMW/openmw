@@ -65,8 +65,7 @@ namespace ESM
         // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
         float mEnchantmentCharge;
 
-        // This is 5 for Gold_005 references, 100 for Gold_100 and so on.
-        int32_t mGoldValue;
+        int32_t mCount;
 
         // For doors - true if this door teleports to somewhere else, false
         // if it should open through animation.

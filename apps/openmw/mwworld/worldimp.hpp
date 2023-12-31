@@ -275,7 +275,7 @@ namespace MWWorld
         std::string_view getCellName(const MWWorld::Cell& cell) const override;
         std::string_view getCellName(const ESM::Cell* cell) const override;
 
-        void removeRefScript(MWWorld::RefData* ref) override;
+        void removeRefScript(const MWWorld::CellRef* ref) override;
         //< Remove the script attached to ref from mLocalScripts
 
         Ptr getPtr(const ESM::RefId& name, bool activeOnly) override;

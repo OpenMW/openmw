@@ -106,6 +106,11 @@ unsigned int MWWorld::LiveCellRefBase::getType() const
     return mClass->getType();
 }
 
+bool MWWorld::LiveCellRefBase::isDeleted() const
+{
+    return mData.isDeletedByContentFile() || mRef.getCount(false) == 0;
+}
+
 namespace MWWorld
 {
     std::string makeDynamicCastErrorMessage(const LiveCellRefBase* value, std::string_view recordType)

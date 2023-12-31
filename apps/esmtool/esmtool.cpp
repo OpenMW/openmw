@@ -265,7 +265,7 @@ namespace
                 std::cout << "    Faction rank: " << ref.mFactionRank << '\n';
             std::cout << "    Enchantment charge: " << ref.mEnchantmentCharge << '\n';
             std::cout << "    Uses/health: " << ref.mChargeInt << '\n';
-            std::cout << "    Gold value: " << ref.mGoldValue << '\n';
+            std::cout << "    Count: " << ref.mCount << '\n';
             std::cout << "    Blocked: " << static_cast<int>(ref.mReferenceBlocked) << '\n';
             std::cout << "    Deleted: " << deleted << '\n';
             if (!ref.mKey.empty())

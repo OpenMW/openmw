@@ -373,7 +373,7 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("enchant fail"));
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage34}");
-            if (!mEnchanting.getGem().isEmpty() && !mEnchanting.getGem().getRefData().getCount())
+            if (!mEnchanting.getGem().isEmpty() && !mEnchanting.getGem().getCellRef().getCount())
             {
                 setSoulGem(MWWorld::Ptr());
                 mEnchanting.nextCastStyle();

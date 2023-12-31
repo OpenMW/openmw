@@ -1022,7 +1022,7 @@ namespace MWMechanics
             if (stolenIt == mStolenItems.end())
                 continue;
             OwnerMap& owners = stolenIt->second;
-            int itemCount = it->getRefData().getCount();
+            int itemCount = it->getCellRef().getCount();
             for (OwnerMap::iterator ownerIt = owners.begin(); ownerIt != owners.end();)
             {
                 int toRemove = std::min(itemCount, ownerIt->second);
@@ -1034,7 +1034,7 @@ namespace MWMechanics
                     ++ownerIt;
             }
 
-            int toMove = it->getRefData().getCount() - itemCount;
+            int toMove = it->getCellRef().getCount() - itemCount;
 
             containerStore.add(*it, toMove);
             store.remove(*it, toMove);
@@ -1084,15 +1084,21 @@ namespace MWMechanics
             }
         }
 
-        if (!(item.getCellRef().getRefId() == MWWorld::ContainerStore::sGoldId))
+        const bool isGold = item.getClass().isGold(item);
+        if (!isGold)
         {
             if (victim.isEmpty()
-                || (victim.getClass().isActor() && victim.getRefData().getCount() > 0
+                || (victim.getClass().isActor() && victim.getCellRef().getCount() > 0
                     && !victim.getClass().getCreatureStats(victim).isDead()))
                 mStolenItems[item.getCellRef().getRefId()][owner] += count;
         }
         if (alarm)
-            commitCrime(ptr, victim, OT_Theft, ownerCellRef->getFaction(), item.getClass().getValue(item) * count);
+        {
+            int value = count;
+            if (!isGold)
+                value *= item.getClass().getValue(item);
+            commitCrime(ptr, victim, OT_Theft, ownerCellRef->getFaction(), value);
+        }
     }
 
     bool MechanicsManager::commitCrime(const MWWorld::Ptr& player, const MWWorld::Ptr& victim, OffenseType type,

@@ -121,7 +121,7 @@ namespace MWLua
                     cell.mStore->load();
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
-                    if (ptr.getRefData().isDeleted())
+                    if (ptr.mRef->isDeleted())
                         return true;
                     MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     if (getLiveCellRefType(ptr.mRef) == ptr.getType())

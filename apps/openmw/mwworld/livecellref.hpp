@@ -59,6 +59,9 @@ namespace MWWorld
         template <class T>
         static LiveCellRef<T>* dynamicCast(LiveCellRefBase* value);
 
+        /// Returns true if the object was either deleted by the content file or by gameplay.
+        bool isDeleted() const;
+
     protected:
         void loadImp(const ESM::ObjectState& state);
         ///< Load state into a LiveCellRef, that has already been initialised with base and

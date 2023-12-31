@@ -560,7 +560,7 @@ namespace MWGui
         if (mEquippedStackableCount.has_value())
         {
             // the count to unequip
-            int count = ptr.getRefData().getCount() - mDragAndDrop->mDraggedCount - mEquippedStackableCount.value();
+            int count = ptr.getCellRef().getCount() - mDragAndDrop->mDraggedCount - mEquippedStackableCount.value();
             if (count > 0)
             {
                 MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
@@ -604,7 +604,7 @@ namespace MWGui
 
                 // Save the currently equipped count before useItem()
                 if (slotIt != invStore.end() && slotIt->getCellRef().getRefId() == ptr.getCellRef().getRefId())
-                    mEquippedStackableCount = slotIt->getRefData().getCount();
+                    mEquippedStackableCount = slotIt->getCellRef().getCount();
                 else
                     mEquippedStackableCount = 0;
             }
@@ -735,7 +735,7 @@ namespace MWGui
         if (!object.getClass().hasToolTip(object))
             return;
 
-        int count = object.getRefData().getCount();
+        int count = object.getCellRef().getCount();
         if (object.getClass().isGold(object))
             count *= object.getClass().getValue(object);
 
@@ -755,8 +755,7 @@ namespace MWGui
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
-        MWWorld::Ptr newObject
-            = *player.getClass().getContainerStore(player).add(object, object.getRefData().getCount());
+        MWWorld::Ptr newObject = *player.getClass().getContainerStore(player).add(object, count);
 
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject(object);

@@ -715,7 +715,7 @@ namespace MWScript
                         MWWorld::ConstContainerStoreIterator it = store.getSlot(slot);
                         if (it != store.end() && it->getCellRef().getRefId() == item)
                         {
-                            numNotEquipped -= it->getRefData().getCount();
+                            numNotEquipped -= it->getCellRef().getCount();
                         }
                     }
 
@@ -724,7 +724,7 @@ namespace MWScript
                         MWWorld::ContainerStoreIterator it = store.getSlot(slot);
                         if (it != store.end() && it->getCellRef().getRefId() == item)
                         {
-                            int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
+                            int numToRemove = std::min(amount - numNotEquipped, it->getCellRef().getCount());
                             store.unequipItemQuantity(*it, numToRemove);
                             numNotEquipped += numToRemove;
                         }
@@ -1418,7 +1418,7 @@ namespace MWScript
 
                 if (ptr.getRefData().isDeletedByContentFile())
                     msg << "[Deleted by content file]" << std::endl;
-                if (!ptr.getRefData().getCount())
+                if (!ptr.getCellRef().getCount())
                     msg << "[Deleted]" << std::endl;
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
