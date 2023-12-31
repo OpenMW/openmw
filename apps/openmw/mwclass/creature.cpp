@@ -828,7 +828,7 @@ namespace MWClass
         }
 
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
-        if (ptr.getRefData().getCount() <= 0
+        if (ptr.getCellRef().getCount() <= 0
             && (!isFlagBitSet(ptr, ESM::Creature::Respawn) || !customData.mCreatureStats.isDead()))
         {
             state.mHasCustomState = false;
@@ -848,7 +848,7 @@ namespace MWClass
     void Creature::respawn(const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& creatureStats = getCreatureStats(ptr);
-        if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
+        if (ptr.getCellRef().getCount() > 0 && !creatureStats.isDead())
             return;
 
         if (!creatureStats.isDeathAnimationFinished())
@@ -860,16 +860,16 @@ namespace MWClass
         static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->mValue.getFloat();
 
         float delay
-            = ptr.getRefData().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
+            = ptr.getCellRef().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
 
         if (isFlagBitSet(ptr, ESM::Creature::Respawn)
             && creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())
         {
             if (ptr.getCellRef().hasContentFile())
             {
-                if (ptr.getRefData().getCount() == 0)
+                if (ptr.getCellRef().getCount() == 0)
                 {
-                    ptr.getRefData().setCount(1);
+                    ptr.getCellRef().setCount(1);
                     const ESM::RefId& script = getScript(ptr);
                     if (!script.empty())
                         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);

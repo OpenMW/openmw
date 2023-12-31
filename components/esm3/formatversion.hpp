@@ -24,7 +24,8 @@ namespace ESM
     inline constexpr FormatVersion MaxNameIsRefIdOnlyFormatVersion = 25;
     inline constexpr FormatVersion MaxUseEsmCellIdFormatVersion = 26;
     inline constexpr FormatVersion MaxActiveSpellSlotIndexFormatVersion = 27;
-    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 30;
+    inline constexpr FormatVersion MaxOldCountFormatVersion = 30;
+    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 31;
 
     inline constexpr FormatVersion MinSupportedSaveGameFormatVersion = 4;
     inline constexpr FormatVersion OpenMW0_48SaveGameFormatVersion = 21;

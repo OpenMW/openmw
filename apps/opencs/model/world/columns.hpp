@@ -45,7 +45,7 @@ namespace CSMWorld
             ColumnId_FactionIndex = 31,
             ColumnId_Charges = 32,
             ColumnId_Enchantment = 33,
-            ColumnId_CoinValue = 34,
+            ColumnId_StackCount = 34,
             ColumnId_Teleport = 35,
             ColumnId_TeleportCell = 36,
             ColumnId_LockLevel = 37,

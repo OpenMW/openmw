@@ -118,7 +118,7 @@ namespace MWWorld
         /// scripting compatibility, and the fact that objects may be "un-deleted" in the original game).
         static bool isAccessible(const MWWorld::RefData& refdata, const MWWorld::CellRef& cref)
         {
-            return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || refdata.getCount() > 0);
+            return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || cref.getCount() > 0);
         }
 
         /// Moves object from this cell to the given cell.

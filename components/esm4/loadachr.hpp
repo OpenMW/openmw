@@ -57,6 +57,8 @@ namespace ESM4
 
         EnableParent mEsp;
 
+        std::int32_t mCount = 1;
+
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 

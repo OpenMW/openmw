@@ -426,7 +426,7 @@ namespace MWRender
         const auto& weaponType = MWMechanics::getWeaponType(type);
         if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
         {
-            ammoCount = ammo->getRefData().getCount();
+            ammoCount = ammo->getCellRef().getCount();
             osg::Group* throwingWeaponNode = getBoneByName(weaponType->mAttachBone);
             if (throwingWeaponNode && throwingWeaponNode->getNumChildren())
                 ammoCount--;
@@ -439,7 +439,7 @@ namespace MWRender
             if (ammo == inv.end())
                 return;
 
-            ammoCount = ammo->getRefData().getCount();
+            ammoCount = ammo->getCellRef().getCount();
             bool arrowAttached = isArrowAttached();
             if (arrowAttached)
                 ammoCount--;
@@ -514,7 +514,7 @@ namespace MWRender
             ItemLightMap::iterator iter = mItemLights.find(item);
             if (iter != mItemLights.end())
             {
-                if (!item.getRefData().getCount())
+                if (!item.getCellRef().getCount())
                 {
                     removeHiddenItemLight(item);
                 }

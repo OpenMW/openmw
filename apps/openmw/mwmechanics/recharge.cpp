@@ -38,7 +38,7 @@ namespace MWMechanics
 
     bool rechargeItem(const MWWorld::Ptr& item, const MWWorld::Ptr& gem)
     {
-        if (!gem.getRefData().getCount())
+        if (!gem.getCellRef().getCount())
             return false;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -87,7 +87,7 @@ namespace MWMechanics
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Enchant, 0);
         gem.getContainerStore()->remove(gem, 1);
 
-        if (gem.getRefData().getCount() == 0)
+        if (gem.getCellRef().getCount() == 0)
         {
             std::string message = MWBase::Environment::get()
                                       .getESMStore()

@@ -99,7 +99,7 @@ namespace MWMechanics
 
         // Target is not here right now, wait for it to return
         // Really we should be checking whether the target is currently registered with the MechanicsManager
-        if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
+        if (target == MWWorld::Ptr() || !target.getCellRef().getCount() || !target.getRefData().isEnabled())
             return false;
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);

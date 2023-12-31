@@ -34,7 +34,7 @@ namespace
         objstate.mPosition = cellref.mPos;
         objstate.mRef.mRefNum = cellref.mRefNum;
         if (cellref.mDeleted)
-            objstate.mCount = 0;
+            objstate.mRef.mCount = 0;
         convertSCRI(cellref.mActorData.mSCRI, objstate.mLocals);
         objstate.mHasLocals = !objstate.mLocals.mVariables.empty();
 

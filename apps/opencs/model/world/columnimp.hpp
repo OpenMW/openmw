@@ -1111,19 +1111,19 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
-    struct GoldValueColumn : public Column<ESXRecordT>
+    struct StackSizeColumn : public Column<ESXRecordT>
     {
-        GoldValueColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_CoinValue, ColumnBase::Display_Integer)
+        StackSizeColumn()
+            : Column<ESXRecordT>(Columns::ColumnId_StackCount, ColumnBase::Display_Integer)
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mGoldValue; }
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mCount; }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-            record2.mGoldValue = data.toInt();
+            record2.mCount = data.toInt();
             record.setModified(record2);
         }
 

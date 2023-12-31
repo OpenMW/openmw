@@ -98,9 +98,8 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     if (cellRef.mEnchantmentCharge < -1)
         messages.add(id, "Negative number of enchantment points", "", CSMDoc::Message::Severity_Error);
 
-    // Check if gold value isn't negative
-    if (cellRef.mGoldValue < 0)
-        messages.add(id, "Negative gold value", "", CSMDoc::Message::Severity_Error);
+    if (cellRef.mCount < 1)
+        messages.add(id, "Reference without count", {}, CSMDoc::Message::Severity_Error);
 }
 
 int CSMTools::ReferenceCheckStage::setup()

@@ -377,17 +377,19 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setGoldValue(int value)
+    void CellRef::setCount(int value)
     {
-        if (value != getGoldValue())
+        if (value != getCount(false))
         {
             mChanged = true;
             std::visit(ESM::VisitOverload{
-                           [&](ESM4::Reference& /*ref*/) {},
-                           [&](ESM4::ActorCharacter&) {},
-                           [&](ESM::CellRef& ref) { ref.mGoldValue = value; },
+                           [&](ESM4::Reference& ref) { ref.mCount = value; },
+                           [&](ESM4::ActorCharacter& ref) { ref.mCount = value; },
+                           [&](ESM::CellRef& ref) { ref.mCount = value; },
                        },
                 mCellRef.mVariant);
+            if (value == 0)
+                MWBase::Environment::get().getWorld()->removeRefScript(this);
         }
     }
 

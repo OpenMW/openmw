@@ -140,9 +140,8 @@ namespace MWLua
 
         mObjectLists.update();
 
-        std::erase_if(mActiveLocalScripts, [](const LocalScripts* l) {
-            return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().getRefData().isDeleted();
-        });
+        std::erase_if(mActiveLocalScripts,
+            [](const LocalScripts* l) { return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().mRef->isDeleted(); });
 
         mGlobalScripts.statsNextFrame();
         for (LocalScripts* scripts : mActiveLocalScripts)
