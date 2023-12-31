@@ -902,7 +902,6 @@ printf "Qt ${QT_VER}... "
 	fi
 
 	cd $QT_SDK
-	add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
 		if [ $CONFIGURATION == "Debug" ]; then
 			DLLSUFFIX="d"
