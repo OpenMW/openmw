@@ -2095,6 +2095,10 @@ namespace MWMechanics
                             if (ally.getClass().getCreatureStats(ally).getAiSequence().getCombatTargets(enemies)
                                 && std::find(enemies.begin(), enemies.end(), actorPtr) != enemies.end())
                                 break;
+                            enemies.clear();
+                            if (actorPtr.getClass().getCreatureStats(actorPtr).getAiSequence().getCombatTargets(enemies)
+                                && std::find(enemies.begin(), enemies.end(), ally) != enemies.end())
+                                break;
                         }
                         list.push_back(package->getTarget());
                     }
