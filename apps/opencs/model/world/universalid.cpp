@@ -221,6 +221,23 @@ namespace
 
         return std::to_string(value);
     }
+
+    CSMWorld::UniversalId::Class getClassByType(CSMWorld::UniversalId::Type type)
+    {
+        if (const auto it
+            = std::find_if(std::begin(sIdArg), std::end(sIdArg), [&](const TypeData& v) { return v.mType == type; });
+            it != std::end(sIdArg))
+            return it->mClass;
+        if (const auto it = std::find_if(
+                std::begin(sIndexArg), std::end(sIndexArg), [&](const TypeData& v) { return v.mType == type; });
+            it != std::end(sIndexArg))
+            return it->mClass;
+        if (const auto it
+            = std::find_if(std::begin(sNoArg), std::end(sNoArg), [&](const TypeData& v) { return v.mType == type; });
+            it != std::end(sNoArg))
+            return it->mClass;
+        throw std::logic_error("invalid UniversalId type: " + std::to_string(type));
+    }
 }
 
 CSMWorld::UniversalId::UniversalId(const std::string& universalId)
@@ -330,7 +347,8 @@ CSMWorld::UniversalId::UniversalId(Type type, ESM::RefId id)
 }
 
 CSMWorld::UniversalId::UniversalId(Type type, const UniversalId& id)
-    : mType(type)
+    : mClass(getClassByType(type))
+    , mType(type)
     , mValue(id.mValue)
 {
 }
