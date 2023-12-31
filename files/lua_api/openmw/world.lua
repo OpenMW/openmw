@@ -112,6 +112,11 @@
 -- @param #number ratio
 
 ---
+-- Frame duration in seconds
+-- @function [parent=#world] getRealFrameDuration
+-- @return #number
+
+---
 -- Whether the world is paused (onUpdate doesn't work when the world is paused).
 -- @function [parent=#world] isWorldPaused
 -- @return #boolean
