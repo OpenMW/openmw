@@ -65,7 +65,7 @@ void main()
 #if @normalMap
     vec3 viewNormal = normalToView(texture2D(normalMap, adjustedUV).xyz * 2.0 - 1.0);
 #else
-    vec3 viewNormal = normalToView(normalize(passNormal));
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
 #endif
 
     float shadowing = unshadowedLightRatio(linearDepth);

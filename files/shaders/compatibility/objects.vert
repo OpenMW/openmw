@@ -101,7 +101,7 @@ void main(void)
 #endif
 
 #if @envMap || !PER_PIXEL_LIGHTING || @shadows_enabled
-    vec3 viewNormal = normalToView(passNormal);
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
 #endif
 
 #if @envMap
