@@ -196,7 +196,8 @@ namespace MWRender
         float mRainMaxHeight;
         float mRainEntranceSpeed;
         int mRainMaxRaindrops;
-        bool mRipples;
+        bool mRainRipplesEnabled;
+        bool mSnowRipplesEnabled;
         float mWindSpeed;
         float mBaseWindSpeed;
 
