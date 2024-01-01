@@ -57,7 +57,13 @@ namespace NifOsg
             }
             case Nif::NiTimeController::ExtrapolationMode::Constant:
             default:
-                return std::clamp(time, mStartTime, mStopTime);
+            {
+                if (time < mStartTime)
+                    return mStartTime;
+                if (time > mStopTime)
+                    return mStopTime;
+                return time;
+            }
         }
     }
 
