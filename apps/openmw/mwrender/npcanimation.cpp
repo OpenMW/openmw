@@ -493,8 +493,16 @@ namespace MWRender
 
         std::string smodel = defaultSkeleton;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
-            smodel = Misc::ResourceHelpers::correctActorModelPath(
-                Misc::ResourceHelpers::correctMeshPath(mNpc->mModel), mResourceSystem->getVFS());
+        {
+            // TESCS sometimes writes the default animation nif to the animation subrecord. This harmless (as it
+            // will match the NPC's race) until the NPC's race is changed. If the player record contains a default
+            // non-beast race animation and the player selects a beast race in chargen, animations aren't applied
+            // properly. Morrowind.exe appears to handle an NPC using any of the base animations as not having custom
+            // animations.
+            std::string model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
+            if (!isDefaultActorSkeleton(model))
+                smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
+        }
 
         setObjectRoot(smodel, true, true, false);
 
@@ -511,7 +519,7 @@ namespace MWRender
 
             addAnimSource(smodel, smodel);
 
-            if (!isWerewolf && mNpc->mRace.contains("argonian"))
+            if (!isWerewolf && isBeast && mNpc->mRace.contains("argonian"))
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
         }
         else

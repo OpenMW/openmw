@@ -17,11 +17,8 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
-#include <components/misc/resourcehelpers.hpp>
-#include <components/vfs/pathutil.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
-#include "../mwrender/actorutil.hpp"
 
 namespace
 {
@@ -136,32 +133,11 @@ namespace
             }
 
             const ESM::Race* race = races.search(npc.mRace);
-            if (race)
-            {
-                // TESCS sometimes writes the default animation nif to the animation subrecord. This harmless (as it
-                // will match the NPC's race) until the NPC's race is changed. If the player record contains a default
-                // non-beast race animation and the player selects a beast race in chargen, animations aren't applied
-                // properly. Morrowind.exe handles this gracefully, so we clear the animation here to force the default
-                // values to be used.
-                if (!npc.mModel.empty() && npc.mId == "player")
-                {
-                    const bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-                    const std::string& defaultModel = MWRender::getActorSkeleton(false, !npc.isMale(), isBeast, false);
-                    std::string model = Misc::ResourceHelpers::correctMeshPath(npc.mModel);
-                    if (VFS::Path::pathEqual(defaultModel, model))
-                    {
-                        npc.mModel.clear();
-                        changed = true;
-                    }
-                }
-            }
-            else
+            if (!race)
             {
                 Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent race " << npc.mRace
                                     << ", using " << defaultRace << " race as replacement.";
                 npc.mRace = defaultRace;
-                // Remove animations that might be race specific
-                npc.mModel.clear();
                 changed = true;
             }
 
