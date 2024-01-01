@@ -22,6 +22,13 @@ command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt
 export PATH="/opt/homebrew/opt/qt@6/bin:$PATH"
 
+# where are my bins?
+ls -al /opt/homebrew/opt/qt@6/bin
+
+ls -al /opt/homebrew/bin
+
+ls -al /opt/local/opt
+
 
 # Install deps
 brew install icu4c yaml-cpp sqlite
