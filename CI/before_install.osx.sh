@@ -4,7 +4,9 @@ export HOMEBREW_NO_EMOJI=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
 
 # purge large and unnecessary packages that get in our way
-brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk qt@6 || true
+brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk || true
+brew uninstall qt@5 || true
+brew uninstall qt || true
 
 brew tap --repair
 brew update --quiet
@@ -23,6 +25,8 @@ command -v qmake >/dev/null 2>&1 || brew install qt@6
 export PATH="/opt/homebrew/opt/qt/bin:$PATH"
 
 # where are my bins?
+brew --prefix qt@6
+
 find /opt | grep qt
 
 find /opt | grep qmake
