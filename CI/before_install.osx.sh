@@ -5,8 +5,6 @@ export HOMEBREW_NO_INSTALL_CLEANUP=1
 
 # purge large and unnecessary packages that get in our way
 brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk || true
-brew uninstall qt@5 || true
-brew uninstall qt || true
 
 brew tap --repair
 brew update --quiet
@@ -21,19 +19,8 @@ install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PAT
 
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
-command -v qmake >/dev/null 2>&1 || brew install qt@6
-
-# possible workaround, please remove
-export PATH="/opt/homebrew/Cellar/qt/6.6.1.reinstall/bin:$PATH"
-
-ls -al /opt/homebrew/opt/qt || true
-
-# where are my bins?
-brew --prefix qt@6
-
-find /opt | grep qt
-
-find /opt | grep qmake
+command -v qmake >/dev/null 2>&1 || brew install qt@5
+export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
 
 
 # Install deps
