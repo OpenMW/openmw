@@ -492,16 +492,12 @@ namespace MWRender
             getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf), mResourceSystem->getVFS());
 
         std::string smodel = defaultSkeleton;
+        bool isBase = !isWerewolf;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         {
-            // TESCS sometimes writes the default animation nif to the animation subrecord. This harmless (as it
-            // will match the NPC's race) until the NPC's race is changed. If the player record contains a default
-            // non-beast race animation and the player selects a beast race in chargen, animations aren't applied
-            // properly. Morrowind.exe appears to handle an NPC using any of the base animations as not having custom
-            // animations.
             std::string model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
-            if (!isDefaultActorSkeleton(model))
-                smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
+            isBase = isDefaultActorSkeleton(model);
+            smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
         }
 
         setObjectRoot(smodel, true, true, false);
@@ -511,13 +507,14 @@ namespace MWRender
         if (!is1stPerson)
         {
             const std::string& base = Settings::models().mXbaseanim;
-            if (smodel != base && !isWerewolf)
+            if (!isWerewolf)
                 addAnimSource(base, smodel);
 
             if (smodel != defaultSkeleton && base != defaultSkeleton)
                 addAnimSource(defaultSkeleton, smodel);
 
-            addAnimSource(smodel, smodel);
+            if (!isBase)
+                addAnimSource(smodel, smodel);
 
             if (!isWerewolf && isBeast && mNpc->mRace.contains("argonian"))
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
@@ -525,10 +522,11 @@ namespace MWRender
         else
         {
             const std::string& base = Settings::models().mXbaseanim1st;
-            if (smodel != base && !isWerewolf)
+            if (!isWerewolf)
                 addAnimSource(base, smodel);
 
-            addAnimSource(smodel, smodel);
+            if (!isBase)
+                addAnimSource(smodel, smodel);
 
             mObjectRoot->setNodeMask(Mask_FirstPerson);
             mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
