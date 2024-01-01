@@ -4,7 +4,7 @@ export HOMEBREW_NO_EMOJI=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
 
 # purge large and unnecessary packages that get in our way
-brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk || true
+brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk qt@6 || true
 
 brew tap --repair
 brew update --quiet
@@ -19,7 +19,7 @@ install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PAT
 
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
-command -v qmake >/dev/null 2>&1 || brew install qt
+command -v qmake >/dev/null 2>&1 || brew install qt@6
 export PATH="/opt/homebrew/opt/qt/bin:$PATH"
 
 # where are my bins?
