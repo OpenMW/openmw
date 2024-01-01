@@ -489,7 +489,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
                     fileReader.setEncoder(&encoder);
                     fileReader.open(std::move(stream), filepath);
                     file->setAuthor(QString::fromUtf8(fileReader.getAuthor().c_str()));
-                    file->setFormat(fileReader.getFormatVersion());
+                    file->setFormat(QString::number(fileReader.esmVersionF()));
                     file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
                     for (const auto& master : fileReader.getGameFiles())
                         file->addGameFile(QString::fromUtf8(master.name.c_str()));
@@ -505,11 +505,11 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
                 case ESM::Format::Tes4:
                 {
                     ToUTF8::StatelessUtf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
-                    ESM4::Reader reader(std::move(stream), filepath, nullptr, &encoder, true);
-                    file->setAuthor(QString::fromUtf8(reader.getAuthor().c_str()));
-                    file->setFormat(reader.esmVersion());
-                    file->setDescription(QString::fromUtf8(reader.getDesc().c_str()));
-                    for (const auto& master : reader.getGameFiles())
+                    ESM4::Reader fileReader(std::move(stream), filepath, nullptr, &encoder, true);
+                    file->setAuthor(QString::fromUtf8(fileReader.getAuthor().c_str()));
+                    file->setFormat(QString::number(fileReader.esmVersionF()));
+                    file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
+                    for (const auto& master : fileReader.getGameFiles())
                         file->addGameFile(QString::fromUtf8(master.name.c_str()));
                     break;
                 }

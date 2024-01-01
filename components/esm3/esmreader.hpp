@@ -53,9 +53,9 @@ namespace ESM
          *
          *************************************************************************/
 
-        int getVer() const { return mHeader.mData.version; }
+        int getVer() const { return mHeader.mData.version.ui; }
         int getRecordCount() const { return mHeader.mData.records; }
-        float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
+        float esmVersionF() const { return (mHeader.mData.version.f); }
         const std::string& getAuthor() const { return mHeader.mData.author; }
         const std::string& getDesc() const { return mHeader.mData.desc; }
         const std::vector<Header::MasterData>& getGameFiles() const { return mHeader.mMaster; }
