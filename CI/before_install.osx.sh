@@ -4,6 +4,7 @@ export HOMEBREW_NO_EMOJI=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
 
 brew uninstall --ignore-dependencies jpeg || true
+brew uninstall php || true
 
 brew tap --repair
 brew update --quiet
