@@ -9,6 +9,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -120,12 +121,12 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     MWBase::World* world = MWBase::Environment::get().getWorld();
     const DetourNavigator::AgentBounds agentBounds = world->getPathfindingAgentBounds(actor);
 
-    /// Stops the actor when it gets too close to a unloaded cell
-    //... At current time, this test is unnecessary. AI shuts down when actor is more than "actors processing range"
-    // setting value
-    //... units from player, and exterior cells are 8192 units long and wide.
+    /// Stops the actor when it gets too close to a unloaded cell or when the actor is playing a scripted animation
+    //... At current time, the first test is unnecessary. AI shuts down when actor is more than
+    //... "actors processing range" setting value units from player, and exterior cells are 8192 units long and wide.
     //... But AI processing distance may increase in the future.
-    if (isNearInactiveCell(position))
+    if (isNearInactiveCell(position)
+        || MWBase::Environment::get().getMechanicsManager()->checkScriptedAnimationPlaying(actor))
     {
         actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
