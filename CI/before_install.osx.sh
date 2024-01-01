@@ -22,7 +22,11 @@ install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PAT
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt@6
-export PATH="/opt/homebrew/opt/qt/bin:$PATH"
+
+# possible workaround, please remove
+export PATH="/opt/homebrew/Cellar/qt/6.6.1.reinstall/bin:$PATH"
+
+ls -al /opt/homebrew/opt/qt || true
 
 # where are my bins?
 brew --prefix qt@6
