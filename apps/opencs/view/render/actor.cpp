@@ -7,6 +7,7 @@
 #include <osg/Group>
 #include <osg/MatrixTransform>
 #include <osg/Node>
+#include <osg/Vec3d>
 
 #include <apps/opencs/model/world/actoradapter.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
@@ -20,6 +21,7 @@
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
+#include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
 
 namespace CSVRender
@@ -29,7 +31,7 @@ namespace CSVRender
     Actor::Actor(const ESM::RefId& id, CSMWorld::Data& data)
         : mId(id)
         , mData(data)
-        , mBaseNode(new osg::Group())
+        , mBaseNode(new osg::PositionAttitudeTransform())
         , mSkeleton(nullptr)
     {
         mActorData = mData.getActorAdapter()->getActorData(mId);
@@ -60,6 +62,16 @@ namespace CSVRender
 
             // Attach parts to skeleton
             loadBodyParts();
+
+            const CSMWorld::IdCollection<ESM::Race>& races = mData.getRaces();
+            const auto& targetRace = races.getRecord(mActorData->getActorRaceName()).get().mData;
+            osg::Vec3d scale;
+
+            mActorData.get()->isFemale()
+                ? scale = osg::Vec3(targetRace.mFemaleWeight, targetRace.mFemaleWeight, targetRace.mFemaleHeight)
+                : scale = osg::Vec3(targetRace.mMaleWeight, targetRace.mMaleWeight, targetRace.mMaleHeight);
+
+            mBaseNode->setScale(scale);
         }
         else
         {

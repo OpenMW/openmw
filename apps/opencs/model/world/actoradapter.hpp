@@ -96,6 +96,8 @@ namespace CSMWorld
             std::string getSkeleton() const;
             /// Retrieves the associated actor part
             ESM::RefId getPart(ESM::PartReferenceType index) const;
+
+            const ESM::RefId& getActorRaceName() const;
             /// Checks if the actor has a data dependency
             bool hasDependency(const ESM::RefId& id) const;
 

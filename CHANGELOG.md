@@ -133,6 +133,7 @@
     Bug #7724: Guards don't help vs werewolves
     Bug #7733: Launcher shows incorrect data paths when there's two plugins with the same name
     Bug #7742: Governing attribute training limit should use the modified attribute
+    Bug #7753: Editor: Actors Don't Scale According to Their Race
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
     Bug #7765: OpenMW-CS: Touch Record option is broken

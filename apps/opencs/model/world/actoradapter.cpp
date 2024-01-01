@@ -163,6 +163,11 @@ namespace CSMWorld
         return it->second.first;
     }
 
+    const ESM::RefId& ActorAdapter::ActorData::getActorRaceName() const
+    {
+        return mRaceData->getId();
+    }
+
     bool ActorAdapter::ActorData::hasDependency(const ESM::RefId& id) const
     {
         return mDependencies.find(id) != mDependencies.end();
