@@ -126,11 +126,7 @@ namespace LuaUtil::InputTrigger
                 return std::nullopt;
             return it->first;
         }
-        std::optional<Info> operator[](std::string_view key)
-        {
-            Id id = safeIdByKey(key);
-            return mInfo[id];
-        }
+        std::optional<Info> operator[](std::string_view key);
         void insert(Info info);
         void registerHandler(std::string_view key, const LuaUtil::Callback& callback);
         void activate(std::string_view key);

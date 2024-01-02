@@ -265,6 +265,14 @@ namespace LuaUtil
             mHandlers.push_back({});
         }
 
+        std::optional<Info> Registry::operator[](std::string_view key)
+        {
+            auto iter = mIds.find(key);
+            if (iter == mIds.end())
+                return std::nullopt;
+            return mInfo[iter->second];
+        }
+
         void Registry::registerHandler(std::string_view key, const LuaUtil::Callback& callback)
         {
             Id id = safeIdByKey(key);
