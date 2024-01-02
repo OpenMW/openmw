@@ -26,7 +26,7 @@ void ContentSelectorModel::EsmFile::setDate(const QDateTime& modified)
     mModified = modified;
 }
 
-void ContentSelectorModel::EsmFile::setFormat(int format)
+void ContentSelectorModel::EsmFile::setFormat(const QString& format)
 {
     mVersion = format;
 }
@@ -51,8 +51,7 @@ QByteArray ContentSelectorModel::EsmFile::encodedData() const
     QByteArray encodedData;
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
-    stream << mFileName << mAuthor << QString::number(mVersion) << mModified.toString() << mPath << mDescription
-           << mGameFiles;
+    stream << mFileName << mAuthor << mVersion << mModified.toString() << mPath << mDescription << mGameFiles;
 
     return encodedData;
 }

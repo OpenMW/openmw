@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "components/esm/common.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm3/formatversion.hpp"
 
@@ -13,11 +14,7 @@ namespace ESM
 
     struct Data
     {
-        /* File format version. This is actually a float, the supported
-            versions are 1.2 and 1.3. These correspond to:
-            1.2 = 0x3f99999a and 1.3 = 0x3fa66666
-        */
-        uint32_t version;
+        ESM::ESMVersion version;
         int32_t type; // 0=esp, 1=esm, 32=ess (unused)
         std::string author; // Author's name
         std::string desc; // File description
