@@ -63,15 +63,9 @@ namespace CSVRender
             // Attach parts to skeleton
             loadBodyParts();
 
-            const CSMWorld::IdCollection<ESM::Race>& races = mData.getRaces();
-            const auto& targetRace = races.getRecord(mActorData->getActorRaceName()).get().mData;
-            osg::Vec3d scale;
+            const std::pair<float, float> attributes = mActorData.get()->getRaceHeightWeight();
 
-            mActorData.get()->isFemale()
-                ? scale = osg::Vec3(targetRace.mFemaleWeight, targetRace.mFemaleWeight, targetRace.mFemaleHeight)
-                : scale = osg::Vec3(targetRace.mMaleWeight, targetRace.mMaleWeight, targetRace.mMaleHeight);
-
-            mBaseNode->setScale(scale);
+            mBaseNode->setScale(osg::Vec3d(attributes.second, attributes.second, attributes.first));
         }
         else
         {

@@ -67,6 +67,11 @@ namespace CSMWorld
         return mMaleParts[ESM::getMeshPart(index)];
     }
 
+    const std::pair<float, float>& ActorAdapter::RaceData::getRaceAttributes(bool isFemale)
+    {
+        return isFemale == true ? mHeightsWeights.mFemaleAttributes : mHeightsWeights.mMaleAttributes;
+    }
+
     bool ActorAdapter::RaceData::hasDependency(const ESM::RefId& id) const
     {
         return mDependencies.find(id) != mDependencies.end();
@@ -90,10 +95,11 @@ namespace CSMWorld
             mDependencies.emplace(id);
     }
 
-    void ActorAdapter::RaceData::reset_data(const ESM::RefId& id, bool isBeast)
+    void ActorAdapter::RaceData::reset_data(const ESM::RefId& id, const BodyAttributes& raceStats, bool isBeast)
     {
         mId = id;
         mIsBeast = isBeast;
+        mHeightsWeights = raceStats;
         for (auto& str : mFemaleParts)
             str = ESM::RefId();
         for (auto& str : mMaleParts)
@@ -163,9 +169,9 @@ namespace CSMWorld
         return it->second.first;
     }
 
-    const ESM::RefId& ActorAdapter::ActorData::getActorRaceName() const
+    const std::pair<float, float>& ActorAdapter::ActorData::getRaceHeightWeight() const
     {
-        return mRaceData->getId();
+        return mRaceData->getRaceAttributes(isFemale());
     }
 
     bool ActorAdapter::ActorData::hasDependency(const ESM::RefId& id) const
@@ -509,7 +515,11 @@ namespace CSMWorld
         }
 
         auto& race = raceRecord.get();
-        data->reset_data(id, race.mData.mFlags & ESM::Race::Beast);
+
+        BodyAttributes scaleStats = BodyAttributes(
+            race.mData.mMaleHeight, race.mData.mMaleWeight, race.mData.mFemaleHeight, race.mData.mFemaleWeight);
+
+        data->reset_data(id, scaleStats, race.mData.mFlags & ESM::Race::Beast);
 
         // Setup body parts
         for (int i = 0; i < mBodyParts.getSize(); ++i)

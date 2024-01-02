@@ -41,6 +41,25 @@ namespace CSMWorld
         /// Tracks unique strings
         using RefIdSet = std::unordered_set<ESM::RefId>;
 
+        class BodyAttributes
+        {
+        public:
+            std::pair<float, float> mMaleAttributes;
+            std::pair<float, float> mFemaleAttributes;
+
+            BodyAttributes()
+                : mMaleAttributes(std::make_pair(1.0f, 1.0f))
+                , mFemaleAttributes(std::make_pair(1.0f, 1.0f))
+            {
+            }
+
+            BodyAttributes(float maleHeight, float maleWeight, float femaleHeight, float femaleWeight)
+            {
+                mMaleAttributes = std::make_pair(maleHeight, maleWeight);
+                mFemaleAttributes = std::make_pair(femaleHeight, femaleWeight);
+            }
+        };
+
         /// Contains base race data shared between actors
         class RaceData
         {
@@ -57,6 +76,8 @@ namespace CSMWorld
             const ESM::RefId& getFemalePart(ESM::PartReferenceType index) const;
             /// Retrieves the associated body part
             const ESM::RefId& getMalePart(ESM::PartReferenceType index) const;
+
+            const std::pair<float, float>& getRaceAttributes(bool isFemale);
             /// Checks if the race has a data dependency
             bool hasDependency(const ESM::RefId& id) const;
 
@@ -67,7 +88,8 @@ namespace CSMWorld
             /// Marks an additional dependency
             void addOtherDependency(const ESM::RefId& id);
             /// Clears parts and dependencies
-            void reset_data(const ESM::RefId& raceId, bool isBeast = false);
+            void reset_data(
+                const ESM::RefId& raceId, const BodyAttributes& raceStats = BodyAttributes(), bool isBeast = false);
 
         private:
             bool handles(ESM::PartReferenceType type) const;
@@ -75,6 +97,7 @@ namespace CSMWorld
             bool mIsBeast;
             RacePartList mFemaleParts;
             RacePartList mMaleParts;
+            BodyAttributes mHeightsWeights;
             RefIdSet mDependencies;
         };
         using RaceDataPtr = std::shared_ptr<RaceData>;
@@ -97,7 +120,7 @@ namespace CSMWorld
             /// Retrieves the associated actor part
             ESM::RefId getPart(ESM::PartReferenceType index) const;
 
-            const ESM::RefId& getActorRaceName() const;
+            const std::pair<float, float>& getRaceHeightWeight() const;
             /// Checks if the actor has a data dependency
             bool hasDependency(const ESM::RefId& id) const;
 
