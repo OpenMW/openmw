@@ -492,9 +492,13 @@ namespace MWRender
             getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf), mResourceSystem->getVFS());
 
         std::string smodel = defaultSkeleton;
+        bool isBase = !isWerewolf;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
-            smodel = Misc::ResourceHelpers::correctActorModelPath(
-                Misc::ResourceHelpers::correctMeshPath(mNpc->mModel), mResourceSystem->getVFS());
+        {
+            std::string model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
+            isBase = isDefaultActorSkeleton(model);
+            smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
+        }
 
         setObjectRoot(smodel, true, true, false);
 
@@ -503,24 +507,26 @@ namespace MWRender
         if (!is1stPerson)
         {
             const std::string& base = Settings::models().mXbaseanim;
-            if (smodel != base && !isWerewolf)
+            if (!isWerewolf)
                 addAnimSource(base, smodel);
 
             if (smodel != defaultSkeleton && base != defaultSkeleton)
                 addAnimSource(defaultSkeleton, smodel);
 
-            addAnimSource(smodel, smodel);
+            if (!isBase)
+                addAnimSource(smodel, smodel);
 
-            if (!isWerewolf && mNpc->mRace.contains("argonian"))
+            if (!isWerewolf && isBeast && mNpc->mRace.contains("argonian"))
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
         }
         else
         {
             const std::string& base = Settings::models().mXbaseanim1st;
-            if (smodel != base && !isWerewolf)
+            if (!isWerewolf)
                 addAnimSource(base, smodel);
 
-            addAnimSource(smodel, smodel);
+            if (!isBase)
+                addAnimSource(smodel, smodel);
 
             mObjectRoot->setNodeMask(Mask_FirstPerson);
             mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));

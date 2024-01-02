@@ -83,12 +83,22 @@ namespace
         throw std::runtime_error("List of NPC classes is empty!");
     }
 
+    const ESM::RefId& getDefaultRace(const MWWorld::Store<ESM::Race>& races)
+    {
+        auto it = races.begin();
+        if (it != races.end())
+            return it->mId;
+        throw std::runtime_error("List of NPC races is empty!");
+    }
+
     std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions,
-        const MWWorld::Store<ESM::Class>& classes, const MWWorld::Store<ESM::Script>& scripts,
-        const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
+        const MWWorld::Store<ESM::Class>& classes, const MWWorld::Store<ESM::Race>& races,
+        const MWWorld::Store<ESM::Script>& scripts, const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         const ESM::RefId& defaultCls = getDefaultClass(classes);
+        // Same for races
+        const ESM::RefId& defaultRace = getDefaultRace(races);
 
         // Validate NPCs for non-existing class and faction.
         // We will replace invalid entries by fixed ones
@@ -113,13 +123,21 @@ namespace
                 }
             }
 
-            const ESM::RefId& npcClass = npc.mClass;
-            const ESM::Class* cls = classes.search(npcClass);
+            const ESM::Class* cls = classes.search(npc.mClass);
             if (!cls)
             {
                 Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent class "
                                     << npc.mClass << ", using " << defaultCls << " class as replacement.";
                 npc.mClass = defaultCls;
+                changed = true;
+            }
+
+            const ESM::Race* race = races.search(npc.mRace);
+            if (!race)
+            {
+                Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent race " << npc.mRace
+                                    << ", using " << defaultRace << " race as replacement.";
+                npc.mRace = defaultRace;
                 changed = true;
             }
 
@@ -580,8 +598,8 @@ namespace MWWorld
     void ESMStore::validate()
     {
         auto& npcs = getWritable<ESM::NPC>();
-        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(
-            getWritable<ESM::Faction>(), getWritable<ESM::Class>(), getWritable<ESM::Script>(), npcs.mStatic);
+        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(),
+            getWritable<ESM::Race>(), getWritable<ESM::Script>(), npcs.mStatic);
 
         for (const ESM::NPC& npc : npcsToReplace)
         {
@@ -623,8 +641,8 @@ namespace MWWorld
         auto& npcs = getWritable<ESM::NPC>();
         auto& scripts = getWritable<ESM::Script>();
 
-        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(
-            getWritable<ESM::Faction>(), getWritable<ESM::Class>(), getWritable<ESM::Script>(), npcs.mDynamic);
+        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(),
+            getWritable<ESM::Race>(), getWritable<ESM::Script>(), npcs.mDynamic);
 
         for (const ESM::NPC& npc : npcsToReplace)
             npcs.insert(npc);
