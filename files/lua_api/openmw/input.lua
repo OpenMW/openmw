@@ -402,10 +402,10 @@
 
 ---
 -- @type TriggerInfo
--- @field [parent=#Actioninfo] #string key
--- @field [parent=#Actioninfo] #string l10n Localization context containing the name and description keys
--- @field [parent=#Actioninfo] #string name Localization key of the trigger's name
--- @field [parent=#Actioninfo] #string description Localization key of the trigger's description
+-- @field [parent=#TriggerInfo] #string key
+-- @field [parent=#TriggerInfo] #string l10n Localization context containing the name and description keys
+-- @field [parent=#TriggerInfo] #string name Localization key of the trigger's name
+-- @field [parent=#TriggerInfo] #string description Localization key of the trigger's description
 
 ---
 -- Map of all currently registered triggers
