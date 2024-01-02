@@ -63,9 +63,9 @@ namespace CSVRender
             // Attach parts to skeleton
             loadBodyParts();
 
-            const std::pair<float, float> attributes = mActorData.get()->getRaceHeightWeight();
+            const osg::Vec2f& attributes = mActorData.get()->getRaceHeightWeight();
 
-            mBaseNode->setScale(osg::Vec3d(attributes.second, attributes.second, attributes.first));
+            mBaseNode->setScale(osg::Vec3d(attributes.x(), attributes.x(), attributes.y()));
         }
         else
         {
