@@ -100,6 +100,12 @@ declare -rA GROUPED_DEPS=(
     clang-format-14
     git-core
   "
+
+  [openmw-qt-translations]="
+    qttools5-dev
+    qttools5-dev-tools
+    git-core
+  "
 )
 
 if [[ $# -eq 0 ]]; then
