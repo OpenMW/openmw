@@ -13,6 +13,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwgui/settingswindow.hpp"
+
 #include "../mwworld/player.hpp"
 
 #include "actions.hpp"
@@ -156,7 +158,7 @@ namespace MWInput
 
         // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
         // Also do not trigger bindings when input controls are disabled, e.g. during save loading
-        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
+        if (!MWBase::Environment::get().getWindowManager()->getSettingsWindow()->isVisible()
             && !input->controlsDisabled())
             mBindingsManager->mousePressed(arg, id);
     }

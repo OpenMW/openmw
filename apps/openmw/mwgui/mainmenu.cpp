@@ -18,6 +18,7 @@
 #include "backgroundimage.hpp"
 #include "confirmationdialog.hpp"
 #include "savegamedialog.hpp"
+#include "settingswindow.hpp"
 #include "videowidget.hpp"
 
 namespace MWGui
@@ -97,7 +98,9 @@ namespace MWGui
             winMgr->removeGuiMode(GM_MainMenu);
         }
         else if (name == "options")
-            winMgr->pushGuiMode(GM_Settings);
+        {
+            winMgr->getSettingsWindow()->setVisible(true);
+        }
         else if (name == "credits")
             winMgr->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
