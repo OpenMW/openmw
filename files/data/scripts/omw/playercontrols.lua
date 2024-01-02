@@ -198,6 +198,8 @@ input.registerActionHandler('Use', async:callback(function(value)
     if value and combatAllowed() then startUse = true end
 end))
 local function processAttacking()
+    -- for spell-casting, set controls.use to true for exactly one frame
+    -- otherwise spell casting is attempted every frame while Use is true
     if Actor.stance(self) == Actor.STANCE.Spell then
         self.controls.use = startUse and 1 or 0
     else
