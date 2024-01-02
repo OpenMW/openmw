@@ -195,7 +195,7 @@ end))
 
 local startUse = false
 input.registerActionHandler('Use', async:callback(function(value)
-    if value and controlsAllowed() then startUse = true end
+    if value and combatAllowed() then startUse = true end
 end))
 local function processAttacking()
     if Actor.stance(self) == Actor.STANCE.Spell then
