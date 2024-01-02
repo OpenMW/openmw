@@ -127,7 +127,7 @@ namespace MWClass
 
         info.enchant = ref->mBase->mEnchant;
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

@@ -265,7 +265,7 @@ namespace MWClass
         if (!info.enchant.empty())
             info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

@@ -271,7 +271,7 @@ namespace MWClass
                 text += "\nYou can not use evidence chests";
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

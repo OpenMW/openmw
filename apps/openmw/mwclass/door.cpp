@@ -293,7 +293,7 @@ namespace MWClass
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

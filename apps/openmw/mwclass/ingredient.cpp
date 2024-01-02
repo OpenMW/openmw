@@ -145,7 +145,7 @@ namespace MWClass
         }
         info.effects = list;
 
-        info.text = text;
+        info.text = std::move(text);
         info.isIngredient = true;
 
         return info;
