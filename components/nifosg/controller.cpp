@@ -442,7 +442,7 @@ namespace NifOsg
         }
     }
 
-    MaterialColorController::MaterialColorController() {}
+    MaterialColorController::MaterialColorController() = default;
 
     MaterialColorController::MaterialColorController(
         const Nif::NiMaterialColorController* ctrl, const osg::Material* baseMaterial)
