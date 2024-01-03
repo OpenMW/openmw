@@ -599,7 +599,7 @@ namespace MWClass
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
