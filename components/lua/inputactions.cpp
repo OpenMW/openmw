@@ -113,7 +113,7 @@ namespace LuaUtil
             }
         }
 
-        void Registry::insert(Info info)
+        void Registry::insert(const Info& info)
         {
             if (mIds.find(info.mKey) != mIds.end())
                 throw std::domain_error(Misc::StringUtils::format("Action key \"%s\" is already in use", info.mKey));
@@ -251,7 +251,7 @@ namespace LuaUtil
             return it->second;
         }
 
-        void Registry::insert(Info info)
+        void Registry::insert(const Info& info)
         {
             if (mIds.find(info.mKey) != mIds.end())
                 throw std::domain_error(Misc::StringUtils::format("Trigger key \"%s\" is already in use", info.mKey));
@@ -263,6 +263,14 @@ namespace LuaUtil
             mIds[info.mKey] = id;
             mInfo.push_back(info);
             mHandlers.push_back({});
+        }
+
+        std::optional<Info> Registry::operator[](std::string_view key)
+        {
+            auto iter = mIds.find(key);
+            if (iter == mIds.end())
+                return std::nullopt;
+            return mInfo[iter->second];
         }
 
         void Registry::registerHandler(std::string_view key, const LuaUtil::Callback& callback)

@@ -60,7 +60,7 @@ namespace LuaUtil::InputAction
     {
     public:
         using ConstIterator = std::vector<Info>::const_iterator;
-        void insert(Info info);
+        void insert(const Info& info);
         size_t size() const { return mKeys.size(); }
         std::optional<std::string> firstKey() const { return mKeys.empty() ? std::nullopt : std::optional(mKeys[0]); }
         std::optional<std::string> nextKey(std::string_view key) const;
@@ -126,12 +126,8 @@ namespace LuaUtil::InputTrigger
                 return std::nullopt;
             return it->first;
         }
-        std::optional<Info> operator[](std::string_view key)
-        {
-            Id id = safeIdByKey(key);
-            return mInfo[id];
-        }
-        void insert(Info info);
+        std::optional<Info> operator[](std::string_view key);
+        void insert(const Info& info);
         void registerHandler(std::string_view key, const LuaUtil::Callback& callback);
         void activate(std::string_view key);
         void clear()
