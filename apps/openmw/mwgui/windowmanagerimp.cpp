@@ -408,7 +408,6 @@ namespace MWGui
         mSettingsWindow = settingsWindow.get();
         mWindows.push_back(std::move(settingsWindow));
         trackWindow(mSettingsWindow, makeSettingsWindowSettingValues());
-        mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
         auto confirmationDialog = std::make_unique<ConfirmationDialog>();
         mConfirmationDialog = confirmationDialog.get();
@@ -1474,6 +1473,10 @@ namespace MWGui
     MWGui::PostProcessorHud* WindowManager::getPostProcessorHud()
     {
         return mPostProcessorHud;
+    }
+    MWGui::SettingsWindow* WindowManager::getSettingsWindow()
+    {
+        return mSettingsWindow;
     }
 
     void WindowManager::useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions)

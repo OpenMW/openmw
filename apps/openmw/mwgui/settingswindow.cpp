@@ -240,7 +240,7 @@ namespace MWGui
     }
 
     SettingsWindow::SettingsWindow()
-        : WindowBase("openmw_settings_window.layout")
+        : WindowModal("openmw_settings_window.layout")
         , mKeyboardMode(true)
         , mCurrentPage(-1)
     {
@@ -450,7 +450,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+        setVisible(false);
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -1041,6 +1041,8 @@ namespace MWGui
 
     void SettingsWindow::onOpen()
     {
+        WindowModal::onOpen();
+
         highlightCurrentResolution();
         updateControlsBox();
         updateLightSettings();
