@@ -871,6 +871,7 @@
 -- @field #MagicSchoolData school Optional magic school
 -- @field #string attribute The id of the skill's governing attribute
 
+---
 -- @type MagicSchoolData
 -- @field #string name Human-readable name
 -- @field #string areaSound VFS path to the area sound
