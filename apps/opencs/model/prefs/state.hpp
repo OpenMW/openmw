@@ -72,7 +72,7 @@ namespace CSMPrefs
 
         EnumSetting& declareEnum(EnumSettingValue& value, const QString& label);
 
-        ColourSetting& declareColour(const std::string& key, const QString& label, QColor default_);
+        ColourSetting& declareColour(Settings::SettingValue<std::string>& value, const QString& label);
 
         ShortcutSetting& declareShortcut(const std::string& key, const QString& label, const QKeySequence& default_);
 

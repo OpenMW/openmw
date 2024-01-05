@@ -6,6 +6,7 @@
 #include <QColor>
 
 #include <string>
+#include <string_view>
 #include <utility>
 
 class QMutex;
@@ -30,7 +31,7 @@ namespace CSMPrefs
 
     public:
         explicit ColourSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
         ColourSetting& setTooltip(const std::string& tooltip);
 
