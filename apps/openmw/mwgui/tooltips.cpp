@@ -481,10 +481,13 @@ namespace MWGui
                 MyGUI::IntCoord(padding.left + 8 + 4, totalSize.height + padding.top, 300 - padding.left - 8 - 4,
                     300 - totalSize.height),
                 MyGUI::Align::Default);
-            edit->setEditMultiLine(true);
-            edit->setEditWordWrap(true);
-            edit->setCaption(note);
-            edit->setSize(edit->getWidth(), edit->getTextSize().height);
+            constexpr size_t maxLength = 60;
+            std::string shortenedNote = note.substr(0, std::min(maxLength, note.find('\n')));
+            if (shortenedNote.size() < note.size())
+                shortenedNote += " ...";
+            edit->setCaption(shortenedNote);
+            MyGUI::IntSize noteTextSize = edit->getTextSize();
+            edit->setSize(std::max(edit->getWidth(), noteTextSize.width), noteTextSize.height);
             icon->setPosition(icon->getLeft(), (edit->getTop() + edit->getBottom()) / 2 - icon->getHeight() / 2);
             totalSize.height += std::max(edit->getHeight(), icon->getHeight());
             totalSize.width = std::max(totalSize.width, edit->getWidth() + 8 + 4);
