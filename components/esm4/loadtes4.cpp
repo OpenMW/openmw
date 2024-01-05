@@ -100,6 +100,7 @@ void ESM4::Header::load(ESM4::Reader& reader)
             case ESM4::SUB_OFST: // Oblivion only?
             case ESM4::SUB_DELE: // Oblivion only?
             case ESM4::SUB_TNAM: // Fallout 4 (CK only)
+            case ESM::fourCC("MMSB"): // Fallout 76
                 reader.skipSubRecordData();
                 break;
             default:
