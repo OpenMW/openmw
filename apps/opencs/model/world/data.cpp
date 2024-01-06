@@ -622,6 +622,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
 
     mSelectionGroups.addColumn(new StringIdColumn<ESM::SelectionGroup>);
     mSelectionGroups.addColumn(new RecordStateColumn<ESM::SelectionGroup>);
+    mSelectionGroups.addColumn(new FixedRecordTypeColumn<ESM::SelectionGroup>(UniversalId::Type_SelectionGroup));
     mSelectionGroups.addColumn(new SelectionGroupColumn);
 
     mMetaData.appendBlankRecord(ESM::RefId::stringRefId("sys::meta"));
