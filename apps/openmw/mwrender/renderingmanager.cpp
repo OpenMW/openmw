@@ -716,6 +716,9 @@ namespace MWRender
         // need to wrap this in a StateUpdater?
         mSunLight->setPosition(osg::Vec4(position.x(), position.y(), position.z(), 0));
 
+        // The sun is not synchronized with the sunlight because sunlight origin can't reach the horizon
+        // This is based on exterior sun orbit and won't make sense for interiors, see WeatherManager::update
+        position.z() = 400.f - std::abs(position.x());
         mSky->setSunDirection(position);
 
         mPostProcessor->getStateUpdater()->setSunPos(mSunLight->getPosition(), mNight);

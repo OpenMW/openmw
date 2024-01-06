@@ -752,21 +752,21 @@ namespace MWWorld
             const float dayDuration = adjustedNightStart - mSunriseTime;
             const float nightDuration = 24.f - dayDuration;
 
-            double theta;
+            float orbit;
             if (!is_night)
             {
-                theta = static_cast<float>(osg::PI) * (adjustedHour - mSunriseTime) / dayDuration;
+                float t = (adjustedHour - mSunriseTime) / dayDuration;
+                orbit = 1.f - 2.f * t;
             }
             else
             {
-                theta = static_cast<float>(osg::PI)
-                    - static_cast<float>(osg::PI) * (adjustedHour - adjustedNightStart) / nightDuration;
+                float t = (adjustedHour - adjustedNightStart) / nightDuration;
+                orbit = 2.f * t - 1.f;
             }
 
-            osg::Vec3f final(static_cast<float>(cos(theta)),
-                -0.268f, // approx tan( -15 degrees )
-                static_cast<float>(sin(theta)));
-            mRendering.setSunDirection(final * -1);
+            // Hardcoded constant from Morrowind
+            const osg::Vec3f sunDir(-400.f * orbit, 75.f, -100.f);
+            mRendering.setSunDirection(sunDir);
             mRendering.setNight(is_night);
         }
 
