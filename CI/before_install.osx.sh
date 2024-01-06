@@ -5,11 +5,11 @@ export HOMEBREW_NO_INSTALL_CLEANUP=1
 export HOMEBREW_AUTOREMOVE=1
 
 # purge large and unnecessary packages that get in our way
-brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk || true
+brew uninstall ruby php openjdk node postgresql maven || true
 
 # purge things pre-installed that cause issues
 brew uninstall curl # aom cairo httpd jpeg-xl libavif
-brew uninstall xquartz gd fontconfig freetype harfbuzz brotli
+brew uninstall xquartz # gd fontconfig freetype harfbuzz brotli
 
 brew tap --repair
 brew update --quiet
