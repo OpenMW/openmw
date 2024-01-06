@@ -13,9 +13,10 @@ brew update --quiet
 brew reinstall xquartz gd fontconfig freetype harfbuzz brotli
 
 # Fix: can't open file: @loader_path/libbrotlicommon.1.dylib (No such file or directory)
-BREW_LIB_PATH="$(brew --prefix)/lib"
-install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PATH}/libbrotlicommon.1.dylib" ${BREW_LIB_PATH}/libbrotlidec.1.dylib
-install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PATH}/libbrotlicommon.1.dylib" ${BREW_LIB_PATH}/libbrotlienc.1.dylib
+# TODO: this is also now broke :()
+#BREW_LIB_PATH="$(brew --prefix)/lib"
+#install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PATH}/libbrotlicommon.1.dylib" ${BREW_LIB_PATH}/libbrotlidec.1.dylib
+#install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PATH}/libbrotlicommon.1.dylib" ${BREW_LIB_PATH}/libbrotlienc.1.dylib
 
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
