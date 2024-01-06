@@ -157,8 +157,10 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             {
                 const ESM::Pathgrid* pathgrid
                     = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
+                const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+                const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
                 mPathFinder.buildLimitedPath(actor, position, dest, actor.getCell(), getPathGridGraph(pathgrid),
-                    agentBounds, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, pathType);
+                    agentBounds, navigatorFlags, areaCosts, endTolerance, pathType);
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -486,10 +488,10 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
     return result;
 }
 
-DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::Ptr& actor) const
+DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(
+    const MWWorld::Ptr& actor, DetourNavigator::Flags flags) const
 {
     DetourNavigator::AreaCosts costs;
-    const DetourNavigator::Flags flags = getNavigatorFlags(actor);
     const MWWorld::Class& actorClass = actor.getClass();
 
     const float walkSpeed = [&] {
