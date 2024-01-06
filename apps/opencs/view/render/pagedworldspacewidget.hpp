@@ -163,7 +163,7 @@ namespace CSVRender
 
         std::vector<osg::ref_ptr<TagBase>> getSelection(unsigned int elementMask) const override;
 
-        void selectGroup(const std::vector<std::string> group) const override;
+        void selectGroup(const std::vector<std::string>& group) const override;
 
         void unhideAll() const override;
 

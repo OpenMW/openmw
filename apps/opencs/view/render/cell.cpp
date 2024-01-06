@@ -612,7 +612,7 @@ osg::ref_ptr<CSVRender::TagBase> CSVRender::Cell::getSnapTarget(unsigned int ele
     return result;
 }
 
-void CSVRender::Cell::selectFromGroup(const std::vector<std::string> group)
+void CSVRender::Cell::selectFromGroup(const std::vector<std::string>& group)
 {
     for (const auto& [_, object] : mObjects)
     {
