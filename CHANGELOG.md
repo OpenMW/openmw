@@ -131,7 +131,6 @@
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
-    Feature #6624: Drop support for old saves
     Feature #6726: Lua API for creating new objects
     Feature #6864: Lua file access API
     Feature #6922: Improve launcher appearance
@@ -163,6 +162,7 @@
     Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
     Task #5896: Do not use deprecated MyGUI properties
+    Task #6624: Drop support for saves made prior to 0.45
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
