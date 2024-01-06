@@ -180,7 +180,6 @@ namespace MWWorld
         , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
         , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
         , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
-        , mThunderSoundID()
         , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
         , mFlashBrightness(0.0f)
     {
@@ -823,19 +822,29 @@ namespace MWWorld
 
     void WeatherManager::stopSounds()
     {
+        MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         if (mAmbientSound)
         {
-            MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
+            sndMgr->stopSound(mAmbientSound);
             mAmbientSound = nullptr;
         }
         mPlayingAmbientSoundID = ESM::RefId();
 
         if (mRainSound)
         {
-            MWBase::Environment::get().getSoundManager()->stopSound(mRainSound);
+            sndMgr->stopSound(mRainSound);
             mRainSound = nullptr;
         }
         mPlayingRainSoundID = ESM::RefId();
+
+        for (ESM::RefId soundId : mWeatherSettings[mCurrentWeather].mThunderSoundID)
+            if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
+
+        if (inTransition())
+            for (ESM::RefId soundId : mWeatherSettings[mNextWeather].mThunderSoundID)
+                if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                    sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
     }
 
     float WeatherManager::getWindSpeed() const

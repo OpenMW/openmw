@@ -32,6 +32,7 @@
     Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
     Bug #6313: Followers with high Fight can turn hostile
+    Bug #6402: The sound of a thunderstorm does not stop playing after entering the premises
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6550: Cloned body parts don't inherit texture effects
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
