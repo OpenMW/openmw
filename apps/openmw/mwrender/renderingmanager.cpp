@@ -721,7 +721,7 @@ namespace MWRender
         position.z() = 400.f - std::abs(position.x());
         mSky->setSunDirection(position);
 
-        mPostProcessor->getStateUpdater()->setSunPos(mSunLight->getPosition(), mNight);
+        mPostProcessor->getStateUpdater()->setSunPos(osg::Vec4f(position, 0.f), mNight);
     }
 
     void RenderingManager::addCell(const MWWorld::CellStore* store)
