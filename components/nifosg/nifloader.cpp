@@ -2599,7 +2599,10 @@ namespace NifOsg
                         emissiveMult = matprop->mEmissiveMult;
 
                         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mSpecular, 1.f));
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->mGlossiness);
+                        // NIFs may provide specular exponents way above OpenGL's limit.
+                        // They can't be used properly, but we don't need OSG to constantly harass us about it.
+                        float glossiness = std::clamp(matprop->mGlossiness, 0.f, 128.f);
+                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
 
                         if (!matprop->mController.empty())
                         {
@@ -2714,7 +2717,8 @@ namespace NifOsg
                         mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderprop->mAlpha);
                         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mEmissive, 1.f));
                         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mSpecular, 1.f));
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
+                        float glossiness = std::clamp(shaderprop->mGlossiness, 0.f, 128.f);
+                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
                         specEnabled = shaderprop->specular();
