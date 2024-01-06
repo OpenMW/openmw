@@ -9,13 +9,13 @@ brew uninstall ruby php openjdk node postgresql maven || true
 
 # purge things pre-installed that cause issues
 brew uninstall curl # aom cairo httpd jpeg-xl libavif
-brew uninstall xquartz # gd fontconfig freetype harfbuzz brotli
+# brew uninstall xquartz # gd fontconfig freetype harfbuzz brotli
 
 brew tap --repair
 brew update --quiet
 
 # Some of these tools can come from places other than brew, so check before installing
-brew install xquartz gd fontconfig freetype harfbuzz brotli
+brew install curl xquartz gd fontconfig freetype harfbuzz brotli
 
 # Fix: can't open file: @loader_path/libbrotlicommon.1.dylib (No such file or directory)
 # TODO: this is also now broke :()
