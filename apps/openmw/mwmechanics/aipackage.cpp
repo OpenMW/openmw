@@ -492,14 +492,20 @@ DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::P
     const DetourNavigator::Flags flags = getNavigatorFlags(actor);
     const MWWorld::Class& actorClass = actor.getClass();
 
-    const float swimSpeed = (flags & DetourNavigator::Flag_swim) == 0 ? 0.0f : actorClass.getSwimSpeed(actor);
-
     const float walkSpeed = [&] {
         if ((flags & DetourNavigator::Flag_walk) == 0)
             return 0.0f;
         if (getTypeId() == AiPackageTypeId::Wander)
             return actorClass.getWalkSpeed(actor);
         return actorClass.getRunSpeed(actor);
+    }();
+
+    const float swimSpeed = [&] {
+        if ((flags & DetourNavigator::Flag_swim) == 0)
+            return 0.0f;
+        if (hasWaterWalking(actor))
+            return walkSpeed;
+        return actorClass.getSwimSpeed(actor);
     }();
 
     const float maxSpeed = std::max(swimSpeed, walkSpeed);
