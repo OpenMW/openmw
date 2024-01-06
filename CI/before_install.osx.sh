@@ -10,7 +10,7 @@ brew tap --repair
 brew update --quiet
 
 # Some of these tools can come from places other than brew, so check before installing
-brew reinstall xquartz fontconfig freetype harfbuzz brotli
+brew reinstall xquartz gd fontconfig freetype harfbuzz brotli
 
 # Fix: can't open file: @loader_path/libbrotlicommon.1.dylib (No such file or directory)
 BREW_LIB_PATH="$(brew --prefix)/lib"
@@ -21,6 +21,9 @@ command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt@5
 export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+
+# try to find fontconfig
+find /opt | grep -i libfreetype
 
 
 # Install deps
