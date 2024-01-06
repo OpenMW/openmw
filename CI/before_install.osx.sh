@@ -8,7 +8,7 @@ export HOMEBREW_AUTOREMOVE=1
 brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk || true
 
 # purge things pre-installed that cause issues
-brew uninstall aom cairo curl httpd jpeg-xl libavif
+brew uninstall curl # aom cairo httpd jpeg-xl libavif
 brew uninstall xquartz gd fontconfig freetype harfbuzz brotli
 
 brew tap --repair
