@@ -6,11 +6,14 @@ export HOMEBREW_NO_INSTALL_CLEANUP=1
 # purge large and unnecessary packages that get in our way
 brew uninstall ruby php openjdk node postgresql maven google-cloud-sdk || true
 
+# purge things pre-installed that cause issues
+brew uninstall xquartz gd fontconfig freetype harfbuzz brotli
+
 brew tap --repair
 brew update --quiet
 
 # Some of these tools can come from places other than brew, so check before installing
-brew reinstall xquartz gd fontconfig freetype harfbuzz brotli
+brew install xquartz gd fontconfig freetype harfbuzz brotli
 
 # Fix: can't open file: @loader_path/libbrotlicommon.1.dylib (No such file or directory)
 # TODO: this is also now broke :()
@@ -24,7 +27,10 @@ command -v qmake >/dev/null 2>&1 || brew install qt@5
 export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
 
 # try to find fontconfig
-find /opt | grep -i libfreetype
+find /opt | grep -i freetype
+#mkdir -p /opt/homebrew/opt/fontconfig/lib/
+#/opt/homebrew/Cellar/freetype/2.13.2.reinstall/lib/libfreetype.dylib
+
 
 
 # Install deps
