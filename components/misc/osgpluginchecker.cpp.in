@@ -51,7 +51,7 @@ namespace Misc
         bool haveAllPlugins = true;
         for (std::string_view plugin : requiredOSGPlugins)
         {
-            if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(), [&](std::string availablePlugin) {
+            if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(), [&](std::string_view availablePlugin) {
 #ifdef OSG_USE_UTF8_FILENAME
                 std::filesystem::path pluginPath {stringToU8String(availablePlugin)};
 #else
