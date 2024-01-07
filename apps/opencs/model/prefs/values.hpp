@@ -1,6 +1,8 @@
 #ifndef OPENMW_APPS_OPENCS_MODEL_PREFS_VALUES_H
 #define OPENMW_APPS_OPENCS_MODEL_PREFS_VALUES_H
 
+#include "enumvalueview.hpp"
+
 #include <components/settings/sanitizer.hpp>
 #include <components/settings/settingvalue.hpp>
 
@@ -15,12 +17,6 @@
 
 namespace CSMPrefs
 {
-    struct EnumValueView
-    {
-        std::string_view mValue;
-        std::string_view mTooltip;
-    };
-
     class EnumSanitizer final : public Settings::Sanitizer<std::string>
     {
     public:
@@ -51,6 +47,26 @@ namespace CSMPrefs
         return std::make_unique<EnumSanitizer>(values);
     }
 
+    class EnumSettingValue
+    {
+    public:
+        explicit EnumSettingValue(Settings::Index& index, std::string_view category, std::string_view name,
+            std::span<const EnumValueView> values, std::size_t defaultValueIndex)
+            : mValue(
+                index, category, name, std::string(values[defaultValueIndex].mValue), makeEnumSanitizerString(values))
+            , mEnumValues(values)
+        {
+        }
+
+        Settings::SettingValue<std::string>& getValue() { return mValue; }
+
+        std::span<const EnumValueView> getEnumValues() const { return mEnumValues; }
+
+    private:
+        Settings::SettingValue<std::string> mValue;
+        std::span<const EnumValueView> mEnumValues;
+    };
+
     struct WindowsCategory : Settings::WithIndex
     {
         using Settings::WithIndex::WithIndex;
@@ -72,8 +88,7 @@ namespace CSMPrefs
         Settings::SettingValue<int> mMaxSubviews{ mIndex, sName, "max-subviews", 256 };
         Settings::SettingValue<bool> mHideSubview{ mIndex, sName, "hide-subview", false };
         Settings::SettingValue<int> mMinimumWidth{ mIndex, sName, "minimum-width", 325 };
-        Settings::SettingValue<std::string> mMainwindowScrollbar{ mIndex, sName, "mainwindow-scrollbar",
-            std::string(sMainwindowScrollbarValues[0].mValue), makeEnumSanitizerString(sMainwindowScrollbarValues) };
+        EnumSettingValue mMainwindowScrollbar{ mIndex, sName, "mainwindow-scrollbar", sMainwindowScrollbarValues, 0 };
         Settings::SettingValue<bool> mGrowLimit{ mIndex, sName, "grow-limit", false };
     };
 
@@ -89,10 +104,8 @@ namespace CSMPrefs
             EnumValueView{ "Text Only", "" },
         };
 
-        Settings::SettingValue<std::string> mStatusFormat{ mIndex, sName, "status-format",
-            std::string(sRecordValues[0].mValue), makeEnumSanitizerString(sRecordValues) };
-        Settings::SettingValue<std::string> mTypeFormat{ mIndex, sName, "type-format",
-            std::string(sRecordValues[0].mValue), makeEnumSanitizerString(sRecordValues) };
+        EnumSettingValue mStatusFormat{ mIndex, sName, "status-format", sRecordValues, 0 };
+        EnumSettingValue mTypeFormat{ mIndex, sName, "type-format", sRecordValues, 0 };
     };
 
     struct IdTablesCategory : Settings::WithIndex
@@ -118,16 +131,11 @@ namespace CSMPrefs
             EnumValueView{ "No Jump", "No special action" },
         };
 
-        Settings::SettingValue<std::string> mDouble{ mIndex, sName, "double", std::string(sDoubleClickValues[0].mValue),
-            makeEnumSanitizerString(sDoubleClickValues) };
-        Settings::SettingValue<std::string> mDoubleS{ mIndex, sName, "double-s",
-            std::string(sDoubleClickValues[1].mValue), makeEnumSanitizerString(sDoubleClickValues) };
-        Settings::SettingValue<std::string> mDoubleC{ mIndex, sName, "double-c",
-            std::string(sDoubleClickValues[2].mValue), makeEnumSanitizerString(sDoubleClickValues) };
-        Settings::SettingValue<std::string> mDoubleSc{ mIndex, sName, "double-sc",
-            std::string(sDoubleClickValues[5].mValue), makeEnumSanitizerString(sDoubleClickValues) };
-        Settings::SettingValue<std::string> mJumpToAdded{ mIndex, sName, "jump-to-added",
-            std::string(sJumpAndSelectValues[0].mValue), makeEnumSanitizerString(sJumpAndSelectValues) };
+        EnumSettingValue mDouble{ mIndex, sName, "double", sDoubleClickValues, 0 };
+        EnumSettingValue mDoubleS{ mIndex, sName, "double-s", sDoubleClickValues, 1 };
+        EnumSettingValue mDoubleC{ mIndex, sName, "double-c", sDoubleClickValues, 2 };
+        EnumSettingValue mDoubleSc{ mIndex, sName, "double-sc", sDoubleClickValues, 5 };
+        EnumSettingValue mJumpToAdded{ mIndex, sName, "jump-to-added", sJumpAndSelectValues, 0 };
         Settings::SettingValue<bool> mExtendedConfig{ mIndex, sName, "extended-config", false };
         Settings::SettingValue<bool> mSubviewNewWindow{ mIndex, sName, "subview-new-window", false };
     };
@@ -156,14 +164,10 @@ namespace CSMPrefs
                 "report table" },
         };
 
-        Settings::SettingValue<std::string> mDouble{ mIndex, sName, "double", std::string(sReportValues[1].mValue),
-            makeEnumSanitizerString(sReportValues) };
-        Settings::SettingValue<std::string> mDoubleS{ mIndex, sName, "double-s", std::string(sReportValues[2].mValue),
-            makeEnumSanitizerString(sReportValues) };
-        Settings::SettingValue<std::string> mDoubleC{ mIndex, sName, "double-c", std::string(sReportValues[3].mValue),
-            makeEnumSanitizerString(sReportValues) };
-        Settings::SettingValue<std::string> mDoubleSc{ mIndex, sName, "double-sc", std::string(sReportValues[0].mValue),
-            makeEnumSanitizerString(sReportValues) };
+        EnumSettingValue mDouble{ mIndex, sName, "double", sReportValues, 1 };
+        EnumSettingValue mDoubleS{ mIndex, sName, "double-s", sReportValues, 2 };
+        EnumSettingValue mDoubleC{ mIndex, sName, "double-c", sReportValues, 3 };
+        EnumSettingValue mDoubleSc{ mIndex, sName, "double-sc", sReportValues, 0 };
         Settings::SettingValue<bool> mIgnoreBaseRecords{ mIndex, sName, "ignore-base-records", false };
     };
 
@@ -194,8 +198,7 @@ namespace CSMPrefs
         Settings::SettingValue<bool> mWrapLines{ mIndex, sName, "wrap-lines", false };
         Settings::SettingValue<bool> mMonoFont{ mIndex, sName, "mono-font", true };
         Settings::SettingValue<int> mTabWidth{ mIndex, sName, "tab-width", 4 };
-        Settings::SettingValue<std::string> mWarnings{ mIndex, sName, "warnings", std::string(sWarningValues[1].mValue),
-            makeEnumSanitizerString(sWarningValues) };
+        EnumSettingValue mWarnings{ mIndex, sName, "warnings", sWarningValues, 1 };
         Settings::SettingValue<bool> mToolbar{ mIndex, sName, "toolbar", true };
         Settings::SettingValue<int> mCompileDelay{ mIndex, sName, "compile-delay", 100 };
         Settings::SettingValue<int> mErrorHeight{ mIndex, sName, "error-height", 100 };
@@ -310,14 +313,7 @@ namespace CSMPrefs
             EnumValueView{ "Discard", "" },
         };
 
-        static constexpr std::array<EnumValueView, 4> sPrimarySelectAction{
-            EnumValueView{ "Select only", "" },
-            EnumValueView{ "Add to selection", "" },
-            EnumValueView{ "Remove from selection", "" },
-            EnumValueView{ "Invert selection", "" },
-        };
-
-        static constexpr std::array<EnumValueView, 4> sSecondarySelectAction{
+        static constexpr std::array<EnumValueView, 4> sSelectAction{
             EnumValueView{ "Select only", "" },
             EnumValueView{ "Add to selection", "" },
             EnumValueView{ "Remove from selection", "" },
@@ -328,16 +324,12 @@ namespace CSMPrefs
         Settings::SettingValue<double> mGridsnapRotation{ mIndex, sName, "gridsnap-rotation", 15 };
         Settings::SettingValue<double> mGridsnapScale{ mIndex, sName, "gridsnap-scale", 0.25 };
         Settings::SettingValue<int> mDistance{ mIndex, sName, "distance", 50 };
-        Settings::SettingValue<std::string> mOutsideDrop{ mIndex, sName, "outside-drop",
-            std::string(sInsertOutsideCellValues[0].mValue), makeEnumSanitizerString(sInsertOutsideCellValues) };
-        Settings::SettingValue<std::string> mOutsideVisibleDrop{ mIndex, sName, "outside-visible-drop",
-            std::string(sInsertOutsideVisibleCellValues[0].mValue),
-            makeEnumSanitizerString(sInsertOutsideVisibleCellValues) };
-        Settings::SettingValue<std::string> mOutsideLandedit{ mIndex, sName, "outside-landedit",
-            std::string(sLandEditOutsideCellValues[0].mValue), makeEnumSanitizerString(sLandEditOutsideCellValues) };
-        Settings::SettingValue<std::string> mOutsideVisibleLandedit{ mIndex, sName, "outside-visible-landedit",
-            std::string(sLandEditOutsideVisibleCellValues[0].mValue),
-            makeEnumSanitizerString(sLandEditOutsideVisibleCellValues) };
+        EnumSettingValue mOutsideDrop{ mIndex, sName, "outside-drop", sInsertOutsideCellValues, 0 };
+        EnumSettingValue mOutsideVisibleDrop{ mIndex, sName, "outside-visible-drop", sInsertOutsideVisibleCellValues,
+            0 };
+        EnumSettingValue mOutsideLandedit{ mIndex, sName, "outside-landedit", sLandEditOutsideCellValues, 0 };
+        EnumSettingValue mOutsideVisibleLandedit{ mIndex, sName, "outside-visible-landedit",
+            sLandEditOutsideVisibleCellValues, 0 };
         Settings::SettingValue<int> mTexturebrushMaximumsize{ mIndex, sName, "texturebrush-maximumsize", 50 };
         Settings::SettingValue<int> mShapebrushMaximumsize{ mIndex, sName, "shapebrush-maximumsize", 100 };
         Settings::SettingValue<bool> mLandeditPostSmoothpainting{ mIndex, sName, "landedit-post-smoothpainting",
@@ -345,10 +337,8 @@ namespace CSMPrefs
         Settings::SettingValue<double> mLandeditPostSmoothstrength{ mIndex, sName, "landedit-post-smoothstrength",
             0.25 };
         Settings::SettingValue<bool> mOpenListView{ mIndex, sName, "open-list-view", false };
-        Settings::SettingValue<std::string> mPrimarySelectAction{ mIndex, sName, "primary-select-action",
-            std::string(sPrimarySelectAction[0].mValue), makeEnumSanitizerString(sPrimarySelectAction) };
-        Settings::SettingValue<std::string> mSecondarySelectAction{ mIndex, sName, "secondary-select-action",
-            std::string(sPrimarySelectAction[1].mValue), makeEnumSanitizerString(sPrimarySelectAction) };
+        EnumSettingValue mPrimarySelectAction{ mIndex, sName, "primary-select-action", sSelectAction, 0 };
+        EnumSettingValue mSecondarySelectAction{ mIndex, sName, "secondary-select-action", sSelectAction, 1 };
     };
 
     struct KeyBindingsCategory : Settings::WithIndex

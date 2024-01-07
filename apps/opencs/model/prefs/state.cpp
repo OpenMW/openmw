@@ -59,13 +59,7 @@ void CSMPrefs::State::declare()
     declareInt(mValues->mWindows.mMinimumWidth, "Minimum subview width")
         .setTooltip("Minimum width of subviews.")
         .setRange(50, 10000);
-    EnumValue scrollbarOnly("Scrollbar Only",
-        "Simple addition of scrollbars, the view window "
-        "does not grow automatically.");
-    declareEnum("mainwindow-scrollbar", "Horizontal scrollbar mode for main window.", scrollbarOnly)
-        .addValue(scrollbarOnly)
-        .addValue("Grow Only", "The view window grows as subviews are added. No scrollbars.")
-        .addValue("Grow then Scroll", "The view window grows. The scrollbar appears once it cannot grow any further.");
+    declareEnum(mValues->mWindows.mMainwindowScrollbar, "Horizontal scrollbar mode for main window.");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     declareBool(mValues->mWindows.mGrowLimit, "Grow Limit Screen")
         .setTooltip(
@@ -75,34 +69,15 @@ void CSMPrefs::State::declare()
 #endif
 
     declareCategory("Records");
-    EnumValue iconAndText("Icon and Text");
-    EnumValues recordValues;
-    recordValues.add(iconAndText).add("Icon Only").add("Text Only");
-    declareEnum("status-format", "Modification status display format", iconAndText).addValues(recordValues);
-    declareEnum("type-format", "ID type display format", iconAndText).addValues(recordValues);
+    declareEnum(mValues->mRecords.mStatusFormat, "Modification status display format");
+    declareEnum(mValues->mRecords.mTypeFormat, "ID type display format");
 
     declareCategory("ID Tables");
-    EnumValue inPlaceEdit("Edit in Place", "Edit the clicked cell");
-    EnumValue editRecord("Edit Record", "Open a dialogue subview for the clicked record");
-    EnumValue view("View", "Open a scene subview for the clicked record (not available everywhere)");
-    EnumValue editRecordAndClose("Edit Record and Close");
-    EnumValues doubleClickValues;
-    doubleClickValues.add(inPlaceEdit)
-        .add(editRecord)
-        .add(view)
-        .add("Revert")
-        .add("Delete")
-        .add(editRecordAndClose)
-        .add("View and Close", "Open a scene subview for the clicked record and close the table subview");
-    declareEnum("double", "Double Click", inPlaceEdit).addValues(doubleClickValues);
-    declareEnum("double-s", "Shift Double Click", editRecord).addValues(doubleClickValues);
-    declareEnum("double-c", "Control Double Click", view).addValues(doubleClickValues);
-    declareEnum("double-sc", "Shift Control Double Click", editRecordAndClose).addValues(doubleClickValues);
-    EnumValue jumpAndSelect("Jump and Select", "Scroll new record into view and make it the selection");
-    declareEnum("jump-to-added", "Action on adding or cloning a record", jumpAndSelect)
-        .addValue(jumpAndSelect)
-        .addValue("Jump Only", "Scroll new record into view")
-        .addValue("No Jump", "No special action");
+    declareEnum(mValues->mIdTables.mDouble, "Double Click");
+    declareEnum(mValues->mIdTables.mDoubleS, "Shift Double Click");
+    declareEnum(mValues->mIdTables.mDoubleC, "Control Double Click");
+    declareEnum(mValues->mIdTables.mDoubleSc, "Shift Control Double Click");
+    declareEnum(mValues->mIdTables.mJumpToAdded, "Action on adding or cloning a record");
     declareBool(
         mValues->mIdTables.mExtendedConfig, "Manually specify affected record types for an extended delete/revert")
         .setTooltip(
@@ -120,18 +95,10 @@ void CSMPrefs::State::declare()
     declareBool(mValues->mIdDialogues.mToolbar, "Show toolbar");
 
     declareCategory("Reports");
-    EnumValue actionNone("None");
-    EnumValue actionEdit("Edit", "Open a table or dialogue suitable for addressing the listed report");
-    EnumValue actionRemove("Remove", "Remove the report from the report table");
-    EnumValue actionEditAndRemove("Edit And Remove",
-        "Open a table or dialogue suitable for addressing the listed report, then remove the report from the report "
-        "table");
-    EnumValues reportValues;
-    reportValues.add(actionNone).add(actionEdit).add(actionRemove).add(actionEditAndRemove);
-    declareEnum("double", "Double Click", actionEdit).addValues(reportValues);
-    declareEnum("double-s", "Shift Double Click", actionRemove).addValues(reportValues);
-    declareEnum("double-c", "Control Double Click", actionEditAndRemove).addValues(reportValues);
-    declareEnum("double-sc", "Shift Control Double Click", actionNone).addValues(reportValues);
+    declareEnum(mValues->mReports.mDouble, "Double Click");
+    declareEnum(mValues->mReports.mDoubleS, "Shift Double Click");
+    declareEnum(mValues->mReports.mDoubleC, "Control Double Click");
+    declareEnum(mValues->mReports.mDoubleSc, "Shift Control Double Click");
     declareBool(mValues->mReports.mIgnoreBaseRecords, "Ignore base records in verifier");
 
     declareCategory("Search & Replace");
@@ -152,11 +119,7 @@ void CSMPrefs::State::declare()
     declareInt(mValues->mScripts.mTabWidth, "Tab Width")
         .setTooltip("Number of characters for tab width")
         .setRange(1, 10);
-    EnumValue warningsNormal("Normal", "Report warnings as warning");
-    declareEnum("warnings", "Warning Mode", warningsNormal)
-        .addValue("Ignore", "Do not report warning")
-        .addValue(warningsNormal)
-        .addValue("Strict", "Promote warning to an error");
+    declareEnum(mValues->mScripts.mWarnings, "Warning Mode");
     declareBool(mValues->mScripts.mToolbar, "Show toolbar");
     declareInt(mValues->mScripts.mCompileDelay, "Delay between updating of source errors")
         .setTooltip("Delay in milliseconds")
@@ -244,32 +207,6 @@ void CSMPrefs::State::declare()
     declareBool(mValues->mTooltips.mSceneHideBasic, "Hide basic  3D scenes tooltips");
     declareInt(mValues->mTooltips.mSceneDelay, "Tooltip delay in milliseconds").setMin(1);
 
-    EnumValue createAndInsert("Create cell and insert");
-    EnumValue showAndInsert("Show cell and insert");
-    EnumValue dontInsert("Discard");
-    EnumValue insertAnyway("Insert anyway");
-    EnumValues insertOutsideCell;
-    insertOutsideCell.add(createAndInsert).add(dontInsert).add(insertAnyway);
-    EnumValues insertOutsideVisibleCell;
-    insertOutsideVisibleCell.add(showAndInsert).add(dontInsert).add(insertAnyway);
-
-    EnumValue createAndLandEdit("Create cell and land, then edit");
-    EnumValue showAndLandEdit("Show cell and edit");
-    EnumValue dontLandEdit("Discard");
-    EnumValues landeditOutsideCell;
-    landeditOutsideCell.add(createAndLandEdit).add(dontLandEdit);
-    EnumValues landeditOutsideVisibleCell;
-    landeditOutsideVisibleCell.add(showAndLandEdit).add(dontLandEdit);
-
-    EnumValue SelectOnly("Select only");
-    EnumValue SelectAdd("Add to selection");
-    EnumValue SelectRemove("Remove from selection");
-    EnumValue selectInvert("Invert selection");
-    EnumValues primarySelectAction;
-    primarySelectAction.add(SelectOnly).add(SelectAdd).add(SelectRemove).add(selectInvert);
-    EnumValues secondarySelectAction;
-    secondarySelectAction.add(SelectOnly).add(SelectAdd).add(SelectRemove).add(selectInvert);
-
     declareCategory("3D Scene Editing");
     declareDouble(mValues->mSceneEditing.mGridsnapMovement, "Grid snap size");
     declareDouble(mValues->mSceneEditing.mGridsnapRotation, "Angle snap size");
@@ -278,15 +215,13 @@ void CSMPrefs::State::declare()
         .setTooltip(
             "If an instance drop can not be placed against another object at the "
             "insert point, it will be placed by this distance from the insert point instead");
-    declareEnum("outside-drop", "Handling drops outside of cells", createAndInsert).addValues(insertOutsideCell);
-    declareEnum("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert)
-        .addValues(insertOutsideVisibleCell);
-    declareEnum("outside-landedit", "Handling terrain edit outside of cells", createAndLandEdit)
-        .setTooltip("Behavior of terrain editing, if land editing brush reaches an area without cell record.")
-        .addValues(landeditOutsideCell);
-    declareEnum("outside-visible-landedit", "Handling terrain edit outside of visible cells", showAndLandEdit)
-        .setTooltip("Behavior of terrain editing, if land editing brush reaches an area that is not currently visible.")
-        .addValues(landeditOutsideVisibleCell);
+    declareEnum(mValues->mSceneEditing.mOutsideDrop, "Handling drops outside of cells");
+    declareEnum(mValues->mSceneEditing.mOutsideVisibleDrop, "Handling drops outside of visible cells");
+    declareEnum(mValues->mSceneEditing.mOutsideLandedit, "Handling terrain edit outside of cells")
+        .setTooltip("Behavior of terrain editing, if land editing brush reaches an area without cell record.");
+    declareEnum(mValues->mSceneEditing.mOutsideVisibleLandedit, "Handling terrain edit outside of visible cells")
+        .setTooltip(
+            "Behavior of terrain editing, if land editing brush reaches an area that is not currently visible.");
     declareInt(mValues->mSceneEditing.mTexturebrushMaximumsize, "Maximum texture brush size").setMin(1);
     declareInt(mValues->mSceneEditing.mShapebrushMaximumsize, "Maximum height edit brush size")
         .setTooltip("Setting for the slider range of brush size in terrain height editing.")
@@ -303,16 +238,14 @@ void CSMPrefs::State::declare()
         .setTooltip(
             "When opening a reference from the scene view, it will open the"
             " instance list view instead of the individual instance record view.");
-    declareEnum("primary-select-action", "Action for primary select", SelectOnly)
+    declareEnum(mValues->mSceneEditing.mPrimarySelectAction, "Action for primary select")
         .setTooltip(
             "Selection can be chosen between select only, add to selection, remove from selection and invert "
-            "selection.")
-        .addValues(primarySelectAction);
-    declareEnum("secondary-select-action", "Action for secondary select", SelectAdd)
+            "selection.");
+    declareEnum(mValues->mSceneEditing.mSecondarySelectAction, "Action for secondary select")
         .setTooltip(
             "Selection can be chosen between select only, add to selection, remove from selection and invert "
-            "selection.")
-        .addValues(secondarySelectAction);
+            "selection.");
 
     declareCategory("Key Bindings");
 
@@ -531,12 +464,13 @@ CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(Settings::SettingValue<bool>
     return *setting;
 }
 
-CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(const std::string& key, const QString& label, EnumValue default_)
+CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(EnumSettingValue& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    CSMPrefs::EnumSetting* setting = new CSMPrefs::EnumSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+    CSMPrefs::EnumSetting* setting = new CSMPrefs::EnumSetting(
+        &mCurrentCategory->second, &mMutex, value.getValue().mName, label, value.getEnumValues(), *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
 

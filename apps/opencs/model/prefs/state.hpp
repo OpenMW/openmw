@@ -32,6 +32,7 @@ namespace CSMPrefs
     class ModifierSetting;
     class Setting;
     class StringSetting;
+    class EnumSettingValue;
     struct Values;
 
     /// \brief User settings state
@@ -69,7 +70,7 @@ namespace CSMPrefs
 
         BoolSetting& declareBool(Settings::SettingValue<bool>& value, const QString& label);
 
-        EnumSetting& declareEnum(const std::string& key, const QString& label, EnumValue default_);
+        EnumSetting& declareEnum(EnumSettingValue& value, const QString& label);
 
         ColourSetting& declareColour(const std::string& key, const QString& label, QColor default_);
 
