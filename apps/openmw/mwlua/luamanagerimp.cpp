@@ -75,6 +75,7 @@ namespace MWLua
     void LuaManager::init()
     {
         Context context;
+        context.mIsMenu = false;
         context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
@@ -86,11 +87,14 @@ namespace MWLua
         localContext.mIsGlobal = false;
         localContext.mSerializer = mLocalSerializer.get();
 
+        Context menuContext = context;
+        menuContext.mIsMenu = true;
+
         for (const auto& [name, package] : initCommonPackages(context))
             mLua.addCommonPackage(name, package);
         for (const auto& [name, package] : initGlobalPackages(context))
             mGlobalScripts.addPackage(name, package);
-        for (const auto& [name, package] : initMenuPackages(context))
+        for (const auto& [name, package] : initMenuPackages(menuContext))
             mMenuScripts.addPackage(name, package);
 
         mLocalPackages = initLocalPackages(localContext);
@@ -278,7 +282,7 @@ namespace MWLua
 
     void LuaManager::clear()
     {
-        LuaUi::clearUserInterface();
+        LuaUi::clearGameInterface();
         mUiResourceManager.clear();
         MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
         mActiveLocalScripts.clear();
@@ -526,7 +530,8 @@ namespace MWLua
     {
         Log(Debug::Info) << "Reload Lua";
 
-        LuaUi::clearUserInterface();
+        LuaUi::clearGameInterface();
+        LuaUi::clearMenuInterface();
         MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         MWBase::Environment::get().getL10nManager()->dropCache();
         mUiResourceManager.clear();

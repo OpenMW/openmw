@@ -240,7 +240,8 @@ namespace LuaUi
         }
     }
 
-    std::map<Element*, std::shared_ptr<Element>> Element::sAllElements;
+    std::map<Element*, std::shared_ptr<Element>> Element::sGameElements;
+    std::map<Element*, std::shared_ptr<Element>> Element::sMenuElements;
 
     Element::Element(sol::table layout)
         : mRoot(nullptr)
@@ -251,10 +252,17 @@ namespace LuaUi
     {
     }
 
-    std::shared_ptr<Element> Element::make(sol::table layout)
+    std::shared_ptr<Element> Element::makeGameElement(sol::table layout)
     {
         std::shared_ptr<Element> ptr(new Element(std::move(layout)));
-        sAllElements[ptr.get()] = ptr;
+        sGameElements[ptr.get()] = ptr;
+        return ptr;
+    }
+
+    std::shared_ptr<Element> Element::makeMenuElement(sol::table layout)
+    {
+        std::shared_ptr<Element> ptr(new Element(std::move(layout)));
+        sMenuElements[ptr.get()] = ptr;
         return ptr;
     }
 
@@ -302,6 +310,7 @@ namespace LuaUi
             mRoot = nullptr;
             mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
         }
-        sAllElements.erase(this);
+        sGameElements.erase(this);
+        sMenuElements.erase(this);
     }
 }

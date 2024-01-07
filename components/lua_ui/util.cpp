@@ -44,10 +44,17 @@ namespace LuaUi
         return types;
     }
 
-    void clearUserInterface()
+    void clearGameInterface()
     {
+        // TODO: move settings clearing logic to Lua?
         clearSettings();
-        while (!Element::sAllElements.empty())
-            Element::sAllElements.begin()->second->destroy();
+        while (!Element::sGameElements.empty())
+            Element::sGameElements.begin()->second->destroy();
+    }
+
+    void clearMenuInterface()
+    {
+        while (!Element::sMenuElements.empty())
+            Element::sMenuElements.begin()->second->destroy();
     }
 }

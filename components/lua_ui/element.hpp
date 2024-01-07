@@ -7,12 +7,20 @@ namespace LuaUi
 {
     struct Element
     {
-        static std::shared_ptr<Element> make(sol::table layout);
+        static std::shared_ptr<Element> makeGameElement(sol::table layout);
+        static std::shared_ptr<Element> makeMenuElement(sol::table layout);
 
         template <class Callback>
-        static void forEach(Callback callback)
+        static void forEachGameElement(Callback callback)
         {
-            for (auto& [e, _] : sAllElements)
+            for (auto& [e, _] : sGameElements)
+                callback(e);
+        }
+
+        template <class Callback>
+        static void forEachMenuElement(Callback callback)
+        {
+            for (auto& [e, _] : sMenuElements)
                 callback(e);
         }
 
@@ -28,12 +36,14 @@ namespace LuaUi
 
         void destroy();
 
-        friend void clearUserInterface();
+        friend void clearGameInterface();
+        friend void clearMenuInterface();
 
     private:
         Element(sol::table layout);
         sol::table layout() { return LuaUtil::cast<sol::table>(mLayout); }
-        static std::map<Element*, std::shared_ptr<Element>> sAllElements;
+        static std::map<Element*, std::shared_ptr<Element>> sGameElements;
+        static std::map<Element*, std::shared_ptr<Element>> sMenuElements;
     };
 }
 

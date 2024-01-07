@@ -155,15 +155,27 @@ namespace MWLua
             }
         };
         api["content"] = LuaUi::loadContentConstructor(context.mLua);
-        api["create"] = [luaManager = context.mLuaManager](const sol::table& layout) {
-            auto element = LuaUi::Element::make(layout);
-            luaManager->addAction([element] { wrapAction(element, [&] { element->create(); }); }, "Create UI");
+        api["create"] = [context](const sol::table& layout) {
+            auto element
+                = context.mIsMenu ? LuaUi::Element::makeMenuElement(layout) : LuaUi::Element::makeGameElement(layout);
+            context.mLuaManager->addAction([element] { wrapAction(element, [&] { element->create(); }); }, "Create UI");
             return element;
         };
         api["updateAll"] = [context]() {
-            LuaUi::Element::forEach([](LuaUi::Element* e) { e->mUpdate = true; });
-            context.mLuaManager->addAction(
-                []() { LuaUi::Element::forEach([](LuaUi::Element* e) { e->update(); }); }, "Update all UI elements");
+            if (context.mIsMenu)
+            {
+                LuaUi::Element::forEachMenuElement([](LuaUi::Element* e) { e->mUpdate = true; });
+                context.mLuaManager->addAction(
+                    []() { LuaUi::Element::forEachMenuElement([](LuaUi::Element* e) { e->update(); }); },
+                    "Update all menu UI elements");
+            }
+            else
+            {
+                LuaUi::Element::forEachGameElement([](LuaUi::Element* e) { e->mUpdate = true; });
+                context.mLuaManager->addAction(
+                    []() { LuaUi::Element::forEachGameElement([](LuaUi::Element* e) { e->update(); }); },
+                    "Update all game UI elements");
+            }
         };
         api["_getMenuTransparency"] = []() -> float { return Settings::gui().mMenuTransparency; };
 
