@@ -113,7 +113,7 @@ void ContentSelectorModel::EsmFile::setFileProperty(const FileProperty prop, con
             break;
 
         case FileProperty_Format:
-            mVersion = value.toInt();
+            mVersion = value;
             break;
 
         case FileProperty_DateModified:
