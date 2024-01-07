@@ -51,7 +51,8 @@ QByteArray ContentSelectorModel::EsmFile::encodedData() const
     QByteArray encodedData;
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
-    stream << mFileName << mAuthor << mVersion << mModified.toString() << mPath << mDescription << mGameFiles;
+    stream << mFileName << mAuthor << mVersion << mModified.toString(Qt::ISODate) << mPath << mDescription
+           << mGameFiles;
 
     return encodedData;
 }
@@ -113,11 +114,11 @@ void ContentSelectorModel::EsmFile::setFileProperty(const FileProperty prop, con
             break;
 
         case FileProperty_Format:
-            mVersion = value.toInt();
+            mVersion = value;
             break;
 
         case FileProperty_DateModified:
-            mModified = QDateTime::fromString(value);
+            mModified = QDateTime::fromString(value, Qt::ISODate);
             break;
 
         case FileProperty_FilePath:
