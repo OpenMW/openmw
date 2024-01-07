@@ -2,6 +2,7 @@
 #include "esmfile.hpp"
 
 #include <fstream>
+#include <memory>
 #include <stdexcept>
 #include <unordered_set>
 
@@ -447,26 +448,37 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
     {
         QFileInfo info(dir.absoluteFilePath(path2));
 
-        if (item(info.fileName()))
-            continue;
-
         // Enabled by default in system openmw.cfg; shouldn't be shown in content list.
         if (info.fileName().compare("builtin.omwscripts", Qt::CaseInsensitive) == 0)
             continue;
 
+        EsmFile* file = const_cast<EsmFile*>(item(info.fileName()));
+        bool add = file == nullptr;
+        std::unique_ptr<EsmFile> newFile;
+        if (add)
+        {
+            newFile = std::make_unique<EsmFile>(path2);
+            file = newFile.get();
+        }
+        else
+        {
+            // We've found the same file in a higher priority dir, update our existing entry
+            file->setFileName(path2);
+            file->setGameFiles({});
+        }
+
         if (info.fileName().endsWith(".omwscripts", Qt::CaseInsensitive))
         {
-            EsmFile* file = new EsmFile(path2);
             file->setDate(info.lastModified());
             file->setFilePath(info.absoluteFilePath());
-            addFile(file);
+            if (add)
+                addFile(newFile.release());
             setNew(file->fileName(), newfiles);
             continue;
         }
 
         try
         {
-            EsmFile* file = new EsmFile(path2);
             file->setDate(info.lastModified());
             file->setFilePath(info.absoluteFilePath());
             std::filesystem::path filepath = Files::pathFromQString(info.absoluteFilePath());
@@ -522,14 +534,14 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
             }
 
             // Put the file in the table
-            addFile(file);
+            if (add)
+                addFile(newFile.release());
             setNew(file->fileName(), newfiles);
         }
         catch (std::runtime_error& e)
         {
             // An error occurred while reading the .esp
             qWarning() << "Error reading addon file: " << e.what();
-            continue;
         }
     }
 }

@@ -30,15 +30,11 @@ namespace ContentSelectorModel
         };
 
         EsmFile(const QString& fileName = QString(), ModelItem* parent = nullptr);
-        //   EsmFile(const EsmFile &);
-
-        ~EsmFile() {}
 
         void setFileProperty(const FileProperty prop, const QString& value);
 
         void setFileName(const QString& fileName);
         void setAuthor(const QString& author);
-        void setSize(const int size);
         void setDate(const QDateTime& modified);
         void setFormat(const QString& format);
         void setFilePath(const QString& path);
