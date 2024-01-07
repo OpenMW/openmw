@@ -875,7 +875,7 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::
     return result;
 }
 
-void CSVRender::PagedWorldspaceWidget::selectGroup(std::vector<std::string> group) const
+void CSVRender::PagedWorldspaceWidget::selectGroup(const std::vector<std::string>& group) const
 {
     for (const auto& [_, cell] : mCells)
         cell->selectFromGroup(group);

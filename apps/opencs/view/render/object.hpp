@@ -139,7 +139,7 @@ namespace CSVRender
         ~Object();
 
         /// Mark the object as selected, selected objects show an outline effect
-        void setSelected(bool selected, osg::Vec4f color = osg::Vec4f(1, 1, 1, 1));
+        void setSelected(bool selected, const osg::Vec4f& color = osg::Vec4f(1, 1, 1, 1));
 
         bool getSelected() const;
 

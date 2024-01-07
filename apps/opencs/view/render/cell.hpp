@@ -148,7 +148,7 @@ namespace CSVRender
         // already selected
         void selectAllWithSameParentId(int elementMask);
 
-        void selectFromGroup(const std::vector<std::string> group);
+        void selectFromGroup(const std::vector<std::string>& group);
 
         void unhideAll();
 

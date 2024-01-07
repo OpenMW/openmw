@@ -199,7 +199,7 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::UnpagedWorldspaceWidget
     return mCell->getSelection(elementMask);
 }
 
-void CSVRender::UnpagedWorldspaceWidget::selectGroup(const std::vector<std::string> group) const
+void CSVRender::UnpagedWorldspaceWidget::selectGroup(const std::vector<std::string>& group) const
 {
     mCell->selectFromGroup(group);
 }

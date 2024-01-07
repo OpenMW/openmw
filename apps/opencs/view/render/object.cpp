@@ -484,7 +484,7 @@ CSVRender::Object::~Object()
     mParentNode->removeChild(mRootNode);
 }
 
-void CSVRender::Object::setSelected(bool selected, osg::Vec4f color)
+void CSVRender::Object::setSelected(bool selected, const osg::Vec4f& color)
 {
     mSelected = selected;
 
