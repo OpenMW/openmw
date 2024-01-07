@@ -22,78 +22,64 @@ namespace MWRender
     class PingPongCanvas : public osg::Geometry
     {
     public:
-        PingPongCanvas(Shader::ShaderManager& shaderManager);
-
-        void drawImplementation(osg::RenderInfo& renderInfo) const override;
-
-        void dirty(size_t frameId) { mBufferData[frameId].dirty = true; }
-
-        const fx::DispatchArray& getCurrentFrameData(size_t frame) { return mBufferData[frame % 2].data; }
-
-        // Sets current frame pass data and stores copy of dispatch array to apply to next frame data
-        void setCurrentFrameData(size_t frameId, fx::DispatchArray&& data);
-
-        void setMask(size_t frameId, bool underwater, bool exterior);
-
-        void setSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].sceneTex = tex; }
-
-        void setLDRSceneTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex)
-        {
-            mBufferData[frameId].sceneTexLDR = tex;
-        }
-
-        void setDepthTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex) { mBufferData[frameId].depthTex = tex; }
-
-        void setNormalsTexture(size_t frameId, osg::ref_ptr<osg::Texture> tex)
-        {
-            mBufferData[frameId].normalsTex = tex;
-        }
-
-        void setHDR(size_t frameId, bool hdr) { mBufferData[frameId].hdr = hdr; }
-
-        void setPostProcessing(size_t frameId, bool postprocessing)
-        {
-            mBufferData[frameId].postprocessing = postprocessing;
-        }
-
-        const osg::ref_ptr<osg::Texture>& getSceneTexture(size_t frameId) const
-        {
-            return mBufferData[frameId].sceneTex;
-        }
+        PingPongCanvas(
+            Shader::ShaderManager& shaderManager, const std::shared_ptr<LuminanceCalculator>& luminanceCalculator);
 
         void drawGeometry(osg::RenderInfo& renderInfo) const;
 
-    private:
-        void copyNewFrameData(size_t frameId) const;
+        void drawImplementation(osg::RenderInfo& renderInfo) const override;
 
-        mutable LuminanceCalculator mLuminanceCalculator;
+        void dirty() { mDirty = true; }
+
+        void setDirtyAttachments(const std::vector<fx::Types::RenderTarget>& attachments)
+        {
+            mDirtyAttachments = attachments;
+        }
+
+        const fx::DispatchArray& getPasses() { return mPasses; }
+
+        void setPasses(fx::DispatchArray&& passes);
+
+        void setMask(bool underwater, bool exterior);
+
+        void setTextureScene(osg::ref_ptr<osg::Texture> tex) { mTextureScene = tex; }
+
+        void setTextureDepth(osg::ref_ptr<osg::Texture> tex) { mTextureDepth = tex; }
+
+        void setTextureNormals(osg::ref_ptr<osg::Texture> tex) { mTextureNormals = tex; }
+
+        void setTextureDistortion(osg::ref_ptr<osg::Texture> tex) { mTextureDistortion = tex; }
+
+        void setCalculateAvgLum(bool enabled) { mAvgLum = enabled; }
+
+        void setPostProcessing(bool enabled) { mPostprocessing = enabled; }
+
+        const osg::ref_ptr<osg::Texture>& getSceneTexture(size_t frameId) const { return mTextureScene; }
+
+    private:
+        bool mAvgLum = false;
+        bool mPostprocessing = false;
+
+        fx::DispatchArray mPasses;
+        fx::FlagsType mMask = 0;
 
         osg::ref_ptr<osg::Program> mFallbackProgram;
         osg::ref_ptr<osg::Program> mMultiviewResolveProgram;
         osg::ref_ptr<osg::StateSet> mFallbackStateSet;
         osg::ref_ptr<osg::StateSet> mMultiviewResolveStateSet;
-        mutable osg::ref_ptr<osg::FrameBufferObject> mMultiviewResolveFramebuffer;
 
-        struct BufferData
-        {
-            bool dirty = false;
-            bool hdr = false;
-            bool postprocessing = true;
+        osg::ref_ptr<osg::Texture> mTextureScene;
+        osg::ref_ptr<osg::Texture> mTextureDepth;
+        osg::ref_ptr<osg::Texture> mTextureNormals;
+        osg::ref_ptr<osg::Texture> mTextureDistortion;
 
-            fx::DispatchArray data;
-            fx::FlagsType mask;
-
-            osg::ref_ptr<osg::FrameBufferObject> destination;
-
-            osg::ref_ptr<osg::Texture> sceneTex;
-            osg::ref_ptr<osg::Texture> depthTex;
-            osg::ref_ptr<osg::Texture> sceneTexLDR;
-            osg::ref_ptr<osg::Texture> normalsTex;
-        };
-
-        mutable std::array<BufferData, 2> mBufferData;
-        mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
+        mutable bool mDirty = false;
+        mutable std::vector<fx::Types::RenderTarget> mDirtyAttachments;
         mutable osg::ref_ptr<osg::Viewport> mRenderViewport;
+        mutable osg::ref_ptr<osg::FrameBufferObject> mMultiviewResolveFramebuffer;
+        mutable osg::ref_ptr<osg::FrameBufferObject> mDestinationFBO;
+        mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
+        mutable std::shared_ptr<LuminanceCalculator> mLuminanceCalculator;
     };
 }
 

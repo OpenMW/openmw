@@ -1,6 +1,7 @@
 #include "actorutil.hpp"
 
 #include <components/settings/values.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace MWRender
 {
@@ -28,5 +29,12 @@ namespace MWRender
             else
                 return Settings::models().mXbaseanim1st;
         }
+    }
+
+    bool isDefaultActorSkeleton(std::string_view model)
+    {
+        return VFS::Path::pathEqual(Settings::models().mBaseanimkna.get(), model)
+            || VFS::Path::pathEqual(Settings::models().mBaseanimfemale.get(), model)
+            || VFS::Path::pathEqual(Settings::models().mBaseanim.get(), model);
     }
 }

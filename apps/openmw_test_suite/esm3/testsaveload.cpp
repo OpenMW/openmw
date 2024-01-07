@@ -292,7 +292,7 @@ namespace ESM
             record.mFactionRank = std::numeric_limits<int>::max();
             record.mChargeInt = std::numeric_limits<int>::max();
             record.mEnchantmentCharge = std::numeric_limits<float>::max();
-            record.mGoldValue = std::numeric_limits<int>::max();
+            record.mCount = std::numeric_limits<int>::max();
             record.mTeleport = true;
             generateArray(record.mDoorDest.pos);
             generateArray(record.mDoorDest.rot);
@@ -317,7 +317,7 @@ namespace ESM
             EXPECT_EQ(record.mFactionRank, result.mFactionRank);
             EXPECT_EQ(record.mChargeInt, result.mChargeInt);
             EXPECT_EQ(record.mEnchantmentCharge, result.mEnchantmentCharge);
-            EXPECT_EQ(record.mGoldValue, result.mGoldValue);
+            EXPECT_EQ(record.mCount, result.mCount);
             EXPECT_EQ(record.mTeleport, result.mTeleport);
             EXPECT_EQ(record.mDoorDest, result.mDoorDest);
             EXPECT_EQ(record.mDestCell, result.mDestCell);

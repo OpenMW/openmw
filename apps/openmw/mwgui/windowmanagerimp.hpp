@@ -182,6 +182,7 @@ namespace MWGui
         MWGui::ConfirmationDialog* getConfirmationDialog() override;
         MWGui::TradeWindow* getTradeWindow() override;
         MWGui::PostProcessorHud* getPostProcessorHud() override;
+        MWGui::SettingsWindow* getSettingsWindow() override;
 
         /// Make the player use an item, while updating GUI state accordingly
         void useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions = false) override;
@@ -269,8 +270,8 @@ namespace MWGui
             enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
         void staticMessageBox(std::string_view message) override;
         void removeStaticMessageBox() override;
-        void interactiveMessageBox(
-            std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false) override;
+        void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {},
+            bool block = false, int defaultFocus = -1) override;
 
         int readPressedButton() override; ///< returns the index of the pressed button or -1 if no button was pressed
                                           ///< (->MessageBoxmanager->InteractiveMessageBox)

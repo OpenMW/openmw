@@ -95,12 +95,16 @@ namespace MWClass
 
     bool Actor::consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const
     {
-        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
         MWMechanics::CastSpell cast(actor, actor);
         const ESM::RefId& recordId = consumable.getCellRef().getRefId();
         MWBase::Environment::get().getWorldModel()->registerPtr(consumable);
         MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
         actor.getClass().getContainerStore(actor).remove(consumable, 1);
-        return cast.cast(recordId);
+        if (cast.cast(recordId))
+        {
+            MWBase::Environment::get().getWorld()->breakInvisibility(actor);
+            return true;
+        }
+        return false;
     }
 }

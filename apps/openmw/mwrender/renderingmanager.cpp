@@ -331,8 +331,8 @@ namespace MWRender
         // Shadows and radial fog have problems with fixed-function mode.
         bool forceShaders = Settings::fog().mRadialFog || Settings::fog().mExponentialFog
             || Settings::shaders().mSoftParticles || Settings::shaders().mForceShaders
-            || Settings::Manager::getBool("enable shadows", "Shadows")
-            || lightingMethod != SceneUtil::LightingMethod::FFP || reverseZ || mSkyBlending || Stereo::getMultiview();
+            || Settings::shadows().mEnableShadows || lightingMethod != SceneUtil::LightingMethod::FFP || reverseZ
+            || mSkyBlending || Stereo::getMultiview();
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
 
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
@@ -367,22 +367,22 @@ namespace MWRender
         sceneRoot->setName("Scene Root");
 
         int shadowCastingTraversalMask = Mask_Scene;
-        if (Settings::Manager::getBool("actor shadows", "Shadows"))
+        if (Settings::shadows().mActorShadows)
             shadowCastingTraversalMask |= Mask_Actor;
-        if (Settings::Manager::getBool("player shadows", "Shadows"))
+        if (Settings::shadows().mPlayerShadows)
             shadowCastingTraversalMask |= Mask_Player;
 
         int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
-        if (Settings::Manager::getBool("object shadows", "Shadows"))
+        if (Settings::shadows().mObjectShadows)
             shadowCastingTraversalMask |= (Mask_Object | Mask_Static);
-        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
+        if (Settings::shadows().mTerrainShadows)
             shadowCastingTraversalMask |= Mask_Terrain;
 
         mShadowManager = std::make_unique<SceneUtil::ShadowManager>(sceneRoot, mRootNode, shadowCastingTraversalMask,
-            indoorShadowCastingTraversalMask, Mask_Terrain | Mask_Object | Mask_Static,
+            indoorShadowCastingTraversalMask, Mask_Terrain | Mask_Object | Mask_Static, Settings::shadows(),
             mResourceSystem->getSceneManager()->getShaderManager());
 
-        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
+        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
         Shader::ShaderManager::DefineMap lightDefines = sceneRoot->getLightDefines();
         Shader::ShaderManager::DefineMap globalDefines
             = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -502,6 +502,7 @@ namespace MWRender
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
+        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));
 
         mFog = std::make_unique<FogManager>();
 
@@ -692,8 +693,9 @@ namespace MWRender
         osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell.getMood().mDirectionalColor);
 
         setSunColour(diffuse, diffuse, 1.f);
-
-        const osg::Vec4f interiorSunPos = osg::Vec4f(-0.15f, 0.15f, 1.f, 0.f);
+        // This is total nonsense but it's what Morrowind uses
+        static const osg::Vec4f interiorSunPos
+            = osg::Vec4f(-1.f, osg::DegreesToRadians(45.f), osg::DegreesToRadians(45.f), 0.f);
         mPostProcessor->getStateUpdater()->setSunPos(interiorSunPos, false);
         mSunLight->setPosition(interiorSunPos);
     }
@@ -702,7 +704,7 @@ namespace MWRender
     {
         // need to wrap this in a StateUpdater?
         mSunLight->setDiffuse(diffuse);
-        mSunLight->setSpecular(specular);
+        mSunLight->setSpecular(osg::Vec4f(specular.x(), specular.y(), specular.z(), specular.w() * sunVis));
 
         mPostProcessor->getStateUpdater()->setSunColor(diffuse);
         mPostProcessor->getStateUpdater()->setSunVis(sunVis);
@@ -770,7 +772,7 @@ namespace MWRender
         if (enabled)
             mShadowManager->enableOutdoorMode();
         else
-            mShadowManager->enableIndoorMode();
+            mShadowManager->enableIndoorMode(Settings::shadows());
         mPostProcessor->getStateUpdater()->setIsInterior(!enabled);
     }
 
@@ -847,6 +849,7 @@ namespace MWRender
 
         float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
+        mWater->setRainRipplesEnabled(mSky->getRainRipplesEnabled());
 
         mWater->update(dt, paused);
         if (!paused)
@@ -1230,8 +1233,8 @@ namespace MWRender
         if (mViewDistance < mNearClip)
             throw std::runtime_error("Viewing distance is less than near clip");
 
-        double width = Settings::Manager::getInt("resolution x", "Video");
-        double height = Settings::Manager::getInt("resolution y", "Video");
+        const double width = Settings::video().mResolutionX;
+        const double height = Settings::video().mResolutionY;
 
         double aspect = (height == 0.0) ? 1.0 : width / height;
         float fov = mFieldOfView;
@@ -1256,7 +1259,7 @@ namespace MWRender
             mSharedUniformStateUpdater->setScreenRes(res.x(), res.y());
             Stereo::Manager::instance().setMasterProjectionMatrix(mPerViewUniformStateUpdater->getProjectionMatrix());
         }
-        else if (!mPostProcessor->isEnabled())
+        else
         {
             mSharedUniformStateUpdater->setScreenRes(width, height);
         }
@@ -1319,6 +1322,7 @@ namespace MWRender
         const float lodFactor = Settings::terrain().mLodFactor;
         const bool groundcover = Settings::groundcover().mEnabled;
         const bool distantTerrain = Settings::terrain().mDistantTerrain;
+        const double expiryDelay = Settings::cells().mCacheExpiryDelay;
         if (distantTerrain || groundcover)
         {
             const int compMapResolution = Settings::terrain().mCompositeMapResolution;
@@ -1329,7 +1333,7 @@ namespace MWRender
             const bool debugChunks = Settings::terrain().mDebugChunks;
             auto quadTreeWorld = std::make_unique<Terrain::QuadTreeWorld>(mSceneRoot, mRootNode, mResourceSystem,
                 mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel,
-                lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks, worldspace);
+                lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks, worldspace, expiryDelay);
             if (Settings::terrain().mObjectPaging)
             {
                 newChunkMgr.mObjectPaging
@@ -1351,7 +1355,7 @@ namespace MWRender
         }
         else
             newChunkMgr.mTerrain = std::make_unique<Terrain::TerrainGrid>(mSceneRoot, mRootNode, mResourceSystem,
-                mTerrainStorage.get(), Mask_Terrain, worldspace, Mask_PreCompile, Mask_Debug);
+                mTerrainStorage.get(), Mask_Terrain, worldspace, expiryDelay, Mask_PreCompile, Mask_Debug);
 
         newChunkMgr.mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
         float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);

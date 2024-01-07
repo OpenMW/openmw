@@ -9,15 +9,14 @@ namespace ESSImport
 
     void convertInventory(const Inventory& inventory, ESM::InventoryState& state)
     {
-        int index = 0;
+        uint32_t index = 0;
         for (const auto& item : inventory.mItems)
         {
             ESM::ObjectState objstate;
             objstate.blank();
             objstate.mRef = item;
             objstate.mRef.mRefID = ESM::RefId::stringRefId(item.mId);
-            objstate.mCount = std::abs(item.mCount); // restocking items have negative count in the savefile
-                                                     // openmw handles them differently, so no need to set any flags
+            objstate.mRef.mCount = item.mCount;
             state.mItems.push_back(objstate);
             if (item.mRelativeEquipmentSlot != -1)
                 // Note we should really write the absolute slot here, which we do not know about

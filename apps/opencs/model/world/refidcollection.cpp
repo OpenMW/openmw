@@ -97,7 +97,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     inventoryColumns.mIcon = &mColumns.back();
     mColumns.emplace_back(Columns::ColumnId_Weight, ColumnBase::Display_Float);
     inventoryColumns.mWeight = &mColumns.back();
-    mColumns.emplace_back(Columns::ColumnId_CoinValue, ColumnBase::Display_Integer);
+    mColumns.emplace_back(Columns::ColumnId_StackCount, ColumnBase::Display_Integer);
     inventoryColumns.mValue = &mColumns.back();
 
     IngredientColumns ingredientColumns(inventoryColumns);

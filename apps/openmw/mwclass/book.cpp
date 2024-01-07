@@ -1,6 +1,7 @@
 #include "book.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadsoun.hpp>
@@ -19,7 +20,6 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -111,8 +111,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -128,7 +127,7 @@ namespace MWClass
 
         info.enchant = ref->mBase->mEnchant;
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

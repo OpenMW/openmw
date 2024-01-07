@@ -117,7 +117,6 @@
 #include "tradewindow.hpp"
 #include "trainingwindow.hpp"
 #include "travelwindow.hpp"
-#include "ustring.hpp"
 #include "videowidget.hpp"
 #include "waitdialog.hpp"
 
@@ -294,8 +293,7 @@ namespace MWGui
             += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
 
         mVideoWrapper = std::make_unique<SDLUtil::VideoWrapper>(window, viewer);
-        mVideoWrapper->setGammaContrast(
-            Settings::Manager::getFloat("gamma", "Video"), Settings::Manager::getFloat("contrast", "Video"));
+        mVideoWrapper->setGammaContrast(Settings::video().mGamma, Settings::video().mContrast);
 
         if (useShaders)
             mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
@@ -410,7 +408,6 @@ namespace MWGui
         mSettingsWindow = settingsWindow.get();
         mWindows.push_back(std::move(settingsWindow));
         trackWindow(mSettingsWindow, makeSettingsWindowSettingValues());
-        mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
         auto confirmationDialog = std::make_unique<ConfirmationDialog>();
         mConfirmationDialog = confirmationDialog.get();
@@ -745,9 +742,9 @@ namespace MWGui
     }
 
     void WindowManager::interactiveMessageBox(
-        std::string_view message, const std::vector<std::string>& buttons, bool block)
+        std::string_view message, const std::vector<std::string>& buttons, bool block, int defaultFocus)
     {
-        mMessageBoxManager->createInteractiveMessageBox(message, buttons);
+        mMessageBoxManager->createInteractiveMessageBox(message, buttons, block, defaultFocus);
         updateVisible();
 
         if (block)
@@ -780,6 +777,8 @@ namespace MWGui
 
                 frameRateLimiter.limit();
             }
+
+            mMessageBoxManager->resetInteractiveMessageBox();
         }
     }
 
@@ -787,8 +786,8 @@ namespace MWGui
     {
         if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never)
         {
-            MyGUI::UString text = MyGUI::LanguageManager::getInstance().replaceTags(toUString(message));
-            mDialogueWindow->addMessageBox(text.asUTF8());
+            MyGUI::UString text = MyGUI::LanguageManager::getInstance().replaceTags(MyGUI::UString(message));
+            mDialogueWindow->addMessageBox(text);
         }
         else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only)
         {
@@ -1088,7 +1087,7 @@ namespace MWGui
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
-        std::string_view tag = _tag.asUTF8();
+        std::string_view tag = _tag;
 
         std::string_view MyGuiPrefix = "setting=";
 
@@ -1101,7 +1100,7 @@ namespace MWGui
             std::string_view settingSection = tag.substr(0, comma_pos);
             std::string_view settingTag = tag.substr(comma_pos + 1, tag.length());
 
-            _result = Settings::Manager::getString(settingTag, settingSection);
+            _result = Settings::get<MyGUI::Colour>(settingSection, settingTag).get().print();
         }
         else if (tag.starts_with(tokenToFind))
         {
@@ -1116,7 +1115,7 @@ namespace MWGui
         else
         {
             std::vector<std::string> split;
-            Misc::StringUtils::split(std::string{ tag }, split, ":");
+            Misc::StringUtils::split(tag, split, ":");
 
             l10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
@@ -1157,25 +1156,22 @@ namespace MWGui
                 changeRes = true;
 
             else if (setting.first == "Video" && setting.second == "vsync mode")
-                mVideoWrapper->setSyncToVBlank(Settings::Manager::getInt("vsync mode", "Video"));
+                mVideoWrapper->setSyncToVBlank(Settings::video().mVsyncMode);
             else if (setting.first == "Video" && (setting.second == "gamma" || setting.second == "contrast"))
-                mVideoWrapper->setGammaContrast(
-                    Settings::Manager::getFloat("gamma", "Video"), Settings::Manager::getFloat("contrast", "Video"));
+                mVideoWrapper->setGammaContrast(Settings::video().mGamma, Settings::video().mContrast);
         }
 
         if (changeRes)
         {
-            mVideoWrapper->setVideoMode(Settings::Manager::getInt("resolution x", "Video"),
-                Settings::Manager::getInt("resolution y", "Video"),
-                static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video")),
-                Settings::Manager::getBool("window border", "Video"));
+            mVideoWrapper->setVideoMode(Settings::video().mResolutionX, Settings::video().mResolutionY,
+                Settings::video().mWindowMode, Settings::video().mWindowBorder);
         }
     }
 
     void WindowManager::windowResized(int x, int y)
     {
-        Settings::Manager::setInt("resolution x", "Video", x);
-        Settings::Manager::setInt("resolution y", "Video", y);
+        Settings::video().mResolutionX.set(x);
+        Settings::video().mResolutionY.set(y);
 
         // We only want to process changes to window-size related settings.
         Settings::CategorySettingVector filter = { { "Video", "resolution x" }, { "Video", "resolution y" } };
@@ -1477,6 +1473,10 @@ namespace MWGui
     MWGui::PostProcessorHud* WindowManager::getPostProcessorHud()
     {
         return mPostProcessorHud;
+    }
+    MWGui::SettingsWindow* WindowManager::getSettingsWindow()
+    {
+        return mSettingsWindow;
     }
 
     void WindowManager::useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions)

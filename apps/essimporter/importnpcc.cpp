@@ -7,7 +7,7 @@ namespace ESSImport
 
     void NPCC::load(ESM::ESMReader& esm)
     {
-        esm.getHNTSized<8>(mNPDT, "NPDT");
+        esm.getHNT("NPDT", mNPDT.mDisposition, mNPDT.unknown, mNPDT.mReputation, mNPDT.unknown2, mNPDT.mIndex);
 
         while (esm.isNextSub("AI_W") || esm.isNextSub("AI_E") || esm.isNextSub("AI_T") || esm.isNextSub("AI_F")
             || esm.isNextSub("AI_A"))

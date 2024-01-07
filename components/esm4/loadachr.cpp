@@ -82,6 +82,11 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 reader.getFormId(mEsp.parent);
                 reader.get(mEsp.flags);
                 break;
+            case ESM4::SUB_XCNT:
+            {
+                reader.get(mCount);
+                break;
+            }
             case ESM4::SUB_XRGD: // ragdoll
             case ESM4::SUB_XRGB: // ragdoll biped
             case ESM4::SUB_XHRS: // horse formId
@@ -113,7 +118,6 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
             case ESM4::SUB_XATO: // FONV
             case ESM4::SUB_MNAM: // FO4
             case ESM4::SUB_XATP: // FO4
-            case ESM4::SUB_XCNT: // FO4
             case ESM4::SUB_XEMI: // FO4
             case ESM4::SUB_XFVC: // FO4
             case ESM4::SUB_XHLT: // FO4

@@ -1,6 +1,7 @@
 #include "container.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/containerstate.hpp>
 #include <components/esm3/loadcont.hpp>
@@ -24,7 +25,6 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/objects.hpp"
@@ -249,7 +249,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name));
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();
@@ -271,7 +271,7 @@ namespace MWClass
                 text += "\nYou can not use evidence chests";
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -306,7 +306,7 @@ namespace MWClass
         if (newPtr.getRefData().getCustomData())
         {
             MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
-            newPtr.getContainerStore()->setPtr(newPtr);
+            getContainerStore(newPtr).setPtr(newPtr);
         }
         return newPtr;
     }

@@ -12,7 +12,7 @@ namespace ESSImport
         while (esm.isNextSub("NPCO"))
         {
             ContItem contItem;
-            esm.getHTSized<36>(contItem);
+            esm.getHT(contItem.mCount, contItem.mItem.mData);
 
             InventoryItem item;
             item.mId = contItem.mItem.toString();
@@ -28,7 +28,7 @@ namespace ESSImport
                 bool newStack = esm.isNextSub("XIDX");
                 if (newStack)
                 {
-                    unsigned int idx;
+                    uint32_t idx;
                     esm.getHT(idx);
                     separateStacks = true;
                     item.mCount = 1;
@@ -40,7 +40,7 @@ namespace ESSImport
                 bool isDeleted = false;
                 item.ESM::CellRef::loadData(esm, isDeleted);
 
-                int charge = -1;
+                int32_t charge = -1;
                 esm.getHNOT(charge, "XHLT");
                 item.mChargeInt = charge;
 
@@ -60,7 +60,7 @@ namespace ESSImport
             // this is currently not handled properly.
 
             esm.getSubHeader();
-            int itemIndex; // index of the item in the NPCO list
+            int32_t itemIndex; // index of the item in the NPCO list
             esm.getT(itemIndex);
 
             if (itemIndex < 0 || itemIndex >= int(mItems.size()))
@@ -68,7 +68,7 @@ namespace ESSImport
 
             // appears to be a relative index for only the *possible* slots this item can be equipped in,
             // i.e. 0 most of the time
-            int slotIndex;
+            int32_t slotIndex;
             esm.getT(slotIndex);
 
             mItems[itemIndex].mRelativeEquipmentSlot = slotIndex;

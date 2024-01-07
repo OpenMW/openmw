@@ -59,9 +59,6 @@ namespace MWMechanics
         float mMaxDist = 450;
         const float mDuration; // In hours
         float mRemainingDuration; // In hours
-
-        const int mCellX;
-        const int mCellY;
     };
 }
 #endif

@@ -28,7 +28,7 @@ namespace ESM
         static std::string_view getRecordType() { return "StartScript"; }
 
         std::string mData;
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
 
         // Load a record and add it to the list

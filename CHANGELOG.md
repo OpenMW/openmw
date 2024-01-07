@@ -8,10 +8,17 @@
     Bug #4204: Dead slaughterfish doesn't float to water surface after loading saved game
     Bug #4207: RestoreHealth/Fatigue spells have a huge priority even if a success chance is near 0
     Bug #4382: Sound output device does not change when it should
+    Bug #4508: Can't stack enchantment buffs from different instances of the same self-cast generic magic apparel
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
+    Bug #4683: Disposition decrease when player commits crime is not implemented properly
+    Bug #4742: Actors with wander never stop walking after Loopgroup Walkforward
+    Bug #4743: PlayGroup doesn't play non-looping animations correctly 
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
+    Bug #4822: Non-weapon equipment and body parts can't inherit time from parent animation
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
+    Bug #5062: Root bone rotations for NPC animation don't work the same as for creature animation
+    Bug #5066: Quirks with starting and stopping scripted animations
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5280: Unskinned shapes in skinned equipment are rendered in the wrong place
     Bug #5371: Keyframe animation tracks are used for any file that begins with an X
@@ -22,6 +29,7 @@
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6025: Subrecords cannot overlap records
     Bug #6027: Collisionshape becomes spiderweb-like when the mesh is too complex
+    Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
     Bug #6313: Followers with high Fight can turn hostile
     Bug #6427: Enemy health bar disappears before damaging effect ends
@@ -30,6 +38,8 @@
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6716: mwscript comparison operator handling is too restrictive
+    Bug #6754: Beast to Non-beast transformation mod is not working on OpenMW
+    Bug #6758: Main menu background video can be stopped by opening the options menu
     Bug #6807: Ultimate Galleon is not working properly
     Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
     Bug #6894: Added item combines with equipped stack instead of creating a new unequipped stack
@@ -63,32 +73,63 @@
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Supporting loading external files from VFS from esm files
     Bug #7284: "Your weapon has no effect." message doesn't always show when the player character attempts to attack
+    Bug #7292: Weather settings for disabling or enabling snow and rain ripples don't work
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
+    Bug #7309: Sunlight scattering is visible in inappropriate situations
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
+    Bug #7354: Disabling post processing in-game causes a crash
+    Bug #7364: Post processing is not reflected in savegame previews
+    Bug #7380: NiZBufferProperty issue
     Bug #7413: Generated wilderness cells don't spawn fish
     Bug #7415: Unbreakable lock discrepancies
+    Bug #7416: Modpccrimelevel is different from vanilla
     Bug #7428: AutoCalc flag is not used to calculate enchantment costs
     Bug #7450: Evading obstacles does not work for actors missing certain animations
     Bug #7459: Icons get stacked on the cursor when picking up multiple items simultaneously
     Bug #7472: Crash when enchanting last projectiles
+    Bug #7475: Equipping a constant effect item doesn't update the magic menu
     Bug #7502: Data directories dialog (0.48.0) forces adding subdirectory instead of intended directory
     Bug #7505: Distant terrain does not support sample size greater than cell size
     Bug #7553: Faction reaction loading is incorrect
     Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
     Bug #7573: Drain Fatigue can't bring fatigue below zero by default
+    Bug #7585: Difference in interior lighting between OpenMW with legacy lighting method enabled and vanilla Morrowind
     Bug #7603: Scripts menu size is not updated properly
     Bug #7604: Goblins Grunt becomes idle once injured
     Bug #7609: ForceGreeting should not open dialogue for werewolves
     Bug #7611: Beast races' idle animations slide after turning or jumping in place
+    Bug #7619: Long map notes may get cut off
     Bug #7630: Charm can be cast on creatures
     Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
+    Bug #7636: Animations bug out when switching between 1st and 3rd person, while playing a scripted animation
+    Bug #7637: Actors can sometimes move while playing scripted animations
     Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
+    Bug #7641: loopgroup loops the animation one time too many for actors
+    Bug #7642: Items in repair and recharge menus aren't sorted alphabetically
+    Bug #7643: Can't enchant items with constant effect on self magic effects for non-player character
+    Bug #7646: Follower voices pain sounds when attacked with magic
     Bug #7647: NPC walk cycle bugs after greeting player
+    Bug #7654: Tooltips for enchantments with invalid effects cause crashes
+    Bug #7660: Some inconsistencies regarding Invisibility breaking
+    Bug #7661: Player followers should stop attacking newly recruited actors
+    Bug #7665: Alchemy menu is missing the ability to deselect and choose different qualities of an apparatus
+    Bug #7675: Successful lock spell doesn't produce a sound
+    Bug #7676: Incorrect magic effect order in alchemy
+    Bug #7679: Scene luminance value flashes when toggling shaders
+    Bug #7685: Corky sometimes doesn't follow Llovyn Andus
+    Bug #7712: Casting doesn't support spells and enchantments with no effects
+    Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
+    Bug #7724: Guards don't help vs werewolves
+    Bug #7742: Governing attribute training limit should use the modified attribute
+    Bug #7758: Water walking is not taken into account to compute path cost on the water
+    Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
+    Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts
+    Feature #6188: Specular lighting from point light sources
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
@@ -113,12 +154,17 @@
     Feature #7477: NegativeLight Magic Effect flag
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field
     Feature #7546: Start the game on Fredas
+    Feature #7554: Controller binding for tab for menu navigation
     Feature #7568: Uninterruptable scripted music
+    Feature #7608: Make the missing dependencies warning when loading a savegame more helpful
     Feature #7618: Show the player character's health in the save details
     Feature #7625: Add some missing console error outputs
     Feature #7634: Support NiParticleBomb
     Feature #7652: Sort inactive post processing shaders list properly
+    Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
+    Feature #7709: Improve resolution selection in Launcher
     Task #5896: Do not use deprecated MyGUI properties
+    Task #6624: Drop support for saves made prior to 0.45
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message

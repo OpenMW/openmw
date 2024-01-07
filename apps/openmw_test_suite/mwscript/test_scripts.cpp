@@ -19,7 +19,16 @@ namespace
             mErrorHandler.reset();
             std::istringstream input(scriptBody);
             Compiler::Scanner scanner(mErrorHandler, input, mCompilerContext.getExtensions());
-            scanner.scan(mParser);
+            try
+            {
+                scanner.scan(mParser);
+            }
+            catch (...)
+            {
+                if (!shouldFail)
+                    logErrors();
+                throw;
+            }
             if (mErrorHandler.isGood())
                 return CompiledScript(mParser.getProgram(), mParser.getLocals());
             else if (!shouldFail)
@@ -387,6 +396,12 @@ endif
 
 End)mwscript";
 
+    const std::string sIssue4996 = R"mwscript(---Begin issue4996
+
+player-> SetPos, Z, myZ + 50
+
+End)mwscript";
+
     const std::string sIssue5087 = R"mwscript(Begin Begin
 
 player->sethealth 0
@@ -456,6 +471,9 @@ set a to 1
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -+'\/.,><$@---!=\/?--------(){}------ show a
+
+( GetDisabled == 1 )
+GetDisabled == 1
 
 End)mwscript";
 
@@ -808,6 +826,12 @@ End)mwscript";
     TEST_F(MWScriptTest, mwscript_test_4888)
     {
         EXPECT_FALSE(!compile(sIssue4888));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_4996)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue4996));
     }
 
     TEST_F(MWScriptTest, mwscript_test_5087)

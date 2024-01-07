@@ -334,12 +334,7 @@ namespace MWWorld
 
             if (player.mObject.mNpcStats.mIsWerewolf)
             {
-                if (player.mObject.mNpcStats.mWerewolfDeprecatedData)
-                {
-                    saveStats();
-                    setWerewolfStats();
-                }
-                else if (reader.getFormatVersion() <= ESM::MaxOldSkillsAndAttributesFormatVersion)
+                if (reader.getFormatVersion() <= ESM::MaxOldSkillsAndAttributesFormatVersion)
                 {
                     setWerewolfStats();
                     if (player.mSetWerewolfAcrobatics)

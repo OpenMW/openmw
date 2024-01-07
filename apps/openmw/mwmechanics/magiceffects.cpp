@@ -64,6 +64,11 @@ namespace MWMechanics
         return left.mArg < right.mArg;
     }
 
+    bool operator==(const EffectKey& left, const EffectKey& right)
+    {
+        return left.mId == right.mId && left.mArg == right.mArg;
+    }
+
     float EffectParam::getMagnitude() const
     {
         return mBase + mModifier;

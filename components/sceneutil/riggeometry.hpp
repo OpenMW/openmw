@@ -36,21 +36,23 @@ namespace SceneUtil
         // static parts of the model.
         void compileGLObjects(osg::RenderInfo& renderInfo) const override {}
 
-        // TODO: Make InfluenceMap more similar to InfluenceData
-        struct BoneInfluence
+        struct BoneInfo
         {
-            osg::Matrixf mInvBindMatrix;
+            std::string mName;
             osg::BoundingSpheref mBoundSphere;
-            // <vertex index, weight>
-            std::vector<std::pair<unsigned short, float>> mWeights;
+            osg::Matrixf mInvBindMatrix;
         };
 
-        struct InfluenceMap : public osg::Referenced
-        {
-            std::vector<std::pair<std::string, BoneInfluence>> mData;
-        };
+        using VertexWeight = std::pair<unsigned short, float>;
+        using VertexWeights = std::vector<VertexWeight>;
+        using BoneWeight = std::pair<size_t, float>;
+        using BoneWeights = std::vector<BoneWeight>;
 
-        void setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap);
+        void setBoneInfo(std::vector<BoneInfo>&& bones);
+        // Convert influences in vertex and weight list per bone format
+        void setInfluences(const std::vector<VertexWeights>& influences);
+        // Convert influences in bone and weight list per vertex format
+        void setInfluences(const std::vector<BoneWeights>& influences);
 
         /// Initialize this geometry from the source geometry.
         /// @note The source geometry will not be modified.
@@ -89,19 +91,11 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::RefMatrix> mGeomToSkelMatrix;
 
-        struct BoneInfo
-        {
-            std::string mName;
-            osg::BoundingSpheref mBoundSphere;
-            osg::Matrixf mInvBindMatrix;
-        };
-
-        using BoneWeight = std::pair<size_t, float>;
         using VertexList = std::vector<unsigned short>;
         struct InfluenceData : public osg::Referenced
         {
             std::vector<BoneInfo> mBones;
-            std::vector<std::pair<std::vector<BoneWeight>, VertexList>> mInfluences;
+            std::vector<std::pair<BoneWeights, VertexList>> mInfluences;
         };
         osg::ref_ptr<InfluenceData> mData;
         std::vector<Bone*> mNodes;

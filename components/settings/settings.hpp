@@ -5,9 +5,12 @@
 #include "gyroscopeaxis.hpp"
 #include "hrtfmode.hpp"
 #include "navmeshrendermode.hpp"
+#include "screenshotsettings.hpp"
+#include "windowmode.hpp"
 
 #include <components/detournavigator/collisionshapetype.hpp>
 #include <components/sceneutil/lightingmethod.hpp>
+#include <components/sdlutil/vsyncmode.hpp>
 
 #include <filesystem>
 #include <set>
@@ -27,13 +30,6 @@ namespace Files
 
 namespace Settings
 {
-    enum class WindowMode
-    {
-        Fullscreen = 0,
-        WindowedFullscreen,
-        Windowed
-    };
-
     ///
     /// \brief Settings management (can change during runtime)
     ///
@@ -82,6 +78,15 @@ namespace Settings
         static osg::Vec3f getVector3(std::string_view setting, std::string_view category);
 
         template <class T>
+        static T getOrDefault(std::string_view setting, std::string_view category, const T& defaultValue)
+        {
+            const auto key = std::make_pair(category, setting);
+            if (!mUserSettings.contains(key) && !mDefaultSettings.contains(key))
+                return defaultValue;
+            return get<T>(setting, category);
+        }
+
+        template <class T>
         static T get(std::string_view setting, std::string_view category)
         {
             recordInit(setting, category);
@@ -114,6 +119,8 @@ namespace Settings
         static void set(std::string_view setting, std::string_view category, const MyGUI::Colour& value);
         static void set(std::string_view setting, std::string_view category, SceneUtil::LightingMethod value);
         static void set(std::string_view setting, std::string_view category, HrtfMode value);
+        static void set(std::string_view setting, std::string_view category, WindowMode value);
+        static void set(std::string_view setting, std::string_view category, SDLUtil::VSyncMode value);
 
     private:
         static std::set<std::pair<std::string_view, std::string_view>> sInitialized;
@@ -238,6 +245,32 @@ namespace Settings
         if (value > 0)
             return HrtfMode::Enable;
         return HrtfMode::Disable;
+    }
+
+    template <>
+    inline WindowMode Manager::getImpl<WindowMode>(std::string_view setting, std::string_view category)
+    {
+        const int value = getInt(setting, category);
+        if (value < 0 || 2 < value)
+            return WindowMode::Fullscreen;
+        return static_cast<WindowMode>(value);
+    }
+
+    template <>
+    inline SDLUtil::VSyncMode Manager::getImpl<SDLUtil::VSyncMode>(std::string_view setting, std::string_view category)
+    {
+        const int value = getInt(setting, category);
+        if (value < 0 || 2 < value)
+            return SDLUtil::VSyncMode::Disabled;
+        return static_cast<SDLUtil::VSyncMode>(value);
+    }
+
+    ScreenshotSettings parseScreenshotSettings(std::string_view value);
+
+    template <>
+    inline ScreenshotSettings Manager::getImpl<ScreenshotSettings>(std::string_view setting, std::string_view category)
+    {
+        return parseScreenshotSettings(getString(setting, category));
     }
 }
 

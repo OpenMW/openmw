@@ -27,16 +27,14 @@ namespace VFS
     public:
         FileSystemArchive(const std::filesystem::path& path);
 
-        void listResources(std::map<std::string, File*>& out) override;
+        void listResources(FileMap& out) override;
 
-        bool contains(const std::string& file) const override;
+        bool contains(std::string_view file) const override;
 
         std::string getDescription() const override;
 
     private:
-        typedef std::map<std::string, FileSystemArchiveFile> index;
-        index mIndex;
-
+        std::map<std::string, FileSystemArchiveFile, std::less<>> mIndex;
         bool mBuiltIndex;
         std::filesystem::path mPath;
     };

@@ -290,6 +290,17 @@ namespace Nif
         }
     }
 
+    const Nif::NiSkinPartition* NiSkinInstance::getPartitions() const
+    {
+        const Nif::NiSkinPartition* partitions = nullptr;
+        if (!mPartitions.empty())
+            partitions = mPartitions.getPtr();
+        else if (!mData.empty() && !mData->mPartitions.empty())
+            partitions = mData->mPartitions.getPtr();
+
+        return partitions;
+    }
+
     void BSDismemberSkinInstance::read(NIFStream* nif)
     {
         NiSkinInstance::read(nif);
@@ -413,7 +424,7 @@ namespace Nif
         if (!hasPresenceFlags || nif->get<bool>())
             nif->readVector(mVertexMap, numVertices);
         if (!hasPresenceFlags || nif->get<bool>())
-            nif->readVector(mWeights, numVertices * bonesPerVertex);
+            nif->readVector(mWeights, static_cast<size_t>(numVertices) * bonesPerVertex);
         std::vector<unsigned short> stripLengths;
         nif->readVector(stripLengths, numStrips);
         if (!hasPresenceFlags || nif->get<bool>())
@@ -428,7 +439,7 @@ namespace Nif
                 nif->readVector(mTriangles, numTriangles * 3);
         }
         if (nif->get<uint8_t>() != 0)
-            nif->readVector(mBoneIndices, numVertices * bonesPerVertex);
+            nif->readVector(mBoneIndices, static_cast<size_t>(numVertices) * bonesPerVertex);
         if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
         {
             nif->read(mLODLevel);

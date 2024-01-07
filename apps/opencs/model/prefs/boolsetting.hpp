@@ -12,21 +12,21 @@ namespace CSMPrefs
 {
     class Category;
 
-    class BoolSetting : public Setting
+    class BoolSetting final : public TypedSetting<bool>
     {
         Q_OBJECT
 
         std::string mTooltip;
-        bool mDefault;
         QCheckBox* mWidget;
 
     public:
-        BoolSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label, bool default_);
+        explicit BoolSetting(
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
         BoolSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

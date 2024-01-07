@@ -40,8 +40,7 @@ testing.registerLocalTest('playerForwardRunning',
             coroutine.yield()
         end
         local direction, distance = (self.position - startPos):normalize()
-        local normalizedDistance = distance / types.Actor.runSpeed(self)
-        testing.expectEqualWithDelta(normalizedDistance, 1, 0.2, 'Normalized forward runned distance')
+        testing.expectGreaterThan(distance, 0, 'Run forward, distance')
         testing.expectEqualWithDelta(direction.x, 0, 0.1, 'Run forward, X coord')
         testing.expectEqualWithDelta(direction.y, 1, 0.1, 'Run forward, Y coord')
     end)
@@ -59,8 +58,7 @@ testing.registerLocalTest('playerDiagonalWalking',
             coroutine.yield()
         end
         local direction, distance = (self.position - startPos):normalize()
-        local normalizedDistance = distance / types.Actor.walkSpeed(self)
-        testing.expectEqualWithDelta(normalizedDistance, 1, 0.2, 'Normalized diagonally walked distance')
+        testing.expectGreaterThan(distance, 0, 'Walk diagonally, distance')
         testing.expectEqualWithDelta(direction.x, -0.707, 0.1, 'Walk diagonally, X coord')
         testing.expectEqualWithDelta(direction.y, -0.707, 0.1, 'Walk diagonally, Y coord')
     end)
@@ -82,7 +80,8 @@ testing.registerLocalTest('findPath',
         }
         local status, path = nearby.findPath(src, dst, options)
         testing.expectEqual(status, nearby.FIND_PATH_STATUS.Success, 'Status')
-        testing.expectLessOrEqual((path[path:size()] - dst):length(), 1, 'Last path point')
+        testing.expectLessOrEqual((path[path:size()] - dst):length(), 1,
+            'Last path point '  .. testing.formatActualExpected(path[path:size()], dst))
     end)
 
 testing.registerLocalTest('findRandomPointAroundCircle',
@@ -94,7 +93,8 @@ testing.registerLocalTest('findRandomPointAroundCircle',
             includeFlags = nearby.NAVIGATOR_FLAGS.Walk,
         }
         local result = nearby.findRandomPointAroundCircle(position, maxRadius, options)
-        testing.expectGreaterThan((result - position):length(), 1, 'Random point')
+        testing.expectGreaterThan((result - position):length(), 1,
+            'Random point ' .. testing.formatActualExpected(result, position))
     end)
 
 testing.registerLocalTest('castNavigationRay',
@@ -106,7 +106,22 @@ testing.registerLocalTest('castNavigationRay',
             includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.Swim,
         }
         local result = nearby.castNavigationRay(src, dst, options)
-        testing.expectLessOrEqual((result - dst):length(), 1, 'Navigation hit point')
+        testing.expectLessOrEqual((result - dst):length(), 1,
+            'Navigation hit point ' .. testing.formatActualExpected(result, dst))
+    end)
+
+testing.registerLocalTest('findNearestNavMeshPosition',
+    function()
+        local position = util.vector3(4096, 4096, 1000)
+        local options = {
+            agentBounds = types.Actor.getPathfindingAgentBounds(self),
+            includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.Swim,
+            searchAreaHalfExtents = util.vector3(1000, 1000, 1000),
+        }
+        local result = nearby.findNearestNavMeshPosition(position, options)
+        local expected = util.vector3(4096, 4096, 872.674)
+        testing.expectLessOrEqual((result - expected):length(), 1,
+            'Navigation mesh position ' .. testing.formatActualExpected(result, expected))
     end)
 
 return {

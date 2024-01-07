@@ -7,6 +7,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_UString.h>
 
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
@@ -35,7 +36,6 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
-#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -198,7 +198,7 @@ namespace MWGui
                 }
 
                 title << " (#{sLevel} " << signature.mPlayerLevel << " "
-                      << MyGUI::TextIterator::toTagsString(toUString(className)) << ")";
+                      << MyGUI::TextIterator::toTagsString(MyGUI::UString(className)) << ")";
 
                 mCharacterSelection->addItem(MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 
@@ -302,7 +302,7 @@ namespace MWGui
 
         if (mSaving)
         {
-            MWBase::Environment::get().getStateManager()->saveGame(mSaveNameEdit->getCaption().asUTF8(), mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->saveGame(mSaveNameEdit->getCaption(), mCurrentSlot);
         }
         else
         {
@@ -413,8 +413,8 @@ namespace MWGui
         text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
 
         if (mCurrentSlot->mProfile.mMaximumHealth > 0)
-            text << std::fixed << std::setprecision(0) << "#{sHealth} " << mCurrentSlot->mProfile.mCurrentHealth << "/"
-                 << mCurrentSlot->mProfile.mMaximumHealth << "\n";
+            text << "#{sHealth} " << static_cast<int>(mCurrentSlot->mProfile.mCurrentHealth) << "/"
+                 << static_cast<int>(mCurrentSlot->mProfile.mMaximumHealth) << "\n";
 
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCellName << "}\n";

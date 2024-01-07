@@ -17,7 +17,7 @@ namespace ESM
         ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
         void adjustRefNum(RefNum& refNum, const ESMReader& reader)
         {
-            unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
+            uint32_t local = (refNum.mIndex & 0xff000000) >> 24;
 
             // If we have an index value that does not make sense, assume that it was an addition
             // by the present plugin (but a faulty one)
@@ -124,7 +124,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case fourCC("INTV"):
-                    int waterl;
+                    int32_t waterl;
                     esm.getHT(waterl);
                     mWater = static_cast<float>(waterl);
                     mWaterInt = true;
@@ -192,7 +192,7 @@ namespace ESM
         {
             if (mWaterInt)
             {
-                int water = (mWater >= 0) ? (int)(mWater + 0.5) : (int)(mWater - 0.5);
+                int32_t water = (mWater >= 0) ? static_cast<int32_t>(mWater + 0.5) : static_cast<int32_t>(mWater - 0.5);
                 esm.writeHNT("INTV", water);
             }
             else
@@ -218,13 +218,13 @@ namespace ESM
         }
     }
 
-    void Cell::saveTempMarker(ESMWriter& esm, int tempCount) const
+    void Cell::saveTempMarker(ESMWriter& esm, int32_t tempCount) const
     {
         if (tempCount != 0)
             esm.writeHNT("NAM0", tempCount);
     }
 
-    void Cell::restore(ESMReader& esm, int iCtx) const
+    void Cell::restore(ESMReader& esm, size_t iCtx) const
     {
         esm.restoreContext(mContextList.at(iCtx));
     }
@@ -321,7 +321,7 @@ namespace ESM
 
     void Cell::blank()
     {
-        mName = "";
+        mName.clear();
         mRegion = ESM::RefId();
         mWater = 0;
         mWaterInt = false;

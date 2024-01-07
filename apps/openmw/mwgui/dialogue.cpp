@@ -4,6 +4,7 @@
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
+#include <MyGUI_UString.h>
 #include <MyGUI_Window.h>
 
 #include <components/debug/debuglog.hpp>
@@ -22,9 +23,11 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "bookpage.hpp"
 #include "textcolours.hpp"
@@ -337,7 +340,7 @@ namespace MWGui
     void DialogueWindow::onTradeComplete()
     {
         MyGUI::UString message = MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}");
-        addResponse({}, message.asUTF8());
+        addResponse({}, message);
     }
 
     bool DialogueWindow::exit()
@@ -735,6 +738,15 @@ namespace MWGui
         bool dispositionVisible = false;
         if (!mPtr.isEmpty() && mPtr.getClass().isNpc())
         {
+            // If actor was a witness to a crime which was payed off,
+            // restore original disposition immediately.
+            MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);
+            if (npcStats.getCrimeId() != -1 && npcStats.getCrimeDispositionModifier() != 0)
+            {
+                if (npcStats.getCrimeId() <= MWBase::Environment::get().getWorld()->getPlayer().getCrimeId())
+                    npcStats.setCrimeDispositionModifier(0);
+            }
+
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(

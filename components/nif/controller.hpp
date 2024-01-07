@@ -171,7 +171,7 @@ namespace Nif
         };
 
         NiPosDataPtr mData;
-        TargetColor mTargetColor;
+        TargetColor mTargetColor = TargetColor::Ambient;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

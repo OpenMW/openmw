@@ -6,7 +6,6 @@ namespace MWGui
     enum GuiMode
     {
         GM_None,
-        GM_Settings, // Settings window
         GM_Inventory, // Inventory mode
         GM_Container,
         GM_Companion,

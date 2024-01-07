@@ -224,8 +224,10 @@ namespace MWMechanics
             {
                 const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
                 constexpr float endTolerance = 0;
+                const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+                const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
                 mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(pathgrid),
-                    agentBounds, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, PathType::Full);
+                    agentBounds, navigatorFlags, areaCosts, endTolerance, PathType::Full);
             }
 
             if (mPathFinder.isPathConstructed())
@@ -367,8 +369,8 @@ namespace MWMechanics
         const auto world = MWBase::Environment::get().getWorld();
         const auto agentBounds = world->getPathfindingAgentBounds(actor);
         const auto navigator = world->getNavigator();
-        const auto navigatorFlags = getNavigatorFlags(actor);
-        const auto areaCosts = getAreaCosts(actor);
+        const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+        const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
 
         do

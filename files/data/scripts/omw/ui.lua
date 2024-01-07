@@ -236,7 +236,7 @@ return {
         ---
         -- Returns if the player HUD is visible or not
         -- @function [parent=#UI] isHudVisible
-        -- @return #bool
+        -- @return #boolean
         isHudVisible = function() return ui._isHudVisible() end,
 
         -- TODO

@@ -72,7 +72,6 @@ namespace fx
         std::array<std::string, 3> mRenderTargets;
 
         std::string mTarget;
-        std::optional<osg::Vec4f> mClearColor;
 
         std::optional<osg::BlendFunc::BlendFuncMode> mBlendSource;
         std::optional<osg::BlendFunc::BlendFuncMode> mBlendDest;

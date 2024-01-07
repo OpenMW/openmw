@@ -43,10 +43,68 @@ namespace LuaUi
             return type;
         }
 
-        void destroyWidget(LuaUi::WidgetExtension* ext)
+        void destroyWidget(WidgetExtension* ext)
         {
             ext->deinitialize();
             MyGUI::Gui::getInstancePtr()->destroyWidget(ext->widget());
+        }
+
+        void destroyChild(WidgetExtension* ext)
+        {
+            if (!ext->isRoot())
+                destroyWidget(ext);
+            else
+                ext->widget()->detachFromWidget();
+        }
+
+        void detachElements(WidgetExtension* ext)
+        {
+            for (auto* child : ext->children())
+            {
+                if (child->isRoot())
+                    child->widget()->detachFromWidget();
+                else
+                    detachElements(child);
+            }
+            for (auto* child : ext->templateChildren())
+            {
+                if (child->isRoot())
+                    child->widget()->detachFromWidget();
+                else
+                    detachElements(child);
+            }
+        }
+
+        void destroyRoot(WidgetExtension* ext)
+        {
+            detachElements(ext);
+            destroyWidget(ext);
+        }
+
+        void updateRootCoord(WidgetExtension* ext)
+        {
+            WidgetExtension* root = ext;
+            while (root->getParent())
+                root = root->getParent();
+            root->updateCoord();
+        }
+
+        WidgetExtension* pluckElementRoot(const sol::object& child)
+        {
+            std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
+            WidgetExtension* root = element->mRoot;
+            if (!root)
+                throw std::logic_error("Using a destroyed element as a layout child");
+            WidgetExtension* parent = root->getParent();
+            if (parent)
+            {
+                auto children = parent->children();
+                std::erase(children, root);
+                parent->setChildren(children);
+                root->widget()->detachFromWidget();
+            }
+            root->updateCoord();
+            return root;
         }
 
         WidgetExtension* createWidget(const sol::table& layout, uint64_t depth);
@@ -60,7 +118,7 @@ namespace LuaUi
             if (contentObj == sol::nil)
             {
                 for (WidgetExtension* w : children)
-                    destroyWidget(w);
+                    destroyChild(w);
                 return result;
             }
             ContentView content(LuaUtil::cast<sol::table>(contentObj));
@@ -69,22 +127,39 @@ namespace LuaUi
             for (size_t i = 0; i < minSize; i++)
             {
                 WidgetExtension* ext = children[i];
-                sol::table newLayout = content.at(i);
-                if (ext->widget()->getTypeName() == widgetType(newLayout))
+                sol::object child = content.at(i);
+                if (child.is<Element>())
                 {
-                    updateWidget(ext, newLayout, depth);
+                    WidgetExtension* root = pluckElementRoot(child);
+                    if (ext != root)
+                        destroyChild(ext);
+                    result[i] = root;
                 }
                 else
                 {
-                    destroyWidget(ext);
-                    ext = createWidget(newLayout, depth);
+                    sol::table newLayout = child.as<sol::table>();
+                    if (ext->widget()->getTypeName() == widgetType(newLayout))
+                    {
+                        updateWidget(ext, newLayout, depth);
+                    }
+                    else
+                    {
+                        destroyChild(ext);
+                        ext = createWidget(newLayout, depth);
+                    }
+                    result[i] = ext;
                 }
-                result[i] = ext;
             }
             for (size_t i = minSize; i < children.size(); i++)
-                destroyWidget(children[i]);
+                destroyChild(children[i]);
             for (size_t i = minSize; i < content.size(); i++)
-                result[i] = createWidget(content.at(i), depth);
+            {
+                sol::object child = content.at(i);
+                if (child.is<Element>())
+                    result[i] = pluckElementRoot(child);
+                else
+                    result[i] = createWidget(child.as<sol::table>(), depth);
+            }
             return result;
         }
 
@@ -97,7 +172,7 @@ namespace LuaUi
             ext->setTemplateChildren(updateContent(ext->templateChildren(), content, depth));
         }
 
-        void setEventCallbacks(LuaUi::WidgetExtension* ext, const sol::object& eventsObj)
+        void setEventCallbacks(WidgetExtension* ext, const sol::object& eventsObj)
         {
             ext->clearCallbacks();
             if (eventsObj == sol::nil)
@@ -130,7 +205,7 @@ namespace LuaUi
             WidgetExtension* ext = dynamic_cast<WidgetExtension*>(widget);
             if (!ext)
                 throw std::runtime_error("Invalid widget!");
-            ext->initialize(layout.lua_state(), widget);
+            ext->initialize(layout.lua_state(), widget, depth == 0);
 
             updateWidget(ext, layout, depth);
             return ext;
@@ -169,7 +244,6 @@ namespace LuaUi
 
     Element::Element(sol::table layout)
         : mRoot(nullptr)
-        , mAttachedTo(nullptr)
         , mLayout(std::move(layout))
         , mLayer()
         , mUpdate(false)
@@ -191,7 +265,7 @@ namespace LuaUi
         {
             mRoot = createWidget(layout(), 0);
             mLayer = setLayer(mRoot, layout());
-            updateAttachment();
+            updateRootCoord(mRoot);
         }
     }
 
@@ -201,15 +275,21 @@ namespace LuaUi
         {
             if (mRoot->widget()->getTypeName() != widgetType(layout()))
             {
-                destroyWidget(mRoot);
+                destroyRoot(mRoot);
+                WidgetExtension* parent = mRoot->getParent();
+                auto children = parent->children();
+                auto it = std::find(children.begin(), children.end(), mRoot);
                 mRoot = createWidget(layout(), 0);
+                *it = mRoot;
+                parent->setChildren(children);
+                mRoot->updateCoord();
             }
             else
             {
                 updateWidget(mRoot, layout(), 0);
             }
             mLayer = setLayer(mRoot, layout());
-            updateAttachment();
+            updateRootCoord(mRoot);
         }
         mUpdate = false;
     }
@@ -218,40 +298,10 @@ namespace LuaUi
     {
         if (mRoot)
         {
-            destroyWidget(mRoot);
+            destroyRoot(mRoot);
             mRoot = nullptr;
             mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
         }
         sAllElements.erase(this);
-    }
-
-    void Element::attachToWidget(WidgetExtension* w)
-    {
-        if (mAttachedTo)
-            throw std::logic_error("A UI element can't be attached to two widgets at once");
-        mAttachedTo = w;
-        updateAttachment();
-    }
-
-    void Element::detachFromWidget()
-    {
-        if (mRoot)
-            mRoot->widget()->detachFromWidget();
-        if (mAttachedTo)
-            mAttachedTo->setChildren({});
-        mAttachedTo = nullptr;
-    }
-
-    void Element::updateAttachment()
-    {
-        if (!mRoot)
-            return;
-        if (mAttachedTo)
-        {
-            if (!mLayer.empty())
-                Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
-            mAttachedTo->setChildren({ mRoot });
-            mAttachedTo->updateCoord();
-        }
     }
 }

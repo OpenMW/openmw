@@ -154,7 +154,7 @@ namespace MWRender
 
     public:
         CharacterPreviewRTTNode(uint32_t sizeX, uint32_t sizeY)
-            : RTTNode(sizeX, sizeY, Settings::Manager::getInt("antialiasing", "Video"), false, 0,
+            : RTTNode(sizeX, sizeY, Settings::video().mAntialiasing, false, 0,
                 StereoAwareness::Unaware_MultiViewShaders, shouldAddMSAAIntermediateTarget())
             , mAspectRatio(static_cast<float>(sizeX) / static_cast<float>(sizeY))
         {
@@ -247,7 +247,7 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
 
-        SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
+        SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *stateset);
 
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)

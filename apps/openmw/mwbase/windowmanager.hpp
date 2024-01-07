@@ -77,6 +77,7 @@ namespace MWGui
     class JailScreen;
     class MessageBox;
     class PostProcessorHud;
+    class SettingsWindow;
 
     enum ShowInDialogueMode
     {
@@ -156,6 +157,7 @@ namespace MWBase
         virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
         virtual MWGui::TradeWindow* getTradeWindow() = 0;
         virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
+        virtual MWGui::SettingsWindow* getSettingsWindow() = 0;
 
         /// Make the player use an item, while updating GUI state accordingly
         virtual void useItem(const MWWorld::Ptr& item, bool force = false) = 0;
@@ -255,8 +257,8 @@ namespace MWBase
             = 0;
         virtual void staticMessageBox(std::string_view message) = 0;
         virtual void removeStaticMessageBox() = 0;
-        virtual void interactiveMessageBox(
-            std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false)
+        virtual void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {},
+            bool block = false, int defaultFocus = -1)
             = 0;
 
         /// returns the index of the pressed button or -1 if no button was pressed

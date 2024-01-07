@@ -33,7 +33,6 @@
 #include <osg/StateAttribute>
 #include <osg/StateSet>
 #include <osg/Vec3>
-#include <osg/Vec4f>
 
 #include <osgFX/Scribe>
 
@@ -485,7 +484,7 @@ CSVRender::Object::~Object()
     mParentNode->removeChild(mRootNode);
 }
 
-void CSVRender::Object::setSelected(bool selected)
+void CSVRender::Object::setSelected(bool selected, const osg::Vec4f& color)
 {
     mSelected = selected;
 
@@ -499,7 +498,7 @@ void CSVRender::Object::setSelected(bool selected)
     mRootNode->removeChild(mBaseNode);
     if (selected)
     {
-        mOutline->setWireframeColor(osg::Vec4f(1, 1, 1, 1));
+        mOutline->setWireframeColor(color);
         mOutline->addChild(mBaseNode);
         mRootNode->addChild(mOutline);
     }

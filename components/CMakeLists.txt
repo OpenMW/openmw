@@ -26,6 +26,7 @@ if (GIT_CHECKOUT)
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
             -DOPENMW_LUA_API_REVISION=${OPENMW_LUA_API_REVISION}
+            -DOPENMW_POSTPROCESSING_API_REVISION=${OPENMW_POSTPROCESSING_API_REVISION}
             -DOPENMW_VERSION=${OPENMW_VERSION}
             -DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
             "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
@@ -43,7 +44,7 @@ list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 
 add_component_dir (lua
     luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
-    shapes/box
+    shapes/box inputactions
     )
 
 add_component_dir (l10n
@@ -87,6 +88,8 @@ add_component_dir (settings
     settingvalue
     shadermanager
     values
+    screenshotsettings
+    windowmode
     )
 
 add_component_dir (bsa
@@ -127,7 +130,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifosg
-    nifloader controller particle matrixtransform
+    nifloader controller particle matrixtransform fog
     )
 
 add_component_dir (nifbullet
@@ -163,7 +166,7 @@ add_component_dir (esm3
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
-    infoorder timestamp formatversion landrecorddata
+    infoorder timestamp formatversion landrecorddata selectiongroup
     )
 
 add_component_dir (esmterrain
@@ -270,7 +273,7 @@ add_component_dir (esm4
 )
 
 add_component_dir (misc
-    barrier budgetmeasurement color compression constants convert coordinateconverter endianness float16 frameratelimiter
+    barrier budgetmeasurement color compression constants convert coordinateconverter display endianness float16 frameratelimiter
     guarded math mathutil messageformatparser notnullptr objectpool osguservalues progressreporter resourcehelpers rng
     strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
     )
@@ -336,7 +339,15 @@ add_component_dir (fontloader
     )
 
 add_component_dir (sdlutil
-    gl4es_init sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper events sdlcursormanager sdlmappings
+    events
+    gl4es_init
+    imagetosurface
+    sdlcursormanager
+    sdlgraphicswindow
+    sdlinputwrapper
+    sdlmappings
+    sdlvideowrapper
+    vsyncmode
     )
 
 add_component_dir (version
@@ -479,7 +490,7 @@ else ()
         )
 endif()
 
-set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
     )
 
 if (USE_QT)
@@ -545,7 +556,7 @@ target_link_libraries(components
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
 
-    ${SDL2_LIBRARIES}
+    SDL2::SDL2
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
     ${LUA_LIBRARIES}

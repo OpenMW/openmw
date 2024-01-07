@@ -148,6 +148,10 @@ namespace CSVRender
         // already selected
         void selectAllWithSameParentId(int elementMask);
 
+        void selectFromGroup(const std::vector<std::string>& group);
+
+        void unhideAll();
+
         void handleSelectDrag(Object* object, DragMode dragMode);
 
         void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode);

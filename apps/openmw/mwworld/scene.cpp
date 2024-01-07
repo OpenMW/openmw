@@ -69,13 +69,13 @@ namespace
 
     osg::Quat makeInverseNodeRotation(const MWWorld::Ptr& ptr)
     {
-        const auto pos = ptr.getRefData().getPosition();
+        const auto& pos = ptr.getRefData().getPosition();
         return ptr.getClass().isActor() ? makeActorOsgQuat(pos) : makeInversedOrderObjectOsgQuat(pos);
     }
 
     osg::Quat makeDirectNodeRotation(const MWWorld::Ptr& ptr)
     {
-        const auto pos = ptr.getRefData().getPosition();
+        const auto& pos = ptr.getRefData().getPosition();
         return ptr.getClass().isActor() ? makeActorOsgQuat(pos) : Misc::Convert::makeOsgQuat(pos);
     }
 
@@ -115,9 +115,7 @@ namespace
         if (!refnum.hasContentFile() || !std::binary_search(pagedRefs.begin(), pagedRefs.end(), refnum))
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
         else
-            ptr.getRefData().setBaseNode(
-                new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend
-                                                           // on basenode
+            ptr.getRefData().setBaseNode(nullptr);
         setNodeRotation(ptr, rendering, rotation);
 
         if (ptr.getClass().useAnim())
@@ -226,7 +224,7 @@ namespace
     {
         for (MWWorld::Ptr& ptr : mToInsert)
         {
-            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+            if (!ptr.mRef->isDeleted() && ptr.getRefData().isEnabled())
             {
                 try
                 {
@@ -648,7 +646,7 @@ namespace MWWorld
                 if (ptr.mRef->mData.mPhysicsPostponed)
                 {
                     ptr.mRef->mData.mPhysicsPostponed = false;
-                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0)
+                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mRef.getCount() > 0)
                     {
                         std::string model = getModel(ptr);
                         if (!model.empty())

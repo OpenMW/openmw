@@ -189,9 +189,9 @@ void CSMTools::FixLandsAndLandTexturesMergeStage::perform(int stage, CSMDoc::Mes
         CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&>(
             *mState.mTarget->getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
 
-        const std::string& id = mState.mTarget->getData().getLand().getId(stage).getRefIdString();
+        const auto& id = mState.mTarget->getData().getLand().getId(stage);
 
-        CSMWorld::TouchLandCommand cmd(landTable, ltexTable, id);
+        CSMWorld::TouchLandCommand cmd(landTable, ltexTable, id.getRefIdString());
         cmd.redo();
 
         // Get rid of base data

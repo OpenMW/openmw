@@ -16,6 +16,12 @@
 -- @return #number
 
 ---
+-- Check if the given actor is dead.
+-- @function [parent=#Actor] isDead
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
 -- Agent bounds to be used for pathfinding functions.
 -- @function [parent=#Actor] getPathfindingAgentBounds
 -- @param openmw.core#GameObject actor
@@ -669,6 +675,15 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Set of properties that differentiates one item from another of the same record type.
+-- @function [parent=#Item] itemData
+-- @param openmw.core#GameObject item
+-- @return #ItemData
+
+---
+-- @type ItemData
+-- @field #number condition The item's current condition. Time remaining for lights. Uses left for lockpicks and probes. Current health for weapons and armor.
 
 --------------------------------------------------------------------------------
 -- @{#Creature} functions
@@ -712,7 +727,7 @@
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
 -- @field #number baseGold The base barter gold of the creature
--- @field #list<#string> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 
 
 --- @{#NPC} functions
@@ -831,14 +846,14 @@
 -- NPC.modifyFactionReputation(player, "mages guild", 5);
 
 ---
--- Expell NPC from given faction.
+-- Expel NPC from given faction.
 -- Throws an exception if there is no such faction.
 -- Note: expelled NPC still keeps his rank and reputation in faction, he just get an additonal flag for given faction.
--- @function [parent=#NPC] expell
+-- @function [parent=#NPC] expel
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
 -- @usage local NPC = require('openmw.types').NPC;
--- NPC.expell(player, "mages guild");
+-- NPC.expel(player, "mages guild");
 
 ---
 -- Clear expelling of NPC from given faction.
@@ -872,6 +887,31 @@
 -- @param openmw.core#GameObject actor
 -- @return #number
 
+--- @{#Classes}: Class Data
+-- @field [parent=#NPC] #Classes classes
+
+---
+-- A read-only list of all @{#ClassRecord}s in the world database.
+-- @field [parent=#Classes] #list<#ClassRecord> records
+
+---
+-- Returns a read-only @{#ClassRecord}
+-- @function [parent=#Classes] record
+-- @param #string recordId
+-- @return #ClassRecord
+
+---
+-- Class data record
+-- @type ClassRecord
+-- @field #string id Class id
+-- @field #string name Class name
+-- @field #list<#string> attributes A read-only list containing the specialized attributes of the class.
+-- @field #list<#string> majorSkills A read-only list containing the major skills of the class.
+-- @field #list<#string> minorSkills A read-only list containing the minor skills of the class.
+-- @field #string description Class description
+-- @field #boolean isPlayable True if the player can play as this class
+-- @field #string specialization Class specialization. Either combat, magic, or stealth.
+
 ---
 -- Whether the NPC or player is in the werewolf form at the moment.
 -- @function [parent=#NPC] isWerewolf
@@ -896,7 +936,7 @@
 -- @field #number baseGold The base barter gold of the NPC
 -- @field #number baseDisposition NPC's starting disposition
 -- @field #bool isMale The gender setting of the NPC
--- @field #list<#string> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #map<#string, #boolean> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 
 
 --------------------------------------------------------------------------------
@@ -919,7 +959,7 @@
 -- @function [parent=#Player] getCrimeLevel
 -- @param openmw.core#GameObject player
 -- @return #number
- 
+
 ---
 -- Whether the character generation for this player is finished.
 -- @function [parent=#Player] isCharGenFinished
@@ -930,7 +970,6 @@
 -- Whether teleportation for this player is enabled.
 -- @function [parent=#Player] isTeleportingEnabled
 -- @param openmw.core#GameObject player
--- @param #boolean player
 -- @return #boolean
 
 ---
@@ -1058,7 +1097,7 @@
 -- @param #ArmorRecord armor A Lua table with the fields of a ArmorRecord, with an additional field `template` that accepts a @{#ArmorRecord} as a base.
 -- @return #ArmorRecord A strongly typed Armor record.
 -- @usage local armorTemplate = types.Armor.record('orcish_cuirass')
--- local armorTable = {name = "Better Orcish Cuirass",template = armorTemplate,baseArmor = armorTemplate.baseArmor + 10} 
+-- local armorTable = {name = "Better Orcish Cuirass",template = armorTemplate,baseArmor = armorTemplate.baseArmor + 10}
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Armor.createRecordDraft(armorTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record
@@ -1185,7 +1224,7 @@
 -- @param #ClothingRecord clothing A Lua table with the fields of a ClothingRecord, with an additional field `template` that accepts a @{#ClothingRecord} as a base.
 -- @return #ClothingRecord A strongly typed clothing record.
 -- @usage local clothingTemplate = types.Clothing.record('exquisite_robe_01')
--- local clothingTable = {name = "Better Exquisite Robe",template = clothingTemplate,enchantCapacity = clothingTemplate.enchantCapacity + 10} 
+-- local clothingTable = {name = "Better Exquisite Robe",template = clothingTemplate,enchantCapacity = clothingTemplate.enchantCapacity + 10}
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Clothing.createRecordDraft(clothingTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record
@@ -1874,6 +1913,9 @@
 
 --- Functions for @{#ESM4Ingredient} objects
 -- @field [parent=#types] #ESM4Ingredient ESM4Ingredient
+
+--- Functions for @{#ESM4ItemMod} objects
+-- @field [parent=#types] #ESM4ItemMod ESM4ItemMod
 
 --- Functions for @{#ESM4Light} objects
 -- @field [parent=#types] #ESM4Light ESM4Light

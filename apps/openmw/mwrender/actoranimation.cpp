@@ -130,8 +130,7 @@ namespace MWRender
                     if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                         return std::string();
                     if (!bodypart->mModel.empty())
-                        return Misc::ResourceHelpers::correctMeshPath(
-                            bodypart->mModel, MWBase::Environment::get().getResourceSystem()->getVFS());
+                        return Misc::ResourceHelpers::correctMeshPath(bodypart->mModel);
                 }
             }
         }
@@ -315,6 +314,7 @@ namespace MWRender
         if (node == nullptr)
             return;
 
+        // This is used to avoid playing animations intended for equipped weapons on holstered weapons.
         SceneUtil::ForceControllerSourcesVisitor removeVisitor(std::make_shared<NullAnimationTime>());
         node->accept(removeVisitor);
     }
@@ -346,9 +346,7 @@ namespace MWRender
         if (mesh.empty() || boneName.empty())
             return;
 
-        // If the scabbard is not found, use a weapon mesh as fallback.
-        // Note: it is unclear how to handle time for controllers attached to bodyparts, so disable them for now.
-        // We use the similar approach for other bodyparts.
+        // If the scabbard is not found, use the weapon mesh as fallback.
         scabbardName = scabbardName.replace(scabbardName.size() - 4, 4, "_sh.nif");
         bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
         if (!mResourceSystem->getVFS()->exists(scabbardName))
@@ -428,7 +426,7 @@ namespace MWRender
         const auto& weaponType = MWMechanics::getWeaponType(type);
         if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
         {
-            ammoCount = ammo->getRefData().getCount();
+            ammoCount = ammo->getCellRef().getCount();
             osg::Group* throwingWeaponNode = getBoneByName(weaponType->mAttachBone);
             if (throwingWeaponNode && throwingWeaponNode->getNumChildren())
                 ammoCount--;
@@ -441,7 +439,7 @@ namespace MWRender
             if (ammo == inv.end())
                 return;
 
-            ammoCount = ammo->getRefData().getCount();
+            ammoCount = ammo->getCellRef().getCount();
             bool arrowAttached = isArrowAttached();
             if (arrowAttached)
                 ammoCount--;
@@ -516,7 +514,7 @@ namespace MWRender
             ItemLightMap::iterator iter = mItemLights.find(item);
             if (iter != mItemLights.end())
             {
-                if (!item.getRefData().getCount())
+                if (!item.getCellRef().getCount())
                 {
                     removeHiddenItemLight(item);
                 }

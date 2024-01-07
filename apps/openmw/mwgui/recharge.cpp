@@ -75,7 +75,7 @@ namespace MWGui
 
         mChargeLabel->setCaptionWithReplacing("#{sCharges} " + MyGUI::utility::toString(creature->mData.mSoul));
 
-        bool toolBoxVisible = (gem.getRefData().getCount() != 0);
+        bool toolBoxVisible = gem.getCellRef().getCount() != 0;
         mGemBox->setVisible(toolBoxVisible);
         mGemBox->setUserString("Hidden", toolBoxVisible ? "false" : "true");
 

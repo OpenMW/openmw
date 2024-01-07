@@ -292,6 +292,8 @@ namespace MWRender
 
         osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
+        bool mPlayScriptedOnly;
+
         const NodeMap& getNodeMap() const;
 
         /* Sets the appropriate animations on the bone groups based on priority.
@@ -441,7 +443,8 @@ namespace MWRender
          * \param speedmult Stores the animation speed multiplier
          * \return True if the animation is active, false otherwise.
          */
-        bool getInfo(std::string_view groupname, float* complete = nullptr, float* speedmult = nullptr) const;
+        bool getInfo(std::string_view groupname, float* complete = nullptr, float* speedmult = nullptr,
+            size_t* loopcount = nullptr) const;
 
         /// Get the absolute position in the animation track of the first text key with the given group.
         float getStartTime(const std::string& groupname) const;
@@ -452,8 +455,6 @@ namespace MWRender
         /// Get the current absolute position in the animation track for the animation that is currently playing from
         /// the given group.
         float getCurrentTime(const std::string& groupname) const;
-
-        size_t getCurrentLoopCount(const std::string& groupname) const;
 
         /** Disables the specified animation group;
          * \param groupname Animation group to disable.
@@ -476,6 +477,9 @@ namespace MWRender
 
         MWWorld::MovementDirectionFlags getSupportedMovementDirections(
             std::span<const std::string_view> prefixes) const;
+
+        bool getPlayScriptedOnly() const { return mPlayScriptedOnly; }
+        void setPlayScriptedOnly(bool playScriptedOnly) { mPlayScriptedOnly = playScriptedOnly; }
 
         virtual bool useShieldAnimations() const { return false; }
         virtual bool getWeaponsShown() const { return false; }

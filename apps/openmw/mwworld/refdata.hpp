@@ -58,9 +58,6 @@ namespace MWWorld
         bool mPhysicsPostponed : 1;
 
     private:
-        /// 0: deleted
-        int mCount;
-
         ESM::Position mPosition;
 
         ESM::AnimationState mAnimationState;
@@ -110,26 +107,15 @@ namespace MWWorld
         /// Set base node (can be a null pointer).
         void setBaseNode(osg::ref_ptr<SceneUtil::PositionAttitudeTransform> base);
 
-        int getCount(bool absolute = true) const;
-
         void setLocals(const ESM::Script& script);
 
         MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
         void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
 
-        void setCount(int count);
-        ///< Set object count (an object pile is a simple object with a count >1).
-        ///
-        /// \warning Do not call setCount() to add or remove objects from a
-        /// container or an actor's inventory. Call ContainerStore::add() or
-        /// ContainerStore::remove() instead.
-
         /// This flag is only used for content stack loading and will not be stored in the savegame.
         /// If the object was deleted by gameplay, then use setCount(0) instead.
         void setDeletedByContentFile(bool deleted);
 
-        /// Returns true if the object was either deleted by the content file or by gameplay.
-        bool isDeleted() const;
         /// Returns true if the object was deleted by a content file.
         bool isDeletedByContentFile() const;
 

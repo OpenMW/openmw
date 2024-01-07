@@ -161,16 +161,16 @@ namespace MWWorld
         void storeState(const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
         template <typename T>
-        void storeStates(
-            const CellRefList<T>& collection, ESM::InventoryState& inventory, int& index, bool equipable = false) const;
+        void storeStates(const CellRefList<T>& collection, ESM::InventoryState& inventory, size_t& index,
+            bool equipable = false) const;
 
         void updateRechargingItems();
 
         virtual void storeEquipmentState(
-            const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
+            const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const;
 
         virtual void readEquipmentState(
-            const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
+            const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory);
 
     public:
         ContainerStore();

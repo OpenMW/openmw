@@ -1,6 +1,7 @@
 #include "ingredient.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadnpc.hpp>
@@ -16,7 +17,6 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -107,8 +107,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -146,7 +145,7 @@ namespace MWClass
         }
         info.effects = list;
 
-        info.text = text;
+        info.text = std::move(text);
         info.isIngredient = true;
 
         return info;

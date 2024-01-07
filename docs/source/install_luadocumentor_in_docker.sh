@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 if [ ! -f /.dockerenv ] && [ ! -f /home/docs/omw_luadoc_docker ]; then
     echo 'This script installs lua-5.1, luarocks, and openmwluadocumentor to $HOME. Should be used only in docker.'
     exit 1
@@ -28,8 +30,8 @@ PATH=$PATH:~/luarocks/bin
 
 echo "Install openmwluadocumentor"
 git clone https://gitlab.com/ptmikheev/openmw-luadocumentor.git
-git checkout 78577b255d19a1f4f4f539662e00357936b73c33
 cd openmw-luadocumentor
+git checkout 78577b255d19a1f4f4f539662e00357936b73c33
 luarocks make luarocks/openmwluadocumentor-0.2.0-1.rockspec
 cd ~
 rm -r openmw-luadocumentor

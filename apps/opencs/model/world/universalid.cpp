@@ -68,6 +68,7 @@ namespace
             ":./resources-video" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_DebugProfiles, "Debug Profiles",
             ":./debug-profile.png" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SelectionGroup, "Selection Groups", "" },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_RunLog, "Run Log", ":./run-log.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SoundGens, "Sound Generators",
             ":./sound-generator.png" },
@@ -187,6 +188,8 @@ namespace
         {
             mStream << ": " << value;
         }
+
+        void operator()(const ESM::RefId& value) const { mStream << ": " << value.toString(); }
     };
 
     struct GetTypeData
@@ -217,6 +220,23 @@ namespace
         }
 
         return std::to_string(value);
+    }
+
+    CSMWorld::UniversalId::Class getClassByType(CSMWorld::UniversalId::Type type)
+    {
+        if (const auto it
+            = std::find_if(std::begin(sIdArg), std::end(sIdArg), [&](const TypeData& v) { return v.mType == type; });
+            it != std::end(sIdArg))
+            return it->mClass;
+        if (const auto it = std::find_if(
+                std::begin(sIndexArg), std::end(sIndexArg), [&](const TypeData& v) { return v.mType == type; });
+            it != std::end(sIndexArg))
+            return it->mClass;
+        if (const auto it
+            = std::find_if(std::begin(sNoArg), std::end(sNoArg), [&](const TypeData& v) { return v.mType == type; });
+            it != std::end(sNoArg))
+            return it->mClass;
+        throw std::logic_error("invalid UniversalId type: " + std::to_string(type));
     }
 }
 
@@ -326,6 +346,13 @@ CSMWorld::UniversalId::UniversalId(Type type, ESM::RefId id)
     throw std::logic_error("invalid RefId argument UniversalId type: " + std::to_string(type));
 }
 
+CSMWorld::UniversalId::UniversalId(Type type, const UniversalId& id)
+    : mClass(getClassByType(type))
+    , mType(type)
+    , mValue(id.mValue)
+{
+}
+
 CSMWorld::UniversalId::UniversalId(Type type, int index)
     : mType(type)
     , mValue(index)
@@ -359,6 +386,10 @@ const std::string& CSMWorld::UniversalId::getId() const
 {
     if (const std::string* result = std::get_if<std::string>(&mValue))
         return *result;
+
+    if (const ESM::RefId* refId = std::get_if<ESM::RefId>(&mValue))
+        if (const ESM::StringRefId* result = refId->getIf<ESM::StringRefId>())
+            return result->getValue();
 
     throw std::logic_error("invalid access to ID of " + ::toString(getArgumentType()) + " UniversalId");
 }

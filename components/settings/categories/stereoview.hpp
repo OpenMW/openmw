@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_STEREOVIEW_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_STEREOVIEW_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
@@ -31,14 +31,14 @@ namespace Settings
             makeClampSanitizerDouble(-1, 1) };
         SettingValue<double> mLeftEyeOrientationW{ mIndex, "Stereo View", "left eye orientation w",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mLeftEyeFovLeft{ mIndex, "Stereo View", "left eye fov left",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mLeftEyeFovRight{ mIndex, "Stereo View", "left eye fov right",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mLeftEyeFovUp{ mIndex, "Stereo View", "left eye fov up",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mLeftEyeFovDown{ mIndex, "Stereo View", "left eye fov down",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
+        SettingValue<float> mLeftEyeFovLeft{ mIndex, "Stereo View", "left eye fov left",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
+        SettingValue<float> mLeftEyeFovRight{ mIndex, "Stereo View", "left eye fov right",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
+        SettingValue<float> mLeftEyeFovUp{ mIndex, "Stereo View", "left eye fov up",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
+        SettingValue<float> mLeftEyeFovDown{ mIndex, "Stereo View", "left eye fov down",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
         SettingValue<double> mRightEyeOffsetX{ mIndex, "Stereo View", "right eye offset x" };
         SettingValue<double> mRightEyeOffsetY{ mIndex, "Stereo View", "right eye offset y" };
         SettingValue<double> mRightEyeOffsetZ{ mIndex, "Stereo View", "right eye offset z" };
@@ -50,14 +50,14 @@ namespace Settings
             makeClampSanitizerDouble(-1, 1) };
         SettingValue<double> mRightEyeOrientationW{ mIndex, "Stereo View", "right eye orientation w",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mRightEyeFovLeft{ mIndex, "Stereo View", "right eye fov left",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mRightEyeFovRight{ mIndex, "Stereo View", "right eye fov right",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mRightEyeFovUp{ mIndex, "Stereo View", "right eye fov up",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mRightEyeFovDown{ mIndex, "Stereo View", "right eye fov down",
-            makeClampSanitizerDouble(-osg::PI, osg::PI) };
+        SettingValue<float> mRightEyeFovLeft{ mIndex, "Stereo View", "right eye fov left",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
+        SettingValue<float> mRightEyeFovRight{ mIndex, "Stereo View", "right eye fov right",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
+        SettingValue<float> mRightEyeFovUp{ mIndex, "Stereo View", "right eye fov up",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
+        SettingValue<float> mRightEyeFovDown{ mIndex, "Stereo View", "right eye fov down",
+            makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
     };
 }
 

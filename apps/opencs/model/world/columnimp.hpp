@@ -16,6 +16,7 @@
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/esm3/selectiongroup.hpp>
 #include <components/esm3/variant.hpp>
 
 #include <optional>
@@ -570,19 +571,34 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            const ESM::Race::MaleFemaleF& value = mWeight ? record.get().mData.mWeight : record.get().mData.mHeight;
-
-            return mMale ? value.mMale : value.mFemale;
+            if (mWeight)
+            {
+                if (mMale)
+                    return record.get().mData.mMaleWeight;
+                return record.get().mData.mFemaleWeight;
+            }
+            if (mMale)
+                return record.get().mData.mMaleHeight;
+            return record.get().mData.mFemaleHeight;
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-
-            ESM::Race::MaleFemaleF& value = mWeight ? record2.mData.mWeight : record2.mData.mHeight;
-
-            (mMale ? value.mMale : value.mFemale) = data.toFloat();
-
+            if (mWeight)
+            {
+                if (mMale)
+                    record2.mData.mMaleWeight = data.toFloat();
+                else
+                    record2.mData.mFemaleWeight = data.toFloat();
+            }
+            else
+            {
+                if (mMale)
+                    record2.mData.mMaleHeight = data.toFloat();
+                else
+                    record2.mData.mFemaleHeight = data.toFloat();
+            }
             record.setModified(record2);
         }
 
@@ -1095,19 +1111,19 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
-    struct GoldValueColumn : public Column<ESXRecordT>
+    struct StackSizeColumn : public Column<ESXRecordT>
     {
-        GoldValueColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_CoinValue, ColumnBase::Display_Integer)
+        StackSizeColumn()
+            : Column<ESXRecordT>(Columns::ColumnId_StackCount, ColumnBase::Display_Integer)
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mGoldValue; }
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mCount; }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-            record2.mGoldValue = data.toInt();
+            record2.mCount = data.toInt();
             record.setModified(record2);
         }
 
@@ -2374,6 +2390,17 @@ namespace CSMWorld
 
         QVariant get(const Record<ESM::BodyPart>& record) const override;
         void set(Record<ESM::BodyPart>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
+    struct SelectionGroupColumn : public Column<ESM::SelectionGroup>
+    {
+        SelectionGroupColumn();
+
+        QVariant get(const Record<ESM::SelectionGroup>& record) const override;
+
+        void set(Record<ESM::SelectionGroup>& record, const QVariant& data) override;
+
         bool isEditable() const override;
     };
 }

@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESSIMPORT_ACDT_H
 #define OPENMW_ESSIMPORT_ACDT_H
 
+#include <cstdint>
 #include <string>
 
 #include "importscri.hpp"
@@ -25,14 +26,12 @@ namespace ESSImport
     };
 
     /// Actor data, shared by (at least) REFR and CellRef
-#pragma pack(push)
-#pragma pack(1)
     struct ACDT
     {
         // Note, not stored at *all*:
         // - Level changes are lost on reload, except for the player (there it's in the NPC record).
         unsigned char mUnknown[12];
-        unsigned int mFlags;
+        uint32_t mFlags;
         float mBreathMeter; // Seconds left before drowning
         unsigned char mUnknown2[20];
         float mDynamic[3][2];
@@ -41,7 +40,7 @@ namespace ESSImport
         float mMagicEffects[27]; // Effect attributes:
                                  // https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attributes
         unsigned char mUnknown4[4];
-        unsigned int mGoldPool;
+        uint32_t mGoldPool;
         unsigned char mCountDown; // seen the same value as in ACSC.mCorpseClearCountdown, maybe
                                   // this one is for respawning?
         unsigned char mUnknown5[3];
@@ -60,7 +59,6 @@ namespace ESSImport
         unsigned char mUnknown[3];
         float mTime;
     };
-#pragma pack(pop)
 
     struct ActorData
     {

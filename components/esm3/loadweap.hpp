@@ -24,6 +24,7 @@ namespace ESM
 
         enum Type
         {
+            First = -4,
             PickProbe = -4,
             HandToHand = -3,
             Spell = -2,
@@ -41,7 +42,8 @@ namespace ESM
             MarksmanCrossbow = 10,
             MarksmanThrown = 11,
             Arrow = 12,
-            Bolt = 13
+            Bolt = 13,
+            Last = 13
         };
 
         enum AttackType

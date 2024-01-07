@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include <components/esm/common.hpp>
 
 namespace ESM
 {
@@ -83,7 +84,7 @@ namespace ESM
 
         esm.writeHNOCString("FNAM", mName);
 
-        if (esm.getVersion() == VER_12)
+        if (esm.getVersion() == VER_120)
             esm.writeHNT("WEAT", mData.mProbabilities, mData.mProbabilities.size() - 2);
         else
             esm.writeHNT("WEAT", mData.mProbabilities);

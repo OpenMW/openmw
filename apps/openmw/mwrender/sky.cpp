@@ -220,7 +220,7 @@ namespace
             camera->setNodeMask(MWRender::Mask_RenderToTexture);
             camera->setCullMask(MWRender::Mask_Sky);
             camera->addChild(mEarlyRenderBinRoot);
-            SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
+            SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *camera->getOrCreateStateSet());
         }
 
     private:
@@ -257,6 +257,8 @@ namespace MWRender
         , mRainMaxHeight(0.f)
         , mRainEntranceSpeed(1.f)
         , mRainMaxRaindrops(0)
+        , mRainRipplesEnabled(Fallback::Map::getBool("Weather_Rain_Ripples"))
+        , mSnowRipplesEnabled(Fallback::Map::getBool("Weather_Snow_Ripples"))
         , mWindSpeed(0.f)
         , mBaseWindSpeed(0.f)
         , mEnabled(true)
@@ -271,7 +273,7 @@ namespace MWRender
         if (!mSceneManager->getForceShaders())
             skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
                 osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED | osg::StateAttribute::ON);
-        SceneUtil::ShadowManager::disableShadowsForStateSet(skyroot->getOrCreateStateSet());
+        SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *skyroot->getOrCreateStateSet());
         parentNode->addChild(skyroot);
 
         mEarlyRenderBinRoot = new osg::Group;
@@ -514,6 +516,20 @@ namespace MWRender
     bool SkyManager::hasRain() const
     {
         return mRainNode != nullptr;
+    }
+
+    bool SkyManager::getRainRipplesEnabled() const
+    {
+        if (!mEnabled || mIsStorm)
+            return false;
+
+        if (hasRain())
+            return mRainRipplesEnabled;
+
+        if (mParticleNode && mCurrentParticleEffect == "meshes\\snow.nif")
+            return mSnowRipplesEnabled;
+
+        return false;
     }
 
     float SkyManager::getPrecipitationAlpha() const

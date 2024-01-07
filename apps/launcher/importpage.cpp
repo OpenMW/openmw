@@ -104,9 +104,9 @@ void Launcher::ImportPage::on_importerButton_clicked()
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p> \
-                              <p>Please make sure you have the right permissions \
-                              and try again.</p></body></html>")
+                tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p>"
+                   "<p>Please make sure you have the right permissions "
+                   "and try again.</p></body></html>")
                     .arg(file.fileName()));
             msgBox.exec();
             return;

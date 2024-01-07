@@ -43,6 +43,7 @@ const float SCATTER_AMOUNT = 0.3;                  // amount of sunlight scatter
 const vec3 SCATTER_COLOUR = vec3(0.0,1.0,0.95);    // colour of sunlight scattering
 
 const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
+const float SUN_SPEC_FADING_THRESHOLD = 0.15;       // visibility at which sun specularity starts to fade
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
@@ -80,6 +81,7 @@ uniform float near;
 uniform float far;
 
 uniform float rainIntensity;
+uniform bool enableRainRipples;
 
 uniform vec2 screenRes;
 
@@ -112,7 +114,7 @@ void main(void)
 
     vec4 rainRipple;
 
-    if (rainIntensity > 0.01)
+    if (rainIntensity > 0.01 && enableRainRipples)
         rainRipple = rainCombined(position.xy/1000.0, waterTimer) * clamp(rainIntensity, 0.0, 1.0);
     else
         rainRipple = vec4(0.0);
@@ -172,6 +174,8 @@ void main(void)
     vec3 waterColor = WATER_COLOR * sunFade;
 
     vec4 sunSpec = lcalcSpecular(0);
+    // alpha component is sun visibility; we want to start fading lighting effects when visibility is low
+    sunSpec.a = min(1.0, sunSpec.a / SUN_SPEC_FADING_THRESHOLD);
 
     // artificial specularity to make rain ripples more noticeable
     vec3 skyColorEstimate = vec3(max(0.0, mix(-0.3, 1.0, sunFade)));
@@ -179,7 +183,7 @@ void main(void)
 
 #if REFRACTION
     // no alpha here, so make sure raindrop ripple specularity gets properly subdued
-    rainSpecular *= clamp(fresnel*6.0 + specular * sunSpec.w, 0.0, 1.0);
+    rainSpecular *= clamp(fresnel*6.0 + specular * sunSpec.a, 0.0, 1.0);
 
     // refraction
     vec3 refraction = sampleRefractionMap(screenCoords - screenCoordsOffset).rgb;
@@ -199,8 +203,8 @@ void main(void)
     float sunHeight = lVec.z;
     vec3 scatterColour = mix(SCATTER_COLOUR*vec3(1.0,0.4,0.0), SCATTER_COLOUR, clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
     vec3 lR = reflect(lVec, lNormal);
-    float lightScatter = clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0) * SCATTER_AMOUNT * sunFade * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
-    gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * sunSpec.xyz + rainSpecular;
+    float lightScatter = clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0) * SCATTER_AMOUNT * sunFade * sunSpec.a * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
+    gl_FragData[0].xyz = mix(mix(refraction,  scatterColour,  lightScatter), reflection, fresnel) + specular * sunSpec.rgb * sunSpec.a + rainSpecular;
     gl_FragData[0].w = 1.0;
 
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping
@@ -213,8 +217,8 @@ void main(void)
     shoreOffset = clamp(mix(shoreOffset, 1.0, clamp(linearDepth / WOBBLY_SHORE_FADE_DISTANCE, 0.0, 1.0)), 0.0, 1.0);
     gl_FragData[0].xyz = mix(rawRefraction, gl_FragData[0].xyz, shoreOffset);
 #else
-    gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * sunSpec.xyz + rainSpecular;
-    gl_FragData[0].w = clamp(fresnel*6.0 + specular * sunSpec.w, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);
+    gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * sunSpec.rgb  * sunSpec.a + rainSpecular;
+    gl_FragData[0].w = clamp(fresnel*6.0 + specular * sunSpec.a, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.a, 0.0, 1.0);
 #endif
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], radialDepth, linearDepth, far);

@@ -14,21 +14,15 @@ namespace SDLUtil
         close(true);
     }
 
-    GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits, int vsync)
+    GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits, VSyncMode vsyncMode)
         : mWindow(nullptr)
         , mContext(nullptr)
         , mValid(false)
         , mRealized(false)
         , mOwnsWindow(false)
+        , mVSyncMode(vsyncMode)
     {
         _traits = traits;
-
-        if (vsync == 2)
-            mVSyncMode = VSyncMode::Adaptive;
-        else if (vsync == 1)
-            mVSyncMode = VSyncMode::Enabled;
-        else
-            mVSyncMode = VSyncMode::Disabled;
 
         init();
         if (GraphicsWindowSDL2::valid())

@@ -789,8 +789,7 @@ namespace MWWorld
         mRendering.configureFog(
             mResult.mFogDepth, underwaterFog, mResult.mDLFogFactor, mResult.mDLFogOffset / 100.0f, mResult.mFogColor);
         mRendering.setAmbientColour(mResult.mAmbientColor);
-        mRendering.setSunColour(
-            mResult.mSunColor, mResult.mSunColor * mResult.mGlareView * glareFade, mResult.mGlareView * glareFade);
+        mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor, mResult.mGlareView * glareFade);
 
         mRendering.getSkyManager()->setWeather(mResult);
 
@@ -899,36 +898,27 @@ namespace MWWorld
     {
         if (ESM::REC_WTHR == type)
         {
-            if (reader.getFormatVersion() <= ESM::MaxOldWeatherFormatVersion)
+            ESM::WeatherState state;
+            state.load(reader);
+
+            std::swap(mCurrentRegion, state.mCurrentRegion);
+            mTimePassed = state.mTimePassed;
+            mFastForward = state.mFastForward;
+            mWeatherUpdateTime = state.mWeatherUpdateTime;
+            mTransitionFactor = state.mTransitionFactor;
+            mCurrentWeather = state.mCurrentWeather;
+            mNextWeather = state.mNextWeather;
+            mQueuedWeather = state.mQueuedWeather;
+
+            mRegions.clear();
+            importRegions();
+
+            for (auto it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
             {
-                // Weather state isn't really all that important, so to preserve older save games, we'll just discard
-                // the older weather records, rather than fail to handle the record.
-                reader.skipRecord();
-            }
-            else
-            {
-                ESM::WeatherState state;
-                state.load(reader);
-
-                std::swap(mCurrentRegion, state.mCurrentRegion);
-                mTimePassed = state.mTimePassed;
-                mFastForward = state.mFastForward;
-                mWeatherUpdateTime = state.mWeatherUpdateTime;
-                mTransitionFactor = state.mTransitionFactor;
-                mCurrentWeather = state.mCurrentWeather;
-                mNextWeather = state.mNextWeather;
-                mQueuedWeather = state.mQueuedWeather;
-
-                mRegions.clear();
-                importRegions();
-
-                for (auto it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
+                auto found = mRegions.find(it->first);
+                if (found != mRegions.end())
                 {
-                    auto found = mRegions.find(it->first);
-                    if (found != mRegions.end())
-                    {
-                        found->second = RegionWeather(it->second);
-                    }
+                    found->second = RegionWeather(it->second);
                 }
             }
 

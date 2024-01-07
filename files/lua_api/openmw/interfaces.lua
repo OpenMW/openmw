@@ -21,6 +21,9 @@
 -- @field [parent=#interfaces] scripts.omw.ui#scripts.omw.ui UI
 
 ---
+-- @field [parent=#interfaces] scripts.omw.usehandlers#scripts.omw.usehandlers ItemUsage
+
+---
 -- @function [parent=#interfaces] __index
 -- @param #interfaces self
 -- @param #string key

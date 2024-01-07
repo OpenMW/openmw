@@ -6,6 +6,7 @@
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm/attr.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -19,8 +20,6 @@
 #include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwworld/esmstore.hpp"
-
-#include "ustring.hpp"
 
 namespace MWGui::Widgets
 {
@@ -135,8 +134,7 @@ namespace MWGui::Widgets
             }
             else
             {
-                MyGUI::UString name = toUString(attribute->mName);
-                mAttributeNameWidget->setCaption(name);
+                mAttributeNameWidget->setCaption(MyGUI::UString(attribute->mName));
             }
         }
         if (mAttributeValueWidget)
@@ -355,11 +353,9 @@ namespace MWGui::Widgets
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
-        const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
+        const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(mEffectParams.mEffectID);
         const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(mEffectParams.mAttribute);
         const ESM::Skill* skill = store.get<ESM::Skill>().search(mEffectParams.mSkill);
-
-        assert(magicEffect);
 
         auto windowManager = MWBase::Environment::get().getWindowManager();
 
@@ -499,13 +495,13 @@ namespace MWGui::Widgets
         {
             std::stringstream out;
             out << mValue << "/" << mMax;
-            mBarTextWidget->setCaption(out.str().c_str());
+            mBarTextWidget->setCaption(out.str());
         }
     }
     void MWDynamicStat::setTitle(std::string_view text)
     {
         if (mTextWidget)
-            mTextWidget->setCaption(toUString(text));
+            mTextWidget->setCaption(MyGUI::UString(text));
     }
 
     MWDynamicStat::~MWDynamicStat() {}

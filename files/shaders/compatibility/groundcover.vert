@@ -21,7 +21,6 @@ varying vec2 diffuseMapUV;
 
 #if @normalMap
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
 
 // Other shaders respect forcePPL, but legacy groundcover mods were designed to work with vertex lighting.
@@ -41,6 +40,7 @@ centroid varying vec3 shadowDiffuseLighting;
 varying vec3 passNormal;
 
 #include "shadows_vertex.glsl"
+#include "compatibility/normals.glsl"
 #include "lib/light/lighting.glsl"
 #include "lib/view/depth.glsl"
 
@@ -149,8 +149,14 @@ void main(void)
 
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
+    passNormal = rotation3(rotation) * gl_Normal.xyz;
+    normalToViewMatrix = gl_NormalMatrix;
+#if @normalMap
+    normalToViewMatrix *= generateTangentSpace(gl_MultiTexCoord7.xyzw * rotation, passNormal);
+#endif
+
 #if (!PER_PIXEL_LIGHTING || @shadows_enabled)
-    vec3 viewNormal = normalize((gl_NormalMatrix * rotation3(rotation) * gl_Normal).xyz);
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
 #endif
 
 #if @diffuseMap
@@ -159,15 +165,14 @@ void main(void)
 
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
-    passTangent = gl_MultiTexCoord7.xyzw * rotation;
 #endif
 
-    passNormal = rotation3(rotation) * gl_Normal.xyz;
 #if PER_PIXEL_LIGHTING
     passViewPos = viewPos.xyz;
 #else
-    vec3 diffuseLight, ambientLight;
-    doLighting(viewPos.xyz, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
+    vec3 diffuseLight, ambientLight, specularLight;
+    vec3 unusedShadowSpecular;
+    doLighting(viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, unusedShadowSpecular);
     passLighting = diffuseLight + ambientLight;
     clampLightingResult(passLighting);
 #endif

@@ -209,8 +209,6 @@ namespace MWWorld
 
         if (state.mIdMagic.size() > 1)
         {
-            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
             {
                 std::ostringstream nodeName;
@@ -222,7 +220,7 @@ namespace MWWorld
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
                     mResourceSystem->getSceneManager()->getInstance(
-                        Misc::ResourceHelpers::correctMeshPath(weapon->mModel, vfs), findVisitor.mFoundNode);
+                        Misc::ResourceHelpers::correctMeshPath(weapon->mModel), findVisitor.mFoundNode);
             }
         }
 
@@ -254,7 +252,7 @@ namespace MWWorld
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);
 
-        MWRender::overrideFirstRootTexture(texture, mResourceSystem, std::move(projectile));
+        MWRender::overrideFirstRootTexture(texture, mResourceSystem, *projectile);
     }
 
     void ProjectileManager::update(State& state, float duration)
@@ -330,8 +328,7 @@ namespace MWWorld
         if (state.mIdMagic.size() > 1)
         {
             model = Misc::ResourceHelpers::correctMeshPath(
-                MWBase::Environment::get().getESMStore()->get<ESM::Weapon>().find(state.mIdMagic[1])->mModel,
-                MWBase::Environment::get().getResourceSystem()->getVFS());
+                MWBase::Environment::get().getESMStore()->get<ESM::Weapon>().find(state.mIdMagic[1])->mModel);
         }
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
@@ -437,7 +434,7 @@ namespace MWWorld
             MWWorld::Ptr caster = magicBoltState.getCaster();
             if (!caster.isEmpty() && caster.getClass().isActor())
             {
-                if (caster.getRefData().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
+                if (caster.getCellRef().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
                 {
                     cleanupMagicBolt(magicBoltState);
                     continue;
@@ -453,7 +450,7 @@ namespace MWWorld
             {
                 const auto npc = caster.get<ESM::NPC>()->mBase;
                 const auto race = store.get<ESM::Race>().find(npc->mRace);
-                speed *= npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+                speed *= npc->isMale() ? race->mData.mMaleWeight : race->mData.mFemaleWeight;
             }
             osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
             direction.normalize();

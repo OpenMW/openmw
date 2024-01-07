@@ -133,7 +133,8 @@ namespace LuaUtil
 
         // Lua bindings for Box
         util["box"] = sol::overload([](const Vec3& center, const Vec3& halfSize) { return Box(center, halfSize); },
-            [](const TransformM& transform) { return Box(transform.mM); });
+            [](const TransformM& transform) { return Box(transform.mM); },
+            [](const TransformQ& transform) { return Box(Vec3(), Vec3(1, 1, 1), transform.mQ); });
         sol::usertype<Box> boxType = lua.new_usertype<Box>("Box");
         boxType["center"] = sol::readonly_property([](const Box& b) { return b.mCenter; });
         boxType["halfSize"] = sol::readonly_property([](const Box& b) { return b.mHalfSize; });

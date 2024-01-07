@@ -46,13 +46,13 @@ namespace MWRender
     class Refraction;
     class Reflection;
     class RippleSimulation;
-    class RainIntensityUpdater;
+    class RainSettingsUpdater;
     class Ripples;
 
     /// Water rendering
     class Water
     {
-        osg::ref_ptr<RainIntensityUpdater> mRainIntensityUpdater;
+        osg::ref_ptr<RainSettingsUpdater> mRainSettingsUpdater;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mSceneRoot;
@@ -113,6 +113,7 @@ namespace MWRender
         void changeCell(const MWWorld::CellStore* store);
         void setHeight(const float height);
         void setRainIntensity(const float rainIntensity);
+        void setRainRipplesEnabled(bool enableRipples);
 
         void update(float dt, bool paused);
 

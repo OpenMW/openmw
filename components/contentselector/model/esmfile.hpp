@@ -40,7 +40,7 @@ namespace ContentSelectorModel
         void setAuthor(const QString& author);
         void setSize(const int size);
         void setDate(const QDateTime& modified);
-        void setFormat(const int format);
+        void setFormat(const QString& format);
         void setFilePath(const QString& path);
         void setGameFiles(const QStringList& gameFiles);
         void setDescription(const QString& description);
@@ -51,7 +51,7 @@ namespace ContentSelectorModel
         QString fileName() const { return mFileName; }
         QString author() const { return mAuthor; }
         QDateTime modified() const { return mModified; }
-        ESM::FormatVersion formatVersion() const { return mVersion; }
+        QString formatVersion() const { return mVersion; }
         QString filePath() const { return mPath; }
 
         /// @note Contains file names, not paths.
@@ -59,7 +59,7 @@ namespace ContentSelectorModel
         QString description() const { return mDescription; }
         QString toolTip() const
         {
-            return sToolTip.arg(mAuthor)
+            return mTooltipTemlate.arg(mAuthor)
                 .arg(mVersion)
                 .arg(mModified.toString(Qt::ISODate))
                 .arg(mPath)
@@ -72,13 +72,20 @@ namespace ContentSelectorModel
 
     public:
         static int sPropertyCount;
-        static QString sToolTip;
 
     private:
+        QString mTooltipTemlate = tr(
+            "<b>Author:</b> %1<br/>"
+            "<b>Format version:</b> %2<br/>"
+            "<b>Modified:</b> %3<br/>"
+            "<b>Path:</b><br/>%4<br/>"
+            "<br/><b>Description:</b><br/>%5<br/>"
+            "<br/><b>Dependencies: </b>%6<br/>");
+
         QString mFileName;
         QString mAuthor;
         QDateTime mModified;
-        ESM::FormatVersion mVersion = ESM::DefaultFormatVersion;
+        QString mVersion = QString::number(ESM::DefaultFormatVersion);
         QString mPath;
         QStringList mGameFiles;
         QString mDescription;

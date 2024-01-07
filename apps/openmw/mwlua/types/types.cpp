@@ -45,6 +45,7 @@ namespace MWLua
         constexpr std::string_view ESM4Flora = "ESM4Flora";
         constexpr std::string_view ESM4Furniture = "ESM4Furniture";
         constexpr std::string_view ESM4Ingredient = "ESM4Ingredient";
+        constexpr std::string_view ESM4ItemMod = "ESM4ItemMod";
         constexpr std::string_view ESM4Light = "ESM4Light";
         constexpr std::string_view ESM4MiscItem = "ESM4Miscellaneous";
         constexpr std::string_view ESM4MovableStatic = "ESM4MovableStatic";
@@ -90,6 +91,7 @@ namespace MWLua
             { ESM::REC_FLOR4, ObjectTypeName::ESM4Flora },
             { ESM::REC_FURN4, ObjectTypeName::ESM4Furniture },
             { ESM::REC_INGR4, ObjectTypeName::ESM4Ingredient },
+            { ESM::REC_IMOD4, ObjectTypeName::ESM4ItemMod },
             { ESM::REC_LIGH4, ObjectTypeName::ESM4Light },
             { ESM::REC_MISC4, ObjectTypeName::ESM4MiscItem },
             { ESM::REC_MSTT4, ObjectTypeName::ESM4MovableStatic },
@@ -193,9 +195,11 @@ namespace MWLua
 
         addActorBindings(
             addType(ObjectTypeName::Actor, { ESM::REC_INTERNAL_PLAYER, ESM::REC_CREA, ESM::REC_NPC_ }), context);
-        addItemBindings(addType(ObjectTypeName::Item,
-            { ESM::REC_ARMO, ESM::REC_BOOK, ESM::REC_CLOT, ESM::REC_INGR, ESM::REC_LIGH, ESM::REC_MISC, ESM::REC_ALCH,
-                ESM::REC_WEAP, ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA }));
+        addItemBindings(
+            addType(ObjectTypeName::Item,
+                { ESM::REC_ARMO, ESM::REC_BOOK, ESM::REC_CLOT, ESM::REC_INGR, ESM::REC_LIGH, ESM::REC_MISC,
+                    ESM::REC_ALCH, ESM::REC_WEAP, ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA }),
+            context);
         addLockableBindings(
             addType(ObjectTypeName::Lockable, { ESM::REC_CONT, ESM::REC_DOOR, ESM::REC_CONT4, ESM::REC_DOOR4 }));
 
@@ -234,6 +238,7 @@ namespace MWLua
         addType(ObjectTypeName::ESM4Flora, { ESM::REC_FLOR4 });
         addType(ObjectTypeName::ESM4Furniture, { ESM::REC_FURN4 });
         addType(ObjectTypeName::ESM4Ingredient, { ESM::REC_INGR4 });
+        addType(ObjectTypeName::ESM4ItemMod, { ESM::REC_IMOD4 });
         addType(ObjectTypeName::ESM4Light, { ESM::REC_LIGH4 });
         addType(ObjectTypeName::ESM4MiscItem, { ESM::REC_MISC4 });
         addType(ObjectTypeName::ESM4MovableStatic, { ESM::REC_MSTT4 });

@@ -211,11 +211,8 @@ namespace
                 const ESM::Static* const fx
                     = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Soul_Trap"));
                 if (fx != nullptr)
-                {
-                    const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), "",
+                    world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel), "",
                         creature.getRefData().getPosition().asVec3());
-                }
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(
                     creature.getRefData().getPosition().asVec3(), ESM::RefId::stringRefId("conjuration hit"), 1.f, 1.f);
@@ -707,10 +704,9 @@ namespace MWMechanics
             }
         }
 
-        // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
+        // Make guards go aggressive with creatures and werewolves that are in combat
         const auto world = MWBase::Environment::get().getWorld();
-        if (!aggressive && actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc()
-            && creatureStats2.getAiSequence().isInCombat())
+        if (!aggressive && actor1.getClass().isClass(actor1, "Guard") && creatureStats2.getAiSequence().isInCombat())
         {
             // Check if the creature is too far
             static const float fAlarmRadius
@@ -718,20 +714,30 @@ namespace MWMechanics
             if (sqrDist > fAlarmRadius * fAlarmRadius)
                 return;
 
-            bool followerOrEscorter = false;
-            for (const auto& package : creatureStats2.getAiSequence())
+            bool targetIsCreature = !actor2.getClass().isNpc();
+            if (targetIsCreature || actor2.getClass().getNpcStats(actor2).isWerewolf())
             {
-                // The follow package must be first or have nothing but combat before it
-                if (package->sideWithTarget())
+                bool followerOrEscorter = false;
+                // ...unless the creature has allies
+                if (targetIsCreature)
                 {
-                    followerOrEscorter = true;
-                    break;
+                    for (const auto& package : creatureStats2.getAiSequence())
+                    {
+                        // The follow package must be first or have nothing but combat before it
+                        if (package->sideWithTarget())
+                        {
+                            followerOrEscorter = true;
+                            break;
+                        }
+                        else if (package->getTypeId() != MWMechanics::AiPackageTypeId::Combat)
+                            break;
+                    }
                 }
-                else if (package->getTypeId() != MWMechanics::AiPackageTypeId::Combat)
-                    break;
+                // Morrowind also checks "known werewolf" flag, but the player is never in combat
+                // so this code is unreachable for the player
+                if (!followerOrEscorter)
+                    aggressive = true;
             }
-            if (!followerOrEscorter)
-                aggressive = true;
         }
 
         // If any of the above conditions turned actor1 aggressive towards actor2, do an awareness check. If it passes,
@@ -1154,6 +1160,9 @@ namespace MWMechanics
                 creatureStats.setAttacked(false);
                 creatureStats.setAlarmed(false);
                 creatureStats.setAiSetting(AiSetting::Fight, ptr.getClass().getBaseFightRating(ptr));
+
+                // Restore original disposition
+                npcStats.setCrimeDispositionModifier(0);
 
                 // Update witness crime id
                 npcStats.setCrimeId(-1);
@@ -1730,6 +1739,8 @@ namespace MWMechanics
         actor.getClass().getCreatureStats(actor).notifyDied();
 
         ++mDeathCount[actor.getCellRef().getRefId()];
+
+        MWBase::Environment::get().getLuaManager()->actorDied(actor);
     }
 
     void Actors::resurrect(const MWWorld::Ptr& ptr) const
@@ -1814,12 +1825,8 @@ namespace MWMechanics
             const ESM::Static* fx = MWBase::Environment::get().getESMStore()->get<ESM::Static>().search(
                 ESM::RefId::stringRefId("VFX_Summon_End"));
             if (fx)
-            {
-                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 MWBase::Environment::get().getWorld()->spawnEffect(
-                    Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), "",
-                    ptr.getRefData().getPosition().asVec3());
-            }
+                    Misc::ResourceHelpers::correctMeshPath(fx->mModel), "", ptr.getRefData().getPosition().asVec3());
 
             // Remove the summoned creature's summoned creatures as well
             MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
@@ -1998,12 +2005,12 @@ namespace MWMechanics
     }
 
     bool Actors::playAnimationGroup(
-        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist) const
+        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
         {
-            return iter->second->getCharacterController().playGroup(groupName, mode, number, persist);
+            return iter->second->getCharacterController().playGroup(groupName, mode, number, scripted);
         }
         else
         {
@@ -2087,6 +2094,10 @@ namespace MWMechanics
                             std::vector<MWWorld::Ptr> enemies;
                             if (ally.getClass().getCreatureStats(ally).getAiSequence().getCombatTargets(enemies)
                                 && std::find(enemies.begin(), enemies.end(), actorPtr) != enemies.end())
+                                break;
+                            enemies.clear();
+                            if (actorPtr.getClass().getCreatureStats(actorPtr).getAiSequence().getCombatTargets(enemies)
+                                && std::find(enemies.begin(), enemies.end(), ally) != enemies.end())
                                 break;
                         }
                         list.push_back(package->getTarget());

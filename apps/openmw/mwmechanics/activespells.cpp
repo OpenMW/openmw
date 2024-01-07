@@ -228,6 +228,7 @@ namespace MWMechanics
                 mSpells.emplace_back(ActiveSpellParams{ spell, ptr });
         }
 
+        bool updateSpellWindow = false;
         if (ptr.getClass().hasInventoryStore(ptr)
             && !(creatureStats.isDead() && !creatureStats.isDeathAnimationFinished()))
         {
@@ -264,6 +265,7 @@ namespace MWMechanics
                     for (const auto& effect : params.mEffects)
                         MWMechanics::playEffects(
                             ptr, *world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId), playNonLooping);
+                    updateSpellWindow = true;
                 }
             }
         }
@@ -321,11 +323,8 @@ namespace MWMechanics
                     ESM::RefId::stringRefId("VFX_Reflect"));
                 MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
                 if (animation && !reflectStatic->mModel.empty())
-                {
-                    const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    animation->addEffect(Misc::ResourceHelpers::correctMeshPath(reflectStatic->mModel, vfs),
+                    animation->addEffect(Misc::ResourceHelpers::correctMeshPath(reflectStatic->mModel),
                         ESM::MagicEffect::Reflect, false);
-                }
                 caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
             }
             if (removedSpell)
@@ -368,6 +367,7 @@ namespace MWMechanics
                 for (const auto& effect : params.mEffects)
                     onMagicEffectRemoved(ptr, params, effect);
                 applyPurges(ptr, &spellIt);
+                updateSpellWindow = true;
                 continue;
             }
             ++spellIt;
@@ -379,6 +379,14 @@ namespace MWMechanics
                 = ptr.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;
             if (creatureStats.getMagicEffects().getOrDefault(effect).getMagnitude() > 0.f)
                 creatureStats.getAiSequence().stopCombat();
+        }
+
+        if (ptr == player && updateSpellWindow)
+        {
+            // Something happened with the spell list -- possibly while the game is paused,
+            // so we want to make the spell window get the memo.
+            // We don't normally want to do this, so this targets constant enchantments.
+            MWBase::Environment::get().getWindowManager()->updateSpellWindow();
         }
     }
 

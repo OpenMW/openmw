@@ -21,7 +21,7 @@ namespace MWRender
         if (Stereo::getStereo())
         {
             mViewportStateset = new osg::StateSet();
-            mViewport = new osg::Viewport(0, 0, pp->renderWidth(), pp->renderHeight());
+            mViewport = new osg::Viewport;
             mViewportStateset->setAttribute(mViewport);
         }
     }
@@ -37,41 +37,31 @@ namespace MWRender
         size_t frame = cv->getTraversalNumber();
         size_t frameId = frame % 2;
 
-        MWRender::PostProcessor* postProcessor
-            = dynamic_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
-        if (!postProcessor)
-            throw std::runtime_error("PingPongCull: failed to get a PostProcessor!");
-
         if (Stereo::getStereo())
         {
             auto& sm = Stereo::Manager::instance();
             auto view = sm.getEye(cv);
             int index = view == Stereo::Eye::Right ? 1 : 0;
             auto projectionMatrix = sm.computeEyeProjection(index, true);
-            postProcessor->getStateUpdater()->setProjectionMatrix(projectionMatrix);
+            mPostProcessor->getStateUpdater()->setProjectionMatrix(projectionMatrix);
         }
 
-        postProcessor->getStateUpdater()->setViewMatrix(cv->getCurrentCamera()->getViewMatrix());
-        postProcessor->getStateUpdater()->setPrevViewMatrix(mLastViewMatrix[0]);
+        mPostProcessor->getStateUpdater()->setViewMatrix(cv->getCurrentCamera()->getViewMatrix());
+        mPostProcessor->getStateUpdater()->setPrevViewMatrix(mLastViewMatrix[0]);
         mLastViewMatrix[0] = cv->getCurrentCamera()->getViewMatrix();
 
-        postProcessor->getStateUpdater()->setEyePos(cv->getEyePoint());
-        postProcessor->getStateUpdater()->setEyeVec(cv->getLookVectorLocal());
+        mPostProcessor->getStateUpdater()->setEyePos(cv->getEyePoint());
+        mPostProcessor->getStateUpdater()->setEyeVec(cv->getLookVectorLocal());
 
-        if (!postProcessor->getFbo(PostProcessor::FBO_Primary, frameId))
+        if (!mPostProcessor->getFbo(PostProcessor::FBO_Multisample, frameId))
         {
-            renderStage->setMultisampleResolveFramebufferObject(nullptr);
-            renderStage->setFrameBufferObject(nullptr);
-        }
-        else if (!postProcessor->getFbo(PostProcessor::FBO_Multisample, frameId))
-        {
-            renderStage->setFrameBufferObject(postProcessor->getFbo(PostProcessor::FBO_Primary, frameId));
+            renderStage->setFrameBufferObject(mPostProcessor->getFbo(PostProcessor::FBO_Primary, frameId));
         }
         else
         {
             renderStage->setMultisampleResolveFramebufferObject(
-                postProcessor->getFbo(PostProcessor::FBO_Primary, frameId));
-            renderStage->setFrameBufferObject(postProcessor->getFbo(PostProcessor::FBO_Multisample, frameId));
+                mPostProcessor->getFbo(PostProcessor::FBO_Primary, frameId));
+            renderStage->setFrameBufferObject(mPostProcessor->getFbo(PostProcessor::FBO_Multisample, frameId));
 
             // The MultiView patch has a bug where it does not update resolve layers if the resolve framebuffer is
             // changed. So we do blit manually in this case

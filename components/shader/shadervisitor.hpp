@@ -108,6 +108,7 @@ namespace Shader
             bool mBlendFuncOverridden;
             bool mAdditiveBlending;
 
+            bool mDiffuseHeight; // true if diffuse map has height info in alpha channel
             bool mNormalHeight; // true if normal map has height info in alpha channel
 
             // -1 == no tangents required

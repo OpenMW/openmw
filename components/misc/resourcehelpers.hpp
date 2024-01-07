@@ -33,7 +33,7 @@ namespace Misc
         std::string correctActorModelPath(const std::string& resPath, const VFS::Manager* vfs);
 
         // Adds "meshes\\".
-        std::string correctMeshPath(std::string_view resPath, const VFS::Manager* vfs);
+        std::string correctMeshPath(std::string_view resPath);
 
         // Adds "sound\\".
         std::string correctSoundPath(const std::string& resPath);

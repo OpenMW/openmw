@@ -1,13 +1,5 @@
 #include "maindialog.hpp"
 
-#include <components/debug/debuglog.hpp>
-#include <components/files/configurationmanager.hpp>
-#include <components/files/conversion.hpp>
-#include <components/files/qtconversion.hpp>
-#include <components/misc/helpviewer.hpp>
-#include <components/misc/utf8qtextstream.hpp>
-#include <components/version/version.hpp>
-
 #include <QCloseEvent>
 #include <QDir>
 #include <QMessageBox>
@@ -15,10 +7,15 @@
 #include <QTime>
 
 #include <components/debug/debugging.hpp>
+#include <components/debug/debuglog.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/qtconfigpath.hpp>
 #include <components/files/qtconversion.hpp>
+#include <components/misc/helpviewer.hpp>
 #include <components/misc/utf8qtextstream.hpp>
+#include <components/settings/settings.hpp>
+#include <components/version/version.hpp>
 
 #include "datafilespage.hpp"
 #include "graphicspage.hpp"
@@ -121,13 +118,14 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
     const auto& userConfigDir = mCfgMgr.getUserConfigPath();
     if (!exists(userConfigDir))
     {
-        if (!create_directories(userConfigDir))
+        std::error_code ec;
+        if (!create_directories(userConfigDir, ec))
         {
-            cfgError(tr("Error opening OpenMW configuration file"),
-                tr("<br><b>Could not create directory %0</b><br><br> \
-                        Please make sure you have the right permissions \
-                        and try again.<br>")
-                    .arg(Files::pathToQString(canonical(userConfigDir))));
+            cfgError(tr("Error creating OpenMW configuration directory: code %0").arg(ec.value()),
+                tr("<br><b>Could not create directory %0</b><br><br>"
+                   "%1<br>")
+                    .arg(Files::pathToQString(userConfigDir))
+                    .arg(QString(ec.message().c_str())));
             return FirstRunDialogResultFailure;
         }
     }
@@ -139,10 +137,10 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setStandardButtons(QMessageBox::NoButton);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Welcome to OpenMW!</b></p> \
-                          <p>It is recommended to run the Installation Wizard.</p> \
-                          <p>The Wizard will let you select an existing Morrowind installation, \
-                          or install Morrowind for OpenMW to use.</p></body></html>"));
+            tr("<html><head/><body><p><b>Welcome to OpenMW!</b></p>"
+               "<p>It is recommended to run the Installation Wizard.</p>"
+               "<p>The Wizard will let you select an existing Morrowind installation, "
+               "or install Morrowind for OpenMW to use.</p></body></html>"));
 
         QAbstractButton* wizardButton
             = msgBox.addButton(tr("Run &Installation Wizard"), QMessageBox::AcceptRole); // ActionRole doesn't work?!
@@ -300,9 +298,9 @@ bool Launcher::MainDialog::setupLauncherSettings()
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         cfgError(tr("Error opening OpenMW configuration file"),
-            tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br> \
-                     Please make sure you have the right permissions \
-                     and try again.<br>")
+            tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br>"
+               "Please make sure you have the right permissions "
+               "and try again.<br>")
                 .arg(file.fileName())
                 .arg(file.errorString()));
         return false;
@@ -330,9 +328,9 @@ bool Launcher::MainDialog::setupGameSettings()
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
                 cfgError(tr("Error opening OpenMW configuration file"),
-                    tr("<br><b>Could not open %0 for reading</b><br><br> \
-                            Please make sure you have the right permissions \
-                            and try again.<br>")
+                    tr("<br><b>Could not open %0 for reading</b><br><br>"
+                       "Please make sure you have the right permissions "
+                       "and try again.<br>")
                         .arg(file.fileName()));
                 return {};
             }
@@ -391,8 +389,8 @@ bool Launcher::MainDialog::setupGameData()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::NoButton);
         msgBox.setText(
-            tr("<br><b>Could not find the Data Files location</b><br><br> \
-                                   The directory containing the data files was not found."));
+            tr("<br><b>Could not find the Data Files location</b><br><br>"
+               "The directory containing the data files was not found."));
 
         QAbstractButton* wizardButton = msgBox.addButton(tr("Run &Installation Wizard..."), QMessageBox::ActionRole);
         QAbstractButton* skipButton = msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
@@ -422,8 +420,8 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     catch (std::exception& e)
     {
         cfgError(tr("Error reading OpenMW configuration files"),
-            tr("<br>The problem may be due to an incomplete installation of OpenMW.<br> \
-                     Reinstalling OpenMW may resolve the problem.<br>")
+            tr("<br>The problem may be due to an incomplete installation of OpenMW.<br>"
+               "Reinstalling OpenMW may resolve the problem.<br>")
                 + e.what());
         return false;
     }
@@ -460,13 +458,14 @@ bool Launcher::MainDialog::writeSettings()
 
     if (!exists(userPath))
     {
-        if (!create_directories(userPath))
+        std::error_code ec;
+        if (!create_directories(userPath, ec))
         {
-            cfgError(tr("Error creating OpenMW configuration directory"),
-                tr("<br><b>Could not create %0</b><br><br> \
-                         Please make sure you have the right permissions \
-                         and try again.<br>")
-                    .arg(Files::pathToQString(userPath)));
+            cfgError(tr("Error creating OpenMW configuration directory: code %0").arg(ec.value()),
+                tr("<br><b>Could not create directory %0</b><br><br>"
+                   "%1<br>")
+                    .arg(Files::pathToQString(userPath))
+                    .arg(QString(ec.message().c_str())));
             return false;
         }
     }
@@ -482,9 +481,9 @@ bool Launcher::MainDialog::writeSettings()
     {
         // File cannot be opened or created
         cfgError(tr("Error writing OpenMW configuration file"),
-            tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                     Please make sure you have the right permissions \
-                     and try again.<br>")
+            tr("<br><b>Could not open or create %0 for writing</b><br><br>"
+               "Please make sure you have the right permissions "
+               "and try again.<br>")
                 .arg(file.fileName()));
         return false;
     }
@@ -513,9 +512,9 @@ bool Launcher::MainDialog::writeSettings()
     {
         // File cannot be opened or created
         cfgError(tr("Error writing Launcher configuration file"),
-            tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                     Please make sure you have the right permissions \
-                     and try again.<br>")
+            tr("<br><b>Could not open or create %0 for writing</b><br><br>"
+               "Please make sure you have the right permissions "
+               "and try again.<br>")
                 .arg(file.fileName()));
         return false;
     }
@@ -565,8 +564,8 @@ void Launcher::MainDialog::play()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<br><b>You do not have a game file selected.</b><br><br> \
-                          OpenMW will not start without a game file selected.<br>"));
+            tr("<br><b>You do not have a game file selected.</b><br><br>"
+               "OpenMW will not start without a game file selected.<br>"));
         msgBox.exec();
         return;
     }

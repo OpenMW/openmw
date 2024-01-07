@@ -1,7 +1,6 @@
 #ifndef GAME_MWMECHANICS_ALCHEMY_H
 #define GAME_MWMECHANICS_ALCHEMY_H
 
-#include <set>
 #include <vector>
 
 #include <components/esm3/effectlist.hpp>
@@ -110,7 +109,7 @@ namespace MWMechanics
         void setPotionName(const std::string& name);
         ///< Set name of potion to create
 
-        std::set<EffectKey> listEffects() const;
+        std::vector<EffectKey> listEffects() const;
         ///< List all effects shared by at least two ingredients.
 
         int addIngredient(const MWWorld::Ptr& ingredient);
@@ -119,8 +118,14 @@ namespace MWMechanics
         /// \return Slot index or -1, if adding failed because of no free slot or the ingredient type being
         /// listed already.
 
-        void removeIngredient(int index);
+        void addApparatus(const MWWorld::Ptr& apparatus);
+        ///< Add apparatus into the appropriate slot.
+
+        void removeIngredient(size_t index);
         ///< Remove ingredient from slot (calling this function on an empty slot is a no-op).
+
+        void removeApparatus(size_t index);
+        ///< Remove apparatus from slot.
 
         std::string suggestPotionName();
         ///< Suggest a name for the potion, based on the current effects

@@ -21,7 +21,7 @@ namespace ESM
 
             Faction faction;
 
-            int expelled = 0;
+            int32_t expelled = 0;
             esm.getHNOT(expelled, "FAEX");
 
             if (expelled)
@@ -37,49 +37,12 @@ namespace ESM
         mDisposition = 0;
         esm.getHNOT(mDisposition, "DISP");
 
+        mCrimeDispositionModifier = 0;
+        esm.getHNOT(mCrimeDispositionModifier, "DISM");
+
         const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
         for (auto& skill : mSkills)
             skill.load(esm, intFallback);
-
-        mWerewolfDeprecatedData = false;
-        if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion && esm.peekNextSub("STBA"))
-        {
-            // we have deprecated werewolf skills, stored interleaved
-            // Load into one big vector, then remove every 2nd value
-            mWerewolfDeprecatedData = true;
-            std::vector<StatState<float>> skills(mSkills.begin(), mSkills.end());
-
-            for (size_t i = 0; i < std::size(mSkills); ++i)
-            {
-                StatState<float> skill;
-                skill.load(esm, intFallback);
-                skills.push_back(skill);
-            }
-
-            int i = 0;
-            for (std::vector<StatState<float>>::iterator it = skills.begin(); it != skills.end(); ++i)
-            {
-                if (i % 2 == 1)
-                    it = skills.erase(it);
-                else
-                    ++it;
-            }
-            if (skills.size() != std::size(mSkills))
-                throw std::runtime_error(
-                    "Invalid number of skill for werewolf deprecated data: " + std::to_string(skills.size()));
-            std::copy(skills.begin(), skills.end(), mSkills.begin());
-        }
-
-        // No longer used
-        bool hasWerewolfAttributes = false;
-        esm.getHNOT(hasWerewolfAttributes, "HWAT");
-        if (hasWerewolfAttributes)
-        {
-            StatState<int> dummy;
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
-                dummy.load(esm, intFallback);
-            mWerewolfDeprecatedData = true;
-        }
 
         mIsWerewolf = false;
         esm.getHNOT(mIsWerewolf, "WOLF");
@@ -92,14 +55,6 @@ namespace ESM
 
         mWerewolfKills = 0;
         esm.getHNOT(mWerewolfKills, "WKIL");
-
-        // No longer used
-        if (esm.isNextSub("PROF"))
-            esm.skipHSub(); // int profit
-
-        // No longer used
-        if (esm.isNextSub("ASTR"))
-            esm.skipHSub(); // attackStrength
 
         mLevelProgress = 0;
         esm.getHNOT(mLevelProgress, "LPRO");
@@ -116,39 +71,34 @@ namespace ESM
         mTimeToStartDrowning = 0;
         esm.getHNOT(mTimeToStartDrowning, "DRTI");
 
-        // No longer used
-        float lastDrowningHit = 0;
-        esm.getHNOT(lastDrowningHit, "DRLH");
-
-        // No longer used
-        float levelHealthBonus = 0;
-        esm.getHNOT(levelHealthBonus, "LVLH");
-
         mCrimeId = -1;
         esm.getHNOT(mCrimeId, "CRID");
     }
 
     void NpcStats::save(ESMWriter& esm) const
     {
-        for (auto iter(mFactions.begin()); iter != mFactions.end(); ++iter)
+        for (const auto& [id, faction] : mFactions)
         {
-            esm.writeHNRefId("FACT", iter->first);
+            esm.writeHNRefId("FACT", id);
 
-            if (iter->second.mExpelled)
+            if (faction.mExpelled)
             {
-                int expelled = 1;
+                int32_t expelled = 1;
                 esm.writeHNT("FAEX", expelled);
             }
 
-            if (iter->second.mRank >= 0)
-                esm.writeHNT("FARA", iter->second.mRank);
+            if (faction.mRank >= 0)
+                esm.writeHNT("FARA", faction.mRank);
 
-            if (iter->second.mReputation)
-                esm.writeHNT("FARE", iter->second.mReputation);
+            if (faction.mReputation)
+                esm.writeHNT("FARE", faction.mReputation);
         }
 
         if (mDisposition)
             esm.writeHNT("DISP", mDisposition);
+
+        if (mCrimeDispositionModifier)
+            esm.writeHNT("DISM", mCrimeDispositionModifier);
 
         for (const auto& skill : mSkills)
             skill.save(esm);
@@ -169,7 +119,7 @@ namespace ESM
             esm.writeHNT("LPRO", mLevelProgress);
 
         bool saveSkillIncreases = false;
-        for (int increase : mSkillIncrease)
+        for (int32_t increase : mSkillIncrease)
         {
             if (increase != 0)
             {
@@ -183,8 +133,8 @@ namespace ESM
         if (mSpecIncreases[0] != 0 || mSpecIncreases[1] != 0 || mSpecIncreases[2] != 0)
             esm.writeHNT("SPEC", mSpecIncreases);
 
-        for (auto iter(mUsedIds.begin()); iter != mUsedIds.end(); ++iter)
-            esm.writeHNRefId("USED", *iter);
+        for (const RefId& id : mUsedIds)
+            esm.writeHNRefId("USED", id);
 
         if (mTimeToStartDrowning)
             esm.writeHNT("DRTI", mTimeToStartDrowning);
@@ -195,9 +145,9 @@ namespace ESM
 
     void NpcStats::blank()
     {
-        mWerewolfDeprecatedData = false;
         mIsWerewolf = false;
         mDisposition = 0;
+        mCrimeDispositionModifier = 0;
         mBounty = 0;
         mReputation = 0;
         mWerewolfKills = 0;

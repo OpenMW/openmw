@@ -23,6 +23,10 @@
 -- @type MWScriptFunctions
 
 ---
+-- @type MWScriptVariables
+-- @map <#string, #number>
+
+---
 -- Returns local mwscript on ``object``. Returns `nil` if the script doesn't exist or is not started.
 -- @function [parent=#MWScriptFunctions] getLocalScript
 -- @param openmw.core#GameObject object
@@ -33,7 +37,7 @@
 -- Returns mutable global variables. In multiplayer, these may be specific to the provided player.
 -- @function [parent=#MWScriptFunctions] getGlobalVariables
 -- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to get the globals if there is a separate instance for each player. Currently has no effect.
--- @return #list<#number>
+-- @return #MWScriptVariables
 
 ---
 -- Returns global mwscript with given recordId. Returns `nil` if the script doesn't exist or is not started.
@@ -106,6 +110,11 @@
 -- Set the ratio of game time speed to simulation time speed.
 -- @function [parent=#world] setGameTimeScale
 -- @param #number ratio
+
+---
+-- Frame duration in seconds
+-- @function [parent=#world] getRealFrameDuration
+-- @return #number
 
 ---
 -- Whether the world is paused (onUpdate doesn't work when the world is paused).

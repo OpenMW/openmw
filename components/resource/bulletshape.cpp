@@ -32,11 +32,11 @@ namespace Resource
                 return newShape;
             }
 
-            if (shape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
+            if (shape->getShapeType() == SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE)
             {
-                const btBvhTriangleMeshShape* trishape = static_cast<const btBvhTriangleMeshShape*>(shape);
+                const btScaledBvhTriangleMeshShape* trishape = static_cast<const btScaledBvhTriangleMeshShape*>(shape);
                 return CollisionShapePtr(new btScaledBvhTriangleMeshShape(
-                    const_cast<btBvhTriangleMeshShape*>(trishape), btVector3(1.f, 1.f, 1.f)));
+                    const_cast<btBvhTriangleMeshShape*>(trishape->getChildShape()), trishape->getLocalScaling()));
             }
 
             if (shape->getShapeType() == BOX_SHAPE_PROXYTYPE)

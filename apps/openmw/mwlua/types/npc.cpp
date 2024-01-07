@@ -12,6 +12,7 @@
 #include <apps/openmw/mwworld/class.hpp>
 #include <apps/openmw/mwworld/esmstore.hpp>
 
+#include "../classbindings.hpp"
 #include "../localscripts.hpp"
 #include "../stats.hpp"
 
@@ -80,6 +81,8 @@ namespace MWLua
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
         addActorServicesBindings<ESM::NPC>(record, context);
+
+        npc["classes"] = initCoreClassBindings(context);
 
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
@@ -265,7 +268,7 @@ namespace MWLua
             npcStats.setFactionReputation(factionId, existingReputation + value);
         };
 
-        npc["expell"] = [](Object& actor, std::string_view faction) {
+        npc["expel"] = [](Object& actor, std::string_view faction) {
             if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
                 throw std::runtime_error("Local scripts can modify only self");
 

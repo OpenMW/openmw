@@ -85,7 +85,7 @@ namespace MWLua
     public:
         sol::object getCurrent(const Context& context) const
         {
-            return getValue(context, mObject, &LevelStat::setValue, 0, "current",
+            return getValue(context, mObject, &LevelStat::setValue, std::monostate{}, "current",
                 [](const MWWorld::Ptr& ptr) { return ptr.getClass().getCreatureStats(ptr).getLevel(); });
         }
 
@@ -93,7 +93,7 @@ namespace MWLua
         {
             SelfObject* obj = mObject.asSelfObject();
             addStatUpdateAction(context.mLuaManager, *obj);
-            obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, 0, "current" }] = value;
+            obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, std::monostate{}, "current" }] = value;
         }
 
         sol::object getProgress(const Context& context) const
@@ -446,6 +446,9 @@ namespace MWLua
         skillT["name"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mName; });
         skillT["description"]
             = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mDescription; });
+        skillT["specialization"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view {
+            return ESM::Class::specializationIndexToLuaId.at(rec.mData.mSpecialization);
+        });
         skillT["icon"] = sol::readonly_property([vfs](const ESM::Skill& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
@@ -453,6 +456,9 @@ namespace MWLua
             if (!rec.mSchool)
                 return nullptr;
             return &*rec.mSchool;
+        });
+        skillT["attribute"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string {
+            return ESM::Attribute::indexToRefId(rec.mData.mAttribute).serializeText();
         });
 
         auto schoolT = context.mLua->sol().new_usertype<ESM::MagicSchool>("MagicSchool");

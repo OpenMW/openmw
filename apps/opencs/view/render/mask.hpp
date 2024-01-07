@@ -11,6 +11,7 @@ namespace CSVRender
     enum Mask : unsigned int
     {
         // elements that are part of the actual scene
+        Mask_Hidden = 0x0,
         Mask_Reference = 0x2,
         Mask_Pathgrid = 0x4,
         Mask_Water = 0x8,

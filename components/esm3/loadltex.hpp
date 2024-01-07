@@ -29,7 +29,7 @@ namespace ESM
         // mId is merely a user friendly name for the texture in the editor.
         std::string mTexture;
         RefId mId;
-        int mIndex;
+        int32_t mIndex;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

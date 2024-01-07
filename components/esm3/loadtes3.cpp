@@ -9,7 +9,7 @@ namespace ESM
 
     void Header::blank()
     {
-        mData.version = VER_13;
+        mData.version.ui = VER_130;
         mData.type = 0;
         mData.author.clear();
         mData.desc.clear();
@@ -20,15 +20,13 @@ namespace ESM
 
     void Header::load(ESMReader& esm)
     {
-        if (esm.isNextSub("FORM"))
-            esm.getHT(mFormatVersion);
-        else
-            mFormatVersion = DefaultFormatVersion;
+        mFormatVersion = DefaultFormatVersion;
+        esm.getHNOT("FORM", mFormatVersion);
 
         if (esm.isNextSub("HEDR"))
         {
             esm.getSubHeader();
-            esm.getT(mData.version);
+            esm.getT(mData.version.ui);
             esm.getT(mData.type);
             mData.author = esm.getMaybeFixedStringSize(32);
             mData.desc = esm.getMaybeFixedStringSize(256);
@@ -43,10 +41,8 @@ namespace ESM
             mMaster.push_back(m);
         }
 
-        if (esm.isNextSub("GMDT"))
-        {
-            esm.getHTSized<124>(mGameData);
-        }
+        esm.getHNOT("GMDT", mGameData.mCurrentHealth, mGameData.mMaximumHealth, mGameData.mHour, mGameData.unknown1,
+            mGameData.mCurrentCell.mData, mGameData.unknown2, mGameData.mPlayerName.mData);
         if (esm.isNextSub("SCRD"))
         {
             esm.getSubHeader();

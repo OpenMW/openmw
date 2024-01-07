@@ -46,32 +46,32 @@ void MWWorld::InventoryStore::initSlots(TSlots& slots_)
 }
 
 void MWWorld::InventoryStore::storeEquipmentState(
-    const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const
+    const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const
 {
-    for (int i = 0; i < static_cast<int>(mSlots.size()); ++i)
+    for (int32_t i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+    {
         if (mSlots[i].getType() != -1 && mSlots[i]->getBase() == &ref)
-        {
-            inventory.mEquipmentSlots[index] = i;
-        }
+            inventory.mEquipmentSlots[static_cast<uint32_t>(index)] = i;
+    }
 
     if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
         inventory.mSelectedEnchantItem = index;
 }
 
 void MWWorld::InventoryStore::readEquipmentState(
-    const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory)
+    const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory)
 {
     if (index == inventory.mSelectedEnchantItem)
         mSelectedEnchantItem = iter;
 
-    std::map<int, int>::const_iterator found = inventory.mEquipmentSlots.find(index);
+    auto found = inventory.mEquipmentSlots.find(index);
     if (found != inventory.mEquipmentSlots.end())
     {
         if (found->second < 0 || found->second >= MWWorld::InventoryStore::Slots)
             throw std::runtime_error("Invalid slot index in inventory state");
 
         // make sure the item can actually be equipped in this slot
-        int slot = found->second;
+        int32_t slot = found->second;
         std::pair<std::vector<int>, bool> allowedSlots = iter->getClass().getEquipmentSlots(*iter);
         if (!allowedSlots.first.size())
             return;
@@ -79,11 +79,11 @@ void MWWorld::InventoryStore::readEquipmentState(
             slot = allowedSlots.first.front();
 
         // unstack if required
-        if (!allowedSlots.second && iter->getRefData().getCount() > 1)
+        if (!allowedSlots.second && iter->getCellRef().getCount() > 1)
         {
-            int count = iter->getRefData().getCount(false);
+            int count = iter->getCellRef().getCount(false);
             MWWorld::ContainerStoreIterator newIter = addNewStack(*iter, count > 0 ? 1 : -1);
-            iter->getRefData().setCount(subtractItems(count, 1));
+            iter->getCellRef().setCount(subtractItems(count, 1));
             mSlots[slot] = newIter;
         }
         else
@@ -171,7 +171,7 @@ void MWWorld::InventoryStore::equip(int slot, const ContainerStoreIterator& iter
 
     // unstack item pointed to by iterator if required
     if (iterator != end() && !slots_.second
-        && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
+        && iterator->getCellRef().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
     {
         unstack(*iterator);
     }
@@ -355,7 +355,7 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
                 {
                     if (!itemsSlots.second)
                     {
-                        if (weapon->getRefData().getCount() > 1)
+                        if (weapon->getCellRef().getCount() > 1)
                         {
                             unstack(*weapon);
                         }
@@ -478,7 +478,7 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
             if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
             {
                 // unstack item pointed to by iterator if required
-                if (iter->getRefData().getCount() > 1)
+                if (iter->getCellRef().getCount() > 1)
                 {
                     unstack(*iter);
                 }
@@ -590,7 +590,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, bool equipReplac
     int retCount = ContainerStore::remove(item, count, equipReplacement, resolve);
 
     bool wasEquipped = false;
-    if (!item.getRefData().getCount())
+    if (!item.getCellRef().getCount())
     {
         for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
@@ -618,7 +618,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, bool equipReplac
             autoEquip();
     }
 
-    if (item.getRefData().getCount() == 0 && mSelectedEnchantItem != end() && *mSelectedEnchantItem == item)
+    if (item.getCellRef().getCount() == 0 && mSelectedEnchantItem != end() && *mSelectedEnchantItem == item)
     {
         mSelectedEnchantItem = end();
     }
@@ -643,7 +643,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, b
         // empty this slot
         mSlots[slot] = end();
 
-        if (it->getRefData().getCount())
+        if (it->getCellRef().getCount())
         {
             retval = restack(*it);
 
@@ -690,10 +690,10 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
         throw std::runtime_error("attempt to unequip an item that is not currently equipped");
     if (count <= 0)
         throw std::runtime_error("attempt to unequip nothing (count <= 0)");
-    if (count > item.getRefData().getCount())
+    if (count > item.getCellRef().getCount())
         throw std::runtime_error("attempt to unequip more items than equipped");
 
-    if (count == item.getRefData().getCount())
+    if (count == item.getCellRef().getCount())
         return unequipItem(item);
 
     // Move items to an existing stack if possible, otherwise split count items out into a new stack.
@@ -702,13 +702,13 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
     {
         if (stacks(*iter, item) && !isEquipped(*iter))
         {
-            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), count));
-            item.getRefData().setCount(subtractItems(item.getRefData().getCount(false), count));
+            iter->getCellRef().setCount(addItems(iter->getCellRef().getCount(false), count));
+            item.getCellRef().setCount(subtractItems(item.getCellRef().getCount(false), count));
             return iter;
         }
     }
 
-    return unstack(item, item.getRefData().getCount() - count);
+    return unstack(item, item.getCellRef().getCount() - count);
 }
 
 MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getInvListener() const

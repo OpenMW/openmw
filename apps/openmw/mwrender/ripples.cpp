@@ -128,10 +128,11 @@ namespace MWRender
         {
             size_t frameId = nv.getFrameStamp()->getFrameNumber() % 2;
 
-            const ESM::Position& player = MWMechanics::getPlayer().getRefData().getPosition();
+            const auto& player = MWMechanics::getPlayer();
+            const ESM::Position& playerPos = player.getRefData().getPosition();
 
             mCurrentPlayerPos = osg::Vec2f(
-                std::floor(player.pos[0] / mWorldScaleFactor), std::floor(player.pos[1] / mWorldScaleFactor));
+                std::floor(playerPos.pos[0] / mWorldScaleFactor), std::floor(playerPos.pos[1] / mWorldScaleFactor));
             osg::Vec2f offset = mCurrentPlayerPos - mLastPlayerPos;
             mLastPlayerPos = mCurrentPlayerPos;
             mState[frameId].mPaused = mPaused;

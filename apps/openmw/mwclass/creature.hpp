@@ -67,7 +67,8 @@ namespace MWClass
             const osg::Vec3f& hitPosition, bool success) const override;
 
         void onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const override;
+            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+            const MWMechanics::DamageSourceType sourceType) const override;
 
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation

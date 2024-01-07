@@ -22,6 +22,7 @@ namespace MWMechanics
     class NpcStats : public CreatureStats
     {
         int mDisposition;
+        int mCrimeDispositionModifier;
         std::map<ESM::RefId, SkillValue> mSkills; // SkillValue.mProgress used by the player only
 
         int mReputation;
@@ -53,6 +54,10 @@ namespace MWMechanics
 
         int getBaseDisposition() const;
         void setBaseDisposition(int disposition);
+
+        int getCrimeDispositionModifier() const;
+        void setCrimeDispositionModifier(int value);
+        void modCrimeDispositionModifier(int value);
 
         int getReputation() const;
         void setReputation(int reputation);

@@ -2,12 +2,63 @@
 
 #include <cstdint>
 
+#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
+
+#include <components/misc/convert.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/resource/bulletshape.hpp>
 
 #include "data.hpp"
 #include "exception.hpp"
 #include "physics.hpp"
 #include "property.hpp"
+
+namespace
+{
+
+    void triBasedGeomToBtTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriBasedGeomData& data)
+    {
+        // FIXME: copying vertices/indices individually is unreasonable
+        const std::vector<osg::Vec3f>& vertices = data.mVertices;
+        mesh.preallocateVertices(static_cast<int>(vertices.size()));
+        for (const osg::Vec3f& vertex : vertices)
+            mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
+
+        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles) * 3);
+    }
+
+    void trianglesToBtTriangleMesh(btTriangleMesh& mesh, const std::vector<unsigned short>& triangles)
+    {
+        for (std::size_t i = 0; i < triangles.size(); i += 3)
+            mesh.addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
+    }
+
+    void stripsToBtTriangleMesh(btTriangleMesh& mesh, const std::vector<std::vector<unsigned short>>& strips)
+    {
+        for (const auto& strip : strips)
+        {
+            if (strip.size() < 3)
+                continue;
+
+            unsigned short a;
+            unsigned short b = strip[0];
+            unsigned short c = strip[1];
+            for (size_t i = 2; i < strip.size(); i++)
+            {
+                a = b;
+                b = c;
+                c = strip[i];
+                if (a == b || b == c || a == c)
+                    continue;
+                if (i % 2 == 0)
+                    mesh.addTriangleIndices(a, b, c);
+                else
+                    mesh.addTriangleIndices(a, c, b);
+            }
+        }
+    }
+
+}
 
 namespace Nif
 {
@@ -216,6 +267,99 @@ namespace Nif
                     break;
             }
         }
+    }
+
+    std::unique_ptr<btCollisionShape> NiTriShape::getCollisionShape() const
+    {
+        if (mData.empty() || mData->mVertices.empty())
+            return nullptr;
+
+        std::vector<const std::vector<unsigned short>*> triangleLists;
+        std::vector<const std::vector<std::vector<unsigned short>>*> stripsLists;
+        auto data = static_cast<const NiTriShapeData*>(mData.getPtr());
+        const Nif::NiSkinPartition* partitions = nullptr;
+        if (!mSkin.empty())
+            partitions = mSkin->getPartitions();
+
+        if (partitions)
+        {
+            triangleLists.reserve(partitions->mPartitions.size());
+            stripsLists.reserve(partitions->mPartitions.size());
+            for (auto& partition : partitions->mPartitions)
+            {
+                triangleLists.push_back(&partition.mTrueTriangles);
+                stripsLists.push_back(&partition.mTrueStrips);
+            }
+        }
+        else if (data->mNumTriangles != 0)
+            triangleLists.push_back(&data->mTriangles);
+
+        // This makes a perhaps dangerous assumption that NiSkinPartition will never have more than 65536 triangles.
+        auto mesh = std::make_unique<btTriangleMesh>();
+        triBasedGeomToBtTriangleMesh(*mesh, *data);
+        for (const auto triangles : triangleLists)
+            trianglesToBtTriangleMesh(*mesh, *triangles);
+        for (const auto strips : stripsLists)
+            stripsToBtTriangleMesh(*mesh, *strips);
+
+        if (mesh->getNumTriangles() == 0)
+            return nullptr;
+
+        auto shape = std::make_unique<Resource::TriangleMeshShape>(mesh.get(), true);
+        std::ignore = mesh.release();
+
+        return shape;
+    }
+
+    std::unique_ptr<btCollisionShape> NiTriStrips::getCollisionShape() const
+    {
+        if (mData.empty() || mData->mVertices.empty())
+            return nullptr;
+
+        std::vector<const std::vector<unsigned short>*> triangleLists;
+        std::vector<const std::vector<std::vector<unsigned short>>*> stripsLists;
+        auto data = static_cast<const NiTriStripsData*>(mData.getPtr());
+        const Nif::NiSkinPartition* partitions = nullptr;
+        if (!mSkin.empty())
+            partitions = mSkin->getPartitions();
+
+        if (partitions)
+        {
+            triangleLists.reserve(partitions->mPartitions.size());
+            stripsLists.reserve(partitions->mPartitions.size());
+            for (auto& partition : partitions->mPartitions)
+            {
+                triangleLists.push_back(&partition.mTrueTriangles);
+                stripsLists.push_back(&partition.mTrueStrips);
+            }
+        }
+        else if (data->mNumTriangles != 0)
+            stripsLists.push_back(&data->mStrips);
+
+        auto mesh = std::make_unique<btTriangleMesh>();
+        triBasedGeomToBtTriangleMesh(*mesh, *data);
+        for (const auto triangles : triangleLists)
+            trianglesToBtTriangleMesh(*mesh, *triangles);
+        for (const auto strips : stripsLists)
+            stripsToBtTriangleMesh(*mesh, *strips);
+
+        if (mesh->getNumTriangles() == 0)
+            return nullptr;
+
+        auto shape = std::make_unique<Resource::TriangleMeshShape>(mesh.get(), true);
+        std::ignore = mesh.release();
+
+        return shape;
+    }
+
+    std::unique_ptr<btCollisionShape> NiLines::getCollisionShape() const
+    {
+        return nullptr;
+    }
+
+    std::unique_ptr<btCollisionShape> NiParticles::getCollisionShape() const
+    {
+        return nullptr;
     }
 
     void BSSegmentedTriShape::SegmentData::read(NIFStream* nif)

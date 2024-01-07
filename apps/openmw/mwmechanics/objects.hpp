@@ -46,7 +46,7 @@ namespace MWMechanics
         void onClose(const MWWorld::Ptr& ptr);
 
         bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist = false);
+            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false);
         void skipAnimation(const MWWorld::Ptr& ptr);
         void persistAnimationStates();
 

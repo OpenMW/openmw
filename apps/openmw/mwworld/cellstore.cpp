@@ -54,6 +54,7 @@
 #include <components/esm4/loaddoor.hpp>
 #include <components/esm4/loadflor.hpp>
 #include <components/esm4/loadfurn.hpp>
+#include <components/esm4/loadimod.hpp>
 #include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadmisc.hpp>
@@ -151,7 +152,7 @@ namespace
             if (toIgnore.find(&*iter) != toIgnore.end())
                 continue;
 
-            if (actor.getClass().getCreatureStats(actor).matchesActorId(actorId) && actor.getRefData().getCount() > 0)
+            if (actor.getClass().getCreatureStats(actor).matchesActorId(actorId) && actor.getCellRef().getCount() > 0)
                 return actor;
         }
 
@@ -161,31 +162,32 @@ namespace
     template <typename T>
     void writeReferenceCollection(ESM::ESMWriter& writer, const MWWorld::CellRefList<T>& collection)
     {
-        if (!collection.mList.empty())
+        // references
+        for (const MWWorld::LiveCellRef<T>& liveCellRef : collection.mList)
         {
-            // references
-            for (typename MWWorld::CellRefList<T>::List::const_iterator iter(collection.mList.begin());
-                 iter != collection.mList.end(); ++iter)
+            if (ESM::isESM4Rec(T::sRecordId))
             {
-                if (!iter->mData.hasChanged() && !iter->mRef.hasChanged() && iter->mRef.hasContentFile())
-                {
-                    // Reference that came from a content file and has not been changed -> ignore
-                    continue;
-                }
-                if (iter->mData.getCount() == 0 && !iter->mRef.hasContentFile())
-                {
-                    // Deleted reference that did not come from a content file -> ignore
-                    continue;
-                }
-                using StateType = typename RecordToState<T>::StateType;
-                StateType state;
-                iter->save(state);
-
-                // recordId currently unused
-                writer.writeHNT("OBJE", collection.mList.front().mBase->sRecordId);
-
-                state.save(writer);
+                // TODO: Implement loading/saving of REFR4 and ACHR4 with ESM3 reader/writer.
+                continue;
             }
+            if (!liveCellRef.mData.hasChanged() && !liveCellRef.mRef.hasChanged() && liveCellRef.mRef.hasContentFile())
+            {
+                // Reference that came from a content file and has not been changed -> ignore
+                continue;
+            }
+            if (liveCellRef.mRef.getCount() == 0 && !liveCellRef.mRef.hasContentFile())
+            {
+                // Deleted reference that did not come from a content file -> ignore
+                continue;
+            }
+            using StateType = typename RecordToState<T>::StateType;
+            StateType state;
+            liveCellRef.save(state);
+
+            // recordId currently unused
+            writer.writeHNT("OBJE", collection.mList.front().mBase->sRecordId);
+
+            state.save(writer);
         }
     }
 
@@ -199,8 +201,8 @@ namespace
             {
                 for (auto& item : state.mInventory.mItems)
                 {
-                    if (item.mCount > 0 && baseItem.mItem == item.mRef.mRefID)
-                        item.mCount = -item.mCount;
+                    if (item.mRef.mCount > 0 && baseItem.mItem == item.mRef.mRefID)
+                        item.mRef.mCount = -item.mRef.mCount;
                 }
             }
         }
@@ -250,16 +252,16 @@ namespace
         if (!record)
             return;
 
-        if (state.mVersion < 15)
+        if (state.mVersion <= ESM::MaxOldRestockingFormatVersion)
             fixRestocking(record, state);
-        if (state.mVersion < 17)
+        if (state.mVersion <= ESM::MaxClearModifiersFormatVersion)
         {
             if constexpr (std::is_same_v<T, ESM::Creature>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory);
             else if constexpr (std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertMagicEffects(state.mCreatureStats, state.mInventory, &state.mNpcStats);
         }
-        else if (state.mVersion < 20)
+        else if (state.mVersion <= ESM::MaxOldCreatureStatsFormatVersion)
         {
             if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertStats(state.mCreatureStats);
@@ -296,9 +298,9 @@ namespace
             // instance is invalid. But non-storable item are always stored in saves together with their original cell.
             // If a non-storable item references a content file, but is not found in this content file,
             // we should drop it. Likewise if this stack is empty.
-            if (!MWWorld::ContainerStore::isStorableType<T>() || !state.mCount)
+            if (!MWWorld::ContainerStore::isStorableType<T>() || !state.mRef.mCount)
             {
-                if (state.mCount)
+                if (state.mRef.mCount)
                     Log(Debug::Warning) << "Warning: Dropping reference to " << state.mRef.mRefID
                                         << " (invalid content file link)";
                 return;
@@ -674,7 +676,7 @@ namespace MWWorld
             MWWorld::Ptr actor(base, this);
             if (!actor.getClass().isActor())
                 continue;
-            if (actor.getClass().getCreatureStats(actor).matchesActorId(id) && actor.getRefData().getCount() > 0)
+            if (actor.getClass().getCreatureStats(actor).matchesActorId(id) && actor.getCellRef().getCount() > 0)
                 return actor;
         }
 
@@ -1040,7 +1042,7 @@ namespace MWWorld
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
             ESM::RefNum refNum = base->mRef.getRefNum();
-            if (base->mData.isDeleted() && !refNum.hasContentFile())
+            if (base->isDeleted() && !refNum.hasContentFile())
                 continue; // filtered out in writeReferenceCollection
             ESM::RefId movedTo = store->getCell()->getId();
 
@@ -1166,20 +1168,18 @@ namespace MWWorld
     {
         if (mState == State_Loaded)
         {
-            for (CellRefList<ESM::Creature>::List::iterator it(get<ESM::Creature>().mList.begin());
-                 it != get<ESM::Creature>().mList.end(); ++it)
+            for (MWWorld::LiveCellRef<ESM::Creature>& creature : get<ESM::Creature>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
-                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                Ptr ptr = getCurrentPtr(&creature);
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
                 {
                     MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
             }
-            for (CellRefList<ESM::NPC>::List::iterator it(get<ESM::NPC>().mList.begin());
-                 it != get<ESM::NPC>().mList.end(); ++it)
+            for (MWWorld::LiveCellRef<ESM::NPC>& npc : get<ESM::NPC>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
-                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                Ptr ptr = getCurrentPtr(&npc);
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
                 {
                     MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
@@ -1194,29 +1194,26 @@ namespace MWWorld
 
         if (mState == State_Loaded)
         {
-            for (CellRefList<ESM::Creature>::List::iterator it(get<ESM::Creature>().mList.begin());
-                 it != get<ESM::Creature>().mList.end(); ++it)
+            for (MWWorld::LiveCellRef<ESM::Creature>& creature : get<ESM::Creature>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
-                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                Ptr ptr = getCurrentPtr(&creature);
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
                 {
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }
-            for (CellRefList<ESM::NPC>::List::iterator it(get<ESM::NPC>().mList.begin());
-                 it != get<ESM::NPC>().mList.end(); ++it)
+            for (MWWorld::LiveCellRef<ESM::NPC>& npc : get<ESM::NPC>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
-                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                Ptr ptr = getCurrentPtr(&npc);
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
                 {
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }
-            for (CellRefList<ESM::Container>::List::iterator it(get<ESM::Container>().mList.begin());
-                 it != get<ESM::Container>().mList.end(); ++it)
+            for (MWWorld::LiveCellRef<ESM::Container>& container : get<ESM::Container>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
-                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0
+                Ptr ptr = getCurrentPtr(&container);
+                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getCellRef().getCount() > 0
                     && ptr.getClass().getContainerStore(ptr).isResolved())
                 {
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
@@ -1260,7 +1257,7 @@ namespace MWWorld
             }
             forEachType<ESM::CreatureLevList>([](Ptr ptr) {
                 // no need to clearCorpse, handled as part of get<ESM::Creature>()
-                if (!ptr.getRefData().isDeleted())
+                if (!ptr.mRef->isDeleted())
                     ptr.getClass().respawn(ptr);
                 return true;
             });
@@ -1288,7 +1285,7 @@ namespace MWWorld
             for (auto& item : list)
             {
                 Ptr ptr = getCurrentPtr(&item);
-                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
                 {
                     checkItem(ptr);
                 }

@@ -21,21 +21,17 @@ namespace ESM
         // We changed stats values from integers to floats; ensure backwards compatibility
         if (intFallback)
         {
-            int base = 0;
+            int32_t base = 0;
             esm.getHNT(base, "STBA");
             mBase = static_cast<T>(base);
 
-            int mod = 0;
+            int32_t mod = 0;
             esm.getHNOT(mod, "STMO");
             mMod = static_cast<T>(mod);
 
-            int current = 0;
+            int32_t current = 0;
             esm.getHNOT(current, "STCU");
             mCurrent = static_cast<T>(current);
-
-            int oldDamage = 0;
-            esm.getHNOT(oldDamage, "STDA");
-            mDamage = static_cast<float>(oldDamage);
         }
         else
         {

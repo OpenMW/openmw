@@ -9,17 +9,17 @@ namespace ESSImport
     {
         esm.getSubNameIs("GMDT");
         esm.getSubHeader();
-        if (esm.getSubSize() == 92)
-        {
-            esm.getExact(&mGMDT, 92);
-            mGMDT.mSecundaPhase = 0;
-        }
-        else if (esm.getSubSize() == 96)
-        {
-            esm.getTSized<96>(mGMDT);
-        }
-        else
-            esm.fail("unexpected subrecord size for GAME.GMDT");
+        bool hasSecundaPhase = esm.getSubSize() == 96;
+        esm.getT(mGMDT.mCellName);
+        esm.getT(mGMDT.mFogColour);
+        esm.getT(mGMDT.mFogDensity);
+        esm.getT(mGMDT.mCurrentWeather);
+        esm.getT(mGMDT.mNextWeather);
+        esm.getT(mGMDT.mWeatherTransition);
+        esm.getT(mGMDT.mTimeOfNextTransition);
+        esm.getT(mGMDT.mMasserPhase);
+        if (hasSecundaPhase)
+            esm.getT(mGMDT.mSecundaPhase);
 
         mGMDT.mWeatherTransition &= (0x000000ff);
         mGMDT.mSecundaPhase &= (0x000000ff);

@@ -156,7 +156,7 @@ Allowed options)");
               return false;
               }*/
 
-        const auto inputFiles = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
+        const auto& inputFiles = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
         info.filename = inputFiles[0].u8string(); // This call to u8string is redundant, but required to build on
                                                   // MSVC 14.26 due to implementation bugs.
         if (inputFiles.size() > 1)
@@ -265,7 +265,7 @@ namespace
                 std::cout << "    Faction rank: " << ref.mFactionRank << '\n';
             std::cout << "    Enchantment charge: " << ref.mEnchantmentCharge << '\n';
             std::cout << "    Uses/health: " << ref.mChargeInt << '\n';
-            std::cout << "    Gold value: " << ref.mGoldValue << '\n';
+            std::cout << "    Count: " << ref.mCount << '\n';
             std::cout << "    Blocked: " << static_cast<int>(ref.mReferenceBlocked) << '\n';
             std::cout << "    Deleted: " << deleted << '\n';
             if (!ref.mKey.empty())
@@ -341,7 +341,7 @@ namespace
             {
                 std::cout << "Author: " << esm.getAuthor() << '\n'
                           << "Description: " << esm.getDesc() << '\n'
-                          << "File format version: " << esm.getFVer() << '\n';
+                          << "File format version: " << esm.esmVersionF() << '\n';
                 std::vector<ESM::Header::MasterData> masterData = esm.getGameFiles();
                 if (!masterData.empty())
                 {
@@ -508,7 +508,7 @@ namespace
         ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(info.encoding));
         esm.setEncoder(&encoder);
         esm.setHeader(data.mHeader);
-        esm.setVersion(ESM::VER_13);
+        esm.setVersion(ESM::VER_130);
         esm.setRecordCount(recordCount);
 
         std::fstream save(info.outname, std::fstream::out | std::fstream::binary);

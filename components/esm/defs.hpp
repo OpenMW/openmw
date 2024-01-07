@@ -18,9 +18,9 @@ namespace ESM
     struct EpochTimeStamp
     {
         float mGameHour;
-        int mDay;
-        int mMonth;
-        int mYear;
+        int32_t mDay;
+        int32_t mMonth;
+        int32_t mYear;
     };
 
     // Pixel color value. Standard four-byte rr,gg,bb,aa format.
@@ -146,8 +146,6 @@ namespace ESM
 
         // format 0 - saved games
         REC_SAVE = esm3Recname("SAVE"),
-        REC_JOUR_LEGACY = esm3Recname("\xa4UOR"), // "\xa4UOR", rather than "JOUR", little oversight when magic numbers
-                                                  // were calculated by hand, needs to be supported for older files now
         REC_JOUR = esm3Recname("JOUR"),
         REC_QUES = esm3Recname("QUES"),
         REC_GSCR = esm3Recname("GSCR"),
@@ -172,6 +170,8 @@ namespace ESM
         // format 1
         REC_FILT = esm3Recname("FILT"),
         REC_DBGP = esm3Recname("DBGP"), ///< only used in project files
+        REC_SELG = esm3Recname("SELG"),
+
         REC_LUAL = esm3Recname("LUAL"), // LuaScriptsCfg (only in omwgame or omwaddon)
 
         // format 16 - Lua scripts in saved games

@@ -38,23 +38,15 @@ namespace ESM
         mHitRecovery = false;
         mBlock = false;
         mRecalcDynamicStats = false;
-        if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion)
+        if (esm.getFormatVersion() <= MaxUnoptimizedCharacterDataFormatVersion)
         {
             esm.getHNOT(mDead, "DEAD");
             esm.getHNOT(mDeathAnimationFinished, "DFNT");
-            if (esm.getFormatVersion() <= MaxOldDeathAnimationFormatVersion && mDead)
-                mDeathAnimationFinished = true;
             esm.getHNOT(mDied, "DIED");
             esm.getHNOT(mMurdered, "MURD");
-            if (esm.isNextSub("FRHT"))
-                esm.skipHSub(); // Friendly hits, no longer used
             esm.getHNOT(mTalkedTo, "TALK");
             esm.getHNOT(mAlarmed, "ALRM");
             esm.getHNOT(mAttacked, "ATKD");
-            if (esm.isNextSub("HOST"))
-                esm.skipHSub(); // Hostile, no longer used
-            if (esm.isNextSub("ATCK"))
-                esm.skipHSub(); // attackingOrSpell, no longer used
             esm.getHNOT(mKnockdown, "KNCK");
             esm.getHNOT(mKnockdownOneFrame, "KNC1");
             esm.getHNOT(mKnockdownOverOneFrame, "KNCO");
@@ -82,9 +74,6 @@ namespace ESM
         mMovementFlags = 0;
         esm.getHNOT(mMovementFlags, "MOVE");
 
-        if (esm.isNextSub("ASTR"))
-            esm.skipHSub(); // attackStrength, no longer used
-
         mFallHeight = 0;
         esm.getHNOT(mFallHeight, "FALL");
 
@@ -92,7 +81,7 @@ namespace ESM
 
         mLastHitAttemptObject = esm.getHNORefId("LHAT");
 
-        if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion)
+        if (esm.getFormatVersion() <= MaxUnoptimizedCharacterDataFormatVersion)
             esm.getHNOT(mRecalcDynamicStats, "CALC");
 
         mDrawState = 0;

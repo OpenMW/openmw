@@ -124,12 +124,12 @@ namespace Stereo
         }
     }
 
-    void setVertexBufferHint(bool enableMultiview)
+    void setVertexBufferHint(bool enableMultiview, bool allowDisplayListsForMultiview)
     {
         if (getStereo() && enableMultiview)
         {
             auto* ds = osg::DisplaySettings::instance().get();
-            if (!Settings::Manager::getBool("allow display lists for multiview", "Stereo")
+            if (!allowDisplayListsForMultiview
                 && ds->getVertexBufferHint() == osg::DisplaySettings::VertexBufferHint::NO_PREFERENCE)
             {
                 // Note that this only works if this code is executed before realize() is called on the viewer.

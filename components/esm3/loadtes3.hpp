@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "components/esm/common.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm3/formatversion.hpp"
 
@@ -11,20 +12,13 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
-#pragma pack(push)
-#pragma pack(1)
-
     struct Data
     {
-        /* File format version. This is actually a float, the supported
-            versions are 1.2 and 1.3. These correspond to:
-            1.2 = 0x3f99999a and 1.3 = 0x3fa66666
-        */
-        unsigned int version;
-        int type; // 0=esp, 1=esm, 32=ess (unused)
+        ESM::ESMVersion version;
+        int32_t type; // 0=esp, 1=esm, 32=ess (unused)
         std::string author; // Author's name
         std::string desc; // File description
-        int records; // Number of records
+        int32_t records; // Number of records
     };
 
     struct GMDT
@@ -37,8 +31,6 @@ namespace ESM
         unsigned char unknown2[4];
         NAME32 mPlayerName;
     };
-
-#pragma pack(pop)
 
     /// \brief File header record
     struct Header

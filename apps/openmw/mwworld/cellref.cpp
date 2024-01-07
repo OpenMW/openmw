@@ -188,25 +188,30 @@ namespace MWWorld
     void CellRef::applyChargeRemainderToBeSubtracted(float chargeRemainder)
     {
         auto esm3Visit = [&](ESM::CellRef& cellRef3) {
-            cellRef3.mChargeIntRemainder += std::abs(chargeRemainder);
-            if (cellRef3.mChargeIntRemainder > 1.0f)
+            cellRef3.mChargeIntRemainder -= std::abs(chargeRemainder);
+            if (cellRef3.mChargeIntRemainder <= -1.0f)
             {
-                float newChargeRemainder = (cellRef3.mChargeIntRemainder - std::floor(cellRef3.mChargeIntRemainder));
-                if (cellRef3.mChargeInt <= static_cast<int>(cellRef3.mChargeIntRemainder))
-                {
-                    cellRef3.mChargeInt = 0;
-                }
-                else
-                {
-                    cellRef3.mChargeInt -= static_cast<int>(cellRef3.mChargeIntRemainder);
-                }
+                float newChargeRemainder = std::modf(cellRef3.mChargeIntRemainder, &cellRef3.mChargeIntRemainder);
+                cellRef3.mChargeInt += static_cast<int>(cellRef3.mChargeIntRemainder);
                 cellRef3.mChargeIntRemainder = newChargeRemainder;
+                if (cellRef3.mChargeInt < 0)
+                    cellRef3.mChargeInt = 0;
             }
         };
         std::visit(ESM::VisitOverload{
                        [&](ESM4::Reference& /*ref*/) {},
                        [&](ESM4::ActorCharacter&) {},
                        esm3Visit,
+                   },
+            mCellRef.mVariant);
+    }
+
+    void CellRef::setChargeIntRemainder(float chargeRemainder)
+    {
+        std::visit(ESM::VisitOverload{
+                       [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM4::ActorCharacter&) {},
+                       [&](ESM::CellRef& ref) { ref.mChargeIntRemainder = chargeRemainder; },
                    },
             mCellRef.mVariant);
     }
@@ -372,17 +377,19 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setGoldValue(int value)
+    void CellRef::setCount(int value)
     {
-        if (value != getGoldValue())
+        if (value != getCount(false))
         {
             mChanged = true;
             std::visit(ESM::VisitOverload{
-                           [&](ESM4::Reference& /*ref*/) {},
-                           [&](ESM4::ActorCharacter&) {},
-                           [&](ESM::CellRef& ref) { ref.mGoldValue = value; },
+                           [&](ESM4::Reference& ref) { ref.mCount = value; },
+                           [&](ESM4::ActorCharacter& ref) { ref.mCount = value; },
+                           [&](ESM::CellRef& ref) { ref.mCount = value; },
                        },
                 mCellRef.mVariant);
+            if (value == 0)
+                MWBase::Environment::get().getWorld()->removeRefScript(this);
         }
     }
 

@@ -47,7 +47,6 @@ namespace MWLua
         }
 
         const std::unordered_map<MWGui::GuiMode, std::string_view> modeToName{
-            { MWGui::GM_Settings, "SettingsMenu" },
             { MWGui::GM_Inventory, "Interface" },
             { MWGui::GM_Container, "Container" },
             { MWGui::GM_Companion, "Companion" },
@@ -101,6 +100,13 @@ namespace MWLua
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
         auto element = context.mLua->sol().new_usertype<LuaUi::Element>("Element");
+        element[sol::meta_function::to_string] = [](const LuaUi::Element& element) {
+            std::stringstream res;
+            res << "UiElement";
+            if (element.mLayer != "")
+                res << "[" << element.mLayer << "]";
+            return res.str();
+        };
         element["layout"] = sol::property([](LuaUi::Element& element) { return element.mLayout; },
             [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
         element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
@@ -246,10 +252,7 @@ namespace MWLua
             return luaManager->uiResourceManager()->registerTexture(data);
         };
 
-        api["screenSize"] = []() {
-            return osg::Vec2f(
-                Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
-        };
+        api["screenSize"] = []() { return osg::Vec2f(Settings::video().mResolutionX, Settings::video().mResolutionY); };
 
         api["_getAllUiModes"] = [](sol::this_state lua) {
             sol::table res(lua, sol::create);

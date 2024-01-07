@@ -6,6 +6,8 @@
 #include <components/esm4/loadtree.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwworld/cellstore.hpp"

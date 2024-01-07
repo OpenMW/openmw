@@ -839,7 +839,7 @@ namespace MWLua
 
             // Note that, although this is member method of ActorActiveEffects and we are removing an effect (not a
             // spell), we still need to use the active spells store to purge this effect from active spells.
-            auto ptr = effects.mActor.ptr();
+            const auto& ptr = effects.mActor.ptr();
 
             auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
             activeSpells.purgeEffect(ptr, key.mId, key.mArg);

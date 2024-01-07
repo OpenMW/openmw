@@ -5,6 +5,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/fallback/fallback.hpp>
 #include <components/widgets/box.hpp>
@@ -22,7 +23,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "class.hpp"
-#include "ustring.hpp"
 
 namespace
 {
@@ -176,7 +176,7 @@ namespace MWGui
         if (levelupdescription.empty())
             levelupdescription = Fallback::Map::getString("Level_Up_Default");
 
-        mLevelDescription->setCaption(toUString(levelupdescription));
+        mLevelDescription->setCaption(MyGUI::UString(levelupdescription));
 
         unsigned int availableAttributes = 0;
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())

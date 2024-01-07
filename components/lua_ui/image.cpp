@@ -8,9 +8,7 @@ namespace LuaUi
 {
     void LuaTileRect::_setAlign(const MyGUI::IntSize& _oldsize)
     {
-        mCurrentCoord.set(0, 0, mCroppedParent->getWidth(), mCroppedParent->getHeight());
-        mAlign = MyGUI::Align::Stretch;
-        MyGUI::TileRect::_setAlign(_oldsize);
+        mCoord.set(0, 0, mCroppedParent->getWidth(), mCroppedParent->getHeight());
         mTileSize = mSetTileSize;
 
         // zero tilesize stands for not tiling
@@ -25,6 +23,8 @@ namespace LuaUi
             mTileSize.width = 1e7;
         if (mTileSize.height <= 0)
             mTileSize.height = 1e7;
+
+        MyGUI::TileRect::_updateView();
     }
 
     void LuaImage::initialize()
@@ -55,13 +55,13 @@ namespace LuaUi
         if (texture != nullptr)
             textureSize = MyGUI::IntSize(texture->getWidth(), texture->getHeight());
 
-        mTileRect->updateSize(MyGUI::IntSize(tileH ? textureSize.width : 0, tileV ? textureSize.height : 0));
-        setImageTile(textureSize);
-
         if (atlasCoord.width == 0)
             atlasCoord.width = textureSize.width;
         if (atlasCoord.height == 0)
             atlasCoord.height = textureSize.height;
+
+        mTileRect->updateSize(MyGUI::IntSize(tileH ? atlasCoord.width : 0, tileV ? atlasCoord.height : 0));
+        setImageTile(atlasCoord.size());
         setImageCoord(atlasCoord);
 
         setColour(propertyValue("color", MyGUI::Colour(1, 1, 1, 1)));

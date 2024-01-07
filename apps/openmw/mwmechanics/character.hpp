@@ -40,7 +40,7 @@ namespace MWMechanics
         Priority_Torch,
         Priority_Storm,
         Priority_Death,
-        Priority_Persistent,
+        Priority_Scripted,
 
         Num_Priorities
     };
@@ -135,7 +135,9 @@ namespace MWMechanics
         {
             std::string mGroup;
             size_t mLoopCount;
-            bool mPersist;
+            float mTime;
+            bool mLooping;
+            bool mScripted;
         };
         typedef std::deque<AnimationQueueEntry> AnimationQueue;
         AnimationQueue mAnimQueue;
@@ -207,7 +209,7 @@ namespace MWMechanics
         void refreshMovementAnims(CharacterState movement, bool force = false);
         void refreshIdleAnims(CharacterState idle, bool force = false);
 
-        void clearAnimQueue(bool clearPersistAnims = false);
+        void clearAnimQueue(bool clearScriptedAnims = false);
 
         bool updateWeaponState();
         void updateIdleStormState(bool inwater) const;
@@ -215,10 +217,11 @@ namespace MWMechanics
         std::string chooseRandomAttackAnimation() const;
         static bool isRandomAttackAnimation(std::string_view group);
 
-        bool isPersistentAnimPlaying() const;
+        bool isScriptedAnimPlaying() const;
         bool isMovementAnimationControlled() const;
 
         void updateAnimQueue();
+        void playAnimQueue(bool useLoopStart = false);
 
         void updateHeadTracking(float duration);
 
@@ -245,6 +248,8 @@ namespace MWMechanics
 
         void prepareHit();
 
+        bool isLoopingAnimation(std::string_view group) const;
+
     public:
         CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation* anim);
         virtual ~CharacterController();
@@ -270,7 +275,7 @@ namespace MWMechanics
         void persistAnimationState() const;
         void unpersistAnimationState();
 
-        bool playGroup(std::string_view groupname, int mode, int count, bool persist = false);
+        bool playGroup(std::string_view groupname, int mode, int count, bool scripted = false);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
 
@@ -318,6 +323,8 @@ namespace MWMechanics
         void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 
         void playSwishSound() const;
+
+        float getAnimationMovementDirection() const;
 
         MWWorld::MovementDirectionFlags getSupportedMovementDirections() const;
     };

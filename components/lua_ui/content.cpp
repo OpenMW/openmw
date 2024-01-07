@@ -1,4 +1,5 @@
 #include "content.hpp"
+#include "element.hpp"
 
 namespace LuaUi
 {
@@ -14,6 +15,8 @@ namespace LuaUi
 
     bool isValidContent(const sol::object& object)
     {
+        if (object.is<Element>())
+            return true;
         if (object.get_type() != sol::type::table)
             return false;
         sol::table table = object;

@@ -108,7 +108,15 @@ namespace Nif
     enum BSShaderFlags1
     {
         BSSFlag1_Specular = 0x00000001,
+        BSSFlag1_Refraction = 0x00008000,
+        BSSFlag1_FireRefraction = 0x00010000,
         BSSFlag1_Decal = 0x04000000,
+        BSSFlag1_DepthTest = 0x80000000,
+    };
+
+    enum BSShaderFlags2
+    {
+        BSSFlag2_DepthWrite = 0x00000001,
     };
 
     struct BSSPParallaxParams
@@ -140,6 +148,10 @@ namespace Nif
         // Shader-specific flag methods must be handled on per-record basis
         bool specular() const { return mShaderFlags1 & BSSFlag1_Specular; }
         bool decal() const { return mShaderFlags1 & BSSFlag1_Decal; }
+        bool depthTest() const { return mShaderFlags1 & BSSFlag1_DepthTest; }
+        bool depthWrite() const { return mShaderFlags2 & BSSFlag2_DepthWrite; }
+        bool refraction() const { return mShaderFlags1 & BSSFlag1_Refraction; }
+        bool fireRefraction() const { return mShaderFlags1 & BSSFlag1_FireRefraction; }
     };
 
     struct BSShaderLightingProperty : BSShaderProperty
@@ -287,15 +299,15 @@ namespace Nif
     {
         BSShaderTextureSetPtr mTextureSet;
         osg::Vec3f mEmissive;
-        float mEmissiveMult;
+        float mEmissiveMult{ 1.f };
         std::string mRootMaterial;
-        uint32_t mClamp;
-        float mAlpha;
+        uint32_t mClamp{ 3 };
+        float mAlpha{ 1.f };
         float mRefractionStrength;
         float mGlossiness{ 80.f };
         float mSmoothness{ 1.f };
         osg::Vec3f mSpecular;
-        float mSpecStrength;
+        float mSpecStrength{ 1.f };
         std::array<float, 2> mLightingEffects;
         float mSubsurfaceRolloff;
         float mRimlightPower;
@@ -453,11 +465,22 @@ namespace Nif
 
     struct NiFogProperty : NiProperty
     {
+        enum Flags : uint16_t
+        {
+            Enabled = 0x02,
+            Radial = 0x08,
+            VertexAlpha = 0x10,
+        };
+
         uint16_t mFlags;
         float mFogDepth;
         osg::Vec3f mColour;
 
         void read(NIFStream* nif) override;
+
+        bool enabled() const { return mFlags & Flags::Enabled; }
+        bool radial() const { return mFlags & Flags::Radial; }
+        bool vertexAlpha() const { return mFlags & Flags::VertexAlpha; }
     };
 
     struct NiMaterialProperty : NiProperty

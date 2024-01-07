@@ -1,6 +1,7 @@
 #include "armor.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadgmst.hpp>
@@ -24,7 +25,6 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "classmodel.hpp"
 
@@ -217,8 +217,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -266,7 +265,7 @@ namespace MWClass
         if (!info.enchant.empty())
             info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

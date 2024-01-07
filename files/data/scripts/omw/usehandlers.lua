@@ -22,7 +22,7 @@ local function useItem(obj, actor, force)
             end
         end
     end
-    world._runStandardUseAction(obj, actor, force)
+    world._runStandardUseAction(obj, actor, options.force)
 end
 
 return {

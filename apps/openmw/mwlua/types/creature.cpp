@@ -29,8 +29,6 @@ namespace MWLua
             { "Humanoid", ESM::Creature::Humanoid },
         }));
 
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM::Creature>(creature, context);
 
         sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
@@ -39,9 +37,8 @@ namespace MWLua
         record["id"]
             = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Creature& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
-        });
+        record["model"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
         record["mwscript"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> std::string { return rec.mScript.serializeText(); });
         record["baseCreature"] = sol::readonly_property(

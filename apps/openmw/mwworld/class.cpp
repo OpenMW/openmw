@@ -124,7 +124,7 @@ namespace MWWorld
     }
 
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker,
-        const osg::Vec3f& hitPosition, bool successful) const
+        const osg::Vec3f& hitPosition, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
         throw std::runtime_error("class cannot be hit");
     }
@@ -373,7 +373,7 @@ namespace MWWorld
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
-        newPtr.getRefData().setCount(count);
+        newPtr.getCellRef().setCount(count);
         newPtr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
         return newPtr;
@@ -524,10 +524,8 @@ namespace MWWorld
 
         const ESM::Enchantment* enchantment
             = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchantmentName);
-        if (!enchantment)
+        if (!enchantment || enchantment->mEffects.mList.empty())
             return result;
-
-        assert(enchantment->mEffects.mList.size());
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(
             enchantment->mEffects.mList.front().mEffectID);

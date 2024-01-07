@@ -53,6 +53,7 @@ namespace Nif::Testing
     {
         value.mData = NiSkinDataPtr(nullptr);
         value.mRoot = NiAVObjectPtr(nullptr);
+        value.mPartitions = NiSkinPartitionPtr(nullptr);
     }
 
     inline void init(NiTimeController& value)

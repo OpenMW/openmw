@@ -29,6 +29,19 @@ namespace SceneUtil
         node.setUserValue(Misc::OsgUserValues::sXSoftEffect, true);
     }
 
+    void setupDistortion(osg::Node& node, float distortionStrength)
+    {
+        static const osg::ref_ptr<SceneUtil::AutoDepth> depth
+            = new SceneUtil::AutoDepth(osg::Depth::ALWAYS, 0, 1, false);
+
+        osg::StateSet* stateset = node.getOrCreateStateSet();
+
+        stateset->setRenderBinDetails(14, "Distortion", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+        stateset->addUniform(new osg::Uniform("distortionStrength", distortionStrength));
+
+        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+    }
+
     void ProcessExtraDataVisitor::apply(osg::Node& node)
     {
         if (!mSceneMgr->getSoftParticles())
@@ -53,6 +66,12 @@ namespace SceneUtil
                     auto falloffDepth = it.second["falloffDepth"].as<float>(defaultFalloffDepth);
 
                     setupSoftEffect(node, size, falloff, falloffDepth);
+                }
+                else if (key == "distortion")
+                {
+                    auto strength = it.second["strength"].as<float>(0.1f);
+
+                    setupDistortion(node, strength);
                 }
             }
 

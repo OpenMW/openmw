@@ -173,6 +173,13 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSCollisionQueryProxyExtraData : BSExtraData
+    {
+        std::vector<uint8_t> mData;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct BSConnectPoint
     {
         struct Point

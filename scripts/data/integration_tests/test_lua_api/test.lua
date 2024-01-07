@@ -95,6 +95,10 @@ tests = {
         initPlayer()
         testing.runLocalTest(player, 'castNavigationRay')
     end},
+    {'findNearestNavMeshPosition', function()
+        initPlayer()
+        testing.runLocalTest(player, 'findNearestNavMeshPosition')
+    end},
     {'teleport', testTeleport},
     {'getGMST', testGetGMST},
 }

@@ -119,7 +119,7 @@ namespace MWGui
 
     void EditEffectDialog::newEffect(const ESM::MagicEffect* effect)
     {
-        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
+        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0 || mConstantEffect;
         bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
 
         setMagicEffect(effect);
@@ -240,7 +240,7 @@ namespace MWGui
         // cycle through range types until we find something that's allowed
         // does not handle the case where nothing is allowed (this should be prevented before opening the Add Effect
         // dialog)
-        bool allowSelf = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
+        bool allowSelf = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0 || mConstantEffect;
         bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
         bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
         if (mEffect.mRange == ESM::RT_Self && !allowSelf)
@@ -629,7 +629,7 @@ namespace MWGui
         const ESM::MagicEffect* effect
             = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
 
-        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
+        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0 || mConstantEffect;
         bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
         bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
 
@@ -751,25 +751,9 @@ namespace MWGui
     void EffectEditorBase::setConstantEffect(bool constant)
     {
         mAddEffectDialog.setConstantEffect(constant);
+        if (!mConstantEffect && constant)
+            for (ESM::ENAMstruct& effect : mEffects)
+                effect.mRange = ESM::RT_Self;
         mConstantEffect = constant;
-
-        if (!constant)
-            return;
-
-        for (auto it = mEffects.begin(); it != mEffects.end();)
-        {
-            if (it->mRange != ESM::RT_Self)
-            {
-                auto& store = *MWBase::Environment::get().getESMStore();
-                auto magicEffect = store.get<ESM::MagicEffect>().find(it->mEffectID);
-                if ((magicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) == 0)
-                {
-                    it = mEffects.erase(it);
-                    continue;
-                }
-                it->mRange = ESM::RT_Self;
-            }
-            ++it;
-        }
     }
 }

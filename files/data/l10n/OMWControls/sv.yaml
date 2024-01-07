@@ -13,3 +13,6 @@ toggleSneakDescription: |
     Denna inställningen gör att smygknappen (förinställt till ctrl) slår smygning på eller av vid ett knapptryck
     istället för att att kräva att knappen hålls nedtryckt för att smyga.
     Spelare som spenderar mycket tid med att smyga lär ha lättare att kontrollera rollfiguren med denna funktion aktiverad.
+
+# smoothControllerMovement
+# smoothControllerMovementDescription

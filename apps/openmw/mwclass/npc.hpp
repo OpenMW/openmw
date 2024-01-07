@@ -82,7 +82,8 @@ namespace MWClass
             const osg::Vec3f& hitPosition, bool success) const override;
 
         void onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const override;
+            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+            const MWMechanics::DamageSourceType sourceType) const override;
 
         void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:

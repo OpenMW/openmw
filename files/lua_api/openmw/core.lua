@@ -56,6 +56,11 @@
 -- @return #number
 
 ---
+-- Frame duration in seconds
+-- @function [parent=#core] getRealFrameDuration
+-- @return #number
+
+---
 -- Get a GMST setting from content files.
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
@@ -161,7 +166,7 @@
 -- @field openmw.util#Transform startingRotation The object original rotation
 -- @field #string ownerRecordId NPC who owns the object (nil if missing). Global and self scripts can set the value.
 -- @field #string ownerFactionId Faction who owns the object (nil if missing). Global and self scripts can set the value.
--- @field #number ownerFactionRank Rank required to be allowed to pick up the object. Global and self scripts can set the value.
+-- @field #number ownerFactionRank Rank required to be allowed to pick up the object (`nil` if any rank is allowed). Global and self scripts can set the value.
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
 -- @field #GameObject parentContainer Container or actor that contains (or has in inventory) this object. It is nil if the object is in a cell.
 -- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
@@ -265,6 +270,7 @@
 -- @function [parent=#GameObject] split
 -- @param self
 -- @param #number count The number of items to return.
+-- @return #GameObject
 -- @usage -- take 50 coins from `money` and put to the container `cont`
 -- money:split(50):moveInto(types.Container.content(cont))
 
@@ -861,8 +867,11 @@
 -- @field #string name Human-readable name
 -- @field #string description Human-readable description
 -- @field #string icon VFS path to the icon
+-- @field #string specialization Skill specialization. Either combat, magic, or stealth.
 -- @field #MagicSchoolData school Optional magic school
+-- @field #string attribute The id of the skill's governing attribute
 
+---
 -- @type MagicSchoolData
 -- @field #string name Human-readable name
 -- @field #string areaSound VFS path to the area sound
