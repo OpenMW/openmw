@@ -1,27 +1,42 @@
 #include "components/misc/osgpluginchecker.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/strings/conversion.hpp>
 
+#include <osg/Config>
 #include <osgDB/PluginQuery>
 
 #include <algorithm>
+#include <filesystem>
 #include <string_view>
 
 namespace Misc
 {
+#ifdef OSG_LIBRARY_STATIC
+
+    bool checkRequiredOSGPluginsArePresent()
+    {
+        // assume they were linked in at build time and CMake would have failed if they were missing
+        return true;
+    }
+
+#else
+
     namespace
     {
-        std::string_view USED_OSG_PLUGINS = "${USED_OSG_PLUGINS}";
+        std::string_view USED_OSG_PLUGIN_FILENAMES = "${USED_OSG_PLUGIN_FILENAMES}";
 
-        constexpr std::vector<std::string_view> getRequiredOSGPlugins()
+        constexpr auto getRequiredOSGPlugins()
         {
+            // TODO: this is only constexpr due to an MSVC extension, so doesn't work on GCC and Clang
+            // I tried replacing it with std::views::split_range, but we support compilers without that bit of C++20, and it wasn't obvious how to use the result as a string_view without C++23
             std::vector<std::string_view> requiredOSGPlugins;
-            auto currentStart = USED_OSG_PLUGINS.begin();
-            while (currentStart != USED_OSG_PLUGINS.end())
+            auto currentStart = USED_OSG_PLUGIN_FILENAMES.begin();
+            while (currentStart != USED_OSG_PLUGIN_FILENAMES.end())
             {
-                auto currentEnd = std::find(currentStart, USED_OSG_PLUGINS.end(), ';');
+                auto currentEnd = std::find(currentStart, USED_OSG_PLUGIN_FILENAMES.end(), ';');
                 requiredOSGPlugins.emplace_back(currentStart, currentEnd);
-                if (currentEnd == USED_OSG_PLUGINS.end())
+                if (currentEnd == USED_OSG_PLUGIN_FILENAMES.end())
                     break;
                 currentStart = currentEnd + 1;
             }
@@ -36,7 +51,14 @@ namespace Misc
         bool haveAllPlugins = true;
         for (std::string_view plugin : requiredOSGPlugins)
         {
-            if (std::find(availableOSGPlugins.begin(), availableOSGPlugins.end(), plugin) == availableOSGPlugins.end())
+            if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(), [&](std::string availablePlugin) {
+#ifdef OSG_USE_UTF8_FILENAME
+                std::filesystem::path pluginPath {stringToU8String(availablePlugin)};
+#else
+                std::filesystem::path pluginPath {availablePlugin};
+#endif
+                return pluginPath.filename() == plugin;
+            }) == availableOSGPlugins.end())
             {
                 Log(Debug::Error) << "Missing OSG plugin: " << plugin;
                 haveAllPlugins = false;
@@ -44,4 +66,6 @@ namespace Misc
         }
         return haveAllPlugins;
     }
+
+#endif
 }
