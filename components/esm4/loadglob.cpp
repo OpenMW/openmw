@@ -44,19 +44,16 @@ void ESM4::GlobalVariable::load(ESM4::Reader& reader)
             case ESM4::SUB_EDID:
                 reader.getZString(mEditorId);
                 break;
+            case ESM::fourCC("XALG"): // FO76
+                reader.get(mExtraFlags2);
+                break;
             case ESM4::SUB_FNAM:
                 reader.get(mType);
                 break;
             case ESM4::SUB_FLTV:
                 reader.get(mValue);
                 break;
-            case ESM4::SUB_FULL:
-            case ESM4::SUB_MODL:
-            case ESM4::SUB_MODB:
-            case ESM4::SUB_ICON:
-            case ESM4::SUB_DATA:
-            case ESM4::SUB_OBND: // TES5
-            case ESM4::SUB_VMAD: // TES5
+            case ESM::fourCC("NTWK"): // FO76
                 reader.skipSubRecordData();
                 break;
             default:
