@@ -128,7 +128,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
                 continue;
 
             noGameFiles = false;
-            if (isChecked(depFile->filePath()))
+            if (mCheckedFiles.contains(depFile))
             {
                 gamefileChecked = true;
                 break;
@@ -215,7 +215,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
             if (file == mGameFile)
                 return QVariant();
 
-            return mCheckStates[file->filePath()];
+            return mCheckedFiles.contains(file) ? Qt::Checked : Qt::Unchecked;
         }
 
         case Qt::UserRole:
@@ -229,7 +229,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
         }
 
         case Qt::UserRole + 1:
-            return isChecked(file->filePath());
+            return mCheckedFiles.contains(file);
     }
     return QVariant();
 }
@@ -277,12 +277,12 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
         {
             int checkValue = value.toInt();
             bool setState = false;
-            if ((checkValue == Qt::Checked) && !isChecked(file->filePath()))
+            if (checkValue == Qt::Checked && !mCheckedFiles.contains(file))
             {
                 setState = true;
                 success = true;
             }
-            else if ((checkValue == Qt::Checked) && isChecked(file->filePath()))
+            else if (checkValue == Qt::Checked && mCheckedFiles.contains(file))
                 setState = true;
             else if (checkValue == Qt::Unchecked)
                 setState = true;
@@ -628,14 +628,6 @@ void ContentSelectorModel::ContentModel::sortFiles()
     emit layoutChanged();
 }
 
-bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) const
-{
-    const auto it = mCheckStates.find(filepath);
-    if (it == mCheckStates.end())
-        return false;
-    return it.value() == Qt::Checked;
-}
-
 bool ContentSelectorModel::ContentModel::isEnabled(const QModelIndex& index) const
 {
     return (flags(index) & Qt::ItemIsEnabled);
@@ -723,7 +715,7 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
         }
         else
         {
-            if (!isChecked(dependentFile->filePath()))
+            if (!mCheckedFiles.contains(dependentFile))
             {
                 errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
             }
@@ -776,9 +768,13 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
     Qt::CheckState state = Qt::Unchecked;
 
     if (checkState)
+    {
         state = Qt::Checked;
+        mCheckedFiles.insert(file);
+    }
+    else
+        mCheckedFiles.erase(file);
 
-    mCheckStates[filepath] = state;
     emit dataChanged(indexFromItem(item(filepath)), indexFromItem(item(filepath)));
 
     if (file->isGameFile())
@@ -794,8 +790,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
             if (!upstreamFile)
                 continue;
 
-            if (!isChecked(upstreamFile->filePath()))
-                mCheckStates[upstreamFile->filePath()] = Qt::Checked;
+            mCheckedFiles.insert(upstreamFile);
 
             emit dataChanged(indexFromItem(upstreamFile), indexFromItem(upstreamFile));
         }
@@ -810,8 +805,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
 
             if (downstreamFile->gameFiles().contains(filename, Qt::CaseInsensitive))
             {
-                if (mCheckStates.contains(downstreamFile->filePath()))
-                    mCheckStates[downstreamFile->filePath()] = Qt::Unchecked;
+                mCheckedFiles.erase(downstreamFile);
 
                 emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
             }
@@ -829,7 +823,7 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
     // First search for game files and next addons,
     // so we get more or less correct game files vs addons order.
     for (EsmFile* file : mFiles)
-        if (isChecked(file->filePath()))
+        if (mCheckedFiles.contains(file))
             list << file;
 
     return list;
@@ -838,6 +832,6 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
 void ContentSelectorModel::ContentModel::uncheckAll()
 {
     emit layoutAboutToBeChanged();
-    mCheckStates.clear();
+    mCheckedFiles.clear();
     emit layoutChanged();
 }

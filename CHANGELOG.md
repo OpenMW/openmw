@@ -64,6 +64,7 @@
     Bug #7084: Resurrecting an actor doesn't take into account base record changes
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Bug #7092: BSA archives from higher priority directories don't take priority
+    Bug #7103: Multiple paths pointing to the same plugin but with different cases lead to automatically removed config entries
     Bug #7122: Teleportation to underwater should cancel active water walking effect
     Bug #7131: MyGUI log spam when post processing HUD is open
     Bug #7134: Saves with an invalid last generated RefNum can be loaded
