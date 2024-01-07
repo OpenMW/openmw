@@ -29,7 +29,7 @@ namespace ESM
         void AiTravel::load(ESMReader& esm)
         {
             esm.getHNT("DATA", mData.mX, mData.mY, mData.mZ);
-            esm.getHNOT(mHidden, "HIDD");
+            esm.getHNT(mHidden, "HIDD");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
         }
@@ -258,7 +258,7 @@ namespace ESM
                 }
             }
 
-            esm.getHNOT(mLastAiPackage, "LAST");
+            esm.getHNT(mLastAiPackage, "LAST");
 
             if (count > 1 && esm.getFormatVersion() <= MaxOldAiPackageFormatVersion)
             {

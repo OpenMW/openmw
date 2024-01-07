@@ -27,7 +27,7 @@ namespace ESM
     inline constexpr FormatVersion MaxOldCountFormatVersion = 30;
     inline constexpr FormatVersion CurrentSaveGameFormatVersion = 31;
 
-    inline constexpr FormatVersion MinSupportedSaveGameFormatVersion = 4;
+    inline constexpr FormatVersion MinSupportedSaveGameFormatVersion = 5;
     inline constexpr FormatVersion OpenMW0_48SaveGameFormatVersion = 21;
     inline constexpr FormatVersion OpenMW0_49SaveGameFormatVersion = CurrentSaveGameFormatVersion;
 }
