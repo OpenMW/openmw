@@ -4,12 +4,9 @@ export HOMEBREW_NO_EMOJI=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
 export HOMEBREW_AUTOREMOVE=1
 
-# purge large and unnecessary packages that get in our way
-brew uninstall ruby php openjdk node postgresql maven || true
-
-# purge things pre-installed that cause issues
-brew uninstall curl # aom cairo httpd jpeg-xl libavif
-# brew uninstall xquartz # gd fontconfig freetype harfbuzz brotli
+# workaround for gitlab's pre-installed brew
+# purge large and unnecessary packages that get in our way and have caused issues
+brew uninstall ruby php openjdk node postgresql maven curl || true
 
 brew tap --repair
 brew update --quiet
@@ -17,22 +14,10 @@ brew update --quiet
 # Some of these tools can come from places other than brew, so check before installing
 brew install curl xquartz gd fontconfig freetype harfbuzz brotli
 
-# Fix: can't open file: @loader_path/libbrotlicommon.1.dylib (No such file or directory)
-# TODO: this is also now broke :()
-#BREW_LIB_PATH="$(brew --prefix)/lib"
-#install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PATH}/libbrotlicommon.1.dylib" ${BREW_LIB_PATH}/libbrotlidec.1.dylib
-#install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PATH}/libbrotlicommon.1.dylib" ${BREW_LIB_PATH}/libbrotlienc.1.dylib
-
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt@5
 export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
-
-# try to find fontconfig
-find /opt | grep -i freetype
-#mkdir -p /opt/homebrew/opt/fontconfig/lib/
-#/opt/homebrew/Cellar/freetype/2.13.2.reinstall/lib/libfreetype.dylib
-
 
 
 # Install deps
