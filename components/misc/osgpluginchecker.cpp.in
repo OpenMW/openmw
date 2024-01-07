@@ -1,0 +1,47 @@
+#include "components/misc/osgpluginchecker.hpp"
+
+#include <components/debug/debuglog.hpp>
+
+#include <osgDB/PluginQuery>
+
+#include <algorithm>
+#include <string_view>
+
+namespace Misc
+{
+    namespace
+    {
+        std::string_view USED_OSG_PLUGINS = "${USED_OSG_PLUGINS}";
+
+        constexpr std::vector<std::string_view> getRequiredOSGPlugins()
+        {
+            std::vector<std::string_view> requiredOSGPlugins;
+            auto currentStart = USED_OSG_PLUGINS.begin();
+            while (currentStart != USED_OSG_PLUGINS.end())
+            {
+                auto currentEnd = std::find(currentStart, USED_OSG_PLUGINS.end(), ';');
+                requiredOSGPlugins.emplace_back(currentStart, currentEnd);
+                if (currentEnd == USED_OSG_PLUGINS.end())
+                    break;
+                currentStart = currentEnd + 1;
+            }
+            return requiredOSGPlugins;
+        }
+    }
+
+    bool checkRequiredOSGPluginsArePresent()
+    {
+        auto availableOSGPlugins = osgDB::listAllAvailablePlugins();
+        auto requiredOSGPlugins = getRequiredOSGPlugins();
+        bool haveAllPlugins = true;
+        for (std::string_view plugin : requiredOSGPlugins)
+        {
+            if (std::find(availableOSGPlugins.begin(), availableOSGPlugins.end(), plugin) == availableOSGPlugins.end())
+            {
+                Log(Debug::Error) << "Missing OSG plugin: " << plugin;
+                haveAllPlugins = false;
+            }
+        }
+        return haveAllPlugins;
+    }
+}

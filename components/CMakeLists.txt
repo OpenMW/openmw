@@ -40,6 +40,11 @@ endif (GIT_CHECKOUT)
 
 list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 
+# OSG plugin checker
+set(OSG_PLUGIN_CHECKER_CPP_FILE "components/misc/osgpluginchecker.cpp")
+configure_file("${OpenMW_SOURCE_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+list(APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+
 # source files
 
 add_component_dir (lua
@@ -274,8 +279,8 @@ add_component_dir (esm4
 
 add_component_dir (misc
     barrier budgetmeasurement color compression constants convert coordinateconverter display endianness float16 frameratelimiter
-    guarded math mathutil messageformatparser notnullptr objectpool osguservalues progressreporter resourcehelpers rng
-    strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
+    guarded math mathutil messageformatparser notnullptr objectpool osgpluginchecker osguservalues progressreporter resourcehelpers
+    rng strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
     )
 
 add_component_dir (misc/strings
