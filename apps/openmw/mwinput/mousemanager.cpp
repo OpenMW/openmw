@@ -158,8 +158,9 @@ namespace MWInput
 
         // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
         // Also do not trigger bindings when input controls are disabled, e.g. during save loading
-        if (!MWBase::Environment::get().getWindowManager()->getSettingsWindow()->isVisible()
-            && !input->controlsDisabled())
+        const MWGui::SettingsWindow* settingsWindow
+            = MWBase::Environment::get().getWindowManager()->getSettingsWindow();
+        if ((!settingsWindow || !settingsWindow->isVisible()) && !input->controlsDisabled())
             mBindingsManager->mousePressed(arg, id);
     }
 

@@ -37,7 +37,7 @@ namespace MWGui
         /// Sets the visibility of the window
         void setVisible(bool visible) override;
         /// Returns the visibility state of the window
-        bool isVisible();
+        bool isVisible() const;
 
         void center();
 
