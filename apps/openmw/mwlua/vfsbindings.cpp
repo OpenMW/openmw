@@ -161,7 +161,8 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         sol::usertype<FileHandle> handle = context.mLua->sol().new_usertype<FileHandle>("FileHandle");
-        handle["fileName"] = sol::readonly_property([](const FileHandle& self) { return self.mFileName; });
+        handle["fileName"]
+            = sol::readonly_property([](const FileHandle& self) -> std::string_view { return self.mFileName; });
         handle[sol::meta_function::to_string] = [](const FileHandle& self) {
             return "FileHandle{'" + self.mFileName + "'" + (!self.mFilePtr ? ", closed" : "") + "}";
         };
