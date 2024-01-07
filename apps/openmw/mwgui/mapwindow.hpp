@@ -170,8 +170,7 @@ namespace MWGui
         MyGUI::IntPoint getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const;
         MyGUI::IntCoord getMarkerCoordinates(
             float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const;
-        MyGUI::Widget* createDoorMarker(
-            const std::string& name, const MyGUI::VectorString& notes, float x, float y) const;
+        MyGUI::Widget* createDoorMarker(const std::string& name, float x, float y) const;
         MyGUI::IntCoord getMarkerCoordinates(MyGUI::Widget* widget, size_t markerSize) const;
 
         virtual void notifyPlayerUpdate() {}
