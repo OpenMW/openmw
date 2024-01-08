@@ -510,7 +510,7 @@ namespace MWRender
             if (!isWerewolf)
                 addAnimSource(base, smodel);
 
-            if (smodel != defaultSkeleton && base != defaultSkeleton)
+            if (!isBase || (isBase && base != defaultSkeleton))
                 addAnimSource(defaultSkeleton, smodel);
 
             if (!isBase)
