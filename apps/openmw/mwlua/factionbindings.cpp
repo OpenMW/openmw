@@ -122,7 +122,8 @@ namespace MWLua
             return "ESM3_FactionRank[" + rec.mFactionId.toDebugString() + ", " + std::to_string(rec.mRankIndex + 1)
                 + "]";
         };
-        rankT["name"] = sol::readonly_property([](const FactionRank& rec) { return rec.mRankName; });
+        rankT["name"]
+            = sol::readonly_property([](const FactionRank& rec) -> std::string_view { return rec.mRankName; });
         rankT["primarySkillValue"] = sol::readonly_property([](const FactionRank& rec) { return rec.mPrimarySkill; });
         rankT["favouredSkillValue"] = sol::readonly_property([](const FactionRank& rec) { return rec.mFavouredSkill; });
         rankT["factionReaction"] = sol::readonly_property([](const FactionRank& rec) { return rec.mFactReaction; });
