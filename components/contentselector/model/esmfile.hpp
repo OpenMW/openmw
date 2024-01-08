@@ -64,10 +64,6 @@ namespace ContentSelectorModel
         }
 
         bool isGameFile() const;
-        QByteArray encodedData() const;
-
-    public:
-        static int sPropertyCount;
 
     private:
         QString mTooltipTemlate = tr(

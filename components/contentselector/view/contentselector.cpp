@@ -108,6 +108,7 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     connect(ui->addonView, &QTableView::activated, this, &ContentSelector::slotAddonTableItemActivated);
     connect(mContentModel, &ContentSelectorModel::ContentModel::dataChanged, this,
         &ContentSelector::signalAddonDataChanged);
+    connect(mContentModel, &ContentSelectorModel::ContentModel::dataChanged, this, &ContentSelector::slotRowsMoved);
     buildContextMenu();
 }
 
@@ -330,4 +331,9 @@ void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()
 void ContentSelectorView::ContentSelector::slotSearchFilterTextChanged(const QString& newText)
 {
     ui->addonView->setDragEnabled(newText.isEmpty());
+}
+
+void ContentSelectorView::ContentSelector::slotRowsMoved()
+{
+    ui->addonView->selectionModel()->clearSelection();
 }
