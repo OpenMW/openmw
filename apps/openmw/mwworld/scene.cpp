@@ -115,7 +115,9 @@ namespace
         if (!refnum.hasContentFile() || !std::binary_search(pagedRefs.begin(), pagedRefs.end(), refnum))
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
         else
-            ptr.getRefData().setBaseNode(nullptr);
+            ptr.getRefData().setBaseNode(
+                new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend
+                                                           // on basenode
         setNodeRotation(ptr, rendering, rotation);
 
         if (ptr.getClass().useAnim())

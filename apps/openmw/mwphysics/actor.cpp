@@ -102,11 +102,7 @@ namespace MWPhysics
         updateScaleUnsafe();
 
         if (!mRotationallyInvariant)
-        {
-            const SceneUtil::PositionAttitudeTransform* baseNode = mPtr.getRefData().getBaseNode();
-            if (baseNode)
-                mRotation = baseNode->getAttitude();
-        }
+            mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
 
         addCollisionMask(getCollisionMask());
         updateCollisionObjectPositionUnsafe();
