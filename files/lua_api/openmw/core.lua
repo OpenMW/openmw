@@ -1,6 +1,6 @@
 ---
--- `openmw.core` defines functions and types that are available in both local
--- and global scripts.
+-- `openmw.core` defines functions and types that are available in local,
+-- global and menu scripts.
 -- @module core
 -- @usage local core = require('openmw.core')
 

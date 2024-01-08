@@ -1,6 +1,6 @@
 ---
 -- `openmw.ambient` controls background sounds, specific to given player (2D-sounds).
--- Can be used only by local scripts, that are attached to a player.
+-- Can be used only by menu scripts and local scripts, that are attached to a player.
 -- @module ambient
 -- @usage local ambient = require('openmw.ambient')
 

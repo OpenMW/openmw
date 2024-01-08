@@ -1,5 +1,5 @@
 ---
--- `openmw.input` can be used only in scripts attached to a player.
+-- `openmw.input` can be used only in menu scripts and scripts attached to a player.
 -- @module input
 -- @usage local input = require('openmw.input')
 
