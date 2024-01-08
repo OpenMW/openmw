@@ -126,14 +126,14 @@ void CSMPrefs::State::declare()
         .setRange(0, 10000);
     declareInt(mValues->mScripts.mErrorHeight, "Initial height of the error panel").setRange(100, 10000);
     declareBool(mValues->mScripts.mHighlightOccurrences, "Highlight other occurrences of selected names");
-    declareColour("colour-highlight", "Colour of highlighted occurrences", QColor("lightcyan"));
-    declareColour("colour-int", "Highlight Colour: Integer Literals", QColor("darkmagenta"));
-    declareColour("colour-float", "Highlight Colour: Float Literals", QColor("magenta"));
-    declareColour("colour-name", "Highlight Colour: Names", QColor("grey"));
-    declareColour("colour-keyword", "Highlight Colour: Keywords", QColor("red"));
-    declareColour("colour-special", "Highlight Colour: Special Characters", QColor("darkorange"));
-    declareColour("colour-comment", "Highlight Colour: Comments", QColor("green"));
-    declareColour("colour-id", "Highlight Colour: IDs", QColor("blue"));
+    declareColour(mValues->mScripts.mColourHighlight, "Colour of highlighted occurrences");
+    declareColour(mValues->mScripts.mColourInt, "Highlight Colour: Integer Literals");
+    declareColour(mValues->mScripts.mColourFloat, "Highlight Colour: Float Literals");
+    declareColour(mValues->mScripts.mColourName, "Highlight Colour: Names");
+    declareColour(mValues->mScripts.mColourKeyword, "Highlight Colour: Keywords");
+    declareColour(mValues->mScripts.mColourSpecial, "Highlight Colour: Special Characters");
+    declareColour(mValues->mScripts.mColourComment, "Highlight Colour: Comments");
+    declareColour(mValues->mScripts.mColourId, "Highlight Colour: IDs");
 
     declareCategory("General Input");
     declareBool(mValues->mGeneralInput.mCycle, "Cyclic next/previous")
@@ -185,18 +185,18 @@ void CSMPrefs::State::declare()
         .setRange(10, 10000);
     declareDouble(mValues->mRendering.mObjectMarkerAlpha, "Object Marker Transparency").setPrecision(2).setRange(0, 1);
     declareBool(mValues->mRendering.mSceneUseGradient, "Use Gradient Background");
-    declareColour("scene-day-background-colour", "Day Background Colour", QColor(110, 120, 128, 255));
-    declareColour("scene-day-gradient-colour", "Day Gradient  Colour", QColor(47, 51, 51, 255))
+    declareColour(mValues->mRendering.mSceneDayBackgroundColour, "Day Background Colour");
+    declareColour(mValues->mRendering.mSceneDayGradientColour, "Day Gradient  Colour")
         .setTooltip(
             "Sets the gradient color to use in conjunction with the day background color. Ignored if "
             "the gradient option is disabled.");
-    declareColour("scene-bright-background-colour", "Scene Bright Background Colour", QColor(79, 87, 92, 255));
-    declareColour("scene-bright-gradient-colour", "Scene Bright Gradient Colour", QColor(47, 51, 51, 255))
+    declareColour(mValues->mRendering.mSceneBrightBackgroundColour, "Scene Bright Background Colour");
+    declareColour(mValues->mRendering.mSceneBrightGradientColour, "Scene Bright Gradient Colour")
         .setTooltip(
             "Sets the gradient color to use in conjunction with the bright background color. Ignored if "
             "the gradient option is disabled.");
-    declareColour("scene-night-background-colour", "Scene Night Background Colour", QColor(64, 77, 79, 255));
-    declareColour("scene-night-gradient-colour", "Scene Night Gradient Colour", QColor(47, 51, 51, 255))
+    declareColour(mValues->mRendering.mSceneNightBackgroundColour, "Scene Night Background Colour");
+    declareColour(mValues->mRendering.mSceneNightGradientColour, "Scene Night Gradient Colour")
         .setTooltip(
             "Sets the gradient color to use in conjunction with the night background color. Ignored if "
             "the gradient option is disabled.");
@@ -477,13 +477,14 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(EnumSettingValue& value, con
     return *setting;
 }
 
-CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(const std::string& key, const QString& label, QColor default_)
+CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(
+    Settings::SettingValue<std::string>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
     CSMPrefs::ColourSetting* setting
-        = new CSMPrefs::ColourSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+        = new CSMPrefs::ColourSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
 
