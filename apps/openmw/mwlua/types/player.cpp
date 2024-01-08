@@ -41,7 +41,7 @@ namespace MWLua
             throw std::runtime_error("The argument must be a player!");
     }
 
-    void addPlayerQuestBindings(sol::table& player, const Context& context)
+    void addPlayerBindings(sol::table player, const Context& context)
     {
         MWBase::Journal* const journal = MWBase::Environment::get().getJournal();
 
@@ -161,10 +161,7 @@ namespace MWLua
             verifyPlayer(player);
             context.mLuaEvents->addMenuEvent({ std::move(eventName), LuaUtil::serialize(eventData) });
         };
-    }
 
-    void addPlayerBindings(sol::table player, const Context& context)
-    {
         player["getCrimeLevel"] = [](const Object& o) -> int {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getNpcStats(o.ptr()).getBounty();
@@ -172,6 +169,5 @@ namespace MWLua
         player["isCharGenFinished"] = [](const Object&) -> bool {
             return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
         };
-        addPlayerQuestBindings(player, context);
     }
 }
