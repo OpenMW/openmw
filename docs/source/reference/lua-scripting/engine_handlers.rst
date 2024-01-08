@@ -127,3 +127,14 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | User entered `command` in in-game console. Called if either
       | `mode` is not default or `command` starts with prefix `lua`.
 
+**Only for menu scripts**
+
+.. list-table::
+  :widths: 20 80
+  * - onStateChanged()
+    - | Called whenever the current game changes
+      | (i. e. the result of `getState <openmw_menu.html##(getState)>`_ changes)
+  * - | onConsoleCommand(
+      |     mode, command, selectedObject)
+    - | User entered `command` in in-game console. Called if either
+      | `mode` is not default or `command` starts with prefix `lua`.
