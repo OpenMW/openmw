@@ -1,8 +1,6 @@
 local common = require('scripts.omw.settings.common')
 local render = require('scripts.omw.settings.render')
 
-require('scripts.omw.settings.renderers')(render.registerRenderer)
-
 ---
 -- @type PageOptions
 -- @field #string key A unique key
@@ -71,11 +69,11 @@ return {
     -- local globalSettings = storage.globalSection('SettingsGlobalMyMod')
     interface = {
         ---
-        -- @field [parent=#Settings] #string version
-        version = 0,
+        -- @field [parent=#Settings] #number version
+        version = 1,
         ---
         -- @function [parent=#Settings] registerPage Register a page to be displayed in the settings menu,
-        --   only available in player scripts
+        --   available in player and menu scripts
         -- @param #PageOptions options
         -- @usage
         -- I.Settings.registerPage({
@@ -87,7 +85,7 @@ return {
         registerPage = render.registerPage,
         ---
         -- @function [parent=#Settings] registerRenderer Register a renderer,
-        --   only avaialable in player scripts
+        --   only avaialable in menu scripts (DEPRECATED in player scripts)
         -- @param #string key
         -- @param #function renderer A renderer function, receives setting's value,
         --   a function to change it and an argument from the setting options
@@ -107,7 +105,10 @@ return {
         --     },
         --   }
         -- end)
-        registerRenderer = render.registerRenderer,
+        registerRenderer = function()
+            print(
+                'Register setting renderers in player scripts has been deprecated and moved to menu Settings interface')
+        end,
         ---
         -- @function [parent=#Settings] registerGroup Register a group to be attached to a page,
         --   available both in player and global scripts

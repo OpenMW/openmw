@@ -1,9 +1,11 @@
 # UI framework
 PLAYER: scripts/omw/mwui/init.lua
+MENU: scripts/omw/mwui/init.lua
 
 # Settings framework
 GLOBAL: scripts/omw/settings/global.lua
 PLAYER: scripts/omw/settings/player.lua
+MENU: scripts/omw/settings/menu.lua
 
 # Mechanics
 GLOBAL: scripts/omw/activationhandlers.lua
