@@ -2,7 +2,7 @@
 
 #include "luamanagerimp.hpp"
 
-#include <apps/openmw/profile.hpp>
+#include "apps/openmw/profile.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/settings/values.hpp>

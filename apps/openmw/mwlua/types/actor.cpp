@@ -6,8 +6,10 @@
 #include <components/lua/luastate.hpp>
 #include <components/settings/values.hpp>
 
+#include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
 #include "apps/openmw/mwbase/windowmanager.hpp"
+#include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwmechanics/actorutil.hpp"
 #include "apps/openmw/mwmechanics/creaturestats.hpp"
 #include "apps/openmw/mwmechanics/drawstate.hpp"
