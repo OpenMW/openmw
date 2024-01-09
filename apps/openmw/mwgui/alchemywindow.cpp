@@ -395,8 +395,10 @@ namespace MWGui
     {
         std::string suggestedName = mAlchemy->suggestPotionName();
         if (suggestedName != mSuggestedPotionName)
+        {
             mNameEdit->setCaptionWithReplacing(suggestedName);
-        mSuggestedPotionName = suggestedName;
+            mSuggestedPotionName = std::move(suggestedName);
+        }
 
         mSortModel->clearDragItems();
 

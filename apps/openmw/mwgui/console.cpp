@@ -440,7 +440,7 @@ namespace MWGui
         // If new search term reset position, otherwise continue from current position
         if (newSearchTerm != mCurrentSearchTerm)
         {
-            mCurrentSearchTerm = newSearchTerm;
+            mCurrentSearchTerm = std::move(newSearchTerm);
             mCurrentOccurrenceIndex = std::string::npos;
         }
 
