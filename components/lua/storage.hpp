@@ -3,6 +3,7 @@
 
 #include <map>
 #include <sol/sol.hpp>
+#include <stdexcept>
 
 #include "asyncpackage.hpp"
 #include "serialization.hpp"
@@ -17,10 +18,11 @@ namespace LuaUtil
         static sol::table initGlobalPackage(lua_State* lua, LuaStorage* globalStorage);
         static sol::table initLocalPackage(lua_State* lua, LuaStorage* globalStorage);
         static sol::table initPlayerPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage);
-        static sol::table initMenuPackage(lua_State* lua, LuaStorage* playerStorage);
+        static sol::table initMenuPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage);
 
         explicit LuaStorage(lua_State* lua)
             : mLua(lua)
+            , mActive(false)
         {
         }
 
@@ -55,6 +57,7 @@ namespace LuaUtil
             virtual void sectionReplaced(std::string_view section, const sol::optional<sol::table>& values) const = 0;
         };
         void setListener(const Listener* listener) { mListener = listener; }
+        void setActive(bool active) { mActive = active; }
 
     private:
         class Value
@@ -95,6 +98,8 @@ namespace LuaUtil
                                                          // remove them in clear()
             bool mPermanent = true;
             static Value sEmpty;
+
+            void checkIfActive() const { mStorage->checkIfActive(); }
         };
         struct SectionView
         {
@@ -109,6 +114,12 @@ namespace LuaUtil
         std::map<std::string_view, std::shared_ptr<Section>> mData;
         const Listener* mListener = nullptr;
         std::set<const Section*> mRunningCallbacks;
+        bool mActive;
+        void checkIfActive() const
+        {
+            if (!mActive)
+                throw std::logic_error("Trying to access inactive storage");
+        }
     };
 
 }

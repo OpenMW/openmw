@@ -157,10 +157,10 @@ void MWState::StateManager::newGame(bool bypass)
     {
         Log(Debug::Info) << "Starting a new game";
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-        MWBase::Environment::get().getLuaManager()->newGameStarted();
         MWBase::Environment::get().getWorld()->startNewGame(bypass);
 
         mState = State_Running;
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
@@ -184,11 +184,13 @@ void MWState::StateManager::newGame(bool bypass)
 void MWState::StateManager::endGame()
 {
     mState = State_Ended;
+    MWBase::Environment::get().getLuaManager()->gameEnded();
 }
 
 void MWState::StateManager::resumeGame()
 {
     mState = State_Running;
+    MWBase::Environment::get().getLuaManager()->gameLoaded();
 }
 
 void MWState::StateManager::saveGame(std::string_view description, const Slot* slot)

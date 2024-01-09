@@ -68,6 +68,7 @@ namespace MWLua
         // LuaManager queues these events and propagates to scripts on the next `update` call.
         void newGameStarted() override;
         void gameLoaded() override;
+        void gameEnded() override;
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void inputEvent(const InputEvent& event) override;
