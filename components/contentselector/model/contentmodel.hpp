@@ -7,6 +7,8 @@
 #include <QSet>
 #include <QStringList>
 
+#include <set>
+
 namespace ContentSelectorModel
 {
     class EsmFile;
@@ -57,7 +59,6 @@ namespace ContentSelectorModel
         void setCurrentGameFile(const EsmFile* file);
 
         bool isEnabled(const QModelIndex& index) const;
-        bool isChecked(const QString& filepath) const;
         bool setCheckState(const QString& filepath, bool isChecked);
         bool isNew(const QString& filepath) const;
         void setNew(const QString& filepath, bool isChecked);
@@ -85,7 +86,7 @@ namespace ContentSelectorModel
         const EsmFile* mGameFile;
         ContentFileList mFiles;
         QStringList mArchives;
-        QHash<QString, Qt::CheckState> mCheckStates;
+        std::set<const EsmFile*> mCheckedFiles;
         QHash<QString, bool> mNewFiles;
         QSet<QString> mPluginsWithLoadOrderError;
         QString mEncoding;

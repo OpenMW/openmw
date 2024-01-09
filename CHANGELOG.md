@@ -64,6 +64,7 @@
     Bug #7084: Resurrecting an actor doesn't take into account base record changes
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Bug #7092: BSA archives from higher priority directories don't take priority
+    Bug #7103: Multiple paths pointing to the same plugin but with different cases lead to automatically removed config entries
     Bug #7122: Teleportation to underwater should cancel active water walking effect
     Bug #7131: MyGUI log spam when post processing HUD is open
     Bug #7134: Saves with an invalid last generated RefNum can be loaded
@@ -121,6 +122,7 @@
     Bug #7712: Casting doesn't support spells and enchantments with no effects
     Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
     Bug #7724: Guards don't help vs werewolves
+    Bug #7733: Launcher shows incorrect data paths when there's two plugins with the same name
     Bug #7742: Governing attribute training limit should use the modified attribute
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive

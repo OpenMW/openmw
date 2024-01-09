@@ -125,27 +125,6 @@ namespace Launcher
         {
             return Settings::navigator().mMaxNavmeshdbFileSize / (1024 * 1024);
         }
-
-        std::optional<QString> findFirstPath(const QStringList& directories, const QString& fileName)
-        {
-            for (const QString& directoryPath : directories)
-            {
-                const QString filePath = QDir(directoryPath).absoluteFilePath(fileName);
-                if (QFile::exists(filePath))
-                    return filePath;
-            }
-            return std::nullopt;
-        }
-
-        QStringList findAllFilePaths(const QStringList& directories, const QStringList& fileNames)
-        {
-            QStringList result;
-            result.reserve(fileNames.size());
-            for (const QString& fileName : fileNames)
-                if (const auto filepath = findFirstPath(directories, fileName))
-                    result.append(*filepath);
-            return result;
-        }
     }
 }
 
@@ -366,8 +345,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         row++;
     }
 
-    mSelector->setProfileContent(
-        findAllFilePaths(directories, mLauncherSettings.getContentListFiles(contentModelName)));
+    mSelector->setProfileContent(mLauncherSettings.getContentListFiles(contentModelName));
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString& profile)
