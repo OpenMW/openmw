@@ -6,7 +6,6 @@ local argumentSectionPostfix = 'Arguments'
 
 local contextSection = storage.playerSection or storage.globalSection
 local groupSection = contextSection(groupSectionKey)
-groupSection:reset()
 groupSection:removeOnExit()
 
 local function validateSettingOptions(options)
@@ -110,9 +109,11 @@ end
 
 return {
     getSection = function(global, key)
+        if global then error('Getting global section') end
         return (global and storage.globalSection or storage.playerSection)(key)
     end,
     getArgumentSection = function(global, key)
+        if global then error('Getting global section') end
         return (global and storage.globalSection or storage.playerSection)(key .. argumentSectionPostfix)
     end,
     updateRendererArgument = function(groupKey, settingKey, argument)
@@ -120,6 +121,7 @@ return {
         argumentSection:set(settingKey, argument)
     end,
     setGlobalEvent = 'OMWSettingsGlobalSet',
+    registerPageEvent = 'OmWSettingsRegisterPage',
     groupSectionKey = groupSectionKey,
     onLoad = function(saved)
         if not saved then return end

@@ -78,10 +78,10 @@ set(BUILTIN_DATA_FILES
     scripts/omw/console/menu.lua
     scripts/omw/mechanics/playercontroller.lua
     scripts/omw/playercontrols.lua
+    scripts/omw/settings/menu.lua
     scripts/omw/settings/player.lua
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua
-    scripts/omw/settings/render.lua
     scripts/omw/settings/renderers.lua
     scripts/omw/mwui/constants.lua
     scripts/omw/mwui/borders.lua

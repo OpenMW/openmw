@@ -5,6 +5,7 @@ local common = require('scripts.omw.settings.common')
 return {
     interfaceName = 'Settings',
     interface = {
+        version = 1,
         registerGroup = common.registerGroup,
         updateRendererArgument = common.updateRendererArgument,
     },

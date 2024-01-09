@@ -1,5 +1,12 @@
+local storage = require('openmw.storage')
+local types = require('openmw.types')
+local self = require('openmw.self')
+
 local common = require('scripts.omw.settings.common')
-local render = require('scripts.omw.settings.render')
+
+local function registerPage(options)
+    types.Player.sendMenuEvent(self, common.registerPageEvent, options)
+end
 
 ---
 -- @type PageOptions
@@ -82,7 +89,7 @@ return {
         --   name = 'MyModName',
         --   description = 'MyModDescription',
         -- })---
-        registerPage = render.registerPage,
+        registerPage = registerPage,
         ---
         -- @function [parent=#Settings] registerRenderer Register a renderer,
         --   only avaialable in menu scripts (DEPRECATED in player scripts)
@@ -105,9 +112,9 @@ return {
         --     },
         --   }
         -- end)
-        registerRenderer = function()
-            print(
-                'Register setting renderers in player scripts has been deprecated and moved to menu Settings interface')
+        registerRenderer = function(name)
+            print(([[Can't register setting renderer "%s". registerRenderer and moved to Menu context Settings interface]])
+                :format(name))
         end,
         ---
         -- @function [parent=#Settings] registerGroup Register a group to be attached to a page,
