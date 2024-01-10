@@ -24,13 +24,15 @@ namespace MWLua
             : LuaUtil::ScriptsContainer(lua, "Menu")
             , mInputProcessor(this)
         {
-            registerEngineHandlers({ &mStateChanged, &mConsoleCommandHandlers, &mUiModeChanged });
+            registerEngineHandlers({ &mOnFrameHandlers, &mStateChanged, &mConsoleCommandHandlers, &mUiModeChanged });
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
         {
             mInputProcessor.processInputEvent(event);
         }
+
+        void onFrame(float dt) { callEngineHandlers(mOnFrameHandlers, dt); }
 
         void stateChanged() { callEngineHandlers(mStateChanged); }
 
@@ -44,6 +46,7 @@ namespace MWLua
 
     private:
         MWLua::InputProcessor mInputProcessor;
+        EngineHandlerList mOnFrameHandlers{ "onFrame" };
         EngineHandlerList mStateChanged{ "onStateChanged" };
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };
         EngineHandlerList mUiModeChanged{ "_onUiModeChanged" };

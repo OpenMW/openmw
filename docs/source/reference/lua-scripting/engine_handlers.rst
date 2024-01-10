@@ -5,9 +5,15 @@ Engine handlers reference
 
 Engine handler is a function defined by a script, that can be called by the engine.
 
-
-
 **Can be defined by any script**
+
+.. list-table::
+  :widths: 20 80
+  * - onInterfaceOverride(base)
+    - | Called if the current script has an interface and overrides an interface
+      | (``base``) of another script.
+
+**Can be defined by any non-menu script**
 
 .. list-table::
   :widths: 20 80
@@ -29,9 +35,6 @@ Engine handler is a function defined by a script, that can be called by the engi
       | Note that ``onLoad`` means loading a script rather than loading a game.
       | If a script did not exist when a game was saved onLoad will not be
       | called, but ``onInit`` will.
-  * - onInterfaceOverride(base)
-    - | Called if the current script has an interface and overrides an interface
-      | (``base``) of another script.
 
 **Only for global scripts**
 
@@ -84,8 +87,12 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 .. list-table::
   :widths: 20 80
-
-* - onKeyPress(key)
+  * - onFrame(dt)
+    - | Called every frame (even if the game is paused) right after
+      | processing user input. Use it only for latency-critical stuff
+      | and for UI that should work on pause.
+      | `dt` is simulation time delta (0 when on pause).
+  * - onKeyPress(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
@@ -124,19 +131,12 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 .. list-table::
   :widths: 20 80
-  * - onFrame(dt)
-    - | Called every frame (even if the game is paused) right after
-      | processing user input. Use it only for latency-critical stuff
-      | and for UI that should work on pause.
-      | `dt` is simulation time delta (0 when on pause).
   * - onKeyPress(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
   * - onQuestUpdate(questId, stage)
     - | Called when a quest is updated.
- 
- 
 
 **Only for menu scripts**
 

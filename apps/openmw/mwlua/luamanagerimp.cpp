@@ -243,7 +243,7 @@ namespace MWLua
             ? 0.0
             : MWBase::Environment::get().getFrameDuration();
         mInputActions.update(frameDuration);
-        mMenuScripts.update(0);
+        mMenuScripts.onFrame(frameDuration);
         if (playerScripts)
             playerScripts->onFrame(frameDuration);
         mProcessingInputEvents = false;

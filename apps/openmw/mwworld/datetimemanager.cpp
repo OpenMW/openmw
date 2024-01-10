@@ -4,6 +4,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -263,8 +264,9 @@ namespace MWWorld
 
     void DateTimeManager::updateIsPaused()
     {
+        auto stateManager = MWBase::Environment::get().getStateManager();
         auto wm = MWBase::Environment::get().getWindowManager();
         mPaused = !mPausedTags.empty() || wm->isConsoleMode() || wm->isPostProcessorHudVisible()
-            || wm->isInteractiveMessageBoxActive();
+            || wm->isInteractiveMessageBoxActive() || stateManager->getState() == MWBase::StateManager::State_NoGame;
     }
 }
