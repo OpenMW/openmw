@@ -380,7 +380,7 @@ namespace MWLua
         addProp(context, attributeStatT, "base", &MWMechanics::AttributeValue::getBase);
         addProp(context, attributeStatT, "damage", &MWMechanics::AttributeValue::getDamage);
         attributeStatT["modified"]
-            = sol::property([=](const AttributeStat& stat) { return stat.getModified(context); });
+            = sol::readonly_property([=](const AttributeStat& stat) { return stat.getModified(context); });
         addProp(context, attributeStatT, "modifier", &MWMechanics::AttributeValue::getModifier);
         sol::table attributes(context.mLua->sol(), sol::create);
         stats["attributes"] = LuaUtil::makeReadOnly(attributes);
@@ -399,7 +399,8 @@ namespace MWLua
         auto skillStatT = context.mLua->sol().new_usertype<SkillStat>("SkillStat");
         addProp(context, skillStatT, "base", &MWMechanics::SkillValue::getBase);
         addProp(context, skillStatT, "damage", &MWMechanics::SkillValue::getDamage);
-        skillStatT["modified"] = sol::property([=](const SkillStat& stat) { return stat.getModified(context); });
+        skillStatT["modified"]
+            = sol::readonly_property([=](const SkillStat& stat) { return stat.getModified(context); });
         addProp(context, skillStatT, "modifier", &MWMechanics::SkillValue::getModifier);
         skillStatT["progress"] = sol::property([context](const SkillStat& stat) { return stat.getProgress(context); },
             [context](const SkillStat& stat, const sol::object& value) { stat.cache(context, "progress", value); });
