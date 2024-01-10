@@ -117,7 +117,8 @@ return {
         end,
         ---
         -- @function [parent=#Settings] registerGroup Register a group to be attached to a page,
-        --   available both in player and global scripts
+        --   available in player, menu and global scripts
+        --   Note: menu scripts only allow group with permanentStorage = true, but can render the page before a game is loaded!
         -- @param #GroupOptions options
         -- @usage
         -- I.Settings.registerGroup {
@@ -147,7 +148,7 @@ return {
         registerGroup = common.registerGroup,
         ---
         -- @function [parent=#Settings] updateRendererArgument Change the renderer argument of a setting
-        --   available both in player and global scripts
+        --   available both in player, menu and global scripts
         -- @param #string groupKey A settings group key
         -- @param #string settingKey A setting key
         -- @param argument A renderer argument
