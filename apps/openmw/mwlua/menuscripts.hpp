@@ -45,7 +45,8 @@ namespace MWLua
         void uiModeChanged() { callEngineHandlers(mUiModeChanged); }
 
     private:
-        MWLua::InputProcessor mInputProcessor;
+        friend class MWLua::InputProcessor<MenuScripts>;
+        MWLua::InputProcessor<MenuScripts> mInputProcessor;
         EngineHandlerList mOnFrameHandlers{ "onFrame" };
         EngineHandlerList mStateChanged{ "onStateChanged" };
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };

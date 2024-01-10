@@ -3,18 +3,17 @@
 
 #include <SDL_events.h>
 
-#include <components/lua/luastate.hpp>
-#include <components/lua/scriptscontainer.hpp>
 #include <components/sdlutil/events.hpp>
 
 #include "../mwbase/luamanager.hpp"
 
 namespace MWLua
 {
+    template <class Container>
     class InputProcessor
     {
     public:
-        InputProcessor(LuaUtil::ScriptsContainer* scriptsContainer)
+        InputProcessor(Container* scriptsContainer)
             : mScriptsContainer(scriptsContainer)
         {
             mScriptsContainer->registerEngineHandlers({ &mKeyPressHandlers, &mKeyReleaseHandlers,
@@ -58,15 +57,15 @@ namespace MWLua
         }
 
     private:
-        LuaUtil::ScriptsContainer* mScriptsContainer;
-        LuaUtil::ScriptsContainer::EngineHandlerList mKeyPressHandlers{ "onKeyPress" };
-        LuaUtil::ScriptsContainer::EngineHandlerList mKeyReleaseHandlers{ "onKeyRelease" };
-        LuaUtil::ScriptsContainer::EngineHandlerList mControllerButtonPressHandlers{ "onControllerButtonPress" };
-        LuaUtil::ScriptsContainer::EngineHandlerList mControllerButtonReleaseHandlers{ "onControllerButtonRelease" };
-        LuaUtil::ScriptsContainer::EngineHandlerList mActionHandlers{ "onInputAction" };
-        LuaUtil::ScriptsContainer::EngineHandlerList mTouchpadPressed{ "onTouchPress" };
-        LuaUtil::ScriptsContainer::EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
-        LuaUtil::ScriptsContainer::EngineHandlerList mTouchpadMoved{ "onTouchMove" };
+        Container* mScriptsContainer;
+        Container::EngineHandlerList mKeyPressHandlers{ "onKeyPress" };
+        Container::EngineHandlerList mKeyReleaseHandlers{ "onKeyRelease" };
+        Container::EngineHandlerList mControllerButtonPressHandlers{ "onControllerButtonPress" };
+        Container::EngineHandlerList mControllerButtonReleaseHandlers{ "onControllerButtonRelease" };
+        Container::EngineHandlerList mActionHandlers{ "onInputAction" };
+        Container::EngineHandlerList mTouchpadPressed{ "onTouchPress" };
+        Container::EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
+        Container::EngineHandlerList mTouchpadMoved{ "onTouchMove" };
     };
 }
 

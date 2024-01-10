@@ -48,7 +48,8 @@ namespace MWLua
         }
 
     private:
-        InputProcessor mInputProcessor;
+        friend class MWLua::InputProcessor<PlayerScripts>;
+        InputProcessor<PlayerScripts> mInputProcessor;
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };
         EngineHandlerList mOnFrameHandlers{ "onFrame" };
         EngineHandlerList mQuestUpdate{ "onQuestUpdate" };
