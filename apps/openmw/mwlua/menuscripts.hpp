@@ -10,6 +10,7 @@
 #include "../mwbase/luamanager.hpp"
 
 #include "context.hpp"
+#include "inputprocessor.hpp"
 
 namespace MWLua
 {
@@ -21,8 +22,14 @@ namespace MWLua
     public:
         MenuScripts(LuaUtil::LuaState* lua)
             : LuaUtil::ScriptsContainer(lua, "Menu")
+            , mInputProcessor(this)
         {
             registerEngineHandlers({ &mStateChanged, &mConsoleCommandHandlers, &mUiModeChanged });
+        }
+
+        void processInputEvent(const MWBase::LuaManager::InputEvent& event)
+        {
+            mInputProcessor.processInputEvent(event);
         }
 
         void stateChanged() { callEngineHandlers(mStateChanged); }
@@ -36,6 +43,7 @@ namespace MWLua
         void uiModeChanged() { callEngineHandlers(mUiModeChanged); }
 
     private:
+        MWLua::InputProcessor mInputProcessor;
         EngineHandlerList mStateChanged{ "onStateChanged" };
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };
         EngineHandlerList mUiModeChanged{ "_onUiModeChanged" };

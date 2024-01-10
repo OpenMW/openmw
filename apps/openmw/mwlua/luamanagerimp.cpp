@@ -229,7 +229,9 @@ namespace MWLua
         PlayerScripts* playerScripts
             = mPlayer.isEmpty() ? nullptr : dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-        // TODO: handle main menu input events
+
+        for (const auto& event : mInputEvents)
+            mMenuScripts.processInputEvent(event);
         if (playerScripts && !windowManager->containsMode(MWGui::GM_MainMenu))
         {
             for (const auto& event : mInputEvents)

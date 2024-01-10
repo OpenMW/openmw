@@ -157,7 +157,8 @@ namespace LuaUtil
         void collectStats(std::vector<ScriptStats>& stats) const;
         static int64_t getInstanceCount() { return sInstanceCount; }
 
-    protected:
+    public: // TODO: public to be available to MWLua::InputProcessor. Consider other ways of reusing engine handlers
+            // between containers
         struct Handler
         {
             int mScriptId;
@@ -198,6 +199,7 @@ namespace LuaUtil
         // a public function (see how ScriptsContainer::update is implemented) that calls `callEngineHandlers`.
         void registerEngineHandlers(std::initializer_list<EngineHandlerList*> handlers);
 
+    protected:
         const std::string mNamePrefix;
         LuaUtil::LuaState& mLua;
 

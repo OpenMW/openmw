@@ -80,23 +80,16 @@ Engine handler is a function defined by a script, that can be called by the engi
       | Similarly to onActivated, the item has already been removed
       | from the actor's inventory, and the count was set to zero.
 
-**Only for local scripts attached to a player**
+**Only menu scripts and local scripts attached to a player**
 
 .. list-table::
   :widths: 20 80
 
-  * - onFrame(dt)
-    - | Called every frame (even if the game is paused) right after
-      | processing user input. Use it only for latency-critical stuff
-      | and for UI that should work on pause.
-      | `dt` is simulation time delta (0 when on pause).
-  * - onKeyPress(key)
+* - onKeyPress(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
-  * - onQuestUpdate(questId, stage)
-    - | Called when a quest is updated.
-  * - onKeyRelease(key)
+ * - onKeyRelease(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is released.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
@@ -127,6 +120,24 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | User entered `command` in in-game console. Called if either
       | `mode` is not default or `command` starts with prefix `lua`.
 
+**Only for local scripts attached to a player**
+
+.. list-table::
+  :widths: 20 80
+  * - onFrame(dt)
+    - | Called every frame (even if the game is paused) right after
+      | processing user input. Use it only for latency-critical stuff
+      | and for UI that should work on pause.
+      | `dt` is simulation time delta (0 when on pause).
+  * - onKeyPress(key)
+    - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
+      | Usage example:
+      | ``if key.symbol == 'z' and key.withShift then ...``
+  * - onQuestUpdate(questId, stage)
+    - | Called when a quest is updated.
+ 
+ 
+
 **Only for menu scripts**
 
 .. list-table::
@@ -134,7 +145,3 @@ Engine handler is a function defined by a script, that can be called by the engi
   * - onStateChanged()
     - | Called whenever the current game changes
       | (i. e. the result of `getState <openmw_menu.html##(getState)>`_ changes)
-  * - | onConsoleCommand(
-      |     mode, command, selectedObject)
-    - | User entered `command` in in-game console. Called if either
-      | `mode` is not default or `command` starts with prefix `lua`.
