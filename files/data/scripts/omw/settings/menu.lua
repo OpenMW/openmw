@@ -493,6 +493,9 @@ return {
         end,
         registerRenderer = registerRenderer,
         registerGroup = function(options)
+            if not options.permanentStorage then
+                error('Menu scripts are only allowed to register setting groups with permanentStorage = true')
+            end
             common.registerGroup(options)
             menuGroups[options.key] = true
         end,
