@@ -1065,7 +1065,7 @@ namespace MWGui
                 {
                     createActiveFormats(newBook);
 
-                    mBook = newBook;
+                    mBook = std::move(newBook);
                     setPage(newPage);
 
                     if (newPage < mBook->mPages.size())

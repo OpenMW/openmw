@@ -1,12 +1,13 @@
 #include "types.hpp"
 
 #include "../luamanagerimp.hpp"
-#include <apps/openmw/mwbase/inputmanager.hpp>
-#include <apps/openmw/mwbase/journal.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwmechanics/npcstats.hpp>
-#include <apps/openmw/mwworld/class.hpp>
-#include <apps/openmw/mwworld/globals.hpp>
+
+#include "apps/openmw/mwbase/inputmanager.hpp"
+#include "apps/openmw/mwbase/journal.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwmechanics/npcstats.hpp"
+#include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/globals.hpp"
 
 namespace MWLua
 {

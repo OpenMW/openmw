@@ -510,11 +510,15 @@ namespace MWRender
             if (!isWerewolf)
                 addAnimSource(base, smodel);
 
-            if (smodel != defaultSkeleton && base != defaultSkeleton)
-                addAnimSource(defaultSkeleton, smodel);
-
             if (!isBase)
+            {
+                addAnimSource(defaultSkeleton, smodel);
                 addAnimSource(smodel, smodel);
+            }
+            else if (base != defaultSkeleton)
+            {
+                addAnimSource(defaultSkeleton, smodel);
+            }
 
             if (!isWerewolf && isBeast && mNpc->mRace.contains("argonian"))
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);

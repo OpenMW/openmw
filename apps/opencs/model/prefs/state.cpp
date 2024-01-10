@@ -126,14 +126,14 @@ void CSMPrefs::State::declare()
         .setRange(0, 10000);
     declareInt(mValues->mScripts.mErrorHeight, "Initial height of the error panel").setRange(100, 10000);
     declareBool(mValues->mScripts.mHighlightOccurrences, "Highlight other occurrences of selected names");
-    declareColour("colour-highlight", "Colour of highlighted occurrences", QColor("lightcyan"));
-    declareColour("colour-int", "Highlight Colour: Integer Literals", QColor("darkmagenta"));
-    declareColour("colour-float", "Highlight Colour: Float Literals", QColor("magenta"));
-    declareColour("colour-name", "Highlight Colour: Names", QColor("grey"));
-    declareColour("colour-keyword", "Highlight Colour: Keywords", QColor("red"));
-    declareColour("colour-special", "Highlight Colour: Special Characters", QColor("darkorange"));
-    declareColour("colour-comment", "Highlight Colour: Comments", QColor("green"));
-    declareColour("colour-id", "Highlight Colour: IDs", QColor("blue"));
+    declareColour(mValues->mScripts.mColourHighlight, "Colour of highlighted occurrences");
+    declareColour(mValues->mScripts.mColourInt, "Highlight Colour: Integer Literals");
+    declareColour(mValues->mScripts.mColourFloat, "Highlight Colour: Float Literals");
+    declareColour(mValues->mScripts.mColourName, "Highlight Colour: Names");
+    declareColour(mValues->mScripts.mColourKeyword, "Highlight Colour: Keywords");
+    declareColour(mValues->mScripts.mColourSpecial, "Highlight Colour: Special Characters");
+    declareColour(mValues->mScripts.mColourComment, "Highlight Colour: Comments");
+    declareColour(mValues->mScripts.mColourId, "Highlight Colour: IDs");
 
     declareCategory("General Input");
     declareBool(mValues->mGeneralInput.mCycle, "Cyclic next/previous")
@@ -185,18 +185,18 @@ void CSMPrefs::State::declare()
         .setRange(10, 10000);
     declareDouble(mValues->mRendering.mObjectMarkerAlpha, "Object Marker Transparency").setPrecision(2).setRange(0, 1);
     declareBool(mValues->mRendering.mSceneUseGradient, "Use Gradient Background");
-    declareColour("scene-day-background-colour", "Day Background Colour", QColor(110, 120, 128, 255));
-    declareColour("scene-day-gradient-colour", "Day Gradient  Colour", QColor(47, 51, 51, 255))
+    declareColour(mValues->mRendering.mSceneDayBackgroundColour, "Day Background Colour");
+    declareColour(mValues->mRendering.mSceneDayGradientColour, "Day Gradient  Colour")
         .setTooltip(
             "Sets the gradient color to use in conjunction with the day background color. Ignored if "
             "the gradient option is disabled.");
-    declareColour("scene-bright-background-colour", "Scene Bright Background Colour", QColor(79, 87, 92, 255));
-    declareColour("scene-bright-gradient-colour", "Scene Bright Gradient Colour", QColor(47, 51, 51, 255))
+    declareColour(mValues->mRendering.mSceneBrightBackgroundColour, "Scene Bright Background Colour");
+    declareColour(mValues->mRendering.mSceneBrightGradientColour, "Scene Bright Gradient Colour")
         .setTooltip(
             "Sets the gradient color to use in conjunction with the bright background color. Ignored if "
             "the gradient option is disabled.");
-    declareColour("scene-night-background-colour", "Scene Night Background Colour", QColor(64, 77, 79, 255));
-    declareColour("scene-night-gradient-colour", "Scene Night Gradient Colour", QColor(47, 51, 51, 255))
+    declareColour(mValues->mRendering.mSceneNightBackgroundColour, "Scene Night Background Colour");
+    declareColour(mValues->mRendering.mSceneNightGradientColour, "Scene Night Gradient Colour")
         .setTooltip(
             "Sets the gradient color to use in conjunction with the night background color. Ignored if "
             "the gradient option is disabled.");
@@ -250,157 +250,154 @@ void CSMPrefs::State::declare()
     declareCategory("Key Bindings");
 
     declareSubcategory("Document");
-    declareShortcut("document-file-newgame", "New Game", QKeySequence(Qt::ControlModifier | Qt::Key_N));
-    declareShortcut("document-file-newaddon", "New Addon", QKeySequence());
-    declareShortcut("document-file-open", "Open", QKeySequence(Qt::ControlModifier | Qt::Key_O));
-    declareShortcut("document-file-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
-    declareShortcut("document-help-help", "Help", QKeySequence(Qt::Key_F1));
-    declareShortcut("document-help-tutorial", "Tutorial", QKeySequence());
-    declareShortcut("document-file-verify", "Verify", QKeySequence());
-    declareShortcut("document-file-merge", "Merge", QKeySequence());
-    declareShortcut("document-file-errorlog", "Open Load Error Log", QKeySequence());
-    declareShortcut("document-file-metadata", "Meta Data", QKeySequence());
-    declareShortcut("document-file-close", "Close Document", QKeySequence(Qt::ControlModifier | Qt::Key_W));
-    declareShortcut("document-file-exit", "Exit Application", QKeySequence(Qt::ControlModifier | Qt::Key_Q));
-    declareShortcut("document-edit-undo", "Undo", QKeySequence(Qt::ControlModifier | Qt::Key_Z));
-    declareShortcut("document-edit-redo", "Redo", QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z));
-    declareShortcut("document-edit-preferences", "Open Preferences", QKeySequence());
-    declareShortcut("document-edit-search", "Search", QKeySequence(Qt::ControlModifier | Qt::Key_F));
-    declareShortcut("document-view-newview", "New View", QKeySequence());
-    declareShortcut("document-view-statusbar", "Toggle Status Bar", QKeySequence());
-    declareShortcut("document-view-filters", "Open Filter List", QKeySequence());
-    declareShortcut("document-world-regions", "Open Region List", QKeySequence());
-    declareShortcut("document-world-cells", "Open Cell List", QKeySequence());
-    declareShortcut("document-world-referencables", "Open Object List", QKeySequence());
-    declareShortcut("document-world-references", "Open Instance List", QKeySequence());
-    declareShortcut("document-world-lands", "Open Lands List", QKeySequence());
-    declareShortcut("document-world-landtextures", "Open Land Textures List", QKeySequence());
-    declareShortcut("document-world-pathgrid", "Open Pathgrid List", QKeySequence());
-    declareShortcut("document-world-regionmap", "Open Region Map", QKeySequence());
-    declareShortcut("document-mechanics-globals", "Open Global List", QKeySequence());
-    declareShortcut("document-mechanics-gamesettings", "Open Game Settings", QKeySequence());
-    declareShortcut("document-mechanics-scripts", "Open Script List", QKeySequence());
-    declareShortcut("document-mechanics-spells", "Open Spell List", QKeySequence());
-    declareShortcut("document-mechanics-enchantments", "Open Enchantment List", QKeySequence());
-    declareShortcut("document-mechanics-magiceffects", "Open Magic Effect List", QKeySequence());
-    declareShortcut("document-mechanics-startscripts", "Open Start Script List", QKeySequence());
-    declareShortcut("document-character-skills", "Open Skill List", QKeySequence());
-    declareShortcut("document-character-classes", "Open Class List", QKeySequence());
-    declareShortcut("document-character-factions", "Open Faction List", QKeySequence());
-    declareShortcut("document-character-races", "Open Race List", QKeySequence());
-    declareShortcut("document-character-birthsigns", "Open Birthsign List", QKeySequence());
-    declareShortcut("document-character-topics", "Open Topic List", QKeySequence());
-    declareShortcut("document-character-journals", "Open Journal List", QKeySequence());
-    declareShortcut("document-character-topicinfos", "Open Topic Info List", QKeySequence());
-    declareShortcut("document-character-journalinfos", "Open Journal Info List", QKeySequence());
-    declareShortcut("document-character-bodyparts", "Open Body Part List", QKeySequence());
-    declareShortcut("document-assets-reload", "Reload Assets", QKeySequence(Qt::Key_F5));
-    declareShortcut("document-assets-sounds", "Open Sound Asset List", QKeySequence());
-    declareShortcut("document-assets-soundgens", "Open Sound Generator List", QKeySequence());
-    declareShortcut("document-assets-meshes", "Open Mesh Asset List", QKeySequence());
-    declareShortcut("document-assets-icons", "Open Icon Asset List", QKeySequence());
-    declareShortcut("document-assets-music", "Open Music Asset List", QKeySequence());
-    declareShortcut("document-assets-soundres", "Open Sound File List", QKeySequence());
-    declareShortcut("document-assets-textures", "Open Texture Asset List", QKeySequence());
-    declareShortcut("document-assets-videos", "Open Video Asset List", QKeySequence());
-    declareShortcut("document-debug-run", "Run Debug", QKeySequence());
-    declareShortcut("document-debug-shutdown", "Stop Debug", QKeySequence());
-    declareShortcut("document-debug-profiles", "Debug Profiles", QKeySequence());
-    declareShortcut("document-debug-runlog", "Open Run Log", QKeySequence());
+    declareShortcut(mValues->mKeyBindings.mDocumentFileNewgame, "New Game");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileNewaddon, "New Addon");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileOpen, "Open");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileSave, "Save");
+    declareShortcut(mValues->mKeyBindings.mDocumentHelpHelp, "Help");
+    declareShortcut(mValues->mKeyBindings.mDocumentHelpTutorial, "Tutorial");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileVerify, "Verify");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileMerge, "Merge");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileErrorlog, "Open Load Error Log");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileMetadata, "Meta Data");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileClose, "Close Document");
+    declareShortcut(mValues->mKeyBindings.mDocumentFileExit, "Exit Application");
+    declareShortcut(mValues->mKeyBindings.mDocumentEditUndo, "Undo");
+    declareShortcut(mValues->mKeyBindings.mDocumentEditRedo, "Redo");
+    declareShortcut(mValues->mKeyBindings.mDocumentEditPreferences, "Open Preferences");
+    declareShortcut(mValues->mKeyBindings.mDocumentEditSearch, "Search");
+    declareShortcut(mValues->mKeyBindings.mDocumentViewNewview, "New View");
+    declareShortcut(mValues->mKeyBindings.mDocumentViewStatusbar, "Toggle Status Bar");
+    declareShortcut(mValues->mKeyBindings.mDocumentViewFilters, "Open Filter List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldRegions, "Open Region List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldCells, "Open Cell List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldReferencables, "Open Object List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldReferences, "Open Instance List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldLands, "Open Lands List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldLandtextures, "Open Land Textures List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldPathgrid, "Open Pathgrid List");
+    declareShortcut(mValues->mKeyBindings.mDocumentWorldRegionmap, "Open Region Map");
+    declareShortcut(mValues->mKeyBindings.mDocumentMechanicsGlobals, "Open Global List");
+    declareShortcut(mValues->mKeyBindings.mDocumentMechanicsGamesettings, "Open Game Settings");
+    declareShortcut(mValues->mKeyBindings.mDocumentMechanicsScripts, "Open Script List");
+    declareShortcut(mValues->mKeyBindings.mDocumentMechanicsSpells, "Open Spell List");
+    declareShortcut(mValues->mKeyBindings.mDocumentMechanicsEnchantments, "Open Enchantment List");
+    declareShortcut(mValues->mKeyBindings.mDocumentMechanicsMagiceffects, "Open Magic Effect List");
+    declareShortcut(mValues->mKeyBindings.mDocumentMechanicsStartscripts, "Open Start Script List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterSkills, "Open Skill List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterClasses, "Open Class List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterFactions, "Open Faction List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterRaces, "Open Race List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterBirthsigns, "Open Birthsign List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterTopics, "Open Topic List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterJournals, "Open Journal List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterTopicinfos, "Open Topic Info List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterJournalinfos, "Open Journal Info List");
+    declareShortcut(mValues->mKeyBindings.mDocumentCharacterBodyparts, "Open Body Part List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsReload, "Reload Assets");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsSounds, "Open Sound Asset List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsSoundgens, "Open Sound Generator List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsMeshes, "Open Mesh Asset List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsIcons, "Open Icon Asset List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsMusic, "Open Music Asset List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsSoundres, "Open Sound File List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsTextures, "Open Texture Asset List");
+    declareShortcut(mValues->mKeyBindings.mDocumentAssetsVideos, "Open Video Asset List");
+    declareShortcut(mValues->mKeyBindings.mDocumentDebugRun, "Run Debug");
+    declareShortcut(mValues->mKeyBindings.mDocumentDebugShutdown, "Stop Debug");
+    declareShortcut(mValues->mKeyBindings.mDocumentDebugProfiles, "Debug Profiles");
+    declareShortcut(mValues->mKeyBindings.mDocumentDebugRunlog, "Open Run Log");
 
     declareSubcategory("Table");
-    declareShortcut("table-edit", "Edit Record", QKeySequence());
-    declareShortcut("table-add", "Add Row/Record", QKeySequence(Qt::ShiftModifier | Qt::Key_A));
-    declareShortcut("table-clone", "Clone Record", QKeySequence(Qt::ShiftModifier | Qt::Key_D));
-    declareShortcut("touch-record", "Touch Record", QKeySequence());
-    declareShortcut("table-revert", "Revert Record", QKeySequence());
-    declareShortcut("table-remove", "Remove Row/Record", QKeySequence(Qt::Key_Delete));
-    declareShortcut("table-moveup", "Move Record Up", QKeySequence());
-    declareShortcut("table-movedown", "Move Record Down", QKeySequence());
-    declareShortcut("table-view", "View Record", QKeySequence(Qt::ShiftModifier | Qt::Key_C));
-    declareShortcut("table-preview", "Preview Record", QKeySequence(Qt::ShiftModifier | Qt::Key_V));
-    declareShortcut("table-extendeddelete", "Extended Record Deletion", QKeySequence());
-    declareShortcut("table-extendedrevert", "Extended Record Revertion", QKeySequence());
+    declareShortcut(mValues->mKeyBindings.mTableEdit, "Edit Record");
+    declareShortcut(mValues->mKeyBindings.mTableAdd, "Add Row/Record");
+    declareShortcut(mValues->mKeyBindings.mTableClone, "Clone Record");
+    declareShortcut(mValues->mKeyBindings.mTouchRecord, "Touch Record");
+    declareShortcut(mValues->mKeyBindings.mTableRevert, "Revert Record");
+    declareShortcut(mValues->mKeyBindings.mTableRemove, "Remove Row/Record");
+    declareShortcut(mValues->mKeyBindings.mTableMoveup, "Move Record Up");
+    declareShortcut(mValues->mKeyBindings.mTableMovedown, "Move Record Down");
+    declareShortcut(mValues->mKeyBindings.mTableView, "View Record");
+    declareShortcut(mValues->mKeyBindings.mTablePreview, "Preview Record");
+    declareShortcut(mValues->mKeyBindings.mTableExtendeddelete, "Extended Record Deletion");
+    declareShortcut(mValues->mKeyBindings.mTableExtendedrevert, "Extended Record Revertion");
 
     declareSubcategory("Report Table");
-    declareShortcut("reporttable-show", "Show Report", QKeySequence());
-    declareShortcut("reporttable-remove", "Remove Report", QKeySequence(Qt::Key_Delete));
-    declareShortcut("reporttable-replace", "Replace Report", QKeySequence());
-    declareShortcut("reporttable-refresh", "Refresh Report", QKeySequence());
+    declareShortcut(mValues->mKeyBindings.mReporttableShow, "Show Report");
+    declareShortcut(mValues->mKeyBindings.mReporttableRemove, "Remove Report");
+    declareShortcut(mValues->mKeyBindings.mReporttableReplace, "Replace Report");
+    declareShortcut(mValues->mKeyBindings.mReporttableRefresh, "Refresh Report");
 
     declareSubcategory("Scene");
-    declareShortcut("scene-navi-primary", "Camera Rotation From Mouse Movement", QKeySequence(Qt::LeftButton));
-    declareShortcut("scene-navi-secondary", "Camera Translation From Mouse Movement",
-        QKeySequence(Qt::ControlModifier | (int)Qt::LeftButton));
-    declareShortcut("scene-open-primary", "Primary Open", QKeySequence(Qt::ShiftModifier | (int)Qt::LeftButton));
-    declareShortcut("scene-edit-primary", "Primary Edit", QKeySequence(Qt::RightButton));
-    declareShortcut("scene-edit-secondary", "Secondary Edit", QKeySequence(Qt::ControlModifier | (int)Qt::RightButton));
-    declareShortcut("scene-select-primary", "Primary Select", QKeySequence(Qt::MiddleButton));
-    declareShortcut(
-        "scene-select-secondary", "Secondary Select", QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
-    declareShortcut(
-        "scene-select-tertiary", "Tertiary Select", QKeySequence(Qt::ShiftModifier | (int)Qt::MiddleButton));
+    declareShortcut(mValues->mKeyBindings.mSceneNaviPrimary, "Camera Rotation From Mouse Movement");
+    declareShortcut(mValues->mKeyBindings.mSceneNaviSecondary, "Camera Translation From Mouse Movement");
+    declareShortcut(mValues->mKeyBindings.mSceneOpenPrimary, "Primary Open");
+    declareShortcut(mValues->mKeyBindings.mSceneEditPrimary, "Primary Edit");
+    declareShortcut(mValues->mKeyBindings.mSceneEditSecondary, "Secondary Edit");
+    declareShortcut(mValues->mKeyBindings.mSceneSelectPrimary, "Primary Select");
+    declareShortcut(mValues->mKeyBindings.mSceneSelectSecondary, "Secondary Select");
+    declareShortcut(mValues->mKeyBindings.mSceneSelectTertiary, "Tertiary Select");
     declareModifier(mValues->mKeyBindings.mSceneSpeedModifier, "Speed Modifier");
-    declareShortcut("scene-delete", "Delete Instance", QKeySequence(Qt::Key_Delete));
-    declareShortcut("scene-instance-drop-terrain", "Drop to terrain level", QKeySequence(Qt::Key_G));
-    declareShortcut("scene-instance-drop-collision", "Drop to collision", QKeySequence(Qt::Key_H));
-    declareShortcut("scene-instance-drop-terrain-separately", "Drop to terrain level separately", QKeySequence());
-    declareShortcut("scene-instance-drop-collision-separately", "Drop to collision separately", QKeySequence());
-    declareShortcut("scene-load-cam-cell", "Load Camera Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_5));
-    declareShortcut("scene-load-cam-eastcell", "Load East Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_6));
-    declareShortcut("scene-load-cam-northcell", "Load North Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_8));
-    declareShortcut("scene-load-cam-westcell", "Load West Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_4));
-    declareShortcut("scene-load-cam-southcell", "Load South Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_2));
-    declareShortcut("scene-edit-abort", "Abort", QKeySequence(Qt::Key_Escape));
-    declareShortcut("scene-focus-toolbar", "Toggle Toolbar Focus", QKeySequence(Qt::Key_T));
-    declareShortcut("scene-render-stats", "Debug Rendering Stats", QKeySequence(Qt::Key_F3));
-    declareShortcut("scene-duplicate", "Duplicate Instance", QKeySequence(Qt::ShiftModifier | Qt::Key_C));
-    declareShortcut("scene-clear-selection", "Clear Selection", QKeySequence(Qt::Key_Space));
-    declareShortcut("scene-unhide-all", "Unhide All Objects", QKeySequence(Qt::AltModifier | Qt::Key_H));
-    declareShortcut("scene-toggle-visibility", "Toggle Selection Visibility", QKeySequence(Qt::Key_H));
-    declareShortcut("scene-group-1", "Select Group 1", QKeySequence(Qt::Key_1));
-    declareShortcut("scene-save-1", "Save Group 1", QKeySequence(Qt::ControlModifier | Qt::Key_1));
-    declareShortcut("scene-group-2", "Select Group 2", QKeySequence(Qt::Key_2));
-    declareShortcut("scene-save-2", "Save Group 2", QKeySequence(Qt::ControlModifier | Qt::Key_2));
-    declareShortcut("scene-group-3", "Select Group 3", QKeySequence(Qt::Key_3));
-    declareShortcut("scene-save-3", "Save Group 3", QKeySequence(Qt::ControlModifier | Qt::Key_3));
-    declareShortcut("scene-group-4", "Select Group 4", QKeySequence(Qt::Key_4));
-    declareShortcut("scene-save-4", "Save Group 4", QKeySequence(Qt::ControlModifier | Qt::Key_4));
-    declareShortcut("scene-group-5", "Selection Group 5", QKeySequence(Qt::Key_5));
-    declareShortcut("scene-save-5", "Save Group 5", QKeySequence(Qt::ControlModifier | Qt::Key_5));
-    declareShortcut("scene-group-6", "Selection Group 6", QKeySequence(Qt::Key_6));
-    declareShortcut("scene-save-6", "Save Group 6", QKeySequence(Qt::ControlModifier | Qt::Key_6));
-    declareShortcut("scene-group-7", "Selection Group 7", QKeySequence(Qt::Key_7));
-    declareShortcut("scene-save-7", "Save Group 7", QKeySequence(Qt::ControlModifier | Qt::Key_7));
-    declareShortcut("scene-group-8", "Selection Group 8", QKeySequence(Qt::Key_8));
-    declareShortcut("scene-save-8", "Save Group 8", QKeySequence(Qt::ControlModifier | Qt::Key_8));
-    declareShortcut("scene-group-9", "Selection Group 9", QKeySequence(Qt::Key_9));
-    declareShortcut("scene-save-9", "Save Group 9", QKeySequence(Qt::ControlModifier | Qt::Key_9));
-    declareShortcut("scene-group-0", "Selection Group 10", QKeySequence(Qt::Key_0));
-    declareShortcut("scene-save-0", "Save Group 10", QKeySequence(Qt::ControlModifier | Qt::Key_0));
+    declareShortcut(mValues->mKeyBindings.mSceneDelete, "Delete Instance");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrain, "Drop to terrain level");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollision, "Drop to collision");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrainSeparately, "Drop to terrain level separately");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollisionSeparately, "Drop to collision separately");
+    declareShortcut(mValues->mKeyBindings.mSceneLoadCamCell, "Load Camera Cell");
+    declareShortcut(mValues->mKeyBindings.mSceneLoadCamEastcell, "Load East Cell");
+    declareShortcut(mValues->mKeyBindings.mSceneLoadCamNorthcell, "Load North Cell");
+    declareShortcut(mValues->mKeyBindings.mSceneLoadCamWestcell, "Load West Cell");
+    declareShortcut(mValues->mKeyBindings.mSceneLoadCamSouthcell, "Load South Cell");
+    declareShortcut(mValues->mKeyBindings.mSceneEditAbort, "Abort");
+    declareShortcut(mValues->mKeyBindings.mSceneFocusToolbar, "Toggle Toolbar Focus");
+    declareShortcut(mValues->mKeyBindings.mSceneRenderStats, "Debug Rendering Stats");
+    declareShortcut(mValues->mKeyBindings.mSceneDuplicate, "Duplicate Instance");
+    declareShortcut(mValues->mKeyBindings.mSceneClearSelection, "Clear Selection");
+    declareShortcut(mValues->mKeyBindings.mSceneUnhideAll, "Unhide All Objects");
+    declareShortcut(mValues->mKeyBindings.mSceneToggleVisibility, "Toggle Selection Visibility");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup0, "Selection Group 0");
+    declareShortcut(mValues->mKeyBindings.mSceneSave0, "Save Group 0");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup1, "Select Group 1");
+    declareShortcut(mValues->mKeyBindings.mSceneSave1, "Save Group 1");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup2, "Select Group 2");
+    declareShortcut(mValues->mKeyBindings.mSceneSave2, "Save Group 2");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup3, "Select Group 3");
+    declareShortcut(mValues->mKeyBindings.mSceneSave3, "Save Group 3");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup4, "Select Group 4");
+    declareShortcut(mValues->mKeyBindings.mSceneSave4, "Save Group 4");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup5, "Selection Group 5");
+    declareShortcut(mValues->mKeyBindings.mSceneSave5, "Save Group 5");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup6, "Selection Group 6");
+    declareShortcut(mValues->mKeyBindings.mSceneSave6, "Save Group 6");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup7, "Selection Group 7");
+    declareShortcut(mValues->mKeyBindings.mSceneSave7, "Save Group 7");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup8, "Selection Group 8");
+    declareShortcut(mValues->mKeyBindings.mSceneSave8, "Save Group 8");
+    declareShortcut(mValues->mKeyBindings.mSceneGroup9, "Selection Group 9");
+    declareShortcut(mValues->mKeyBindings.mSceneSave9, "Save Group 9");
 
     declareSubcategory("1st/Free Camera");
-    declareShortcut("free-forward", "Forward", QKeySequence(Qt::Key_W));
-    declareShortcut("free-backward", "Backward", QKeySequence(Qt::Key_S));
-    declareShortcut("free-left", "Left", QKeySequence(Qt::Key_A));
-    declareShortcut("free-right", "Right", QKeySequence(Qt::Key_D));
-    declareShortcut("free-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
-    declareShortcut("free-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
-    declareShortcut("free-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
+    declareShortcut(mValues->mKeyBindings.mFreeForward, "Forward");
+    declareShortcut(mValues->mKeyBindings.mFreeBackward, "Backward");
+    declareShortcut(mValues->mKeyBindings.mFreeLeft, "Left");
+    declareShortcut(mValues->mKeyBindings.mFreeRight, "Right");
+    declareShortcut(mValues->mKeyBindings.mFreeRollLeft, "Roll Left");
+    declareShortcut(mValues->mKeyBindings.mFreeRollRight, "Roll Right");
+    declareShortcut(mValues->mKeyBindings.mFreeSpeedMode, "Toggle Speed Mode");
 
     declareSubcategory("Orbit Camera");
-    declareShortcut("orbit-up", "Up", QKeySequence(Qt::Key_W));
-    declareShortcut("orbit-down", "Down", QKeySequence(Qt::Key_S));
-    declareShortcut("orbit-left", "Left", QKeySequence(Qt::Key_A));
-    declareShortcut("orbit-right", "Right", QKeySequence(Qt::Key_D));
-    declareShortcut("orbit-roll-left", "Roll Left", QKeySequence(Qt::Key_Q));
-    declareShortcut("orbit-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
-    declareShortcut("orbit-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
-    declareShortcut("orbit-center-selection", "Center On Selected", QKeySequence(Qt::Key_C));
+    declareShortcut(mValues->mKeyBindings.mOrbitUp, "Up");
+    declareShortcut(mValues->mKeyBindings.mOrbitDown, "Down");
+    declareShortcut(mValues->mKeyBindings.mOrbitLeft, "Left");
+    declareShortcut(mValues->mKeyBindings.mOrbitRight, "Right");
+    declareShortcut(mValues->mKeyBindings.mOrbitRollLeft, "Roll Left");
+    declareShortcut(mValues->mKeyBindings.mOrbitRollRight, "Roll Right");
+    declareShortcut(mValues->mKeyBindings.mOrbitSpeedMode, "Toggle Speed Mode");
+    declareShortcut(mValues->mKeyBindings.mOrbitCenterSelection, "Center On Selected");
 
     declareSubcategory("Script Editor");
-    declareShortcut("script-editor-comment", "Comment Selection", QKeySequence());
-    declareShortcut("script-editor-uncomment", "Uncomment Selection", QKeySequence());
+    declareShortcut(mValues->mKeyBindings.mScriptEditorComment, "Comment Selection");
+    declareShortcut(mValues->mKeyBindings.mScriptEditorUncomment, "Uncomment Selection");
 
     declareCategory("Models");
     declareString(mValues->mModels.mBaseanim, "base animations").setTooltip("3rd person base model with textkeys-data");
@@ -477,13 +474,14 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(EnumSettingValue& value, con
     return *setting;
 }
 
-CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(const std::string& key, const QString& label, QColor default_)
+CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(
+    Settings::SettingValue<std::string>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
     CSMPrefs::ColourSetting* setting
-        = new CSMPrefs::ColourSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+        = new CSMPrefs::ColourSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
 
@@ -491,7 +489,7 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(const std::string& key, 
 }
 
 CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
-    const std::string& key, const QString& label, const QKeySequence& default_)
+    Settings::SettingValue<std::string>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -499,11 +497,11 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
     // Setup with actual data
     QKeySequence sequence;
 
-    getShortcutManager().convertFromString(mIndex->get<std::string>(mCurrentCategory->second.getKey(), key), sequence);
-    getShortcutManager().setSequence(key, sequence);
+    getShortcutManager().convertFromString(value, sequence);
+    getShortcutManager().setSequence(value.mName, sequence);
 
     CSMPrefs::ShortcutSetting* setting
-        = new CSMPrefs::ShortcutSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+        = new CSMPrefs::ShortcutSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
     mCurrentCategory->second.addSetting(setting);
 
     return *setting;

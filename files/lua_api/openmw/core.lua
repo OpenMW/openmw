@@ -682,7 +682,6 @@
 ---
 -- @type ActiveEffect
 -- Magic effect that is currently active on an actor.
--- Note that when this effect expires or is removed, it will remain temporarily. Magnitude will be set to 0 for effects that expire.
 -- @field #string affectedSkill Optional skill ID
 -- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Effect id string

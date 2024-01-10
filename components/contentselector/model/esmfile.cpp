@@ -1,10 +1,5 @@
 #include "esmfile.hpp"
 
-#include <QDataStream>
-#include <QIODevice>
-
-int ContentSelectorModel::EsmFile::sPropertyCount = 7;
-
 ContentSelectorModel::EsmFile::EsmFile(const QString& fileName, ModelItem* parent)
     : ModelItem(parent)
     , mFileName(fileName)
@@ -44,17 +39,6 @@ void ContentSelectorModel::EsmFile::setGameFiles(const QStringList& gamefiles)
 void ContentSelectorModel::EsmFile::setDescription(const QString& description)
 {
     mDescription = description;
-}
-
-QByteArray ContentSelectorModel::EsmFile::encodedData() const
-{
-    QByteArray encodedData;
-    QDataStream stream(&encodedData, QIODevice::WriteOnly);
-
-    stream << mFileName << mAuthor << mVersion << mModified.toString(Qt::ISODate) << mPath << mDescription
-           << mGameFiles;
-
-    return encodedData;
 }
 
 bool ContentSelectorModel::EsmFile::isGameFile() const

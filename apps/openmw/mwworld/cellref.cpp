@@ -8,10 +8,10 @@
 #include <components/esm3/objectstate.hpp>
 #include <components/esm4/loadrefr.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwmechanics/spellutil.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwmechanics/spellutil.hpp"
+#include "apps/openmw/mwworld/esmstore.hpp"
 
 namespace MWWorld
 {

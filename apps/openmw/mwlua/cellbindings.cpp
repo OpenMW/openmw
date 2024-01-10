@@ -43,6 +43,8 @@
 #include <components/esm4/loadtree.hpp>
 #include <components/esm4/loadweap.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/worldmodel.hpp"
 

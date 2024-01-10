@@ -10,12 +10,13 @@ DEPENDENCIES_ROOT="/tmp/openmw-deps"
 
 QT_PATH=$(brew --prefix qt@5)
 ICU_PATH=$(brew --prefix icu4c)
+OPENAL_PATH=$(brew --prefix openal-soft)
 CCACHE_EXECUTABLE=$(brew --prefix ccache)/bin/ccache
 mkdir build
 cd build
 
 cmake \
--D CMAKE_PREFIX_PATH="$DEPENDENCIES_ROOT;$QT_PATH" \
+-D CMAKE_PREFIX_PATH="$DEPENDENCIES_ROOT;$QT_PATH;$OPENAL_PATH" \
 -D CMAKE_C_COMPILER_LAUNCHER="$CCACHE_EXECUTABLE" \
 -D CMAKE_CXX_COMPILER_LAUNCHER="$CCACHE_EXECUTABLE" \
 -D CMAKE_CXX_FLAGS="-stdlib=libc++" \

@@ -7,7 +7,6 @@
 #include <components/lua/luastate.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
-#include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/store.hpp"
 

@@ -288,6 +288,7 @@ namespace LuaUi
                 auto children = parent->children();
                 auto it = std::find(children.begin(), children.end(), mRoot);
                 mRoot = createWidget(layout(), 0);
+                assert(it != children.end());
                 *it = mRoot;
                 parent->setChildren(children);
                 mRoot->updateCoord();

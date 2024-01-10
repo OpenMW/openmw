@@ -154,7 +154,7 @@ bool Launcher::GraphicsPage::loadSettings()
     if (Settings::shadows().mEnableIndoorShadows)
         indoorShadowsCheckBox->setCheckState(Qt::Checked);
 
-    auto boundMethod = Settings::shadows().mComputeSceneBounds.get();
+    const auto& boundMethod = Settings::shadows().mComputeSceneBounds.get();
     if (boundMethod == "bounds")
         shadowComputeSceneBoundsComboBox->setCurrentIndex(0);
     else if (boundMethod == "primitives")

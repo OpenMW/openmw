@@ -472,7 +472,7 @@ namespace MWGui
 
         ESM::EffectList effectList;
         effectList.mList = mEffects;
-        mSpell.mEffects = effectList;
+        mSpell.mEffects = std::move(effectList);
         mSpell.mData.mCost = int(y);
         mSpell.mData.mType = ESM::Spell::ST_Spell;
         mSpell.mData.mFlags = 0;

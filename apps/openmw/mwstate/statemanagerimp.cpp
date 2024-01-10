@@ -64,6 +64,7 @@ void MWState::StateManager::cleanup(bool force)
         mState = State_NoGame;
         mCharacterManager.setCurrentCharacter(nullptr);
         mTimePlayed = 0;
+        mLastSavegame.clear();
 
         MWMechanics::CreatureStats::cleanup();
     }
@@ -119,14 +120,27 @@ void MWState::StateManager::askLoadRecent()
 
     if (!mAskLoadRecent)
     {
-        const MWState::Character* character = getCurrentCharacter();
-        if (!character || character->begin() == character->end()) // no saves
+        if (mLastSavegame.empty()) // no saves
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
         }
         else
         {
-            MWState::Slot lastSave = *character->begin();
+            std::string saveName = Files::pathToUnicodeString(mLastSavegame.filename());
+            // Assume the last saved game belongs to the current character's slot list.
+            const Character* character = getCurrentCharacter();
+            if (character)
+            {
+                for (const auto& slot : *character)
+                {
+                    if (slot.mPath == mLastSavegame)
+                    {
+                        saveName = slot.mProfile.mDescription;
+                        break;
+                    }
+                }
+            }
+
             std::vector<std::string> buttons;
             buttons.emplace_back("#{Interface:Yes}");
             buttons.emplace_back("#{Interface:No}");
@@ -134,7 +148,7 @@ void MWState::StateManager::askLoadRecent()
                 = MWBase::Environment::get().getL10nManager()->getMessage("OMWEngine", "AskLoadLastSave");
             std::string_view tag = "%s";
             size_t pos = message.find(tag);
-            message.replace(pos, tag.length(), lastSave.mProfile.mDescription);
+            message.replace(pos, tag.length(), saveName);
             MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
             mAskLoadRecent = true;
         }
@@ -324,6 +338,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
             throw std::runtime_error("Write operation failed (file stream)");
 
         Settings::saves().mCharacter.set(Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
+        mLastSavegame = slot->mPath;
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -563,6 +578,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         if (character)
             Settings::saves().mCharacter.set(Files::pathToUnicodeString(character->getPath().filename()));
+        mLastSavegame = filepath;
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
         MWBase::Environment::get().getWorld()->saveLoaded();
@@ -641,7 +657,15 @@ void MWState::StateManager::quickLoad()
 
 void MWState::StateManager::deleteGame(const MWState::Character* character, const MWState::Slot* slot)
 {
+    const std::filesystem::path savePath = slot->mPath;
     mCharacterManager.deleteSlot(character, slot);
+    if (mLastSavegame == savePath)
+    {
+        if (character->begin() != character->end())
+            mLastSavegame = character->begin()->mPath;
+        else
+            mLastSavegame.clear();
+    }
 }
 
 MWState::Character* MWState::StateManager::getCurrentCharacter()
@@ -672,9 +696,9 @@ void MWState::StateManager::update(float duration)
         {
             mAskLoadRecent = false;
             // Load last saved game for current character
-
-            MWState::Slot lastSave = *curCharacter->begin();
-            loadGame(curCharacter, lastSave.mPath);
+            // loadGame resets the game state along with mLastSavegame so we want to preserve it
+            const std::filesystem::path filePath = std::move(mLastSavegame);
+            loadGame(curCharacter, filePath);
         }
         else if (iButton == 1)
         {

@@ -1,4 +1,5 @@
 #include "apps/openmw/mwdialogue/keywordsearch.hpp"
+
 #include <gtest/gtest.h>
 
 struct KeywordSearchTest : public ::testing::Test

@@ -251,7 +251,7 @@ namespace MWGui
                     if (!cost.empty() && cost != "0")
                         info.text
                             += MWGui::ToolTips::getValueString(MWMechanics::calcSpellCost(*spell), "#{sCastCost}");
-                    info.effects = effects;
+                    info.effects = std::move(effects);
                     tooltipSize = createToolTip(info);
                 }
                 else if (type == "Layout")

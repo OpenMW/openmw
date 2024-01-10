@@ -9,7 +9,6 @@
 #include <fstream>
 #include <regex>
 
-#include <apps/openmw/mwgui/textcolours.hpp>
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
 #include <components/compiler/lineparser.hpp>
@@ -19,6 +18,8 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/misc/utf8stream.hpp>
 #include <components/settings/values.hpp>
+
+#include "apps/openmw/mwgui/textcolours.hpp"
 
 #include "../mwscript/extensions.hpp"
 #include "../mwscript/interpretercontext.hpp"
@@ -439,7 +440,7 @@ namespace MWGui
         // If new search term reset position, otherwise continue from current position
         if (newSearchTerm != mCurrentSearchTerm)
         {
-            mCurrentSearchTerm = newSearchTerm;
+            mCurrentSearchTerm = std::move(newSearchTerm);
             mCurrentOccurrenceIndex = std::string::npos;
         }
 

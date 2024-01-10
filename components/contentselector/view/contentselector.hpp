@@ -85,6 +85,7 @@ namespace ContentSelectorView
         void slotUncheckMultiSelectedItems();
         void slotCopySelectedItemsPaths();
         void slotSearchFilterTextChanged(const QString& newText);
+        void slotRowsMoved();
     };
 }
 

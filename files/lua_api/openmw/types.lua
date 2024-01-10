@@ -210,14 +210,14 @@
 -- end
 -- @usage -- Check for a specific effect
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.Telekinesis)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Telekinesis effect')
 -- end
 -- @usage -- Check for a specific effect targeting a specific attribute.
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, core.ATTRIBUTE.Luck)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Fortify Luck effect')
@@ -229,7 +229,7 @@
 -- @param self
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
--- @return openmw.core#ActiveEffect if such an effect is active, nil otherwise
+-- @return openmw.core#ActiveEffect
 
 ---
 -- Completely removes the active effect from the actor.

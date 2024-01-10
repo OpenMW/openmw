@@ -5,10 +5,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
-
 namespace sol
 {
     template <>
