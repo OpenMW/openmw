@@ -46,8 +46,6 @@ namespace LuaUi
 
     void clearGameInterface()
     {
-        // TODO: move settings clearing logic to Lua?
-        clearSettings();
         while (!Element::sGameElements.empty())
             Element::sGameElements.begin()->second->destroy();
     }

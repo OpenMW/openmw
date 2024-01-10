@@ -35,6 +35,7 @@ namespace MWLua
         LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir);
         LuaManager(const LuaManager&) = delete;
         LuaManager(LuaManager&&) = delete;
+        ~LuaManager();
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();

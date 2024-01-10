@@ -94,6 +94,11 @@
 -- @param #SettingsPageOptions page
 
 ---
+-- Removes the settings page
+-- @function [parent=#ui] removeSettingsPage
+-- @param #SettingsPageOptions page must be the exact same table of options as the one passed to registerSettingsPage
+
+---
 -- Table with settings page options, passed as an argument to ui.registerSettingsPage
 -- @type SettingsPageOptions
 -- @field #string name Name of the page, displayed in the list, used for search

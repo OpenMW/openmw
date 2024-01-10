@@ -423,17 +423,27 @@ local function updateGlobalGroups()
 end
 
 local menuGroups = {}
+local menuPages = {}
 
-local function resetGroups()
+local function reset()
     for pageKey, page in pairs(groups) do
         for groupKey in pairs(page) do
             if not menuGroups[groupKey] then
                 page[groupKey] = nil
             end
         end
-        local renderedOptions = renderPage(pages[pageKey])
-        for k, v in pairs(renderedOptions) do
-            pageOptions[pageKey][k] = v
+        if pageOptions[pageKey] then
+            pageOptions[pageKey].element.destroy()
+            if not menuPages[pageKey] then
+                pageOptions[pageKey].element.destroy()
+                ui.removeSettingsPage(pageOptions[pageKey])
+                pageOptions[pageKey] = nil
+            else
+                local renderedOptions = renderPage(pages[pageKey])
+                for k, v in pairs(renderedOptions) do
+                    pageOptions[pageKey][k] = v
+                end
+            end
         end
     end
 end
@@ -477,7 +487,10 @@ return {
     interfaceName = 'Settings',
     interface = {
         version = 1,
-        registerPage = registerPage,
+        registerPage = function(options)
+            registerPage(options)
+            menuPages[options] = true
+        end,
         registerRenderer = registerRenderer,
         registerGroup = function(options)
             common.registerGroup(options)
@@ -492,7 +505,7 @@ return {
             if menu.getState() == menu.STATE.Running then
                 updateGlobalGroups()
             else
-                resetGroups()
+                reset()
             end
             updatePlayerGroups()
         end,

@@ -18,6 +18,7 @@
 #include <components/l10n/manager.hpp>
 
 #include <components/lua_ui/content.hpp>
+#include <components/lua_ui/registerscriptsettings.hpp>
 #include <components/lua_ui/util.hpp>
 
 #include "../mwbase/windowmanager.hpp"
@@ -60,6 +61,11 @@ namespace MWLua
         mLocalLoader = createUserdataSerializer(true, &mContentFileMapping);
 
         mGlobalScripts.setSerializer(mGlobalSerializer.get());
+    }
+
+    LuaManager::~LuaManager()
+    {
+        LuaUi::clearSettings();
     }
 
     void LuaManager::initConfiguration()
@@ -551,6 +557,7 @@ namespace MWLua
 
         LuaUi::clearGameInterface();
         LuaUi::clearMenuInterface();
+        LuaUi::clearSettings();
         MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         MWBase::Environment::get().getL10nManager()->dropCache();
         mUiResourceManager.clear();

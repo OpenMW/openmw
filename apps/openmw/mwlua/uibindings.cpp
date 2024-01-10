@@ -247,6 +247,7 @@ namespace MWLua
                 { "Center", LuaUi::Alignment::Center }, { "End", LuaUi::Alignment::End } }));
 
         api["registerSettingsPage"] = &LuaUi::registerSettingsPage;
+        api["removeSettingsPage"] = &LuaUi::registerSettingsPage;
 
         api["texture"] = [luaManager = context.mLuaManager](const sol::table& options) {
             LuaUi::TextureData data;
