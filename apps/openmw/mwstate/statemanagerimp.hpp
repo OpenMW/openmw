@@ -17,6 +17,7 @@ namespace MWState
         State mState;
         CharacterManager mCharacterManager;
         double mTimePlayed;
+        std::filesystem::path mLastSavegame;
 
     private:
         void cleanup(bool force = false);
