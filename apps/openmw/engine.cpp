@@ -893,8 +893,8 @@ void OMW::Engine::prepareEngine()
                              << 100 * static_cast<double>(result.second) / result.first << "%)";
     }
 
-    mLuaManager->init();
     mLuaManager->loadPermanentStorage(mCfgMgr.getUserConfigPath());
+    mLuaManager->init();
 
     // starts a separate lua thread if "lua num threads" > 0
     mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager, *mViewer);
