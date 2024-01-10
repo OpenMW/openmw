@@ -54,6 +54,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 if (APPLE)
+    set(CMAKE_FIND_FRAMEWORK LAST) # prefer dylibs over frameworks
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
