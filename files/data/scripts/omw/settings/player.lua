@@ -1,4 +1,3 @@
-local storage = require('openmw.storage')
 local types = require('openmw.types')
 local self = require('openmw.self')
 

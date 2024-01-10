@@ -47,7 +47,7 @@ local spacedLines = function(count)
     local content = {}
     table.insert(content, spacer)
     table.insert(content, stretchingLine)
-    for i = 2, count do
+    for _ = 2, count do
         table.insert(content, interval)
         table.insert(content, stretchingLine)
     end
@@ -422,10 +422,14 @@ local function updateGlobalGroups()
     end))
 end
 
+local menuGroups = {}
+
 local function resetGroups()
     for pageKey, page in pairs(groups) do
         for groupKey in pairs(page) do
-            page[groupKey] = nil
+            if not menuGroups[groupKey] then
+                page[groupKey] = nil
+            end
         end
         local renderedOptions = renderPage(pages[pageKey])
         for k, v in pairs(renderedOptions) do
@@ -475,7 +479,10 @@ return {
         version = 1,
         registerPage = registerPage,
         registerRenderer = registerRenderer,
-        registerGroup = common.registerGroup,
+        registerGroup = function(options)
+            common.registerGroup(options)
+            menuGroups[options.key] = true
+        end,
         updateRendererArgument = common.updateRendererArgument,
     },
     engineHandlers = {
