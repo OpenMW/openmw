@@ -221,7 +221,7 @@ namespace MWGui::Formatting
                 }
             }
 
-            mAttributes[key] = value;
+            mAttributes[key] = std::move(value);
         }
     }
 
