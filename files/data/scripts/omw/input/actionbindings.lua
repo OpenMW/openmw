@@ -134,90 +134,16 @@ function clearBinding(id)
     end
 end
 
-local function updateBinding(id, binding)
-    bindingSection:set(id, binding)
+bindingSection:subscribe(async:callback(function(_, id)
+    if not id then return end
+    local binding = bindingSection:get(id)
     clearBinding(id)
     if binding ~= nil then
         registerBinding(binding, id)
     end
     return id
-end
+end))
 
-local interfaceL10n = core.l10n('interface')
-
-I.Settings.registerRenderer('inputBinding', function(id, set, arg)
-    if type(id) ~= 'string' then error('inputBinding: must have a string default value') end
-    if not arg.type then error('inputBinding: type argument is required') end
-    if not arg.key then error('inputBinding: key argument is required') end
-    local info = input.actions[arg.key] or input.triggers[arg.key]
-    if not info then return {} end
-
-    local l10n = core.l10n(info.key)
-
-    local name = {
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = l10n(info.name),
-        },
-    }
-
-    local description = {
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = l10n(info.description),
-        },
-    }
-
-    local binding = bindingSection:get(id)
-    local label = binding and input.getKeyName(binding.code) or interfaceL10n('None')
-
-    local recorder = {
-        template = I.MWUI.templates.textEditLine,
-        props = {
-            readOnly = true,
-            text = label,
-        },
-        events = {
-            focusGain = async:callback(function()
-                if binding == nil then return end
-                updateBinding(id, nil)
-                set(id)
-            end),
-            keyPress = async:callback(function(key)
-                if binding ~= nil or key.code == input.KEY.Escape then return end
-
-                local newBinding = {
-                    code = key.code,
-                    type = arg.type,
-                    key = arg.key,
-                }
-                updateBinding(id, newBinding)
-                set(id)
-            end),
-        },
-    }
-
-    local row = {
-        type = ui.TYPE.Flex,
-        props = {
-            horizontal = true,
-        },
-        content = ui.content {
-            name,
-            { props = { size = util.vector2(10, 0) } },
-            recorder,
-        },
-    }
-    local column = {
-        type = ui.TYPE.Flex,
-        content = ui.content {
-            row,
-            description,
-        },
-    }
-
-    return column
-end)
 
 local initiated = false
 
