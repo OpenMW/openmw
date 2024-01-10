@@ -74,7 +74,7 @@ namespace CSMPrefs
 
         ColourSetting& declareColour(Settings::SettingValue<std::string>& value, const QString& label);
 
-        ShortcutSetting& declareShortcut(const std::string& key, const QString& label, const QKeySequence& default_);
+        ShortcutSetting& declareShortcut(Settings::SettingValue<std::string>& value, const QString& label);
 
         StringSetting& declareString(Settings::SettingValue<std::string>& value, const QString& label);
 

@@ -28,8 +28,8 @@ namespace CSMPrefs
         /// The shortcut class will do this automatically
         void removeShortcut(Shortcut* shortcut);
 
-        bool getSequence(const std::string& name, QKeySequence& sequence) const;
-        void setSequence(const std::string& name, const QKeySequence& sequence);
+        bool getSequence(std::string_view name, QKeySequence& sequence) const;
+        void setSequence(std::string_view name, const QKeySequence& sequence);
 
         bool getModifier(const std::string& name, int& modifier) const;
         void setModifier(std::string_view name, int modifier);
@@ -50,7 +50,7 @@ namespace CSMPrefs
     private:
         // Need a multimap in case multiple shortcuts share the same name
         typedef std::multimap<std::string, Shortcut*, std::less<>> ShortcutMap;
-        typedef std::map<std::string, QKeySequence> SequenceMap;
+        typedef std::map<std::string, QKeySequence, std::less<>> SequenceMap;
         typedef std::map<std::string, int, std::less<>> ModifierMap;
         typedef std::map<int, std::string> NameMap;
         typedef std::map<std::string, int> KeyMap;
