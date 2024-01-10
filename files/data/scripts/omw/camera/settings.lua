@@ -3,10 +3,10 @@ local async = require('openmw.async')
 local I = require('openmw.interfaces')
 
 I.Settings.registerPage({
-  key = 'OMWCamera',
-  l10n = 'OMWCamera',
-  name = 'Camera',
-  description = 'settingsPageDescription',
+    key = 'OMWCamera',
+    l10n = 'OMWCamera',
+    name = 'Camera',
+    description = 'settingsPageDescription',
 })
 
 local thirdPersonGroup = 'SettingsOMWCameraThirdPerson'
@@ -16,8 +16,8 @@ local function boolSetting(prefix, key, default)
     return {
         key = key,
         renderer = 'checkbox',
-        name = prefix..key,
-        description = prefix..key..'Description',
+        name = prefix .. key,
+        description = prefix .. key .. 'Description',
         default = default,
     }
 end
@@ -26,8 +26,8 @@ local function floatSetting(prefix, key, default)
     return {
         key = key,
         renderer = 'number',
-        name = prefix..key,
-        description = prefix..key..'Description',
+        name = prefix .. key,
+        description = prefix .. key .. 'Description',
         default = default,
     }
 end
@@ -70,33 +70,29 @@ I.Settings.registerGroup({
     },
 })
 
-local settings = {
-    thirdPerson = storage.playerSection(thirdPersonGroup),
-    headBobbing = storage.playerSection(headBobbingGroup),
-}
+local thirdPerson = storage.playerSection(thirdPersonGroup)
+local headBobbing = storage.playerSection(headBobbingGroup)
 
 local function updateViewOverShoulderDisabled()
-    local shoulderDisabled = not settings.thirdPerson:get('viewOverShoulder')
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetX', {disabled = shoulderDisabled})
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetY', {disabled = shoulderDisabled})
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'autoSwitchShoulder', {disabled = shoulderDisabled})
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'zoomOutWhenMoveCoef', {disabled = shoulderDisabled})
+    local shoulderDisabled = not thirdPerson:get('viewOverShoulder')
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetX', { disabled = shoulderDisabled })
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetY', { disabled = shoulderDisabled })
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'autoSwitchShoulder', { disabled = shoulderDisabled })
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'zoomOutWhenMoveCoef', { disabled = shoulderDisabled })
 
-    local move360Disabled = not settings.thirdPerson:get('move360')
-    I.Settings.updateRendererArgument(thirdPersonGroup, 'move360TurnSpeed', {disabled = move360Disabled})
+    local move360Disabled = not thirdPerson:get('move360')
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'move360TurnSpeed', { disabled = move360Disabled })
 end
 
 local function updateHeadBobbingDisabled()
-    local disabled = not settings.headBobbing:get('enabled')
-    I.Settings.updateRendererArgument(headBobbingGroup, 'step', {disabled = disabled, min = 1})
-    I.Settings.updateRendererArgument(headBobbingGroup, 'height', {disabled = disabled})
-    I.Settings.updateRendererArgument(headBobbingGroup, 'roll', {disabled = disabled, min = 0, max = 90})
+    local disabled = not headBobbing:get('enabled')
+    I.Settings.updateRendererArgument(headBobbingGroup, 'step', { disabled = disabled, min = 1 })
+    I.Settings.updateRendererArgument(headBobbingGroup, 'height', { disabled = disabled })
+    I.Settings.updateRendererArgument(headBobbingGroup, 'roll', { disabled = disabled, min = 0, max = 90 })
 end
 
 updateViewOverShoulderDisabled()
 updateHeadBobbingDisabled()
 
-settings.thirdPerson:subscribe(async:callback(updateViewOverShoulderDisabled))
-settings.headBobbing:subscribe(async:callback(updateHeadBobbingDisabled))
-
-return settings
+thirdPerson:subscribe(async:callback(updateViewOverShoulderDisabled))
+headBobbing:subscribe(async:callback(updateHeadBobbingDisabled))

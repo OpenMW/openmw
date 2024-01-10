@@ -5,6 +5,7 @@ local util = require('openmw.util')
 local self = require('openmw.self')
 local nearby = require('openmw.nearby')
 local async = require('openmw.async')
+local storage = require('openmw.storage')
 local I = require('openmw.interfaces')
 
 local Actor = require('openmw.types').Actor
@@ -28,7 +29,7 @@ input.registerAction {
     defaultValue = 0,
 }
 
-local settings = require('scripts.omw.camera.settings').thirdPerson
+local settings = storage.playerSection('SettingsOMWCameraThirdPerson')
 local head_bobbing = require('scripts.omw.camera.head_bobbing')
 local third_person = require('scripts.omw.camera.third_person')
 local pov_auto_switch = require('scripts.omw.camera.first_person_auto_switch')
