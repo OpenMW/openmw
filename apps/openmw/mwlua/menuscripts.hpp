@@ -51,7 +51,6 @@ namespace MWLua
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };
         EngineHandlerList mUiModeChanged{ "_onUiModeChanged" };
     };
-
 }
 
 #endif // MWLUA_GLOBALSCRIPTS_H

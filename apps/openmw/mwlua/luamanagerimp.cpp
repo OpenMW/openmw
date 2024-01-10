@@ -118,6 +118,7 @@ namespace MWLua
             = LuaUtil::LuaStorage::initPlayerPackage(mLua.sol(), &mGlobalStorage, &mPlayerStorage);
 
         mPlayerStorage.setActive(true);
+        mGlobalStorage.setActive(false);
 
         initConfiguration();
         mInitialized = true;
@@ -126,6 +127,8 @@ namespace MWLua
 
     void LuaManager::loadPermanentStorage(const std::filesystem::path& userConfigPath)
     {
+        mPlayerStorage.setActive(true);
+        mGlobalStorage.setActive(true);
         const auto globalPath = userConfigPath / "global_storage.bin";
         const auto playerPath = userConfigPath / "player_storage.bin";
         if (std::filesystem::exists(globalPath))
@@ -236,8 +239,9 @@ namespace MWLua
             = mPlayer.isEmpty() ? nullptr : dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
-        for (const auto& event : mInputEvents)
+        for (const auto& event : mMenuInputEvents)
             mMenuScripts.processInputEvent(event);
+        mMenuInputEvents.clear();
         if (playerScripts && !windowManager->containsMode(MWGui::GM_MainMenu))
         {
             for (const auto& event : mInputEvents)
@@ -300,6 +304,7 @@ namespace MWLua
         mLuaEvents.clear();
         mEngineEvents.clear();
         mInputEvents.clear();
+        mMenuInputEvents.clear();
         mObjectLists.clear();
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
@@ -432,6 +437,7 @@ namespace MWLua
         {
             mInputEvents.push_back(event);
         }
+        mMenuInputEvents.push_back(event);
     }
 
     MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const

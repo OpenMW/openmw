@@ -51,6 +51,7 @@
 #include <components/l10n/manager.hpp>
 
 #include <components/lua_ui/util.hpp>
+#include <components/lua_ui/widget.hpp>
 
 #include <components/settings/values.hpp>
 
@@ -1676,7 +1677,10 @@ namespace MWGui
 
     void WindowManager::onKeyFocusChanged(MyGUI::Widget* widget)
     {
-        if (widget && widget->castType<MyGUI::EditBox>(false))
+        bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
+        LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
+        bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
+        if (widget && capturesInput)
             SDL_StartTextInput();
         else
             SDL_StopTextInput();

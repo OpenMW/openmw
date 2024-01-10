@@ -179,6 +179,7 @@ namespace MWLua
         LuaEvents mLuaEvents{ mGlobalScripts, mMenuScripts };
         EngineEvents mEngineEvents{ mGlobalScripts };
         std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
+        std::vector<MWBase::LuaManager::InputEvent> mMenuInputEvents;
 
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalSerializer;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalSerializer;

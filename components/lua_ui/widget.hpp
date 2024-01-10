@@ -73,6 +73,8 @@ namespace LuaUi
         virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
         MyGUI::IntCoord calculateCoord();
 
+        virtual bool isTextInput() { return false; }
+
     protected:
         virtual void initialize();
         void registerEvents(MyGUI::Widget* w);
