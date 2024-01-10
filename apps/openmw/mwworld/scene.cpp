@@ -111,11 +111,16 @@ namespace
         std::string model = getModel(ptr);
         const auto rotation = makeDirectNodeRotation(ptr);
 
+        // Null node meant to distinguish objects that aren't in the scene from paged objects
+        // TODO: find a more clever way to make paging exclusion more reliable?
+        static const osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pagedNode(
+            new SceneUtil::PositionAttitudeTransform);
+
         ESM::RefNum refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || !std::binary_search(pagedRefs.begin(), pagedRefs.end(), refnum))
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
         else
-            ptr.getRefData().setBaseNode(nullptr);
+            ptr.getRefData().setBaseNode(pagedNode);
         setNodeRotation(ptr, rendering, rotation);
 
         if (ptr.getClass().useAnim())
