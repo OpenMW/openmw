@@ -81,11 +81,6 @@ int runApplication(int argc, char* argv[])
 
     Application application(argc, argv);
 
-#ifdef Q_OS_MAC
-    QDir dir(QCoreApplication::applicationDirPath());
-    QDir::setCurrent(dir.absolutePath());
-#endif
-
     application.setWindowIcon(QIcon(":./openmw-cs.png"));
 
     CS::Editor editor(argc, argv);
