@@ -16,6 +16,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/algorithm.hpp>
 #include <components/settings/values.hpp>
 
 #include <osg/Image>
@@ -81,10 +82,8 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap(const ESM::ES
 
     for (int iPrev = 0; iPrev < static_cast<int>(prev.size()); ++iPrev)
     {
-        std::string id = Misc::StringUtils::lowerCase(prev[iPrev].name);
-
         for (int iCurrent = 0; iCurrent < static_cast<int>(current.size()); ++iCurrent)
-            if (id == Misc::StringUtils::lowerCase(current[iCurrent]))
+            if (Misc::StringUtils::ciEqual(prev[iPrev].name, current[iCurrent]))
             {
                 map.insert(std::make_pair(iPrev, iCurrent));
                 break;
