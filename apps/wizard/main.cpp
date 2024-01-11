@@ -28,8 +28,6 @@ int main(int argc, char* argv[])
     app.setLibraryPaths(libraryPaths);
 #endif
 
-    QDir::setCurrent(dir.absolutePath());
-
     Wizard::MainWizard wizard;
 
     wizard.show();

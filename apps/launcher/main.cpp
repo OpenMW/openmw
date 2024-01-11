@@ -41,11 +41,6 @@ int runLauncher(int argc, char* argv[])
         appTranslator.load(":/translations/" + locale + ".qm");
         app.installTranslator(&appTranslator);
 
-        // Now we make sure the current dir is set to application path
-        QDir dir(QCoreApplication::applicationDirPath());
-
-        QDir::setCurrent(dir.absolutePath());
-
         Launcher::MainDialog mainWin(configurationManager);
 
         Launcher::FirstRunDialogResult result = mainWin.showFirstRunDialog();
