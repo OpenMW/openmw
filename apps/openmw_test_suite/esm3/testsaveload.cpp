@@ -422,7 +422,6 @@ namespace ESM
             std::copy(std::begin(idle), std::end(idle), record.mData.mIdle);
             record.mData.mShouldRepeat = 12;
             record.mDurationData.mRemainingDuration = 13;
-            record.mDurationData.mUnused = 14;
             record.mStoredInitialActorPosition = true;
             constexpr float initialActorPosition[3] = { 15, 16, 17 };
             static_assert(std::size(initialActorPosition) == std::size(record.mInitialActorPosition.mValues));
@@ -438,7 +437,6 @@ namespace ESM
             EXPECT_THAT(result.mData.mIdle, ElementsAreArray(record.mData.mIdle));
             EXPECT_EQ(result.mData.mShouldRepeat, record.mData.mShouldRepeat);
             EXPECT_EQ(result.mDurationData.mRemainingDuration, record.mDurationData.mRemainingDuration);
-            EXPECT_EQ(result.mDurationData.mUnused, record.mDurationData.mUnused);
             EXPECT_EQ(result.mStoredInitialActorPosition, record.mStoredInitialActorPosition);
             EXPECT_THAT(result.mInitialActorPosition.mValues, ElementsAreArray(record.mInitialActorPosition.mValues));
         }
