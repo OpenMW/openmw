@@ -55,7 +55,7 @@ namespace fx
             osg::ref_ptr<osg::Texture2D> mRenderTexture;
             bool mResolve = false;
             Types::SizeProxy mSize;
-            bool mMipMap;
+            bool mMipMap = false;
 
             SubPass(const SubPass& other, const osg::CopyOp& copyOp = osg::CopyOp::SHALLOW_COPY)
                 : mStateSet(new osg::StateSet(*other.mStateSet, copyOp))
