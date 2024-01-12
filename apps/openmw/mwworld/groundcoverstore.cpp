@@ -9,8 +9,6 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-
 #include "store.hpp"
 
 namespace MWWorld
@@ -26,8 +24,6 @@ namespace MWWorld
         const ::EsmLoader::EsmData content
             = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections, readers, encoder, listener);
 
-        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         static constexpr std::string_view prefix = "grass\\";
         for (const ESM::Static& stat : statics)
         {
@@ -35,7 +31,7 @@ namespace MWWorld
             std::replace(model.begin(), model.end(), '/', '\\');
             if (!model.starts_with(prefix))
                 continue;
-            mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
+            mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model);
         }
 
         for (const ESM::Static& stat : content.mStatics)
@@ -44,7 +40,7 @@ namespace MWWorld
             std::replace(model.begin(), model.end(), '/', '\\');
             if (!model.starts_with(prefix))
                 continue;
-            mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
+            mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model);
         }
 
         for (const ESM::Cell& cell : content.mCells)

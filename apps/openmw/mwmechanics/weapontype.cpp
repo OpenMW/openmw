@@ -8,6 +8,8 @@
 
 #include <components/esm3/loadweap.hpp>
 
+#include <set>
+
 namespace MWMechanics
 {
     template <enum ESM::Weapon::Type>
@@ -415,5 +417,19 @@ namespace MWMechanics
         }
 
         return &Weapon<ESM::Weapon::ShortBladeOneHand>::getValue();
+    }
+
+    std::vector<std::string_view> getAllWeaponTypeShortGroups()
+    {
+        // Go via a set to eliminate duplicates.
+        std::set<std::string_view> shortGroupSet;
+        for (int type = ESM::Weapon::Type::First; type <= ESM::Weapon::Type::Last; type++)
+        {
+            std::string_view shortGroup = getWeaponType(type)->mShortGroup;
+            if (!shortGroup.empty())
+                shortGroupSet.insert(shortGroup);
+        }
+
+        return std::vector<std::string_view>(shortGroupSet.begin(), shortGroupSet.end());
     }
 }

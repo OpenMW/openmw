@@ -1,12 +1,12 @@
 local core = require('openmw.core')
 local input = require('openmw.input')
 local self = require('openmw.self')
-local util = require('openmw.util')
+local storage = require('openmw.storage')
 local ui = require('openmw.ui')
+local async = require('openmw.async')
 local Actor = require('openmw.types').Actor
 local Player = require('openmw.types').Player
 
-local storage = require('openmw.storage')
 local I = require('openmw.interfaces')
 
 local settingsGroup = 'SettingsOMWControls'
@@ -16,16 +16,16 @@ local function boolSetting(key, default)
         key = key,
         renderer = 'checkbox',
         name = key,
-        description = key..'Description',
+        description = key .. 'Description',
         default = default,
     }
 end
 
 I.Settings.registerPage({
-  key = 'OMWControls',
-  l10n = 'OMWControls',
-  name = 'ControlsPage',
-  description = 'ControlsPageDescription',
+    key = 'OMWControls',
+    l10n = 'OMWControls',
+    name = 'ControlsPage',
+    description = 'ControlsPageDescription',
 })
 
 I.Settings.registerGroup({
@@ -36,93 +36,66 @@ I.Settings.registerGroup({
     permanentStorage = true,
     settings = {
         boolSetting('alwaysRun', false),
-        boolSetting('toggleSneak', false),
+        boolSetting('toggleSneak', false), -- TODO: consider removing this setting when we have the advanced binding UI
+        boolSetting('smoothControllerMovement', true),
     },
 })
 
-local settings = storage.playerSection(settingsGroup)
+local settings = storage.playerSection('SettingsOMWControls')
 
-local attemptJump = false
-local startAttack = false
-local autoMove = false
-local movementControlsOverridden = false
-local combatControlsOverridden = false
-local uiControlsOverridden = false
+do
+    local rangeActions = {
+        'MoveForward',
+        'MoveBackward',
+        'MoveLeft',
+        'MoveRight'
+    }
+    for _, key in ipairs(rangeActions) do
+        input.registerAction {
+            key = key,
+            l10n = 'OMWControls',
+            name = key .. '_name',
+            description = key .. '_description',
+            type = input.ACTION_TYPE.Range,
+            defaultValue = 0,
+        }
+    end
 
-local function processMovement()
-    local controllerMovement = -input.getAxisValue(input.CONTROLLER_AXIS.MoveForwardBackward)
-    local controllerSideMovement = input.getAxisValue(input.CONTROLLER_AXIS.MoveLeftRight)
-    if controllerMovement ~= 0 or controllerSideMovement ~= 0 then
-        -- controller movement
-        if util.vector2(controllerMovement, controllerSideMovement):length2() < 0.25
-           and not self.controls.sneak and Actor.isOnGround(self) and not Actor.isSwimming(self) then
-            self.controls.run = false
-            self.controls.movement = controllerMovement * 2
-            self.controls.sideMovement = controllerSideMovement * 2
-        else
-            self.controls.run = true
-            self.controls.movement = controllerMovement
-            self.controls.sideMovement = controllerSideMovement
-        end
-    else
-        -- keyboard movement
-        self.controls.movement = 0
-        self.controls.sideMovement = 0
-        if input.isActionPressed(input.ACTION.MoveLeft) then
-            self.controls.sideMovement = self.controls.sideMovement - 1
-        end
-        if input.isActionPressed(input.ACTION.MoveRight) then
-            self.controls.sideMovement = self.controls.sideMovement + 1
-        end
-        if input.isActionPressed(input.ACTION.MoveBackward) then
-            self.controls.movement = self.controls.movement - 1
-        end
-        if input.isActionPressed(input.ACTION.MoveForward) then
-            self.controls.movement = self.controls.movement + 1
-        end
-        self.controls.run = input.isActionPressed(input.ACTION.Run) ~= settings:get('alwaysRun')
+    local booleanActions = {
+        'Use',
+        'Run',
+        'Sneak',
+    }
+    for _, key in ipairs(booleanActions) do
+        input.registerAction {
+            key = key,
+            l10n = 'OMWControls',
+            name = key .. '_name',
+            description = key .. '_description',
+            type = input.ACTION_TYPE.Boolean,
+            defaultValue = false,
+        }
     end
-    if self.controls.movement ~= 0 or not Actor.canMove(self) then
-        autoMove = false
-    elseif autoMove then
-        self.controls.movement = 1
-    end
-    self.controls.jump = attemptJump and Player.getControlSwitch(self, Player.CONTROL_SWITCH.Jumping)
-    if not settings:get('toggleSneak') then
-        self.controls.sneak = input.isActionPressed(input.ACTION.Sneak)
-    end
-end
 
-local function processAttacking()
-    if startAttack then
-        self.controls.use = 1
-    elseif Actor.stance(self) == Actor.STANCE.Spell then
-        self.controls.use = 0
-    elseif input.getAxisValue(input.CONTROLLER_AXIS.TriggerRight) < 0.6
-           and not input.isActionPressed(input.ACTION.Use) then
-        -- The value "0.6" shouldn't exceed the triggering threshold in BindingsManager::actionValueChanged.
-        -- TODO: Move more logic from BindingsManager to Lua and consider to make this threshold configurable.
-        self.controls.use = 0
+    local triggers = {
+        'Jump',
+        'AutoMove',
+        'ToggleWeapon',
+        'ToggleSpell',
+        'AlwaysRun',
+        'ToggleSneak',
+        'Inventory',
+        'Journal',
+        'QuickKeysMenu',
+    }
+    for _, key in ipairs(triggers) do
+        input.registerTrigger {
+            key = key,
+            l10n = 'OMWControls',
+            name = key .. '_name',
+            description = key .. '_description',
+        }
     end
-end
-
-local function onFrame(dt)
-    local controlsAllowed = Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls)
-                            and not core.isWorldPaused() and not I.UI.getMode()
-    if not movementControlsOverridden then
-        if controlsAllowed then
-            processMovement()
-        else
-            self.controls.movement = 0
-            self.controls.sideMovement = 0
-            self.controls.jump = false
-        end
-    end
-    if controlsAllowed and not combatControlsOverridden then
-        processAttacking()
-    end
-    attemptJump = false
-    startAttack = false
 end
 
 local function checkNotWerewolf()
@@ -139,68 +112,155 @@ local function isJournalAllowed()
     return I.UI.getWindowsForMode(I.UI.MODE.Interface)[I.UI.WINDOW.Magic]
 end
 
-local function onInputAction(action)
-    if not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) then
-        return
+local movementControlsOverridden = false
+
+local autoMove = false
+local function processMovement()
+    local movement = input.getRangeActionValue('MoveForward') - input.getRangeActionValue('MoveBackward')
+    local sideMovement = input.getRangeActionValue('MoveRight') - input.getRangeActionValue('MoveLeft')
+    local run = input.getBooleanActionValue('Run') ~= settings:get('alwaysRun')
+
+    if movement ~= 0 or not Actor.canMove(self) then
+        autoMove = false
+    elseif autoMove then
+        movement = 1
     end
 
-    if not uiControlsOverridden then
-        if action == input.ACTION.Inventory then
-            if I.UI.getMode() == nil then
-                I.UI.setMode(I.UI.MODE.Interface)
-            elseif I.UI.getMode() == I.UI.MODE.Interface or I.UI.getMode() == I.UI.MODE.Container then
-                I.UI.removeMode(I.UI.getMode())
-            end
-        elseif action == input.ACTION.Journal then
-            if I.UI.getMode() == I.UI.MODE.Journal then
-                I.UI.removeMode(I.UI.MODE.Journal)
-            elseif isJournalAllowed() then
-                I.UI.addMode(I.UI.MODE.Journal)
-            end
-        elseif action == input.ACTION.QuickKeysMenu then
-            if I.UI.getMode() == I.UI.MODE.QuickKeysMenu then
-                I.UI.removeMode(I.UI.MODE.QuickKeysMenu)
-            elseif checkNotWerewolf() and Player.isCharGenFinished(self) then
-                I.UI.addMode(I.UI.MODE.QuickKeysMenu)
-            end
+    self.controls.movement = movement
+    self.controls.sideMovement = sideMovement
+    self.controls.run = run
+
+    if not settings:get('toggleSneak') then
+        self.controls.sneak = input.getBooleanActionValue('Sneak')
+    end
+end
+
+local function controlsAllowed()
+    return not core.isWorldPaused()
+        and Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls)
+        and not I.UI.getMode()
+end
+
+local function movementAllowed()
+    return controlsAllowed() and not movementControlsOverridden
+end
+
+input.registerTriggerHandler('Jump', async:callback(function()
+    if not movementAllowed() then return end
+    self.controls.jump = Player.getControlSwitch(self, Player.CONTROL_SWITCH.Jumping)
+end))
+
+input.registerTriggerHandler('ToggleSneak', async:callback(function()
+    if not movementAllowed() then return end
+    if settings:get('toggleSneak') then
+        self.controls.sneak = not self.controls.sneak
+    end
+end))
+
+input.registerTriggerHandler('AlwaysRun', async:callback(function()
+    if not movementAllowed() then return end
+    settings:set('alwaysRun', not settings:get('alwaysRun'))
+end))
+
+input.registerTriggerHandler('AutoMove', async:callback(function()
+    if not movementAllowed() then return end
+    autoMove = not autoMove
+end))
+
+local combatControlsOverridden = false
+
+local function combatAllowed()
+    return controlsAllowed() and not combatControlsOverridden
+end
+
+input.registerTriggerHandler('ToggleSpell', async:callback(function()
+    if not combatAllowed() then return end
+    if Actor.stance(self) == Actor.STANCE.Spell then
+        Actor.setStance(self, Actor.STANCE.Nothing)
+    elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Magic) then
+        if checkNotWerewolf() then
+            Actor.setStance(self, Actor.STANCE.Spell)
         end
     end
+end))
 
-    if core.isWorldPaused() or I.UI.getMode() then
-        return
+input.registerTriggerHandler('ToggleWeapon', async:callback(function()
+    if not combatAllowed() then return end
+    if Actor.stance(self) == Actor.STANCE.Weapon then
+        Actor.setStance(self, Actor.STANCE.Nothing)
+    elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Fighting) then
+        Actor.setStance(self, Actor.STANCE.Weapon)
     end
+end))
 
-    if action == input.ACTION.Jump then
-        attemptJump = true
-    elseif action == input.ACTION.Use then
-        startAttack = Actor.stance(self) ~= Actor.STANCE.Nothing
-    elseif action == input.ACTION.AutoMove and not movementControlsOverridden then
-        autoMove = not autoMove
-    elseif action == input.ACTION.AlwaysRun and not movementControlsOverridden then
-        settings:set('alwaysRun', not settings:get('alwaysRun'))
-    elseif action == input.ACTION.Sneak and not movementControlsOverridden then
-        if settings:get('toggleSneak') then
-            self.controls.sneak = not self.controls.sneak
-        end
-    elseif action == input.ACTION.ToggleSpell and not combatControlsOverridden then
-        if Actor.stance(self) == Actor.STANCE.Spell then
-            Actor.setStance(self, Actor.STANCE.Nothing)
-        elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Magic) then
-            if checkNotWerewolf() then
-                Actor.setStance(self, Actor.STANCE.Spell)
-            end
-        end
-    elseif action == input.ACTION.ToggleWeapon and not combatControlsOverridden then
-        if Actor.stance(self) == Actor.STANCE.Weapon then
-            Actor.setStance(self, Actor.STANCE.Nothing)
-        elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Fighting) then
-            Actor.setStance(self, Actor.STANCE.Weapon)
-        end
+local startUse = false
+input.registerActionHandler('Use', async:callback(function(value)
+    if value and combatAllowed() then startUse = true end
+end))
+local function processAttacking()
+    -- for spell-casting, set controls.use to true for exactly one frame
+    -- otherwise spell casting is attempted every frame while Use is true
+    if Actor.stance(self) == Actor.STANCE.Spell then
+        self.controls.use = startUse and 1 or 0
+    else
+        self.controls.use = input.getBooleanActionValue('Use') and 1 or 0
+    end
+    startUse = false
+end
+
+local uiControlsOverridden = false
+
+local function uiAllowed()
+    return Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) and not uiControlsOverridden
+end
+
+input.registerTriggerHandler('Inventory', async:callback(function()
+    if not uiAllowed() then return end
+
+    if I.UI.getMode() == nil then
+        I.UI.setMode(I.UI.MODE.Interface)
+    elseif I.UI.getMode() == I.UI.MODE.Interface or I.UI.getMode() == I.UI.MODE.Container then
+        I.UI.removeMode(I.UI.getMode())
+    end
+end))
+
+input.registerTriggerHandler('Journal', async:callback(function()
+    if not uiAllowed() then return end
+
+    if I.UI.getMode() == I.UI.MODE.Journal then
+        I.UI.removeMode(I.UI.MODE.Journal)
+    elseif isJournalAllowed() then
+        I.UI.addMode(I.UI.MODE.Journal)
+    end
+end))
+
+input.registerTriggerHandler('QuickKeysMenu', async:callback(function()
+    if not uiAllowed() then return end
+
+    if I.UI.getMode() == I.UI.MODE.QuickKeysMenu then
+        I.UI.removeMode(I.UI.MODE.QuickKeysMenu)
+    elseif checkNotWerewolf() and Player.isCharGenFinished(self) then
+        I.UI.addMode(I.UI.MODE.QuickKeysMenu)
+    end
+end))
+
+local function onFrame(_)
+    if movementAllowed() then
+        processMovement()
+    elseif not movementControlsOverridden then
+        self.controls.movement = 0
+        self.controls.sideMovement = 0
+        self.controls.jump = false
+    end
+    if combatAllowed() then
+        processAttacking()
     end
 end
 
 local function onSave()
-    return {sneaking = self.controls.sneak}
+    return {
+        sneaking = self.controls.sneak
+    }
 end
 
 local function onLoad(data)
@@ -211,7 +271,6 @@ end
 return {
     engineHandlers = {
         onFrame = onFrame,
-        onInputAction = onInputAction,
         onSave = onSave,
         onLoad = onLoad,
     },
@@ -242,4 +301,3 @@ return {
         overrideUiControls = function(v) uiControlsOverridden = v end,
     }
 }
-

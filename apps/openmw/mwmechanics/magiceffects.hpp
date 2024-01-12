@@ -38,6 +38,7 @@ namespace MWMechanics
     };
 
     bool operator<(const EffectKey& left, const EffectKey& right);
+    bool operator==(const EffectKey& left, const EffectKey& right);
 
     struct EffectParam
     {

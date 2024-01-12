@@ -78,6 +78,15 @@ namespace Settings
         static osg::Vec3f getVector3(std::string_view setting, std::string_view category);
 
         template <class T>
+        static T getOrDefault(std::string_view setting, std::string_view category, const T& defaultValue)
+        {
+            const auto key = std::make_pair(category, setting);
+            if (!mUserSettings.contains(key) && !mDefaultSettings.contains(key))
+                return defaultValue;
+            return get<T>(setting, category);
+        }
+
+        template <class T>
         static T get(std::string_view setting, std::string_view category)
         {
             recordInit(setting, category);

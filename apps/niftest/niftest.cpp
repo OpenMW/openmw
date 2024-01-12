@@ -45,9 +45,6 @@ std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
 {
     switch (Bsa::BSAFile::detectVersion(path))
     {
-        case Bsa::BSAVER_UNKNOWN:
-            std::cerr << '"' << path << "\" is unknown BSA archive" << std::endl;
-            return nullptr;
         case Bsa::BSAVER_COMPRESSED:
             return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_COMPRESSED>::type>(path);
         case Bsa::BSAVER_BA2_GNRL:
@@ -56,11 +53,11 @@ std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
             return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_BA2_DX10>::type>(path);
         case Bsa::BSAVER_UNCOMPRESSED:
             return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_UNCOMPRESSED>::type>(path);
+        case Bsa::BSAVER_UNKNOWN:
+        default:
+            std::cerr << "'" << Files::pathToUnicodeString(path) << "' is not a recognized BSA archive" << std::endl;
+            return nullptr;
     }
-
-    std::cerr << '"' << path << "\" is unsupported BSA archive" << std::endl;
-
-    return nullptr;
 }
 
 std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
@@ -72,58 +69,86 @@ std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
     return nullptr;
 }
 
+void readNIF(
+    const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
+{
+    const std::string pathStr = Files::pathToUnicodeString(path);
+    if (!quiet)
+    {
+        std::cout << "Reading NIF file '" << pathStr << "'";
+        if (!source.empty())
+            std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
+        std::cout << std::endl;
+    }
+    std::filesystem::path fullPath = !source.empty() ? source / path : path;
+    try
+    {
+        Nif::NIFFile file(fullPath);
+        Nif::Reader reader(file);
+        if (vfs != nullptr)
+            reader.parse(vfs->get(pathStr));
+        else
+            reader.parse(Files::openConstrainedFileStream(fullPath));
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Failed to read '" << pathStr << "':" << std::endl << e.what() << std::endl;
+    }
+}
+
 /// Check all the nif files in a given VFS::Archive
 /// \note Can not read a bsa file inside of a bsa file.
-void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::path& archivePath = {})
+void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::path& archivePath, bool quiet)
 {
-    if (anArchive == nullptr)
+    if (archive == nullptr)
         return;
 
-    VFS::Manager myManager;
-    myManager.addArchive(std::move(anArchive));
-    myManager.buildIndex();
+    if (!quiet)
+        std::cout << "Reading data source '" << Files::pathToUnicodeString(archivePath) << "'" << std::endl;
 
-    for (const auto& name : myManager.getRecursiveDirectoryIterator(""))
+    VFS::Manager vfs;
+    vfs.addArchive(std::move(archive));
+    vfs.buildIndex();
+
+    for (const auto& name : vfs.getRecursiveDirectoryIterator(""))
     {
-        try
+        if (isNIF(name))
         {
-            if (isNIF(name))
-            {
-                //           std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile file(archivePath / name);
-                Nif::Reader reader(file);
-                reader.parse(myManager.get(name));
-            }
-            else if (isBSA(name))
-            {
-                if (!archivePath.empty() && !isBSA(archivePath))
-                {
-                    //                     std::cout << "Reading BSA File: " << name << std::endl;
-                    readVFS(makeBsaArchive(archivePath / name), archivePath / name);
-                    //                     std::cout << "Done with BSA File: " << name << std::endl;
-                }
-            }
+            readNIF(archivePath, name, &vfs, quiet);
         }
-        catch (std::exception& e)
+    }
+
+    if (!archivePath.empty() && !isBSA(archivePath))
+    {
+        Files::PathContainer dataDirs = { archivePath };
+        const Files::Collections fileCollections = Files::Collections(dataDirs);
+        const Files::MultiDirCollection& bsaCol = fileCollections.getCollection(".bsa");
+        const Files::MultiDirCollection& ba2Col = fileCollections.getCollection(".ba2");
+        for (auto& file : bsaCol)
         {
-            std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
+            readVFS(makeBsaArchive(file.second), file.second, quiet);
+        }
+        for (auto& file : ba2Col)
+        {
+            readVFS(makeBsaArchive(file.second), file.second, quiet);
         }
     }
 }
 
-bool parseOptions(int argc, char** argv, std::vector<Files::MaybeQuotedPath>& files, bool& writeDebugLog,
-    std::vector<Files::MaybeQuotedPath>& archives)
+bool parseOptions(int argc, char** argv, Files::PathContainer& files, Files::PathContainer& archives,
+    bool& writeDebugLog, bool& quiet)
 {
     bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF and BSA files
 
 Usages:
-  niftool <nif files, BSA files, or directories>
-      Scan the file or directories for nif errors.
+  niftest <nif files, BSA files, or directories>
+      Scan the file or directories for NIF errors.
 
 Allowed options)");
     auto addOption = desc.add_options();
     addOption("help,h", "print help message.");
     addOption("write-debug-log,v", "write debug log for unsupported nif files");
+    addOption("quiet,q", "do not log read archives/files");
     addOption("archives", bpo::value<Files::MaybeQuotedPathContainer>(), "path to archive files to provide files");
     addOption("input-file", bpo::value<Files::MaybeQuotedPathContainer>(), "input file");
 
@@ -143,17 +168,18 @@ Allowed options)");
             return false;
         }
         writeDebugLog = variables.count("write-debug-log") > 0;
+        quiet = variables.count("quiet") > 0;
         if (variables.count("input-file"))
         {
-            files = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
+            files = asPathContainer(variables["input-file"].as<Files::MaybeQuotedPathContainer>());
             if (const auto it = variables.find("archives"); it != variables.end())
-                archives = it->second.as<Files::MaybeQuotedPathContainer>();
+                archives = asPathContainer(it->second.as<Files::MaybeQuotedPathContainer>());
             return true;
         }
     }
     catch (std::exception& e)
     {
-        std::cout << "ERROR parsing arguments: " << e.what() << "\n\n" << desc << std::endl;
+        std::cout << "Error parsing arguments: " << e.what() << "\n\n" << desc << std::endl;
         return false;
     }
 
@@ -164,64 +190,62 @@ Allowed options)");
 
 int main(int argc, char** argv)
 {
-    std::vector<Files::MaybeQuotedPath> files;
+    Files::PathContainer files, sources;
     bool writeDebugLog = false;
-    std::vector<Files::MaybeQuotedPath> archives;
-    if (!parseOptions(argc, argv, files, writeDebugLog, archives))
+    bool quiet = false;
+    if (!parseOptions(argc, argv, files, sources, writeDebugLog, quiet))
         return 1;
 
     Nif::Reader::setLoadUnsupportedFiles(true);
     Nif::Reader::setWriteNifDebugLog(writeDebugLog);
 
     std::unique_ptr<VFS::Manager> vfs;
-    if (!archives.empty())
+    if (!sources.empty())
     {
         vfs = std::make_unique<VFS::Manager>();
-        for (const std::filesystem::path& path : archives)
+        for (const std::filesystem::path& path : sources)
         {
+            const std::string pathStr = Files::pathToUnicodeString(path);
+            if (!quiet)
+                std::cout << "Adding data source '" << pathStr << "'" << std::endl;
+
             try
             {
                 if (auto archive = makeArchive(path))
                     vfs->addArchive(std::move(archive));
                 else
-                    std::cerr << '"' << path << "\" is unsupported archive" << std::endl;
-                vfs->buildIndex();
+                    std::cerr << "Error: '" << pathStr << "' is not an archive or directory" << std::endl;
             }
             catch (std::exception& e)
             {
-                std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
+                std::cerr << "Failed to add data source '" << pathStr << "':  " << e.what() << std::endl;
             }
         }
+
+        vfs->buildIndex();
     }
 
-    //     std::cout << "Reading Files" << std::endl;
     for (const auto& path : files)
     {
+        const std::string pathStr = Files::pathToUnicodeString(path);
         try
         {
             if (isNIF(path))
             {
-                // std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile file(path);
-                Nif::Reader reader(file);
-                if (vfs != nullptr)
-                    reader.parse(vfs->get(Files::pathToUnicodeString(path)));
-                else
-                    reader.parse(Files::openConstrainedFileStream(path));
+                readNIF({}, path, vfs.get(), quiet);
             }
             else if (auto archive = makeArchive(path))
             {
-                readVFS(std::move(archive), path);
+                readVFS(std::move(archive), path, quiet);
             }
             else
             {
-                std::cerr << "ERROR:  \"" << Files::pathToUnicodeString(path)
-                          << "\" is not a nif file, bsa/ba2 file, or directory!" << std::endl;
+                std::cerr << "Error: '" << pathStr << "' is not a NIF file, BSA/BA2 archive, or directory" << std::endl;
             }
         }
         catch (std::exception& e)
         {
-            std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
+            std::cerr << "Failed to read '" << pathStr << "':  " << e.what() << std::endl;
         }
     }
     return 0;

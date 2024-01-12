@@ -5,10 +5,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/class.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
+#include "apps/openmw/mwworld/class.hpp"
 
 namespace sol
 {
@@ -42,8 +39,6 @@ namespace MWLua
         };
         container["capacity"] = container["getCapacity"]; // for compatibility; should be removed later
 
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM::Container>(container, context);
 
         sol::usertype<ESM::Container> record = context.mLua->sol().new_usertype<ESM::Container>("ESM3_Container");
@@ -53,8 +48,8 @@ namespace MWLua
         record["id"]
             = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Container& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        record["model"] = sol::readonly_property([](const ESM::Container& rec) -> std::string {
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel);
         });
         record["mwscript"] = sol::readonly_property(
             [](const ESM::Container& rec) -> std::string { return rec.mScript.serializeText(); });

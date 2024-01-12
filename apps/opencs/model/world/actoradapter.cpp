@@ -7,6 +7,7 @@
 #include <string_view>
 #include <vector>
 
+#include <apps/opencs/model/prefs/state.hpp>
 #include <apps/opencs/model/world/columns.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/record.hpp>
@@ -132,11 +133,11 @@ namespace CSMWorld
         bool beast = mRaceData ? mRaceData->isBeast() : false;
 
         if (beast)
-            return Settings::Manager::getString("baseanimkna", "Models");
+            return CSMPrefs::get()["Models"]["baseanimkna"].toString();
         else if (mFemale)
-            return Settings::Manager::getString("baseanimfemale", "Models");
+            return CSMPrefs::get()["Models"]["baseanimfemale"].toString();
         else
-            return Settings::Manager::getString("baseanim", "Models");
+            return CSMPrefs::get()["Models"]["baseanim"].toString();
     }
 
     ESM::RefId ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const

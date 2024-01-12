@@ -10,6 +10,24 @@ local I = require('openmw.interfaces')
 local Actor = require('openmw.types').Actor
 local Player = require('openmw.types').Player
 
+input.registerAction {
+    key = 'TogglePOV',
+    l10n = 'OMWControls',
+    name = 'TogglePOV_name',
+    description = 'TogglePOV_description',
+    type = input.ACTION_TYPE.Boolean,
+    defaultValue = false,
+}
+
+input.registerAction {
+    key = 'Zoom3rdPerson',
+    l10n = 'OMWControls',
+    name = 'Zoom3rdPerson_name',
+    description = 'Zoom3rdPerson_description',
+    type = input.ACTION_TYPE.Number,
+    defaultValue = 0,
+}
+
 local settings = require('scripts.omw.camera.settings').thirdPerson
 local head_bobbing = require('scripts.omw.camera.head_bobbing')
 local third_person = require('scripts.omw.camera.third_person')
@@ -63,7 +81,7 @@ local previewTimer = 0
 
 local function updatePOV(dt)
     local switchLimit = 0.25
-    if input.isActionPressed(input.ACTION.TogglePOV) and Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) then
+    if input.getBooleanActionValue('TogglePOV') and Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) then
         previewTimer = previewTimer + dt
         if primaryMode == MODE.ThirdPerson or previewTimer >= switchLimit then
             third_person.standingPreview = false
@@ -117,18 +135,19 @@ local maxDistance = 800
 
 local function zoom(delta)
     if not Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) or
-       not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) or
-       camera.getMode() == MODE.Static or next(noZoom) then
+        not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) or
+        camera.getMode() == MODE.Static or next(noZoom) then
         return
     end
     if camera.getMode() ~= MODE.FirstPerson then
         local obstacleDelta = third_person.preferredDistance - camera.getThirdPersonDistance()
         if delta > 0 and third_person.baseDistance == minDistance and
-           (camera.getMode() ~= MODE.Preview or third_person.standingPreview) and not next(noModeControl) then
+            (camera.getMode() ~= MODE.Preview or third_person.standingPreview) and not next(noModeControl) then
             primaryMode = MODE.FirstPerson
             camera.setMode(primaryMode)
         elseif delta > 0 or obstacleDelta < -delta then
-            third_person.baseDistance = util.clamp(third_person.baseDistance - delta - obstacleDelta, minDistance, maxDistance)
+            third_person.baseDistance = util.clamp(third_person.baseDistance - delta - obstacleDelta, minDistance,
+                maxDistance)
         end
     elseif delta < 0 and not next(noModeControl) then
         primaryMode = MODE.ThirdPerson
@@ -137,21 +156,10 @@ local function zoom(delta)
     end
 end
 
-local function applyControllerZoom(dt)
-    if input.isActionPressed(input.ACTION.TogglePOV) then
-        local triggerLeft = input.getAxisValue(input.CONTROLLER_AXIS.TriggerLeft)
-        local triggerRight = input.getAxisValue(input.CONTROLLER_AXIS.TriggerRight)
-        local controllerZoom = (triggerRight - triggerLeft) * 100 * dt
-        if controllerZoom ~= 0 then
-            zoom(controllerZoom)
-        end
-    end
-end
-
 local function updateStandingPreview()
     local mode = camera.getMode()
     if not previewIfStandStill or next(noStandingPreview)
-       or mode == MODE.FirstPerson or mode == MODE.Static or mode == MODE.Vanity then
+        or mode == MODE.FirstPerson or mode == MODE.Static or mode == MODE.Vanity then
         third_person.standingPreview = false
         return
     end
@@ -184,7 +192,7 @@ local function updateIdleTimer(dt)
     if not input.isIdle() then
         idleTimer = 0
     elseif self.controls.movement ~= 0 or self.controls.sideMovement ~= 0 or self.controls.jump or self.controls.use ~= 0 then
-        idleTimer = 0  -- also reset the timer in case of a scripted movement
+        idleTimer = 0 -- also reset the timer in case of a scripted movement
     else
         idleTimer = idleTimer + dt
     end
@@ -205,7 +213,14 @@ local function onFrame(dt)
         updateStandingPreview()
         updateCrosshair()
     end
-    applyControllerZoom(dt)
+
+    do
+        local Zoom3rdPerson = input.getNumberActionValue('Zoom3rdPerson')
+        if Zoom3rdPerson ~= 0 then
+            zoom(Zoom3rdPerson)
+        end
+    end
+
     third_person.update(dt, smoothedSpeed)
     if not next(noHeadBobbing) then head_bobbing.update(dt, smoothedSpeed) end
     if slowViewChange then
@@ -312,15 +327,6 @@ return {
     engineHandlers = {
         onUpdate = onUpdate,
         onFrame = onFrame,
-        onInputAction = function(action)
-            if core.isWorldPaused() or I.UI.getMode() then return end
-            if action == input.ACTION.ZoomIn then
-                zoom(10)
-            elseif action == input.ACTION.ZoomOut then
-                zoom(-10)
-            end
-            move360.onInputAction(action)
-        end,
         onTeleported = function()
             camera.instantTransition()
         end,
@@ -329,7 +335,7 @@ return {
             if data and data.distance then third_person.baseDistance = data.distance end
         end,
         onSave = function()
-            return {version = 0, distance = third_person.baseDistance}
+            return { version = 0, distance = third_person.baseDistance }
         end,
     },
 }

@@ -16,7 +16,7 @@ namespace ESSImport
             objstate.blank();
             objstate.mRef = item;
             objstate.mRef.mRefID = ESM::RefId::stringRefId(item.mId);
-            objstate.mCount = item.mCount;
+            objstate.mRef.mCount = item.mCount;
             state.mItems.push_back(objstate);
             if (item.mRelativeEquipmentSlot != -1)
                 // Note we should really write the absolute slot here, which we do not know about

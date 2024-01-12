@@ -168,7 +168,7 @@ namespace MWRender
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
                 source = mWeaponAnimationTime;
             else
-                source = std::make_shared<NullAnimationTime>();
+                source = mAnimationTimePtr[0];
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(source);
             attached->accept(assignVisitor);

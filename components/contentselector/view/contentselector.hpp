@@ -1,12 +1,21 @@
 #ifndef CONTENTSELECTOR_HPP
 #define CONTENTSELECTOR_HPP
 
-#include <QDialog>
+#include <memory>
 
-#include "ui_contentselector.h"
+#include <QComboBox>
+#include <QDialog>
+#include <QMenu>
+#include <QToolButton>
+
 #include <components/contentselector/model/contentmodel.hpp>
 
 class QSortFilterProxyModel;
+
+namespace Ui
+{
+    class ContentSelector;
+}
 
 namespace ContentSelectorView
 {
@@ -22,6 +31,8 @@ namespace ContentSelectorView
 
     public:
         explicit ContentSelector(QWidget* parent = nullptr, bool showOMWScripts = false);
+
+        ~ContentSelector() override;
 
         QString currentFile() const;
 
@@ -39,18 +50,18 @@ namespace ContentSelectorView
 
         void setGameFile(const QString& filename = QString(""));
 
-        bool isGamefileSelected() const { return ui.gameFileView->currentIndex() > 0; }
+        bool isGamefileSelected() const;
 
-        QWidget* uiWidget() const { return ui.contentGroupBox; }
+        QWidget* uiWidget() const;
 
-        QComboBox* languageBox() const { return ui.languageComboBox; }
+        QComboBox* languageBox() const;
 
-        QToolButton* refreshButton() const { return ui.refreshButton; }
+        QToolButton* refreshButton() const;
 
-        QLineEdit* searchFilter() const { return ui.searchFilter; }
+        QLineEdit* searchFilter() const;
 
     private:
-        Ui::ContentSelector ui;
+        std::unique_ptr<Ui::ContentSelector> ui;
 
         void buildContentModel(bool showOMWScripts);
         void buildGameFileView();
@@ -74,6 +85,7 @@ namespace ContentSelectorView
         void slotUncheckMultiSelectedItems();
         void slotCopySelectedItemsPaths();
         void slotSearchFilterTextChanged(const QString& newText);
+        void slotRowsMoved();
     };
 }
 

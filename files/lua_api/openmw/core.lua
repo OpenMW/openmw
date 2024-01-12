@@ -56,6 +56,11 @@
 -- @return #number
 
 ---
+-- Frame duration in seconds
+-- @function [parent=#core] getRealFrameDuration
+-- @return #number
+
+---
 -- Get a GMST setting from content files.
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
@@ -677,7 +682,6 @@
 ---
 -- @type ActiveEffect
 -- Magic effect that is currently active on an actor.
--- Note that when this effect expires or is removed, it will remain temporarily. Magnitude will be set to 0 for effects that expire.
 -- @field #string affectedSkill Optional skill ID
 -- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Effect id string
@@ -866,6 +870,7 @@
 -- @field #MagicSchoolData school Optional magic school
 -- @field #string attribute The id of the skill's governing attribute
 
+---
 -- @type MagicSchoolData
 -- @field #string name Human-readable name
 -- @field #string areaSound VFS path to the area sound

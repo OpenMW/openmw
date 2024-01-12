@@ -1,6 +1,7 @@
 #include "converter.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <stdexcept>
 
 #include <osgDB/WriteFile>
@@ -33,7 +34,7 @@ namespace
         objstate.mPosition = cellref.mPos;
         objstate.mRef.mRefNum = cellref.mRefNum;
         if (cellref.mDeleted)
-            objstate.mCount = 0;
+            objstate.mRef.mCount = 0;
         convertSCRI(cellref.mActorData.mSCRI, objstate.mLocals);
         objstate.mHasLocals = !objstate.mLocals.mVariables.empty();
 
@@ -90,14 +91,14 @@ namespace ESSImport
 
     struct MAPH
     {
-        unsigned int size;
-        unsigned int value;
+        uint32_t size;
+        uint32_t value;
     };
 
     void ConvertFMAP::read(ESM::ESMReader& esm)
     {
         MAPH maph;
-        esm.getHNTSized<8>(maph, "MAPH");
+        esm.getHNT("MAPH", maph.size, maph.value);
         std::vector<char> data;
         esm.getSubNameIs("MAPD");
         esm.getSubHeader();
@@ -278,7 +279,7 @@ namespace ESSImport
         while (esm.isNextSub("MPCD"))
         {
             float notepos[3];
-            esm.getHTSized<3 * sizeof(float)>(notepos);
+            esm.getHT(notepos);
 
             // Markers seem to be arranged in a 32*32 grid, notepos has grid-indices.
             // This seems to be the reason markers can't be placed everywhere in interior cells,

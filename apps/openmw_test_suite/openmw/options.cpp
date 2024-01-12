@@ -1,4 +1,5 @@
-#include <apps/openmw/options.hpp>
+#include "apps/openmw/options.hpp"
+
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 

@@ -243,7 +243,7 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -276,8 +276,8 @@ namespace MWClass
             return { 0, "#{sInventoryMessage1}" };
 
         // Do not allow equip weapons from inventory during attack
-        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
-            && MWBase::Environment::get().getWindowManager()->isGuiMode())
+        if (npc.isInCell() && MWBase::Environment::get().getWindowManager()->isGuiMode()
+            && MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
             return { 0, "#{sCantEquipWeapWarning}" };
 
         std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);

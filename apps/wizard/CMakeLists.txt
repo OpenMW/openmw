@@ -34,20 +34,20 @@ set(WIZARD_HEADER
 )
 
 set(WIZARD_UI
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/componentselectionpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/conclusionpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/existinginstallationpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/importpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/installationtargetpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/intropage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/languageselectionpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/methodselectionpage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/componentselectionpage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/conclusionpage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/existinginstallationpage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/importpage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/installationtargetpage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/intropage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/languageselectionpage.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/methodselectionpage.ui
 )
 
 if (OPENMW_USE_UNSHIELD)
     set (WIZARD ${WIZARD} installationpage.cpp unshield/unshieldworker.cpp)
     set (WIZARD_HEADER ${WIZARD_HEADER} installationpage.hpp unshield/unshieldworker.hpp)
-    set (WIZARD_UI ${WIZARD_UI} ${CMAKE_SOURCE_DIR}/files/ui/wizard/installationpage.ui)
+    set (WIZARD_UI ${WIZARD_UI} ${CMAKE_CURRENT_SOURCE_DIR}/ui/installationpage.ui)
     add_definitions(-DOPENMW_USE_UNSHIELD)
 endif (OPENMW_USE_UNSHIELD)
 

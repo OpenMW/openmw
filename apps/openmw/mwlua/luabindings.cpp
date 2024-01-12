@@ -21,6 +21,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/datetimemanager.hpp"
@@ -86,6 +87,7 @@ namespace MWLua
         api["getRealTime"] = []() {
             return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
         };
+        api["getRealFrameDuration"] = []() { return MWBase::Environment::get().getFrameDuration(); };
 
         if (!global)
             return;

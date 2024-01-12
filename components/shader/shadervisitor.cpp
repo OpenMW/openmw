@@ -181,6 +181,7 @@ namespace Shader
         , mAlphaBlend(false)
         , mBlendFuncOverridden(false)
         , mAdditiveBlending(false)
+        , mDiffuseHeight(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
         , mSoftParticles(false)
@@ -350,7 +351,17 @@ namespace Shader
                                 normalMap = texture;
                             }
                             else if (texName == "diffuseMap")
+                            {
+                                int applyMode;
+                                // Oblivion parallax
+                                if (node.getUserValue("applyMode", applyMode) && applyMode == 4)
+                                {
+                                    mRequirements.back().mShaderRequired = true;
+                                    mRequirements.back().mDiffuseHeight = true;
+                                    mRequirements.back().mTexStageRequiringTangents = unit;
+                                }
                                 diffuseMap = texture;
+                            }
                             else if (texName == "specularMap")
                                 specularMap = texture;
                             else if (texName == "bumpMap")
@@ -615,6 +626,7 @@ namespace Shader
             addedState->addUniform("useDiffuseMapForShadowAlpha");
         }
 
+        defineMap["diffuseParallax"] = reqs.mDiffuseHeight ? "1" : "0";
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));

@@ -205,21 +205,25 @@ namespace MWRender
         }
     };
 
-    class RainIntensityUpdater : public SceneUtil::StateSetUpdater
+    class RainSettingsUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        RainIntensityUpdater()
+        RainSettingsUpdater()
             : mRainIntensity(0.f)
+            , mEnableRipples(false)
         {
         }
 
         void setRainIntensity(float rainIntensity) { mRainIntensity = rainIntensity; }
+        void setRipplesEnabled(bool enableRipples) { mEnableRipples = enableRipples; }
 
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
             osg::ref_ptr<osg::Uniform> rainIntensityUniform = new osg::Uniform("rainIntensity", 0.0f);
             stateset->addUniform(rainIntensityUniform.get());
+            osg::ref_ptr<osg::Uniform> enableRainRipplesUniform = new osg::Uniform("enableRainRipples", false);
+            stateset->addUniform(enableRainRipplesUniform.get());
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
@@ -227,10 +231,14 @@ namespace MWRender
             osg::ref_ptr<osg::Uniform> rainIntensityUniform = stateset->getUniform("rainIntensity");
             if (rainIntensityUniform != nullptr)
                 rainIntensityUniform->set(mRainIntensity);
+            osg::ref_ptr<osg::Uniform> enableRainRipplesUniform = stateset->getUniform("enableRainRipples");
+            if (enableRainRipplesUniform != nullptr)
+                enableRainRipplesUniform->set(mEnableRipples);
         }
 
     private:
         float mRainIntensity;
+        bool mEnableRipples;
     };
 
     class Refraction : public SceneUtil::RTTNode
@@ -430,7 +438,7 @@ namespace MWRender
 
     Water::Water(osg::Group* parent, osg::Group* sceneRoot, Resource::ResourceSystem* resourceSystem,
         osgUtil::IncrementalCompileOperation* ico)
-        : mRainIntensityUpdater(nullptr)
+        : mRainSettingsUpdater(nullptr)
         , mParent(parent)
         , mSceneRoot(sceneRoot)
         , mResourceSystem(resourceSystem)
@@ -579,7 +587,7 @@ namespace MWRender
 
         node->setStateSet(stateset);
         node->setUpdateCallback(nullptr);
-        mRainIntensityUpdater = nullptr;
+        mRainSettingsUpdater = nullptr;
 
         // Add animated textures
         std::vector<osg::ref_ptr<osg::Texture2D>> textures;
@@ -711,8 +719,8 @@ namespace MWRender
         normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
         normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 
-        mRainIntensityUpdater = new RainIntensityUpdater();
-        node->setUpdateCallback(mRainIntensityUpdater);
+        mRainSettingsUpdater = new RainSettingsUpdater();
+        node->setUpdateCallback(mRainSettingsUpdater);
 
         mShaderWaterStateSetUpdater
             = new ShaderWaterStateSetUpdater(this, mReflection, mRefraction, mRipples, std::move(program), normalMap);
@@ -801,8 +809,14 @@ namespace MWRender
 
     void Water::setRainIntensity(float rainIntensity)
     {
-        if (mRainIntensityUpdater)
-            mRainIntensityUpdater->setRainIntensity(rainIntensity);
+        if (mRainSettingsUpdater)
+            mRainSettingsUpdater->setRainIntensity(rainIntensity);
+    }
+
+    void Water::setRainRipplesEnabled(bool enableRipples)
+    {
+        if (mRainSettingsUpdater)
+            mRainSettingsUpdater->setRipplesEnabled(enableRipples);
     }
 
     void Water::update(float dt, bool paused)

@@ -16,6 +16,7 @@ set(SHADER_FILES
     lib/particle/occlusion.glsl
     lib/util/quickstep.glsl
     lib/util/coordinates.glsl
+    lib/util/distortion.glsl
     lib/core/fragment.glsl
     lib/core/fragment.h.glsl
     lib/core/fragment_multiview.glsl
@@ -45,6 +46,7 @@ set(SHADER_FILES
     compatibility/shadowcasting.vert
     compatibility/shadowcasting.frag
     compatibility/vertexcolors.glsl
+    compatibility/normals.glsl
     compatibility/multiview_resolve.vert
     compatibility/multiview_resolve.frag
     compatibility/depthclipped.vert

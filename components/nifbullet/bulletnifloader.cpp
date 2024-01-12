@@ -250,11 +250,16 @@ namespace NifBullet
             const Nif::Parent currentParent{ *ninode, parent };
             for (const auto& child : ninode->mChildren)
             {
-                if (child.empty())
-                    continue;
-
-                assert(std::find(child->mParents.begin(), child->mParents.end(), ninode) != child->mParents.end());
-                handleNode(child.get(), &currentParent, args);
+                if (!child.empty())
+                {
+                    assert(std::find(child->mParents.begin(), child->mParents.end(), ninode) != child->mParents.end());
+                    handleNode(child.get(), &currentParent, args);
+                }
+                // For NiSwitchNodes and NiFltAnimationNodes, only use the first child
+                // TODO: must synchronize with the rendering scene graph somehow
+                // Doing this for NiLODNodes is unsafe (the first level might not be the closest)
+                if (node.recType == Nif::RC_NiSwitchNode || node.recType == Nif::RC_NiFltAnimationNode)
+                    break;
             }
         }
     }
@@ -272,7 +277,6 @@ namespace NifBullet
 
         if (!niGeometry.mSkin.empty())
             args.mAnimated = false;
-        // TODO: handle NiSkinPartition
 
         std::unique_ptr<btCollisionShape> childShape = niGeometry.getCollisionShape();
         if (childShape == nullptr)
@@ -281,7 +285,20 @@ namespace NifBullet
         osg::Matrixf transform = niGeometry.mTransform.toMatrix();
         for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
             transform *= parent->mNiNode.mTransform.toMatrix();
-        childShape->setLocalScaling(Misc::Convert::toBullet(transform.getScale()));
+
+        if (childShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)
+        {
+            auto scaledShape = std::make_unique<Resource::ScaledTriangleMeshShape>(
+                static_cast<btBvhTriangleMeshShape*>(childShape.get()), Misc::Convert::toBullet(transform.getScale()));
+            std::ignore = childShape.release();
+
+            childShape = std::move(scaledShape);
+        }
+        else
+        {
+            childShape->setLocalScaling(Misc::Convert::toBullet(transform.getScale()));
+        }
+
         transform.orthoNormalize(transform);
 
         btTransform trans;

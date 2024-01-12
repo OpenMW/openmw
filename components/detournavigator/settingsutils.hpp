@@ -47,6 +47,7 @@ namespace DetourNavigator
         return position;
     }
 
+    // Returns value in NavMesh coordinates
     inline float getTileSize(const RecastSettings& settings)
     {
         return static_cast<float>(settings.mTileSize) * settings.mCellSize;
@@ -62,16 +63,19 @@ namespace DetourNavigator
         return static_cast<int>(v);
     }
 
+    // Returns integer tile position for position in navmesh coordinates
     inline TilePosition getTilePosition(const RecastSettings& settings, const osg::Vec2f& position)
     {
         return TilePosition(getTilePosition(settings, position.x()), getTilePosition(settings, position.y()));
     }
 
+    // Returns integer tile position for position in navmesh coordinates
     inline TilePosition getTilePosition(const RecastSettings& settings, const osg::Vec3f& position)
     {
         return getTilePosition(settings, osg::Vec2f(position.x(), position.z()));
     }
 
+    // Returns tile bounds in navmesh coordinates
     inline TileBounds makeTileBounds(const RecastSettings& settings, const TilePosition& tilePosition)
     {
         return TileBounds{
@@ -80,6 +84,7 @@ namespace DetourNavigator
         };
     }
 
+    // Returns border size relative to cell size
     inline float getBorderSize(const RecastSettings& settings)
     {
         return static_cast<float>(settings.mBorderSize) * settings.mCellSize;
@@ -95,6 +100,7 @@ namespace DetourNavigator
         return std::floor(std::sqrt(settings.mMaxTilesNumber / osg::PI)) - 1;
     }
 
+    // Returns tile bounds in real coordinates
     inline TileBounds makeRealTileBoundsWithBorder(const RecastSettings& settings, const TilePosition& tilePosition)
     {
         TileBounds result = makeTileBounds(settings, tilePosition);

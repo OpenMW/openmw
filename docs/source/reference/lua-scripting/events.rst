@@ -6,6 +6,18 @@ Built-in events
 Actor events
 ------------
 
+**Died**
+
+This event is sent to an actor's local script when that actor dies.
+
+.. code-block:: Lua
+
+    eventHandlers = {
+        Died = function()
+            print('Alas, ye hardly knew me!')
+        end
+    }
+
 **StartAIPackage, RemoveAIPackages**
 
 Any script can send to any actor (except player, for player will be ignored) events ``StartAIPackage`` and ``RemoveAIPackages``.

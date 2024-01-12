@@ -27,6 +27,8 @@ import termtables
               help='Show a graph for given metric over time.')
 @click.option('--commulative_timeseries', type=str, multiple=True,
               help='Show a graph for commulative sum of a given metric over time.')
+@click.option('--timeseries_delta', type=str, multiple=True,
+              help='Show a graph for delta between neighbouring frames of a given metric over time.')
 @click.option('--hist', type=str, multiple=True,
               help='Show a histogram for all values of given metric.')
 @click.option('--hist_ratio', nargs=2, type=str, multiple=True,
@@ -47,6 +49,8 @@ import termtables
               help='Add a graph to timeseries for a sum per frame of all given timeseries metrics.')
 @click.option('--commulative_timeseries_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given commulative timeseries.')
+@click.option('--timeseries_delta_sum', is_flag=True,
+              help='Add a graph to timeseries for a sum per frame of all given timeseries delta.')
 @click.option('--stats_sum', is_flag=True,
               help='Add a row to stats table for a sum per frame of all given stats metrics.')
 @click.option('--begin_frame', type=int, default=0,
@@ -69,7 +73,8 @@ import termtables
 def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
          commulative_timeseries, commulative_timeseries_sum, frame_number_name,
-         hist_threshold, threshold_name, threshold_value, show_common_path_prefix, stats_sort_by):
+         hist_threshold, threshold_name, threshold_value, show_common_path_prefix, stats_sort_by,
+         timeseries_delta, timeseries_delta_sum):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
     if not show_common_path_prefix and len(sources) > 1:
         longest_common_prefix = os.path.commonprefix(list(sources.keys()))
@@ -92,6 +97,9 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if commulative_timeseries:
         draw_commulative_timeseries(sources=frames, keys=matching_keys(commulative_timeseries), add_sum=commulative_timeseries_sum,
                                     begin_frame=begin_frame, end_frame=end_frame)
+    if timeseries_delta:
+        draw_timeseries_delta(sources=frames, keys=matching_keys(timeseries_delta), add_sum=timeseries_delta_sum,
+                              begin_frame=begin_frame, end_frame=end_frame)
     if hist:
         draw_hists(sources=frames, keys=matching_keys(hist))
     if hist_ratio:
@@ -135,7 +143,7 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
     end_frame = min(end_frame, max(v[-1][frame_number_name] for v in sources.values()) + 1)
     for name in sources.keys():
         for key in keys:
-            result[name][key] = [0] * (end_frame - begin_frame)
+            result[name][key] = [None] * (end_frame - begin_frame)
     for name, frames in sources.items():
         for frame in frames:
             number = frame[frame_number_name]
@@ -146,7 +154,14 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
                         result[name][key][index] = frame[key]
     for name in result.keys():
         for key in keys:
-            result[name][key] = numpy.array(result[name][key])
+            prev = 0.0
+            values = result[name][key]
+            for i in range(len(values)):
+                if values[i] is not None:
+                    prev = values[i]
+                else:
+                    values[i] = prev
+            result[name][key] = numpy.array(values)
     return result, begin_frame, end_frame
 
 
@@ -184,6 +199,20 @@ def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('commulative_timeseries')
+
+
+def draw_timeseries_delta(sources, keys, add_sum, begin_frame, end_frame):
+    fig, ax = matplotlib.pyplot.subplots()
+    x = numpy.array(range(begin_frame + 1, end_frame))
+    for name, frames in sources.items():
+        for key in keys:
+            ax.plot(x, numpy.diff(frames[key]), label=f'{key}:{name}')
+        if add_sum:
+            ax.plot(x, numpy.diff(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}',
+                    linestyle='--')
+    ax.grid(True)
+    ax.legend()
+    fig.canvas.manager.set_window_title('timeseries_delta')
 
 
 def draw_hists(sources, keys):
@@ -328,7 +357,7 @@ def make_stats(source, key, values, precision):
         sum=fixed_float(sum(values), precision),
         mean=fixed_float(statistics.mean(values), precision),
         median=fixed_float(statistics.median(values), precision),
-        stdev=fixed_float(statistics.stdev(values), precision),
+        stdev=fixed_float(statistics.stdev(float(v) for v in values), precision),
         q95=fixed_float(numpy.quantile(values, 0.95), precision),
     )
 

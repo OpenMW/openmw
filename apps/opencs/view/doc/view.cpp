@@ -629,7 +629,7 @@ void CSVDoc::View::addSubView(const CSMWorld::UniversalId& id, const std::string
     if (isReferenceable)
     {
         view = mSubViewFactory.makeSubView(
-            CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
+            CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id), *mDocument);
     }
     else
     {

@@ -347,7 +347,9 @@ namespace NifOsg
 
     private:
         Vec3Interpolator mData;
-        Nif::NiMaterialColorController::TargetColor mTargetColor;
+        Nif::NiMaterialColorController::TargetColor mTargetColor{
+            Nif::NiMaterialColorController::TargetColor::Ambient
+        };
         osg::ref_ptr<const osg::Material> mBaseMaterial;
     };
 

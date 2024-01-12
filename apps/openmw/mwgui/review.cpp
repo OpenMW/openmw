@@ -148,11 +148,11 @@ namespace MWGui
         mUpdateSkillArea = true;
     }
 
-    void ReviewDialog::setClass(const ESM::Class& class_)
+    void ReviewDialog::setClass(const ESM::Class& playerClass)
     {
-        mKlass = class_;
-        mClassWidget->setCaption(mKlass.mName);
-        ToolTips::createClassToolTip(mClassWidget, mKlass);
+        mClass = playerClass;
+        mClassWidget->setCaption(mClass.mName);
+        ToolTips::createClassToolTip(mClassWidget, mClass);
     }
 
     void ReviewDialog::setBirthSign(const ESM::RefId& signId)

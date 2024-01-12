@@ -6,6 +6,7 @@
 #include <osg/Stats>
 #include <set>
 
+#include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/storage.hpp>
 #include <components/lua_ui/resources.hpp>
@@ -85,6 +86,7 @@ namespace MWLua
         void objectTeleported(const MWWorld::Ptr& ptr) override;
         void questUpdated(const ESM::RefId& questId, int stage) override;
         void uiModeChanged(const MWWorld::Ptr& arg) override;
+        void actorDied(const MWWorld::Ptr& actor) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 
@@ -142,6 +144,9 @@ namespace MWLua
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
         std::string formatResourceUsageStats() const override;
+
+        LuaUtil::InputAction::Registry& inputActions() { return mInputActions; }
+        LuaUtil::InputTrigger::Registry& inputTriggers() { return mInputTriggers; }
 
     private:
         void initConfiguration();
@@ -205,6 +210,9 @@ namespace MWLua
 
         LuaUtil::LuaStorage mGlobalStorage{ mLua.sol() };
         LuaUtil::LuaStorage mPlayerStorage{ mLua.sol() };
+
+        LuaUtil::InputAction::Registry mInputActions;
+        LuaUtil::InputTrigger::Registry mInputTriggers;
     };
 
 }

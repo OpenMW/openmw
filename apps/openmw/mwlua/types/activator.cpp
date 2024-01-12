@@ -5,10 +5,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
-
 namespace sol
 {
     template <>
@@ -43,8 +39,6 @@ namespace MWLua
 {
     void addActivatorBindings(sol::table activator, const Context& context)
     {
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         activator["createRecordDraft"] = tableToActivator;
         addRecordFunctionBinding<ESM::Activator>(activator, context);
 
@@ -54,8 +48,8 @@ namespace MWLua
         record["id"]
             = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Activator& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        record["model"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string {
+            return Misc::ResourceHelpers::correctMeshPath(rec.mModel);
         });
         record["mwscript"] = sol::readonly_property(
             [](const ESM::Activator& rec) -> std::string { return rec.mScript.serializeText(); });

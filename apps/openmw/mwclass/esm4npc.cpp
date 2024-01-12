@@ -88,26 +88,34 @@ namespace MWClass
         auto data = std::make_unique<ESM4NpcCustomData>();
 
         const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
-        auto npcRecs = withBaseTemplates<ESM4::LevelledNpc, ESM4::Npc>(ptr.get<ESM4::Npc>()->mBase);
+        const ESM4::Npc* const base = ptr.get<ESM4::Npc>()->mBase;
+        auto npcRecs = withBaseTemplates<ESM4::LevelledNpc, ESM4::Npc>(base);
 
         data->mTraits = chooseTemplate(npcRecs, ESM4::Npc::Template_UseTraits);
+
+        if (data->mTraits == nullptr)
+            Log(Debug::Warning) << "Traits are not found for ESM4 NPC base record: \"" << base->mEditorId << "\" ("
+                                << ESM::RefId(base->mId) << ")";
+
         data->mBaseData = chooseTemplate(npcRecs, ESM4::Npc::Template_UseBaseData);
 
-        if (!data->mTraits)
-            throw std::runtime_error("ESM4 NPC traits not found");
-        if (!data->mBaseData)
-            throw std::runtime_error("ESM4 NPC base data not found");
+        if (data->mBaseData == nullptr)
+            Log(Debug::Warning) << "Base data is not found for ESM4 NPC base record: \"" << base->mEditorId << "\" ("
+                                << ESM::RefId(base->mId) << ")";
 
-        data->mRace = store->get<ESM4::Race>().find(data->mTraits->mRace);
-        if (data->mTraits->mIsTES4)
-            data->mIsFemale = data->mTraits->mBaseConfig.tes4.flags & ESM4::Npc::TES4_Female;
-        else if (data->mTraits->mIsFONV)
-            data->mIsFemale = data->mTraits->mBaseConfig.fo3.flags & ESM4::Npc::FO3_Female;
-        else if (data->mTraits->mIsFO4)
-            data->mIsFemale
-                = data->mTraits->mBaseConfig.fo4.flags & ESM4::Npc::TES5_Female; // FO4 flags are the same as TES5
-        else
-            data->mIsFemale = data->mTraits->mBaseConfig.tes5.flags & ESM4::Npc::TES5_Female;
+        if (data->mTraits != nullptr)
+        {
+            data->mRace = store->get<ESM4::Race>().find(data->mTraits->mRace);
+            if (data->mTraits->mIsTES4)
+                data->mIsFemale = data->mTraits->mBaseConfig.tes4.flags & ESM4::Npc::TES4_Female;
+            else if (data->mTraits->mIsFONV)
+                data->mIsFemale = data->mTraits->mBaseConfig.fo3.flags & ESM4::Npc::FO3_Female;
+            else if (data->mTraits->mIsFO4)
+                data->mIsFemale
+                    = data->mTraits->mBaseConfig.fo4.flags & ESM4::Npc::TES5_Female; // FO4 flags are the same as TES5
+            else
+                data->mIsFemale = data->mTraits->mBaseConfig.tes5.flags & ESM4::Npc::TES5_Female;
+        }
 
         if (auto inv = chooseTemplate(npcRecs, ESM4::Npc::Template_UseInventory))
         {
@@ -116,7 +124,7 @@ namespace MWClass
                 if (auto* armor
                     = ESM4Impl::resolveLevelled<ESM4::LevelledItem, ESM4::Armor>(ESM::FormId::fromUint32(item.item)))
                     data->mEquippedArmor.push_back(armor);
-                else if (data->mTraits->mIsTES4)
+                else if (data->mTraits != nullptr && data->mTraits->mIsTES4)
                 {
                     const auto* clothing = ESM4Impl::resolveLevelled<ESM4::LevelledItem, ESM4::Clothing>(
                         ESM::FormId::fromUint32(item.item));
@@ -170,17 +178,21 @@ namespace MWClass
     std::string ESM4Npc::getModel(const MWWorld::ConstPtr& ptr) const
     {
         const ESM4NpcCustomData& data = getCustomData(ptr);
+        if (data.mTraits == nullptr)
+            return {};
         std::string_view model;
         if (data.mTraits->mIsTES4)
             model = data.mTraits->mModel;
         else
             model = data.mIsFemale ? data.mRace->mModelFemale : data.mRace->mModelMale;
-        const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        return Misc::ResourceHelpers::correctMeshPath(model, vfs);
+        return Misc::ResourceHelpers::correctMeshPath(model);
     }
 
     std::string_view ESM4Npc::getName(const MWWorld::ConstPtr& ptr) const
     {
-        return getCustomData(ptr).mBaseData->mFullName;
+        const ESM4::Npc* const baseData = getCustomData(ptr).mBaseData;
+        if (baseData == nullptr)
+            return {};
+        return baseData->mFullName;
     }
 }

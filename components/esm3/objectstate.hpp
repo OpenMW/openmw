@@ -32,7 +32,6 @@ namespace ESM
         Locals mLocals;
         LuaScripts mLuaScripts;
         unsigned char mEnabled;
-        int32_t mCount;
         Position mPosition;
         uint32_t mFlags;
 
@@ -46,7 +45,6 @@ namespace ESM
         ObjectState()
             : mHasLocals(0)
             , mEnabled(0)
-            , mCount(0)
             , mFlags(0)
             , mHasCustomState(true)
         {

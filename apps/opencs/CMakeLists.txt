@@ -1,5 +1,4 @@
 set (OPENCS_SRC
-    ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc
     )
 
 opencs_units (. editor)
@@ -116,7 +115,7 @@ opencs_units (view/prefs
 
 opencs_units (model/prefs
     state setting intsetting doublesetting boolsetting enumsetting coloursetting shortcut
-    shortcuteventhandler shortcutmanager shortcutsetting modifiersetting stringsetting
+    shortcuteventhandler shortcutmanager shortcutsetting modifiersetting stringsetting subcategory
     )
 
 opencs_units (model/prefs
@@ -139,14 +138,16 @@ set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
     )
 
 set (OPENCS_UI
-    ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/filedialog.ui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/filedialog.ui
     )
 
 source_group (openmw-cs FILES main.cpp ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
     set(QT_USE_QTMAIN TRUE)
+    set(OPENCS_RC_FILE ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc)
+else(WIN32)
+    set(OPENCS_RC_FILE "")
 endif(WIN32)
 
 if (QT_VERSION_MAJOR VERSION_EQUAL 5)
@@ -187,6 +188,7 @@ if(BUILD_OPENCS)
         ${OPENCS_CFG}
         ${OPENCS_DEFAULT_FILTERS_FILE}
         ${OPENCS_OPENMW_CFG}
+        ${OPENCS_RC_FILE}
         main.cpp
     )
 

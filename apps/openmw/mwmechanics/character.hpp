@@ -135,6 +135,8 @@ namespace MWMechanics
         {
             std::string mGroup;
             size_t mLoopCount;
+            float mTime;
+            bool mLooping;
             bool mScripted;
         };
         typedef std::deque<AnimationQueueEntry> AnimationQueue;
@@ -219,6 +221,7 @@ namespace MWMechanics
         bool isMovementAnimationControlled() const;
 
         void updateAnimQueue();
+        void playAnimQueue(bool useLoopStart = false);
 
         void updateHeadTracking(float duration);
 
@@ -244,6 +247,8 @@ namespace MWMechanics
         void setAttackingOrSpell(bool attackingOrSpell) const;
 
         void prepareHit();
+
+        bool isLoopingAnimation(std::string_view group) const;
 
     public:
         CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation* anim);

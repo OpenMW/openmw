@@ -84,7 +84,6 @@ namespace MWSound
         void deinit() override;
 
         std::vector<std::string> enumerateHrtf() override;
-        void setHrtf(const std::string& hrtfname, HrtfMode hrtfmode) override;
 
         std::pair<Sound_Handle, size_t> loadSound(const std::string& fname) override;
         size_t unloadSound(Sound_Handle data) override;

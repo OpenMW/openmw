@@ -15,7 +15,7 @@ namespace MWLua
         item["setEnchantmentCharge"]
             = [](const GObject& object, float charge) { object.ptr().getCellRef().setEnchantmentCharge(charge); };
         item["isRestocking"]
-            = [](const Object& object) -> bool { return object.ptr().getRefData().getCount(false) < 0; };
+            = [](const Object& object) -> bool { return object.ptr().getCellRef().getCount(false) < 0; };
 
         addItemDataBindings(item, context);
     }

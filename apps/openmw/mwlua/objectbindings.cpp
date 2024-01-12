@@ -20,6 +20,9 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "luaevents.hpp"
 #include "luamanagerimp.hpp"
 #include "types/types.hpp"
@@ -124,7 +127,7 @@ namespace MWLua
                 newPtr = cls.moveToCell(ptr, *destCell, toPos(pos, rot));
                 ptr.getCellRef().unsetRefNum();
                 ptr.getRefData().setLuaScripts(nullptr);
-                ptr.getRefData().setCount(0);
+                ptr.getCellRef().setCount(0);
                 ESM::RefId script = cls.getScript(newPtr);
                 if (!script.empty())
                     world->getLocalScripts().add(script, newPtr);
@@ -256,7 +259,7 @@ namespace MWLua
                 [types = getTypeToPackageTable(context.mLua->sol())](
                     const ObjectT& o) mutable { return types[getLiveCellRefType(o.ptr().mRef)]; });
 
-            objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getRefData().getCount(); });
+            objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getCellRef().getCount(); });
             objectT[sol::meta_function::equal_to] = [](const ObjectT& a, const ObjectT& b) { return a.id() == b.id(); };
             objectT[sol::meta_function::to_string] = &ObjectT::toString;
             objectT["sendEvent"] = [context](const ObjectT& dest, std::string eventName, const sol::object& eventData) {
@@ -340,10 +343,10 @@ namespace MWLua
 
             auto isEnabled = [](const ObjectT& o) { return o.ptr().getRefData().isEnabled(); };
             auto setEnabled = [context](const GObject& object, bool enable) {
-                if (enable && object.ptr().getRefData().isDeleted())
+                if (enable && object.ptr().mRef->isDeleted())
                     throw std::runtime_error("Object is removed");
                 context.mLuaManager->addAction([object, enable] {
-                    if (object.ptr().getRefData().isDeleted())
+                    if (object.ptr().mRef->isDeleted())
                         return;
                     if (object.ptr().isInCell())
                     {
@@ -417,20 +420,20 @@ namespace MWLua
 
                 using DelayedRemovalFn = std::function<void(MWWorld::Ptr)>;
                 auto removeFn = [](const MWWorld::Ptr ptr, int countToRemove) -> std::optional<DelayedRemovalFn> {
-                    int rawCount = ptr.getRefData().getCount(false);
+                    int rawCount = ptr.getCellRef().getCount(false);
                     int currentCount = std::abs(rawCount);
                     int signedCountToRemove = (rawCount < 0 ? -1 : 1) * countToRemove;
 
                     if (countToRemove <= 0 || countToRemove > currentCount)
                         throw std::runtime_error("Can't remove " + std::to_string(countToRemove) + " of "
                             + std::to_string(currentCount) + " items");
-                    ptr.getRefData().setCount(rawCount - signedCountToRemove); // Immediately change count
+                    ptr.getCellRef().setCount(rawCount - signedCountToRemove); // Immediately change count
                     if (!ptr.getContainerStore() && currentCount > countToRemove)
                         return std::nullopt;
                     // Delayed action to trigger side effects
                     return [signedCountToRemove](MWWorld::Ptr ptr) {
                         // Restore the original count
-                        ptr.getRefData().setCount(ptr.getRefData().getCount(false) + signedCountToRemove);
+                        ptr.getCellRef().setCount(ptr.getCellRef().getCount(false) + signedCountToRemove);
                         // And now remove properly
                         if (ptr.getContainerStore())
                             ptr.getContainerStore()->remove(ptr, std::abs(signedCountToRemove), false);
@@ -443,7 +446,7 @@ namespace MWLua
                 };
                 objectT["remove"] = [removeFn, context](const GObject& object, sol::optional<int> count) {
                     std::optional<DelayedRemovalFn> delayed
-                        = removeFn(object.ptr(), count.value_or(object.ptr().getRefData().getCount()));
+                        = removeFn(object.ptr(), count.value_or(object.ptr().getCellRef().getCount()));
                     if (delayed.has_value())
                         context.mLuaManager->addAction([fn = *delayed, object] { fn(object.ptr()); });
                 };
@@ -463,7 +466,7 @@ namespace MWLua
                 };
                 objectT["moveInto"] = [removeFn, context](const GObject& object, const sol::object& dest) {
                     const MWWorld::Ptr& ptr = object.ptr();
-                    int count = ptr.getRefData().getCount();
+                    int count = ptr.getCellRef().getCount();
                     MWWorld::Ptr destPtr;
                     if (dest.is<GObject>())
                         destPtr = dest.as<GObject>().ptr();
@@ -474,9 +477,9 @@ namespace MWLua
                     std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
                     context.mLuaManager->addAction([item = object, count, cont = GObject(destPtr), delayedRemovalFn] {
                         const MWWorld::Ptr& oldPtr = item.ptr();
-                        auto& refData = oldPtr.getRefData();
+                        auto& refData = oldPtr.getCellRef();
                         refData.setCount(count); // temporarily undo removal to run ContainerStore::add
-                        refData.enable();
+                        oldPtr.getRefData().enable();
                         cont.ptr().getClass().getContainerStore(cont.ptr()).add(oldPtr, count, false);
                         refData.setCount(0);
                         if (delayedRemovalFn.has_value())
@@ -487,7 +490,7 @@ namespace MWLua
                                           const osg::Vec3f& pos, const sol::object& options) {
                     MWWorld::CellStore* cell = findCell(cellOrName, pos);
                     MWWorld::Ptr ptr = object.ptr();
-                    int count = ptr.getRefData().getCount();
+                    int count = ptr.getCellRef().getCount();
                     if (count == 0)
                         throw std::runtime_error("Object is either removed or already in the process of teleporting");
                     osg::Vec3f rot = ptr.getRefData().getPosition().asRotationVec3();
@@ -508,9 +511,9 @@ namespace MWLua
                         context.mLuaManager->addAction(
                             [object, cell, pos, rot, count, delayedRemovalFn, placeOnGround] {
                                 MWWorld::Ptr oldPtr = object.ptr();
-                                oldPtr.getRefData().setCount(count);
+                                oldPtr.getCellRef().setCount(count);
                                 MWWorld::Ptr newPtr = oldPtr.getClass().moveToCell(oldPtr, *cell);
-                                oldPtr.getRefData().setCount(0);
+                                oldPtr.getCellRef().setCount(0);
                                 newPtr.getRefData().disable();
                                 teleportNotPlayer(newPtr, cell, pos, rot, placeOnGround);
                                 delayedRemovalFn(oldPtr);
@@ -522,10 +525,10 @@ namespace MWLua
                             [cell, pos, rot, placeOnGround] { teleportPlayer(cell, pos, rot, placeOnGround); });
                     else
                     {
-                        ptr.getRefData().setCount(0);
+                        ptr.getCellRef().setCount(0);
                         context.mLuaManager->addAction(
                             [object, cell, pos, rot, count, placeOnGround] {
-                                object.ptr().getRefData().setCount(count);
+                                object.ptr().getCellRef().setCount(count);
                                 teleportNotPlayer(object.ptr(), cell, pos, rot, placeOnGround);
                             },
                             "TeleportAction");

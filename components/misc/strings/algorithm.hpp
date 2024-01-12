@@ -99,6 +99,13 @@ namespace Misc::StringUtils
         bool operator()(std::string_view left, std::string_view right) const { return ciLess(left, right); }
     };
 
+    struct StringHash
+    {
+        using is_transparent = void;
+        [[nodiscard]] size_t operator()(std::string_view sv) const { return std::hash<std::string_view>{}(sv); }
+        [[nodiscard]] size_t operator()(const std::string& s) const { return std::hash<std::string>{}(s); }
+    };
+
     /** @brief Replaces all occurrences of a string in another string.
      *
      * @param str The string to operate on.

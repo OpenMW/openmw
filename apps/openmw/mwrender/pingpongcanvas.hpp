@@ -48,6 +48,8 @@ namespace MWRender
 
         void setTextureNormals(osg::ref_ptr<osg::Texture> tex) { mTextureNormals = tex; }
 
+        void setTextureDistortion(osg::ref_ptr<osg::Texture> tex) { mTextureDistortion = tex; }
+
         void setCalculateAvgLum(bool enabled) { mAvgLum = enabled; }
 
         void setPostProcessing(bool enabled) { mPostprocessing = enabled; }
@@ -59,7 +61,7 @@ namespace MWRender
         bool mPostprocessing = false;
 
         fx::DispatchArray mPasses;
-        fx::FlagsType mMask;
+        fx::FlagsType mMask = 0;
 
         osg::ref_ptr<osg::Program> mFallbackProgram;
         osg::ref_ptr<osg::Program> mMultiviewResolveProgram;
@@ -69,6 +71,7 @@ namespace MWRender
         osg::ref_ptr<osg::Texture> mTextureScene;
         osg::ref_ptr<osg::Texture> mTextureDepth;
         osg::ref_ptr<osg::Texture> mTextureNormals;
+        osg::ref_ptr<osg::Texture> mTextureDistortion;
 
         mutable bool mDirty = false;
         mutable std::vector<fx::Types::RenderTarget> mDirtyAttachments;

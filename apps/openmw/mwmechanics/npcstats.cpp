@@ -20,6 +20,7 @@
 
 MWMechanics::NpcStats::NpcStats()
     : mDisposition(0)
+    , mCrimeDispositionModifier(0)
     , mReputation(0)
     , mCrimeId(-1)
     , mBounty(0)
@@ -41,6 +42,21 @@ int MWMechanics::NpcStats::getBaseDisposition() const
 void MWMechanics::NpcStats::setBaseDisposition(int disposition)
 {
     mDisposition = disposition;
+}
+
+int MWMechanics::NpcStats::getCrimeDispositionModifier() const
+{
+    return mCrimeDispositionModifier;
+}
+
+void MWMechanics::NpcStats::setCrimeDispositionModifier(int value)
+{
+    mCrimeDispositionModifier = value;
+}
+
+void MWMechanics::NpcStats::modCrimeDispositionModifier(int value)
+{
+    mCrimeDispositionModifier += value;
 }
 
 const MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill(ESM::RefId id) const
@@ -464,6 +480,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
         state.mFactions[iter->first].mRank = iter->second;
 
     state.mDisposition = mDisposition;
+    state.mCrimeDispositionModifier = mCrimeDispositionModifier;
 
     for (const auto& [id, value] : mSkills)
     {
@@ -528,6 +545,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
         }
 
     mDisposition = state.mDisposition;
+    mCrimeDispositionModifier = state.mCrimeDispositionModifier;
 
     for (size_t i = 0; i < state.mSkills.size(); ++i)
     {

@@ -512,6 +512,10 @@ namespace Nif
 
     void Reader::parse(Files::IStreamPtr&& stream)
     {
+        const bool writeDebug = sWriteNifDebugLog;
+        if (writeDebug)
+            Log(Debug::Verbose) << "NIF Debug: Reading file: '" << mFilename << "'";
+
         const std::array<std::uint64_t, 2> fileHash = Files::getHash(mFilename, *stream);
         mHash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
 
@@ -538,15 +542,9 @@ namespace Nif
         };
         const bool supportedVersion
             = std::find(supportedVers.begin(), supportedVers.end(), mVersion) != supportedVers.end();
-        const bool writeDebugLog = sWriteNifDebugLog;
-        if (!supportedVersion)
-        {
-            if (!sLoadUnsupportedFiles)
-                throw Nif::Exception("Unsupported NIF version: " + versionToString(mVersion), mFilename);
-            if (writeDebugLog)
-                Log(Debug::Warning) << " NIFFile Warning: Unsupported NIF version: " << versionToString(mVersion)
-                                    << ". Proceed with caution! File: " << mFilename;
-        }
+
+        if (!supportedVersion && !sLoadUnsupportedFiles)
+            throw Nif::Exception("Unsupported NIF version: " + versionToString(mVersion), mFilename);
 
         const bool hasEndianness = mVersion >= NIFStream::generateVersion(20, 0, 0, 4);
         const bool hasUserVersion = mVersion >= NIFStream::generateVersion(10, 0, 1, 8);
@@ -601,6 +599,17 @@ namespace Nif
                 if (mBethVersion >= 103)
                     nif.getExportString(); // Max file path
             }
+        }
+
+        if (writeDebug)
+        {
+            std::stringstream versionInfo;
+            versionInfo << "NIF Debug: Version: " << versionToString(mVersion);
+            if (mUserVersion)
+                versionInfo << "\nUser version: " << mUserVersion;
+            if (mBethVersion)
+                versionInfo << "\nBSStream version: " << mBethVersion;
+            Log(Debug::Verbose) << versionInfo.str();
         }
 
         if (hasRecTypeListings)
@@ -658,9 +667,8 @@ namespace Nif
 
             r = entry->second();
 
-            if (!supportedVersion && writeDebugLog)
-                Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " ("
-                                    << mFilename << ")";
+            if (writeDebug)
+                Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i;
 
             assert(r != nullptr);
             assert(r->recType != RC_MISSING);

@@ -115,7 +115,7 @@ namespace MWMechanics
         if (target.isEmpty())
             return true;
 
-        if (!target.getRefData().getCount()
+        if (!target.getCellRef().getCount()
             || !target.getRefData().isEnabled() // Really we should be checking whether the target is currently
                                                 // registered with the MechanicsManager
             || target.getClass().getCreatureStats(target).isDead())
@@ -283,8 +283,8 @@ namespace MWMechanics
             const MWBase::World* world = MWBase::Environment::get().getWorld();
             // Try to build path to the target.
             const auto agentBounds = world->getPathfindingAgentBounds(actor);
-            const auto navigatorFlags = getNavigatorFlags(actor);
-            const auto areaCosts = getAreaCosts(actor);
+            const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+            const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
             const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
             const auto& pathGridGraph = getPathGridGraph(pathgrid);
             mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, agentBounds,
@@ -478,8 +478,7 @@ namespace MWMechanics
 
     MWWorld::Ptr AiCombat::getTarget() const
     {
-        if (mCachedTarget.isEmpty() || mCachedTarget.getRefData().isDeleted()
-            || !mCachedTarget.getRefData().isEnabled())
+        if (mCachedTarget.isEmpty() || mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
         {
             mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
         }

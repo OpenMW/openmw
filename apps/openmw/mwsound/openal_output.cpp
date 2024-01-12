@@ -1034,65 +1034,6 @@ namespace MWSound
         return ret;
     }
 
-    void OpenAL_Output::setHrtf(const std::string& hrtfname, HrtfMode hrtfmode)
-    {
-        if (!mDevice || !ALC.SOFT_HRTF)
-        {
-            Log(Debug::Info) << "HRTF extension not present";
-            return;
-        }
-
-        LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
-        getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
-
-        LPALCRESETDEVICESOFT alcResetDeviceSOFT = nullptr;
-        getALCFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
-
-        std::vector<ALCint> attrs;
-        attrs.reserve(15);
-
-        attrs.push_back(ALC_HRTF_SOFT);
-        attrs.push_back(hrtfmode == HrtfMode::Disable ? ALC_FALSE
-                : hrtfmode == HrtfMode::Enable        ? ALC_TRUE
-                                                      :
-                                               /*hrtfmode == HrtfMode::Auto ?*/ ALC_DONT_CARE_SOFT);
-        if (!hrtfname.empty())
-        {
-            ALCint index = -1;
-            ALCint num_hrtf;
-            alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
-            for (ALCint i = 0; i < num_hrtf; ++i)
-            {
-                const ALCchar* entry = alcGetStringiSOFT(mDevice, ALC_HRTF_SPECIFIER_SOFT, i);
-                if (hrtfname == entry)
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            if (index < 0)
-                Log(Debug::Warning) << "Failed to find HRTF name \"" << hrtfname << "\", using default";
-            else
-            {
-                attrs.push_back(ALC_HRTF_ID_SOFT);
-                attrs.push_back(index);
-            }
-        }
-        attrs.push_back(0);
-        alcResetDeviceSOFT(mDevice, attrs.data());
-
-        ALCint hrtf_state;
-        alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtf_state);
-        if (!hrtf_state)
-            Log(Debug::Info) << "HRTF disabled";
-        else
-        {
-            const ALCchar* hrtf = alcGetString(mDevice, ALC_HRTF_SPECIFIER_SOFT);
-            Log(Debug::Info) << "Enabled HRTF " << hrtf;
-        }
-    }
-
     std::pair<Sound_Handle, size_t> OpenAL_Output::loadSound(const std::string& fname)
     {
         getALError();

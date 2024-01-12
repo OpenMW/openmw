@@ -685,7 +685,7 @@ namespace MWWorld
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
     }
 
-    void World::removeRefScript(MWWorld::RefData* ref)
+    void World::removeRefScript(const MWWorld::CellRef* ref)
     {
         mLocalScripts.remove(ref);
     }
@@ -827,7 +827,7 @@ namespace MWWorld
             reference.getRefData().enable();
 
             if (mWorldScene->getActiveCells().find(reference.getCell()) != mWorldScene->getActiveCells().end()
-                && reference.getRefData().getCount())
+                && reference.getCellRef().getCount())
                 mWorldScene->addObjectToScene(reference);
 
             if (reference.getCellRef().getRefNum().hasContentFile())
@@ -879,7 +879,7 @@ namespace MWWorld
         }
 
         if (mWorldScene->getActiveCells().find(reference.getCell()) != mWorldScene->getActiveCells().end()
-            && reference.getRefData().getCount())
+            && reference.getCellRef().getCount())
         {
             mWorldScene->removeObjectFromScene(reference);
             mWorldScene->addPostponedPhysicsObjects();
@@ -1039,12 +1039,12 @@ namespace MWWorld
 
     void World::deleteObject(const Ptr& ptr)
     {
-        if (!ptr.getRefData().isDeleted() && ptr.getContainerStore() == nullptr)
+        if (!ptr.mRef->isDeleted() && ptr.getContainerStore() == nullptr)
         {
             if (ptr == getPlayerPtr())
                 throw std::runtime_error("can not delete player object");
 
-            ptr.getRefData().setCount(0);
+            ptr.getCellRef().setCount(0);
 
             if (ptr.isInCell()
                 && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
@@ -1061,9 +1061,9 @@ namespace MWWorld
     {
         if (!ptr.getCellRef().hasContentFile())
             return;
-        if (ptr.getRefData().isDeleted())
+        if (ptr.mRef->isDeleted())
         {
-            ptr.getRefData().setCount(1);
+            ptr.getCellRef().setCount(1);
             if (mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
                 && ptr.getRefData().isEnabled())
             {
@@ -1392,7 +1392,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, const ESM::Position& pos)
     {
-        return copyObjectToCell(ptr, cell, pos, ptr.getRefData().getCount(), false);
+        return copyObjectToCell(ptr, cell, pos, ptr.getCellRef().getCount(), false);
     }
 
     MWWorld::Ptr World::safePlaceObject(const ConstPtr& ptr, const ConstPtr& referenceObject,
@@ -1443,7 +1443,7 @@ namespace MWWorld
             ipos.rot[1] = 0;
         }
 
-        MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getRefData().getCount(), false);
+        MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getCellRef().getCount(), false);
         adjustPosition(placed, true); // snap to ground
         return placed;
     }
@@ -1893,7 +1893,7 @@ namespace MWWorld
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *static_cast<MWWorld::LiveCellRef<ESM::Door>*>(ptr.getBase());
 
-            if (!ref.mData.isEnabled() || ref.mData.isDeleted())
+            if (!ref.mData.isEnabled() || ref.isDeleted())
                 return true;
 
             if (ref.mRef.getTeleport())
@@ -2541,7 +2541,7 @@ namespace MWWorld
 
         bool operator()(const MWWorld::Ptr& ptr)
         {
-            if (ptr.getRefData().isDeleted())
+            if (ptr.mRef->isDeleted())
                 return true;
 
             // vanilla Morrowind does not allow to sell items from containers with zero capacity
@@ -3337,7 +3337,7 @@ namespace MWWorld
                 >= mSquaredDist)
                 return true;
 
-            if (!ptr.getRefData().isEnabled() || ptr.getRefData().isDeleted())
+            if (!ptr.getRefData().isEnabled() || ptr.mRef->isDeleted())
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in
@@ -3632,9 +3632,8 @@ namespace MWWorld
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
-        std::string model = Misc::ResourceHelpers::correctMeshPath(
-            std::string{ Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))) }, // [0, 2]
-            mResourceSystem->getVFS());
+        std::string model = Misc::ResourceHelpers::correctMeshPath(std::string{
+            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))) } /*[0, 2]*/);
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }

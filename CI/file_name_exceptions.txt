@@ -19,6 +19,7 @@ apps/openmw_test_suite/lua/test_serialization.cpp
 apps/openmw_test_suite/lua/test_storage.cpp
 apps/openmw_test_suite/lua/test_ui_content.cpp
 apps/openmw_test_suite/lua/test_utilpackage.cpp
+apps/openmw_test_suite/lua/test_inputactions.cpp
 apps/openmw_test_suite/misc/test_endianness.cpp
 apps/openmw_test_suite/misc/test_resourcehelpers.cpp
 apps/openmw_test_suite/misc/test_stringops.cpp

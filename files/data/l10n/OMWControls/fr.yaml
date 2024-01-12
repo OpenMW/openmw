@@ -14,3 +14,6 @@ toggleSneakDescription: |
     Une simple pression de la touche associée (Ctrl par défaut) active le mode discrétion, une seconde pression désactive le mode discrétion.\n\n
     Il n'est plus nécessaire de maintenir une touche appuyée pour que le mode discrétion soit actif.\n\n
     Certains joueurs ayant une utilisation intensive du mode discrétion considèrent qu'il est plus aisé de contrôler leur personnage ainsi.
+
+# smoothControllerMovement
+# smoothControllerMovementDescription

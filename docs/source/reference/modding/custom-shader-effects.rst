@@ -6,10 +6,9 @@ This node must have the prefix `omw:data` and have a valid JSON object that foll
 
 .. note::
 
-    This is a new feature to inject OpenMW-specific shader effects. Only a single
-    effect is currently supported. By default, the shader effects will propogate
-    to all a node's children. Other propogation modes and effects will come with
-    future releases.
+    This is a new feature to inject OpenMW-specific shader effects. By default,
+    the shader effects will propagate to all of a node's children.
+    Other propagation modes and effects will come with future releases.
 
 
 Soft Effect
@@ -51,6 +50,41 @@ Example usage.
                 "size": 250,
                 "falloff" : false,
                 "falloffDepth": 5,
+            }
+        }
+    }
+
+Distortion
+----------
+
+This effect is used to imitate effects such as refraction and heat distortion. A common use case is to assign a normal map to the
+diffuse slot to a material and add uv scrolling. The red and green channels of the texture are used to offset the final scene texture.
+Blue and alpha channels are ignored.
+
+To use this feature the :ref:`post processing` setting must be enabled.
+This setting can either be activated in the OpenMW launcher, in-game, or changed in `settings.cfg`:
+
+::
+
+    [Post Processing]
+    enabled = false
+
+Variables.
+
++---------+--------------------------------------------------------------------------------------------------------+---------+---------+
+| Name    | Description                                                                                            | Type    | Default |
++---------+--------------------------------------------------------------------------------------------------------+---------+---------+
+| strength| The strength of the distortion effect. Scales linearly.                                                | float   | 0.1     |
++---------+--------------------------------------------------------------------------------------------------------+---------+---------+
+
+Example usage.
+
+::
+
+    omw:data {
+        "shader" : {
+            "distortion" : {
+                "strength": 0.12,
             }
         }
     }

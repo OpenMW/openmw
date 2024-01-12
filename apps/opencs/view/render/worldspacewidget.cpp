@@ -50,6 +50,7 @@
 
 #include "cameracontroller.hpp"
 #include "instancemode.hpp"
+#include "mask.hpp"
 #include "object.hpp"
 #include "pathgridmode.hpp"
 
@@ -134,6 +135,15 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
 
     CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
     connect(abortShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &WorldspaceWidget::abortDrag);
+
+    connect(new CSMPrefs::Shortcut("scene-toggle-visibility", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::toggleHiddenInstances);
+
+    connect(new CSMPrefs::Shortcut("scene-unhide-all", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::unhideAll);
+
+    connect(new CSMPrefs::Shortcut("scene-clear-selection", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        [this] { this->clearSelection(Mask_Reference); });
 
     mInConstructor = false;
 }
@@ -738,6 +748,23 @@ void CSVRender::WorldspaceWidget::tertiarySelect(bool activate)
 void CSVRender::WorldspaceWidget::speedMode(bool activate)
 {
     mSpeedMode = activate;
+}
+
+void CSVRender::WorldspaceWidget::toggleHiddenInstances()
+{
+    const std::vector<osg::ref_ptr<TagBase>> selection = getSelection(Mask_Reference);
+
+    if (selection.empty())
+        return;
+
+    const CSVRender::ObjectTag* firstSelection = dynamic_cast<CSVRender::ObjectTag*>(selection.begin()->get());
+
+    const CSVRender::Mask firstMask
+        = firstSelection->mObject->getRootNode()->getNodeMask() == Mask_Hidden ? Mask_Reference : Mask_Hidden;
+
+    for (const auto& object : selection)
+        if (const auto objectTag = dynamic_cast<CSVRender::ObjectTag*>(object.get()))
+            objectTag->mObject->getRootNode()->setNodeMask(firstMask);
 }
 
 void CSVRender::WorldspaceWidget::handleInteraction(InteractionType type, bool activate)

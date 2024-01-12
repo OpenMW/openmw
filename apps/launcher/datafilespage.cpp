@@ -125,27 +125,6 @@ namespace Launcher
         {
             return Settings::navigator().mMaxNavmeshdbFileSize / (1024 * 1024);
         }
-
-        std::optional<QString> findFirstPath(const QStringList& directories, const QString& fileName)
-        {
-            for (const QString& directoryPath : directories)
-            {
-                const QString filePath = QDir(directoryPath).absoluteFilePath(fileName);
-                if (QFile::exists(filePath))
-                    return filePath;
-            }
-            return std::nullopt;
-        }
-
-        QStringList findAllFilePaths(const QStringList& directories, const QStringList& fileNames)
-        {
-            QStringList result;
-            result.reserve(fileNames.size());
-            for (const QString& fileName : fileNames)
-                if (const auto filepath = findFirstPath(directories, fileName))
-                    result.append(*filepath);
-            return result;
-        }
     }
 }
 
@@ -164,11 +143,14 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     const QString encoding = mGameSettings.value("encoding", "win1252");
     mSelector->setEncoding(encoding);
 
-    QStringList languages;
-    languages << tr("English") << tr("French") << tr("German") << tr("Italian") << tr("Polish") << tr("Russian")
-              << tr("Spanish");
+    QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
+        { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
+        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
 
-    mSelector->languageBox()->addItems(languages);
+    for (auto lang : languages)
+    {
+        mSelector->languageBox()->addItem(lang.second, lang.first);
+    }
 
     mNewProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
     mCloneProfileDialog = new TextInputDialog(tr("Clone Content List"), tr("Content List name:"), this);
@@ -254,9 +236,17 @@ bool Launcher::DataFilesPage::loadSettings()
     if (!currentProfile.isEmpty())
         addProfile(currentProfile, true);
 
-    const int index = mSelector->languageBox()->findText(mLauncherSettings.getLanguage());
-    if (index != -1)
-        mSelector->languageBox()->setCurrentIndex(index);
+    auto language = mLauncherSettings.getLanguage();
+
+    for (int i = 0; i < mSelector->languageBox()->count(); ++i)
+    {
+        QString languageItem = mSelector->languageBox()->itemData(i).toString();
+        if (language == languageItem)
+        {
+            mSelector->languageBox()->setCurrentIndex(i);
+            break;
+        }
+    }
 
     return true;
 }
@@ -301,12 +291,14 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         auto row = ui.directoryListWidget->count() - 1;
         auto* item = ui.directoryListWidget->item(row);
 
-        // Display new content with green background
+        // Display new content with custom formatting
         if (mNewDataDirs.contains(canonicalDirPath))
         {
             tooltip += "Will be added to the current profile\n";
-            item->setBackground(Qt::green);
-            item->setForeground(Qt::black);
+            QFont font = item->font();
+            font.setBold(true);
+            font.setItalic(true);
+            item->setFont(font);
         }
 
         // deactivate data-local and global data directory: they are always included
@@ -353,8 +345,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         row++;
     }
 
-    mSelector->setProfileContent(
-        findAllFilePaths(directories, mLauncherSettings.getContentListFiles(contentModelName)));
+    mSelector->setProfileContent(mLauncherSettings.getContentListFiles(contentModelName));
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString& profile)
@@ -384,7 +375,7 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
     mLauncherSettings.setContentList(profileName, dirList, selectedArchivePaths(), fileNames);
     mGameSettings.setContentList(dirList, selectedArchivePaths(), fileNames);
 
-    QString language(mSelector->languageBox()->currentText());
+    QString language(mSelector->languageBox()->currentData().toString());
 
     mLauncherSettings.setLanguage(language);
 
@@ -737,8 +728,11 @@ void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState sel
     ui.archiveListWidget->item(row)->setCheckState(selected);
     if (mKnownArchives.filter(name).isEmpty()) // XXX why contains doesn't work here ???
     {
-        ui.archiveListWidget->item(row)->setBackground(Qt::green);
-        ui.archiveListWidget->item(row)->setForeground(Qt::black);
+        auto item = ui.archiveListWidget->item(row);
+        QFont font = item->font();
+        font.setBold(true);
+        font.setItalic(true);
+        item->setFont(font);
     }
 }
 

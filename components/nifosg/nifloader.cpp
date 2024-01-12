@@ -56,6 +56,7 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
+#include "fog.hpp"
 #include "matrixtransform.hpp"
 #include "particle.hpp"
 
@@ -1381,17 +1382,7 @@ namespace NifOsg
             if (!niGeometry->mSkin.empty())
             {
                 const Nif::NiSkinInstance* skin = niGeometry->mSkin.getPtr();
-                const Nif::NiSkinData* data = nullptr;
-                const Nif::NiSkinPartition* partitions = nullptr;
-                if (!skin->mData.empty())
-                {
-                    data = skin->mData.getPtr();
-                    if (!data->mPartitions.empty())
-                        partitions = data->mPartitions.getPtr();
-                }
-                if (!partitions && !skin->mPartitions.empty())
-                    partitions = skin->mPartitions.getPtr();
-
+                const Nif::NiSkinPartition* partitions = skin->getPartitions();
                 hasPartitions = partitions != nullptr;
                 if (hasPartitions)
                 {
@@ -1515,24 +1506,24 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
                 rig->setSourceGeometry(geom);
 
-                // Assign bone weights
-                osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
-
                 const Nif::NiSkinInstance* skin = niGeometry->mSkin.getPtr();
                 const Nif::NiSkinData* data = skin->mData.getPtr();
                 const Nif::NiAVObjectList& bones = skin->mBones;
+
+                // Assign bone weights
+                std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
+                std::vector<SceneUtil::RigGeometry::VertexWeights> influences;
+                boneInfo.resize(bones.size());
+                influences.resize(bones.size());
                 for (std::size_t i = 0; i < bones.size(); ++i)
                 {
-                    std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
-
-                    SceneUtil::RigGeometry::BoneInfluence influence;
-                    influence.mWeights = data->mBones[i].mWeights;
-                    influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
-                    influence.mBoundSphere = data->mBones[i].mBoundSphere;
-
-                    map->mData.emplace_back(boneName, influence);
+                    boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+                    boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                    boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
+                    influences[i] = data->mBones[i].mWeights;
                 }
-                rig->setInfluenceMap(map);
+                rig->setBoneInfo(std::move(boneInfo));
+                rig->setInfluences(influences);
 
                 drawable = rig;
             }
@@ -1671,29 +1662,29 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
                 rig->setSourceGeometry(geometry);
 
-                osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
-
-                auto skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
+                const Nif::BSSkinInstance* skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
                 const Nif::BSSkinBoneData* data = skin->mData.getPtr();
                 const Nif::NiAVObjectList& bones = skin->mBones;
-                std::vector<std::vector<Nif::NiSkinData::VertWeight>> vertWeights(data->mBones.size());
-                for (size_t i = 0; i < vertices.size(); i++)
-                    for (int j = 0; j < 4; j++)
-                        vertWeights[bsTriShape->mVertData[i].mBoneIndices[j]].emplace_back(
-                            i, halfToFloat(bsTriShape->mVertData[i].mBoneWeights[j]));
 
+                std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
+                std::vector<SceneUtil::RigGeometry::BoneWeights> influences;
+                boneInfo.resize(bones.size());
+                influences.resize(vertices.size());
                 for (std::size_t i = 0; i < bones.size(); ++i)
                 {
-                    std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
-
-                    SceneUtil::RigGeometry::BoneInfluence influence;
-                    influence.mWeights = vertWeights[i];
-                    influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
-                    influence.mBoundSphere = data->mBones[i].mBoundSphere;
-
-                    map->mData.emplace_back(boneName, influence);
+                    boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+                    boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                    boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
                 }
-                rig->setInfluenceMap(map);
+
+                for (size_t i = 0; i < vertices.size(); i++)
+                {
+                    const Nif::BSVertexData& vertData = bsTriShape->mVertData[i];
+                    for (int j = 0; j < 4; j++)
+                        influences[i].emplace_back(vertData.mBoneIndices[j], halfToFloat(vertData.mBoneWeights[j]));
+                }
+                rig->setBoneInfo(std::move(boneInfo));
+                rig->setInfluences(influences);
 
                 drawable = rig;
             }
@@ -2363,6 +2354,7 @@ namespace NifOsg
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     handleTextureProperty(
                         texprop, node->getName(), stateset, composite, imageManager, boundTextures, animflags);
+                    node->setUserValue("applyMode", static_cast<int>(texprop->mApplyMode));
                     break;
                 }
                 case Nif::RC_BSShaderPPLightingProperty:
@@ -2379,6 +2371,8 @@ namespace NifOsg
                             textureSet, texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->refraction())
+                        SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2436,6 +2430,8 @@ namespace NifOsg
                     if (texprop->treeAnim())
                         stateset->addUniform(new osg::Uniform("useTreeAnim", true));
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
+                    if (texprop->refraction())
+                        SceneUtil::setupDistortion(*node, texprop->mRefractionStrength);
                     break;
                 }
                 case Nif::RC_BSEffectShaderProperty:
@@ -2494,10 +2490,35 @@ namespace NifOsg
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
                     break;
                 }
+                case Nif::RC_NiFogProperty:
+                {
+                    const Nif::NiFogProperty* fogprop = static_cast<const Nif::NiFogProperty*>(property);
+                    osg::StateSet* stateset = node->getOrCreateStateSet();
+                    // Vertex alpha mode appears to be broken
+                    if (!fogprop->vertexAlpha() && fogprop->enabled())
+                    {
+                        osg::ref_ptr<NifOsg::Fog> fog = new NifOsg::Fog;
+                        fog->setMode(osg::Fog::LINEAR);
+                        fog->setColor(osg::Vec4f(fogprop->mColour, 1.f));
+                        fog->setDepth(fogprop->mFogDepth);
+                        stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
+                        // Intentionally ignoring radial fog flag
+                        // We don't really want to override the global setting
+                    }
+                    else
+                    {
+                        osg::ref_ptr<osg::Fog> fog = new osg::Fog;
+                        // Shaders don't respect glDisable(GL_FOG)
+                        fog->setMode(osg::Fog::LINEAR);
+                        fog->setStart(10000000);
+                        fog->setEnd(10000000);
+                        stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+                    }
+                    break;
+                }
                 // unused by mw
                 case Nif::RC_NiShadeProperty:
                 case Nif::RC_NiDitherProperty:
-                case Nif::RC_NiFogProperty:
                 {
                     break;
                 }
@@ -2578,7 +2599,10 @@ namespace NifOsg
                         emissiveMult = matprop->mEmissiveMult;
 
                         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mSpecular, 1.f));
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->mGlossiness);
+                        // NIFs may provide specular exponents way above OpenGL's limit.
+                        // They can't be used properly, but we don't need OSG to constantly harass us about it.
+                        float glossiness = std::clamp(matprop->mGlossiness, 0.f, 128.f);
+                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
 
                         if (!matprop->mController.empty())
                         {
@@ -2693,7 +2717,8 @@ namespace NifOsg
                         mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderprop->mAlpha);
                         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mEmissive, 1.f));
                         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mSpecular, 1.f));
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
+                        float glossiness = std::clamp(shaderprop->mGlossiness, 0.f, 128.f);
+                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
                         specEnabled = shaderprop->specular();

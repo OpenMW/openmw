@@ -79,6 +79,8 @@ namespace MWRender
 
         bool hasRain() const;
 
+        bool getRainRipplesEnabled() const;
+
         float getPrecipitationAlpha() const;
 
         void setRainSpeed(float speed);
@@ -194,6 +196,8 @@ namespace MWRender
         float mRainMaxHeight;
         float mRainEntranceSpeed;
         int mRainMaxRaindrops;
+        bool mRainRipplesEnabled;
+        bool mSnowRipplesEnabled;
         float mWindSpeed;
         float mBaseWindSpeed;
 

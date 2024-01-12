@@ -14,6 +14,8 @@
 
 #include "editmode.hpp"
 #include "instancedragmodes.hpp"
+#include <apps/opencs/model/world/idtable.hpp>
+#include <components/esm3/selectiongroup.hpp>
 
 class QDragEnterEvent;
 class QDropEvent;
@@ -60,6 +62,7 @@ namespace CSVRender
         osg::ref_ptr<osg::Group> mParentNode;
         osg::Vec3 mDragStart;
         std::vector<osg::Vec3> mObjectsAtDragStart;
+        CSMWorld::IdTable* mSelectionGroups;
 
         int getSubModeFromId(const std::string& id) const;
 
@@ -131,7 +134,10 @@ namespace CSVRender
     private slots:
 
         void subModeChanged(const std::string& id);
-        void deleteSelectedInstances(bool active);
+        void deleteSelectedInstances();
+        void cloneSelectedInstances();
+        void getSelectionGroup(const int group);
+        void saveSelectionGroup(const int group);
         void dropSelectedInstancesToCollision();
         void dropSelectedInstancesToTerrain();
         void dropSelectedInstancesToCollisionSeparately();

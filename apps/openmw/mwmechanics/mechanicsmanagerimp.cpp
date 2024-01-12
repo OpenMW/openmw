@@ -134,14 +134,9 @@ namespace MWMechanics
         for (size_t i = 0; i < player->mNpdt.mSkills.size(); ++i)
             npcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(player->mNpdt.mSkills[i]);
 
-        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
-        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt.mIntelligence);
-        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt.mWillpower);
-        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt.mAgility);
-        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt.mSpeed);
-        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt.mEndurance);
-        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt.mPersonality);
-        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt.mLuck);
+        for (size_t i = 0; i < player->mNpdt.mAttributes.size(); ++i)
+            npcStats.setAttribute(ESM::Attribute::indexToRefId(i), player->mNpdt.mSkills[i]);
+
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         // race
@@ -152,13 +147,7 @@ namespace MWMechanics
             bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
             for (const ESM::Attribute& attribute : esmStore.get<ESM::Attribute>())
-            {
-                auto index = ESM::Attribute::refIdToIndex(attribute.mId);
-                assert(index >= 0);
-
-                const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[static_cast<size_t>(index)];
-                creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
-            }
+                creatureStats.setAttribute(attribute.mId, race->mData.getAttribute(attribute.mId, male));
 
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {
@@ -484,8 +473,8 @@ namespace MWMechanics
 
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr, bool clamp)
     {
-        const MWMechanics::NpcStats& npcSkill = ptr.getClass().getNpcStats(ptr);
-        float x = static_cast<float>(npcSkill.getBaseDisposition());
+        const MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+        float x = static_cast<float>(npcStats.getBaseDisposition() + npcStats.getCrimeDispositionModifier());
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         MWWorld::Ptr playerPtr = getPlayer();
@@ -1033,7 +1022,7 @@ namespace MWMechanics
             if (stolenIt == mStolenItems.end())
                 continue;
             OwnerMap& owners = stolenIt->second;
-            int itemCount = it->getRefData().getCount();
+            int itemCount = it->getCellRef().getCount();
             for (OwnerMap::iterator ownerIt = owners.begin(); ownerIt != owners.end();)
             {
                 int toRemove = std::min(itemCount, ownerIt->second);
@@ -1045,7 +1034,7 @@ namespace MWMechanics
                     ++ownerIt;
             }
 
-            int toMove = it->getRefData().getCount() - itemCount;
+            int toMove = it->getCellRef().getCount() - itemCount;
 
             containerStore.add(*it, toMove);
             store.remove(*it, toMove);
@@ -1095,15 +1084,21 @@ namespace MWMechanics
             }
         }
 
-        if (!(item.getCellRef().getRefId() == MWWorld::ContainerStore::sGoldId))
+        const bool isGold = item.getClass().isGold(item);
+        if (!isGold)
         {
             if (victim.isEmpty()
-                || (victim.getClass().isActor() && victim.getRefData().getCount() > 0
+                || (victim.getClass().isActor() && victim.getCellRef().getCount() > 0
                     && !victim.getClass().getCreatureStats(victim).isDead()))
                 mStolenItems[item.getCellRef().getRefId()][owner] += count;
         }
         if (alarm)
-            commitCrime(ptr, victim, OT_Theft, ownerCellRef->getFaction(), item.getClass().getValue(item) * count);
+        {
+            int value = count;
+            if (!isGold)
+                value *= item.getClass().getValue(item);
+            commitCrime(ptr, victim, OT_Theft, ownerCellRef->getFaction(), value);
+        }
     }
 
     bool MechanicsManager::commitCrime(const MWWorld::Ptr& player, const MWWorld::Ptr& victim, OffenseType type,
@@ -1298,67 +1293,140 @@ namespace MWMechanics
             if (!canReportCrime(actor, victim, playerFollowers))
                 continue;
 
-            if (reported && actor.getClass().isClass(actor, "guard"))
+            NpcStats& observerStats = actor.getClass().getNpcStats(actor);
+
+            int alarm = observerStats.getAiSetting(AiSetting::Alarm).getBase();
+            float alarmTerm = 0.01f * alarm;
+
+            bool isActorVictim = actor == victim;
+            float dispTerm = isActorVictim ? dispVictim : disp;
+
+            bool isActorGuard = actor.getClass().isClass(actor, "guard");
+
+            int currentDisposition = getDerivedDisposition(actor);
+
+            bool isPermanent = false;
+            bool applyOnlyIfHostile = false;
+            int dispositionModifier = 0;
+            // Murdering and trespassing seem to do not affect disposition
+            if (type == OT_Theft)
+            {
+                dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+            }
+            else if (type == OT_Pickpocket)
+            {
+                if (alarm >= 100 && isActorGuard)
+                    dispositionModifier = static_cast<int>(dispTerm);
+                else if (isActorVictim && isActorGuard)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+                }
+                else if (isActorVictim)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm);
+                }
+            }
+            else if (type == OT_Assault)
+            {
+                if (isActorVictim && !isActorGuard)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm);
+                }
+                else if (alarm >= 100)
+                    dispositionModifier = static_cast<int>(dispTerm);
+                else if (isActorVictim && isActorGuard)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+                }
+                else
+                {
+                    applyOnlyIfHostile = true;
+                    dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+                }
+            }
+
+            bool setCrimeId = false;
+            if (isPermanent && dispositionModifier != 0 && !applyOnlyIfHostile)
+            {
+                setCrimeId = true;
+                dispositionModifier = std::clamp(dispositionModifier, -currentDisposition, 100 - currentDisposition);
+                int baseDisposition = observerStats.getBaseDisposition();
+                observerStats.setBaseDisposition(baseDisposition + dispositionModifier);
+            }
+            else if (dispositionModifier != 0 && !applyOnlyIfHostile)
+            {
+                setCrimeId = true;
+                dispositionModifier = std::clamp(dispositionModifier, -currentDisposition, 100 - currentDisposition);
+                observerStats.modCrimeDispositionModifier(dispositionModifier);
+            }
+
+            if (isActorGuard && alarm >= 100)
             {
                 // Mark as Alarmed for dialogue
-                actor.getClass().getCreatureStats(actor).setAlarmed(true);
+                observerStats.setAlarmed(true);
 
-                // Set the crime ID, which we will use to calm down participants
-                // once the bounty has been paid.
-                actor.getClass().getNpcStats(actor).setCrimeId(id);
+                setCrimeId = true;
 
-                if (!actor.getClass().getCreatureStats(actor).getAiSequence().isInPursuit())
+                if (!observerStats.getAiSequence().isInPursuit())
                 {
-                    actor.getClass().getCreatureStats(actor).getAiSequence().stack(AiPursue(player), actor);
+                    observerStats.getAiSequence().stack(AiPursue(player), actor);
                 }
             }
             else
             {
-                float dispTerm = (actor == victim) ? dispVictim : disp;
-
-                float alarmTerm
-                    = 0.01f * actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Alarm).getBase();
-                if (type == OT_Pickpocket && alarmTerm <= 0)
+                // If Alarm is 0, treat it like 100 to calculate a Fight modifier for a victim of pickpocketing.
+                // Observers which do not try to arrest player do not care about pickpocketing at all.
+                if (type == OT_Pickpocket && isActorVictim && alarmTerm == 0.0)
                     alarmTerm = 1.0;
+                else if (type == OT_Pickpocket && !isActorVictim)
+                    alarmTerm = 0.0;
 
-                if (actor != victim)
-                    dispTerm *= alarmTerm;
-
-                float fightTerm = static_cast<float>((actor == victim) ? fightVictim : fight);
+                float fightTerm = static_cast<float>(isActorVictim ? fightVictim : fight);
                 fightTerm += getFightDispositionBias(dispTerm);
                 fightTerm += getFightDistanceBias(actor, player);
                 fightTerm *= alarmTerm;
 
-                const int observerFightRating
-                    = actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Fight).getBase();
+                const int observerFightRating = observerStats.getAiSetting(AiSetting::Fight).getBase();
                 if (observerFightRating + fightTerm > 100)
                     fightTerm = static_cast<float>(100 - observerFightRating);
                 fightTerm = std::max(0.f, fightTerm);
 
                 if (observerFightRating + fightTerm >= 100)
                 {
+                    if (dispositionModifier != 0 && applyOnlyIfHostile)
+                    {
+                        dispositionModifier
+                            = std::clamp(dispositionModifier, -currentDisposition, 100 - currentDisposition);
+                        observerStats.modCrimeDispositionModifier(dispositionModifier);
+                    }
+
                     startCombat(actor, player);
 
-                    NpcStats& observerStats = actor.getClass().getNpcStats(actor);
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
                     observerStats.setAiSetting(AiSetting::Fight, observerFightRating + static_cast<int>(fightTerm));
 
-                    observerStats.setBaseDisposition(observerStats.getBaseDisposition() + static_cast<int>(dispTerm));
-
-                    // Set the crime ID, which we will use to calm down participants
-                    // once the bounty has been paid.
-                    observerStats.setCrimeId(id);
+                    setCrimeId = true;
 
                     // Mark as Alarmed for dialogue
                     observerStats.setAlarmed(true);
                 }
             }
+
+            // Set the crime ID, which we will use to calm down participants
+            // once the bounty has been paid and restore their disposition to player character.
+            if (setCrimeId)
+                observerStats.setCrimeId(id);
         }
 
         if (reported)
         {
-            player.getClass().getNpcStats(player).setBounty(player.getClass().getNpcStats(player).getBounty() + arg);
+            player.getClass().getNpcStats(player).setBounty(
+                std::max(0, player.getClass().getNpcStats(player).getBounty() + arg));
 
             // If committing a crime against a faction member, expell from the faction
             if (!victim.isEmpty() && victim.getClass().isNpc())
@@ -1404,26 +1472,10 @@ namespace MWMechanics
         if (target == player || !attacker.getClass().isActor())
             return false;
 
-        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
-        if (attacker == player)
-        {
-            std::set<MWWorld::Ptr> followersAttacker;
-            getActorsSidingWith(attacker, followersAttacker);
-            if (followersAttacker.find(target) != followersAttacker.end())
-            {
-                statsTarget.friendlyHit();
-
-                if (statsTarget.getFriendlyHits() < 4)
-                {
-                    MWBase::Environment::get().getDialogueManager()->say(target, ESM::RefId::stringRefId("hit"));
-                    return false;
-                }
-            }
-        }
-
         if (canCommitCrimeAgainst(target, attacker))
             commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
 
+        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
         AiSequence& seq = statsTarget.getAiSequence();
 
         if (!attacker.isEmpty()
@@ -1466,10 +1518,13 @@ namespace MWMechanics
 
     bool MechanicsManager::canCommitCrimeAgainst(const MWWorld::Ptr& target, const MWWorld::Ptr& attacker)
     {
-        const MWMechanics::AiSequence& seq = target.getClass().getCreatureStats(target).getAiSequence();
-        return target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
-            && !isAggressive(target, attacker) && !seq.isEngagedWithActor()
-            && !target.getClass().getCreatureStats(target).getAiSequence().isInPursuit();
+        const MWWorld::Class& cls = target.getClass();
+        const MWMechanics::CreatureStats& stats = cls.getCreatureStats(target);
+        const MWMechanics::AiSequence& seq = stats.getAiSequence();
+        return cls.isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker) && !isAggressive(target, attacker)
+            && !seq.isEngagedWithActor() && !stats.getAiSequence().isInPursuit()
+            && !cls.getNpcStats(target).isWerewolf()
+            && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Vampirism).getMagnitude() <= 0;
     }
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker)
@@ -1920,7 +1975,8 @@ namespace MWMechanics
 
                 if (reported)
                 {
-                    npcStats.setBounty(npcStats.getBounty() + gmst.find("iWereWolfBounty")->mValue.getInteger());
+                    npcStats.setBounty(
+                        std::max(0, npcStats.getBounty() + gmst.find("iWereWolfBounty")->mValue.getInteger()));
                 }
             }
         }

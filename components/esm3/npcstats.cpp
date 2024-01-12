@@ -37,49 +37,12 @@ namespace ESM
         mDisposition = 0;
         esm.getHNOT(mDisposition, "DISP");
 
+        mCrimeDispositionModifier = 0;
+        esm.getHNOT(mCrimeDispositionModifier, "DISM");
+
         const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
         for (auto& skill : mSkills)
             skill.load(esm, intFallback);
-
-        mWerewolfDeprecatedData = false;
-        if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion && esm.peekNextSub("STBA"))
-        {
-            // we have deprecated werewolf skills, stored interleaved
-            // Load into one big vector, then remove every 2nd value
-            mWerewolfDeprecatedData = true;
-            std::vector<StatState<float>> skills(mSkills.begin(), mSkills.end());
-
-            for (size_t i = 0; i < std::size(mSkills); ++i)
-            {
-                StatState<float> skill;
-                skill.load(esm, intFallback);
-                skills.push_back(skill);
-            }
-
-            int i = 0;
-            for (std::vector<StatState<float>>::iterator it = skills.begin(); it != skills.end(); ++i)
-            {
-                if (i % 2 == 1)
-                    it = skills.erase(it);
-                else
-                    ++it;
-            }
-            if (skills.size() != std::size(mSkills))
-                throw std::runtime_error(
-                    "Invalid number of skill for werewolf deprecated data: " + std::to_string(skills.size()));
-            std::copy(skills.begin(), skills.end(), mSkills.begin());
-        }
-
-        // No longer used
-        bool hasWerewolfAttributes = false;
-        esm.getHNOT(hasWerewolfAttributes, "HWAT");
-        if (hasWerewolfAttributes)
-        {
-            StatState<int32_t> dummy;
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
-                dummy.load(esm, intFallback);
-            mWerewolfDeprecatedData = true;
-        }
 
         mIsWerewolf = false;
         esm.getHNOT(mIsWerewolf, "WOLF");
@@ -92,14 +55,6 @@ namespace ESM
 
         mWerewolfKills = 0;
         esm.getHNOT(mWerewolfKills, "WKIL");
-
-        // No longer used
-        if (esm.isNextSub("PROF"))
-            esm.skipHSub(); // int profit
-
-        // No longer used
-        if (esm.isNextSub("ASTR"))
-            esm.skipHSub(); // attackStrength
 
         mLevelProgress = 0;
         esm.getHNOT(mLevelProgress, "LPRO");
@@ -115,14 +70,6 @@ namespace ESM
 
         mTimeToStartDrowning = 0;
         esm.getHNOT(mTimeToStartDrowning, "DRTI");
-
-        // No longer used
-        float lastDrowningHit = 0;
-        esm.getHNOT(lastDrowningHit, "DRLH");
-
-        // No longer used
-        float levelHealthBonus = 0;
-        esm.getHNOT(levelHealthBonus, "LVLH");
 
         mCrimeId = -1;
         esm.getHNOT(mCrimeId, "CRID");
@@ -149,6 +96,9 @@ namespace ESM
 
         if (mDisposition)
             esm.writeHNT("DISP", mDisposition);
+
+        if (mCrimeDispositionModifier)
+            esm.writeHNT("DISM", mCrimeDispositionModifier);
 
         for (const auto& skill : mSkills)
             skill.save(esm);
@@ -195,9 +145,9 @@ namespace ESM
 
     void NpcStats::blank()
     {
-        mWerewolfDeprecatedData = false;
         mIsWerewolf = false;
         mDisposition = 0;
+        mCrimeDispositionModifier = 0;
         mBounty = 0;
         mReputation = 0;
         mWerewolfKills = 0;

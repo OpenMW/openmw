@@ -529,6 +529,7 @@ namespace MWRender
         , mBodyPitchRadians(0.f)
         , mHasMagicEffects(false)
         , mAlpha(1.f)
+        , mPlayScriptedOnly(false)
     {
         for (size_t i = 0; i < sNumBlendMasks; i++)
             mAnimationTimePtr[i] = std::make_shared<AnimationTime>();
@@ -1020,7 +1021,7 @@ namespace MWRender
         return false;
     }
 
-    bool Animation::getInfo(std::string_view groupname, float* complete, float* speedmult) const
+    bool Animation::getInfo(std::string_view groupname, float* complete, float* speedmult, size_t* loopcount) const
     {
         AnimStateMap::const_iterator iter = mStates.find(groupname);
         if (iter == mStates.end())
@@ -1029,6 +1030,8 @@ namespace MWRender
                 *complete = 0.0f;
             if (speedmult)
                 *speedmult = 0.0f;
+            if (loopcount)
+                *loopcount = 0;
             return false;
         }
 
@@ -1042,6 +1045,9 @@ namespace MWRender
         }
         if (speedmult)
             *speedmult = iter->second.mSpeedMult;
+
+        if (loopcount)
+            *loopcount = iter->second.mLoopCount;
         return true;
     }
 
@@ -1052,15 +1058,6 @@ namespace MWRender
             return -1.f;
 
         return iter->second.getTime();
-    }
-
-    size_t Animation::getCurrentLoopCount(const std::string& groupname) const
-    {
-        AnimStateMap::const_iterator iter = mStates.find(groupname);
-        if (iter == mStates.end())
-            return 0;
-
-        return iter->second.mLoopCount;
     }
 
     void Animation::disable(std::string_view groupname)
@@ -1141,23 +1138,12 @@ namespace MWRender
 
     osg::Vec3f Animation::runAnimation(float duration)
     {
-        // If we have scripted animations, play only them
-        bool hasScriptedAnims = false;
-        for (AnimStateMap::iterator stateiter = mStates.begin(); stateiter != mStates.end(); stateiter++)
-        {
-            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Scripted)) && stateiter->second.mPlaying)
-            {
-                hasScriptedAnims = true;
-                break;
-            }
-        }
-
         osg::Vec3f movement(0.f, 0.f, 0.f);
         AnimStateMap::iterator stateiter = mStates.begin();
         while (stateiter != mStates.end())
         {
             AnimState& state = stateiter->second;
-            if (hasScriptedAnims && !state.mPriority.contains(int(MWMechanics::Priority_Scripted)))
+            if (mPlayScriptedOnly && !state.mPriority.contains(MWMechanics::Priority_Scripted))
             {
                 ++stateiter;
                 continue;
@@ -1262,10 +1248,6 @@ namespace MWRender
                 mHeadController->setRotate(
                     osg::Quat(mHeadPitchRadians, osg::Vec3f(1, 0, 0)) * osg::Quat(yaw, osg::Vec3f(0, 0, 1)));
         }
-
-        // Scripted animations should not cause movement
-        if (hasScriptedAnims)
-            return osg::Vec3f(0, 0, 0);
 
         return movement;
     }
@@ -1593,7 +1575,7 @@ namespace MWRender
         // Notify that this animation has attached magic effects
         mHasMagicEffects = true;
 
-        overrideFirstRootTexture(texture, mResourceSystem, node);
+        overrideFirstRootTexture(texture, mResourceSystem, *node);
     }
 
     void Animation::removeEffect(int effectId)

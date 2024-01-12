@@ -17,8 +17,8 @@ namespace ESM
     void BaseProjectileState::load(ESMReader& esm)
     {
         mId = esm.getHNRefId("ID__");
-        esm.getHNTSized<12>(mPosition, "VEC3");
-        esm.getHNTSized<16>(mOrientation, "QUAT");
+        esm.getHNT("VEC3", mPosition.mValues);
+        esm.getHNT("QUAT", mOrientation.mValues);
         esm.getHNT(mActorId, "ACTO");
     }
 
@@ -37,17 +37,10 @@ namespace ESM
         BaseProjectileState::load(esm);
 
         mSpellId = esm.getHNRefId("SPEL");
-        if (esm.isNextSub("SRCN")) // for backwards compatibility
-            esm.skipHSub();
-        EffectList().load(esm); // for backwards compatibility
         esm.getHNT(mSpeed, "SPED");
         if (esm.peekNextSub("ITEM"))
             mItem = esm.getFormId(true, "ITEM");
         if (esm.isNextSub("SLOT")) // for backwards compatibility
-            esm.skipHSub();
-        if (esm.isNextSub("STCK")) // for backwards compatibility
-            esm.skipHSub();
-        if (esm.isNextSub("SOUN")) // for backwards compatibility
             esm.skipHSub();
     }
 
@@ -65,7 +58,7 @@ namespace ESM
         BaseProjectileState::load(esm);
 
         mBowId = esm.getHNRefId("BOW_");
-        esm.getHNTSized<12>(mVelocity, "VEL_");
+        esm.getHNT("VEL_", mVelocity.mValues);
 
         mAttackStrength = 1.f;
         esm.getHNOT(mAttackStrength, "STR_");

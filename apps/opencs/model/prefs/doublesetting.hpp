@@ -9,7 +9,7 @@ namespace CSMPrefs
 {
     class Category;
 
-    class DoubleSetting : public Setting
+    class DoubleSetting final : public TypedSetting<double>
     {
         Q_OBJECT
 
@@ -17,12 +17,11 @@ namespace CSMPrefs
         double mMin;
         double mMax;
         std::string mTooltip;
-        double mDefault;
         QDoubleSpinBox* mWidget;
 
     public:
-        DoubleSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const std::string& label, double default_);
+        explicit DoubleSetting(
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
         DoubleSetting& setPrecision(int precision);
 
@@ -36,7 +35,7 @@ namespace CSMPrefs
         DoubleSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

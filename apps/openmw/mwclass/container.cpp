@@ -271,7 +271,7 @@ namespace MWClass
                 text += "\nYou can not use evidence chests";
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -306,7 +306,7 @@ namespace MWClass
         if (newPtr.getRefData().getCustomData())
         {
             MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
-            newPtr.getContainerStore()->setPtr(newPtr);
+            getContainerStore(newPtr).setPtr(newPtr);
         }
         return newPtr;
     }

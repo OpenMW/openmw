@@ -1,7 +1,6 @@
 #ifndef GAME_MWMECHANICS_ALCHEMY_H
 #define GAME_MWMECHANICS_ALCHEMY_H
 
-#include <set>
 #include <vector>
 
 #include <components/esm3/effectlist.hpp>
@@ -110,7 +109,7 @@ namespace MWMechanics
         void setPotionName(const std::string& name);
         ///< Set name of potion to create
 
-        std::set<EffectKey> listEffects() const;
+        std::vector<EffectKey> listEffects() const;
         ///< List all effects shared by at least two ingredients.
 
         int addIngredient(const MWWorld::Ptr& ingredient);

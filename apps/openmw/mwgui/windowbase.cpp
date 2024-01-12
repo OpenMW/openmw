@@ -58,7 +58,7 @@ void WindowBase::setVisible(bool visible)
         onClose();
 }
 
-bool WindowBase::isVisible()
+bool WindowBase::isVisible() const
 {
     return mMainWidget->getVisible();
 }

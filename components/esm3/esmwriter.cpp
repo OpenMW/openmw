@@ -84,12 +84,12 @@ namespace ESM
 
     unsigned int ESMWriter::getVersion() const
     {
-        return mHeader.mData.version;
+        return mHeader.mData.version.ui;
     }
 
     void ESMWriter::setVersion(unsigned int ver)
     {
-        mHeader.mData.version = ver;
+        mHeader.mData.version.ui = ver;
     }
 
     void ESMWriter::setType(int type)

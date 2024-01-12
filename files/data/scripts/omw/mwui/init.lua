@@ -77,6 +77,7 @@ require('scripts.omw.mwui.space')(templates)
 ---
 -- Same as box, but with a semi-transparent background
 -- @field [parent=#Templates] openmw.ui#Template boxTransparent
+
 ---
 -- Same as box, but with a solid background
 -- @field [parent=#Templates] openmw.ui#Template boxSolid
@@ -100,6 +101,7 @@ require('scripts.omw.mwui.space')(templates)
 ---
 -- Same as box, but with a semi-transparent background
 -- @field [parent=#Templates] openmw.ui#Template boxTransparentThick
+
 ---
 -- Same as box, but with a solid background
 -- @field [parent=#Templates] openmw.ui#Template boxSolidThick

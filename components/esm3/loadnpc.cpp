@@ -59,23 +59,31 @@ namespace ESM
                     if (esm.getSubSize() == 52)
                     {
                         mNpdtType = NPC_DEFAULT;
-                        esm.getExact(&mNpdt, 52);
+                        esm.getT(mNpdt.mLevel);
+                        esm.getT(mNpdt.mAttributes);
+                        esm.getT(mNpdt.mSkills);
+                        esm.getT(mNpdt.mUnknown1);
+                        esm.getT(mNpdt.mHealth);
+                        esm.getT(mNpdt.mMana);
+                        esm.getT(mNpdt.mFatigue);
+                        esm.getT(mNpdt.mDisposition);
+                        esm.getT(mNpdt.mReputation);
+                        esm.getT(mNpdt.mRank);
+                        esm.getT(mNpdt.mUnknown2);
+                        esm.getT(mNpdt.mGold);
                     }
                     else if (esm.getSubSize() == 12)
                     {
-                        // Reading into temporary NPDTstruct12 object
-                        NPDTstruct12 npdt12;
                         mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
-                        esm.getExact(&npdt12, 12);
 
                         // Clearing the mNdpt struct to initialize all values
                         blankNpdt();
-                        // Swiching to an internal representation
-                        mNpdt.mLevel = npdt12.mLevel;
-                        mNpdt.mDisposition = npdt12.mDisposition;
-                        mNpdt.mReputation = npdt12.mReputation;
-                        mNpdt.mRank = npdt12.mRank;
-                        mNpdt.mGold = npdt12.mGold;
+                        esm.getT(mNpdt.mLevel);
+                        esm.getT(mNpdt.mDisposition);
+                        esm.getT(mNpdt.mReputation);
+                        esm.getT(mNpdt.mRank);
+                        esm.skip(3);
+                        esm.getT(mNpdt.mGold);
                     }
                     else
                         esm.fail("NPC_NPDT must be 12 or 52 bytes long");
@@ -146,20 +154,32 @@ namespace ESM
 
         if (mNpdtType == NPC_DEFAULT)
         {
-            esm.writeHNT("NPDT", mNpdt, 52);
+            esm.startSubRecord("NPDT");
+            esm.writeT(mNpdt.mLevel);
+            esm.writeT(mNpdt.mAttributes);
+            esm.writeT(mNpdt.mSkills);
+            esm.writeT(mNpdt.mUnknown1);
+            esm.writeT(mNpdt.mHealth);
+            esm.writeT(mNpdt.mMana);
+            esm.writeT(mNpdt.mFatigue);
+            esm.writeT(mNpdt.mDisposition);
+            esm.writeT(mNpdt.mReputation);
+            esm.writeT(mNpdt.mRank);
+            esm.writeT(mNpdt.mUnknown2);
+            esm.writeT(mNpdt.mGold);
+            esm.endRecord("NPDT");
         }
         else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
         {
-            NPDTstruct12 npdt12;
-            npdt12.mLevel = mNpdt.mLevel;
-            npdt12.mDisposition = mNpdt.mDisposition;
-            npdt12.mReputation = mNpdt.mReputation;
-            npdt12.mRank = mNpdt.mRank;
-            npdt12.mUnknown1 = 0;
-            npdt12.mUnknown2 = 0;
-            npdt12.mUnknown3 = 0;
-            npdt12.mGold = mNpdt.mGold;
-            esm.writeHNT("NPDT", npdt12, 12);
+            esm.startSubRecord("NPDT");
+            esm.writeT(mNpdt.mLevel);
+            esm.writeT(mNpdt.mDisposition);
+            esm.writeT(mNpdt.mReputation);
+            esm.writeT(mNpdt.mRank);
+            constexpr char padding[] = { 0, 0, 0 };
+            esm.writeT(padding);
+            esm.writeT(mNpdt.mGold);
+            esm.endRecord("NPDT");
         }
 
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
@@ -213,8 +233,7 @@ namespace ESM
     void NPC::blankNpdt()
     {
         mNpdt.mLevel = 0;
-        mNpdt.mStrength = mNpdt.mIntelligence = mNpdt.mWillpower = mNpdt.mAgility = mNpdt.mSpeed = mNpdt.mEndurance
-            = mNpdt.mPersonality = mNpdt.mLuck = 0;
+        mNpdt.mAttributes.fill(0);
         mNpdt.mSkills.fill(0);
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;

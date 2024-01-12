@@ -79,8 +79,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
         int value = ref->mBase->mData.mValue;
-        if (ptr.getCellRef().getGoldValue() > 1 && ptr.getRefData().getCount() == 1)
-            value = ptr.getCellRef().getGoldValue();
+        if (isGold(ptr) && ptr.getCellRef().getCount() != 1)
+            value = 1;
 
         if (!ptr.getCellRef().getSoul().empty())
         {
@@ -167,7 +167,7 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -189,8 +189,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
 
         MWWorld::Ptr ptr(cell.insert(ref), &cell);
-        ptr.getCellRef().setGoldValue(goldAmount);
-        ptr.getRefData().setCount(1);
+        ptr.getCellRef().setCount(goldAmount);
         return ptr;
     }
 
@@ -203,7 +202,7 @@ namespace MWClass
         {
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
-            newPtr.getRefData().setCount(count);
+            newPtr.getCellRef().setCount(count);
         }
         newPtr.getCellRef().unsetRefNum();
         newPtr.getRefData().setLuaScripts(nullptr);
@@ -216,10 +215,9 @@ namespace MWClass
         MWWorld::Ptr newPtr;
         if (isGold(ptr))
         {
-            newPtr = createGold(cell, getValue(ptr) * ptr.getRefData().getCount());
+            newPtr = createGold(cell, getValue(ptr) * ptr.getCellRef().getCount());
             newPtr.getRefData() = ptr.getRefData();
             newPtr.getCellRef().setRefNum(ptr.getCellRef().getRefNum());
-            newPtr.getRefData().setCount(1);
         }
         else
         {

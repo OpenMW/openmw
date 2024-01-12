@@ -21,11 +21,13 @@
 #include <components/lua_ui/util.hpp>
 
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwrender/postprocessor.hpp"
 
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -123,8 +125,8 @@ namespace MWLua
 
     void LuaManager::update()
     {
-        if (Settings::lua().mGcStepsPerFrame > 0)
-            lua_gc(mLua.sol(), LUA_GCSTEP, Settings::lua().mGcStepsPerFrame);
+        if (const int steps = Settings::lua().mGcStepsPerFrame; steps > 0)
+            lua_gc(mLua.sol(), LUA_GCSTEP, steps);
 
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
@@ -140,9 +142,8 @@ namespace MWLua
 
         mObjectLists.update();
 
-        std::erase_if(mActiveLocalScripts, [](const LocalScripts* l) {
-            return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().getRefData().isDeleted();
-        });
+        std::erase_if(mActiveLocalScripts,
+            [](const LocalScripts* l) { return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().mRef->isDeleted(); });
 
         mGlobalScripts.statsNextFrame();
         for (LocalScripts* scripts : mActiveLocalScripts)
@@ -225,10 +226,12 @@ namespace MWLua
                 playerScripts->processInputEvent(event);
         }
         mInputEvents.clear();
+        double frameDuration = MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
+            ? 0.0
+            : MWBase::Environment::get().getFrameDuration();
+        mInputActions.update(frameDuration);
         if (playerScripts)
-            playerScripts->onFrame(MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
-                    ? 0.0
-                    : MWBase::Environment::get().getFrameDuration());
+            playerScripts->onFrame(frameDuration);
         mProcessingInputEvents = false;
 
         for (const std::string& message : mUIMessages)
@@ -291,6 +294,8 @@ namespace MWLua
         }
         mGlobalStorage.clearTemporaryAndRemoveCallbacks();
         mPlayerStorage.clearTemporaryAndRemoveCallbacks();
+        mInputActions.clear();
+        mInputTriggers.clear();
         for (int i = 0; i < 5; ++i)
             lua_gc(mLua.sol(), LUA_GCCOLLECT, 0);
     }
@@ -342,6 +347,13 @@ namespace MWLua
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         if (playerScripts)
             playerScripts->uiModeChanged(argId, false);
+    }
+
+    void LuaManager::actorDied(const MWWorld::Ptr& actor)
+    {
+        if (actor.isEmpty())
+            return;
+        mLuaEvents.addLocalEvent({ getId(actor), "Died", {} });
     }
 
     void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)
@@ -513,6 +525,8 @@ namespace MWLua
         MWBase::Environment::get().getL10nManager()->dropCache();
         mUiResourceManager.clear();
         mLua.dropScriptCache();
+        mInputActions.clear();
+        mInputTriggers.clear();
         initConfiguration();
 
         { // Reload global scripts

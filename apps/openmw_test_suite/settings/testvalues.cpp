@@ -59,6 +59,33 @@ namespace Settings
             EXPECT_EQ(values.mCamera.mFieldOfView.get(), 1);
         }
 
+        TEST_F(SettingsValuesTest, constructorWithDefaultShouldDoLookup)
+        {
+            Manager::mUserSettings[std::make_pair("category", "value")] = "13";
+            Index index;
+            SettingValue<int> value{ index, "category", "value", 42 };
+            EXPECT_EQ(value.get(), 13);
+            value.reset();
+            EXPECT_EQ(value.get(), 42);
+        }
+
+        TEST_F(SettingsValuesTest, constructorWithDefaultShouldSanitize)
+        {
+            Manager::mUserSettings[std::make_pair("category", "value")] = "2";
+            Index index;
+            SettingValue<int> value{ index, "category", "value", -1, Settings::makeClampSanitizerInt(0, 1) };
+            EXPECT_EQ(value.get(), 1);
+            value.reset();
+            EXPECT_EQ(value.get(), 0);
+        }
+
+        TEST_F(SettingsValuesTest, constructorWithDefaultShouldFallbackToDefault)
+        {
+            Index index;
+            const SettingValue<int> value{ index, "category", "value", 42 };
+            EXPECT_EQ(value.get(), 42);
+        }
+
         TEST_F(SettingsValuesTest, moveConstructorShouldSetDefaults)
         {
             Index index;
@@ -77,6 +104,13 @@ namespace Settings
             Manager::mUserSettings[std::make_pair("Camera", "field of view")] = "-1";
             Values values(std::move(defaultValues));
             EXPECT_EQ(values.mCamera.mFieldOfView.get(), 1);
+        }
+
+        TEST_F(SettingsValuesTest, moveConstructorShouldThrowOnMissingSetting)
+        {
+            Index index;
+            SettingValue<int> defaultValue{ index, "category", "value", 42 };
+            EXPECT_THROW([&] { SettingValue<int> value(std::move(defaultValue)); }(), std::runtime_error);
         }
 
         TEST_F(SettingsValuesTest, findShouldThrowExceptionOnTypeMismatch)

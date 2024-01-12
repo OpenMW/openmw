@@ -142,7 +142,7 @@ Ubuntu_GCC:
   variables:
     CC: gcc
     CXX: g++
-    CCACHE_SIZE: 4G
+    CCACHE_SIZE: 3G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -193,7 +193,7 @@ Ubuntu_GCC_Debug:
   variables:
     CC: gcc
     CXX: g++
-    CCACHE_SIZE: 4G
+    CCACHE_SIZE: 3G
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.

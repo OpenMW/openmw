@@ -10,7 +10,7 @@ namespace MWWorld
     std::string Ptr::toString() const
     {
         std::string res = "object";
-        if (getRefData().isDeleted())
+        if (mRef->isDeleted())
             res = "deleted object";
         res.append(getCellRef().getRefNum().toString());
         res.append(" (");

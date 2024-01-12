@@ -12,6 +12,7 @@
 #include "actorutil.hpp"
 #include "character.hpp"
 #include "creaturestats.hpp"
+#include "npcstats.hpp"
 
 namespace MWMechanics
 {
@@ -37,7 +38,7 @@ namespace MWMechanics
 
         // Stop if the target doesn't exist
         // Really we should be checking whether the target is currently registered with the MechanicsManager
-        if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
+        if (target == MWWorld::Ptr() || !target.getCellRef().getCount() || !target.getRefData().isEnabled())
             return true;
 
         if (isTargetMagicallyHidden(target)
@@ -45,6 +46,9 @@ namespace MWMechanics
             return false;
 
         if (target.getClass().getCreatureStats(target).isDead())
+            return true;
+
+        if (target.getClass().getNpcStats(target).getBounty() <= 0)
             return true;
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
@@ -79,7 +83,7 @@ namespace MWMechanics
     {
         if (!mCachedTarget.isEmpty())
         {
-            if (mCachedTarget.getRefData().isDeleted() || !mCachedTarget.getRefData().isEnabled())
+            if (mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
                 mCachedTarget = MWWorld::Ptr();
             else
                 return mCachedTarget;

@@ -22,8 +22,6 @@ namespace ESM
         // <Index in mItems, equipment slot>
         std::map<uint32_t, int32_t> mEquipmentSlots;
 
-        std::map<std::pair<ESM::RefId, std::string>, int32_t> mLevelledItemMap;
-
         std::map<ESM::RefId, std::vector<std::pair<float, float>>> mPermanentMagicEffectMagnitudes;
 
         std::optional<uint32_t> mSelectedEnchantItem; // For inventories only

@@ -154,8 +154,13 @@ bool Launcher::GraphicsPage::loadSettings()
     if (Settings::shadows().mEnableIndoorShadows)
         indoorShadowsCheckBox->setCheckState(Qt::Checked);
 
-    shadowComputeSceneBoundsComboBox->setCurrentIndex(
-        shadowComputeSceneBoundsComboBox->findText(QString(tr(Settings::shadows().mComputeSceneBounds.get().c_str()))));
+    const auto& boundMethod = Settings::shadows().mComputeSceneBounds.get();
+    if (boundMethod == "bounds")
+        shadowComputeSceneBoundsComboBox->setCurrentIndex(0);
+    else if (boundMethod == "primitives")
+        shadowComputeSceneBoundsComboBox->setCurrentIndex(1);
+    else
+        shadowComputeSceneBoundsComboBox->setCurrentIndex(2);
 
     const int shadowDistLimit = Settings::shadows().mMaximumShadowMapDistance;
     if (shadowDistLimit > 0)
@@ -254,7 +259,14 @@ void Launcher::GraphicsPage::saveSettings()
 
     Settings::shadows().mEnableIndoorShadows.set(indoorShadowsCheckBox->checkState() != Qt::Unchecked);
     Settings::shadows().mShadowMapResolution.set(shadowResolutionComboBox->currentText().toInt());
-    Settings::shadows().mComputeSceneBounds.set(shadowComputeSceneBoundsComboBox->currentText().toStdString());
+
+    auto index = shadowComputeSceneBoundsComboBox->currentIndex();
+    if (index == 0)
+        Settings::shadows().mComputeSceneBounds.set("bounds");
+    else if (index == 1)
+        Settings::shadows().mComputeSceneBounds.set("primitives");
+    else
+        Settings::shadows().mComputeSceneBounds.set("none");
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)

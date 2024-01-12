@@ -22,6 +22,9 @@ LoadingInProgress: "Laddar sparat spel"
 LoadingRequiresNewVersionError: |-
     Denna sparfil skapades i en nyare version av OpenMW och stöds därför inte.
     Uppgradera till den senaste versionen av OpenMW för att ladda filen.
+# LoadingRequiresOldVersionError: |-
+#     This save file was created using an older version of OpenMW in a format that is no longer supported.
+#     Load and save this file using {version} to upgrade it.
 NewGameConfirmation: "Vill du starta ett nytt spel och förlora det pågående spelet?"
 SaveGameDenied: "Spelet kan inte sparas just nu."
 SavingInProgress: "Sparar..."

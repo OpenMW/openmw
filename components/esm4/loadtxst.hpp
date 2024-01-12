@@ -44,6 +44,7 @@ namespace ESM4
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
+        std::string mFilter;
 
         std::string mDiffuse; // includes alpha info
         std::string mNormalMap; // includes specular info (alpha channel)
@@ -51,8 +52,12 @@ namespace ESM4
         std::string mToneMap;
         std::string mDetailMap;
         std::string mEnvMap;
-        std::string mUnknown;
+        std::string mMultiLayer;
         std::string mSpecular;
+        std::string mSmoothSpecular;
+        std::string mLighting;
+        std::string mFlow;
+        std::uint16_t mDataFlags;
         std::string mMaterial;
 
         void load(ESM4::Reader& reader);

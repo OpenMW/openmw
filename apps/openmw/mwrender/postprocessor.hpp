@@ -50,12 +50,13 @@ namespace MWRender
     class PingPongCull;
     class PingPongCanvas;
     class TransparentDepthBinCallback;
+    class DistortionCallback;
 
     class PostProcessor : public osg::Group
     {
     public:
-        using FBOArray = std::array<osg::ref_ptr<osg::FrameBufferObject>, 5>;
-        using TextureArray = std::array<osg::ref_ptr<osg::Texture>, 5>;
+        using FBOArray = std::array<osg::ref_ptr<osg::FrameBufferObject>, 6>;
+        using TextureArray = std::array<osg::ref_ptr<osg::Texture>, 6>;
         using TechniqueList = std::vector<std::shared_ptr<fx::Technique>>;
 
         enum TextureIndex
@@ -64,7 +65,8 @@ namespace MWRender
             Tex_Scene_LDR,
             Tex_Depth,
             Tex_OpaqueDepth,
-            Tex_Normal
+            Tex_Normal,
+            Tex_Distortion,
         };
 
         enum FBOIndex
@@ -73,7 +75,8 @@ namespace MWRender
             FBO_Multisample,
             FBO_FirstPerson,
             FBO_OpaqueDepth,
-            FBO_Intercept
+            FBO_Intercept,
+            FBO_Distortion,
         };
 
         enum TextureUnits
@@ -83,6 +86,7 @@ namespace MWRender
             Unit_Depth,
             Unit_EyeAdaptation,
             Unit_Normals,
+            Unit_Distortion,
             Unit_NextFree
         };
 
@@ -223,6 +227,7 @@ namespace MWRender
         TechniqueList mTechniques;
         TechniqueList mTemplates;
         TechniqueList mQueuedTemplates;
+        TechniqueList mInternalTechniques;
 
         std::unordered_map<std::string, std::filesystem::path> mTechniqueFileMap;
 
@@ -258,6 +263,7 @@ namespace MWRender
         osg::ref_ptr<PingPongCull> mPingPongCull;
         std::array<osg::ref_ptr<PingPongCanvas>, 2> mCanvases;
         osg::ref_ptr<TransparentDepthBinCallback> mTransparentDepthPostPass;
+        osg::ref_ptr<DistortionCallback> mDistortionCallback;
 
         fx::DispatchArray mTemplateData;
     };

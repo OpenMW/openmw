@@ -24,45 +24,64 @@
 #include "creaturestats.hpp"
 #include "magiceffects.hpp"
 
+namespace
+{
+    constexpr size_t sNumEffects = 4;
+
+    std::optional<MWMechanics::EffectKey> toKey(const ESM::Ingredient& ingredient, size_t i)
+    {
+        if (ingredient.mData.mEffectID[i] < 0)
+            return {};
+        ESM::RefId arg = ESM::Skill::indexToRefId(ingredient.mData.mSkills[i]);
+        if (arg.empty())
+            arg = ESM::Attribute::indexToRefId(ingredient.mData.mAttributes[i]);
+        return MWMechanics::EffectKey(ingredient.mData.mEffectID[i], arg);
+    }
+
+    bool containsEffect(const ESM::Ingredient& ingredient, const MWMechanics::EffectKey& effect)
+    {
+        for (size_t j = 0; j < sNumEffects; ++j)
+        {
+            if (toKey(ingredient, j) == effect)
+                return true;
+        }
+        return false;
+    }
+}
+
 MWMechanics::Alchemy::Alchemy()
     : mValue(0)
-    , mPotionName("")
 {
 }
 
-std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
+std::vector<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
 {
-    std::map<EffectKey, int> effects;
-
-    for (TIngredientsIterator iter(mIngredients.begin()); iter != mIngredients.end(); ++iter)
+    // We care about the order of these effects as each effect can affect the next when applied.
+    // The player can affect effect order by placing ingredients into different slots
+    std::vector<EffectKey> effects;
+    for (size_t slotI = 0; slotI < mIngredients.size() - 1; ++slotI)
     {
-        if (!iter->isEmpty())
+        if (mIngredients[slotI].isEmpty())
+            continue;
+        const ESM::Ingredient* ingredient = mIngredients[slotI].get<ESM::Ingredient>()->mBase;
+        for (size_t slotJ = slotI + 1; slotJ < mIngredients.size(); ++slotJ)
         {
-            const MWWorld::LiveCellRef<ESM::Ingredient>* ingredient = iter->get<ESM::Ingredient>();
-
-            std::set<EffectKey> seenEffects;
-
-            for (int i = 0; i < 4; ++i)
-                if (ingredient->mBase->mData.mEffectID[i] != -1)
+            if (mIngredients[slotJ].isEmpty())
+                continue;
+            const ESM::Ingredient* ingredient2 = mIngredients[slotJ].get<ESM::Ingredient>()->mBase;
+            for (size_t i = 0; i < sNumEffects; ++i)
+            {
+                if (const auto key = toKey(*ingredient, i))
                 {
-                    ESM::RefId arg = ESM::Skill::indexToRefId(ingredient->mBase->mData.mSkills[i]);
-                    if (arg.empty())
-                        arg = ESM::Attribute::indexToRefId(ingredient->mBase->mData.mAttributes[i]);
-                    EffectKey key(ingredient->mBase->mData.mEffectID[i], arg);
-
-                    if (seenEffects.insert(key).second)
-                        ++effects[key];
+                    if (std::find(effects.begin(), effects.end(), *key) != effects.end())
+                        continue;
+                    if (containsEffect(*ingredient2, *key))
+                        effects.push_back(*key);
                 }
+            }
         }
     }
-
-    std::set<EffectKey> effects2;
-
-    for (std::map<EffectKey, int>::const_iterator iter(effects.begin()); iter != effects.end(); ++iter)
-        if (iter->second > 1)
-            effects2.insert(iter->first);
-
-    return effects2;
+    return effects;
 }
 
 void MWMechanics::Alchemy::applyTools(int flags, float& value) const
@@ -133,7 +152,7 @@ void MWMechanics::Alchemy::updateEffects()
         return;
 
     // find effects
-    std::set<EffectKey> effects(listEffects());
+    std::vector<EffectKey> effects = listEffects();
 
     // general alchemy factor
     float x = getAlchemyFactor();
@@ -150,14 +169,14 @@ void MWMechanics::Alchemy::updateEffects()
         x * MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("iAlchemyMod")->mValue.getFloat());
 
     // build quantified effect list
-    for (std::set<EffectKey>::const_iterator iter(effects.begin()); iter != effects.end(); ++iter)
+    for (const auto& effectKey : effects)
     {
         const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(iter->mId);
+            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectKey.mId);
 
         if (magicEffect->mData.mBaseCost <= 0)
         {
-            const std::string os = "invalid base cost for magic effect " + std::to_string(iter->mId);
+            const std::string os = "invalid base cost for magic effect " + std::to_string(effectKey.mId);
             throw std::runtime_error(os);
         }
 
@@ -198,15 +217,15 @@ void MWMechanics::Alchemy::updateEffects()
         if (magnitude > 0 && duration > 0)
         {
             ESM::ENAMstruct effect;
-            effect.mEffectID = iter->mId;
+            effect.mEffectID = effectKey.mId;
 
             effect.mAttribute = -1;
             effect.mSkill = -1;
 
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                effect.mSkill = ESM::Skill::refIdToIndex(iter->mArg);
+                effect.mSkill = ESM::Skill::refIdToIndex(effectKey.mArg);
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                effect.mAttribute = ESM::Attribute::refIdToIndex(iter->mArg);
+                effect.mAttribute = ESM::Attribute::refIdToIndex(effectKey.mArg);
 
             effect.mRange = 0;
             effect.mArea = 0;
@@ -241,7 +260,7 @@ const ESM::Potion* MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) co
 
         bool mismatch = false;
 
-        for (int i = 0; i < static_cast<int>(iter->mEffects.mList.size()); ++i)
+        for (size_t i = 0; i < iter->mEffects.mList.size(); ++i)
         {
             const ESM::ENAMstruct& first = iter->mEffects.mList[i];
             const ESM::ENAMstruct& second = mEffects[i];
@@ -270,7 +289,7 @@ void MWMechanics::Alchemy::removeIngredients()
         {
             iter->getContainerStore()->remove(*iter, 1);
 
-            if (iter->getRefData().getCount() < 1)
+            if (iter->getCellRef().getCount() < 1)
                 *iter = MWWorld::Ptr();
         }
 
@@ -350,7 +369,7 @@ int MWMechanics::Alchemy::countPotionsToBrew() const
     for (TIngredientsIterator iter(beginIngredients()); iter != endIngredients(); ++iter)
         if (!iter->isEmpty())
         {
-            int count = iter->getRefData().getCount();
+            int count = iter->getCellRef().getCount();
             if ((count > 0 && count < toBrew) || toBrew < 0)
                 toBrew = count;
         }
@@ -578,7 +597,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::createSingle()
 
 std::string MWMechanics::Alchemy::suggestPotionName()
 {
-    std::set<MWMechanics::EffectKey> effects = listEffects();
+    std::vector<MWMechanics::EffectKey> effects = listEffects();
     if (effects.empty())
         return {};
 
@@ -595,11 +614,11 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
     const static auto fWortChanceValue = store->get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
     const auto& data = item->mData;
 
-    for (auto i = 0; i < 4; ++i)
+    for (size_t i = 0; i < sNumEffects; ++i)
     {
         const auto effectID = data.mEffectID[i];
 
-        if (alchemySkill < fWortChanceValue * (i + 1))
+        if (alchemySkill < fWortChanceValue * static_cast<int>(i + 1))
             break;
 
         if (effectID != -1)

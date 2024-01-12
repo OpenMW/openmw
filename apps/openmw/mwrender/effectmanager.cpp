@@ -52,9 +52,9 @@ namespace MWRender
         node->accept(assignVisitor);
 
         if (isMagicVFX)
-            overrideFirstRootTexture(textureOverride, mResourceSystem, node);
+            overrideFirstRootTexture(textureOverride, mResourceSystem, *node);
         else
-            overrideTexture(textureOverride, mResourceSystem, node);
+            overrideTexture(textureOverride, mResourceSystem, *node);
 
         mParentNode->addChild(trans);
 

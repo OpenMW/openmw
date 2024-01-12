@@ -44,7 +44,7 @@ list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 
 add_component_dir (lua
     luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
-    shapes/box
+    shapes/box inputactions
     )
 
 add_component_dir (l10n
@@ -130,7 +130,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifosg
-    nifloader controller particle matrixtransform
+    nifloader controller particle matrixtransform fog
     )
 
 add_component_dir (nifbullet
@@ -166,7 +166,7 @@ add_component_dir (esm3
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
-    infoorder timestamp formatversion landrecorddata
+    infoorder timestamp formatversion landrecorddata selectiongroup
     )
 
 add_component_dir (esmterrain
@@ -490,7 +490,7 @@ else ()
         )
 endif()
 
-set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
     )
 
 if (USE_QT)

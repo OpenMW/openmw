@@ -151,7 +151,7 @@ namespace MWGui
             if (mIngredients[i]->isUserString("ToolTipType"))
             {
                 MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
-                if (ingred.getRefData().getCount() == 0)
+                if (ingred.getCellRef().getCount() == 0)
                     mAlchemy->removeIngredient(i);
             }
 
@@ -395,8 +395,10 @@ namespace MWGui
     {
         std::string suggestedName = mAlchemy->suggestPotionName();
         if (suggestedName != mSuggestedPotionName)
+        {
             mNameEdit->setCaptionWithReplacing(suggestedName);
-        mSuggestedPotionName = suggestedName;
+            mSuggestedPotionName = std::move(suggestedName);
+        }
 
         mSortModel->clearDragItems();
 
@@ -413,7 +415,7 @@ namespace MWGui
             }
 
             if (!item.isEmpty())
-                mSortModel->addDragItem(item, item.getRefData().getCount());
+                mSortModel->addDragItem(item, item.getCellRef().getCount());
 
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
@@ -428,12 +430,12 @@ namespace MWGui
             ingredient->setUserString("ToolTipType", "ItemPtr");
             ingredient->setUserData(MWWorld::Ptr(item));
 
-            ingredient->setCount(item.getRefData().getCount());
+            ingredient->setCount(item.getCellRef().getCount());
         }
 
         mItemView->update();
 
-        std::set<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
+        std::vector<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
         Widgets::SpellEffectList list;
         unsigned int effectIndex = 0;
         for (const MWMechanics::EffectKey& effectKey : effectIds)

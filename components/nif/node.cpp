@@ -27,6 +27,37 @@ namespace
         mesh.preallocateIndices(static_cast<int>(data.mNumTriangles) * 3);
     }
 
+    void trianglesToBtTriangleMesh(btTriangleMesh& mesh, const std::vector<unsigned short>& triangles)
+    {
+        for (std::size_t i = 0; i < triangles.size(); i += 3)
+            mesh.addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
+    }
+
+    void stripsToBtTriangleMesh(btTriangleMesh& mesh, const std::vector<std::vector<unsigned short>>& strips)
+    {
+        for (const auto& strip : strips)
+        {
+            if (strip.size() < 3)
+                continue;
+
+            unsigned short a;
+            unsigned short b = strip[0];
+            unsigned short c = strip[1];
+            for (size_t i = 2; i < strip.size(); i++)
+            {
+                a = b;
+                b = c;
+                c = strip[i];
+                if (a == b || b == c || a == c)
+                    continue;
+                if (i % 2 == 0)
+                    mesh.addTriangleIndices(a, b, c);
+                else
+                    mesh.addTriangleIndices(a, c, b);
+            }
+        }
+    }
+
 }
 
 namespace Nif
@@ -243,15 +274,33 @@ namespace Nif
         if (mData.empty() || mData->mVertices.empty())
             return nullptr;
 
+        std::vector<const std::vector<unsigned short>*> triangleLists;
+        std::vector<const std::vector<std::vector<unsigned short>>*> stripsLists;
         auto data = static_cast<const NiTriShapeData*>(mData.getPtr());
-        if (data->mNumTriangles == 0 || data->mTriangles.empty())
-            return nullptr;
+        const Nif::NiSkinPartition* partitions = nullptr;
+        if (!mSkin.empty())
+            partitions = mSkin->getPartitions();
 
+        if (partitions)
+        {
+            triangleLists.reserve(partitions->mPartitions.size());
+            stripsLists.reserve(partitions->mPartitions.size());
+            for (auto& partition : partitions->mPartitions)
+            {
+                triangleLists.push_back(&partition.mTrueTriangles);
+                stripsLists.push_back(&partition.mTrueStrips);
+            }
+        }
+        else if (data->mNumTriangles != 0)
+            triangleLists.push_back(&data->mTriangles);
+
+        // This makes a perhaps dangerous assumption that NiSkinPartition will never have more than 65536 triangles.
         auto mesh = std::make_unique<btTriangleMesh>();
         triBasedGeomToBtTriangleMesh(*mesh, *data);
-        const std::vector<unsigned short>& triangles = data->mTriangles;
-        for (std::size_t i = 0; i < triangles.size(); i += 3)
-            mesh->addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
+        for (const auto triangles : triangleLists)
+            trianglesToBtTriangleMesh(*mesh, *triangles);
+        for (const auto strips : stripsLists)
+            stripsToBtTriangleMesh(*mesh, *strips);
 
         if (mesh->getNumTriangles() == 0)
             return nullptr;
@@ -267,33 +316,32 @@ namespace Nif
         if (mData.empty() || mData->mVertices.empty())
             return nullptr;
 
+        std::vector<const std::vector<unsigned short>*> triangleLists;
+        std::vector<const std::vector<std::vector<unsigned short>>*> stripsLists;
         auto data = static_cast<const NiTriStripsData*>(mData.getPtr());
-        if (data->mNumTriangles == 0 || data->mStrips.empty())
-            return nullptr;
+        const Nif::NiSkinPartition* partitions = nullptr;
+        if (!mSkin.empty())
+            partitions = mSkin->getPartitions();
+
+        if (partitions)
+        {
+            triangleLists.reserve(partitions->mPartitions.size());
+            stripsLists.reserve(partitions->mPartitions.size());
+            for (auto& partition : partitions->mPartitions)
+            {
+                triangleLists.push_back(&partition.mTrueTriangles);
+                stripsLists.push_back(&partition.mTrueStrips);
+            }
+        }
+        else if (data->mNumTriangles != 0)
+            stripsLists.push_back(&data->mStrips);
 
         auto mesh = std::make_unique<btTriangleMesh>();
         triBasedGeomToBtTriangleMesh(*mesh, *data);
-        for (const std::vector<unsigned short>& strip : data->mStrips)
-        {
-            if (strip.size() < 3)
-                continue;
-
-            unsigned short a;
-            unsigned short b = strip[0];
-            unsigned short c = strip[1];
-            for (size_t i = 2; i < strip.size(); i++)
-            {
-                a = b;
-                b = c;
-                c = strip[i];
-                if (a == b || b == c || a == c)
-                    continue;
-                if (i % 2 == 0)
-                    mesh->addTriangleIndices(a, b, c);
-                else
-                    mesh->addTriangleIndices(a, c, b);
-            }
-        }
+        for (const auto triangles : triangleLists)
+            trianglesToBtTriangleMesh(*mesh, *triangles);
+        for (const auto strips : stripsLists)
+            stripsToBtTriangleMesh(*mesh, *strips);
 
         if (mesh->getNumTriangles() == 0)
             return nullptr;

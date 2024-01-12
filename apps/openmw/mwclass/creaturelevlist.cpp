@@ -81,7 +81,7 @@ namespace MWClass
         if (!creature.isEmpty())
         {
             const MWMechanics::CreatureStats& creatureStats = creature.getClass().getCreatureStats(creature);
-            if (creature.getRefData().getCount() == 0)
+            if (creature.getCellRef().getCount() == 0)
                 customData.mSpawn = true;
             else if (creatureStats.isDead())
             {

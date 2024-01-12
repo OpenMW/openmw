@@ -58,9 +58,9 @@ bool Wizard::ExistingInstallationPage::validatePage()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Cancel);
         msgBox.setText(
-            QObject::tr("<br><b>Could not find Morrowind.ini</b><br><br> \
-                                   The Wizard needs to update settings in this file.<br><br> \
-                                   Press \"Browse...\" to specify the location manually.<br>"));
+            QObject::tr("<br><b>Could not find Morrowind.ini</b><br><br>"
+                        "The Wizard needs to update settings in this file.<br><br>"
+                        "Press \"Browse...\" to specify the location manually.<br>"));
 
         QAbstractButton* browseButton2 = msgBox.addButton(QObject::tr("B&rowse..."), QMessageBox::ActionRole);
 
@@ -107,8 +107,8 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            QObject::tr("<b>Morrowind.bsa</b> is missing!<br>\
-            Make sure your Morrowind installation is complete."));
+            QObject::tr("<b>Morrowind.bsa</b> is missing!<br>"
+                        "Make sure your Morrowind installation is complete."));
         msgBox.exec();
         return;
     }
@@ -187,8 +187,8 @@ bool Wizard::ExistingInstallationPage::versionIsOK(QString directory_name)
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         msgBox.setText(
-            QObject::tr("<br><b>There may be a more recent version of Morrowind available.</b><br><br>\
-                              Do you wish to continue anyway?<br>"));
+            QObject::tr("<br><b>There may be a more recent version of Morrowind available.</b><br><br>"
+                        "Do you wish to continue anyway?<br>"));
         int ret = msgBox.exec();
         if (ret == QMessageBox::Yes)
         {

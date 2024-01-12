@@ -43,6 +43,8 @@
 #include <components/esm4/loadtree.hpp>
 #include <components/esm4/loadweap.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/worldmodel.hpp"
 
@@ -121,7 +123,7 @@ namespace MWLua
                     cell.mStore->load();
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
-                    if (ptr.getRefData().isDeleted())
+                    if (ptr.mRef->isDeleted())
                         return true;
                     MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     if (getLiveCellRefType(ptr.mRef) == ptr.getType())

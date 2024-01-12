@@ -194,7 +194,8 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     // Get a stream for the file to extract
     for (auto it = bsa->getList().rbegin(); it != bsa->getList().rend(); ++it)
     {
-        if (Misc::StringUtils::ciEqual(Misc::StringUtils::stringToU8String(it->name()), archivePath))
+        auto streamPath = Misc::StringUtils::stringToU8String(it->name());
+        if (Misc::StringUtils::ciEqual(streamPath, archivePath) || Misc::StringUtils::ciEqual(streamPath, extractPath))
         {
             stream = bsa->getFile(&*it);
             break;

@@ -180,7 +180,6 @@ namespace MWWorld
         , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
         , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
         , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
-        , mThunderSoundID()
         , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
         , mFlashBrightness(0.0f)
     {
@@ -195,21 +194,19 @@ namespace MWWorld
         mThunderSoundID[3]
             = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3"));
 
-        // TODO: support weathers that have both "Ambient Loop Sound ID" and "Rain Loop Sound ID", need to play both
-        // sounds at the same time.
-
         if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing
                                   // Using_Precip has no effect
         {
-            mAmbientLoopSoundID
+            mRainLoopSoundID
                 = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID"));
-            if (mAmbientLoopSoundID.empty()) // default to "rain" if not set
-                mAmbientLoopSoundID = ESM::RefId::stringRefId("rain");
+            if (mRainLoopSoundID.empty()) // default to "rain" if not set
+                mRainLoopSoundID = ESM::RefId::stringRefId("rain");
+            else if (mRainLoopSoundID == "None")
+                mRainLoopSoundID = ESM::RefId();
         }
-        else
-            mAmbientLoopSoundID
-                = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
 
+        mAmbientLoopSoundID
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
         if (mAmbientLoopSoundID == "None")
             mAmbientLoopSoundID = ESM::RefId();
     }
@@ -552,8 +549,6 @@ namespace MWWorld
         , mQueuedWeather(0)
         , mRegions()
         , mResult()
-        , mAmbientSound(nullptr)
-        , mPlayingSoundID()
     {
         mTimeSettings.mNightStart = mSunsetTime + mSunsetDuration;
         mTimeSettings.mNightEnd = mSunriseTime;
@@ -794,24 +789,62 @@ namespace MWWorld
         mRendering.getSkyManager()->setWeather(mResult);
 
         // Play sounds
-        if (mPlayingSoundID != mResult.mAmbientLoopSoundID)
+        if (mPlayingAmbientSoundID != mResult.mAmbientLoopSoundID)
         {
-            stopSounds();
+            if (mAmbientSound)
+            {
+                MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
+                mAmbientSound = nullptr;
+            }
             if (!mResult.mAmbientLoopSoundID.empty())
                 mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mAmbientLoopSoundID,
                     mResult.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingSoundID = mResult.mAmbientLoopSoundID;
+            mPlayingAmbientSoundID = mResult.mAmbientLoopSoundID;
         }
         else if (mAmbientSound)
             mAmbientSound->setVolume(mResult.mAmbientSoundVolume);
+
+        if (mPlayingRainSoundID != mResult.mRainLoopSoundID)
+        {
+            if (mRainSound)
+            {
+                MWBase::Environment::get().getSoundManager()->stopSound(mRainSound);
+                mRainSound = nullptr;
+            }
+            if (!mResult.mRainLoopSoundID.empty())
+                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mRainLoopSoundID,
+                    mResult.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
+            mPlayingRainSoundID = mResult.mRainLoopSoundID;
+        }
+        else if (mRainSound)
+            mRainSound->setVolume(mResult.mAmbientSoundVolume);
     }
 
     void WeatherManager::stopSounds()
     {
+        MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         if (mAmbientSound)
-            MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
-        mAmbientSound = nullptr;
-        mPlayingSoundID = ESM::RefId();
+        {
+            sndMgr->stopSound(mAmbientSound);
+            mAmbientSound = nullptr;
+        }
+        mPlayingAmbientSoundID = ESM::RefId();
+
+        if (mRainSound)
+        {
+            sndMgr->stopSound(mRainSound);
+            mRainSound = nullptr;
+        }
+        mPlayingRainSoundID = ESM::RefId();
+
+        for (ESM::RefId soundId : mWeatherSettings[mCurrentWeather].mThunderSoundID)
+            if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
+
+        if (inTransition())
+            for (ESM::RefId soundId : mWeatherSettings[mNextWeather].mThunderSoundID)
+                if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                    sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
     }
 
     float WeatherManager::getWindSpeed() const
@@ -898,36 +931,27 @@ namespace MWWorld
     {
         if (ESM::REC_WTHR == type)
         {
-            if (reader.getFormatVersion() <= ESM::MaxOldWeatherFormatVersion)
+            ESM::WeatherState state;
+            state.load(reader);
+
+            std::swap(mCurrentRegion, state.mCurrentRegion);
+            mTimePassed = state.mTimePassed;
+            mFastForward = state.mFastForward;
+            mWeatherUpdateTime = state.mWeatherUpdateTime;
+            mTransitionFactor = state.mTransitionFactor;
+            mCurrentWeather = state.mCurrentWeather;
+            mNextWeather = state.mNextWeather;
+            mQueuedWeather = state.mQueuedWeather;
+
+            mRegions.clear();
+            importRegions();
+
+            for (auto it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
             {
-                // Weather state isn't really all that important, so to preserve older save games, we'll just discard
-                // the older weather records, rather than fail to handle the record.
-                reader.skipRecord();
-            }
-            else
-            {
-                ESM::WeatherState state;
-                state.load(reader);
-
-                std::swap(mCurrentRegion, state.mCurrentRegion);
-                mTimePassed = state.mTimePassed;
-                mFastForward = state.mFastForward;
-                mWeatherUpdateTime = state.mWeatherUpdateTime;
-                mTransitionFactor = state.mTransitionFactor;
-                mCurrentWeather = state.mCurrentWeather;
-                mNextWeather = state.mNextWeather;
-                mQueuedWeather = state.mQueuedWeather;
-
-                mRegions.clear();
-                importRegions();
-
-                for (auto it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
+                auto found = mRegions.find(it->first);
+                if (found != mRegions.end())
                 {
-                    auto found = mRegions.find(it->first);
-                    if (found != mRegions.end())
-                    {
-                        found->second = RegionWeather(it->second);
-                    }
+                    found->second = RegionWeather(it->second);
                 }
             }
 
@@ -1127,6 +1151,7 @@ namespace MWWorld
         mResult.mCloudSpeed = current.mCloudSpeed;
         mResult.mGlareView = current.mGlareView;
         mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+        mResult.mRainLoopSoundID = current.mRainLoopSoundID;
         mResult.mAmbientSoundVolume = 1.f;
         mResult.mPrecipitationAlpha = 1.f;
 
@@ -1246,6 +1271,7 @@ namespace MWWorld
             mResult.mAmbientSoundVolume = 1.f - factor / threshold;
             mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
             mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+            mResult.mRainLoopSoundID = current.mRainLoopSoundID;
             mResult.mRainDiameter = current.mRainDiameter;
             mResult.mRainMinHeight = current.mRainMinHeight;
             mResult.mRainMaxHeight = current.mRainMaxHeight;
@@ -1261,6 +1287,7 @@ namespace MWWorld
             mResult.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
             mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
             mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+            mResult.mRainLoopSoundID = other.mRainLoopSoundID;
 
             mResult.mRainDiameter = other.mRainDiameter;
             mResult.mRainMinHeight = other.mRainMinHeight;

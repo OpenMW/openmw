@@ -7,7 +7,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/worldmodel.hpp"
 
 namespace sol
@@ -55,8 +54,6 @@ namespace MWLua
                 return sol::make_object(lua, LCell{ &cell });
         };
 
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM::Door>(door, context);
 
         sol::usertype<ESM::Door> record = context.mLua->sol().new_usertype<ESM::Door>("ESM3_Door");
@@ -65,9 +62,8 @@ namespace MWLua
         record["id"]
             = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Door& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
-        });
+        record["model"] = sol::readonly_property(
+            [](const ESM::Door& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
         record["mwscript"]
             = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mScript.serializeText(); });
         record["openSound"] = sol::readonly_property(
@@ -95,8 +91,6 @@ namespace MWLua
                 return sol::make_object(lua, LCell{ &cell });
         };
 
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM4::Door>(door, context, "ESM4Door");
 
         sol::usertype<ESM4::Door> record = context.mLua->sol().new_usertype<ESM4::Door>("ESM4_Door");
@@ -106,9 +100,8 @@ namespace MWLua
         record["id"] = sol::readonly_property(
             [](const ESM4::Door& rec) -> std::string { return ESM::RefId(rec.mId).serializeText(); });
         record["name"] = sol::readonly_property([](const ESM4::Door& rec) -> std::string { return rec.mFullName; });
-        record["model"] = sol::readonly_property([vfs](const ESM4::Door& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
-        });
+        record["model"] = sol::readonly_property(
+            [](const ESM4::Door& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
         record["isAutomatic"] = sol::readonly_property(
             [](const ESM4::Door& rec) -> bool { return rec.mDoorFlags & ESM4::Door::Flag_AutomaticDoor; });
     }

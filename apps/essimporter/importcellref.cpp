@@ -1,6 +1,7 @@
 #include "importcellref.hpp"
 
 #include <components/esm3/esmreader.hpp>
+#include <cstdint>
 
 namespace ESSImport
 {
@@ -44,19 +45,14 @@ namespace ESSImport
         bool isDeleted = false;
         ESM::CellRef::loadData(esm, isDeleted);
 
-        mActorData.mHasACDT = false;
-        if (esm.isNextSub("ACDT"))
-        {
-            mActorData.mHasACDT = true;
-            esm.getHTSized<264>(mActorData.mACDT);
-        }
+        mActorData.mHasACDT
+            = esm.getHNOT("ACDT", mActorData.mACDT.mUnknown, mActorData.mACDT.mFlags, mActorData.mACDT.mBreathMeter,
+                mActorData.mACDT.mUnknown2, mActorData.mACDT.mDynamic, mActorData.mACDT.mUnknown3,
+                mActorData.mACDT.mAttributes, mActorData.mACDT.mMagicEffects, mActorData.mACDT.mUnknown4,
+                mActorData.mACDT.mGoldPool, mActorData.mACDT.mCountDown, mActorData.mACDT.mUnknown5);
 
-        mActorData.mHasACSC = false;
-        if (esm.isNextSub("ACSC"))
-        {
-            mActorData.mHasACSC = true;
-            esm.getHTSized<112>(mActorData.mACSC);
-        }
+        mActorData.mHasACSC = esm.getHNOT("ACSC", mActorData.mACSC.mUnknown1, mActorData.mACSC.mFlags,
+            mActorData.mACSC.mUnknown2, mActorData.mACSC.mCorpseClearCountdown, mActorData.mACSC.mUnknown3);
 
         if (esm.isNextSub("ACSL"))
             esm.skipHSubSize(112);
@@ -122,23 +118,17 @@ namespace ESSImport
         }
 
         // FIXME: not all actors have this, add flag
-        if (esm.isNextSub("CHRD")) // npc only
-            esm.getHExact(mActorData.mSkills, 27 * 2 * sizeof(int));
+        esm.getHNOT("CHRD", mActorData.mSkills); // npc only
 
-        if (esm.isNextSub("CRED")) // creature only
-            esm.getHExact(mActorData.mCombatStats, 3 * 2 * sizeof(int));
+        esm.getHNOT("CRED", mActorData.mCombatStats); // creature only
 
         mActorData.mSCRI.load(esm);
 
         if (esm.isNextSub("ND3D"))
             esm.skipHSub();
 
-        mActorData.mHasANIS = false;
-        if (esm.isNextSub("ANIS"))
-        {
-            mActorData.mHasANIS = true;
-            esm.getHTSized<8>(mActorData.mANIS);
-        }
+        mActorData.mHasANIS
+            = esm.getHNOT("ANIS", mActorData.mANIS.mGroupIndex, mActorData.mANIS.mUnknown, mActorData.mANIS.mTime);
 
         if (esm.isNextSub("LVCR"))
         {
@@ -155,13 +145,13 @@ namespace ESSImport
         // DATA should occur for all references, except levelled creature spawners
         // I've seen DATA *twice* on a creature record, and with the exact same content too! weird
         // alarmvoi0000.ess
-        esm.getHNOTSized<24>(mPos, "DATA");
-        esm.getHNOTSized<24>(mPos, "DATA");
+        for (int i = 0; i < 2; ++i)
+            esm.getHNOT("DATA", mPos.pos, mPos.rot);
 
         mDeleted = 0;
         if (esm.isNextSub("DELE"))
         {
-            unsigned int deleted;
+            uint32_t deleted;
             esm.getHT(deleted);
             mDeleted = ((deleted >> 24) & 0x2) != 0; // the other 3 bytes seem to be uninitialized garbage
         }

@@ -333,6 +333,37 @@ namespace CSMWorld
         return true;
     }
 
+    SelectionGroupColumn::SelectionGroupColumn()
+        : Column<ESM::SelectionGroup>(Columns::ColumnId_SelectionGroupObjects, ColumnBase::Display_None)
+    {
+    }
+
+    QVariant SelectionGroupColumn::get(const Record<ESM::SelectionGroup>& record) const
+    {
+        QVariant data;
+        QStringList selectionInfo;
+        const std::vector<std::string>& instances = record.get().selectedInstances;
+
+        for (const std::string& instance : instances)
+            selectionInfo << QString::fromStdString(instance);
+        data.setValue(selectionInfo);
+
+        return data;
+    }
+
+    void SelectionGroupColumn::set(Record<ESM::SelectionGroup>& record, const QVariant& data)
+    {
+        ESM::SelectionGroup record2 = record.get();
+        for (const auto& item : data.toStringList())
+            record2.selectedInstances.push_back(item.toStdString());
+        record.setModified(record2);
+    }
+
+    bool SelectionGroupColumn::isEditable() const
+    {
+        return false;
+    }
+
     std::optional<std::uint32_t> getSkillIndex(std::string_view value)
     {
         int index = ESM::Skill::refIdToIndex(ESM::RefId::stringRefId(value));

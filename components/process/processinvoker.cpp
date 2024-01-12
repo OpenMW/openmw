@@ -76,9 +76,9 @@ bool Process::ProcessInvoker::startProcess(const QString& name, const QStringLis
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not find %1</b></p> \
-                          <p>The application is not found.</p> \
-                          <p>Please make sure OpenMW is installed correctly and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>Could not find %1</b></p>"
+               "<p>The application is not found.</p>"
+               "<p>Please make sure OpenMW is installed correctly and try again.</p></body></html>")
                 .arg(info.fileName()));
         msgBox.exec();
         return false;
@@ -91,9 +91,9 @@ bool Process::ProcessInvoker::startProcess(const QString& name, const QStringLis
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not start %1</b></p> \
-                          <p>The application is not executable.</p> \
-                          <p>Please make sure you have the right permissions and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>Could not start %1</b></p>"
+               "<p>The application is not executable.</p>"
+               "<p>Please make sure you have the right permissions and try again.</p></body></html>")
                 .arg(info.fileName()));
         msgBox.exec();
         return false;
@@ -109,9 +109,9 @@ bool Process::ProcessInvoker::startProcess(const QString& name, const QStringLis
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<html><head/><body><p><b>Could not start %1</b></p> \
-                              <p>An error occurred while starting %1.</p> \
-                              <p>Press \"Show Details...\" for more information.</p></body></html>")
+                tr("<html><head/><body><p><b>Could not start %1</b></p>"
+                   "<p>An error occurred while starting %1.</p>"
+                   "<p>Press \"Show Details...\" for more information.</p></body></html>")
                     .arg(info.fileName()));
             msgBox.setDetailedText(mProcess->errorString());
             msgBox.exec();
@@ -168,9 +168,9 @@ void Process::ProcessInvoker::processError(QProcess::ProcessError error)
     msgBox.setIcon(QMessageBox::Critical);
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setText(
-        tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
-                      <p>An error occurred while running %1.</p> \
-                      <p>Press \"Show Details...\" for more information.</p></body></html>")
+        tr("<html><head/><body><p><b>Executable %1 returned an error</b></p>"
+           "<p>An error occurred while running %1.</p>"
+           "<p>Press \"Show Details...\" for more information.</p></body></html>")
             .arg(mName));
     msgBox.setDetailedText(mProcess->errorString());
     msgBox.exec();
@@ -191,9 +191,9 @@ void Process::ProcessInvoker::processFinished(int exitCode, QProcess::ExitStatus
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
-                          <p>An error occurred while running %1.</p> \
-                          <p>Press \"Show Details...\" for more information.</p></body></html>")
+            tr("<html><head/><body><p><b>Executable %1 returned an error</b></p>"
+               "<p>An error occurred while running %1.</p>"
+               "<p>Press \"Show Details...\" for more information.</p></body></html>")
                 .arg(mName));
         msgBox.setDetailedText(error);
         msgBox.exec();

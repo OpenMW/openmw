@@ -11,7 +11,8 @@ static const std::set<std::string_view> allowedKeysInt = { "LightAttenuation_Lin
     "Water_RippleFrameCount", "Water_SurfaceTileCount", "Water_SurfaceFrameCount", "Weather_Clear_Using_Precip",
     "Weather_Cloudy_Using_Precip", "Weather_Foggy_Using_Precip", "Weather_Overcast_Using_Precip",
     "Weather_Rain_Using_Precip", "Weather_Thunderstorm_Using_Precip", "Weather_Ashstorm_Using_Precip",
-    "Weather_Blight_Using_Precip", "Weather_Snow_Using_Precip", "Weather_Blizzard_Using_Precip" };
+    "Weather_Blight_Using_Precip", "Weather_Snow_Using_Precip", "Weather_Blizzard_Using_Precip", "Weather_Rain_Ripples",
+    "Weather_Snow_Ripples" };
 
 static const std::set<std::string_view> allowedKeysFloat = { "General_Werewolf_FOV", "Inventory_DirectionalAmbientB",
     "Inventory_DirectionalAmbientG", "Inventory_DirectionalAmbientR", "Inventory_DirectionalDiffuseB",
@@ -160,7 +161,7 @@ static const std::set<std::string_view> allowedKeysNonNumeric = { "Blood_Model_0
     "Weather_Rain_Ambient_Sunrise_Color", "Weather_Rain_Ambient_Sunset_Color", "Weather_Rain_Cloud_Texture",
     "Weather_Rain_Fog_Day_Color", "Weather_Rain_Fog_Night_Color", "Weather_Rain_Fog_Sunrise_Color",
     "Weather_Rain_Fog_Sunset_Color", "Weather_Rain_Rain_Loop_Sound_ID", "Weather_Rain_Ripple_Radius",
-    "Weather_Rain_Ripples", "Weather_Rain_Ripple_Scale", "Weather_Rain_Ripple_Speed", "Weather_Rain_Ripples_Per_Drop",
+    "Weather_Rain_Ripple_Scale", "Weather_Rain_Ripple_Speed", "Weather_Rain_Ripples_Per_Drop",
     "Weather_Rain_Sky_Day_Color", "Weather_Rain_Sky_Night_Color", "Weather_Rain_Sky_Sunrise_Color",
     "Weather_Rain_Sky_Sunset_Color", "Weather_Rain_Sun_Day_Color", "Weather_Rain_Sun_Disc_Sunset_Color",
     "Weather_Rain_Sun_Night_Color", "Weather_Rain_Sun_Sunrise_Color", "Weather_Rain_Sun_Sunset_Color",
@@ -168,7 +169,7 @@ static const std::set<std::string_view> allowedKeysNonNumeric = { "Blood_Model_0
     "Weather_Snow_Ambient_Sunrise_Color", "Weather_Snow_Ambient_Sunset_Color", "Weather_Snow_Cloud_Texture",
     "Weather_Snow_Fog_Day_Color", "Weather_Snow_Fog_Night_Color", "Weather_Snow_Fog_Sunrise_Color",
     "Weather_Snow_Fog_Sunset_Color", "Weather_Snow_Gravity_Scale", "Weather_Snow_High_Kill", "Weather_Snow_Low_Kill",
-    "Weather_Snow_Max_Snowflakes", "Weather_Snow_Ripple_Radius", "Weather_Snow_Ripples", "Weather_Snow_Ripple_Scale",
+    "Weather_Snow_Max_Snowflakes", "Weather_Snow_Ripple_Radius", "Weather_Snow_Ripple_Scale",
     "Weather_Snow_Ripple_Speed", "Weather_Snow_Ripples_Per_Flake", "Weather_Snow_Sky_Day_Color",
     "Weather_Snow_Sky_Night_Color", "Weather_Snow_Sky_Sunrise_Color", "Weather_Snow_Sky_Sunset_Color",
     "Weather_Snow_Snow_Diameter", "Weather_Snow_Snow_Entrance_Speed", "Weather_Snow_Snow_Height_Max",

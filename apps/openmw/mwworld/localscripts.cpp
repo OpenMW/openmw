@@ -24,7 +24,7 @@ namespace
 
         bool operator()(const MWWorld::Ptr& ptr)
         {
-            if (ptr.getRefData().isDeleted())
+            if (ptr.mRef->isDeleted())
                 return true;
 
             const ESM::RefId& script = ptr.getClass().getScript(ptr);
@@ -152,10 +152,10 @@ void MWWorld::LocalScripts::clearCell(CellStore* cell)
     }
 }
 
-void MWWorld::LocalScripts::remove(RefData* ref)
+void MWWorld::LocalScripts::remove(const MWWorld::CellRef* ref)
 {
     for (auto iter = mScripts.begin(); iter != mScripts.end(); ++iter)
-        if (&(iter->second.getRefData()) == ref)
+        if (&(iter->second.getCellRef()) == ref)
         {
             if (iter == mIter)
                 ++mIter;

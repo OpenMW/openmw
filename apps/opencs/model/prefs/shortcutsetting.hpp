@@ -2,6 +2,7 @@
 #define CSM_PREFS_SHORTCUTSETTING_H
 
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <QKeySequence>
@@ -17,14 +18,16 @@ class QWidget;
 namespace CSMPrefs
 {
     class Category;
-    class ShortcutSetting : public Setting
+
+    class ShortcutSetting final : public TypedSetting<std::string>
     {
         Q_OBJECT
 
     public:
-        ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label);
+        explicit ShortcutSetting(
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

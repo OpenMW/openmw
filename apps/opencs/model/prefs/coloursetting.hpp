@@ -6,6 +6,7 @@
 #include <QColor>
 
 #include <string>
+#include <string_view>
 #include <utility>
 
 class QMutex;
@@ -20,22 +21,22 @@ namespace CSVWidget
 namespace CSMPrefs
 {
     class Category;
-    class ColourSetting : public Setting
+
+    class ColourSetting final : public TypedSetting<std::string>
     {
         Q_OBJECT
 
         std::string mTooltip;
-        QColor mDefault;
         CSVWidget::ColorEditor* mWidget;
 
     public:
-        ColourSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const std::string& label, QColor default_);
+        explicit ColourSetting(
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
         ColourSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

@@ -12,8 +12,8 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwclass/esm4npc.hpp"
-#include "../mwworld/customdata.hpp"
 #include "../mwworld/esmstore.hpp"
 
 namespace MWRender
@@ -28,11 +28,13 @@ namespace MWRender
 
     void ESM4NpcAnimation::updateParts()
     {
-        if (!mObjectRoot.get())
+        if (mObjectRoot == nullptr)
             return;
         const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
+        if (traits == nullptr)
+            return;
         if (traits->mIsTES4)
-            updatePartsTES4();
+            updatePartsTES4(*traits);
         else if (traits->mIsFONV)
         {
             // Not implemented yet
@@ -42,7 +44,7 @@ namespace MWRender
             // There is no easy way to distinguish TES5 and FO3.
             // In case of FO3 the function shouldn't crash the game and will
             // only lead to the NPC not being rendered.
-            updatePartsTES5();
+            updatePartsTES5(*traits);
         }
     }
 
@@ -51,7 +53,7 @@ namespace MWRender
         if (model.empty())
             return;
         mResourceSystem->getSceneManager()->getInstance(
-            Misc::ResourceHelpers::correctMeshPath(model, mResourceSystem->getVFS()), mObjectRoot.get());
+            Misc::ResourceHelpers::correctMeshPath(model), mObjectRoot.get());
     }
 
     template <class Record>
@@ -65,9 +67,8 @@ namespace MWRender
             return rec->mModel;
     }
 
-    void ESM4NpcAnimation::updatePartsTES4()
+    void ESM4NpcAnimation::updatePartsTES4(const ESM4::Npc& traits)
     {
-        const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
         const ESM4::Race* race = MWClass::ESM4Npc::getRace(mPtr);
         bool isFemale = MWClass::ESM4Npc::isFemale(mPtr);
 
@@ -77,13 +78,13 @@ namespace MWRender
             insertPart(bodyPart.mesh);
         for (const ESM4::Race::BodyPart& bodyPart : race->mHeadParts)
             insertPart(bodyPart.mesh);
-        if (!traits->mHair.isZeroOrUnset())
+        if (!traits.mHair.isZeroOrUnset())
         {
             const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
-            if (const ESM4::Hair* hair = store->get<ESM4::Hair>().search(traits->mHair))
+            if (const ESM4::Hair* hair = store->get<ESM4::Hair>().search(traits.mHair))
                 insertPart(hair->mModel);
             else
-                Log(Debug::Error) << "Hair not found: " << ESM::RefId(traits->mHair);
+                Log(Debug::Error) << "Hair not found: " << ESM::RefId(traits.mHair);
         }
 
         for (const ESM4::Armor* armor : MWClass::ESM4Npc::getEquippedArmor(mPtr))
@@ -111,11 +112,10 @@ namespace MWRender
         }
     }
 
-    void ESM4NpcAnimation::updatePartsTES5()
+    void ESM4NpcAnimation::updatePartsTES5(const ESM4::Npc& traits)
     {
         const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
 
-        const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
         const ESM4::Race* race = MWClass::ESM4Npc::getRace(mPtr);
         bool isFemale = MWClass::ESM4Npc::isFemale(mPtr);
 
@@ -132,9 +132,9 @@ namespace MWRender
                     Log(Debug::Error) << "ArmorAddon not found: " << ESM::RefId(armaId);
                     continue;
                 }
-                bool compatibleRace = arma->mRacePrimary == traits->mRace;
+                bool compatibleRace = arma->mRacePrimary == traits.mRace;
                 for (auto r : arma->mRaces)
-                    if (r == traits->mRace)
+                    if (r == traits.mRace)
                         compatibleRace = true;
                 if (compatibleRace)
                     armorAddons.push_back(arma);
@@ -143,12 +143,12 @@ namespace MWRender
 
         for (const ESM4::Armor* armor : MWClass::ESM4Npc::getEquippedArmor(mPtr))
             findArmorAddons(armor);
-        if (!traits->mWornArmor.isZeroOrUnset())
+        if (!traits.mWornArmor.isZeroOrUnset())
         {
-            if (const ESM4::Armor* armor = store->get<ESM4::Armor>().search(traits->mWornArmor))
+            if (const ESM4::Armor* armor = store->get<ESM4::Armor>().search(traits.mWornArmor))
                 findArmorAddons(armor);
             else
-                Log(Debug::Error) << "Worn armor not found: " << ESM::RefId(traits->mWornArmor);
+                Log(Debug::Error) << "Worn armor not found: " << ESM::RefId(traits.mWornArmor);
         }
         if (!race->mSkin.isZeroOrUnset())
         {
@@ -183,7 +183,7 @@ namespace MWRender
         std::set<uint32_t> usedHeadPartTypes;
         if (usedParts & ESM4::Armor::TES5_Hair)
             usedHeadPartTypes.insert(ESM4::HeadPart::Type_Hair);
-        insertHeadParts(traits->mHeadParts, usedHeadPartTypes);
+        insertHeadParts(traits.mHeadParts, usedHeadPartTypes);
         insertHeadParts(isFemale ? race->mHeadPartIdsFemale : race->mHeadPartIdsMale, usedHeadPartTypes);
     }
 }

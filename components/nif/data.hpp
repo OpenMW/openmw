@@ -208,6 +208,8 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+
+        const Nif::NiSkinPartition* getPartitions() const;
     };
 
     struct BSDismemberSkinInstance : public NiSkinInstance

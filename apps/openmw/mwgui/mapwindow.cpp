@@ -300,11 +300,9 @@ namespace MWGui
         return MyGUI::IntCoord(position.left - halfMarkerSize, position.top - halfMarkerSize, markerSize, markerSize);
     }
 
-    MyGUI::Widget* LocalMapBase::createDoorMarker(
-        const std::string& name, const MyGUI::VectorString& notes, float x, float y) const
+    MyGUI::Widget* LocalMapBase::createDoorMarker(const std::string& name, float x, float y) const
     {
         MarkerUserData data(mLocalMapRender);
-        data.notes = notes;
         data.caption = name;
         MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>(
             "MarkerButton", getMarkerCoordinates(x, y, data, 8), MyGUI::Align::Default);
@@ -662,8 +660,9 @@ namespace MWGui
             MarkerUserData* data;
             if (mDoorMarkersToRecycle.empty())
             {
-                markerWidget = createDoorMarker(marker.name, destNotes, marker.x, marker.y);
+                markerWidget = createDoorMarker(marker.name, marker.x, marker.y);
                 data = markerWidget->getUserData<MarkerUserData>();
+                data->notes = std::move(destNotes);
                 doorMarkerCreated(markerWidget);
             }
             else
@@ -672,7 +671,7 @@ namespace MWGui
                 mDoorMarkersToRecycle.pop_back();
 
                 data = markerWidget->getUserData<MarkerUserData>();
-                data->notes = destNotes;
+                data->notes = std::move(destNotes);
                 data->caption = marker.name;
                 markerWidget->setCoord(getMarkerCoordinates(marker.x, marker.y, *data, 8));
                 markerWidget->setVisible(true);

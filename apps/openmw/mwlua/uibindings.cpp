@@ -47,7 +47,6 @@ namespace MWLua
         }
 
         const std::unordered_map<MWGui::GuiMode, std::string_view> modeToName{
-            { MWGui::GM_Settings, "SettingsMenu" },
             { MWGui::GM_Inventory, "Interface" },
             { MWGui::GM_Container, "Container" },
             { MWGui::GM_Companion, "Companion" },
@@ -162,8 +161,8 @@ namespace MWLua
         api["_getMenuTransparency"] = []() -> float { return Settings::gui().mMenuTransparency; };
 
         auto uiLayer = context.mLua->sol().new_usertype<LuaUi::Layer>("UiLayer");
-        uiLayer["name"] = sol::property([](LuaUi::Layer& self) { return self.name(); });
-        uiLayer["size"] = sol::property([](LuaUi::Layer& self) { return self.size(); });
+        uiLayer["name"] = sol::readonly_property([](LuaUi::Layer& self) -> std::string_view { return self.name(); });
+        uiLayer["size"] = sol::readonly_property([](LuaUi::Layer& self) { return self.size(); });
         uiLayer[sol::meta_function::to_string]
             = [](LuaUi::Layer& self) { return Misc::StringUtils::format("UiLayer(%s)", self.name()); };
 

@@ -150,7 +150,7 @@ namespace MWMechanics
 
         DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
 
-        DetourNavigator::AreaCosts getAreaCosts(const MWWorld::Ptr& actor) const;
+        DetourNavigator::AreaCosts getAreaCosts(const MWWorld::Ptr& actor, DetourNavigator::Flags flags) const;
 
         const AiPackageTypeId mTypeId;
         const Options mOptions;

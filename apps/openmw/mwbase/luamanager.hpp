@@ -29,6 +29,14 @@ namespace ESM
     struct LuaScripts;
 }
 
+namespace LuaUtil
+{
+    namespace InputAction
+    {
+        class Registry;
+    }
+}
+
 namespace MWBase
 {
     // \brief LuaManager is the central interface through which the engine invokes lua scripts.
@@ -53,6 +61,7 @@ namespace MWBase
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
         virtual void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
+        virtual void actorDied(const MWWorld::Ptr& actor) = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
 
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
@@ -60,7 +69,8 @@ namespace MWBase
 
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,
-        //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) = 0;
+        //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful,
+        //                          DamageSourceType sourceType) = 0;
 
         struct InputEvent
         {

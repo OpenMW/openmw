@@ -769,8 +769,13 @@ namespace MWLua
             sol::state_view lua(ts);
             self.reset();
             return sol::as_function([lua, self]() mutable -> std::pair<sol::object, sol::object> {
-                if (!self.isEnd())
+                while (!self.isEnd())
                 {
+                    if (self.mIterator->second.getBase() == 0 && self.mIterator->second.getModifier() == 0.f)
+                    {
+                        self.advance();
+                        continue;
+                    }
                     ActiveEffect effect = ActiveEffect{ self.mIterator->first, self.mIterator->second };
                     auto result = sol::make_object(lua, effect);
 
@@ -778,10 +783,7 @@ namespace MWLua
                     self.advance();
                     return { key, result };
                 }
-                else
-                {
-                    return { sol::lua_nil, sol::lua_nil };
-                }
+                return { sol::lua_nil, sol::lua_nil };
             });
         };
 
@@ -823,7 +825,7 @@ namespace MWLua
             if (auto* store = effects.getStore())
                 if (auto effect = store->get(key))
                     return ActiveEffect{ key, effect.value() };
-            return sol::nullopt;
+            return ActiveEffect{ key, MWMechanics::EffectParam() };
         };
 
         // types.Actor.activeEffects(o):removeEffect(id, ?arg)
@@ -839,7 +841,7 @@ namespace MWLua
 
             // Note that, although this is member method of ActorActiveEffects and we are removing an effect (not a
             // spell), we still need to use the active spells store to purge this effect from active spells.
-            auto ptr = effects.mActor.ptr();
+            const auto& ptr = effects.mActor.ptr();
 
             auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
             activeSpells.purgeEffect(ptr, key.mId, key.mArg);

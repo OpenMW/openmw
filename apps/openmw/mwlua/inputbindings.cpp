@@ -4,6 +4,7 @@
 #include <SDL_gamecontroller.h>
 #include <SDL_mouse.h>
 
+#include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/sdlutil/events.hpp>
 
@@ -11,11 +12,22 @@
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwinput/actions.hpp"
+#include "luamanagerimp.hpp"
 
 namespace sol
 {
     template <>
     struct is_automagical<SDL_Keysym> : std::false_type
+    {
+    };
+
+    template <>
+    struct is_automagical<LuaUtil::InputAction::Info> : std::false_type
+    {
+    };
+
+    template <>
+    struct is_automagical<LuaUtil::InputAction::Registry> : std::false_type
     {
     };
 }
@@ -47,8 +59,129 @@ namespace MWLua
         touchpadEvent["pressure"]
             = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> float { return e.mPressure; });
 
+        auto inputActions = context.mLua->sol().new_usertype<LuaUtil::InputAction::Registry>("InputActions");
+        inputActions[sol::meta_function::index]
+            = [](LuaUtil::InputAction::Registry& registry, std::string_view key) { return registry[key]; };
+        {
+            auto pairs = [](LuaUtil::InputAction::Registry& registry) {
+                auto next = [](LuaUtil::InputAction::Registry& registry, std::string_view key)
+                    -> sol::optional<std::tuple<std::string_view, LuaUtil::InputAction::Info>> {
+                    std::optional<std::string_view> nextKey(registry.nextKey(key));
+                    if (!nextKey.has_value())
+                        return sol::nullopt;
+                    else
+                        return std::make_tuple(*nextKey, registry[*nextKey].value());
+                };
+                return std::make_tuple(next, registry, registry.firstKey());
+            };
+            inputActions[sol::meta_function::pairs] = pairs;
+        }
+
+        auto actionInfo = context.mLua->sol().new_usertype<LuaUtil::InputAction::Info>("ActionInfo");
+        actionInfo["key"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mKey; });
+        actionInfo["name"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mName; });
+        actionInfo["description"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mDescription; });
+        actionInfo["l10n"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mL10n; });
+        actionInfo["type"] = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mType; });
+        actionInfo["defaultValue"]
+            = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mDefaultValue; });
+
+        auto inputTriggers = context.mLua->sol().new_usertype<LuaUtil::InputTrigger::Registry>("InputTriggers");
+        inputTriggers[sol::meta_function::index]
+            = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key) { return registry[key]; };
+        {
+            auto pairs = [](LuaUtil::InputTrigger::Registry& registry) {
+                auto next = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key)
+                    -> sol::optional<std::tuple<std::string_view, LuaUtil::InputTrigger::Info>> {
+                    std::optional<std::string_view> nextKey(registry.nextKey(key));
+                    if (!nextKey.has_value())
+                        return sol::nullopt;
+                    else
+                        return std::make_tuple(*nextKey, registry[*nextKey].value());
+                };
+                return std::make_tuple(next, registry, registry.firstKey());
+            };
+            inputTriggers[sol::meta_function::pairs] = pairs;
+        }
+
+        auto triggerInfo = context.mLua->sol().new_usertype<LuaUtil::InputTrigger::Info>("TriggerInfo");
+        triggerInfo["key"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mKey; });
+        triggerInfo["name"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mName; });
+        triggerInfo["description"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mDescription; });
+        triggerInfo["l10n"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mL10n; });
+
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         sol::table api(context.mLua->sol(), sol::create);
+
+        api["ACTION_TYPE"]
+            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, LuaUtil::InputAction::Type>({
+                { "Boolean", LuaUtil::InputAction::Type::Boolean },
+                { "Number", LuaUtil::InputAction::Type::Number },
+                { "Range", LuaUtil::InputAction::Type::Range },
+            }));
+
+        api["actions"] = std::ref(context.mLuaManager->inputActions());
+        api["registerAction"] = [manager = context.mLuaManager](sol::table options) {
+            LuaUtil::InputAction::Info parsedOptions;
+            parsedOptions.mKey = options["key"].get<std::string_view>();
+            parsedOptions.mType = options["type"].get<LuaUtil::InputAction::Type>();
+            parsedOptions.mL10n = options["l10n"].get<std::string_view>();
+            parsedOptions.mName = options["name"].get<std::string_view>();
+            parsedOptions.mDescription = options["description"].get<std::string_view>();
+            parsedOptions.mDefaultValue = options["defaultValue"].get<sol::main_object>();
+            manager->inputActions().insert(std::move(parsedOptions));
+        };
+        api["bindAction"] = [manager = context.mLuaManager](
+                                std::string_view key, const sol::table& callback, sol::table dependencies) {
+            std::vector<std::string_view> parsedDependencies;
+            parsedDependencies.reserve(dependencies.size());
+            for (size_t i = 1; i <= dependencies.size(); ++i)
+            {
+                sol::object dependency = dependencies[i];
+                if (!dependency.is<std::string_view>())
+                    throw std::domain_error("The dependencies argument must be a list of Action keys");
+                parsedDependencies.push_back(dependency.as<std::string_view>());
+            }
+            if (!manager->inputActions().bind(key, LuaUtil::Callback::fromLua(callback), parsedDependencies))
+                throw std::domain_error("Cyclic action binding");
+        };
+        api["registerActionHandler"]
+            = [manager = context.mLuaManager](std::string_view key, const sol::table& callback) {
+                  manager->inputActions().registerHandler(key, LuaUtil::Callback::fromLua(callback));
+              };
+        api["getBooleanActionValue"] = [manager = context.mLuaManager](std::string_view key) {
+            return manager->inputActions().valueOfType(key, LuaUtil::InputAction::Type::Boolean);
+        };
+        api["getNumberActionValue"] = [manager = context.mLuaManager](std::string_view key) {
+            return manager->inputActions().valueOfType(key, LuaUtil::InputAction::Type::Number);
+        };
+        api["getRangeActionValue"] = [manager = context.mLuaManager](std::string_view key) {
+            return manager->inputActions().valueOfType(key, LuaUtil::InputAction::Type::Range);
+        };
+
+        api["triggers"] = std::ref(context.mLuaManager->inputTriggers());
+        api["registerTrigger"] = [manager = context.mLuaManager](sol::table options) {
+            LuaUtil::InputTrigger::Info parsedOptions;
+            parsedOptions.mKey = options["key"].get<std::string_view>();
+            parsedOptions.mL10n = options["l10n"].get<std::string_view>();
+            parsedOptions.mName = options["name"].get<std::string_view>();
+            parsedOptions.mDescription = options["description"].get<std::string_view>();
+            manager->inputTriggers().insert(std::move(parsedOptions));
+        };
+        api["registerTriggerHandler"]
+            = [manager = context.mLuaManager](std::string_view key, const sol::table& callback) {
+                  manager->inputTriggers().registerHandler(key, LuaUtil::Callback::fromLua(callback));
+              };
+        api["activateTrigger"]
+            = [manager = context.mLuaManager](std::string_view key) { manager->inputTriggers().activate(key); };
 
         api["isIdle"] = [input]() { return input->isIdle(); };
         api["isActionPressed"] = [input](int action) { return input->actionIsActive(action); };

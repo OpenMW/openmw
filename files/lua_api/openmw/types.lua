@@ -210,14 +210,14 @@
 -- end
 -- @usage -- Check for a specific effect
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.Telekinesis)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Telekinesis effect')
 -- end
 -- @usage -- Check for a specific effect targeting a specific attribute.
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, core.ATTRIBUTE.Luck)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Fortify Luck effect')
@@ -229,7 +229,7 @@
 -- @param self
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
--- @return openmw.core#ActiveEffect if such an effect is active, nil otherwise
+-- @return openmw.core#ActiveEffect
 
 ---
 -- Completely removes the active effect from the actor.
@@ -846,14 +846,14 @@
 -- NPC.modifyFactionReputation(player, "mages guild", 5);
 
 ---
--- Expell NPC from given faction.
+-- Expel NPC from given faction.
 -- Throws an exception if there is no such faction.
 -- Note: expelled NPC still keeps his rank and reputation in faction, he just get an additonal flag for given faction.
--- @function [parent=#NPC] expell
+-- @function [parent=#NPC] expel
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
 -- @usage local NPC = require('openmw.types').NPC;
--- NPC.expell(player, "mages guild");
+-- NPC.expel(player, "mages guild");
 
 ---
 -- Clear expelling of NPC from given faction.

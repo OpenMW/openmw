@@ -180,8 +180,8 @@ namespace DetourNavigator
         if (!playerTileChanged && changedTiles.empty())
             return;
 
-        const dtNavMeshParams params = *navMeshCacheItem->lockConst()->getImpl().getParams();
-        const int maxTiles = std::min(mSettings.get().mMaxTilesNumber, params.maxTiles);
+        const int maxTiles
+            = std::min(mSettings.get().mMaxTilesNumber, navMeshCacheItem->lockConst()->getImpl().getParams()->maxTiles);
 
         std::unique_lock lock(mMutex);
 
@@ -376,9 +376,10 @@ namespace DetourNavigator
             return JobStatus::Done;
 
         const auto playerTile = *mPlayerTile.lockConst();
-        const auto params = *navMeshCacheItem->lockConst()->getImpl().getParams();
+        const int maxTiles
+            = std::min(mSettings.get().mMaxTilesNumber, navMeshCacheItem->lockConst()->getImpl().getParams()->maxTiles);
 
-        if (!shouldAddTile(job.mChangedTile, playerTile, std::min(mSettings.get().mMaxTilesNumber, params.maxTiles)))
+        if (!shouldAddTile(job.mChangedTile, playerTile, maxTiles))
         {
             Log(Debug::Debug) << "Ignore add tile by job " << job.mId << ": too far from player";
             navMeshCacheItem->lock()->removeTile(job.mChangedTile);

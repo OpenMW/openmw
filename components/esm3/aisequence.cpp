@@ -15,12 +15,7 @@ namespace ESM
         {
             esm.getHNT("DATA", mData.mDistance, mData.mDuration, mData.mTimeOfDay, mData.mIdle, mData.mShouldRepeat);
             esm.getHNT("STAR", mDurationData.mRemainingDuration, mDurationData.unused); // was mStartTime
-            mStoredInitialActorPosition = false;
-            if (esm.isNextSub("POS_"))
-            {
-                mStoredInitialActorPosition = true;
-                esm.getHT(mInitialActorPosition.mValues);
-            }
+            mStoredInitialActorPosition = esm.getHNOT("POS_", mInitialActorPosition.mValues);
         }
 
         void AiWander::save(ESMWriter& esm) const
@@ -34,7 +29,7 @@ namespace ESM
         void AiTravel::load(ESMReader& esm)
         {
             esm.getHNT("DATA", mData.mX, mData.mY, mData.mZ);
-            esm.getHNOT(mHidden, "HIDD");
+            esm.getHNT(mHidden, "HIDD");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
         }
@@ -263,7 +258,7 @@ namespace ESM
                 }
             }
 
-            esm.getHNOT(mLastAiPackage, "LAST");
+            esm.getHNT(mLastAiPackage, "LAST");
 
             if (count > 1 && esm.getFormatVersion() <= MaxOldAiPackageFormatVersion)
             {

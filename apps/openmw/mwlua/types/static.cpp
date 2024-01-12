@@ -5,10 +5,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
-
 namespace sol
 {
     template <>
@@ -21,8 +17,6 @@ namespace MWLua
 {
     void addStaticBindings(sol::table stat, const Context& context)
     {
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM::Static>(stat, context);
 
         sol::usertype<ESM::Static> record = context.mLua->sol().new_usertype<ESM::Static>("ESM3_Static");
@@ -30,8 +24,7 @@ namespace MWLua
             = [](const ESM::Static& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Static& rec) -> std::string { return rec.mId.serializeText(); });
-        record["model"] = sol::readonly_property([vfs](const ESM::Static& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
-        });
+        record["model"] = sol::readonly_property(
+            [](const ESM::Static& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
     }
 }
