@@ -213,7 +213,7 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
         mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
     }
 
-    mBrushTexture = newBrushTextureId;
+    mBrushTexture = std::move(newBrushTextureId);
 
     emit passTextureId(mBrushTexture);
     emit passBrushShape(mBrushShape); // updates the icon tooltip
