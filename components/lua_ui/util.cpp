@@ -47,12 +47,12 @@ namespace LuaUi
     void clearGameInterface()
     {
         while (!Element::sGameElements.empty())
-            Element::sGameElements.begin()->second->destroy();
+            Element::erase(Element::sGameElements.begin()->second.get());
     }
 
     void clearMenuInterface()
     {
         while (!Element::sMenuElements.empty())
-            Element::sMenuElements.begin()->second->destroy();
+            Element::erase(Element::sMenuElements.begin()->second.get());
     }
 }

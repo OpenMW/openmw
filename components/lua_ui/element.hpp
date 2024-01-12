@@ -7,21 +7,15 @@ namespace LuaUi
 {
     struct Element
     {
-        static std::shared_ptr<Element> makeGameElement(sol::table layout);
-        static std::shared_ptr<Element> makeMenuElement(sol::table layout);
+        static std::shared_ptr<Element> make(sol::table layout, bool menu);
+        static void erase(Element* element);
 
         template <class Callback>
-        static void forEachGameElement(Callback callback)
+        static void forEach(bool menu, Callback callback)
         {
-            for (auto& [e, _] : sGameElements)
-                callback(e);
-        }
-
-        template <class Callback>
-        static void forEachMenuElement(Callback callback)
-        {
-            for (auto& [e, _] : sMenuElements)
-                callback(e);
+            auto& container = menu ? sMenuElements : sGameElements;
+            for (auto& [_, element] : container)
+                callback(element.get());
         }
 
         WidgetExtension* mRoot;

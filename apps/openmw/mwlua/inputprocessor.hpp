@@ -58,14 +58,14 @@ namespace MWLua
 
     private:
         Container* mScriptsContainer;
-        Container::EngineHandlerList mKeyPressHandlers{ "onKeyPress" };
-        Container::EngineHandlerList mKeyReleaseHandlers{ "onKeyRelease" };
-        Container::EngineHandlerList mControllerButtonPressHandlers{ "onControllerButtonPress" };
-        Container::EngineHandlerList mControllerButtonReleaseHandlers{ "onControllerButtonRelease" };
-        Container::EngineHandlerList mActionHandlers{ "onInputAction" };
-        Container::EngineHandlerList mTouchpadPressed{ "onTouchPress" };
-        Container::EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
-        Container::EngineHandlerList mTouchpadMoved{ "onTouchMove" };
+        typename Container::EngineHandlerList mKeyPressHandlers{ "onKeyPress" };
+        typename Container::EngineHandlerList mKeyReleaseHandlers{ "onKeyRelease" };
+        typename Container::EngineHandlerList mControllerButtonPressHandlers{ "onControllerButtonPress" };
+        typename Container::EngineHandlerList mControllerButtonReleaseHandlers{ "onControllerButtonRelease" };
+        typename Container::EngineHandlerList mActionHandlers{ "onInputAction" };
+        typename Container::EngineHandlerList mTouchpadPressed{ "onTouchPress" };
+        typename Container::EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
+        typename Container::EngineHandlerList mTouchpadMoved{ "onTouchMove" };
     };
 }
 
