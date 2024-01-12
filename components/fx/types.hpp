@@ -29,16 +29,6 @@ namespace fx
             std::optional<int> mWidth;
             std::optional<int> mHeight;
 
-            SizeProxy() = default;
-
-            SizeProxy(const SizeProxy& other)
-                : mWidthRatio(other.mWidthRatio)
-                , mHeightRatio(other.mHeightRatio)
-                , mWidth(other.mWidth)
-                , mHeight(other.mHeight)
-            {
-            }
-
             std::tuple<int, int> get(int width, int height) const
             {
                 int scaledWidth = width;
@@ -64,16 +54,6 @@ namespace fx
             SizeProxy mSize;
             bool mMipMap = false;
             osg::Vec4f mClearColor = osg::Vec4f(0.0, 0.0, 0.0, 1.0);
-
-            RenderTarget() = default;
-
-            RenderTarget(const RenderTarget& other)
-                : mTarget(other.mTarget)
-                , mSize(other.mSize)
-                , mMipMap(other.mMipMap)
-                , mClearColor(other.mClearColor)
-            {
-            }
         };
 
         template <class T>
