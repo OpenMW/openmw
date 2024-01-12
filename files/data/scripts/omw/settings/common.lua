@@ -6,7 +6,6 @@ local argumentSectionPostfix = 'Arguments'
 
 local contextSection = storage.playerSection or storage.globalSection
 local groupSection = contextSection(groupSectionKey)
-groupSection:removeOnExit()
 
 local function validateSettingOptions(options)
     if type(options) ~= 'table' then
@@ -109,11 +108,9 @@ end
 
 return {
     getSection = function(global, key)
-        if global then error('Getting global section') end
         return (global and storage.globalSection or storage.playerSection)(key)
     end,
     getArgumentSection = function(global, key)
-        if global then error('Getting global section') end
         return (global and storage.globalSection or storage.playerSection)(key .. argumentSectionPostfix)
     end,
     updateRendererArgument = function(groupKey, settingKey, argument)

@@ -7,6 +7,8 @@ local storage = require('openmw.storage')
 local I = require('openmw.interfaces')
 
 local common = require('scripts.omw.settings.common')
+-- :reset on startup instead of :removeOnExit
+common.getSection(false, common.groupSectionKey):reset()
 
 local renderers = {}
 local function registerRenderer(name, renderFunction)
@@ -276,6 +278,9 @@ local function renderPage(page)
     local groupLayouts = {}
     for _, pageGroup in ipairs(sortedGroups) do
         local group = common.getSection(pageGroup.global, common.groupSectionKey):get(pageGroup.key)
+        if not group then
+            error(string.format('%s group "%s" was not found', pageGroup.global and 'Global' or 'Player', pageGroup.key))
+        end
         table.insert(groupLayouts, renderGroup(group, pageGroup.global))
     end
     local groupsLayout = {
@@ -425,17 +430,16 @@ end
 local menuGroups = {}
 local menuPages = {}
 
-local function reset()
+local function resetPlayerGroups()
     for pageKey, page in pairs(groups) do
-        for groupKey in pairs(page) do
-            if not menuGroups[groupKey] then
+        for groupKey, group in pairs(page) do
+            if not menuGroups[groupKey] and not group.global then
                 page[groupKey] = nil
             end
         end
         if pageOptions[pageKey] then
-            pageOptions[pageKey].element.destroy()
+            pageOptions[pageKey].element:destroy()
             if not menuPages[pageKey] then
-                pageOptions[pageKey].element.destroy()
                 ui.removeSettingsPage(pageOptions[pageKey])
                 pageOptions[pageKey] = nil
             else
@@ -483,6 +487,8 @@ local function registerPage(options)
     ui.registerSettingsPage(pageOptions[page.key])
 end
 
+local lastState
+
 return {
     interfaceName = 'Settings',
     interface = {
@@ -502,15 +508,15 @@ return {
         updateRendererArgument = common.updateRendererArgument,
     },
     engineHandlers = {
-        onLoad = common.onLoad,
-        onSave = common.onSave,
         onStateChanged = function()
-            if menu.getState() == menu.STATE.Running then
-                updateGlobalGroups()
-            else
-                reset()
+            if lastState == menu.STATE.Running then
+                resetPlayerGroups()
             end
             updatePlayerGroups()
+            if menu.getState() == menu.STATE.Running then
+                updateGlobalGroups()
+            end
+            lastState = menu.getState()
         end,
     },
     eventHandlers = {

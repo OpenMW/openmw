@@ -1,6 +1,7 @@
 local storage = require('openmw.storage')
 
 local common = require('scripts.omw.settings.common')
+common.getSection(true, common.groupSectionKey):removeOnExit()
 
 return {
     interfaceName = 'Settings',
