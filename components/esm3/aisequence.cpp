@@ -14,7 +14,7 @@ namespace ESM
         void AiWander::load(ESMReader& esm)
         {
             esm.getHNT("DATA", mData.mDistance, mData.mDuration, mData.mTimeOfDay, mData.mIdle, mData.mShouldRepeat);
-            esm.getHNT("STAR", mDurationData.mRemainingDuration, mDurationData.unused); // was mStartTime
+            esm.getHNT("STAR", mDurationData.mRemainingDuration, mDurationData.mUnused); // was mStartTime
             mStoredInitialActorPosition = esm.getHNOT("POS_", mInitialActorPosition.mValues);
         }
 

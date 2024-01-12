@@ -48,7 +48,7 @@ namespace ESM
         struct AiWanderDuration
         {
             float mRemainingDuration;
-            int32_t unused;
+            int32_t mUnused;
         };
         struct AiTravelData
         {
