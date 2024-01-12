@@ -141,7 +141,8 @@ namespace MWLua
 
     void LuaManager::savePermanentStorage(const std::filesystem::path& userConfigPath)
     {
-        mGlobalStorage.save(userConfigPath / "global_storage.bin");
+        if (mGlobalScriptsStarted)
+            mGlobalStorage.save(userConfigPath / "global_storage.bin");
         mPlayerStorage.save(userConfigPath / "player_storage.bin");
     }
 
@@ -318,6 +319,7 @@ namespace MWLua
             mPlayer.getRefData().setLuaScripts(nullptr);
             mPlayer = MWWorld::Ptr();
         }
+        mGlobalStorage.setActive(true);
         mGlobalStorage.clearTemporaryAndRemoveCallbacks();
         mGlobalStorage.setActive(false);
         mPlayerStorage.clearTemporaryAndRemoveCallbacks();
