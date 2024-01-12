@@ -1,4 +1,5 @@
 #include <components/esm/fourcc.hpp>
+#include <components/esm3/aisequence.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
@@ -408,6 +409,87 @@ namespace ESM
             saveAndLoadRecord(record, GetParam(), result);
             EXPECT_EQ(result.mId, record.mId);
             EXPECT_EQ(result.mStringId, record.mStringId);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, aiSequenceAiWanderShouldNotChange)
+        {
+            AiSequence::AiWander record;
+            record.mData.mDistance = 1;
+            record.mData.mDuration = 2;
+            record.mData.mTimeOfDay = 3;
+            constexpr std::uint8_t idle[8] = { 4, 5, 6, 7, 8, 9, 10, 11 };
+            static_assert(std::size(idle) == std::size(record.mData.mIdle));
+            std::copy(std::begin(idle), std::end(idle), record.mData.mIdle);
+            record.mData.mShouldRepeat = 12;
+            record.mDurationData.mRemainingDuration = 13;
+            record.mDurationData.mUnused = 14;
+            record.mStoredInitialActorPosition = true;
+            constexpr float initialActorPosition[3] = { 15, 16, 17 };
+            static_assert(std::size(initialActorPosition) == std::size(record.mInitialActorPosition.mValues));
+            std::copy(
+                std::begin(initialActorPosition), std::end(initialActorPosition), record.mInitialActorPosition.mValues);
+
+            AiSequence::AiWander result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mDistance, record.mData.mDistance);
+            EXPECT_EQ(result.mData.mDuration, record.mData.mDuration);
+            EXPECT_EQ(result.mData.mTimeOfDay, record.mData.mTimeOfDay);
+            EXPECT_THAT(result.mData.mIdle, ElementsAreArray(record.mData.mIdle));
+            EXPECT_EQ(result.mData.mShouldRepeat, record.mData.mShouldRepeat);
+            EXPECT_EQ(result.mDurationData.mRemainingDuration, record.mDurationData.mRemainingDuration);
+            EXPECT_EQ(result.mDurationData.mUnused, record.mDurationData.mUnused);
+            EXPECT_EQ(result.mStoredInitialActorPosition, record.mStoredInitialActorPosition);
+            EXPECT_THAT(result.mInitialActorPosition.mValues, ElementsAreArray(record.mInitialActorPosition.mValues));
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, aiSequenceAiTravelShouldNotChange)
+        {
+            AiSequence::AiTravel record;
+            record.mData.mX = 1;
+            record.mData.mY = 2;
+            record.mData.mZ = 3;
+            record.mHidden = true;
+            record.mRepeat = true;
+
+            AiSequence::AiTravel result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mX, record.mData.mX);
+            EXPECT_EQ(result.mData.mY, record.mData.mY);
+            EXPECT_EQ(result.mData.mZ, record.mData.mZ);
+            EXPECT_EQ(result.mHidden, record.mHidden);
+            EXPECT_EQ(result.mRepeat, record.mRepeat);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, aiSequenceAiEscortShouldNotChange)
+        {
+            AiSequence::AiEscort record;
+            record.mData.mX = 1;
+            record.mData.mY = 2;
+            record.mData.mZ = 3;
+            record.mData.mDuration = 4;
+            record.mTargetActorId = 5;
+            record.mTargetId = generateRandomRefId(32);
+            record.mCellId = generateRandomString(257);
+            record.mRemainingDuration = 6;
+            record.mRepeat = true;
+
+            AiSequence::AiEscort result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mX, record.mData.mX);
+            EXPECT_EQ(result.mData.mY, record.mData.mY);
+            EXPECT_EQ(result.mData.mZ, record.mData.mZ);
+            if (GetParam() <= MaxOldAiPackageFormatVersion)
+                EXPECT_EQ(result.mData.mDuration, record.mRemainingDuration);
+            else
+                EXPECT_EQ(result.mData.mDuration, record.mData.mDuration);
+            EXPECT_EQ(result.mTargetActorId, record.mTargetActorId);
+            EXPECT_EQ(result.mTargetId, record.mTargetId);
+            EXPECT_EQ(result.mCellId, record.mCellId);
+            EXPECT_EQ(result.mRemainingDuration, record.mRemainingDuration);
+            EXPECT_EQ(result.mRepeat, record.mRepeat);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));
