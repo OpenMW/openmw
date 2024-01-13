@@ -32,6 +32,7 @@ namespace Launcher
         void slotAnimSourcesToggled(bool checked);
         void slotPostProcessToggled(bool checked);
         void slotSkyBlendingToggled(bool checked);
+        void slotShadowDistLimitToggled(bool checked);
 
     private:
         Config::GameSettings& mGameSettings;

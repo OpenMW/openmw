@@ -7,20 +7,20 @@
     <x>0</x>
     <y>0</y>
     <width>720</width>
-    <height>565</height>
+    <height>635</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>720</width>
-    <height>565</height>
+    <height>635</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>OpenMW Launcher</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../launcher/launcher.qrc">
+   <iconset resource="../../../files/launcher/launcher.qrc">
     <normaloff>:/images/openmw.png</normaloff>:/images/openmw.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -120,7 +120,7 @@ QToolButton {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../launcher/launcher.qrc">
+    <iconset resource="../../../files/launcher/launcher.qrc">
      <normaloff>:/images/openmw-plugin.png</normaloff>:/images/openmw-plugin.png</iconset>
    </property>
    <property name="text">
@@ -141,11 +141,11 @@ QToolButton {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../launcher/launcher.qrc">
+    <iconset resource="../../../files/launcher/launcher.qrc">
      <normaloff>:/images/preferences-video.png</normaloff>:/images/preferences-video.png</iconset>
    </property>
    <property name="text">
-    <string>Graphics</string>
+    <string>Display</string>
    </property>
    <property name="toolTip">
     <string>Allows to change graphics settings</string>
@@ -156,7 +156,7 @@ QToolButton {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../launcher/launcher.qrc">
+    <iconset resource="../../../files/launcher/launcher.qrc">
      <normaloff>:/images/preferences.png</normaloff>:/images/preferences.png</iconset>
    </property>
    <property name="text">
@@ -171,7 +171,7 @@ QToolButton {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../launcher/launcher.qrc">
+    <iconset resource="../../../files/launcher/launcher.qrc">
      <normaloff>:/images/preferences-advanced.png</normaloff>:/images/preferences-advanced.png</iconset>
    </property>
    <property name="text">
@@ -183,7 +183,7 @@ QToolButton {
   </action>
  </widget>
  <resources>
-  <include location="../launcher/launcher.qrc"/>
+  <include location="../../../files/launcher/launcher.qrc"/>
  </resources>
  <connections/>
 </ui>
