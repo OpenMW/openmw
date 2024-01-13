@@ -364,9 +364,8 @@ namespace MWGui
         if (mCurrentWindowSize == _sender->getSize())
             return;
 
-        mTopicsList->adjustSize();
+        redrawTopicsList();
         updateHistory();
-        updateTopicFormat();
         mCurrentWindowSize = _sender->getSize();
     }
 
@@ -534,6 +533,14 @@ namespace MWGui
         return true;
     }
 
+    void DialogueWindow::redrawTopicsList()
+    {
+        mTopicsList->adjustSize();
+
+        // The topics list has been regenerated so topic formatting needs to be updated
+        updateTopicFormat();
+    }
+
     void DialogueWindow::updateTopicsPane()
     {
         mTopicsList->clear();
@@ -591,11 +598,9 @@ namespace MWGui
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
             mTopicLinks[topicId] = std::move(t);
         }
-        mTopicsList->adjustSize();
 
+        redrawTopicsList();
         updateHistory();
-        // The topics list has been regenerated so topic formatting needs to be updated
-        updateTopicFormat();
     }
 
     void DialogueWindow::updateHistory(bool scrollbar)
@@ -756,21 +761,12 @@ namespace MWGui
                 + std::string("/100"));
         }
 
-        bool dispositionWasVisible = mDispositionBar->getVisible();
-
-        if (dispositionVisible && !dispositionWasVisible)
+        if (mDispositionBar->getVisible() != dispositionVisible)
         {
-            mDispositionBar->setVisible(true);
-            int offset = mDispositionBar->getHeight() + 5;
+            mDispositionBar->setVisible(dispositionVisible);
+            const int offset = (mDispositionBar->getHeight() + 5) * (dispositionVisible ? 1 : -1);
             mTopicsList->setCoord(mTopicsList->getCoord() + MyGUI::IntCoord(0, offset, 0, -offset));
-            mTopicsList->adjustSize();
-        }
-        else if (!dispositionVisible && dispositionWasVisible)
-        {
-            mDispositionBar->setVisible(false);
-            int offset = mDispositionBar->getHeight() + 5;
-            mTopicsList->setCoord(mTopicsList->getCoord() - MyGUI::IntCoord(0, offset, 0, -offset));
-            mTopicsList->adjustSize();
+            redrawTopicsList();
         }
     }
 
