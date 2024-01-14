@@ -36,7 +36,7 @@ CSMWorld::TouchCommand::TouchCommand(IdTable& table, const std::string& id, QUnd
 
 void CSMWorld::TouchCommand::redo()
 {
-    mOld.reset(mTable.getRecord(mId).clone().get());
+    mOld = mTable.getRecord(mId).clone();
     mChanged = mTable.touchRecord(mId);
 }
 
@@ -181,9 +181,8 @@ const std::string& CSMWorld::TouchLandCommand::getDestinationId() const
 
 void CSMWorld::TouchLandCommand::onRedo()
 {
+    mOld = mLands.getRecord(mId).clone();
     mChanged = mLands.touchRecord(mId);
-    if (mChanged)
-        mOld.reset(mLands.getRecord(mId).clone().get());
 }
 
 void CSMWorld::TouchLandCommand::onUndo()
