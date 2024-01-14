@@ -9,6 +9,9 @@
 -- @field [parent=#STATE] Running
 -- @field [parent=#STATE] Ended
 
+---
+-- All possible game states returned by @{#menu.getState}
+-- @field [parent=#menu] #STATE STATE
 
 ---
 -- Current game state
@@ -63,3 +66,5 @@
 ---
 -- Exit the game
 -- @function [parent=#menu] quit
+
+return nil

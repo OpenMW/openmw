@@ -9,6 +9,7 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 .. list-table::
   :widths: 20 80
+
   * - onInterfaceOverride(base)
     - | Called if the current script has an interface and overrides an interface
       | (``base``) of another script.
@@ -87,6 +88,7 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 .. list-table::
   :widths: 20 80
+
   * - onFrame(dt)
     - | Called every frame (even if the game is paused) right after
       | processing user input. Use it only for latency-critical stuff
@@ -96,7 +98,7 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
- * - onKeyRelease(key)
+  * - onKeyRelease(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is released.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
@@ -131,6 +133,7 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 .. list-table::
   :widths: 20 80
+
   * - onKeyPress(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:
@@ -142,6 +145,7 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 .. list-table::
   :widths: 20 80
+
   * - onStateChanged()
     - | Called whenever the current game changes
       | (i. e. the result of `getState <openmw_menu.html##(getState)>`_ changes)

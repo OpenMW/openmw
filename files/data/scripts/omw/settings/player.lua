@@ -91,7 +91,7 @@ return {
         registerPage = registerPage,
         ---
         -- @function [parent=#Settings] registerRenderer Register a renderer,
-        --   only avaialable in menu scripts (DEPRECATED in player scripts)
+        --   only available in menu scripts (DEPRECATED in player scripts)
         -- @param #string key
         -- @param #function renderer A renderer function, receives setting's value,
         --   a function to change it and an argument from the setting options

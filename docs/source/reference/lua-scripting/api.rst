@@ -27,6 +27,7 @@ Lua API reference
     openmw_camera
     openmw_postprocessing
     openmw_debug
+    openmw_menu
     openmw_aux_calendar
     openmw_aux_util
     openmw_aux_time
