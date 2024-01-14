@@ -183,16 +183,17 @@ namespace MWClass
         return getClassModel<ESM::Creature>(ptr);
     }
 
-    void Creature::getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const
+    void Creature::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const
     {
         std::string model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
 
-        // FIXME: use const version of InventoryStore functions once they are available
-        if (hasInventoryStore(ptr))
+        const MWWorld::CustomData* customData = ptr.getRefData().getCustomData();
+        if (customData && hasInventoryStore(ptr))
         {
-            const MWWorld::InventoryStore& invStore = getInventoryStore(ptr);
+            const auto& invStore
+                = static_cast<const MWWorld::InventoryStore&>(*customData->asCreatureCustomData().mContainerStore);
             for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
             {
                 MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
@@ -513,7 +514,7 @@ namespace MWClass
             throw std::runtime_error("this creature has no inventory store");
     }
 
-    bool Creature::hasInventoryStore(const MWWorld::Ptr& ptr) const
+    bool Creature::hasInventoryStore(const MWWorld::ConstPtr& ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }

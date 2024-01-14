@@ -74,7 +74,7 @@ namespace MWClass
         MWWorld::InventoryStore& getInventoryStore(const MWWorld::Ptr& ptr) const override;
         ///< Return inventory store
 
-        bool hasInventoryStore(const MWWorld::Ptr& ptr) const override { return true; }
+        bool hasInventoryStore(const MWWorld::ConstPtr& ptr) const override { return true; }
 
         bool evaluateHit(const MWWorld::Ptr& ptr, MWWorld::Ptr& victim, osg::Vec3f& hitPosition) const override;
 
@@ -85,7 +85,7 @@ namespace MWClass
             const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
             const MWMechanics::DamageSourceType sourceType) const override;
 
-        void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
+        void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const override;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 

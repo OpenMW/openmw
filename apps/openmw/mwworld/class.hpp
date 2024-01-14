@@ -170,7 +170,7 @@ namespace MWWorld
         ///< Return inventory store or throw an exception, if class does not have a
         /// inventory store (default implementation: throw an exception)
 
-        virtual bool hasInventoryStore(const Ptr& ptr) const;
+        virtual bool hasInventoryStore(const ConstPtr& ptr) const;
         ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
 
         virtual bool canLock(const ConstPtr& ptr) const;
@@ -284,7 +284,7 @@ namespace MWWorld
         virtual bool useAnim() const;
         ///< Whether or not to use animated variant of model (default false)
 
-        virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
+        virtual void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 

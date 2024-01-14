@@ -224,12 +224,12 @@ namespace MWWorld
 
             mHasState = true;
 
-            for (unsigned int i = 0; i < mMergedRefs.size(); ++i)
+            for (LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
-                if (!visitor(MWWorld::Ptr(mMergedRefs[i], this)))
+                if (!visitor(MWWorld::Ptr(mergedRef, this)))
                     return false;
             }
             return true;
@@ -249,12 +249,12 @@ namespace MWWorld
             if (mMergedRefsNeedsUpdate)
                 updateMergedRefs();
 
-            for (unsigned int i = 0; i < mMergedRefs.size(); ++i)
+            for (const LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
-                if (!visitor(MWWorld::ConstPtr(mMergedRefs[i], this)))
+                if (!visitor(MWWorld::ConstPtr(mergedRef, this)))
                     return false;
             }
             return true;
