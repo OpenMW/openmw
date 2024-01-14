@@ -543,7 +543,8 @@ namespace MWDialogue
         mPermanentDispositionChange += perm;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
+        player.getClass().skillUsageSucceeded(
+            player, ESM::Skill::Speechcraft, success ? ESM::Skill::Speechcraft_Success : ESM::Skill::Speechcraft_Fail);
 
         if (success)
         {

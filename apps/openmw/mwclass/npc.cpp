@@ -22,6 +22,7 @@
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -655,7 +656,7 @@ namespace MWClass
             ESM::RefId weapskill = ESM::Skill::HandToHand;
             if (!weapon.isEmpty())
                 weapskill = weapon.getClass().getEquipmentSkill(weapon);
-            skillUsageSucceeded(ptr, weapskill, 0);
+            skillUsageSucceeded(ptr, weapskill, ESM::Skill::Weapon_SuccessfulHit);
 
             const MWMechanics::AiSequence& seq = victim.getClass().getCreatureStats(victim).getAiSequence();
 
@@ -845,7 +846,7 @@ namespace MWClass
 
                     ESM::RefId skill = armor.getClass().getEquipmentSkill(armor);
                     if (ptr == MWMechanics::getPlayer())
-                        skillUsageSucceeded(ptr, skill, 0);
+                        skillUsageSucceeded(ptr, skill, ESM::Skill::Armor_HitByOpponent);
 
                     if (skill == ESM::Skill::LightArmor)
                         sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
@@ -855,7 +856,7 @@ namespace MWClass
                         sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
                 }
                 else if (ptr == MWMechanics::getPlayer())
-                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
+                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, ESM::Skill::Armor_HitByOpponent);
             }
         }
 
@@ -1131,16 +1132,7 @@ namespace MWClass
 
     void Npc::skillUsageSucceeded(const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor) const
     {
-        MWMechanics::NpcStats& stats = getNpcStats(ptr);
-
-        if (stats.isWerewolf())
-            return;
-
-        MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
-
-        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(ref->mBase->mClass);
-
-        stats.useSkill(skill, *class_, usageType, extraFactor);
+        MWBase::Environment::get().getLuaManager()->skillUse(ptr, skill, usageType, extraFactor);
     }
 
     float Npc::getArmorRating(const MWWorld::Ptr& ptr) const

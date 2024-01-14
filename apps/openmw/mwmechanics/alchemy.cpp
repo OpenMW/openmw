@@ -335,7 +335,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
 
 void MWMechanics::Alchemy::increaseSkill()
 {
-    mAlchemist.getClass().skillUsageSucceeded(mAlchemist, ESM::Skill::Alchemy, 0);
+    mAlchemist.getClass().skillUsageSucceeded(mAlchemist, ESM::Skill::Alchemy, ESM::Skill::Alchemy_CreatePotion);
 }
 
 float MWMechanics::Alchemy::getAlchemyFactor() const

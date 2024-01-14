@@ -90,6 +90,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/mwui/textEdit.lua
     scripts/omw/mwui/space.lua
     scripts/omw/mwui/init.lua
+    scripts/omw/skillhandlers.lua
     scripts/omw/ui.lua
     scripts/omw/usehandlers.lua
     scripts/omw/worldeventhandlers.lua

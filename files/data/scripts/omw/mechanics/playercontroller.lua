@@ -1,7 +1,13 @@
+local ambient = require('openmw.ambient')
 local core = require('openmw.core')
+local Skill = core.stats.Skill
+local I = require('openmw.interfaces')
 local nearby = require('openmw.nearby')
 local self = require('openmw.self')
 local types = require('openmw.types')
+local NPC = types.NPC
+local Actor = types.Actor
+local ui = require('openmw.ui')
 
 local cell = nil
 local autodoors = {}
@@ -31,6 +37,69 @@ local function processAutomaticDoors()
     end
 end
 
+local function skillLevelUpHandler(skillid, source, params)
+    local skillStat = NPC.stats.skills[skillid](self)
+    if skillStat.base >= 100 then 
+        return false 
+    end
+
+    if params.skillIncreaseValue then
+        skillStat.base = skillStat.base + params.skillIncreaseValue
+    end
+    
+    local levelStat = Actor.stats.level(self)
+    if params.levelUpProgress then
+        levelStat.progress = levelStat.progress + params.levelUpProgress
+    end
+
+    if params.levelUpAttribute and params.levelUpAttributeIncreaseValue then
+        levelStat.skillIncreasesForAttribute[params.levelUpAttribute]
+            = levelStat.skillIncreasesForAttribute[params.levelUpAttribute] + params.levelUpAttributeIncreaseValue
+    end
+
+    if params.levelUpSpecialization and params.levelUpSpecializationIncreaseValue then
+        levelStat.skillIncreasesForSpecialization[params.levelUpSpecialization]
+            = levelStat.skillIncreasesForSpecialization[params.levelUpSpecialization] + params.levelUpSpecializationIncreaseValue;
+    end
+
+    local skillRecord = Skill.record(skillid)
+    local npcRecord = NPC.record(self)
+    local class = NPC.classes.record(npcRecord.class)
+
+    ambient.playSound("skillraise")
+
+    local message = core.getGMST('sNotifyMessage39')
+    message = message:gsub("%%s", skillRecord.name)
+    message = message:gsub("%%d", tostring(skillStat.base))
+
+    if source == I.SkillProgression.SKILL_INCREASE_SOURCES.Book then
+        message = '#{sBookSkillMessage}\n'..message
+    end
+
+    ui.showMessage(message)
+    
+    if levelStat.progress >= core.getGMST('iLevelUpTotal') then
+        ui.showMessage('#{sLevelUpMsg}')
+    end
+
+    if not source or source == I.SkillProgression.SKILL_INCREASE_SOURCES.Usage then skillStat.progress = 0 end
+end
+
+local function skillUsedHandler(skillid, useType, params)
+    if NPC.isWerewolf(self) then
+        return false
+    end
+
+    if params.skillGain then
+        local skillStat = NPC.stats.skills[skillid](self)
+        skillStat.progress = skillStat.progress + params.skillGain
+
+        if skillStat.progress >= 1 then
+            I.SkillProgression.skillLevelUp(skillid, I.SkillProgression.SKILL_INCREASE_SOURCES.Usage)
+        end
+    end
+end
+
 local function onUpdate()
     if self.cell ~= cell then
         cell = self.cell
@@ -39,8 +108,14 @@ local function onUpdate()
     processAutomaticDoors()
 end
 
+local function onActive()
+    I.SkillProgression.addSkillUsedHandler(skillUsedHandler)
+    I.SkillProgression.addSkillLevelUpHandler(skillLevelUpHandler)
+end
+
 return {
     engineHandlers = {
         onUpdate = onUpdate,
+        onActive = onActive,
     },
 }

@@ -69,7 +69,7 @@ namespace
         // Advance acrobatics and set flag for GetPCJumping
         if (isPlayer)
         {
-            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, 0);
+            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, ESM::Skill::Acrobatics_Jump);
             MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
         }
 

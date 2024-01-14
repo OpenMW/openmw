@@ -167,7 +167,7 @@ namespace MWMechanics
             blockerStats.setBlock(true);
 
             if (blocker == getPlayer())
-                blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
+                blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, ESM::Skill::Block_Success);
 
             return true;
         }
@@ -267,7 +267,7 @@ namespace MWMechanics
             applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
-                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
+                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, ESM::Skill::Weapon_SuccessfulHit);
 
             const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
             bool unaware = attacker == getPlayer() && !sequence.isInCombat()

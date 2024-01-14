@@ -79,7 +79,8 @@ namespace MWMechanics
         {
             skillGain = std::floor(100.f * (initialMerchantOffer - finalPrice) / initialMerchantOffer);
         }
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
+        player.getClass().skillUsageSucceeded(
+            player, ESM::Skill::Mercantile, ESM::Skill::Mercantile_Success, skillGain);
 
         return true;
     }

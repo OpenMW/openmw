@@ -176,7 +176,7 @@ namespace MWLua
     {
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
         registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
-            &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers });
+            &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnSkillUse });
     }
 
     void LocalScripts::setActive(bool active)

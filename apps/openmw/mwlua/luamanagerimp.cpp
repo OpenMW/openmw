@@ -406,6 +406,11 @@ namespace MWLua
             scripts->onPlayAnimation(groupname, options);
     }
 
+    void LuaManager::skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale)
+    {
+        mEngineEvents.addToQueue(EngineEvents::OnSkillUse{ getId(actor), skillId.serializeText(), useType, scale });
+    }
+
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
         mObjectLists.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.

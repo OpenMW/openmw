@@ -9,5 +9,6 @@ paths=(
   scripts/omw/settings/player.lua
   scripts/omw/ui.lua
   scripts/omw/usehandlers.lua
+  scripts/omw/skillhandlers.lua
 )
 printf '%s\n' "${paths[@]}"

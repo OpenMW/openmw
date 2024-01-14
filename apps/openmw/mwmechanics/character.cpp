@@ -2088,7 +2088,7 @@ namespace MWMechanics
                         mSecondsOfSwimming += duration;
                         while (mSecondsOfSwimming > 1)
                         {
-                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
+                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, ESM::Skill::Athletics_SwimOneSecond);
                             mSecondsOfSwimming -= 1;
                         }
                     }
@@ -2097,7 +2097,7 @@ namespace MWMechanics
                         mSecondsOfRunning += duration;
                         while (mSecondsOfRunning > 1)
                         {
-                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
+                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, ESM::Skill::Athletics_RunOneSecond);
                             mSecondsOfRunning -= 1;
                         }
                     }
@@ -2215,7 +2215,7 @@ namespace MWMechanics
                         {
                             // report acrobatics progression
                             if (isPlayer)
-                                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+                                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, ESM::Skill::Acrobatics_Fall);
                         }
                     }
 

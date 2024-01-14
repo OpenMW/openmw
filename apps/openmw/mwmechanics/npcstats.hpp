@@ -92,10 +92,14 @@ namespace MWMechanics
         void increaseSkill(ESM::RefId id, const ESM::Class& class_, bool preserveProgress, bool readBook = false);
 
         int getLevelProgress() const;
+        void setLevelProgress(int progress);
 
         int getLevelupAttributeMultiplier(ESM::Attribute::AttributeID attribute) const;
+        int getSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute) const;
+        void setSkillIncreasesForAttribute(ESM::Attribute::AttributeID, int increases);
 
         int getSkillIncreasesForSpecialization(int spec) const;
+        void setSkillIncreasesForSpecialization(int spec, int increases);
 
         void levelUp();
 

@@ -94,6 +94,15 @@ namespace MWLua
             if (auto* scripts = getLocalScripts(actor))
                 scripts->onAnimationTextKey(event.mGroupname, event.mKey);
         }
+        
+        void operator()(const OnSkillUse& event) const
+        {
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (actor.isEmpty())
+                return;
+            if (auto* scripts = getLocalScripts(actor))
+                scripts->onSkillUse(event.mSkill, event.useType, event.scale);
+        }
 
     private:
         MWWorld::Ptr getPtr(ESM::RefNum id) const

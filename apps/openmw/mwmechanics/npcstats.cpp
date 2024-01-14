@@ -298,6 +298,11 @@ int MWMechanics::NpcStats::getLevelProgress() const
     return mLevelProgress;
 }
 
+void MWMechanics::NpcStats::setLevelProgress(int progress)
+{
+    mLevelProgress = progress;
+}
+
 void MWMechanics::NpcStats::levelUp()
 {
     const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
@@ -344,9 +349,31 @@ int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::Attribute::Attribu
     return MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find(gmst.str())->mValue.getInteger();
 }
 
+int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute) const
+{
+    auto it = mSkillIncreases.find(attribute);
+    if (it == mSkillIncreases.end())
+        return 0;
+    return it->second;
+}
+
+void MWMechanics::NpcStats::setSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute, int increases)
+{
+    if (increases == 0)
+        mSkillIncreases.erase(attribute);
+    else
+        mSkillIncreases[attribute] = increases;
+}
+
 int MWMechanics::NpcStats::getSkillIncreasesForSpecialization(int spec) const
 {
     return mSpecIncreases[spec];
+}
+
+void MWMechanics::NpcStats::setSkillIncreasesForSpecialization(int spec, int increases)
+{
+    assert(spec >= 0 && spec < 3);
+    mSpecIncreases[spec] = increases;
 }
 
 void MWMechanics::NpcStats::flagAsUsed(const ESM::RefId& id)

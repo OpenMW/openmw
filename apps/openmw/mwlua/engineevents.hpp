@@ -57,8 +57,21 @@ namespace MWLua
             std::string mGroupname;
             std::string mKey;
         };
+        struct OnAnimationTextKey
+        {
+            ESM::RefNum mActor;
+            std::string mGroupname;
+            std::string mKey;
+        };
+        struct OnSkillUse
+        {
+            ESM::RefNum mActor;
+            std::string mSkill;
+            int useType;
+            float scale;
+        };
         using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnUseItem, OnNewExterior, OnTeleported,
-            OnAnimationTextKey>;
+            OnAnimationTextKey, OnSkillUse>;
 
         void clear() { mQueue.clear(); }
         void addToQueue(Event e) { mQueue.push_back(std::move(e)); }

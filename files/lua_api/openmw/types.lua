@@ -352,10 +352,29 @@
 -- @function [parent=#ActorSpells] clear
 -- @param self
 
+--- Values affect how much each attribute can be increased at level up, and are all reset to 0 upon level up.
+-- @type SkillIncreasesForAttributeStats
+-- @field #number agility Number of contributions to agility for the next level up.
+-- @field #number endurance Number of contributions to endurance for the next level up.
+-- @field #number intelligence Number of contributions to intelligence for the next level up.
+-- @field #number luck Number of contributions to luck for the next level up.
+-- @field #number personality Number of contributions to personality for the next level up.
+-- @field #number speed Number of contributions to speed for the next level up.
+-- @field #number strength Number of contributions to strength for the next level up.
+-- @field #number willpower Number of contributions to willpower for the next level up.
+
+--- Values affect the graphic used on the level up screen, and are all reset to 0 upon level up.
+-- @type SkillIncreasesForSpecializationStats
+-- @field #number combat Number of contributions to combat specialization for the next level up.
+-- @field #number magic Number of contributions to magic specialization for the next level up.
+-- @field #number stealth Number of contributions to stealth specialization for the next level up.
+
 ---
 -- @type LevelStat
 -- @field #number current The actor's current level.
--- @field #number progress The NPC's level progress (read-only.)
+-- @field #number progress The NPC's level progress.
+-- @field #SkillIncreasesForAttributeStats skillIncreasesForAttribute The NPC's attribute contributions towards the next level up. Values affect how much each attribute can be increased at level up.
+-- @field #SkillIncreasesForSpecializationStats skillIncreasesForSpecialization The NPC's attribute contributions towards the next level up. Values affect the graphic used on the level up screen.
 
 ---
 -- @type DynamicStat
