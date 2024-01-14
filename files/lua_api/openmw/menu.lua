@@ -50,6 +50,7 @@
 -- @field #string description
 -- @field #string playerName
 -- @field #string playerLevel
+-- @field #number timePlayed Gameplay time for this saved game. Note: available even with [time played](../modding/settings/saves.html#timeplayed) turned off
 -- @field #list<#string> contentFiles
 
 ---
@@ -59,9 +60,9 @@
 -- @return #list<#SaveInfo>
 
 ---
--- List of all available saves
+-- List of all available saves, grouped by directory
 -- @function [parent=#menu] getAllSaves
--- @return #list<#SaveInfo>
+-- @return #map<#string, #list<#SaveInfo>>
 
 ---
 -- Exit the game

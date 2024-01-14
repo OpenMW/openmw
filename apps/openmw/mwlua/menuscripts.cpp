@@ -85,6 +85,7 @@ namespace MWLua
                 slotInfo["description"] = slot.mProfile.mDescription;
                 slotInfo["playerName"] = slot.mProfile.mPlayerName;
                 slotInfo["playerLevel"] = slot.mProfile.mPlayerLevel;
+                slotInfo["timePlayed"] = slot.mProfile.mTimePlayed;
                 sol::table contentFiles(lua, sol::create);
                 for (size_t i = 0; i < slot.mProfile.mContentFiles.size(); ++i)
                     contentFiles[i + 1] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
