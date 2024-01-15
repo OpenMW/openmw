@@ -365,12 +365,12 @@ void MWMechanics::NpcStats::setSkillIncreasesForAttribute(ESM::Attribute::Attrib
         mSkillIncreases[attribute] = increases;
 }
 
-int MWMechanics::NpcStats::getSkillIncreasesForSpecialization(int spec) const
+int MWMechanics::NpcStats::getSkillIncreasesForSpecialization(ESM::Class::Specialization spec) const
 {
     return mSpecIncreases[spec];
 }
 
-void MWMechanics::NpcStats::setSkillIncreasesForSpecialization(int spec, int increases)
+void MWMechanics::NpcStats::setSkillIncreasesForSpecialization(ESM::Class::Specialization spec, int increases)
 {
     assert(spec >= 0 && spec < 3);
     mSpecIncreases[spec] = increases;

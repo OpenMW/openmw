@@ -3,6 +3,7 @@
 
 #include "creaturestats.hpp"
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <map>
 #include <set>
@@ -98,8 +99,8 @@ namespace MWMechanics
         int getSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute) const;
         void setSkillIncreasesForAttribute(ESM::Attribute::AttributeID, int increases);
 
-        int getSkillIncreasesForSpecialization(int spec) const;
-        void setSkillIncreasesForSpecialization(int spec, int increases);
+        int getSkillIncreasesForSpecialization(ESM::Class::Specialization spec) const;
+        void setSkillIncreasesForSpecialization(ESM::Class::Specialization spec, int increases);
 
         void levelUp();
 

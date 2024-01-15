@@ -89,7 +89,8 @@ namespace MWLua
             stats.setSkillIncreasesForAttribute(
                 *std::get<ESM::RefId>(index).getIf<ESM::StringRefId>(), LuaUtil::cast<int>(value));
         else if (prop == "skillIncreasesForSpecialization")
-            stats.setSkillIncreasesForSpecialization(std::get<int>(index), LuaUtil::cast<int>(value));
+            stats.setSkillIncreasesForSpecialization(
+                static_cast<ESM::Class::Specialization>(std::get<int>(index)), LuaUtil::cast<int>(value));
     }
 
     class SkillIncreasesForAttributeStats
@@ -144,7 +145,8 @@ namespace MWLua
 
             return getValue(context, mObject, &setNpcValue, specialization, "skillIncreasesForSpecialization",
                 [specialization](const MWWorld::Ptr& ptr) {
-                    return ptr.getClass().getNpcStats(ptr).getSkillIncreasesForSpecialization(specialization);
+                    return ptr.getClass().getNpcStats(ptr).getSkillIncreasesForSpecialization(
+                        static_cast<ESM::Class::Specialization>(specialization));
                 });
         }
 
