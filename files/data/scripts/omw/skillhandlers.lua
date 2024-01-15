@@ -265,9 +265,12 @@ return {
         },
     },
     engineHandlers = { 
+        -- Use the interface in these handlers so any overrides will receive the calls.
         _onSkillUse = function (skillid, useType, scale)
-            -- Use the interface here so any overrides of skillUsed will receive the call.
             I.SkillProgression.skillUsed(skillid, useType, scale)
+        end,
+        _onSkillLevelUp = function (skillid, source)
+            I.SkillProgression.skillLevelUp(skillid, source)
         end,
     },
 }

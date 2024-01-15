@@ -70,8 +70,14 @@ namespace MWLua
             int useType;
             float scale;
         };
+        struct OnSkillLevelUp
+        {
+            ESM::RefNum mActor;
+            std::string mSkill;
+            std::string mSource;
+        };
         using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnUseItem, OnNewExterior, OnTeleported,
-            OnAnimationTextKey, OnSkillUse>;
+            OnAnimationTextKey, OnSkillUse, OnSkillLevelUp>;
 
         void clear() { mQueue.clear(); }
         void addToQueue(Event e) { mQueue.push_back(std::move(e)); }

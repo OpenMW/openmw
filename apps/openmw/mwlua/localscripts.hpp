@@ -83,6 +83,10 @@ namespace MWLua
         {
             callEngineHandlers(mOnSkillUse, skillId, useType, scale);
         }
+        void onSkillLevelUp(std::string_view skillId, std::string_view source)
+        {
+            callEngineHandlers(mOnSkillLevelUp, skillId, source);
+        }
 
         void applyStatsCache();
 
@@ -98,6 +102,7 @@ namespace MWLua
         EngineHandlerList mOnAnimationTextKeyHandlers{ "_onAnimationTextKey" };
         EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
         EngineHandlerList mOnSkillUse{ "_onSkillUse" };
+        EngineHandlerList mOnSkillLevelUp{ "_onSkillLevelUp" };
     };
 
 }

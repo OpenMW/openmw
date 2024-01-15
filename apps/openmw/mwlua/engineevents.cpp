@@ -104,6 +104,15 @@ namespace MWLua
                 scripts->onSkillUse(event.mSkill, event.useType, event.scale);
         }
 
+        void operator()(const OnSkillLevelUp& event) const
+        {
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (actor.isEmpty())
+                return;
+            if (auto* scripts = getLocalScripts(actor))
+                scripts->onSkillLevelUp(event.mSkill, event.mSource);
+        }
+
     private:
         MWWorld::Ptr getPtr(ESM::RefNum id) const
         {
