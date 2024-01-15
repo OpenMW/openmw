@@ -2,6 +2,7 @@
 #define VFS_BSAARCHIVE_HPP_
 
 #include "archive.hpp"
+#include "file.hpp"
 #include "pathutil.hpp"
 
 #include <components/bsa/ba2dx10file.hpp>

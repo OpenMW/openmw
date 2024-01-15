@@ -6,6 +6,7 @@
 
 #include <components/misc/strings/conversion.hpp>
 #include <components/vfs/archive.hpp>
+#include <components/vfs/file.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
 

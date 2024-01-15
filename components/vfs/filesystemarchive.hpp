@@ -2,8 +2,9 @@
 #define OPENMW_COMPONENTS_RESOURCE_FILESYSTEMARCHIVE_H
 
 #include "archive.hpp"
-#include <filesystem>
+#include "file.hpp"
 
+#include <filesystem>
 #include <string>
 
 namespace VFS

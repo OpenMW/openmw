@@ -5,12 +5,19 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "archive.hpp"
+#include "file.hpp"
 #include "pathutil.hpp"
+#include "recursivedirectoryiterator.hpp"
 
 namespace VFS
 {
+    Manager::Manager() = default;
+
+    Manager::~Manager() = default;
+
     void Manager::reset()
     {
         mIndex.clear();
@@ -70,7 +77,7 @@ namespace VFS
         return found->second->getPath();
     }
 
-    Manager::RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(std::string_view path) const
+    RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(std::string_view path) const
     {
         if (path.empty())
             return { mIndex.begin(), mIndex.end() };
