@@ -875,10 +875,7 @@
 -- @field #string specialization Skill specialization. Either combat, magic, or stealth.
 -- @field #MagicSchoolData school Optional magic school
 -- @field #string attribute The id of the skill's governing attribute
--- @field #string skillGain1 1 of 4 possible skill gain values. See [SkillProgression#SkillUseType](interface_skill_progression.html#SkillUseType)
--- @field #string skillGain2 2 of 4 possible skill gain values. See [SkillProgression#SkillUseType](interface_skill_progression.html#SkillUseType)
--- @field #string skillGain3 3 of 4 possible skill gain values. See [SkillProgression#SkillUseType](interface_skill_progression.html#SkillUseType)
--- @field #string skillGain4 4 of 4 possible skill gain values. See [SkillProgression#SkillUseType](interface_skill_progression.html#SkillUseType)
+-- @field #table skillGain Table of the 4 possible skill gain values. See [SkillProgression#SkillUseType](interface_skill_progression.html#SkillUseType).
 
 ---
 -- @type MagicSchoolData
