@@ -8,7 +8,12 @@ namespace VFS
 {
     class File;
 
-    using FileMap = std::map<std::string, File*, std::less<>>;
+    namespace Path
+    {
+        class Normalized;
+    }
+
+    using FileMap = std::map<Path::Normalized, File*, std::less<>>;
 }
 
 #endif

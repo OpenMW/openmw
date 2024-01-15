@@ -61,7 +61,7 @@ namespace TestingOpenMW
         void listResources(VFS::FileMap& out) override
         {
             for (const auto& [key, value] : mFiles)
-                out.emplace(VFS::Path::normalizeFilename(key), value);
+                out.emplace(key, value);
         }
 
         bool contains(std::string_view file) const override { return mFiles.contains(file); }

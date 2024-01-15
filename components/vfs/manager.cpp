@@ -83,7 +83,7 @@ namespace VFS
             return { mIndex.begin(), mIndex.end() };
         std::string normalized = Path::normalizeFilename(path);
         const auto it = mIndex.lower_bound(normalized);
-        if (it == mIndex.end() || !it->first.starts_with(normalized))
+        if (it == mIndex.end() || !it->first.view().starts_with(normalized))
             return { it, it };
         ++normalized.back();
         return { it, mIndex.lower_bound(normalized) };

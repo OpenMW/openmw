@@ -4,6 +4,7 @@
 #include <string>
 
 #include "filemap.hpp"
+#include "pathutil.hpp"
 
 namespace VFS
 {
@@ -15,9 +16,9 @@ namespace VFS
         {
         }
 
-        const std::string& operator*() const { return mIt->first; }
+        const std::string& operator*() const { return mIt->first.value(); }
 
-        const std::string* operator->() const { return &mIt->first; }
+        const std::string* operator->() const { return &mIt->first.value(); }
 
         RecursiveDirectoryIterator& operator++()
         {
