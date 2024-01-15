@@ -1,4 +1,5 @@
 local self = require('openmw.self')
+local I = require('openmw.interfaces')
 local types = require('openmw.types')
 local core = require('openmw.core')
 local NPC = require('openmw.types').NPC
@@ -263,5 +264,10 @@ return {
             Trainer = 'trainer',
         },
     },
-    engineHandlers = { _onSkillUse = skillUsed },
+    engineHandlers = { 
+        _onSkillUse = function (skillid, useType, scale)
+            -- Use the interface here so any overrides of skillUsed will receive the call.
+            I.SkillProgression.skillUsed(skillid, useType, scale)
+        end,
+    },
 }
