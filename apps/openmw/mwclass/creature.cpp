@@ -339,10 +339,7 @@ namespace MWClass
         MWMechanics::applyElementalShields(ptr, victim);
 
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
-        {
             damage = 0;
-            victim.getClass().block(victim);
-        }
 
         MWMechanics::diseaseContact(victim, ptr);
 

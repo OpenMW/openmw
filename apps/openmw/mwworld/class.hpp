@@ -151,10 +151,6 @@ namespace MWWorld
         /// actor responsible for the attack. \a successful specifies if the hit is
         /// successful or not. \a sourceType classifies the damage source.
 
-        virtual void block(const Ptr& ptr) const;
-        ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
-        /// (default implementation: throw an exception)
-
         virtual std::unique_ptr<Action> activate(const Ptr& ptr, const Ptr& actor) const;
         ///< Generate action for activation (default implementation: return a null action).
 

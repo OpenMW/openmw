@@ -118,11 +118,6 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
-    void Class::block(const Ptr& ptr) const
-    {
-        throw std::runtime_error("class cannot block");
-    }
-
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker,
         const osg::Vec3f& hitPosition, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
