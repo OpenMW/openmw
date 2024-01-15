@@ -77,24 +77,6 @@ local function tableHasValue(table, value)
     return false
 end
 
-local function getSkillGainValue(skillid, useType, scale)
-    local skillRecord = Skill.record(skillid)
-
-    local skillGain = 0
-    if useType == 0 then
-        skillGain = skillRecord.skillGain1
-    elseif useType == 1 then
-        skillGain = skillRecord.skillGain2
-    elseif useType == 2 then
-        skillGain = skillRecord.skillGain3
-    elseif useType == 3 then
-        skillGain = skillRecord.skillGain4
-    end
-
-    if scale ~= nil then skillGain = skillGain * scale end
-    return skillGain
-end
-
 local function getSkillProgressRequirementUnorm(npc, skillid)
     local npcRecord = NPC.record(npc)
     local class = NPC.classes.record(npcRecord.class)
@@ -128,7 +110,9 @@ local function skillUsed(skillid, useType, scale)
 
     -- Compute skill gain
     local skillStat = NPC.stats.skills[skillid](self)
-    local skillGainUnorm = getSkillGainValue(skillid, useType, scale)
+    local skillRecord = Skill.record(skillid)
+    local skillGainUnorm = skillRecord.skillGain[useType + 1]
+    if scale then skillGainUnorm = skillGainUnorm * scale end
     local skillProgressRequirementUnorm = getSkillProgressRequirementUnorm(self, skillid)
     local skillGain = skillGainUnorm / skillProgressRequirementUnorm
 

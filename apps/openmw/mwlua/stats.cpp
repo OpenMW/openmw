@@ -604,14 +604,13 @@ namespace MWLua
         skillT["attribute"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string {
             return ESM::Attribute::indexToRefId(rec.mData.mAttribute).serializeText();
         });
-        skillT["skillGain1"]
-            = sol::readonly_property([](const ESM::Skill& rec) -> float { return rec.mData.mUseValue[0]; });
-        skillT["skillGain2"]
-            = sol::readonly_property([](const ESM::Skill& rec) -> float { return rec.mData.mUseValue[1]; });
-        skillT["skillGain3"]
-            = sol::readonly_property([](const ESM::Skill& rec) -> float { return rec.mData.mUseValue[2]; });
-        skillT["skillGain4"]
-            = sol::readonly_property([](const ESM::Skill& rec) -> float { return rec.mData.mUseValue[3]; });
+        skillT["skillGain"] = sol::readonly_property([lua](const ESM::Skill& rec) -> sol::table {
+            sol::table res(lua, sol::create);
+            int index = 1;
+            for (auto skillGain : rec.mData.mUseValue)
+                res[index++] = skillGain;
+            return res;
+        });
 
         auto schoolT = context.mLua->sol().new_usertype<ESM::MagicSchool>("MagicSchool");
         schoolT[sol::meta_function::to_string]
