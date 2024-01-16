@@ -15,6 +15,11 @@ namespace osg
     class State;
 }
 
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
+
 namespace Resource
 {
 
@@ -30,7 +35,7 @@ namespace Resource
     class ResourceSystem
     {
     public:
-        explicit ResourceSystem(const VFS::Manager* vfs, double expiryDelay);
+        explicit ResourceSystem(const VFS::Manager* vfs, double expiryDelay, const ToUTF8::Utf8Encoder* encoder);
         ~ResourceSystem();
 
         SceneManager* getSceneManager();
