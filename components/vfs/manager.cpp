@@ -1,6 +1,7 @@
 #include "manager.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <stdexcept>
 
 #include <components/files/conversion.hpp>
@@ -44,6 +45,7 @@ namespace VFS
 
     Files::IStreamPtr Manager::getNormalized(std::string_view normalizedName) const
     {
+        assert(Path::isNormalized(normalizedName));
         const auto found = mIndex.find(normalizedName);
         if (found == mIndex.end())
             throw std::runtime_error("Resource '" + std::string(normalizedName) + "' not found");
