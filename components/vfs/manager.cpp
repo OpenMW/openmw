@@ -38,9 +38,9 @@ namespace VFS
             archive->listResources(mIndex);
     }
 
-    Files::IStreamPtr Manager::get(std::string_view name) const
+    Files::IStreamPtr Manager::get(const Path::Normalized& name) const
     {
-        return getNormalized(Path::normalizeFilename(name));
+        return getNormalized(name);
     }
 
     Files::IStreamPtr Manager::getNormalized(std::string_view normalizedName) const
@@ -52,17 +52,16 @@ namespace VFS
         return found->second->open();
     }
 
-    bool Manager::exists(std::string_view name) const
+    bool Manager::exists(const Path::Normalized& name) const
     {
-        return mIndex.find(Path::normalizeFilename(name)) != mIndex.end();
+        return mIndex.find(name) != mIndex.end();
     }
 
-    std::string Manager::getArchive(std::string_view name) const
+    std::string Manager::getArchive(const Path::Normalized& name) const
     {
-        std::string normalized = Path::normalizeFilename(name);
         for (auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)
         {
-            if ((*it)->contains(normalized))
+            if ((*it)->contains(name))
                 return (*it)->getDescription();
         }
         return {};
