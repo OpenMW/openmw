@@ -52,19 +52,14 @@ namespace VFS
         void listResources(FileMap& out) override
         {
             for (auto& resource : mResources)
-            {
-                std::string ent = resource.mInfo->name();
-                Path::normalizeFilenameInPlace(ent);
-
-                out[ent] = &resource;
-            }
+                out[VFS::Path::Normalized(resource.mInfo->name())] = &resource;
         }
 
-        bool contains(std::string_view file) const override
+        bool contains(Path::NormalizedView file) const override
         {
             for (const auto& it : mResources)
             {
-                if (Path::pathEqual(file, it.mInfo->name()))
+                if (Path::pathEqual(file.value(), it.mInfo->name()))
                     return true;
             }
             return false;
