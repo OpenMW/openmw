@@ -149,7 +149,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mResourcesManager.setVFS(mVFS.get());
 
     constexpr double expiryDelay = 0;
-    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay, &mEncoder);
+    mResourceSystem
+        = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay, &mEncoder.getStatelessEncoder());
 
     Shader::ShaderManager::DefineMap defines
         = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();

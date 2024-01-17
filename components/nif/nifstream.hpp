@@ -25,7 +25,7 @@
 
 namespace ToUTF8
 {
-    class Utf8Encoder;
+    class StatelessUtf8Encoder;
 }
 
 namespace Nif
@@ -73,11 +73,12 @@ namespace Nif
     {
         const Reader& mReader;
         Files::IStreamPtr mStream;
-        const ToUTF8::Utf8Encoder* mEncoder;
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
         std::string mBuffer;
 
     public:
-        explicit NIFStream(const Reader& reader, Files::IStreamPtr&& stream, const ToUTF8::Utf8Encoder* encoder)
+        explicit NIFStream(
+            const Reader& reader, Files::IStreamPtr&& stream, const ToUTF8::StatelessUtf8Encoder* encoder)
             : mReader(reader)
             , mStream(std::move(stream))
             , mEncoder(encoder)

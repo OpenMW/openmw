@@ -11,7 +11,7 @@
 
 namespace ToUTF8
 {
-    class Utf8Encoder;
+    class StatelessUtf8Encoder;
 }
 
 namespace Resource
@@ -54,7 +54,7 @@ namespace Resource
     {
     public:
         explicit KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
-            const ToUTF8::Utf8Encoder* encoder);
+            const ToUTF8::StatelessUtf8Encoder* encoder);
         ~KeyframeManager() = default;
 
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
@@ -65,7 +65,7 @@ namespace Resource
 
     private:
         SceneManager* mSceneManager;
-        const ToUTF8::Utf8Encoder* mEncoder;
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
     };
 
 }

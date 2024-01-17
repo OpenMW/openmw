@@ -129,6 +129,7 @@
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
     Bug #7770: Sword of the Perithia: Script execution failure
+    Bug #7780: Non-ASCII texture paths in NIF files don't work
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty

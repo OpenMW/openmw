@@ -61,7 +61,7 @@ namespace Nif
         if (end != std::string::npos)
             str.erase(end);
         if (mEncoder)
-            str = mEncoder->getStatelessEncoder().getUtf8(str, ToUTF8::BufferAllocationPolicy::UseGrowFactor, mBuffer);
+            str = mEncoder->getUtf8(str, ToUTF8::BufferAllocationPolicy::UseGrowFactor, mBuffer);
         return str;
     }
 

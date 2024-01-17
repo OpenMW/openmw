@@ -24,7 +24,7 @@
 namespace Nif
 {
 
-    Reader::Reader(NIFFile& file, const ToUTF8::Utf8Encoder* encoder)
+    Reader::Reader(NIFFile& file, const ToUTF8::StatelessUtf8Encoder* encoder)
         : mVersion(file.mVersion)
         , mUserVersion(file.mUserVersion)
         , mBethVersion(file.mBethVersion)

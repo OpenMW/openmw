@@ -207,8 +207,8 @@ namespace Resource
 namespace Resource
 {
 
-    KeyframeManager::KeyframeManager(
-        const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay, const ToUTF8::Utf8Encoder* encoder)
+    KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
+        const ToUTF8::StatelessUtf8Encoder* encoder)
         : ResourceManager(vfs, expiryDelay)
         , mSceneManager(sceneManager)
         , mEncoder(encoder)

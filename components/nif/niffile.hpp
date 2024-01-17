@@ -13,7 +13,7 @@
 
 namespace ToUTF8
 {
-    class Utf8Encoder;
+    class StatelessUtf8Encoder;
 }
 
 namespace Nif
@@ -117,7 +117,7 @@ namespace Nif
         std::vector<std::string> mStrings;
 
         bool& mUseSkinning;
-        const ToUTF8::Utf8Encoder* mEncoder;
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
 
         static std::atomic_bool sLoadUnsupportedFiles;
         static std::atomic_bool sWriteNifDebugLog;
@@ -128,7 +128,7 @@ namespace Nif
 
     public:
         /// Open a NIF stream. The name is used for error messages.
-        Reader(NIFFile& file, const ToUTF8::Utf8Encoder* encoder);
+        explicit Reader(NIFFile& file, const ToUTF8::StatelessUtf8Encoder* encoder);
 
         /// Parse the file
         void parse(Files::IStreamPtr&& stream);

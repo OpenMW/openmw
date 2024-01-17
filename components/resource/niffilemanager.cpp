@@ -31,7 +31,7 @@ namespace Resource
         Nif::NIFFilePtr mNifFile;
     };
 
-    NifFileManager::NifFileManager(const VFS::Manager* vfs, const ToUTF8::Utf8Encoder* encoder)
+    NifFileManager::NifFileManager(const VFS::Manager* vfs, const ToUTF8::StatelessUtf8Encoder* encoder)
         // NIF files aren't needed any more once the converted objects are cached in SceneManager / BulletShapeManager,
         // so no point in using an expiry delay.
         : ResourceManager(vfs, 0)

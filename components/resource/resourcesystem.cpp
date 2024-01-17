@@ -10,7 +10,8 @@
 namespace Resource
 {
 
-    ResourceSystem::ResourceSystem(const VFS::Manager* vfs, double expiryDelay, const ToUTF8::Utf8Encoder* encoder)
+    ResourceSystem::ResourceSystem(
+        const VFS::Manager* vfs, double expiryDelay, const ToUTF8::StatelessUtf8Encoder* encoder)
         : mVFS(vfs)
     {
         mNifFileManager = std::make_unique<NifFileManager>(vfs, encoder);
