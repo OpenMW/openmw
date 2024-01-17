@@ -33,14 +33,10 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
     return changeExtension(path, ".dds");
 }
 
-std::string Misc::ResourceHelpers::correctResourcePath(
-    std::span<const std::string_view> topLevelDirectories, std::string_view resPath, const VFS::Manager* vfs)
+// If `ext` is not empty we first search file with extension `ext`, then if not found fallback to original extension.
+std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::string_view> topLevelDirectories,
+    std::string_view resPath, const VFS::Manager* vfs, std::string_view ext)
 {
-    /* Bethesda at some point converted all their BSA
-     * textures from tga to dds for increased load speed, but all
-     * texture file name references were kept as .tga.
-     */
-
     std::string correctedPath = Misc::StringUtils::lowerCase(resPath);
 
     // Flatten slashes
@@ -80,14 +76,14 @@ std::string Misc::ResourceHelpers::correctResourcePath(
 
     std::string origExt = correctedPath;
 
-    // since we know all (GOTY edition or less) textures end
-    // in .dds, we change the extension
-    bool changedToDds = changeExtensionToDds(correctedPath);
+    // replace extension if `ext` is specified (used for .tga -> .dds, .wav -> .mp3)
+    bool isExtChanged = !ext.empty() && changeExtension(correctedPath, ext);
+
     if (vfs->exists(correctedPath))
         return correctedPath;
-    // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
-    // verify, and revert if false (this call succeeds quickly, but fails slowly)
-    if (changedToDds && vfs->exists(origExt))
+
+    // fall back to original extension
+    if (isExtChanged && vfs->exists(origExt))
         return origExt;
 
     // fall back to a resource in the top level directory if it exists
@@ -98,7 +94,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(
     if (vfs->exists(fallback))
         return fallback;
 
-    if (changedToDds)
+    if (isExtChanged)
     {
         fallback = topLevelDirectories.front();
         fallback += '\\';
@@ -110,19 +106,23 @@ std::string Misc::ResourceHelpers::correctResourcePath(
     return correctedPath;
 }
 
+// Note: Bethesda at some point converted all their BSA textures from tga to dds for increased load speed,
+// but all texture file name references were kept as .tga. So we pass ext=".dds" to all helpers
+// looking for textures.
+
 std::string Misc::ResourceHelpers::correctTexturePath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ { "textures", "bookart" } }, resPath, vfs);
+    return correctResourcePath({ { "textures", "bookart" } }, resPath, vfs, ".dds");
 }
 
 std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ { "icons" } }, resPath, vfs);
+    return correctResourcePath({ { "icons" } }, resPath, vfs, ".dds");
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ { "bookart", "textures" } }, resPath, vfs);
+    return correctResourcePath({ { "bookart", "textures" } }, resPath, vfs, ".dds");
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(
@@ -199,6 +199,12 @@ std::string_view Misc::ResourceHelpers::meshPathForESM3(std::string_view resPath
 VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(
     VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
+    // Note: likely should be replaced with
+    //     return correctResourcePath({ { "sound" } }, resPath, vfs, ".mp3");
+    // but there is a slight difference in behaviour:
+    // - `correctResourcePath(..., ".mp3")` first checks `.mp3`, then tries the original extension
+    // - the implementation below first tries the original extension, then falls back to `.mp3`.
+
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
     if (!vfs.exists(resPath))
     {

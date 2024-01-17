@@ -2450,5 +2450,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
+-- @field #string openSound FormId of the door opening sound
+-- @field #string closeSound FormId of the door closing sound
 
 return nil

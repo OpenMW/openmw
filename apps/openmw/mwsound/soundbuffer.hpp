@@ -15,6 +15,12 @@ namespace ESM
     struct Sound;
 }
 
+namespace ESM4
+{
+    struct Sound;
+    struct SoundReference;
+}
+
 namespace VFS
 {
     class Manager;
@@ -112,8 +118,10 @@ namespace MWSound
         // NOTE: unused buffers are stored in front-newest order.
         std::deque<SoundBuffer*> mUnusedBuffers;
 
-        inline SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM::Sound& sound);
-        inline SoundBuffer* insertSound(std::string_view fileName);
+        SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM::Sound& sound);
+        SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM4::Sound& sound);
+        SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM4::SoundReference& sound);
+        SoundBuffer* insertSound(std::string_view fileName);
 
         inline void unloadUnused();
     };
