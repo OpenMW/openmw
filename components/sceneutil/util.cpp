@@ -37,26 +37,26 @@ namespace SceneUtil
         }
 
         const std::array<std::string, 32> glowTextureNames = generateGlowTextureNames();
+
+        struct FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
+        {
+            FindLowestUnusedTexUnitVisitor()
+                : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            {
+            }
+
+            void apply(osg::Node& node) override
+            {
+                if (osg::StateSet* stateset = node.getStateSet())
+                    mLowestUnusedTexUnit
+                        = std::max(mLowestUnusedTexUnit, int(stateset->getTextureAttributeList().size()));
+
+                traverse(node);
+            }
+
+            int mLowestUnusedTexUnit = 0;
+        };
     }
-
-    class FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
-    {
-    public:
-        FindLowestUnusedTexUnitVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mLowestUnusedTexUnit(0)
-        {
-        }
-
-        void apply(osg::Node& node) override
-        {
-            if (osg::StateSet* stateset = node.getStateSet())
-                mLowestUnusedTexUnit = std::max(mLowestUnusedTexUnit, int(stateset->getTextureAttributeList().size()));
-
-            traverse(node);
-        }
-        int mLowestUnusedTexUnit;
-    };
 
     GlowUpdater::GlowUpdater(int texUnit, const osg::Vec4f& color,
         const std::vector<osg::ref_ptr<osg::Texture2D>>& textures, osg::Node* node, float duration,
