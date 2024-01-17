@@ -91,7 +91,7 @@ void CSVDoc::AdjusterWidget::setName(const QString& name, bool addon)
         {
             // path already points to the local data directory
             message = "Will be saved as: " + Files::pathToQString(path);
-            mResultPath = path;
+            mResultPath = std::move(path);
         }
         // in all other cases, ensure the path points to data-local and do an existing file check
         else

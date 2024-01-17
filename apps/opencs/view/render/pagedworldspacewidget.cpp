@@ -514,7 +514,7 @@ void CSVRender::PagedWorldspaceWidget::moveCellSelection(int x, int y)
             addCellToScene(*iter);
     }
 
-    mSelection = newSelection;
+    mSelection = std::move(newSelection);
 }
 
 void CSVRender::PagedWorldspaceWidget::addCellToSceneFromCamera(int offsetX, int offsetY)
