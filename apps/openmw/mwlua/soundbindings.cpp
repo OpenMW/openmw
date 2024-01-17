@@ -23,6 +23,11 @@ namespace
         float mTimeOffset = 0.f;
     };
 
+    struct StreamMusicArgs
+    {
+        float mFade = 1.f;
+    };
+
     PlaySoundArgs getPlaySoundArgs(const sol::optional<sol::table>& options)
     {
         PlaySoundArgs args;
@@ -54,6 +59,17 @@ namespace
         else if (!args.mScale)
             return MWSound::PlayMode::NoEnvNoScaling;
         return MWSound::PlayMode::NoEnv;
+    }
+
+    StreamMusicArgs getStreamMusicArgs(const sol::optional<sol::table>& options)
+    {
+        StreamMusicArgs args;
+
+        if (options.has_value())
+        {
+            args.mFade = options->get_or("fadeOut", 1.f);
+        }
+        return args;
     }
 }
 
@@ -95,9 +111,10 @@ namespace MWLua
             return MWBase::Environment::get().getSoundManager()->getSoundPlaying(MWWorld::Ptr(), fileName);
         };
 
-        api["streamMusic"] = [](std::string_view fileName) {
+        api["streamMusic"] = [](std::string_view fileName, const sol::optional<sol::table>& options) {
+            auto args = getStreamMusicArgs(options);
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-            sndMgr->streamMusic(std::string(fileName), MWSound::MusicType::Scripted);
+            sndMgr->streamMusic(std::string(fileName), MWSound::MusicType::Scripted, args.mFade);
         };
 
         api["isMusicPlaying"] = []() { return MWBase::Environment::get().getSoundManager()->isMusicPlaying(); };
