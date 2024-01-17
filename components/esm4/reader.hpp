@@ -36,11 +36,15 @@
 
 #include <components/esm/formid.hpp>
 #include <components/files/istreamptr.hpp>
-#include <components/vfs/manager.hpp>
 
 namespace ToUTF8
 {
     class StatelessUtf8Encoder;
+}
+
+namespace VFS
+{
+    class Manager;
 }
 
 namespace ESM4
