@@ -209,8 +209,8 @@ namespace MWWorld
         /// false will abort the iteration.
         /// \note Prefer using forEachConst when possible.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class Visitor>
         bool forEach(Visitor&& visitor)
         {
@@ -238,8 +238,8 @@ namespace MWWorld
         /// Call visitor (MWWorld::ConstPtr) for each reference. visitor must return a bool. Returning
         /// false will abort the iteration.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class Visitor>
         bool forEachConst(Visitor&& visitor) const
         {
@@ -263,8 +263,8 @@ namespace MWWorld
         /// Call visitor (ref) for each reference of given type. visitor must return a bool. Returning
         /// false will abort the iteration.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class T, class Visitor>
         bool forEachType(Visitor&& visitor)
         {
