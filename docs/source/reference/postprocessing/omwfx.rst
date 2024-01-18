@@ -561,7 +561,7 @@ color buffer will accumulate.
         source_format = rgb;
         internal_format = rgb16f;
         source_type = float;
-        clear_color = vec4(1,0,0,1);
+        clear_color = vec4(0,0,0,1);
     }
 
     fragment red(target=RT_Red,blend=(add, src_color, one), rt1=RT_Red) {
