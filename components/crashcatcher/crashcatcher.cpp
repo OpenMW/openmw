@@ -131,7 +131,7 @@ namespace
     }
 }
 
-static void gdb_info(pid_t pid)
+static void printGdbInfo(pid_t pid)
 {
     /*
      * Create a temp file to put gdb commands into.
@@ -141,13 +141,24 @@ static void gdb_info(pid_t pid)
      */
     char respfile[64] = "/tmp/gdb-respfile-XXXXXX";
 
-    FILE* f;
-    int fd;
-
 #ifdef __COVERITY__
     umask(0600);
 #endif
-    if ((fd = mkstemp(respfile)) >= 0 && (f = fdopen(fd, "w")) != nullptr)
+
+    const int fd = mkstemp(respfile);
+    if (fd == -1)
+    {
+        printf("Failed to call mkstemp: %s\n", std::generic_category().message(errno).c_str());
+        return;
+    }
+
+    FILE* const f = fdopen(fd, "w");
+    if (f == nullptr)
+    {
+        printf("Failed to open file for gdb output \"%s\": %s\n", respfile,
+            std::generic_category().message(errno).c_str());
+    }
+    else
     {
         fprintf(f,
             "attach %d\n"
@@ -179,33 +190,24 @@ static void gdb_info(pid_t pid)
 
         int ret = system(cmd_buf);
 
-        if (ret != 0)
+        if (ret == -1)
             printf(
-                "\nFailed to create a crash report. Please make sure that 'gdb' is installed and present in PATH then "
-                "crash again."
-                "\nCurrent PATH: %s\n",
+                "\nFailed to create a crash report: %s.\n"
+                "Please make sure that 'gdb' is installed and present in PATH then crash again.\n"
+                "Current PATH: %s\n",
+                std::generic_category().message(errno).c_str(), getenv("PATH"));
+        else if (ret != 0)
+            printf(
+                "\nFailed to create a crash report.\n"
+                "Please make sure that 'gdb' is installed and present in PATH then crash again.\n"
+                "Current PATH: %s\n",
                 getenv("PATH"));
-        fflush(stdout);
 
-        /* Clean up */
-        if (remove(respfile) != 0)
-            Log(Debug::Warning) << "Warning: can not remove file '" << respfile
-                                << "': " << std::generic_category().message(errno);
+        fflush(stdout);
     }
-    else
-    {
-        /* Error creating temp file */
-        if (fd >= 0)
-        {
-            if (close(fd) != 0)
-                Log(Debug::Warning) << "Warning: can not close file '" << respfile
-                                    << "': " << std::generic_category().message(errno);
-            else if (remove(respfile) != 0)
-                Log(Debug::Warning) << "Warning: can not remove file '" << respfile
-                                    << "': " << std::generic_category().message(errno);
-        }
-        printf("!!! Could not create gdb command file\n");
-    }
+
+    close(fd);
+    remove(respfile);
     fflush(stdout);
 }
 
@@ -365,7 +367,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
 
     if (crash_info.pid > 0)
     {
-        gdb_info(crash_info.pid);
+        printGdbInfo(crash_info.pid);
         kill(crash_info.pid, SIGKILL);
     }
 
