@@ -76,7 +76,7 @@ namespace Bsa
                     fail("Corrupted BSA");
             }
 
-            mFolders[dirHash][{ nameHash, extHash }] = file;
+            mFolders[dirHash][{ nameHash, extHash }] = std::move(file);
 
             FileStruct fileStruct{};
             mFiles.push_back(fileStruct);
