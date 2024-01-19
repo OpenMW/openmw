@@ -63,7 +63,6 @@ static struct
     int signum;
     pid_t pid;
     std::optional<siginfo_t> siginfo;
-    char buf[1024];
 } crash_info;
 
 namespace
@@ -127,8 +126,6 @@ namespace
         return it == info.end() ? "" : it->mDescription;
     }
 }
-
-static int (*cc_user_info)(char*, char*);
 
 static void gdb_info(pid_t pid)
 {
@@ -265,8 +262,6 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
         crash_info.siginfo = std::nullopt;
     else
         crash_info.siginfo = *siginfo;
-    if (cc_user_info)
-        cc_user_info(crash_info.buf, crash_info.buf + sizeof(crash_info.buf));
 
     /* Fork off to start a crash handler */
     switch ((dbg_pid = fork()))
@@ -367,8 +362,6 @@ static void crash_handler(const char* logfile)
 
     sys_info();
 
-    crash_info.buf[sizeof(crash_info.buf) - 1] = '\0';
-    printf("%s\n", crash_info.buf);
     fflush(stdout);
 
     if (crash_info.pid > 0)
@@ -425,8 +418,7 @@ static void getExecPath(char** argv)
     }
 }
 
-int crashCatcherInstallHandlers(
-    int argc, char** argv, int num_signals, int* signals, const char* logfile, int (*user_info)(char*, char*))
+int crashCatcherInstallHandlers(int argc, char** argv, int num_signals, int* signals, const char* logfile)
 {
     struct sigaction sa;
     stack_t altss;
@@ -434,8 +426,6 @@ int crashCatcherInstallHandlers(
 
     if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
         crash_handler(logfile);
-
-    cc_user_info = user_info;
 
     getExecPath(argv);
 
@@ -534,7 +524,7 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
         int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), nullptr) == -1)
+        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str()) == -1)
         {
             Log(Debug::Warning) << "Installing crash handler failed";
         }
