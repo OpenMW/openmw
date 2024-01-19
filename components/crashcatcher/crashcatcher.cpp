@@ -415,7 +415,7 @@ static void getExecPath(char** argv)
     }
 }
 
-int crashCatcherInstallHandlers(int argc, char** argv, int num_signals, int* signals, const char* logfile)
+int crashCatcherInstallHandlers(int argc, char** argv, const char* logfile)
 {
     if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
         crash_handler(logfile);
@@ -437,17 +437,15 @@ int crashCatcherInstallHandlers(int argc, char** argv, int num_signals, int* sig
     sa.sa_flags = SA_RESETHAND | SA_NODEFER | SA_SIGINFO | SA_ONSTACK;
     sigemptyset(&sa.sa_mask);
 
+    constexpr int signals[] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+
     int retval = 0;
-    while (num_signals--)
+    for (const int signal : signals)
     {
-        if ((*signals != SIGSEGV && *signals != SIGILL && *signals != SIGFPE && *signals != SIGABRT
-                && *signals != SIGBUS)
-            || sigaction(*signals, &sa, nullptr) == -1)
+        if (sigaction(signal, &sa, nullptr) == -1)
         {
-            *signals = 0;
             retval = -1;
         }
-        ++signals;
     }
     return retval;
 }
@@ -511,8 +509,7 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
 {
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
-        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str()) == -1)
+        if (crashCatcherInstallHandlers(argc, argv, crashLogPath.c_str()) == -1)
         {
             Log(Debug::Warning) << "Installing crash handler failed";
         }
