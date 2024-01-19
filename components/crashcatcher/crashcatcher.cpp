@@ -341,25 +341,22 @@ static void crash_handler(const char* logfile)
         fprintf(stderr, "Address: %p\n", crash_info.siginfo->si_addr);
     fputc('\n', stderr);
 
-    if (logfile)
+    /* Create crash log file and redirect shell output to it */
+    if (freopen(logfile, "wa", stdout) != stdout)
     {
-        /* Create crash log file and redirect shell output to it */
-        if (freopen(logfile, "wa", stdout) != stdout)
-        {
-            fprintf(stderr, "!!! Could not create %s following signal\n", logfile);
-            exit(1);
-        }
-        fprintf(stderr, "Generating %s and killing process %d, please wait... ", logfile, crash_info.pid);
-
-        printf(
-            "*** Fatal Error ***\n"
-            "%s (signal %i)\n",
-            sigdesc, crash_info.signum);
-        if (crash_info.siginfo.has_value())
-            printf("Address: %p\n", crash_info.siginfo->si_addr);
-        fputc('\n', stdout);
-        fflush(stdout);
+        fprintf(stderr, "!!! Could not create %s following signal\n", logfile);
+        exit(1);
     }
+    fprintf(stderr, "Generating %s and killing process %d, please wait... ", logfile, crash_info.pid);
+
+    printf(
+        "*** Fatal Error ***\n"
+        "%s (signal %i)\n",
+        sigdesc, crash_info.signum);
+    if (crash_info.siginfo.has_value())
+        printf("Address: %p\n", crash_info.siginfo->si_addr);
+    fputc('\n', stdout);
+    fflush(stdout);
 
     sys_info();
 
@@ -376,12 +373,9 @@ static void crash_handler(const char* logfile)
     // even faulty applications shouldn't be able to freeze the X server.
     usleep(100000);
 
-    if (logfile)
-    {
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile)
-            + "'.\n Please report this to https://gitlab.com/OpenMW/openmw/issues !";
-        SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
-    }
+    const std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile)
+        + "'.\n Please report this to https://gitlab.com/OpenMW/openmw/issues !";
+    SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
 
     exit(0);
 }
@@ -509,15 +503,15 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
 {
 #if (defined(__APPLE__) || (defined(__linux) && !defined(ANDROID)) || (defined(__unix) && !defined(ANDROID))           \
     || defined(__posix))
-    if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
-    {
-        if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
-            crash_handler(Files::pathToUnicodeString(crashLogPath).c_str());
+    if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
+        crash_handler(Files::pathToUnicodeString(crashLogPath).c_str());
 
-        if (crashCatcherInstallHandlers(argv) == -1)
-            Log(Debug::Warning) << "Installing crash handler failed";
-        else
-            Log(Debug::Info) << "Crash handler installed";
-    }
+    if (is_debugger_present())
+        return;
+
+    if (crashCatcherInstallHandlers(argv) == -1)
+        Log(Debug::Warning) << "Installing crash handler failed";
+    else
+        Log(Debug::Info) << "Crash handler installed";
 #endif
 }
