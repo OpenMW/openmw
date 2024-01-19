@@ -129,17 +129,17 @@ namespace
 
 static void gdb_info(pid_t pid)
 {
-    char respfile[64];
-    FILE* f;
-    int fd;
-
     /*
      * Create a temp file to put gdb commands into.
      * Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
      * Modern systems implement it and suggest to do not touch masks in multithreaded applications.
      * So CoverityScan warning is valid only for ancient versions of stdlib.
      */
-    strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
+    char respfile[64] = "/tmp/gdb-respfile-XXXXXX";
+
+    FILE* f;
+    int fd;
+
 #ifdef __COVERITY__
     umask(0600);
 #endif
@@ -223,8 +223,8 @@ static size_t safe_write(int fd, const void* buf, size_t len)
     size_t ret = 0;
     while (ret < len)
     {
-        ssize_t rem;
-        if ((rem = write(fd, (const char*)buf + ret, len - ret)) == -1)
+        const ssize_t rem = write(fd, (const char*)buf + ret, len - ret);
+        if (rem == -1)
         {
             if (errno == EINTR)
                 continue;
@@ -235,12 +235,8 @@ static size_t safe_write(int fd, const void* buf, size_t len)
     return ret;
 }
 
-static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
+static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
 {
-    // ucontext_t *ucontext = (ucontext_t*)context;
-    pid_t dbg_pid;
-    int fd[2];
-
     /* Make sure the effective uid is the real uid */
     if (getuid() != geteuid())
     {
@@ -249,6 +245,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
     }
 
     safe_write(STDERR_FILENO, fatal_err, sizeof(fatal_err) - 1);
+    int fd[2];
     if (pipe(fd) == -1)
     {
         safe_write(STDERR_FILENO, pipe_err, sizeof(pipe_err) - 1);
@@ -263,8 +260,9 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
     else
         crash_info.siginfo = *siginfo;
 
+    const pid_t dbg_pid = fork();
     /* Fork off to start a crash handler */
-    switch ((dbg_pid = fork()))
+    switch (dbg_pid)
     {
         /* Error */
         case -1:
@@ -399,7 +397,6 @@ static void getExecPath(char** argv)
     if (proc_pidpath(getpid(), argv0, sizeof(argv0)) > 0)
         return;
 #endif
-    int cwdlen;
     const char* statusPaths[] = { "/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file" };
     memset(argv0, 0, sizeof(argv0));
 
@@ -413,17 +410,13 @@ static void getExecPath(char** argv)
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
     else if (getcwd(argv0, sizeof(argv0)) != nullptr)
     {
-        cwdlen = strlen(argv0);
+        const int cwdlen = strlen(argv0);
         snprintf(argv0 + cwdlen, sizeof(argv0) - cwdlen, "/%s", argv[0]);
     }
 }
 
 int crashCatcherInstallHandlers(int argc, char** argv, int num_signals, int* signals, const char* logfile)
 {
-    struct sigaction sa;
-    stack_t altss;
-    int retval;
-
     if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
         crash_handler(logfile);
 
@@ -432,17 +425,19 @@ int crashCatcherInstallHandlers(int argc, char** argv, int num_signals, int* sig
     /* Set an alternate signal stack so SIGSEGVs caused by stack overflows
      * still run */
     static char* altstack = new char[SIGSTKSZ];
+    stack_t altss;
     altss.ss_sp = altstack;
     altss.ss_flags = 0;
     altss.ss_size = SIGSTKSZ;
     sigaltstack(&altss, nullptr);
 
+    struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_sigaction = crash_catcher;
     sa.sa_flags = SA_RESETHAND | SA_NODEFER | SA_SIGINFO | SA_ONSTACK;
     sigemptyset(&sa.sa_mask);
 
-    retval = 0;
+    int retval = 0;
     while (num_signals--)
     {
         if ((*signals != SIGSEGV && *signals != SIGILL && *signals != SIGFPE && *signals != SIGABRT
@@ -477,10 +472,7 @@ static bool is_debugger_present()
     }
     return false;
 #elif defined(__APPLE__)
-    int junk;
-    int mib[4];
     struct kinfo_proc info;
-    size_t size;
 
     // Initialize the flags so that, if sysctl fails for some bizarre
     // reason, we get a predictable result.
@@ -489,16 +481,12 @@ static bool is_debugger_present()
 
     // Initialize mib, which tells sysctl the info we want, in this case
     // we're looking for information about a specific process ID.
-
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PID;
-    mib[3] = getpid();
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
 
     // Call sysctl.
 
-    size = sizeof(info);
-    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0);
+    size_t size = sizeof(info);
+    const int junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0);
     assert(junk == 0);
 
     // We're being debugged if the P_TRACED flag is set.
