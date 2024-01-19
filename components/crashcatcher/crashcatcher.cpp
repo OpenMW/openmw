@@ -305,7 +305,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
     }
 }
 
-static void crash_handler(const char* logfile)
+[[noreturn]] static void handleCrash(const char* logfile)
 {
     if (fread(&crash_info, sizeof(crash_info), 1, stdin) != 1)
     {
@@ -504,7 +504,7 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
 #if (defined(__APPLE__) || (defined(__linux) && !defined(ANDROID)) || (defined(__unix) && !defined(ANDROID))           \
     || defined(__posix))
     if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
-        crash_handler(Files::pathToUnicodeString(crashLogPath).c_str());
+        handleCrash(Files::pathToUnicodeString(crashLogPath).c_str());
 
     if (is_debugger_present())
         return;
