@@ -129,86 +129,140 @@ namespace
         const auto it = std::find_if(info.begin(), info.end(), [&](const SignalInfo& v) { return v.mCode == code; });
         return it == info.end() ? "" : it->mDescription;
     }
-}
 
-static void printGdbInfo(pid_t pid)
-{
-    /*
-     * Create a temp file to put gdb commands into.
-     * Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
-     * Modern systems implement it and suggest to do not touch masks in multithreaded applications.
-     * So CoverityScan warning is valid only for ancient versions of stdlib.
-     */
-    char respfile[64] = "/tmp/gdb-respfile-XXXXXX";
+    struct Close
+    {
+        void operator()(const int* value) { close(*value); }
+    };
+
+    struct CloseFile
+    {
+        void operator()(FILE* value) { fclose(value); }
+    };
+
+    struct Remove
+    {
+        void operator()(const char* value) { remove(value); }
+    };
+
+    template <class T>
+    bool printDebuggerInfo(pid_t pid)
+    {
+        // Create a temp file to put gdb commands into.
+        // Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
+        // Modern systems implement it and suggest to do not touch masks in multithreaded applications.
+        // So CoverityScan warning is valid only for ancient versions of stdlib.
+        char scriptPath[64];
+
+        std::snprintf(scriptPath, sizeof(scriptPath), "/tmp/%s-script-XXXXXX", T::sName);
 
 #ifdef __COVERITY__
-    umask(0600);
+        umask(0600);
 #endif
 
-    const int fd = mkstemp(respfile);
-    if (fd == -1)
-    {
-        printf("Failed to call mkstemp: %s\n", std::generic_category().message(errno).c_str());
-        return;
-    }
+        const int fd = mkstemp(scriptPath);
+        if (fd == -1)
+        {
+            printf("Failed to call mkstemp: %s\n", std::generic_category().message(errno).c_str());
+            return false;
+        }
+        std::unique_ptr<const char, Remove> tempFile(scriptPath);
+        std::unique_ptr<const int, Close> scopedFd(&fd);
 
-    FILE* const f = fdopen(fd, "w");
-    if (f == nullptr)
-    {
-        printf("Failed to open file for gdb output \"%s\": %s\n", respfile,
-            std::generic_category().message(errno).c_str());
-    }
-    else
-    {
-        fprintf(f,
-            "attach %d\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Loaded Libraries\"\n"
-            "info sharedlibrary\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Threads\"\n"
-            "info threads\n"
-            "shell echo \"\"\n"
-            "shell echo \"* FPU Status\"\n"
-            "info float\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Registers\"\n"
-            "info registers\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Backtrace\"\n"
-            "thread apply all backtrace full 1000\n"
-            "detach\n"
-            "quit\n",
-            pid);
-        fclose(f);
+        FILE* const file = fdopen(fd, "w");
+        if (file == nullptr)
+        {
+            printf("Failed to open file for %s output \"%s\": %s\n", T::sName, scriptPath,
+                std::generic_category().message(errno).c_str());
+            return false;
+        }
+        std::unique_ptr<FILE, CloseFile> scopedFile(file);
 
-        /* Run gdb and print process info. */
-        char cmd_buf[128];
-        snprintf(cmd_buf, sizeof(cmd_buf), "gdb --quiet --batch --command=%s", respfile);
-        printf("Executing: %s\n", cmd_buf);
+        if (fprintf(file, "%s", T::sScript) < 0)
+        {
+            printf("Failed to write debugger script to file \"%s\": %s\n", scriptPath,
+                std::generic_category().message(errno).c_str());
+            return false;
+        }
+
+        scopedFile = nullptr;
+        scopedFd = nullptr;
+
+        char command[128];
+        snprintf(command, sizeof(command), T::sCommandTemplate, pid, scriptPath);
+        printf("Executing: %s\n", command);
         fflush(stdout);
 
-        int ret = system(cmd_buf);
+        const int ret = system(command);
+
+        const bool result = (ret == 0);
 
         if (ret == -1)
             printf(
                 "\nFailed to create a crash report: %s.\n"
-                "Please make sure that 'gdb' is installed and present in PATH then crash again.\n"
+                "Please make sure that '%s' is installed and present in PATH then crash again.\n"
                 "Current PATH: %s\n",
-                std::generic_category().message(errno).c_str(), getenv("PATH"));
+                T::sName, std::generic_category().message(errno).c_str(), getenv("PATH"));
         else if (ret != 0)
             printf(
                 "\nFailed to create a crash report.\n"
-                "Please make sure that 'gdb' is installed and present in PATH then crash again.\n"
+                "Please make sure that '%s' is installed and present in PATH then crash again.\n"
                 "Current PATH: %s\n",
-                getenv("PATH"));
+                T::sName, getenv("PATH"));
 
         fflush(stdout);
+
+        return result;
     }
 
-    close(fd);
-    remove(respfile);
-    fflush(stdout);
+    struct Gdb
+    {
+        static constexpr char sName[] = "gdb";
+        static constexpr char sScript[] = R"(shell echo ""
+shell echo "* Loaded Libraries"
+info sharedlibrary
+shell echo ""
+shell echo "* Threads"
+info threads
+shell echo ""
+shell echo "* FPU Status"
+info float
+shell echo ""
+shell echo "* Registers"
+info registers
+shell echo ""
+shell echo "* Backtrace"
+thread apply all backtrace full 1000
+detach
+quit
+)";
+        static constexpr char sCommandTemplate[] = "gdb --pid %d --quiet --batch --command %s";
+    };
+
+    struct Lldb
+    {
+        static constexpr char sName[] = "lldb";
+        static constexpr char sScript[] = R"(script print("\n* Loaded Libraries")
+image list
+script print('\n* Threads')
+thread list
+script print('\n* Registers')
+register read --all
+script print('\n* Backtrace')
+script print(''.join(f'{t}\n' + ''.join(''.join([f'  {f}\n', ''.join(f'    {s}\n' for s in f.statics), ''.join(f'    {v}\n' for v in f.variables)]) for f in t.frames) for t in lldb.process.threads))
+detach
+quit
+)";
+        static constexpr char sCommandTemplate[] = "lldb --attach-pid %d --batch --source %s";
+    };
+
+    void printProcessInfo(pid_t pid)
+    {
+        if (printDebuggerInfo<Gdb>(pid))
+            return;
+        if (printDebuggerInfo<Lldb>(pid))
+            return;
+    }
 }
 
 static void printSystemInfo(void)
@@ -369,7 +423,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
 
     if (crash_info.pid > 0)
     {
-        printGdbInfo(crash_info.pid);
+        printProcessInfo(crash_info.pid);
         kill(crash_info.pid, SIGKILL);
     }
 
