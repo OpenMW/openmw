@@ -12,8 +12,10 @@
 
 #include <components/to_utf8/to_utf8.hpp>
 
+#include "components/esm/decompose.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
+
 #include "loadtes3.hpp"
 
 namespace ESM
@@ -175,6 +177,16 @@ namespace ESM
             if (mCtx.leftSub != size)
                 reportSubSizeMismatch(size, mCtx.leftSub);
             (getT(args), ...);
+        }
+
+        void getNamedComposite(NAME name, auto& value)
+        {
+            decompose(value, [&](auto&... args) { getHNT(name, args...); });
+        }
+
+        void getComposite(auto& value)
+        {
+            decompose(value, [&](auto&... args) { (getT(args), ...); });
         }
 
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
