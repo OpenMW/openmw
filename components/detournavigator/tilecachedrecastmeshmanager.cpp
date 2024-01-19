@@ -54,6 +54,15 @@ namespace DetourNavigator
         private:
             const std::optional<std::unique_lock<Mutex>> mImpl;
         };
+
+        TilesPositionsRange getIndexRange(const auto& index)
+        {
+            const auto bounds = index.bounds();
+            return TilesPositionsRange{
+                .mBegin = makeTilePosition(bounds.min_corner()),
+                .mEnd = makeTilePosition(bounds.max_corner()) + TilePosition(1, 1),
+            };
+        }
     }
 
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
@@ -104,14 +113,28 @@ namespace DetourNavigator
 
     TilesPositionsRange TileCachedRecastMeshManager::getLimitedObjectsRange() const
     {
-        if (mObjects.empty())
-            return {};
-        const auto bounds = mObjectIndex.bounds();
-        const TilesPositionsRange objectsRange{
-            .mBegin = makeTilePosition(bounds.min_corner()),
-            .mEnd = makeTilePosition(bounds.max_corner()) + TilePosition(1, 1),
-        };
-        return getIntersection(mRange, objectsRange);
+        std::optional<TilesPositionsRange> result;
+        if (!mWater.empty())
+            result = getIndexRange(mWaterIndex);
+        if (!mHeightfields.empty())
+        {
+            const TilesPositionsRange range = getIndexRange(mHeightfieldIndex);
+            if (result.has_value())
+                result = getUnion(*result, range);
+            else
+                result = range;
+        }
+        if (!mObjects.empty())
+        {
+            const TilesPositionsRange range = getIndexRange(mObjectIndex);
+            if (result.has_value())
+                result = getUnion(*result, range);
+            else
+                result = range;
+        }
+        if (result.has_value())
+            return getIntersection(mRange, *result);
+        return {};
     }
 
     void TileCachedRecastMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
