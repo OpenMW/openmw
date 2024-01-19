@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 #include <SDL_messagebox.h>
 
@@ -506,14 +507,17 @@ static bool is_debugger_present()
 
 void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& crashLogPath)
 {
+#if (defined(__APPLE__) || (defined(__linux) && !defined(ANDROID)) || (defined(__unix) && !defined(ANDROID))           \
+    || defined(__posix))
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
         if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
-            crash_handler(crashLogPath.c_str());
+            crash_handler(Files::pathToUnicodeString(crashLogPath).c_str());
 
         if (crashCatcherInstallHandlers(argv) == -1)
             Log(Debug::Warning) << "Installing crash handler failed";
         else
             Log(Debug::Info) << "Crash handler installed";
     }
+#endif
 }
