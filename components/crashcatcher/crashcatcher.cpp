@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <span>
 
 #include <errno.h>
 #include <limits.h>
@@ -64,57 +66,66 @@ static struct
     char buf[1024];
 } crash_info;
 
-static const struct
+namespace
 {
-    const char* name;
-    int signum;
-} signals[] = { { "Segmentation fault", SIGSEGV }, { "Illegal instruction", SIGILL }, { "FPU exception", SIGFPE },
-    { "System BUS error", SIGBUS }, { nullptr, 0 } };
+    struct SignalInfo
+    {
+        int mCode;
+        const char* mDescription;
+    };
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigill_codes[] = {
+    constexpr SignalInfo signals[] = {
+        { SIGSEGV, "Segmentation fault" },
+        { SIGILL, "Illegal instruction" },
+        { SIGFPE, "FPU exception" },
+        { SIGBUS, "System BUS error" },
+    };
+
+    constexpr SignalInfo sigIllCodes[] = {
 #if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
-    { ILL_ILLOPC, "Illegal opcode" }, { ILL_ILLOPN, "Illegal operand" }, { ILL_ILLADR, "Illegal addressing mode" },
-    { ILL_ILLTRP, "Illegal trap" }, { ILL_PRVOPC, "Privileged opcode" }, { ILL_PRVREG, "Privileged register" },
-    { ILL_COPROC, "Coprocessor error" }, { ILL_BADSTK, "Internal stack error" },
+        { ILL_ILLOPC, "Illegal opcode" },
+        { ILL_ILLOPN, "Illegal operand" },
+        { ILL_ILLADR, "Illegal addressing mode" },
+        { ILL_ILLTRP, "Illegal trap" },
+        { ILL_PRVOPC, "Privileged opcode" },
+        { ILL_PRVREG, "Privileged register" },
+        { ILL_COPROC, "Coprocessor error" },
+        { ILL_BADSTK, "Internal stack error" },
 #endif
-    { 0, nullptr }
-};
+    };
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigfpe_codes[] = { { FPE_INTDIV, "Integer divide by zero" }, { FPE_INTOVF, "Integer overflow" },
-    { FPE_FLTDIV, "Floating point divide by zero" }, { FPE_FLTOVF, "Floating point overflow" },
-    { FPE_FLTUND, "Floating point underflow" }, { FPE_FLTRES, "Floating point inexact result" },
-    { FPE_FLTINV, "Floating point invalid operation" }, { FPE_FLTSUB, "Subscript out of range" }, { 0, nullptr } };
+    constexpr SignalInfo sigFpeCodes[] = {
+        { FPE_INTDIV, "Integer divide by zero" },
+        { FPE_INTOVF, "Integer overflow" },
+        { FPE_FLTDIV, "Floating point divide by zero" },
+        { FPE_FLTOVF, "Floating point overflow" },
+        { FPE_FLTUND, "Floating point underflow" },
+        { FPE_FLTRES, "Floating point inexact result" },
+        { FPE_FLTINV, "Floating point invalid operation" },
+        { FPE_FLTSUB, "Subscript out of range" },
+    };
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigsegv_codes[] = {
+    constexpr SignalInfo sigSegvCodes[] = {
 #ifndef __FreeBSD__
-    { SEGV_MAPERR, "Address not mapped to object" }, { SEGV_ACCERR, "Invalid permissions for mapped object" },
+        { SEGV_MAPERR, "Address not mapped to object" },
+        { SEGV_ACCERR, "Invalid permissions for mapped object" },
 #endif
-    { 0, nullptr }
-};
+    };
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigbus_codes[] = {
+    constexpr SignalInfo sigBusCodes[] = {
 #ifndef __FreeBSD__
-    { BUS_ADRALN, "Invalid address alignment" }, { BUS_ADRERR, "Non-existent physical address" },
-    { BUS_OBJERR, "Object specific hardware error" },
+        { BUS_ADRALN, "Invalid address alignment" },
+        { BUS_ADRERR, "Non-existent physical address" },
+        { BUS_OBJERR, "Object specific hardware error" },
 #endif
-    { 0, nullptr }
-};
+    };
+
+    const char* findSignalDescription(std::span<const SignalInfo> info, int code)
+    {
+        const auto it = std::find_if(info.begin(), info.end(), [&](const SignalInfo& v) { return v.mCode == code; });
+        return it == info.end() ? "" : it->mDescription;
+    }
+}
 
 static int (*cc_user_info)(char*, char*);
 
@@ -298,71 +309,32 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
 
 static void crash_handler(const char* logfile)
 {
-    const char* sigdesc = "";
-    int i;
-
     if (fread(&crash_info, sizeof(crash_info), 1, stdin) != 1)
     {
         fprintf(stderr, "!!! Failed to retrieve info from crashed process\n");
         exit(1);
     }
 
-    /* Get the signal description */
-    for (i = 0; signals[i].name; ++i)
-    {
-        if (signals[i].signum == crash_info.signum)
-        {
-            sigdesc = signals[i].name;
-            break;
-        }
-    }
+    const char* sigdesc = findSignalDescription(signals, crash_info.signum);
 
     if (crash_info.has_siginfo)
     {
         switch (crash_info.signum)
         {
             case SIGSEGV:
-                for (i = 0; sigsegv_codes[i].name; ++i)
-                {
-                    if (sigsegv_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigsegv_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigSegvCodes, crash_info.siginfo.si_code);
                 break;
 
             case SIGFPE:
-                for (i = 0; sigfpe_codes[i].name; ++i)
-                {
-                    if (sigfpe_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigfpe_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigFpeCodes, crash_info.siginfo.si_code);
                 break;
 
             case SIGILL:
-                for (i = 0; sigill_codes[i].name; ++i)
-                {
-                    if (sigill_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigill_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigIllCodes, crash_info.siginfo.si_code);
                 break;
 
             case SIGBUS:
-                for (i = 0; sigbus_codes[i].name; ++i)
-                {
-                    if (sigbus_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigbus_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigBusCodes, crash_info.siginfo.si_code);
                 break;
         }
     }
