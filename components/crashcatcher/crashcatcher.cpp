@@ -415,11 +415,8 @@ static void getExecPath(char** argv)
     }
 }
 
-int crashCatcherInstallHandlers(int argc, char** argv, const char* logfile)
+static int crashCatcherInstallHandlers(char** argv)
 {
-    if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
-        crash_handler(logfile);
-
     getExecPath(argv);
 
     /* Set an alternate signal stack so SIGSEGVs caused by stack overflows
@@ -509,10 +506,11 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
 {
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
-        if (crashCatcherInstallHandlers(argc, argv, crashLogPath.c_str()) == -1)
-        {
+        if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
+            crash_handler(crashLogPath.c_str());
+
+        if (crashCatcherInstallHandlers(argv) == -1)
             Log(Debug::Warning) << "Installing crash handler failed";
-        }
         else
             Log(Debug::Info) << "Crash handler installed";
     }
