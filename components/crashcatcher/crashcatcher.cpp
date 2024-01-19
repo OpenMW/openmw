@@ -67,6 +67,8 @@ static struct
 
 namespace
 {
+    constexpr char crash_switch[] = "--cc-handle-crash";
+
     struct SignalInfo
     {
         int mCode;
