@@ -471,7 +471,22 @@ static bool crashCatcherInstallHandlers(char** argv)
     return true;
 }
 
-static bool is_debugger_present()
+namespace
+{
+#if defined(__APPLE__)
+    bool isDebuggerPresent(const auto& info)
+    {
+        return (info.kp_proc.p_flag & P_TRACED) != 0;
+    }
+#elif defined(__FreeBSD__)
+    bool isDebuggerPresent(const auto& info)
+    {
+        return (info.ki_flag & P_TRACED) != 0;
+    }
+#endif
+}
+
+static bool isDebuggerPresent()
 {
 #if defined(__linux__)
     std::filesystem::path procstatus = std::filesystem::path("/proc/self/status");
@@ -490,37 +505,23 @@ static bool is_debugger_present()
         }
     }
     return false;
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__FreeBSD__)
     struct kinfo_proc info;
-
-    // Initialize the flags so that, if sysctl fails for some bizarre
-    // reason, we get a predictable result.
-
-    info.kp_proc.p_flag = 0;
+    std::memset(&info, 0, sizeof(info));
 
     // Initialize mib, which tells sysctl the info we want, in this case
     // we're looking for information about a specific process ID.
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
 
-    // Call sysctl.
-
     size_t size = sizeof(info);
-    const int junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0);
-    assert(junk == 0);
+    if (sysctl(mib, std::size(mib), &info, &size, nullptr, 0) == -1)
+    {
+        Log(Debug::Warning) << "Failed to call sysctl, assuming no debugger: "
+                            << std::generic_category().message(errno);
+        return false;
+    }
 
-    // We're being debugged if the P_TRACED flag is set.
-
-    return (info.kp_proc.p_flag & P_TRACED) != 0;
-#elif defined(__FreeBSD__)
-    struct kinfo_proc info;
-    size_t size = sizeof(info);
-    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
-
-    if (sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0) == 0)
-        return (info.ki_flag & P_TRACED) != 0;
-    else
-        perror("Failed to retrieve process info");
-    return false;
+    return isDebuggerPresent(info);
 #else
     return false;
 #endif
@@ -533,7 +534,7 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
     if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
         handleCrash(Files::pathToUnicodeString(crashLogPath).c_str());
 
-    if (is_debugger_present())
+    if (isDebuggerPresent())
         return;
 
     if (crashCatcherInstallHandlers(argv))
