@@ -129,6 +129,7 @@
     Bug #7742: Governing attribute training limit should use the modified attribute
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
+    Bug #7765: OpenMW-CS: Touch Record option is broken
     Bug #7770: Sword of the Perithia: Script execution failure
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
