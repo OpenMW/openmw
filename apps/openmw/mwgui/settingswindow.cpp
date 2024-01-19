@@ -131,7 +131,7 @@ namespace
     void updateMaxLightsComboBox(MyGUI::ComboBox* box)
     {
         constexpr int min = 8;
-        constexpr int max = 32;
+        constexpr int max = 64;
         constexpr int increment = 8;
         const int maxLights = Settings::shaders().mMaxLights;
         // show increments of 8 in dropdown

@@ -536,6 +536,9 @@
                         <!-- Lighting Method -->
                         <Widget type="TextBox" skin="NormalText" position="0 4 250 18" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:LightingMethod}"/>
+                            <UserString key="ToolTipType" value="Layout"/>
+                            <UserString key="ToolTipLayout" value="TextToolTip"/>
+                            <UserString key="Caption_Text" value="#{OMWEngine:LightsLightingMethodTooltip}"/>
                         </Widget>
                         <Widget type="ComboBox" skin="MW_ComboBox" position="0 28 250 24" align="Left Top" name="LightingMethodButton">
                             <Property key="AddItem" value="legacy"/>
@@ -561,6 +564,10 @@
                             <Property key="AddItem" value="16"/>
                             <Property key="AddItem" value="24"/>
                             <Property key="AddItem" value="32"/>
+                            <Property key="AddItem" value="40"/>
+                            <Property key="AddItem" value="48"/>
+                            <Property key="AddItem" value="56"/>
+                            <Property key="AddItem" value="64"/>
                         </Widget>
                         <Widget type="ImageBox" skin="MW_HLine" position="0 54 360 18" align="Top HStretch"/>
                         <!-- Light Fade Start -->
@@ -570,7 +577,7 @@
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsMaximumDistanceTooltip}"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 104 352 18" align="HStretch Top">
-                            <Property key="Range" value="8192"/>
+                            <Property key="Range" value="8193"/>
                             <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingMin" value="0"/>
