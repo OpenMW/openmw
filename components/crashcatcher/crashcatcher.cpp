@@ -211,12 +211,12 @@ static void printGdbInfo(pid_t pid)
     fflush(stdout);
 }
 
-static void sys_info(void)
+static void printSystemInfo(void)
 {
 #ifdef __unix__
     struct utsname info;
-    if (uname(&info))
-        printf("!!! Failed to get system information\n");
+    if (uname(&info) == -1)
+        printf("Failed to get system information: %s\n", std::generic_category().message(errno).c_str());
     else
         printf("System: %s %s %s %s %s\n", info.sysname, info.nodename, info.release, info.version, info.machine);
 
@@ -312,7 +312,8 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
 {
     if (fread(&crash_info, sizeof(crash_info), 1, stdin) != 1)
     {
-        fprintf(stderr, "!!! Failed to retrieve info from crashed process\n");
+        fprintf(stderr, "Failed to retrieve info from crashed process: %s\n",
+            std::generic_category().message(errno).c_str());
         exit(1);
     }
 
@@ -347,7 +348,8 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
     /* Create crash log file and redirect shell output to it */
     if (freopen(logfile, "wa", stdout) != stdout)
     {
-        fprintf(stderr, "!!! Could not create %s following signal\n", logfile);
+        fprintf(stderr, "Could not create %s following signal: %s\n", logfile,
+            std::generic_category().message(errno).c_str());
         exit(1);
     }
     fprintf(stderr, "Generating %s and killing process %d, please wait... ", logfile, crash_info.pid);
@@ -361,7 +363,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
     fputc('\n', stdout);
     fflush(stdout);
 
-    sys_info();
+    printSystemInfo();
 
     fflush(stdout);
 
