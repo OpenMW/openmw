@@ -79,6 +79,7 @@ namespace
         { SIGILL, "Illegal instruction" },
         { SIGFPE, "FPU exception" },
         { SIGBUS, "System BUS error" },
+        { SIGABRT, "Abnormal termination condition" },
     };
 
     constexpr SignalInfo sigIllCodes[] = {
