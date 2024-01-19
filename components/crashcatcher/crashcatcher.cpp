@@ -74,14 +74,15 @@ namespace
     {
         int mCode;
         const char* mDescription;
+        const char* mName = "";
     };
 
     constexpr SignalInfo signals[] = {
-        { SIGSEGV, "Segmentation fault" },
-        { SIGILL, "Illegal instruction" },
-        { SIGFPE, "FPU exception" },
-        { SIGBUS, "System BUS error" },
-        { SIGABRT, "Abnormal termination condition" },
+        { SIGSEGV, "Segmentation fault", "SIGSEGV" },
+        { SIGILL, "Illegal instruction", "SIGILL" },
+        { SIGFPE, "FPU exception", "SIGFPE" },
+        { SIGBUS, "System BUS error", "SIGBUS" },
+        { SIGABRT, "Abnormal termination condition", "SIGABRT" },
     };
 
     constexpr SignalInfo sigIllCodes[] = {
@@ -388,11 +389,15 @@ static void getExecPath(char** argv)
 
     if (sysctl(mib, 4, argv0, &size, nullptr, 0) == 0)
         return;
+
+    Log(Debug::Warning) << "Failed to call sysctl: " << std::generic_category().message(errno);
 #endif
 
 #if defined(__APPLE__)
     if (proc_pidpath(getpid(), argv0, sizeof(argv0)) > 0)
         return;
+
+    Log(Debug::Warning) << "Failed to call proc_pidpath: " << std::generic_category().message(errno);
 #endif
     const char* statusPaths[] = { "/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file" };
     memset(argv0, 0, sizeof(argv0));
@@ -401,18 +406,28 @@ static void getExecPath(char** argv)
     {
         if (readlink(path, argv0, sizeof(argv0)) != -1)
             return;
+
+        Log(Debug::Warning) << "Failed to call readlink for \"" << path
+                            << "\": " << std::generic_category().message(errno);
     }
 
     if (argv[0][0] == '/')
-        snprintf(argv0, sizeof(argv0), "%s", argv[0]);
-    else if (getcwd(argv0, sizeof(argv0)) != nullptr)
     {
-        const int cwdlen = strlen(argv0);
-        snprintf(argv0 + cwdlen, sizeof(argv0) - cwdlen, "/%s", argv[0]);
+        snprintf(argv0, sizeof(argv0), "%s", argv[0]);
+        return;
     }
+
+    if (getcwd(argv0, sizeof(argv0)) == nullptr)
+    {
+        Log(Debug::Error) << "Failed to call getcwd: " << std::generic_category().message(errno);
+        return;
+    }
+
+    const int cwdlen = strlen(argv0);
+    snprintf(argv0 + cwdlen, sizeof(argv0) - cwdlen, "/%s", argv[0]);
 }
 
-static int crashCatcherInstallHandlers(char** argv)
+static bool crashCatcherInstallHandlers(char** argv)
 {
     getExecPath(argv);
 
@@ -423,25 +438,33 @@ static int crashCatcherInstallHandlers(char** argv)
     altss.ss_sp = altstack;
     altss.ss_flags = 0;
     altss.ss_size = SIGSTKSZ;
-    sigaltstack(&altss, nullptr);
+    if (sigaltstack(&altss, nullptr) == -1)
+    {
+        Log(Debug::Error) << "Failed to call sigaltstack: " << std::generic_category().message(errno);
+        return false;
+    }
 
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_sigaction = crash_catcher;
     sa.sa_flags = SA_RESETHAND | SA_NODEFER | SA_SIGINFO | SA_ONSTACK;
-    sigemptyset(&sa.sa_mask);
-
-    constexpr int signals[] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-
-    int retval = 0;
-    for (const int signal : signals)
+    if (sigemptyset(&sa.sa_mask) == -1)
     {
-        if (sigaction(signal, &sa, nullptr) == -1)
+        Log(Debug::Error) << "Failed to call sigemptyset: " << std::generic_category().message(errno);
+        return false;
+    }
+
+    for (const SignalInfo& signal : signals)
+    {
+        if (sigaction(signal.mCode, &sa, nullptr) == -1)
         {
-            retval = -1;
+            Log(Debug::Error) << "Failed to call sigaction for signal " << signal.mName << " (" << signal.mCode
+                              << "): " << std::generic_category().message(errno);
+            return false;
         }
     }
-    return retval;
+
+    return true;
 }
 
 static bool is_debugger_present()
@@ -509,9 +532,9 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
     if (is_debugger_present())
         return;
 
-    if (crashCatcherInstallHandlers(argv) == -1)
-        Log(Debug::Warning) << "Installing crash handler failed";
-    else
+    if (crashCatcherInstallHandlers(argv))
         Log(Debug::Info) << "Crash handler installed";
+    else
+        Log(Debug::Warning) << "Installing crash handler failed";
 #endif
 }
