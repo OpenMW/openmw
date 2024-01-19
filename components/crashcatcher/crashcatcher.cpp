@@ -2,6 +2,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <span>
 
 #include <errno.h>
@@ -61,8 +62,7 @@ static struct
 {
     int signum;
     pid_t pid;
-    int has_siginfo;
-    siginfo_t siginfo;
+    std::optional<siginfo_t> siginfo;
     char buf[1024];
 } crash_info;
 
@@ -261,8 +261,9 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
 
     crash_info.signum = signum;
     crash_info.pid = getpid();
-    crash_info.has_siginfo = !!siginfo;
-    if (siginfo)
+    if (siginfo == nullptr)
+        crash_info.siginfo = std::nullopt;
+    else
         crash_info.siginfo = *siginfo;
     if (cc_user_info)
         cc_user_info(crash_info.buf, crash_info.buf + sizeof(crash_info.buf));
@@ -318,30 +319,30 @@ static void crash_handler(const char* logfile)
 
     const char* sigdesc = findSignalDescription(signals, crash_info.signum);
 
-    if (crash_info.has_siginfo)
+    if (crash_info.siginfo.has_value())
     {
         switch (crash_info.signum)
         {
             case SIGSEGV:
-                sigdesc = findSignalDescription(sigSegvCodes, crash_info.siginfo.si_code);
+                sigdesc = findSignalDescription(sigSegvCodes, crash_info.siginfo->si_code);
                 break;
 
             case SIGFPE:
-                sigdesc = findSignalDescription(sigFpeCodes, crash_info.siginfo.si_code);
+                sigdesc = findSignalDescription(sigFpeCodes, crash_info.siginfo->si_code);
                 break;
 
             case SIGILL:
-                sigdesc = findSignalDescription(sigIllCodes, crash_info.siginfo.si_code);
+                sigdesc = findSignalDescription(sigIllCodes, crash_info.siginfo->si_code);
                 break;
 
             case SIGBUS:
-                sigdesc = findSignalDescription(sigBusCodes, crash_info.siginfo.si_code);
+                sigdesc = findSignalDescription(sigBusCodes, crash_info.siginfo->si_code);
                 break;
         }
     }
     fprintf(stderr, "%s (signal %i)\n", sigdesc, crash_info.signum);
-    if (crash_info.has_siginfo)
-        fprintf(stderr, "Address: %p\n", crash_info.siginfo.si_addr);
+    if (crash_info.siginfo.has_value())
+        fprintf(stderr, "Address: %p\n", crash_info.siginfo->si_addr);
     fputc('\n', stderr);
 
     if (logfile)
@@ -358,8 +359,8 @@ static void crash_handler(const char* logfile)
             "*** Fatal Error ***\n"
             "%s (signal %i)\n",
             sigdesc, crash_info.signum);
-        if (crash_info.has_siginfo)
-            printf("Address: %p\n", crash_info.siginfo.si_addr);
+        if (crash_info.siginfo.has_value())
+            printf("Address: %p\n", crash_info.siginfo->si_addr);
         fputc('\n', stdout);
         fflush(stdout);
     }
