@@ -145,7 +145,7 @@ namespace Terrain
 
     osg::Callback* World::getHeightCullCallback(float highz, unsigned int mask)
     {
-        if (!mHeightCullCallback)
+        if (!mHeightCullCallback || mTerrainRoot->getNumChildren() == 0)
             return nullptr;
 
         mHeightCullCallback->setHighZ(highz);
