@@ -50,7 +50,7 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
                 reader.getLocalizedString(name);
                 // FIXME: subsequent FULL subrecords name object combinations (FO4)
                 if (mFullName.empty())
-                    mFullName = name;
+                    mFullName = std::move(name);
                 break;
             }
             case ESM4::SUB_MODL:

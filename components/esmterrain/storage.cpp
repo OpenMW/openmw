@@ -586,7 +586,7 @@ namespace ESMTerrain
             Misc::StringUtils::replaceLast(texture_, ".", mNormalHeightMapPattern + ".");
             if (mVFS->exists(texture_))
             {
-                info.mNormalMap = texture_;
+                info.mNormalMap = std::move(texture_);
                 info.mParallax = true;
             }
             else
@@ -594,7 +594,7 @@ namespace ESMTerrain
                 texture_ = texture;
                 Misc::StringUtils::replaceLast(texture_, ".", mNormalMapPattern + ".");
                 if (mVFS->exists(texture_))
-                    info.mNormalMap = texture_;
+                    info.mNormalMap = std::move(texture_);
             }
         }
 
@@ -604,7 +604,7 @@ namespace ESMTerrain
             Misc::StringUtils::replaceLast(texture_, ".", mSpecularMapPattern + ".");
             if (mVFS->exists(texture_))
             {
-                info.mDiffuseMap = texture_;
+                info.mDiffuseMap = std::move(texture_);
                 info.mSpecular = true;
             }
         }

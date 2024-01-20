@@ -85,7 +85,7 @@ namespace LuaUtil
 
         auto initializer = [](sol::table hiddenData) {
             ScriptId id = hiddenData[ScriptsContainer::sScriptIdKey];
-            return AsyncPackageId{ id.mContainer, id.mIndex, hiddenData };
+            return AsyncPackageId{ id.mContainer, id.mIndex, std::move(hiddenData) };
         };
         return sol::make_object(lua, initializer);
     }

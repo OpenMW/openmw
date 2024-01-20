@@ -38,7 +38,7 @@ namespace LuaUi
                 if (typeField != sol::nil && templateType != type)
                     throw std::logic_error(std::string("Template layout type ") + type
                         + std::string(" doesn't match template type ") + templateType);
-                type = templateType;
+                type = std::move(templateType);
             }
             return type;
         }

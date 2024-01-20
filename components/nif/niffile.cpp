@@ -673,7 +673,7 @@ namespace Nif
 
             assert(r != nullptr);
             assert(r->recType != RC_MISSING);
-            r->recName = rec;
+            r->recName = std::move(rec);
             r->recIndex = i;
             r->read(&nif);
             mRecords[i] = std::move(r);

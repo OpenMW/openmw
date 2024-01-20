@@ -601,7 +601,7 @@ namespace DetourNavigator
             if (mSettings.get().mEnableRecastMeshFileNameRevision)
                 recastMeshRevision = revision;
             if (mSettings.get().mEnableNavMeshFileNameRevision)
-                navMeshRevision = revision;
+                navMeshRevision = std::move(revision);
         }
         if (recastMesh && mSettings.get().mEnableWriteRecastMeshToFile)
             writeToFile(*recastMesh,
