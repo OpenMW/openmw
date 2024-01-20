@@ -673,12 +673,13 @@ namespace MWPhysics
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             const float slowFall
                 = 1.f - std::clamp(effects.getOrDefault(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f, 0.f, 1.f);
-            const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
+            const bool isPlayer = ptr == world->getPlayerConstPtr();
+            const bool godmode = isPlayer && world->getGodModeState();
             const bool inert = stats.isDead()
                 || (!godmode && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Paralyze).getModifier() > 0);
 
             simulations.emplace_back(ActorSimulation{
-                physicActor, ActorFrameData{ *physicActor, inert, waterCollision, slowFall, waterlevel } });
+                physicActor, ActorFrameData{ *physicActor, inert, waterCollision, slowFall, waterlevel, isPlayer } });
 
             // if the simulation will run, a jump request will be fulfilled. Update mechanics accordingly.
             if (willSimulate)
@@ -708,6 +709,8 @@ namespace MWPhysics
                 changed = false;
             }
         }
+        for (auto& [_, object] : mObjects)
+            object->resetCollisions();
 
 #ifndef BT_NO_PROFILE
         CProfileManager::Reset();
@@ -782,10 +785,12 @@ namespace MWPhysics
         }
     }
 
-    bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const
+    bool PhysicsSystem::isObjectCollidingWith(const MWWorld::ConstPtr& object, ScriptedCollisionType type) const
     {
-        std::vector<MWWorld::Ptr> collisions = getCollisions(object, CollisionType_World, CollisionType_Actor);
-        return (std::find(collisions.begin(), collisions.end(), actor) != collisions.end());
+        auto found = mObjects.find(object.mRef);
+        if (found != mObjects.end())
+            return found->second->collidedWith(type);
+        return false;
     }
 
     void PhysicsSystem::getActorsCollidingWith(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const
@@ -890,7 +895,8 @@ namespace MWPhysics
             mDebugDrawer->addCollision(position, normal);
     }
 
-    ActorFrameData::ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel)
+    ActorFrameData::ActorFrameData(
+        Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel, bool isPlayer)
         : mPosition()
         , mStandingOn(nullptr)
         , mIsOnGround(actor.getOnGround())
@@ -917,6 +923,7 @@ namespace MWPhysics
         , mIsAquatic(actor.getPtr().getClass().isPureWaterCreature(actor.getPtr()))
         , mWaterCollision(waterCollision)
         , mSkipCollisionDetection(!actor.getCollisionMode())
+        , mIsPlayer(isPlayer)
     {
     }
 
