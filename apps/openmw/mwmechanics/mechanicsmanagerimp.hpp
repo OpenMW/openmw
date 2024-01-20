@@ -145,6 +145,7 @@ namespace MWMechanics
             const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false) override;
         void skipAnimation(const MWWorld::Ptr& ptr) override;
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) override;
+        bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const override;
         void persistAnimationStates() override;
 
         /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently

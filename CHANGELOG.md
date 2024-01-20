@@ -19,6 +19,7 @@
     Bug #4898: Odd/Incorrect lighting on meshes
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5062: Root bone rotations for NPC animation don't work the same as for creature animation
+    Bug #5065: Actors with scripted animation still try to wander and turn around without moving
     Bug #5066: Quirks with starting and stopping scripted animations
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5280: Unskinned shapes in skinned equipment are rendered in the wrong place

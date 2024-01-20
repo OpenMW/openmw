@@ -116,6 +116,7 @@ namespace MWMechanics
             const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false) const;
         void skipAnimation(const MWWorld::Ptr& ptr) const;
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) const;
+        bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const;
         void persistAnimationStates() const;
 
         void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const;
