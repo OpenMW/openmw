@@ -5,6 +5,11 @@
 
 #include "resourcemanager.hpp"
 
+namespace ToUTF8
+{
+    class StatelessUtf8Encoder;
+}
+
 namespace Resource
 {
 
@@ -12,8 +17,10 @@ namespace Resource
     /// @note May be used from any thread.
     class NifFileManager : public ResourceManager
     {
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
+
     public:
-        NifFileManager(const VFS::Manager* vfs);
+        NifFileManager(const VFS::Manager* vfs, const ToUTF8::StatelessUtf8Encoder* encoder);
         ~NifFileManager();
 
         /// Retrieve a NIF file from the cache, or load it from the VFS if not cached yet.

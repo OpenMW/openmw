@@ -131,6 +131,7 @@
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
     Bug #7765: OpenMW-CS: Touch Record option is broken
     Bug #7770: Sword of the Perithia: Script execution failure
+    Bug #7780: Non-ASCII texture paths in NIF files don't work
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty

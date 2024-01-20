@@ -207,9 +207,11 @@ namespace Resource
 namespace Resource
 {
 
-    KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay)
+    KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
+        const ToUTF8::StatelessUtf8Encoder* encoder)
         : ResourceManager(vfs, expiryDelay)
         , mSceneManager(sceneManager)
+        , mEncoder(encoder)
     {
     }
 
@@ -226,7 +228,7 @@ namespace Resource
             if (Misc::getFileExtension(normalized) == "kf")
             {
                 auto file = std::make_shared<Nif::NIFFile>(normalized);
-                Nif::Reader reader(*file);
+                Nif::Reader reader(*file, mEncoder);
                 reader.parse(mVFS->getNormalized(normalized));
                 NifOsg::Loader::loadKf(*file, *loaded.get());
             }

@@ -84,7 +84,7 @@ void readNIF(
     try
     {
         Nif::NIFFile file(fullPath);
-        Nif::Reader reader(file);
+        Nif::Reader reader(file, nullptr);
         if (vfs != nullptr)
             reader.parse(vfs->get(pathStr));
         else
