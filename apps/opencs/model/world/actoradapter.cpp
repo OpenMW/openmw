@@ -468,13 +468,13 @@ namespace CSMWorld
         if (type == UniversalId::Type_Creature)
         {
             // Valid creature record
-            setupCreature(id, data);
+            setupCreature(id, std::move(data));
             emit actorChanged(id);
         }
         else if (type == UniversalId::Type_Npc)
         {
             // Valid npc record
-            setupNpc(id, data);
+            setupNpc(id, std::move(data));
             emit actorChanged(id);
         }
         else
@@ -665,7 +665,7 @@ namespace CSMWorld
             RaceDataPtr data = mCachedRaces.get(race);
             if (data)
             {
-                setupRace(race, data);
+                setupRace(race, std::move(data));
                 // Race was changed. Need to mark actor dependencies as dirty.
                 // Cannot use markDirtyDependency because that would invalidate
                 // the current iterator.
@@ -683,7 +683,7 @@ namespace CSMWorld
             ActorDataPtr data = mCachedActors.get(actor);
             if (data)
             {
-                setupActor(actor, data);
+                setupActor(actor, std::move(data));
             }
         }
         mDirtyActors.clear();
