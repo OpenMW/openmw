@@ -740,7 +740,7 @@ namespace Shader
 
         auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate);
         writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
-        addedState->setAttributeAndModes(program);
+        addedState->setAttributeAndModes(std::move(program));
 
         for (const auto& [unit, name] : reqs.mTextures)
         {
@@ -934,13 +934,13 @@ namespace Shader
         {
             osg::ref_ptr<osg::Geometry> sourceGeometry = rig->getSourceGeometry();
             if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
-                rig->setSourceGeometry(sourceGeometry);
+                rig->setSourceGeometry(std::move(sourceGeometry));
         }
         else if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&drawable))
         {
             osg::ref_ptr<osg::Geometry> sourceGeometry = morph->getSourceGeometry();
             if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
-                morph->setSourceGeometry(sourceGeometry);
+                morph->setSourceGeometry(std::move(sourceGeometry));
         }
         else if (auto osgaRig = dynamic_cast<SceneUtil::RigGeometryHolder*>(&drawable))
         {
@@ -948,8 +948,8 @@ namespace Shader
             osg::ref_ptr<osg::Geometry> sourceGeometry = sourceOsgaRigGeometry->getSourceGeometry();
             if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
             {
-                sourceOsgaRigGeometry->setSourceGeometry(sourceGeometry);
-                osgaRig->setSourceRigGeometry(sourceOsgaRigGeometry);
+                sourceOsgaRigGeometry->setSourceGeometry(std::move(sourceGeometry));
+                osgaRig->setSourceRigGeometry(std::move(sourceOsgaRigGeometry));
             }
         }
 

@@ -101,7 +101,7 @@ namespace MWRender
                 templateNode, mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager(), &rotation);
         }
         return SceneUtil::attach(
-            templateNode, mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager());
+            std::move(templateNode), mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager());
     }
 
     std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const

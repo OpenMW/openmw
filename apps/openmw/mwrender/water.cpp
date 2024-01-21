@@ -722,8 +722,8 @@ namespace MWRender
         mRainSettingsUpdater = new RainSettingsUpdater();
         node->setUpdateCallback(mRainSettingsUpdater);
 
-        mShaderWaterStateSetUpdater
-            = new ShaderWaterStateSetUpdater(this, mReflection, mRefraction, mRipples, std::move(program), normalMap);
+        mShaderWaterStateSetUpdater = new ShaderWaterStateSetUpdater(
+            this, mReflection, mRefraction, mRipples, std::move(program), std::move(normalMap));
         node->addCullCallback(mShaderWaterStateSetUpdater);
     }
 
