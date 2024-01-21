@@ -413,7 +413,8 @@ namespace MWLua
 
     void LuaManager::skillLevelUp(const MWWorld::Ptr& actor, ESM::RefId skillId, std::string_view source)
     {
-        mEngineEvents.addToQueue(EngineEvents::OnSkillLevelUp{ getId(actor), skillId.serializeText(), std::string(source) });
+        mEngineEvents.addToQueue(
+            EngineEvents::OnSkillLevelUp{ getId(actor), skillId.serializeText(), std::string(source) });
     }
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
