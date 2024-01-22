@@ -105,9 +105,9 @@ If you are using a Linux distribution that doesn't use apt, search your package 
 
 Once the innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
 
-.. code:: bash
+.. code:: console
 
-    innoextract setup_tes_morrowind_goty_2.0.0.7.exe -d ~/Documents/Games/Morrowind/
+    $ innoextract ./setup_tes_morrowind_goty_2.0.0.7.exe -d ~/Documents/Games/Morrowind/
 
 If not just run the command without the ``-d`` flag. Assuming you used the filepath above, your ``.esm`` files will be located in this diredctory ``~/Documents/Games/Morrowind/app/Data Files/``.
 
