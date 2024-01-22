@@ -79,31 +79,12 @@ If you have purchased "The Elder Scrolls III: Morrowind" `from GOG <https://www.
 For Distributions Using `apt` (e.g., Ubuntu, Debian)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. code:: bash
+.. code:: console
 
     sudo apt update
     sudo apt install innoextract
 
-Other Distributions
-+++++++++++++++++++
-
-If you are using a Linux distribution that doesn't use apt, search your package manager for the program and install it if it exists.
-
-.. code:: bash
-
-    # openSUSE
-    sudo zypper refresh
-    sudo zypper search innoextract
-    sudo zypper install innoextract
-
-.. code:: bash
-
-    # Arch Linux/Manjaro
-    sudo pacman -Sy
-    sudo pacman -Ss innoextract
-    sudo pacman -S innoextract
-
-Once the innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
+Once innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
 
 .. code:: console
 
