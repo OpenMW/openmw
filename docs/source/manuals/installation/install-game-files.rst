@@ -103,7 +103,7 @@ If you are using a Linux distribution that doesn't use apt, search your package 
     sudo pacman -Ss innoextract
     sudo pacman -S innoextract
 
-Once the program is installed, download the game from GOG. The file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When you run ``innoextract`` it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
+Once the innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
 
 .. code:: bash
 
