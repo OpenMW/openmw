@@ -504,7 +504,7 @@ namespace CSMWorld
 
         auto record2 = std::make_unique<Record<ESXRecordT>>();
         record2->mState = Record<ESXRecordT>::State_ModifiedOnly;
-        record2->mModified = record;
+        record2->mModified = std::move(record);
 
         insertRecord(std::move(record2), getAppendIndex(id, type), type);
     }
