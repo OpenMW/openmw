@@ -385,6 +385,26 @@ namespace CSMWorld
                 case 0:
                 {
                     effect.mEffectID = static_cast<short>(value.toInt());
+                    switch (effect.mEffectID)
+                    {
+                        case ESM::MagicEffect::DrainSkill:
+                        case ESM::MagicEffect::DamageSkill:
+                        case ESM::MagicEffect::RestoreSkill:
+                        case ESM::MagicEffect::FortifySkill:
+                        case ESM::MagicEffect::AbsorbSkill:
+                            effect.mAttribute = -1;
+                            break;
+                        case ESM::MagicEffect::DrainAttribute:
+                        case ESM::MagicEffect::DamageAttribute:
+                        case ESM::MagicEffect::RestoreAttribute:
+                        case ESM::MagicEffect::FortifyAttribute:
+                        case ESM::MagicEffect::AbsorbAttribute:
+                            effect.mSkill = -1;
+                            break;
+                        default:
+                            effect.mSkill = -1;
+                            effect.mAttribute = -1;
+                    }
                     break;
                 }
                 case 1:
