@@ -823,7 +823,7 @@ void OMW::Engine::prepareEngine()
     }
     listener->loadingOff();
 
-    mWorld->init(mViewer, rootNode, mWorkQueue.get(), *mUnrefQueue);
+    mWorld->init(mViewer, std::move(rootNode), mWorkQueue.get(), *mUnrefQueue);
     mEnvironment.setWorldScene(mWorld->getWorldScene());
     mWorld->setupPlayer();
     mWorld->setRandomSeed(mRandomSeed);

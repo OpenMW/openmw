@@ -123,7 +123,7 @@ namespace Resource
                     mergedAnimationTrack->addChannel(channel.get()->clone());
                 }
 
-                callback->addMergedAnimationTrack(mergedAnimationTrack);
+                callback->addMergedAnimationTrack(std::move(mergedAnimationTrack));
 
                 float startTime = animation->getStartTime();
                 float stopTime = startTime + animation->getDuration();
@@ -239,7 +239,7 @@ namespace Resource
                     = dynamic_cast<osgAnimation::BasicAnimationManager*>(scene->getUpdateCallback());
                 if (bam)
                 {
-                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), bam, normalized, mVFS);
+                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), normalized, mVFS);
                     scene->accept(rav);
                 }
             }

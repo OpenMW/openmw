@@ -440,7 +440,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
             osg::Node* node = *nodeIter;
             if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase*>(node->getUserData()))
             {
-                WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
+                WorldspaceHitResult hit = { true, std::move(tag), 0, 0, 0, intersection.getWorldIntersectPoint() };
                 if (intersection.indexList.size() >= 3)
                 {
                     hit.index0 = intersection.indexList[0];
