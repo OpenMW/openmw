@@ -131,6 +131,7 @@
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
     Bug #7765: OpenMW-CS: Touch Record option is broken
+    Bug #7769: Sword of the Perithia: Broken NPCs
     Bug #7770: Sword of the Perithia: Script execution failure
     Bug #7780: Non-ASCII texture paths in NIF files don't work
     Feature #2566: Handle NAM9 records for manual cell references

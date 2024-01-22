@@ -1681,6 +1681,7 @@ namespace MWMechanics
             return;
         }
 
+        const bool inCombat = stats.getAiSequence().isInCombat();
         stats.getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == getPlayer())
         {
@@ -1715,7 +1716,8 @@ namespace MWMechanics
         }
 
         // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
-        MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("attack"));
+        if (!inCombat)
+            MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("attack"));
     }
 
     void MechanicsManager::stopCombat(const MWWorld::Ptr& actor)
