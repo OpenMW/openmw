@@ -109,7 +109,7 @@ Once the innoextract is installed, download the game from GOG. The downloaded fi
 
     $ innoextract ./setup_tes_morrowind_goty_2.0.0.7.exe -d ~/Documents/Games/Morrowind/
 
-If not just run the command without the ``-d`` flag. Assuming you used the filepath above, your ``.esm`` files will be located in this diredctory ``~/Documents/Games/Morrowind/app/Data Files/``.
+Assuming you used the filepath above, your ``.esm`` files will be located in ``~/Documents/Games/Morrowind/app/Data Files/``.
 
 Now you can run the OpenMW launcher and run the installation wizard. Point it to your ``Morrowind.esm`` in the folder you extracted it to, and enjoy playing Morrowind.
 
