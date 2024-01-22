@@ -74,7 +74,7 @@ Innoextract
 Linux
 ~~~~~
 
-If you have purchased "The Elder Scrolls III: Morrowind" from GOG and wish to extract the game files on a Linux system without using Wine, you can do so using ``innoextract``.
+If you have purchased "The Elder Scrolls III: Morrowind" `from GOG <https://www.gog.com/en/game/the_elder_scrolls_iii_morrowind_goty_edition>`_ and wish to extract the game files on a Linux system without using Wine, you can do so using `innoextract <https://constexpr.org/innoextract/>`_.
 
 For Distributions Using `apt` (e.g., Ubuntu, Debian)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
