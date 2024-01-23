@@ -46,4 +46,12 @@ namespace Bsa
         return result;
     }
 
+    uint32_t generateExtensionHash(std::string_view extension)
+    {
+        uint32_t result = 0;
+        for (size_t i = 0; i < 4 && i < extension.size() - 1; i++)
+            result |= static_cast<uint8_t>(extension[i + 1]) << (8 * i);
+        return result;
+    }
+
 } // namespace Bsa

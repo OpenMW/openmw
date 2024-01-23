@@ -172,7 +172,7 @@ namespace Bsa
             return FileRecord(); // folder not found, return default which has offset of sInvalidOffset
 
         uint32_t fileHash = generateHash(fileName);
-        uint32_t extHash = *reinterpret_cast<const uint32_t*>(ext.data() + 1);
+        uint32_t extHash = generateExtensionHash(ext);
         auto iter = it->second.find({ fileHash, extHash });
         if (iter == it->second.end())
             return FileRecord(); // file not found, return default which has offset of sInvalidOffset
