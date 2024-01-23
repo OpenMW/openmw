@@ -4,6 +4,7 @@
 #include <components/misc/strings/lower.hpp>
 
 #include <algorithm>
+#include <ostream>
 #include <string>
 #include <string_view>
 
@@ -50,6 +51,73 @@ namespace VFS::Path
         using is_transparent = void;
 
         bool operator()(std::string_view left, std::string_view right) const { return pathLess(left, right); }
+    };
+
+    class Normalized
+    {
+    public:
+        Normalized() = default;
+
+        Normalized(std::string_view value)
+            : mValue(normalizeFilename(value))
+        {
+        }
+
+        Normalized(const char* value)
+            : Normalized(std::string_view(value))
+        {
+        }
+
+        Normalized(const std::string& value)
+            : Normalized(std::string_view(value))
+        {
+        }
+
+        explicit Normalized(std::string&& value)
+            : mValue(std::move(value))
+        {
+            normalizeFilenameInPlace(mValue);
+        }
+
+        const std::string& value() const& { return mValue; }
+
+        std::string value() && { return std::move(mValue); }
+
+        std::string_view view() const { return mValue; }
+
+        operator std::string_view() const { return mValue; }
+
+        operator const std::string&() const { return mValue; }
+
+        friend bool operator==(const Normalized& lhs, const Normalized& rhs) = default;
+
+        template <class T>
+        friend bool operator==(const Normalized& lhs, const T& rhs)
+        {
+            return lhs.mValue == rhs;
+        }
+
+        friend bool operator<(const Normalized& lhs, const Normalized& rhs) { return lhs.mValue < rhs.mValue; }
+
+        template <class T>
+        friend bool operator<(const Normalized& lhs, const T& rhs)
+        {
+            return lhs.mValue < rhs;
+        }
+
+        template <class T>
+        friend bool operator<(const T& lhs, const Normalized& rhs)
+        {
+            return lhs < rhs.mValue;
+        }
+
+        friend std::ostream& operator<<(std::ostream& stream, const Normalized& value)
+        {
+            return stream << value.mValue;
+        }
+
+    private:
+        std::string mValue;
     };
 }
 
