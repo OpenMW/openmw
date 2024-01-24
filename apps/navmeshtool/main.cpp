@@ -221,7 +221,7 @@ namespace NavMeshTool
             constexpr double expiryDelay = 0;
 
             Resource::ImageManager imageManager(&vfs, expiryDelay);
-            Resource::NifFileManager nifFileManager(&vfs);
+            Resource::NifFileManager nifFileManager(&vfs, &encoder.getStatelessEncoder());
             Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, expiryDelay);
             Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
             DetourNavigator::RecastGlobalAllocator::init();

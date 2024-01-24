@@ -2034,6 +2034,14 @@ namespace MWMechanics
         return false;
     }
 
+    bool Actors::checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            return iter->second->getCharacterController().isScriptedAnimPlaying();
+        return false;
+    }
+
     void Actors::persistAnimationStates() const
     {
         for (const Actor& actor : mActors)

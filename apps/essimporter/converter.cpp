@@ -306,12 +306,12 @@ namespace ESSImport
             mMarkers.push_back(marker);
         }
 
-        newcell.mRefs = cellrefs;
+        newcell.mRefs = std::move(cellrefs);
 
         if (cell.isExterior())
-            mExtCells[std::make_pair(cell.mData.mX, cell.mData.mY)] = newcell;
+            mExtCells[std::make_pair(cell.mData.mX, cell.mData.mY)] = std::move(newcell);
         else
-            mIntCells[cell.mName] = newcell;
+            mIntCells[cell.mName] = std::move(newcell);
     }
 
     void ConvertCell::writeCell(const Cell& cell, ESM::ESMWriter& esm)

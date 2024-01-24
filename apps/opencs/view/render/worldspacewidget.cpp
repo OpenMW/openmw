@@ -184,11 +184,11 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 
 void CSVRender::WorldspaceWidget::centerOrbitCameraOnSelection()
 {
-    std::vector<osg::ref_ptr<TagBase>> selection = getSelection(~0u);
+    std::vector<osg::ref_ptr<TagBase>> selection = getSelection(Mask_Reference);
 
     for (std::vector<osg::ref_ptr<TagBase>>::iterator it = selection.begin(); it != selection.end(); ++it)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(it->get()))
+        if (CSVRender::ObjectTag* objectTag = static_cast<CSVRender::ObjectTag*>(it->get()))
         {
             mOrbitCamControl->setCenter(objectTag->mObject->getPosition().asVec3());
         }
@@ -440,7 +440,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
             osg::Node* node = *nodeIter;
             if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase*>(node->getUserData()))
             {
-                WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
+                WorldspaceHitResult hit = { true, std::move(tag), 0, 0, 0, intersection.getWorldIntersectPoint() };
                 if (intersection.indexList.size() >= 3)
                 {
                     hit.index0 = intersection.indexList[0];
@@ -757,13 +757,14 @@ void CSVRender::WorldspaceWidget::toggleHiddenInstances()
     if (selection.empty())
         return;
 
-    const CSVRender::ObjectTag* firstSelection = dynamic_cast<CSVRender::ObjectTag*>(selection.begin()->get());
+    const CSVRender::ObjectTag* firstSelection = static_cast<CSVRender::ObjectTag*>(selection.begin()->get());
+    assert(firstSelection != nullptr);
 
     const CSVRender::Mask firstMask
         = firstSelection->mObject->getRootNode()->getNodeMask() == Mask_Hidden ? Mask_Reference : Mask_Hidden;
 
     for (const auto& object : selection)
-        if (const auto objectTag = dynamic_cast<CSVRender::ObjectTag*>(object.get()))
+        if (const auto objectTag = static_cast<CSVRender::ObjectTag*>(object.get()))
             objectTag->mObject->getRootNode()->setNodeMask(firstMask);
 }
 

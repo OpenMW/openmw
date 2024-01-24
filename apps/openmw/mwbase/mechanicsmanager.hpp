@@ -187,6 +187,8 @@ namespace MWBase
 
         virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
 
+        virtual bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const = 0;
+
         /// Save the current animation state of managed references to their RefData.
         virtual void persistAnimationStates() = 0;
 

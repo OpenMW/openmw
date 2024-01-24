@@ -4,32 +4,17 @@
 #include <components/files/istreamptr.hpp>
 
 #include <filesystem>
-#include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
-#include "archive.hpp"
+#include "filemap.hpp"
 
 namespace VFS
 {
-
-    template <typename Iterator>
-    class IteratorPair
-    {
-    public:
-        IteratorPair(Iterator first, Iterator last)
-            : mFirst(first)
-            , mLast(last)
-        {
-        }
-        Iterator begin() const { return mFirst; }
-        Iterator end() const { return mLast; }
-
-    private:
-        Iterator mFirst;
-        Iterator mLast;
-    };
+    class Archive;
+    class RecursiveDirectoryRange;
 
     /// @brief The main class responsible for loading files from a virtual file system.
     /// @par Various archive types (e.g. directories on the filesystem, or compressed archives)
@@ -38,29 +23,11 @@ namespace VFS
     /// @par Most of the methods in this class are considered thread-safe, see each method documentation for details.
     class Manager
     {
-        class RecursiveDirectoryIterator
-        {
-        public:
-            RecursiveDirectoryIterator(FileMap::const_iterator it)
-                : mIt(it)
-            {
-            }
-            const std::string& operator*() const { return mIt->first; }
-            const std::string* operator->() const { return &mIt->first; }
-            bool operator!=(const RecursiveDirectoryIterator& other) { return mIt != other.mIt; }
-            RecursiveDirectoryIterator& operator++()
-            {
-                ++mIt;
-                return *this;
-            }
-
-        private:
-            FileMap::const_iterator mIt;
-        };
-
-        using RecursiveDirectoryRange = IteratorPair<RecursiveDirectoryIterator>;
-
     public:
+        Manager();
+
+        ~Manager();
+
         // Empty the file index and unregister archives.
         void reset();
 

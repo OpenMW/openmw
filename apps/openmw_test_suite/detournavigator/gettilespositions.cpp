@@ -1,3 +1,4 @@
+#include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/settings.hpp>
 
@@ -86,4 +87,79 @@ namespace
 
         EXPECT_THAT(mTilesPositions, ElementsAre(TilePosition(0, 0)));
     }
+
+    struct TilesPositionsRangeParams
+    {
+        TilesPositionsRange mA;
+        TilesPositionsRange mB;
+        TilesPositionsRange mResult;
+    };
+
+    struct DetourNavigatorGetIntersectionTest : TestWithParam<TilesPositionsRangeParams>
+    {
+    };
+
+    TEST_P(DetourNavigatorGetIntersectionTest, should_return_expected_result)
+    {
+        EXPECT_EQ(getIntersection(GetParam().mA, GetParam().mB), GetParam().mResult);
+        EXPECT_EQ(getIntersection(GetParam().mB, GetParam().mA), GetParam().mResult);
+    }
+
+    const TilesPositionsRangeParams getIntersectionParams[] = {
+        { .mA = TilesPositionsRange{}, .mB = TilesPositionsRange{}, .mResult = TilesPositionsRange{} },
+        {
+            .mA = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 2, 2 } },
+            .mB = TilesPositionsRange{ .mBegin = TilePosition{ 1, 1 }, .mEnd = TilePosition{ 3, 3 } },
+            .mResult = TilesPositionsRange{ .mBegin = TilePosition{ 1, 1 }, .mEnd = TilePosition{ 2, 2 } },
+        },
+        {
+            .mA = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 1, 1 } },
+            .mB = TilesPositionsRange{ .mBegin = TilePosition{ 2, 2 }, .mEnd = TilePosition{ 3, 3 } },
+            .mResult = TilesPositionsRange{},
+        },
+        {
+            .mA = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 1, 1 } },
+            .mB = TilesPositionsRange{ .mBegin = TilePosition{ 1, 1 }, .mEnd = TilePosition{ 2, 2 } },
+            .mResult = TilesPositionsRange{ .mBegin = TilePosition{ 1, 1 }, .mEnd = TilePosition{ 1, 1 } },
+        },
+        {
+            .mA = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 1, 1 } },
+            .mB = TilesPositionsRange{ .mBegin = TilePosition{ 0, 2 }, .mEnd = TilePosition{ 3, 3 } },
+            .mResult = TilesPositionsRange{},
+        },
+        {
+            .mA = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 1, 1 } },
+            .mB = TilesPositionsRange{ .mBegin = TilePosition{ 2, 0 }, .mEnd = TilePosition{ 3, 3 } },
+            .mResult = TilesPositionsRange{},
+        },
+    };
+
+    INSTANTIATE_TEST_SUITE_P(
+        GetIntersectionParams, DetourNavigatorGetIntersectionTest, ValuesIn(getIntersectionParams));
+
+    struct DetourNavigatorGetUnionTest : TestWithParam<TilesPositionsRangeParams>
+    {
+    };
+
+    TEST_P(DetourNavigatorGetUnionTest, should_return_expected_result)
+    {
+        EXPECT_EQ(getUnion(GetParam().mA, GetParam().mB), GetParam().mResult);
+        EXPECT_EQ(getUnion(GetParam().mB, GetParam().mA), GetParam().mResult);
+    }
+
+    const TilesPositionsRangeParams getUnionParams[] = {
+        { .mA = TilesPositionsRange{}, .mB = TilesPositionsRange{}, .mResult = TilesPositionsRange{} },
+        {
+            .mA = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 2, 2 } },
+            .mB = TilesPositionsRange{ .mBegin = TilePosition{ 1, 1 }, .mEnd = TilePosition{ 3, 3 } },
+            .mResult = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 3, 3 } },
+        },
+        {
+            .mA = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 1, 1 } },
+            .mB = TilesPositionsRange{ .mBegin = TilePosition{ 1, 1 }, .mEnd = TilePosition{ 2, 2 } },
+            .mResult = TilesPositionsRange{ .mBegin = TilePosition{ 0, 0 }, .mEnd = TilePosition{ 2, 2 } },
+        },
+    };
+
+    INSTANTIATE_TEST_SUITE_P(GetUnionParams, DetourNavigatorGetUnionTest, ValuesIn(getUnionParams));
 }

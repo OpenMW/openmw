@@ -68,7 +68,7 @@ namespace MWRender
         ptr.getClass().adjustScale(ptr, scaleVec, true);
         insert->setScale(scaleVec);
 
-        ptr.getRefData().setBaseNode(insert);
+        ptr.getRefData().setBaseNode(std::move(insert));
     }
 
     void Objects::insertModel(const MWWorld::Ptr& ptr, const std::string& mesh, bool allowLight)

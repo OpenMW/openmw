@@ -24,21 +24,22 @@ namespace Resource
         {
         }
 
-        NifFileHolder() {}
+        NifFileHolder() = default;
 
         META_Object(Resource, NifFileHolder)
 
         Nif::NIFFilePtr mNifFile;
     };
 
-    NifFileManager::NifFileManager(const VFS::Manager* vfs)
+    NifFileManager::NifFileManager(const VFS::Manager* vfs, const ToUTF8::StatelessUtf8Encoder* encoder)
         // NIF files aren't needed any more once the converted objects are cached in SceneManager / BulletShapeManager,
         // so no point in using an expiry delay.
         : ResourceManager(vfs, 0)
+        , mEncoder(encoder)
     {
     }
 
-    NifFileManager::~NifFileManager() {}
+    NifFileManager::~NifFileManager() = default;
 
     Nif::NIFFilePtr NifFileManager::get(const std::string& name)
     {
@@ -48,7 +49,7 @@ namespace Resource
         else
         {
             auto file = std::make_shared<Nif::NIFFile>(name);
-            Nif::Reader reader(*file);
+            Nif::Reader reader(*file, mEncoder);
             reader.parse(mVFS->get(name));
             obj = new NifFileHolder(file);
             mCache->addEntryToObjectCache(name, obj);

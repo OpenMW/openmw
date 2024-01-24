@@ -771,6 +771,14 @@ namespace MWMechanics
             return false;
     }
 
+    bool MechanicsManager::checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const
+    {
+        if (ptr.getClass().isActor())
+            return mActors.checkScriptedAnimationPlaying(ptr);
+
+        return false;
+    }
+
     bool MechanicsManager::onOpen(const MWWorld::Ptr& ptr)
     {
         if (ptr.getClass().isActor())

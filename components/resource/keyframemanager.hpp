@@ -9,6 +9,11 @@
 
 #include "resourcemanager.hpp"
 
+namespace ToUTF8
+{
+    class StatelessUtf8Encoder;
+}
+
 namespace Resource
 {
     /// @brief extract animations from OSG formats to OpenMW's animation system
@@ -48,7 +53,8 @@ namespace Resource
     class KeyframeManager : public ResourceManager
     {
     public:
-        explicit KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay);
+        explicit KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
+            const ToUTF8::StatelessUtf8Encoder* encoder);
         ~KeyframeManager() = default;
 
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
@@ -59,6 +65,7 @@ namespace Resource
 
     private:
         SceneManager* mSceneManager;
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
     };
 
 }

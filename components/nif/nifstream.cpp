@@ -4,6 +4,8 @@
 
 #include "niffile.hpp"
 
+#include "../to_utf8/to_utf8.hpp"
+
 namespace
 {
 
@@ -58,6 +60,8 @@ namespace Nif
         size_t end = str.find('\0');
         if (end != std::string::npos)
             str.erase(end);
+        if (mEncoder)
+            str = mEncoder->getUtf8(str, ToUTF8::BufferAllocationPolicy::UseGrowFactor, mBuffer);
         return str;
     }
 

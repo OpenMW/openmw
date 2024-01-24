@@ -1,5 +1,7 @@
 #include "precipitationocclusion.hpp"
 
+#include <cassert>
+
 #include <osgUtil/CullVisitor>
 
 #include <components/misc/constants.hpp>
@@ -120,16 +122,19 @@ namespace MWRender
 
     void PrecipitationOccluder::update()
     {
+        if (!mRange.has_value())
+            return;
+
         const osg::Vec3 pos = mSceneCamera->getInverseViewMatrix().getTrans();
 
-        const float zmin = pos.z() - mRange.z() - Constants::CellSizeInUnits;
-        const float zmax = pos.z() + mRange.z() + Constants::CellSizeInUnits;
+        const float zmin = pos.z() - mRange->z() - Constants::CellSizeInUnits;
+        const float zmax = pos.z() + mRange->z() + Constants::CellSizeInUnits;
         const float near = 0;
         const float far = zmax - zmin;
 
-        const float left = -mRange.x() / 2;
+        const float left = -mRange->x() / 2;
         const float right = -left;
-        const float top = mRange.y() / 2;
+        const float top = mRange->y() / 2;
         const float bottom = -top;
 
         if (SceneUtil::AutoDepth::isReversed())
@@ -163,10 +168,14 @@ namespace MWRender
         mSkyCullCallback = nullptr;
 
         mRootNode->removeChild(mCamera);
+        mRange = std::nullopt;
     }
 
     void PrecipitationOccluder::updateRange(const osg::Vec3f range)
     {
+        assert(range.x() != 0);
+        assert(range.y() != 0);
+        assert(range.z() != 0);
         const osg::Vec3f margin = { -50, -50, 0 };
         mRange = range - margin;
     }

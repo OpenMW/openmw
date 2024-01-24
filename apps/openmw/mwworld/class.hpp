@@ -151,10 +151,6 @@ namespace MWWorld
         /// actor responsible for the attack. \a successful specifies if the hit is
         /// successful or not. \a sourceType classifies the damage source.
 
-        virtual void block(const Ptr& ptr) const;
-        ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
-        /// (default implementation: throw an exception)
-
         virtual std::unique_ptr<Action> activate(const Ptr& ptr, const Ptr& actor) const;
         ///< Generate action for activation (default implementation: return a null action).
 
@@ -170,7 +166,7 @@ namespace MWWorld
         ///< Return inventory store or throw an exception, if class does not have a
         /// inventory store (default implementation: throw an exception)
 
-        virtual bool hasInventoryStore(const Ptr& ptr) const;
+        virtual bool hasInventoryStore(const ConstPtr& ptr) const;
         ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
 
         virtual bool canLock(const ConstPtr& ptr) const;
@@ -284,7 +280,7 @@ namespace MWWorld
         virtual bool useAnim() const;
         ///< Whether or not to use animated variant of model (default false)
 
-        virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
+        virtual void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 

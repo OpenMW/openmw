@@ -76,4 +76,13 @@ namespace DetourNavigator
             return {};
         return TilesPositionsRange{ TilePosition(beginX, beginY), TilePosition(endX, endY) };
     }
+
+    TilesPositionsRange getUnion(const TilesPositionsRange& a, const TilesPositionsRange& b) noexcept
+    {
+        const int beginX = std::min(a.mBegin.x(), b.mBegin.x());
+        const int endX = std::max(a.mEnd.x(), b.mEnd.x());
+        const int beginY = std::min(a.mBegin.y(), b.mBegin.y());
+        const int endY = std::max(a.mEnd.y(), b.mEnd.y());
+        return TilesPositionsRange{ .mBegin = TilePosition(beginX, beginY), .mEnd = TilePosition(endX, endY) };
+    }
 }

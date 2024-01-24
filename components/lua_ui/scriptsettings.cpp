@@ -21,7 +21,7 @@ namespace LuaUi
                 Log(Debug::Warning) << "A script settings page has an empty name";
             if (!element.get())
                 Log(Debug::Warning) << "A script settings page has no UI element assigned";
-            return { std::move(name), std::move(searchHints), element };
+            return { std::move(name), std::move(searchHints), std::move(element) };
         }
     }
 

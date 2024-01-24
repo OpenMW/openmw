@@ -12,7 +12,7 @@
 -- @param #string soundId ID of Sound record to play
 -- @param #table options An optional table with additional optional arguments. Can contain:
 --
---   * `timeOffset` - a floating point number >= 0, to some time (in second) from beginning of sound file (default: 0);
+--   * `timeOffset` - a floating point number >= 0, to skip some time (in seconds) from beginning of sound file (default: 0);
 --   * `volume` - a floating point number >= 0, to set a sound volume (default: 1);
 --   * `pitch` - a floating point number >= 0, to set a sound pitch (default: 1);
 --   * `scale` - a boolean, to set if sound pitch should be scaled by simulation time scaling (default: true);
@@ -32,7 +32,7 @@
 -- @param #string fileName Path to sound file in VFS
 -- @param #table options An optional table with additional optional arguments. Can contain:
 --
---   * `timeOffset` - a floating point number >= 0, to some time (in second) from beginning of sound file (default: 0);
+--   * `timeOffset` - a floating point number >= 0, to skip some time (in seconds) from beginning of sound file (default: 0);
 --   * `volume` - a floating point number >= 0, to set a sound volume (default: 1);
 --   * `pitch` - a floating point number >= 0, to set a sound pitch (default: 1);
 --   * `scale` - a boolean, to set if sound pitch should be scaled by simulation time scaling (default: true);
@@ -76,7 +76,13 @@
 -- Play a sound file as a music track
 -- @function [parent=#ambient] streamMusic
 -- @param #string fileName Path to file in VFS
--- @usage ambient.streamMusic("Music\\Test\\Test.mp3");
+-- @param #table options An optional table with additional optional arguments. Can contain:
+--
+--   * `fadeOut` - a floating point number >= 0, time (in seconds) to fade out current track before playing this one (default 1.0);
+-- @usage local params = {
+--    fadeOut=2.0
+-- };
+-- ambient.streamMusic("Music\\Test\\Test.mp3", params)
 
 ---
 -- Stop to play current music

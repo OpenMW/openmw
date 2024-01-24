@@ -718,6 +718,11 @@
 -- @return #CreatureRecord
 
 ---
+-- @type CreatureAttack
+-- @field #number minDamage Minimum attack damage.
+-- @field #number maxDamage Maximum attack damage.
+
+---
 -- @type CreatureRecord
 -- @field #string id The record ID of the creature
 -- @field #string name
@@ -727,6 +732,10 @@
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
 -- @field #number baseGold The base barter gold of the creature
+-- @field #number combatSkill The base combat skill of the creature. This is the skill value used for all skills with a 'combat' specialization
+-- @field #number magicSkill The base magic skill of the creature. This is the skill value used for all skills with a 'magic' specialization
+-- @field #number stealthSkill The base stealth skill of the creature. This is the skill value used for all skills with a 'stealth' specialization
+-- @field #list<#number> attack A table of the 3 randomly selected attacks used by creatures that do not carry weapons. The table consists of 6 numbers split into groups of 2 values corresponding to minimum and maximum damage in that order.
 -- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 
 

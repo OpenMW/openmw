@@ -7,6 +7,7 @@
 namespace Bsa
 {
     uint32_t generateHash(const std::string& name);
+    uint32_t generateExtensionHash(std::string_view extension);
 }
 
 #endif

@@ -5,6 +5,7 @@
 #include <list>
 #include <type_traits>
 
+#include "components/esm/decompose.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
 
@@ -121,6 +122,20 @@ namespace ESM
             endRecord(name);
         }
 
+        void writeNamedComposite(NAME name, const auto& value)
+        {
+            decompose(value, [&](const auto&... args) {
+                startSubRecord(name);
+                (writeT(args), ...);
+                endRecord(name);
+            });
+        }
+
+        void writeComposite(const auto& value)
+        {
+            decompose(value, [&](const auto&... args) { (writeT(args), ...); });
+        }
+
         // Prevent using writeHNT with strings. This already happened by accident and results in
         // state being discarded without any error on writing or reading it. :(
         // writeHNString and friends must be used instead.
@@ -132,7 +147,7 @@ namespace ESM
         void writeHNT(NAME name, const T (&data)[size], int) = delete;
 
         template <typename T>
-        void writeHNT(NAME name, const T& data, int size)
+        void writeHNT(NAME name, const T& data, std::size_t size)
         {
             startSubRecord(name);
             writeT(data, size);

@@ -166,6 +166,7 @@ namespace DetourNavigator
             return;
         mLastRecastMeshManagerRevision = mRecastMeshManager.getRevision();
         mPlayerTile = playerTile;
+        mRecastMeshManager.setRange(makeRange(playerTile, mSettings.mMaxTilesNumber), guard);
         const auto changedTiles = mRecastMeshManager.takeChangedTiles(guard);
         const TilesPositionsRange range = mRecastMeshManager.getLimitedObjectsRange();
         for (const auto& [agentBounds, cached] : mCache)

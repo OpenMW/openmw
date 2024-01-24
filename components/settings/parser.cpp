@@ -77,7 +77,7 @@ void Settings::SettingsFileParser::loadSettingsFile(
         Misc::StringUtils::trim(value);
 
         if (overrideExisting)
-            settings[std::make_pair(currentCategory, setting)] = value;
+            settings[std::make_pair(currentCategory, setting)] = std::move(value);
         else if (settings.insert(std::make_pair(std::make_pair(currentCategory, setting), value)).second == false)
             fail(std::string("duplicate setting: [" + currentCategory + "] " + setting));
     }

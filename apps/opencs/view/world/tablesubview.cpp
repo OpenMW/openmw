@@ -169,7 +169,7 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
         {
             CSVFilter::FilterData filterData;
             filterData.searchData = it->getId();
-            filterData.columns = col;
+            filterData.columns = std::move(col);
             sourceFilter.emplace_back(filterData);
         }
 
@@ -195,7 +195,7 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
 
         CSVFilter::FilterData filterData;
         filterData.searchData = qData;
-        filterData.columns = searchColumns;
+        filterData.columns = std::move(searchColumns);
 
         sourceFilterByValue.emplace_back(filterData);
 

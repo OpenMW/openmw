@@ -410,7 +410,7 @@ bool CSVDoc::ViewManager::removeDocument(CSVDoc::View* view)
                 remainingViews.push_back(*iter);
         }
         mDocumentManager.removeDocument(document);
-        mViews = remainingViews;
+        mViews = std::move(remainingViews);
     }
     return true;
 }

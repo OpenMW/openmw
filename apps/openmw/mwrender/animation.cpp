@@ -33,6 +33,7 @@
 #include <components/sceneutil/keyframe.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>

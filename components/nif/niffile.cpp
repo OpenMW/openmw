@@ -24,7 +24,7 @@
 namespace Nif
 {
 
-    Reader::Reader(NIFFile& file)
+    Reader::Reader(NIFFile& file, const ToUTF8::StatelessUtf8Encoder* encoder)
         : mVersion(file.mVersion)
         , mUserVersion(file.mUserVersion)
         , mBethVersion(file.mBethVersion)
@@ -33,6 +33,7 @@ namespace Nif
         , mRecords(file.mRecords)
         , mRoots(file.mRoots)
         , mUseSkinning(file.mUseSkinning)
+        , mEncoder(encoder)
     {
     }
 
@@ -519,7 +520,7 @@ namespace Nif
         const std::array<std::uint64_t, 2> fileHash = Files::getHash(mFilename, *stream);
         mHash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
 
-        NIFStream nif(*this, std::move(stream));
+        NIFStream nif(*this, std::move(stream), mEncoder);
 
         // Check the header string
         std::string head = nif.getVersionString();
@@ -672,7 +673,7 @@ namespace Nif
 
             assert(r != nullptr);
             assert(r->recType != RC_MISSING);
-            r->recName = rec;
+            r->recName = std::move(rec);
             r->recIndex = i;
             r->read(&nif);
             mRecords[i] = std::move(r);

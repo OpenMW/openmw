@@ -11,6 +11,11 @@
 
 #include "record.hpp"
 
+namespace ToUTF8
+{
+    class StatelessUtf8Encoder;
+}
+
 namespace Nif
 {
 
@@ -112,6 +117,7 @@ namespace Nif
         std::vector<std::string> mStrings;
 
         bool& mUseSkinning;
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
 
         static std::atomic_bool sLoadUnsupportedFiles;
         static std::atomic_bool sWriteNifDebugLog;
@@ -122,7 +128,7 @@ namespace Nif
 
     public:
         /// Open a NIF stream. The name is used for error messages.
-        explicit Reader(NIFFile& file);
+        explicit Reader(NIFFile& file, const ToUTF8::StatelessUtf8Encoder* encoder);
 
         /// Parse the file
         void parse(Files::IStreamPtr&& stream);
