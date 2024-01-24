@@ -170,7 +170,7 @@ namespace MWRender
             else
                 source = mAnimationTimePtr[0];
 
-            SceneUtil::AssignControllerSourcesVisitor assignVisitor(source);
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::move(source));
             attached->accept(assignVisitor);
         }
         catch (std::exception& e)

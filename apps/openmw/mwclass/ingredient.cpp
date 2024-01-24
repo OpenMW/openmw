@@ -143,7 +143,7 @@ namespace MWClass
 
             list.push_back(params);
         }
-        info.effects = list;
+        info.effects = std::move(list);
 
         info.text = std::move(text);
         info.isIngredient = true;

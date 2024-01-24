@@ -893,7 +893,7 @@ namespace MWWorld
         // Try to overwrite existing record
         auto ret = mStatic.emplace(cell, pathgrid);
         if (!ret.second)
-            ret.first->second = pathgrid;
+            ret.first->second = std::move(pathgrid);
 
         return RecordId(ESM::RefId(), isDeleted);
     }

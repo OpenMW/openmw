@@ -363,7 +363,7 @@ namespace MWRender
             imageDest.mImage = image;
             imageDest.mX = x;
             imageDest.mY = y;
-            mPendingImageDest[camera] = imageDest;
+            mPendingImageDest[camera] = std::move(imageDest);
         }
 
         // Create a quad rendering the updated texture

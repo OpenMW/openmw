@@ -436,7 +436,7 @@ namespace MWRender
 
                 // We still should use one-handed animation as fallback
                 if (mAnimation->hasAnimation(inventoryGroup))
-                    groupname = inventoryGroup;
+                    groupname = std::move(inventoryGroup);
                 else
                 {
                     static const std::string oneHandFallback
@@ -456,7 +456,7 @@ namespace MWRender
 
         mAnimation->showCarriedLeft(showCarriedLeft);
 
-        mCurrentAnimGroup = groupname;
+        mCurrentAnimGroup = std::move(groupname);
         mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);

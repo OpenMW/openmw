@@ -684,7 +684,7 @@ namespace MWMechanics
             if (!mAnimation->hasAnimation(weapMovementAnimName))
                 weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
 
-            movementAnimName = weapMovementAnimName;
+            movementAnimName = std::move(weapMovementAnimName);
         }
 
         if (!mAnimation->hasAnimation(movementAnimName))
@@ -798,7 +798,7 @@ namespace MWMechanics
                 weapIdleGroup += weapShortGroup;
                 if (!mAnimation->hasAnimation(weapIdleGroup))
                     weapIdleGroup = fallbackShortWeaponGroup(idleGroup);
-                idleGroup = weapIdleGroup;
+                idleGroup = std::move(weapIdleGroup);
 
                 // play until the Loop Stop key 2 to 5 times, then play until the Stop key
                 // this replicates original engine behavior for the "Idle1h" 1st-person animation
@@ -820,7 +820,7 @@ namespace MWMechanics
             mAnimation->getInfo(mCurrentIdle, &startPoint);
 
         clearStateAnimation(mCurrentIdle);
-        mCurrentIdle = idleGroup;
+        mCurrentIdle = std::move(idleGroup);
         mAnimation->play(mCurrentIdle, priority, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop",
             startPoint, numLoops, true);
     }
