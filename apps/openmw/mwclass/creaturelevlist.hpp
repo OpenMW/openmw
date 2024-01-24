@@ -20,10 +20,6 @@ namespace MWClass
         bool hasToolTip(const MWWorld::ConstPtr& ptr) const override;
         ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-        void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
-        ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
-        ///< list getModel().
-
         void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
             MWRender::RenderingInterface& renderingInterface) const override;
         ///< Add reference into a cell for rendering

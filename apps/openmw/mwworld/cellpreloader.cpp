@@ -52,19 +52,12 @@ namespace MWWorld
 
     struct ListModelsVisitor
     {
-        ListModelsVisitor(std::vector<std::string>& out)
-            : mOut(out)
-        {
-        }
-
-        virtual bool operator()(const MWWorld::Ptr& ptr)
+        bool operator()(const MWWorld::ConstPtr& ptr)
         {
             ptr.getClass().getModelsToPreload(ptr, mOut);
 
             return true;
         }
-
-        virtual ~ListModelsVisitor() = default;
 
         std::vector<std::string>& mOut;
     };
@@ -90,8 +83,8 @@ namespace MWWorld
         {
             mTerrainView = mTerrain->createView();
 
-            ListModelsVisitor visitor(mMeshes);
-            cell->forEach(visitor);
+            ListModelsVisitor visitor{ mMeshes };
+            cell->forEachConst(visitor);
         }
 
         void abort() override { mAbort = true; }
