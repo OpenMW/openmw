@@ -30,6 +30,7 @@
 #include "../mwbase/world.hpp"
 
 #include "actor.hpp"
+#include "actors.hpp"
 #include "actorutil.hpp"
 #include "aicombat.hpp"
 #include "aipursue.hpp"
@@ -1508,14 +1509,14 @@ namespace MWMechanics
 
                 if (!peaceful)
                 {
-                    startCombat(target, attacker, nullptr);
+                    SidingCache cachedAllies{ mActors, false };
+                    const std::set<MWWorld::Ptr>& attackerAllies = cachedAllies.getActorsSidingWith(attacker);
+                    startCombat(target, attacker, &attackerAllies);
                     // Force friendly actors into combat to prevent infighting between followers
-                    std::set<MWWorld::Ptr> followersTarget;
-                    getActorsSidingWith(target, followersTarget);
-                    for (const auto& follower : followersTarget)
+                    for (const auto& follower : cachedAllies.getActorsSidingWith(target))
                     {
                         if (follower != attacker && follower != player)
-                            startCombat(follower, attacker, nullptr);
+                            startCombat(follower, attacker, &attackerAllies);
                     }
                 }
             }
