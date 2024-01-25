@@ -132,9 +132,6 @@ namespace MWMechanics
         /// Are we in combat with this particular actor?
         bool isInCombat(const MWWorld::Ptr& actor) const;
 
-        bool canAddTarget(const ESM::Position& actorPos, float distToTarget) const;
-        ///< Function assumes that actor can have only 1 target apart player
-
         /// Removes all combat packages until first non-combat or stack empty.
         void stopCombat();
 

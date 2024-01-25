@@ -24,6 +24,7 @@
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5280: Unskinned shapes in skinned equipment are rendered in the wrong place
     Bug #5371: Keyframe animation tracks are used for any file that begins with an X
+    Bug #5413: Enemies do a battlecry everytime the player summons a creature
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5849: Paralysis breaks landing
     Bug #5870: Disposing of actors who were selected in the console doesn't deselect them like vanilla

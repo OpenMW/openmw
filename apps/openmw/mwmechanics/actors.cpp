@@ -620,7 +620,7 @@ namespace MWMechanics
 
             if (creatureStats2.matchesActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId()))
             {
-                mechanicsManager->startCombat(actor1, actor2);
+                mechanicsManager->startCombat(actor1, actor2, nullptr);
                 // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
                 // if the player gets out of reach, while the ally would continue combat with the player
                 creatureStats1.setHitAttemptActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId());
@@ -655,11 +655,11 @@ namespace MWMechanics
                 {
                     if (ally2 != actor2 && ally2.getClass().getCreatureStats(ally2).getAiSequence().isInCombat(actor1))
                     {
-                        mechanicsManager->startCombat(actor1, actor2);
+                        mechanicsManager->startCombat(actor1, actor2, &allies2);
                         // Also have actor1's allies start combat
                         for (const MWWorld::Ptr& ally1 : allies1)
                             if (ally1 != player)
-                                mechanicsManager->startCombat(ally1, actor2);
+                                mechanicsManager->startCombat(ally1, actor2, &allies2);
                         return;
                     }
                 }
@@ -747,7 +747,7 @@ namespace MWMechanics
             bool LOS = world->getLOS(actor1, actor2) && mechanicsManager->awarenessCheck(actor2, actor1);
 
             if (LOS)
-                mechanicsManager->startCombat(actor1, actor2);
+                mechanicsManager->startCombat(actor1, actor2, nullptr);
         }
     }
 
@@ -1133,7 +1133,7 @@ namespace MWMechanics
                     = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->mValue.getInteger();
                 if (playerStats.getBounty() >= cutoff * iCrimeThresholdMultiplier)
                 {
-                    mechanicsManager->startCombat(ptr, player);
+                    mechanicsManager->startCombat(ptr, player, nullptr);
                     creatureStats.setHitAttemptActorId(
                         playerClass.getCreatureStats(player)
                             .getActorId()); // Stops the guard from quitting combat if player is unreachable

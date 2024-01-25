@@ -508,7 +508,7 @@ namespace MWScript
 
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(targetID, true, false);
                 if (!target.isEmpty() && !target.getClass().getCreatureStats(target).isDead())
-                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor, target);
+                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor, target, nullptr);
             }
         };
 
