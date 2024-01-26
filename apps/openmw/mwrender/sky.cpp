@@ -306,7 +306,7 @@ namespace MWRender
 
         bool forceShaders = mSceneManager->getForceShaders();
 
-        mAtmosphereDay = mSceneManager->getInstance(Settings::models().mSkyatmosphere, mEarlyRenderBinRoot);
+        mAtmosphereDay = mSceneManager->getInstance(Settings::models().mSkyatmosphere.get(), mEarlyRenderBinRoot);
         ModVertexAlphaVisitor modAtmosphere(ModVertexAlphaVisitor::Atmosphere);
         mAtmosphereDay->accept(modAtmosphere);
 
@@ -319,9 +319,9 @@ namespace MWRender
 
         osg::ref_ptr<osg::Node> atmosphereNight;
         if (mSceneManager->getVFS()->exists(Settings::models().mSkynight02.get()))
-            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight02, mAtmosphereNightNode);
+            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight02.get(), mAtmosphereNightNode);
         else
-            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight01, mAtmosphereNightNode);
+            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight01.get(), mAtmosphereNightNode);
         atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(
             createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
@@ -341,7 +341,8 @@ namespace MWRender
         mEarlyRenderBinRoot->addChild(mCloudNode);
 
         mCloudMesh = new osg::PositionAttitudeTransform;
-        osg::ref_ptr<osg::Node> cloudMeshChild = mSceneManager->getInstance(Settings::models().mSkyclouds, mCloudMesh);
+        osg::ref_ptr<osg::Node> cloudMeshChild
+            = mSceneManager->getInstance(Settings::models().mSkyclouds.get(), mCloudMesh);
         mCloudUpdater = new CloudUpdater(forceShaders);
         mCloudUpdater->setOpacity(1.f);
         cloudMeshChild->addUpdateCallback(mCloudUpdater);
@@ -349,7 +350,7 @@ namespace MWRender
 
         mNextCloudMesh = new osg::PositionAttitudeTransform;
         osg::ref_ptr<osg::Node> nextCloudMeshChild
-            = mSceneManager->getInstance(Settings::models().mSkyclouds, mNextCloudMesh);
+            = mSceneManager->getInstance(Settings::models().mSkyclouds.get(), mNextCloudMesh);
         mNextCloudUpdater = new CloudUpdater(forceShaders);
         mNextCloudUpdater->setOpacity(0.f);
         nextCloudMeshChild->addUpdateCallback(mNextCloudUpdater);

@@ -24,7 +24,7 @@ add_openmw_dir (mwrender
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
     renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging groundcover
     postprocessor pingpongcull luminancecalculator pingpongcanvas transparentpass precipitationocclusion ripples
-    actorutil distortion
+    actorutil distortion animationpriority bonegroup blendmask
     )
 
 add_openmw_dir (mwinput
@@ -64,7 +64,7 @@ add_openmw_dir (mwlua
     context globalscripts localscripts playerscripts luabindings objectbindings cellbindings mwscriptbindings
     camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings postprocessingbindings stats debugbindings itemdata
     types/types types/door types/item types/actor types/container types/lockable types/weapon types/npc types/creature types/player types/activator types/book types/lockpick types/probe types/apparatus types/potion types/ingredient types/misc types/repair types/armor types/light types/static types/clothing types/levelledlist types/terminal
-    worker magicbindings factionbindings classbindings
+    worker magicbindings factionbindings classbindings animationbindings
     )
 
 add_openmw_dir (mwsound
@@ -109,7 +109,7 @@ add_openmw_dir (mwstate
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager windowmanager statemanager
+    inputmanager windowmanager statemanager luamanager
     )
 
 # Main executable

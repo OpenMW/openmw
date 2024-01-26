@@ -10,6 +10,7 @@ GLOBAL: scripts/omw/activationhandlers.lua
 GLOBAL: scripts/omw/cellhandlers.lua
 GLOBAL: scripts/omw/usehandlers.lua
 GLOBAL: scripts/omw/worldeventhandlers.lua
+CREATURE, NPC, PLAYER: scripts/omw/mechanics/animationcontroller.lua
 PLAYER: scripts/omw/mechanics/playercontroller.lua
 PLAYER: scripts/omw/playercontrols.lua
 PLAYER: scripts/omw/camera/camera.lua

@@ -35,6 +35,7 @@
 #include "mwscriptbindings.hpp"
 #include "objectlists.hpp"
 
+#include "animationbindings.hpp"
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
 #include "debugbindings.hpp"
@@ -147,6 +148,7 @@ namespace MWLua
         };
         api["contentFiles"] = initContentFilesBindings(lua->sol());
         api["sound"] = initCoreSoundBindings(context);
+        api["vfx"] = initCoreVfxBindings(context);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
@@ -330,6 +332,7 @@ namespace MWLua
         sol::state_view lua = context.mLua->sol();
         MWWorld::DateTimeManager* tm = MWBase::Environment::get().getWorld()->getTimeManager();
         return {
+            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.async",
                 LuaUtil::getAsyncPackageInitializer(
                     lua, [tm] { return tm->getSimulationTime(); }, [tm] { return tm->getGameTime(); }) },

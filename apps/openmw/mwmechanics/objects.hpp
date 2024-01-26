@@ -47,8 +47,12 @@ namespace MWMechanics
 
         bool playAnimationGroup(
             const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false);
+        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
+            std::string_view startKey, std::string_view stopKey, bool forceLoop);
+        void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable);
         void skipAnimation(const MWWorld::Ptr& ptr);
         void persistAnimationStates();
+        void clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted);
 
         void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const;
 

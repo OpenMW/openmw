@@ -756,6 +756,21 @@ namespace MWMechanics
         else
             return mObjects.playAnimationGroup(ptr, groupName, mode, number, scripted);
     }
+    bool MechanicsManager::playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops,
+        float speed, std::string_view startKey, std::string_view stopKey, bool forceLoop)
+    {
+        if (ptr.getClass().isActor())
+            return mActors.playAnimationGroupLua(ptr, groupName, loops, speed, startKey, stopKey, forceLoop);
+        else
+            return mObjects.playAnimationGroupLua(ptr, groupName, loops, speed, startKey, stopKey, forceLoop);
+    }
+    void MechanicsManager::enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable)
+    {
+        if (ptr.getClass().isActor())
+            mActors.enableLuaAnimations(ptr, enable);
+        else
+            mObjects.enableLuaAnimations(ptr, enable);
+    }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
         if (ptr.getClass().isActor())
@@ -797,6 +812,14 @@ namespace MWMechanics
     {
         mActors.persistAnimationStates();
         mObjects.persistAnimationStates();
+    }
+
+    void MechanicsManager::clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted)
+    {
+        if (ptr.getClass().isActor())
+            mActors.clearAnimationQueue(ptr, clearScripted);
+        else
+            mObjects.clearAnimationQueue(ptr, clearScripted);
     }
 
     void MechanicsManager::updateMagicEffects(const MWWorld::Ptr& ptr)

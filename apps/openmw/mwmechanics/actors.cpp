@@ -2019,6 +2019,24 @@ namespace MWMechanics
             return false;
         }
     }
+
+    bool Actors::playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
+        std::string_view startKey, std::string_view stopKey, bool forceLoop)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            return iter->second->getCharacterController().playGroupLua(
+                groupName, speed, startKey, stopKey, loops, forceLoop);
+        return false;
+    }
+
+    void Actors::enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            iter->second->getCharacterController().enableLuaAnimations(enable);
+    }
+
     void Actors::skipAnimation(const MWWorld::Ptr& ptr) const
     {
         const auto iter = mIndex.find(ptr.mRef);
@@ -2046,6 +2064,13 @@ namespace MWMechanics
     {
         for (const Actor& actor : mActors)
             actor.getCharacterController().persistAnimationState();
+    }
+
+    void Actors::clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            iter->second->getCharacterController().clearAnimQueue(clearScripted);
     }
 
     void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const
