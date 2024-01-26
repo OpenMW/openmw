@@ -34,7 +34,7 @@ bool hasExtension(const std::filesystem::path& filename, const std::string& exte
 /// See if the file has the "nif" extension.
 bool isNIF(const std::filesystem::path& filename)
 {
-    return hasExtension(filename, ".nif");
+    return hasExtension(filename, ".nif") || hasExtension(filename, ".kf");
 }
 /// See if the file has the "bsa" extension.
 bool isBSA(const std::filesystem::path& filename)
@@ -76,7 +76,10 @@ void readNIF(
     const std::string pathStr = Files::pathToUnicodeString(path);
     if (!quiet)
     {
-        std::cout << "Reading NIF file '" << pathStr << "'";
+        if (hasExtension(path, ".kf"))
+            std::cout << "Reading KF file '" << pathStr << "'";
+        else
+            std::cout << "Reading NIF file '" << pathStr << "'";
         if (!source.empty())
             std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
         std::cout << std::endl;
@@ -139,10 +142,10 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 bool parseOptions(int argc, char** argv, Files::PathContainer& files, Files::PathContainer& archives,
     bool& writeDebugLog, bool& quiet)
 {
-    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF and BSA files
+    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF, KF and BSA/BA2 files
 
 Usages:
-  niftest <nif files, BSA files, or directories>
+  niftest <nif files, kf files, BSA/BA2 files, or directories>
       Scan the file or directories for NIF errors.
 
 Allowed options)");
@@ -241,7 +244,8 @@ int main(int argc, char** argv)
             }
             else
             {
-                std::cerr << "Error: '" << pathStr << "' is not a NIF file, BSA/BA2 archive, or directory" << std::endl;
+                std::cerr << "Error: '" << pathStr << "' is not a NIF/KF file, BSA/BA2 archive, or directory"
+                          << std::endl;
             }
         }
         catch (std::exception& e)
