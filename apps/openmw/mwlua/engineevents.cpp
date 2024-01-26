@@ -86,6 +86,15 @@ namespace MWLua
 
         void operator()(const OnNewExterior& event) const { mGlobalScripts.onNewExterior(GCell{ &event.mCell }); }
 
+        void operator()(const OnAnimationTextKey& event) const
+        {
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (actor.isEmpty())
+                return;
+            if (auto* scripts = getLocalScripts(actor))
+                scripts->onAnimationTextKey(event.mGroupname, event.mKey);
+        }
+
     private:
         MWWorld::Ptr getPtr(ESM::RefNum id) const
         {

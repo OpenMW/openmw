@@ -16,6 +16,7 @@ Lua API reference
     openmw_storage
     openmw_core
     openmw_types
+    openmw_animation
     openmw_async
     openmw_vfs
     openmw_world
@@ -33,6 +34,7 @@ Lua API reference
     openmw_aux_ui
     interface_activation
     interface_ai
+    interface_animation
     interface_camera
     interface_controls
     interface_item_usage

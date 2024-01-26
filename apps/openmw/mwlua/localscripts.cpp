@@ -3,6 +3,8 @@
 #include <components/esm3/loadcell.hpp>
 #include <components/misc/strings/lower.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwmechanics/aicombat.hpp"
 #include "../mwmechanics/aiescort.hpp"
 #include "../mwmechanics/aifollow.hpp"
@@ -162,6 +164,10 @@ namespace MWLua
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             ai.stack(MWMechanics::AiTravel(target.x(), target.y(), target.z(), false), ptr, cancelOther);
         };
+        selfAPI["_enableLuaAnimations"] = [](SelfObject& self, bool enable) {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWBase::Environment::get().getMechanicsManager()->enableLuaAnimations(ptr, enable);
+        };
     }
 
     LocalScripts::LocalScripts(LuaUtil::LuaState* lua, const LObject& obj)
@@ -170,7 +176,7 @@ namespace MWLua
     {
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
         registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
-            &mOnTeleportedHandlers });
+            &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers });
     }
 
     void LocalScripts::setActive(bool active)
