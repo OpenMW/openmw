@@ -279,7 +279,8 @@ namespace
         return false;
     }
 
-    void absorbSpell(const ESM::RefId& spellId, const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
+    void absorbSpell(const MWMechanics::ActiveSpells::ActiveSpellParams& spellParams, const MWWorld::Ptr& caster,
+        const MWWorld::Ptr& target)
     {
         const auto& esmStore = *MWBase::Environment::get().getESMStore();
         const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Absorb"));
@@ -287,15 +288,14 @@ namespace
         if (animation && !absorbStatic->mModel.empty())
             animation->addEffect(Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel),
                 ESM::MagicEffect::indexToName(ESM::MagicEffect::SpellAbsorption), false);
-        const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellId);
         int spellCost = 0;
-        if (spell)
+        if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellParams.getId()))
         {
             spellCost = MWMechanics::calcSpellCost(*spell);
         }
         else
         {
-            const ESM::Enchantment* enchantment = esmStore.get<ESM::Enchantment>().search(spellId);
+            const ESM::Enchantment* enchantment = esmStore.get<ESM::Enchantment>().search(spellParams.getEnchantment());
             if (enchantment)
                 spellCost = MWMechanics::getEffectiveEnchantmentCastCost(*enchantment, caster);
         }
@@ -342,7 +342,7 @@ namespace
                         {
                             if (canAbsorb && Misc::Rng::roll0to99(prng) < activeEffect.mMagnitude)
                             {
-                                absorbSpell(spellParams.getId(), caster, target);
+                                absorbSpell(spellParams, caster, target);
                                 return MWMechanics::MagicApplicationResult::Type::REMOVED;
                             }
                         }
