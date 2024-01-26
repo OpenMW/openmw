@@ -691,15 +691,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
             return;
         }
     }
-    else if (npc.mNpdt.mHealth != 0)
-    {
-        for (size_t i = 0; i < npc.mNpdt.mAttributes.size(); ++i)
-        {
-            if (npc.mNpdt.mAttributes[i] == 0)
-                messages.add(id, ESM::Attribute::indexToRefId(i).getRefIdString() + " is equal to zero", {},
-                    CSMDoc::Message::Severity_Warning);
-        }
-    }
 
     if (level <= 0)
         messages.add(id, "Level is non-positive", "", CSMDoc::Message::Severity_Warning);
