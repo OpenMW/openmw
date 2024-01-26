@@ -173,6 +173,7 @@
     Feature #7652: Sort inactive post processing shaders list properly
     Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
+    Feature #7792: Support Timescale Clouds
     Task #5896: Do not use deprecated MyGUI properties
     Task #6624: Drop support for saves made prior to 0.45
     Task #7113: Move from std::atoi to std::from_char
