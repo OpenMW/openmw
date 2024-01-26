@@ -853,7 +853,7 @@ namespace MWRender
                     src = mWeaponAnimationTime;
                 else
                     src = mAnimationTimePtr[0];
-                SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
+                SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::move(src));
                 node->accept(assignVisitor);
             }
         }

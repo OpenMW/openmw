@@ -613,7 +613,7 @@ namespace MWLua
                     MWBase::Environment::get().getWorldModel()->registerPtr(item);
                     list->push_back(getId(item));
                 }
-                return ObjectList<ObjectT>{ list };
+                return ObjectList<ObjectT>{ std::move(list) };
             };
 
             inventoryT["countOf"] = [](const InventoryT& inventory, std::string_view recordId) {
@@ -661,7 +661,7 @@ namespace MWLua
                         list->push_back(getId(item));
                     }
                 }
-                return ObjectList<ObjectT>{ list };
+                return ObjectList<ObjectT>{ std::move(list) };
             };
         }
 

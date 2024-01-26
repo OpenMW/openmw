@@ -270,7 +270,7 @@ namespace MWLua
                 if (!ok)
                     throw std::runtime_error(
                         std::string("Incorrect type argument in cell:getAll: " + LuaUtil::toString(*type)));
-                return GObjectList{ res };
+                return GObjectList{ std::move(res) };
             };
         }
     }
