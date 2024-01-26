@@ -74,6 +74,8 @@ namespace MWRender
         std::vector<Emitter> mEmitters;
 
         Ripples* mRipples = nullptr;
+
+        int mMaxNumberRipples;
     };
 
 }
