@@ -297,6 +297,7 @@
 -- @field #number gridY Index of the cell by Y (only for exteriors).
 -- @field #string worldSpaceId Id of the world space.
 -- @field #boolean hasWater True if the cell contains water.
+-- @field #number waterLevel The water level of the cell. (nil if cell has no water).
 -- @field #boolean hasSky True if in this cell sky should be rendered.
 
 ---

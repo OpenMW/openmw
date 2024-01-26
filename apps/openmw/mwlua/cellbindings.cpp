@@ -115,6 +115,13 @@ namespace MWLua
             return cell == c.mStore || (cell->getCell()->getWorldSpace() == c.mStore->getCell()->getWorldSpace());
         };
 
+        cellT["waterLevel"] = sol::readonly_property([](const CellT& c) -> sol::optional<float> {
+            if (c.mStore->getCell()->hasWater())
+                return c.mStore->getWaterLevel();
+            else
+                return sol::nullopt;
+        });
+
         if constexpr (std::is_same_v<CellT, GCell>)
         { // only for global scripts
             cellT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
