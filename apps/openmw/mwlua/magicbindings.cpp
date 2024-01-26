@@ -730,7 +730,7 @@ namespace MWLua
                     auto id = sol::make_object(lua, self.mIterator->getId().serializeText());
                     auto params = sol::make_object(lua, ActiveSpell{ self.mActor, *self.mIterator });
                     self.advance();
-                    return { params, params };
+                    return { id, params };
                 }
                 else
                 {
