@@ -396,51 +396,38 @@ local function onGroupRegistered(global, key)
     end
 end
 
-
-local function updatePlayerGroups()
-    local playerGroups = storage.playerSection(common.groupSectionKey)
-    for groupKey in pairs(playerGroups:asTable()) do
-        onGroupRegistered(false, groupKey)
+local function updateGroups(global)
+    local groupSection = common.getSection(global, common.groupSectionKey)
+    for groupKey in pairs(groupSection:asTable()) do
+        onGroupRegistered(global, groupKey)
     end
-    playerGroups:subscribe(async:callback(function(_, key)
+    groupSection:subscribe(async:callback(function(_, key)
         if key then
-            onGroupRegistered(false, key)
+            onGroupRegistered(global, key)
         else
-            for groupKey in pairs(playerGroups:asTable()) do
-                onGroupRegistered(false, groupKey)
+            for groupKey in pairs(groupSection:asTable()) do
+                onGroupRegistered(global, groupKey)
             end
         end
     end))
 end
 
+local updatePlayerGroups = function() updateGroups(false) end
 updatePlayerGroups()
 
-local function updateGlobalGroups()
-    local globalGroups = storage.globalSection(common.groupSectionKey)
-    for groupKey in pairs(globalGroups:asTable()) do
-        onGroupRegistered(true, groupKey)
-    end
-    globalGroups:subscribe(async:callback(function(_, key)
-        if key then
-            onGroupRegistered(true, key)
-        else
-            for groupKey in pairs(globalGroups:asTable()) do
-                onGroupRegistered(true, groupKey)
-            end
-        end
-    end))
-end
+local updateGlobalGroups = function() updateGroups(true) end
 
 local menuGroups = {}
 local menuPages = {}
 
 local function resetPlayerGroups()
-    local settingGroupsSection = storage.playerSection(common.groupSectionKey)
+    print('MENU reset player groups')
+    local playerGroupsSection = storage.playerSection(common.groupSectionKey)
     for pageKey, page in pairs(groups) do
         for groupKey, group in pairs(page) do
             if not menuGroups[groupKey] and not group.global then
                 page[groupKey] = nil
-                settingGroupsSection:set(groupKey, nil)
+                playerGroupsSection:set(groupKey, nil)
             end
         end
         if pageOptions[pageKey] then
@@ -513,10 +500,11 @@ return {
     },
     engineHandlers = {
         onStateChanged = function()
-            resetPlayerGroups()
             if menu.getState() == menu.STATE.Running then
                 updatePlayerGroups()
                 updateGlobalGroups()
+            else
+                resetPlayerGroups()
             end
         end,
     },
