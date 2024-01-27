@@ -749,14 +749,14 @@ namespace MWMechanics
     }
 
     bool MechanicsManager::playAnimationGroup(
-        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted)
+        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number, bool scripted)
     {
         if (ptr.getClass().isActor())
             return mActors.playAnimationGroup(ptr, groupName, mode, number, scripted);
         else
             return mObjects.playAnimationGroup(ptr, groupName, mode, number, scripted);
     }
-    bool MechanicsManager::playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops,
+    bool MechanicsManager::playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops,
         float speed, std::string_view startKey, std::string_view stopKey, bool forceLoop)
     {
         if (ptr.getClass().isActor())

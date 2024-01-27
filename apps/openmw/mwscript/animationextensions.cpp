@@ -56,7 +56,7 @@ namespace MWScript
                 }
 
                 MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(
-                    ptr, group, mode, std::numeric_limits<int>::max(), true);
+                    ptr, group, mode, std::numeric_limits<uint32_t>::max(), true);
             }
         };
 

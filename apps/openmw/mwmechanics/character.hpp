@@ -134,7 +134,7 @@ namespace MWMechanics
         struct AnimationQueueEntry
         {
             std::string mGroup;
-            size_t mLoopCount;
+            uint32_t mLoopCount;
             float mTime;
             bool mLooping;
             bool mScripted;
@@ -277,9 +277,9 @@ namespace MWMechanics
         void playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority, int blendMask,
             bool autodisable, float speedmult, std::string_view start, std::string_view stop, float startpoint,
             size_t loops, bool loopfallback = false) const;
-        bool playGroup(std::string_view groupname, int mode, int count, bool scripted = false);
+        bool playGroup(std::string_view groupname, int mode, uint32_t count, bool scripted = false);
         bool playGroupLua(std::string_view groupname, float speed, std::string_view startKey, std::string_view stopKey,
-            int loops, bool forceLoop);
+            uint32_t loops, bool forceLoop);
         void enableLuaAnimations(bool enable);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
