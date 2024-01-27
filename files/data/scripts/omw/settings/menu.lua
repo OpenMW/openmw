@@ -499,7 +499,7 @@ return {
         version = 1,
         registerPage = function(options)
             registerPage(options)
-            menuPages[options] = true
+            menuPages[options.key] = true
         end,
         registerRenderer = registerRenderer,
         registerGroup = function(options)
@@ -514,8 +514,8 @@ return {
     engineHandlers = {
         onStateChanged = function()
             resetPlayerGroups()
-            updatePlayerGroups()
             if menu.getState() == menu.STATE.Running then
+                updatePlayerGroups()
                 updateGlobalGroups()
             end
         end,
