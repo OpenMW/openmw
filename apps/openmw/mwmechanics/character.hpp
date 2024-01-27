@@ -138,9 +138,13 @@ namespace MWMechanics
             float mTime;
             bool mLooping;
             bool mScripted;
+            std::string mStartKey;
+            std::string mStopKey;
+            float mSpeed;
         };
         typedef std::deque<AnimationQueueEntry> AnimationQueue;
         AnimationQueue mAnimQueue;
+        bool mLuaAnimations{ false };
 
         CharacterState mIdleState{ CharState_None };
         std::string mCurrentIdle;
@@ -209,8 +213,6 @@ namespace MWMechanics
         void refreshMovementAnims(CharacterState movement, bool force = false);
         void refreshIdleAnims(CharacterState idle, bool force = false);
 
-        void clearAnimQueue(bool clearScriptedAnims = false);
-
         bool updateWeaponState();
         void updateIdleStormState(bool inwater) const;
 
@@ -247,8 +249,6 @@ namespace MWMechanics
 
         void prepareHit();
 
-        bool isLoopingAnimation(std::string_view group) const;
-
     public:
         CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation* anim);
         virtual ~CharacterController();
@@ -274,10 +274,17 @@ namespace MWMechanics
         void persistAnimationState() const;
         void unpersistAnimationState();
 
+        void playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority, int blendMask,
+            bool autodisable, float speedmult, std::string_view start, std::string_view stop, float startpoint,
+            size_t loops, bool loopfallback = false) const;
         bool playGroup(std::string_view groupname, int mode, int count, bool scripted = false);
+        bool playGroupLua(std::string_view groupname, float speed, std::string_view startKey, std::string_view stopKey,
+            int loops, bool forceLoop);
+        void enableLuaAnimations(bool enable);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
         bool isScriptedAnimPlaying() const;
+        void clearAnimQueue(bool clearScriptedAnims = false);
 
         enum KillResult
         {

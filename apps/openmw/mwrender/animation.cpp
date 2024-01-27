@@ -46,6 +46,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -53,6 +54,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
+#include "../mwmechanics/weapontype.hpp"
 
 #include "actorutil.hpp"
 #include "rotatecontroller.hpp"
@@ -301,11 +303,10 @@ namespace
         RemoveCallbackVisitor()
             : RemoveVisitor()
             , mHasMagicEffects(false)
-            , mEffectId(-1)
         {
         }
 
-        RemoveCallbackVisitor(int effectId)
+        RemoveCallbackVisitor(std::string_view effectId)
             : RemoveVisitor()
             , mHasMagicEffects(false)
             , mEffectId(effectId)
@@ -324,7 +325,7 @@ namespace
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
                 if (vfxCallback)
                 {
-                    bool toRemove = mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId;
+                    bool toRemove = mEffectId == "" || vfxCallback->mParams.mEffectId == mEffectId;
                     if (toRemove)
                         mToRemove.emplace_back(group.asNode(), group.getParent(0));
                     else
@@ -338,7 +339,7 @@ namespace
         void apply(osg::Geometry&) override {}
 
     private:
-        int mEffectId;
+        std::string_view mEffectId;
     };
 
     class FindVfxCallbacksVisitor : public osg::NodeVisitor
@@ -348,11 +349,10 @@ namespace
 
         FindVfxCallbacksVisitor()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mEffectId(-1)
         {
         }
 
-        FindVfxCallbacksVisitor(int effectId)
+        FindVfxCallbacksVisitor(std::string_view effectId)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mEffectId(effectId)
         {
@@ -368,7 +368,7 @@ namespace
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
                 if (vfxCallback)
                 {
-                    if (mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId)
+                    if (mEffectId == "" || vfxCallback->mParams.mEffectId == mEffectId)
                     {
                         mCallbacks.push_back(vfxCallback);
                     }
@@ -382,7 +382,7 @@ namespace
         void apply(osg::Geometry&) override {}
 
     private:
-        int mEffectId;
+        std::string_view mEffectId;
     };
 
     osg::ref_ptr<osg::LightModel> getVFXLightModelInstance()
@@ -447,7 +447,7 @@ namespace MWRender
 
         typedef std::map<std::string, osg::ref_ptr<SceneUtil::KeyframeController>> ControllerMap;
 
-        ControllerMap mControllerMap[Animation::sNumBlendMasks];
+        ControllerMap mControllerMap[sNumBlendMasks];
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
     };
@@ -715,6 +715,41 @@ namespace MWRender
         return mSupportedAnimations.find(anim) != mSupportedAnimations.end();
     }
 
+    bool Animation::isLoopingAnimation(std::string_view group) const
+    {
+        // In Morrowind, a some animation groups are always considered looping, regardless
+        // of loop start/stop keys.
+        // To be match vanilla behavior we probably only need to check this list, but we don't
+        // want to prevent modded animations with custom group names from looping either.
+        static const std::unordered_set<std::string_view> loopingAnimations = { "walkforward", "walkback", "walkleft",
+            "walkright", "swimwalkforward", "swimwalkback", "swimwalkleft", "swimwalkright", "runforward", "runback",
+            "runleft", "runright", "swimrunforward", "swimrunback", "swimrunleft", "swimrunright", "sneakforward",
+            "sneakback", "sneakleft", "sneakright", "turnleft", "turnright", "swimturnleft", "swimturnright",
+            "spellturnleft", "spellturnright", "torch", "idle", "idle2", "idle3", "idle4", "idle5", "idle6", "idle7",
+            "idle8", "idle9", "idlesneak", "idlestorm", "idleswim", "jump", "inventoryhandtohand",
+            "inventoryweapononehand", "inventoryweapontwohand", "inventoryweapontwowide" };
+        static const std::vector<std::string_view> shortGroups = MWMechanics::getAllWeaponTypeShortGroups();
+
+        if (getTextKeyTime(std::string(group) + ": loop start") >= 0)
+            return true;
+
+        // Most looping animations have variants for each weapon type shortgroup.
+        // Just remove the shortgroup instead of enumerating all of the possible animation groupnames.
+        // Make sure we pick the longest shortgroup so e.g. "bow" doesn't get picked over "crossbow"
+        // when the shortgroup is crossbow.
+        std::size_t suffixLength = 0;
+        for (std::string_view suffix : shortGroups)
+        {
+            if (suffix.length() > suffixLength && group.ends_with(suffix))
+            {
+                suffixLength = suffix.length();
+            }
+        }
+        group.remove_suffix(suffixLength);
+
+        return loopingAnimations.count(group) > 0;
+    }
+
     float Animation::getStartTime(const std::string& groupname) const
     {
         for (AnimSourceList::const_reverse_iterator iter(mAnimSources.rbegin()); iter != mAnimSources.rend(); ++iter)
@@ -758,16 +793,14 @@ namespace MWRender
                 state.mLoopStopTime = key->first;
         }
 
-        if (mTextKeyListener)
+        try
         {
-            try
-            {
+            if (mTextKeyListener != nullptr)
                 mTextKeyListener->handleTextKey(groupname, key, map);
-            }
-            catch (std::exception& e)
-            {
-                Log(Debug::Error) << "Error handling text key " << evt << ": " << e.what();
-            }
+        }
+        catch (std::exception& e)
+        {
+            Log(Debug::Error) << "Error handling text key " << evt << ": " << e.what();
         }
     }
 
@@ -923,7 +956,7 @@ namespace MWRender
         return true;
     }
 
-    void Animation::setTextKeyListener(Animation::TextKeyListener* listener)
+    void Animation::setTextKeyListener(TextKeyListener* listener)
     {
         mTextKeyListener = listener;
     }
@@ -1052,7 +1085,16 @@ namespace MWRender
         return true;
     }
 
-    float Animation::getCurrentTime(const std::string& groupname) const
+    std::string_view Animation::getActiveGroup(BoneGroup boneGroup) const
+    {
+        if (auto timePtr = mAnimationTimePtr[boneGroup]->getTimePtr())
+            for (auto& state : mStates)
+                if (state.second.mTime == timePtr)
+                    return state.first;
+        return "";
+    }
+
+    float Animation::getCurrentTime(std::string_view groupname) const
     {
         AnimStateMap::const_iterator iter = mStates.find(groupname);
         if (iter == mStates.end())
@@ -1496,8 +1538,8 @@ namespace MWRender
         mExtraLightSource->setActorFade(mAlpha);
     }
 
-    void Animation::addEffect(
-        const std::string& model, int effectId, bool loop, std::string_view bonename, std::string_view texture)
+    void Animation::addEffect(std::string_view model, std::string_view effectId, bool loop, std::string_view bonename,
+        std::string_view texture)
     {
         if (!mObjectRoot.get())
             return;
@@ -1579,7 +1621,7 @@ namespace MWRender
         overrideFirstRootTexture(texture, mResourceSystem, *node);
     }
 
-    void Animation::removeEffect(int effectId)
+    void Animation::removeEffect(std::string_view effectId)
     {
         RemoveCallbackVisitor visitor(effectId);
         mInsert->accept(visitor);
@@ -1589,16 +1631,18 @@ namespace MWRender
 
     void Animation::removeEffects()
     {
-        removeEffect(-1);
+        removeEffect("");
     }
 
-    void Animation::getLoopingEffects(std::vector<int>& out) const
+    std::vector<std::string_view> Animation::getLoopingEffects() const
     {
         if (!mHasMagicEffects)
-            return;
+            return {};
 
         FindVfxCallbacksVisitor visitor;
         mInsert->accept(visitor);
+
+        std::vector<std::string_view> out;
 
         for (std::vector<UpdateVfxCallback*>::iterator it = visitor.mCallbacks.begin(); it != visitor.mCallbacks.end();
              ++it)
@@ -1608,6 +1652,7 @@ namespace MWRender
             if (callback->mParams.mLoop && !callback->mFinished)
                 out.push_back(callback->mParams.mEffectId);
         }
+        return out;
     }
 
     void Animation::updateEffects()

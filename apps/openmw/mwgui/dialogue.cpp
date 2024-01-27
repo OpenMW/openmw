@@ -196,7 +196,7 @@ namespace MWGui
                 std::string topicName
                     = Misc::StringUtils::lowerCase(windowManager->getTranslationDataStorage().topicStandardForm(link));
 
-                std::string displayName = link;
+                std::string displayName = std::move(link);
                 while (displayName[displayName.size() - 1] == '*')
                     displayName.erase(displayName.size() - 1, 1);
 
@@ -248,7 +248,7 @@ namespace MWGui
                 i = match.mEnd;
             }
             if (i != text.end())
-                addTopicLink(typesetter, 0, i - text.begin(), text.size());
+                addTopicLink(std::move(typesetter), 0, i - text.begin(), text.size());
         }
     }
 

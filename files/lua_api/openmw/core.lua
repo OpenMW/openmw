@@ -297,6 +297,7 @@
 -- @field #number gridY Index of the cell by Y (only for exteriors).
 -- @field #string worldSpaceId Id of the world space.
 -- @field #boolean hasWater True if the cell contains water.
+-- @field #number waterLevel The water level of the cell. (nil if cell has no water).
 -- @field #boolean hasSky True if in this cell sky should be rendered.
 
 ---
@@ -667,6 +668,11 @@
 -- @field #number baseCost
 -- @field openmw.util#Color color
 -- @field #boolean harmful
+-- @field #boolean continuousVfx Whether the magic effect's vfx should loop or not
+-- @field #string particle Identifier of the particle texture
+-- @field #string castingStatic Identifier of the vfx static used for casting
+-- @field #string hitStatic Identifier of the vfx static used on hit
+-- @field #string areaStatic Identifier of the vfx static used for AOE spells
 
 ---
 -- @type MagicEffectWithParams
@@ -897,5 +903,25 @@
 -- @field #number primarySkillValue Primary skill value required to get this rank.
 -- @field #number favouredSkillValue Secondary skill value required to get this rank.
 -- @field #number factionReaction Reaction of faction members if player is in this faction.
+
+--- @{#VFX}: Visual effects
+-- @field [parent=#core] #VFX vfx
+
+---
+-- Spawn a VFX at the given location in the world
+-- @function [parent=#VFX] spawn
+-- @param #any static openmw.core#StaticRecord or #string ID
+-- @param openmw.util#Vector3 location
+-- @param #table options optional table of parameters. Can contain:
+--
+--   * `mwMagicVfx` - Boolean that if true causes the textureOverride parameter to only affect nodes with the Nif::RC_NiTexturingProperty property set. (default: true).
+--   * `particleTextureOverride` - Name of a particle texture that should override this effect's default texture. (default: "")
+--   * `scale` - A number that scales the size of the vfx (Default: 1)
+--
+-- @usage -- Spawn a sanctuary effect near the player
+-- local effect = core.magic.effects[core.magic.EFFECT_TYPE.Sanctuary]
+-- pos = self.position + util.vector3(0, 100, 0)
+-- core.vfx.spawn(effect.castingStatic, pos)
+--
 
 return nil

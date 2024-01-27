@@ -436,7 +436,7 @@ namespace MWRender
 
                 // We still should use one-handed animation as fallback
                 if (mAnimation->hasAnimation(inventoryGroup))
-                    groupname = inventoryGroup;
+                    groupname = std::move(inventoryGroup);
                 else
                 {
                     static const std::string oneHandFallback
@@ -456,15 +456,15 @@ namespace MWRender
 
         mAnimation->showCarriedLeft(showCarriedLeft);
 
-        mCurrentAnimGroup = groupname;
-        mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mCurrentAnimGroup = std::move(groupname);
+        mAnimation->play(mCurrentAnimGroup, 1, BlendMask::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if (torch != inv.end() && torch->getType() == ESM::Light::sRecordId && showCarriedLeft)
         {
             if (!mAnimation->getInfo("torch"))
                 mAnimation->play(
-                    "torch", 2, Animation::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f, ~0ul, true);
+                    "torch", 2, BlendMask::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f, ~0ul, true);
         }
         else if (mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
@@ -591,7 +591,7 @@ namespace MWRender
     void RaceSelectionPreview::onSetup()
     {
         CharacterPreview::onSetup();
-        mAnimation->play("idle", 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mAnimation->play("idle", 1, BlendMask::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->runAnimation(0.f);
 
         // attach camera to follow the head node

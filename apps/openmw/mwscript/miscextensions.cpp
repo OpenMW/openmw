@@ -1473,7 +1473,7 @@ namespace MWScript
 
                                 if (lastTextureSrc.empty() || textureSrc != lastTextureSrc)
                                 {
-                                    lastTextureSrc = textureSrc;
+                                    lastTextureSrc = std::move(textureSrc);
                                     if (lastTextureSrc.empty())
                                         lastTextureSrc = "[No Source]";
 

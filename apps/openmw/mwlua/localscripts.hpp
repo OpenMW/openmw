@@ -71,6 +71,14 @@ namespace MWLua
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
         void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }
         void onTeleported() { callEngineHandlers(mOnTeleportedHandlers); }
+        void onAnimationTextKey(std::string_view groupname, std::string_view key)
+        {
+            callEngineHandlers(mOnAnimationTextKeyHandlers, groupname, key);
+        }
+        void onPlayAnimation(std::string_view groupname, const sol::table& options)
+        {
+            callEngineHandlers(mOnPlayAnimationHandlers, groupname, options);
+        }
 
         void applyStatsCache();
 
@@ -83,6 +91,8 @@ namespace MWLua
         EngineHandlerList mOnConsumeHandlers{ "onConsume" };
         EngineHandlerList mOnActivatedHandlers{ "onActivated" };
         EngineHandlerList mOnTeleportedHandlers{ "onTeleported" };
+        EngineHandlerList mOnAnimationTextKeyHandlers{ "_onAnimationTextKey" };
+        EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
     };
 
 }

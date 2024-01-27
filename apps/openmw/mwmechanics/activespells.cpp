@@ -324,7 +324,7 @@ namespace MWMechanics
                 MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
                 if (animation && !reflectStatic->mModel.empty())
                     animation->addEffect(Misc::ResourceHelpers::correctMeshPath(reflectStatic->mModel),
-                        ESM::MagicEffect::Reflect, false);
+                        ESM::MagicEffect::indexToName(ESM::MagicEffect::Reflect), false);
                 caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
             }
             if (removedSpell)

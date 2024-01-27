@@ -719,7 +719,7 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
         fill(container.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
         addScripts(*this, container.mCell);
     }
-    return { listener };
+    return { std::move(listener) };
 }
 
 void MWWorld::ContainerStore::unresolve()

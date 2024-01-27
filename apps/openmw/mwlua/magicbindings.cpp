@@ -389,6 +389,17 @@ namespace MWLua
             auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
+        magicEffectT["particle"]
+            = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view { return rec.mParticle; });
+        magicEffectT["continuousVfx"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> bool {
+            return (rec.mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
+        });
+        magicEffectT["castingStatic"] = sol::readonly_property(
+            [](const ESM::MagicEffect& rec) -> std::string { return rec.mCasting.serializeText(); });
+        magicEffectT["hitStatic"] = sol::readonly_property(
+            [](const ESM::MagicEffect& rec) -> std::string { return rec.mHit.serializeText(); });
+        magicEffectT["areaStatic"] = sol::readonly_property(
+            [](const ESM::MagicEffect& rec) -> std::string { return rec.mArea.serializeText(); });
         magicEffectT["name"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view {
             return MWBase::Environment::get()
                 .getWorld()
@@ -730,7 +741,7 @@ namespace MWLua
                     auto id = sol::make_object(lua, self.mIterator->getId().serializeText());
                     auto params = sol::make_object(lua, ActiveSpell{ self.mActor, *self.mIterator });
                     self.advance();
-                    return { params, params };
+                    return { id, params };
                 }
                 else
                 {

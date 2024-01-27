@@ -36,6 +36,7 @@
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -270,7 +271,7 @@ namespace
             case CharState_IdleSwim:
                 return Priority_SwimIdle;
             case CharState_IdleSneak:
-                priority[MWRender::Animation::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
+                priority[MWRender::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
                 [[fallthrough]];
             default:
                 return priority;
@@ -444,8 +445,8 @@ namespace MWMechanics
         {
             mHitState = CharState_Block;
             priority = Priority_Hit;
-            priority[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
-            priority[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+            priority[MWRender::BoneGroup_LeftArm] = Priority_Block;
+            priority[MWRender::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
             startKey = "block start";
             stopKey = "block stop";
         }
@@ -482,8 +483,7 @@ namespace MWMechanics
             return;
         }
 
-        mAnimation->play(
-            mCurrentHit, priority, MWRender::Animation::BlendMask_All, true, 1, startKey, stopKey, 0.0f, ~0ul);
+        playBlendedAnimation(mCurrentHit, priority, MWRender::BlendMask_All, true, 1, startKey, stopKey, 0.0f, ~0ul);
     }
 
     void CharacterController::refreshJumpAnims(JumpingState jump, bool force)
@@ -502,7 +502,7 @@ namespace MWMechanics
         std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
         std::string jumpAnimName = "jump";
         jumpAnimName += weapShortGroup;
-        MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
+        MWRender::Animation::BlendMask jumpmask = MWRender::BlendMask_All;
         if (!weapShortGroup.empty() && !mAnimation->hasAnimation(jumpAnimName))
             jumpAnimName = fallbackShortWeaponGroup("jump", &jumpmask);
 
@@ -520,10 +520,10 @@ namespace MWMechanics
 
         mCurrentJump = jumpAnimName;
         if (mJumpState == JumpState_InAir)
-            mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false, 1.0f, startAtLoop ? "loop start" : "start",
-                "stop", 0.f, ~0ul);
+            playBlendedAnimation(jumpAnimName, Priority_Jump, jumpmask, false, 1.0f,
+                startAtLoop ? "loop start" : "start", "stop", 0.f, ~0ul);
         else if (mJumpState == JumpState_Landing)
-            mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true, 1.0f, "loop stop", "stop", 0.0f, 0);
+            playBlendedAnimation(jumpAnimName, Priority_Jump, jumpmask, true, 1.0f, "loop stop", "stop", 0.0f, 0);
     }
 
     bool CharacterController::onOpen() const
@@ -539,8 +539,8 @@ namespace MWMechanics
             if (mAnimation->isPlaying("containerclose"))
                 return false;
 
-            mAnimation->play("containeropen", Priority_Scripted, MWRender::Animation::BlendMask_All, false, 1.0f,
-                "start", "stop", 0.f, 0);
+            mAnimation->play(
+                "containeropen", Priority_Scripted, MWRender::BlendMask_All, false, 1.0f, "start", "stop", 0.f, 0);
             if (mAnimation->isPlaying("containeropen"))
                 return false;
         }
@@ -560,8 +560,8 @@ namespace MWMechanics
             if (animPlaying)
                 startPoint = 1.f - complete;
 
-            mAnimation->play("containerclose", Priority_Scripted, MWRender::Animation::BlendMask_All, false, 1.0f,
-                "start", "stop", startPoint, 0);
+            mAnimation->play("containerclose", Priority_Scripted, MWRender::BlendMask_All, false, 1.0f, "start", "stop",
+                startPoint, 0);
         }
     }
 
@@ -600,7 +600,7 @@ namespace MWMechanics
         if (!isRealWeapon(mWeaponType))
         {
             if (blendMask != nullptr)
-                *blendMask = MWRender::Animation::BlendMask_LowerBody;
+                *blendMask = MWRender::BlendMask_LowerBody;
 
             return baseGroupName;
         }
@@ -619,13 +619,13 @@ namespace MWMechanics
 
         // Special case for crossbows - we should apply 1h animations a fallback only for lower body
         if (mWeaponType == ESM::Weapon::MarksmanCrossbow && blendMask != nullptr)
-            *blendMask = MWRender::Animation::BlendMask_LowerBody;
+            *blendMask = MWRender::BlendMask_LowerBody;
 
         if (!mAnimation->hasAnimation(groupName))
         {
             groupName = baseGroupName;
             if (blendMask != nullptr)
-                *blendMask = MWRender::Animation::BlendMask_LowerBody;
+                *blendMask = MWRender::BlendMask_LowerBody;
         }
 
         return groupName;
@@ -658,7 +658,7 @@ namespace MWMechanics
             }
         }
 
-        MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
+        MWRender::Animation::BlendMask movemask = MWRender::BlendMask_All;
 
         std::string_view weapShortGroup = getWeaponShortGroup(mWeaponType);
 
@@ -684,7 +684,7 @@ namespace MWMechanics
             if (!mAnimation->hasAnimation(weapMovementAnimName))
                 weapMovementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
 
-            movementAnimName = weapMovementAnimName;
+            movementAnimName = std::move(weapMovementAnimName);
         }
 
         if (!mAnimation->hasAnimation(movementAnimName))
@@ -749,7 +749,7 @@ namespace MWMechanics
             }
         }
 
-        mAnimation->play(
+        playBlendedAnimation(
             mCurrentMovement, Priority_Movement, movemask, false, 1.f, "start", "stop", startpoint, ~0ul, true);
     }
 
@@ -798,7 +798,7 @@ namespace MWMechanics
                 weapIdleGroup += weapShortGroup;
                 if (!mAnimation->hasAnimation(weapIdleGroup))
                     weapIdleGroup = fallbackShortWeaponGroup(idleGroup);
-                idleGroup = weapIdleGroup;
+                idleGroup = std::move(weapIdleGroup);
 
                 // play until the Loop Stop key 2 to 5 times, then play until the Stop key
                 // this replicates original engine behavior for the "Idle1h" 1st-person animation
@@ -820,9 +820,9 @@ namespace MWMechanics
             mAnimation->getInfo(mCurrentIdle, &startPoint);
 
         clearStateAnimation(mCurrentIdle);
-        mCurrentIdle = idleGroup;
-        mAnimation->play(mCurrentIdle, priority, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop",
-            startPoint, numLoops, true);
+        mCurrentIdle = std::move(idleGroup);
+        playBlendedAnimation(
+            mCurrentIdle, priority, MWRender::BlendMask_All, false, 1.0f, "start", "stop", startPoint, numLoops, true);
     }
 
     void CharacterController::refreshCurrentAnims(
@@ -855,8 +855,8 @@ namespace MWMechanics
         resetCurrentIdleState();
         resetCurrentJumpState();
 
-        mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::BlendMask_All, false, 1.0f, "start",
-            "stop", startpoint, 0);
+        playBlendedAnimation(
+            mCurrentDeath, Priority_Death, MWRender::BlendMask_All, false, 1.0f, "start", "stop", startpoint, 0);
     }
 
     CharacterState CharacterController::chooseRandomDeathState() const
@@ -997,6 +997,8 @@ namespace MWMechanics
         std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map)
     {
         std::string_view evt = key->second;
+
+        MWBase::Environment::get().getLuaManager()->animationTextKey(mPtr, key->second);
 
         if (evt.substr(0, 7) == "sound: ")
         {
@@ -1189,8 +1191,9 @@ namespace MWMechanics
             {
                 if (!animPlaying)
                 {
-                    int mask = MWRender::Animation::BlendMask_Torso | MWRender::Animation::BlendMask_RightArm;
-                    mAnimation->play("idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul, true);
+                    int mask = MWRender::BlendMask_Torso | MWRender::BlendMask_RightArm;
+                    playBlendedAnimation(
+                        "idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul, true);
                 }
                 else
                 {
@@ -1245,41 +1248,6 @@ namespace MWMechanics
                 mAttackStrength = 0.f;
             playSwishSound();
         }
-    }
-
-    bool CharacterController::isLoopingAnimation(std::string_view group) const
-    {
-        // In Morrowind, a some animation groups are always considered looping, regardless
-        // of loop start/stop keys.
-        // To be match vanilla behavior we probably only need to check this list, but we don't
-        // want to prevent modded animations with custom group names from looping either.
-        static const std::unordered_set<std::string_view> loopingAnimations = { "walkforward", "walkback", "walkleft",
-            "walkright", "swimwalkforward", "swimwalkback", "swimwalkleft", "swimwalkright", "runforward", "runback",
-            "runleft", "runright", "swimrunforward", "swimrunback", "swimrunleft", "swimrunright", "sneakforward",
-            "sneakback", "sneakleft", "sneakright", "turnleft", "turnright", "swimturnleft", "swimturnright",
-            "spellturnleft", "spellturnright", "torch", "idle", "idle2", "idle3", "idle4", "idle5", "idle6", "idle7",
-            "idle8", "idle9", "idlesneak", "idlestorm", "idleswim", "jump", "inventoryhandtohand",
-            "inventoryweapononehand", "inventoryweapontwohand", "inventoryweapontwowide" };
-        static const std::vector<std::string_view> shortGroups = getAllWeaponTypeShortGroups();
-
-        if (mAnimation && mAnimation->getTextKeyTime(std::string(group) + ": loop start") >= 0)
-            return true;
-
-        // Most looping animations have variants for each weapon type shortgroup.
-        // Just remove the shortgroup instead of enumerating all of the possible animation groupnames.
-        // Make sure we pick the longest shortgroup so e.g. "bow" doesn't get picked over "crossbow"
-        // when the shortgroup is crossbow.
-        std::size_t suffixLength = 0;
-        for (std::string_view suffix : shortGroups)
-        {
-            if (suffix.length() > suffixLength && group.ends_with(suffix))
-            {
-                suffixLength = suffix.length();
-            }
-        }
-        group.remove_suffix(suffixLength);
-
-        return loopingAnimations.count(group) > 0;
     }
 
     bool CharacterController::updateWeaponState()
@@ -1357,8 +1325,8 @@ namespace MWMechanics
                 if (mAnimation->isPlaying("shield"))
                     mAnimation->disable("shield");
 
-                mAnimation->play("torch", Priority_Torch, MWRender::Animation::BlendMask_LeftArm, false, 1.0f, "start",
-                    "stop", 0.0f, std::numeric_limits<size_t>::max(), true);
+                playBlendedAnimation("torch", Priority_Torch, MWRender::BlendMask_LeftArm, false, 1.0f, "start", "stop",
+                    0.0f, std::numeric_limits<size_t>::max(), true);
             }
             else if (mAnimation->isPlaying("torch"))
             {
@@ -1369,7 +1337,7 @@ namespace MWMechanics
         // For biped actors, blend weapon animations with lower body animations with higher priority
         MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
         if (cls.isBipedal(mPtr))
-            priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+            priorityWeapon[MWRender::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
         bool forcestateupdate = false;
 
@@ -1400,19 +1368,19 @@ namespace MWMechanics
                 {
                     // Note: we do not disable unequipping animation automatically to avoid body desync
                     weapgroup = getWeaponAnimation(mWeaponType);
-                    int unequipMask = MWRender::Animation::BlendMask_All;
+                    int unequipMask = MWRender::BlendMask_All;
                     bool useShieldAnims = mAnimation->useShieldAnimations();
                     if (useShieldAnims && mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell
                         && !(mWeaponType == ESM::Weapon::None && weaptype == ESM::Weapon::Spell))
                     {
-                        unequipMask = unequipMask | ~MWRender::Animation::BlendMask_LeftArm;
-                        mAnimation->play("shield", Priority_Block, MWRender::Animation::BlendMask_LeftArm, true, 1.0f,
+                        unequipMask = unequipMask | ~MWRender::BlendMask_LeftArm;
+                        playBlendedAnimation("shield", Priority_Block, MWRender::BlendMask_LeftArm, true, 1.0f,
                             "unequip start", "unequip stop", 0.0f, 0);
                     }
                     else if (mWeaponType == ESM::Weapon::HandToHand)
                         mAnimation->showCarriedLeft(false);
 
-                    mAnimation->play(
+                    playBlendedAnimation(
                         weapgroup, priorityWeapon, unequipMask, false, 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                     mUpperBodyState = UpperBodyState::Unequipping;
 
@@ -1458,15 +1426,15 @@ namespace MWMechanics
                         if (weaptype != ESM::Weapon::None)
                         {
                             mAnimation->showWeapons(false);
-                            int equipMask = MWRender::Animation::BlendMask_All;
+                            int equipMask = MWRender::BlendMask_All;
                             if (useShieldAnims && weaptype != ESM::Weapon::Spell)
                             {
-                                equipMask = equipMask | ~MWRender::Animation::BlendMask_LeftArm;
-                                mAnimation->play("shield", Priority_Block, MWRender::Animation::BlendMask_LeftArm, true,
-                                    1.0f, "equip start", "equip stop", 0.0f, 0);
+                                equipMask = equipMask | ~MWRender::BlendMask_LeftArm;
+                                playBlendedAnimation("shield", Priority_Block, MWRender::BlendMask_LeftArm, true, 1.0f,
+                                    "equip start", "equip stop", 0.0f, 0);
                             }
 
-                            mAnimation->play(
+                            playBlendedAnimation(
                                 weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start", "equip stop", 0.0f, 0);
                             mUpperBodyState = UpperBodyState::Equipping;
 
@@ -1617,11 +1585,11 @@ namespace MWMechanics
 
                                 if (mAnimation->getNode("Bip01 L Hand"))
                                     mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
-                                        -1, false, "Bip01 L Hand", effect->mParticle);
+                                        "", false, "Bip01 L Hand", effect->mParticle);
 
                                 if (mAnimation->getNode("Bip01 R Hand"))
                                     mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
-                                        -1, false, "Bip01 R Hand", effect->mParticle);
+                                        "", false, "Bip01 R Hand", effect->mParticle);
                             }
                             // first effect used for casting animation
                             const ESM::ENAMstruct& firstEffect = effects->front();
@@ -1656,9 +1624,8 @@ namespace MWMechanics
                                 startKey = mAttackType + " start";
                                 stopKey = mAttackType + " stop";
                             }
-
-                            mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false,
-                                1, startKey, stopKey, 0.0f, 0);
+                            playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, 1,
+                                startKey, stopKey, 0.0f, 0);
                             mUpperBodyState = UpperBodyState::Casting;
                         }
                     }
@@ -1709,8 +1676,8 @@ namespace MWMechanics
                     mAttackVictim = MWWorld::Ptr();
                     mAttackHitPos = osg::Vec3f();
 
-                    mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false,
-                        weapSpeed, startKey, stopKey, 0.0f, 0);
+                    playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, weapSpeed,
+                        startKey, stopKey, 0.0f, 0);
                 }
             }
 
@@ -1783,7 +1750,7 @@ namespace MWMechanics
                 }
 
                 mAnimation->disable(mCurrentWeapon);
-                mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false, weapSpeed,
+                playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, weapSpeed,
                     mAttackType + " max attack", mAttackType + ' ' + hit, startPoint, 0);
             }
 
@@ -1813,7 +1780,7 @@ namespace MWMechanics
                 // Follow animations have lower priority than movement for non-biped creatures, logic be damned
                 if (!cls.isBipedal(mPtr))
                     priorityFollow = Priority_Default;
-                mAnimation->play(mCurrentWeapon, priorityFollow, MWRender::Animation::BlendMask_All, false, weapSpeed,
+                playBlendedAnimation(mCurrentWeapon, priorityFollow, MWRender::BlendMask_All, false, weapSpeed,
                     mAttackType + ' ' + start, mAttackType + ' ' + stop, 0.0f, 0);
                 mUpperBodyState = UpperBodyState::AttackEnd;
 
@@ -1935,9 +1902,16 @@ namespace MWMechanics
             mIdleState = CharState_SpecialIdle;
             auto priority = mAnimQueue.front().mScripted ? Priority_Scripted : Priority_Default;
             mAnimation->setPlayScriptedOnly(mAnimQueue.front().mScripted);
-            mAnimation->play(mAnimQueue.front().mGroup, priority, MWRender::Animation::BlendMask_All, false, 1.0f,
-                (loopStart ? "loop start" : "start"), "stop", mAnimQueue.front().mTime, mAnimQueue.front().mLoopCount,
-                mAnimQueue.front().mLooping);
+            if (mAnimQueue.front().mScripted)
+                mAnimation->play(mAnimQueue.front().mGroup, priority, MWRender::BlendMask_All, false,
+                    mAnimQueue.front().mSpeed, (loopStart ? "loop start" : mAnimQueue.front().mStartKey),
+                    mAnimQueue.front().mStopKey, mAnimQueue.front().mTime, mAnimQueue.front().mLoopCount,
+                    mAnimQueue.front().mLooping);
+            else
+                playBlendedAnimation(mAnimQueue.front().mGroup, priority, MWRender::BlendMask_All, false,
+                    mAnimQueue.front().mSpeed, (loopStart ? "loop start" : mAnimQueue.front().mStartKey),
+                    mAnimQueue.front().mStopKey, mAnimQueue.front().mTime, mAnimQueue.front().mLoopCount,
+                    mAnimQueue.front().mLooping);
         }
     }
 
@@ -2504,6 +2478,7 @@ namespace MWMechanics
         state.mScriptedAnims.clear();
         for (AnimationQueue::const_iterator iter = mAnimQueue.begin(); iter != mAnimQueue.end(); ++iter)
         {
+            // TODO: Probably want to presist lua animations too
             if (!iter->mScripted)
                 continue;
 
@@ -2541,8 +2516,10 @@ namespace MWMechanics
                 AnimationQueueEntry entry;
                 entry.mGroup = iter->mGroup;
                 entry.mLoopCount = iter->mLoopCount;
-                entry.mScripted = true;
-                entry.mLooping = isLoopingAnimation(entry.mGroup);
+                entry.mLooping = mAnimation->isLoopingAnimation(entry.mGroup);
+                entry.mStartKey = "start";
+                entry.mStopKey = "stop";
+                entry.mSpeed = 1.f;
                 entry.mTime = iter->mTime;
                 if (iter->mAbsolute)
                 {
@@ -2559,6 +2536,18 @@ namespace MWMechanics
         }
     }
 
+    void CharacterController::playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority,
+        int blendMask, bool autodisable, float speedmult, std::string_view start, std::string_view stop,
+        float startpoint, size_t loops, bool loopfallback) const
+    {
+        if (mLuaAnimations)
+            MWBase::Environment::get().getLuaManager()->playAnimation(mPtr, groupname, priority, blendMask, autodisable,
+                speedmult, start, stop, startpoint, loops, loopfallback);
+        else
+            mAnimation->play(
+                groupname, priority, blendMask, autodisable, speedmult, start, stop, startpoint, loops, loopfallback);
+    }
+
     bool CharacterController::playGroup(std::string_view groupname, int mode, int count, bool scripted)
     {
         if (!mAnimation || !mAnimation->hasAnimation(groupname))
@@ -2568,7 +2557,7 @@ namespace MWMechanics
         if (isScriptedAnimPlaying() && !scripted)
             return true;
 
-        bool looping = isLoopingAnimation(groupname);
+        bool looping = mAnimation->isLoopingAnimation(groupname);
 
         // If this animation is a looped animation that is already playing
         // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
@@ -2602,8 +2591,12 @@ namespace MWMechanics
         entry.mGroup = groupname;
         entry.mLoopCount = count;
         entry.mTime = 0.f;
-        entry.mScripted = scripted;
+        // "PlayGroup idle" is a special case, used to remove to stop scripted animations playing
+        entry.mScripted = (scripted && groupname != "idle");
         entry.mLooping = looping;
+        entry.mSpeed = 1.f;
+        entry.mStartKey = ((mode == 2) ? "loop start" : "start");
+        entry.mStopKey = "stop";
 
         bool playImmediately = false;
 
@@ -2618,16 +2611,48 @@ namespace MWMechanics
             mAnimQueue.resize(1);
         }
 
-        // "PlayGroup idle" is a special case, used to stop and remove scripted animations playing
-        if (groupname == "idle")
-            entry.mScripted = false;
-
         mAnimQueue.push_back(entry);
 
         if (playImmediately)
             playAnimQueue(mode == 2);
 
         return true;
+    }
+
+    bool CharacterController::playGroupLua(std::string_view groupname, float speed, std::string_view startKey,
+        std::string_view stopKey, int loops, bool forceLoop)
+    {
+        // Note: In mwscript, "idle" is a special case used to clear the anim queue.
+        // In lua we offer an explicit clear method instead so this method does not treat "idle" special.
+
+        if (!mAnimation || !mAnimation->hasAnimation(groupname))
+            return false;
+
+        AnimationQueueEntry entry;
+        entry.mGroup = groupname;
+        // Note: MWScript gives one less loop to actors than non-actors.
+        // But this is the Lua version. We don't need to reproduce this weirdness here.
+        entry.mLoopCount = std::max(loops, 0);
+        entry.mStartKey = startKey;
+        entry.mStopKey = stopKey;
+        entry.mLooping = mAnimation->isLoopingAnimation(groupname) || forceLoop;
+        entry.mScripted = true;
+        entry.mSpeed = speed;
+        entry.mTime = 0;
+
+        if (mAnimQueue.size() > 1)
+            mAnimQueue.resize(1);
+        mAnimQueue.push_back(entry);
+
+        if (mAnimQueue.size() == 1)
+            playAnimQueue();
+
+        return true;
+    }
+
+    void CharacterController::enableLuaAnimations(bool enable)
+    {
+        mLuaAnimations = enable;
     }
 
     void CharacterController::skipAnim()
@@ -2745,18 +2770,20 @@ namespace MWMechanics
         // as it's extremely spread out (ActiveSpells, Spells, InventoryStore effects, etc...) so we do it here.
 
         // Stop any effects that are no longer active
-        std::vector<int> effects;
-        mAnimation->getLoopingEffects(effects);
+        std::vector<std::string_view> effects = mAnimation->getLoopingEffects();
 
-        for (int effectId : effects)
+        for (std::string_view effectId : effects)
         {
-            if (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
-                || mPtr.getClass()
-                        .getCreatureStats(mPtr)
-                        .getMagicEffects()
-                        .getOrDefault(MWMechanics::EffectKey(effectId))
-                        .getMagnitude()
-                    <= 0)
+            auto index = ESM::MagicEffect::indexNameToIndex(effectId);
+
+            if (index >= 0
+                && (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
+                    || mPtr.getClass()
+                            .getCreatureStats(mPtr)
+                            .getMagicEffects()
+                            .getOrDefault(MWMechanics::EffectKey(index))
+                            .getMagnitude()
+                        <= 0))
                 mAnimation->removeEffect(effectId);
         }
     }

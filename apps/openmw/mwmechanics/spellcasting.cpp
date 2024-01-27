@@ -552,8 +552,8 @@ namespace MWMechanics
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
             if (animation)
             {
-                animation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel), effect->mIndex, false,
-                    {}, effect->mParticle);
+                animation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
+                    ESM::MagicEffect::indexToName(effect->mIndex), false, {}, effect->mParticle);
             }
             else
             {
@@ -626,8 +626,8 @@ namespace MWMechanics
         {
             // Don't play particle VFX unless the effect is new or it should be looping.
             if (playNonLooping || loop)
-                anim->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel), magicEffect.mIndex, loop,
-                    {}, magicEffect.mParticle);
+                anim->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
+                    ESM::MagicEffect::indexToName(magicEffect.mIndex), loop, {}, magicEffect.mParticle);
         }
     }
 }
