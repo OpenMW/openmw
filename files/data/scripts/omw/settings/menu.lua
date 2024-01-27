@@ -354,6 +354,8 @@ end
 
 local function onGroupRegistered(global, key)
     local group = common.getSection(global, common.groupSectionKey):get(key)
+    if not group then return end
+
     groups[group.page] = groups[group.page] or {}
     local pageGroup = {
         key = group.key,
@@ -364,6 +366,8 @@ local function onGroupRegistered(global, key)
     if not groups[group.page][pageGroup.key] then
         common.getSection(global, group.key):subscribe(onSettingChanged(global))
         common.getArgumentSection(global, group.key):subscribe(async:callback(function(_, settingKey)
+            if settingKey == nil then return end
+
             local group = common.getSection(global, common.groupSectionKey):get(group.key)
             if not group or not pageOptions[group.page] then return end
 
@@ -431,10 +435,12 @@ local menuGroups = {}
 local menuPages = {}
 
 local function resetPlayerGroups()
+    local settingGroupsSection = storage.playerSection(common.groupSectionKey)
     for pageKey, page in pairs(groups) do
         for groupKey, group in pairs(page) do
             if not menuGroups[groupKey] and not group.global then
                 page[groupKey] = nil
+                settingGroupsSection:set(groupKey, nil)
             end
         end
         if pageOptions[pageKey] then
@@ -487,8 +493,6 @@ local function registerPage(options)
     ui.registerSettingsPage(pageOptions[page.key])
 end
 
-local lastState
-
 return {
     interfaceName = 'Settings',
     interface = {
@@ -509,14 +513,11 @@ return {
     },
     engineHandlers = {
         onStateChanged = function()
-            if lastState == menu.STATE.Running then
-                resetPlayerGroups()
-            end
+            resetPlayerGroups()
             updatePlayerGroups()
             if menu.getState() == menu.STATE.Running then
                 updateGlobalGroups()
             end
-            lastState = menu.getState()
         end,
     },
     eventHandlers = {

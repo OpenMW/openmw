@@ -47,6 +47,7 @@ local recording = nil
 
 I.Settings.registerRenderer('inputBinding', function(id, set, arg)
     if type(id) ~= 'string' then error('inputBinding: must have a string default value') end
+    if not arg then error('inputBinding: argument with "key" and "type" is required') end
     if not arg.type then error('inputBinding: type argument is required') end
     if not arg.key then error('inputBinding: key argument is required') end
     local info = input.actions[arg.key] or input.triggers[arg.key]

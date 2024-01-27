@@ -90,7 +90,6 @@ local function registerGroup(options)
     }
     local valueSection = contextSection(options.key)
     local argumentSection = contextSection(options.key .. argumentSectionPostfix)
-    argumentSection:removeOnExit()
     for i, opt in ipairs(options.settings) do
         local setting = registerSetting(opt)
         setting.order = i
