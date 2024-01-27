@@ -107,6 +107,10 @@ LightsBoundingSphereMultiplier: "Gränssfärsmultiplikator"
 LightsBoundingSphereMultiplierTooltip: "Förvalt: 1.65\nMultiplikator för ljusens gränssfär.\nHögre värden ger mjukare minskning av gränssfären, men kräver högre värde i Max antal ljuskällor.\n\nPåverkar inte ljusstyrkan."
 LightsFadeStartMultiplier: "Blekningsstartmultiplikator"
 LightsFadeStartMultiplierTooltip: "Förvalt: 0.85\nFraktion av det maximala avståndet från vilket ljuskällor börjar blekna.\n\nVälj lågt värde för långsammare övergång eller högre värde för snabbare övergång."
+#LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
+#    \"Legacy\" always uses 8 lights per object and provides a lighting closest to an original game.\n\n
+#    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
+#    \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
 LightsMaximumDistance: "Maximalt ljusavstånd"
 LightsMaximumDistanceTooltip: "Förvalt: 8192\nMaximala avståndet där ljuskällor syns (mätt i enheter).\n\nVärdet 0 ger oändligt avstånd."
 LightsMinimumInteriorBrightness: "Minsta ljusstyrka i interiörer"

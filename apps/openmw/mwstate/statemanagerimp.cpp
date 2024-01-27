@@ -16,6 +16,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/algorithm.hpp>
 #include <components/settings/values.hpp>
 
 #include <osg/Image>
@@ -81,10 +82,8 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap(const ESM::ES
 
     for (int iPrev = 0; iPrev < static_cast<int>(prev.size()); ++iPrev)
     {
-        std::string id = Misc::StringUtils::lowerCase(prev[iPrev].name);
-
         for (int iCurrent = 0; iCurrent < static_cast<int>(current.size()); ++iCurrent)
-            if (id == Misc::StringUtils::lowerCase(current[iCurrent]))
+            if (Misc::StringUtils::ciEqual(prev[iPrev].name, current[iCurrent]))
             {
                 map.insert(std::make_pair(iPrev, iCurrent));
                 break;
@@ -412,9 +411,38 @@ void MWState::StateManager::loadGame(const std::filesystem::path& filepath)
     loadGame(character, filepath);
 }
 
-struct VersionMismatchError : public std::runtime_error
+struct SaveFormatVersionError : public std::exception
 {
-    using std::runtime_error::runtime_error;
+    using std::exception::exception;
+
+    SaveFormatVersionError(ESM::FormatVersion savegameFormat, const std::string& message)
+        : mSavegameFormat(savegameFormat)
+        , mErrorMessage(message)
+    {
+    }
+
+    const char* what() const noexcept override { return mErrorMessage.c_str(); }
+    ESM::FormatVersion getFormatVersion() const { return mSavegameFormat; }
+
+protected:
+    ESM::FormatVersion mSavegameFormat = ESM::DefaultFormatVersion;
+    std::string mErrorMessage;
+};
+
+struct SaveVersionTooOldError : SaveFormatVersionError
+{
+    SaveVersionTooOldError(ESM::FormatVersion savegameFormat)
+        : SaveFormatVersionError(savegameFormat, "format version " + std::to_string(savegameFormat) + " is too old")
+    {
+    }
+};
+
+struct SaveVersionTooNewError : SaveFormatVersionError
+{
+    SaveVersionTooNewError(ESM::FormatVersion savegameFormat)
+        : SaveFormatVersionError(savegameFormat, "format version " + std::to_string(savegameFormat) + " is too new")
+    {
+    }
 };
 
 void MWState::StateManager::loadGame(const Character* character, const std::filesystem::path& filepath)
@@ -434,23 +462,9 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         ESM::FormatVersion version = reader.getFormatVersion();
         if (version > ESM::CurrentSaveGameFormatVersion)
-            throw VersionMismatchError("#{OMWEngine:LoadingRequiresNewVersionError}");
+            throw SaveVersionTooNewError(version);
         else if (version < ESM::MinSupportedSaveGameFormatVersion)
-        {
-            const char* release;
-            // Report the last version still capable of reading this save
-            if (version <= ESM::OpenMW0_48SaveGameFormatVersion)
-                release = "OpenMW 0.48.0";
-            else
-            {
-                // Insert additional else if statements above to cover future releases
-                static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_49SaveGameFormatVersion);
-                release = "OpenMW 0.49.0";
-            }
-            auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
-            std::string message = l10n->formatMessage("LoadingRequiresOldVersionError", { "version" }, { release });
-            throw VersionMismatchError(message);
-        }
+            throw SaveVersionTooOldError(version);
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap(reader);
         reader.setContentFileMapping(&contentFileMap);
@@ -632,21 +646,47 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         MWBase::Environment::get().getLuaManager()->gameLoaded();
     }
+    catch (const SaveVersionTooNewError& e)
+    {
+        std::string error = "#{OMWEngine:LoadingRequiresNewVersionError}";
+        printSavegameFormatError(e.what(), error);
+    }
+    catch (const SaveVersionTooOldError& e)
+    {
+        const char* release;
+        // Report the last version still capable of reading this save
+        if (e.getFormatVersion() <= ESM::OpenMW0_48SaveGameFormatVersion)
+            release = "OpenMW 0.48.0";
+        else
+        {
+            // Insert additional else if statements above to cover future releases
+            static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_49SaveGameFormatVersion);
+            release = "OpenMW 0.49.0";
+        }
+        auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+        std::string error = l10n->formatMessage("LoadingRequiresOldVersionError", { "version" }, { release });
+        printSavegameFormatError(e.what(), error);
+    }
     catch (const std::exception& e)
     {
-        Log(Debug::Error) << "Failed to load saved game: " << e.what();
-
-        cleanup(true);
-
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
-
-        std::vector<std::string> buttons;
-        buttons.emplace_back("#{Interface:OK}");
-
         std::string error = "#{OMWEngine:LoadingFailed}: " + std::string(e.what());
-
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error, buttons);
+        printSavegameFormatError(e.what(), error);
     }
+}
+
+void MWState::StateManager::printSavegameFormatError(
+    const std::string& exceptionText, const std::string& messageBoxText)
+{
+    Log(Debug::Error) << "Failed to load saved game: " << exceptionText;
+
+    cleanup(true);
+
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
+
+    std::vector<std::string> buttons;
+    buttons.emplace_back("#{Interface:OK}");
+
+    MWBase::Environment::get().getWindowManager()->interactiveMessageBox(messageBoxText, buttons);
 }
 
 void MWState::StateManager::quickLoad()

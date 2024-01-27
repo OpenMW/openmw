@@ -371,7 +371,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
                 {
                     if ((keyMatch.captured(1) + "=" + keyMatch.captured(2)) == keyVal)
                     {
-                        *iter = settingLine;
+                        *iter = std::move(settingLine);
                         break;
                     }
                 }

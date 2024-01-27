@@ -219,8 +219,6 @@ int runApplication(int argc, char* argv[])
     Platform::init();
 
 #ifdef __APPLE__
-    std::filesystem::path binary_path = std::filesystem::absolute(std::filesystem::path(argv[0]));
-    std::filesystem::current_path(binary_path.parent_path());
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
 

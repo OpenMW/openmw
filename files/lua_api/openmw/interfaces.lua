@@ -6,6 +6,9 @@
 -- @field [parent=#interfaces] scripts.omw.activationhandlers#scripts.omw.activationhandlers Activation
 
 ---
+-- @field [parent=#interfaces] scripts.omw.mechanics.animationcontroller#scripts.omw.mechanics.animationcontroller AnimationController
+
+---
 -- @field [parent=#interfaces] scripts.omw.ai#scripts.omw.ai AI
 
 ---

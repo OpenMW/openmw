@@ -87,6 +87,10 @@ LightsBoundingSphereMultiplier: "Bounding-Sphere-Multiplikator"
 LightsBoundingSphereMultiplierTooltip: "Standard: 1.65\nMultiplikator für Begrenzungskugel.\nHöhere Zahlen ermöglichen einen sanften Abfall, erfordern jedoch eine Erhöhung der Anzahl der maximalen Lichter.\n\nBeeinflusst nicht die Beleuchtung oder Lichtstärke."
 LightsFadeStartMultiplier: "Licht Verblassungs-Start-Multiplikator"
 LightsFadeStartMultiplierTooltip: "Standard: 0.85\nBruchteil der maximalen Entfernung, bei der die Lichter zu verblassen beginnen.\n\nStellen Sie hier einen niedrigen Wert für langsamere Übergänge oder einen hohen Wert für schnellere Übergänge ein."
+#LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
+#    \"Legacy\" always uses 8 lights per object and provides a lighting closest to an original game.\n\n
+#    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
+#    \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
 LightsMaximumDistance: "Maximale Lichtreichweite"
 LightsMaximumDistanceTooltip: "Standard: 8192\nMaximale Entfernung, bei der Lichter erscheinen (gemessen in Einheiten).\n\nSetzen Sie dies auf 0, um eine unbegrenzte Entfernung zu verwenden."
 LightsMinimumInteriorBrightness: "Minimale Innenhelligkeit"

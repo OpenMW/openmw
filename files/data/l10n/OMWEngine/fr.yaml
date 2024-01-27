@@ -107,6 +107,10 @@ LightsBoundingSphereMultiplier: "Multiplicateur de sphère englobante"
 LightsBoundingSphereMultiplierTooltip: "valeur par défaut: 1.65\nMultiplicateur pour le rayon de la sphère incluant les sources lumineuses.\nUn multiplicateur plus élevé permet une extinction plus douce, mais applique un plus grand nombre de sources lumineuses sur chaque objet.\n\nCe paramètre ne modifie ni l'intensité ni la luminance des lumières."
 LightsFadeStartMultiplier: "Seuil de perte d'éclat lumineux"
 LightsFadeStartMultiplierTooltip: "valeur par défaut: 0.85\nFraction de la distance maximale d'une source à partir de laquelle l'intensité lumineuse commence à décroître.\n\nSélectionnez une valeur basse pour une transition douce ou une valeur plus élevée pour une transition plus abrupte."
+#LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
+#    \"Legacy\" always uses 8 lights per object and provides a lighting closest to an original game.\n\n
+#    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
+#    \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
 LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
 LightsMinimumInteriorBrightness: "Luminosité intérieure minimale"

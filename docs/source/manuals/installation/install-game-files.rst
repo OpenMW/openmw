@@ -68,6 +68,39 @@ You will find ``Morrowind.esm`` there.
 Users of other platforms running Wine, will find it at
 ``~/.wine/drive_c/Program Files/Bethesda Softworks/Morrowind``
 
+Innoextract
+^^^^^^^^^^^
+
+macOS and Linux
+~~~~~~~~~~~~~~~
+
+If you have purchased "The Elder Scrolls III: Morrowind" `from GOG <https://www.gog.com/en/game/the_elder_scrolls_iii_morrowind_goty_edition>`_ and wish to extract the game files on a Linux system without using Wine, or on macOS, you can do so using `innoextract <https://constexpr.org/innoextract/>`_. First install innoextract.
+
+For Distributions Using `apt` (e.g., Ubuntu, Debian)
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. code:: console
+
+    sudo apt update
+    sudo apt install innoextract
+
+For macOS using Homebrew
+++++++++++++++++++++++++
+
+.. code:: console
+
+    brew install innoextract
+
+Once innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
+
+.. code:: console
+
+    $ innoextract ./setup_tes_morrowind_goty_2.0.0.7.exe -d ~/Documents/Games/Morrowind/
+
+Assuming you used the filepath above, your ``.esm`` files will be located in ``~/Documents/Games/Morrowind/app/Data Files/``.
+
+You can now run the OpenMW launcher, and from there run the installation wizard. Point it to your ``Morrowind.esm`` in the folder you extracted it to, and follow the instructions.
+
 -----
 Steam
 -----

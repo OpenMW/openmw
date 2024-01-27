@@ -16,8 +16,10 @@
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #4822: Non-weapon equipment and body parts can't inherit time from parent animation
+    Bug #4898: Odd/Incorrect lighting on meshes
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5062: Root bone rotations for NPC animation don't work the same as for creature animation
+    Bug #5065: Actors with scripted animation still try to wander and turn around without moving
     Bug #5066: Quirks with starting and stopping scripted animations
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5280: Unskinned shapes in skinned equipment are rendered in the wrong place
@@ -32,6 +34,7 @@
     Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
     Bug #6313: Followers with high Fight can turn hostile
+    Bug #6402: The sound of a thunderstorm does not stop playing after entering the premises
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6550: Cloned body parts don't inherit texture effects
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
@@ -127,6 +130,9 @@
     Bug #7742: Governing attribute training limit should use the modified attribute
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
+    Bug #7765: OpenMW-CS: Touch Record option is broken
+    Bug #7770: Sword of the Perithia: Script execution failure
+    Bug #7780: Non-ASCII texture paths in NIF files don't work
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty

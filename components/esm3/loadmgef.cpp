@@ -631,7 +631,7 @@ namespace ESM
     {
         auto name = sIndexNameToIndexMap.find(effect);
         if (name == sIndexNameToIndexMap.end())
-            throw std::runtime_error("Unimplemented effect " + std::string(effect));
+            return -1;
 
         return name->second;
     }

@@ -63,17 +63,17 @@ namespace
         switch (order)
         {
             case 0:
-                return { question, { r0, r1, r2 }, sound };
+                return { std::move(question), { std::move(r0), std::move(r1), std::move(r2) }, std::move(sound) };
             case 1:
-                return { question, { r0, r2, r1 }, sound };
+                return { std::move(question), { std::move(r0), std::move(r2), std::move(r1) }, std::move(sound) };
             case 2:
-                return { question, { r1, r0, r2 }, sound };
+                return { std::move(question), { std::move(r1), std::move(r0), std::move(r2) }, std::move(sound) };
             case 3:
-                return { question, { r1, r2, r0 }, sound };
+                return { std::move(question), { std::move(r1), std::move(r2), std::move(r0) }, std::move(sound) };
             case 4:
-                return { question, { r2, r0, r1 }, sound };
+                return { std::move(question), { std::move(r2), std::move(r0), std::move(r1) }, std::move(sound) };
             default:
-                return { question, { r2, r1, r0 }, sound };
+                return { std::move(question), { std::move(r2), std::move(r1), std::move(r0) }, std::move(sound) };
         }
     }
 }

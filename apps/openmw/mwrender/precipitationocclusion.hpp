@@ -4,6 +4,8 @@
 #include <osg/Camera>
 #include <osg/Texture2D>
 
+#include <optional>
+
 namespace MWRender
 {
     class PrecipitationOccluder
@@ -27,7 +29,7 @@ namespace MWRender
         osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<osg::Camera> mSceneCamera;
         osg::ref_ptr<osg::Texture2D> mDepthTexture;
-        osg::Vec3f mRange;
+        std::optional<osg::Vec3f> mRange;
     };
 }
 

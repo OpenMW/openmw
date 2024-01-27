@@ -8,6 +8,7 @@
 #include <SDL_events.h>
 
 #include "../mwgui/mode.hpp"
+#include "../mwrender/animationpriority.hpp"
 #include <components/sdlutil/events.hpp>
 
 namespace MWWorld
@@ -61,10 +62,14 @@ namespace MWBase
         virtual void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) = 0;
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
         virtual void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) = 0;
+        virtual void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) = 0;
+        virtual void playAnimation(const MWWorld::Ptr& object, const std::string& groupname,
+            const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
+            std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback)
+            = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
         virtual void actorDied(const MWWorld::Ptr& actor) = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
-
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
 

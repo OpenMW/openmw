@@ -1,27 +1,13 @@
-#ifndef OPENMW_COMPONENTS_RESOURCE_ARCHIVE_H
-#define OPENMW_COMPONENTS_RESOURCE_ARCHIVE_H
+#ifndef OPENMW_COMPONENTS_VFS_ARCHIVE_H
+#define OPENMW_COMPONENTS_VFS_ARCHIVE_H
 
-#include <filesystem>
-#include <map>
+#include <string>
 #include <string_view>
 
-#include <components/files/istreamptr.hpp>
+#include "filemap.hpp"
 
 namespace VFS
 {
-
-    class File
-    {
-    public:
-        virtual ~File() = default;
-
-        virtual Files::IStreamPtr open() = 0;
-
-        virtual std::filesystem::path getPath() = 0;
-    };
-
-    using FileMap = std::map<std::string, File*, std::less<>>;
-
     class Archive
     {
     public:

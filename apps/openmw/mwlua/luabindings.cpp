@@ -7,6 +7,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/datetimemanager.hpp"
 
+#include "animationbindings.hpp"
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
 #include "corebindings.hpp"
@@ -30,6 +31,7 @@ namespace MWLua
         sol::state_view lua = context.mLua->sol();
         MWWorld::DateTimeManager* tm = MWBase::Environment::get().getWorld()->getTimeManager();
         return {
+            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.async",
                 LuaUtil::getAsyncPackageInitializer(
                     lua, [tm] { return tm->getSimulationTime(); }, [tm] { return tm->getGameTime(); }) },

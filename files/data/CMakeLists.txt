@@ -76,6 +76,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/console/local.lua
     scripts/omw/console/player.lua
     scripts/omw/console/menu.lua
+    scripts/omw/mechanics/animationcontroller.lua
     scripts/omw/mechanics/playercontroller.lua
     scripts/omw/settings/menu.lua
     scripts/omw/settings/player.lua

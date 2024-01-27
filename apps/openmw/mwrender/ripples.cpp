@@ -106,7 +106,7 @@ namespace MWRender
         mProgramBlobber = shaderManager.getProgram(
             vertex, shaderManager.getShader("ripples_blobber.frag", defineMap, osg::Shader::FRAGMENT));
         mProgramSimulation = shaderManager.getProgram(
-            vertex, shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT));
+            std::move(vertex), shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT));
     }
 
     void RipplesSurface::setupComputePipeline()

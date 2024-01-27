@@ -11,7 +11,7 @@ scaling factor
 This setting scales GUI windows.
 A value of 1.0 results in the normal scale. Larger values are useful to increase the scale of the GUI for high resolution displays.
 
-This setting can be configured in the Interface section of the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 font size
 ---------
@@ -24,7 +24,7 @@ Allows to specify glyph size for in-game fonts.
 Note: default bitmap fonts are supposed to work with 16px size, otherwise glyphs will be blurry.
 TrueType fonts do not have this issue.
 
-This setting can be configured in the Interface section of the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 menu transparency
 -----------------
@@ -65,7 +65,7 @@ The Bethesda provided assets have a 4:3 aspect ratio, but other assets are permi
 If this setting is false, the assets will be centered in the mentioned 4:3 aspect ratio,
 with black bars filling the remainder of the screen.
 
-This setting can be configured in the Interface section of the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 subtitles
 ---------

@@ -624,7 +624,7 @@ bool CSMFilter::Parser::parse(const std::string& filter, bool allowPredefined)
         }
 
         if (node)
-            mFilter = node;
+            mFilter = std::move(node);
         else
         {
             // Empty filter string equals to filter "true".

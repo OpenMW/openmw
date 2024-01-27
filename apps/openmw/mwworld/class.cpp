@@ -118,11 +118,6 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
-    void Class::block(const Ptr& ptr) const
-    {
-        throw std::runtime_error("class cannot block");
-    }
-
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker,
         const osg::Vec3f& hitPosition, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
@@ -149,7 +144,7 @@ namespace MWWorld
         throw std::runtime_error("class does not have an inventory store");
     }
 
-    bool Class::hasInventoryStore(const Ptr& ptr) const
+    bool Class::hasInventoryStore(const ConstPtr& ptr) const
     {
         return false;
     }
@@ -320,7 +315,7 @@ namespace MWWorld
         return false;
     }
 
-    void Class::getModelsToPreload(const Ptr& ptr, std::vector<std::string>& models) const
+    void Class::getModelsToPreload(const ConstPtr& ptr, std::vector<std::string>& models) const
     {
         std::string model = getModel(ptr);
         if (!model.empty())

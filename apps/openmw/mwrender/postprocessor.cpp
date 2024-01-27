@@ -23,6 +23,7 @@
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -662,6 +663,11 @@ namespace MWRender
 
                 for (const auto& name : pass->getRenderTargets())
                 {
+                    if (name.empty())
+                    {
+                        continue;
+                    }
+
                     auto& renderTarget = technique->getRenderTargetsMap()[name];
                     subPass.mStateSet->setTextureAttribute(subTexUnit, renderTarget.mTarget);
                     subPass.mStateSet->addUniform(new osg::Uniform(name.c_str(), subTexUnit));

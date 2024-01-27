@@ -79,7 +79,7 @@ namespace MWClass
         MWWorld::InventoryStore& getInventoryStore(const MWWorld::Ptr& ptr) const override;
         ///< Return inventory store
 
-        bool hasInventoryStore(const MWWorld::Ptr& ptr) const override;
+        bool hasInventoryStore(const MWWorld::ConstPtr& ptr) const override;
 
         ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
@@ -107,7 +107,7 @@ namespace MWClass
 
         std::string getModel(const MWWorld::ConstPtr& ptr) const override;
 
-        void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
+        void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const override;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 

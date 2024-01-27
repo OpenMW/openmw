@@ -190,6 +190,7 @@ namespace MWGui
         void updateDisposition();
         void restock();
         void deleteLater();
+        void redrawTopicsList();
 
         bool mIsCompanion;
         std::list<std::string> mKeywords;

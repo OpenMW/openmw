@@ -60,6 +60,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -996,6 +997,9 @@ namespace MWWorld
     MWWorld::Ptr World::getFacedObject()
     {
         MWWorld::Ptr facedObject;
+
+        if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
+            return facedObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
             && MWBase::Environment::get().getWindowManager()->isConsoleMode())

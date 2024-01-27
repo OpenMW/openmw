@@ -149,7 +149,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mResourcesManager.setVFS(mVFS.get());
 
     constexpr double expiryDelay = 0;
-    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay);
+    mResourceSystem
+        = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay, &mEncoder.getStatelessEncoder());
 
     Shader::ShaderManager::DefineMap defines
         = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -1107,7 +1108,7 @@ void CSMWorld::Data::loadFallbackEntries()
             newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Static>>();
-            record->mBase = newMarker;
+            record->mBase = std::move(newMarker);
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord(std::move(record), CSMWorld::UniversalId::Type_Static);
         }
@@ -1123,7 +1124,7 @@ void CSMWorld::Data::loadFallbackEntries()
             newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Door>>();
-            record->mBase = newMarker;
+            record->mBase = std::move(newMarker);
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord(std::move(record), CSMWorld::UniversalId::Type_Door);
         }

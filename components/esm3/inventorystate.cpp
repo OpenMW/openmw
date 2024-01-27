@@ -74,7 +74,7 @@ namespace ESM
                 esm.getHNT(multiplier, "MULT");
                 params.emplace_back(rand, multiplier);
             }
-            mPermanentMagicEffectMagnitudes[id] = params;
+            mPermanentMagicEffectMagnitudes[id] = std::move(params);
         }
 
         while (esm.isNextSub("EQUI"))

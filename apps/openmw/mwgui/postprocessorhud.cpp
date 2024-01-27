@@ -136,9 +136,9 @@ namespace MWGui
                 return;
 
             if (enabled)
-                processor->enableTechnique(technique);
+                processor->enableTechnique(std::move(technique));
             else
-                processor->disableTechnique(technique);
+                processor->disableTechnique(std::move(technique));
             processor->saveChain();
         }
     }
@@ -171,7 +171,7 @@ namespace MWGui
             if (technique->getDynamic())
                 return;
 
-            if (processor->enableTechnique(technique, index) != MWRender::PostProcessor::Status_Error)
+            if (processor->enableTechnique(std::move(technique), index) != MWRender::PostProcessor::Status_Error)
                 processor->saveChain();
         }
     }

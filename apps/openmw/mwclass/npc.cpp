@@ -436,10 +436,11 @@ namespace MWClass
         return model;
     }
 
-    void Npc::getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const
+    void Npc::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
-        const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().search(npc->mBase->mRace);
+        const auto& esmStore = MWBase::Environment::get().getESMStore();
+        const ESM::Race* race = esmStore->get<ESM::Race>().search(npc->mBase->mRace);
         if (race && race->mData.mFlags & ESM::Race::Beast)
             models.push_back(Settings::models().mBaseanimkna);
 
@@ -453,56 +454,57 @@ namespace MWClass
 
         if (!npc->mBase->mHead.empty())
         {
-            const ESM::BodyPart* head
-                = MWBase::Environment::get().getESMStore()->get<ESM::BodyPart>().search(npc->mBase->mHead);
+            const ESM::BodyPart* head = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHead);
             if (head)
                 models.push_back(Misc::ResourceHelpers::correctMeshPath(head->mModel));
         }
         if (!npc->mBase->mHair.empty())
         {
-            const ESM::BodyPart* hair
-                = MWBase::Environment::get().getESMStore()->get<ESM::BodyPart>().search(npc->mBase->mHair);
+            const ESM::BodyPart* hair = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHair);
             if (hair)
                 models.push_back(Misc::ResourceHelpers::correctMeshPath(hair->mModel));
         }
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
 
-        // FIXME: use const version of InventoryStore functions once they are available
-        // preload equipped items
-        const MWWorld::InventoryStore& invStore = getInventoryStore(ptr);
-        for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+        const MWWorld::CustomData* customData = ptr.getRefData().getCustomData();
+        if (customData)
         {
-            MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
-            if (equipped != invStore.end())
+            const MWWorld::InventoryStore& invStore = customData->asNpcCustomData().mInventoryStore;
+            for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
             {
-                std::vector<ESM::PartReference> parts;
-                if (equipped->getType() == ESM::Clothing::sRecordId)
+                MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
+                if (equipped != invStore.end())
                 {
-                    const ESM::Clothing* clothes = equipped->get<ESM::Clothing>()->mBase;
-                    parts = clothes->mParts.mParts;
-                }
-                else if (equipped->getType() == ESM::Armor::sRecordId)
-                {
-                    const ESM::Armor* armor = equipped->get<ESM::Armor>()->mBase;
-                    parts = armor->mParts.mParts;
-                }
-                else
-                {
-                    std::string model = equipped->getClass().getModel(*equipped);
-                    if (!model.empty())
-                        models.push_back(model);
-                }
+                    const auto addParts = [&](const std::vector<ESM::PartReference>& parts) {
+                        for (const ESM::PartReference& partRef : parts)
+                        {
+                            const ESM::RefId& partname
+                                = (female && !partRef.mFemale.empty()) || (!female && partRef.mMale.empty())
+                                ? partRef.mFemale
+                                : partRef.mMale;
 
-                for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
-                {
-                    const ESM::RefId& partname
-                        = (female && !it->mFemale.empty()) || (!female && it->mMale.empty()) ? it->mFemale : it->mMale;
-
-                    const ESM::BodyPart* part
-                        = MWBase::Environment::get().getESMStore()->get<ESM::BodyPart>().search(partname);
-                    if (part && !part->mModel.empty())
-                        models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel));
+                            const ESM::BodyPart* part = esmStore->get<ESM::BodyPart>().search(partname);
+                            if (part && !part->mModel.empty())
+                                models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel));
+                        }
+                    };
+                    if (equipped->getType() == ESM::Clothing::sRecordId)
+                    {
+                        const ESM::Clothing* clothes = equipped->get<ESM::Clothing>()->mBase;
+                        addParts(clothes->mParts.mParts);
+                    }
+                    else if (equipped->getType() == ESM::Armor::sRecordId)
+                    {
+                        const ESM::Armor* armor = equipped->get<ESM::Armor>()->mBase;
+                        addParts(armor->mParts.mParts);
+                    }
+                    else
+                    {
+                        std::string model = equipped->getClass().getModel(*equipped);
+                        if (!model.empty())
+                            models.push_back(model);
+                    }
                 }
             }
         }
@@ -512,9 +514,8 @@ namespace MWClass
         {
             const std::vector<const ESM::BodyPart*>& parts
                 = MWRender::NpcAnimation::getBodyParts(race->mId, female, false, false);
-            for (std::vector<const ESM::BodyPart*>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+            for (const ESM::BodyPart* part : parts)
             {
-                const ESM::BodyPart* part = *it;
                 if (part && !part->mModel.empty())
                     models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel));
             }
@@ -678,10 +679,7 @@ namespace MWClass
         MWMechanics::applyElementalShields(ptr, victim);
 
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
-        {
             damage = 0;
-            victim.getClass().block(victim);
-        }
 
         if (victim == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
             damage = 0;

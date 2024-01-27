@@ -10,13 +10,14 @@
 namespace Resource
 {
 
-    ResourceSystem::ResourceSystem(const VFS::Manager* vfs, double expiryDelay)
+    ResourceSystem::ResourceSystem(
+        const VFS::Manager* vfs, double expiryDelay, const ToUTF8::StatelessUtf8Encoder* encoder)
         : mVFS(vfs)
     {
-        mNifFileManager = std::make_unique<NifFileManager>(vfs);
+        mNifFileManager = std::make_unique<NifFileManager>(vfs, encoder);
         mImageManager = std::make_unique<ImageManager>(vfs, expiryDelay);
         mSceneManager = std::make_unique<SceneManager>(vfs, mImageManager.get(), mNifFileManager.get(), expiryDelay);
-        mKeyframeManager = std::make_unique<KeyframeManager>(vfs, mSceneManager.get(), expiryDelay);
+        mKeyframeManager = std::make_unique<KeyframeManager>(vfs, mSceneManager.get(), expiryDelay, encoder);
 
         addResourceManager(mNifFileManager.get());
         addResourceManager(mKeyframeManager.get());

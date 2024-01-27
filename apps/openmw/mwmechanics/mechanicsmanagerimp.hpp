@@ -143,9 +143,14 @@ namespace MWMechanics
         /// @return Success or error
         bool playAnimationGroup(
             const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false) override;
+        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
+            std::string_view startKey, std::string_view stopKey, bool forceLoop) override;
+        void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable) override;
         void skipAnimation(const MWWorld::Ptr& ptr) override;
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) override;
+        bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const override;
         void persistAnimationStates() override;
+        void clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted) override;
 
         /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
         /// paused we may want to do it manually (after equipping permanent enchantment)

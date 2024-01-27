@@ -24,6 +24,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwrender/bonegroup.hpp"
 #include "../mwrender/postprocessor.hpp"
 
 #include "../mwworld/datetimemanager.hpp"
@@ -400,6 +401,49 @@ namespace MWLua
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
         mEngineEvents.addToQueue(EngineEvents::OnUseItem{ getId(actor), getId(object), force });
+    }
+
+    void LuaManager::animationTextKey(const MWWorld::Ptr& actor, const std::string& key)
+    {
+        auto pos = key.find(": ");
+        if (pos != std::string::npos)
+            mEngineEvents.addToQueue(
+                EngineEvents::OnAnimationTextKey{ getId(actor), key.substr(0, pos), key.substr(pos + 2) });
+    }
+
+    void LuaManager::playAnimation(const MWWorld::Ptr& actor, const std::string& groupname,
+        const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
+        std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback)
+    {
+        sol::table options = mLua.newTable();
+        options["blendmask"] = blendMask;
+        options["autodisable"] = autodisable;
+        options["speed"] = speedmult;
+        options["startkey"] = start;
+        options["stopkey"] = stop;
+        options["startpoint"] = startpoint;
+        options["loops"] = loops;
+        options["forceloop"] = loopfallback;
+
+        bool priorityAsTable = false;
+        for (uint32_t i = 1; i < MWRender::sNumBlendMasks; i++)
+            if (priority[static_cast<MWRender::BoneGroup>(i)] != priority[static_cast<MWRender::BoneGroup>(0)])
+                priorityAsTable = true;
+        if (priorityAsTable)
+        {
+            sol::table priorityTable = mLua.newTable();
+            for (uint32_t i = 0; i < MWRender::sNumBlendMasks; i++)
+                priorityTable[static_cast<MWRender::BoneGroup>(i)] = priority[static_cast<MWRender::BoneGroup>(i)];
+            options["priority"] = priorityTable;
+        }
+        else
+            options["priority"] = priority[MWRender::BoneGroup_LowerBody];
+
+        // mEngineEvents.addToQueue(event);
+        //  Has to be called immediately, otherwise engine details that depend on animations playing immediately
+        //  break.
+        if (auto* scripts = actor.getRefData().getLuaScripts())
+            scripts->onPlayAnimation(groupname, options);
     }
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)

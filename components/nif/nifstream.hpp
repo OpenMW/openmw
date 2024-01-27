@@ -8,6 +8,7 @@
 #include <istream>
 #include <stdexcept>
 #include <stdint.h>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -21,6 +22,11 @@
 #include <osg/Vec4f>
 
 #include "niftypes.hpp"
+
+namespace ToUTF8
+{
+    class StatelessUtf8Encoder;
+}
 
 namespace Nif
 {
@@ -67,11 +73,15 @@ namespace Nif
     {
         const Reader& mReader;
         Files::IStreamPtr mStream;
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
+        std::string mBuffer;
 
     public:
-        explicit NIFStream(const Reader& reader, Files::IStreamPtr&& stream)
+        explicit NIFStream(
+            const Reader& reader, Files::IStreamPtr&& stream, const ToUTF8::StatelessUtf8Encoder* encoder)
             : mReader(reader)
             , mStream(std::move(stream))
+            , mEncoder(encoder)
         {
         }
 

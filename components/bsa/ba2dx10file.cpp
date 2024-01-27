@@ -76,7 +76,7 @@ namespace Bsa
                     fail("Corrupted BSA");
             }
 
-            mFolders[dirHash][{ nameHash, extHash }] = file;
+            mFolders[dirHash][{ nameHash, extHash }] = std::move(file);
 
             FileStruct fileStruct{};
             mFiles.push_back(fileStruct);
@@ -177,7 +177,7 @@ namespace Bsa
             return std::nullopt; // folder not found
 
         uint32_t fileHash = generateHash(fileName);
-        uint32_t extHash = *reinterpret_cast<const uint32_t*>(ext.data() + 1);
+        uint32_t extHash = generateExtensionHash(ext);
         auto iter = it->second.find({ fileHash, extHash });
         if (iter == it->second.end())
             return std::nullopt; // file not found

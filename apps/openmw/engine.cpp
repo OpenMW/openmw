@@ -321,11 +321,7 @@ bool OMW::Engine::frame(float frametime)
     // update GUI by world data
     {
         ScopedProfile<UserStatsType::WindowManager> profile(frameStart, frameNumber, *timer, *stats);
-
-        if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
-        {
-            mWorld->updateWindowManager();
-        }
+        mWorld->updateWindowManager();
     }
 
     mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
@@ -706,7 +702,8 @@ void OMW::Engine::prepareEngine()
 
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
-    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get(), Settings::cells().mCacheExpiryDelay);
+    mResourceSystem = std::make_unique<Resource::ResourceSystem>(
+        mVFS.get(), Settings::cells().mCacheExpiryDelay, &mEncoder.get()->getStatelessEncoder());
     mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
     mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
         false); // keep to Off for now to allow better state sharing
@@ -826,7 +823,7 @@ void OMW::Engine::prepareEngine()
     }
     listener->loadingOff();
 
-    mWorld->init(mViewer, rootNode, mWorkQueue.get(), *mUnrefQueue);
+    mWorld->init(mViewer, std::move(rootNode), mWorkQueue.get(), *mUnrefQueue);
     mEnvironment.setWorldScene(mWorld->getWorldScene());
     mWorld->setupPlayer();
     mWorld->setRandomSeed(mRandomSeed);

@@ -162,6 +162,8 @@ namespace MWWorld
         // This is used for Rain and Thunderstorm
         ESM::RefId mRainLoopSoundID;
 
+        std::array<ESM::RefId, 4> mThunderSoundID;
+
         // Is this an ash storm / blight storm? If so, the following will happen:
         // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
         // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm
@@ -213,7 +215,6 @@ namespace MWWorld
         // non-zero values.
         float mThunderFrequency;
         float mThunderThreshold;
-        ESM::RefId mThunderSoundID[4];
         float mFlashDecrement;
 
         float mFlashBrightness;

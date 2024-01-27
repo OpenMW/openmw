@@ -17,6 +17,7 @@
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "animationbindings.hpp"
 #include "factionbindings.hpp"
 #include "luaevents.hpp"
 #include "magicbindings.hpp"
@@ -83,6 +84,7 @@ namespace MWLua
         };
         api["contentFiles"] = initContentFilesBindings(lua->sol());
         api["sound"] = initCoreSoundBindings(context);
+        api["vfx"] = initCoreVfxBindings(context);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
@@ -133,6 +135,7 @@ namespace MWLua
             api[k] = v;
         api["sendGlobalEvent"] = sol::nil;
         api["sound"] = sol::nil;
+        api["vfx"] = sol::nil;
         return LuaUtil::makeReadOnly(api);
     }
 }

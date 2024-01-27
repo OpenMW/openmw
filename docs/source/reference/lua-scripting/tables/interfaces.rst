@@ -10,6 +10,9 @@
   * - :ref:`AI <Interface AI>`
     - by local scripts
     - Control basic AI of NPCs and creatures.
+  * - :ref:`AnimationController <Interface AnimationController>`
+    - by local scripts
+    - Control animations of NPCs and creatures.
   * - :ref:`Camera <Interface Camera>`
     - by player scripts
     - | Allows to alter behavior of the built-in camera script

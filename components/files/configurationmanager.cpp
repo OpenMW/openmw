@@ -309,7 +309,7 @@ namespace Files
                     tempPath /= str.substr(pos + 1, str.length() - pos);
                 }
 
-                path = tempPath;
+                path = std::move(tempPath);
             }
             else
             {

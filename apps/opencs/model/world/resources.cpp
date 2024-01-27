@@ -11,6 +11,7 @@
 
 #include <components/misc/strings/lower.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 CSMWorld::Resources::Resources(
     const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type, const char* const* extensions)

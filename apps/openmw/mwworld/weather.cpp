@@ -180,7 +180,6 @@ namespace MWWorld
         , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
         , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
         , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
-        , mThunderSoundID()
         , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
         , mFlashBrightness(0.0f)
     {
@@ -748,21 +747,21 @@ namespace MWWorld
             const float dayDuration = adjustedNightStart - mSunriseTime;
             const float nightDuration = 24.f - dayDuration;
 
-            double theta;
+            float orbit;
             if (!is_night)
             {
-                theta = static_cast<float>(osg::PI) * (adjustedHour - mSunriseTime) / dayDuration;
+                float t = (adjustedHour - mSunriseTime) / dayDuration;
+                orbit = 1.f - 2.f * t;
             }
             else
             {
-                theta = static_cast<float>(osg::PI)
-                    - static_cast<float>(osg::PI) * (adjustedHour - adjustedNightStart) / nightDuration;
+                float t = (adjustedHour - adjustedNightStart) / nightDuration;
+                orbit = 2.f * t - 1.f;
             }
 
-            osg::Vec3f final(static_cast<float>(cos(theta)),
-                -0.268f, // approx tan( -15 degrees )
-                static_cast<float>(sin(theta)));
-            mRendering.setSunDirection(final * -1);
+            // Hardcoded constant from Morrowind
+            const osg::Vec3f sunDir(-400.f * orbit, 75.f, -100.f);
+            mRendering.setSunDirection(sunDir);
             mRendering.setNight(is_night);
         }
 
@@ -823,19 +822,29 @@ namespace MWWorld
 
     void WeatherManager::stopSounds()
     {
+        MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         if (mAmbientSound)
         {
-            MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
+            sndMgr->stopSound(mAmbientSound);
             mAmbientSound = nullptr;
         }
         mPlayingAmbientSoundID = ESM::RefId();
 
         if (mRainSound)
         {
-            MWBase::Environment::get().getSoundManager()->stopSound(mRainSound);
+            sndMgr->stopSound(mRainSound);
             mRainSound = nullptr;
         }
         mPlayingRainSoundID = ESM::RefId();
+
+        for (ESM::RefId soundId : mWeatherSettings[mCurrentWeather].mThunderSoundID)
+            if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
+
+        if (inTransition())
+            for (ESM::RefId soundId : mWeatherSettings[mNextWeather].mThunderSoundID)
+                if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                    sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
     }
 
     float WeatherManager::getWindSpeed() const

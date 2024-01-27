@@ -82,13 +82,18 @@ namespace MWLua
             inputActions[sol::meta_function::pairs] = pairs;
         }
 
-        context.mLua->sol().new_usertype<LuaUtil::InputAction::Info>("ActionInfo", "key",
-            sol::property([](const LuaUtil::InputAction::Info& info) { return info.mKey; }), "name",
-            sol::property([](const LuaUtil::InputAction::Info& info) { return info.mName; }), "description",
-            sol::property([](const LuaUtil::InputAction::Info& info) { return info.mDescription; }), "type",
-            sol::property([](const LuaUtil::InputAction::Info& info) { return info.mType; }), "l10n",
-            sol::property([](const LuaUtil::InputAction::Info& info) { return info.mL10n; }), "defaultValue",
-            sol::property([](const LuaUtil::InputAction::Info& info) { return info.mDefaultValue; }));
+        auto actionInfo = context.mLua->sol().new_usertype<LuaUtil::InputAction::Info>("ActionInfo");
+        actionInfo["key"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mKey; });
+        actionInfo["name"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mName; });
+        actionInfo["description"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mDescription; });
+        actionInfo["l10n"] = sol::readonly_property(
+            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mL10n; });
+        actionInfo["type"] = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mType; });
+        actionInfo["defaultValue"]
+            = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mDefaultValue; });
 
         auto inputTriggers = context.mLua->sol().new_usertype<LuaUtil::InputTrigger::Registry>("InputTriggers");
         inputTriggers[sol::meta_function::index]
@@ -108,11 +113,15 @@ namespace MWLua
             inputTriggers[sol::meta_function::pairs] = pairs;
         }
 
-        context.mLua->sol().new_usertype<LuaUtil::InputTrigger::Info>("TriggerInfo", "key",
-            sol::property([](const LuaUtil::InputTrigger::Info& info) { return info.mKey; }), "name",
-            sol::property([](const LuaUtil::InputTrigger::Info& info) { return info.mName; }), "description",
-            sol::property([](const LuaUtil::InputTrigger::Info& info) { return info.mDescription; }), "l10n",
-            sol::property([](const LuaUtil::InputTrigger::Info& info) { return info.mL10n; }));
+        auto triggerInfo = context.mLua->sol().new_usertype<LuaUtil::InputTrigger::Info>("TriggerInfo");
+        triggerInfo["key"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mKey; });
+        triggerInfo["name"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mName; });
+        triggerInfo["description"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mDescription; });
+        triggerInfo["l10n"] = sol::readonly_property(
+            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mL10n; });
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         sol::table api(context.mLua->sol(), sol::create);

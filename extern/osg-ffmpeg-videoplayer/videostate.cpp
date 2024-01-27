@@ -598,8 +598,17 @@ public:
 
                 if(av_read_frame(pFormatCtx, packet.get()) < 0)
                 {
-                    if (self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0 && self->pictq_size == 0)
-                        self->mVideoEnded = true;
+                    if (self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0)
+                    {
+                        self->pictq_mutex.lock();
+                        bool videoEnded = self->pictq_size == 0;
+                        self->pictq_mutex.unlock();
+                        if (videoEnded)
+                            self->mVideoEnded = true;
+                        else
+                            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    }
+
                     continue;
                 }
                 else

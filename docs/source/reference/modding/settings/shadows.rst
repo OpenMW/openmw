@@ -16,6 +16,8 @@ Unlike in the original Morrowind engine, 'Shadow Mapping' is used, which can hav
 Bear in mind that this will force OpenMW to use shaders as if :ref:`force shaders` was enabled.
 A keen developer may be able to implement compatibility with fixed-function mode using the advice of `this post <https://github.com/OpenMW/openmw/pull/1547#issuecomment-369657381>`_, but it may be more difficult than it seems.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 number of shadow maps
 ---------------------
 
@@ -38,6 +40,8 @@ The maximum distance from the camera shadows cover, limiting their overall area 
 and improving their quality and performance at the cost of removing shadows of distant objects or terrain.
 Set this to a non-positive value to remove the limit.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 shadow fade start
 -------------------
 
@@ -48,6 +52,8 @@ shadow fade start
 The fraction of the maximum shadow map distance at which the shadows will begin to fade away.
 Tweaking it will make the transition proportionally more or less smooth.
 This setting has no effect if the maximum shadow map distance is non-positive (infinite).
+
+This setting can be controlled in the Settings tab of the launcher.
 
 allow shadow map overlap
 ------------------------
@@ -90,6 +96,8 @@ compute scene bounds
 Two different ways to make better use of shadow map(s) by making them cover a smaller area.
 While primitives give better shadows at expense of more CPU, bounds gives better performance overall but with lower quality shadows. There is also the ability to disable this computation with none.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 shadow map resolution
 ---------------------
 
@@ -101,6 +109,8 @@ Control How large to make the shadow map(s).
 Higher values increase GPU load but can produce better-looking results.
 Power-of-two values may turn out to be faster than smaller values which are not powers of two on some GPU/driver combinations.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 actor shadows
 -------------
 
@@ -110,6 +120,8 @@ actor shadows
 
 Allow actors to cast shadows.
 Potentially decreases performance.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 player shadows
 --------------
@@ -121,6 +133,8 @@ player shadows
 Allow the player to cast shadows.
 Potentially decreases performance.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 terrain shadows
 ---------------
 
@@ -130,6 +144,8 @@ terrain shadows
 
 Allow terrain to cast shadows.
 Potentially decreases performance.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 object shadows
 --------------
@@ -141,6 +157,8 @@ object shadows
 Allow static objects to cast shadows.
 Potentially decreases performance.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 enable indoor shadows
 ---------------------
 
@@ -151,6 +169,8 @@ enable indoor shadows
 Allow shadows indoors.
 Due to limitations with Morrowind's data, only actors can cast shadows indoors without the ceiling casting a shadow everywhere.
 Some might feel this is distracting as shadows can be cast through other objects, so indoor shadows can be disabled completely.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 Expert settings
 ***************
