@@ -104,8 +104,12 @@ namespace MWLua
         });
         mwscript["player"] = sol::readonly_property(
             [](const MWScriptRef&) { return GObject(MWBase::Environment::get().getWorld()->getPlayerPtr()); });
-        mwscriptVars[sol::meta_function::index] = [](MWScriptVariables& s, std::string_view var) {
-            return s.mRef.getLocals().getVarAsDouble(s.mRef.mId, Misc::StringUtils::lowerCase(var));
+        mwscriptVars[sol::meta_function::index]
+            = [](MWScriptVariables& s, std::string_view var) -> sol::optional<double> {
+            if (s.mRef.getLocals().hasVar(s.mRef.mId, var))
+                return s.mRef.getLocals().getVarAsDouble(s.mRef.mId, Misc::StringUtils::lowerCase(var));
+            else
+                return sol::nullopt;
         };
         mwscriptVars[sol::meta_function::new_index] = [](MWScriptVariables& s, std::string_view var, double val) {
             MWScript::Locals& locals = s.mRef.getLocals();
