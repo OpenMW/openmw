@@ -69,7 +69,7 @@ namespace MWClass
         float getRemainingUsageTime(const MWWorld::ConstPtr& ptr) const override;
         ///< Returns the remaining duration of the object.
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
 
         float getWeight(const MWWorld::ConstPtr& ptr) const override;
 

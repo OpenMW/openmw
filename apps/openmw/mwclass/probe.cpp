@@ -38,7 +38,7 @@ namespace MWClass
         }
     }
 
-    std::string Probe::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Probe::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Probe>(ptr);
     }

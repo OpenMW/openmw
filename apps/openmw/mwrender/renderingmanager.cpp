@@ -1497,7 +1497,7 @@ namespace MWRender
     osg::Vec3f RenderingManager::getHalfExtents(const MWWorld::ConstPtr& object) const
     {
         osg::Vec3f halfExtents(0, 0, 0);
-        std::string modelName = object.getClass().getModel(object);
+        std::string modelName = object.getClass().getCorrectedModel(object);
         if (modelName.empty())
             return halfExtents;
 
@@ -1519,7 +1519,7 @@ namespace MWRender
 
     osg::BoundingBox RenderingManager::getCullSafeBoundingBox(const MWWorld::Ptr& ptr) const
     {
-        const std::string model = ptr.getClass().getModel(ptr);
+        const std::string model = ptr.getClass().getCorrectedModel(ptr);
         if (model.empty())
             return {};
 

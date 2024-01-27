@@ -96,7 +96,7 @@ namespace
     {
         if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId()))
             return {};
-        return ptr.getClass().getModel(ptr);
+        return ptr.getClass().getCorrectedModel(ptr);
     }
 
     void addObject(const MWWorld::Ptr& ptr, const MWWorld::World& world, const std::vector<ESM::RefNum>& pagedRefs,

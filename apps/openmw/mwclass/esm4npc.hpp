@@ -54,7 +54,7 @@ namespace MWClass
             return ESM4Impl::getToolTipInfo(getName(ptr), count);
         }
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
         std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
 
         static const ESM4::Npc* getTraitsRecord(const MWWorld::Ptr& ptr);

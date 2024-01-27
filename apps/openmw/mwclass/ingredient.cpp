@@ -39,7 +39,7 @@ namespace MWClass
         }
     }
 
-    std::string Ingredient::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Ingredient::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Ingredient>(ptr);
     }

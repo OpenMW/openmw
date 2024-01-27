@@ -44,7 +44,7 @@ namespace MWClass
         }
     }
 
-    std::string Armor::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Armor::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Armor>(ptr);
     }
