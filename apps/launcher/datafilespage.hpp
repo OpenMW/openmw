@@ -6,6 +6,7 @@
 #include <components/process/processinvoker.hpp>
 
 #include <QDir>
+#include <QMenu>
 #include <QStringList>
 #include <QWidget>
 
@@ -39,6 +40,7 @@ namespace Launcher
 
         ContentSelectorView::ContentSelector* mSelector;
         Ui::DataFilesPage ui;
+        QMenu* mArchiveContextMenu;
 
     public:
         explicit DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
@@ -72,8 +74,12 @@ namespace Launcher
         void addSubdirectories(bool append);
         void sortDirectories();
         void removeDirectory();
-        void moveArchive(int step);
+        void moveArchives(int step);
         void moveDirectory(int step);
+
+        void slotShowArchiveContextMenu(const QPoint& pos);
+        void slotCheckMultiSelectedItems();
+        void slotUncheckMultiSelectedItems();
 
         void on_newProfileAction_triggered();
         void on_cloneProfileAction_triggered();
@@ -120,7 +126,10 @@ namespace Launcher
 
         void addArchive(const QString& name, Qt::CheckState selected, int row = -1);
         void addArchivesFromDir(const QString& dir);
+        bool moveArchive(QListWidgetItem* listItem, int step);
         void buildView();
+        void buildArchiveContextMenu();
+        void setCheckStateForMultiSelectedItems(bool checked);
         void setProfile(int index, bool savePrevious);
         void setProfile(const QString& previous, const QString& current, bool savePrevious);
         void removeProfile(const QString& profile);
