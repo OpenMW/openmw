@@ -116,9 +116,9 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 
     for (const auto& name : vfs.getRecursiveDirectoryIterator(""))
     {
-        if (isNIF(name))
+        if (isNIF(name.value()))
         {
-            readNIF(archivePath, name, &vfs, quiet);
+            readNIF(archivePath, name.value(), &vfs, quiet);
         }
     }
 

@@ -16,9 +16,9 @@ namespace VFS
         {
         }
 
-        const std::string& operator*() const { return mIt->first.value(); }
+        const Path::Normalized& operator*() const { return mIt->first; }
 
-        const std::string* operator->() const { return &mIt->first.value(); }
+        const Path::Normalized* operator->() const { return &mIt->first; }
 
         RecursiveDirectoryIterator& operator++()
         {
