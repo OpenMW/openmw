@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>573</width>
-    <height>384</height>
+    <height>557</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -29,6 +29,12 @@
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="dataNoteLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: content files that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -41,14 +47,111 @@
        <string>Data Directories</string>
       </attribute>
       <layout class="QGridLayout" name="dirTabLayout">
-       <item row="0" column="0" rowspan="26">
+       <item row="0" column="0">
         <widget class="QListWidget" name="directoryListWidget">
          <property name="dragDropMode">
           <enum>QAbstractItemView::InternalMove</enum>
          </property>
         </widget>
        </item>
-       <item row="32" column="0" colspan="2">
+       <item row="0" column="1">
+        <layout class="QVBoxLayout" name="directoryButtons">
+         <item>
+          <widget class="QPushButton" name="directoryAddSubdirsButton">
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>33</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Scan directories for likely data directories and append them at the end of the list.</string>
+           </property>
+           <property name="text">
+            <string>Append</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="directoryInsertButton">
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>33</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Scan directories for likely data directories and insert them above the selected position</string>
+           </property>
+           <property name="text">
+            <string>Insert Above</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="directoryUpButton">
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>33</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Move selected directory one position up</string>
+           </property>
+           <property name="text">
+            <string>Move Up</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="directoryDownButton">
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>33</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Move selected directory one position down</string>
+           </property>
+           <property name="text">
+            <string>Move Down</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="directoryRemoveButton">
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>33</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Remove selected directory</string>
+           </property>
+           <property name="text">
+            <string>Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="directoryButtonsSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0" colspan="2">
         <widget class="QLabel" name="directoryNoteLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -61,116 +164,6 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="directoryAddSubdirsButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Scan directories for likely data directories and append them at the end of the list.</string>
-         </property>
-         <property name="text">
-          <string>Append</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QPushButton" name="directoryInsertButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Scan directories for likely data directories and insert them above the selected position</string>
-         </property>
-         <property name="text">
-          <string>Insert Above</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1">
-        <widget class="QPushButton" name="directoryUpButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Move selected directory one position up</string>
-         </property>
-         <property name="text">
-          <string>Move Up</string>
-         </property>
-        </widget>
-       </item>
-       <item row="12" column="1">
-        <widget class="QPushButton" name="directoryDownButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Move selected directory one position down</string>
-         </property>
-         <property name="text">
-          <string>Move Down</string>
-         </property>
-        </widget>
-       </item>
-       <item row="16" column="1">
-        <widget class="QPushButton" name="directoryRemoveButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Remove selected directory</string>
-         </property>
-         <property name="text">
-          <string>Remove</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="archiveTab">
@@ -178,61 +171,87 @@
        <string>Archive Files</string>
       </attribute>
       <layout class="QGridLayout" name="archiveTabLayout">
-       <item row="0" column="0" rowspan="26">
+       <item row="0" column="0">
         <widget class="QListWidget" name="archiveListWidget">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
          <property name="dragDropMode">
           <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::CopyAction</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QPushButton" name="archiveUpButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>33</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Move selected archive one position up</string>
-         </property>
-         <property name="text">
-          <string>Move Up</string>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="archiveButtons">
+         <item>
+          <widget class="QPushButton" name="archiveUpButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>33</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>33</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Move selected archive one position up</string>
+           </property>
+           <property name="text">
+            <string>Move Up</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="archiveDownButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>33</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>33</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Move selected archive one position down</string>
+           </property>
+           <property name="text">
+            <string>Move Down</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="archiveButtonsSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
-       <item row="27" column="0" colspan="2">
+       <item row="1" column="0" colspan="2">
         <widget class="QLabel" name="archiveNoteLabel">
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: archives that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="archiveDownButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>33</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>33</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Move selected archive one position down</string>
-         </property>
-         <property name="text">
-          <string>Move Down</string>
          </property>
         </widget>
        </item>
