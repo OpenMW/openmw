@@ -61,6 +61,7 @@
     Bug #7034: Misc items defined in one content file are not treated as keys if another content file uses them as such
     Bug #7042: Weapon follow animations that immediately follow the hit animations cause multiple hits
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
+    Bug #7053: Running into objects doesn't trigger GetCollidingPC
     Bug #7054: Quests aren't sorted by name
     Bug #7064: NPCs don't report crime if the player is casting offensive spells on them while sneaking
     Bug #7077: OpenMW fails to load certain particle effects in .osgt format
