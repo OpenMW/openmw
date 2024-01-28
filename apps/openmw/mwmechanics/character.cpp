@@ -2585,7 +2585,7 @@ namespace MWMechanics
         // if played with a count of 0, all objects play exactly once from start to stop.
         // But if the count is x > 0, actors and non-actors behave differently. actors will loop
         // exactly x times, while non-actors will loop x+1 instead.
-        if (mPtr.getClass().isActor())
+        if (mPtr.getClass().isActor() && count > 0)
             count--;
 
         AnimationQueueEntry entry;
