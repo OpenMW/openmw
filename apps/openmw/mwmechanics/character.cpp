@@ -2516,7 +2516,8 @@ namespace MWMechanics
             {
                 AnimationQueueEntry entry;
                 entry.mGroup = iter->mGroup;
-                entry.mLoopCount = iter->mLoopCount;
+                entry.mLoopCount
+                    = static_cast<uint32_t>(std::min<uint64_t>(iter->mLoopCount, std::numeric_limits<uint32_t>::max()));
                 entry.mLooping = mAnimation->isLoopingAnimation(entry.mGroup);
                 entry.mStartKey = "start";
                 entry.mStopKey = "stop";
@@ -2586,7 +2587,6 @@ namespace MWMechanics
         // exactly x times, while non-actors will loop x+1 instead.
         if (mPtr.getClass().isActor())
             count--;
-        count = std::max(count, 0u);
 
         AnimationQueueEntry entry;
         entry.mGroup = groupname;
@@ -2633,7 +2633,7 @@ namespace MWMechanics
         entry.mGroup = groupname;
         // Note: MWScript gives one less loop to actors than non-actors.
         // But this is the Lua version. We don't need to reproduce this weirdness here.
-        entry.mLoopCount = std::max(loops, 0u);
+        entry.mLoopCount = loops;
         entry.mStartKey = startKey;
         entry.mStopKey = stopKey;
         entry.mLooping = mAnimation->isLoopingAnimation(groupname) || forceLoop;
