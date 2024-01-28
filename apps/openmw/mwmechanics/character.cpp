@@ -2540,7 +2540,7 @@ namespace MWMechanics
 
     void CharacterController::playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority,
         int blendMask, bool autodisable, float speedmult, std::string_view start, std::string_view stop,
-        float startpoint, size_t loops, bool loopfallback) const
+        float startpoint, uint32_t loops, bool loopfallback) const
     {
         if (mLuaAnimations)
             MWBase::Environment::get().getLuaManager()->playAnimation(mPtr, groupname, priority, blendMask, autodisable,
