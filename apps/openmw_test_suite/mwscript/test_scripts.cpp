@@ -326,6 +326,8 @@ End)mwscript";
 Addtopic -spells...
 Addtopic -magicka...
 
+player->PositionCell, -97274, -94273, 8064, -12,-12
+
 End)mwscript";
 
     const std::string sIssue4061 = R"mwscript(Begin 01_Rz_neuvazhay-koryto2
@@ -763,7 +765,33 @@ End)mwscript";
                     mTopics.erase(mTopics.begin());
                 }
             };
+            class PositionCell : public Interpreter::Opcode0
+            {
+            public:
+                void execute(Interpreter::Runtime& runtime)
+                {
+                    std::string_view target = runtime.getStringLiteral(runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float x = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float y = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float z = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float zRot = runtime[0].mFloat;
+                    runtime.pop();
+                    std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
+                    runtime.pop();
+                    EXPECT_EQ(target, "player");
+                    EXPECT_EQ(x, -97274);
+                    EXPECT_EQ(y, -94273);
+                    EXPECT_EQ(z, 8064);
+                    EXPECT_EQ(zRot, -12);
+                    EXPECT_EQ(cellID, "-12");
+                }
+            };
             installOpcode<AddTopic>(Compiler::Dialogue::opcodeAddTopic, topics);
+            installOpcode<PositionCell>(Compiler::Transformation::opcodePositionCellExplicit);
             TestInterpreterContext context;
             run(*script, context);
             EXPECT_TRUE(topics.empty());
