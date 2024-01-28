@@ -174,6 +174,25 @@ namespace MWMechanics
         mWorsenings = -1;
     }
 
+    ESM::RefId ActiveSpells::ActiveSpellParams::getEnchantment() const
+    {
+        // Enchantment id is not stored directly. Instead the enchanted item is stored.
+        const auto& store = MWBase::Environment::get().getESMStore();
+        switch (store->find(mId))
+        {
+            case ESM::REC_ARMO:
+                return store->get<ESM::Armor>().find(mId)->mEnchant;
+            case ESM::REC_BOOK:
+                return store->get<ESM::Book>().find(mId)->mEnchant;
+            case ESM::REC_CLOT:
+                return store->get<ESM::Clothing>().find(mId)->mEnchant;
+            case ESM::REC_WEAP:
+                return store->get<ESM::Weapon>().find(mId)->mEnchant;
+            default:
+                return {};
+        }
+    }
+
     void ActiveSpells::update(const MWWorld::Ptr& ptr, float duration)
     {
         if (mIterating)
@@ -438,21 +457,8 @@ namespace MWMechanics
         if (store->get<ESM::Enchantment>().search(id) == nullptr)
             return false;
 
-        // Enchantment id is not stored directly. Instead the enchanted item is stored.
         return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) {
-            switch (store->find(spell.mId))
-            {
-                case ESM::REC_ARMO:
-                    return store->get<ESM::Armor>().find(spell.mId)->mEnchant == id;
-                case ESM::REC_BOOK:
-                    return store->get<ESM::Book>().find(spell.mId)->mEnchant == id;
-                case ESM::REC_CLOT:
-                    return store->get<ESM::Clothing>().find(spell.mId)->mEnchant == id;
-                case ESM::REC_WEAP:
-                    return store->get<ESM::Weapon>().find(spell.mId)->mEnchant == id;
-                default:
-                    return false;
-            }
+            return spell.getEnchantment() == id;
         }) != mSpells.end();
     }
 

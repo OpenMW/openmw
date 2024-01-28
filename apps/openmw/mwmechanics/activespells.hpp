@@ -73,6 +73,7 @@ namespace MWMechanics
             const std::string& getDisplayName() const { return mDisplayName; }
 
             ESM::RefNum getItem() const { return mItem; }
+            ESM::RefId getEnchantment() const;
 
             // Increments worsenings count and sets the next timestamp
             void worsen();
