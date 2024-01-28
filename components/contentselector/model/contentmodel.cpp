@@ -723,8 +723,10 @@ QString ContentSelectorModel::ContentModel::toolTip(const EsmFile* file) const
         int index = indexFromItem(item(file->filePath())).row();
         for (const LoadOrderError& error : checkForLoadOrderErrors(file, index))
         {
+            assert(error.errorCode() != LoadOrderError::ErrorCode::ErrorCode_None);
+
             text += "<p>";
-            text += error.toolTip();
+            text += mErrorToolTips[error.errorCode() - 1].arg(error.fileName());
             text += "</p>";
         }
         text += ("</b>");
