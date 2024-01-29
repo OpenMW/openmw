@@ -939,6 +939,7 @@
 -- @field #string name
 -- @field #string race
 -- @field #string class Name of the NPC's class (e. g. Acrobat)
+-- @field #string model Path to the model associated with this NPC, used for animations.
 -- @field #string mwscript MWScript that is attached to this NPC
 -- @field #string hair Path to the hair body part model
 -- @field #string head Path to the head body part model
