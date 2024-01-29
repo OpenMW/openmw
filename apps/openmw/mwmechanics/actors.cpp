@@ -606,8 +606,7 @@ namespace MWMechanics
 
         // Get actors allied with actor1. Includes those following or escorting actor1, actors following or escorting
         // those actors, (recursive) and any actor currently being followed or escorted by actor1
-        const std::set<MWWorld::Ptr> allies1 = cachedAllies.getActorsSidingWith(actor1);
-        const std::set<MWWorld::Ptr> allies2 = cachedAllies.getActorsSidingWith(actor2);
+        const std::set<MWWorld::Ptr>& allies1 = cachedAllies.getActorsSidingWith(actor1);
 
         const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
         // If an ally of actor1 has been attacked by actor2 or has attacked actor2, start combat between actor1 and
@@ -619,7 +618,7 @@ namespace MWMechanics
 
             if (creatureStats2.matchesActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId()))
             {
-                mechanicsManager->startCombat(actor1, actor2, &allies2);
+                mechanicsManager->startCombat(actor1, actor2, &cachedAllies.getActorsSidingWith(actor2));
                 // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
                 // if the player gets out of reach, while the ally would continue combat with the player
                 creatureStats1.setHitAttemptActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId());
@@ -644,6 +643,7 @@ namespace MWMechanics
             // Check that actor2 is in combat with actor1
             if (creatureStats2.getAiSequence().isInCombat(actor1))
             {
+                const std::set<MWWorld::Ptr>& allies2 = cachedAllies.getActorsSidingWith(actor2);
                 // Check that an ally of actor2 is also in combat with actor1
                 for (const MWWorld::Ptr& ally2 : allies2)
                 {
@@ -741,7 +741,7 @@ namespace MWMechanics
             bool LOS = world->getLOS(actor1, actor2) && mechanicsManager->awarenessCheck(actor2, actor1);
 
             if (LOS)
-                mechanicsManager->startCombat(actor1, actor2, &allies2);
+                mechanicsManager->startCombat(actor1, actor2, &cachedAllies.getActorsSidingWith(actor2));
         }
     }
 
