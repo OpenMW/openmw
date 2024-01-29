@@ -2083,7 +2083,7 @@ namespace MWMechanics
             for (const auto& package : stats.getAiSequence())
             {
                 if (excludeInfighting && !sameActor && package->getTypeId() == AiPackageTypeId::Combat
-                    && package->getTarget() == actorPtr)
+                    && package->targetIs(actorPtr))
                     break;
                 if (package->sideWithTarget() && !package->getTarget().isEmpty())
                 {
@@ -2103,7 +2103,7 @@ namespace MWMechanics
                         }
                         list.push_back(package->getTarget());
                     }
-                    else if (package->getTarget() == actorPtr)
+                    else if (package->targetIs(actorPtr))
                     {
                         list.push_back(iteratedActor);
                     }
@@ -2122,7 +2122,7 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> list;
         forEachFollowingPackage(
             mActors, actorPtr, getPlayer(), [&](const Actor& actor, const std::shared_ptr<AiPackage>& package) {
-                if (package->followTargetThroughDoors() && package->getTarget() == actorPtr)
+                if (package->followTargetThroughDoors() && package->targetIs(actorPtr))
                     list.push_back(actor.getPtr());
                 else if (package->getTypeId() != AiPackageTypeId::Combat
                     && package->getTypeId() != AiPackageTypeId::Wander)
@@ -2154,7 +2154,7 @@ namespace MWMechanics
         std::vector<int> list;
         forEachFollowingPackage(
             mActors, actor, getPlayer(), [&](const Actor&, const std::shared_ptr<AiPackage>& package) {
-                if (package->followTargetThroughDoors() && package->getTarget() == actor)
+                if (package->followTargetThroughDoors() && package->targetIs(actor))
                 {
                     list.push_back(static_cast<const AiFollow*>(package.get())->getFollowIndex());
                     return false;
@@ -2172,7 +2172,7 @@ namespace MWMechanics
         std::map<int, MWWorld::Ptr> map;
         forEachFollowingPackage(
             mActors, actor, getPlayer(), [&](const Actor& otherActor, const std::shared_ptr<AiPackage>& package) {
-                if (package->followTargetThroughDoors() && package->getTarget() == actor)
+                if (package->followTargetThroughDoors() && package->targetIs(actor))
                 {
                     const int index = static_cast<const AiFollow*>(package.get())->getFollowIndex();
                     map[index] = otherActor.getPtr();

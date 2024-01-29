@@ -176,11 +176,11 @@ namespace MWMechanics
         if (!isInCombat())
             return false;
 
-        for (auto it = mPackages.begin(); it != mPackages.end(); ++it)
+        for (const auto& package : mPackages)
         {
-            if ((*it)->getTypeId() == AiPackageTypeId::Combat)
+            if (package->getTypeId() == AiPackageTypeId::Combat)
             {
-                if ((*it)->getTarget() == actor)
+                if (package->targetIs(actor))
                     return true;
             }
         }
