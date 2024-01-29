@@ -57,12 +57,6 @@ namespace MWLua
             std::string mGroupname;
             std::string mKey;
         };
-        struct OnAnimationTextKey
-        {
-            ESM::RefNum mActor;
-            std::string mGroupname;
-            std::string mKey;
-        };
         struct OnSkillUse
         {
             ESM::RefNum mActor;

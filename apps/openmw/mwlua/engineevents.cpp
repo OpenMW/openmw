@@ -94,7 +94,7 @@ namespace MWLua
             if (auto* scripts = getLocalScripts(actor))
                 scripts->onAnimationTextKey(event.mGroupname, event.mKey);
         }
-        
+
         void operator()(const OnSkillUse& event) const
         {
             MWWorld::Ptr actor = getPtr(event.mActor);
