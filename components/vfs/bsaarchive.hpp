@@ -10,6 +10,8 @@
 #include <components/bsa/bsa_file.hpp>
 #include <components/bsa/compressedbsafile.hpp>
 
+#include <algorithm>
+
 namespace VFS
 {
     template <typename FileType>
@@ -44,7 +46,10 @@ namespace VFS
             for (Bsa::BSAFile::FileList::const_iterator it = filelist.begin(); it != filelist.end(); ++it)
             {
                 mResources.emplace_back(&*it, mFile.get());
+                mFiles.emplace_back(it->name());
             }
+
+            std::sort(mFiles.begin(), mFiles.end());
         }
 
         virtual ~BsaArchive() {}
@@ -57,12 +62,7 @@ namespace VFS
 
         bool contains(Path::NormalizedView file) const override
         {
-            for (const auto& it : mResources)
-            {
-                if (Path::pathEqual(file.value(), it.mInfo->name()))
-                    return true;
-            }
-            return false;
+            return std::binary_search(mFiles.begin(), mFiles.end(), file);
         }
 
         std::string getDescription() const override { return std::string{ "BSA: " } + mFile->getFilename(); }
@@ -70,6 +70,7 @@ namespace VFS
     private:
         std::unique_ptr<BSAFileType> mFile;
         std::vector<BsaArchiveFile<BSAFileType>> mResources;
+        std::vector<VFS::Path::Normalized> mFiles;
     };
 
     template <Bsa::BsaVersion>
