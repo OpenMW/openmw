@@ -116,7 +116,7 @@ namespace Gui
         }
     }
 
-    void SharedStateButton::createButtonGroup(ButtonGroup group)
+    void SharedStateButton::createButtonGroup(ButtonGroup& group)
     {
         for (ButtonGroup::iterator it = group.begin(); it != group.end(); ++it)
         {

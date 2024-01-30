@@ -10,10 +10,10 @@
 namespace MWPhysics
 {
     ClosestNotMeRayResultCallback::ClosestNotMeRayResultCallback(const btCollisionObject* me,
-        std::vector<const btCollisionObject*> targets, const btVector3& from, const btVector3& to)
+        const std::vector<const btCollisionObject*>& targets, const btVector3& from, const btVector3& to)
         : btCollisionWorld::ClosestRayResultCallback(from, to)
         , mMe(me)
-        , mTargets(std::move(targets))
+        , mTargets(targets)
     {
     }
 

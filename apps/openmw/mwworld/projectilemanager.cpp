@@ -188,7 +188,7 @@ namespace MWWorld
     };
 
     void ProjectileManager::createModel(State& state, const std::string& model, const osg::Vec3f& pos,
-        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture)
+        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, const std::string& texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
