@@ -186,16 +186,35 @@ namespace DetourNavigator
                 &context, solid, width, height, bmin.ptr(), bmax.ptr(), settings.mCellSize, settings.mCellHeight);
         }
 
+        bool isSupportedCoordinate(float value)
+        {
+            constexpr float maxVertexCoordinate = static_cast<float>(1 << 22);
+            return -maxVertexCoordinate < value && value < maxVertexCoordinate;
+        }
+
+        template <class Iterator>
+        bool isSupportedCoordinates(Iterator begin, Iterator end)
+        {
+            return std::all_of(begin, end, isSupportedCoordinate);
+        }
+
         [[nodiscard]] bool rasterizeTriangles(RecastContext& context, const Mesh& mesh, const RecastSettings& settings,
             const RecastParams& params, rcHeightfield& solid)
         {
             std::vector<unsigned char> areas(mesh.getAreaTypes().begin(), mesh.getAreaTypes().end());
             std::vector<float> vertices = mesh.getVertices();
 
-            for (std::size_t i = 0; i < vertices.size(); i += 3)
+            constexpr std::size_t verticesPerTriangle = 3;
+
+            for (std::size_t i = 0; i < vertices.size(); i += verticesPerTriangle)
             {
-                for (std::size_t j = 0; j < 3; ++j)
-                    vertices[i + j] = toNavMeshCoordinates(settings, vertices[i + j]);
+                for (std::size_t j = 0; j < verticesPerTriangle; ++j)
+                {
+                    const float coordinate = toNavMeshCoordinates(settings, vertices[i + j]);
+                    if (!isSupportedCoordinate(coordinate))
+                        return false;
+                    vertices[i + j] = coordinate;
+                }
                 std::swap(vertices[i + 1], vertices[i + 2]);
             }
 
@@ -216,6 +235,9 @@ namespace DetourNavigator
                 rectangle.mBounds.mMax.x(), rectangle.mHeight, rectangle.mBounds.mMax.y(), // vertex 2
                 rectangle.mBounds.mMax.x(), rectangle.mHeight, rectangle.mBounds.mMin.y(), // vertex 3
             };
+
+            if (!isSupportedCoordinates(vertices.begin(), vertices.end()))
+                return false;
 
             const std::array indices{
                 0, 1, 2, // triangle 0
