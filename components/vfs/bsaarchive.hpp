@@ -11,6 +11,8 @@
 #include <components/bsa/compressedbsafile.hpp>
 
 #include <algorithm>
+#include <memory>
+#include <stdexcept>
 
 namespace VFS
 {
@@ -73,34 +75,24 @@ namespace VFS
         std::vector<VFS::Path::Normalized> mFiles;
     };
 
-    template <Bsa::BsaVersion>
-    struct ArchiveSelector
+    inline std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
     {
-    };
+        switch (Bsa::BSAFile::detectVersion(path))
+        {
+            case Bsa::BSAVER_UNKNOWN:
+                break;
+            case Bsa::BSAVER_UNCOMPRESSED:
+                return std::make_unique<BsaArchive<Bsa::BSAFile>>(path);
+            case Bsa::BSAVER_COMPRESSED:
+                return std::make_unique<BsaArchive<Bsa::CompressedBSAFile>>(path);
+            case Bsa::BSAVER_BA2_GNRL:
+                return std::make_unique<BsaArchive<Bsa::BA2GNRLFile>>(path);
+            case Bsa::BSAVER_BA2_DX10:
+                return std::make_unique<BsaArchive<Bsa::BA2DX10File>>(path);
+        }
 
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_UNCOMPRESSED>
-    {
-        using type = BsaArchive<Bsa::BSAFile>;
-    };
-
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_COMPRESSED>
-    {
-        using type = BsaArchive<Bsa::CompressedBSAFile>;
-    };
-
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_BA2_GNRL>
-    {
-        using type = BsaArchive<Bsa::BA2GNRLFile>;
-    };
-
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_BA2_DX10>
-    {
-        using type = BsaArchive<Bsa::BA2DX10File>;
-    };
+        throw std::runtime_error("Unknown archive type '" + Files::pathToUnicodeString(path) + "'");
+    }
 }
 
 #endif
