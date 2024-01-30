@@ -325,25 +325,15 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
 {
     std::ifstream input(filePath, std::ios_base::binary);
 
-    // Total archive size
-    std::streamoff fsize = 0;
-    if (input.seekg(0, std::ios_base::end))
-    {
-        fsize = input.tellg();
-        input.seekg(0);
-    }
-
-    if (fsize < 12)
-    {
-        return BsaVersion::Unknown;
-    }
-
     // Get essential header numbers
 
     // First 12 bytes
     uint32_t head[3];
 
-    input.read(reinterpret_cast<char*>(head), 12);
+    input.read(reinterpret_cast<char*>(head), sizeof(head));
+
+    if (input.gcount() != sizeof(head))
+        return BsaVersion::Unknown;
 
     if (head[0] == static_cast<uint32_t>(BsaVersion::Uncompressed))
     {
