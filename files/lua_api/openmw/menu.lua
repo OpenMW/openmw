@@ -51,6 +51,7 @@
 -- @field #string playerName
 -- @field #string playerLevel
 -- @field #number timePlayed Gameplay time for this saved game. Note: available even with [time played](../modding/settings/saves.html#timeplayed) turned off
+-- @field #number creationTime Time at which the game was saved, as a timestamp in seconds. Can be passed as the second argument to `os.data`.
 -- @field #list<#string> contentFiles
 
 ---

@@ -89,6 +89,13 @@ namespace MWLua
                 sol::table contentFiles(lua, sol::create);
                 for (size_t i = 0; i < slot.mProfile.mContentFiles.size(); ++i)
                     contentFiles[i + 1] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
+
+                {
+                    auto system_time = std::chrono::system_clock::now()
+                        - (std::filesystem::file_time_type::clock::now() - slot.mTimeStamp);
+                    slotInfo["creationTime"] = std::chrono::duration<double>(system_time.time_since_epoch()).count();
+                }
+
                 slotInfo["contentFiles"] = contentFiles;
                 saves[slot.mPath.filename().string()] = slotInfo;
             }
