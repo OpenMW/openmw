@@ -69,7 +69,7 @@ Allowed options)");
         addOption("name,n", bpo::value<std::string>(), "Show only the record with this name.  Only affects dump mode.");
         addOption("plain,p",
             "Print contents of dialogs, books and scripts. "
-            "(skipped by default)"
+            "(skipped by default) "
             "Only affects dump mode.");
         addOption("quiet,q", "Suppress all record information. Useful for speed tests.");
         addOption("loadcells,C", "Browse through contents of all cells.");
@@ -390,7 +390,7 @@ namespace
 
                 if (!quiet && interested)
                 {
-                    std::cout << "\nRecord: " << n.toStringView() << " '" << record->getId() << "'\n"
+                    std::cout << "\nRecord: " << n.toStringView() << " " << record->getId() << "\n"
                               << "Record flags: " << recordFlags(record->getFlags()) << '\n';
                     record->print();
                 }
