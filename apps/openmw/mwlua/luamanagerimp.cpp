@@ -166,6 +166,10 @@ namespace MWLua
 
         mObjectLists.update();
 
+        for (auto scripts : mQueuedAutoStartedScripts)
+            scripts->addAutoStartedScripts();
+        mQueuedAutoStartedScripts.clear();
+
         std::erase_if(mActiveLocalScripts,
             [](const LocalScripts* l) { return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().mRef->isDeleted(); });
 
@@ -343,7 +347,7 @@ namespace MWLua
         if (!localScripts)
         {
             localScripts = createLocalScripts(ptr);
-            localScripts->addAutoStartedScripts();
+            mQueuedAutoStartedScripts.push_back(localScripts);
         }
         mActiveLocalScripts.insert(localScripts);
         mEngineEvents.addToQueue(EngineEvents::OnActive{ getId(ptr) });
@@ -459,7 +463,7 @@ namespace MWLua
             if (!autoStartConf.empty())
             {
                 localScripts = createLocalScripts(ptr, std::move(autoStartConf));
-                localScripts->addAutoStartedScripts(); // TODO: put to a queue and apply on next `update()`
+                mQueuedAutoStartedScripts.push_back(localScripts);
             }
         }
         if (localScripts)
