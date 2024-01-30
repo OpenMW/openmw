@@ -79,15 +79,15 @@ namespace VFS
     {
         switch (Bsa::BSAFile::detectVersion(path))
         {
-            case Bsa::BSAVER_UNKNOWN:
+            case Bsa::BsaVersion::Unknown:
                 break;
-            case Bsa::BSAVER_UNCOMPRESSED:
+            case Bsa::BsaVersion::Uncompressed:
                 return std::make_unique<BsaArchive<Bsa::BSAFile>>(path);
-            case Bsa::BSAVER_COMPRESSED:
+            case Bsa::BsaVersion::Compressed:
                 return std::make_unique<BsaArchive<Bsa::CompressedBSAFile>>(path);
-            case Bsa::BSAVER_BA2_GNRL:
+            case Bsa::BsaVersion::BA2GNRL:
                 return std::make_unique<BsaArchive<Bsa::BA2GNRLFile>>(path);
-            case Bsa::BSAVER_BA2_DX10:
+            case Bsa::BsaVersion::BA2DX10:
                 return std::make_unique<BsaArchive<Bsa::BA2DX10File>>(path);
         }
 

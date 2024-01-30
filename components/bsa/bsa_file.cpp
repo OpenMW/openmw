@@ -335,7 +335,7 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
 
     if (fsize < 12)
     {
-        return BSAVER_UNKNOWN;
+        return BsaVersion::Unknown;
     }
 
     // Get essential header numbers
@@ -345,23 +345,23 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
 
     input.read(reinterpret_cast<char*>(head), 12);
 
-    if (head[0] == static_cast<uint32_t>(BSAVER_UNCOMPRESSED))
+    if (head[0] == static_cast<uint32_t>(BsaVersion::Uncompressed))
     {
-        return BSAVER_UNCOMPRESSED;
+        return BsaVersion::Uncompressed;
     }
 
-    if (head[0] == static_cast<uint32_t>(BSAVER_COMPRESSED) || head[0] == ESM::fourCC("BTDX"))
+    if (head[0] == static_cast<uint32_t>(BsaVersion::Compressed) || head[0] == ESM::fourCC("BTDX"))
     {
         if (head[1] == static_cast<uint32_t>(0x01))
         {
             if (head[2] == ESM::fourCC("GNRL"))
-                return BSAVER_BA2_GNRL;
+                return BsaVersion::BA2GNRL;
             if (head[2] == ESM::fourCC("DX10"))
-                return BSAVER_BA2_DX10;
-            return BSAVER_UNKNOWN;
+                return BsaVersion::BA2DX10;
+            return BsaVersion::Unknown;
         }
-        return BSAVER_COMPRESSED;
+        return BsaVersion::Compressed;
     }
 
-    return BSAVER_UNKNOWN;
+    return BsaVersion::Unknown;
 }

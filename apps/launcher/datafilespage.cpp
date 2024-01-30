@@ -819,7 +819,7 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
     for (const auto& fileinfo : dir.entryInfoList(archiveFilter))
     {
         const auto absPath = fileinfo.absoluteFilePath();
-        if (Bsa::BSAFile::detectVersion(Files::pathFromQString(absPath)) == Bsa::BSAVER_UNKNOWN)
+        if (Bsa::BSAFile::detectVersion(Files::pathFromQString(absPath)) == Bsa::BsaVersion::Unknown)
             continue;
 
         const auto fileName = fileinfo.fileName();
