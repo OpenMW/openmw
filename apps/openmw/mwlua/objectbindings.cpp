@@ -215,7 +215,7 @@ namespace MWLua
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
             objectT["globalVariable"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<std::string> {
-                std::string globalVariable = o.ptr().getCellRef().getGlobalVariable();
+                std::string_view globalVariable = o.ptr().getCellRef().getGlobalVariable();
                 if (globalVariable.empty())
                     return sol::nullopt;
                 else
@@ -619,7 +619,7 @@ namespace MWLua
             inventoryT["countOf"] = [](const InventoryT& inventory, std::string_view recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                return store.count(ESM::RefId::stringRefId(recordId));
+                return store.count(ESM::RefId::deserializeText(recordId));
             };
             if constexpr (std::is_same_v<ObjectT, GObject>)
             {
@@ -637,7 +637,7 @@ namespace MWLua
             inventoryT["find"] = [](const InventoryT& inventory, std::string_view recordId) -> sol::optional<ObjectT> {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                auto itemId = ESM::RefId::stringRefId(recordId);
+                auto itemId = ESM::RefId::deserializeText(recordId);
                 for (const MWWorld::Ptr& item : store)
                 {
                     if (item.getCellRef().getRefId() == itemId)
@@ -651,7 +651,7 @@ namespace MWLua
             inventoryT["findAll"] = [](const InventoryT& inventory, std::string_view recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                auto itemId = ESM::RefId::stringRefId(recordId);
+                auto itemId = ESM::RefId::deserializeText(recordId);
                 ObjectIdList list = std::make_shared<std::vector<ObjectId>>();
                 for (const MWWorld::Ptr& item : store)
                 {
