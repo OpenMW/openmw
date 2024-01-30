@@ -449,9 +449,12 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 {
     try
     {
-        // let menu scripts do cleanup
-        mState = State_Ended;
-        MWBase::Environment::get().getLuaManager()->gameEnded();
+        if (mState != State_Ended)
+        {
+            // let menu scripts do cleanup
+            mState = State_Ended;
+            MWBase::Environment::get().getLuaManager()->gameEnded();
+        }
 
         cleanup();
 
