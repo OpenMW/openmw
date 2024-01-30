@@ -82,7 +82,8 @@ namespace MWLua
         void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) override;
         void playAnimation(const MWWorld::Ptr& actor, const std::string& groupname,
             const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
-            std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback) override;
+            std::string_view start, std::string_view stop, float startpoint, uint32_t loops,
+            bool loopfallback) override;
         void exteriorCreated(MWWorld::CellStore& cell) override
         {
             mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });

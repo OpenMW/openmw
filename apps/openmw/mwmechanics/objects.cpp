@@ -99,7 +99,7 @@ namespace MWMechanics
     }
 
     bool Objects::playAnimationGroup(
-        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted)
+        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number, bool scripted)
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
@@ -114,8 +114,8 @@ namespace MWMechanics
         }
     }
 
-    bool Objects::playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
-        std::string_view startKey, std::string_view stopKey, bool forceLoop)
+    bool Objects::playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops,
+        float speed, std::string_view startKey, std::string_view stopKey, bool forceLoop)
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())

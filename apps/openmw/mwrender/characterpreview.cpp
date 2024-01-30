@@ -464,7 +464,7 @@ namespace MWRender
         {
             if (!mAnimation->getInfo("torch"))
                 mAnimation->play(
-                    "torch", 2, BlendMask::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f, ~0ul, true);
+                    "torch", 2, BlendMask::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f, std::numeric_limits<uint32_t>::max(), true);
         }
         else if (mAnimation->getInfo("torch"))
             mAnimation->disable("torch");

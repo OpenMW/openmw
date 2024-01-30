@@ -112,9 +112,9 @@ namespace MWMechanics
 
         void forceStateUpdate(const MWWorld::Ptr& ptr) const;
 
-        bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false) const;
-        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
+        bool playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number,
+            bool scripted = false) const;
+        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops, float speed,
             std::string_view startKey, std::string_view stopKey, bool forceLoop);
         void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable);
         void skipAnimation(const MWWorld::Ptr& ptr) const;
