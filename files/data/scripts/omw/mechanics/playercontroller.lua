@@ -68,9 +68,7 @@ local function skillLevelUpHandler(skillid, source, params)
 
     ambient.playSound("skillraise")
 
-    local message = core.getGMST('sNotifyMessage39')
-    message = message:gsub("%%s", skillRecord.name)
-    message = message:gsub("%%d", tostring(skillStat.base))
+    local message = string.format(core.getGMST('sNotifyMessage39'),skillRecord.name,skillStat.base)
 
     if source == I.SkillProgression.SKILL_INCREASE_SOURCES.Book then
         message = '#{sBookSkillMessage}\n'..message

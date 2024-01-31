@@ -212,7 +212,7 @@ return {
             skillUsedHandlers[#skillUsedHandlers + 1] = handler
         end,
         
-        --- Register a skill use, activating relevant handlers
+        --- Trigger a skill use, activating relevant handlers
         -- @function [parent=#SkillProgression] skillUsed
         -- @param #string skillid The if of the skill that was used
         -- @param #SkillUseType useType A number from 0 to 3 (inclusive) representing the way the skill was used, with each use type having a different skill progression rate. Available use types and its effect is skill specific. See @{SkillProgression#skillUseType}
@@ -250,9 +250,9 @@ return {
             Athletics_SwimOneSecond = 0,
         },
         
-        --- Register a skill increase, activating relevant handlers
-        -- @function [parent=#SkillProgression] skillUsed
-        -- @param #string skillid The id of the skill to be increased.
+        --- Trigger a skill level up, activating relevant handlers
+        -- @function [parent=#SkillProgression] skillLevelUp
+        -- @param #string skillid The id of the skill to level up.
         -- @param #SkillLevelUpSource source The source of the skill increase.
         skillLevelUp = skillLevelUp,
         
