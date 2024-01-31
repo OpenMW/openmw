@@ -274,8 +274,6 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         mContentFiles = contentFiles;
-        if (encoder)
-            mReaders.setStatelessEncoder(encoder->getStatelessEncoder());
         mESMVersions.resize(mContentFiles.size(), -1);
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
