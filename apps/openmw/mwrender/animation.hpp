@@ -153,7 +153,7 @@ namespace MWRender
 
             bool mPlaying;
             bool mLoopingEnabled;
-            size_t mLoopCount;
+            uint32_t mLoopCount;
 
             AnimPriority mPriority;
             int mBlendMask;
@@ -379,7 +379,7 @@ namespace MWRender
          *                     the "start" and "stop" keys for looping?
          */
         void play(std::string_view groupname, const AnimPriority& priority, int blendMask, bool autodisable,
-            float speedmult, std::string_view start, std::string_view stop, float startpoint, size_t loops,
+            float speedmult, std::string_view start, std::string_view stop, float startpoint, uint32_t loops,
             bool loopfallback = false);
 
         /** Adjust the speed multiplier of an already playing animation.

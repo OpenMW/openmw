@@ -483,7 +483,8 @@ namespace MWMechanics
             return;
         }
 
-        playBlendedAnimation(mCurrentHit, priority, MWRender::BlendMask_All, true, 1, startKey, stopKey, 0.0f, ~0ul);
+        playBlendedAnimation(mCurrentHit, priority, MWRender::BlendMask_All, true, 1, startKey, stopKey, 0.0f,
+            std::numeric_limits<uint32_t>::max());
     }
 
     void CharacterController::refreshJumpAnims(JumpingState jump, bool force)
@@ -521,7 +522,7 @@ namespace MWMechanics
         mCurrentJump = jumpAnimName;
         if (mJumpState == JumpState_InAir)
             playBlendedAnimation(jumpAnimName, Priority_Jump, jumpmask, false, 1.0f,
-                startAtLoop ? "loop start" : "start", "stop", 0.f, ~0ul);
+                startAtLoop ? "loop start" : "start", "stop", 0.f, std::numeric_limits<uint32_t>::max());
         else if (mJumpState == JumpState_Landing)
             playBlendedAnimation(jumpAnimName, Priority_Jump, jumpmask, true, 1.0f, "loop stop", "stop", 0.0f, 0);
     }
@@ -749,8 +750,8 @@ namespace MWMechanics
             }
         }
 
-        playBlendedAnimation(
-            mCurrentMovement, Priority_Movement, movemask, false, 1.f, "start", "stop", startpoint, ~0ul, true);
+        playBlendedAnimation(mCurrentMovement, Priority_Movement, movemask, false, 1.f, "start", "stop", startpoint,
+            std::numeric_limits<uint32_t>::max(), true);
     }
 
     void CharacterController::refreshIdleAnims(CharacterState idle, bool force)
@@ -778,7 +779,7 @@ namespace MWMechanics
         }
 
         MWRender::Animation::AnimPriority priority = getIdlePriority(mIdleState);
-        size_t numLoops = std::numeric_limits<size_t>::max();
+        size_t numLoops = std::numeric_limits<uint32_t>::max();
 
         // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
         // "idle"+weapon or "idle".
@@ -1192,8 +1193,8 @@ namespace MWMechanics
                 if (!animPlaying)
                 {
                     int mask = MWRender::BlendMask_Torso | MWRender::BlendMask_RightArm;
-                    playBlendedAnimation(
-                        "idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul, true);
+                    playBlendedAnimation("idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f,
+                        std::numeric_limits<uint32_t>::max(), true);
                 }
                 else
                 {
@@ -1326,7 +1327,7 @@ namespace MWMechanics
                     mAnimation->disable("shield");
 
                 playBlendedAnimation("torch", Priority_Torch, MWRender::BlendMask_LeftArm, false, 1.0f, "start", "stop",
-                    0.0f, std::numeric_limits<size_t>::max(), true);
+                    0.0f, std::numeric_limits<uint32_t>::max(), true);
             }
             else if (mAnimation->isPlaying("torch"))
             {
@@ -2515,7 +2516,8 @@ namespace MWMechanics
             {
                 AnimationQueueEntry entry;
                 entry.mGroup = iter->mGroup;
-                entry.mLoopCount = iter->mLoopCount;
+                entry.mLoopCount
+                    = static_cast<uint32_t>(std::min<uint64_t>(iter->mLoopCount, std::numeric_limits<uint32_t>::max()));
                 entry.mLooping = mAnimation->isLoopingAnimation(entry.mGroup);
                 entry.mStartKey = "start";
                 entry.mStopKey = "stop";
@@ -2538,7 +2540,7 @@ namespace MWMechanics
 
     void CharacterController::playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority,
         int blendMask, bool autodisable, float speedmult, std::string_view start, std::string_view stop,
-        float startpoint, size_t loops, bool loopfallback) const
+        float startpoint, uint32_t loops, bool loopfallback) const
     {
         if (mLuaAnimations)
             MWBase::Environment::get().getLuaManager()->playAnimation(mPtr, groupname, priority, blendMask, autodisable,
@@ -2548,7 +2550,7 @@ namespace MWMechanics
                 groupname, priority, blendMask, autodisable, speedmult, start, stop, startpoint, loops, loopfallback);
     }
 
-    bool CharacterController::playGroup(std::string_view groupname, int mode, int count, bool scripted)
+    bool CharacterController::playGroup(std::string_view groupname, int mode, uint32_t count, bool scripted)
     {
         if (!mAnimation || !mAnimation->hasAnimation(groupname))
             return false;
@@ -2583,9 +2585,8 @@ namespace MWMechanics
         // if played with a count of 0, all objects play exactly once from start to stop.
         // But if the count is x > 0, actors and non-actors behave differently. actors will loop
         // exactly x times, while non-actors will loop x+1 instead.
-        if (mPtr.getClass().isActor())
+        if (mPtr.getClass().isActor() && count > 0)
             count--;
-        count = std::max(count, 0);
 
         AnimationQueueEntry entry;
         entry.mGroup = groupname;
@@ -2620,7 +2621,7 @@ namespace MWMechanics
     }
 
     bool CharacterController::playGroupLua(std::string_view groupname, float speed, std::string_view startKey,
-        std::string_view stopKey, int loops, bool forceLoop)
+        std::string_view stopKey, uint32_t loops, bool forceLoop)
     {
         // Note: In mwscript, "idle" is a special case used to clear the anim queue.
         // In lua we offer an explicit clear method instead so this method does not treat "idle" special.
@@ -2632,7 +2633,7 @@ namespace MWMechanics
         entry.mGroup = groupname;
         // Note: MWScript gives one less loop to actors than non-actors.
         // But this is the Lua version. We don't need to reproduce this weirdness here.
-        entry.mLoopCount = std::max(loops, 0);
+        entry.mLoopCount = loops;
         entry.mStartKey = startKey;
         entry.mStopKey = stopKey;
         entry.mLooping = mAnimation->isLoopingAnimation(groupname) || forceLoop;

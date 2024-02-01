@@ -464,7 +464,8 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 
@@ -516,7 +517,8 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
         std::cout << "  Icon: " << mData.mIcon << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Type: " << apparatusTypeLabel(mData.mData.mType) << " (" << mData.mData.mType << ")"
                   << std::endl;
         std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
@@ -679,7 +681,8 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Flags: " << creatureFlags((int)mData.mFlags) << std::endl;
         std::cout << "  Blood Type: " << mData.mBloodType + 1 << std::endl;
         std::cout << "  Original: " << mData.mOriginal << std::endl;
@@ -747,7 +750,8 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  OpenSound: " << mData.mOpenSound << std::endl;
         std::cout << "  CloseSound: " << mData.mCloseSound << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
@@ -1338,28 +1342,26 @@ namespace EsmTool
     template <>
     void Record<CellState>::print()
     {
-        std::cout << "  Id:" << std::endl;
-        std::cout << "    CellId: " << mData.mCellState.mId << std::endl;
-        std::cout << "    Index:" << std::endl;
-        std::cout << "  WaterLevel: " << mData.mCellState.mWaterLevel << std::endl;
-        std::cout << "  HasFogOfWar: " << mData.mCellState.mHasFogOfWar << std::endl;
-        std::cout << "  LastRespawn:" << std::endl;
+        std::cout << "  Cell Id: \"" << mData.mCellState.mId.toString() << "\"" << std::endl;
+        std::cout << "  Water Level: " << mData.mCellState.mWaterLevel << std::endl;
+        std::cout << "  Has Fog Of War: " << mData.mCellState.mHasFogOfWar << std::endl;
+        std::cout << "  Last Respawn:" << std::endl;
         std::cout << "    Day:" << mData.mCellState.mLastRespawn.mDay << std::endl;
         std::cout << "    Hour:" << mData.mCellState.mLastRespawn.mHour << std::endl;
         if (mData.mCellState.mHasFogOfWar)
         {
-            std::cout << "  NorthMarkerAngle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
+            std::cout << "  North Marker Angle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
             std::cout << "  Bounds:" << std::endl;
-            std::cout << "    MinX: " << mData.mFogState.mBounds.mMinX << std::endl;
-            std::cout << "    MinY: " << mData.mFogState.mBounds.mMinY << std::endl;
-            std::cout << "    MaxX: " << mData.mFogState.mBounds.mMaxX << std::endl;
-            std::cout << "    MaxY: " << mData.mFogState.mBounds.mMaxY << std::endl;
+            std::cout << "    Min X: " << mData.mFogState.mBounds.mMinX << std::endl;
+            std::cout << "    Min Y: " << mData.mFogState.mBounds.mMinY << std::endl;
+            std::cout << "    Max X: " << mData.mFogState.mBounds.mMaxX << std::endl;
+            std::cout << "    Max Y: " << mData.mFogState.mBounds.mMaxY << std::endl;
             for (const ESM::FogTexture& fogTexture : mData.mFogState.mFogTextures)
             {
-                std::cout << "  FogTexture:" << std::endl;
+                std::cout << "  Fog Texture:" << std::endl;
                 std::cout << "    X: " << fogTexture.mX << std::endl;
                 std::cout << "    Y: " << fogTexture.mY << std::endl;
-                std::cout << "    ImageData: (" << fogTexture.mImageData.size() << ")" << std::endl;
+                std::cout << "    Image Data: (" << fogTexture.mImageData.size() << ")" << std::endl;
             }
         }
     }
@@ -1367,7 +1369,7 @@ namespace EsmTool
     template <>
     std::string Record<ESM::Cell>::getId() const
     {
-        return mData.mName;
+        return std::string(); // No ID for Cell record
     }
 
     template <>
@@ -1397,9 +1399,7 @@ namespace EsmTool
     template <>
     std::string Record<CellState>::getId() const
     {
-        std::ostringstream stream;
-        stream << mData.mCellState.mId;
-        return stream.str();
+        return std::string(); // No ID for CellState record
     }
 
 } // end namespace

@@ -417,7 +417,7 @@ namespace MWLua
 
     void LuaManager::playAnimation(const MWWorld::Ptr& actor, const std::string& groupname,
         const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
-        std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback)
+        std::string_view start, std::string_view stop, float startpoint, uint32_t loops, bool loopfallback)
     {
         sol::table options = mLua.newTable();
         options["blendmask"] = blendMask;

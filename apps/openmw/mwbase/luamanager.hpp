@@ -65,7 +65,7 @@ namespace MWBase
         virtual void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) = 0;
         virtual void playAnimation(const MWWorld::Ptr& object, const std::string& groupname,
             const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
-            std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback)
+            std::string_view start, std::string_view stop, float startpoint, uint32_t loops, bool loopfallback)
             = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
         virtual void actorDied(const MWWorld::Ptr& actor) = 0;

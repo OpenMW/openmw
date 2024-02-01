@@ -274,8 +274,6 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         mContentFiles = contentFiles;
-        if (encoder)
-            mReaders.setStatelessEncoder(encoder->getStatelessEncoder());
         mESMVersions.resize(mContentFiles.size(), -1);
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
@@ -2429,15 +2427,12 @@ namespace MWWorld
 
     bool World::getPlayerCollidingWith(const MWWorld::ConstPtr& object)
     {
-        MWWorld::Ptr player = getPlayerPtr();
-        return mPhysics->isActorCollidingWith(player, object);
+        return mPhysics->isObjectCollidingWith(object, MWPhysics::ScriptedCollisionType_Player);
     }
 
     bool World::getActorCollidingWith(const MWWorld::ConstPtr& object)
     {
-        std::vector<MWWorld::Ptr> actors;
-        mPhysics->getActorsCollidingWith(object, actors);
-        return !actors.empty();
+        return mPhysics->isObjectCollidingWith(object, MWPhysics::ScriptedCollisionType_Actor);
     }
 
     void World::hurtStandingActors(const ConstPtr& object, float healthPerSecond)

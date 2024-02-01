@@ -93,6 +93,10 @@ namespace ContentSelectorModel
         QIcon mWarningIcon;
         bool mShowOMWScripts;
 
+        QString mErrorToolTips[ContentSelectorModel::LoadOrderError::ErrorCode_LoadOrder]
+            = { tr("Unable to find dependent file: %1"), tr("Dependent file needs to be active: %1"),
+                  tr("This file needs to load after %1") };
+
     public:
         QString mMimeType;
         QStringList mMimeTypes;

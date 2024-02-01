@@ -3,7 +3,9 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QList>
 #include <QMessageBox>
+#include <QPair>
 #include <QPushButton>
 
 #include <algorithm>
@@ -162,8 +164,8 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     connect(ui.directoryUpButton, &QPushButton::released, this, [this]() { this->moveDirectory(-1); });
     connect(ui.directoryDownButton, &QPushButton::released, this, [this]() { this->moveDirectory(1); });
     connect(ui.directoryRemoveButton, &QPushButton::released, this, [this]() { this->removeDirectory(); });
-    connect(ui.archiveUpButton, &QPushButton::released, this, [this]() { this->moveArchive(-1); });
-    connect(ui.archiveDownButton, &QPushButton::released, this, [this]() { this->moveArchive(1); });
+    connect(ui.archiveUpButton, &QPushButton::released, this, [this]() { this->moveArchives(-1); });
+    connect(ui.archiveDownButton, &QPushButton::released, this, [this]() { this->moveArchives(1); });
     connect(
         ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, [this]() { this->sortDirectories(); });
 
@@ -218,6 +220,18 @@ void Launcher::DataFilesPage::buildView()
         &DataFilesPage::readNavMeshToolStderr);
     connect(mNavMeshToolInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
         &DataFilesPage::navMeshToolFinished);
+
+    buildArchiveContextMenu();
+}
+
+void Launcher::DataFilesPage::buildArchiveContextMenu()
+{
+    connect(ui.archiveListWidget, &QListWidget::customContextMenuRequested, this,
+        &DataFilesPage::slotShowArchiveContextMenu);
+
+    mArchiveContextMenu = new QMenu(ui.archiveListWidget);
+    mArchiveContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
+    mArchiveContextMenu->addAction(tr("&Uncheck Selected"), this, SLOT(slotUncheckMultiSelectedItems()));
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -707,17 +721,71 @@ void Launcher::DataFilesPage::removeDirectory()
     refreshDataFilesView();
 }
 
-void Launcher::DataFilesPage::moveArchive(int step)
+void Launcher::DataFilesPage::slotShowArchiveContextMenu(const QPoint& pos)
 {
-    int selectedRow = ui.archiveListWidget->currentRow();
+    QPoint globalPos = ui.archiveListWidget->viewport()->mapToGlobal(pos);
+    mArchiveContextMenu->exec(globalPos);
+}
+
+void Launcher::DataFilesPage::setCheckStateForMultiSelectedItems(bool checked)
+{
+    Qt::CheckState checkState = checked ? Qt::Checked : Qt::Unchecked;
+
+    for (QListWidgetItem* selectedItem : ui.archiveListWidget->selectedItems())
+    {
+        selectedItem->setCheckState(checkState);
+    }
+}
+
+void Launcher::DataFilesPage::slotUncheckMultiSelectedItems()
+{
+    setCheckStateForMultiSelectedItems(false);
+}
+
+void Launcher::DataFilesPage::slotCheckMultiSelectedItems()
+{
+    setCheckStateForMultiSelectedItems(true);
+}
+
+void Launcher::DataFilesPage::moveArchives(int step)
+{
+    QList<QListWidgetItem*> selectedItems = ui.archiveListWidget->selectedItems();
+    QList<QPair<int, QListWidgetItem*>> sortedItems;
+
+    for (QListWidgetItem* selectedItem : selectedItems)
+    {
+        int selectedRow = ui.archiveListWidget->row(selectedItem);
+        sortedItems.append(qMakePair(selectedRow, selectedItem));
+    }
+
+    if (step > 0)
+    {
+        std::sort(sortedItems.begin(), sortedItems.end(), [](auto a, auto b) { return a.first > b.first; });
+    }
+    else
+    {
+        std::sort(sortedItems.begin(), sortedItems.end(), [](auto a, auto b) { return a.first < b.first; });
+    }
+
+    for (auto i : sortedItems)
+    {
+        if (!moveArchive(i.second, step))
+            break;
+    }
+}
+
+bool Launcher::DataFilesPage::moveArchive(QListWidgetItem* listItem, int step)
+{
+    int selectedRow = ui.archiveListWidget->row(listItem);
     int newRow = selectedRow + step;
     if (selectedRow == -1 || newRow < 0 || newRow > ui.archiveListWidget->count() - 1)
-        return;
+        return false;
 
-    const auto* item = ui.archiveListWidget->takeItem(selectedRow);
+    const QListWidgetItem* item = ui.archiveListWidget->takeItem(selectedRow);
 
     addArchive(item->text(), item->checkState(), newRow);
     ui.archiveListWidget->setCurrentRow(newRow);
+    return true;
 }
 
 void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState selected, int row)

@@ -249,7 +249,7 @@ namespace MWLua
         // Extended variant of MWScript's PlayGroup and LoopGroup
         api["playQueued"] = sol::overload(
             [mechanics](const sol::object& object, const std::string& groupname, const sol::table& options) {
-                int numberOfLoops = options.get_or("loops", std::numeric_limits<int>::max());
+                uint32_t numberOfLoops = options.get_or("loops", std::numeric_limits<uint32_t>::max());
                 float speed = options.get_or("speed", 1.f);
                 std::string startKey = options.get_or<std::string>("startkey", "start");
                 std::string stopKey = options.get_or<std::string>("stopkey", "stop");
@@ -265,7 +265,7 @@ namespace MWLua
             });
 
         api["playBlended"] = [](const sol::object& object, std::string_view groupname, const sol::table& options) {
-            int loops = options.get_or("loops", 0);
+            uint32_t loops = options.get_or("loops", 0u);
             MWRender::Animation::AnimPriority priority = getPriorityArgument(options);
             BlendMask blendMask = options.get_or("blendmask", BlendMask::BlendMask_All);
             bool autoDisable = options.get_or("autodisable", true);

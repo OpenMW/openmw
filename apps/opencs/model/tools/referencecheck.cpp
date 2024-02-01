@@ -18,16 +18,18 @@
 #include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/esm3/cellref.hpp>
+#include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadfact.hpp>
 
 CSMTools::ReferenceCheckStage::ReferenceCheckStage(const CSMWorld::RefCollection& references,
     const CSMWorld::RefIdCollection& referencables, const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-    const CSMWorld::IdCollection<ESM::Faction>& factions)
+    const CSMWorld::IdCollection<ESM::Faction>& factions, const CSMWorld::IdCollection<ESM::BodyPart>& bodyparts)
     : mReferences(references)
     , mObjects(referencables)
     , mDataSet(referencables.getDataSet())
     , mCells(cells)
     , mFactions(factions)
+    , mBodyParts(bodyparts)
 {
     mIgnoreBaseRecords = false;
 }
@@ -49,9 +51,11 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     else
     {
         // Check for non existing referenced object
-        if (mObjects.searchId(cellRef.mRefID) == -1)
+        if (mObjects.searchId(cellRef.mRefID) == -1 && mBodyParts.searchId(cellRef.mRefID) == -1)
+        {
             messages.add(id, "Instance of a non-existent object '" + cellRef.mRefID.getRefIdString() + "'", "",
                 CSMDoc::Message::Severity_Error);
+        }
         else
         {
             // Check if reference charge is valid for it's proper referenced type

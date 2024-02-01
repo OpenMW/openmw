@@ -15,6 +15,7 @@
 #include "collisiontype.hpp"
 #include "constants.hpp"
 #include "contacttestwrapper.h"
+#include "object.hpp"
 #include "physicssystem.hpp"
 #include "projectile.hpp"
 #include "projectileconvexcallback.hpp"
@@ -243,11 +244,20 @@ namespace MWPhysics
             float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + actor.mHalfExtentsZ;
             osg::Vec3f oldPosition = newPosition;
             bool usedStepLogic = false;
-            if (hitHeight < Constants::sStepSizeUp && !isActor(tracer.mHitObject))
+            if (!isActor(tracer.mHitObject))
             {
-                // Try to step up onto it.
-                // NOTE: this modifies newPosition and velocity on its own if successful
-                usedStepLogic = stepper.step(newPosition, velocity, remainingTime, seenGround, iterations == 0);
+                if (hitHeight < Constants::sStepSizeUp)
+                {
+                    // Try to step up onto it.
+                    // NOTE: this modifies newPosition and velocity on its own if successful
+                    usedStepLogic = stepper.step(newPosition, velocity, remainingTime, seenGround, iterations == 0);
+                }
+                auto* ptrHolder = static_cast<PtrHolder*>(tracer.mHitObject->getUserPointer());
+                if (Object* hitObject = dynamic_cast<Object*>(ptrHolder))
+                {
+                    hitObject->addCollision(
+                        actor.mIsPlayer ? ScriptedCollisionType_Player : ScriptedCollisionType_Actor);
+                }
             }
             if (usedStepLogic)
             {

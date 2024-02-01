@@ -165,6 +165,7 @@ namespace MWRender
         int mDay;
         int mMonth;
 
+        bool mTimescaleClouds;
         float mCloudAnimationTimer;
 
         float mRainTimer;

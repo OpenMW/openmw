@@ -61,6 +61,7 @@
     Bug #7034: Misc items defined in one content file are not treated as keys if another content file uses them as such
     Bug #7042: Weapon follow animations that immediately follow the hit animations cause multiple hits
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
+    Bug #7053: Running into objects doesn't trigger GetCollidingPC
     Bug #7054: Quests aren't sorted by name
     Bug #7064: NPCs don't report crime if the player is casting offensive spells on them while sneaking
     Bug #7077: OpenMW fails to load certain particle effects in .osgt format
@@ -133,6 +134,8 @@
     Bug #7765: OpenMW-CS: Touch Record option is broken
     Bug #7770: Sword of the Perithia: Script execution failure
     Bug #7780: Non-ASCII texture paths in NIF files don't work
+    Bug #7785: OpenMW-CS initialising Skill and Attribute fields to 0 instead of -1 on non-FortifyStat spells
+    Bug #7796: Absorbed enchantments don't restore magicka
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
@@ -166,6 +169,7 @@
     Feature #7546: Start the game on Fredas
     Feature #7554: Controller binding for tab for menu navigation
     Feature #7568: Uninterruptable scripted music
+    Feature #7606: Launcher: allow Shift-select in Archives tab
     Feature #7608: Make the missing dependencies warning when loading a savegame more helpful
     Feature #7618: Show the player character's health in the save details
     Feature #7625: Add some missing console error outputs
@@ -174,6 +178,8 @@
     Feature #7652: Sort inactive post processing shaders list properly
     Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
+    Feature #7792: Support Timescale Clouds
+    Feature #7795: Support MaxNumberRipples INI setting
     Feature #7805: Lua Menu context
     Task #5896: Do not use deprecated MyGUI properties
     Task #6624: Drop support for saves made prior to 0.45

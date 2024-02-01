@@ -15,6 +15,11 @@ namespace VFS::Path
         return c == '\\' ? '/' : Misc::StringUtils::toLower(c);
     }
 
+    inline constexpr bool isNormalized(std::string_view name)
+    {
+        return std::all_of(name.begin(), name.end(), [](char v) { return v == normalize(v); });
+    }
+
     inline void normalizeFilenameInPlace(std::string& name)
     {
         std::transform(name.begin(), name.end(), name.begin(), normalize);
