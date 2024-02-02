@@ -6,16 +6,6 @@
 
 namespace MWPhysics
 {
-    ProjectileConvexCallback::ProjectileConvexCallback(const btCollisionObject* caster, const btCollisionObject* me,
-        const btVector3& from, const btVector3& to, Projectile* proj)
-        : btCollisionWorld::ClosestConvexResultCallback(from, to)
-        , mCaster(caster)
-        , mMe(me)
-        , mProjectile(proj)
-    {
-        assert(mProjectile);
-    }
-
     btScalar ProjectileConvexCallback::addSingleResult(
         btCollisionWorld::LocalConvexResult& result, bool normalInWorldSpace)
     {
@@ -33,25 +23,25 @@ namespace MWPhysics
         {
             case CollisionType_Actor:
             {
-                if (!mProjectile->isValidTarget(hitObject))
+                if (!mProjectile.isValidTarget(hitObject))
                     return 1.f;
                 break;
             }
             case CollisionType_Projectile:
             {
                 auto* target = static_cast<Projectile*>(hitObject->getUserPointer());
-                if (!mProjectile->isValidTarget(target->getCasterCollisionObject()))
+                if (!mProjectile.isValidTarget(target->getCasterCollisionObject()))
                     return 1.f;
                 target->hit(mMe, m_hitPointWorld, m_hitNormalWorld);
                 break;
             }
             case CollisionType_Water:
             {
-                mProjectile->setHitWater();
+                mProjectile.setHitWater();
                 break;
             }
         }
-        mProjectile->hit(hitObject, m_hitPointWorld, m_hitNormalWorld);
+        mProjectile.hit(hitObject, m_hitPointWorld, m_hitNormalWorld);
 
         return result.m_hitFraction;
     }
