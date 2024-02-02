@@ -2519,6 +2519,7 @@ namespace MWMechanics
                 entry.mLoopCount
                     = static_cast<uint32_t>(std::min<uint64_t>(iter->mLoopCount, std::numeric_limits<uint32_t>::max()));
                 entry.mLooping = mAnimation->isLoopingAnimation(entry.mGroup);
+                entry.mScripted = true;
                 entry.mStartKey = "start";
                 entry.mStopKey = "stop";
                 entry.mSpeed = 1.f;
