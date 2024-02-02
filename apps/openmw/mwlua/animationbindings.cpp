@@ -119,7 +119,7 @@ namespace MWLua
         if (asTable)
         {
             AnimationPriorities priorities = AnimationPriorities(Priority::Priority_Default);
-            for (auto entry : asTable.value())
+            for (const auto& entry : asTable.value())
             {
                 if (!entry.first.is<BoneGroup>() || !entry.second.is<Priority>())
                     throw std::runtime_error("Priority table must consist of BoneGroup-Priority pairs only");

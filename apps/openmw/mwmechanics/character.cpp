@@ -711,7 +711,7 @@ namespace MWMechanics
         mMovementAnimationHasMovement = true;
 
         clearStateAnimation(mCurrentMovement);
-        mCurrentMovement = movementAnimName;
+        mCurrentMovement = std::move(movementAnimName);
 
         // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
         // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
