@@ -164,6 +164,10 @@ namespace MWLua
     sol::table initTypesPackage(const Context& context)
     {
         auto* lua = context.mLua;
+
+        if (lua->sol()["openmw_types"] != sol::nil)
+            return lua->sol()["openmw_types"];
+
         sol::table types(lua->sol(), sol::create);
         auto addType = [&](std::string_view name, std::vector<ESM::RecNameInts> recTypes,
                            std::optional<std::string_view> base = std::nullopt) -> sol::table {
@@ -255,6 +259,7 @@ namespace MWLua
             packageToType[t] = type;
         }
 
-        return LuaUtil::makeReadOnly(types);
+        lua->sol()["openmw_types"] = LuaUtil::makeReadOnly(types);
+        return lua->sol()["openmw_types"];
     }
 }

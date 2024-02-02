@@ -174,11 +174,13 @@
     Feature #7618: Show the player character's health in the save details
     Feature #7625: Add some missing console error outputs
     Feature #7634: Support NiParticleBomb
+    Feature #7648: Lua Save game API
     Feature #7652: Sort inactive post processing shaders list properly
     Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
     Feature #7792: Support Timescale Clouds
     Feature #7795: Support MaxNumberRipples INI setting
+    Feature #7805: Lua Menu context
     Task #5896: Do not use deprecated MyGUI properties
     Task #6624: Drop support for saves made prior to 0.45
     Task #7113: Move from std::atoi to std::from_char

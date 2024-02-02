@@ -1045,6 +1045,12 @@
 -- Values that can be used with getControlSwitch/setControlSwitch.
 -- @field [parent=#Player] #CONTROL_SWITCH CONTROL_SWITCH
 
+---
+-- Send an event to menu scripts.
+-- @function [parent=#core] sendMenuEvent
+-- @param openmw.core#GameObject player
+-- @param #string eventName
+-- @param eventData
 
 --------------------------------------------------------------------------------
 -- @{#Armor} functions

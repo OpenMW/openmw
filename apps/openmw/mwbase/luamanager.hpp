@@ -55,6 +55,7 @@ namespace MWBase
 
         virtual void newGameStarted() = 0;
         virtual void gameLoaded() = 0;
+        virtual void gameEnded() = 0;
         virtual void objectAddedToScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectRemovedFromScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectTeleported(const MWWorld::Ptr& ptr) = 0;

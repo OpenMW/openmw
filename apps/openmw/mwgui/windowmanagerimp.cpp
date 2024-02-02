@@ -51,6 +51,7 @@
 #include <components/l10n/manager.hpp>
 
 #include <components/lua_ui/util.hpp>
+#include <components/lua_ui/widget.hpp>
 
 #include <components/settings/values.hpp>
 
@@ -546,7 +547,8 @@ namespace MWGui
     {
         try
         {
-            LuaUi::clearUserInterface();
+            LuaUi::clearGameInterface();
+            LuaUi::clearMenuInterface();
 
             mStatsWatcher.reset();
 
@@ -1675,7 +1677,10 @@ namespace MWGui
 
     void WindowManager::onKeyFocusChanged(MyGUI::Widget* widget)
     {
-        if (widget && widget->castType<MyGUI::EditBox>(false))
+        bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
+        LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
+        bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
+        if (widget && capturesInput)
             SDL_StartTextInput();
         else
             SDL_StopTextInput();
@@ -2173,9 +2178,14 @@ namespace MWGui
         mConsole->print(msg, color);
     }
 
-    void WindowManager::setConsoleMode(const std::string& mode)
+    void WindowManager::setConsoleMode(std::string_view mode)
     {
         mConsole->setConsoleMode(mode);
+    }
+
+    const std::string& WindowManager::getConsoleMode()
+    {
+        return mConsole->getConsoleMode();
     }
 
     void WindowManager::createCursors()

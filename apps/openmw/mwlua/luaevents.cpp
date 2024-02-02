@@ -13,6 +13,7 @@
 
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
+#include "menuscripts.hpp"
 
 namespace MWLua
 {
@@ -23,6 +24,7 @@ namespace MWLua
         mLocalEventBatch.clear();
         mNewGlobalEventBatch.clear();
         mNewLocalEventBatch.clear();
+        mMenuEvents.clear();
     }
 
     void LuaEvents::finalizeEventBatch()
@@ -49,6 +51,13 @@ namespace MWLua
                                   << ". Object not found or has no attached scripts";
         }
         mLocalEventBatch.clear();
+    }
+
+    void LuaEvents::callMenuEventHandlers()
+    {
+        for (const Global& e : mMenuEvents)
+            mMenuScripts.receiveEvent(e.mEventName, e.mEventData);
+        mMenuEvents.clear();
     }
 
     template <typename Event>

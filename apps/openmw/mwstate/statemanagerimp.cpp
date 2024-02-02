@@ -68,6 +68,8 @@ void MWState::StateManager::cleanup(bool force)
         mLastSavegame.clear();
 
         MWMechanics::CreatureStats::cleanup();
+
+        endGame();
     }
     MWBase::Environment::get().getLuaManager()->clear();
 }
@@ -170,10 +172,10 @@ void MWState::StateManager::newGame(bool bypass)
     {
         Log(Debug::Info) << "Starting a new game";
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-        MWBase::Environment::get().getLuaManager()->newGameStarted();
         MWBase::Environment::get().getWorld()->startNewGame(bypass);
 
         mState = State_Running;
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
@@ -197,11 +199,13 @@ void MWState::StateManager::newGame(bool bypass)
 void MWState::StateManager::endGame()
 {
     mState = State_Ended;
+    MWBase::Environment::get().getLuaManager()->gameEnded();
 }
 
 void MWState::StateManager::resumeGame()
 {
     mState = State_Running;
+    MWBase::Environment::get().getLuaManager()->gameLoaded();
 }
 
 void MWState::StateManager::saveGame(std::string_view description, const Slot* slot)
@@ -743,6 +747,18 @@ void MWState::StateManager::update(float duration)
             mAskLoadRecent = false;
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
         }
+    }
+
+    if (mNewGameRequest)
+    {
+        newGame();
+        mNewGameRequest = false;
+    }
+
+    if (mLoadRequest)
+    {
+        loadGame(*mLoadRequest);
+        mLoadRequest = std::nullopt;
     }
 }
 

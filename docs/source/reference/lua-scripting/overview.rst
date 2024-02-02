@@ -70,6 +70,9 @@ Cell
 Global scripts
     Lua scripts that are not attached to any game object and are always active. Global scripts can not be started or stopped during a game session. Lists of global scripts are defined by `omwscripts` files, which should be :ref:`registered <Lua scripting>` in `openmw.cfg`.
 
+Menu scripts
+    Lua scripts that are ran regardless of a game being loaded. They can be used to add features to the main menu and manage save files.
+
 Local scripts
     Lua scripts that are attached to some game object. A local script is active only if the object it is attached to is in an active cell. There are no limitations to the number of local scripts on one object. Local scripts can be attached to (or detached from) any object at any moment by a global script. In some cases inactive local scripts still can run code (for example during saving and loading), but while inactive they can not see nearby objects.
 
@@ -173,6 +176,7 @@ The order of lines determines the script load order (i.e. script priorities).
 Possible flags are:
 
 - ``GLOBAL`` - a global script; always active, can not be stopped;
+- ``MENU`` - a menu script; always active, even before a game is loaded
 - ``CUSTOM`` - dynamic local script that can be started or stopped by a global script;
 - ``PLAYER`` - an auto started player script;
 - ``ACTIVATOR`` - a local script that will be automatically attached to any activator;
@@ -474,6 +478,12 @@ This is another kind of script-to-script interactions. The differences:
 - Event handlers can not return any data to the sender.
 - Event handlers have a single argument `eventData` (must be :ref:`serializable <Serializable data>`)
 
+There are a few methods for sending events:
+
+- `core.sendGlobalEvent <openmw_core.html##(sendGlobalEvent)>`_ to send events to global scripts
+- `GameObject:sendEvent <openmw_core.html##(GameObject).sendEvent>`_ to send events to local scripts attached to a game object
+- `types.Player.sendMenuEvent <openmw_menu.html##(Player).sendMenuEvent>`_ to send events to menu scripts of the given player
+
 Events are the main way of interacting between local and global scripts.
 They are not recommended for interactions between two global scripts, because in this case interfaces are more convenient.
 
@@ -614,7 +624,7 @@ Also in `openmw_aux`_ is the helper function ``runRepeatedly``, it is implemente
     local core = require('openmw.core')
     local time = require('openmw_aux.time')
 
-    -- call `doSomething()` at the end of every game day. 
+    -- call `doSomething()` at the end of every game day.
     -- the second argument (`time.day`) is the interval.
     -- the periodical evaluation can be stopped at any moment by calling `stopFn()`
     local timeBeforeMidnight = time.day - core.getGameTime() % time.day

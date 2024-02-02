@@ -18,6 +18,7 @@
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
 #include "luaevents.hpp"
+#include "menuscripts.hpp"
 #include "object.hpp"
 #include "objectlists.hpp"
 
@@ -34,6 +35,7 @@ namespace MWLua
         LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir);
         LuaManager(const LuaManager&) = delete;
         LuaManager(LuaManager&&) = delete;
+        ~LuaManager();
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();
@@ -67,6 +69,7 @@ namespace MWLua
         // LuaManager queues these events and propagates to scripts on the next `update` call.
         void newGameStarted() override;
         void gameLoaded() override;
+        void gameEnded() override;
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void inputEvent(const InputEvent& event) override;
@@ -171,15 +174,18 @@ namespace MWLua
         std::map<std::string, sol::object> mLocalPackages;
         std::map<std::string, sol::object> mPlayerPackages;
 
+        MenuScripts mMenuScripts{ &mLua };
         GlobalScripts mGlobalScripts{ &mLua };
         std::set<LocalScripts*> mActiveLocalScripts;
+        std::vector<LocalScripts*> mQueuedAutoStartedScripts;
         ObjectLists mObjectLists;
 
         MWWorld::Ptr mPlayer;
 
-        LuaEvents mLuaEvents{ mGlobalScripts };
+        LuaEvents mLuaEvents{ mGlobalScripts, mMenuScripts };
         EngineEvents mEngineEvents{ mGlobalScripts };
         std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
+        std::vector<MWBase::LuaManager::InputEvent> mMenuInputEvents;
 
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalSerializer;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalSerializer;

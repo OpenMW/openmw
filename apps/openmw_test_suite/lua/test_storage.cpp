@@ -22,6 +22,7 @@ namespace
         sol::state_view& mLua = luaState.sol();
         LuaUtil::LuaStorage::initLuaBindings(mLua);
         LuaUtil::LuaStorage storage(mLua);
+        storage.setActive(true);
 
         std::vector<std::string> callbackCalls;
         sol::table callbackHiddenData(mLua, sol::create);
@@ -65,6 +66,7 @@ namespace
         sol::state mLua;
         LuaUtil::LuaStorage::initLuaBindings(mLua);
         LuaUtil::LuaStorage storage(mLua);
+        storage.setActive(true);
         mLua["mutable"] = storage.getMutableSection("test");
         mLua["ro"] = storage.getReadOnlySection("test");
 
@@ -82,6 +84,7 @@ namespace
         sol::state mLua;
         LuaUtil::LuaStorage::initLuaBindings(mLua);
         LuaUtil::LuaStorage storage(mLua);
+        storage.setActive(true);
 
         mLua["permanent"] = storage.getMutableSection("permanent");
         mLua["temporary"] = storage.getMutableSection("temporary");
@@ -104,6 +107,7 @@ namespace
         mLua.safe_script("permanent:set('z', 4)");
 
         LuaUtil::LuaStorage storage2(mLua);
+        storage2.setActive(true);
         storage2.load(tmpFile);
         mLua["permanent"] = storage2.getMutableSection("permanent");
         mLua["temporary"] = storage2.getMutableSection("temporary");

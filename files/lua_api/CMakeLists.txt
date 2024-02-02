@@ -21,6 +21,7 @@ set(LUA_API_FILES
     openmw/util.lua
     openmw/vfs.lua
     openmw/world.lua
+    openmw/menu.lua
 )
 
 foreach (f ${LUA_API_FILES})

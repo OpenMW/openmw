@@ -36,6 +36,12 @@ namespace MWLua
 
     sol::table initInputPackage(const Context& context)
     {
+        {
+            sol::state_view& lua = context.mLua->sol();
+            if (lua["openmw_input"] != sol::nil)
+                return lua["openmw_input"];
+        }
+
         sol::usertype<SDL_Keysym> keyEvent = context.mLua->sol().new_usertype<SDL_Keysym>("KeyEvent");
         keyEvent["symbol"] = sol::readonly_property([](const SDL_Keysym& e) {
             if (e.sym > 0 && e.sym <= 255)
@@ -424,7 +430,9 @@ namespace MWLua
             { "Tab", SDL_SCANCODE_TAB },
         }));
 
-        return LuaUtil::makeReadOnly(api);
+        sol::state_view& lua = context.mLua->sol();
+        lua["openmw_input"] = LuaUtil::makeReadOnly(api);
+        return lua["openmw_input"];
     }
 
 }

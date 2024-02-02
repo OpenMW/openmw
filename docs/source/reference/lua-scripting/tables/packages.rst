@@ -31,6 +31,8 @@
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.ui <Package openmw.ui>`                        | by player scripts  | | Controls :ref:`user interface <User interface reference>`.  |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.menu <Package openmw.menu>`                    | by menu scripts    | | Main menu functionality, such as managing game saves        |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.camera <Package openmw.camera>`                | by player scripts  | | Controls camera.                                            |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.postprocessing <Package openmw.postprocessing>`| by player scripts  | | Controls post-process shaders.                              |

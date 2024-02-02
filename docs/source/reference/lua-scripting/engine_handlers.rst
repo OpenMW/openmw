@@ -5,9 +5,16 @@ Engine handlers reference
 
 Engine handler is a function defined by a script, that can be called by the engine.
 
-
-
 **Can be defined by any script**
+
+.. list-table::
+  :widths: 20 80
+
+  * - onInterfaceOverride(base)
+    - | Called if the current script has an interface and overrides an interface
+      | (``base``) of another script.
+
+**Can be defined by any non-menu script**
 
 .. list-table::
   :widths: 20 80
@@ -29,9 +36,6 @@ Engine handler is a function defined by a script, that can be called by the engi
       | Note that ``onLoad`` means loading a script rather than loading a game.
       | If a script did not exist when a game was saved onLoad will not be
       | called, but ``onInit`` will.
-  * - onInterfaceOverride(base)
-    - | Called if the current script has an interface and overrides an interface
-      | (``base``) of another script.
 
 **Only for global scripts**
 
@@ -80,7 +84,7 @@ Engine handler is a function defined by a script, that can be called by the engi
       | Similarly to onActivated, the item has already been removed
       | from the actor's inventory, and the count was set to zero.
 
-**Only for local scripts attached to a player**
+**Only menu scripts and local scripts attached to a player**
 
 .. list-table::
   :widths: 20 80
@@ -94,8 +98,6 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
-  * - onQuestUpdate(questId, stage)
-    - | Called when a quest is updated.
   * - onKeyRelease(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is released.
       | Usage example:
@@ -127,3 +129,23 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | User entered `command` in in-game console. Called if either
       | `mode` is not default or `command` starts with prefix `lua`.
 
+**Only for local scripts attached to a player**
+
+.. list-table::
+  :widths: 20 80
+
+  * - onKeyPress(key)
+    - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
+      | Usage example:
+      | ``if key.symbol == 'z' and key.withShift then ...``
+  * - onQuestUpdate(questId, stage)
+    - | Called when a quest is updated.
+
+**Only for menu scripts**
+
+.. list-table::
+  :widths: 20 80
+
+  * - onStateChanged()
+    - | Called whenever the current game changes
+      | (i. e. the result of `getState <openmw_menu.html##(getState)>`_ changes)

@@ -1,3 +1,4 @@
+local menu = require('openmw.menu')
 local ui = require('openmw.ui')
 local util = require('openmw.util')
 local async = require('openmw.async')
@@ -6,11 +7,14 @@ local storage = require('openmw.storage')
 local I = require('openmw.interfaces')
 
 local common = require('scripts.omw.settings.common')
+-- :reset on startup instead of :removeOnExit
+common.getSection(false, common.groupSectionKey):reset()
 
 local renderers = {}
 local function registerRenderer(name, renderFunction)
     renderers[name] = renderFunction
 end
+require('scripts.omw.settings.renderers')(registerRenderer)
 
 local interfaceL10n = core.l10n('Interface')
 
@@ -25,12 +29,12 @@ local growingIntreval = {
         grow = 1,
     },
 }
-local spacer =  {
+local spacer = {
     props = {
         size = util.vector2(0, 10),
     },
 }
-local bigSpacer =  {
+local bigSpacer = {
     props = {
         size = util.vector2(0, 50),
     },
@@ -45,7 +49,7 @@ local spacedLines = function(count)
     local content = {}
     table.insert(content, spacer)
     table.insert(content, stretchingLine)
-    for i = 2, count do
+    for _ = 2, count do
         table.insert(content, interval)
         table.insert(content, stretchingLine)
     end
@@ -267,11 +271,16 @@ end
 local function renderPage(page)
     local l10n = core.l10n(page.l10n)
     local sortedGroups = {}
-    for i, v in ipairs(groups[page.key]) do sortedGroups[i] = v end
+    for _, group in pairs(groups[page.key]) do
+        table.insert(sortedGroups, group)
+    end
     table.sort(sortedGroups, pageGroupComparator)
     local groupLayouts = {}
     for _, pageGroup in ipairs(sortedGroups) do
         local group = common.getSection(pageGroup.global, common.groupSectionKey):get(pageGroup.key)
+        if not group then
+            error(string.format('%s group "%s" was not found', pageGroup.global and 'Global' or 'Player', pageGroup.key))
+        end
         table.insert(groupLayouts, renderGroup(group, pageGroup.global))
     end
     local groupsLayout = {
@@ -342,52 +351,99 @@ local function onSettingChanged(global)
         element:update()
     end)
 end
+
 local function onGroupRegistered(global, key)
     local group = common.getSection(global, common.groupSectionKey):get(key)
+    if not group then return end
+
     groups[group.page] = groups[group.page] or {}
-    local pageGroup =  {
+    local pageGroup = {
         key = group.key,
         global = global,
         order = group.order,
     }
-    table.insert(groups[group.page], pageGroup)
-    common.getSection(global, group.key):subscribe(onSettingChanged(global))
-    common.getArgumentSection(global, group.key):subscribe(async:callback(function(_, settingKey)
-        local groupKey = group.key
-        local group = common.getSection(global, common.groupSectionKey):get(groupKey)
-        if not group or not pageOptions[group.page] then return end
 
-        local value = common.getSection(global, group.key):get(settingKey)
+    if not groups[group.page][pageGroup.key] then
+        common.getSection(global, group.key):subscribe(onSettingChanged(global))
+        common.getArgumentSection(global, group.key):subscribe(async:callback(function(_, settingKey)
+            if settingKey == nil then return end
 
-        local element = pageOptions[group.page].element
-        local groupsLayout = element.layout.content.groups
-        local groupLayout = groupsLayout.content[groupLayoutName(group.key, global)]
-        local settingsContent = groupLayout.content.settings.content
-        settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value, global)
-        element:update()
-    end))
+            local group = common.getSection(global, common.groupSectionKey):get(group.key)
+            if not group or not pageOptions[group.page] then return end
+
+            local value = common.getSection(global, group.key):get(settingKey)
+
+            local element = pageOptions[group.page].element
+            local groupsLayout = element.layout.content.groups
+            local groupLayout = groupsLayout.content[groupLayoutName(group.key, global)]
+            local settingsContent = groupLayout.content.settings.content
+            settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value, global)
+            element:update()
+        end))
+    end
+
+    groups[group.page][pageGroup.key] = pageGroup
 
     if not pages[group.page] then return end
-    local options = renderPage(pages[group.page])
     if pageOptions[group.page] then
         pageOptions[group.page].element:destroy()
     else
         pageOptions[group.page] = {}
     end
-    for k, v in pairs(options) do
+    local renderedOptions = renderPage(pages[group.page])
+    for k, v in pairs(renderedOptions) do
         pageOptions[group.page][k] = v
     end
 end
-local globalGroups = storage.globalSection(common.groupSectionKey)
-for groupKey in pairs(globalGroups:asTable()) do
-    onGroupRegistered(true, groupKey)
+
+local function updateGroups(global)
+    local groupSection = common.getSection(global, common.groupSectionKey)
+    for groupKey in pairs(groupSection:asTable()) do
+        onGroupRegistered(global, groupKey)
+    end
+    groupSection:subscribe(async:callback(function(_, key)
+        if key then
+            onGroupRegistered(global, key)
+        else
+            for groupKey in pairs(groupSection:asTable()) do
+                onGroupRegistered(global, groupKey)
+            end
+        end
+    end))
 end
-globalGroups:subscribe(async:callback(function(_, key)
-    if key then onGroupRegistered(true, key) end
-end))
-storage.playerSection(common.groupSectionKey):subscribe(async:callback(function(_, key)
-    if key then onGroupRegistered(false, key) end
-end))
+
+local updatePlayerGroups = function() updateGroups(false) end
+updatePlayerGroups()
+
+local updateGlobalGroups = function() updateGroups(true) end
+
+local menuGroups = {}
+local menuPages = {}
+
+local function resetPlayerGroups()
+    print('MENU reset player groups')
+    local playerGroupsSection = storage.playerSection(common.groupSectionKey)
+    for pageKey, page in pairs(groups) do
+        for groupKey, group in pairs(page) do
+            if not menuGroups[groupKey] and not group.global then
+                page[groupKey] = nil
+                playerGroupsSection:set(groupKey, nil)
+            end
+        end
+        if pageOptions[pageKey] then
+            pageOptions[pageKey].element:destroy()
+            if not menuPages[pageKey] then
+                ui.removeSettingsPage(pageOptions[pageKey])
+                pageOptions[pageKey] = nil
+            else
+                local renderedOptions = renderPage(pages[pageKey])
+                for k, v in pairs(renderedOptions) do
+                    pageOptions[pageKey][k] = v
+                end
+            end
+        end
+    end
+end
 
 local function registerPage(options)
     if type(options) ~= 'table' then
@@ -413,11 +469,48 @@ local function registerPage(options)
     }
     pages[page.key] = page
     groups[page.key] = groups[page.key] or {}
-    pageOptions[page.key] = renderPage(page)
+    if pageOptions[page.key] then
+        pageOptions[page.key].element:destroy()
+    end
+    pageOptions[page.key] = pageOptions[page.key] or {}
+    local renderedOptions = renderPage(page)
+    for k, v in pairs(renderedOptions) do
+        pageOptions[page.key][k] = v
+    end
     ui.registerSettingsPage(pageOptions[page.key])
 end
 
 return {
-    registerPage = registerPage,
-    registerRenderer = registerRenderer,
+    interfaceName = 'Settings',
+    interface = {
+        version = 1,
+        registerPage = function(options)
+            registerPage(options)
+            menuPages[options.key] = true
+        end,
+        registerRenderer = registerRenderer,
+        registerGroup = function(options)
+            if not options.permanentStorage then
+                error('Menu scripts are only allowed to register setting groups with permanentStorage = true')
+            end
+            common.registerGroup(options)
+            menuGroups[options.key] = true
+        end,
+        updateRendererArgument = common.updateRendererArgument,
+    },
+    engineHandlers = {
+        onStateChanged = function()
+            if menu.getState() == menu.STATE.Running then
+                updatePlayerGroups()
+                updateGlobalGroups()
+            else
+                resetPlayerGroups()
+            end
+        end,
+    },
+    eventHandlers = {
+        [common.registerPageEvent] = function(options)
+            registerPage(options)
+        end,
+    }
 }
