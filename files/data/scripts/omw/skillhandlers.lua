@@ -41,32 +41,6 @@ local Skill = core.stats.Skill
 -- @field #string Trainer trainer
 -- @field #string Usage usage
 
----
--- Table of valid handler signatures
--- @type HandlerSignatures
---
-
---- Signature of the skillLevelUp handler
--- @function [parent=#HandlerSignatures] skillLevelUpHandler
--- @param #string skillid The ID of the skill being leveled up
--- @param #SkillLevelUpSource source The source of the skill level up
--- @param #table params Modifiable skill level up values as a table. These values are calculated based on vanilla mechanics. Setting any value to nil will cause that mechanic to be skipped. By default contains these values:
---
---   * `skillIncreaseValue` - The numeric amount of skill levels gained.
---   * `levelUpProgress` - The numeric amount of level up progress gained.
---   * `levelUpAttribute` - The string identifying the attribute that should receive points from this skill level up.
---   * `levelUpAttributeIncreaseValue` - The numeric amount of attribute increase points received. This contributes to the amount of each attribute the character receives during a vanilla level up.
---   * `levelUpSpecialization` - The string identifying the specialization that should receive points from this skill level up.
---   * `levelUpSpecializationIncreaseValue` - The numeric amount of specialization increase points received. This contributes to the icon displayed at the level up screen during a vanilla level up.
-
---- Signature of the skillUsed handler
--- @function [parent=#HandlerSignatures] skillUsedHandler
--- @param #string skillid The ID of the skill being progressed
--- @param #SkillUseType useType The use type the skill progression
--- @param #table params Modifiable skill progression value. By default contains the single value
---
---   * `skillGain` - The numeric amount of skill progress gained, normalized to the range 0 to 1, where 1 is a full level.
-
 
 local skillUsedHandlers = {}
 local skillLevelUpHandlers = {}
@@ -118,12 +92,12 @@ local function skillUsed(skillid, useType, scale)
     local skillGain = skillGainUnorm / skillProgressRequirementUnorm
 
     -- Put skill gain in a table so that handlers can modify it
-    local parameters = { 
+    local options = { 
         skillGain = skillGain,
     }
 
     for i = #skillUsedHandlers, 1, -1 do
-        if skillUsedHandlers[i](skillid, useType, parameters) == false then
+        if skillUsedHandlers[i](skillid, useType, options) == false then
             return
         end
     end
@@ -150,7 +124,7 @@ local function skillLevelUp(skillid, source)
         levelUpAttributeIncreaseValue = core.getGMST('iLevelUpMajorMultAttribute')
     end
 
-    local parameters = 
+    local options = 
     {
         skillIncreaseValue = 1,
         levelUpProgress = levelUpProgress,
@@ -161,7 +135,7 @@ local function skillLevelUp(skillid, source)
     }
 
     for i = #skillLevelUpHandlers, 1, -1 do
-        if skillLevelUpHandlers[i](skillid, source, parameters) == false then
+        if skillLevelUpHandlers[i](skillid, source, options) == false then
             return
         end
     end
@@ -199,13 +173,32 @@ return {
         version = 0,
 
         --- Add new skill level up handler for this actor
+        -- If `handler(skillid, source, options)` returns false, other handlers (including the default skill level up handler) 
+        -- will be skipped. Where skillid and source are the parameters passed to @{SkillProgression#skillLevelUp}, and options is
+        -- a modifiable table of skill level up values, and can be modified to change the behavior of later handlers. 
+        -- These values are calculated based on vanilla mechanics. Setting any value to nil will cause that mechanic to be skipped. By default contains these values:
+        --
+        --   * `skillIncreaseValue` - The numeric amount of skill levels gained.
+        --   * `levelUpProgress` - The numeric amount of level up progress gained.
+        --   * `levelUpAttribute` - The string identifying the attribute that should receive points from this skill level up.
+        --   * `levelUpAttributeIncreaseValue` - The numeric amount of attribute increase points received. This contributes to the amount of each attribute the character receives during a vanilla level up.
+        --   * `levelUpSpecialization` - The string identifying the specialization that should receive points from this skill level up.
+        --   * `levelUpSpecializationIncreaseValue` - The numeric amount of specialization increase points received. This contributes to the icon displayed at the level up screen during a vanilla level up.
+        --
         -- @function [parent=#SkillProgression] addSkillLevelUpHandler
-        -- @param #function handler The handler, see #skillLevelUpHandler.
+        -- @param #function handler The handler.
         addSkillLevelUpHandler = function(handler)
             skillLevelUpHandlers[#skillLevelUpHandlers + 1] = handler
         end,
 
         --- Add new skillUsed handler for this actor
+        -- If `handler(skillid, useType, options)` returns false, other handlers (including the default skill progress handler) 
+        -- will be skipped. Where skillid and useType are the parameters passed to @{SkillProgression#skillUsed},
+        -- and options is a modifiable table of skill progression values, and can be modified to change the behavior of later handlers. 
+        -- By default contains the single value:
+        --
+        --   * `skillGain` - The numeric amount of skill progress gained, normalized to the range 0 to 1, where 1 is a full level.
+        --
         -- @function [parent=#SkillProgression] addSkillUsedHandler
         -- @param #function handler The handler.
         addSkillUsedHandler = function(handler)
