@@ -68,6 +68,8 @@ void MWState::StateManager::cleanup(bool force)
         mLastSavegame.clear();
 
         MWMechanics::CreatureStats::cleanup();
+
+        endGame();
     }
     MWBase::Environment::get().getLuaManager()->clear();
 }
@@ -449,13 +451,6 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 {
     try
     {
-        if (mState != State_Ended)
-        {
-            // let menu scripts do cleanup
-            mState = State_Ended;
-            MWBase::Environment::get().getLuaManager()->gameEnded();
-        }
-
         cleanup();
 
         Log(Debug::Info) << "Reading save file " << filepath.filename();
