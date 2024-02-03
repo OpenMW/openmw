@@ -19,7 +19,7 @@
 -- @function [parent=#core] quit
 
 ---
--- Send an event to global scripts.
+-- Send an event to global scripts. Note: in menu scripts, errors if the game is not running (check @{openmw.menu#menu.getState})
 -- @function [parent=#core] sendGlobalEvent
 -- @param #string eventName
 -- @param eventData
