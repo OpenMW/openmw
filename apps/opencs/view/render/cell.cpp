@@ -131,7 +131,7 @@ void CSVRender::Cell::updateLand()
         return;
     }
 
-    CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);
 
     if (landIndex == -1)
