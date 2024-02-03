@@ -53,6 +53,20 @@ namespace sol
 namespace MWLua
 {
 
+    auto getGlobalVariableValue(const std::string_view globalId) -> float
+    {
+        char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
+        if (varType == 'f')
+        {
+            return MWBase::Environment::get().getWorld()->getGlobalFloat(globalId);
+        }
+        else if (varType == 's' || varType == 'l')
+        {
+            return static_cast<float>(MWBase::Environment::get().getWorld()->getGlobalInt(globalId));
+        }
+        return 0;
+    };
+
     sol::table initMWScriptBindings(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
@@ -130,15 +144,7 @@ namespace MWLua
                 auto g = store.search(ESM::RefId::deserializeText(globalId));
                 if (g == nullptr)
                     return sol::nullopt;
-                char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
-                if (varType == 's' || varType == 'l')
-                {
-                    return static_cast<float>(MWBase::Environment::get().getWorld()->getGlobalInt(globalId));
-                }
-                else
-                {
-                    return MWBase::Environment::get().getWorld()->getGlobalFloat(globalId);
-                }
+                return getGlobalVariableValue(globalId);
             },
             [](const GlobalStore& store, int index) -> sol::optional<float> {
                 if (index < 1 || index >= store.getSize())
@@ -147,15 +153,7 @@ namespace MWLua
                 if (g == nullptr)
                     return sol::nullopt;
                 std::string globalId = g->mId.serializeText();
-                char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
-                if (varType == 's' || varType == 'l')
-                {
-                    return static_cast<float>(MWBase::Environment::get().getWorld()->getGlobalInt(globalId));
-                }
-                else
-                {
-                    return MWBase::Environment::get().getWorld()->getGlobalFloat(globalId);
-                }
+                return getGlobalVariableValue(globalId);
             });
 
         globalStoreT[sol::meta_function::new_index]
@@ -163,15 +161,7 @@ namespace MWLua
                   auto g = store.search(ESM::RefId::deserializeText(globalId));
                   if (g == nullptr)
                       throw std::runtime_error("No variable \"" + std::string(globalId) + "\" in GlobalStore");
-                  char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
-                  if (varType == 's' || varType == 'l')
-                  {
-                      MWBase::Environment::get().getWorld()->setGlobalInt(globalId, static_cast<int>(val));
-                  }
-                  else
-                  {
-                      MWBase::Environment::get().getWorld()->setGlobalFloat(globalId, val);
-                  }
+                  return getGlobalVariableValue(globalId);
               });
         globalStoreT[sol::meta_function::pairs] = [](const GlobalStore& store) {
             int index = 0;
@@ -182,19 +172,10 @@ namespace MWLua
 
                     const auto& global = store.at(index++);
                     if (!global)
-                        return sol::nullopt; 
+                        return sol::nullopt;
 
                     std::string globalId = global->mId.serializeText();
-                    char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
-                    float value;
-                    if (varType == 's' || varType == 'l')
-                    {
-                        value = static_cast<float>(MWBase::Environment::get().getWorld()->getGlobalInt(globalId));
-                    }
-                    else
-                    {
-                        value = MWBase::Environment::get().getWorld()->getGlobalFloat(globalId);
-                    }
+                    float value = getGlobalVariableValue(globalId);
 
                     return std::make_tuple(globalId, value);
                 });
