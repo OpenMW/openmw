@@ -37,6 +37,13 @@ namespace VFS::Path
             EXPECT_EQ(value.view(), "foo/bar/baz");
         }
 
+        TEST(NormalizedTest, shouldSupportConstructorFromNormalizedView)
+        {
+            const NormalizedView view = "foo/bar/baz";
+            const Normalized value(view);
+            EXPECT_EQ(value.view(), "foo/bar/baz");
+        }
+
         TEST(NormalizedTest, supportMovingValueOut)
         {
             Normalized value("Foo\\Bar/baz");
@@ -67,9 +74,11 @@ namespace VFS::Path
 
         TYPED_TEST_P(NormalizedOperatorsTest, supportsEqual)
         {
-            const Normalized normalized("a/foo/bar/baz");
-            const TypeParam otherEqual{ "a/foo/bar/baz" };
-            const TypeParam otherNotEqual{ "b/foo/bar/baz" };
+            using Type0 = typename TypeParam::Type0;
+            using Type1 = typename TypeParam::Type1;
+            const Type0 normalized{ "a/foo/bar/baz" };
+            const Type1 otherEqual{ "a/foo/bar/baz" };
+            const Type1 otherNotEqual{ "b/foo/bar/baz" };
             EXPECT_EQ(normalized, otherEqual);
             EXPECT_EQ(otherEqual, normalized);
             EXPECT_NE(normalized, otherNotEqual);
@@ -78,10 +87,12 @@ namespace VFS::Path
 
         TYPED_TEST_P(NormalizedOperatorsTest, supportsLess)
         {
-            const Normalized normalized("b/foo/bar/baz");
-            const TypeParam otherEqual{ "b/foo/bar/baz" };
-            const TypeParam otherLess{ "a/foo/bar/baz" };
-            const TypeParam otherGreater{ "c/foo/bar/baz" };
+            using Type0 = typename TypeParam::Type0;
+            using Type1 = typename TypeParam::Type1;
+            const Type0 normalized{ "b/foo/bar/baz" };
+            const Type1 otherEqual{ "b/foo/bar/baz" };
+            const Type1 otherLess{ "a/foo/bar/baz" };
+            const Type1 otherGreater{ "c/foo/bar/baz" };
             EXPECT_FALSE(normalized < otherEqual);
             EXPECT_FALSE(otherEqual < normalized);
             EXPECT_LT(otherLess, normalized);
@@ -92,8 +103,37 @@ namespace VFS::Path
 
         REGISTER_TYPED_TEST_SUITE_P(NormalizedOperatorsTest, supportsEqual, supportsLess);
 
-        using StringTypes = Types<Normalized, const char*, std::string, std::string_view>;
+        template <class T0, class T1>
+        struct TypePair
+        {
+            using Type0 = T0;
+            using Type1 = T1;
+        };
 
-        INSTANTIATE_TYPED_TEST_SUITE_P(Typed, NormalizedOperatorsTest, StringTypes);
+        using TypePairs = Types<TypePair<Normalized, Normalized>, TypePair<Normalized, const char*>,
+            TypePair<Normalized, std::string>, TypePair<Normalized, std::string_view>,
+            TypePair<Normalized, NormalizedView>, TypePair<NormalizedView, Normalized>,
+            TypePair<NormalizedView, const char*>, TypePair<NormalizedView, std::string>,
+            TypePair<NormalizedView, std::string_view>, TypePair<NormalizedView, NormalizedView>>;
+
+        INSTANTIATE_TYPED_TEST_SUITE_P(Typed, NormalizedOperatorsTest, TypePairs);
+
+        TEST(NormalizedViewTest, shouldSupportConstructorFromNormalized)
+        {
+            const Normalized value("Foo\\Bar/baz");
+            const NormalizedView view(value);
+            EXPECT_EQ(view.value(), "foo/bar/baz");
+        }
+
+        TEST(NormalizedViewTest, shouldSupportConstexprConstructorFromNormalizedStringLiteral)
+        {
+            constexpr NormalizedView view("foo/bar/baz");
+            EXPECT_EQ(view.value(), "foo/bar/baz");
+        }
+
+        TEST(NormalizedViewTest, constructorShouldThrowExceptionOnNotNormalized)
+        {
+            EXPECT_THROW([] { NormalizedView("Foo\\Bar/baz"); }(), std::invalid_argument);
+        }
     }
 }
