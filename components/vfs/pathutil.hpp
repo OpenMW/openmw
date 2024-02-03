@@ -96,22 +96,26 @@ namespace VFS::Path
 
         friend bool operator==(const Normalized& lhs, const Normalized& rhs) = default;
 
-        template <class T>
-        friend bool operator==(const Normalized& lhs, const T& rhs)
+        friend bool operator==(const Normalized& lhs, const auto& rhs) { return lhs.mValue == rhs; }
+
+#if defined(_MSC_VER) && _MSC_VER <= 1935
+        friend bool operator==(const auto& lhs, const Normalized& rhs)
         {
-            return lhs.mValue == rhs;
+            return lhs == rhs.mValue;
+        }
+#endif
+
+        friend bool operator<(const Normalized& lhs, const Normalized& rhs)
+        {
+            return lhs.mValue < rhs.mValue;
         }
 
-        friend bool operator<(const Normalized& lhs, const Normalized& rhs) { return lhs.mValue < rhs.mValue; }
-
-        template <class T>
-        friend bool operator<(const Normalized& lhs, const T& rhs)
+        friend bool operator<(const Normalized& lhs, const auto& rhs)
         {
             return lhs.mValue < rhs;
         }
 
-        template <class T>
-        friend bool operator<(const T& lhs, const Normalized& rhs)
+        friend bool operator<(const auto& lhs, const Normalized& rhs)
         {
             return lhs < rhs.mValue;
         }
