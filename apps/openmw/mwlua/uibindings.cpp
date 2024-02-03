@@ -217,7 +217,7 @@ namespace MWLua
             sol::object size = LuaUtil::getFieldOrNil(options, "size");
             if (size.is<osg::Vec2f>())
                 data.mSize = size.as<osg::Vec2f>();
-            return luaManager->uiResourceManager()->registerTexture(data);
+            return luaManager->uiResourceManager()->registerTexture(std::move(data));
         };
 
         api["screenSize"] = []() { return osg::Vec2f(Settings::video().mResolutionX, Settings::video().mResolutionY); };

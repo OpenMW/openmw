@@ -844,7 +844,7 @@ namespace MWRender
                         }
                     }
                 }
-                SceneUtil::ForceControllerSourcesVisitor assignVisitor(src);
+                SceneUtil::ForceControllerSourcesVisitor assignVisitor(std::move(src));
                 node->accept(assignVisitor);
             }
             else
