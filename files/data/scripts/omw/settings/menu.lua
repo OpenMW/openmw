@@ -502,7 +502,7 @@ return {
             if menu.getState() == menu.STATE.Running then
                 updatePlayerGroups()
                 updateGlobalGroups()
-            else
+            elseif menu.getState() == menu.STATE.NoGame then
                 resetPlayerGroups()
             end
         end,
