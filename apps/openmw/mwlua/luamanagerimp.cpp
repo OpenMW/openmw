@@ -379,6 +379,12 @@ namespace MWLua
         mMenuScripts.stateChanged();
     }
 
+    void LuaManager::noGame()
+    {
+        clear();
+        mMenuScripts.stateChanged();
+    }
+
     void LuaManager::uiModeChanged(const MWWorld::Ptr& arg)
     {
         if (mPlayer.isEmpty())

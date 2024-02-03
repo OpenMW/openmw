@@ -62,16 +62,19 @@ void MWState::StateManager::cleanup(bool force)
         MWBase::Environment::get().getInputManager()->clear();
         MWBase::Environment::get().getMechanicsManager()->clear();
 
-        mState = State_NoGame;
         mCharacterManager.setCurrentCharacter(nullptr);
         mTimePlayed = 0;
         mLastSavegame.clear();
-
         MWMechanics::CreatureStats::cleanup();
 
-        endGame();
+        mState = State_NoGame;
+        MWBase::Environment::get().getLuaManager()->noGame();
     }
-    MWBase::Environment::get().getLuaManager()->clear();
+    else
+    {
+        // TODO: do we need this cleanup?
+        MWBase::Environment::get().getLuaManager()->clear();
+    }
 }
 
 std::map<int, int> MWState::StateManager::buildContentFileIndexMap(const ESM::ESMReader& reader) const
