@@ -174,7 +174,7 @@ namespace MWLua
                   }
               });
         globalStoreT[sol::meta_function::pairs] = [](const GlobalStore& store) {
-            int index = 0; // Start index
+            int index = 0;
             return sol::as_function(
                 [index, &store](sol::this_state ts) mutable -> sol::optional<std::tuple<std::string, float>> {
                     if (index >= store.getSize())
