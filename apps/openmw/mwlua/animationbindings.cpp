@@ -344,18 +344,19 @@ namespace MWLua
             [world, context](const sol::object& staticOrID, const osg::Vec3f& worldPos) {
                 auto model = getStaticModelOrThrow(staticOrID);
                 context.mLuaManager->addAction(
-                    [world, model, worldPos]() { world->spawnEffect(model, "", worldPos); }, "openmw.vfx.spawn");
+                    [world, model = std::move(model), worldPos]() { world->spawnEffect(model, "", worldPos); },
+                    "openmw.vfx.spawn");
             },
             [world, context](const sol::object& staticOrID, const osg::Vec3f& worldPos, const sol::table& options) {
                 auto model = getStaticModelOrThrow(staticOrID);
 
                 bool magicVfx = options.get_or("mwMagicVfx", true);
-                std::string textureOverride = options.get_or<std::string>("particleTextureOverride", "");
+                std::string texture = options.get_or<std::string>("particleTextureOverride", "");
                 float scale = options.get_or("scale", 1.f);
 
                 context.mLuaManager->addAction(
-                    [world, model, textureOverride, worldPos, scale, magicVfx]() {
-                        world->spawnEffect(model, textureOverride, worldPos, scale, magicVfx);
+                    [world, model = std::move(model), texture = std::move(texture), worldPos, scale, magicVfx]() {
+                        world->spawnEffect(model, texture, worldPos, scale, magicVfx);
                     },
                     "openmw.vfx.spawn");
             });

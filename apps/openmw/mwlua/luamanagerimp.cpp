@@ -643,7 +643,7 @@ namespace MWLua
             scripts->setSavedDataDeserializer(mLocalSerializer.get());
             ESM::LuaScripts data;
             scripts->save(data);
-            localData[id] = data;
+            localData[id] = std::move(data);
         }
 
         mMenuScripts.removeAllScripts();
