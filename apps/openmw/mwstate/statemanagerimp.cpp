@@ -693,7 +693,8 @@ void MWState::StateManager::quickLoad()
     {
         if (currentCharacter->begin() == currentCharacter->end())
             return;
-        loadGame(currentCharacter, currentCharacter->begin()->mPath); // Get newest save
+        // use requestLoad, otherwise we can crash by loading during the wrong part of the frame
+        requestLoad(currentCharacter->begin()->mPath);
     }
 }
 
