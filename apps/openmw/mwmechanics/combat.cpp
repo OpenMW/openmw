@@ -674,6 +674,8 @@ namespace MWMechanics
             return false;
 
         MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
+        if (statsTarget.getAiSequence().isInCombat())
+            return true;
         statsTarget.friendlyHit();
         if (statsTarget.getFriendlyHits() >= 4)
             return false;

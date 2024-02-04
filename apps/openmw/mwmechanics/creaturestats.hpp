@@ -200,6 +200,8 @@ namespace MWMechanics
         void friendlyHit();
         ///< Increase number of friendly hits by one.
 
+        void resetFriendlyHits();
+
         bool hasTalkedToPlayer() const;
         ///< Has this creature talked with the player before?
 
@@ -294,7 +296,7 @@ namespace MWMechanics
         bool wasTeleported() const { return mTeleported; }
         void setTeleported(bool v) { mTeleported = v; }
 
-        const std::map<ESM::RefId, AttributeValue> getAttributes() const { return mAttributes; }
+        const std::map<ESM::RefId, AttributeValue>& getAttributes() const { return mAttributes; }
     };
 }
 
