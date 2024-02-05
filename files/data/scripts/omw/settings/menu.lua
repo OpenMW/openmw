@@ -421,7 +421,6 @@ local menuGroups = {}
 local menuPages = {}
 
 local function resetPlayerGroups()
-    print('MENU reset player groups')
     local playerGroupsSection = storage.playerSection(common.groupSectionKey)
     for pageKey, page in pairs(groups) do
         for groupKey, group in pairs(page) do
@@ -503,7 +502,7 @@ return {
             if menu.getState() == menu.STATE.Running then
                 updatePlayerGroups()
                 updateGlobalGroups()
-            else
+            elseif menu.getState() == menu.STATE.NoGame then
                 resetPlayerGroups()
             end
         end,
