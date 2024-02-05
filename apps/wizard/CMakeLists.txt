@@ -79,6 +79,8 @@ openmw_add_executable(openmw-wizard
     ${UI_HDRS}
 )
 
+add_dependencies(openmw-wizard qm-files)
+
 target_link_libraries(openmw-wizard
     components_qt
 )
