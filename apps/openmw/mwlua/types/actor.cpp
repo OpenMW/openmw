@@ -274,7 +274,8 @@ namespace MWLua
             {
                 ei = LuaUtil::cast<std::string>(item);
             }
-            context.mLuaManager->addAction([obj = Object(ptr), ei = ei] { setSelectedEnchantedItem(obj.ptr(), ei); },
+            context.mLuaManager->addAction(
+                [obj = Object(ptr), ei = std::move(ei)] { setSelectedEnchantedItem(obj.ptr(), ei); },
                 "setSelectedEnchantedItemAction");
         };
 
