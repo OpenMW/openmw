@@ -1,6 +1,7 @@
 #include "corebindings.hpp"
 
 #include <chrono>
+#include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadfact.hpp>
@@ -133,7 +134,14 @@ namespace MWLua
         sol::table api(context.mLua->sol(), sol::create);
         for (auto& [k, v] : LuaUtil::getMutableFromReadOnly(initCorePackage(context)))
             api[k] = v;
-        api["sendGlobalEvent"] = sol::nil;
+        api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
+            if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
+            {
+                throw std::logic_error("Can't send global events when no game is loaded");
+            }
+            context.mLuaEvents->addGlobalEvent(
+                { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+        };
         api["sound"] = sol::nil;
         api["vfx"] = sol::nil;
         return LuaUtil::makeReadOnly(api);

@@ -379,6 +379,12 @@ namespace MWLua
         mMenuScripts.stateChanged();
     }
 
+    void LuaManager::noGame()
+    {
+        clear();
+        mMenuScripts.stateChanged();
+    }
+
     void LuaManager::uiModeChanged(const MWWorld::Ptr& arg)
     {
         if (mPlayer.isEmpty())
@@ -643,7 +649,7 @@ namespace MWLua
             scripts->setSavedDataDeserializer(mLocalSerializer.get());
             ESM::LuaScripts data;
             scripts->save(data);
-            localData[id] = data;
+            localData[id] = std::move(data);
         }
 
         mMenuScripts.removeAllScripts();

@@ -37,14 +37,14 @@ void Wizard::ConclusionPage::initializePage()
         if (field(QLatin1String("installation.retailDisc")).toBool() == true)
         {
             textLabel->setText(
-                tr("<html><head/><body><p>The OpenMW Wizard successfully installed Morrowind on your computer.</p>"
-                   "<p>Click Finish to close the Wizard.</p></body></html>"));
+                tr("<html><head/><body><p>The OpenMW Wizard successfully installed Morrowind on your "
+                   "computer.</p></body></html>"));
         }
         else
         {
             textLabel->setText(
                 tr("<html><head/><body><p>The OpenMW Wizard successfully modified your existing Morrowind "
-                   "installation.</p><p>Click Finish to close the Wizard.</p></body></html>"));
+                   "installation.</body></html>"));
         }
     }
     else

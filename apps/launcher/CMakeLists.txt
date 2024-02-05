@@ -71,6 +71,8 @@ openmw_add_executable(openmw-launcher
     ${UI_HDRS}
 )
 
+add_dependencies(openmw-launcher qm-files)
+
 if (WIN32)
     INSTALL(TARGETS openmw-launcher RUNTIME DESTINATION ".")
 endif (WIN32)

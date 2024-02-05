@@ -30,6 +30,7 @@
 #include "../mwbase/world.hpp"
 
 #include "actor.hpp"
+#include "actors.hpp"
 #include "actorutil.hpp"
 #include "aicombat.hpp"
 #include "aipursue.hpp"
@@ -1192,9 +1193,9 @@ namespace MWMechanics
                 && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
                 reported = reportCrime(player, victim, type, ESM::RefId(), arg);
 
+            // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
             if (!reported)
-                startCombat(victim,
-                    player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
+                startCombat(victim, player, &playerFollowers);
         }
         return crimeSeen;
     }
@@ -1435,7 +1436,7 @@ namespace MWMechanics
                         observerStats.modCrimeDispositionModifier(dispositionModifier);
                     }
 
-                    startCombat(actor, player);
+                    startCombat(actor, player, &playerFollowers);
 
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
@@ -1486,7 +1487,7 @@ namespace MWMechanics
                 // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
                 // Note: accidental or collateral damage attacks are ignored.
                 if (!victim.getClass().getCreatureStats(victim).getAiSequence().isInPursuit())
-                    startCombat(victim, player);
+                    startCombat(victim, player, &playerFollowers);
 
                 // Set the crime ID, which we will use to calm down participants
                 // once the bounty has been paid.
@@ -1531,14 +1532,14 @@ namespace MWMechanics
 
                 if (!peaceful)
                 {
-                    startCombat(target, attacker);
+                    SidingCache cachedAllies{ mActors, false };
+                    const std::set<MWWorld::Ptr>& attackerAllies = cachedAllies.getActorsSidingWith(attacker);
+                    startCombat(target, attacker, &attackerAllies);
                     // Force friendly actors into combat to prevent infighting between followers
-                    std::set<MWWorld::Ptr> followersTarget;
-                    getActorsSidingWith(target, followersTarget);
-                    for (const auto& follower : followersTarget)
+                    for (const auto& follower : cachedAllies.getActorsSidingWith(target))
                     {
                         if (follower != attacker && follower != player)
-                            startCombat(follower, attacker);
+                            startCombat(follower, attacker, &attackerAllies);
                     }
                 }
             }
@@ -1687,7 +1688,8 @@ namespace MWMechanics
         }
     }
 
-    void MechanicsManager::startCombat(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target)
+    void MechanicsManager::startCombat(
+        const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, const std::set<MWWorld::Ptr>* targetAllies)
     {
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
@@ -1704,6 +1706,31 @@ namespace MWMechanics
             return;
         }
 
+        const bool inCombat = stats.getAiSequence().isInCombat();
+        bool shout = !inCombat;
+        if (inCombat)
+        {
+            const auto isInCombatWithOneOf = [&](const auto& allies) {
+                for (const MWWorld::Ptr& ally : allies)
+                {
+                    if (stats.getAiSequence().isInCombat(ally))
+                        return true;
+                }
+                return false;
+            };
+            if (targetAllies)
+                shout = !isInCombatWithOneOf(*targetAllies);
+            else
+            {
+                shout = stats.getAiSequence().isInCombat(target);
+                if (!shout)
+                {
+                    std::set<MWWorld::Ptr> sidingActors;
+                    getActorsSidingWith(target, sidingActors);
+                    shout = !isInCombatWithOneOf(sidingActors);
+                }
+            }
+        }
         stats.getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == getPlayer())
         {
@@ -1738,7 +1765,8 @@ namespace MWMechanics
         }
 
         // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
-        MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("attack"));
+        if (shout)
+            MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("attack"));
     }
 
     void MechanicsManager::stopCombat(const MWWorld::Ptr& actor)

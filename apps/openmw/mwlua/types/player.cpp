@@ -117,7 +117,7 @@ namespace MWLua
             // The journal mwscript function has a try function here, we will make the lua function throw an
             // error. However, the addAction will cause it to error outside of this function.
             context.mLuaManager->addAction(
-                [actor, q, stage] {
+                [actor = std::move(actor), q, stage] {
                     MWWorld::Ptr actorPtr;
                     if (actor)
                         actorPtr = actor->ptr();

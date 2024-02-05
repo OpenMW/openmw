@@ -308,7 +308,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         // Display new content with custom formatting
         if (mNewDataDirs.contains(canonicalDirPath))
         {
-            tooltip += "Will be added to the current profile\n";
+            tooltip += tr("Will be added to the current profile");
             QFont font = item->font();
             font.setBold(true);
             font.setItalic(true);
@@ -326,7 +326,10 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         if (mSelector->containsDataFiles(currentDir))
         {
             item->setIcon(QIcon(":/images/openmw-plugin.png"));
-            tooltip += "Contains content file(s)";
+            if (!tooltip.isEmpty())
+                tooltip += "\n";
+
+            tooltip += tr("Contains content file(s)");
         }
         else
         {

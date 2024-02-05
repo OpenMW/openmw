@@ -70,6 +70,7 @@ namespace MWLua
         void newGameStarted() override;
         void gameLoaded() override;
         void gameEnded() override;
+        void noGame() override;
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void inputEvent(const InputEvent& event) override;

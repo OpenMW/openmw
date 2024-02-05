@@ -35,10 +35,6 @@ namespace OpenMW
             bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")->multitoken()->composing(),
             "set fallback BSA archives (later archives have higher priority)");
 
-        addOption("resources",
-            bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
-            "set resources directory");
-
         addOption("start", bpo::value<std::string>()->default_value(""), "set initial cell");
 
         addOption("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),

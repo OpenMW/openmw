@@ -24,6 +24,7 @@
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5280: Unskinned shapes in skinned equipment are rendered in the wrong place
     Bug #5371: Keyframe animation tracks are used for any file that begins with an X
+    Bug #5413: Enemies do a battlecry everytime the player summons a creature
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5849: Paralysis breaks landing
     Bug #5870: Disposing of actors who were selected in the console doesn't deselect them like vanilla
@@ -37,6 +38,7 @@
     Bug #6402: The sound of a thunderstorm does not stop playing after entering the premises
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6550: Cloned body parts don't inherit texture effects
+    Bug #6574: Crash at far away from world origin coordinates
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
@@ -132,6 +134,7 @@
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
     Bug #7765: OpenMW-CS: Touch Record option is broken
+    Bug #7769: Sword of the Perithia: Broken NPCs
     Bug #7770: Sword of the Perithia: Script execution failure
     Bug #7780: Non-ASCII texture paths in NIF files don't work
     Bug #7785: OpenMW-CS initialising Skill and Attribute fields to 0 instead of -1 on non-FortifyStat spells
@@ -143,6 +146,7 @@
     Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts
     Feature #6188: Specular lighting from point light sources
+    Feature #6411: Support translations in openmw-launcher
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds

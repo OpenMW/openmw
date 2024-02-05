@@ -107,7 +107,8 @@ namespace MWMechanics
         bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) override;
 
         /// Makes \a ptr fight \a target. Also shouts a combat taunt.
-        void startCombat(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) override;
+        void startCombat(
+            const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, const std::set<MWWorld::Ptr>* targetAllies) override;
 
         void stopCombat(const MWWorld::Ptr& ptr) override;
 

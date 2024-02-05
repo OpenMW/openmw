@@ -98,6 +98,26 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
     return mCachedTarget;
 }
 
+bool MWMechanics::AiPackage::targetIs(const MWWorld::Ptr& ptr) const
+{
+    if (mTargetActorId == -2)
+        return ptr.isEmpty();
+    else if (mTargetActorId == -1)
+    {
+        if (mTargetActorRefId.empty())
+        {
+            mTargetActorId = -2;
+            return ptr.isEmpty();
+        }
+        if (!ptr.isEmpty() && ptr.getCellRef().getRefId() == mTargetActorRefId)
+            return getTarget() == ptr;
+        return false;
+    }
+    if (ptr.isEmpty() || !ptr.getClass().isActor())
+        return false;
+    return ptr.getClass().getCreatureStats(ptr).getActorId() == mTargetActorId;
+}
+
 void MWMechanics::AiPackage::reset()
 {
     // reset all members

@@ -241,7 +241,7 @@ namespace MWLua
                   for (unsigned i = 0; i < newStack.size(); ++i)
                       newStack[i] = nameToMode.at(LuaUtil::cast<std::string_view>(modes[i + 1]));
                   luaManager->addAction(
-                      [windowManager, newStack, arg]() {
+                      [windowManager, newStack = std::move(newStack), arg]() {
                           MWWorld::Ptr ptr;
                           if (arg.has_value())
                               ptr = arg->ptr();
@@ -319,7 +319,7 @@ namespace MWLua
         };
 
         auto uiLayer = context.mLua->sol().new_usertype<LuaUi::Layer>("UiLayer");
-        uiLayer["name"] = sol::readonly_property([](LuaUi::Layer& self) { return self.name(); });
+        uiLayer["name"] = sol::readonly_property([](LuaUi::Layer& self) -> std::string_view { return self.name(); });
         uiLayer["size"] = sol::readonly_property([](LuaUi::Layer& self) { return self.size(); });
         uiLayer[sol::meta_function::to_string]
             = [](LuaUi::Layer& self) { return Misc::StringUtils::format("UiLayer(%s)", self.name()); };
