@@ -871,7 +871,7 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, update_for_very_big_object_should_be_limited)
     {
-        const float size = static_cast<float>(2 * static_cast<std::int64_t>(std::numeric_limits<int>::max()) - 1);
+        const float size = static_cast<float>((1 << 22) - 1);
         CollisionShapeInstance bigBox(std::make_unique<btBoxShape>(btVector3(size, size, 1)));
         const ObjectTransform objectTransform{
             .mPosition = ESM::Position{ .pos = { 0, 0, 0 }, .rot{ 0, 0, 0 } },
