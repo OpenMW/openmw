@@ -16,6 +16,7 @@ namespace MWMechanics
         virtual float getCombatRange(bool& isRanged) const = 0;
         virtual float getActionCooldown() const { return 0.f; }
         virtual const ESM::Weapon* getWeapon() const { return nullptr; }
+        virtual ESM::RefId getSpell() const { return {}; }
         virtual bool isAttackingOrSpell() const { return true; }
         virtual bool isFleeing() const { return false; }
     };
@@ -43,6 +44,7 @@ namespace MWMechanics
         void prepare(const MWWorld::Ptr& actor) override;
 
         float getCombatRange(bool& isRanged) const override;
+        ESM::RefId getSpell() const override { return mSpellId; }
     };
 
     class ActionEnchantedItem : public Action
