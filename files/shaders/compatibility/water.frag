@@ -17,6 +17,8 @@
 // tweakables -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 const float VISIBILITY = 2500.0;
+const float VISIBILITY_DEPTH = VISIBILITY * 1.5;
+const float DEPTH_FADE = 0.15;
 
 const float BIG_WAVES_X = 0.1; // strength of big waves
 const float BIG_WAVES_Y = 0.1;
@@ -48,6 +50,7 @@ const float SUN_SPEC_FADING_THRESHOLD = 0.15;       // visibility at which sun s
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
 const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
+const float REFR_FOG_DISTORT_DISTANCE = 3000.0;    // at what distance refraction fog will be calculated using real water depth instead of distorted depth (prevents splotchy shores)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
@@ -160,9 +163,10 @@ void main(void)
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
 #if REFRACTION
     float depthSample = linearizeDepth(sampleRefractionDepthMap(screenCoords), near, far) * radialise;
-    float depthSampleDistorted = linearizeDepth(sampleRefractionDepthMap(screenCoords-screenCoordsOffset), near, far) * radialise;
     float surfaceDepth = linearizeDepth(gl_FragCoord.z, near, far) * radialise;
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
+    float depthSampleDistorted = linearizeDepth(sampleRefractionDepthMap(screenCoords - screenCoordsOffset), near, far) * radialise;
+    float waterDepthDistorted = max(depthSampleDistorted - surfaceDepth, 0.0);
     screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #endif
     // reflection
@@ -185,6 +189,16 @@ void main(void)
     // no alpha here, so make sure raindrop ripple specularity gets properly subdued
     rainSpecular *= clamp(fresnel*6.0 + specular * sunSpec.a, 0.0, 1.0);
 
+    // selectively nullify screenCoordsOffset to eliminate remaining shore artifacts, not needed for reflection
+    if (cameraPos.z > 0.0 && realWaterDepth <= VISIBILITY_DEPTH && waterDepthDistorted > VISIBILITY_DEPTH)
+        screenCoordsOffset = vec2(0.0);
+
+    depthSampleDistorted = linearizeDepth(sampleRefractionDepthMap(screenCoords - screenCoordsOffset), near, far) * radialise;
+    waterDepthDistorted = max(depthSampleDistorted - surfaceDepth, 0.0);
+
+    // fade to realWaterDepth at a distance to compensate for physically inaccurate depth calculation
+    waterDepthDistorted = mix(waterDepthDistorted, realWaterDepth, min(surfaceDepth / REFR_FOG_DISTORT_DISTANCE, 1.0));
+
     // refraction
     vec3 refraction = sampleRefractionMap(screenCoords - screenCoordsOffset).rgb;
     vec3 rawRefraction = refraction;
@@ -193,7 +207,11 @@ void main(void)
     if (cameraPos.z < 0.0)
         refraction = clamp(refraction * 1.5, 0.0, 1.0);
     else
-        refraction = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
+    {
+        float depthCorrection = sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE);
+        float factor = DEPTH_FADE * DEPTH_FADE / (-0.5 * depthCorrection + 0.5 - waterDepthDistorted / VISIBILITY) + 0.5 * depthCorrection + 0.5;
+        refraction = mix(refraction, waterColor, clamp(factor, 0.0, 1.0));
+    }
 
     // sunlight scattering
     // normal for sunlight scattering
