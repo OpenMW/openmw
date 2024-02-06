@@ -29,9 +29,11 @@ BuildingNavigationMesh: "Baue Navigationsgitter"
 #     This save file was created using an older version of OpenMW in a format that is no longer supported.
 #     Load and save this file using {version} to upgrade it.
 #NewGameConfirmation: "Do you want to start a new game and lose the current one?"
+#QuitGameConfirmation: "Quit the game?"
 #SaveGameDenied: "The game cannot be saved right now."
 #SavingInProgress: "Saving..."
-#QuitGameConfirmation: "Quit the game?"
+#ScreenshotFailed: "Failed to save screenshot"
+#ScreenshotMade: "%s has been saved"
 
 
 # Save game menu
