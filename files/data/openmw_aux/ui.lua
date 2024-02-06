@@ -33,4 +33,47 @@ function aux_ui.deepLayoutCopy(layout)
     return result
 end
 
+local function isUiElement(v)
+    return v.__type and v.__type.name == 'LuaUi::Element'
+end
+
+local function deepElementCallback(layout, callback)
+    if not layout.content then return end
+    for i = 1, #layout.content do
+        local child = layout.content[i]
+        if isUiElement(child) then
+            callback(child)
+            deepElementCallback(child.layout, callback)
+        else
+            deepElementCallback(child, callback)
+        end
+    end
+end
+
+---
+-- Recursively updates all elements in the passed layout or element
+-- @function [parent=#ui] deepUpdate
+-- @param #any elementOrLayout  @{openmw.ui#Layout} or  @{openmw.ui#Element}
+function aux_ui.deepUpdate(elementOrLayout)
+    local layout = elementOrLayout
+    if elementOrLayout.update then
+        elementOrLayout:update()
+        layout = elementOrLayout.layout
+    end
+    deepElementCallback(layout, function (e) e:update() end)
+end
+
+---
+-- Recursively destroys all elements in the passed layout or element
+-- @function [parent=#ui] deepDestroy
+-- @param #any elementOrLayout  @{openmw.ui#Layout} or  @{openmw.ui#Element}
+function aux_ui.deepDestroy(elementOrLayout)
+    local layout = elementOrLayout
+    if elementOrLayout.destroy then
+        elementOrLayout:destroy()
+        layout = elementOrLayout.layout
+    end
+    deepElementCallback(layout, function (e) e:destroy() end)
+end
+
 return aux_ui
