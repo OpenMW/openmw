@@ -85,7 +85,7 @@ namespace MWClass
 
         void respawn(const MWWorld::Ptr& ptr) const override;
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
 
         bool useAnim() const override;
 

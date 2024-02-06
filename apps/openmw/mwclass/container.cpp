@@ -126,7 +126,7 @@ namespace MWClass
         physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string Container::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Container::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Container>(ptr);
     }

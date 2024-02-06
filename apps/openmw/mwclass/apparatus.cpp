@@ -35,7 +35,7 @@ namespace MWClass
         }
     }
 
-    std::string Apparatus::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Apparatus::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Apparatus>(ptr);
     }

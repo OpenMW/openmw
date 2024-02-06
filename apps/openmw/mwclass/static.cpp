@@ -43,7 +43,7 @@ namespace MWClass
         physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string Static::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Static::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Static>(ptr);
     }

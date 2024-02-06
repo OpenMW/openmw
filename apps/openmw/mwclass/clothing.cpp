@@ -39,7 +39,7 @@ namespace MWClass
         }
     }
 
-    std::string Clothing::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Clothing::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Clothing>(ptr);
     }

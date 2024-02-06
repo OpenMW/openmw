@@ -32,7 +32,7 @@ namespace MWClass
         bool hasToolTip(const MWWorld::ConstPtr& ptr) const override;
         ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
     };
 }
 

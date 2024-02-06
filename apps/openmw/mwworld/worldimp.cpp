@@ -2306,7 +2306,7 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
         mPhysics->remove(getPlayerPtr());
-        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getModel(getPlayerPtr()));
+        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getCorrectedModel(getPlayerPtr()));
 
         applyLoopingParticles(player);
 
@@ -3696,7 +3696,7 @@ namespace MWWorld
         try
         {
             MWWorld::ManualRef ref(store, obj);
-            std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+            std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
             if (!model.empty())
                 scene->preload(model, ref.getPtr().getClass().useAnim());
         }
