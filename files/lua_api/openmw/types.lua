@@ -652,7 +652,7 @@
 -- Get this item's current enchantment charge.
 -- @function [parent=#Item] getEnchantmentCharge
 -- @param openmw.core#GameObject item
--- @return #number The charge remaining. -1 if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of -1.
+-- @return #number The charge remaining. `nil` if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of `nil`.
 
 ---
 -- Checks if the item restocks.
@@ -665,7 +665,7 @@
 -- Set this item's enchantment charge.
 -- @function [parent=#Item] setEnchantmentCharge
 -- @param openmw.core#GameObject item
--- @param #number charge
+-- @param #number charge Can be `nil` to reset the unused state / full
 
 ---
 -- Whether the object is supposed to be carriable. It is true for all items except
