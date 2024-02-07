@@ -232,7 +232,7 @@ namespace Debug
         auto vertices = new osg::Vec3Array;
         auto color = new osg::Vec3Array;
         lines.setDataVariance(osg::Object::STATIC);
-        lines.setUseVertexArrayObject(true);
+        lines.setUseVertexBufferObjects(true);
         lines.setUseDisplayList(false);
         lines.setCullingActive(false);
 

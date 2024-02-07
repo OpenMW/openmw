@@ -433,7 +433,7 @@ namespace MWRender
         }
 
         mDebugDraw = new Debug::DebugDrawer(mResourceSystem->getSceneManager()->getShaderManager());
-        mRootNode->addChild(mDebugDraw);
+        sceneRoot->addChild(mDebugDraw);
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
