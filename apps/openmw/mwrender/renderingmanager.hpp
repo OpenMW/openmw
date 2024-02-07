@@ -335,7 +335,7 @@ namespace MWRender
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;
-        std::unique_ptr<Debug::DebugDrawer> mDebugDraw;
+        osg::ref_ptr<Debug::DebugDrawer> mDebugDraw;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
         osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;

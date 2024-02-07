@@ -215,12 +215,12 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     geom.addPrimitiveSet(indices);
 }
 
-static int getIdexBufferReadFromFrame(const long long int& nFrame)
+static int getIndexBufferReadFromFrame(const unsigned int& nFrame)
 {
     return nFrame % 2;
 }
 
-static int getIdexBufferWriteFromFrame(const long long int& nFrame)
+static int getIndexBufferWriteFromFrame(const unsigned int& nFrame)
 {
     return (nFrame + 1) % 2;
 }
@@ -246,6 +246,16 @@ namespace Debug
     {
         mLinesToDraw = new osg::Geometry();
         makeLineInstance(*mLinesToDraw);
+    }
+
+    DebugCustomDraw::DebugCustomDraw(const DebugCustomDraw& copy, const osg::CopyOp& copyop)
+        : Drawable(copy, copyop)
+        , mShapesToDraw(copy.mShapesToDraw)
+        , mLinesToDraw(copy.mLinesToDraw)
+        , mCubeGeometry(copy.mCubeGeometry)
+        , mCylinderGeometry(copy.mCylinderGeometry)
+        , mWireCubeGeometry(copy.mWireCubeGeometry)
+    {
     }
 
     void DebugCustomDraw::drawImplementation(osg::RenderInfo& renderInfo) const
@@ -308,43 +318,23 @@ namespace Debug
         static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexArray())->clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getNormalArray())->clear();
     }
-
-    class DebugDrawCallback : public SceneUtil::NodeCallback<DebugDrawCallback>
-    {
-    public:
-        DebugDrawCallback(Debug::DebugDrawer& debugDrawer)
-            : mDebugDrawer(debugDrawer)
-        {
-        }
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            mDebugDrawer.mCurrentFrame = nv->getTraversalNumber();
-            int indexRead = getIdexBufferReadFromFrame(mDebugDrawer.mCurrentFrame);
-            auto& lines = mDebugDrawer.mCustomDebugDrawer[indexRead]->mLinesToDraw;
-            lines->removePrimitiveSet(0, 1);
-            lines->addPrimitiveSet(new osg::DrawArrays(
-                osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->getVertexArray())->size()));
-
-            nv->pushOntoNodePath(mDebugDrawer.mCustomDebugDrawer[indexRead]);
-            nv->apply(*mDebugDrawer.mCustomDebugDrawer[indexRead]);
-            nv->popFromNodePath();
-        }
-
-        Debug::DebugDrawer& mDebugDrawer;
-    };
 }
 
-Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
-    : mParentNode(std::move(parentNode))
+Debug::DebugDrawer::DebugDrawer(const DebugDrawer& copy, const osg::CopyOp& copyop)
+    : Drawable(copy, copyop)
+    , mCurrentFrame(copy.mCurrentFrame)
+    , mCustomDebugDrawer(copy.mCustomDebugDrawer)
+{
+}
+
+Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager)
 {
     mCurrentFrame = 0;
 
     auto program = shaderManager.getProgram("debug");
 
-    mDebugDrawSceneObjects = new osg::Group;
-    mDebugDrawSceneObjects->setCullingActive(false);
-    osg::StateSet* stateset = mDebugDrawSceneObjects->getOrCreateStateSet();
+    setCullingActive(false);
+    osg::StateSet* stateset = getOrCreateStateSet();
     stateset->addUniform(new osg::Uniform("color", osg::Vec3f(1., 1., 1.)));
     stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(0., 0., 0.)));
     stateset->addUniform(new osg::Uniform("scale", osg::Vec3f(1., 1., 1.)));
@@ -378,19 +368,28 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
         mCustomDebugDrawer[i]->mCubeGeometry = cubeGeometry;
         mCustomDebugDrawer[i]->mCylinderGeometry = cylinderGeom;
     }
-    mDebugDrawSceneObjects->addCullCallback(new DebugDrawCallback(*this));
-
-    mParentNode->addChild(mDebugDrawSceneObjects);
 }
 
-Debug::DebugDrawer::~DebugDrawer()
+void Debug::DebugDrawer::accept(osg::NodeVisitor& nv)
 {
-    mParentNode->removeChild(mDebugDrawSceneObjects);
+    if (!nv.validNodeMask(*this))
+        return;
+
+    mCurrentFrame = nv.getTraversalNumber();
+    int indexRead = getIndexBufferReadFromFrame(mCurrentFrame);
+    auto& lines = mCustomDebugDrawer[indexRead]->mLinesToDraw;
+    lines->removePrimitiveSet(0, 1);
+    lines->addPrimitiveSet(new osg::DrawArrays(
+        osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->getVertexArray())->size()));
+
+    nv.pushOntoNodePath(this);
+    mCustomDebugDrawer[indexRead]->accept(nv);
+    nv.popFromNodePath();
 }
 
 void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
-    mCustomDebugDrawer[getIdexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(
+    mCustomDebugDrawer[getIndexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(
         { mPosition, mDims, mColor, DrawShape::Cube });
 }
 
@@ -403,12 +402,12 @@ void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec
 
 void Debug::DebugDrawer::addDrawCall(const DrawCall& draw)
 {
-    mCustomDebugDrawer[getIdexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(draw);
+    mCustomDebugDrawer[getIndexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(draw);
 }
 
 void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
 {
-    const int indexWrite = getIdexBufferWriteFromFrame(mCurrentFrame);
+    const int indexWrite = getIndexBufferWriteFromFrame(mCurrentFrame);
     const auto& lines = mCustomDebugDrawer[indexWrite]->mLinesToDraw;
     auto vertices = static_cast<osg::Vec3Array*>(lines->getVertexArray());
     auto colors = static_cast<osg::Vec3Array*>(lines->getNormalArray());
