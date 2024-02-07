@@ -8,7 +8,11 @@
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwmechanics/npcstats.hpp"
 #include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/globals.hpp"
+#include "apps/openmw/mwworld/player.hpp"
+
+#include <components/esm3/loadbsgn.hpp>
 
 namespace MWLua
 {
@@ -33,6 +37,20 @@ namespace sol
     struct is_automagical<MWLua::Quest> : std::false_type
     {
     };
+}
+
+namespace
+{
+    ESM::RefId toBirthSignId(const sol::object& recordOrId)
+    {
+        if (recordOrId.is<ESM::BirthSign>())
+            return recordOrId.as<const ESM::BirthSign*>()->mId;
+        std::string_view textId = LuaUtil::cast<std::string_view>(recordOrId);
+        ESM::RefId id = ESM::RefId::deserializeText(textId);
+        if (!MWBase::Environment::get().getESMStore()->get<ESM::BirthSign>().search(id))
+            throw std::runtime_error("Failed to find birth sign: " + std::string(textId));
+        return id;
+    }
 }
 
 namespace MWLua
@@ -173,5 +191,15 @@ namespace MWLua
         };
 
         player["birthSigns"] = initCoreBirthSignBindings(context);
+        player["getBirthSign"] = [](const Object& player) -> std::string {
+            verifyPlayer(player);
+            return MWBase::Environment::get().getWorld()->getPlayer().getBirthSign().serializeText();
+        };
+        player["setBirthSign"] = [](const Object& player, const sol::object& recordOrId) {
+            verifyPlayer(player);
+            if (!dynamic_cast<const GObject*>(&player))
+                throw std::runtime_error("Only global scripts can change birth signs");
+            MWBase::Environment::get().getWorld()->getPlayer().setBirthSign(toBirthSignId(recordOrId));
+        };
     }
 }

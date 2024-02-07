@@ -1045,6 +1045,17 @@
 -- Values that can be used with getControlSwitch/setControlSwitch.
 -- @field [parent=#Player] #CONTROL_SWITCH CONTROL_SWITCH
 
+---
+-- @function [parent=#Player] getBirthSign
+-- @param openmw.core#GameObject player
+-- @return #string The player's birth sign
+
+---
+-- Can be used only in global scripts. Note that this does not update the player's spells.
+-- @function [parent=#Player] setBirthSign
+-- @param openmw.core#GameObject player
+-- @param #any recordOrId Record or string ID of the birth sign to assign
+
 --- @{#BirthSigns}: Birth Sign Data
 -- @field [parent=#Player] #BirthSigns birthSigns
 
