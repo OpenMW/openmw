@@ -1045,6 +1045,28 @@
 -- Values that can be used with getControlSwitch/setControlSwitch.
 -- @field [parent=#Player] #CONTROL_SWITCH CONTROL_SWITCH
 
+--- @{#BirthSigns}: Birth Sign Data
+-- @field [parent=#Player] #BirthSigns birthSigns
+
+---
+-- A read-only list of all @{#BirthSignRecord}s in the world database.
+-- @field [parent=#BirthSigns] #list<#BirthSignRecord> records
+
+---
+-- Returns a read-only @{#BirthSignRecord}
+-- @function [parent=#BirthSigns] record
+-- @param #string recordId
+-- @return #BirthSignRecord
+
+---
+-- Birth sign data record
+-- @type BirthSignRecord
+-- @field #string id Birth sign id
+-- @field #string name Birth sign name
+-- @field #string description Birth sign description
+-- @field #string texture Birth sign texture
+-- @field #list<#string> spells A read-only list containing the ids of all spells gained from this sign.
+
 ---
 -- Send an event to menu scripts.
 -- @function [parent=#core] sendMenuEvent

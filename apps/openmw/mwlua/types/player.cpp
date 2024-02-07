@@ -1,5 +1,6 @@
 #include "types.hpp"
 
+#include "../birthsignbindings.hpp"
 #include "../luamanagerimp.hpp"
 
 #include "apps/openmw/mwbase/inputmanager.hpp"
@@ -170,5 +171,7 @@ namespace MWLua
         player["isCharGenFinished"] = [](const Object&) -> bool {
             return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
         };
+
+        player["birthSigns"] = initCoreBirthSignBindings(context);
     }
 }
