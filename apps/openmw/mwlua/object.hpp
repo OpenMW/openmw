@@ -71,6 +71,12 @@ namespace MWLua
     {
         Obj mObj;
     };
+
+    template <typename Obj>
+    struct Owner
+    {
+        Obj mObj;
+    };
 }
 
 #endif // MWLUA_OBJECT_H
