@@ -22,7 +22,7 @@ namespace MWRender
         const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : Animation(ptr, std::move(parentNode), resourceSystem)
     {
-        setObjectRoot(mPtr.getClass().getModel(mPtr), true, true, false);
+        setObjectRoot(mPtr.getClass().getCorrectedModel(mPtr), true, true, false);
         updateParts();
     }
 

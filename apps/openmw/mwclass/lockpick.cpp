@@ -38,7 +38,7 @@ namespace MWClass
         }
     }
 
-    std::string Lockpick::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Lockpick::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Lockpick>(ptr);
     }

@@ -49,7 +49,7 @@ namespace MWClass
         }
     }
 
-    std::string Miscellaneous::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Miscellaneous::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Miscellaneous>(ptr);
     }

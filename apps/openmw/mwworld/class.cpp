@@ -6,6 +6,7 @@
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadsoun.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -305,8 +306,16 @@ namespace MWWorld
 
     void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const {}
 
-    std::string Class::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Class::getModel(const MWWorld::ConstPtr& ptr) const
     {
+        return {};
+    }
+
+    std::string Class::getCorrectedModel(const MWWorld::ConstPtr& ptr) const
+    {
+        std::string_view model = getModel(ptr);
+        if (!model.empty())
+            return Misc::ResourceHelpers::correctMeshPath(model);
         return {};
     }
 
@@ -315,9 +324,9 @@ namespace MWWorld
         return false;
     }
 
-    void Class::getModelsToPreload(const ConstPtr& ptr, std::vector<std::string>& models) const
+    void Class::getModelsToPreload(const ConstPtr& ptr, std::vector<std::string_view>& models) const
     {
-        std::string model = getModel(ptr);
+        std::string_view model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
     }

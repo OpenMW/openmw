@@ -164,15 +164,21 @@
 -- @field openmw.util#Transform rotation Object rotation.
 -- @field openmw.util#Vector3 startingPosition The object original position
 -- @field openmw.util#Transform startingRotation The object original rotation
--- @field #string ownerRecordId NPC who owns the object (nil if missing). Global and self scripts can set the value.
--- @field #string ownerFactionId Faction who owns the object (nil if missing). Global and self scripts can set the value.
--- @field #number ownerFactionRank Rank required to be allowed to pick up the object (`nil` if any rank is allowed). Global and self scripts can set the value.
+-- @field #ObjectOwner owner Ownership information
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
 -- @field #GameObject parentContainer Container or actor that contains (or has in inventory) this object. It is nil if the object is in a cell.
 -- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (>1 means a stack of objects).
 -- @field #string recordId Returns record ID of the object in lowercase.
 -- @field #string globalVariable Global Variable associated with this object(read only).
+
+
+---
+-- Object owner information
+-- @type ObjectOwner
+-- @field #string recordId NPC who owns the object (nil if missing). Global and self scripts can set the value.
+-- @field #string factionId Faction who owns the object (nil if missing). Global and self scripts can set the value.
+-- @field #number factionRank Rank required to be allowed to pick up the object (`nil` if any rank is allowed). Global and self scripts can set the value.
 
 ---
 -- Does the object still exist and is available.

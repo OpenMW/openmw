@@ -19,6 +19,7 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/npcstate.hpp>
 #include <components/settings/values.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -424,45 +425,51 @@ namespace MWClass
         return (ref->mBase->mRecordFlags & ESM::FLAG_Persistent) != 0;
     }
 
-    std::string Npc::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Npc::getModel(const MWWorld::ConstPtr& ptr) const
+    {
+        const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
+        std::string_view model = Settings::models().mBaseanim.get();
+        const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
+        if (race->mData.mFlags & ESM::Race::Beast)
+            model = Settings::models().mBaseanimkna.get();
+        // Base animations should be in the meshes dir
+        constexpr std::string_view prefix = "meshes/";
+        assert(VFS::Path::pathEqual(prefix, model.substr(0, prefix.size())));
+        return model.substr(prefix.size());
+    }
+
+    std::string Npc::getCorrectedModel(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
-        std::string model = Settings::models().mBaseanim;
+        const std::string& model = Settings::models().mBaseanim;
         const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
         if (race->mData.mFlags & ESM::Race::Beast)
-            model = Settings::models().mBaseanimkna;
+            return Settings::models().mBaseanimkna;
 
         return model;
     }
 
-    void Npc::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const
+    void Npc::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         const auto& esmStore = MWBase::Environment::get().getESMStore();
-        const ESM::Race* race = esmStore->get<ESM::Race>().search(npc->mBase->mRace);
-        if (race && race->mData.mFlags & ESM::Race::Beast)
-            models.push_back(Settings::models().mBaseanimkna);
-
-        // keep these always loaded just in case
-        models.push_back(Settings::models().mXargonianswimkna);
-        models.push_back(Settings::models().mXbaseanimfemale);
-        models.push_back(Settings::models().mXbaseanim);
+        models.push_back(getModel(ptr));
 
         if (!npc->mBase->mModel.empty())
-            models.push_back(Misc::ResourceHelpers::correctMeshPath(npc->mBase->mModel));
+            models.push_back(npc->mBase->mModel);
 
         if (!npc->mBase->mHead.empty())
         {
             const ESM::BodyPart* head = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHead);
             if (head)
-                models.push_back(Misc::ResourceHelpers::correctMeshPath(head->mModel));
+                models.push_back(head->mModel);
         }
         if (!npc->mBase->mHair.empty())
         {
             const ESM::BodyPart* hair = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHair);
             if (hair)
-                models.push_back(Misc::ResourceHelpers::correctMeshPath(hair->mModel));
+                models.push_back(hair->mModel);
         }
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
@@ -486,7 +493,7 @@ namespace MWClass
 
                             const ESM::BodyPart* part = esmStore->get<ESM::BodyPart>().search(partname);
                             if (part && !part->mModel.empty())
-                                models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel));
+                                models.push_back(part->mModel);
                         }
                     };
                     if (equipped->getType() == ESM::Clothing::sRecordId)
@@ -501,7 +508,7 @@ namespace MWClass
                     }
                     else
                     {
-                        std::string model = equipped->getClass().getModel(*equipped);
+                        std::string_view model = equipped->getClass().getModel(*equipped);
                         if (!model.empty())
                             models.push_back(model);
                     }
@@ -510,14 +517,14 @@ namespace MWClass
         }
 
         // preload body parts
-        if (race)
+        if (const ESM::Race* race = esmStore->get<ESM::Race>().search(npc->mBase->mRace))
         {
             const std::vector<const ESM::BodyPart*>& parts
                 = MWRender::NpcAnimation::getBodyParts(race->mId, female, false, false);
             for (const ESM::BodyPart* part : parts)
             {
                 if (part && !part->mModel.empty())
-                    models.push_back(Misc::ResourceHelpers::correctMeshPath(part->mModel));
+                    models.push_back(part->mModel);
             }
         }
     }

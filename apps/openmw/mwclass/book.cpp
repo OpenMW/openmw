@@ -41,7 +41,7 @@ namespace MWClass
         }
     }
 
-    std::string Book::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Book::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Book>(ptr);
     }

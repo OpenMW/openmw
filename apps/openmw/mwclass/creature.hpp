@@ -105,9 +105,9 @@ namespace MWClass
 
         float getMaxSpeed(const MWWorld::Ptr& ptr) const override;
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
 
-        void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const override;
+        void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const override;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 

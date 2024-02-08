@@ -241,7 +241,7 @@ namespace MWLua
                   for (unsigned i = 0; i < newStack.size(); ++i)
                       newStack[i] = nameToMode.at(LuaUtil::cast<std::string_view>(modes[i + 1]));
                   luaManager->addAction(
-                      [windowManager, newStack = std::move(newStack), arg]() {
+                      [windowManager, newStack = std::move(newStack), arg = std::move(arg)]() {
                           MWWorld::Ptr ptr;
                           if (arg.has_value())
                               ptr = arg->ptr();

@@ -36,7 +36,7 @@ namespace MWClass
         }
     }
 
-    std::string Repair::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Repair::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Repair>(ptr);
     }
