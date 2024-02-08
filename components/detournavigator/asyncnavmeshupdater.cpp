@@ -814,6 +814,23 @@ namespace DetourNavigator
                         Log(Debug::Warning)
                             << "Writes to navmeshdb are disabled to avoid concurrent writes from multiple processes";
                     }
+                    else if (message.find("UNIQUE constraint failed: tiles.tile_id") != std::string_view::npos)
+                    {
+                        Log(Debug::Warning) << "Found duplicate navmeshdb tile_id, please report the "
+                                               "issue to https://gitlab.com/OpenMW/openmw/-/issues, attach openmw.log: "
+                                            << mNextTileId;
+                        try
+                        {
+                            mNextTileId = TileId(mDb->getMaxTileId() + 1);
+                            Log(Debug::Info) << "Updated navmeshdb tile_id to: " << mNextTileId;
+                        }
+                        catch (const std::exception& e)
+                        {
+                            mWriteToDb = false;
+                            Log(Debug::Warning)
+                                << "Failed to update next tile_id, writes to navmeshdb are disabled: " << e.what();
+                        }
+                    }
                 }
             }
         };
