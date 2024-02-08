@@ -25,7 +25,7 @@ namespace sol
 
 namespace MWLua
 {
-    sol::table initCoreBirthSignBindings(const Context& context)
+    sol::table initBirthSignRecordBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
         sol::table birthSigns(context.mLua->sol(), sol::create);

@@ -7,7 +7,7 @@
 
 namespace MWLua
 {
-    sol::table initCoreBirthSignBindings(const Context& context);
+    sol::table initBirthSignRecordBindings(const Context& context);
 }
 
 #endif // MWLUA_BIRTHSIGNBINDINGS_H

@@ -25,7 +25,7 @@ namespace sol
 namespace MWLua
 {
 
-    sol::table initCoreClassBindings(const Context& context)
+    sol::table initClassRecordBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
         sol::table classes(context.mLua->sol(), sol::create);

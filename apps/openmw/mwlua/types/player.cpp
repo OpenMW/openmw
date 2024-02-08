@@ -190,7 +190,7 @@ namespace MWLua
             return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
         };
 
-        player["birthSigns"] = initCoreBirthSignBindings(context);
+        player["birthSigns"] = initBirthSignRecordBindings(context);
         player["getBirthSign"] = [](const Object& player) -> std::string {
             verifyPlayer(player);
             return MWBase::Environment::get().getWorld()->getPlayer().getBirthSign().serializeText();

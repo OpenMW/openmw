@@ -85,7 +85,7 @@ namespace MWLua
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
         addActorServicesBindings<ESM::NPC>(record, context);
 
-        npc["classes"] = initCoreClassBindings(context);
+        npc["classes"] = initClassRecordBindings(context);
 
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
