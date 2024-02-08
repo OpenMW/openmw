@@ -954,10 +954,6 @@ namespace MWClass
                 return std::make_unique<MWWorld::ActionTalk>(ptr);
         }
 
-        // Tribunal and some mod companions oddly enough must use open action as fallback
-        if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
-            return std::make_unique<MWWorld::ActionOpen>(ptr);
-
         if (inCombatWithActor)
             return std::make_unique<MWWorld::FailedAction>("#{sActorInCombat}");
 
