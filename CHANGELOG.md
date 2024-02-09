@@ -26,6 +26,7 @@
     Bug #5371: Keyframe animation tracks are used for any file that begins with an X
     Bug #5413: Enemies do a battlecry everytime the player summons a creature
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
+    Bug #5755: Reset friendly hit counter
     Bug #5849: Paralysis breaks landing
     Bug #5870: Disposing of actors who were selected in the console doesn't deselect them like vanilla
     Bug #5883: Immobile creatures don't cause water ripples
