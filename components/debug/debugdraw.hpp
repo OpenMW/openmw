@@ -72,7 +72,7 @@ namespace Debug
         DebugCustomDraw();
         DebugCustomDraw(const DebugCustomDraw& copy, const osg::CopyOp& copyop);
 
-        META_Object(Debug, DebugCustomDraw)
+        META_Node(Debug, DebugCustomDraw)
 
         mutable std::vector<DrawCall> mShapesToDraw;
         osg::ref_ptr<osg::Geometry> mLinesToDraw;
