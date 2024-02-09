@@ -317,6 +317,7 @@ namespace Debug
         mShapesToDraw.clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexArray())->clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getNormalArray())->clear();
+        static_cast<osg::DrawArrays*>(mLinesToDraw->getPrimitiveSet(0))->setCount(0);
     }
 }
 
@@ -377,10 +378,6 @@ void Debug::DebugDrawer::accept(osg::NodeVisitor& nv)
 
     mCurrentFrame = nv.getTraversalNumber();
     int indexRead = getIndexBufferReadFromFrame(mCurrentFrame);
-    auto& lines = mCustomDebugDrawer[indexRead]->mLinesToDraw;
-    lines->removePrimitiveSet(0, 1);
-    lines->addPrimitiveSet(new osg::DrawArrays(
-        osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->getVertexArray())->size()));
 
     nv.pushOntoNodePath(this);
     mCustomDebugDrawer[indexRead]->accept(nv);
@@ -411,6 +408,7 @@ void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, c
     const auto& lines = mCustomDebugDrawer[indexWrite]->mLinesToDraw;
     auto vertices = static_cast<osg::Vec3Array*>(lines->getVertexArray());
     auto colors = static_cast<osg::Vec3Array*>(lines->getNormalArray());
+    auto primitive = static_cast<osg::DrawArrays*>(lines->getPrimitiveSet(0));
 
     vertices->push_back(start);
     vertices->push_back(end);
@@ -419,4 +417,6 @@ void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, c
     colors->push_back(color);
     colors->push_back(color);
     colors->dirty();
+
+    primitive->setCount(vertices->size());
 }
