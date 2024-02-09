@@ -322,7 +322,7 @@ namespace Debug
 }
 
 Debug::DebugDrawer::DebugDrawer(const DebugDrawer& copy, const osg::CopyOp& copyop)
-    : Drawable(copy, copyop)
+    : Node(copy, copyop)
     , mCurrentFrame(copy.mCurrentFrame)
     , mCustomDebugDrawer(copy.mCustomDebugDrawer)
 {
@@ -371,17 +371,10 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager)
     }
 }
 
-void Debug::DebugDrawer::accept(osg::NodeVisitor& nv)
+void Debug::DebugDrawer::traverse(osg::NodeVisitor& nv)
 {
-    if (!nv.validNodeMask(*this))
-        return;
-
     mCurrentFrame = nv.getTraversalNumber();
-    int indexRead = getIndexBufferReadFromFrame(mCurrentFrame);
-
-    nv.pushOntoNodePath(this);
-    mCustomDebugDrawer[indexRead]->accept(nv);
-    nv.popFromNodePath();
+    mCustomDebugDrawer[getIndexBufferReadFromFrame(mCurrentFrame)]->accept(nv);
 }
 
 void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)

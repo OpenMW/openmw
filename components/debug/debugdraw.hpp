@@ -84,15 +84,15 @@ namespace Debug
         virtual void drawImplementation(osg::RenderInfo&) const override;
     };
 
-    struct DebugDrawer : public osg::Drawable
+    struct DebugDrawer : public osg::Node
     {
         DebugDrawer() = default;
         DebugDrawer(const DebugDrawer& copy, const osg::CopyOp& copyop);
         DebugDrawer(Shader::ShaderManager& shaderManager);
 
-        META_Object(Debug, DebugDrawer)
+        META_Node(Debug, DebugDrawer)
 
-        void accept(osg::NodeVisitor& nv) override;
+        void traverse(osg::NodeVisitor& nv) override;
 
         void drawCube(
             osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50., 50., 50.), osg::Vec3f mColor = colorWhite);
