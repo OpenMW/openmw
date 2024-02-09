@@ -53,7 +53,7 @@ namespace sol
 namespace MWLua
 {
 
-    auto getGlobalVariableValue(const std::string_view globalId) -> float
+    float getGlobalVariableValue(const std::string_view globalId)
     {
         char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
         if (varType == 'f')
@@ -147,7 +147,7 @@ namespace MWLua
                 return getGlobalVariableValue(globalId);
             },
             [](const GlobalStore& store, int index) -> sol::optional<float> {
-                if (index < 1 || index >= store.getSize())
+                if (index < 1 || store.getSize() < index)
                     return sol::nullopt;
                 auto g = store.at(index - 1);
                 if (g == nullptr)
@@ -170,7 +170,7 @@ namespace MWLua
                     if (index >= store.getSize())
                         return sol::nullopt;
 
-                    const auto& global = store.at(index++);
+                    const ESM::Global* global = store.at(index++);
                     if (!global)
                         return sol::nullopt;
 
