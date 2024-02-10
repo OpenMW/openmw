@@ -10,6 +10,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -118,6 +119,8 @@ namespace MWInput
 
             mBindingsManager->setPlayerControlsEnabled(!guiMode);
             mBindingsManager->mouseReleased(arg, id);
+            MWBase::Environment::get().getLuaManager()->inputEvent(
+                { MWBase::LuaManager::InputEvent::MouseButtonReleased, arg.button });
         }
     }
 
@@ -125,7 +128,11 @@ namespace MWInput
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         if (mBindingsManager->isDetectingBindingState() || !input->controlsDisabled())
+        {
             mBindingsManager->mouseWheelMoved(arg);
+            MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::MouseWheel,
+                MWBase::LuaManager::InputEvent::WheelChange{ arg.x, arg.y } });
+        }
 
         input->setJoystickLastUsed(false);
     }
@@ -161,7 +168,11 @@ namespace MWInput
         const MWGui::SettingsWindow* settingsWindow
             = MWBase::Environment::get().getWindowManager()->getSettingsWindow();
         if ((!settingsWindow || !settingsWindow->isVisible()) && !input->controlsDisabled())
+        {
             mBindingsManager->mousePressed(arg, id);
+            MWBase::Environment::get().getLuaManager()->inputEvent(
+                { MWBase::LuaManager::InputEvent::MouseButtonPressed, arg.button });
+        }
     }
 
     void MouseManager::updateCursorMode()
