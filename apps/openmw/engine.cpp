@@ -14,6 +14,7 @@
 #include <components/debug/gldebug.hpp>
 
 #include <components/misc/rng.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
@@ -109,10 +110,23 @@ namespace
             profiler.removeUserStatsLine(" -Async");
     }
 
-    struct ScheduleNonDialogMessageBox
+    struct ScreenCaptureMessageBox
     {
-        void operator()(std::string message) const
+        void operator()(std::string filePath) const
         {
+            if (filePath.empty())
+            {
+                MWBase::Environment::get().getWindowManager()->scheduleMessageBox(
+                    "#{OMWEngine:ScreenshotFailed}", MWGui::ShowInDialogueMode_Never);
+
+                return;
+            }
+
+            std::string messageFormat
+                = MWBase::Environment::get().getL10nManager()->getMessage("OMWEngine", "ScreenshotMade");
+
+            std::string message = Misc::StringUtils::format(messageFormat, filePath);
+
             MWBase::Environment::get().getWindowManager()->scheduleMessageBox(
                 std::move(message), MWGui::ShowInDialogueMode_Never);
         }
@@ -717,9 +731,8 @@ void OMW::Engine::prepareEngine()
     mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(mWorkQueue,
         new SceneUtil::WriteScreenshotToFileOperation(mCfgMgr.getScreenshotPath(),
             Settings::general().mScreenshotFormat,
-            Settings::general().mNotifyOnSavedScreenshot
-                ? std::function<void(std::string)>(ScheduleNonDialogMessageBox{})
-                : std::function<void(std::string)>(IgnoreString{})));
+            Settings::general().mNotifyOnSavedScreenshot ? std::function<void(std::string)>(ScreenCaptureMessageBox{})
+                                                         : std::function<void(std::string)>(IgnoreString{})));
 
     mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
 

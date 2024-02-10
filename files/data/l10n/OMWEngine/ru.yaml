@@ -26,9 +26,11 @@ LoadingRequiresOldVersionError: |-
     Это сохранение создано старой версией OpenMW и использует формат, который больше не поддерживается.
     Загрузите и сохраните этот файл в {version}, чтобы обновить его.
 NewGameConfirmation: "Вы хотите начать новую игру? Текущая игра будет потеряна."
+QuitGameConfirmation: "Выйти из игры?"
 SaveGameDenied: "В данный момент игру нельзя сохранить."
 SavingInProgress: "Сохранение..."
-QuitGameConfirmation: "Выйти из игры?"
+ScreenshotFailed: "Не удалось создать снимок экрана"
+ScreenshotMade: "Создан снимок экрана %s"
 
 
 # Save game menu
