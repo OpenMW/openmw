@@ -852,7 +852,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use anti-alias alpha testing</source>
+        <source>Use anti-aliased alpha testing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
