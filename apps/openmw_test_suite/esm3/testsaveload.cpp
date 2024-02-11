@@ -1,4 +1,5 @@
 #include <components/esm/fourcc.hpp>
+#include <components/esm3/aipackage.hpp>
 #include <components/esm3/aisequence.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -89,8 +90,18 @@ namespace ESM
 
         constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
+        template <class T, class = std::void_t<>>
+        struct HasSave : std::false_type
+        {
+        };
+
         template <class T>
-        void save(const T& record, ESMWriter& writer)
+        struct HasSave<T, std::void_t<decltype(std::declval<T>().save(std::declval<ESMWriter&>()))>> : std::true_type
+        {
+        };
+
+        template <class T>
+        auto save(const T& record, ESMWriter& writer) -> std::enable_if_t<HasSave<std::decay_t<T>>::value>
         {
             record.save(writer);
         }
@@ -98,6 +109,12 @@ namespace ESM
         void save(const CellRef& record, ESMWriter& writer)
         {
             record.save(writer, true);
+        }
+
+        template <class T>
+        auto save(const T& record, ESMWriter& writer) -> std::enable_if_t<!HasSave<std::decay_t<T>>::value>
+        {
+            writer.writeComposite(record);
         }
 
         template <typename T>
@@ -152,6 +169,12 @@ namespace ESM
         {
             bool deleted = false;
             record.load(reader, deleted, true);
+        }
+
+        template <class T>
+        auto load(ESMReader& reader, T& record) -> std::enable_if_t<!HasSave<std::decay_t<T>>::value>
+        {
+            reader.getComposite(record);
         }
 
         template <typename T>
@@ -488,6 +511,25 @@ namespace ESM
             EXPECT_EQ(result.mCellId, record.mCellId);
             EXPECT_EQ(result.mRemainingDuration, record.mRemainingDuration);
             EXPECT_EQ(result.mRepeat, record.mRepeat);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, aiDataShouldNotChange)
+        {
+            AIData record;
+            record.mHello = 1;
+            record.mFight = 2;
+            record.mFlee = 3;
+            record.mAlarm = 4;
+            record.mServices = 5;
+
+            AIData result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mHello, record.mHello);
+            EXPECT_EQ(result.mFight, record.mFight);
+            EXPECT_EQ(result.mFlee, record.mFlee);
+            EXPECT_EQ(result.mAlarm, record.mAlarm);
+            EXPECT_EQ(result.mServices, record.mServices);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));

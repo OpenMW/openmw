@@ -722,9 +722,6 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
-        std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
-        std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
         std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
@@ -1115,9 +1112,6 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
-        std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
-        std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
         std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
