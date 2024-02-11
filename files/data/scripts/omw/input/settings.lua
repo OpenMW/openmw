@@ -181,7 +181,6 @@ return {
         onKeyPress = function(key)
             bindButton(key.code ~= input.KEY.Escape and 'keyboard' or nil, key.code)
         end,
-        -- TODO: currently never triggers, because mouse events are disabled while inside settings
         onMouseButtonPress = function(button)
             bindButton('mouse', button)
         end,
