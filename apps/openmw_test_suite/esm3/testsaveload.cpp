@@ -90,18 +90,17 @@ namespace ESM
 
         constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
-        template <class T, class = std::void_t<>>
-        struct HasSave : std::false_type
+        template <class T>
+        concept HasSave = requires(T v, ESMWriter& w)
         {
+            v.save(w);
         };
 
         template <class T>
-        struct HasSave<T, std::void_t<decltype(std::declval<T>().save(std::declval<ESMWriter&>()))>> : std::true_type
-        {
-        };
+        concept NotHasSave = !HasSave<T>;
 
-        template <class T>
-        auto save(const T& record, ESMWriter& writer) -> std::enable_if_t<HasSave<std::decay_t<T>>::value>
+        template <HasSave T>
+        auto save(const T& record, ESMWriter& writer)
         {
             record.save(writer);
         }
@@ -111,8 +110,8 @@ namespace ESM
             record.save(writer, true);
         }
 
-        template <class T>
-        auto save(const T& record, ESMWriter& writer) -> std::enable_if_t<!HasSave<std::decay_t<T>>::value>
+        template <NotHasSave T>
+        auto save(const T& record, ESMWriter& writer)
         {
             writer.writeComposite(record);
         }
@@ -130,36 +129,29 @@ namespace ESM
             return stream;
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasLoad : std::false_type
+        template <class T>
+        concept HasLoad = requires(T v, ESMReader& r)
         {
+            v.load(r);
         };
 
         template <class T>
-        struct HasLoad<T, std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>()))>> : std::true_type
+        concept HasLoadWithDelete = requires(T v, ESMReader& r, bool& d)
         {
+            v.load(r, d);
         };
 
         template <class T>
-        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoad<std::decay_t<T>>::value>
+        concept NotHasLoad = !HasLoad<T> && !HasLoadWithDelete<T>;
+
+        template <HasLoad T>
+        void load(ESMReader& reader, T& record)
         {
             record.load(reader);
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasLoadWithDelete : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasLoadWithDelete<T,
-            std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>(), std::declval<bool&>()))>>
-            : std::true_type
-        {
-        };
-
-        template <class T>
-        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoadWithDelete<std::decay_t<T>>::value>
+        template <HasLoadWithDelete T>
+        void load(ESMReader& reader, T& record)
         {
             bool deleted = false;
             record.load(reader, deleted);
@@ -171,8 +163,8 @@ namespace ESM
             record.load(reader, deleted, true);
         }
 
-        template <class T>
-        auto load(ESMReader& reader, T& record) -> std::enable_if_t<!HasSave<std::decay_t<T>>::value>
+        template <NotHasLoad T>
+        void load(ESMReader& reader, T& record)
         {
             reader.getComposite(record);
         }
@@ -515,12 +507,13 @@ namespace ESM
 
         TEST_P(Esm3SaveLoadRecordTest, aiDataShouldNotChange)
         {
-            AIData record;
-            record.mHello = 1;
-            record.mFight = 2;
-            record.mFlee = 3;
-            record.mAlarm = 4;
-            record.mServices = 5;
+            AIData record = {
+                .mHello = 1,
+                .mFight = 2,
+                .mFlee = 3,
+                .mAlarm = 4,
+                .mServices = 5,
+            };
 
             AIData result;
             saveAndLoadRecord(record, GetParam(), result);
