@@ -235,7 +235,7 @@ namespace LuaUtil
     // work around for a (likely) sol3 bug
     // when the index meta method throws, simply calling table.get crashes instead of re-throwing the error
     template <class Key>
-    sol::object safe_get(const sol::table& table, const Key& key)
+    sol::object safeGet(const sol::table& table, const Key& key)
     {
         auto index = table.traverse_raw_get<sol::optional<sol::main_protected_function>>(
             sol::metatable_key, sol::meta_function::index);
@@ -257,7 +257,7 @@ namespace LuaUtil
     {
         if (!table.is<sol::table>())
             return sol::nil;
-        sol::object value = safe_get(table.as<sol::table>(), first);
+        sol::object value = safeGet(table.as<sol::table>(), first);
         if constexpr (sizeof...(str) == 0)
             return value;
         else
