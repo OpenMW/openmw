@@ -196,6 +196,18 @@ namespace MWRender
             {
             }
 
+            void apply(osg::Group& group) override
+            {
+                for (unsigned int i = 0; i < group.getNumChildren();)
+                {
+                    if (group.getChild(i)->asDrawable() && !group.getChild(i)->asGeometry())
+                        group.removeChild(i);
+                    else
+                        ++i;
+                }
+                traverse(group);
+            }
+
             void apply(osg::Geometry& geom) override
             {
                 for (unsigned int i = 0; i < geom.getNumPrimitiveSets(); ++i)
