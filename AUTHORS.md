@@ -187,6 +187,7 @@ Programmers
     pkubik
     PLkolek
     PlutonicOverkill
+    Qlonever
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
     Randy Davin (Kindi)
