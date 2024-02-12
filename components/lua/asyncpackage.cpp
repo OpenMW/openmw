@@ -24,7 +24,11 @@ namespace LuaUtil
 
     Callback Callback::fromLua(const sol::table& t)
     {
-        return Callback{ t.raw_get<sol::main_protected_function>(1), t.raw_get<AsyncPackageId>(2).mHiddenData };
+        const sol::object& function = t.get_or(1, sol::nil);
+        const sol::object& asyncPackageId = t.get_or(2, sol::nil);
+        if (!function.is<sol::main_protected_function>() || !asyncPackageId.is<AsyncPackageId>())
+            throw std::domain_error("Expected an async:callback, received a table");
+        return Callback{ function.as<sol::main_protected_function>(), asyncPackageId.as<AsyncPackageId>().mHiddenData };
     }
 
     bool Callback::isLuaCallback(const sol::object& t)
