@@ -37,9 +37,9 @@ namespace VFS
 
                 FileSystemArchiveFile file(path);
 
-                std::string searchable = Path::normalizeFilename(std::string_view{ proper }.substr(prefix));
+                VFS::Path::Normalized searchable(std::string_view{ proper }.substr(prefix));
 
-                const auto inserted = mIndex.emplace(searchable, file);
+                const auto inserted = mIndex.emplace(std::move(searchable), std::move(file));
                 if (!inserted.second)
                     Log(Debug::Warning)
                         << "Warning: found duplicate file for '" << proper
@@ -56,7 +56,7 @@ namespace VFS
         }
     }
 
-    bool FileSystemArchive::contains(std::string_view file) const
+    bool FileSystemArchive::contains(Path::NormalizedView file) const
     {
         return mIndex.find(file) != mIndex.end();
     }

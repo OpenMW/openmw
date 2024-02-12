@@ -51,25 +51,21 @@ namespace TestingOpenMW
 
     struct VFSTestData : public VFS::Archive
     {
-        std::map<std::string, VFS::File*, VFS::Path::PathLess> mFiles;
+        VFS::FileMap mFiles;
 
-        VFSTestData(std::map<std::string, VFS::File*, VFS::Path::PathLess> files)
+        explicit VFSTestData(VFS::FileMap&& files)
             : mFiles(std::move(files))
         {
         }
 
-        void listResources(VFS::FileMap& out) override
-        {
-            for (const auto& [key, value] : mFiles)
-                out.emplace(key, value);
-        }
+        void listResources(VFS::FileMap& out) override { out = mFiles; }
 
-        bool contains(std::string_view file) const override { return mFiles.contains(file); }
+        bool contains(VFS::Path::NormalizedView file) const override { return mFiles.contains(file); }
 
         std::string getDescription() const override { return "TestData"; }
     };
 
-    inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*, VFS::Path::PathLess> files)
+    inline std::unique_ptr<VFS::Manager> createTestVFS(VFS::FileMap&& files)
     {
         auto vfs = std::make_unique<VFS::Manager>();
         vfs->addArchive(std::make_unique<VFSTestData>(std::move(files)));

@@ -97,6 +97,8 @@ file(GLOB UNITTEST_SRC_FILES
     esmterrain/testgridsampling.cpp
 
     resource/testobjectcache.cpp
+
+    vfs/testpathutil.cpp
 )
 
 source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
