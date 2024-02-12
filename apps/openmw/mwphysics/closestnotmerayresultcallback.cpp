@@ -1,7 +1,6 @@
 #include "closestnotmerayresultcallback.hpp"
 
 #include <algorithm>
-#include <utility>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
@@ -9,14 +8,6 @@
 
 namespace MWPhysics
 {
-    ClosestNotMeRayResultCallback::ClosestNotMeRayResultCallback(const btCollisionObject* me,
-        const std::vector<const btCollisionObject*>& targets, const btVector3& from, const btVector3& to)
-        : btCollisionWorld::ClosestRayResultCallback(from, to)
-        , mMe(me)
-        , mTargets(targets)
-    {
-    }
-
     btScalar ClosestNotMeRayResultCallback::addSingleResult(
         btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
     {
