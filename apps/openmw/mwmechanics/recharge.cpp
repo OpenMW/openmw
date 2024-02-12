@@ -84,7 +84,7 @@ namespace MWMechanics
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Enchant Fail"));
         }
 
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Enchant, 0);
+        player.getClass().skillUsageSucceeded(player, ESM::Skill::Enchant, ESM::Skill::Enchant_Recharge);
         gem.getContainerStore()->remove(gem, 1);
 
         if (gem.getCellRef().getCount() == 0)

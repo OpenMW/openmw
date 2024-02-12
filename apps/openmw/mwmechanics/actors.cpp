@@ -1956,7 +1956,7 @@ namespace MWMechanics
                 mSneakSkillTimer = 0.f;
 
             if (avoidedNotice && mSneakSkillTimer == 0.f)
-                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
+                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, ESM::Skill::Sneak_AvoidNotice);
 
             if (!detected)
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);

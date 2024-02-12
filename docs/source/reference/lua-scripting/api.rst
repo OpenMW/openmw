@@ -41,6 +41,7 @@ Lua API reference
     interface_item_usage
     interface_mwui
     interface_settings
+    interface_skill_progression
     interface_ui
     iterables
 
