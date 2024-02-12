@@ -139,6 +139,7 @@
     Bug #7770: Sword of the Perithia: Script execution failure
     Bug #7780: Non-ASCII texture paths in NIF files don't work
     Bug #7785: OpenMW-CS initialising Skill and Attribute fields to 0 instead of -1 on non-FortifyStat spells
+    Bug #7794: Fleeing NPCs name tooltip doesn't appear
     Bug #7796: Absorbed enchantments don't restore magicka
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples

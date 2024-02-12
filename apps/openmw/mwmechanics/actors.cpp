@@ -1309,7 +1309,8 @@ namespace MWMechanics
                 if (inProcessingRange)
                 {
                     MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
-                    if (!stats.isDead() && stats.getAiSequence().isInCombat())
+                    bool isDead = stats.isDead() && stats.isDeathAnimationFinished();
+                    if (!isDead && stats.getAiSequence().isInCombat())
                     {
                         hasHostiles = true;
                         break;

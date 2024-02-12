@@ -924,35 +924,38 @@ namespace MWClass
         }
 
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const MWMechanics::AiSequence& aiSequence = stats.getAiSequence();
+        const bool isPursuing = aiSequence.isInPursuit() && actor == MWMechanics::getPlayer();
+        const bool inCombatWithActor = aiSequence.isInCombat(actor) || isPursuing;
 
         if (stats.isDead())
         {
-            // by default user can loot friendly actors during death animation
-            if (Settings::game().mCanLootDuringDeathAnimation && !stats.getAiSequence().isInCombat())
+            // by default user can loot non-fighting actors during death animation
+            if (Settings::game().mCanLootDuringDeathAnimation)
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
 
             // otherwise wait until death animation
             if (stats.isDeathAnimationFinished())
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
         }
-        else if (!stats.getAiSequence().isInCombat())
+        else
         {
-            if (stats.getKnockedDown() || MWBase::Environment::get().getMechanicsManager()->isSneaking(actor))
-                return std::make_unique<MWWorld::ActionOpen>(ptr); // stealing
+            const bool allowStealingFromKO
+                = Settings::game().mAlwaysAllowStealingFromKnockedOutActors || !inCombatWithActor;
+            if (stats.getKnockedDown() && allowStealingFromKO)
+                return std::make_unique<MWWorld::ActionOpen>(ptr);
 
-            // Can't talk to werewolves
-            if (!getNpcStats(ptr).isWerewolf())
+            const bool allowStealingWhileSneaking = !inCombatWithActor;
+            if (MWBase::Environment::get().getMechanicsManager()->isSneaking(actor) && allowStealingWhileSneaking)
+                return std::make_unique<MWWorld::ActionOpen>(ptr);
+
+            const bool allowTalking = !inCombatWithActor && !getNpcStats(ptr).isWerewolf();
+            if (allowTalking)
                 return std::make_unique<MWWorld::ActionTalk>(ptr);
         }
-        else // In combat
-        {
-            if (Settings::game().mAlwaysAllowStealingFromKnockedOutActors && stats.getKnockedDown())
-                return std::make_unique<MWWorld::ActionOpen>(ptr); // stealing
-        }
 
-        // Tribunal and some mod companions oddly enough must use open action as fallback
-        if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
-            return std::make_unique<MWWorld::ActionOpen>(ptr);
+        if (inCombatWithActor)
+            return std::make_unique<MWWorld::FailedAction>("#{sActorInCombat}");
 
         return std::make_unique<MWWorld::FailedAction>();
     }
@@ -1086,7 +1089,8 @@ namespace MWClass
         if (customData.mNpcStats.isDead() && customData.mNpcStats.isDeathAnimationFinished())
             return true;
 
-        if (!customData.mNpcStats.getAiSequence().isInCombat())
+        const MWMechanics::AiSequence& aiSeq = customData.mNpcStats.getAiSequence();
+        if (!aiSeq.isInCombat() || aiSeq.isFleeing())
             return true;
 
         if (Settings::game().mAlwaysAllowStealingFromKnockedOutActors && customData.mNpcStats.getKnockedDown())
