@@ -128,7 +128,7 @@ Table with the following optional fields:
     - Disables changing the setting from the UI
 
 inputBinding
------
+------------
 
 Allows the user to bind inputs to an action or trigger
 
