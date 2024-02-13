@@ -304,7 +304,7 @@ namespace MWBase
         virtual const MWPhysics::RayCastingInterface* getRayCasting() const = 0;
 
         virtual bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-            bool ignorePlayer, bool ignoreActors)
+            bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList = {})
             = 0;
 
         virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external) = 0;

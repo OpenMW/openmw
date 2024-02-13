@@ -1817,9 +1817,10 @@ namespace MWWorld
     }
 
     bool World::castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-        bool ignorePlayer, bool ignoreActors)
+        bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList)
     {
-        MWRender::RenderingManager::RayResult rayRes = mRendering->castRay(from, to, ignorePlayer, ignoreActors);
+        MWRender::RenderingManager::RayResult rayRes
+            = mRendering->castRay(from, to, ignorePlayer, ignoreActors, ignoreList);
         res.mHit = rayRes.mHit;
         res.mHitPos = rayRes.mHitPointWorld;
         res.mHitNormal = rayRes.mHitNormalWorld;
@@ -2598,7 +2599,7 @@ namespace MWWorld
             collisionTypes |= MWPhysics::CollisionType_Water;
         }
         MWPhysics::RayCastingResult result
-            = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
+            = mPhysics->castRay(from, to, { MWWorld::Ptr() }, std::vector<MWWorld::Ptr>(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;
@@ -3064,8 +3065,8 @@ namespace MWWorld
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
         // Check for impact, if yes, handle hit, if not, launch projectile
-        MWPhysics::RayCastingResult result
-            = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(
+            sourcePos, worldPos, { actor }, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
         if (result.mHit)
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
         else

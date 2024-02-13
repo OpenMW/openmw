@@ -14,10 +14,10 @@ namespace MWPhysics
     class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
     {
     public:
-        explicit ClosestNotMeRayResultCallback(const btCollisionObject* me, std::span<const btCollisionObject*> targets,
-            const btVector3& from, const btVector3& to)
+        explicit ClosestNotMeRayResultCallback(std::span<const btCollisionObject*> ignore,
+            std::span<const btCollisionObject*> targets, const btVector3& from, const btVector3& to)
             : btCollisionWorld::ClosestRayResultCallback(from, to)
-            , mMe(me)
+            , mIgnoreList(ignore)
             , mTargets(targets)
         {
         }
@@ -25,7 +25,7 @@ namespace MWPhysics
         btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override;
 
     private:
-        const btCollisionObject* mMe;
+        const std::span<const btCollisionObject*> mIgnoreList;
         const std::span<const btCollisionObject*> mTargets;
     };
 }

@@ -12,7 +12,7 @@ namespace MWPhysics
         btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
     {
         const auto* hitObject = rayResult.m_collisionObject;
-        if (hitObject == mMe)
+        if (std::find(mIgnoreList.begin(), mIgnoreList.end(), hitObject) != mIgnoreList.end())
             return 1.f;
 
         if (hitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor && !mTargets.empty())

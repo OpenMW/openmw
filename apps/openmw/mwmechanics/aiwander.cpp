@@ -86,7 +86,7 @@ namespace MWMechanics
             return MWBase::Environment::get()
                 .getWorld()
                 ->getRayCasting()
-                ->castRay(position, visibleDestination, actor, {}, mask)
+                ->castRay(position, visibleDestination, { actor }, {}, mask)
                 .mHit;
         }
 
