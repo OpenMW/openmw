@@ -79,6 +79,7 @@ Programmers
     Eduard Cot (trombonecot)
     Eli2
     Emanuel Guével (potatoesmaster)
+    Epoch
     Eris Caffee (eris)
     eroen
     escondida
