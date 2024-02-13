@@ -477,7 +477,6 @@ if (NOT WIN32)
 endif()
 
 # C++ library binding to Lua
-add_compile_definitions(SOL_ALL_SAFETIES_ON)
 set(SOL_INCLUDE_DIR ${OpenMW_SOURCE_DIR}/extern/sol3)
 set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
