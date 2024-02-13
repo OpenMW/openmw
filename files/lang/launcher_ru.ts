@@ -859,7 +859,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позволяет MSAA работать с моделями с альфа-тестированием, что позволяет улучшить отображение граней и избежать их пикселизации. Может снизить производительность.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Use anti-alias alpha testing</source>
+        <source>Use anti-aliased alpha testing</source>
         <translation>Сглаживание альфа-тестирования</translation>
     </message>
     <message>

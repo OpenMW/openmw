@@ -524,7 +524,7 @@
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation. Can negatively impact performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="text">
-                    <string>Use anti-alias alpha testing</string>
+                    <string>Use anti-aliased alpha testing</string>
                    </property>
                   </widget>
                  </item>
