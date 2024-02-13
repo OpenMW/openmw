@@ -294,6 +294,7 @@ bool Launcher::SettingsPage::loadSettings()
                 hrtfProfileSelectorComboBox->setCurrentIndex(hrtfProfileIndex);
             }
         }
+        loadSettingBool(Settings::sound().mCameraListener, *cameraListenerCheckBox);
     }
 
     // Interface Changes
@@ -490,6 +491,9 @@ void Launcher::SettingsPage::saveSettings()
             Settings::sound().mHrtf.set(hrtfProfileSelectorComboBox->currentText().toStdString());
         else
             Settings::sound().mHrtf.set({});
+
+        const bool cCameraListener = cameraListenerCheckBox->checkState() != Qt::Unchecked;
+        Settings::sound().mCameraListener.set(cCameraListener);
     }
 
     // Interface Changes

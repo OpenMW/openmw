@@ -72,6 +72,8 @@ namespace MWRender
         void setExtraYaw(float angle) { mExtraYaw = angle; }
         void setExtraRoll(float angle) { mExtraRoll = angle; }
 
+        osg::Quat getOrient() const;
+
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force = false);
         bool toggleVanityMode(bool enable);

@@ -1320,6 +1320,16 @@
          </item>
         </layout>
        </item>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="cameraListenerCheckBox">
+         <property name="toolTip">
+          <string>In third-person view, use the camera as the sound listener instead of the player character.</string>
+         </property>
+         <property name="text">
+          <string>Use the camera as the sound listener</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <spacer>
          <property name="orientation">

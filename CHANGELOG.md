@@ -146,6 +146,7 @@
     Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
+    Feature #5944: Option to use camera as sound listener
     Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts
     Feature #6188: Specular lighting from point light sources

@@ -1447,5 +1447,13 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Lights minimum interior brightness</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use the camera as the sound listener</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>
