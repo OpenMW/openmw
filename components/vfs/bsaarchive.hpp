@@ -54,8 +54,6 @@ namespace VFS
             std::sort(mFiles.begin(), mFiles.end());
         }
 
-        virtual ~BsaArchive() {}
-
         void listResources(FileMap& out) override
         {
             for (auto& resource : mResources)
