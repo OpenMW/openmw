@@ -67,9 +67,9 @@ namespace CSMWorld
         return mMaleParts[ESM::getMeshPart(index)];
     }
 
-    const osg::Vec2f& ActorAdapter::RaceData::getHeightWeight(bool isFemale)
+    const osg::Vec2f& ActorAdapter::RaceData::getGenderWeightHeight(bool isFemale)
     {
-        return isFemale ? mHeightsWeights.mFemaleHeightWeight : mHeightsWeights.mMaleHeightWeight;
+        return isFemale ? mWeightsHeights.mFemaleWeightHeight : mWeightsHeights.mMaleWeightHeight;
     }
 
     bool ActorAdapter::RaceData::hasDependency(const ESM::RefId& id) const
@@ -95,11 +95,11 @@ namespace CSMWorld
             mDependencies.emplace(id);
     }
 
-    void ActorAdapter::RaceData::reset_data(const ESM::RefId& id, const HeightsWeights& raceStats, bool isBeast)
+    void ActorAdapter::RaceData::reset_data(const ESM::RefId& id, const WeightsHeights& raceStats, bool isBeast)
     {
         mId = id;
         mIsBeast = isBeast;
-        mHeightsWeights = raceStats;
+        mWeightsHeights = raceStats;
         for (auto& str : mFemaleParts)
             str = ESM::RefId();
         for (auto& str : mMaleParts)
@@ -169,9 +169,9 @@ namespace CSMWorld
         return it->second.first;
     }
 
-    const osg::Vec2f& ActorAdapter::ActorData::getRaceHeightWeight() const
+    const osg::Vec2f& ActorAdapter::ActorData::getRaceWeightHeight() const
     {
-        return mRaceData->getHeightWeight(isFemale());
+        return mRaceData->getGenderWeightHeight(isFemale());
     }
 
     bool ActorAdapter::ActorData::hasDependency(const ESM::RefId& id) const
@@ -516,8 +516,8 @@ namespace CSMWorld
 
         auto& race = raceRecord.get();
 
-        HeightsWeights scaleStats = HeightsWeights(osg::Vec2f(race.mData.mMaleWeight, race.mData.mMaleHeight),
-            osg::Vec2f(race.mData.mFemaleWeight, race.mData.mFemaleHeight));
+        WeightsHeights scaleStats = { osg::Vec2f(race.mData.mMaleWeight, race.mData.mMaleHeight),
+            osg::Vec2f(race.mData.mFemaleWeight, race.mData.mFemaleHeight) };
 
         data->reset_data(id, scaleStats, race.mData.mFlags & ESM::Race::Beast);
 

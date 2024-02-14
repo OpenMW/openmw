@@ -21,7 +21,6 @@
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
-#include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
 
 namespace CSVRender
@@ -63,7 +62,7 @@ namespace CSVRender
             // Attach parts to skeleton
             loadBodyParts();
 
-            const osg::Vec2f& attributes = mActorData.get()->getRaceHeightWeight();
+            const osg::Vec2f& attributes = mActorData->getRaceWeightHeight();
 
             mBaseNode->setScale(osg::Vec3d(attributes.x(), attributes.x(), attributes.y()));
         }
