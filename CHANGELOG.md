@@ -140,6 +140,7 @@
     Bug #7780: Non-ASCII texture paths in NIF files don't work
     Bug #7785: OpenMW-CS initialising Skill and Attribute fields to 0 instead of -1 on non-FortifyStat spells
     Bug #7796: Absorbed enchantments don't restore magicka
+    Bug #7832: Ingredient tooltips show magnitude for Fortify Maximum Magicka effect
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
