@@ -10,6 +10,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -119,15 +120,22 @@ namespace MWInput
             mBindingsManager->setPlayerControlsEnabled(!guiMode);
             mBindingsManager->mouseReleased(arg, id);
         }
+
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            { MWBase::LuaManager::InputEvent::MouseButtonReleased, arg.button });
     }
 
     void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent& arg)
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         if (mBindingsManager->isDetectingBindingState() || !input->controlsDisabled())
+        {
             mBindingsManager->mouseWheelMoved(arg);
+        }
 
         input->setJoystickLastUsed(false);
+        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::MouseWheel,
+            MWBase::LuaManager::InputEvent::WheelChange{ arg.x, arg.y } });
     }
 
     void MouseManager::mousePressed(const SDL_MouseButtonEvent& arg, Uint8 id)
@@ -161,7 +169,11 @@ namespace MWInput
         const MWGui::SettingsWindow* settingsWindow
             = MWBase::Environment::get().getWindowManager()->getSettingsWindow();
         if ((!settingsWindow || !settingsWindow->isVisible()) && !input->controlsDisabled())
+        {
             mBindingsManager->mousePressed(arg, id);
+        }
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            { MWBase::LuaManager::InputEvent::MouseButtonPressed, arg.button });
     }
 
     void MouseManager::updateCursorMode()

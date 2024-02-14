@@ -124,6 +124,15 @@ Engine handler is a function defined by a script, that can be called by the engi
   * - onTouchMove(touchEvent)
     - | A finger moved on a touch device.
       | `Touch event <openmw_input.html##(TouchEvent)>`_.
+  * - onMouseButtonPress(button)
+    - | A mouse button was pressed
+      | Button id
+  * - onMouseButtonRelease(button)
+    - | A mouse button was released
+      | Button id
+  * - onMouseWheel(vertical, horizontal)
+    - | Mouse wheel was scrolled
+      | vertical and horizontal mouse wheel change
   * - | onConsoleCommand(
       |     mode, command, selectedObject)
     - | User entered `command` in in-game console. Called if either

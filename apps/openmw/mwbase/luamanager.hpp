@@ -83,6 +83,12 @@ namespace MWBase
 
         struct InputEvent
         {
+            struct WheelChange
+            {
+                int x;
+                int y;
+            };
+
             enum
             {
                 KeyPressed,
@@ -93,8 +99,11 @@ namespace MWBase
                 TouchPressed,
                 TouchReleased,
                 TouchMoved,
+                MouseButtonPressed,
+                MouseButtonReleased,
+                MouseWheel,
             } mType;
-            std::variant<SDL_Keysym, int, SDLUtil::TouchEvent> mValue;
+            std::variant<SDL_Keysym, int, SDLUtil::TouchEvent, WheelChange> mValue;
         };
         virtual void inputEvent(const InputEvent& event) = 0;
 
