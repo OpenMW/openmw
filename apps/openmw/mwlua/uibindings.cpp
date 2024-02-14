@@ -295,7 +295,7 @@ namespace MWLua
     {
         std::string_view menuCache = "openmw_ui_menu";
         std::string_view gameCache = "openmw_ui_game";
-        std::string_view cacheKey = context.mIsMenu ? menuCache : gameCache;
+        std::string_view cacheKey = context.mType == Context::Menu ? menuCache : gameCache;
         {
             sol::state_view& lua = context.mLua->sol();
             if (lua[cacheKey] != sol::nil)

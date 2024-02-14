@@ -15,8 +15,13 @@ namespace MWLua
 
     struct Context
     {
-        bool mIsMenu;
-        bool mIsGlobal;
+        enum Type
+        {
+            Menu,
+            Global,
+            Local,
+        };
+        Type mType;
         LuaManager* mLuaManager;
         LuaUtil::LuaState* mLua;
         LuaUtil::UserdataSerializer* mSerializer;
