@@ -38,8 +38,8 @@ clamp lighting
 :Default:	True
 
 Restrict the amount of lighting that an object can receive to a maximum of (1,1,1).
-Only affects objects drawn with shaders (see :ref:`force shaders` option).
-Always affects terrain.
+Only affects objects drawn with shaders (see :ref:`force shaders` option) as objects drawn without shaders always have clamped lighting.
+When disabled, terrain is always drawn with shaders to prevent seams between tiles that are and that aren't.
 
 Leaving this option at its default makes the lighting compatible with Morrowind's fixed-function method,
 but the lighting may appear dull and there might be colour shifts.
