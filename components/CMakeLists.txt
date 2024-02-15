@@ -500,9 +500,14 @@ if (USE_QT)
         model/loadordererror
         view/combobox view/contentselector
         )
+
     add_component_qt_dir (config
         gamesettings
         launchersettings
+        )
+
+    add_component_qt_dir (l10n
+        qttranslations
         )
 
     add_component_qt_dir (process
