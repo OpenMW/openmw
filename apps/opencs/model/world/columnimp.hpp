@@ -585,19 +585,22 @@ namespace CSMWorld
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
+
+            float bodyAttr = std::max(0.5f, std::min(2.0f, data.toFloat()));
+
             if (mWeight)
             {
                 if (mMale)
-                    record2.mData.mMaleWeight = data.toFloat();
+                    record2.mData.mMaleWeight = bodyAttr;
                 else
-                    record2.mData.mFemaleWeight = data.toFloat();
+                    record2.mData.mFemaleWeight = bodyAttr;
             }
             else
             {
                 if (mMale)
-                    record2.mData.mMaleHeight = data.toFloat();
+                    record2.mData.mMaleHeight = bodyAttr;
                 else
-                    record2.mData.mFemaleHeight = data.toFloat();
+                    record2.mData.mFemaleHeight = bodyAttr;
             }
             record.setModified(record2);
         }
