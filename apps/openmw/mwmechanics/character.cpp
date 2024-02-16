@@ -2070,7 +2070,7 @@ namespace MWMechanics
             vec.x() *= speed;
             vec.y() *= speed;
 
-            if (isKnockedOut() || isKnockedDown() || isRecovery())
+            if (isKnockedOut() || isKnockedDown() || isRecovery() || isScriptedAnimPlaying())
                 vec = osg::Vec3f();
 
             CharacterState movestate = CharState_None;
