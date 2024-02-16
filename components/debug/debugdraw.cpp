@@ -265,59 +265,45 @@ namespace Debug
 
         const osg::StateSet* stateSet = getStateSet();
 
-        auto program = static_cast<const osg::Program*>(stateSet->getAttribute(osg::StateAttribute::PROGRAM));
-        const osg::Program::PerContextProgram* pcp = program->getPCP(*state);
-        if (!pcp)
-        {
-            return;
-        }
+        const osg::Program::PerContextProgram& pcp = *state->getLastAppliedProgramObject();
+        auto transLocation = pcp.getUniformLocation(stateSet->getUniform("trans")->getNameID());
+        auto colLocation = pcp.getUniformLocation(stateSet->getUniform("color")->getNameID());
+        auto scaleLocation = pcp.getUniformLocation(stateSet->getUniform("scale")->getNameID());
+        auto normalAsColorLocation = pcp.getUniformLocation(stateSet->getUniform("useNormalAsColor")->getNameID());
 
-        const osg::Uniform* uTrans = stateSet->getUniform("trans");
-        const osg::Uniform* uCol = stateSet->getUniform("color");
-        const osg::Uniform* uScale = stateSet->getUniform("scale");
-        const osg::Uniform* uUseNormalAsColor = stateSet->getUniform("useNormalAsColor");
+        auto drawPrimitive = [&](const osg::Drawable* primitive, const osg::Vec3f& pos, const osg::Vec3f& color,
+                                 const osg::Vec3f& scale, const bool normalAsColor) {
+            ext->glUniform3f(transLocation, pos.x(), pos.y(), pos.z());
+            ext->glUniform3f(colLocation, color.x(), color.y(), color.z());
+            ext->glUniform3f(scaleLocation, scale.x(), scale.y(), scale.z());
+            ext->glUniform1i(normalAsColorLocation, normalAsColor);
+            primitive->drawImplementation(renderInfo);
+        };
 
-        auto transLocation = pcp->getUniformLocation(uTrans->getNameID());
-        auto colLocation = pcp->getUniformLocation(uCol->getNameID());
-        auto scaleLocation = pcp->getUniformLocation(uScale->getNameID());
-        auto normalAsColorLocation = pcp->getUniformLocation(uUseNormalAsColor->getNameID());
-
-        ext->glUniform3f(transLocation, 0., 0., 0.);
-        ext->glUniform3f(colLocation, 1., 1., 1.);
-        ext->glUniform3f(scaleLocation, 1., 1., 1.);
-        ext->glUniform1i(normalAsColorLocation, true);
-
-        mLinesToDraw->drawImplementation(renderInfo);
-
-        ext->glUniform1i(normalAsColorLocation, false);
+        drawPrimitive(mLinesToDraw, { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f }, { 1.f, 1.f, 1.f }, true);
 
         for (const auto& shapeToDraw : mShapesToDraw)
         {
-            osg::Vec3f translation = shapeToDraw.mPosition;
-            osg::Vec3f color = shapeToDraw.mColor;
-            osg::Vec3f scale = shapeToDraw.mDims;
-
-            ext->glUniform3f(transLocation, translation.x(), translation.y(), translation.z());
-            ext->glUniform3f(colLocation, color.x(), color.y(), color.z());
-            ext->glUniform3f(scaleLocation, scale.x(), scale.y(), scale.z());
-
+            const osg::Geometry* geometry = nullptr;
             switch (shapeToDraw.mDrawShape)
             {
                 case DrawShape::Cube:
-                    mCubeGeometry->drawImplementation(renderInfo);
+                    geometry = mCubeGeometry;
                     break;
                 case DrawShape::Cylinder:
-                    mCylinderGeometry->drawImplementation(renderInfo);
+                    geometry = mCylinderGeometry;
                     break;
                 case DrawShape::WireCube:
-                    mWireCubeGeometry->drawImplementation(renderInfo);
+                    geometry = mWireCubeGeometry;
                     break;
             }
+            drawPrimitive(geometry, shapeToDraw.mPosition, shapeToDraw.mColor, shapeToDraw.mDims, false);
         }
         mShapesToDraw.clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexArray())->clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getNormalArray())->clear();
         static_cast<osg::DrawArrays*>(mLinesToDraw->getPrimitiveSet(0))->setCount(0);
+        pcp.resetAppliedUniforms();
     }
 }
 
