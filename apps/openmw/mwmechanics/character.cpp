@@ -2146,7 +2146,12 @@ namespace MWMechanics
             mInJump = false;
             const float jumpHeight = cls.getJump(mPtr);
             if (jumpHeight <= 0.f || sneak || inwater || flying || !solid)
+            {
                 vec.z() = 0.f;
+                // Following code might assign some vertical movement regardless, need to reset this manually
+                // This is used for jumping detection
+                movementSettings.mPosition[2] = 0;
+            }
 
             if (!inwater && !flying && solid)
             {
