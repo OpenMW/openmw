@@ -586,7 +586,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            float bodyAttr = std::max(0.5f, std::min(2.0f, data.toFloat()));
+            float bodyAttr = std::clamp(data.toFloat(), 0.5f, 2.0f);
 
             if (mWeight)
             {
