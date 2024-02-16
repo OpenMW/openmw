@@ -2144,6 +2144,10 @@ namespace MWMechanics
 
             bool wasInJump = mInJump;
             mInJump = false;
+            const float jumpHeight = cls.getJump(mPtr);
+            if (jumpHeight <= 0.f || sneak || inwater || flying || !solid)
+                vec.z() = 0.f;
+
             if (!inwater && !flying && solid)
             {
                 // In the air (either getting up —ascending part of jump— or falling).
@@ -2162,20 +2166,16 @@ namespace MWMechanics
                     vec.z() = 0.0f;
                 }
                 // Started a jump.
-                else if (mJumpState != JumpState_InAir && vec.z() > 0.f && !sneak)
+                else if (mJumpState != JumpState_InAir && vec.z() > 0.f)
                 {
-                    float z = cls.getJump(mPtr);
-                    if (z > 0.f)
+                    mInJump = true;
+                    if (vec.x() == 0 && vec.y() == 0)
+                        vec.z() = jumpHeight;
+                    else
                     {
-                        mInJump = true;
-                        if (vec.x() == 0 && vec.y() == 0)
-                            vec.z() = z;
-                        else
-                        {
-                            osg::Vec3f lat(vec.x(), vec.y(), 0.0f);
-                            lat.normalize();
-                            vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
-                        }
+                        osg::Vec3f lat(vec.x(), vec.y(), 0.0f);
+                        lat.normalize();
+                        vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * jumpHeight * 0.707f;
                     }
                 }
             }
