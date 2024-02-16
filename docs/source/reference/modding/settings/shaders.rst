@@ -10,7 +10,7 @@ force shaders
 
 Force rendering with shaders, even for objects that don't strictly need them.
 By default, only objects with certain effects, such as bump or normal maps will use shaders.
-Many visual enhancements, such as :ref:`enable shadows` and :ref:`reverse z` require shaders to be used for all objects, and so behave as if this setting  is true.
+With enhancements enabled, such as :ref:`enable shadows` and :ref:`reverse z`, shaders must be used for all objects, as if this setting is true.
 Typically, one or more of these enhancements will be enabled, and shaders will be needed for everything anyway, meaning toggling this setting will have no effect.
 
 Some settings, such as :ref:`clamp lighting` only apply to objects using shaders, so enabling this option may cause slightly different visuals when used at the same time.
