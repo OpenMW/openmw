@@ -433,8 +433,10 @@ namespace MWRender
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::cells().mTargetFramerate);
         }
 
-        mDebugDraw
-            = std::make_unique<Debug::DebugDrawer>(mResourceSystem->getSceneManager()->getShaderManager(), mRootNode);
+        mDebugDraw = new Debug::DebugDrawer(mResourceSystem->getSceneManager()->getShaderManager());
+        mDebugDraw->setNodeMask(Mask_Debug);
+        sceneRoot->addChild(mDebugDraw);
+
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);
