@@ -25,6 +25,13 @@
 -- @param eventData
 
 ---
+-- Send an event to menu scripts.
+-- @function [parent=#core] sendMenuEvent
+-- @param openmw.core#GameObject player
+-- @param #string eventName
+-- @param eventData
+
+---
 -- Simulation time in seconds.
 -- The number of simulation seconds passed in the game world since starting a new game.
 -- @function [parent=#core] getSimulationTime

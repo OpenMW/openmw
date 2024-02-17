@@ -1097,13 +1097,6 @@
 -- @field #string texture Birth sign texture
 -- @field #list<#string> spells A read-only list containing the ids of all spells gained from this sign.
 
----
--- Send an event to menu scripts.
--- @function [parent=#core] sendMenuEvent
--- @param openmw.core#GameObject player
--- @param #string eventName
--- @param eventData
-
 --------------------------------------------------------------------------------
 -- @{#Armor} functions
 -- @field [parent=#types] #Armor Armor
