@@ -20,21 +20,36 @@ namespace VFS
         if (prefix > 0 && str[prefix - 1] != '\\' && str[prefix - 1] != '/')
             ++prefix;
 
-        for (const auto& i : std::filesystem::recursive_directory_iterator(mPath))
+        std::filesystem::recursive_directory_iterator iterator(mPath);
+
+        for (auto it = std::filesystem::begin(iterator), end = std::filesystem::end(iterator); it != end;)
         {
-            if (std::filesystem::is_directory(i))
-                continue;
+            const auto& i = *it;
 
-            const std::filesystem::path& filePath = i.path();
-            const std::string proper = Files::pathToUnicodeString(filePath);
-            VFS::Path::Normalized searchable(std::string_view{ proper }.substr(prefix));
-            FileSystemArchiveFile file(filePath);
+            if (!std::filesystem::is_directory(i))
+            {
+                const std::filesystem::path& filePath = i.path();
+                const std::string proper = Files::pathToUnicodeString(filePath);
+                VFS::Path::Normalized searchable(std::string_view{ proper }.substr(prefix));
+                FileSystemArchiveFile file(filePath);
 
-            const auto inserted = mIndex.emplace(std::move(searchable), std::move(file));
-            if (!inserted.second)
-                Log(Debug::Warning)
-                    << "Found duplicate file for '" << proper
-                    << "', please check your file system for two files with the same name in different cases.";
+                const auto inserted = mIndex.emplace(std::move(searchable), std::move(file));
+                if (!inserted.second)
+                    Log(Debug::Warning)
+                        << "Found duplicate file for '" << proper
+                        << "', please check your file system for two files with the same name in different cases.";
+            }
+
+            // Exception thrown by the operator++ may not contain the context of the error like what exact path caused
+            // the problem which makes it hard to understand what's going on when iteration happens over a directory
+            // with thousands of files and subdirectories.
+            const std::filesystem::path prevPath = i.path();
+            std::error_code ec;
+            it.increment(ec);
+            if (ec != std::error_code())
+                throw std::runtime_error("Failed to recursively iterate over \"" + Files::pathToUnicodeString(mPath)
+                    + "\" when incrementing to the next item from \"" + Files::pathToUnicodeString(prevPath)
+                    + "\": " + ec.message());
         }
     }
 
