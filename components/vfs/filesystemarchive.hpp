@@ -36,7 +36,6 @@ namespace VFS
 
     private:
         std::map<VFS::Path::Normalized, FileSystemArchiveFile, std::less<>> mIndex;
-        bool mBuiltIndex;
         std::filesystem::path mPath;
     };
 
