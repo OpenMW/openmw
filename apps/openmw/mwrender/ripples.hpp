@@ -51,16 +51,19 @@ namespace MWRender
         static constexpr float sWorldScaleFactor = 2.5;
 
     private:
-        void setupFragmentPipeline();
-        void setupComputePipeline();
-
-        Resource::ResourceSystem* mResourceSystem;
-
         struct State
         {
-            osg::ref_ptr<osg::StateSet> mStateset;
             bool mPaused = true;
+            osg::ref_ptr<osg::StateSet> mStateset;
         };
+
+        void setupFragmentPipeline();
+
+        void setupComputePipeline();
+
+        inline void updateState(const osg::FrameStamp& frameStamp, State& state);
+
+        Resource::ResourceSystem* mResourceSystem;
 
         size_t mPositionCount = 0;
         std::array<osg::Vec3f, 100> mPositions;
@@ -78,6 +81,9 @@ namespace MWRender
 
         bool mPaused = false;
         bool mUseCompute = false;
+
+        double mLastSimulationTime = 0;
+        double mRemainingWaveTime = 0;
     };
 
     class Ripples : public osg::Camera
