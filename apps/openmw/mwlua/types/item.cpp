@@ -1,4 +1,3 @@
-#include <components/esm3/loadligh.hpp>
 #include <sol/sol.hpp>
 
 #include "../../mwmechanics/spellutil.hpp"
