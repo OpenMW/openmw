@@ -3,6 +3,7 @@
 
 #include <osg/NodeVisitor>
 #include <osg/Program>
+#include <components/bindlesstexture/bindlesstexture.hpp>
 
 namespace Resource
 {
@@ -62,6 +63,9 @@ namespace Shader
 
         void pushRequirements(osg::Node& node);
         void popRequirements();
+
+        osg::ref_ptr<BindlessBuffer> mBuffer;
+        osg::ref_ptr<BindlessTexture> mTexture;
 
     private:
         bool mForceShaders;

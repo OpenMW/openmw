@@ -361,6 +361,10 @@ namespace Shader
                                     mRequirements.back().mTexStageRequiringTangents = unit;
                                 }
                                 diffuseMap = texture;
+                                if (!writableStateSet)
+                                    writableStateSet = getWritableStateSet(node);
+                                writableStateSet->setTextureAttribute(unit, mTexture, osg::StateAttribute::ON);
+                                writableStateSet->setAttributeAndModes(mBuffer->Binding(), osg::StateAttribute::ON);
                             }
                             else if (texName == "specularMap")
                                 specularMap = texture;
@@ -739,6 +743,7 @@ namespace Shader
             shaderPrefix = mDefaultShaderPrefix;
 
         auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate);
+        program->addBindAttribLocation("index", 7);
         writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
         addedState->setAttributeAndModes(std::move(program));
 

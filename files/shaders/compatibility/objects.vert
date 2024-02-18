@@ -1,4 +1,6 @@
-#version 120
+#version 450 compatibility
+#extension GL_ARB_bindless_texture : require
+#extension GL_NV_gpu_shader5 : require // uint64_t
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -7,6 +9,9 @@
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
+
+attribute float index;
+flat out int textureIndex;
 
 #include "lib/core/vertex.h.glsl"
 #if @diffuseMap
@@ -94,6 +99,7 @@ void main(void)
     passViewPos = viewPos.xyz;
     passNormal = gl_Normal.xyz;
     normalToViewMatrix = gl_NormalMatrix;
+    textureIndex = (int)(index + 0.5);
 
 #if @normalMap || @diffuseParallax
     passTangent = gl_MultiTexCoord7.xyzw;

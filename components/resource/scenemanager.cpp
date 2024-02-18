@@ -22,6 +22,7 @@
 
 #include <components/nifosg/controller.hpp>
 #include <components/nifosg/nifloader.hpp>
+#include <components/nifosg/particle.hpp>
 
 #include <components/nif/niffile.hpp>
 
@@ -33,13 +34,16 @@
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/extradata.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/optimizer.hpp>
+#include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/visitor.hpp>
@@ -352,6 +356,139 @@ namespace Resource
         std::vector<osg::ref_ptr<SceneUtil::RigGeometryHolder>> mRigGeometryHolders;
     };
 
+    class TextureAtlasVisitor : public osg::NodeVisitor
+    {
+    public:
+        /// default to traversing all children.
+        TextureAtlasVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        void apply(osg::Node& node) override
+        {
+            bool pushedStateState = false;
+
+            osg::StateSet* ss = node.getStateSet();
+            if (ss)
+                pushedStateState = pushStateSet(ss);
+
+            traverse(node);
+
+            if (pushedStateState)
+                popStateSet();
+        }
+
+        void apply(osg::Drawable& node) override
+        {
+            if (auto rig = dynamic_cast<SceneUtil::RigGeometry*>(&node))
+                return apply(*rig->getSourceGeometry());
+            if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&node))
+                return apply(*morph->getSourceGeometry());
+
+            if (dynamic_cast<NifOsg::ParticleSystem*>(&node))
+                return;
+            //if (dynamic_cast<osgParticle::ParticleSystemUpdater*>(&node))
+            //    toskip = true;
+            if (dynamic_cast<osgParticle::ParticleProcessor*>(&node))
+                return;
+            if (dynamic_cast<osgParticle::Particle*>(&node))
+                return;
+
+            bool pushedStateState = false;
+
+            osg::StateSet* ss = node.getStateSet();
+            if (ss)
+                pushedStateState = pushStateSet(ss);
+
+            [&] {
+                osg::Geometry* geom = node.asGeometry();
+                if (!geom || _statesetStack.empty())
+                    return;
+                
+                const osg::StateSet::TextureAttributeList& tal = _statesetStack.back()->getTextureAttributeList();
+                for (unsigned int unit = 0; unit < tal.size(); ++unit)
+                {
+                    osg::ref_ptr<osg::Texture2D> texture = dynamic_cast<osg::Texture2D*>(
+                        _statesetStack.back()->getTextureAttribute(unit, osg::StateAttribute::TEXTURE));
+                    if (!texture)
+                        continue;
+
+                    auto it
+                        = std::find(mTexture->_textureList.begin(), mTexture->_textureList.end(), texture->getImage());
+                    if (it == mTexture->_textureList.end())
+                        continue;
+                    unsigned int d = std::distance(mTexture->_textureList.begin(), it);
+                    auto indices = new osg::IntArray(geom->getVertexArray()->getNumElements());
+                    for (unsigned int i = 0; i < geom->getVertexArray()->getNumElements(); ++i)
+                        (*indices)[i] = d;
+                    geom->setVertexAttribArray(7, indices, osg::Array::BIND_PER_VERTEX);
+                }
+            }();
+
+
+            if (pushedStateState)
+                popStateSet();
+        }
+
+        osg::ref_ptr<BindlessTexture> mTexture;
+
+    protected:
+        bool pushStateSet(osg::StateSet* stateset)
+        {
+            const osg::StateSet::TextureAttributeList& tal = stateset->getTextureAttributeList();
+
+            // if no textures ignore
+            if (tal.empty())
+                return false;
+
+            bool pushStateState = false;
+
+            // if already in stateset list ignore
+            if (_statesetMap.count(stateset) > 0)
+            {
+                pushStateState = true;
+            }
+            else
+            {
+                bool containsTexture2D = false;
+                for (unsigned int unit = 0; unit < tal.size(); ++unit)
+                {
+                    osg::Texture2D* texture2D = dynamic_cast<osg::Texture2D*>(
+                        stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE));
+                    if (texture2D)
+                    {
+                        containsTexture2D = true;
+                        _textures.insert(texture2D);
+                    }
+                }
+
+                if (containsTexture2D)
+                {
+                    _statesetMap[stateset];
+                    pushStateState = true;
+                }
+            }
+
+            if (pushStateState)
+            {
+                _statesetStack.push_back(stateset);
+            }
+
+            return pushStateState;
+        }
+        void popStateSet() { _statesetStack.pop_back(); }
+
+        typedef std::set<osg::Drawable*> Drawables;
+        typedef std::map<osg::StateSet*, Drawables> StateSetMap;
+        typedef std::set<osg::Texture2D*> Textures;
+        typedef std::vector<osg::StateSet*> StateSetStack;
+
+        StateSetMap _statesetMap;
+        StateSetStack _statesetStack;
+        Textures _textures;
+    };
+
     SceneManager::SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
         Resource::NifFileManager* nifFileManager, double expiryDelay)
         : ResourceManager(vfs, expiryDelay)
@@ -374,6 +511,17 @@ namespace Resource
         , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
     {
+        mBuffer = BindlessBuffer::Make(4800);
+        
+        BindlessTexture::TextureList images;
+        images.reserve(4800);
+        for (auto const& tex : vfs->getRecursiveDirectoryIterator("textures/"))
+        {
+            auto image = imageManager->getImage(tex);
+            if (image->s() > 16 || image->t() > 16)
+                images.push_back(image);
+        }
+        mTexture = new BindlessTexture(mBuffer, images);
     }
 
     void SceneManager::setForceShaders(bool force)
@@ -900,6 +1048,11 @@ namespace Resource
             SceneUtil::ReplaceDepthVisitor replaceDepthVisitor;
             loaded->accept(replaceDepthVisitor);
 
+            TextureAtlasVisitor tav;
+            tav.mTexture = mTexture;
+            loaded->accept(tav);
+            shareState(loaded);
+
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor());
             loaded->accept(*shaderVisitor);
 
@@ -1134,6 +1287,10 @@ namespace Resource
         shaderVisitor->setAdjustCoverageForAlphaTest(mAdjustCoverageForAlphaTest);
         shaderVisitor->setSupportsNormalsRT(mSupportsNormalsRT);
         shaderVisitor->setWeatherParticleOcclusion(mWeatherParticleOcclusion);
+
+        shaderVisitor->mBuffer = mBuffer;
+        shaderVisitor->mTexture = mTexture;
+
         return shaderVisitor;
     }
 }

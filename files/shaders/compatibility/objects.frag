@@ -1,4 +1,6 @@
-#version 120
+#version 450 compatibility
+#extension GL_ARB_bindless_texture : require
+#extension GL_NV_gpu_shader5 : require // uint64_t
 #pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
 #if @useUBO
@@ -13,6 +15,13 @@
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
+
+flat in int textureIndex;
+
+layout (binding = 0, std140) uniform TEXTURE_BLOCK
+{
+    uint64_t tex[4096];
+};
 
 #if @darkMap
 uniform sampler2D darkMap;
@@ -124,12 +133,15 @@ void main()
     // only offset diffuse and normal maps for now, other textures are more likely to be using a completely different UV set
     vec2 offset = vec2(0.0);
 
+    int tIndex = (int)(textureIndex);
+    sampler2D myText = sampler2D(tex[tIndex]);
+
 #if @parallax || @diffuseParallax
 #if @parallax
     float height = texture2D(normalMap, normalMapUV).a;
     float flipY = (passTangent.w > 0.0) ? -1.f : 1.f;
 #else
-    float height = texture2D(diffuseMap, diffuseMapUV).a;
+    float height = texture2D(myText, diffuseMapUV).a;
     // FIXME: shouldn't be necessary, but in this path false-positives are common
     float flipY = -1.f;
 #endif
@@ -139,7 +151,7 @@ void main()
 vec2 screenCoords = gl_FragCoord.xy / screenRes;
 
 #if @diffuseMap
-    gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV + offset);
+    gl_FragData[0] = texture2D(myText, diffuseMapUV + offset);
 
 #if defined(DISTORTION) && DISTORTION
     gl_FragData[0].a = getDiffuseColor().a;
@@ -150,7 +162,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 #if @diffuseParallax
     gl_FragData[0].a = 1.0;
 #else
-    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV + offset);
+    gl_FragData[0].a *= coveragePreservingAlphaScale(myText, diffuseMapUV + offset);
 #endif
 #else
     gl_FragData[0] = vec4(1.0);

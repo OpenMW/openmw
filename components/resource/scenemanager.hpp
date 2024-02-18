@@ -12,6 +12,7 @@
 #include "resourcemanager.hpp"
 
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/bindlesstexture/bindlesstexture.hpp>
 #include <filesystem>
 
 namespace VFS
@@ -230,6 +231,9 @@ namespace Resource
         void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
 
     private:
+        osg::ref_ptr<BindlessBuffer> mBuffer;
+        osg::ref_ptr <BindlessTexture> mTexture;
+
         osg::ref_ptr<Shader::ShaderVisitor> createShaderVisitor(const std::string& shaderPrefix = "objects");
         osg::ref_ptr<osg::Node> loadErrorMarker();
         osg::ref_ptr<osg::Node> cloneErrorMarker();
