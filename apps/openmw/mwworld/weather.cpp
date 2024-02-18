@@ -1,8 +1,9 @@
 #include "weather.hpp"
 
+#include <components/settings/values.hpp>
+
 #include <components/misc/rng.hpp>
 
-#include <components/settings/values.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadregn.hpp>
