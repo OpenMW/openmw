@@ -25,14 +25,7 @@ namespace MWLua
         item["isRestocking"]
             = [](const Object& object) -> bool { return object.ptr().getCellRef().getCount(false) < 0; };
 
-        item["isCarriable"] = [](const Object& object) -> bool {
-            if (object.ptr().getClass().isItem(object.ptr()))
-            {
-                return true;
-            }
-            return object.ptr().mRef->getType() == ESM::REC_LIGH
-                && (object.ptr().get<ESM::Light>()->mBase->mData.mFlags & ESM::Light::Carry) != 0;
-        };
+        item["isCarriable"] = [](const Object& object) -> bool { return object.ptr().getClass().isItem(object.ptr()); };
 
         addItemDataBindings(item, context);
     }
