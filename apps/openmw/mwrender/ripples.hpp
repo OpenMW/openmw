@@ -50,6 +50,10 @@ namespace MWRender
         // e.g. texel to cell unit ratio
         static constexpr float mWorldScaleFactor = 2.5;
 
+    private:
+        void setupFragmentPipeline();
+        void setupComputePipeline();
+
         Resource::ResourceSystem* mResourceSystem;
 
         struct State
@@ -62,10 +66,6 @@ namespace MWRender
         std::array<osg::Vec3f, 100> mPositions;
 
         std::array<State, 2> mState;
-
-    private:
-        void setupFragmentPipeline();
-        void setupComputePipeline();
 
         osg::Vec2f mCurrentPlayerPos;
         osg::Vec2f mLastPlayerPos;
