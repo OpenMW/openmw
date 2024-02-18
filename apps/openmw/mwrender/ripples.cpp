@@ -136,7 +136,6 @@ namespace MWRender
             osg::Vec2f offset = mCurrentPlayerPos - mLastPlayerPos;
             mLastPlayerPos = mCurrentPlayerPos;
             mState[frameId].mPaused = mPaused;
-            mState[frameId].mOffset = offset;
             mState[frameId].mStateset->getUniform("positionCount")->set(static_cast<int>(mPositionCount));
             mState[frameId].mStateset->getUniform("offset")->set(offset);
 

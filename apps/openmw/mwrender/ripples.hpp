@@ -54,7 +54,6 @@ namespace MWRender
 
         struct State
         {
-            osg::Vec2f mOffset;
             osg::ref_ptr<osg::StateSet> mStateset;
             bool mPaused = true;
         };
