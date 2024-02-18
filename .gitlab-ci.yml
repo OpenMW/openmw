@@ -210,6 +210,7 @@ Ubuntu_GCC_Debug:
     CCACHE_SIZE: 3G
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
+    BUILD_SHARED_LIBS: 1
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
