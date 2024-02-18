@@ -63,7 +63,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("offset", osg::Vec2f()));
             stateset->addUniform(new osg::Uniform("positionCount", 0));
             stateset->addUniform(new osg::Uniform(osg::Uniform::Type::FLOAT_VEC3, "positions", 100));
-            stateset->setAttributeAndModes(new osg::Viewport(0, 0, RipplesSurface::mRTTSize, RipplesSurface::mRTTSize));
+            stateset->setAttributeAndModes(new osg::Viewport(0, 0, RipplesSurface::sRTTSize, RipplesSurface::sRTTSize));
             mState[i].mStateset = stateset;
         }
 
@@ -78,7 +78,7 @@ namespace MWRender
             texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_BORDER);
             texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_BORDER);
             texture->setBorderColor(osg::Vec4(0, 0, 0, 0));
-            texture->setTextureSize(mRTTSize, mRTTSize);
+            texture->setTextureSize(sRTTSize, sRTTSize);
 
             mTextures[i] = texture;
 
@@ -99,7 +99,7 @@ namespace MWRender
     {
         auto& shaderManager = mResourceSystem->getSceneManager()->getShaderManager();
 
-        Shader::ShaderManager::DefineMap defineMap = { { "ripple_map_size", std::to_string(mRTTSize) + ".0" } };
+        Shader::ShaderManager::DefineMap defineMap = { { "ripple_map_size", std::to_string(sRTTSize) + ".0" } };
 
         osg::ref_ptr<osg::Shader> vertex = shaderManager.getShader("fullscreen_tri.vert", {}, osg::Shader::VERTEX);
 
@@ -132,7 +132,7 @@ namespace MWRender
             const ESM::Position& playerPos = player.getRefData().getPosition();
 
             mCurrentPlayerPos = osg::Vec2f(
-                std::floor(playerPos.pos[0] / mWorldScaleFactor), std::floor(playerPos.pos[1] / mWorldScaleFactor));
+                std::floor(playerPos.pos[0] / sWorldScaleFactor), std::floor(playerPos.pos[1] / sWorldScaleFactor));
             osg::Vec2f offset = mCurrentPlayerPos - mLastPlayerPos;
             mLastPlayerPos = mCurrentPlayerPos;
             mState[frameId].mPaused = mPaused;
@@ -145,9 +145,9 @@ namespace MWRender
             {
                 osg::Vec3f pos = mPositions[i]
                     - osg::Vec3f(
-                        mCurrentPlayerPos.x() * mWorldScaleFactor, mCurrentPlayerPos.y() * mWorldScaleFactor, 0.0)
-                    + osg::Vec3f(mRTTSize * mWorldScaleFactor / 2, mRTTSize * mWorldScaleFactor / 2, 0.0);
-                pos /= mWorldScaleFactor;
+                        mCurrentPlayerPos.x() * sWorldScaleFactor, mCurrentPlayerPos.y() * sWorldScaleFactor, 0.0)
+                    + osg::Vec3f(sRTTSize * sWorldScaleFactor / 2, sRTTSize * sWorldScaleFactor / 2, 0.0);
+                pos /= sWorldScaleFactor;
                 positions->setElement(i, pos);
             }
             positions->dirty();
@@ -195,7 +195,7 @@ namespace MWRender
                 bindImage(mTextures[1], 0, GL_WRITE_ONLY_ARB);
                 bindImage(mTextures[0], 1, GL_READ_ONLY_ARB);
 
-                ext.glDispatchCompute(mRTTSize / 16, mRTTSize / 16, 1);
+                ext.glDispatchCompute(sRTTSize / 16, sRTTSize / 16, 1);
                 ext.glMemoryBarrier(GL_ALL_BARRIER_BITS);
             }
             else
@@ -217,7 +217,7 @@ namespace MWRender
                 bindImage(mTextures[0], 0, GL_WRITE_ONLY_ARB);
                 bindImage(mTextures[1], 1, GL_READ_ONLY_ARB);
 
-                ext.glDispatchCompute(mRTTSize / 16, mRTTSize / 16, 1);
+                ext.glDispatchCompute(sRTTSize / 16, sRTTSize / 16, 1);
                 ext.glMemoryBarrier(GL_ALL_BARRIER_BITS);
             }
             else
@@ -270,7 +270,7 @@ namespace MWRender
         setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         setNodeMask(Mask_RenderToTexture);
         setClearMask(GL_NONE);
-        setViewport(0, 0, RipplesSurface::mRTTSize, RipplesSurface::mRTTSize);
+        setViewport(0, 0, RipplesSurface::sRTTSize, RipplesSurface::sRTTSize);
         addChild(mRipples);
         setCullingActive(false);
         setImplicitBufferAttachmentMask(0, 0);

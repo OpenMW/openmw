@@ -46,9 +46,9 @@ namespace MWRender
 
         void releaseGLObjects(osg::State* state) const override;
 
-        static constexpr size_t mRTTSize = 1024;
+        static constexpr size_t sRTTSize = 1024;
         // e.g. texel to cell unit ratio
-        static constexpr float mWorldScaleFactor = 2.5;
+        static constexpr float sWorldScaleFactor = 2.5;
 
     private:
         void setupFragmentPipeline();

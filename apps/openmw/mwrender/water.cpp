@@ -704,8 +704,8 @@ namespace MWRender
         defineMap["refraction_enabled"] = std::string(mRefraction ? "1" : "0");
         const int rippleDetail = Settings::water().mRainRippleDetail;
         defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
-        defineMap["ripple_map_world_scale"] = std::to_string(RipplesSurface::mWorldScaleFactor);
-        defineMap["ripple_map_size"] = std::to_string(RipplesSurface::mRTTSize) + ".0";
+        defineMap["ripple_map_world_scale"] = std::to_string(RipplesSurface::sWorldScaleFactor);
+        defineMap["ripple_map_size"] = std::to_string(RipplesSurface::sRTTSize) + ".0";
 
         Stereo::shaderStereoDefines(defineMap);
 
