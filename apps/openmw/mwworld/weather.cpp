@@ -47,7 +47,8 @@ namespace MWWorld
         osg::Vec3f calculateStormDirection(const std::string& particleEffect)
         {
             osg::Vec3f stormDirection = MWWorld::Weather::defaultDirection();
-            if (particleEffect == Settings::models().mWeatherashcloud.get() || particleEffect == Settings::models().mWeatherblightcloud.get())
+            if (particleEffect == Settings::models().mWeatherashcloud.get()
+                || particleEffect == Settings::models().mWeatherblightcloud.get())
             {
                 osg::Vec3f playerPos = MWMechanics::getPlayer().getRefData().getPosition().asVec3();
                 playerPos.z() = 0;
