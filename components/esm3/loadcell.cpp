@@ -190,25 +190,15 @@ namespace ESM
 
         if (mData.mFlags & Interior)
         {
-            if (mWaterInt)
-            {
-                int32_t water = (mWater >= 0) ? static_cast<int32_t>(mWater + 0.5) : static_cast<int32_t>(mWater - 0.5);
-                esm.writeHNT("INTV", water);
-            }
-            else
-            {
+            // Try to avoid saving ambient information when it's unnecessary.
+            // This is to fix black lighting and flooded water
+            // in resaved cell records that lack this information.
+            if (mWaterInt && mWater != 0)
                 esm.writeHNT("WHGT", mWater);
-            }
-
             if (mData.mFlags & QuasiEx)
                 esm.writeHNOCRefId("RGNN", mRegion);
-            else
-            {
-                // Try to avoid saving ambient lighting information when it's unnecessary.
-                // This is to fix black lighting in resaved cell records that lack this information.
-                if (mHasAmbi)
-                    esm.writeHNT("AMBI", mAmbi, 16);
-            }
+            else if (mHasAmbi)
+                esm.writeHNT("AMBI", mAmbi, 16);
         }
         else
         {
