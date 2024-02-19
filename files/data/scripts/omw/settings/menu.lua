@@ -386,7 +386,9 @@ local function onGroupRegistered(global, key)
 
     if not pages[group.page] then return end
     if pageOptions[group.page] then
-        pageOptions[group.page].element:destroy()
+        if pageOptions[group.page].element then
+            pageOptions[group.page].element:destroy()
+        end
     else
         pageOptions[group.page] = {}
     end
@@ -423,21 +425,24 @@ local menuPages = {}
 local function resetPlayerGroups()
     local playerGroupsSection = storage.playerSection(common.groupSectionKey)
     for pageKey, page in pairs(groups) do
-        for groupKey, group in pairs(page) do
-            if not menuGroups[groupKey] and not group.global then
+        for groupKey in pairs(page) do
+            if not menuGroups[groupKey] then
                 page[groupKey] = nil
                 playerGroupsSection:set(groupKey, nil)
             end
         end
-        if pageOptions[pageKey] then
-            pageOptions[pageKey].element:destroy()
+        local options = pageOptions[pageKey]
+        if options then
+            if options.element then
+                options.element:destroy()
+            end
             if not menuPages[pageKey] then
-                ui.removeSettingsPage(pageOptions[pageKey])
+                ui.removeSettingsPage(options)
                 pageOptions[pageKey] = nil
             else
                 local renderedOptions = renderPage(pages[pageKey])
                 for k, v in pairs(renderedOptions) do
-                    pageOptions[pageKey][k] = v
+                    options[k] = v
                 end
             end
         end
