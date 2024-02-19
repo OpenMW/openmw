@@ -407,10 +407,7 @@ local function updateGroups(global)
         end
     end))
 end
-
 local updatePlayerGroups = function() updateGroups(false) end
-updatePlayerGroups()
-
 local updateGlobalGroups = function() updateGroups(true) end
 
 local menuGroups = {}
@@ -470,6 +467,11 @@ local function registerPage(options)
     pageOptions[page.key] = pageOptions[page.key] or {}
     renderPage(page, pageOptions[page.key])
     ui.registerSettingsPage(pageOptions[page.key])
+end
+
+updatePlayerGroups()
+if menu.getState() == menu.STATE.Running then -- handle reloadlua correctly
+    updateGlobalGroups()
 end
 
 return {
