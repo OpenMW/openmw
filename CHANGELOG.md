@@ -144,6 +144,7 @@
     Bug #7794: Fleeing NPCs name tooltip doesn't appear
     Bug #7796: Absorbed enchantments don't restore magicka
     Bug #7832: Ingredient tooltips show magnitude for Fortify Maximum Magicka effect
+    Bug #7840: First run of the launcher doesn't save viewing distance as the default value
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
