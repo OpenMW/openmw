@@ -4,6 +4,8 @@
 #include <components/misc/strings/conversion.hpp>
 
 #include <osg/Config>
+#include <osg/Version>
+#include <osgDB/FileUtils>
 #include <osgDB/PluginQuery>
 
 #include <algorithm>
@@ -30,6 +32,31 @@ namespace Misc
 
     bool checkRequiredOSGPluginsArePresent()
     {
+        // work around osgDB::listAllAvailablePlugins() not working on some platforms due to a suspected OSG bug
+        std::filesystem::path pluginDirectoryName = std::string("osgPlugins-") + std::string(osgGetVersion());
+        osgDB::FilePathList& filepath = osgDB::getLibraryFilePathList();
+        for (const auto& path : filepath)
+        {
+#ifdef OSG_USE_UTF8_FILENAME
+            std::filesystem::path osgPath {stringToU8String(path)};
+#else
+            std::filesystem::path osgPath {path};
+#endif
+            if (!osgPath.has_filename())
+                osgPath = osgPath.parent_path();
+            
+            if (osgPath.filename() == pluginDirectoryName)
+            {
+                osgPath = osgPath.parent_path();
+#ifdef OSG_USE_UTF8_FILENAME
+                std::string extraPath = u8StringToString(osgPath.u8string_view());
+#else
+                std::string extraPath = osgPath.string();
+#endif
+                filepath.emplace_back(std::move(extraPath));
+            }
+        }
+
         auto availableOSGPlugins = osgDB::listAllAvailablePlugins();
         bool haveAllPlugins = true;
         for (std::string_view plugin : USED_OSG_PLUGIN_FILENAMES)
