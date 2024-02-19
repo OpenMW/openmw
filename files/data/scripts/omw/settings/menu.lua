@@ -268,7 +268,7 @@ local function generateSearchHints(page)
     return table.concat(hints, ' ')
 end
 
-local function renderPage(page)
+local function renderPage(page, options)
     local l10n = core.l10n(page.l10n)
     local sortedGroups = {}
     for _, group in pairs(groups[page.key]) do
@@ -329,11 +329,10 @@ local function renderPage(page)
             bigSpacer,
         },
     }
-    return {
-        name = l10n(page.name),
-        element = ui.create(layout),
-        searchHints = generateSearchHints(page),
-    }
+    if options.element then options.element:destroy() end
+    options.name = l10n(page.name)
+    options.element = ui.create(layout)
+    options.searchHints = generateSearchHints(page)
 end
 
 local function onSettingChanged(global)
@@ -341,8 +340,12 @@ local function onSettingChanged(global)
         local group = common.getSection(global, common.groupSectionKey):get(groupKey)
         if not group or not pageOptions[group.page] then return end
 
-        local value = common.getSection(global, group.key):get(settingKey)
+        if not settingKey then
+            renderPage(pages[group.page], pageOptions[group.page])
+            return
+        end
 
+        local value = common.getSection(global, group.key):get(settingKey)
         local element = pageOptions[group.page].element
         local groupsLayout = element.layout.content.groups
         local groupLayout = groupsLayout.content[groupLayoutName(group.key, global)]
@@ -385,17 +388,8 @@ local function onGroupRegistered(global, key)
     groups[group.page][pageGroup.key] = pageGroup
 
     if not pages[group.page] then return end
-    if pageOptions[group.page] then
-        if pageOptions[group.page].element then
-            pageOptions[group.page].element:destroy()
-        end
-    else
-        pageOptions[group.page] = {}
-    end
-    local renderedOptions = renderPage(pages[group.page])
-    for k, v in pairs(renderedOptions) do
-        pageOptions[group.page][k] = v
-    end
+    pageOptions[group.page] = pageOptions[group.page] or {}
+    renderPage(pages[group.page], pageOptions[group.page])
 end
 
 local function updateGroups(global)
@@ -433,17 +427,14 @@ local function resetPlayerGroups()
         end
         local options = pageOptions[pageKey]
         if options then
-            if options.element then
-                options.element:destroy()
-            end
             if not menuPages[pageKey] then
+                if options.element then
+                    options.element:destroy()
+                end
                 ui.removeSettingsPage(options)
                 pageOptions[pageKey] = nil
             else
-                local renderedOptions = renderPage(pages[pageKey])
-                for k, v in pairs(renderedOptions) do
-                    options[k] = v
-                end
+                renderPage(pages[pageKey], options)
             end
         end
     end
@@ -477,10 +468,7 @@ local function registerPage(options)
         pageOptions[page.key].element:destroy()
     end
     pageOptions[page.key] = pageOptions[page.key] or {}
-    local renderedOptions = renderPage(page)
-    for k, v in pairs(renderedOptions) do
-        pageOptions[page.key][k] = v
-    end
+    renderPage(page, pageOptions[page.key])
     ui.registerSettingsPage(pageOptions[page.key])
 end
 
