@@ -95,7 +95,8 @@ set(BUILTIN_DATA_FILES
     scripts/omw/worldeventhandlers.lua
     scripts/omw/input/actionbindings.lua
     scripts/omw/input/smoothmovement.lua
-
+    scripts/omw/input/gamepadcontrols.lua
+    
     shaders/adjustments.omwfx
     shaders/bloomlinear.omwfx
     shaders/debug.omwfx

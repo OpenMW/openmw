@@ -16,6 +16,7 @@ PLAYER: scripts/omw/playercontrols.lua
 PLAYER: scripts/omw/camera/camera.lua
 PLAYER: scripts/omw/input/actionbindings.lua
 PLAYER: scripts/omw/input/smoothmovement.lua
+PLAYER: scripts/omw/input/gamepadcontrols.lua
 NPC,CREATURE: scripts/omw/ai.lua
 
 # User interface

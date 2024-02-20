@@ -37,6 +37,7 @@ Lua API reference
     interface_animation
     interface_camera
     interface_controls
+    interface_gamepadcontrols
     interface_item_usage
     interface_mwui
     interface_settings
