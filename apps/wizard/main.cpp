@@ -1,6 +1,12 @@
 #include <QApplication>
 #include <QDir>
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
+#include <components/files/qtconversion.hpp>
+#include <components/l10n/qttranslations.hpp>
+
 #include "mainwizard.hpp"
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -11,6 +17,11 @@
 
 int main(int argc, char* argv[])
 {
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description description;
+    Files::ConfigurationManager configurationManager;
+    configurationManager.addCommonOptions(description);
+    configurationManager.readConfiguration(variables, description, true);
 
     QApplication app(argc, argv);
 
@@ -27,6 +38,14 @@ int main(int argc, char* argv[])
     libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
     app.setLibraryPaths(libraryPaths);
 #endif
+
+    QString resourcesPath(".");
+    if (!variables["resources"].empty())
+    {
+        resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
+    }
+
+    l10n::installQtTranslations(app, "wizard", resourcesPath);
 
     Wizard::MainWizard wizard;
 

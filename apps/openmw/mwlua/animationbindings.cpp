@@ -23,24 +23,6 @@
 
 namespace MWLua
 {
-    struct AnimationGroup;
-    struct TextKeyCallback;
-}
-
-namespace sol
-{
-    template <>
-    struct is_automagical<MWLua::AnimationGroup> : std::false_type
-    {
-    };
-    template <>
-    struct is_automagical<std::shared_ptr<MWLua::TextKeyCallback>> : std::false_type
-    {
-    };
-}
-
-namespace MWLua
-{
     using BlendMask = MWRender::Animation::BlendMask;
     using BoneGroup = MWRender::Animation::BoneGroup;
     using Priority = MWMechanics::Priority;
@@ -119,7 +101,7 @@ namespace MWLua
         if (asTable)
         {
             AnimationPriorities priorities = AnimationPriorities(Priority::Priority_Default);
-            for (auto entry : asTable.value())
+            for (const auto& entry : asTable.value())
             {
                 if (!entry.first.is<BoneGroup>() || !entry.second.is<Priority>())
                     throw std::runtime_error("Priority table must consist of BoneGroup-Priority pairs only");
@@ -249,7 +231,7 @@ namespace MWLua
         // Extended variant of MWScript's PlayGroup and LoopGroup
         api["playQueued"] = sol::overload(
             [mechanics](const sol::object& object, const std::string& groupname, const sol::table& options) {
-                int numberOfLoops = options.get_or("loops", std::numeric_limits<int>::max());
+                uint32_t numberOfLoops = options.get_or("loops", std::numeric_limits<uint32_t>::max());
                 float speed = options.get_or("speed", 1.f);
                 std::string startKey = options.get_or<std::string>("startkey", "start");
                 std::string stopKey = options.get_or<std::string>("stopkey", "stop");
@@ -265,7 +247,7 @@ namespace MWLua
             });
 
         api["playBlended"] = [](const sol::object& object, std::string_view groupname, const sol::table& options) {
-            int loops = options.get_or("loops", 0);
+            uint32_t loops = options.get_or("loops", 0u);
             MWRender::Animation::AnimPriority priority = getPriorityArgument(options);
             BlendMask blendMask = options.get_or("blendmask", BlendMask::BlendMask_All);
             bool autoDisable = options.get_or("autodisable", true);
@@ -344,18 +326,19 @@ namespace MWLua
             [world, context](const sol::object& staticOrID, const osg::Vec3f& worldPos) {
                 auto model = getStaticModelOrThrow(staticOrID);
                 context.mLuaManager->addAction(
-                    [world, model, worldPos]() { world->spawnEffect(model, "", worldPos); }, "openmw.vfx.spawn");
+                    [world, model = std::move(model), worldPos]() { world->spawnEffect(model, "", worldPos); },
+                    "openmw.vfx.spawn");
             },
             [world, context](const sol::object& staticOrID, const osg::Vec3f& worldPos, const sol::table& options) {
                 auto model = getStaticModelOrThrow(staticOrID);
 
                 bool magicVfx = options.get_or("mwMagicVfx", true);
-                std::string textureOverride = options.get_or<std::string>("particleTextureOverride", "");
+                std::string texture = options.get_or<std::string>("particleTextureOverride", "");
                 float scale = options.get_or("scale", 1.f);
 
                 context.mLuaManager->addAction(
-                    [world, model, textureOverride, worldPos, scale, magicVfx]() {
-                        world->spawnEffect(model, textureOverride, worldPos, scale, magicVfx);
+                    [world, model = std::move(model), texture = std::move(texture), worldPos, scale, magicVfx]() {
+                        world->spawnEffect(model, texture, worldPos, scale, magicVfx);
                     },
                     "openmw.vfx.spawn");
             });

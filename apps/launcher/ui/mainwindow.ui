@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
+    <width>750</width>
     <height>635</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>720</width>
+    <width>750</width>
     <height>635</height>
    </size>
   </property>
@@ -148,7 +148,7 @@ QToolButton {
     <string>Display</string>
    </property>
    <property name="toolTip">
-    <string>Allows to change graphics settings</string>
+    <string>Allows to change display settings</string>
    </property>
   </action>
   <action name="settingsAction">

@@ -201,6 +201,80 @@ namespace MWLua
         }
 
         template <class ObjectT>
+        void addOwnerbindings(sol::usertype<ObjectT>& objectT, const std::string& prefix, const Context& context)
+        {
+            using OwnerT = Owner<ObjectT>;
+            sol::usertype<OwnerT> ownerT = context.mLua->sol().new_usertype<OwnerT>(prefix + "Owner");
+
+            ownerT[sol::meta_function::to_string] = [](const OwnerT& o) { return "Owner[" + o.mObj.toString() + "]"; };
+
+            auto getOwnerRecordId = [](const OwnerT& o) -> sol::optional<std::string> {
+                ESM::RefId owner = o.mObj.ptr().getCellRef().getOwner();
+                if (owner.empty())
+                    return sol::nullopt;
+                else
+                    return owner.serializeText();
+            };
+            auto setOwnerRecordId = [](const OwnerT& o, sol::optional<std::string_view> ownerId) {
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                    throw std::runtime_error("Local scripts can set an owner only on self");
+                const MWWorld::Ptr& ptr = o.mObj.ptr();
+
+                if (!ownerId)
+                {
+                    ptr.getCellRef().setOwner(ESM::RefId());
+                    return;
+                }
+                ESM::RefId owner = ESM::RefId::deserializeText(*ownerId);
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+                if (!store.get<ESM::NPC>().search(owner))
+                    throw std::runtime_error("Invalid owner record id");
+                ptr.getCellRef().setOwner(owner);
+            };
+            ownerT["recordId"] = sol::property(getOwnerRecordId, setOwnerRecordId);
+
+            auto getOwnerFactionId = [](const OwnerT& o) -> sol::optional<std::string> {
+                ESM::RefId owner = o.mObj.ptr().getCellRef().getFaction();
+                if (owner.empty())
+                    return sol::nullopt;
+                else
+                    return owner.serializeText();
+            };
+            auto setOwnerFactionId = [](const OwnerT& o, sol::optional<std::string> ownerId) {
+                ESM::RefId ownerFac;
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                    throw std::runtime_error("Local scripts can set an owner faction only on self");
+                if (!ownerId)
+                {
+                    o.mObj.ptr().getCellRef().setFaction(ESM::RefId());
+                    return;
+                }
+                ownerFac = ESM::RefId::deserializeText(*ownerId);
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+                if (!store.get<ESM::Faction>().search(ownerFac))
+                    throw std::runtime_error("Invalid owner faction id");
+                o.mObj.ptr().getCellRef().setFaction(ownerFac);
+            };
+            ownerT["factionId"] = sol::property(getOwnerFactionId, setOwnerFactionId);
+
+            auto getOwnerFactionRank = [](const OwnerT& o) -> sol::optional<int> {
+                int rank = o.mObj.ptr().getCellRef().getFactionRank();
+                if (rank < 0)
+                    return sol::nullopt;
+                else
+                    return rank;
+            };
+            auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<int> factionRank) {
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                    throw std::runtime_error("Local scripts can set an owner faction rank only on self");
+                o.mObj.ptr().getCellRef().setFactionRank(factionRank.value_or(-1));
+            };
+            ownerT["factionRank"] = sol::property(getOwnerFactionRank, setOwnerFactionRank);
+
+            objectT["owner"] = sol::readonly_property([](const ObjectT& object) { return OwnerT{ object }; });
+        }
+
+        template <class ObjectT>
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
             objectT["id"] = sol::readonly_property([](const ObjectT& o) -> std::string { return o.id().toString(); });
@@ -215,7 +289,7 @@ namespace MWLua
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
             objectT["globalVariable"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<std::string> {
-                std::string globalVariable = o.ptr().getCellRef().getGlobalVariable();
+                std::string_view globalVariable = o.ptr().getCellRef().getGlobalVariable();
                 if (globalVariable.empty())
                     return sol::nullopt;
                 else
@@ -266,68 +340,6 @@ namespace MWLua
                 context.mLuaEvents->addLocalEvent(
                     { dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
-            auto getOwnerRecordId = [](const ObjectT& o) -> sol::optional<std::string> {
-                ESM::RefId owner = o.ptr().getCellRef().getOwner();
-                if (owner.empty())
-                    return sol::nullopt;
-                else
-                    return owner.serializeText();
-            };
-            auto setOwnerRecordId = [](const ObjectT& obj, sol::optional<std::string_view> ownerId) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&obj))
-                    throw std::runtime_error("Local scripts can set an owner only on self");
-                const MWWorld::Ptr& ptr = obj.ptr();
-
-                if (!ownerId)
-                {
-                    ptr.getCellRef().setOwner(ESM::RefId());
-                    return;
-                }
-                ESM::RefId owner = ESM::RefId::deserializeText(*ownerId);
-                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-                if (!store.get<ESM::NPC>().search(owner))
-                    throw std::runtime_error("Invalid owner record id");
-                ptr.getCellRef().setOwner(owner);
-            };
-            objectT["ownerRecordId"] = sol::property(getOwnerRecordId, setOwnerRecordId);
-
-            auto getOwnerFactionId = [](const ObjectT& o) -> sol::optional<std::string> {
-                ESM::RefId owner = o.ptr().getCellRef().getFaction();
-                if (owner.empty())
-                    return sol::nullopt;
-                else
-                    return owner.serializeText();
-            };
-            auto setOwnerFactionId = [](const ObjectT& object, sol::optional<std::string> ownerId) {
-                ESM::RefId ownerFac;
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&object))
-                    throw std::runtime_error("Local scripts can set an owner faction only on self");
-                if (!ownerId)
-                {
-                    object.ptr().getCellRef().setFaction(ESM::RefId());
-                    return;
-                }
-                ownerFac = ESM::RefId::deserializeText(*ownerId);
-                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-                if (!store.get<ESM::Faction>().search(ownerFac))
-                    throw std::runtime_error("Invalid owner faction id");
-                object.ptr().getCellRef().setFaction(ownerFac);
-            };
-            objectT["ownerFactionId"] = sol::property(getOwnerFactionId, setOwnerFactionId);
-
-            auto getOwnerFactionRank = [](const ObjectT& o) -> sol::optional<int> {
-                int rank = o.ptr().getCellRef().getFactionRank();
-                if (rank < 0)
-                    return sol::nullopt;
-                else
-                    return rank;
-            };
-            auto setOwnerFactionRank = [](const ObjectT& object, sol::optional<int> factionRank) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&object))
-                    throw std::runtime_error("Local scripts can set an owner faction rank only on self");
-                object.ptr().getCellRef().setFactionRank(factionRank.value_or(-1));
-            };
-            objectT["ownerFactionRank"] = sol::property(getOwnerFactionRank, setOwnerFactionRank);
 
             objectT["activateBy"] = [](const ObjectT& object, const ObjectT& actor) {
                 const MWWorld::Ptr& objPtr = object.ptr();
@@ -619,7 +631,7 @@ namespace MWLua
             inventoryT["countOf"] = [](const InventoryT& inventory, std::string_view recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                return store.count(ESM::RefId::stringRefId(recordId));
+                return store.count(ESM::RefId::deserializeText(recordId));
             };
             if constexpr (std::is_same_v<ObjectT, GObject>)
             {
@@ -637,7 +649,7 @@ namespace MWLua
             inventoryT["find"] = [](const InventoryT& inventory, std::string_view recordId) -> sol::optional<ObjectT> {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                auto itemId = ESM::RefId::stringRefId(recordId);
+                auto itemId = ESM::RefId::deserializeText(recordId);
                 for (const MWWorld::Ptr& item : store)
                 {
                     if (item.getCellRef().getRefId() == itemId)
@@ -651,7 +663,7 @@ namespace MWLua
             inventoryT["findAll"] = [](const InventoryT& inventory, std::string_view recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                auto itemId = ESM::RefId::stringRefId(recordId);
+                auto itemId = ESM::RefId::deserializeText(recordId);
                 ObjectIdList list = std::make_shared<std::vector<ObjectId>>();
                 for (const MWWorld::Ptr& item : store)
                 {
@@ -672,6 +684,7 @@ namespace MWLua
                 = context.mLua->sol().new_usertype<ObjectT>(prefix + "Object", sol::base_classes, sol::bases<Object>());
             addBasicBindings<ObjectT>(objectT, context);
             addInventoryBindings<ObjectT>(objectT, prefix, context);
+            addOwnerbindings<ObjectT>(objectT, prefix, context);
 
             registerObjectList<ObjectT>(prefix, context);
         }

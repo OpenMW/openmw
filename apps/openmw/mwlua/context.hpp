@@ -15,6 +15,7 @@ namespace MWLua
 
     struct Context
     {
+        bool mIsMenu;
         bool mIsGlobal;
         LuaManager* mLuaManager;
         LuaUtil::LuaState* mLua;

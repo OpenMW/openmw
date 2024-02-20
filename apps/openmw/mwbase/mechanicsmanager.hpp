@@ -110,7 +110,9 @@ namespace MWBase
         virtual bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
 
         /// Makes \a ptr fight \a target. Also shouts a combat taunt.
-        virtual void startCombat(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
+        virtual void startCombat(
+            const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, const std::set<MWWorld::Ptr>* targetAllies)
+            = 0;
 
         /// Removes an actor and its allies from combat with the actor's targets.
         virtual void stopCombat(const MWWorld::Ptr& ptr) = 0;
@@ -171,7 +173,7 @@ namespace MWBase
         ///< Forces an object to refresh its animation state.
 
         virtual bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number = 1, bool scripted = false)
+            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number = 1, bool scripted = false)
             = 0;
         ///< Run animation for a MW-reference. Calls to this function for references that are currently not
         /// in the scene should be ignored.
@@ -180,8 +182,8 @@ namespace MWBase
         /// \param number How many times the animation should be run
         /// \param scripted Whether the animation should be treated as a scripted animation.
         /// \return Success or error
-        virtual bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
-            std::string_view startKey, std::string_view stopKey, bool forceLoop)
+        virtual bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops,
+            float speed, std::string_view startKey, std::string_view stopKey, bool forceLoop)
             = 0;
         ///< Lua variant of playAnimationGroup. The mode parameter is omitted
         /// and forced to 0. modes 1 and 2 can be emulated by doing clearAnimationQueue() and

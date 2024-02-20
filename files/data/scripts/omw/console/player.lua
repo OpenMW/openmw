@@ -77,6 +77,7 @@ local env = {
     nearby = require('openmw.nearby'),
     self = require('openmw.self'),
     input = require('openmw.input'),
+    postprocessing = require('openmw.postprocessing'),
     ui = require('openmw.ui'),
     camera = require('openmw.camera'),
     aux_util = require('openmw_aux.util'),
@@ -114,9 +115,12 @@ local function onConsoleCommand(mode, cmd, selectedObject)
                 cmd = 'luag'
             elseif arg == 'selected' then
                 cmd = 'luas'
+            elseif arg == 'menu' then
+                -- handled in menu.lua
             else
                 local msg = [[
-Usage: 'lua player' or 'luap' - enter player context
+Usage: 'lua menu' or 'luam' - enter menu context
+       'lua player' or 'luap' - enter player context
        'lua global' or 'luag' - enter global context
        'lua selected' or 'luas' - enter local context on the selected object]]
                 ui.printToConsole(msg, ui.CONSOLE_COLOR.Info)
@@ -158,4 +162,3 @@ return {
         OMWConsoleHelp = printHelp,
     }
 }
-

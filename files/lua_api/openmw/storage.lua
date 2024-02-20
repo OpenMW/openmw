@@ -17,13 +17,14 @@
 
 ---
 -- Get a section of the global storage; can be used by any script, but only global scripts can change values.
+-- Menu scripts can only access it when a game is running.
 -- Creates the section if it doesn't exist.
 -- @function [parent=#storage] globalSection
 -- @param #string sectionName
 -- @return #StorageSection
 
 ---
--- Get a section of the player storage; can be used by player scripts only.
+-- Get a section of the player storage; can only be used by player and menu scripts.
 -- Creates the section if it doesn't exist.
 -- @function [parent=#storage] playerSection
 -- @param #string sectionName
@@ -36,7 +37,7 @@
 -- @return #table
 
 ---
--- Get all global sections as a table; can be used by player scripts only.
+-- Get all player sections as a table; can only be used by player and menu scripts.
 -- Note that adding/removing items to the returned table doesn't create or remove sections.
 -- @function [parent=#storage] allPlayerSections
 -- @return #table

@@ -844,7 +844,7 @@ namespace MWRender
                         }
                     }
                 }
-                SceneUtil::ForceControllerSourcesVisitor assignVisitor(src);
+                SceneUtil::ForceControllerSourcesVisitor assignVisitor(std::move(src));
                 node->accept(assignVisitor);
             }
             else
@@ -952,7 +952,7 @@ namespace MWRender
             if (weapon != inv.end())
             {
                 osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
-                std::string mesh = weapon->getClass().getModel(*weapon);
+                std::string mesh = weapon->getClass().getCorrectedModel(*weapon);
                 addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1, mesh,
                     !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
@@ -1012,7 +1012,7 @@ namespace MWRender
         if (show && iter != inv.end())
         {
             osg::Vec4f glowColor = iter->getClass().getEnchantmentColor(*iter);
-            std::string mesh = iter->getClass().getModel(*iter);
+            std::string mesh = iter->getClass().getCorrectedModel(*iter);
             // For shields we must try to use the body part model
             if (iter->getType() == ESM::Armor::sRecordId)
             {

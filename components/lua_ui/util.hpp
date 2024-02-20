@@ -10,7 +10,8 @@ namespace LuaUi
 
     const std::unordered_map<std::string, std::string>& widgetTypeToName();
 
-    void clearUserInterface();
+    void clearGameInterface();
+    void clearMenuInterface();
 }
 
 #endif // OPENMW_LUAUI_WIDGETLIST

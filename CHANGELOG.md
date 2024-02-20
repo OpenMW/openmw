@@ -24,7 +24,9 @@
     Bug #5129: Stuttering animation on Centurion Archer
     Bug #5280: Unskinned shapes in skinned equipment are rendered in the wrong place
     Bug #5371: Keyframe animation tracks are used for any file that begins with an X
+    Bug #5413: Enemies do a battlecry everytime the player summons a creature
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
+    Bug #5755: Reset friendly hit counter
     Bug #5849: Paralysis breaks landing
     Bug #5870: Disposing of actors who were selected in the console doesn't deselect them like vanilla
     Bug #5883: Immobile creatures don't cause water ripples
@@ -37,6 +39,7 @@
     Bug #6402: The sound of a thunderstorm does not stop playing after entering the premises
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6550: Cloned body parts don't inherit texture effects
+    Bug #6574: Crash at far away from world origin coordinates
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
@@ -61,6 +64,7 @@
     Bug #7034: Misc items defined in one content file are not treated as keys if another content file uses them as such
     Bug #7042: Weapon follow animations that immediately follow the hit animations cause multiple hits
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
+    Bug #7053: Running into objects doesn't trigger GetCollidingPC
     Bug #7054: Quests aren't sorted by name
     Bug #7064: NPCs don't report crime if the player is casting offensive spells on them while sneaking
     Bug #7077: OpenMW fails to load certain particle effects in .osgt format
@@ -107,6 +111,7 @@
     Bug #7619: Long map notes may get cut off
     Bug #7630: Charm can be cast on creatures
     Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
+    Bug #7633: Groundcover should ignore non-geometry Drawables
     Bug #7636: Animations bug out when switching between 1st and 3rd person, while playing a scripted animation
     Bug #7637: Actors can sometimes move while playing scripted animations
     Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
@@ -128,18 +133,28 @@
     Bug #7724: Guards don't help vs werewolves
     Bug #7733: Launcher shows incorrect data paths when there's two plugins with the same name
     Bug #7742: Governing attribute training limit should use the modified attribute
+    Bug #7753: Editor: Actors Don't Scale According to Their Race
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
     Bug #7765: OpenMW-CS: Touch Record option is broken
+    Bug #7769: Sword of the Perithia: Broken NPCs
     Bug #7770: Sword of the Perithia: Script execution failure
     Bug #7780: Non-ASCII texture paths in NIF files don't work
+    Bug #7785: OpenMW-CS initialising Skill and Attribute fields to 0 instead of -1 on non-FortifyStat spells
+    Bug #7794: Fleeing NPCs name tooltip doesn't appear
+    Bug #7796: Absorbed enchantments don't restore magicka
+    Bug #7832: Ingredient tooltips show magnitude for Fortify Maximum Magicka effect
+    Bug #7840: First run of the launcher doesn't save viewing distance as the default value
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
+    Feature #5926: Refraction based on water depth
+    Feature #5944: Option to use camera as sound listener
     Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts
     Feature #6188: Specular lighting from point light sources
+    Feature #6411: Support translations in openmw-launcher
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
@@ -166,13 +181,18 @@
     Feature #7546: Start the game on Fredas
     Feature #7554: Controller binding for tab for menu navigation
     Feature #7568: Uninterruptable scripted music
+    Feature #7606: Launcher: allow Shift-select in Archives tab
     Feature #7608: Make the missing dependencies warning when loading a savegame more helpful
     Feature #7618: Show the player character's health in the save details
     Feature #7625: Add some missing console error outputs
     Feature #7634: Support NiParticleBomb
+    Feature #7648: Lua Save game API
     Feature #7652: Sort inactive post processing shaders list properly
     Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
+    Feature #7792: Support Timescale Clouds
+    Feature #7795: Support MaxNumberRipples INI setting
+    Feature #7805: Lua Menu context
     Task #5896: Do not use deprecated MyGUI properties
     Task #6624: Drop support for saves made prior to 0.45
     Task #7113: Move from std::atoi to std::from_char

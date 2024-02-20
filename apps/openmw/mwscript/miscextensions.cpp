@@ -1435,7 +1435,7 @@ namespace MWScript
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                     std::string model
-                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), vfs);
+                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs);
                     msg << "Model: " << model << std::endl;
                     if (!model.empty())
                     {
@@ -1711,7 +1711,7 @@ namespace MWScript
                 for (const T& record : store.get<T>())
                 {
                     MWWorld::ManualRef ref(store, record.mId);
-                    std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+                    std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
                     if (!model.empty())
                     {
                         sceneManager->getTemplate(model);

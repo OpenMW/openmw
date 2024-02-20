@@ -27,6 +27,9 @@
 -- @field [parent=#interfaces] scripts.omw.usehandlers#scripts.omw.usehandlers ItemUsage
 
 ---
+-- @field [parent=#interfaces] scripts.omw.skillhandlers#scripts.omw.skillhandlers SkillProgression
+
+---
 -- @function [parent=#interfaces] __index
 -- @param #interfaces self
 -- @param #string key

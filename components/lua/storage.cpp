@@ -31,6 +31,7 @@ namespace LuaUtil
 
     const LuaStorage::Value& LuaStorage::Section::get(std::string_view key) const
     {
+        checkIfActive();
         auto it = mValues.find(key);
         if (it != mValues.end())
             return it->second;
@@ -49,6 +50,14 @@ namespace LuaUtil
                                  return !valid;
                              }),
             mCallbacks.end());
+        mMenuScriptsCallbacks.erase(std::remove_if(mMenuScriptsCallbacks.begin(), mMenuScriptsCallbacks.end(),
+                                        [&](const Callback& callback) {
+                                            bool valid = callback.isValid();
+                                            if (valid)
+                                                callback.tryCall(mSectionName, changedKey);
+                                            return !valid;
+                                        }),
+            mMenuScriptsCallbacks.end());
         mStorage->mRunningCallbacks.erase(this);
     }
 
@@ -64,6 +73,7 @@ namespace LuaUtil
 
     void LuaStorage::Section::set(std::string_view key, const sol::object& value)
     {
+        checkIfActive();
         throwIfCallbackRecursionIsTooDeep();
         if (value != sol::nil)
             mValues[std::string(key)] = Value(value);
@@ -80,6 +90,7 @@ namespace LuaUtil
 
     void LuaStorage::Section::setAll(const sol::optional<sol::table>& values)
     {
+        checkIfActive();
         throwIfCallbackRecursionIsTooDeep();
         mValues.clear();
         if (values)
@@ -94,6 +105,7 @@ namespace LuaUtil
 
     sol::table LuaStorage::Section::asTable()
     {
+        checkIfActive();
         sol::table res(mStorage->mLua, sol::create);
         for (const auto& [k, v] : mValues)
             res[k] = v.getCopy(mStorage->mLua);
@@ -112,7 +124,8 @@ namespace LuaUtil
         };
         sview["asTable"] = [](const SectionView& section) { return section.mSection->asTable(); };
         sview["subscribe"] = [](const SectionView& section, const sol::table& callback) {
-            std::vector<Callback>& callbacks = section.mSection->mCallbacks;
+            std::vector<Callback>& callbacks
+                = section.mForMenuScripts ? section.mSection->mMenuScriptsCallbacks : section.mSection->mCallbacks;
             if (!callbacks.empty() && callbacks.size() == callbacks.capacity())
             {
                 callbacks.erase(
@@ -166,14 +179,29 @@ namespace LuaUtil
         return LuaUtil::makeReadOnly(res);
     }
 
+    sol::table LuaStorage::initMenuPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage)
+    {
+        sol::table res(lua, sol::create);
+        res["playerSection"] = [playerStorage](std::string_view section) {
+            return playerStorage->getMutableSection(section, /*forMenuScripts=*/true);
+        };
+        res["globalSection"]
+            = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
+        res["allPlayerSections"] = [playerStorage]() { return playerStorage->getAllSections(); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
     void LuaStorage::clearTemporaryAndRemoveCallbacks()
     {
         auto it = mData.begin();
         while (it != mData.end())
         {
             it->second->mCallbacks.clear();
+            // Note that we don't clear menu callbacks for permanent sections
+            // because starting/loading a game doesn't reset menu scripts.
             if (!it->second->mPermanent)
             {
+                it->second->mMenuScriptsCallbacks.clear();
                 it->second->mValues.clear();
                 it = mData.erase(it);
             }
@@ -222,6 +250,7 @@ namespace LuaUtil
 
     const std::shared_ptr<LuaStorage::Section>& LuaStorage::getSection(std::string_view sectionName)
     {
+        checkIfActive();
         auto it = mData.find(sectionName);
         if (it != mData.end())
             return it->second;
@@ -231,14 +260,16 @@ namespace LuaUtil
         return newIt->second;
     }
 
-    sol::object LuaStorage::getSection(std::string_view sectionName, bool readOnly)
+    sol::object LuaStorage::getSection(std::string_view sectionName, bool readOnly, bool forMenuScripts)
     {
+        checkIfActive();
         const std::shared_ptr<Section>& section = getSection(sectionName);
-        return sol::make_object<SectionView>(mLua, SectionView{ section, readOnly });
+        return sol::make_object<SectionView>(mLua, SectionView{ section, readOnly, forMenuScripts });
     }
 
     sol::table LuaStorage::getAllSections(bool readOnly)
     {
+        checkIfActive();
         sol::table res(mLua, sol::create);
         for (const auto& [sectionName, _] : mData)
             res[sectionName] = getSection(sectionName, readOnly);

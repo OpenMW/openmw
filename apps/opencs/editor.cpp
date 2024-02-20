@@ -119,8 +119,6 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
         boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(
             Files::MaybeQuotedPathContainer::value_type(), ""));
     addOption("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
-    addOption("resources",
-        boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"));
     addOption("fallback-archive",
         boost::program_options::value<std::vector<std::string>>()
             ->default_value(std::vector<std::string>(), "fallback-archive")

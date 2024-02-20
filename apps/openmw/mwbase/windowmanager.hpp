@@ -166,7 +166,8 @@ namespace MWBase
 
         virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
         virtual MWWorld::Ptr getConsoleSelectedObject() const = 0;
-        virtual void setConsoleMode(const std::string& mode) = 0;
+        virtual void setConsoleMode(std::string_view mode) = 0;
+        virtual const std::string& getConsoleMode() = 0;
 
         static constexpr std::string_view sConsoleColor_Default = "#FFFFFF";
         static constexpr std::string_view sConsoleColor_Error = "#FF2222";

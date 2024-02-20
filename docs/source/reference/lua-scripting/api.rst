@@ -28,6 +28,7 @@ Lua API reference
     openmw_camera
     openmw_postprocessing
     openmw_debug
+    openmw_menu
     openmw_aux_calendar
     openmw_aux_util
     openmw_aux_time
@@ -41,6 +42,7 @@ Lua API reference
     interface_item_usage
     interface_mwui
     interface_settings
+    interface_skill_progression
     interface_ui
     iterables
 

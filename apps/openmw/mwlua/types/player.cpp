@@ -1,5 +1,6 @@
 #include "types.hpp"
 
+#include "../birthsignbindings.hpp"
 #include "../luamanagerimp.hpp"
 
 #include "apps/openmw/mwbase/inputmanager.hpp"
@@ -7,7 +8,11 @@
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwmechanics/npcstats.hpp"
 #include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/globals.hpp"
+#include "apps/openmw/mwworld/player.hpp"
+
+#include <components/esm3/loadbsgn.hpp>
 
 namespace MWLua
 {
@@ -34,16 +39,34 @@ namespace sol
     };
 }
 
+namespace
+{
+    ESM::RefId toBirthSignId(const sol::object& recordOrId)
+    {
+        if (recordOrId.is<ESM::BirthSign>())
+            return recordOrId.as<const ESM::BirthSign*>()->mId;
+        std::string_view textId = LuaUtil::cast<std::string_view>(recordOrId);
+        ESM::RefId id = ESM::RefId::deserializeText(textId);
+        if (!MWBase::Environment::get().getESMStore()->get<ESM::BirthSign>().search(id))
+            throw std::runtime_error("Failed to find birth sign: " + std::string(textId));
+        return id;
+    }
+}
+
 namespace MWLua
 {
+    static void verifyPlayer(const Object& player)
+    {
+        if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            throw std::runtime_error("The argument must be a player!");
+    }
 
-    void addPlayerQuestBindings(sol::table& player, const Context& context)
+    void addPlayerBindings(sol::table player, const Context& context)
     {
         MWBase::Journal* const journal = MWBase::Environment::get().getJournal();
 
         player["quests"] = [](const Object& player) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player!");
+            verifyPlayer(player);
             bool allowChanges = dynamic_cast<const GObject*>(&player) != nullptr
                 || dynamic_cast<const SelfObject*>(&player) != nullptr;
             return Quests{ .mMutable = allowChanges };
@@ -113,7 +136,7 @@ namespace MWLua
             // The journal mwscript function has a try function here, we will make the lua function throw an
             // error. However, the addAction will cause it to error outside of this function.
             context.mLuaManager->addAction(
-                [actor, q, stage] {
+                [actor = std::move(actor), q, stage] {
                     MWWorld::Ptr actorPtr;
                     if (actor)
                         actorPtr = actor->ptr();
@@ -135,33 +158,30 @@ namespace MWLua
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         player["getControlSwitch"] = [input](const Object& player, std::string_view key) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
+            verifyPlayer(player);
             return input->getControlSwitch(key);
         };
-        player["isTeleportingEnabled"] = [](const Object& player) -> bool {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
-            return MWBase::Environment::get().getWorld()->isTeleportingEnabled();
-        };
-        player["setTeleportingEnabled"] = [](const Object& player, bool state) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
-            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
-                throw std::runtime_error("Only player and global scripts can toggle teleportation.");
-            MWBase::Environment::get().getWorld()->enableTeleporting(state);
-        };
         player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
+            verifyPlayer(player);
             if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
                 throw std::runtime_error("Only player and global scripts can toggle control switches.");
             input->toggleControlSwitch(key, v);
         };
-    }
+        player["isTeleportingEnabled"] = [](const Object& player) -> bool {
+            verifyPlayer(player);
+            return MWBase::Environment::get().getWorld()->isTeleportingEnabled();
+        };
+        player["setTeleportingEnabled"] = [](const Object& player, bool state) {
+            verifyPlayer(player);
+            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+                throw std::runtime_error("Only player and global scripts can toggle teleportation.");
+            MWBase::Environment::get().getWorld()->enableTeleporting(state);
+        };
+        player["sendMenuEvent"] = [context](const Object& player, std::string eventName, const sol::object& eventData) {
+            verifyPlayer(player);
+            context.mLuaEvents->addMenuEvent({ std::move(eventName), LuaUtil::serialize(eventData) });
+        };
 
-    void addPlayerBindings(sol::table player, const Context& context)
-    {
         player["getCrimeLevel"] = [](const Object& o) -> int {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getNpcStats(o.ptr()).getBounty();
@@ -169,6 +189,17 @@ namespace MWLua
         player["isCharGenFinished"] = [](const Object&) -> bool {
             return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
         };
-        addPlayerQuestBindings(player, context);
+
+        player["birthSigns"] = initBirthSignRecordBindings(context);
+        player["getBirthSign"] = [](const Object& player) -> std::string {
+            verifyPlayer(player);
+            return MWBase::Environment::get().getWorld()->getPlayer().getBirthSign().serializeText();
+        };
+        player["setBirthSign"] = [](const Object& player, const sol::object& recordOrId) {
+            verifyPlayer(player);
+            if (!dynamic_cast<const GObject*>(&player))
+                throw std::runtime_error("Only global scripts can change birth signs");
+            MWBase::Environment::get().getWorld()->getPlayer().setBirthSign(toBirthSignId(recordOrId));
+        };
     }
 }

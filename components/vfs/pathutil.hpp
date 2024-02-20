@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -13,6 +14,11 @@ namespace VFS::Path
     inline constexpr char normalize(char c)
     {
         return c == '\\' ? '/' : Misc::StringUtils::toLower(c);
+    }
+
+    inline constexpr bool isNormalized(std::string_view name)
+    {
+        return std::all_of(name.begin(), name.end(), [](char v) { return v == normalize(v); });
     }
 
     inline void normalizeFilenameInPlace(std::string& name)
@@ -53,6 +59,59 @@ namespace VFS::Path
         bool operator()(std::string_view left, std::string_view right) const { return pathLess(left, right); }
     };
 
+    class Normalized;
+
+    class NormalizedView
+    {
+    public:
+        constexpr NormalizedView() noexcept = default;
+
+        constexpr NormalizedView(const char* value)
+            : mValue(value)
+        {
+            if (!isNormalized(mValue))
+                throw std::invalid_argument("NormalizedView value is not normalized: \"" + std::string(mValue) + "\"");
+        }
+
+        NormalizedView(const Normalized& value) noexcept;
+
+        constexpr std::string_view value() const noexcept { return mValue; }
+
+        friend constexpr bool operator==(const NormalizedView& lhs, const NormalizedView& rhs) = default;
+
+        friend constexpr bool operator==(const NormalizedView& lhs, const auto& rhs) { return lhs.mValue == rhs; }
+
+#if defined(_MSC_VER) && _MSC_VER <= 1935
+        friend constexpr bool operator==(const auto& lhs, const NormalizedView& rhs)
+        {
+            return lhs == rhs.mValue;
+        }
+#endif
+
+        friend constexpr bool operator<(const NormalizedView& lhs, const NormalizedView& rhs)
+        {
+            return lhs.mValue < rhs.mValue;
+        }
+
+        friend constexpr bool operator<(const NormalizedView& lhs, const auto& rhs)
+        {
+            return lhs.mValue < rhs;
+        }
+
+        friend constexpr bool operator<(const auto& lhs, const NormalizedView& rhs)
+        {
+            return lhs < rhs.mValue;
+        }
+
+        friend std::ostream& operator<<(std::ostream& stream, const NormalizedView& value)
+        {
+            return stream << value.mValue;
+        }
+
+    private:
+        std::string_view mValue;
+    };
+
     class Normalized
     {
     public:
@@ -79,6 +138,11 @@ namespace VFS::Path
             normalizeFilenameInPlace(mValue);
         }
 
+        explicit Normalized(NormalizedView value)
+            : mValue(value.value())
+        {
+        }
+
         const std::string& value() const& { return mValue; }
 
         std::string value() && { return std::move(mValue); }
@@ -91,24 +155,43 @@ namespace VFS::Path
 
         friend bool operator==(const Normalized& lhs, const Normalized& rhs) = default;
 
-        template <class T>
-        friend bool operator==(const Normalized& lhs, const T& rhs)
+        friend bool operator==(const Normalized& lhs, const auto& rhs) { return lhs.mValue == rhs; }
+
+#if defined(_MSC_VER) && _MSC_VER <= 1935
+        friend bool operator==(const auto& lhs, const Normalized& rhs)
         {
-            return lhs.mValue == rhs;
+            return lhs == rhs.mValue;
+        }
+#endif
+
+        friend bool operator==(const Normalized& lhs, const NormalizedView& rhs)
+        {
+            return lhs.mValue == rhs.value();
         }
 
-        friend bool operator<(const Normalized& lhs, const Normalized& rhs) { return lhs.mValue < rhs.mValue; }
+        friend bool operator<(const Normalized& lhs, const Normalized& rhs)
+        {
+            return lhs.mValue < rhs.mValue;
+        }
 
-        template <class T>
-        friend bool operator<(const Normalized& lhs, const T& rhs)
+        friend bool operator<(const Normalized& lhs, const auto& rhs)
         {
             return lhs.mValue < rhs;
         }
 
-        template <class T>
-        friend bool operator<(const T& lhs, const Normalized& rhs)
+        friend bool operator<(const auto& lhs, const Normalized& rhs)
         {
             return lhs < rhs.mValue;
+        }
+
+        friend bool operator<(const Normalized& lhs, const NormalizedView& rhs)
+        {
+            return lhs.mValue < rhs.value();
+        }
+
+        friend bool operator<(const NormalizedView& lhs, const Normalized& rhs)
+        {
+            return lhs.value() < rhs.mValue;
         }
 
         friend std::ostream& operator<<(std::ostream& stream, const Normalized& value)
@@ -119,6 +202,11 @@ namespace VFS::Path
     private:
         std::string mValue;
     };
+
+    inline NormalizedView::NormalizedView(const Normalized& value) noexcept
+        : mValue(value.view())
+    {
+    }
 }
 
 #endif

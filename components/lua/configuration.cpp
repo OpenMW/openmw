@@ -18,6 +18,7 @@ namespace LuaUtil
             { "GLOBAL", ESM::LuaScriptCfg::sGlobal },
             { "CUSTOM", ESM::LuaScriptCfg::sCustom },
             { "PLAYER", ESM::LuaScriptCfg::sPlayer },
+            { "MENU", ESM::LuaScriptCfg::sMenu },
         };
 
         const std::map<std::string, ESM::RecNameInts, std::less<>> typeTagsByName{

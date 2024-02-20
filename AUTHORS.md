@@ -79,6 +79,7 @@ Programmers
     Eduard Cot (trombonecot)
     Eli2
     Emanuel Guével (potatoesmaster)
+    Epoch
     Eris Caffee (eris)
     eroen
     escondida
@@ -187,6 +188,7 @@ Programmers
     pkubik
     PLkolek
     PlutonicOverkill
+    Qlonever
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
     Randy Davin (Kindi)

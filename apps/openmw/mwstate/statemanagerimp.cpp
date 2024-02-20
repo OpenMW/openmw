@@ -62,14 +62,19 @@ void MWState::StateManager::cleanup(bool force)
         MWBase::Environment::get().getInputManager()->clear();
         MWBase::Environment::get().getMechanicsManager()->clear();
 
-        mState = State_NoGame;
         mCharacterManager.setCurrentCharacter(nullptr);
         mTimePlayed = 0;
         mLastSavegame.clear();
-
         MWMechanics::CreatureStats::cleanup();
+
+        mState = State_NoGame;
+        MWBase::Environment::get().getLuaManager()->noGame();
     }
-    MWBase::Environment::get().getLuaManager()->clear();
+    else
+    {
+        // TODO: do we need this cleanup?
+        MWBase::Environment::get().getLuaManager()->clear();
+    }
 }
 
 std::map<int, int> MWState::StateManager::buildContentFileIndexMap(const ESM::ESMReader& reader) const
@@ -170,10 +175,10 @@ void MWState::StateManager::newGame(bool bypass)
     {
         Log(Debug::Info) << "Starting a new game";
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-        MWBase::Environment::get().getLuaManager()->newGameStarted();
         MWBase::Environment::get().getWorld()->startNewGame(bypass);
 
         mState = State_Running;
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
@@ -197,11 +202,13 @@ void MWState::StateManager::newGame(bool bypass)
 void MWState::StateManager::endGame()
 {
     mState = State_Ended;
+    MWBase::Environment::get().getLuaManager()->gameEnded();
 }
 
 void MWState::StateManager::resumeGame()
 {
     mState = State_Running;
+    MWBase::Environment::get().getLuaManager()->gameLoaded();
 }
 
 void MWState::StateManager::saveGame(std::string_view description, const Slot* slot)
@@ -689,7 +696,8 @@ void MWState::StateManager::quickLoad()
     {
         if (currentCharacter->begin() == currentCharacter->end())
             return;
-        loadGame(currentCharacter, currentCharacter->begin()->mPath); // Get newest save
+        // use requestLoad, otherwise we can crash by loading during the wrong part of the frame
+        requestLoad(currentCharacter->begin()->mPath);
     }
 }
 
@@ -743,6 +751,18 @@ void MWState::StateManager::update(float duration)
             mAskLoadRecent = false;
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
         }
+    }
+
+    if (mNewGameRequest)
+    {
+        newGame();
+        mNewGameRequest = false;
+    }
+
+    if (mLoadRequest)
+    {
+        loadGame(*mLoadRequest);
+        mLoadRequest = std::nullopt;
     }
 }
 

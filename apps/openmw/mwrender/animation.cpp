@@ -805,7 +805,7 @@ namespace MWRender
     }
 
     void Animation::play(std::string_view groupname, const AnimPriority& priority, int blendMask, bool autodisable,
-        float speedmult, std::string_view start, std::string_view stop, float startpoint, size_t loops,
+        float speedmult, std::string_view start, std::string_view stop, float startpoint, uint32_t loops,
         bool loopfallback)
     {
         if (!mObjectRoot || mAnimSources.empty())

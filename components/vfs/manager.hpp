@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "filemap.hpp"
+#include "pathutil.hpp"
 
 namespace VFS
 {
@@ -40,19 +41,19 @@ namespace VFS
 
         /// Does a file with this name exist?
         /// @note May be called from any thread once the index has been built.
-        bool exists(std::string_view name) const;
+        bool exists(const Path::Normalized& name) const;
 
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
-        Files::IStreamPtr get(std::string_view name) const;
+        Files::IStreamPtr get(const Path::Normalized& name) const;
 
         /// Retrieve a file by name (name is already normalized).
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
         Files::IStreamPtr getNormalized(std::string_view normalizedName) const;
 
-        std::string getArchive(std::string_view name) const;
+        std::string getArchive(const Path::Normalized& name) const;
 
         /// Recursively iterate over the elements of the given path
         /// In practice it return all files of the VFS starting with the given path

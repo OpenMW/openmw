@@ -127,3 +127,16 @@ Allowed values for this field are enumerated in openmw.log file is an HRTF enabl
 The default value is empty, which uses the default profile.
 
 This setting can be controlled in the Settings tab of the launcher.
+
+camera listener
+---------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+When true, uses the camera position and direction for audio instead of the player position.
+This makes audio in third person sound relative to camera instead of the player.
+False is vanilla Morrowind behaviour.
+
+This setting can be controlled in the Settings tab of the launcher.

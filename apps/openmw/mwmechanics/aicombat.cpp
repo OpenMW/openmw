@@ -270,7 +270,15 @@ namespace MWMechanics
         {
             storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
             // start new attack
-            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
+            bool canShout = true;
+            ESM::RefId spellId = storage.mCurrentAction->getSpell();
+            if (!spellId.empty())
+            {
+                const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
+                if (spell->mEffects.mList.empty() || spell->mEffects.mList[0].mRange != ESM::RT_Target)
+                    canShout = false;
+            }
+            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat, canShout);
         }
 
         // If actor uses custom destination it has to try to rebuild path because environment can change
@@ -635,7 +643,7 @@ namespace MWMechanics
     }
 
     void AiCombatStorage::startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController,
-        const ESM::Weapon* weapon, bool distantCombat)
+        const ESM::Weapon* weapon, bool distantCombat, bool canShout)
     {
         if (mReadyToAttack && characterController.readyToStartAttack())
         {
@@ -658,12 +666,15 @@ namespace MWMechanics
                     baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->mValue.getFloat();
                 }
 
-                // Say a provoking combat phrase
-                const int iVoiceAttackOdds
-                    = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
-                if (Misc::Rng::roll0to99(prng) < iVoiceAttackOdds)
+                if (canShout)
                 {
-                    MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("attack"));
+                    // Say a provoking combat phrase
+                    const int iVoiceAttackOdds
+                        = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
+                    if (Misc::Rng::roll0to99(prng) < iVoiceAttackOdds)
+                    {
+                        MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("attack"));
+                    }
                 }
                 mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(prng), baseDelay + 0.9);
             }

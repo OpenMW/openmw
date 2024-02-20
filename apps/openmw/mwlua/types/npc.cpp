@@ -4,6 +4,7 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
@@ -78,11 +79,13 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> int { return (int)rec.mNpdt.mDisposition; });
         record["head"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
+        record["model"] = sol::readonly_property(
+            [](const ESM::NPC& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
         addActorServicesBindings<ESM::NPC>(record, context);
 
-        npc["classes"] = initCoreClassBindings(context);
+        npc["classes"] = initClassRecordBindings(context);
 
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {

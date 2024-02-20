@@ -72,16 +72,16 @@ set(BUILTIN_DATA_FILES
     scripts/omw/camera/settings.lua
     scripts/omw/camera/move360.lua
     scripts/omw/camera/first_person_auto_switch.lua
-    scripts/omw/console/player.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua
+    scripts/omw/console/player.lua
+    scripts/omw/console/menu.lua
     scripts/omw/mechanics/animationcontroller.lua
     scripts/omw/mechanics/playercontroller.lua
-    scripts/omw/playercontrols.lua
+    scripts/omw/settings/menu.lua
     scripts/omw/settings/player.lua
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua
-    scripts/omw/settings/render.lua
     scripts/omw/settings/renderers.lua
     scripts/omw/mwui/constants.lua
     scripts/omw/mwui/borders.lua
@@ -90,9 +90,12 @@ set(BUILTIN_DATA_FILES
     scripts/omw/mwui/textEdit.lua
     scripts/omw/mwui/space.lua
     scripts/omw/mwui/init.lua
+    scripts/omw/skillhandlers.lua
     scripts/omw/ui.lua
     scripts/omw/usehandlers.lua
     scripts/omw/worldeventhandlers.lua
+    scripts/omw/input/settings.lua
+    scripts/omw/input/playercontrols.lua
     scripts/omw/input/actionbindings.lua
     scripts/omw/input/smoothmovement.lua
     scripts/omw/input/gamepadcontrols.lua

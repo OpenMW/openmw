@@ -107,7 +107,8 @@ namespace MWMechanics
         bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) override;
 
         /// Makes \a ptr fight \a target. Also shouts a combat taunt.
-        void startCombat(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) override;
+        void startCombat(
+            const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, const std::set<MWWorld::Ptr>* targetAllies) override;
 
         void stopCombat(const MWWorld::Ptr& ptr) override;
 
@@ -141,9 +142,9 @@ namespace MWMechanics
 
         /// Attempt to play an animation group
         /// @return Success or error
-        bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false) override;
-        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
+        bool playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number,
+            bool scripted = false) override;
+        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops, float speed,
             std::string_view startKey, std::string_view stopKey, bool forceLoop) override;
         void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable) override;
         void skipAnimation(const MWWorld::Ptr& ptr) override;

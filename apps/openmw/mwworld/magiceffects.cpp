@@ -133,7 +133,7 @@ namespace MWWorld
                 continue;
             ESM::ActiveSpells::ActiveSpellParams params;
             params.mId = id;
-            params.mDisplayName = name;
+            params.mDisplayName = std::move(name);
             params.mCasterActorId = creatureStats.mActorId;
             params.mType = ESM::ActiveSpells::Type_Enchantment;
             params.mWorsenings = -1;

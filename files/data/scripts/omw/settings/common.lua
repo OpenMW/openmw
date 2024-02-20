@@ -6,8 +6,6 @@ local argumentSectionPostfix = 'Arguments'
 
 local contextSection = storage.playerSection or storage.globalSection
 local groupSection = contextSection(groupSectionKey)
-groupSection:reset()
-groupSection:removeOnExit()
 
 local function validateSettingOptions(options)
     if type(options) ~= 'table' then
@@ -92,7 +90,6 @@ local function registerGroup(options)
     }
     local valueSection = contextSection(options.key)
     local argumentSection = contextSection(options.key .. argumentSectionPostfix)
-    argumentSection:removeOnExit()
     for i, opt in ipairs(options.settings) do
         local setting = registerSetting(opt)
         setting.order = i
@@ -120,6 +117,7 @@ return {
         argumentSection:set(settingKey, argument)
     end,
     setGlobalEvent = 'OMWSettingsGlobalSet',
+    registerPageEvent = 'OmWSettingsRegisterPage',
     groupSectionKey = groupSectionKey,
     onLoad = function(saved)
         if not saved then return end

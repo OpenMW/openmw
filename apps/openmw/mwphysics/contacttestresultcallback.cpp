@@ -8,13 +8,8 @@
 
 namespace MWPhysics
 {
-    ContactTestResultCallback::ContactTestResultCallback(const btCollisionObject* testedAgainst)
-        : mTestedAgainst(testedAgainst)
-    {
-    }
-
     btScalar ContactTestResultCallback::addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* col0Wrap,
-        int partId0, int index0, const btCollisionObjectWrapper* col1Wrap, int partId1, int index1)
+        int /*partId0*/, int /*index0*/, const btCollisionObjectWrapper* col1Wrap, int /*partId1*/, int /*index1*/)
     {
         const btCollisionObject* collisionObject = col0Wrap->m_collisionObject;
         if (collisionObject == mTestedAgainst)

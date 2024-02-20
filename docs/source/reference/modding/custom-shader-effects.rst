@@ -61,7 +61,7 @@ This effect is used to imitate effects such as refraction and heat distortion. A
 diffuse slot to a material and add uv scrolling. The red and green channels of the texture are used to offset the final scene texture.
 Blue and alpha channels are ignored.
 
-To use this feature the :ref:`post processing` setting must be enabled.
+To use this feature the :ref:`post processing <Post Processing>` setting must be enabled.
 This setting can either be activated in the OpenMW launcher, in-game, or changed in `settings.cfg`:
 
 ::

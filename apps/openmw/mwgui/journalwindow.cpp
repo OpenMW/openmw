@@ -126,7 +126,7 @@ namespace
                 MWGui::BookPage::ClickCallback callback = [this](intptr_t linkId) { notifyTopicClicked(linkId); };
 
                 getPage(LeftBookPage)->adviseLinkClicked(callback);
-                getPage(RightBookPage)->adviseLinkClicked(callback);
+                getPage(RightBookPage)->adviseLinkClicked(std::move(callback));
 
                 getPage(LeftBookPage)->eventMouseWheel
                     += MyGUI::newDelegate(this, &JournalWindowImpl::notifyMouseWheel);
@@ -140,7 +140,7 @@ namespace
 
                 getPage(LeftTopicIndex)->adviseLinkClicked(callback);
                 getPage(CenterTopicIndex)->adviseLinkClicked(callback);
-                getPage(RightTopicIndex)->adviseLinkClicked(callback);
+                getPage(RightTopicIndex)->adviseLinkClicked(std::move(callback));
             }
 
             adjustButton(PrevPageBTN);
@@ -376,7 +376,7 @@ namespace
             setVisible(PageTwoNum, relPages > 1);
 
             getPage(LeftBookPage)->showPage((relPages > 0) ? book : Book(), page + 0);
-            getPage(RightBookPage)->showPage((relPages > 0) ? book : Book(), page + 1);
+            getPage(RightBookPage)->showPage((relPages > 0) ? std::move(book) : Book(), page + 1);
 
             setText(PageOneNum, page + 1);
             setText(PageTwoNum, page + 2);

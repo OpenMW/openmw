@@ -36,6 +36,7 @@ namespace MWMechanics
     class Actor;
     class CharacterController;
     class CreatureStats;
+    class SidingCache;
 
     class Actors
     {
@@ -112,9 +113,9 @@ namespace MWMechanics
 
         void forceStateUpdate(const MWWorld::Ptr& ptr) const;
 
-        bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false) const;
-        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, int loops, float speed,
+        bool playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number,
+            bool scripted = false) const;
+        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops, float speed,
             std::string_view startKey, std::string_view stopKey, bool forceLoop);
         void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable);
         void skipAnimation(const MWWorld::Ptr& ptr) const;
@@ -186,7 +187,7 @@ namespace MWMechanics
 
         void calculateRestoration(const MWWorld::Ptr& ptr, float duration) const;
 
-        void updateCrimePursuit(const MWWorld::Ptr& ptr, float duration) const;
+        void updateCrimePursuit(const MWWorld::Ptr& ptr, float duration, SidingCache& cachedAllies) const;
 
         void killDeadActors();
 
@@ -198,13 +199,25 @@ namespace MWMechanics
             @Notes: If againstPlayer = true then actor2 should be the Player.
                     If one of the combatants is creature it should be actor1.
         */
-        void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2,
-            std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr>>& cachedAllies, bool againstPlayer) const;
+        void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, SidingCache& cachedAllies,
+            bool againstPlayer) const;
+    };
 
-        /// Recursive version of getActorsSidingWith that takes, adds to and returns a cache of
-        /// actors mapped to their allies. Excludes infighting
-        void getActorsSidingWith(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out,
-            std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr>>& cachedAllies) const;
+    class SidingCache
+    {
+        const Actors& mActors;
+        const bool mExcludeInfighting;
+        std::map<MWWorld::Ptr, std::set<MWWorld::Ptr>> mCache;
+
+    public:
+        SidingCache(const Actors& actors, bool excludeInfighting)
+            : mActors(actors)
+            , mExcludeInfighting(excludeInfighting)
+        {
+        }
+
+        /// Recursive version of getActorsSidingWith that takes, returns a cached set of allies
+        const std::set<MWWorld::Ptr>& getActorsSidingWith(const MWWorld::Ptr& actor);
     };
 }
 

@@ -96,14 +96,14 @@ namespace MWClass
 
         std::string_view getName(const MWWorld::ConstPtr& ptr) const override { return {}; }
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override
         {
-            std::string model = getClassModel<Record>(ptr);
+            std::string_view model = getClassModel<Record>(ptr);
 
             // Hide meshes meshes/marker/* and *LOD.nif in ESM4 cells. It is a temporarty hack.
             // Needed because otherwise LOD meshes are rendered on top of normal meshes.
             // TODO: Figure out a better way find markers and LOD meshes; show LOD only outside of active grid.
-            if (model.empty() || Misc::StringUtils::ciStartsWith(model, "meshes\\marker")
+            if (model.empty() || Misc::StringUtils::ciStartsWith(model, "marker")
                 || Misc::StringUtils::ciEndsWith(model, "lod.nif"))
                 return {};
 

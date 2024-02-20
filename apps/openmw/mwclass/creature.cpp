@@ -178,14 +178,14 @@ namespace MWClass
         objects.insertCreature(ptr, model, hasInventoryStore(ptr));
     }
 
-    std::string Creature::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Creature::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Creature>(ptr);
     }
 
-    void Creature::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const
+    void Creature::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const
     {
-        std::string model = getModel(ptr);
+        std::string_view model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
 
@@ -474,20 +474,17 @@ namespace MWClass
         }
 
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
-        const MWMechanics::AiSequence& aiSequence = stats.getAiSequence();
-
-        const bool isInCombat = aiSequence.isInCombat();
         if (stats.isDead())
         {
-            // by default user can loot friendly actors during death animation
-            if (Settings::game().mCanLootDuringDeathAnimation && !isInCombat)
+            // by default user can loot non-fighting actors during death animation
+            if (Settings::game().mCanLootDuringDeathAnimation)
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
 
             // otherwise wait until death animation
             if (stats.isDeathAnimationFinished())
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
         }
-        else if ((!isInCombat || aiSequence.isFleeing()) && !stats.getKnockedDown())
+        else if (!stats.getKnockedDown())
             return std::make_unique<MWWorld::ActionTalk>(ptr);
 
         // Tribunal and some mod companions oddly enough must use open action as fallback
@@ -651,13 +648,13 @@ namespace MWClass
 
         if (sounds.empty())
         {
-            const std::string model = getModel(ptr);
+            const std::string_view model = getModel(ptr);
             if (!model.empty())
             {
                 for (const ESM::Creature& creature : store.get<ESM::Creature>())
                 {
                     if (creature.mId != ourId && creature.mOriginal != ourId && !creature.mModel.empty()
-                        && Misc::StringUtils::ciEqual(model, Misc::ResourceHelpers::correctMeshPath(creature.mModel)))
+                        && Misc::StringUtils::ciEqual(model, creature.mModel))
                     {
                         const ESM::RefId& fallbackId = !creature.mOriginal.empty() ? creature.mOriginal : creature.mId;
                         sound = store.get<ESM::SoundGenerator>().begin();

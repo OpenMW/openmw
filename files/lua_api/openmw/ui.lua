@@ -1,6 +1,6 @@
 ---
 -- `openmw.ui` controls user interface.
--- Can be used only by local scripts, that are attached to a player.
+-- Can be used only by menu scripts and local scripts, that are attached to a player.
 -- @module ui
 -- @usage
 -- local ui = require('openmw.ui')
@@ -92,6 +92,11 @@
 -- Adds a settings page to main menu setting's Scripts tab.
 -- @function [parent=#ui] registerSettingsPage
 -- @param #SettingsPageOptions page
+
+---
+-- Removes the settings page
+-- @function [parent=#ui] removeSettingsPage
+-- @param #SettingsPageOptions page must be the exact same table of options as the one passed to registerSettingsPage
 
 ---
 -- Table with settings page options, passed as an argument to ui.registerSettingsPage

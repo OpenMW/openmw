@@ -134,7 +134,7 @@ namespace MWRender
                 }
             }
         }
-        return shield.getClass().getModel(shield);
+        return shield.getClass().getCorrectedModel(shield);
     }
 
     std::string ActorAnimation::getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const
@@ -339,7 +339,7 @@ namespace MWRender
         if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
             showHolsteredWeapons = false;
 
-        std::string mesh = weapon->getClass().getModel(*weapon);
+        std::string mesh = weapon->getClass().getCorrectedModel(*weapon);
         std::string scabbardName = mesh;
 
         std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
@@ -409,7 +409,7 @@ namespace MWRender
         if (weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
             return;
 
-        std::string mesh = weapon->getClass().getModel(*weapon);
+        std::string_view mesh = weapon->getClass().getModel(*weapon);
         std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
         if (mesh.empty() || boneName.empty())
             return;
@@ -466,7 +466,7 @@ namespace MWRender
 
         // Add new ones
         osg::Vec4f glowColor = ammo->getClass().getEnchantmentColor(*ammo);
-        std::string model = ammo->getClass().getModel(*ammo);
+        std::string model = ammo->getClass().getCorrectedModel(*ammo);
         for (unsigned int i = 0; i < ammoCount; ++i)
         {
             osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();

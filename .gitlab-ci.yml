@@ -172,6 +172,20 @@ Clang_Format:
     - CI/check_file_names.sh
     - CI/check_clang_format.sh
 
+Lupdate:
+  extends: .Ubuntu_Image
+  stage: checks
+  cache:
+    key: Ubuntu_lupdate.ubuntu_22.04.v1
+    paths:
+      - apt-cache/
+  variables:
+    LUPDATE: lupdate
+  before_script:
+    - CI/install_debian_deps.sh openmw-qt-translations
+  script:
+    - CI/check_qt_translations.sh
+
 Teal:
   stage: checks
   extends: .Ubuntu_Image
@@ -196,6 +210,7 @@ Ubuntu_GCC_Debug:
     CCACHE_SIZE: 3G
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
+    BUILD_SHARED_LIBS: 1
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 

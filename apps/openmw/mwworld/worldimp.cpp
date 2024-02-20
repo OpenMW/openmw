@@ -274,8 +274,6 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         mContentFiles = contentFiles;
-        if (encoder)
-            mReaders.setStatelessEncoder(encoder->getStatelessEncoder());
         mESMVersions.resize(mContentFiles.size(), -1);
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
@@ -1740,23 +1738,27 @@ namespace MWWorld
 
     void World::updateSoundListener()
     {
-        osg::Vec3f cameraPosition = mRendering->getCamera()->getPosition();
+        const MWRender::Camera* camera = mRendering->getCamera();
         const auto& player = getPlayerPtr();
         const ESM::Position& refpos = player.getRefData().getPosition();
-        osg::Vec3f listenerPos;
+        osg::Vec3f listenerPos, up, forward;
+        osg::Quat listenerOrient;
 
-        if (isFirstPerson())
-            listenerPos = cameraPosition;
+        if (isFirstPerson() || Settings::sound().mCameraListener)
+            listenerPos = camera->getPosition();
         else
             listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(player).z());
 
-        osg::Quat listenerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0, -1, 0))
-            * osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1));
+        if (isFirstPerson() || Settings::sound().mCameraListener)
+            listenerOrient = camera->getOrient();
+        else
+            listenerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0, -1, 0))
+                * osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1));
 
-        osg::Vec3f forward = listenerOrient * osg::Vec3f(0, 1, 0);
-        osg::Vec3f up = listenerOrient * osg::Vec3f(0, 0, 1);
+        forward = listenerOrient * osg::Vec3f(0, 1, 0);
+        up = listenerOrient * osg::Vec3f(0, 0, 1);
 
-        bool underwater = isUnderwater(player.getCell(), cameraPosition);
+        bool underwater = isUnderwater(player.getCell(), camera->getPosition());
 
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(listenerPos, forward, up, underwater);
     }
@@ -1819,9 +1821,10 @@ namespace MWWorld
     }
 
     bool World::castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-        bool ignorePlayer, bool ignoreActors)
+        bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList)
     {
-        MWRender::RenderingManager::RayResult rayRes = mRendering->castRay(from, to, ignorePlayer, ignoreActors);
+        MWRender::RenderingManager::RayResult rayRes
+            = mRendering->castRay(from, to, ignorePlayer, ignoreActors, ignoreList);
         res.mHit = rayRes.mHit;
         res.mHitPos = rayRes.mHitPointWorld;
         res.mHitNormal = rayRes.mHitNormalWorld;
@@ -2308,7 +2311,7 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
         mPhysics->remove(getPlayerPtr());
-        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getModel(getPlayerPtr()));
+        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getCorrectedModel(getPlayerPtr()));
 
         applyLoopingParticles(player);
 
@@ -2429,15 +2432,12 @@ namespace MWWorld
 
     bool World::getPlayerCollidingWith(const MWWorld::ConstPtr& object)
     {
-        MWWorld::Ptr player = getPlayerPtr();
-        return mPhysics->isActorCollidingWith(player, object);
+        return mPhysics->isObjectCollidingWith(object, MWPhysics::ScriptedCollisionType_Player);
     }
 
     bool World::getActorCollidingWith(const MWWorld::ConstPtr& object)
     {
-        std::vector<MWWorld::Ptr> actors;
-        mPhysics->getActorsCollidingWith(object, actors);
-        return !actors.empty();
+        return mPhysics->isObjectCollidingWith(object, MWPhysics::ScriptedCollisionType_Actor);
     }
 
     void World::hurtStandingActors(const ConstPtr& object, float healthPerSecond)
@@ -2603,7 +2603,7 @@ namespace MWWorld
             collisionTypes |= MWPhysics::CollisionType_Water;
         }
         MWPhysics::RayCastingResult result
-            = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
+            = mPhysics->castRay(from, to, { MWWorld::Ptr() }, std::vector<MWWorld::Ptr>(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;
@@ -3069,8 +3069,8 @@ namespace MWWorld
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
         // Check for impact, if yes, handle hit, if not, launch projectile
-        MWPhysics::RayCastingResult result
-            = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(
+            sourcePos, worldPos, { actor }, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
         if (result.mHit)
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
         else
@@ -3701,7 +3701,7 @@ namespace MWWorld
         try
         {
             MWWorld::ManualRef ref(store, obj);
-            std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+            std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
             if (!model.empty())
                 scene->preload(model, ref.getPtr().getClass().useAnim());
         }

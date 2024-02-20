@@ -36,7 +36,7 @@
          <item row="6" column="0">
           <widget class="QCheckBox" name="allowNPCToFollowOverWaterSurfaceCheckBox">
            <property name="toolTip">
-            <string>Give actors an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Give actors an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Always allow actors to follow over water</string>
@@ -206,7 +206,7 @@
          <item row="5" column="1">
           <widget class="QCheckBox" name="classicReflectedAbsorbSpellsCheckBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effects of reflected Absorb spells are not mirrored -- like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effects of reflected Absorb spells are not mirrored - like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Classic reflected Absorb spells behavior</string>
@@ -524,7 +524,7 @@
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation. Can negatively impact performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="text">
-                    <string>Use anti-alias alpha testing</string>
+                    <string>Use anti-aliased alpha testing</string>
                    </property>
                   </widget>
                  </item>
@@ -663,6 +663,9 @@
                </item>
                <item row="2" column="1">
                 <widget class="QDoubleSpinBox" name="viewingDistanceComboBox">
+                 <property name="decimals">
+                  <number>3</number>
+                 </property>
                  <property name="suffix">
                   <string> cells</string>
                  </property>
@@ -670,7 +673,7 @@
                   <double>0.000000000000000</double>
                  </property>
                  <property name="singleStep">
-                  <double>0.500000000000000</double>
+                  <double>0.125000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -1319,6 +1322,16 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="cameraListenerCheckBox">
+         <property name="toolTip">
+          <string>In third-person view, use the camera as the sound listener instead of the player character.</string>
+         </property>
+         <property name="text">
+          <string>Use the camera as the sound listener</string>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer>

@@ -63,9 +63,22 @@ namespace Compiler
         switch (mPutback)
         {
             case Putback_Special:
-
+            {
                 mPutback = Putback_None;
+                // Replicate behaviour from scanSpecial so putting something back doesn't change the way it's handled
+                if (mExpectName && (mPutbackCode == S_member || mPutbackCode == S_minus))
+                {
+                    mExpectName = false;
+                    bool cont = false;
+                    bool tolerant = mTolerantNames;
+                    mTolerantNames = true;
+                    MultiChar c{ mPutbackCode == S_member ? '.' : '-' };
+                    scanName(c, parser, cont);
+                    mTolerantNames = tolerant;
+                    return cont;
+                }
                 return parser.parseSpecial(mPutbackCode, mPutbackLoc, *this);
+            }
 
             case Putback_Integer:
 

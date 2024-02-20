@@ -354,7 +354,7 @@ namespace MWMechanics
         if (type == ESM::Enchantment::WhenUsed)
         {
             if (mCaster == getPlayer())
-                mCaster.getClass().skillUsageSucceeded(mCaster, ESM::Skill::Enchant, 1);
+                mCaster.getClass().skillUsageSucceeded(mCaster, ESM::Skill::Enchant, ESM::Skill::Enchant_UseMagicItem);
         }
         else if (type == ESM::Enchantment::CastOnce)
         {
@@ -364,7 +364,7 @@ namespace MWMechanics
         else if (type == ESM::Enchantment::WhenStrikes)
         {
             if (mCaster == getPlayer())
-                mCaster.getClass().skillUsageSucceeded(mCaster, ESM::Skill::Enchant, 3);
+                mCaster.getClass().skillUsageSucceeded(mCaster, ESM::Skill::Enchant, ESM::Skill::Enchant_CastOnStrike);
         }
 
         if (isProjectile)
@@ -439,7 +439,7 @@ namespace MWMechanics
         }
 
         if (!mManualSpell && mCaster == getPlayer() && spellIncreasesSkill(spell))
-            mCaster.getClass().skillUsageSucceeded(mCaster, school, 0);
+            mCaster.getClass().skillUsageSucceeded(mCaster, school, ESM::Skill::Spellcast_Success);
 
         // A non-actor doesn't play its spell cast effects from a character controller, so play them here
         if (!mCaster.getClass().isActor())

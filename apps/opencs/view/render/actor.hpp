@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include <osg/Group>
+#include <osg/PositionAttitudeTransform>
 #include <osg/ref_ptr>
 
 #include <QObject>
@@ -59,7 +60,7 @@ namespace CSVRender
         CSMWorld::Data& mData;
         CSMWorld::ActorAdapter::ActorDataPtr mActorData;
 
-        osg::ref_ptr<osg::Group> mBaseNode;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
         SceneUtil::Skeleton* mSkeleton;
         SceneUtil::NodeMapVisitor::NodeMap mNodeMap;
     };

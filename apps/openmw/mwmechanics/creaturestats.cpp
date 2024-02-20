@@ -319,6 +319,11 @@ namespace MWMechanics
         ++mFriendlyHits;
     }
 
+    void CreatureStats::resetFriendlyHits()
+    {
+        mFriendlyHits = 0;
+    }
+
     bool CreatureStats::hasTalkedToPlayer() const
     {
         return mTalkedTo;

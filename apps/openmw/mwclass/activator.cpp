@@ -62,7 +62,7 @@ namespace MWClass
         physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string Activator::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Activator::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Activator>(ptr);
     }
@@ -141,15 +141,14 @@ namespace MWClass
 
     ESM::RefId Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
-        const std::string model
-            = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
+        // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
+        const std::string_view model = getModel(ptr);
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::RefId* creatureId = nullptr;
 
         for (const ESM::Creature& iter : store.get<ESM::Creature>())
         {
-            if (!iter.mModel.empty()
-                && Misc::StringUtils::ciEqual(model, Misc::ResourceHelpers::correctMeshPath(iter.mModel)))
+            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, iter.mModel))
             {
                 creatureId = !iter.mOriginal.empty() ? &iter.mOriginal : &iter.mId;
                 break;

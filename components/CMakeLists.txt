@@ -500,9 +500,14 @@ if (USE_QT)
         model/loadordererror
         view/combobox view/contentselector
         )
+
     add_component_qt_dir (config
         gamesettings
         launchersettings
+        )
+
+    add_component_qt_dir (l10n
+        qttranslations
         )
 
     add_component_qt_dir (process
@@ -521,11 +526,9 @@ if (USE_QT)
     QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
-if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
-        add_definitions(-fPIC)
-    endif()
-endif ()
+if (ANDROID)
+    set_property(TARGET components PROPERTY POSTION_INDEPENDENT_CODE ON)
+endif()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -594,6 +597,10 @@ if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
     target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
+
+    if (BUILD_LAUNCHER OR BUILD_WIZARD)
+        add_dependencies(components_qt qm-files)
+    endif()
 
     if (BUILD_WITH_CODE_COVERAGE)
         target_compile_options(components_qt PRIVATE --coverage)

@@ -84,7 +84,8 @@ namespace MWMechanics
             if (getEnchantChance() <= (Misc::Rng::roll0to99(prng)))
                 return false;
 
-            mEnchanter.getClass().skillUsageSucceeded(mEnchanter, ESM::Skill::Enchant, 2);
+            mEnchanter.getClass().skillUsageSucceeded(
+                mEnchanter, ESM::Skill::Enchant, ESM::Skill::Enchant_CreateMagicItem);
         }
 
         enchantment.mEffects = mEffectList;
