@@ -98,7 +98,7 @@ namespace SceneUtil
         fakeShadowMapTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         fakeShadowMapTexture->setShadowComparison(true);
         fakeShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
-        for (int i = mShadowSettings->getBaseShadowTextureUnit();
+        for (unsigned int i = mShadowSettings->getBaseShadowTextureUnit();
              i < mShadowSettings->getBaseShadowTextureUnit() + mShadowSettings->getNumShadowMapsPerLight(); ++i)
         {
             stateset.setTextureAttribute(i, fakeShadowMapTexture,

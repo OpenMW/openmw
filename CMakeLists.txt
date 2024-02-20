@@ -718,67 +718,66 @@ if (WIN32)
             )
 
         foreach(d ${WARNINGS_DISABLE})
-            set(WARNINGS "${WARNINGS} /wd${d}")
+            list(APPEND WARNINGS "/wd${d}")
         endforeach(d)
 
         if(OPENMW_MSVC_WERROR)
-            set(WARNINGS "${WARNINGS} /WX")
+            list(APPEND WARNINGS "/WX")
         endif()
 
-        set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
-        set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+        target_compile_options(components PRIVATE ${WARNINGS})
+        target_compile_options(osg-ffmpeg-videoplayer PRIVATE ${WARNINGS})
 
         if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
             target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
         endif()
 
         if (BUILD_BSATOOL)
-            set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(bsatool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESMTOOL)
-            set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(esmtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESSIMPORTER)
-            set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-essimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_LAUNCHER)
-            set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-launcher PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_MWINIIMPORTER)
-            set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-iniimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENCS)
-            set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-cs PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENMW)
-            set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_WIZARD)
-            set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-wizard PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_UNITTESTS)
-            set_target_properties(openmw_test_suite PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw_test_suite PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BENCHMARKS)
-            set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_NAVMESHTOOL)
-            set_target_properties(openmw-navmeshtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-navmeshtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BULLETOBJECTTOOL)
-            set(WARNINGS "${WARNINGS} ${MT_BUILD}")
-            set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
         endif()
     endif(MSVC)
 
