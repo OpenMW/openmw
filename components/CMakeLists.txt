@@ -526,11 +526,9 @@ if (USE_QT)
     QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
-if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
-        add_definitions(-fPIC)
-    endif()
-endif ()
+if (ANDROID)
+    set_property(TARGET components PROPERTY POSTION_INDEPENDENT_CODE ON)
+endif()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
