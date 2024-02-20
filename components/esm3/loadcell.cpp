@@ -118,6 +118,7 @@ namespace ESM
         bool overriding = !mName.empty();
         bool isLoaded = false;
         mHasAmbi = false;
+        mHasWater = false;
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
@@ -133,6 +134,7 @@ namespace ESM
                     float waterLevel;
                     esm.getHT(waterLevel);
                     mWaterInt = false;
+                    mHasWater = true;
                     if (!std::isfinite(waterLevel))
                     {
                         if (!overriding)
@@ -193,7 +195,7 @@ namespace ESM
             // Try to avoid saving ambient information when it's unnecessary.
             // This is to fix black lighting and flooded water
             // in resaved cell records that lack this information.
-            if (mWaterInt && mWater != 0)
+            if (mHasWater)
                 esm.writeHNT("WHGT", mWater);
             if (mData.mFlags & QuasiEx)
                 esm.writeHNOCRefId("RGNN", mRegion);
@@ -323,6 +325,7 @@ namespace ESM
         mData.mY = 0;
 
         mHasAmbi = true;
+        mHasWater = true;
         mAmbi.mAmbient = 0;
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;

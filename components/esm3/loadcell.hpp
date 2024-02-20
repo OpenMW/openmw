@@ -112,6 +112,7 @@ namespace ESM
             , mHasAmbi(true)
             , mWater(0)
             , mWaterInt(false)
+            , mHasWater(false)
             , mMapColor(0)
             , mRefNumCounter(0)
         {
@@ -132,6 +133,7 @@ namespace ESM
 
         float mWater; // Water level
         bool mWaterInt;
+        bool mHasWater;
         int32_t mMapColor;
         // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
         // It prevents overwriting previous refNums, even if they were deleted.
@@ -162,6 +164,8 @@ namespace ESM
         int32_t getGridY() const { return mData.mY; }
 
         bool hasWater() const { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
+
+        void setHasWater(bool hasWater) { mHasWater = hasWater; }
 
         bool hasAmbient() const { return mHasAmbi; }
 

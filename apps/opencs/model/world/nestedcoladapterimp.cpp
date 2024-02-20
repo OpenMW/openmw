@@ -996,7 +996,10 @@ namespace CSMWorld
             case 5:
             {
                 if (isInterior && interiorWater)
+                {
                     cell.mWater = value.toFloat();
+                    cell.setHasWater(true);
+                }
                 else
                     return; // return without saving
                 break;
