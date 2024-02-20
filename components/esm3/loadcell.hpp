@@ -111,7 +111,7 @@ namespace ESM
             , mRegion(ESM::RefId())
             , mHasAmbi(true)
             , mWater(0)
-            , mHasWater(false)
+            , mHasWaterHeightSub(false)
             , mMapColor(0)
             , mRefNumCounter(0)
         {
@@ -131,7 +131,7 @@ namespace ESM
         bool mHasAmbi;
 
         float mWater; // Water level
-        bool mHasWater;
+        bool mHasWaterHeightSub;
         int32_t mMapColor;
         // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
         // It prevents overwriting previous refNums, even if they were deleted.
@@ -163,7 +163,7 @@ namespace ESM
 
         bool hasWater() const { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
 
-        void setHasWater(bool hasWater) { mHasWater = hasWater; }
+        void setHasWater(bool hasWater) { mHasWaterHeightSub = hasWater; }
 
         bool hasAmbient() const { return mHasAmbi; }
 
