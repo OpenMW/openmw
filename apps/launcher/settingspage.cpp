@@ -193,8 +193,10 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
         loadSettingBool(Settings::game().mPlayerMovementIgnoresAnimation, *playerMovementIgnoresAnimationCheckBox);
 
-        distantLandCheckBox->setCheckState(
-            Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging ? Qt::Checked : Qt::Unchecked);
+        connect(distantLandCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotDistantLandToggled);
+        bool distantLandEnabled = Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging;
+        distantLandCheckBox->setCheckState(distantLandEnabled ? Qt::Checked : Qt::Unchecked);
+        slotDistantLandToggled(distantLandEnabled);
 
         loadSettingBool(Settings::terrain().mObjectPagingActiveGrid, *activeGridObjectPagingCheckBox);
         viewingDistanceComboBox->setValue(convertToCells(Settings::camera().mViewingDistance));
@@ -583,9 +585,16 @@ void Launcher::SettingsPage::slotShadowDistLimitToggled(bool checked)
     fadeStartSpinBox->setEnabled(checked);
 }
 
+void Launcher::SettingsPage::slotDistantLandToggled(bool checked)
+{
+    activeGridObjectPagingCheckBox->setEnabled(checked);
+    objectPagingMinSizeComboBox->setEnabled(checked);
+}
+
 void Launcher::SettingsPage::slotLightTypeCurrentIndexChanged(int index)
 {
     lightsMaximumDistanceSpinBox->setEnabled(index != 0);
+    lightFadeMultiplierSpinBox->setEnabled(index != 0);
     lightsMaxLightsSpinBox->setEnabled(index != 0);
     lightsBoundingSphereMultiplierSpinBox->setEnabled(index != 0);
     lightsMinimumInteriorBrightnessSpinBox->setEnabled(index != 0);
