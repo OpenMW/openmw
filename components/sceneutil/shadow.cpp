@@ -104,7 +104,8 @@ namespace SceneUtil
             stateset.setTextureAttribute(i, fakeShadowMapTexture,
                 osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
             stateset.addUniform(new osg::Uniform(
-                ("shadowTexture" + std::to_string(i - mShadowSettings->getBaseShadowTextureUnit())).c_str(), static_cast<int>(i)));
+                ("shadowTexture" + std::to_string(i - mShadowSettings->getBaseShadowTextureUnit())).c_str(),
+                static_cast<int>(i)));
         }
     }
 
