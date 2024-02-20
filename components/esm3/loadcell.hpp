@@ -111,7 +111,6 @@ namespace ESM
             , mRegion(ESM::RefId())
             , mHasAmbi(true)
             , mWater(0)
-            , mWaterInt(false)
             , mHasWater(false)
             , mMapColor(0)
             , mRefNumCounter(0)
@@ -132,7 +131,6 @@ namespace ESM
         bool mHasAmbi;
 
         float mWater; // Water level
-        bool mWaterInt;
         bool mHasWater;
         int32_t mMapColor;
         // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.

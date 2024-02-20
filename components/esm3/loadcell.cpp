@@ -128,12 +128,10 @@ namespace ESM
                     int32_t waterl;
                     esm.getHT(waterl);
                     mWater = static_cast<float>(waterl);
-                    mWaterInt = true;
                     break;
                 case fourCC("WHGT"):
                     float waterLevel;
                     esm.getHT(waterLevel);
-                    mWaterInt = false;
                     mHasWater = true;
                     if (!std::isfinite(waterLevel))
                     {
@@ -316,7 +314,6 @@ namespace ESM
         mName.clear();
         mRegion = ESM::RefId();
         mWater = 0;
-        mWaterInt = false;
         mMapColor = 0;
         mRefNumCounter = 0;
 
