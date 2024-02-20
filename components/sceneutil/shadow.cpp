@@ -101,7 +101,7 @@ namespace SceneUtil
         for (int i = mShadowSettings->getBaseShadowTextureUnit();
              i < mShadowSettings->getBaseShadowTextureUnit() + mShadowSettings->getNumShadowMapsPerLight(); ++i)
         {
-            stateset.setTextureAttributeAndModes(i, fakeShadowMapTexture,
+            stateset.setTextureAttribute(i, fakeShadowMapTexture,
                 osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
             stateset.addUniform(new osg::Uniform(
                 ("shadowTexture" + std::to_string(i - mShadowSettings->getBaseShadowTextureUnit())).c_str(), i));
