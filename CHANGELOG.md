@@ -33,6 +33,7 @@
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6025: Subrecords cannot overlap records
     Bug #6027: Collisionshape becomes spiderweb-like when the mesh is too complex
+    Bug #6146: Lua command `actor:setEquipment` doesn't trigger mwscripts when equipping or unequipping a scripted item
     Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
     Bug #6313: Followers with high Fight can turn hostile
@@ -56,6 +57,7 @@
     Bug #6973: Fade in happens after the scene load and is shown
     Bug #6974: Only harmful effects are reflected
     Bug #6977: Sun damage implementation does not match research
+    Bug #6985: Issues with Magic Cards numbers readability
     Bug #6986: Sound magic effect does not make noise
     Bug #6987: Set/Mod Blindness should not darken the screen
     Bug #6992: Crossbow reloading doesn't look the same as in Morrowind
@@ -76,7 +78,9 @@
     Bug #7131: MyGUI log spam when post processing HUD is open
     Bug #7134: Saves with an invalid last generated RefNum can be loaded
     Bug #7163: Myar Aranath: Wheat breaks the GUI
+    Bug #7168: Fix average scene luminance
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
+    Bug #7202: Post-processing normals for terrain, water randomly stop rendering
     Bug #7204: Missing actor scripts freeze the game
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Supporting loading external files from VFS from esm files
@@ -136,6 +140,7 @@
     Bug #7753: Editor: Actors Don't Scale According to Their Race
     Bug #7758: Water walking is not taken into account to compute path cost on the water
     Bug #7761: Rain and ambient loop sounds are mutually exclusive
+    Bug #7763: Bullet shape loading problems, assorted
     Bug #7765: OpenMW-CS: Touch Record option is broken
     Bug #7769: Sword of the Perithia: Broken NPCs
     Bug #7770: Sword of the Perithia: Script execution failure
@@ -151,14 +156,15 @@
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
     Feature #5944: Option to use camera as sound listener
-    Feature #6149: Dehardcode Lua API_REVISION
     Feature #6152: Playing music via lua scripts
     Feature #6188: Specular lighting from point light sources
     Feature #6411: Support translations in openmw-launcher
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
+    Feature #6679: Design a custom Input Action API
     Feature #6726: Lua API for creating new objects
+    Feature #6727: Lua API for records of all object types
     Feature #6864: Lua file access API
     Feature #6922: Improve launcher appearance
     Feature #6933: Support high-resolution cursor textures
@@ -171,10 +177,12 @@
     Feature #7125: Remembering console commands between sessions
     Feature #7129: Add support for non-adaptive VSync
     Feature #7130: Ability to set MyGUI logging verbosity
+    Feature #7142: MWScript Lua API
     Feature #7148: Optimize string literal lookup in mwscript
+    Feature #7161: OpenMW-CS: Make adding and filtering TopicInfos easier
     Feature #7194: Ori to show texture paths
     Feature #7214: Searching in the in-game console
-    Feature #7284: Searching in the console with regex and toggleable case-sensitivity 
+    Feature #7248: Searching in the console with regex and toggleable case-sensitivity
     Feature #7468: Factions API for Lua
     Feature #7477: NegativeLight Magic Effect flag
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field
@@ -194,7 +202,10 @@
     Feature #7795: Support MaxNumberRipples INI setting
     Feature #7805: Lua Menu context
     Task #5896: Do not use deprecated MyGUI properties
+    Task #6085: Replace boost::filesystem with std::filesystem
+    Task #6149: Dehardcode Lua API_REVISION
     Task #6624: Drop support for saves made prior to 0.45
+    Task #7048: Get rid of std::bind
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
