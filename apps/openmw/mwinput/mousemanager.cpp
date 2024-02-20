@@ -220,7 +220,7 @@ namespace MWInput
         };
 
         // Only actually turn player when we're not in vanity mode
-        bool controls = MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols");
+        bool controls = MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking");
         if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && controls)
         {
             MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
