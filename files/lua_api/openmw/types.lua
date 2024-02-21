@@ -1018,13 +1018,6 @@
 -- types.Player.quests(player)["ms_fargothring"].stage = 0
 
 ---
--- Send an event to menu scripts.
--- @function [parent=#Player] sendMenuEvent
--- @param openmw.core#GameObject player
--- @param #string eventName
--- @param eventData
-
----
 -- @type PlayerQuest
 -- @field #string id The quest id.
 -- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.
@@ -1103,6 +1096,13 @@
 -- @field #string description Birth sign description
 -- @field #string texture Birth sign texture
 -- @field #list<#string> spells A read-only list containing the ids of all spells gained from this sign.
+
+---
+-- Send an event to menu scripts.
+-- @function [parent=#Player] sendMenuEvent
+-- @param openmw.core#GameObject player
+-- @param #string eventName
+-- @param eventData
 
 --------------------------------------------------------------------------------
 -- @{#Armor} functions
