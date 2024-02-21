@@ -7,7 +7,7 @@
 
 namespace MWGui
 {
-    class SettingsWindow : public WindowModal
+    class SettingsWindow : public WindowBase
     {
     public:
         SettingsWindow();
