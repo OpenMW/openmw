@@ -162,6 +162,7 @@ namespace MWGui
 
         bool isConsoleMode() const override;
         bool isPostProcessorHudVisible() const override;
+        bool isSettingsWindowVisible() const override;
         bool isInteractiveMessageBoxActive() const override;
 
         void toggleVisible(GuiWindow wnd) override;
@@ -183,7 +184,6 @@ namespace MWGui
         MWGui::ConfirmationDialog* getConfirmationDialog() override;
         MWGui::TradeWindow* getTradeWindow() override;
         MWGui::PostProcessorHud* getPostProcessorHud() override;
-        MWGui::SettingsWindow* getSettingsWindow() override;
 
         /// Make the player use an item, while updating GUI state accordingly
         void useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions = false) override;
@@ -364,6 +364,7 @@ namespace MWGui
         void toggleConsole() override;
         void toggleDebugWindow() override;
         void togglePostProcessorHud() override;
+        void toggleSettingsWindow() override;
 
         /// Cycle to next or previous spell
         void cycleSpell(bool next) override;

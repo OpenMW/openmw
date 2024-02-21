@@ -241,7 +241,7 @@ namespace MWGui
     }
 
     SettingsWindow::SettingsWindow()
-        : WindowModal("openmw_settings_window.layout")
+        : WindowBase("openmw_settings_window.layout")
         , mKeyboardMode(true)
         , mCurrentPage(-1)
     {
@@ -1042,8 +1042,6 @@ namespace MWGui
 
     void SettingsWindow::onOpen()
     {
-        WindowModal::onOpen();
-
         highlightCurrentResolution();
         updateControlsBox();
         updateLightSettings();

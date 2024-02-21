@@ -99,7 +99,7 @@ namespace MWGui
         }
         else if (name == "options")
         {
-            winMgr->getSettingsWindow()->setVisible(true);
+            winMgr->toggleSettingsWindow();
         }
         else if (name == "credits")
             winMgr->playVideo("mw_credits.bik", true);
@@ -212,6 +212,12 @@ namespace MWGui
 
     bool MainMenu::exit()
     {
+        if (MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible())
+        {
+            MWBase::Environment::get().getWindowManager()->toggleSettingsWindow();
+            return false;
+        }
+
         return MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Running;
     }
 
