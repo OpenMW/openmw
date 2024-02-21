@@ -1099,7 +1099,7 @@
 
 ---
 -- Send an event to menu scripts.
--- @function [parent=#core] sendMenuEvent
+-- @function [parent=#Player] sendMenuEvent
 -- @param openmw.core#GameObject player
 -- @param #string eventName
 -- @param eventData
