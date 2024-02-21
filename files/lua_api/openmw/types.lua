@@ -68,7 +68,7 @@
 -- @field #number Ammunition
 
 ---
--- Available @{#EQUIPMENT_SLOT} values. Used in `Actor.equipment(obj)` and `Actor.setEquipment(obj, eqp)`.
+-- Available @{#EQUIPMENT_SLOT} values. Used in `Actor.getEquipment(obj)` and `Actor.setEquipment(obj, eqp)`.
 -- @field [parent=#Actor] #EQUIPMENT_SLOT EQUIPMENT_SLOT
 
 ---
