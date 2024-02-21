@@ -1018,6 +1018,13 @@
 -- types.Player.quests(player)["ms_fargothring"].stage = 0
 
 ---
+-- Send an event to menu scripts.
+-- @function [parent=#Player] sendMenuEvent
+-- @param openmw.core#GameObject player
+-- @param #string eventName
+-- @param eventData
+
+---
 -- @type PlayerQuest
 -- @field #string id The quest id.
 -- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.
