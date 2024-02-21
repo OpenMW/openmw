@@ -182,7 +182,7 @@ namespace
         for (auto _ : state)
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.get(key.mAgentBounds, key.mTilePosition, key.mRecastMesh);
+            auto result = cache.get(key.mAgentBounds, key.mTilePosition, key.mRecastMesh);
             benchmark::DoNotOptimize(result);
         }
     }
@@ -241,7 +241,7 @@ namespace
         while (state.KeepRunning())
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.set(
+            auto result = cache.set(
                 key.mAgentBounds, key.mTilePosition, key.mRecastMesh, std::make_unique<PreparedNavMeshData>());
             benchmark::DoNotOptimize(result);
         }
