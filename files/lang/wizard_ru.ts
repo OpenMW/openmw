@@ -81,15 +81,15 @@
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Чтобы OpenMW мог работать правильно, ему нужно импортировать настройки из файла с настройками Morrowind.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:bold;&quot;&gt;Подсказка:&lt;/span&gt; Также можно импортировать настройки позже, запустив Мастер импорта заново.&lt;/p&gt;&lt;p/&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Import settings from Morrowind.ini</source>
+        <source>Import Settings From Morrowind.ini</source>
         <translation>Импортировать настройки из Morrowind.ini</translation>
     </message>
     <message>
-        <source>Import add-on and plugin selection</source>
-        <translation>Импортировать список подключенных плагинов</translation>
+        <source>Import Add-on and Plugin Selection</source>
+        <translation>Импортировать список подключенных аддонов и плагинов</translation>
     </message>
     <message>
-        <source>Import bitmap fonts setup from Morrowind.ini</source>
+        <source>Import Bitmap Fonts Setup From Morrowind.ini</source>
         <translation>Импортировать растровые шрифты из Morrowind.ini</translation>
     </message>
     <message>
