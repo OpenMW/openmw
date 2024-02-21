@@ -33,6 +33,7 @@ namespace Launcher
         void slotPostProcessToggled(bool checked);
         void slotSkyBlendingToggled(bool checked);
         void slotShadowDistLimitToggled(bool checked);
+        void slotDistantLandToggled(bool checked);
         void slotLightTypeCurrentIndexChanged(int index);
 
     private:
