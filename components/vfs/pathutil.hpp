@@ -122,7 +122,7 @@ namespace VFS::Path
         {
         }
 
-        Normalized(const char* value)
+        explicit Normalized(const char* value)
             : Normalized(std::string_view(value))
         {
         }
