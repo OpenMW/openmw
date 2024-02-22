@@ -70,7 +70,7 @@ namespace Bsa
 
         input.read(reinterpret_cast<char*>(&mHeader), sizeof(mHeader));
 
-        if (mHeader.mFormat != BSAVER_COMPRESSED) // BSA
+        if (mHeader.mFormat != static_cast<std::uint32_t>(BsaVersion::Compressed)) // BSA
             fail("Unrecognized compressed BSA format");
         if (mHeader.mVersion != Version_TES4 && mHeader.mVersion != Version_FO3 && mHeader.mVersion != Version_SSE)
             fail("Unrecognized compressed BSA version");
