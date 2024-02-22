@@ -220,14 +220,14 @@ namespace MWInput
         };
 
         // Only actually turn player when we're not in vanity mode
-        bool controls = MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols");
-        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && controls)
+        bool playerLooking = MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking");
+        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && playerLooking)
         {
             MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
             player.yaw(-rot[2]);
             player.pitch(-rot[0]);
         }
-        else if (!controls)
+        else if (!playerLooking)
             MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
 
         MWBase::Environment::get().getInputManager()->resetIdleTime();
