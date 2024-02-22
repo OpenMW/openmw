@@ -95,6 +95,8 @@ namespace MWRender
                     {
                         // Other objects are likely cheaper and should let us skip all but a few groundcover instances
                         cullVisitor.computeNearPlane();
+                        computedZNear = cullVisitor.getCalculatedNearPlane();
+                        computedZFar = cullVisitor.getCalculatedFarPlane();
 
                         if (dNear < computedZNear)
                         {
