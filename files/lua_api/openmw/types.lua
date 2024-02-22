@@ -958,6 +958,35 @@
 -- @param #any objectOrRecordId
 -- @return #NpcRecord
 
+--- @{#Races}: Race data
+-- @field [parent=#NPC] #Races races
+
+---
+-- A read-only list of all @{#RaceRecord}s in the world database.
+-- @field [parent=#Races] #list<#RaceRecord> records
+
+---
+-- Returns a read-only @{#RaceRecord}
+-- @function [parent=#Races] record
+-- @param #string recordId
+-- @return #RaceRecord
+
+---
+-- Race data record
+-- @type RaceRecord
+-- @field #string id Race id
+-- @field #string name Race name
+-- @field #string description Race description
+-- @field #map<#string, #number> skills A map of bonus skill points by skill ID
+-- @field #list<#string> spells A read-only list containing the ids of all spells inherent to the race
+-- @field #bool isPlayable True if the player can pick this race in character generation
+-- @field #bool isBeast True if this race is a beast race
+-- @field #map<#string, #number> height A read-only table with male and female fields
+-- @field #map<#string, #number> weight A read-only table with male and female fields
+-- @field #map<#string, #map<#string, #number>> attributes A read-only table of attribute ID to male and female base values
+-- @usage -- Get base strength for men
+-- strength = types.NPC.races.records[1].attributes.strength.male
+
 ---
 -- @type NpcRecord
 -- @field #string id The record ID of the NPC
