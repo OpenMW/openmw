@@ -11,9 +11,12 @@
 
 namespace VFS::Path
 {
+    inline constexpr char separator = '/';
+    inline constexpr char extensionSeparator = '.';
+
     inline constexpr char normalize(char c)
     {
-        return c == '\\' ? '/' : Misc::StringUtils::toLower(c);
+        return c == '\\' ? separator : Misc::StringUtils::toLower(c);
     }
 
     inline constexpr bool isNormalized(std::string_view name)
@@ -21,9 +24,14 @@ namespace VFS::Path
         return std::all_of(name.begin(), name.end(), [](char v) { return v == normalize(v); });
     }
 
+    inline void normalizeFilenameInPlace(auto begin, auto end)
+    {
+        std::transform(begin, end, begin, normalize);
+    }
+
     inline void normalizeFilenameInPlace(std::string& name)
     {
-        std::transform(name.begin(), name.end(), name.begin(), normalize);
+        normalizeFilenameInPlace(name.begin(), name.end());
     }
 
     /// Normalize the given filename, making slashes/backslashes consistent, and lower-casing.
@@ -58,6 +66,11 @@ namespace VFS::Path
 
         bool operator()(std::string_view left, std::string_view right) const { return pathLess(left, right); }
     };
+
+    inline constexpr auto findSeparatorOrExtensionSeparator(auto begin, auto end)
+    {
+        return std::find_if(begin, end, [](char v) { return v == extensionSeparator || v == separator; });
+    }
 
     class Normalized;
 
@@ -153,6 +166,27 @@ namespace VFS::Path
 
         operator const std::string&() const { return mValue; }
 
+        bool changeExtension(std::string_view extension)
+        {
+            if (findSeparatorOrExtensionSeparator(extension.begin(), extension.end()) != extension.end())
+                throw std::invalid_argument("Invalid extension: " + std::string(extension));
+            const auto it = findSeparatorOrExtensionSeparator(mValue.rbegin(), mValue.rend());
+            if (it == mValue.rend() || *it == separator)
+                return false;
+            const std::string::difference_type pos = mValue.rend() - it;
+            mValue.replace(pos, mValue.size(), extension);
+            normalizeFilenameInPlace(mValue.begin() + pos, mValue.end());
+            return true;
+        }
+
+        Normalized& operator/=(NormalizedView value)
+        {
+            mValue.reserve(mValue.size() + value.value().size() + 1);
+            mValue += separator;
+            mValue += value.value();
+            return *this;
+        }
+
         friend bool operator==(const Normalized& lhs, const Normalized& rhs) = default;
 
         friend bool operator==(const Normalized& lhs, const auto& rhs) { return lhs.mValue == rhs; }
@@ -206,6 +240,13 @@ namespace VFS::Path
     inline NormalizedView::NormalizedView(const Normalized& value) noexcept
         : mValue(value.view())
     {
+    }
+
+    inline Normalized operator/(NormalizedView lhs, NormalizedView rhs)
+    {
+        Normalized result(lhs);
+        result /= rhs;
+        return result;
     }
 }
 
