@@ -86,8 +86,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 {
                     modified = true;
 
-                    auto cell = std::make_unique<Cell>(mDocument.getData(), mDocument.getUndoStack(), mRootNode,
-                        iter->first.getId(mWorldspace), deleted);
+                    auto cell
+                        = std::make_unique<Cell>(mDocument, mRootNode, iter->first.getId(mWorldspace), deleted, true);
 
                     delete iter->second;
                     iter->second = cell.release();
@@ -465,8 +465,7 @@ void CSVRender::PagedWorldspaceWidget::addCellToScene(const CSMWorld::CellCoordi
 
     bool deleted = index == -1 || cells.getRecord(index).mState == CSMWorld::RecordBase::State_Deleted;
 
-    auto cell = std::make_unique<Cell>(
-        mDocument.getData(), mDocument.getUndoStack(), mRootNode, coordinates.getId(mWorldspace), deleted);
+    auto cell = std::make_unique<Cell>(mDocument, mRootNode, coordinates.getId(mWorldspace), deleted, true);
     EditMode* editMode = getEditMode();
     cell->setSubMode(editMode->getSubMode(), editMode->getInteractionMask());
 
