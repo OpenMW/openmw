@@ -24,6 +24,7 @@
 #include "cellwater.hpp"
 #include "instancedragmodes.hpp"
 #include "mask.hpp"
+#include "model/doc/document.hpp"
 #include "object.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
@@ -119,7 +120,7 @@ bool CSVRender::Cell::addObjects(int start, int end)
 
 void CSVRender::Cell::updateLand()
 {
-    if (!mUpdateLand || mLandDeleted || !mId.startsWith("#"))
+    if (mLandDeleted)
         return;
 
     mUpdateLand = false;
@@ -132,14 +133,6 @@ void CSVRender::Cell::updateLand()
     }
 
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
-    int landIndex = land.searchId(mId);
-
-    if (landIndex == -1)
-    {
-        CSMWorld::IdTable& landTable
-            = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Land));
-        mUndoStack.push(new CSMWorld::CreateCommand(landTable, mId.getRefIdString()));
-    }
 
     if (land.getRecord(mId).isDeleted())
         return;
@@ -176,14 +169,13 @@ void CSVRender::Cell::unloadLand()
 }
 
 CSVRender::Cell::Cell(
-    CSMWorld::Data& data, QUndoStack& undoStack, osg::Group* rootNode, const std::string& id, bool deleted)
-    : mData(data)
-    , mUndoStack(undoStack)
+    CSMDoc::Document& document, osg::Group* rootNode, const std::string& id, bool deleted, bool isExterior)
+    : mData(document.getData())
     , mId(ESM::RefId::stringRefId(id))
     , mDeleted(deleted)
     , mSubMode(0)
     , mSubModeElementMask(0)
-    , mUpdateLand(true)
+    , mUpdateLand(isExterior)
     , mLandDeleted(false)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId(id);
@@ -209,7 +201,17 @@ CSVRender::Cell::Cell(
 
         addObjects(0, rows - 1);
 
-        updateLand();
+        if (mUpdateLand)
+        {
+            int landIndex = document.getData().getLand().searchId(mId);
+            if (landIndex == -1)
+            {
+                CSMWorld::IdTable& landTable
+                    = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Land));
+                document.getUndoStack().push(new CSMWorld::CreateCommand(landTable, mId.getRefIdString()));
+            }
+            updateLand();
+        }
 
         mPathgrid = std::make_unique<Pathgrid>(mData, mCellNode, mId.getRefIdString(), mCoordinates);
         mCellWater = std::make_unique<CellWater>(mData, mCellNode, mId.getRefIdString(), mCoordinates);
