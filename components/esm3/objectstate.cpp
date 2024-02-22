@@ -30,10 +30,7 @@ namespace ESM
         esm.getHNOT(mEnabled, "ENAB");
 
         if (mVersion <= MaxOldCountFormatVersion)
-        {
-            mRef.mCount = 1;
             esm.getHNOT(mRef.mCount, "COUN");
-        }
 
         mPosition = mRef.mPos;
         esm.getHNOT("POS_", mPosition.pos, mPosition.rot);
