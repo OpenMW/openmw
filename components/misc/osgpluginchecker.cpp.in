@@ -15,11 +15,14 @@
 
 namespace Misc
 {
-#ifdef OSG_LIBRARY_STATIC
+#if defined(OSG_LIBRARY_STATIC) || defined(__APPLE__)
 
     bool checkRequiredOSGPluginsArePresent()
     {
         // assume they were linked in at build time and CMake would have failed if they were missing
+        // true-ish for MacOS - they're copied into the package and that'd fail if they were missing,
+        // but if you don't actually make a MacOS package and run a local build, this won't notice.
+        // the workaround in the real implementation isn't powerful enough to make MacOS work, though.
         return true;
     }
 
