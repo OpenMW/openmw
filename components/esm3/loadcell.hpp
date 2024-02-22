@@ -163,7 +163,7 @@ namespace ESM
 
         bool hasWater() const { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
 
-        void setHasWater(bool hasWater) { mHasWaterHeightSub = hasWater; }
+        void setHasWaterHeightSub(bool hasWater) { mHasWaterHeightSub = hasWater; }
 
         bool hasAmbient() const { return mHasAmbi; }
 

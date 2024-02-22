@@ -998,7 +998,7 @@ namespace CSMWorld
                 if (isInterior && interiorWater)
                 {
                     cell.mWater = value.toFloat();
-                    cell.setHasWater(true);
+                    cell.setHasWaterHeightSub(true);
                 }
                 else
                     return; // return without saving
