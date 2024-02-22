@@ -9,6 +9,7 @@ namespace ESM
 
     inline constexpr FormatVersion DefaultFormatVersion = 0;
     inline constexpr FormatVersion CurrentContentFormatVersion = 1;
+    inline constexpr FormatVersion MaxOldGoldValueFormatVersion = 5;
     inline constexpr FormatVersion MaxOldFogOfWarFormatVersion = 6;
     inline constexpr FormatVersion MaxUnoptimizedCharacterDataFormatVersion = 7;
     inline constexpr FormatVersion MaxOldTimeLeftFormatVersion = 8;
