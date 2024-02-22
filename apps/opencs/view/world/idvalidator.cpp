@@ -2,11 +2,6 @@
 
 #include <components/misc/strings/lower.hpp>
 
-bool CSVWorld::IdValidator::isValid(const QChar& c, bool first) const
-{
-    return c.isPrint() ? true : false;
-}
-
 CSVWorld::IdValidator::IdValidator(bool relaxed, QObject* parent)
     : QValidator(parent)
     , mRelaxed(relaxed)
@@ -86,7 +81,7 @@ QValidator::State CSVWorld::IdValidator::validate(QString& input, int& pos) cons
             {
                 prevScope = false;
 
-                if (!isValid(*iter, first))
+                if (!iter->isPrint())
                     return QValidator::Invalid;
             }
         }
