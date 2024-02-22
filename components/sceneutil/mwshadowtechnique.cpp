@@ -1025,7 +1025,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             {
                 dummyState->setTextureAttribute(i, _fallbackShadowMapTexture, osg::StateAttribute::ON);
                 dummyState->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseUnit)).c_str(), i));
-                dummyState->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseUnit)).c_str(), i));
             }
 
             cv.pushStateSet(dummyState);
@@ -1710,14 +1709,6 @@ void MWShadowTechnique::createShaders()
             osg::ref_ptr<osg::Uniform> shadowTextureSampler = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
             for (auto& perFrameUniformList : _uniforms)
                 perFrameUniformList.emplace_back(shadowTextureSampler.get());
-        }
-
-        {
-            std::stringstream sstr;
-            sstr<<"shadowTextureUnit"<<sm_i;
-            osg::ref_ptr<osg::Uniform> shadowTextureUnit = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
-            for (auto& perFrameUniformList : _uniforms)
-                perFrameUniformList.emplace_back(shadowTextureUnit.get());
         }
     }
 

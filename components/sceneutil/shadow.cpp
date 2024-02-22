@@ -13,6 +13,16 @@ namespace SceneUtil
 {
     using namespace osgShadow;
 
+    ShadowManager* ShadowManager::sInstance = nullptr;
+
+    const ShadowManager& ShadowManager::instance()
+    {
+        if (sInstance)
+            return *sInstance;
+        else
+            throw std::logic_error("No ShadowManager exists yet");
+    }
+
     void ShadowManager::setupShadowSettings(
         const Settings::ShadowsCategory& settings, Shader::ShaderManager& shaderManager)
     {
@@ -75,14 +85,10 @@ namespace SceneUtil
             mShadowTechnique->disableDebugHUD();
     }
 
-    void ShadowManager::disableShadowsForStateSet(const Settings::ShadowsCategory& settings, osg::StateSet& stateset)
+    void ShadowManager::disableShadowsForStateSet(osg::StateSet& stateset) const
     {
-        if (!settings.mEnableShadows)
+        if (!mEnableShadows)
             return;
-
-        const int numberOfShadowMapsPerLight = settings.mNumberOfShadowMaps;
-
-        int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
 
         osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
         fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
@@ -92,14 +98,14 @@ namespace SceneUtil
         fakeShadowMapTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         fakeShadowMapTexture->setShadowComparison(true);
         fakeShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
-        for (int i = baseShadowTextureUnit; i < baseShadowTextureUnit + numberOfShadowMapsPerLight; ++i)
+        for (unsigned int i = mShadowSettings->getBaseShadowTextureUnit();
+             i < mShadowSettings->getBaseShadowTextureUnit() + mShadowSettings->getNumShadowMapsPerLight(); ++i)
         {
-            stateset.setTextureAttributeAndModes(i, fakeShadowMapTexture,
+            stateset.setTextureAttribute(i, fakeShadowMapTexture,
                 osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
-            stateset.addUniform(
-                new osg::Uniform(("shadowTexture" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
-            stateset.addUniform(
-                new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
+            stateset.addUniform(new osg::Uniform(
+                ("shadowTexture" + std::to_string(i - mShadowSettings->getBaseShadowTextureUnit())).c_str(),
+                static_cast<int>(i)));
         }
     }
 
@@ -111,6 +117,9 @@ namespace SceneUtil
         , mOutdoorShadowCastingMask(outdoorShadowCastingMask)
         , mIndoorShadowCastingMask(indoorShadowCastingMask)
     {
+        if (sInstance)
+            throw std::logic_error("A ShadowManager already exists");
+
         mShadowedScene->setShadowTechnique(mShadowTechnique);
 
         if (Stereo::getStereo())
@@ -127,6 +136,8 @@ namespace SceneUtil
         mShadowTechnique->setWorldMask(worldMask);
 
         enableOutdoorMode();
+
+        sInstance = this;
     }
 
     ShadowManager::~ShadowManager()
@@ -135,7 +146,7 @@ namespace SceneUtil
             Stereo::Manager::instance().setShadowTechnique(nullptr);
     }
 
-    Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines(const Settings::ShadowsCategory& settings)
+    Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines(const Settings::ShadowsCategory& settings) const
     {
         if (!mEnableShadows)
             return getShadowsDisabledDefines();
