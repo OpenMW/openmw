@@ -101,7 +101,7 @@ namespace Debug
         void addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color = colorWhite);
 
     private:
-        unsigned int mCurrentFrame;
+        unsigned int mCurrentFrame = 0;
 
         std::array<osg::ref_ptr<DebugCustomDraw>, 2> mCustomDebugDrawer;
     };
