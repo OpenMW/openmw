@@ -14,7 +14,7 @@ KeyboardControls: |
     Shift+Left-Arrow > Deactive shader
     Shift+Up-Arrow > Move shader up
     Shift+Down-Arrow > Move shader down
-PostProcessHUD: "Postprocess HUD"
+PostProcessHUD: "Post Processor HUD"
 ResetShader: "Reset shader to default state"
 ShaderLocked: "Locked"
 ShaderLockedDescription: "Cannot be toggled or moved, controlled by external Lua script"
@@ -30,11 +30,11 @@ BloomDescription: "Bloom shader performing its calculations in (approximately) l
 DebugDescription: "Debug shader."
 DebugHeaderDepth: "Depth Buffer"
 DebugHeaderNormals: "Normals"
-DisplayDepthFactorName: "Depth colour factor"
+DisplayDepthFactorName: "Depth Colour Factor"
 DisplayDepthFactorDescription: "Determines correlation between pixel depth value and its output colour. High values lead to brighter image."
-DisplayDepthName: "Visualize depth buffer"
-DisplayNormalsName: "Visualize pass normals"
-NormalsInWorldSpace: "Show normals in world space"
+DisplayDepthName: "Visualize Depth Buffer"
+DisplayNormalsName: "Visualize Pass Normals"
+NormalsInWorldSpace: "Show Normals in World Space"
 ContrastLevelDescription: "Constrast level."
 ContrastLevelName: "Constrast"
 GammaLevelDescription: "Gamma level."
