@@ -163,8 +163,8 @@ namespace MWLua
                 ignore = parseIgnoreList(*options);
             }
 
-            context.mLuaManager->addAction([context, ignore, callback = LuaUtil::Callback::fromLua(callback), from,
-                                               to] {
+            context.mLuaManager->addAction([context, ignore = std::move(ignore),
+                                               callback = LuaUtil::Callback::fromLua(callback), from, to] {
                 MWPhysics::RayCastingResult res;
                 MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false, ignore);
                 context.mLuaManager->queueCallback(callback, sol::main_object(context.mLua->sol(), sol::in_place, res));
