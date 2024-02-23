@@ -526,15 +526,15 @@ if (USE_QT)
     QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
-if (ANDROID)
-    set_property(TARGET components PROPERTY POSTION_INDEPENDENT_CODE ON)
-endif()
-
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(SQLite3 REQUIRED)
 
 add_library(components STATIC ${COMPONENT_FILES})
+
+if (ANDROID)
+    set_property(TARGET components PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif()
 
 target_link_libraries(components
     ${COLLADA_DOM_LIBRARIES}
