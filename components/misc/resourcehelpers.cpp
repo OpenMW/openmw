@@ -47,7 +47,7 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
 }
 
 std::string Misc::ResourceHelpers::correctResourcePath(
-    const std::vector<std::string_view>& topLevelDirectories, std::string_view resPath, const VFS::Manager* vfs)
+    std::span<const std::string_view> topLevelDirectories, std::string_view resPath, const VFS::Manager* vfs)
 {
     /* Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
@@ -124,17 +124,17 @@ std::string Misc::ResourceHelpers::correctResourcePath(
 
 std::string Misc::ResourceHelpers::correctTexturePath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ "textures", "bookart" }, resPath, vfs);
+    return correctResourcePath({ { "textures", "bookart" } }, resPath, vfs);
 }
 
 std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ "icons" }, resPath, vfs);
+    return correctResourcePath({ { "icons" } }, resPath, vfs);
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ "bookart", "textures" }, resPath, vfs);
+    return correctResourcePath({ { "bookart", "textures" } }, resPath, vfs);
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(
