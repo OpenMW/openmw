@@ -16,8 +16,14 @@
 -- @return #number
 
 ---
--- Check if the given actor is dead.
+-- Check if the given actor is dead (health reached 0, so death process started).
 -- @function [parent=#Actor] isDead
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
+-- Check if the given actor's death process is finished.
+-- @function [parent=#Actor] isDeathFinished
 -- @param openmw.core#GameObject actor
 -- @return #boolean
 
