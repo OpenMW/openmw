@@ -14,11 +14,13 @@ namespace LuaUtil
     class LuaStorage
     {
     public:
-        static void initLuaBindings(lua_State*);
-        static sol::table initGlobalPackage(lua_State* lua, LuaStorage* globalStorage);
-        static sol::table initLocalPackage(lua_State* lua, LuaStorage* globalStorage);
-        static sol::table initPlayerPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage);
-        static sol::table initMenuPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage);
+        static void initLuaBindings(lua_State* L);
+        static sol::table initGlobalPackage(LuaUtil::LuaState& luaState, LuaStorage* globalStorage);
+        static sol::table initLocalPackage(LuaUtil::LuaState& luaState, LuaStorage* globalStorage);
+        static sol::table initPlayerPackage(
+            LuaUtil::LuaState& luaState, LuaStorage* globalStorage, LuaStorage* playerStorage);
+        static sol::table initMenuPackage(
+            LuaUtil::LuaState& luaState, LuaStorage* globalStorage, LuaStorage* playerStorage);
 
         explicit LuaStorage(lua_State* lua)
             : mLua(lua)
@@ -78,6 +80,13 @@ namespace LuaUtil
 
         struct Section
         {
+            enum LifeTime
+            {
+                Persistent,
+                GameSession,
+                Temporary
+            };
+
             explicit Section(LuaStorage* storage, std::string name)
                 : mStorage(storage)
                 , mSectionName(std::move(name))
@@ -96,7 +105,7 @@ namespace LuaUtil
             std::vector<Callback> mCallbacks;
             std::vector<Callback> mMenuScriptsCallbacks; // menu callbacks are in a separate vector because we don't
                                                          // remove them in clear()
-            bool mPermanent = true;
+            LifeTime mLifeTime = Persistent;
             static Value sEmpty;
 
             void checkIfActive() const { mStorage->checkIfActive(); }
@@ -120,6 +129,7 @@ namespace LuaUtil
             if (!mActive)
                 throw std::logic_error("Trying to access inactive storage");
         }
+        static void registerLifeTime(LuaUtil::LuaState& luaState, sol::table& res);
     };
 
 }

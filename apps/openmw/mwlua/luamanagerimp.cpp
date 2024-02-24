@@ -112,13 +112,12 @@ namespace MWLua
         mPlayerPackages.insert(mLocalPackages.begin(), mLocalPackages.end());
 
         LuaUtil::LuaStorage::initLuaBindings(mLua.sol());
-        mGlobalScripts.addPackage(
-            "openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(mLua.sol(), &mGlobalStorage));
+        mGlobalScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(mLua, &mGlobalStorage));
         mMenuScripts.addPackage(
-            "openmw.storage", LuaUtil::LuaStorage::initMenuPackage(mLua.sol(), &mGlobalStorage, &mPlayerStorage));
-        mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua.sol(), &mGlobalStorage);
+            "openmw.storage", LuaUtil::LuaStorage::initMenuPackage(mLua, &mGlobalStorage, &mPlayerStorage));
+        mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua, &mGlobalStorage);
         mPlayerPackages["openmw.storage"]
-            = LuaUtil::LuaStorage::initPlayerPackage(mLua.sol(), &mGlobalStorage, &mPlayerStorage);
+            = LuaUtil::LuaStorage::initPlayerPackage(mLua, &mGlobalStorage, &mPlayerStorage);
 
         mPlayerStorage.setActive(true);
         mGlobalStorage.setActive(false);
