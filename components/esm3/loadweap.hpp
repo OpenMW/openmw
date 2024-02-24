@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_WEAP_H
 #define OPENMW_ESM_WEAP_H
 
+#include <array>
 #include <string>
 
 #include "components/esm/refid.hpp"
@@ -59,8 +60,6 @@ namespace ESM
             Silver = 0x02
         };
 
-#pragma pack(push)
-#pragma pack(1)
         struct WPDTstruct
         {
             float mWeight;
@@ -69,10 +68,9 @@ namespace ESM
             uint16_t mHealth;
             float mSpeed, mReach;
             uint16_t mEnchant; // Enchantment points. The real value is mEnchant/10.f
-            unsigned char mChop[2], mSlash[2], mThrust[2]; // Min and max
+            std::array<unsigned char, 2> mChop, mSlash, mThrust; // Min and max
             int32_t mFlags;
         }; // 32 bytes
-#pragma pack(pop)
 
         WPDTstruct mData;
 

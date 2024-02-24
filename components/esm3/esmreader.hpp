@@ -191,13 +191,7 @@ namespace ESM
 
         void getSubComposite(auto& value)
         {
-            decompose(value, [&](auto&... args) {
-                constexpr size_t size = (0 + ... + sizeof(decltype(args)));
-                getSubHeader();
-                if (mCtx.leftSub != size)
-                    reportSubSizeMismatch(size, mCtx.leftSub);
-                (getT(args), ...);
-            });
+            decompose(value, [&](auto&... args) { getHT(args...); });
         }
 
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
