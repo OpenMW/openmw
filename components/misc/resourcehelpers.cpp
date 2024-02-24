@@ -47,7 +47,7 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
 }
 
 std::string Misc::ResourceHelpers::correctResourcePath(
-    std::string_view topLevelDirectory, std::string_view resPath, const VFS::Manager* vfs)
+    std::span<const std::string_view> topLevelDirectories, std::string_view resPath, const VFS::Manager* vfs)
 {
     /* Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
@@ -66,16 +66,30 @@ std::string Misc::ResourceHelpers::correctResourcePath(
         correctedPath.erase(0, 1);
 
     // Handle top level directory
-    if (!correctedPath.starts_with(topLevelDirectory) || correctedPath.size() <= topLevelDirectory.size()
-        || correctedPath[topLevelDirectory.size()] != '\\')
+    bool needsPrefix = true;
+    for (std::string_view potentialTopLevelDirectory : topLevelDirectories)
     {
-        std::string topLevelPrefix = std::string{ topLevelDirectory } + '\\';
-        size_t topLevelPos = correctedPath.find('\\' + topLevelPrefix);
-        if (topLevelPos == std::string::npos)
-            correctedPath = topLevelPrefix + correctedPath;
+        if (correctedPath.starts_with(potentialTopLevelDirectory)
+            && correctedPath.size() > potentialTopLevelDirectory.size()
+            && correctedPath[potentialTopLevelDirectory.size()] == '\\')
+        {
+            needsPrefix = false;
+            break;
+        }
         else
-            correctedPath.erase(0, topLevelPos + 1);
+        {
+            std::string topLevelPrefix = std::string{ potentialTopLevelDirectory } + '\\';
+            size_t topLevelPos = correctedPath.find('\\' + topLevelPrefix);
+            if (topLevelPos != std::string::npos)
+            {
+                correctedPath.erase(0, topLevelPos + 1);
+                needsPrefix = false;
+                break;
+            }
+        }
     }
+    if (needsPrefix)
+        correctedPath = std::string{ topLevelDirectories.front() } + '\\' + correctedPath;
 
     std::string origExt = correctedPath;
 
@@ -90,7 +104,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(
         return origExt;
 
     // fall back to a resource in the top level directory if it exists
-    std::string fallback{ topLevelDirectory };
+    std::string fallback{ topLevelDirectories.front() };
     fallback += '\\';
     fallback += getBasename(correctedPath);
     if (vfs->exists(fallback))
@@ -98,7 +112,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(
 
     if (changedToDds)
     {
-        fallback = topLevelDirectory;
+        fallback = topLevelDirectories.front();
         fallback += '\\';
         fallback += getBasename(origExt);
         if (vfs->exists(fallback))
@@ -110,17 +124,17 @@ std::string Misc::ResourceHelpers::correctResourcePath(
 
 std::string Misc::ResourceHelpers::correctTexturePath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath("textures", resPath, vfs);
+    return correctResourcePath({ { "textures", "bookart" } }, resPath, vfs);
 }
 
 std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath("icons", resPath, vfs);
+    return correctResourcePath({ { "icons" } }, resPath, vfs);
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath("bookart", resPath, vfs);
+    return correctResourcePath({ { "bookart", "textures" } }, resPath, vfs);
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(
