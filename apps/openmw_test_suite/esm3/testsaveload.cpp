@@ -1,6 +1,7 @@
 #include <components/esm/fourcc.hpp>
 #include <components/esm3/aipackage.hpp>
 #include <components/esm3/aisequence.hpp>
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
@@ -523,6 +524,34 @@ namespace ESM
             EXPECT_EQ(result.mFlee, record.mFlee);
             EXPECT_EQ(result.mAlarm, record.mAlarm);
             EXPECT_EQ(result.mServices, record.mServices);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, enamShouldNotChange)
+        {
+            EffectList record;
+            record.mList.emplace_back(ENAMstruct{
+                .mEffectID = 1,
+                .mSkill = 2,
+                .mAttribute = 3,
+                .mRange = 4,
+                .mArea = 5,
+                .mDuration = 6,
+                .mMagnMin = 7,
+                .mMagnMax = 8,
+            });
+
+            EffectList result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mList.size(), record.mList.size());
+            EXPECT_EQ(result.mList[0].mEffectID, record.mList[0].mEffectID);
+            EXPECT_EQ(result.mList[0].mSkill, record.mList[0].mSkill);
+            EXPECT_EQ(result.mList[0].mAttribute, record.mList[0].mAttribute);
+            EXPECT_EQ(result.mList[0].mRange, record.mList[0].mRange);
+            EXPECT_EQ(result.mList[0].mArea, record.mList[0].mArea);
+            EXPECT_EQ(result.mList[0].mDuration, record.mList[0].mDuration);
+            EXPECT_EQ(result.mList[0].mMagnMin, record.mList[0].mMagnMin);
+            EXPECT_EQ(result.mList[0].mMagnMax, record.mList[0].mMagnMax);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));

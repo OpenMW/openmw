@@ -102,8 +102,7 @@ namespace ESM
                     mInventory.add(esm);
                     break;
                 case fourCC("AIDT"):
-                    esm.getSubHeader();
-                    esm.getComposite(mAiData);
+                    esm.getSubComposite(mAiData);
                     break;
                 case fourCC("DODT"):
                 case fourCC("DNAM"):
