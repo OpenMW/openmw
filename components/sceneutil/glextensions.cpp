@@ -13,12 +13,23 @@ namespace SceneUtil
         public:
             static GLExtensionsObserver sInstance;
 
+            ~GLExtensionsObserver() override
+            {
+                for (auto& ptr : sGLExtensions)
+                {
+                    osg::ref_ptr<osg::GLExtensions> ref;
+                    if (ptr.lock(ref))
+                        ref->removeObserver(this);
+                }
+            }
+
             void objectDeleted(void* referenced) override
             {
                 sGLExtensions.erase(static_cast<osg::GLExtensions*>(referenced));
             }
         };
 
+        // construct after sGLExtensions so this gets destroyed first.
         GLExtensionsObserver GLExtensionsObserver::sInstance{};
     }
 
