@@ -9,9 +9,9 @@
 #include <osg/Vec3d>
 #include <osg/ref_ptr>
 
+#include "../../model/doc/document.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 #include "instancedragmodes.hpp"
-#include "model/doc/document.hpp"
 #include <components/esm/refid.hpp>
 #include <components/misc/algorithm.hpp>
 

@@ -16,6 +16,7 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/terrain/terraingrid.hpp>
 
+#include "../../model/doc/document.hpp"
 #include "../../model/world/idtable.hpp"
 
 #include "cellarrow.hpp"
@@ -24,7 +25,6 @@
 #include "cellwater.hpp"
 #include "instancedragmodes.hpp"
 #include "mask.hpp"
-#include "model/doc/document.hpp"
 #include "object.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
