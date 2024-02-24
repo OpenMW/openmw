@@ -33,6 +33,11 @@ namespace SceneUtil
         GLExtensionsObserver GLExtensionsObserver::sInstance{};
     }
 
+    bool glExtensionsReady()
+    {
+        return !sGLExtensions.empty();
+    }
+
     osg::GLExtensions& getGLExtensions()
     {
         if (sGLExtensions.empty())

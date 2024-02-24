@@ -6,6 +6,7 @@
 
 namespace SceneUtil
 {
+    bool glExtensionsReady();
     osg::GLExtensions& getGLExtensions();
 
     class GetGLExtensionsOperation : public osg::GraphicsOperation

@@ -825,9 +825,9 @@ namespace SceneUtil
         , mPointLightFadeEnd(0.f)
         , mPointLightFadeStart(0.f)
     {
-        osg::GLExtensions& exts = SceneUtil::getGLExtensions();
-        bool supportsUBO = exts.isUniformBufferObjectSupported;
-        bool supportsGPU4 = exts.isGpuShader4Supported;
+        osg::GLExtensions* exts = SceneUtil::glExtensionsReady() ? &SceneUtil::getGLExtensions() : nullptr;
+        bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
+        bool supportsGPU4 = exts && exts->isGpuShader4Supported;
 
         mSupported[static_cast<int>(LightingMethod::FFP)] = true;
         mSupported[static_cast<int>(LightingMethod::PerObjectUniform)] = true;
