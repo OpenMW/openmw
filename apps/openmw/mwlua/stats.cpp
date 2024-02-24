@@ -476,7 +476,7 @@ namespace MWLua
 
         auto skillIncreasesForAttributeStatsT
             = context.mLua->sol().new_usertype<SkillIncreasesForAttributeStats>("SkillIncreasesForAttributeStats");
-        for (auto attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
+        for (const auto& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
             skillIncreasesForAttributeStatsT[ESM::RefId(attribute.mId).serializeText()] = sol::property(
                 [=](const SkillIncreasesForAttributeStats& stat) { return stat.get(context, attribute.mId); },

@@ -316,8 +316,6 @@ Debug::DebugDrawer::DebugDrawer(const DebugDrawer& copy, const osg::CopyOp& copy
 
 Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager)
 {
-    mCurrentFrame = 0;
-
     auto program = shaderManager.getProgram("debug");
 
     setCullingActive(false);
