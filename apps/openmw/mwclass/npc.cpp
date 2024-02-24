@@ -1118,7 +1118,7 @@ namespace MWClass
         }
 
         if (fullHelp)
-            info.text = MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra = MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
 
         return info;
     }

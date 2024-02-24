@@ -115,6 +115,7 @@
     Bug #7611: Beast races' idle animations slide after turning or jumping in place
     Bug #7617: The death prompt asks the player if they wanted to load the character's last created save
     Bug #7619: Long map notes may get cut off
+    Bug #7623: Incorrect placement of the script info in the engraved ring of healing tooltip
     Bug #7630: Charm can be cast on creatures
     Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
     Bug #7633: Groundcover should ignore non-geometry Drawables
