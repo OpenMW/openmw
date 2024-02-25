@@ -80,5 +80,5 @@ SmoothMoveBackward_description: "Backward movement adjusted for smooth Walk-Run 
 SmoothMoveLeft_name: "Smooth Move Left"
 SmoothMoveLeft_description: "Left movement adjusted for smooth Walk-Run transitions."
 
-SkmoothMoveRight_name: "Smooth Move Right"
-SkmoothMoveRight_description: "Right movement adjusted for smooth Walk-Run transitions."
+SmoothMoveRight_name: "Smooth Move Right"
+SmoothMoveRight_description: "Right movement adjusted for smooth Walk-Run transitions."

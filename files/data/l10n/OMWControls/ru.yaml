@@ -81,5 +81,5 @@ SmoothMoveBackward_description: "Движение назад с плавными
 SmoothMoveLeft_name: "Плавно двигаться влево"
 SmoothMoveLeft_description: "Движение влево с плавными переходами от ходьбы к бегу."
 
-SkmoothMoveRight_name: "Плавно двигаться вправо"
-SkmoothMoveRight_description: "Движение вправо с плавными переходами от ходьбы к бегу."
+SmoothMoveRight_name: "Плавно двигаться вправо"
+SmoothMoveRight_description: "Движение вправо с плавными переходами от ходьбы к бегу."
