@@ -127,6 +127,7 @@ namespace ESM
                 case fourCC("INTV"):
                     int32_t waterl;
                     esm.getHT(waterl);
+                    mHasWaterHeightSub = true;
                     mWater = static_cast<float>(waterl);
                     break;
                 case fourCC("WHGT"):
