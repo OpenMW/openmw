@@ -66,6 +66,8 @@ namespace Resource
             case (GL_COMPRESSED_RGBA_S3TC_DXT3_EXT):
             case (GL_COMPRESSED_RGBA_S3TC_DXT5_EXT):
             {
+                if (!SceneUtil::glExtensionsReady())
+                    return true; // hashtag yolo (CS might not have context when loading assets)
                 osg::GLExtensions& exts = SceneUtil::getGLExtensions();
                 if (!exts.isTextureCompressionS3TCSupported
                     // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a
