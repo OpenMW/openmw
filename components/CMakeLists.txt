@@ -12,7 +12,7 @@ set (VERSION_CPP_FILE "components/version/version.cpp")
 
 if (GIT_CHECKOUT)
     get_generator_is_multi_config(multi_config)
-    add_custom_target (
+    add_custom_target (get-version
        BYPRODUCTS "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
        DEPENDS "${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in"
        COMMAND ${CMAKE_COMMAND}
