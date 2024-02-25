@@ -12,8 +12,8 @@ set (VERSION_CPP_FILE "components/version/version.cpp")
 
 if (GIT_CHECKOUT)
     get_generator_is_multi_config(multi_config)
-    add_custom_command (
-       OUTPUT "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
+    add_custom_target (
+       BYPRODUCTS "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
        DEPENDS "${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in"
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
@@ -21,7 +21,8 @@ if (GIT_CHECKOUT)
             -DOpenMW_BINARY_DIR=${OpenMW_BINARY_DIR}
             -DVERSION_RESOURCE_FILE_IN=${VERSION_RESOURCE_FILE_IN}
             -DVERSION_RESOURCE_FILE_RELATIVE=${VERSION_RESOURCE_FILE_RELATIVE}
-            -DVERSION_CPP_FILE=${VERSION_CPP_FILE}
+            -DVERSION_CPP_FILE_IN=${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in
+            -DVERSION_CPP_FILE_OUT=${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}.out
             -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
@@ -32,7 +33,9 @@ if (GIT_CHECKOUT)
             "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
             -Dgenerator_is_multi_config_var=${multi_config}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
-            VERBATIM)
+        COMMAND ${CMAKE_COMMAND}
+            -E copy_if_different ${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}.out ${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}
+        VERBATIM)
 else (GIT_CHECKOUT)
     configure_resource_file(${VERSION_RESOURCE_FILE_IN} ${OpenMW_BINARY_DIR} ${VERSION_RESOURCE_FILE_RELATIVE})
     configure_file("${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")

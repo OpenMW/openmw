@@ -29,4 +29,4 @@ endif ()
 include(${MACROSFILE})
 
 configure_resource_file(${VERSION_RESOURCE_FILE_IN} ${OpenMW_BINARY_DIR} ${VERSION_RESOURCE_FILE_RELATIVE})
-configure_file("${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
+configure_file("${VERSION_CPP_FILE_IN}" "${VERSION_CPP_FILE_OUT}")
