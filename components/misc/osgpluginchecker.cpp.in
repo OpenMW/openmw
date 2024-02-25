@@ -41,13 +41,13 @@ namespace Misc
         for (const auto& path : filepath)
         {
 #ifdef OSG_USE_UTF8_FILENAME
-            std::filesystem::path osgPath {stringToU8String(path)};
+            std::filesystem::path osgPath{ stringToU8String(path) };
 #else
-            std::filesystem::path osgPath {path};
+            std::filesystem::path osgPath{ path };
 #endif
             if (!osgPath.has_filename())
                 osgPath = osgPath.parent_path();
-            
+
             if (osgPath.filename() == pluginDirectoryName)
             {
                 osgPath = osgPath.parent_path();
@@ -64,14 +64,16 @@ namespace Misc
         bool haveAllPlugins = true;
         for (std::string_view plugin : USED_OSG_PLUGIN_FILENAMES)
         {
-            if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(), [&](std::string_view availablePlugin) {
+            if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(),
+                    [&](std::string_view availablePlugin) {
 #ifdef OSG_USE_UTF8_FILENAME
-                std::filesystem::path pluginPath {stringToU8String(availablePlugin)};
+                        std::filesystem::path pluginPath{ stringToU8String(availablePlugin) };
 #else
                 std::filesystem::path pluginPath {availablePlugin};
 #endif
-                return pluginPath.filename() == plugin;
-            }) == availableOSGPlugins.end())
+                        return pluginPath.filename() == plugin;
+                    })
+                == availableOSGPlugins.end())
             {
                 Log(Debug::Error) << "Missing OSG plugin: " << plugin;
                 haveAllPlugins = false;
