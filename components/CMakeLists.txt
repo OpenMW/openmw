@@ -28,6 +28,7 @@ if (GIT_CHECKOUT)
             -DOPENMW_LUA_API_REVISION=${OPENMW_LUA_API_REVISION}
             -DOPENMW_POSTPROCESSING_API_REVISION=${OPENMW_POSTPROCESSING_API_REVISION}
             -DOPENMW_VERSION=${OPENMW_VERSION}
+            -DOPENMW_DOC_BASEURL=${OPENMW_DOC_BASEURL}
             -DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
             "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
             -Dgenerator_is_multi_config_var=${multi_config}
@@ -596,7 +597,6 @@ endif()
 if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
-    target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 
     if (BUILD_LAUNCHER OR BUILD_WIZARD)
         add_dependencies(components_qt qm-files)
@@ -636,6 +636,7 @@ endif()
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
 
 target_compile_definitions(components PUBLIC BT_USE_DOUBLE_PRECISION)
+target_compile_definitions(components PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 
 if(OSG_STATIC)
     unset(_osg_plugins_static_files)
