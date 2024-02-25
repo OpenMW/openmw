@@ -349,17 +349,11 @@ bool Launcher::MainDialog::setupGameSettings()
     if (!loadFile(Files::getUserConfigPathQString(mCfgMgr), &Config::GameSettings::readUserFile))
         return false;
 
-    // Now the rest - priority: user > local > global
-    if (auto result = loadFile(Files::getLocalConfigPathQString(mCfgMgr), &Config::GameSettings::readFile, true))
+    for (const auto& path : Files::getActiveConfigPathsQString(mCfgMgr))
     {
-        // Load global if local wasn't found
-        if (!*result && !loadFile(Files::getGlobalConfigPathQString(mCfgMgr), &Config::GameSettings::readFile, true))
+        if (!loadFile(path, &Config::GameSettings::readFile))
             return false;
     }
-    else
-        return false;
-    if (!loadFile(Files::getUserConfigPathQString(mCfgMgr), &Config::GameSettings::readFile))
-        return false;
 
     return true;
 }
