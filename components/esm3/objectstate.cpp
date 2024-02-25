@@ -30,7 +30,11 @@ namespace ESM
         esm.getHNOT(mEnabled, "ENAB");
 
         if (mVersion <= MaxOldCountFormatVersion)
-            esm.getHNOT(mRef.mCount, "COUN");
+        {
+            if (mVersion <= MaxOldGoldValueFormatVersion)
+                mRef.mCount = std::max(1, mRef.mCount);
+            esm.getHNOT("COUN", mRef.mCount);
+        }
 
         mPosition = mRef.mPos;
         esm.getHNOT("POS_", mPosition.pos, mPosition.rot);
