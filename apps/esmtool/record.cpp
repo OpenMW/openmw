@@ -612,7 +612,6 @@ namespace EsmTool
         }
         else
             std::cout << "  Map Color: " << Misc::StringUtils::format("0x%08X", mData.mMapColor) << std::endl;
-        std::cout << "  Water Level Int: " << mData.mWaterInt << std::endl;
         std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }

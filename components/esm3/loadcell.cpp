@@ -118,6 +118,7 @@ namespace ESM
         bool overriding = !mName.empty();
         bool isLoaded = false;
         mHasAmbi = false;
+        mHasWaterHeightSub = false;
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
@@ -126,13 +127,13 @@ namespace ESM
                 case fourCC("INTV"):
                     int32_t waterl;
                     esm.getHT(waterl);
+                    mHasWaterHeightSub = true;
                     mWater = static_cast<float>(waterl);
-                    mWaterInt = true;
                     break;
                 case fourCC("WHGT"):
                     float waterLevel;
                     esm.getHT(waterLevel);
-                    mWaterInt = false;
+                    mHasWaterHeightSub = true;
                     if (!std::isfinite(waterLevel))
                     {
                         if (!overriding)
@@ -190,25 +191,15 @@ namespace ESM
 
         if (mData.mFlags & Interior)
         {
-            if (mWaterInt)
-            {
-                int32_t water = (mWater >= 0) ? static_cast<int32_t>(mWater + 0.5) : static_cast<int32_t>(mWater - 0.5);
-                esm.writeHNT("INTV", water);
-            }
-            else
-            {
+            // Try to avoid saving ambient information when it's unnecessary.
+            // This is to fix black lighting and flooded water
+            // in resaved cell records that lack this information.
+            if (mHasWaterHeightSub)
                 esm.writeHNT("WHGT", mWater);
-            }
-
             if (mData.mFlags & QuasiEx)
                 esm.writeHNOCRefId("RGNN", mRegion);
-            else
-            {
-                // Try to avoid saving ambient lighting information when it's unnecessary.
-                // This is to fix black lighting in resaved cell records that lack this information.
-                if (mHasAmbi)
-                    esm.writeHNT("AMBI", mAmbi, 16);
-            }
+            else if (mHasAmbi)
+                esm.writeHNT("AMBI", mAmbi, 16);
         }
         else
         {
@@ -324,7 +315,6 @@ namespace ESM
         mName.clear();
         mRegion = ESM::RefId();
         mWater = 0;
-        mWaterInt = false;
         mMapColor = 0;
         mRefNumCounter = 0;
 
@@ -333,6 +323,7 @@ namespace ESM
         mData.mY = 0;
 
         mHasAmbi = true;
+        mHasWaterHeightSub = true;
         mAmbi.mAmbient = 0;
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;
