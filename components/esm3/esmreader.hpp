@@ -189,6 +189,11 @@ namespace ESM
             decompose(value, [&](auto&... args) { (getT(args), ...); });
         }
 
+        void getSubComposite(auto& value)
+        {
+            decompose(value, [&](auto&... args) { getHT(args...); });
+        }
+
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
         void skipHT()
         {

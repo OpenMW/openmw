@@ -54,29 +54,25 @@ namespace ESM
         else if (esm.retSubName() == AI_Wander)
         {
             pack.mType = AI_Wander;
-            esm.getSubHeader();
-            esm.getComposite(pack.mWander);
+            esm.getSubComposite(pack.mWander);
             mList.push_back(pack);
         }
         else if (esm.retSubName() == AI_Travel)
         {
             pack.mType = AI_Travel;
-            esm.getSubHeader();
-            esm.getComposite(pack.mTravel);
+            esm.getSubComposite(pack.mTravel);
             mList.push_back(pack);
         }
         else if (esm.retSubName() == AI_Escort || esm.retSubName() == AI_Follow)
         {
             pack.mType = (esm.retSubName() == AI_Escort) ? AI_Escort : AI_Follow;
-            esm.getSubHeader();
-            esm.getComposite(pack.mTarget);
+            esm.getSubComposite(pack.mTarget);
             mList.push_back(pack);
         }
         else if (esm.retSubName() == AI_Activate)
         {
             pack.mType = AI_Activate;
-            esm.getSubHeader();
-            esm.getComposite(pack.mActivate);
+            esm.getSubComposite(pack.mActivate);
             mList.push_back(pack);
         }
     }

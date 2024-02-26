@@ -1,12 +1,14 @@
 #include <components/esm/fourcc.hpp>
 #include <components/esm3/aipackage.hpp>
 #include <components/esm3/aisequence.hpp>
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
+#include <components/esm3/loadweap.hpp>
 #include <components/esm3/player.hpp>
 #include <components/esm3/quickkeys.hpp>
 
@@ -523,6 +525,81 @@ namespace ESM
             EXPECT_EQ(result.mFlee, record.mFlee);
             EXPECT_EQ(result.mAlarm, record.mAlarm);
             EXPECT_EQ(result.mServices, record.mServices);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, enamShouldNotChange)
+        {
+            EffectList record;
+            record.mList.emplace_back(ENAMstruct{
+                .mEffectID = 1,
+                .mSkill = 2,
+                .mAttribute = 3,
+                .mRange = 4,
+                .mArea = 5,
+                .mDuration = 6,
+                .mMagnMin = 7,
+                .mMagnMax = 8,
+            });
+
+            EffectList result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mList.size(), record.mList.size());
+            EXPECT_EQ(result.mList[0].mEffectID, record.mList[0].mEffectID);
+            EXPECT_EQ(result.mList[0].mSkill, record.mList[0].mSkill);
+            EXPECT_EQ(result.mList[0].mAttribute, record.mList[0].mAttribute);
+            EXPECT_EQ(result.mList[0].mRange, record.mList[0].mRange);
+            EXPECT_EQ(result.mList[0].mArea, record.mList[0].mArea);
+            EXPECT_EQ(result.mList[0].mDuration, record.mList[0].mDuration);
+            EXPECT_EQ(result.mList[0].mMagnMin, record.mList[0].mMagnMin);
+            EXPECT_EQ(result.mList[0].mMagnMax, record.mList[0].mMagnMax);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, weaponShouldNotChange)
+        {
+            Weapon record = {
+                .mData = {
+                    .mWeight = 0,
+                    .mValue = 1,
+                    .mType = 2,
+                    .mHealth = 3,
+                    .mSpeed = 4,
+                    .mReach = 5,
+                    .mEnchant = 6,
+                    .mChop = { 7, 8 },
+                    .mSlash = { 9, 10 },
+                    .mThrust = { 11, 12 },
+                    .mFlags = 13,
+                },
+                .mRecordFlags = 0,
+                .mId = generateRandomRefId(32),
+                .mEnchant = generateRandomRefId(32),
+                .mScript = generateRandomRefId(32),
+                .mName = generateRandomString(32),
+                .mModel = generateRandomString(32),
+                .mIcon = generateRandomString(32),
+            };
+
+            Weapon result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mWeight, record.mData.mWeight);
+            EXPECT_EQ(result.mData.mValue, record.mData.mValue);
+            EXPECT_EQ(result.mData.mType, record.mData.mType);
+            EXPECT_EQ(result.mData.mHealth, record.mData.mHealth);
+            EXPECT_EQ(result.mData.mSpeed, record.mData.mSpeed);
+            EXPECT_EQ(result.mData.mReach, record.mData.mReach);
+            EXPECT_EQ(result.mData.mEnchant, record.mData.mEnchant);
+            EXPECT_EQ(result.mData.mChop, record.mData.mChop);
+            EXPECT_EQ(result.mData.mSlash, record.mData.mSlash);
+            EXPECT_EQ(result.mData.mThrust, record.mData.mThrust);
+            EXPECT_EQ(result.mData.mFlags, record.mData.mFlags);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mEnchant, record.mEnchant);
+            EXPECT_EQ(result.mScript, record.mScript);
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mModel, record.mModel);
+            EXPECT_EQ(result.mIcon, record.mIcon);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));
