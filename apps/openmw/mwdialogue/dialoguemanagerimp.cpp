@@ -653,7 +653,7 @@ namespace MWDialogue
             if (Settings::gui().mSubtitles)
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
-                sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(info->mSound));
+                sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(info->mSound)));
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
         }

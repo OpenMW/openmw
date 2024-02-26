@@ -57,6 +57,11 @@ namespace VFS
         return mIndex.find(name) != mIndex.end();
     }
 
+    bool Manager::exists(Path::NormalizedView name) const
+    {
+        return mIndex.find(name) != mIndex.end();
+    }
+
     std::string Manager::getArchive(const Path::Normalized& name) const
     {
         for (auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)

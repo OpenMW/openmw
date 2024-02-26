@@ -180,9 +180,10 @@ std::string Misc::ResourceHelpers::correctMeshPath(std::string_view resPath)
     return res;
 }
 
-std::string Misc::ResourceHelpers::correctSoundPath(const std::string& resPath)
+VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(VFS::Path::NormalizedView resPath)
 {
-    return "sound\\" + resPath;
+    static constexpr VFS::Path::NormalizedView prefix("sound");
+    return prefix / resPath;
 }
 
 std::string Misc::ResourceHelpers::correctMusicPath(const std::string& resPath)
@@ -201,17 +202,17 @@ std::string_view Misc::ResourceHelpers::meshPathForESM3(std::string_view resPath
     return resPath.substr(prefix.size() + 1);
 }
 
-std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-    if (!vfs->exists(resPath))
+    if (!vfs.exists(resPath))
     {
-        std::string sound{ resPath };
-        changeExtension(sound, ".mp3");
-        VFS::Path::normalizeFilenameInPlace(sound);
+        VFS::Path::Normalized sound(resPath);
+        sound.changeExtension("mp3");
         return sound;
     }
-    return VFS::Path::normalizeFilename(resPath);
+    return VFS::Path::Normalized(resPath);
 }
 
 bool Misc::ResourceHelpers::isHiddenMarker(const ESM::RefId& id)

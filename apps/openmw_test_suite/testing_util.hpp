@@ -2,6 +2,7 @@
 #define TESTING_UTIL_H
 
 #include <filesystem>
+#include <initializer_list>
 #include <sstream>
 
 #include <components/misc/strings/conversion.hpp>
@@ -71,6 +72,12 @@ namespace TestingOpenMW
         vfs->addArchive(std::make_unique<VFSTestData>(std::move(files)));
         vfs->buildIndex();
         return vfs;
+    }
+
+    inline std::unique_ptr<VFS::Manager> createTestVFS(
+        std::initializer_list<std::pair<std::string_view, VFS::File*>> files)
+    {
+        return createTestVFS(VFS::FileMap(files.begin(), files.end()));
     }
 
 #define EXPECT_ERROR(X, ERR_SUBSTR)                                                                                    \

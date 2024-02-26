@@ -1,6 +1,8 @@
 #ifndef MISC_RESOURCEHELPERS_H
 #define MISC_RESOURCEHELPERS_H
 
+#include <components/vfs/pathutil.hpp>
+
 #include <span>
 #include <string>
 #include <string_view>
@@ -37,7 +39,7 @@ namespace Misc
         std::string correctMeshPath(std::string_view resPath);
 
         // Adds "sound\\".
-        std::string correctSoundPath(const std::string& resPath);
+        VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath);
 
         // Adds "music\\".
         std::string correctMusicPath(const std::string& resPath);
@@ -45,7 +47,7 @@ namespace Misc
         // Removes "meshes\\".
         std::string_view meshPathForESM3(std::string_view resPath);
 
-        std::string correctSoundPath(std::string_view resPath, const VFS::Manager* vfs);
+        VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
 
         /// marker objects that have a hardcoded function in the game logic, should be hidden from the player
         bool isHiddenMarker(const ESM::RefId& id);
