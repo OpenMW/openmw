@@ -46,27 +46,29 @@ namespace MWRender
 
         void releaseGLObjects(osg::State* state) const override;
 
-        static constexpr size_t mRTTSize = 1024;
+        static constexpr size_t sRTTSize = 1024;
         // e.g. texel to cell unit ratio
-        static constexpr float mWorldScaleFactor = 2.5;
+        static constexpr float sWorldScaleFactor = 2.5;
 
-        Resource::ResourceSystem* mResourceSystem;
-
+    private:
         struct State
         {
-            osg::Vec2f mOffset;
-            osg::ref_ptr<osg::StateSet> mStateset;
             bool mPaused = true;
+            osg::ref_ptr<osg::StateSet> mStateset;
         };
+
+        void setupFragmentPipeline();
+
+        void setupComputePipeline();
+
+        inline void updateState(const osg::FrameStamp& frameStamp, State& state);
+
+        Resource::ResourceSystem* mResourceSystem;
 
         size_t mPositionCount = 0;
         std::array<osg::Vec3f, 100> mPositions;
 
         std::array<State, 2> mState;
-
-    private:
-        void setupFragmentPipeline();
-        void setupComputePipeline();
 
         osg::Vec2f mCurrentPlayerPos;
         osg::Vec2f mLastPlayerPos;
@@ -79,6 +81,9 @@ namespace MWRender
 
         bool mPaused = false;
         bool mUseCompute = false;
+
+        double mLastSimulationTime = 0;
+        double mRemainingWaveTime = 0;
     };
 
     class Ripples : public osg::Camera
