@@ -5,6 +5,7 @@
 #include <string>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/concepts.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 #include "esmreader.hpp"
@@ -40,6 +41,18 @@ namespace ESM
 namespace ESM
 {
     const StringRefId Cell::sDefaultWorldspaceId = StringRefId("sys::default");
+
+    template <Misc::SameAsWithoutCvref<Cell::DATAstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mFlags, v.mX, v.mY);
+    }
+
+    template <Misc::SameAsWithoutCvref<Cell::AMBIstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mAmbient, v.mSunlight, v.mFog, v.mFogDensity);
+    }
 
     // Some overloaded compare operators.
     bool operator==(const MovedCellRef& ref, const RefNum& refNum)
@@ -93,7 +106,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("DATA"):
-                    esm.getHT(mData.mFlags, mData.mX, mData.mY);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case SREC_DELE:
@@ -181,7 +194,7 @@ namespace ESM
     void Cell::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mName);
-        esm.writeHNT("DATA", mData, 12);
+        esm.writeNamedComposite("DATA", mData);
 
         if (isDeleted)
         {
@@ -199,7 +212,7 @@ namespace ESM
             if (mData.mFlags & QuasiEx)
                 esm.writeHNOCRefId("RGNN", mRegion);
             else if (mHasAmbi)
-                esm.writeHNT("AMBI", mAmbi, 16);
+                esm.writeNamedComposite("AMBI", mAmbi);
         }
         else
         {

@@ -184,6 +184,16 @@ namespace ESM
             decompose(value, [&](auto&... args) { getHNT(name, args...); });
         }
 
+        bool getOptionalComposite(NAME name, auto& value)
+        {
+            if (isNextSub(name))
+            {
+                getSubComposite(value);
+                return true;
+            }
+            return false;
+        }
+
         void getComposite(auto& value)
         {
             decompose(value, [&](auto&... args) { (getT(args), ...); });

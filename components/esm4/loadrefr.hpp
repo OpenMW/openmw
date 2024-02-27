@@ -32,6 +32,7 @@
 #include "reference.hpp" // EnableParent
 
 #include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 
 namespace ESM4

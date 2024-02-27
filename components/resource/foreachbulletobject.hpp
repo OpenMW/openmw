@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_FOREACHBULLETOBJECT_H
 #define OPENMW_COMPONENTS_RESOURCE_FOREACHBULLETOBJECT_H
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/resource/bulletshape.hpp>
 
 #include <osg/ref_ptr>

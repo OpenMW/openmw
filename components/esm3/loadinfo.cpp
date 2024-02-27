@@ -3,8 +3,17 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<DialInfo::DATAstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        char padding = 0;
+        f(v.mType, v.mDisposition, v.mRank, v.mGender, v.mPCrank, padding);
+    }
+
     void DialInfo::load(ESMReader& esm, bool& isDeleted)
     {
         mId = esm.getHNRefId("INAM");
@@ -23,8 +32,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case fourCC("DATA"):
-                    esm.getHT(mData.mUnknown1, mData.mDisposition, mData.mRank, mData.mGender, mData.mPCrank,
-                        mData.mUnknown2);
+                    esm.getSubComposite(mData);
                     break;
                 case fourCC("ONAM"):
                     mActor = esm.getRefId();
@@ -102,7 +110,7 @@ namespace ESM
             return;
         }
 
-        esm.writeHNT("DATA", mData, 12);
+        esm.writeNamedComposite("DATA", mData);
         esm.writeHNOCRefId("ONAM", mActor);
         esm.writeHNOCRefId("RNAM", mRace);
         esm.writeHNOCRefId("CNAM", mClass);
