@@ -981,11 +981,16 @@
 -- @field #list<#string> spells A read-only list containing the ids of all spells inherent to the race
 -- @field #bool isPlayable True if the player can pick this race in character generation
 -- @field #bool isBeast True if this race is a beast race
--- @field #map<#string, #number> height A read-only table with male and female fields
--- @field #map<#string, #number> weight A read-only table with male and female fields
--- @field #map<#string, #map<#string, #number>> attributes A read-only table of attribute ID to male and female base values
+-- @field #GenderedNumber height Height values
+-- @field #GenderedNumber weight Weight values
+-- @field #map<#string, #GenderedNumber> attributes A read-only table of attribute ID to base value
 -- @usage -- Get base strength for men
 -- strength = types.NPC.races.records[1].attributes.strength.male
+
+---
+-- @type GenderedNumber
+-- @field #number male Male value
+-- @field #number female Female value
 
 ---
 -- @type NpcRecord
