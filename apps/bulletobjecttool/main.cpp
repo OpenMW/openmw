@@ -146,7 +146,9 @@ namespace
         dataDirs.insert(dataDirs.begin(), resDir / "vfs");
         const Files::Collections fileCollections(dataDirs);
         const auto& archives = variables["fallback-archive"].as<StringsVector>();
-        const auto& contentFiles = variables["content"].as<StringsVector>();
+        StringsVector contentFiles{ "builtin.omwscripts" };
+        const auto& configContentFiles = variables["content"].as<StringsVector>();
+        contentFiles.insert(contentFiles.end(), configContentFiles.begin(), configContentFiles.end());
 
         Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
 

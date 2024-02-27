@@ -434,10 +434,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
     {
         QFileInfo info(dir.absoluteFilePath(path2));
 
-        // Enabled by default in system openmw.cfg; shouldn't be shown in content list.
-        if (info.fileName().compare("builtin.omwscripts", Qt::CaseInsensitive) == 0)
-            continue;
-
         EsmFile* file = const_cast<EsmFile*>(item(info.fileName()));
         bool add = file == nullptr;
         std::unique_ptr<EsmFile> newFile;
