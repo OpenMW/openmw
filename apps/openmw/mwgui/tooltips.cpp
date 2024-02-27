@@ -410,13 +410,13 @@ namespace MWGui
         const std::string& image = info.icon;
         int imageSize = (!image.empty()) ? info.imageSize : 0;
         std::string text = info.text;
-        std::string extra = info.extra;
+        std::string_view extra = info.extra;
 
         // remove the first newline (easier this way)
         if (!text.empty() && text[0] == '\n')
             text.erase(0, 1);
         if (!extra.empty() && extra[0] == '\n')
-            extra.erase(0, 1);
+            extra = extra.substr(1);
 
         const ESM::Enchantment* enchant = nullptr;
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
