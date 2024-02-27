@@ -147,8 +147,11 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
                 || key == QLatin1String("load-savegame"))
             {
                 // Path line (e.g. 'data=...'), so needs processing to deal with ampersands and quotes
-                // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not
-                // work as there are too may QStrings involved
+                // The following is based on boost::io::detail::quoted_manip.hpp, but we don't actually use
+                // boost::filesystem::path anymore, and use a custom class MaybeQuotedPath which uses Boost-like quoting
+                // rules but internally stores as a std::filesystem::path.
+                // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked,
+                // and we rely on that.
                 QChar delim = '\"';
                 QChar escape = '&';
 
