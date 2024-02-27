@@ -98,7 +98,31 @@ bool Config::GameSettings::readUserFile(QTextStream& stream, bool ignoreContent)
 bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QString>& settings, bool ignoreContent)
 {
     QMultiMap<QString, QString> cache;
+    QRegularExpression replaceRe("^\\s*replace\\s*=\\s*(.+)$");
     QRegularExpression keyRe("^([^=]+)\\s*=\\s*(.+)$");
+
+    auto initialPos = stream.pos();
+
+    while (!stream.atEnd())
+    {
+        QString line = stream.readLine();
+
+        if (line.isEmpty() || line.startsWith("#"))
+            continue;
+
+        QRegularExpressionMatch match = keyRe.match(line);
+        if (match.hasMatch())
+        {
+            QString key = match.captured(1).trimmed();
+            // Replace composing entries with a replace= line
+            if (key == QLatin1String("data") || key == QLatin1String("fallback-archive")
+                || key == QLatin1String("content") || key == QLatin1String("groundcover")
+                || key == QLatin1String("script-blacklist"))
+                settings.remove(key);
+        }
+    }
+
+    stream.seek(initialPos);
 
     while (!stream.atEnd())
     {
