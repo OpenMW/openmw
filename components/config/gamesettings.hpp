@@ -53,7 +53,8 @@ namespace Config
         }
 
         QStringList getDataDirs() const;
-        std::filesystem::path getGlobalDataDir() const;
+
+        QString getResourcesVfs() const;
 
         inline void removeDataDir(const QString& dir)
         {

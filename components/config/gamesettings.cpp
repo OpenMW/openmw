@@ -64,13 +64,11 @@ void Config::GameSettings::validatePaths()
     }
 }
 
-std::filesystem::path Config::GameSettings::getGlobalDataDir() const
+QString Config::GameSettings::getResourcesVfs() const
 {
-    // global data dir may not exists if OpenMW is not installed (ie if run from build directory)
-    const auto& path = mCfgMgr.getGlobalDataPath();
-    if (std::filesystem::exists(path))
-        return std::filesystem::canonical(path);
-    return {};
+    QString resources = mSettings.value(QString("resources"), QString("./resources"));
+    resources += "/vfs";
+    return QFileInfo(resources).canonicalFilePath();
 }
 
 QStringList Config::GameSettings::values(const QString& key, const QStringList& defaultValues) const

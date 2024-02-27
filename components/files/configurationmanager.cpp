@@ -411,11 +411,6 @@ namespace Files
         return mFixedPath.getLocalPath();
     }
 
-    const std::filesystem::path& ConfigurationManager::getGlobalDataPath() const
-    {
-        return mFixedPath.getGlobalDataPath();
-    }
-
     const std::filesystem::path& ConfigurationManager::getCachePath() const
     {
         return mFixedPath.getCachePath();

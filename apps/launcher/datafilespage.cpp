@@ -279,9 +279,9 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!mDataLocal.isEmpty())
         directories.insert(0, mDataLocal);
 
-    const auto& globalDataDir = mGameSettings.getGlobalDataDir();
-    if (!globalDataDir.empty())
-        directories.insert(0, Files::pathToQString(globalDataDir));
+    const auto& resourcesVfs = mGameSettings.getResourcesVfs();
+    if (!resourcesVfs.isEmpty())
+        directories.insert(0, resourcesVfs);
 
     std::unordered_set<QString> visitedDirectories;
     for (const QString& currentDir : directories)
@@ -315,8 +315,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             item->setFont(font);
         }
 
-        // deactivate data-local and global data directory: they are always included
-        if (currentDir == mDataLocal || Files::pathFromQString(currentDir) == globalDataDir)
+        // deactivate data-local and resources/vfs: they are always included
+        if (currentDir == mDataLocal || currentDir == resourcesVfs)
         {
             auto flags = item->flags();
             item->setFlags(flags & ~(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled));

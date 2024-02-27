@@ -233,10 +233,10 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
         return;
     }
 
-    // global and local data directories are not part of any profile
-    const auto globalDataDir = Files::pathToQString(gameSettings.getGlobalDataDir());
+    // local data directory and resources/vfs are not part of any profile
+    const auto resourcesVfs = gameSettings.getResourcesVfs();
     const auto dataLocal = gameSettings.getDataLocal();
-    dirs.removeAll(globalDataDir);
+    dirs.removeAll(resourcesVfs);
     dirs.removeAll(dataLocal);
 
     // if any existing profile in launcher matches the content list, make that profile the default
