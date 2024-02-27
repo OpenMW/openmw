@@ -47,11 +47,6 @@ void Config::GameSettings::validatePaths()
 
     // Do the same for data-local
     QString local = mSettings.value(QString("data-local"));
-    if (local.length() && local.at(0) == QChar('\"'))
-    {
-        local.remove(0, 1);
-        local.chop(1);
-    }
 
     if (local.isEmpty())
         return;
