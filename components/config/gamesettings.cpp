@@ -108,9 +108,10 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
         {
             QString key = match.captured(1).trimmed();
             // Replace composing entries with a replace= line
-            if (key == QLatin1String("data") || key == QLatin1String("fallback-archive")
-                || key == QLatin1String("content") || key == QLatin1String("groundcover")
-                || key == QLatin1String("script-blacklist"))
+            if (key == QLatin1String("config") || key == QLatin1String("replace") || key == QLatin1String("data")
+                || key == QLatin1String("fallback-archive") || key == QLatin1String("content")
+                || key == QLatin1String("groundcover") || key == QLatin1String("script-blacklist")
+                || key == QLatin1String("fallback"))
                 settings.remove(key);
         }
     }
@@ -131,12 +132,14 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
             QString value = match.captured(2).trimmed();
 
             // Don't remove composing entries
-            if (key != QLatin1String("data") && key != QLatin1String("fallback-archive")
-                && key != QLatin1String("content") && key != QLatin1String("groundcover")
-                && key != QLatin1String("script-blacklist"))
+            if (key != QLatin1String("config") && key != QLatin1String("replace") && key != QLatin1String("data")
+                && key != QLatin1String("fallback-archive") && key != QLatin1String("content")
+                && key != QLatin1String("groundcover") && key != QLatin1String("script-blacklist")
+                && key != QLatin1String("fallback"))
                 settings.remove(key);
 
-            if (key == QLatin1String("data") || key == QLatin1String("data-local") || key == QLatin1String("resources")
+            if (key == QLatin1String("config") || key == QLatin1String("user-data") || key == QLatin1String("resources")
+                || key == QLatin1String("data") || key == QLatin1String("data-local")
                 || key == QLatin1String("load-savegame"))
             {
                 // Path line (e.g. 'data=...'), so needs processing to deal with ampersands and quotes
@@ -204,8 +207,9 @@ bool Config::GameSettings::writeFile(QTextStream& stream)
         // Boost-like quoting rules but internally stores as a std::filesystem::path.
         // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked, and we
         // rely on that.
-        if (i.key() == QLatin1String("data") || i.key() == QLatin1String("data-local")
-            || i.key() == QLatin1String("resources") || i.key() == QLatin1String("load-savegame"))
+        if (i.key() == QLatin1String("config") || i.key() == QLatin1String("user-data")
+            || i.key() == QLatin1String("resources") || i.key() == QLatin1String("data")
+            || i.key() == QLatin1String("data-local") || i.key() == QLatin1String("load-savegame"))
         {
             stream << i.key() << "=";
 
@@ -428,8 +432,9 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
         // Boost-like quoting rules but internally stores as a std::filesystem::path.
         // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked, and we
         // rely on that.
-        if (it.key() == QLatin1String("data") || it.key() == QLatin1String("data-local")
-            || it.key() == QLatin1String("resources") || it.key() == QLatin1String("load-savegame"))
+        if (it.key() == QLatin1String("config") || it.key() == QLatin1String("user-data")
+            || it.key() == QLatin1String("resources") || it.key() == QLatin1String("data")
+            || it.key() == QLatin1String("data-local") || it.key() == QLatin1String("load-savegame"))
         {
             settingLine = it.key() + "=";
 
