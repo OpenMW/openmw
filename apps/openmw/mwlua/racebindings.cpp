@@ -6,6 +6,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "idcollectionbindings.hpp"
 #include "luamanagerimp.hpp"
 #include "racebindings.hpp"
 #include "types/types.hpp"
@@ -58,8 +59,8 @@ namespace MWLua
         raceT["name"] = sol::readonly_property([](const ESM::Race& rec) -> std::string_view { return rec.mName; });
         raceT["description"]
             = sol::readonly_property([](const ESM::Race& rec) -> std::string_view { return rec.mDescription; });
-        raceT["spells"]
-            = sol::readonly_property([lua](const ESM::Race& rec) -> const ESM::SpellList* { return &rec.mPowers; });
+        raceT["spells"] = sol::readonly_property(
+            [lua](const ESM::Race& rec) -> sol::table { return createReadOnlyRefIdTable(lua, rec.mPowers.mList); });
         raceT["skills"] = sol::readonly_property([lua](const ESM::Race& rec) -> sol::table {
             sol::table res(lua, sol::create);
             for (const auto& skillBonus : rec.mData.mBonus)

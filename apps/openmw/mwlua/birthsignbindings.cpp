@@ -8,6 +8,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "birthsignbindings.hpp"
+#include "idcollectionbindings.hpp"
 #include "luamanagerimp.hpp"
 #include "types/types.hpp"
 
@@ -47,19 +48,9 @@ namespace MWLua
         signT["texture"] = sol::readonly_property([vfs](const ESM::BirthSign& rec) -> std::string {
             return Misc::ResourceHelpers::correctTexturePath(rec.mTexture, vfs);
         });
-        signT["spells"]
-            = sol::readonly_property([](const ESM::BirthSign& rec) -> const ESM::SpellList* { return &rec.mPowers; });
-
-        auto spellListT = lua.new_usertype<ESM::SpellList>("ESM3_SpellList");
-        spellListT[sol::meta_function::length] = [](const ESM::SpellList& list) { return list.mList.size(); };
-        spellListT[sol::meta_function::index]
-            = [](const ESM::SpellList& list, size_t index) -> sol::optional<std::string> {
-            if (index == 0 || index > list.mList.size())
-                return sol::nullopt;
-            return list.mList[index - 1].serializeText(); // Translate from Lua's 1-based indexing.
-        };
-        spellListT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
-        spellListT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
+        signT["spells"] = sol::readonly_property([lua](const ESM::BirthSign& rec) -> sol::table {
+            return createReadOnlyRefIdTable(lua, rec.mPowers.mList);
+        });
 
         return LuaUtil::makeReadOnly(birthSigns);
     }

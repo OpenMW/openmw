@@ -9,6 +9,7 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "idcollectionbindings.hpp"
 #include "luamanagerimp.hpp"
 
 namespace
@@ -96,26 +97,10 @@ namespace MWLua
             return res;
         });
         factionT["attributes"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
-            sol::table res(lua, sol::create);
-            for (auto attributeIndex : rec.mData.mAttribute)
-            {
-                ESM::RefId id = ESM::Attribute::indexToRefId(attributeIndex);
-                if (!id.empty())
-                    res.add(id.serializeText());
-            }
-
-            return res;
+            return createReadOnlyRefIdTable(lua, rec.mData.mAttribute, ESM::Attribute::indexToRefId);
         });
         factionT["skills"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
-            sol::table res(lua, sol::create);
-            for (auto skillIndex : rec.mData.mSkills)
-            {
-                ESM::RefId id = ESM::Skill::indexToRefId(skillIndex);
-                if (!id.empty())
-                    res.add(id.serializeText());
-            }
-
-            return res;
+            return createReadOnlyRefIdTable(lua, rec.mData.mSkills, ESM::Skill::indexToRefId);
         });
         auto rankT = lua.new_usertype<FactionRank>("ESM3_FactionRank");
         rankT[sol::meta_function::to_string] = [](const FactionRank& rec) -> std::string {
