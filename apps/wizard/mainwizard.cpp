@@ -26,9 +26,10 @@
 
 using namespace Process;
 
-Wizard::MainWizard::MainWizard(QWidget* parent)
+Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* parent)
     : QWizard(parent)
     , mInstallations()
+    , mCfgMgr(cfgMgr)
     , mError(false)
     , mGameSettings(mCfgMgr)
 {
@@ -172,10 +173,7 @@ void Wizard::MainWizard::setupGameSettings()
     file.close();
 
     // Now the rest
-    QStringList paths;
-    paths.append(Files::getUserConfigPathQString(mCfgMgr));
-    paths.append(QLatin1String("openmw.cfg"));
-    paths.append(Files::getGlobalConfigPathQString(mCfgMgr));
+    QStringList paths = Files::getActiveConfigPathsQString(mCfgMgr);
 
     for (const QString& path2 : paths)
     {
