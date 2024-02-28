@@ -109,6 +109,9 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
     if (!file)
         return Qt::NoItemFlags;
 
+    if (file->builtIn() || file->fromAnotherConfigFile())
+        return Qt::NoItemFlags;
+
     // game files can always be checked
     if (file == mGameFile)
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
@@ -130,7 +133,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
                 continue;
 
             noGameFiles = false;
-            if (mCheckedFiles.contains(depFile))
+            if (depFile->builtIn() || depFile->fromAnotherConfigFile() || mCheckedFiles.contains(depFile))
             {
                 gamefileChecked = true;
                 break;
@@ -217,14 +220,14 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
             if (file == mGameFile)
                 return QVariant();
 
-            return mCheckedFiles.contains(file) ? Qt::Checked : Qt::Unchecked;
+            return (file->builtIn() || file->fromAnotherConfigFile() || mCheckedFiles.contains(file)) ? Qt::Checked : Qt::Unchecked;
         }
 
         case Qt::UserRole:
         {
             if (file == mGameFile)
                 return ContentType_GameFile;
-            else if (flags(index))
+            else
                 return ContentType_Addon;
 
             break;
@@ -279,7 +282,12 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
         {
             int checkValue = value.toInt();
             bool setState = false;
-            if (checkValue == Qt::Checked && !mCheckedFiles.contains(file))
+            if (file->builtIn() || file->fromAnotherConfigFile())
+            {
+                setState = false;
+                success = false;
+            }
+            else if (checkValue == Qt::Checked && !mCheckedFiles.contains(file))
             {
                 setState = true;
                 success = true;
@@ -374,6 +382,13 @@ bool ContentSelectorModel::ContentModel::dropMimeData(
     else if (parent.isValid())
         beginRow = parent.row();
 
+    int firstModifiable = 0;
+    while (item(firstModifiable)->builtIn() || item(firstModifiable)->fromAnotherConfigFile())
+        ++firstModifiable;
+
+    if (beginRow < firstModifiable)
+        return false;
+
     QByteArray encodedData = data->data(mMimeType);
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
 
@@ -448,6 +463,9 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
             file->setFileName(path2);
             file->setGameFiles({});
         }
+
+        if (info.fileName().compare("builtin.omwscripts", Qt::CaseInsensitive) == 0)
+            file->setBuiltIn(true);
 
         if (info.fileName().endsWith(".omwscripts", Qt::CaseInsensitive))
         {
@@ -579,15 +597,20 @@ void ContentSelectorModel::ContentModel::setCurrentGameFile(const EsmFile* file)
 void ContentSelectorModel::ContentModel::sortFiles()
 {
     emit layoutAboutToBeChanged();
+
+    int firstModifiable = 0;
+    while (mFiles.at(firstModifiable)->builtIn() || mFiles.at(firstModifiable)->fromAnotherConfigFile())
+        ++firstModifiable;
+
     // Dependency sort
     std::unordered_set<const EsmFile*> moved;
-    for (int i = mFiles.size() - 1; i > 0;)
+    for (int i = mFiles.size() - 1; i > firstModifiable;)
     {
         const auto file = mFiles.at(i);
         if (moved.find(file) == moved.end())
         {
             int index = -1;
-            for (int j = 0; j < i; ++j)
+            for (int j = firstModifiable; j < i; ++j)
             {
                 const QStringList& gameFiles = mFiles.at(j)->gameFiles();
                 // All addon files are implicitly dependent on the game file
@@ -650,6 +673,7 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
     {
         if (setCheckState(filepath, true))
         {
+            // setCheckState already gracefully handles builtIn and fromAnotherConfigFile
             // as necessary, move plug-ins in visible list to match sequence of supplied filelist
             const EsmFile* file = item(filepath);
             int filePosition = indexFromItem(file).row();
@@ -747,7 +771,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
 
     const EsmFile* file = item(filepath);
 
-    if (!file)
+    if (!file || file->builtIn() || file->fromAnotherConfigFile())
         return false;
 
     if (checkState)
