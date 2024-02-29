@@ -103,7 +103,7 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
         if (line.isEmpty() || line.startsWith("#"))
             continue;
 
-        QRegularExpressionMatch match = keyRe.match(line);
+        QRegularExpressionMatch match = replaceRe.match(line);
         if (match.hasMatch())
         {
             QString key = match.captured(1).trimmed();
