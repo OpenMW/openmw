@@ -295,7 +295,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         // add new achives files presents in current directory
         addArchivesFromDir(currentDir);
 
-        QString tooltip;
+        QStringList tooltip;
 
         // add content files presents in current directory
         mSelector->addFiles(currentDir, mNewDataDirs.contains(canonicalDirPath));
@@ -308,7 +308,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         // Display new content with custom formatting
         if (mNewDataDirs.contains(canonicalDirPath))
         {
-            tooltip += tr("Will be added to the current profile");
+            tooltip << tr("Will be added to the current profile");
             QFont font = item->font();
             font.setBold(true);
             font.setItalic(true);
@@ -321,15 +321,17 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             auto flags = item->flags();
             item->setFlags(flags & ~(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled));
         }
+        if (currentDir == mDataLocal)
+            tooltip << tr("This is the data-local directory and cannot be disabled");
+        else if (currentDir == resourcesVfs)
+            tooltip << tr("This directory is part of OpenMW and cannot be disabled");
 
         // Add a "data file" icon if the directory contains a content file
         if (mSelector->containsDataFiles(currentDir))
         {
             item->setIcon(QIcon(":/images/openmw-plugin.png"));
-            if (!tooltip.isEmpty())
-                tooltip += "\n";
 
-            tooltip += tr("Contains content file(s)");
+            tooltip << tr("Contains content file(s)");
         }
         else
         {
@@ -339,7 +341,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             auto emptyIcon = QIcon(pixmap);
             item->setIcon(emptyIcon);
         }
-        item->setToolTip(tooltip);
+        item->setToolTip(tooltip.join('\n'));
     }
     mSelector->sortFiles();
 
