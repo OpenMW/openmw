@@ -65,10 +65,10 @@ void readNIF(
             std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
         std::cout << std::endl;
     }
-    std::filesystem::path fullPath = !source.empty() ? source / path : path;
+    const std::filesystem::path fullPath = !source.empty() ? source / path : path;
     try
     {
-        Nif::NIFFile file(fullPath);
+        Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
         Nif::Reader reader(file, nullptr);
         if (vfs != nullptr)
             reader.parse(vfs->get(pathStr));
