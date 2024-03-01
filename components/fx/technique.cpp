@@ -37,11 +37,22 @@ namespace
 
 namespace fx
 {
+    namespace
+    {
+        VFS::Path::Normalized makeFilePath(std::string_view name)
+        {
+            std::string fileName(name);
+            fileName += Technique::sExt;
+            VFS::Path::Normalized result(Technique::sSubdir);
+            result /= fileName;
+            return result;
+        }
+    }
+
     Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
         int height, bool ubo, bool supportsNormals)
         : mName(std::move(name))
-        , mFileName(Files::pathToUnicodeString(
-              (Files::pathFromUnicodeString(Technique::sSubdir) / (mName + Technique::sExt))))
+        , mFilePath(makeFilePath(mName))
         , mLastModificationTime(std::filesystem::file_time_type::clock::now())
         , mWidth(width)
         , mHeight(height)
@@ -98,9 +109,9 @@ namespace fx
     {
         clear();
 
-        if (!mVFS.exists(mFileName))
+        if (!mVFS.exists(mFilePath))
         {
-            Log(Debug::Error) << "Could not load technique, file does not exist '" << mFileName << "'";
+            Log(Debug::Error) << "Could not load technique, file does not exist '" << mFilePath << "'";
 
             mStatus = Status::File_Not_exists;
             return false;
@@ -167,7 +178,7 @@ namespace fx
             mStatus = Status::Parse_Error;
 
             mLastError = "Failed parsing technique '" + getName() + "' " + e.what();
-            ;
+
             Log(Debug::Error) << mLastError;
         }
 
@@ -177,11 +188,6 @@ namespace fx
     std::string Technique::getName() const
     {
         return mName;
-    }
-
-    std::string Technique::getFileName() const
-    {
-        return mFileName;
     }
 
     bool Technique::setLastModificationTime(std::filesystem::file_time_type timeStamp)
