@@ -316,12 +316,13 @@ namespace LuaUtil
         sol::table meta(lua, sol::create);
         meta["t"] = table;
         if (strictIndex)
-            meta["__index"] = lua["createStrictIndexFn"](table);
+            meta[sol::meta_method::index] = lua["createStrictIndexFn"](table);
         else
-            meta["__index"] = table;
-        meta["__pairs"] = lua["pairsForReadOnly"];
-        meta["__ipairs"] = lua["ipairsForReadOnly"];
-        meta["__len"] = lua["lenForReadOnly"];
+            meta[sol::meta_method::index] = table;
+        meta[sol::meta_method::pairs] = lua["pairsForReadOnly"];
+        meta[sol::meta_method::ipairs] = lua["ipairsForReadOnly"];
+        meta[sol::meta_method::length] = lua["lenForReadOnly"];
+        meta[sol::meta_method::type] = "ReadOnlyTable";
 
         lua_newuserdata(luaState, 0);
         sol::stack::push(luaState, meta);
