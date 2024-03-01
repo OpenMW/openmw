@@ -3,6 +3,8 @@
 
 #include <osg/ref_ptr>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "objectcache.hpp"
 
 namespace VFS
@@ -70,11 +72,11 @@ namespace Resource
         double mExpiryDelay;
     };
 
-    class ResourceManager : public GenericResourceManager<std::string>
+    class ResourceManager : public GenericResourceManager<VFS::Path::Normalized>
     {
     public:
         explicit ResourceManager(const VFS::Manager* vfs, double expiryDelay)
-            : GenericResourceManager<std::string>(vfs, expiryDelay)
+            : GenericResourceManager(vfs, expiryDelay)
         {
         }
     };
