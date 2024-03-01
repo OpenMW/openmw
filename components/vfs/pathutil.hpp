@@ -187,6 +187,16 @@ namespace VFS::Path
             return *this;
         }
 
+        Normalized& operator/=(std::string_view value)
+        {
+            mValue.reserve(mValue.size() + value.size() + 1);
+            mValue += separator;
+            const std::size_t offset = mValue.size();
+            mValue += value;
+            normalizeFilenameInPlace(mValue.begin() + offset, mValue.end());
+            return *this;
+        }
+
         friend bool operator==(const Normalized& lhs, const Normalized& rhs) = default;
 
         friend bool operator==(const Normalized& lhs, const auto& rhs) { return lhs.mValue == rhs; }
