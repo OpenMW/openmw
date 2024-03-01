@@ -329,10 +329,14 @@ local function renderPage(page, options)
             bigSpacer,
         },
     }
-    if options.element then options.element:destroy() end
     options.name = l10n(page.name)
-    options.element = ui.create(layout)
     options.searchHints = generateSearchHints(page)
+    if options.element then
+        options.element.layout = layout
+        options.element:update()
+    else
+        options.element = ui.create(layout)
+    end
 end
 
 local function onSettingChanged(global)
@@ -461,9 +465,6 @@ local function registerPage(options)
     }
     pages[page.key] = page
     groups[page.key] = groups[page.key] or {}
-    if pageOptions[page.key] then
-        pageOptions[page.key].element:destroy()
-    end
     pageOptions[page.key] = pageOptions[page.key] or {}
     renderPage(page, pageOptions[page.key])
     ui.registerSettingsPage(pageOptions[page.key])
