@@ -1,14 +1,9 @@
+#include "classbindings.hpp"
+
 #include <components/esm3/loadclas.hpp>
 #include <components/lua/luastate.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
-
-#include "classbindings.hpp"
 #include "idcollectionbindings.hpp"
-#include "luamanagerimp.hpp"
-#include "stats.hpp"
 #include "types/types.hpp"
 
 namespace sol

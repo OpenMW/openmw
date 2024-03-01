@@ -1,15 +1,13 @@
+#include "birthsignbindings.hpp"
+
 #include <components/esm3/loadbsgn.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
 
-#include "birthsignbindings.hpp"
 #include "idcollectionbindings.hpp"
-#include "luamanagerimp.hpp"
 #include "types/types.hpp"
 
 namespace sol

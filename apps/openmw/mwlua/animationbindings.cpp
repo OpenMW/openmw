@@ -1,3 +1,5 @@
+#include "animationbindings.hpp"
+
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/asyncpackage.hpp>
@@ -17,9 +19,6 @@
 #include "context.hpp"
 #include "luamanagerimp.hpp"
 #include "objectvariant.hpp"
-
-#include "animationbindings.hpp"
-#include <array>
 
 namespace MWLua
 {

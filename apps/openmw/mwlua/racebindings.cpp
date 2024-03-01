@@ -1,14 +1,13 @@
+#include "racebindings.hpp"
+
 #include <components/esm/attr.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/lua/luastate.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "idcollectionbindings.hpp"
-#include "luamanagerimp.hpp"
-#include "racebindings.hpp"
 #include "types/types.hpp"
 
 namespace
