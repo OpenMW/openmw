@@ -18,14 +18,6 @@ namespace sol
     struct is_automagical<ESM::BirthSign> : std::false_type
     {
     };
-    template <>
-    struct is_automagical<MWWorld::Store<ESM::BirthSign>> : std::false_type
-    {
-    };
-    template <>
-    struct is_automagical<ESM::SpellList> : std::false_type
-    {
-    };
 }
 
 namespace MWLua

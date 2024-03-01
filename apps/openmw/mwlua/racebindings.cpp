@@ -35,10 +35,6 @@ namespace sol
     {
     };
     template <>
-    struct is_automagical<MWWorld::Store<ESM::Race>> : std::false_type
-    {
-    };
-    template <>
     struct is_automagical<RaceAttributes> : std::false_type
     {
     };

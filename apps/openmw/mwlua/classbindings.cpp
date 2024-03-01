@@ -17,10 +17,6 @@ namespace sol
     struct is_automagical<ESM::Class> : std::false_type
     {
     };
-    template <>
-    struct is_automagical<MWWorld::Store<ESM::Class>> : std::false_type
-    {
-    };
 }
 
 namespace MWLua
