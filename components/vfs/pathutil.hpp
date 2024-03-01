@@ -130,7 +130,7 @@ namespace VFS::Path
     public:
         Normalized() = default;
 
-        Normalized(std::string_view value)
+        explicit Normalized(std::string_view value)
             : mValue(normalizeFilename(value))
         {
         }

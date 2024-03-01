@@ -29,7 +29,7 @@ namespace Resource
     static bool collectStatUpdate = false;
     static bool collectStatEngine = false;
 
-    constexpr std::string_view sFontName = "Fonts/DejaVuLGCSansMono.ttf";
+    static const VFS::Path::Normalized sFontName("Fonts/DejaVuLGCSansMono.ttf");
 
     static void setupStatCollection()
     {

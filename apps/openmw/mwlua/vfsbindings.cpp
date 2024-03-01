@@ -328,7 +328,8 @@ namespace MWLua
             },
             [](const sol::object&) -> sol::object { return sol::nil; });
 
-        api["fileExists"] = [vfs](std::string_view fileName) -> bool { return vfs->exists(fileName); };
+        api["fileExists"]
+            = [vfs](std::string_view fileName) -> bool { return vfs->exists(VFS::Path::Normalized(fileName)); };
         api["pathsWithPrefix"] = [vfs](std::string_view prefix) {
             auto iterator = vfs->getRecursiveDirectoryIterator(prefix);
             return sol::as_function([iterator, current = iterator.begin()]() mutable -> sol::optional<std::string> {
