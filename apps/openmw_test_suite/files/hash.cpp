@@ -10,6 +10,8 @@
 #include <sstream>
 #include <string>
 
+#include <components/files/conversion.hpp>
+
 #include "../testing_util.hpp"
 
 namespace
@@ -35,7 +37,8 @@ namespace
         std::fill_n(std::back_inserter(content), 1, 'a');
         std::istringstream stream(content);
         stream.exceptions(std::ios::failbit | std::ios::badbit);
-        EXPECT_THAT(getHash(fileName, stream), ElementsAre(9607679276477937801ull, 16624257681780017498ull));
+        EXPECT_THAT(getHash(Files::pathToUnicodeString(fileName), stream),
+            ElementsAre(9607679276477937801ull, 16624257681780017498ull));
     }
 
     TEST_P(FilesGetHash, shouldReturnHashForStringStream)
@@ -44,7 +47,7 @@ namespace
         std::string content;
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
         std::istringstream stream(content);
-        EXPECT_EQ(getHash(fileName, stream), GetParam().mHash);
+        EXPECT_EQ(getHash(Files::pathToUnicodeString(fileName), stream), GetParam().mHash);
     }
 
     TEST_P(FilesGetHash, shouldReturnHashForConstrainedFileStream)
@@ -57,7 +60,7 @@ namespace
         std::fstream(file, std::ios_base::out | std::ios_base::binary)
             .write(content.data(), static_cast<std::streamsize>(content.size()));
         const auto stream = Files::openConstrainedFileStream(file, 0, content.size());
-        EXPECT_EQ(getHash(file, *stream), GetParam().mHash);
+        EXPECT_EQ(getHash(Files::pathToUnicodeString(file), *stream), GetParam().mHash);
     }
 
     INSTANTIATE_TEST_SUITE_P(Params, FilesGetHash,
