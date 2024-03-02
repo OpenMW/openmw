@@ -8,6 +8,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "birthsignbindings.hpp"
+#include "idcollectionbindings.hpp"
 #include "luamanagerimp.hpp"
 #include "types/types.hpp"
 
@@ -15,10 +16,6 @@ namespace sol
 {
     template <>
     struct is_automagical<ESM::BirthSign> : std::false_type
-    {
-    };
-    template <>
-    struct is_automagical<MWWorld::Store<ESM::BirthSign>> : std::false_type
     {
     };
 }
@@ -44,10 +41,7 @@ namespace MWLua
             return Misc::ResourceHelpers::correctTexturePath(rec.mTexture, vfs);
         });
         signT["spells"] = sol::readonly_property([lua](const ESM::BirthSign& rec) -> sol::table {
-            sol::table res(lua, sol::create);
-            for (size_t i = 0; i < rec.mPowers.mList.size(); ++i)
-                res[i + 1] = rec.mPowers.mList[i].serializeText();
-            return res;
+            return createReadOnlyRefIdTable(lua, rec.mPowers.mList);
         });
 
         return LuaUtil::makeReadOnly(birthSigns);

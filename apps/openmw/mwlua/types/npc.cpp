@@ -15,6 +15,7 @@
 
 #include "../classbindings.hpp"
 #include "../localscripts.hpp"
+#include "../racebindings.hpp"
 #include "../stats.hpp"
 
 namespace sol
@@ -86,6 +87,7 @@ namespace MWLua
         addActorServicesBindings<ESM::NPC>(record, context);
 
         npc["classes"] = initClassRecordBindings(context);
+        npc["races"] = initRaceRecordBindings(context);
 
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
