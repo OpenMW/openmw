@@ -154,6 +154,7 @@
     Bug #7832: Ingredient tooltips show magnitude for Fortify Maximum Magicka effect
     Bug #7840: First run of the launcher doesn't save viewing distance as the default value
     Bug #7841: Editor: "Dirty" water heights are saved in modified CELLs
+    Bug #7859: AutoCalc flag is not used to calculate potion value
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty

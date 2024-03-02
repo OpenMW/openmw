@@ -479,7 +479,7 @@ namespace EsmTool
             std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
         std::cout << "  Value: " << mData.mData.mValue << std::endl;
-        std::cout << "  AutoCalc: " << mData.mData.mAutoCalc << std::endl;
+        std::cout << "  Flags: " << potionFlags(mData.mData.mFlags) << std::endl;
         printEffectList(mData.mEffects);
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }

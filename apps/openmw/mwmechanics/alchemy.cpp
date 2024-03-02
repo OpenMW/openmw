@@ -250,7 +250,7 @@ const ESM::Potion* MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) co
 
         if (iter->mName != toFind.mName || iter->mScript != toFind.mScript
             || iter->mData.mWeight != toFind.mData.mWeight || iter->mData.mValue != toFind.mData.mValue
-            || iter->mData.mAutoCalc != toFind.mData.mAutoCalc)
+            || iter->mData.mFlags != toFind.mData.mFlags)
             continue;
 
         // Don't choose an ID that came from the content files, would have unintended side effects
@@ -310,7 +310,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
         newRecord.mData.mWeight /= countIngredients();
 
     newRecord.mData.mValue = mValue;
-    newRecord.mData.mAutoCalc = 0;
+    newRecord.mData.mFlags = 0;
     newRecord.mRecordFlags = 0;
 
     newRecord.mName = name;
