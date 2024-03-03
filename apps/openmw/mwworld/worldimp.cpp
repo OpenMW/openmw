@@ -2939,11 +2939,12 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
+        const bool casterIsPlayer = actor == MWMechanics::getPlayer();
         MWWorld::Ptr target;
         // For scripted spells we should not use hit contact
         if (manualSpell)
         {
-            if (actor != MWMechanics::getPlayer())
+            if (!casterIsPlayer)
             {
                 for (const auto& package : stats.getAiSequence())
                 {
@@ -2957,7 +2958,7 @@ namespace MWWorld
         }
         else
         {
-            if (actor == MWMechanics::getPlayer())
+            if (casterIsPlayer)
                 target = getFacedObject();
 
             if (target.isEmpty() || !target.getClass().hasToolTip(target))
@@ -2990,12 +2991,21 @@ namespace MWWorld
         if (!target.isEmpty())
         {
             // Touch explosion placement doesn't depend on where the target was "touched".
-            // For NPC targets, it also doesn't depend on the height.
-            // Using 0.75 of the collision box height seems accurate for actors and looks decent for non-actors.
-            // In Morrowind, touch explosion placement for non-actors is inexplicable,
-            // often putting the explosion way above the object.
+            // In Morrowind, it's at 0.7 of the actor's AABB height for actors
+            // or at 0.7 of the player's height for non-actors if the player is the caster
+            // This is probably meant to prevent the explosion from being too far above on large objects
+            // but it often puts the explosions way above small objects, so we'll deviate here
+            // and use the object's bounds when reasonable (it's $CURRENT_YEAR, we can afford that)
+            // Note collision object origin is intentionally not used
             hitPosition = target.getRefData().getPosition().asVec3();
-            hitPosition.z() += mPhysics->getHalfExtents(target).z() * 2.f * Constants::TorsoHeight;
+            constexpr float explosionHeight = 0.7f;
+            float targetHeight = getHalfExtents(target).z() * 2.f;
+            if (!target.getClass().isActor() && casterIsPlayer)
+            {
+                const float playerHeight = getHalfExtents(actor).z() * 2.f;
+                targetHeight = std::min(targetHeight, playerHeight);
+            }
+            hitPosition.z() += targetHeight * explosionHeight;
         }
 
         const ESM::RefId& selectedSpell = stats.getSpells().getSelectedSpell();
