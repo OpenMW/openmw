@@ -19,6 +19,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwmechanics/alchemy.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 #include "classmodel.hpp"
 
@@ -65,9 +66,7 @@ namespace MWClass
 
     int Potion::getValue(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
-
-        return ref->mBase->mData.mValue;
+        return MWMechanics::getPotionValue(*ptr.get<ESM::Potion>()->mBase);
     }
 
     const ESM::RefId& Potion::getUpSoundId(const MWWorld::ConstPtr& ptr) const
@@ -101,7 +100,7 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->mBase->mEffects);
 

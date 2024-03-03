@@ -36,7 +36,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("ALDT"):
-                    esm.getHT(mData.mWeight, mData.mValue, mData.mAutoCalc);
+                    esm.getHT(mData.mWeight, mData.mValue, mData.mFlags);
                     hasData = true;
                     break;
                 case fourCC("ENAM"):
@@ -80,7 +80,7 @@ namespace ESM
         mRecordFlags = 0;
         mData.mWeight = 0;
         mData.mValue = 0;
-        mData.mAutoCalc = 0;
+        mData.mFlags = 0;
         mName.clear();
         mModel.clear();
         mIcon.clear();
