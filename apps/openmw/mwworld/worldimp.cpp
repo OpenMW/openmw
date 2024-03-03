@@ -2939,87 +2939,63 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit
-        // result.
-        std::vector<MWWorld::Ptr> targetActors;
-        if (!actor.isEmpty() && actor != MWMechanics::getPlayer() && !manualSpell)
-            stats.getAiSequence().getCombatTargets(targetActors);
-
-        const float fCombatDistance = mStore.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
-
-        osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
-
-        // for player we can take faced object first
         MWWorld::Ptr target;
-        if (actor == MWMechanics::getPlayer())
-            target = getFacedObject();
-
-        // if the faced object can not be activated, do not use it
-        if (!target.isEmpty() && !target.getClass().hasToolTip(target))
-            target = nullptr;
-
-        if (target.isEmpty())
+        // For scripted spells we should not use hit contact
+        if (manualSpell)
         {
-            // For scripted spells we should not use hit contact
-            if (manualSpell)
+            if (actor != MWMechanics::getPlayer())
             {
-                if (actor != MWMechanics::getPlayer())
+                for (const auto& package : stats.getAiSequence())
                 {
-                    for (const auto& package : stats.getAiSequence())
+                    if (package->getTypeId() == MWMechanics::AiPackageTypeId::Cast)
                     {
-                        if (package->getTypeId() == MWMechanics::AiPackageTypeId::Cast)
-                        {
-                            target = package->getTarget();
-                            break;
-                        }
+                        target = package->getTarget();
+                        break;
                     }
                 }
             }
-            else
+        }
+        else
+        {
+            if (actor == MWMechanics::getPlayer())
+                target = getFacedObject();
+
+            if (target.isEmpty() || !target.getClass().hasToolTip(target))
             {
                 // For actor targets, we want to use melee hit contact.
                 // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would
-                // be very hard to aim at otherwise. For object targets, we want the detailed shapes (rendering
-                // raycast). If we used the bounding boxes for static objects, then we would not be able to target e.g.
+                // be very hard to aim at otherwise.
+                // For object targets, we want the detailed shapes (rendering raycast).
+                // If we used the bounding boxes for static objects, then we would not be able to target e.g.
                 // objects lying on a shelf.
-                const std::pair<Ptr, osg::Vec3f> result1 = MWMechanics::getHitContact(actor, fCombatDistance);
+                const float fCombatDistance = mStore.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
+                target = MWMechanics::getHitContact(actor, fCombatDistance).first;
 
-                // Get the target to use for "on touch" effects, using the facing direction from Head node
-                osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
-
-                osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1, 0, 0))
-                    * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
-
-                osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
-                float distance = getMaxActivationDistance();
-                osg::Vec3f dest = origin + direction * distance;
-
-                MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
-
-                float dist1 = std::numeric_limits<float>::max();
-                float dist2 = std::numeric_limits<float>::max();
-
-                if (!result1.first.isEmpty() && result1.first.getClass().isActor())
-                    dist1 = (origin - result1.second).length();
-                if (result2.mHit)
-                    dist2 = (origin - result2.mHitPointWorld).length();
-
-                if (!result1.first.isEmpty() && result1.first.getClass().isActor())
+                if (target.isEmpty())
                 {
-                    target = result1.first;
-                    hitPosition = result1.second;
-                    if (dist1 > getMaxActivationDistance())
-                        target = nullptr;
-                }
-                else if (result2.mHit)
-                {
-                    target = result2.mHitObject;
-                    hitPosition = result2.mHitPointWorld;
-                    if (dist2 > getMaxActivationDistance() && !target.isEmpty()
-                        && !target.getClass().hasToolTip(target))
-                        target = nullptr;
+                    // Get the target using the facing direction from Head node
+                    const osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
+                    const osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1, 0, 0))
+                        * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
+                    const osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
+                    const osg::Vec3f dest = origin + direction * getMaxActivationDistance();
+                    const MWRender::RenderingManager::RayResult result = mRendering->castRay(origin, dest, true, true);
+                    if (result.mHit)
+                        target = result.mHitObject;
                 }
             }
+        }
+
+        osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
+        if (!target.isEmpty())
+        {
+            // Touch explosion placement doesn't depend on where the target was "touched".
+            // For NPC targets, it also doesn't depend on the height.
+            // Using 0.75 of the collision box height seems accurate for actors and looks decent for non-actors.
+            // In Morrowind, touch explosion placement for non-actors is inexplicable,
+            // often putting the explosion way above the object.
+            hitPosition = target.getRefData().getPosition().asVec3();
+            hitPosition.z() += mPhysics->getHalfExtents(target).z() * 2.f * Constants::TorsoHeight;
         }
 
         const ESM::RefId& selectedSpell = stats.getSpells().getSelectedSpell();
