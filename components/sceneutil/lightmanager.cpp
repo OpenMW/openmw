@@ -13,6 +13,7 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/shader/shadermanager.hpp>
 
@@ -824,7 +825,7 @@ namespace SceneUtil
         , mPointLightFadeEnd(0.f)
         , mPointLightFadeStart(0.f)
     {
-        osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
+        osg::GLExtensions* exts = SceneUtil::glExtensionsReady() ? &SceneUtil::getGLExtensions() : nullptr;
         bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
         bool supportsGPU4 = exts && exts->isGpuShader4Supported;
 
