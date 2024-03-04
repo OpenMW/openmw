@@ -43,6 +43,24 @@ endif (GIT_CHECKOUT)
 
 list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 
+# OSG plugin checker
+# Helpfully, OSG doesn't export this to its CMake config as it doesn't have one
+set(OSG_PLUGIN_PREFIX "")
+if (CYGWIN)
+    SET(OSG_PLUGIN_PREFIX "cygwin_")
+elseif(MINGW)
+    SET(OSG_PLUGIN_PREFIX "mingw_")
+endif()
+list(TRANSFORM USED_OSG_PLUGINS PREPEND "${OSG_PLUGIN_PREFIX}" OUTPUT_VARIABLE USED_OSG_PLUGIN_FILENAMES)
+list(TRANSFORM USED_OSG_PLUGIN_FILENAMES APPEND "${CMAKE_SHARED_MODULE_SUFFIX}")
+list(TRANSFORM USED_OSG_PLUGIN_FILENAMES PREPEND "\"" OUTPUT_VARIABLE USED_OSG_PLUGIN_FILENAMES_FORMATTED)
+list(TRANSFORM USED_OSG_PLUGIN_FILENAMES_FORMATTED APPEND "\"")
+list(JOIN USED_OSG_PLUGIN_FILENAMES_FORMATTED ", " USED_OSG_PLUGIN_FILENAMES_FORMATTED)
+
+set(OSG_PLUGIN_CHECKER_CPP_FILE "components/misc/osgpluginchecker.cpp")
+configure_file("${OpenMW_SOURCE_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+list(APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+
 # source files
 
 add_component_dir (lua
@@ -277,8 +295,8 @@ add_component_dir (esm4
 
 add_component_dir (misc
     barrier budgetmeasurement color compression constants convert coordinateconverter display endianness float16 frameratelimiter
-    guarded math mathutil messageformatparser notnullptr objectpool osguservalues progressreporter resourcehelpers rng
-    strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
+    guarded math mathutil messageformatparser notnullptr objectpool osgpluginchecker osguservalues progressreporter resourcehelpers
+    rng strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
     )
 
 add_component_dir (misc/strings

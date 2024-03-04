@@ -1,0 +1,86 @@
+#include "components/misc/osgpluginchecker.hpp"
+
+#include <components/debug/debuglog.hpp>
+#include <components/misc/strings/conversion.hpp>
+
+#include <osg/Config>
+#include <osg/Version>
+#include <osgDB/FileUtils>
+#include <osgDB/PluginQuery>
+
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <string_view>
+
+namespace Misc
+{
+#if defined(OSG_LIBRARY_STATIC) || defined(__APPLE__)
+
+    bool checkRequiredOSGPluginsArePresent()
+    {
+        // assume they were linked in at build time and CMake would have failed if they were missing
+        // true-ish for MacOS - they're copied into the package and that'd fail if they were missing,
+        // but if you don't actually make a MacOS package and run a local build, this won't notice.
+        // the workaround in the real implementation isn't powerful enough to make MacOS work, though.
+        return true;
+    }
+
+#else
+
+    namespace
+    {
+        constexpr auto USED_OSG_PLUGIN_FILENAMES = std::to_array<std::string_view>({${USED_OSG_PLUGIN_FILENAMES_FORMATTED}});
+    }
+
+    bool checkRequiredOSGPluginsArePresent()
+    {
+        // work around osgDB::listAllAvailablePlugins() not working on some platforms due to a suspected OSG bug
+        std::filesystem::path pluginDirectoryName = std::string("osgPlugins-") + std::string(osgGetVersion());
+        osgDB::FilePathList& filepath = osgDB::getLibraryFilePathList();
+        for (const auto& path : filepath)
+        {
+#ifdef OSG_USE_UTF8_FILENAME
+            std::filesystem::path osgPath{ stringToU8String(path) };
+#else
+            std::filesystem::path osgPath{ path };
+#endif
+            if (!osgPath.has_filename())
+                osgPath = osgPath.parent_path();
+
+            if (osgPath.filename() == pluginDirectoryName)
+            {
+                osgPath = osgPath.parent_path();
+#ifdef OSG_USE_UTF8_FILENAME
+                std::string extraPath = u8StringToString(osgPath.u8string_view());
+#else
+                std::string extraPath = osgPath.string();
+#endif
+                filepath.emplace_back(std::move(extraPath));
+            }
+        }
+
+        auto availableOSGPlugins = osgDB::listAllAvailablePlugins();
+        bool haveAllPlugins = true;
+        for (std::string_view plugin : USED_OSG_PLUGIN_FILENAMES)
+        {
+            if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(),
+                    [&](std::string_view availablePlugin) {
+#ifdef OSG_USE_UTF8_FILENAME
+                        std::filesystem::path pluginPath{ stringToU8String(availablePlugin) };
+#else
+                std::filesystem::path pluginPath {availablePlugin};
+#endif
+                        return pluginPath.filename() == plugin;
+                    })
+                == availableOSGPlugins.end())
+            {
+                Log(Debug::Error) << "Missing OSG plugin: " << plugin;
+                haveAllPlugins = false;
+            }
+        }
+        return haveAllPlugins;
+    }
+
+#endif
+}
