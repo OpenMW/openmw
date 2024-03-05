@@ -136,6 +136,7 @@
     Bug #7679: Scene luminance value flashes when toggling shaders
     Bug #7685: Corky sometimes doesn't follow Llovyn Andus
     Bug #7712: Casting doesn't support spells and enchantments with no effects
+    Bug #7721: CS: Special Chars Not Allowed in IDs
     Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
     Bug #7724: Guards don't help vs werewolves
     Bug #7733: Launcher shows incorrect data paths when there's two plugins with the same name
