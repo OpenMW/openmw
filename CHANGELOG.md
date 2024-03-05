@@ -194,6 +194,7 @@
     Feature #7546: Start the game on Fredas
     Feature #7554: Controller binding for tab for menu navigation
     Feature #7568: Uninterruptable scripted music
+    Feature #7590: [Lua] Ability to deserialize YAML data from scripts
     Feature #7606: Launcher: allow Shift-select in Archives tab
     Feature #7608: Make the missing dependencies warning when loading a savegame more helpful
     Feature #7618: Show the player character's health in the save details
