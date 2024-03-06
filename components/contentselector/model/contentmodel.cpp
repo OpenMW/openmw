@@ -220,7 +220,8 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
             if (file == mGameFile)
                 return QVariant();
 
-            return (file->builtIn() || file->fromAnotherConfigFile() || mCheckedFiles.contains(file)) ? Qt::Checked : Qt::Unchecked;
+            return (file->builtIn() || file->fromAnotherConfigFile() || mCheckedFiles.contains(file)) ? Qt::Checked
+                                                                                                      : Qt::Unchecked;
         }
 
         case Qt::UserRole:
@@ -467,6 +468,8 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
         if (info.fileName().compare("builtin.omwscripts", Qt::CaseInsensitive) == 0)
             file->setBuiltIn(true);
 
+        file->setFromAnotherConfigFile(mNonUserContent.contains(info.fileName().toLower()));
+
         if (info.fileName().endsWith(".omwscripts", Qt::CaseInsensitive))
         {
             file->setDate(info.lastModified());
@@ -658,6 +661,28 @@ void ContentSelectorModel::ContentModel::setNew(const QString& filepath, bool is
         return;
 
     mNewFiles[filepath] = isNew;
+}
+
+void ContentSelectorModel::ContentModel::setNonUserContent(const QStringList& fileList)
+{
+    mNonUserContent.clear();
+    for (const auto& file : fileList)
+        mNonUserContent.insert(file.toLower());
+    for (auto* file : mFiles)
+        file->setFromAnotherConfigFile(mNonUserContent.contains(file->fileName().toLower()));
+
+    int insertPosition = 0;
+    while (mFiles.at(insertPosition)->builtIn())
+        ++insertPosition;
+
+    for (const auto& filepath : fileList)
+    {
+        const EsmFile* file = item(filepath);
+        int filePosition = indexFromItem(file).row();
+        mFiles.move(filePosition, insertPosition++);
+    }
+
+    sortFiles();
 }
 
 bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) const

@@ -24,6 +24,8 @@
 #include "installationpage.hpp"
 #endif
 
+#include <algorithm>
+
 using namespace Process;
 
 Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* parent)
@@ -167,7 +169,7 @@ void Wizard::MainWizard::setupGameSettings()
         QTextStream stream(&file);
         Misc::ensureUtf8Encoding(stream);
 
-        mGameSettings.readUserFile(stream);
+        mGameSettings.readUserFile(stream, QFileInfo(path).dir().path());
     }
 
     file.close();
@@ -196,7 +198,7 @@ void Wizard::MainWizard::setupGameSettings()
             QTextStream stream(&file);
             Misc::ensureUtf8Encoding(stream);
 
-            mGameSettings.readFile(stream);
+            mGameSettings.readFile(stream, QFileInfo(path2).dir().path());
         }
         file.close();
     }
@@ -241,11 +243,11 @@ void Wizard::MainWizard::setupLauncherSettings()
 void Wizard::MainWizard::setupInstallations()
 {
     // Check if the paths actually contain a Morrowind installation
-    for (const QString& path : mGameSettings.getDataDirs())
+    for (const auto& path : mGameSettings.getDataDirs())
     {
 
-        if (findFiles(QLatin1String("Morrowind"), path))
-            addInstallation(path);
+        if (findFiles(QLatin1String("Morrowind"), path.value))
+            addInstallation(path.value);
     }
 }
 
@@ -332,10 +334,12 @@ void Wizard::MainWizard::addInstallation(const QString& path)
     mInstallations.insert(QDir::toNativeSeparators(path), install);
 
     // Add it to the openmw.cfg too
-    if (!mGameSettings.getDataDirs().contains(path))
+    const auto& dataDirs = mGameSettings.getDataDirs();
+    if (std::none_of(
+            dataDirs.begin(), dataDirs.end(), [&](const Config::SettingValue& dir) { return dir.value == path; }))
     {
-        mGameSettings.setMultiValue(QLatin1String("data"), path);
-        mGameSettings.addDataDir(path);
+        mGameSettings.setMultiValue(QLatin1String("data"), { path });
+        mGameSettings.addDataDir({ path });
     }
 }
 
@@ -394,15 +398,15 @@ void Wizard::MainWizard::writeSettings()
 
     if (language == QLatin1String("Polish"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1250"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1250" });
     }
     else if (language == QLatin1String("Russian"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1251" });
     }
     else
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1252" });
     }
 
     // Write the installation path so that openmw can find them
@@ -410,7 +414,7 @@ void Wizard::MainWizard::writeSettings()
 
     // Make sure the installation path is the last data= entry
     mGameSettings.removeDataDir(path);
-    mGameSettings.addDataDir(path);
+    mGameSettings.addDataDir({ path });
 
     QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     QDir dir(userPath);
