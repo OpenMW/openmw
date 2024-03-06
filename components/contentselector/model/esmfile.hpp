@@ -62,16 +62,18 @@ namespace ContentSelectorModel
         QString toolTip() const
         {
             QString tooltip = mTooltipTemlate.arg(mAuthor)
-                .arg(mVersion)
-                .arg(mModified.toString(Qt::ISODate))
-                .arg(mPath)
-                .arg(mDescription)
-                .arg(mGameFiles.join(", "));
+                                  .arg(mVersion)
+                                  .arg(mModified.toString(Qt::ISODate))
+                                  .arg(mPath)
+                                  .arg(mDescription)
+                                  .arg(mGameFiles.join(", "));
 
             if (mBuiltIn)
                 tooltip += tr("<br/><b>This content file cannot be disabled because it is part of OpenMW.</b><br/>");
             else if (mFromAnotherConfigFile)
-                tooltip += tr("<br/><b>This content file cannot be disabled because it is enabled in a config file other than the user one.</b><br/>");
+                tooltip += tr(
+                    "<br/><b>This content file cannot be disabled because it is enabled in a config file other than "
+                    "the user one.</b><br/>");
 
             return tooltip;
         }
