@@ -73,7 +73,7 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     uint32_t size = esm.getSubSize();
-                    if (size != 16u * mData.mPoints)
+                    if (size != getCompositeSize(Point{}) * mData.mPoints)
                         esm.fail("Path point subrecord size mismatch");
                     else
                     {
