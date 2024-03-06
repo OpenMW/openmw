@@ -544,19 +544,15 @@ bool Config::GameSettings::hasMaster()
 void Config::GameSettings::setContentList(
     const QList<SettingValue>& dirNames, const QList<SettingValue>& archiveNames, const QStringList& fileNames)
 {
-    auto const reset = [this](const char* key, const QStringList& list) {
-        remove(key);
-        for (auto const& item : list)
-            setMultiValue(key, { item });
-    };
-
     remove(sDirectoryKey);
     for (auto const& item : dirNames)
         setMultiValue(sDirectoryKey, item);
     remove(sArchiveKey);
     for (auto const& item : archiveNames)
         setMultiValue(sArchiveKey, item);
-    reset(sContentKey, fileNames);
+    remove(sContentKey);
+    for (auto const& item : fileNames)
+        setMultiValue(sContentKey, { item });
 }
 
 QList<Config::SettingValue> Config::GameSettings::getDataDirs() const
