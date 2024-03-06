@@ -25,7 +25,7 @@ namespace Config
         // path of openmw.cfg, e.g. to resolve relative paths
         QString context = "";
 
-        friend auto operator<=>(const SettingValue&, const SettingValue&) = default;
+        friend std::strong_ordering operator<=>(const SettingValue&, const SettingValue&) = default;
     };
 
     class GameSettings
