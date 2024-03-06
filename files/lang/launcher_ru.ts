@@ -372,6 +372,26 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>&amp;Uncheck Selected</source>
         <translation>&amp;Отключить выбранные</translation>
     </message>
+    <message>
+        <source>Resolved as %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This is the data-local directory and cannot be disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This directory is part of OpenMW and cannot be disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This directory is enabled in an openmw.cfg other than the user one</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This archive is enabled in an openmw.cfg other than the user one</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Launcher::GraphicsPage</name>

@@ -590,59 +590,59 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
 <context>
     <name>Wizard::MainWizard</name>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="41"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="44"/>
         <source>OpenMW Wizard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="94"/>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="118"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="97"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="121"/>
         <source>Error opening Wizard log file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="57"/>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="450"/>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="477"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="60"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="452"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="479"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for writing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="142"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="145"/>
         <location filename="../../apps/wizard/mainwizard.cpp" line="213"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for reading&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="158"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="161"/>
         <location filename="../../apps/wizard/mainwizard.cpp" line="190"/>
         <location filename="../../apps/wizard/mainwizard.cpp" line="226"/>
         <source>Error opening OpenMW configuration file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="380"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="382"/>
         <source>Quit Wizard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="383"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="385"/>
         <source>Are you sure you want to exit the Wizard?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="425"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="427"/>
         <source>Error creating OpenMW configuration directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="429"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="431"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="446"/>
-        <location filename="../../apps/wizard/mainwizard.cpp" line="473"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="448"/>
+        <location filename="../../apps/wizard/mainwizard.cpp" line="475"/>
         <source>Error writing OpenMW configuration file</source>
         <translation type="unfinished"></translation>
     </message>
