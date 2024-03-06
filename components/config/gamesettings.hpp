@@ -76,8 +76,7 @@ namespace Config
             if (!existingDir.isEmpty())
             {
                 // non-user settings can't be removed as we can't edit the openmw.cfg they're in
-                std::remove_if(mDataDirs.begin(), mDataDirs.end(),
-                    [&](const SettingValue& dir) { return isUserSetting(dir) && dir.value == existingDir; });
+                mDataDirs.erase(std::remove_if(mDataDirs.begin(), mDataDirs.end(), [&](const SettingValue& dir) { return isUserSetting(dir) && dir.value == existingDir; }), mDataDirs.end());
             }
         }
 
