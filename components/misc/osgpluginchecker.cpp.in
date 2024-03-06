@@ -41,7 +41,7 @@ namespace Misc
         for (const auto& path : filepath)
         {
 #ifdef OSG_USE_UTF8_FILENAME
-            std::filesystem::path osgPath{ stringToU8String(path) };
+            std::filesystem::path osgPath{ StringUtils::stringToU8String(path) };
 #else
             std::filesystem::path osgPath{ path };
 #endif
@@ -52,7 +52,7 @@ namespace Misc
             {
                 osgPath = osgPath.parent_path();
 #ifdef OSG_USE_UTF8_FILENAME
-                std::string extraPath = u8StringToString(osgPath.u8string_view());
+                std::string extraPath = StringUtils::u8StringToString(osgPath.u8string());
 #else
                 std::string extraPath = osgPath.string();
 #endif
@@ -67,7 +67,7 @@ namespace Misc
             if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(),
                     [&](std::string_view availablePlugin) {
 #ifdef OSG_USE_UTF8_FILENAME
-                        std::filesystem::path pluginPath{ stringToU8String(availablePlugin) };
+                        std::filesystem::path pluginPath{ StringUtils::stringToU8String(availablePlugin) };
 #else
                 std::filesystem::path pluginPath {availablePlugin};
 #endif
