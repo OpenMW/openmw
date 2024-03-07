@@ -50,6 +50,7 @@ namespace MyGUI
 
 namespace MWWorld
 {
+    class Cell;
     class ESMStore;
 }
 
@@ -215,9 +216,6 @@ namespace MWGui
         bool toggleFogOfWar() override;
         bool toggleFullHelp() override; ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const override;
-
-        void setActiveMap(int x, int y, bool interior) override;
-        ///< set the indices of the map texture that should be used
 
         /// sets the visibility of the drowning bar
         void setDrowningBarVisibility(bool visible) override;
@@ -588,6 +586,9 @@ namespace MWGui
 
         void setCullMask(uint32_t mask) override;
         uint32_t getCullMask() override;
+
+        void setActiveMap(const MWWorld::Cell& cell);
+        ///< set the indices of the map texture that should be used
 
         Files::ConfigurationManager& mCfgMgr;
     };
