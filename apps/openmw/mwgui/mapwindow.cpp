@@ -96,11 +96,11 @@ namespace
             viewingDistanceInCells, Constants::CellGridRadius, Settings::map().mMaxLocalViewingDistance.get());
     }
 
-    ESM::RefId getCellIdInWorldSpace(const MWWorld::Cell* cell, int x, int y)
+    ESM::RefId getCellIdInWorldSpace(const MWWorld::Cell& cell, int x, int y)
     {
-        if (cell->isExterior())
+        if (cell.isExterior())
             return ESM::Cell::generateIdForCell(true, {}, x, y);
-        return cell->getId();
+        return cell.getId();
     }
 }
 
@@ -260,9 +260,8 @@ namespace MWGui
     {
         // normalized cell coordinates
         auto mapWidgetSize = getWidgetSize();
-        return MyGUI::IntPoint(
-            std::round(nX * mapWidgetSize + (mCellDistance + (cellX - mActiveCell->getGridX())) * mapWidgetSize),
-            std::round(nY * mapWidgetSize + (mCellDistance - (cellY - mActiveCell->getGridY())) * mapWidgetSize));
+        return MyGUI::IntPoint(std::round((nX + mCellDistance + cellX - mActiveCell->getGridX()) * mapWidgetSize),
+            std::round((nY + mCellDistance - cellY + mActiveCell->getGridY()) * mapWidgetSize));
     }
 
     MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const
@@ -350,7 +349,7 @@ namespace MWGui
             for (int dY = -mCellDistance; dY <= mCellDistance; ++dY)
             {
                 ESM::RefId cellRefId
-                    = getCellIdInWorldSpace(mActiveCell, mActiveCell->getGridX() + dX, mActiveCell->getGridY() + dY);
+                    = getCellIdInWorldSpace(*mActiveCell, mActiveCell->getGridX() + dX, mActiveCell->getGridY() + dY);
 
                 CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellRefId);
                 for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second;
@@ -892,7 +891,7 @@ namespace MWGui
 
         mEditingMarker.mWorldX = worldPos.x();
         mEditingMarker.mWorldY = worldPos.y();
-        ESM::RefId clickedId = getCellIdInWorldSpace(mActiveCell, x, y);
+        ESM::RefId clickedId = getCellIdInWorldSpace(*mActiveCell, x, y);
 
         mEditingMarker.mCell = clickedId;
 
