@@ -234,7 +234,7 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
     )
     FetchContent_MakeAvailableExcludeFromAll(yaml-cpp)
 
-    if (MSVC)
+    if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
         target_precompile_headers(yaml-cpp PRIVATE <algorithm>)
     endif()
 endif()

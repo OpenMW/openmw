@@ -94,7 +94,7 @@ if(USE_QT)
     set_property(TARGET openmw-launcher PROPERTY AUTOMOC ON)
 endif(USE_QT)
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-launcher PRIVATE
         <boost/program_options/options_description.hpp>
 
