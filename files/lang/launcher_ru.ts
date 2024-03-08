@@ -374,23 +374,23 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Resolved as %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Путь разрешен как %1</translation>
     </message>
     <message>
         <source>This is the data-local directory and cannot be disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Это директория data-loсal, и она не может быть отключена</translation>
     </message>
     <message>
         <source>This directory is part of OpenMW and cannot be disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Это директория является частью OpenMW и не может быть отключена</translation>
     </message>
     <message>
         <source>This directory is enabled in an openmw.cfg other than the user one</source>
-        <translation type="unfinished"></translation>
+        <translation>Это директория включена в openmw.cfg, не являющемся пользовательским</translation>
     </message>
     <message>
         <source>This archive is enabled in an openmw.cfg other than the user one</source>
-        <translation type="unfinished"></translation>
+        <translation>Этот архив включен в openmw.cfg, не являющемся пользовательским</translation>
     </message>
 </context>
 <context>
