@@ -12,80 +12,80 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Add OpenMW PPA Dependencies
-        run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
+    - name: Add OpenMW PPA Dependencies
+      run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
 
-      - name: Install Building Dependencies
-        run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+    - name: Install Building Dependencies
+      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
-      - name: Prime ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
-          max-size: 1000M
+    - name: Prime ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+        max-size: 1000M
 
-      - name: Configure
-        run: >
-            cmake .
-            -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-            -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
-            -D USE_SYSTEM_TINYXML=ON
-            -D BUILD_COMPONENTS_TESTS=ON
-            -D BUILD_OPENMW_TESTS=ON
-            -D BUILD_OPENCS_TESTS=ON
-            -D CMAKE_INSTALL_PREFIX=install
+    - name: Configure
+      run: >
+        cmake .
+        -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
+        -D USE_SYSTEM_TINYXML=ON
+        -D BUILD_COMPONENTS_TESTS=ON
+        -D BUILD_OPENMW_TESTS=ON
+        -D BUILD_OPENCS_TESTS=ON
+        -D CMAKE_INSTALL_PREFIX=install
 
-      - name: Build
-        run: cmake --build . -- -j$(nproc)
+    - name: Build
+      run: cmake --build . -- -j$(nproc)
 
-      - name: Run components tests
-        run: ./components-tests
+    - name: Run components tests
+      run: ./components-tests
 
-      - name: Run OpenMW tests
-        run: ./openmw-tests
+    - name: Run OpenMW tests
+      run: ./openmw-tests
 
-      - name: Run OpenMW-CS tests
-        run: ./openmw-cs-tests
+    - name: Run OpenMW-CS tests
+      run: ./openmw-cs-tests
 
-          #    - name: Install
-          #      shell: bash
-          #      run: cmake --install .
+    # - name: Install
+    #   shell: bash
+    #   run: cmake --install .
 
-          #    - name: Create Artifact
-          #      shell: bash
-          #      working-directory: install
-          #      run: |
-          #        ls -laR
-          #        7z a ../build_artifact.7z .
+    # - name: Create Artifact
+    #   shell: bash
+    #   working-directory: install
+    #   run: |
+    #     ls -laR
+    #     7z a ../build_artifact.7z .
 
-  #    - name: Upload Artifact
-  #      uses: actions/upload-artifact@v1
-  #      with:
-  #        path: ./build_artifact.7z
-  #        name: build_artifact.7z
+    # - name: Upload Artifact
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     path: ./build_artifact.7z
+    #     name: build_artifact.7z
 
   MacOS:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Install Building Dependencies
-        run: CI/before_install.osx.sh
+    - name: Install Building Dependencies
+      run: CI/before_install.osx.sh
 
-      - name: Prime ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
-          max-size: 1000M
+    - name: Prime ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+        max-size: 1000M
 
-      - name: Configure
-        run: |
-          rm -fr build  # remove the build directory
-          CI/before_script.osx.sh
-      - name: Build
-        run: |
-          cd build 
-          make -j $(sysctl -n hw.logicalcpu) package
+    - name: Configure
+      run: |
+        rm -fr build  # remove the build directory
+        CI/before_script.osx.sh
+    - name: Build
+      run: |
+        cd build
+        make -j $(sysctl -n hw.logicalcpu) package
