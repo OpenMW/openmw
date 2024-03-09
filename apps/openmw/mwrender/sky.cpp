@@ -528,7 +528,7 @@ namespace MWRender
         if (hasRain())
             return mRainRipplesEnabled;
 
-        if (mParticleNode && mCurrentParticleEffect == "meshes\\snow.nif")
+        if (mParticleNode && mCurrentParticleEffect == Settings::models().mWeathersnow.get())
             return mSnowRipplesEnabled;
 
         return false;
@@ -554,7 +554,7 @@ namespace MWRender
             osg::Quat quat;
             quat.makeRotate(MWWorld::Weather::defaultDirection(), mStormParticleDirection);
             // Morrowind deliberately rotates the blizzard mesh, so so should we.
-            if (mCurrentParticleEffect == "meshes\\blizzard.nif")
+            if (mCurrentParticleEffect == Settings::models().mWeatherblizzard.get())
                 quat.makeRotate(osg::Vec3f(-1, 0, 0), mStormParticleDirection);
             mParticleNode->setAttitude(quat);
         }
@@ -726,7 +726,7 @@ namespace MWRender
 
                 const osg::Vec3 defaultWrapRange = osg::Vec3(1024, 1024, 800);
                 const bool occlusionEnabledForEffect
-                    = !mRainEffect.empty() || mCurrentParticleEffect == "meshes\\snow.nif";
+                    = !mRainEffect.empty() || mCurrentParticleEffect == Settings::models().mWeathersnow.get();
 
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {
