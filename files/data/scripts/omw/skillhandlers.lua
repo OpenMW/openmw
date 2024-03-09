@@ -177,7 +177,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#SkillProgression] #number version
-        version = 0,
+        version = 1,
 
         --- Add new skill level up handler for this actor.
         -- For load order consistency, handlers should be added in the body if your script.
