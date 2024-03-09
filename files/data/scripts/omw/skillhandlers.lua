@@ -8,7 +8,7 @@ local Skill = core.stats.Skill
 ---
 -- Table of skill use types defined by morrowind.
 -- Each entry corresponds to an index into the available skill gain values
--- of a @{openmw.types#SkillRecord}
+-- of a @{openmw.core#SkillRecord}
 -- @type SkillUseType
 -- @field #number Armor_HitByOpponent 0
 -- @field #number Block_Success 0
@@ -182,7 +182,7 @@ return {
         --- Add new skill level up handler for this actor.
         -- For load order consistency, handlers should be added in the body if your script.
         -- If `handler(skillid, source, options)` returns false, other handlers (including the default skill level up handler) 
-        -- will be skipped. Where skillid and source are the parameters passed to @{#skillLevelUp}, and options is
+        -- will be skipped. Where skillid and source are the parameters passed to @{#SkillProgression.skillLevelUp}, and options is
         -- a modifiable table of skill level up values, and can be modified to change the behavior of later handlers. 
         -- These values are calculated based on vanilla mechanics. Setting any value to nil will cause that mechanic to be skipped. By default contains these values:
         --
@@ -203,7 +203,7 @@ return {
         -- For load order consistency, handlers should be added in the body of your script.
         -- If `handler(skillid, options)` returns false, other handlers (including the default skill progress handler) 
         -- will be skipped. Where options is a modifiable table of skill progression values, and can be modified to change the behavior of later handlers. 
-        -- Contains a `skillGain` value as well as a shallow copy of the options passed to @{#skillUsed}.
+        -- Contains a `skillGain` value as well as a shallow copy of the options passed to @{#SkillProgression.skillUsed}.
         -- @function [parent=#SkillProgression] addSkillUsedHandler
         -- @param #function handler The handler.
         addSkillUsedHandler = function(handler)
