@@ -844,7 +844,7 @@ namespace MWGui
 
         if (!player.getCell()->isExterior())
         {
-            setActiveMap(x, y, true);
+            setActiveMap(*player.getCell()->getCell());
         }
         // else: need to know the current grid center, call setActiveMap from changeCell
 
@@ -982,29 +982,23 @@ namespace MWGui
                 mMap->addVisitedLocation(name, cellCommon->getGridX(), cellCommon->getGridY());
 
             mMap->cellExplored(cellCommon->getGridX(), cellCommon->getGridY());
-
-            setActiveMap(cellCommon->getGridX(), cellCommon->getGridY(), false);
         }
         else
         {
-            mMap->setCellPrefix(std::string(cellCommon->getNameId()));
-            mHud->setCellPrefix(std::string(cellCommon->getNameId()));
-
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
                 worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
             else
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x(), worldPos.y());
-
-            setActiveMap(0, 0, true);
         }
+        setActiveMap(*cellCommon);
     }
 
-    void WindowManager::setActiveMap(int x, int y, bool interior)
+    void WindowManager::setActiveMap(const MWWorld::Cell& cell)
     {
-        mMap->setActiveCell(x, y, interior);
-        mHud->setActiveCell(x, y, interior);
+        mMap->setActiveCell(cell);
+        mHud->setActiveCell(cell);
     }
 
     void WindowManager::setDrowningBarVisibility(bool visible)

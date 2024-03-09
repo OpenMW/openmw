@@ -202,9 +202,6 @@ namespace MWBase
 
         virtual bool getFullHelp() const = 0;
 
-        virtual void setActiveMap(int x, int y, bool interior) = 0;
-        ///< set the indices of the map texture that should be used
-
         /// sets the visibility of the drowning bar
         virtual void setDrowningBarVisibility(bool visible) = 0;
 
