@@ -2,7 +2,6 @@
 #define GAME_SOUND_REGIONSOUNDSELECTOR_H
 
 #include <components/esm/refid.hpp>
-#include <optional>
 #include <string>
 
 namespace MWBase
@@ -15,7 +14,7 @@ namespace MWSound
     class RegionSoundSelector
     {
     public:
-        std::optional<ESM::RefId> getNextRandom(float duration, const ESM::RefId& regionName);
+        ESM::RefId getNextRandom(float duration, const ESM::RefId& regionName);
 
         RegionSoundSelector();
 

@@ -900,8 +900,9 @@ namespace MWSound
         if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
             return;
 
-        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion()))
-            mCurrentRegionSound = playSound(*next, 1.0f, 1.0f);
+        ESM::RefId next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion());
+        if (!next.empty())
+            mCurrentRegionSound = playSound(next, 1.0f, 1.0f);
     }
 
     void SoundManager::updateWaterSound()
