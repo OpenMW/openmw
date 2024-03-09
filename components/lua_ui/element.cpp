@@ -278,6 +278,7 @@ namespace LuaUi
             mRoot = createWidget(layout(), true, depth);
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
+            mState = Created;
         }
     }
 
@@ -304,8 +305,8 @@ namespace LuaUi
             }
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
+            mState = Created;
         }
-        mState = Created;
     }
 
     void Element::destroy()
