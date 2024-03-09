@@ -301,8 +301,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRegions.addColumn(new NestedParentColumn<ESM::Region>(Columns::ColumnId_RegionWeather));
     index = mRegions.getColumns() - 1;
     mRegions.addAdapter(std::make_pair(&mRegions.getColumn(index), new RegionWeatherAdapter()));
-    mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn(Columns::ColumnId_WeatherName, ColumnBase::Display_String, false));
+    mRegions.getNestableColumn(index)->addColumn(new NestedChildColumn(
+        Columns::ColumnId_WeatherName, ColumnBase::Display_String, ColumnBase::Flag_Dialogue, false));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_WeatherChance, ColumnBase::Display_UnsignedInteger8));
     // Region Sounds
@@ -313,6 +313,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
         new NestedChildColumn(Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_SoundChance, ColumnBase::Display_UnsignedInteger8));
+    mRegions.getNestableColumn(index)->addColumn(new NestedChildColumn(
+        Columns::ColumnId_SoundProbability, ColumnBase::Display_Float, ColumnBase::Flag_Dialogue, false));
 
     mBirthsigns.addColumn(new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn(new RecordStateColumn<ESM::BirthSign>);

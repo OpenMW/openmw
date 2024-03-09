@@ -414,20 +414,31 @@ namespace CSMWorld
 
     QVariant RegionSoundListAdapter::getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const
     {
-        ESM::Region region = record.get();
+        const ESM::Region& region = record.get();
 
-        std::vector<ESM::Region::SoundRef>& soundList = region.mSoundList;
+        const std::vector<ESM::Region::SoundRef>& soundList = region.mSoundList;
 
-        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(soundList.size()))
+        const size_t index = static_cast<size_t>(subRowIndex);
+        if (subRowIndex < 0 || index >= soundList.size())
             throw std::runtime_error("index out of range");
 
-        ESM::Region::SoundRef soundRef = soundList[subRowIndex];
+        const ESM::Region::SoundRef& soundRef = soundList[subRowIndex];
         switch (subColIndex)
         {
             case 0:
                 return QString(soundRef.mSound.getRefIdString().c_str());
             case 1:
                 return soundRef.mChance;
+            case 2:
+            {
+                float probability = 1.f;
+                for (size_t i = 0; i < index; ++i)
+                {
+                    const float p = std::min(soundList[i].mChance / 100.f, 1.f);
+                    probability *= 1.f - p;
+                }
+                return probability * std::min(soundRef.mChance / 100.f, 1.f) * 100.f;
+            }
             default:
                 throw std::runtime_error("Region sounds subcolumn index out of range");
         }
@@ -463,7 +474,7 @@ namespace CSMWorld
 
     int RegionSoundListAdapter::getColumnsCount(const Record<ESM::Region>& record) const
     {
-        return 2;
+        return 3;
     }
 
     int RegionSoundListAdapter::getRowsCount(const Record<ESM::Region>& record) const
