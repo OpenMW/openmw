@@ -778,12 +778,12 @@ namespace Resource
         }
     };
 
-    bool canOptimize(const std::string& filename)
+    static bool canOptimize(std::string_view filename)
     {
-        size_t slashpos = filename.find_last_of("\\/");
-        if (slashpos != std::string::npos && slashpos + 1 < filename.size())
+        const std::string_view::size_type slashpos = filename.find_last_of('/');
+        if (slashpos != std::string_view::npos && slashpos + 1 < filename.size())
         {
-            std::string basename = filename.substr(slashpos + 1);
+            const std::string_view basename = filename.substr(slashpos + 1);
             // xmesh.nif can not be optimized because there are keyframes added in post
             if (!basename.empty() && basename[0] == 'x')
                 return false;
@@ -796,7 +796,7 @@ namespace Resource
 
         // For spell VFX, DummyXX nodes must remain intact. Not adding those to reservedNames to avoid being overly
         // cautious - instead, decide on filename
-        if (filename.find("vfx_pattern") != std::string::npos)
+        if (filename.find("vfx_pattern") != std::string_view::npos)
             return false;
         return true;
     }
