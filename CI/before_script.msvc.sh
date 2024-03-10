@@ -528,10 +528,12 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
-if [ -n "$USE_CCACHE" ] && ([ -n "$NMAKE" ] || [ -n "$NINJA" ]); then
-	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPRECOMPILE_HEADERS_WITH_MSVC=OFF"
-elif [ -n "$USE_CCACHE" ]; then
-	echo "Ignoring -C (CCache) as it is incompatible with Visual Studio CMake generators"
+if [ -n "$USE_CCACHE" ]; then
+	if [ -n "$NMAKE" ] || [ -n "$NINJA" ]; then
+		add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPRECOMPILE_HEADERS_WITH_MSVC=OFF"
+	else
+		echo "Ignoring -C (CCache) as it is incompatible with Visual Studio CMake generators"
+	fi
 fi
 
 # turn on LTO by default
