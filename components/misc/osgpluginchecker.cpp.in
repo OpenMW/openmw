@@ -30,7 +30,7 @@ namespace Misc
 
     namespace
     {
-        constexpr auto USED_OSG_PLUGIN_FILENAMES = std::to_array<std::string_view>({${USED_OSG_PLUGIN_FILENAMES_FORMATTED}});
+        constexpr auto USED_OSG_PLUGIN_NAMES = std::to_array<std::string_view>({${USED_OSG_PLUGIN_NAMES_FORMATTED}});
     }
 
     bool checkRequiredOSGPluginsArePresent()
@@ -62,7 +62,7 @@ namespace Misc
 
         auto availableOSGPlugins = osgDB::listAllAvailablePlugins();
         bool haveAllPlugins = true;
-        for (std::string_view plugin : USED_OSG_PLUGIN_FILENAMES)
+        for (std::string_view plugin : USED_OSG_PLUGIN_NAMES)
         {
             if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(),
                     [&](std::string_view availablePlugin) {
@@ -71,7 +71,10 @@ namespace Misc
 #else
                 std::filesystem::path pluginPath {availablePlugin};
 #endif
-                        return pluginPath.filename() == plugin;
+                        return pluginPath.filename()
+                            == std::filesystem::path(
+                                osgDB::Registry::instance()->createLibraryNameForExtension(std::string{ plugin }))
+                                   .filename();
                     })
                 == availableOSGPlugins.end())
             {
