@@ -191,6 +191,22 @@ if (MSVC)
     add_compile_options(/bigobj)
 
     add_compile_options(/Zc:__cplusplus)
+
+    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER)
+        if (CMAKE_GENERATOR MATCHES "Visual Studio")
+            message(STATUS "A compiler launcher was specified, but will be unused by the current generator (${CMAKE_GENERATOR})")
+        else()
+            foreach (config_lower ${CMAKE_CONFIGURATION_TYPES})
+                string(TOUPPER "${config_lower}" config)
+                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
+                endif()
+                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_${config} "${CMAKE_CXX_FLAGS_${config}}")
+                endif()
+            endforeach()
+        endif()
+    endif()
 endif()
 
 # Set up common paths
