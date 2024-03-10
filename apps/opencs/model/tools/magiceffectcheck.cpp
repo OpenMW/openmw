@@ -60,6 +60,11 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages& messa
     ESM::MagicEffect effect = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_MagicEffect, CSMWorld::getRecordId(effect));
 
+    if (effect.mData.mSpeed <= 0.0f)
+    {
+        messages.add(id, "Speed is less than or equal to zero", "", CSMDoc::Message::Severity_Error);
+    }
+
     if (effect.mDescription.empty())
     {
         messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
