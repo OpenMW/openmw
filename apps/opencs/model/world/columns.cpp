@@ -378,6 +378,7 @@ namespace CSMWorld
             { ColumnId_Blocked, "Blocked" },
 
             { ColumnId_LevelledCreatureId, "Levelled Creature" },
+            { ColumnId_ProjectileSpeed, "Projectile Speed" },
 
             // end marker
             { -1, 0 },
