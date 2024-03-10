@@ -2,12 +2,6 @@
 #define GAME_SOUND_REGIONSOUNDSELECTOR_H
 
 #include <components/esm/refid.hpp>
-#include <string>
-
-namespace MWBase
-{
-    class World;
-}
 
 namespace MWSound
 {
@@ -20,8 +14,6 @@ namespace MWSound
 
     private:
         float mTimeToNextEnvSound = 0.0f;
-        int mSumChance = 0;
-        ESM::RefId mLastRegionName;
         float mTimePassed = 0.0;
         float mMinTimeBetweenSounds;
         float mMaxTimeBetweenSounds;

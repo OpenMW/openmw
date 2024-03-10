@@ -26,14 +26,8 @@ namespace MWSound
         mTimeToNextEnvSound = mMinTimeBetweenSounds + (mMaxTimeBetweenSounds - mMinTimeBetweenSounds) * a;
         mTimePassed = 0;
 
-        if (mLastRegionName != regionName)
-        {
-            mLastRegionName = regionName;
-            mSumChance = 0;
-        }
-
         const ESM::Region* const region
-            = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(mLastRegionName);
+            = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(regionName);
 
         if (region == nullptr)
             return {};
