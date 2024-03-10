@@ -1166,9 +1166,6 @@ namespace MWGui
 
     void WindowManager::windowResized(int x, int y)
     {
-        if (x == Settings::video().mResolutionX && y == Settings::video().mResolutionY)
-            return;
-
         Settings::video().mResolutionX.set(x);
         Settings::video().mResolutionY.set(y);
 
