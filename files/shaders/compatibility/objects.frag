@@ -85,9 +85,11 @@ varying vec3 passNormal;
 varying vec4 passTangent;
 #endif
 
+/*
 #if @additiveBlending
 #define ADDITIVE_BLENDING
 #endif
+*/
 
 #include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
@@ -109,11 +111,11 @@ uniform float softFalloffDepth;
 
 #if @particleOcclusion
 #include "lib/particle/occlusion.glsl"
-uniform sampler2D orthoDepthMap;
+uniform highp sampler2D orthoDepthMap;
 varying vec3 orthoDepthMapCoord;
 #endif
 
-uniform sampler2D opaqueDepthTex;
+uniform highp sampler2D opaqueDepthTex;
 
 void main()
 {
