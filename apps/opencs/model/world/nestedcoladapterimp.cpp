@@ -437,7 +437,8 @@ namespace CSMWorld
                     const float p = std::min(soundList[i].mChance / 100.f, 1.f);
                     probability *= 1.f - p;
                 }
-                return probability * std::min(soundRef.mChance / 100.f, 1.f) * 100.f;
+                probability *= std::min(soundRef.mChance / 100.f, 1.f) * 100.f;
+                return QString("%1%").arg(probability, 0, 'f', 2);
             }
             default:
                 throw std::runtime_error("Region sounds subcolumn index out of range");
