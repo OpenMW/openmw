@@ -26,13 +26,13 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
+#include "constants.hpp"
+#include "ffmpeg_decoder.hpp"
+#include "openal_output.hpp"
 #include "sound.hpp"
 #include "sound_buffer.hpp"
 #include "sound_decoder.hpp"
 #include "sound_output.hpp"
-
-#include "ffmpeg_decoder.hpp"
-#include "openal_output.hpp"
 
 namespace MWSound
 {
@@ -352,12 +352,12 @@ namespace MWSound
         mechanicsManager->setMusicType(type);
         advanceMusic(normalizedName, fade);
         if (type == MWSound::MusicType::Battle)
-            mCurrentPlaylist = "Battle";
+            mCurrentPlaylist = battlePlaylist;
         else if (type == MWSound::MusicType::Explore)
-            mCurrentPlaylist = "Explore";
+            mCurrentPlaylist = explorePlaylist;
     }
 
-    void SoundManager::playPlaylist(const std::string& playlist)
+    void SoundManager::playPlaylist(VFS::Path::NormalizedView playlist)
     {
         if (mCurrentPlaylist == playlist)
             return;
@@ -367,17 +367,18 @@ namespace MWSound
         if (it == mMusicFiles.end())
         {
             std::vector<VFS::Path::Normalized> filelist;
-            auto playlistPath = Misc::ResourceHelpers::correctMusicPath(playlist) + '/';
-            for (const auto& name : mVFS->getRecursiveDirectoryIterator(playlistPath))
+            constexpr VFS::Path::NormalizedView music("music");
+            const VFS::Path::Normalized playlistPath = music / playlist / VFS::Path::NormalizedView();
+            for (const auto& name : mVFS->getRecursiveDirectoryIterator(VFS::Path::NormalizedView(playlistPath)))
                 filelist.push_back(name);
 
             it = mMusicFiles.emplace_hint(it, playlist, std::move(filelist));
         }
 
         // No Battle music? Use Explore playlist
-        if (playlist == "Battle" && it->second.empty())
+        if (playlist == battlePlaylist && it->second.empty())
         {
-            playPlaylist("Explore");
+            playPlaylist(explorePlaylist);
             return;
         }
 
@@ -1024,7 +1025,7 @@ namespace MWSound
         mTimePassed = 0.0f;
 
         // Make sure music is still playing
-        if (!isMusicPlaying() && !mCurrentPlaylist.empty())
+        if (!isMusicPlaying() && !mCurrentPlaylist.value().empty())
             startRandomTitle();
 
         Environment env = Env_Normal;

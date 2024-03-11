@@ -42,7 +42,7 @@ namespace Misc
         VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath);
 
         // Adds "music\\".
-        std::string correctMusicPath(const std::string& resPath);
+        std::string correctMusicPath(std::string_view resPath);
 
         // Removes "meshes\\".
         std::string_view meshPathForESM3(std::string_view resPath);

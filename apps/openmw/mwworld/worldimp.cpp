@@ -90,6 +90,8 @@
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/physicssystem.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "actionteleport.hpp"
 #include "cellstore.hpp"
 #include "containerstore.hpp"
@@ -394,7 +396,7 @@ namespace MWWorld
             {
                 // Make sure that we do not continue to play a Title music after a new game video.
                 MWBase::Environment::get().getSoundManager()->stopMusic();
-                MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
+                MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
             }
         }

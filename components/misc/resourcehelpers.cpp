@@ -186,9 +186,11 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normali
     return prefix / resPath;
 }
 
-std::string Misc::ResourceHelpers::correctMusicPath(const std::string& resPath)
+std::string Misc::ResourceHelpers::correctMusicPath(std::string_view resPath)
 {
-    return "music\\" + resPath;
+    std::string result("music/");
+    result += resPath;
+    return result;
 }
 
 std::string_view Misc::ResourceHelpers::meshPathForESM3(std::string_view resPath)

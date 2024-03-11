@@ -126,7 +126,7 @@ namespace MWBase
         virtual bool isMusicPlaying() = 0;
         ///< Returns true if music is playing
 
-        virtual void playPlaylist(const std::string& playlist) = 0;
+        virtual void playPlaylist(VFS::Path::NormalizedView playlist) = 0;
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
         /// Title music playlist is predefined
