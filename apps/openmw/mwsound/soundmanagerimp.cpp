@@ -300,12 +300,15 @@ namespace MWSound
 
     void SoundManager::startRandomTitle()
     {
-        const std::vector<std::string>& filelist = mMusicFiles[mCurrentPlaylist];
-        if (filelist.empty())
+        const auto playlist = mMusicFiles.find(mCurrentPlaylist);
+
+        if (playlist == mMusicFiles.end() || playlist->second.empty())
         {
             advanceMusic(std::string());
             return;
         }
+
+        const std::vector<VFS::Path::Normalized>& filelist = playlist->second;
 
         auto& tracklist = mMusicToPlay[mCurrentPlaylist];
 
@@ -359,18 +362,20 @@ namespace MWSound
         if (mCurrentPlaylist == playlist)
             return;
 
-        if (mMusicFiles.find(playlist) == mMusicFiles.end())
+        auto it = mMusicFiles.find(playlist);
+
+        if (it == mMusicFiles.end())
         {
-            std::vector<std::string> filelist;
+            std::vector<VFS::Path::Normalized> filelist;
             auto playlistPath = Misc::ResourceHelpers::correctMusicPath(playlist) + '/';
             for (const auto& name : mVFS->getRecursiveDirectoryIterator(playlistPath))
                 filelist.push_back(name);
 
-            mMusicFiles[playlist] = std::move(filelist);
+            it = mMusicFiles.emplace_hint(it, playlist, std::move(filelist));
         }
 
         // No Battle music? Use Explore playlist
-        if (playlist == "Battle" && mMusicFiles[playlist].empty())
+        if (playlist == "Battle" && it->second.empty())
         {
             playPlaylist("Explore");
             return;

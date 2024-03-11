@@ -52,7 +52,7 @@ namespace MWSound
         std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
-        std::unordered_map<std::string, std::vector<std::string>> mMusicFiles;
+        std::unordered_map<std::string, std::vector<VFS::Path::Normalized>> mMusicFiles;
         std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
         std::string mLastPlayedMusic; // The music file that was last played
 
