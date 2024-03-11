@@ -54,7 +54,7 @@ namespace LuaUi
             if (!ext->isRoot())
                 destroyWidget(ext);
             else
-                ext->widget()->detachFromWidget();
+                ext->detachFromParent();
         }
 
         void detachElements(WidgetExtension* ext)
@@ -62,14 +62,14 @@ namespace LuaUi
             for (auto* child : ext->children())
             {
                 if (child->isRoot())
-                    child->widget()->detachFromWidget();
+                    child->detachFromParent();
                 else
                     detachElements(child);
             }
             for (auto* child : ext->templateChildren())
             {
                 if (child->isRoot())
-                    child->widget()->detachFromWidget();
+                    child->detachFromParent();
                 else
                     detachElements(child);
             }
@@ -272,12 +272,13 @@ namespace LuaUi
 
     void Element::create(uint64_t depth)
     {
-        assert(!mRoot);
         if (mState == New)
         {
+            assert(!mRoot);
             mRoot = createWidget(layout(), true, depth);
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
+            mState = Created;
         }
     }
 
@@ -304,8 +305,8 @@ namespace LuaUi
             }
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
+            mState = Created;
         }
-        mState = Created;
     }
 
     void Element::destroy()

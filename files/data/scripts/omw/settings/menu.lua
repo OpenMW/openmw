@@ -378,7 +378,7 @@ local function onSettingChanged(global)
         local value = common.getSection(global, group.key):get(settingKey)
         local settingsContent = groupElement.layout.content.settings.content
         auxUi.deepDestroy(settingsContent[settingKey]) -- support setting renderers which return UI elements
-        settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value)
+        settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value, global)
         groupElement:update()
     end)
 end
@@ -408,7 +408,7 @@ local function onGroupRegistered(global, key)
 
             local element = groupElements[group.page][group.key]
             local settingsContent = element.layout.content.settings.content
-            settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value)
+            settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value, global)
             element:update()
         end))
     end
