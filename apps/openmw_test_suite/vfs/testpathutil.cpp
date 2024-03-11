@@ -72,6 +72,13 @@ namespace VFS::Path
             EXPECT_EQ(value.value(), "foo/bar/baz");
         }
 
+        TEST(NormalizedTest, shouldSupportOperatorDivEqualWithStringView)
+        {
+            Normalized value("foo/bar");
+            value /= std::string_view("BAZ");
+            EXPECT_EQ(value.value(), "foo/bar/baz");
+        }
+
         TEST(NormalizedTest, changeExtensionShouldReplaceAfterLastDot)
         {
             Normalized value("foo/bar.a");
