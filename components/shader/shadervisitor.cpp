@@ -28,6 +28,8 @@
 #include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/settings/values.hpp>
+#include <components/sceneutil/depth.hpp>
 
 #include "removedalphafunc.hpp"
 #include "shadermanager.hpp"
@@ -728,6 +730,13 @@ namespace Shader
                 writableUserData = getWritableUserDataContainer(*writableStateSet);
 
             updateRemovedState(*writableUserData, removedState);
+        }
+
+        if (reqs.mAlphaBlend && Settings::postProcessing().mTransparentPostpass && Settings::postProcessing().mEnabled)
+        {
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
+            depth->setWriteMask(false);
+            writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
 
         defineMap["softParticles"] = reqs.mSoftParticles ? "1" : "0";

@@ -300,7 +300,7 @@ namespace MWRender
         mCanvases[frameId]->setCalculateAvgLum(mHDR);
 
         mCanvases[frameId]->setTextureScene(getTexture(Tex_Scene, frameId));
-        mCanvases[frameId]->setTextureDepth(getTexture(Tex_OpaqueDepth, frameId));
+        mCanvases[frameId]->setTextureDepth(getTexture(Tex_Depth, frameId));
         mCanvases[frameId]->setTextureDistortion(getTexture(Tex_Distortion, frameId));
 
         mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
@@ -407,12 +407,12 @@ namespace MWRender
             mPrevPassLights = mPassLights;
 
             mViewer->stopThreading();
-
+/*
             auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
             auto defines = shaderManager.getGlobalDefines();
             defines["disableNormals"] = mNormals ? "0" : "1";
             shaderManager.setGlobalDefines(defines);
-
+*/
             mRendering.getLightRoot()->setCollectPPLights(mPassLights);
             mStateUpdater->bindPointLights(mPassLights ? mRendering.getLightRoot()->getPPLightsBuffer() : nullptr);
             mStateUpdater->reset();

@@ -35,7 +35,7 @@ namespace fx
             { "bgra", GL_BGRA },
         } };
 
-        constexpr std::array<std::pair<std::string_view, int>, 9> SourceType = { {
+        constexpr std::array<std::pair<std::string_view, int>, 10> SourceType = { {
             { "byte", GL_BYTE },
             { "unsigned_byte", GL_UNSIGNED_BYTE },
             { "short", GL_SHORT },
@@ -43,6 +43,7 @@ namespace fx
             { "int", GL_INT },
             { "unsigned_int", GL_UNSIGNED_INT },
             { "unsigned_int_24_8", GL_UNSIGNED_INT_24_8 },
+            { "half_float", GL_HALF_FLOAT },
             { "float", GL_FLOAT },
             { "double", GL_DOUBLE },
         } };
