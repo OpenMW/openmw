@@ -313,11 +313,14 @@ namespace LuaUi
     {
         if (mState != Destroyed)
         {
-            destroyRoot(mRoot);
-            mRoot = nullptr;
             if (mState != New)
-                mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
-            mState = Destroyed;
+            {
+                assert(mRoot);
+                destroyRoot(mRoot);
+                mRoot = nullptr;
+            }
+            mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
         }
+        mState = Destroyed;
     }
 }
