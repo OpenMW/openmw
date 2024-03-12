@@ -286,6 +286,8 @@ namespace MWRender
         {
             std::unique_ptr<Terrain::World> mTerrain;
             std::unique_ptr<ObjectPaging> mObjectPaging;
+            std::unique_ptr<Terrain::World> mGroundcoverWorld;
+            std::unique_ptr<ObjectPaging> mGroundcoverPaging;
             std::unique_ptr<Groundcover> mGroundcover;
         };
 
@@ -326,6 +328,8 @@ namespace MWRender
         std::unique_ptr<TerrainStorage> mTerrainStorage;
         ObjectPaging* mObjectPaging;
         Groundcover* mGroundcover;
+        Terrain::World* mGroundcoverWorld;
+        ObjectPaging* mGroundcoverPaging;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<FogManager> mFog;
         std::unique_ptr<ScreenshotManager> mScreenshotManager;

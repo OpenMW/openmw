@@ -14,6 +14,7 @@ namespace Resource
 namespace MWWorld
 {
     class ESMStore;
+    class GroundcoverStore;
 }
 
 namespace ESM
@@ -29,7 +30,7 @@ namespace MWRender
     class ObjectPaging : public Resource::GenericResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
-        ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace);
+        ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace, bool groundcover, const MWWorld::GroundcoverStore& store);
         ~ObjectPaging() = default;
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags,
@@ -59,6 +60,9 @@ namespace MWRender
     private:
         Resource::SceneManager* mSceneManager;
         bool mActiveGrid;
+        bool mGroundcover;
+        float mGroundcoverDensity;
+        const MWWorld::GroundcoverStore& mGroundcoverStore;
         bool mDebugBatches;
         float mMergeFactor;
         float mMinSize;

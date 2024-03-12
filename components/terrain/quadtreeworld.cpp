@@ -304,6 +304,18 @@ namespace Terrain
         }
     }
 
+    QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, ESM::RefId worldspace, int nodeMask, float lodFactor, float chunkSize)
+        : TerrainGrid(parent, storage, worldspace, nodeMask)
+        , mViewDataMap(new ViewDataMap)
+        , mQuadTreeBuilt(false)
+        , mLodFactor(lodFactor)
+        , mVertexLodMod(0)
+        , mViewDistance(std::numeric_limits<float>::max())
+        , mMinSize(chunkSize)
+        , mDebugTerrainChunks(false)
+    {
+    }
+
     QuadTreeWorld::~QuadTreeWorld() {}
 
     /// get the level of vertex detail to render this node at, expressed relative to the native resolution of the vertex
