@@ -1,5 +1,7 @@
 #include "weather.hpp"
 
+#include <components/settings/values.hpp>
+
 #include <components/misc/rng.hpp>
 
 #include <components/esm3/esmreader.hpp>
@@ -45,7 +47,8 @@ namespace MWWorld
         osg::Vec3f calculateStormDirection(const std::string& particleEffect)
         {
             osg::Vec3f stormDirection = MWWorld::Weather::defaultDirection();
-            if (particleEffect == "meshes\\ashcloud.nif" || particleEffect == "meshes\\blightcloud.nif")
+            if (particleEffect == Settings::models().mWeatherashcloud.get()
+                || particleEffect == Settings::models().mWeatherblightcloud.get())
             {
                 osg::Vec3f playerPos = MWMechanics::getPlayer().getRefData().getPosition().asVec3();
                 playerPos.z() = 0;
@@ -581,10 +584,10 @@ namespace MWWorld
         addWeather("Overcast", 0.7f, 0.0f); // 3
         addWeather("Rain", 0.5f, 10.0f); // 4
         addWeather("Thunderstorm", 0.5f, 20.0f); // 5
-        addWeather("Ashstorm", 0.2f, 50.0f, "meshes\\ashcloud.nif"); // 6
-        addWeather("Blight", 0.2f, 60.0f, "meshes\\blightcloud.nif"); // 7
-        addWeather("Snow", 0.5f, 40.0f, "meshes\\snow.nif"); // 8
-        addWeather("Blizzard", 0.16f, 70.0f, "meshes\\blizzard.nif"); // 9
+        addWeather("Ashstorm", 0.2f, 50.0f, Settings::models().mWeatherashcloud.get()); // 6
+        addWeather("Blight", 0.2f, 60.0f, Settings::models().mWeatherblightcloud.get()); // 7
+        addWeather("Snow", 0.5f, 40.0f, Settings::models().mWeathersnow.get()); // 8
+        addWeather("Blizzard", 0.16f, 70.0f, Settings::models().mWeatherblizzard.get()); // 9
 
         Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
         for (; it != store.get<ESM::Region>().end(); ++it)
@@ -720,7 +723,7 @@ namespace MWWorld
 
         // For some reason Ash Storm is not considered as a precipitation weather in game
         mPrecipitation = !(mResult.mParticleEffect.empty() && mResult.mRainEffect.empty())
-            && mResult.mParticleEffect != "meshes\\ashcloud.nif";
+            && mResult.mParticleEffect != Settings::models().mWeatherashcloud.get();
 
         mStormDirection = calculateStormDirection(mResult.mParticleEffect);
         mRendering.getSkyManager()->setStormParticleDirection(mStormDirection);

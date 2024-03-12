@@ -19,6 +19,14 @@ if(OPENMW_GL4ES_MANUAL_INIT)
     add_definitions(-DOPENMW_GL4ES_MANUAL_INIT)
 endif()
 
+if (APPLE OR WIN32)
+    set(DEPLOY_QT_TRANSLATIONS_DEFAULT ON)
+else ()
+    set(DEPLOY_QT_TRANSLATIONS_DEFAULT OFF)
+endif ()
+
+option(DEPLOY_QT_TRANSLATIONS "Deploy standard Qt translations to resources folder. Needed when OpenMW applications are deployed with Qt libraries" ${DEPLOY_QT_TRANSLATIONS_DEFAULT})
+
 # Apps and tools
 option(BUILD_OPENMW             "Build OpenMW" ON)
 option(BUILD_LAUNCHER           "Build Launcher" ON)
@@ -36,6 +44,7 @@ option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 option(BUILD_BULLETOBJECTTOOL   "Build Bullet object tool" ON)
 option(BUILD_OPENCS_TESTS       "Build OpenMW Construction Set tests" OFF)
+option(PRECOMPILE_HEADERS_WITH_MSVC "Precompile most common used headers with MSVC (alternative to ccache)" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
@@ -72,7 +81,7 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 53)
+set(OPENMW_LUA_API_REVISION 56)
 set(OPENMW_POSTPROCESSING_API_REVISION 1)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -81,7 +90,7 @@ set(OPENMW_VERSION_COMMITDATE "")
 
 set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
-set(OPENMW_DOC_BASEURL "https://openmw.readthedocs.io/en/stable/")
+set(OPENMW_DOC_BASEURL "https://openmw.readthedocs.io/en/")
 
 set(GIT_CHECKOUT FALSE)
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
@@ -182,6 +191,22 @@ if (MSVC)
     add_compile_options(/bigobj)
 
     add_compile_options(/Zc:__cplusplus)
+
+    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER)
+        if (CMAKE_GENERATOR MATCHES "Visual Studio")
+            message(STATUS "A compiler launcher was specified, but will be unused by the current generator (${CMAKE_GENERATOR})")
+        else()
+            foreach (config_lower ${CMAKE_CONFIGURATION_TYPES})
+                string(TOUPPER "${config_lower}" config)
+                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
+                endif()
+                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_${config} "${CMAKE_CXX_FLAGS_${config}}")
+                endif()
+            endforeach()
+        endif()
+    endif()
 endif()
 
 # Set up common paths
@@ -710,67 +735,66 @@ if (WIN32)
             )
 
         foreach(d ${WARNINGS_DISABLE})
-            set(WARNINGS "${WARNINGS} /wd${d}")
+            list(APPEND WARNINGS "/wd${d}")
         endforeach(d)
 
         if(OPENMW_MSVC_WERROR)
-            set(WARNINGS "${WARNINGS} /WX")
+            list(APPEND WARNINGS "/WX")
         endif()
 
-        set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
-        set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+        target_compile_options(components PRIVATE ${WARNINGS})
+        target_compile_options(osg-ffmpeg-videoplayer PRIVATE ${WARNINGS})
 
         if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
             target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
         endif()
 
         if (BUILD_BSATOOL)
-            set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(bsatool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESMTOOL)
-            set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(esmtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESSIMPORTER)
-            set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-essimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_LAUNCHER)
-            set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-launcher PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_MWINIIMPORTER)
-            set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-iniimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENCS)
-            set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-cs PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENMW)
-            set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_WIZARD)
-            set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-wizard PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_UNITTESTS)
-            set_target_properties(openmw_test_suite PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw_test_suite PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BENCHMARKS)
-            set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_NAVMESHTOOL)
-            set_target_properties(openmw-navmeshtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-navmeshtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BULLETOBJECTTOOL)
-            set(WARNINGS "${WARNINGS} ${MT_BUILD}")
-            set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
         endif()
     endif(MSVC)
 
@@ -1099,13 +1123,13 @@ if (USE_QT)
 
     if (BUILD_LAUNCHER OR BUILD_WIZARD)
         if (APPLE)
-            set(QT_TRANSLATIONS_PATH "${APP_BUNDLE_DIR}/Contents/Resources/resources/translations")
+            set(QT_OPENMW_TRANSLATIONS_PATH "${APP_BUNDLE_DIR}/Contents/Resources/resources/translations")
         else ()
             get_generator_is_multi_config(multi_config)
             if (multi_config)
-                set(QT_TRANSLATIONS_PATH "${OpenMW_BINARY_DIR}/$<CONFIG>/resources/translations")
+                set(QT_OPENMW_TRANSLATIONS_PATH "${OpenMW_BINARY_DIR}/$<CONFIG>/resources/translations")
             else ()
-                set(QT_TRANSLATIONS_PATH "${OpenMW_BINARY_DIR}/resources/translations")
+                set(QT_OPENMW_TRANSLATIONS_PATH "${OpenMW_BINARY_DIR}/resources/translations")
             endif ()
         endif ()
 
@@ -1121,9 +1145,30 @@ if (USE_QT)
 
         qt_add_translation(QM_FILES ${TS_FILES} OPTIONS -silent)
 
+        if (DEPLOY_QT_TRANSLATIONS)
+            # Once we set a Qt 6.2.0 as a minimum required version, we may use "qtpaths --qt-query" instead.
+            get_target_property(QT_QMAKE_EXECUTABLE Qt::qmake IMPORTED_LOCATION)
+            execute_process(COMMAND "${QT_QMAKE_EXECUTABLE}" -query QT_INSTALL_TRANSLATIONS
+                OUTPUT_VARIABLE QT_TRANSLATIONS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+            foreach(QM_FILE ${QM_FILES})
+                get_filename_component(QM_BASENAME ${QM_FILE} NAME)
+                string(REGEX REPLACE "[^_]+_(.*)\\.qm" "\\1" LANG_NAME ${QM_BASENAME})
+                if (EXISTS "${QT_TRANSLATIONS_DIR}/qtbase_${LANG_NAME}.qm")
+                    set(QM_FILES ${QM_FILES} "${QT_TRANSLATIONS_DIR}/qtbase_${LANG_NAME}.qm")
+                elseif (EXISTS "${QT_TRANSLATIONS_DIR}/qt_${LANG_NAME}.qm")
+                    set(QM_FILES ${QM_FILES} "${QT_TRANSLATIONS_DIR}/qt_${LANG_NAME}.qm")
+                else ()
+                    message(FATAL_ERROR "Qt translations for '${LANG_NAME}' locale are not found in the '${QT_TRANSLATIONS_DIR}' folder.")
+                endif ()
+            endforeach(QM_FILE)
+
+            list(REMOVE_DUPLICATES QM_FILES)
+        endif ()
+
         add_custom_target(qm-files
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${QT_TRANSLATIONS_PATH}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${QM_FILES} ${QT_TRANSLATIONS_PATH}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${QT_OPENMW_TRANSLATIONS_PATH}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${QM_FILES} ${QT_OPENMW_TRANSLATIONS_PATH}
             DEPENDS ${QM_FILES}
             COMMENT "Copy *.qm files to resources folder")
     endif ()

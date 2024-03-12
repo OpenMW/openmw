@@ -17,6 +17,8 @@ namespace Version
     std::string getOpenmwVersionDescription();
 
     bool checkResourcesVersion(const std::filesystem::path& resourcePath);
+
+    std::string_view getDocumentationUrl();
 }
 
 #endif // VERSION_HPP

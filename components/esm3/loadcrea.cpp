@@ -69,7 +69,7 @@ namespace ESM
                     mSpells.add(esm);
                     break;
                 case fourCC("AIDT"):
-                    esm.getHExact(&mAiData, sizeof(mAiData));
+                    esm.getSubComposite(mAiData);
                     break;
                 case fourCC("DODT"):
                 case fourCC("DNAM"):
@@ -130,7 +130,7 @@ namespace ESM
 
         mInventory.save(esm);
         mSpells.save(esm);
-        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
+        esm.writeNamedComposite("AIDT", mAiData);
         mTransport.save(esm);
         mAiPackage.save(esm);
     }

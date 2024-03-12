@@ -39,7 +39,7 @@ namespace
     {
         const std::string mText;
         const Response mResponses[3];
-        const std::string mSound;
+        const VFS::Path::Normalized mSound;
     };
 
     Step sGenerateClassSteps(int number)

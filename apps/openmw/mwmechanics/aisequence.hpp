@@ -39,6 +39,7 @@ namespace MWMechanics
 
         /// Finished with top AIPackage, set for one frame
         bool mDone{};
+        bool mResetFriendlyHits{};
 
         int mNumCombatPackages{};
         int mNumPursuitPackages{};

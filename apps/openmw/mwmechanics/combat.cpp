@@ -167,7 +167,7 @@ namespace MWMechanics
             blockerStats.setBlock(true);
 
             if (blocker == getPlayer())
-                blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
+                blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, ESM::Skill::Block_Success);
 
             return true;
         }
@@ -246,14 +246,16 @@ namespace MWMechanics
                 return;
             }
 
-            const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
-            damage = attack[0] + ((attack[1] - attack[0]) * attackStrength); // Bow/crossbow damage
-
-            // Arrow/bolt damage
-            // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
-            attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
-            damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
-
+            {
+                const auto& attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+                damage = attack[0] + ((attack[1] - attack[0]) * attackStrength); // Bow/crossbow damage
+            }
+            {
+                // Arrow/bolt damage
+                // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
+                const auto& attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
+                damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
+            }
             adjustWeaponDamage(damage, weapon, attacker);
         }
 
@@ -267,7 +269,7 @@ namespace MWMechanics
             applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
-                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
+                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, ESM::Skill::Weapon_SuccessfulHit);
 
             const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
             bool unaware = attacker == getPlayer() && !sequence.isInCombat()
@@ -674,6 +676,8 @@ namespace MWMechanics
             return false;
 
         MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
+        if (statsTarget.getAiSequence().isInCombat())
+            return true;
         statsTarget.friendlyHit();
         if (statsTarget.getFriendlyHits() >= 4)
             return false;

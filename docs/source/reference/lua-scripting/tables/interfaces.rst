@@ -25,6 +25,10 @@
     - by global scripts
     - | Allows to extend or override built-in item usage
       | mechanics.
+  * - :ref:`SkillProgression <Interface SkillProgression>`
+    - by local scripts
+    - | Control, extend, and override skill progression of the 
+      | player.
   * - :ref:`Settings <Interface Settings>`
     - by player and global scripts
     - Save, display and track changes of setting values.

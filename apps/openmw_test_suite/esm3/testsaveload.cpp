@@ -1,11 +1,14 @@
 #include <components/esm/fourcc.hpp>
+#include <components/esm3/aipackage.hpp>
 #include <components/esm3/aisequence.hpp>
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
+#include <components/esm3/loadweap.hpp>
 #include <components/esm3/player.hpp>
 #include <components/esm3/quickkeys.hpp>
 
@@ -90,7 +93,16 @@ namespace ESM
         constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
         template <class T>
-        void save(const T& record, ESMWriter& writer)
+        concept HasSave = requires(T v, ESMWriter& w)
+        {
+            v.save(w);
+        };
+
+        template <class T>
+        concept NotHasSave = !HasSave<T>;
+
+        template <HasSave T>
+        auto save(const T& record, ESMWriter& writer)
         {
             record.save(writer);
         }
@@ -98,6 +110,12 @@ namespace ESM
         void save(const CellRef& record, ESMWriter& writer)
         {
             record.save(writer, true);
+        }
+
+        template <NotHasSave T>
+        auto save(const T& record, ESMWriter& writer)
+        {
+            writer.writeComposite(record);
         }
 
         template <typename T>
@@ -113,36 +131,29 @@ namespace ESM
             return stream;
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasLoad : std::false_type
+        template <class T>
+        concept HasLoad = requires(T v, ESMReader& r)
         {
+            v.load(r);
         };
 
         template <class T>
-        struct HasLoad<T, std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>()))>> : std::true_type
+        concept HasLoadWithDelete = requires(T v, ESMReader& r, bool& d)
         {
+            v.load(r, d);
         };
 
         template <class T>
-        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoad<std::decay_t<T>>::value>
+        concept NotHasLoad = !HasLoad<T> && !HasLoadWithDelete<T>;
+
+        template <HasLoad T>
+        void load(ESMReader& reader, T& record)
         {
             record.load(reader);
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasLoadWithDelete : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasLoadWithDelete<T,
-            std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>(), std::declval<bool&>()))>>
-            : std::true_type
-        {
-        };
-
-        template <class T>
-        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoadWithDelete<std::decay_t<T>>::value>
+        template <HasLoadWithDelete T>
+        void load(ESMReader& reader, T& record)
         {
             bool deleted = false;
             record.load(reader, deleted);
@@ -152,6 +163,12 @@ namespace ESM
         {
             bool deleted = false;
             record.load(reader, deleted, true);
+        }
+
+        template <NotHasLoad T>
+        void load(ESMReader& reader, T& record)
+        {
+            reader.getComposite(record);
         }
 
         template <typename T>
@@ -488,6 +505,101 @@ namespace ESM
             EXPECT_EQ(result.mCellId, record.mCellId);
             EXPECT_EQ(result.mRemainingDuration, record.mRemainingDuration);
             EXPECT_EQ(result.mRepeat, record.mRepeat);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, aiDataShouldNotChange)
+        {
+            AIData record = {
+                .mHello = 1,
+                .mFight = 2,
+                .mFlee = 3,
+                .mAlarm = 4,
+                .mServices = 5,
+            };
+
+            AIData result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mHello, record.mHello);
+            EXPECT_EQ(result.mFight, record.mFight);
+            EXPECT_EQ(result.mFlee, record.mFlee);
+            EXPECT_EQ(result.mAlarm, record.mAlarm);
+            EXPECT_EQ(result.mServices, record.mServices);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, enamShouldNotChange)
+        {
+            EffectList record;
+            record.mList.emplace_back(ENAMstruct{
+                .mEffectID = 1,
+                .mSkill = 2,
+                .mAttribute = 3,
+                .mRange = 4,
+                .mArea = 5,
+                .mDuration = 6,
+                .mMagnMin = 7,
+                .mMagnMax = 8,
+            });
+
+            EffectList result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mList.size(), record.mList.size());
+            EXPECT_EQ(result.mList[0].mEffectID, record.mList[0].mEffectID);
+            EXPECT_EQ(result.mList[0].mSkill, record.mList[0].mSkill);
+            EXPECT_EQ(result.mList[0].mAttribute, record.mList[0].mAttribute);
+            EXPECT_EQ(result.mList[0].mRange, record.mList[0].mRange);
+            EXPECT_EQ(result.mList[0].mArea, record.mList[0].mArea);
+            EXPECT_EQ(result.mList[0].mDuration, record.mList[0].mDuration);
+            EXPECT_EQ(result.mList[0].mMagnMin, record.mList[0].mMagnMin);
+            EXPECT_EQ(result.mList[0].mMagnMax, record.mList[0].mMagnMax);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, weaponShouldNotChange)
+        {
+            Weapon record = {
+                .mData = {
+                    .mWeight = 0,
+                    .mValue = 1,
+                    .mType = 2,
+                    .mHealth = 3,
+                    .mSpeed = 4,
+                    .mReach = 5,
+                    .mEnchant = 6,
+                    .mChop = { 7, 8 },
+                    .mSlash = { 9, 10 },
+                    .mThrust = { 11, 12 },
+                    .mFlags = 13,
+                },
+                .mRecordFlags = 0,
+                .mId = generateRandomRefId(32),
+                .mEnchant = generateRandomRefId(32),
+                .mScript = generateRandomRefId(32),
+                .mName = generateRandomString(32),
+                .mModel = generateRandomString(32),
+                .mIcon = generateRandomString(32),
+            };
+
+            Weapon result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mWeight, record.mData.mWeight);
+            EXPECT_EQ(result.mData.mValue, record.mData.mValue);
+            EXPECT_EQ(result.mData.mType, record.mData.mType);
+            EXPECT_EQ(result.mData.mHealth, record.mData.mHealth);
+            EXPECT_EQ(result.mData.mSpeed, record.mData.mSpeed);
+            EXPECT_EQ(result.mData.mReach, record.mData.mReach);
+            EXPECT_EQ(result.mData.mEnchant, record.mData.mEnchant);
+            EXPECT_EQ(result.mData.mChop, record.mData.mChop);
+            EXPECT_EQ(result.mData.mSlash, record.mData.mSlash);
+            EXPECT_EQ(result.mData.mThrust, record.mData.mThrust);
+            EXPECT_EQ(result.mData.mFlags, record.mData.mFlags);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mEnchant, record.mEnchant);
+            EXPECT_EQ(result.mScript, record.mScript);
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mModel, record.mModel);
+            EXPECT_EQ(result.mIcon, record.mIcon);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));

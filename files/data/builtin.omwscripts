@@ -12,11 +12,12 @@ GLOBAL: scripts/omw/cellhandlers.lua
 GLOBAL: scripts/omw/usehandlers.lua
 GLOBAL: scripts/omw/worldeventhandlers.lua
 CREATURE, NPC, PLAYER: scripts/omw/mechanics/animationcontroller.lua
+PLAYER: scripts/omw/skillhandlers.lua
 PLAYER: scripts/omw/mechanics/playercontroller.lua
 MENU: scripts/omw/camera/settings.lua
-PLAYER: scripts/omw/camera/camera.lua
 MENU: scripts/omw/input/settings.lua
 PLAYER: scripts/omw/input/playercontrols.lua
+PLAYER: scripts/omw/camera/camera.lua
 PLAYER: scripts/omw/input/actionbindings.lua
 PLAYER: scripts/omw/input/smoothmovement.lua
 NPC,CREATURE: scripts/omw/ai.lua

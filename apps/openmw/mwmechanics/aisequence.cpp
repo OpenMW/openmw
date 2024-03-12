@@ -82,7 +82,11 @@ namespace MWMechanics
     void AiSequence::onPackageRemoved(const AiPackage& package)
     {
         if (package.getTypeId() == AiPackageTypeId::Combat)
+        {
             mNumCombatPackages--;
+            if (mNumCombatPackages == 0)
+                mResetFriendlyHits = true;
+        }
         else if (package.getTypeId() == AiPackageTypeId::Pursue)
             mNumPursuitPackages--;
 
@@ -244,6 +248,12 @@ namespace MWMechanics
         {
             // Players don't use this.
             return;
+        }
+
+        if (mResetFriendlyHits)
+        {
+            actor.getClass().getCreatureStats(actor).resetFriendlyHits();
+            mResetFriendlyHits = false;
         }
 
         if (mPackages.empty())

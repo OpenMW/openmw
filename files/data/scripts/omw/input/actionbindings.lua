@@ -1,11 +1,7 @@
-local core = require('openmw.core')
 local input = require('openmw.input')
 local util = require('openmw.util')
 local async = require('openmw.async')
 local storage = require('openmw.storage')
-local ui = require('openmw.ui')
-
-local I = require('openmw.interfaces')
 
 local actionPressHandlers = {}
 local function onActionPress(id, handler)
@@ -89,48 +85,87 @@ end
 
 local bindingSection = storage.playerSection('OMWInputBindings')
 
-local keyboardPresses = {}
-local keybordHolds = {}
-local boundActions = {}
+local devices = {
+    keyboard = true,
+    mouse = true,
+    controller = true
+}
 
-local function bindAction(action)
-    if boundActions[action] then return end
-    boundActions[action] = true
-    input.bindAction(action, async:callback(function()
-        if keybordHolds[action] then
-            for _, binding in pairs(keybordHolds[action]) do
-                if input.isKeyPressed(binding.code) then return true end
+local function invalidBinding(binding)
+    if not binding.key then
+        return 'has no key'
+    elseif binding.type ~= 'action' and binding.type ~= 'trigger' then
+        return string.format('has invalid type', binding.type)
+    elseif binding.type == 'action' and not input.actions[binding.key] then
+        return string.format("action %s doesn't exist", binding.key)
+    elseif binding.type == 'trigger' and not input.triggers[binding.key] then
+        return string.format("trigger %s doesn't exist", binding.key)
+    elseif not binding.device or not devices[binding.device] then
+        return string.format("invalid device %s", binding.device)
+    elseif not binding.button then
+        return 'has no button'
+    end
+end
+
+local boundActions = {}
+local actionBindings = {}
+
+local function bindAction(binding, id)
+    local action = binding.key
+    actionBindings[action] = actionBindings[action] or {}
+    actionBindings[action][id] = binding
+    if not boundActions[action] then
+        boundActions[binding.key] = true
+        input.bindAction(action, async:callback(function()
+            for _, binding in pairs(actionBindings[action] or {}) do
+                if binding.device == 'keyboard' then
+                    if input.isKeyPressed(binding.button) then
+                        return true
+                    end
+                elseif binding.device == 'mouse' then
+                    if input.isMouseButtonPressed(binding.button) then
+                        return true
+                    end
+                elseif binding.device == 'controller' then
+                    if input.isControllerButtonPressed(binding.button) then
+                        return true
+                    end
+                end
             end
-        end
-        return false
-    end), {})
+            return false
+        end), {})
+    end
+end
+
+local triggerBindings = {}
+for device in pairs(devices) do triggerBindings[device] = {} end
+
+local function bindTrigger(binding, id)
+    local deviceBindings = triggerBindings[binding.device]
+    deviceBindings[binding.button] = deviceBindings[binding.button] or {}
+    deviceBindings[binding.button][id] = binding
 end
 
 local function registerBinding(binding, id)
-    if not input.actions[binding.key] and not input.triggers[binding.key] then
-        print(string.format('Skipping binding for unknown action or trigger: "%s"', binding.key))
-        return
-    end
-    if binding.type == 'keyboardPress' then
-        local bindings = keyboardPresses[binding.code] or {}
-        bindings[id] = binding
-        keyboardPresses[binding.code] = bindings
-    elseif binding.type == 'keyboardHold' then
-        local bindings = keybordHolds[binding.key] or {}
-        bindings[id] = binding
-        keybordHolds[binding.key] = bindings
-        bindAction(binding.key)
-    else
-        error('Unknown binding type "' .. binding.type .. '"')
+    local invalid = invalidBinding(binding)
+    if invalid then
+        print(string.format('Skipping invalid binding %s: %s', id, invalid))
+    elseif binding.type == 'action' then
+        bindAction(binding, id)
+    elseif binding.type == 'trigger' then
+        bindTrigger(binding, id)
     end
 end
 
 function clearBinding(id)
-    for _, boundTriggers in pairs(keyboardPresses) do
-        boundTriggers[id] = nil
+    for _, deviceBindings in pairs(triggerBindings) do
+        for _, buttonBindings in pairs(deviceBindings) do
+            buttonBindings[id] = nil
+        end
     end
-    for _, boundKeys in pairs(keybordHolds) do
-        boundKeys[id] = nil
+
+    for _, bindings in pairs(actionBindings) do
+        bindings[id] = nil
     end
 end
 
@@ -170,11 +205,24 @@ return {
             end
         end,
         onKeyPress = function(e)
-            local bindings = keyboardPresses[e.code]
-            if bindings then
-                for _, binding in pairs(bindings) do
-                    input.activateTrigger(binding.key)
-                end
+            local buttonTriggers = triggerBindings.keyboard[e.code]
+            if not buttonTriggers then return end
+            for _, binding in pairs(buttonTriggers) do
+                input.activateTrigger(binding.key)
+            end
+        end,
+        onMouseButtonPress = function(button)
+            local buttonTriggers = triggerBindings.mouse[button]
+            if not buttonTriggers then return end
+            for _, binding in pairs(buttonTriggers) do
+                input.activateTrigger(binding.key)
+            end
+        end,
+        onControllerButtonPress = function(id)
+            local buttonTriggers = triggerBindings.controller[id]
+            if not buttonTriggers then return end
+            for _, binding in pairs(buttonTriggers) do
+                input.activateTrigger(binding.key)
             end
         end,
     }

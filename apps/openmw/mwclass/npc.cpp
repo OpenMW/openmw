@@ -23,6 +23,7 @@
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -634,11 +635,11 @@ namespace MWClass
         {
             const unsigned char* attack = nullptr;
             if (type == ESM::Weapon::AT_Chop)
-                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop.data();
             else if (type == ESM::Weapon::AT_Slash)
-                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash.data();
             else if (type == ESM::Weapon::AT_Thrust)
-                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust.data();
             if (attack)
             {
                 damage = attack[0] + ((attack[1] - attack[0]) * attackStrength);
@@ -662,7 +663,7 @@ namespace MWClass
             ESM::RefId weapskill = ESM::Skill::HandToHand;
             if (!weapon.isEmpty())
                 weapskill = weapon.getClass().getEquipmentSkill(weapon);
-            skillUsageSucceeded(ptr, weapskill, 0);
+            skillUsageSucceeded(ptr, weapskill, ESM::Skill::Weapon_SuccessfulHit);
 
             const MWMechanics::AiSequence& seq = victim.getClass().getCreatureStats(victim).getAiSequence();
 
@@ -852,7 +853,7 @@ namespace MWClass
 
                     ESM::RefId skill = armor.getClass().getEquipmentSkill(armor);
                     if (ptr == MWMechanics::getPlayer())
-                        skillUsageSucceeded(ptr, skill, 0);
+                        skillUsageSucceeded(ptr, skill, ESM::Skill::Armor_HitByOpponent);
 
                     if (skill == ESM::Skill::LightArmor)
                         sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
@@ -862,7 +863,7 @@ namespace MWClass
                         sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
                 }
                 else if (ptr == MWMechanics::getPlayer())
-                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
+                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, ESM::Skill::Armor_HitByOpponent);
             }
         }
 
@@ -924,35 +925,38 @@ namespace MWClass
         }
 
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const MWMechanics::AiSequence& aiSequence = stats.getAiSequence();
+        const bool isPursuing = aiSequence.isInPursuit() && actor == MWMechanics::getPlayer();
+        const bool inCombatWithActor = aiSequence.isInCombat(actor) || isPursuing;
 
         if (stats.isDead())
         {
-            // by default user can loot friendly actors during death animation
-            if (Settings::game().mCanLootDuringDeathAnimation && !stats.getAiSequence().isInCombat())
+            // by default user can loot non-fighting actors during death animation
+            if (Settings::game().mCanLootDuringDeathAnimation)
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
 
             // otherwise wait until death animation
             if (stats.isDeathAnimationFinished())
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
         }
-        else if (!stats.getAiSequence().isInCombat())
+        else
         {
-            if (stats.getKnockedDown() || MWBase::Environment::get().getMechanicsManager()->isSneaking(actor))
-                return std::make_unique<MWWorld::ActionOpen>(ptr); // stealing
+            const bool allowStealingFromKO
+                = Settings::game().mAlwaysAllowStealingFromKnockedOutActors || !inCombatWithActor;
+            if (stats.getKnockedDown() && allowStealingFromKO)
+                return std::make_unique<MWWorld::ActionOpen>(ptr);
 
-            // Can't talk to werewolves
-            if (!getNpcStats(ptr).isWerewolf())
+            const bool allowStealingWhileSneaking = !inCombatWithActor;
+            if (MWBase::Environment::get().getMechanicsManager()->isSneaking(actor) && allowStealingWhileSneaking)
+                return std::make_unique<MWWorld::ActionOpen>(ptr);
+
+            const bool allowTalking = !inCombatWithActor && !getNpcStats(ptr).isWerewolf();
+            if (allowTalking)
                 return std::make_unique<MWWorld::ActionTalk>(ptr);
         }
-        else // In combat
-        {
-            if (Settings::game().mAlwaysAllowStealingFromKnockedOutActors && stats.getKnockedDown())
-                return std::make_unique<MWWorld::ActionOpen>(ptr); // stealing
-        }
 
-        // Tribunal and some mod companions oddly enough must use open action as fallback
-        if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
-            return std::make_unique<MWWorld::ActionOpen>(ptr);
+        if (inCombatWithActor)
+            return std::make_unique<MWWorld::FailedAction>("#{sActorInCombat}");
 
         return std::make_unique<MWWorld::FailedAction>();
     }
@@ -1086,7 +1090,8 @@ namespace MWClass
         if (customData.mNpcStats.isDead() && customData.mNpcStats.isDeathAnimationFinished())
             return true;
 
-        if (!customData.mNpcStats.getAiSequence().isInCombat())
+        const MWMechanics::AiSequence& aiSeq = customData.mNpcStats.getAiSequence();
+        if (!aiSeq.isInCombat() || aiSeq.isFleeing())
             return true;
 
         if (Settings::game().mAlwaysAllowStealingFromKnockedOutActors && customData.mNpcStats.getKnockedDown())
@@ -1113,7 +1118,7 @@ namespace MWClass
         }
 
         if (fullHelp)
-            info.text = MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra = MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
 
         return info;
     }
@@ -1138,16 +1143,7 @@ namespace MWClass
 
     void Npc::skillUsageSucceeded(const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor) const
     {
-        MWMechanics::NpcStats& stats = getNpcStats(ptr);
-
-        if (stats.isWerewolf())
-            return;
-
-        MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
-
-        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(ref->mBase->mClass);
-
-        stats.useSkill(skill, *class_, usageType, extraFactor);
+        MWBase::Environment::get().getLuaManager()->skillUse(ptr, skill, usageType, extraFactor);
     }
 
     float Npc::getArmorRating(const MWWorld::Ptr& ptr) const

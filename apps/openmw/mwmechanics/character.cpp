@@ -2070,7 +2070,7 @@ namespace MWMechanics
             vec.x() *= speed;
             vec.y() *= speed;
 
-            if (isKnockedOut() || isKnockedDown() || isRecovery())
+            if (isKnockedOut() || isKnockedDown() || isRecovery() || isScriptedAnimPlaying())
                 vec = osg::Vec3f();
 
             CharacterState movestate = CharState_None;
@@ -2088,7 +2088,7 @@ namespace MWMechanics
                         mSecondsOfSwimming += duration;
                         while (mSecondsOfSwimming > 1)
                         {
-                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
+                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, ESM::Skill::Athletics_SwimOneSecond);
                             mSecondsOfSwimming -= 1;
                         }
                     }
@@ -2097,7 +2097,7 @@ namespace MWMechanics
                         mSecondsOfRunning += duration;
                         while (mSecondsOfRunning > 1)
                         {
-                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
+                            cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, ESM::Skill::Athletics_RunOneSecond);
                             mSecondsOfRunning -= 1;
                         }
                     }
@@ -2144,6 +2144,15 @@ namespace MWMechanics
 
             bool wasInJump = mInJump;
             mInJump = false;
+            const float jumpHeight = cls.getJump(mPtr);
+            if (jumpHeight <= 0.f || sneak || inwater || flying || !solid)
+            {
+                vec.z() = 0.f;
+                // Following code might assign some vertical movement regardless, need to reset this manually
+                // This is used for jumping detection
+                movementSettings.mPosition[2] = 0;
+            }
+
             if (!inwater && !flying && solid)
             {
                 // In the air (either getting up —ascending part of jump— or falling).
@@ -2162,20 +2171,16 @@ namespace MWMechanics
                     vec.z() = 0.0f;
                 }
                 // Started a jump.
-                else if (mJumpState != JumpState_InAir && vec.z() > 0.f && !sneak)
+                else if (mJumpState != JumpState_InAir && vec.z() > 0.f)
                 {
-                    float z = cls.getJump(mPtr);
-                    if (z > 0.f)
+                    mInJump = true;
+                    if (vec.x() == 0 && vec.y() == 0)
+                        vec.z() = jumpHeight;
+                    else
                     {
-                        mInJump = true;
-                        if (vec.x() == 0 && vec.y() == 0)
-                            vec.z() = z;
-                        else
-                        {
-                            osg::Vec3f lat(vec.x(), vec.y(), 0.0f);
-                            lat.normalize();
-                            vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
-                        }
+                        osg::Vec3f lat(vec.x(), vec.y(), 0.0f);
+                        lat.normalize();
+                        vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * jumpHeight * 0.707f;
                     }
                 }
             }
@@ -2215,7 +2220,7 @@ namespace MWMechanics
                         {
                             // report acrobatics progression
                             if (isPlayer)
-                                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+                                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, ESM::Skill::Acrobatics_Fall);
                         }
                     }
 
@@ -2237,8 +2242,6 @@ namespace MWMechanics
                 if (mAnimation->isPlaying(mCurrentJump))
                     jumpstate = JumpState_Landing;
 
-                vec.x() *= scale;
-                vec.y() *= scale;
                 vec.z() = 0.0f;
 
                 if (movementSettings.mIsStrafing)
@@ -2371,7 +2374,8 @@ namespace MWMechanics
                 const float speedMult = speed / mMovementAnimSpeed;
                 mAnimation->adjustSpeedMult(mCurrentMovement, std::min(maxSpeedMult, speedMult));
                 // Make sure the actual speed is the "expected" speed even though the animation is slower
-                scale *= std::max(1.f, speedMult / maxSpeedMult);
+                if (isMovementAnimationControlled())
+                    scale *= std::max(1.f, speedMult / maxSpeedMult);
             }
 
             if (!mSkipAnim)
@@ -2390,20 +2394,17 @@ namespace MWMechanics
                     }
                 }
 
-                if (!isMovementAnimationControlled() && !isScriptedAnimPlaying())
-                    world->queueMovement(mPtr, vec);
+                updateHeadTracking(duration);
             }
 
             movement = vec;
             movementSettings.mPosition[0] = movementSettings.mPosition[1] = 0;
+
+            // Can't reset jump state (mPosition[2]) here in full; we don't know for sure whether the PhysicsSystem will
+            // actually handle it in this frame due to the fixed minimum timestep used for the physics update. It will
+            // be reset in PhysicsSystem::move once the jump is handled.
             if (movement.z() == 0.f)
                 movementSettings.mPosition[2] = 0;
-            // Can't reset jump state (mPosition[2]) here in full; we don't know for sure whether the PhysicSystem will
-            // actually handle it in this frame due to the fixed minimum timestep used for the physics update. It will
-            // be reset in PhysicSystem::move once the jump is handled.
-
-            if (!mSkipAnim)
-                updateHeadTracking(duration);
         }
         else if (cls.getCreatureStats(mPtr).isDead())
         {
@@ -2420,34 +2421,41 @@ namespace MWMechanics
         osg::Vec3f movementFromAnimation
             = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
 
-        if (mPtr.getClass().isActor() && isMovementAnimationControlled() && !isScriptedAnimPlaying())
+        if (mPtr.getClass().isActor() && !isScriptedAnimPlaying())
         {
-            if (duration > 0.0f)
-                movementFromAnimation /= duration;
-            else
-                movementFromAnimation = osg::Vec3f(0.f, 0.f, 0.f);
-
-            movementFromAnimation.x() *= scale;
-            movementFromAnimation.y() *= scale;
-
-            if (speed > 0.f && movementFromAnimation != osg::Vec3f())
+            if (isMovementAnimationControlled())
             {
-                // Ensure we're moving in the right general direction. In vanilla, all horizontal movement is taken from
-                // animations, even when moving diagonally (which doesn't have a corresponding animation). So to acheive
-                // diagonal movement, we have to rotate the movement taken from the animation  to the intended
-                // direction.
-                //
-                // Note that while a complete movement animation cycle will have a well defined direction, no individual
-                // frame will, and therefore we have to determine the direction based on the currently playing cycle
-                // instead.
-                float animMovementAngle = getAnimationMovementDirection();
-                float targetMovementAngle = std::atan2(-movement.x(), movement.y());
-                float diff = targetMovementAngle - animMovementAngle;
-                movementFromAnimation = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * movementFromAnimation;
-            }
+                if (duration != 0.f && movementFromAnimation != osg::Vec3f())
+                {
+                    movementFromAnimation /= duration;
 
-            if (!(isPlayer && Settings::game().mPlayerMovementIgnoresAnimation))
-                movement = movementFromAnimation;
+                    // Ensure we're moving in the right general direction.
+                    // In vanilla, all horizontal movement is taken from animations, even when moving diagonally (which
+                    // doesn't have a corresponding animation). So to achieve diagonal movement, we have to rotate the
+                    // movement taken from the animation to the intended direction.
+                    //
+                    // Note that while a complete movement animation cycle will have a well defined direction, no
+                    // individual frame will, and therefore we have to determine the direction based on the currently
+                    // playing cycle instead.
+                    if (speed > 0.f)
+                    {
+                        float animMovementAngle = getAnimationMovementDirection();
+                        float targetMovementAngle = std::atan2(-movement.x(), movement.y());
+                        float diff = targetMovementAngle - animMovementAngle;
+                        movementFromAnimation = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * movementFromAnimation;
+                    }
+
+                    movement = movementFromAnimation;
+                }
+                else
+                {
+                    movement = osg::Vec3f();
+                }
+            }
+            else if (mSkipAnim)
+            {
+                movement = osg::Vec3f();
+            }
 
             if (mFloatToSurface)
             {
@@ -2463,8 +2471,11 @@ namespace MWMechanics
                 }
             }
 
+            movement.x() *= scale;
+            movement.y() *= scale;
             // Update movement
-            world->queueMovement(mPtr, movement);
+            if (movement != osg::Vec3f())
+                world->queueMovement(mPtr, movement);
         }
 
         mSkipAnim = false;
@@ -2681,11 +2692,15 @@ namespace MWMechanics
 
     bool CharacterController::isMovementAnimationControlled() const
     {
+        if (Settings::game().mPlayerMovementIgnoresAnimation && mPtr == getPlayer())
+            return false;
+
+        if (mInJump)
+            return false;
+
         bool movementAnimationControlled = mIdleState != CharState_None;
         if (mMovementState != CharState_None)
             movementAnimationControlled = mMovementAnimationHasMovement;
-        if (mInJump)
-            movementAnimationControlled = false;
         return movementAnimationControlled;
     }
 

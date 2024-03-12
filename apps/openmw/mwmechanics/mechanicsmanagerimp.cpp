@@ -1703,6 +1703,8 @@ namespace MWMechanics
             // We don't care about dialogue filters since the target is invalid.
             // We still want to play the combat taunt.
             MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("attack"));
+            if (!stats.getAiSequence().isInCombat())
+                stats.resetFriendlyHits();
             return;
         }
 

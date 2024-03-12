@@ -543,7 +543,8 @@ namespace MWDialogue
         mPermanentDispositionChange += perm;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
+        player.getClass().skillUsageSucceeded(
+            player, ESM::Skill::Speechcraft, success ? ESM::Skill::Speechcraft_Success : ESM::Skill::Speechcraft_Fail);
 
         if (success)
         {
@@ -652,7 +653,7 @@ namespace MWDialogue
             if (Settings::gui().mSubtitles)
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
-                sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(info->mSound));
+                sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(info->mSound)));
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
         }

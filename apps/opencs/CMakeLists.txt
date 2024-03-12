@@ -172,7 +172,7 @@ else()
     set (OPENCS_OPENMW_CFG "")
 endif(APPLE)
 
-add_library(openmw-cs-lib
+add_library(openmw-cs-lib STATIC
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -292,7 +292,7 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(openmw-cs-lib gcov)
 endif()
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-cs-lib PRIVATE
         <boost/program_options/options_description.hpp>
 

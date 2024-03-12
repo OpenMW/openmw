@@ -15,7 +15,7 @@ namespace
         return lua.safe_script("return " + luaCode).get<T>();
     }
 
-    TEST(LuaUtilStorageTest, Basic)
+    TEST(LuaUtilStorageTest, Subscribe)
     {
         // Note: LuaUtil::Callback can be used only if Lua is initialized via LuaUtil::LuaState
         LuaUtil::LuaState luaState{ nullptr, nullptr };
@@ -24,21 +24,21 @@ namespace
         LuaUtil::LuaStorage storage(mLua);
         storage.setActive(true);
 
-        std::vector<std::string> callbackCalls;
         sol::table callbackHiddenData(mLua, sol::create);
         callbackHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
-        sol::table callback(mLua, sol::create);
-        callback[1] = [&](const std::string& section, const sol::optional<std::string>& key) {
-            if (key)
-                callbackCalls.push_back(section + "_" + *key);
-            else
-                callbackCalls.push_back(section + "_*");
-        };
-        callback[2] = LuaUtil::AsyncPackageId{ nullptr, 0, callbackHiddenData };
+        LuaUtil::getAsyncPackageInitializer(
+            mLua.lua_state(), []() { return 0.0; }, []() { return 0.0; })(callbackHiddenData);
+        mLua["async"] = LuaUtil::AsyncPackageId{ nullptr, 0, callbackHiddenData };
 
         mLua["mutable"] = storage.getMutableSection("test");
         mLua["ro"] = storage.getReadOnlySection("test");
-        mLua["ro"]["subscribe"](mLua["ro"], callback);
+
+        mLua.safe_script(R"(
+            callbackCalls = {}
+            ro:subscribe(async:callback(function(section, key)
+                table.insert(callbackCalls, section .. '_' .. (key or '*'))
+            end))
+        )");
 
         mLua.safe_script("mutable:set('x', 5)");
         EXPECT_EQ(get<int>(mLua, "mutable:get('x')"), 5);
@@ -58,7 +58,7 @@ namespace
         EXPECT_EQ(get<int>(mLua, "ro:get('x')"), 4);
         EXPECT_EQ(get<int>(mLua, "ro:get('y')"), 7);
 
-        EXPECT_THAT(callbackCalls, ::testing::ElementsAre("test_x", "test_*", "test_*"));
+        EXPECT_THAT(get<std::string>(mLua, "table.concat(callbackCalls, ', ')"), "test_x, test_*, test_*");
     }
 
     TEST(LuaUtilStorageTest, Table)

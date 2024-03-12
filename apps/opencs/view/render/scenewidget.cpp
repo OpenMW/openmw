@@ -48,6 +48,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "../widget/scenetoolmode.hpp"
@@ -75,6 +76,8 @@ namespace CSVRender
         osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window
             = new osgViewer::GraphicsWindowEmbedded(0, 0, width(), height());
         mWidget->setGraphicsWindowEmbedded(window);
+
+        mRenderer->setRealizeOperation(new SceneUtil::GetGLExtensionsOperation());
 
         int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
         mRenderer->setRunMaxFrameRate(frameRateLimit);

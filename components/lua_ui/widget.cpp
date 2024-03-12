@@ -112,6 +112,12 @@ namespace LuaUi
         ext->widget()->attachToWidget(widget());
     }
 
+    void WidgetExtension::detachFromParent()
+    {
+        mParent = nullptr;
+        widget()->detachFromWidget();
+    }
+
     WidgetExtension* WidgetExtension::findDeep(std::string_view flagName)
     {
         for (WidgetExtension* w : mChildren)

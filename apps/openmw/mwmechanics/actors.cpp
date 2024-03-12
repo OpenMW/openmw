@@ -1309,7 +1309,8 @@ namespace MWMechanics
                 if (inProcessingRange)
                 {
                     MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
-                    if (!stats.isDead() && stats.getAiSequence().isInCombat())
+                    bool isDead = stats.isDead() && stats.isDeathAnimationFinished();
+                    if (!isDead && stats.getAiSequence().isInCombat())
                     {
                         hasHostiles = true;
                         break;
@@ -1955,7 +1956,7 @@ namespace MWMechanics
                 mSneakSkillTimer = 0.f;
 
             if (avoidedNotice && mSneakSkillTimer == 0.f)
-                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
+                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, ESM::Skill::Sneak_AvoidNotice);
 
             if (!detected)
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);

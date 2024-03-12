@@ -5,20 +5,17 @@
 #include <vector>
 
 #include "components/esm/esmcommon.hpp"
+#include "components/misc/concepts.hpp"
 
 namespace ESM
 {
     class ESMReader;
     class ESMWriter;
 
-#pragma pack(push)
-#pragma pack(1)
-
     struct AIData
     {
         uint16_t mHello; // This is the base value for greeting distance [0, 65535]
         unsigned char mFight, mFlee, mAlarm; // These are probabilities [0, 100]
-        char mU1, mU2, mU3; // Unknown values
         int32_t mServices; // See the Services enum
 
         void blank();
@@ -38,7 +35,6 @@ namespace ESM
     {
         float mX, mY, mZ;
         unsigned char mShouldRepeat;
-        unsigned char mPadding[3];
     };
 
     struct AITarget
@@ -47,7 +43,6 @@ namespace ESM
         int16_t mDuration;
         NAME32 mId;
         unsigned char mShouldRepeat;
-        unsigned char mPadding;
     };
 
     struct AIActivate
@@ -55,8 +50,6 @@ namespace ESM
         NAME32 mName;
         unsigned char mShouldRepeat;
     };
-
-#pragma pack(pop)
 
     enum AiPackageType : std::uint32_t
     {
@@ -98,6 +91,13 @@ namespace ESM
 
         void save(ESMWriter& esm) const;
     };
+
+    template <Misc::SameAsWithoutCvref<AIData> T>
+    void decompose(T&& v, const auto& f)
+    {
+        char padding[3] = { 0, 0, 0 };
+        f(v.mHello, v.mFight, v.mFlee, v.mAlarm, padding, v.mServices);
+    }
 }
 
 #endif

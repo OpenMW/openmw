@@ -49,7 +49,6 @@
 
 #include "closestnotmerayresultcallback.hpp"
 #include "contacttestresultcallback.hpp"
-#include "deepestnotmecontacttestresultcallback.hpp"
 #include "hasspherecollisioncallback.hpp"
 #include "heightfield.hpp"
 #include "movementsolver.hpp"
@@ -69,7 +68,7 @@ namespace
         // Advance acrobatics and set flag for GetPCJumping
         if (isPlayer)
         {
-            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, 0);
+            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, ESM::Skill::Acrobatics_Jump);
             MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
         }
 
@@ -193,7 +192,8 @@ namespace MWPhysics
     }
 
     RayCastingResult PhysicsSystem::castRay(const osg::Vec3f& from, const osg::Vec3f& to,
-        const MWWorld::ConstPtr& ignore, const std::vector<MWWorld::Ptr>& targets, int mask, int group) const
+        const std::vector<MWWorld::ConstPtr>& ignore, const std::vector<MWWorld::Ptr>& targets, int mask,
+        int group) const
     {
         if (from == to)
         {
@@ -204,19 +204,22 @@ namespace MWPhysics
         btVector3 btFrom = Misc::Convert::toBullet(from);
         btVector3 btTo = Misc::Convert::toBullet(to);
 
-        const btCollisionObject* me = nullptr;
+        std::vector<const btCollisionObject*> ignoreList;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
-        if (!ignore.isEmpty())
+        for (const auto& ptr : ignore)
         {
-            const Actor* actor = getActor(ignore);
-            if (actor)
-                me = actor->getCollisionObject();
-            else
+            if (!ptr.isEmpty())
             {
-                const Object* object = getObject(ignore);
-                if (object)
-                    me = object->getCollisionObject();
+                const Actor* actor = getActor(ptr);
+                if (actor)
+                    ignoreList.push_back(actor->getCollisionObject());
+                else
+                {
+                    const Object* object = getObject(ptr);
+                    if (object)
+                        ignoreList.push_back(object->getCollisionObject());
+                }
             }
         }
 
@@ -230,7 +233,7 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo);
+        ClosestNotMeRayResultCallback resultCallback(ignoreList, targetCollisionObjects, btFrom, btTo);
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 

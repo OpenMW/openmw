@@ -1,22 +1,21 @@
 ControlsPage: "OpenMW Controls"
-ControlsPageDescription: "Additional settings related to player controls"
+ControlsPageDescription: "Additional settings related to player controls."
 
 MovementSettings: "Movement"
 
-alwaysRun: "Always run"
+alwaysRun: "Always Run"
 alwaysRunDescription: |
-    If this setting is true, the character is running by default, otherwise the character is walking by default.
-    The shift key will temporarily invert this setting, and the caps lock key will invert this setting while it's "locked".
+    If this setting is true, the character will run by default, otherwise the character will walk by default.
+    The Shift key will temporarily invert this setting, and the Caps Lock key will invert this setting while it's "locked".
 
-toggleSneak: "Toggle sneak"
+toggleSneak: "Toggle Sneak"
 toggleSneakDescription: |
-    This setting causes the sneak key (bound to Ctrl by default) to toggle sneaking on and off
-    rather than requiring the key to be held down while sneaking.
+    This setting makes the Sneak key (bound to Ctrl by default) toggle sneaking instead of having to be held down to sneak.
     Players that spend significant time sneaking may find the character easier to control with this option enabled.
 
-smoothControllerMovement: "Smooth controller movement"
+smoothControllerMovement: "Smooth Controller Movement"
 smoothControllerMovementDescription: |
-   Enables smooth movement with controller stick, with no abrupt switch from walking to running.
+   Enables smooth controller stick movement. This makes the transition from walking to running less abrupt.
 
 TogglePOV_name: "Toggle POV"
 TogglePOV_description: "Toggle between first and third person view. Hold to enter preview mode."
@@ -25,61 +24,61 @@ Zoom3rdPerson_name: "Zoom In/Out"
 Zoom3rdPerson_description: "Moves the camera closer / further away when in third person view."
 
 MoveForward_name: "Move Forward"
-MoveForward_description: "Can cancel out with Move Backward"
+MoveForward_description: "Can cancel out with Move Backward."
 
 MoveBackward_name: "Move Backward"
-MoveBackward_description: "Can cancel out with Move Forward"
+MoveBackward_description: "Can cancel out with Move Forward."
 
 MoveLeft_name: "Move Left"
-MoveLeft_description: "Can cancel out with Move Right"
+MoveLeft_description: "Can cancel out with Move Right."
 
 MoveRight_name: "Move Right"
-MoveRight_description: "Can cancel out with Move Left"
+MoveRight_description: "Can cancel out with Move Left."
 
 Use_name: "Use"
-Use_description: "Attack with a weapon or cast a spell depending on current stance"
+Use_description: "Attack with a weapon or cast a spell depending on the current stance."
 
 Run_name: "Run"
-Run_description: "Hold to run/walk, depending on the Always Run setting"
+Run_description: "Hold to run/walk depending on the Always Run setting."
 
 AlwaysRun_name: "Always Run"
-AlwaysRun_description: "Toggle the Always Run setting"
+AlwaysRun_description: "Toggle the Always Run setting."
 
 Jump_name: "Jump"
-Jump_description: "Jump whenever you are on the ground"
+Jump_description: "Jump whenever you are on the ground."
 
 AutoMove_name: "Auto Run"
-AutoMove_description: "Toggle continous forward movement"
+AutoMove_description: "Toggle continuous forward movement."
 
 Sneak_name: "Sneak"
-Sneak_description: "Hold to sneak, if the Toggle Sneak setting is off"
+Sneak_description: "Hold to sneak if the Toggle Sneak setting is off."
 
 ToggleSneak_name: "Toggle Sneak"
-ToggleSneak_description: "Toggle sneak, if the Toggle Sneak setting is on"
+ToggleSneak_description: "Toggle sneak if the Toggle Sneak setting is on."
 
 ToggleWeapon_name: "Ready Weapon"
-ToggleWeapon_description: "Enter or leave the weapon stance"
+ToggleWeapon_description: "Enter or leave the weapon stance."
 
 ToggleSpell_name: "Ready Magic"
-ToggleSpell_description: "Enter or leave the magic stance"
+ToggleSpell_description: "Enter or leave the magic stance."
 
 Inventory_name: "Inventory"
-Inventory_description: "Open the inventory"
+Inventory_description: "Open the inventory."
 
 Journal_name: "Journal"
-Journal_description: "Open the journal"
+Journal_description: "Open the journal."
 
-QuickKeysMenu_name: "QuickKeysMenu"
-QuickKeysMenu_description: "Open the quick keys menu"
+QuickKeysMenu_name: "Quick Menu"
+QuickKeysMenu_description: "Open the quick keys menu."
 
 SmoothMoveForward_name: "Smooth Move Forward"
-SmoothMoveForward_description: "Forward movement adjusted for smooth Walk-Run transitions"
+SmoothMoveForward_description: "Forward movement adjusted for smooth Walk-Run transitions."
 
 SmoothMoveBackward_name: "Smooth Move Backward"
-SmoothMoveBackward_description: "Backward movement adjusted for smooth Walk-Run transitions"
+SmoothMoveBackward_description: "Backward movement adjusted for smooth Walk-Run transitions."
 
 SmoothMoveLeft_name: "Smooth Move Left"
-SmoothMoveLeft_description: "Left movement adjusted for smooth Walk-Run transitions"
+SmoothMoveLeft_description: "Left movement adjusted for smooth Walk-Run transitions."
 
-SkmoothMoveRight_name: "SmoothMove Right"
-SkmoothMoveRight_description: "Right movement adjusted for smooth Walk-Run transitions"
+SmoothMoveRight_name: "Smooth Move Right"
+SmoothMoveRight_description: "Right movement adjusted for smooth Walk-Run transitions."

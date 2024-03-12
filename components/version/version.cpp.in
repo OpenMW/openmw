@@ -52,4 +52,11 @@ namespace Version
         return getVersion() == version && getCommitHash() == commitHash && getTagHash() == tagHash;
     }
 
+    std::string_view getDocumentationUrl()
+    {
+        if constexpr (std::string_view("@OPENMW_VERSION_COMMITHASH@") == "@OPENMW_VERSION_TAGHASH@")
+            return OPENMW_DOC_BASEURL "openmw-@OPENMW_VERSION_MAJOR@.@OPENMW_VERSION_MINOR@.@OPENMW_VERSION_RELEASE@/";
+        else
+            return OPENMW_DOC_BASEURL "latest/";
+    }
 }

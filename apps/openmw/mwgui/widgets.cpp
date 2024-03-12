@@ -371,7 +371,7 @@ namespace MWGui::Widgets
 
         std::string spellLine = MWMechanics::getMagicEffectString(*magicEffect, attribute, skill);
 
-        if (mEffectParams.mMagnMin || mEffectParams.mMagnMax)
+        if ((mEffectParams.mMagnMin || mEffectParams.mMagnMax) && !mEffectParams.mNoMagnitude)
         {
             ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
             if (displayType == ESM::MagicEffect::MDT_TimesInt)
@@ -386,7 +386,7 @@ namespace MWGui::Widgets
 
                 spellLine += formatter.str();
             }
-            else if (displayType != ESM::MagicEffect::MDT_None && !mEffectParams.mNoMagnitude)
+            else if (displayType != ESM::MagicEffect::MDT_None)
             {
                 spellLine += " " + MyGUI::utility::toString(mEffectParams.mMagnMin);
                 if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)

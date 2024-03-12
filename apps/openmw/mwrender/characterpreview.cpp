@@ -247,7 +247,7 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
 
-        SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *stateset);
+        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);
 
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)

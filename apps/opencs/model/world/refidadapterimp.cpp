@@ -33,7 +33,7 @@ QVariant CSMWorld::PotionRefIdAdapter::getData(const RefIdColumn* column, const 
         data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Potion)));
 
     if (column == mAutoCalc)
-        return record.get().mData.mAutoCalc != 0;
+        return record.get().mData.mFlags & ESM::Potion::Autocalc;
 
     // to show nested tables in dialogue subview, see IdTree::hasChildren()
     if (column == mColumns.mEffects)
@@ -51,7 +51,7 @@ void CSMWorld::PotionRefIdAdapter::setData(
     ESM::Potion potion = record.get();
 
     if (column == mAutoCalc)
-        potion.mData.mAutoCalc = value.toInt();
+        potion.mData.mFlags = value.toBool();
     else
     {
         InventoryRefIdAdapter<ESM::Potion>::setData(column, data, index, value);

@@ -16,8 +16,14 @@
 -- @return #number
 
 ---
--- Check if the given actor is dead.
+-- Check if the given actor is dead (health reached 0, so death process started).
 -- @function [parent=#Actor] isDead
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
+-- Check if the given actor's death process is finished.
+-- @function [parent=#Actor] isDeathFinished
 -- @param openmw.core#GameObject actor
 -- @return #boolean
 
@@ -68,7 +74,7 @@
 -- @field #number Ammunition
 
 ---
--- Available @{#EQUIPMENT_SLOT} values. Used in `Actor.equipment(obj)` and `Actor.setEquipment(obj, eqp)`.
+-- Available @{#EQUIPMENT_SLOT} values. Used in `Actor.getEquipment(obj)` and `Actor.setEquipment(obj, eqp)`.
 -- @field [parent=#Actor] #EQUIPMENT_SLOT EQUIPMENT_SLOT
 
 ---
@@ -352,10 +358,29 @@
 -- @function [parent=#ActorSpells] clear
 -- @param self
 
+--- Values affect how much each attribute can be increased at level up, and are all reset to 0 upon level up.
+-- @type SkillIncreasesForAttributeStats
+-- @field #number agility Number of contributions to agility for the next level up.
+-- @field #number endurance Number of contributions to endurance for the next level up.
+-- @field #number intelligence Number of contributions to intelligence for the next level up.
+-- @field #number luck Number of contributions to luck for the next level up.
+-- @field #number personality Number of contributions to personality for the next level up.
+-- @field #number speed Number of contributions to speed for the next level up.
+-- @field #number strength Number of contributions to strength for the next level up.
+-- @field #number willpower Number of contributions to willpower for the next level up.
+
+--- Values affect the graphic used on the level up screen, and are all reset to 0 upon level up.
+-- @type SkillIncreasesForSpecializationStats
+-- @field #number combat Number of contributions to combat specialization for the next level up.
+-- @field #number magic Number of contributions to magic specialization for the next level up.
+-- @field #number stealth Number of contributions to stealth specialization for the next level up.
+
 ---
 -- @type LevelStat
 -- @field #number current The actor's current level.
--- @field #number progress The NPC's level progress (read-only.)
+-- @field #number progress The NPC's level progress.
+-- @field #SkillIncreasesForAttributeStats skillIncreasesForAttribute The NPC's attribute contributions towards the next level up. Values affect how much each attribute can be increased at level up.
+-- @field #SkillIncreasesForSpecializationStats skillIncreasesForSpecialization The NPC's attribute contributions towards the next level up. Values affect the graphic used on the level up screen.
 
 ---
 -- @type DynamicStat
@@ -652,7 +677,7 @@
 -- Get this item's current enchantment charge.
 -- @function [parent=#Item] getEnchantmentCharge
 -- @param openmw.core#GameObject item
--- @return #number The charge remaining. -1 if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of -1.
+-- @return #number The charge remaining. `nil` if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of `nil`.
 
 ---
 -- Checks if the item restocks.
@@ -665,7 +690,7 @@
 -- Set this item's enchantment charge.
 -- @function [parent=#Item] setEnchantmentCharge
 -- @param openmw.core#GameObject item
--- @param #number charge
+-- @param #number charge Can be `nil` to reset the unused state / full
 
 ---
 -- Whether the object is supposed to be carriable. It is true for all items except
@@ -933,6 +958,40 @@
 -- @param #any objectOrRecordId
 -- @return #NpcRecord
 
+--- @{#Races}: Race data
+-- @field [parent=#NPC] #Races races
+
+---
+-- A read-only list of all @{#RaceRecord}s in the world database.
+-- @field [parent=#Races] #list<#RaceRecord> records
+
+---
+-- Returns a read-only @{#RaceRecord}
+-- @function [parent=#Races] record
+-- @param #string recordId
+-- @return #RaceRecord
+
+---
+-- Race data record
+-- @type RaceRecord
+-- @field #string id Race id
+-- @field #string name Race name
+-- @field #string description Race description
+-- @field #map<#string, #number> skills A map of bonus skill points by skill ID
+-- @field #list<#string> spells A read-only list containing the ids of all spells inherent to the race
+-- @field #bool isPlayable True if the player can pick this race in character generation
+-- @field #bool isBeast True if this race is a beast race
+-- @field #GenderedNumber height Height values
+-- @field #GenderedNumber weight Weight values
+-- @field #map<#string, #GenderedNumber> attributes A read-only table of attribute ID to base value
+-- @usage -- Get base strength for men
+-- strength = types.NPC.races.records[1].attributes.strength.male
+
+---
+-- @type GenderedNumber
+-- @field #number male Male value
+-- @field #number female Female value
+
 ---
 -- @type NpcRecord
 -- @field #string id The record ID of the NPC
@@ -1046,8 +1105,41 @@
 -- @field [parent=#Player] #CONTROL_SWITCH CONTROL_SWITCH
 
 ---
+-- @function [parent=#Player] getBirthSign
+-- @param openmw.core#GameObject player
+-- @return #string The player's birth sign
+
+---
+-- Can be used only in global scripts. Note that this does not update the player's spells.
+-- @function [parent=#Player] setBirthSign
+-- @param openmw.core#GameObject player
+-- @param #any recordOrId Record or string ID of the birth sign to assign
+
+--- @{#BirthSigns}: Birth Sign Data
+-- @field [parent=#Player] #BirthSigns birthSigns
+
+---
+-- A read-only list of all @{#BirthSignRecord}s in the world database.
+-- @field [parent=#BirthSigns] #list<#BirthSignRecord> records
+
+---
+-- Returns a read-only @{#BirthSignRecord}
+-- @function [parent=#BirthSigns] record
+-- @param #string recordId
+-- @return #BirthSignRecord
+
+---
+-- Birth sign data record
+-- @type BirthSignRecord
+-- @field #string id Birth sign id
+-- @field #string name Birth sign name
+-- @field #string description Birth sign description
+-- @field #string texture Birth sign texture
+-- @field #list<#string> spells A read-only list containing the ids of all spells gained from this sign.
+
+---
 -- Send an event to menu scripts.
--- @function [parent=#core] sendMenuEvent
+-- @function [parent=#Player] sendMenuEvent
 -- @param openmw.core#GameObject player
 -- @param #string eventName
 -- @param eventData

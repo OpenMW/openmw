@@ -31,8 +31,9 @@ namespace ESM
 
         if (mVersion <= MaxOldCountFormatVersion)
         {
-            mRef.mCount = 1;
-            esm.getHNOT(mRef.mCount, "COUN");
+            if (mVersion <= MaxOldGoldValueFormatVersion)
+                mRef.mCount = std::max(1, mRef.mCount);
+            esm.getHNOT("COUN", mRef.mCount);
         }
 
         mPosition = mRef.mPos;

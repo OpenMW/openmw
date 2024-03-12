@@ -5,6 +5,7 @@
 #include <MyGUI_TextIterator.h>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -174,10 +175,7 @@ namespace MWGui
         }
 
         // increase skill
-        MWWorld::LiveCellRef<ESM::NPC>* playerRef = player.get<ESM::NPC>();
-
-        const ESM::Class* class_ = store.get<ESM::Class>().find(playerRef->mBase->mClass);
-        pcStats.increaseSkill(skill->mId, *class_, true);
+        MWBase::Environment::get().getLuaManager()->skillLevelUp(player, skill->mId, "trainer");
 
         // remove gold
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price);

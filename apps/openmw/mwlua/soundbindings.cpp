@@ -174,12 +174,12 @@ namespace MWLua
         api["say"] = sol::overload(
             [luaManager = context.mLuaManager](
                 std::string_view fileName, const Object& object, sol::optional<std::string_view> text) {
-                MWBase::Environment::get().getSoundManager()->say(object.ptr(), std::string(fileName));
+                MWBase::Environment::get().getSoundManager()->say(object.ptr(), VFS::Path::Normalized(fileName));
                 if (text)
                     luaManager->addUIMessage(*text);
             },
             [luaManager = context.mLuaManager](std::string_view fileName, sol::optional<std::string_view> text) {
-                MWBase::Environment::get().getSoundManager()->say(std::string(fileName));
+                MWBase::Environment::get().getSoundManager()->say(VFS::Path::Normalized(fileName));
                 if (text)
                     luaManager->addUIMessage(*text);
             });
@@ -227,7 +227,7 @@ namespace MWLua
         soundT["maxRange"]
             = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mMaxRange; });
         soundT["fileName"] = sol::readonly_property([](const ESM::Sound& rec) -> std::string {
-            return VFS::Path::normalizeFilename(Misc::ResourceHelpers::correctSoundPath(rec.mSound));
+            return Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(rec.mSound)).value();
         });
 
         return LuaUtil::makeReadOnly(api);

@@ -2,6 +2,7 @@
 
 #include <limits>
 
+#include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 
@@ -48,7 +49,7 @@ namespace MWMechanics
         bool appliedOnce = magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce;
         int minMagn = hasMagnitude ? effect.mMagnMin : 1;
         int maxMagn = hasMagnitude ? effect.mMagnMax : 1;
-        if (method != EffectCostMethod::GameEnchantment)
+        if (method == EffectCostMethod::PlayerSpell || method == EffectCostMethod::GameSpell)
         {
             minMagn = std::max(1, minMagn);
             maxMagn = std::max(1, maxMagn);
@@ -57,13 +58,20 @@ namespace MWMechanics
         if (!appliedOnce)
             duration = std::max(1, duration);
         static const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
+        static const float iAlchemyMod = store.get<ESM::GameSetting>().find("iAlchemyMod")->mValue.getFloat();
 
         int durationOffset = 0;
         int minArea = 0;
+        float costMult = fEffectCostMult;
         if (method == EffectCostMethod::PlayerSpell)
         {
             durationOffset = 1;
             minArea = 1;
+        }
+        else if (method == EffectCostMethod::GamePotion)
+        {
+            minArea = 1;
+            costMult = iAlchemyMod;
         }
 
         float x = 0.5 * (minMagn + maxMagn);
@@ -71,7 +79,7 @@ namespace MWMechanics
         x *= durationOffset + duration;
         x += 0.05 * std::max(minArea, effect.mArea) * magicEffect->mData.mBaseCost;
 
-        return x * fEffectCostMult;
+        return x * costMult;
     }
 
     int calcSpellCost(const ESM::Spell& spell)
@@ -138,6 +146,16 @@ namespace MWMechanics
             }
         }
         return enchantment.mData.mCharge;
+    }
+
+    int getPotionValue(const ESM::Potion& potion)
+    {
+        if (potion.mData.mFlags & ESM::Potion::Autocalc)
+        {
+            float cost = getTotalCost(potion.mEffects, EffectCostMethod::GamePotion);
+            return std::round(cost);
+        }
+        return potion.mData.mValue;
     }
 
     float calcSpellBaseSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, ESM::RefId* effectiveSchool)

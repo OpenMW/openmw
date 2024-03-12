@@ -142,9 +142,9 @@
 -- @return #string
 -- @usage if obj.recordId == core.getFormId('Skyrim.esm', 0x4d7da) then ... end
 -- @usage -- In ESM3 content files (e.g. Morrowind) ids are human-readable strings
--- obj.ownerFactionId = 'blades'
+-- obj.owner.factionId = 'blades'
 -- -- In ESM4 (e.g. Skyrim) ids should be constructed using `core.getFormId`:
--- obj.ownerFactionId = core.getFormId('Skyrim.esm', 0x72834)
+-- obj.owner.factionId = core.getFormId('Skyrim.esm', 0x72834)
 -- @usage -- local scripts
 -- local obj = nearby.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
 -- @usage -- global scripts
@@ -881,6 +881,7 @@
 -- @field #string specialization Skill specialization. Either combat, magic, or stealth.
 -- @field #MagicSchoolData school Optional magic school
 -- @field #string attribute The id of the skill's governing attribute
+-- @field #table skillGain Table of the 4 possible skill gain values. See [SkillProgression#SkillUseType](interface_skill_progression.html#SkillUseType).
 
 ---
 -- @type MagicSchoolData

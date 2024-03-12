@@ -64,7 +64,7 @@ add_openmw_dir (mwlua
     context menuscripts globalscripts localscripts playerscripts luabindings objectbindings cellbindings
     mwscriptbindings camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings
     postprocessingbindings stats debugbindings corebindings worldbindings worker magicbindings factionbindings
-    classbindings itemdata inputprocessor animationbindings
+    classbindings itemdata inputprocessor animationbindings birthsignbindings racebindings
     types/types types/door types/item types/actor types/container types/lockable types/weapon types/npc
     types/creature types/player types/activator types/book types/lockpick types/probe types/apparatus
     types/potion types/ingredient types/misc types/repair types/armor types/light types/static
@@ -88,7 +88,7 @@ add_openmw_dir (mwworld
 
 add_openmw_dir (mwphysics
     physicssystem trace collisiontype actor convert object heightfield closestnotmerayresultcallback
-    contacttestresultcallback deepestnotmecontacttestresultcallback stepper movementsolver projectile
+    contacttestresultcallback stepper movementsolver projectile
     actorconvexcallback raycasting mtphysics contacttestwrapper projectileconvexcallback
     )
 
@@ -161,7 +161,7 @@ target_link_libraries(openmw
     components
 )
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw PRIVATE
         <boost/program_options/options_description.hpp>
 
