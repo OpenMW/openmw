@@ -65,7 +65,7 @@ namespace MWLua
             return static_cast<float>(MWBase::Environment::get().getWorld()->getGlobalInt(globalId));
         }
         return 0;
-    };
+    }
 
     sol::table initMWScriptBindings(const Context& context)
     {
@@ -146,7 +146,7 @@ namespace MWLua
                     return sol::nullopt;
                 return getGlobalVariableValue(globalId);
             },
-            [](const GlobalStore& store, int index) -> sol::optional<float> {
+            [](const GlobalStore& store, size_t index) -> sol::optional<float> {
                 if (index < 1 || store.getSize() < index)
                     return sol::nullopt;
                 auto g = store.at(index - 1);
@@ -164,7 +164,7 @@ namespace MWLua
                   return getGlobalVariableValue(globalId);
               });
         globalStoreT[sol::meta_function::pairs] = [](const GlobalStore& store) {
-            int index = 0;
+            size_t index = 0;
             return sol::as_function(
                 [index, &store](sol::this_state ts) mutable -> sol::optional<std::tuple<std::string, float>> {
                     if (index >= store.getSize())
