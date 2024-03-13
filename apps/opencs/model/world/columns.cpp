@@ -235,6 +235,7 @@ namespace CSMWorld
             { ColumnId_RegionSounds, "Sounds" },
             { ColumnId_SoundName, "Sound Name" },
             { ColumnId_SoundChance, "Chance" },
+            { ColumnId_SoundProbability, "Probability" },
 
             { ColumnId_FactionReactions, "Reactions" },
             { ColumnId_FactionRanks, "Ranks" },
