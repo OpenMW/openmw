@@ -7,6 +7,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include <components/settings/values.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "draganddrop.hpp"
@@ -75,6 +76,34 @@ void WindowBase::center()
     coord.left = (layerSize.width - coord.width) / 2;
     coord.top = (layerSize.height - coord.height) / 2;
     mMainWidget->setCoord(coord);
+}
+
+void WindowBase::clampWindowCoordinates(MyGUI::Window* window)
+{
+    auto minSize = window->getMinSize();
+    minSize.height = static_cast<int>(minSize.height * Settings::gui().mScalingFactor);
+    minSize.width = static_cast<int>(minSize.width * Settings::gui().mScalingFactor);
+
+    // Window's minimum size is larger than the screen size, can not clamp coordinates
+    MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+    if (minSize.width > viewSize.width || minSize.height > viewSize.height)
+        return;
+
+    int left = std::max(0, window->getPosition().left);
+    int top = std::max(0, window->getPosition().top);
+    int width = std::clamp(window->getSize().width, 0, viewSize.width);
+    int height = std::clamp(window->getSize().height, 0, viewSize.height);
+    if (left + width > viewSize.width)
+        left = viewSize.width - width;
+
+    if (top + height > viewSize.height)
+        top = viewSize.height - height;
+
+    if (window->getSize().width != width || window->getSize().height != height)
+        window->setSize(width, height);
+
+    if (window->getPosition().left != left || window->getPosition().top != top)
+        window->setPosition(left, top);
 }
 
 WindowModal::WindowModal(const std::string& parLayout)

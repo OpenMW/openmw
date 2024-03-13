@@ -1200,6 +1200,8 @@ namespace MWGui
             const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
             window->setPosition(MyGUI::IntPoint(static_cast<int>(rect.mX * x), static_cast<int>(rect.mY * y)));
             window->setSize(MyGUI::IntSize(static_cast<int>(rect.mW * x), static_cast<int>(rect.mH * y)));
+
+            WindowBase::clampWindowCoordinates(window);
         }
 
         for (const auto& window : mWindows)
@@ -1714,13 +1716,15 @@ namespace MWGui
 
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
 
-        layout->mMainWidget->setPosition(
+        MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
+        window->setPosition(
             MyGUI::IntPoint(static_cast<int>(rect.mX * viewSize.width), static_cast<int>(rect.mY * viewSize.height)));
-        layout->mMainWidget->setSize(
+        window->setSize(
             MyGUI::IntSize(static_cast<int>(rect.mW * viewSize.width), static_cast<int>(rect.mH * viewSize.height)));
 
-        MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
         window->eventWindowChangeCoord += MyGUI::newDelegate(this, &WindowManager::onWindowChangeCoord);
+        WindowBase::clampWindowCoordinates(window);
+
         mTrackedWindows.emplace(window, settings);
     }
 
@@ -1749,6 +1753,8 @@ namespace MWGui
         const auto it = mTrackedWindows.find(window);
         if (it == mTrackedWindows.end())
             return;
+
+        WindowBase::clampWindowCoordinates(window);
 
         const WindowSettingValues& settings = it->second;
 
