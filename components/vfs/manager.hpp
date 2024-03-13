@@ -50,6 +50,8 @@ namespace VFS
         /// @note May be called from any thread once the index has been built.
         Files::IStreamPtr get(const Path::Normalized& name) const;
 
+        Files::IStreamPtr get(Path::NormalizedView name) const;
+
         /// Retrieve a file by name (name is already normalized).
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.

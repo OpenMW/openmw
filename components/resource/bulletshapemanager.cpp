@@ -110,7 +110,7 @@ namespace Resource
 
     osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string& name)
     {
-        const std::string normalized = VFS::Path::normalizeFilename(name);
+        const VFS::Path::Normalized normalized(name);
 
         osg::ref_ptr<BulletShape> shape;
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
