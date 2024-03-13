@@ -47,8 +47,6 @@ namespace MWGui
 
         void onOpen() override;
 
-        void onResChange(int width, int height) override;
-
         // Print a message to the console, in specified color.
         void print(const std::string& msg, std::string_view color = MWBase::WindowManager::sConsoleColor_Default);
 
