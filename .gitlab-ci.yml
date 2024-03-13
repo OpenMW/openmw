@@ -15,6 +15,10 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true'
+      # continue running master and release branch pipelines when we do back-to-back merges in case one introduces a regression
+      auto_cancel:
+        on_new_commit: none
     - if: $CI_COMMIT_BRANCH
 
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
