@@ -170,10 +170,7 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
         }
 
-        void setDetectingKeyboard(bool detecting)
-        {
-            mDetectingKeyboard = detecting;
-        }
+        void setDetectingKeyboard(bool detecting) { mDetectingKeyboard = detecting; }
 
     private:
         ICS::InputControlSystem* mInputBinder;

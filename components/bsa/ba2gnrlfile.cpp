@@ -12,13 +12,13 @@
 #pragma warning(disable : 4706)
 #pragma warning(disable : 4702)
 #include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #pragma warning(pop)
 #else
 #include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #endif
 
 #include <boost/iostreams/device/array.hpp>

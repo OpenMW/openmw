@@ -190,10 +190,7 @@ namespace Debug
             CurrentDebugLevel = Verbose;
         }
 
-        virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
-        {
-            return size;
-        }
+        virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) { return size; }
     };
 
 #if defined _WIN32 && defined _DEBUG
