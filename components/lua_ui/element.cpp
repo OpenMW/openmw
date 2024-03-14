@@ -99,15 +99,6 @@ namespace LuaUi
                 element->create(depth + 1);
             WidgetExtension* root = element->mRoot;
             assert(root);
-            WidgetExtension* parent = root->getParent();
-            if (parent)
-            {
-                auto children = parent->children();
-                std::erase(children, root);
-                parent->setChildren(children);
-                root->widget()->detachFromWidget();
-            }
-            root->updateCoord();
             return root;
         }
 
