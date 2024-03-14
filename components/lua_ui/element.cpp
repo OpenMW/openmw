@@ -313,9 +313,8 @@ namespace LuaUi
     {
         if (mState != Destroyed)
         {
-            if (mState != New)
+            if (mRoot != nullptr)
             {
-                assert(mRoot);
                 destroyRoot(mRoot);
                 mRoot = nullptr;
             }
