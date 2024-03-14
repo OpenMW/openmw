@@ -41,8 +41,8 @@ namespace MWSound
         AVPacket mPacket;
         AVFrame* mFrame;
 
-        int mFrameSize;
-        int mFramePos;
+        std::size_t mFrameSize;
+        std::size_t mFramePos;
 
         double mNextPts;
 
