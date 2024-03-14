@@ -158,7 +158,7 @@ namespace ESM
                         mWater = waterLevel;
                     break;
                 case fourCC("AMBI"):
-                    esm.getHT(mAmbi.mAmbient, mAmbi.mSunlight, mAmbi.mFog, mAmbi.mFogDensity);
+                    esm.getSubComposite(mAmbi);
                     mHasAmbi = true;
                     break;
                 case fourCC("RGNN"):
