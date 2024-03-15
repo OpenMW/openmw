@@ -61,7 +61,7 @@ namespace MWSound
         if (mSamplesPerSec <= 0.0f || mSamples.empty() || sec < 0.0f)
             return 0.0f;
 
-        size_t index = std::clamp<size_t>(static_cast<size_t>(sec * mSamplesPerSec), 0, mSamples.size() - 1);
+        size_t index = std::min(static_cast<size_t>(sec * mSamplesPerSec), mSamples.size() - 1);
         return mSamples[index];
     }
 
