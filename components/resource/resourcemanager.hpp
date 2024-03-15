@@ -72,7 +72,7 @@ namespace Resource
         double mExpiryDelay;
     };
 
-    class ResourceManager : public GenericResourceManager<VFS::Path::Normalized>
+    class ResourceManager : public GenericResourceManager<std::string>
     {
     public:
         explicit ResourceManager(const VFS::Manager* vfs, double expiryDelay)
