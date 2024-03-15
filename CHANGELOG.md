@@ -158,6 +158,7 @@
     Bug #7841: Editor: "Dirty" water heights are saved in modified CELLs
     Bug #7859: AutoCalc flag is not used to calculate potion value
     Bug #7872: Region sounds use wrong odds
+    Bug #7886: Equip and unequip animations can't share the animation track section
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
