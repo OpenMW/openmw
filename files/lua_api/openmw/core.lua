@@ -714,6 +714,8 @@
 
 ---
 -- Play a 3D sound, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] playSound3d
 -- @param #string soundId ID of Sound record to play
 -- @param #GameObject object Object to which we attach the sound
@@ -733,6 +735,8 @@
 
 ---
 -- Play a 3D sound file, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] playSoundFile3d
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object to which we attach the sound
@@ -752,6 +756,8 @@
 
 ---
 -- Stop a 3D sound, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] stopSound3d
 -- @param #string soundId ID of Sound record to stop
 -- @param #GameObject object Object on which we want to stop sound
@@ -759,6 +765,8 @@
 
 ---
 -- Stop a 3D sound file, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] stopSoundFile3d
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object on which we want to stop sound
@@ -781,42 +789,32 @@
 -- @usage local isPlaying = core.sound.isSoundFilePlaying("Sound\\test.mp3", object);
 
 ---
--- Play an animated voiceover. Has two overloads:
---
---   * With an "object" argument: play sound for given object, with speaking animation if possible
---   * Without an "object" argument: play sound globally, without object
+-- Play an animated voiceover.
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] say
 -- @param #string fileName Path to sound file in VFS
--- @param #GameObject object Object on which we want to play an animated voiceover (optional)
+-- @param #GameObject object Object on which we want to play an animated voiceover
 -- @param #string text Subtitle text (optional)
 -- @usage -- play voiceover for object and print messagebox
 -- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", object, "Subtitle text")
--- @usage -- play voiceover globally and print messagebox
--- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", "Subtitle text")
--- @usage -- play voiceover for object without messagebox
+-- @usage -- play voiceover for object, without messagebox
 -- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", object)
--- @usage -- play voiceover globally without messagebox
--- core.sound.say("Sound\\Vo\\Misc\\voice.mp3")
 
 ---
--- Stop animated voiceover
+-- Stop an animated voiceover
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] stopSay
 -- @param #string fileName Path to sound file in VFS
--- @param #GameObject object Object on which we want to stop an animated voiceover (optional)
--- @usage -- stop voice for given object
--- core.sound.stopSay(object);
--- @usage -- stop global voice
--- core.sound.stopSay();
+-- @param #GameObject object Object on which we want to stop an animated voiceover
+-- @usage core.sound.stopSay(object);
 
 ---
--- Check if animated voiceover is playing
+-- Check if an animated voiceover is playing
 -- @function [parent=#Sound] isSayActive
--- @param #GameObject object Object on which we want to check an animated voiceover (optional)
+-- @param #GameObject object Object on which we want to check an animated voiceover
 -- @return #boolean
--- @usage -- check voice for given object
--- local isActive = isSayActive(object);
--- @usage -- check global voice
--- local isActive = isSayActive();
+-- @usage local isActive = isSayActive(object);
 
 ---
 -- @type SoundRecord
