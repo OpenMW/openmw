@@ -29,6 +29,7 @@ file(GLOB UNITTEST_SRC_FILES
     lua/test_storage.cpp
     lua/test_async.cpp
     lua/test_inputactions.cpp
+    lua/test_yaml.cpp
 
     lua/test_ui_content.cpp
 
