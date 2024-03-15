@@ -7,6 +7,7 @@ set of keys over given range of frames.
 
 import click
 import collections
+import json
 import matplotlib.pyplot
 import numpy
 import operator
@@ -43,6 +44,12 @@ import termtables
                    'between Physics Actors and physics_time_taken. Format: --plot <x> <y> <function>.')
 @click.option('--stats', type=str, multiple=True,
               help='Print table with stats for a given metric containing min, max, mean, median etc.')
+@click.option('--stats_sum', is_flag=True,
+              help='Add a row to stats table for a sum per frame of all given stats metrics.')
+@click.option('--stats_sort_by', type=str, default=None, multiple=True,
+              help='Sort stats table by given fields (source, key, sum, min, max etc).')
+@click.option('--stats_table_format', type=click.Choice(['markdown', 'json']), default='markdown',
+              help='Print table with stats in given format.')
 @click.option('--precision', type=int,
               help='Format floating point numbers with given precision')
 @click.option('--timeseries_sum', is_flag=True,
@@ -51,8 +58,6 @@ import termtables
               help='Add a graph to timeseries for a sum per frame of all given commulative timeseries.')
 @click.option('--timeseries_delta_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries delta.')
-@click.option('--stats_sum', is_flag=True,
-              help='Add a row to stats table for a sum per frame of all given stats metrics.')
 @click.option('--begin_frame', type=int, default=0,
               help='Start processing from this frame.')
 @click.option('--end_frame', type=int, default=sys.maxsize,
@@ -67,14 +72,12 @@ import termtables
               help='Threshold for hist_over.')
 @click.option('--show_common_path_prefix', is_flag=True,
               help='Show common path prefix when applied to multiple files.')
-@click.option('--stats_sort_by', type=str, default=None, multiple=True,
-              help='Sort stats table by given fields (source, key, sum, min, max etc).')
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
          commulative_timeseries, commulative_timeseries_sum, frame_number_name,
          hist_threshold, threshold_name, threshold_value, show_common_path_prefix, stats_sort_by,
-         timeseries_delta, timeseries_delta_sum):
+         timeseries_delta, timeseries_delta_sum, stats_table_format):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
     if not show_common_path_prefix and len(sources) > 1:
         longest_common_prefix = os.path.commonprefix(list(sources.keys()))
@@ -109,7 +112,8 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if plot:
         draw_plots(sources=frames, plots=plot)
     if stats:
-        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision, sort_by=stats_sort_by)
+        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision,
+                    sort_by=stats_sort_by, table_format=stats_table_format)
     if hist_threshold:
         draw_hist_threshold(sources=frames, keys=matching_keys(hist_threshold), begin_frame=begin_frame,
                             threshold_name=threshold_name, threshold_value=threshold_value)
@@ -291,7 +295,7 @@ def draw_plots(sources, plots):
     fig.canvas.manager.set_window_title('plots')
 
 
-def print_stats(sources, keys, stats_sum, precision, sort_by):
+def print_stats(sources, keys, stats_sum, precision, sort_by, table_format):
     stats = list()
     for name, frames in sources.items():
         for key in keys:
@@ -301,11 +305,22 @@ def print_stats(sources, keys, stats_sum, precision, sort_by):
     metrics = list(stats[0].keys())
     if sort_by:
         stats.sort(key=operator.itemgetter(*sort_by))
-    termtables.print(
-        [list(v.values()) for v in stats],
-        header=metrics,
-        style=termtables.styles.markdown,
-    )
+    if table_format == 'markdown':
+        termtables.print(
+            [list(v.values()) for v in stats],
+            header=metrics,
+            style=termtables.styles.markdown,
+        )
+    elif table_format == 'json':
+        table = list()
+        for row in stats:
+            row_table = dict()
+            for key, value in zip(metrics, row.values()):
+                row_table[key] = value
+            table.append(row_table)
+        print(json.dumps(table))
+    else:
+        print(f'Unsupported table format: {table_format}')
 
 
 def draw_hist_threshold(sources, keys, begin_frame, threshold_name, threshold_value):
