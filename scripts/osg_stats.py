@@ -149,17 +149,18 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
         for key in keys:
             result[name][key] = [None] * (end_frame - begin_frame)
     for name, frames in sources.items():
+        max_index = 0
         for frame in frames:
             number = frame[frame_number_name]
             if begin_frame <= number < end_frame:
                 index = number - begin_frame
+                max_index = max(max_index, index)
                 for key in keys:
                     if key in frame:
                         result[name][key][index] = frame[key]
-    for name in result.keys():
         for key in keys:
             prev = 0.0
-            values = result[name][key]
+            values = result[name][key][:max_index + 1]
             for i in range(len(values)):
                 if values[i] is not None:
                     prev = values[i]
@@ -183,9 +184,11 @@ def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            ax.plot(x, frames[key], label=f'{key}:{name}')
+            y = frames[key]
+            ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}', linestyle='--')
+            y = numpy.sum(list(frames[k] for k in keys), axis=0)
+            ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('timeseries')
@@ -196,10 +199,11 @@ def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            ax.plot(x, numpy.cumsum(frames[key]), label=f'{key}:{name}')
+            y = numpy.cumsum(frames[key])
+            ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}',
-                    linestyle='--')
+            y = numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0))
+            ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('commulative_timeseries')
@@ -210,10 +214,11 @@ def draw_timeseries_delta(sources, keys, add_sum, begin_frame, end_frame):
     x = numpy.array(range(begin_frame + 1, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            ax.plot(x, numpy.diff(frames[key]), label=f'{key}:{name}')
+            y = numpy.diff(frames[key])
+            ax.plot(x[:len(y)], numpy.diff(frames[key]), label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.diff(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}',
-                    linestyle='--')
+            y = numpy.diff(numpy.sum(list(frames[k] for k in keys), axis=0))
+            ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('timeseries_delta')
@@ -312,12 +317,7 @@ def print_stats(sources, keys, stats_sum, precision, sort_by, table_format):
             style=termtables.styles.markdown,
         )
     elif table_format == 'json':
-        table = list()
-        for row in stats:
-            row_table = dict()
-            for key, value in zip(metrics, row.values()):
-                row_table[key] = value
-            table.append(row_table)
+        table = [dict(zip(metrics, row.values())) for row in stats]
         print(json.dumps(table))
     else:
         print(f'Unsupported table format: {table_format}')
