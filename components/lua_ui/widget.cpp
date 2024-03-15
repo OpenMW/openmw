@@ -100,6 +100,8 @@ namespace LuaUi
 
     void WidgetExtension::attach(WidgetExtension* ext)
     {
+        if (ext->mParent != this)
+            ext->detachFromParent();
         ext->mParent = this;
         ext->mTemplateChild = false;
         ext->widget()->attachToWidget(mSlot->widget());
@@ -114,7 +116,13 @@ namespace LuaUi
 
     void WidgetExtension::detachFromParent()
     {
-        mParent = nullptr;
+        if (mParent)
+        {
+            auto children = mParent->children();
+            std::erase(children, this);
+            mParent->setChildren(children);
+            mParent = nullptr;
+        }
         widget()->detachFromWidget();
     }
 
