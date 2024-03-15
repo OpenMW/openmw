@@ -18,8 +18,8 @@ namespace MWSound
         std::size_t numSamples = bytesToFrames(mQueue.size(), mChannelConfig, mSampleType);
         std::size_t advance = framesToBytes(1, mChannelConfig, mSampleType);
 
-        int segment = 0;
-        int sample = 0;
+        std::size_t segment = 0;
+        std::size_t sample = 0;
         while (segment < numSamples / samplesPerSegment)
         {
             float sum = 0;
