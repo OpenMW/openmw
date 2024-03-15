@@ -35,14 +35,20 @@ void Config::GameSettings::validatePaths()
     for (const auto& dataDir : paths)
     {
         if (QDir(dataDir.value).exists())
-            mDataDirs.append(dataDir);
+        {
+            SettingValue copy = dataDir;
+            copy.value = QDir(dataDir.value).canonicalPath();
+            mDataDirs.append(copy);
+        }
     }
 
     // Do the same for data-local
     const QString& local = mSettings.value(QString("data-local")).value;
 
     if (!local.isEmpty() && QDir(local).exists())
-        mDataLocal = local;
+    {
+        mDataLocal = QDir(local).canonicalPath();
+    }
 }
 
 QString Config::GameSettings::getResourcesVfs() const
