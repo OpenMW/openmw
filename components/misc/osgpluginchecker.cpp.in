@@ -30,52 +30,19 @@ namespace Misc
 
     namespace
     {
-        constexpr auto USED_OSG_PLUGIN_FILENAMES = std::to_array<std::string_view>({${USED_OSG_PLUGIN_FILENAMES_FORMATTED}});
+        constexpr auto USED_OSG_PLUGIN_NAMES = std::to_array<std::string_view>({${USED_OSG_PLUGIN_NAMES_FORMATTED}});
     }
 
     bool checkRequiredOSGPluginsArePresent()
     {
-        // work around osgDB::listAllAvailablePlugins() not working on some platforms due to a suspected OSG bug
-        std::filesystem::path pluginDirectoryName = std::string("osgPlugins-") + std::string(osgGetVersion());
-        osgDB::FilePathList& filepath = osgDB::getLibraryFilePathList();
-        for (const auto& path : filepath)
-        {
-#ifdef OSG_USE_UTF8_FILENAME
-            std::filesystem::path osgPath{ StringUtils::stringToU8String(path) };
-#else
-            std::filesystem::path osgPath{ path };
-#endif
-            if (!osgPath.has_filename())
-                osgPath = osgPath.parent_path();
-
-            if (osgPath.filename() == pluginDirectoryName)
-            {
-                osgPath = osgPath.parent_path();
-#ifdef OSG_USE_UTF8_FILENAME
-                std::string extraPath = StringUtils::u8StringToString(osgPath.u8string());
-#else
-                std::string extraPath = osgPath.string();
-#endif
-                filepath.emplace_back(std::move(extraPath));
-            }
-        }
-
-        auto availableOSGPlugins = osgDB::listAllAvailablePlugins();
+        // osgDB::listAllAvailablePlugins() lies, so don't use it
         bool haveAllPlugins = true;
-        for (std::string_view plugin : USED_OSG_PLUGIN_FILENAMES)
+        for (std::string_view plugin : USED_OSG_PLUGIN_NAMES)
         {
-            if (std::find_if(availableOSGPlugins.begin(), availableOSGPlugins.end(),
-                    [&](std::string_view availablePlugin) {
-#ifdef OSG_USE_UTF8_FILENAME
-                        std::filesystem::path pluginPath{ StringUtils::stringToU8String(availablePlugin) };
-#else
-                std::filesystem::path pluginPath {availablePlugin};
-#endif
-                        return pluginPath.filename() == plugin;
-                    })
-                == availableOSGPlugins.end())
+            std::string libraryName = osgDB::Registry::instance()->createLibraryNameForExtension(std::string{ plugin });
+            if (osgDB::findLibraryFile(libraryName).empty())
             {
-                Log(Debug::Error) << "Missing OSG plugin: " << plugin;
+                Log(Debug::Error) << "Missing OSG plugin: " << libraryName;
                 haveAllPlugins = false;
             }
         }
