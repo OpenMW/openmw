@@ -30,8 +30,8 @@
 #include <cstdint>
 #include <string>
 
-#include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/position.hpp>
 
 namespace ESM4
 {

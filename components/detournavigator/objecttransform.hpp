@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_OBJECTTRANSFORM_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_OBJECTTRANSFORM_H
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 
 #include <tuple>
 

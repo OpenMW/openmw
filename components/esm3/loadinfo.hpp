@@ -35,7 +35,7 @@ namespace ESM
 
         struct DATAstruct
         {
-            int32_t mUnknown1 = 0;
+            int32_t mType = 0; // See Dialogue::Type
             union
             {
                 int32_t mDisposition = 0; // Used for dialogue responses
@@ -44,7 +44,6 @@ namespace ESM
             signed char mRank = -1; // Rank of NPC
             signed char mGender = Gender::NA; // See Gender enum
             signed char mPCrank = -1; // Player rank
-            signed char mUnknown2 = 0;
         }; // 12 bytes
         DATAstruct mData;
 
