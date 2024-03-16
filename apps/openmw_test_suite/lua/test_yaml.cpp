@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <yaml-cpp/yaml.h>
+
 #include <components/lua/yamlloader.hpp>
 
 #include "../testing_util.hpp"
