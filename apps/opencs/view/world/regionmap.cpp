@@ -364,7 +364,6 @@ std::vector<CSMWorld::UniversalId> CSVWorld::RegionMap::getDraggedRecords() cons
 
 void CSVWorld::RegionMap::dragMoveEvent(QDragMoveEvent* event)
 {
-    QModelIndex index = indexAt(event->pos());
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData());
     if (mime != nullptr && (mime->holdsType(CSMWorld::UniversalId::Type_Region)))
     {

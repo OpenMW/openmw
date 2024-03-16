@@ -29,9 +29,11 @@ namespace CSMWorld
     {
         const IdCollection<Land>& lands = data.getLand();
         int landIndex = lands.searchId(cell.mId);
-        const Land& land = lands.getRecord(landIndex).get();
+        if (landIndex == -1)
+            return 0.0f;
 
         // If any part of land is above water, returns > 0 - otherwise returns < 0
+        const Land& land = lands.getRecord(landIndex).get();
         if (land.getLandData())
             return land.getLandData()->mMaxHeight - cell.mWater;
 
