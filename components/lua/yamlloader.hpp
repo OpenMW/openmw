@@ -30,7 +30,7 @@ namespace LuaUtil
             String
         };
 
-        static sol::object load(const std::vector<YAML::Node> rootNodes, const sol::state_view& lua);
+        static sol::object load(const std::vector<YAML::Node>& rootNodes, const sol::state_view& lua);
 
         static sol::object getNode(const YAML::Node& node, const sol::state_view& lua, uint64_t depth);
 

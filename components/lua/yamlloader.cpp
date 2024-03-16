@@ -25,7 +25,7 @@ namespace LuaUtil
         return load(rootNodes, lua);
     }
 
-    sol::object YamlLoader::load(const std::vector<YAML::Node> rootNodes, const sol::state_view& lua)
+    sol::object YamlLoader::load(const std::vector<YAML::Node>& rootNodes, const sol::state_view& lua)
     {
         if (rootNodes.empty())
             return sol::nil;
