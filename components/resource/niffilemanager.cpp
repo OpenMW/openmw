@@ -52,7 +52,7 @@ namespace Resource
             Nif::Reader reader(*file, mEncoder);
             reader.parse(mVFS->get(name));
             obj = new NifFileHolder(file);
-            mCache->addEntryToObjectCache(name, obj);
+            mCache->addEntryToObjectCache(name.value(), obj);
             return file;
         }
     }
