@@ -1,9 +1,7 @@
 #ifndef COMPONENTS_LUA_YAMLLOADER_H
 #define COMPONENTS_LUA_YAMLLOADER_H
 
-#include <map>
 #include <sol/sol.hpp>
-#include <stdexcept>
 #include <yaml-cpp/yaml.h>
 
 namespace LuaUtil
