@@ -1,7 +1,12 @@
 #include "yamlloader.hpp"
 
 #include <charconv>
+#include <cmath>
+#include <limits>
 #include <regex>
+#include <stdexcept>
+#include <system_error>
+#include <vector>
 
 #include <yaml-cpp/yaml.h>
 
