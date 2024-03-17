@@ -8,6 +8,9 @@
 #include <system_error>
 #include <vector>
 
+#include <sol/object.hpp>
+#include <sol/state_view.hpp>
+
 #include <yaml-cpp/yaml.h>
 
 #include <components/misc/strings/format.hpp>
@@ -15,7 +18,7 @@
 
 namespace LuaUtil
 {
-    namespace YamlLoader
+    namespace
     {
         constexpr uint64_t maxDepth = 250;
 
@@ -32,7 +35,7 @@ namespace LuaUtil
             String
         };
 
-        sol::object load(const std::vector<YAML::Node>& rootNodes, const sol::state_view& lua);
+        sol::object loadAll(const std::vector<YAML::Node>& rootNodes, const sol::state_view& lua);
 
         sol::object getNode(const YAML::Node& node, const sol::state_view& lua, uint64_t depth);
 
@@ -45,14 +48,23 @@ namespace LuaUtil
         sol::object getScalar(const YAML::Node& node, const sol::state_view& lua);
 
         [[noreturn]] void nodeError(const YAML::Node& node, const std::string& message);
+    }
 
-        sol::object load(const std::string& input, const sol::state_view& lua)
-        {
-            std::vector<YAML::Node> rootNodes = YAML::LoadAll(input);
-            return load(rootNodes, lua);
-        }
+    sol::object loadYaml(const std::string& input, const sol::state_view& lua)
+    {
+        std::vector<YAML::Node> rootNodes = YAML::LoadAll(input);
+        return loadAll(rootNodes, lua);
+    }
 
-        sol::object load(const std::vector<YAML::Node>& rootNodes, const sol::state_view& lua)
+    sol::object loadYaml(std::istream& input, const sol::state_view& lua)
+    {
+        std::vector<YAML::Node> rootNodes = YAML::LoadAll(input);
+        return loadAll(rootNodes, lua);
+    }
+
+    namespace
+    {
+        sol::object loadAll(const std::vector<YAML::Node>& rootNodes, const sol::state_view& lua)
         {
             if (rootNodes.empty())
                 return sol::nil;
@@ -67,12 +79,6 @@ namespace LuaUtil
             }
 
             return documentsTable;
-        }
-
-        sol::object load(std::istream& input, const sol::state_view& lua)
-        {
-            std::vector<YAML::Node> rootNodes = YAML::LoadAll(input);
-            return load(rootNodes, lua);
         }
 
         sol::object getNode(const YAML::Node& node, const sol::state_view& lua, uint64_t depth)
@@ -143,7 +149,7 @@ namespace LuaUtil
             // 3. Most of possible conversions are invalid or their result is unclear
             // So ignore this feature for now.
             if (tag != "?")
-                nodeError(node, "An invalid tag'" + tag + "' encountered");
+                nodeError(node, "An invalid tag '" + tag + "' encountered");
 
             if (value.empty())
                 return ScalarType::Null;

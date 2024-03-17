@@ -20,10 +20,10 @@ namespace MWLua
 
         api["loadYaml"] = [lua = context.mLua, vfs](std::string_view fileName) {
             Files::IStreamPtr file = vfs->get(VFS::Path::Normalized(fileName));
-            return LuaUtil::YamlLoader::load(*file, lua->sol());
+            return LuaUtil::loadYaml(*file, lua->sol());
         };
         api["decodeYaml"] = [lua = context.mLua](std::string_view inputData) {
-            return LuaUtil::YamlLoader::load(std::string(inputData), lua->sol());
+            return LuaUtil::loadYaml(std::string(inputData), lua->sol());
         };
 
         return LuaUtil::makeReadOnly(api);

@@ -1,17 +1,19 @@
 #include <gtest/gtest.h>
 
+#include <sol/object.hpp>
+#include <sol/state.hpp>
+#include <sol/table.hpp>
+
 #include <yaml-cpp/yaml.h>
 
 #include <components/lua/yamlloader.hpp>
-
-#include "../testing_util.hpp"
 
 namespace
 {
     template <typename T>
     bool checkNumber(sol::state_view& lua, const std::string& inputData, T requiredValue)
     {
-        sol::object result = LuaUtil::YamlLoader::load(inputData, lua);
+        sol::object result = LuaUtil::loadYaml(inputData, lua);
         if (result.get_type() != sol::type::number)
             return false;
 
@@ -20,7 +22,7 @@ namespace
 
     bool checkBool(sol::state_view& lua, const std::string& inputData, bool requiredValue)
     {
-        sol::object result = LuaUtil::YamlLoader::load(inputData, lua);
+        sol::object result = LuaUtil::loadYaml(inputData, lua);
         if (result.get_type() != sol::type::boolean)
             return false;
 
@@ -29,13 +31,13 @@ namespace
 
     bool checkNil(sol::state_view& lua, const std::string& inputData)
     {
-        sol::object result = LuaUtil::YamlLoader::load(inputData, lua);
+        sol::object result = LuaUtil::loadYaml(inputData, lua);
         return result == sol::nil;
     }
 
     bool checkNan(sol::state_view& lua, const std::string& inputData)
     {
-        sol::object result = LuaUtil::YamlLoader::load(inputData, lua);
+        sol::object result = LuaUtil::loadYaml(inputData, lua);
         if (result.get_type() != sol::type::number)
             return false;
 
@@ -44,7 +46,7 @@ namespace
 
     bool checkString(sol::state_view& lua, const std::string& inputData, const std::string& requiredValue)
     {
-        sol::object result = LuaUtil::YamlLoader::load(inputData, lua);
+        sol::object result = LuaUtil::loadYaml(inputData, lua);
         if (result.get_type() != sol::type::string)
             return false;
 
@@ -53,7 +55,7 @@ namespace
 
     bool checkString(sol::state_view& lua, const std::string& inputData)
     {
-        sol::object result = LuaUtil::YamlLoader::load(inputData, lua);
+        sol::object result = LuaUtil::loadYaml(inputData, lua);
         if (result.get_type() != sol::type::string)
             return false;
 
@@ -165,7 +167,7 @@ namespace
         try
         {
             YAML::Node root = YAML::Load(input);
-            sol::object result = LuaUtil::YamlLoader::load(input, lua);
+            sol::object result = LuaUtil::loadYaml(input, lua);
         }
         catch (const std::runtime_error& e)
         {
@@ -180,29 +182,29 @@ namespace
     {
         sol::state lua;
 
-        sol::object map = LuaUtil::YamlLoader::load("{ x: , y: 2, 4: 5 }", lua);
+        sol::object map = LuaUtil::loadYaml("{ x: , y: 2, 4: 5 }", lua);
         ASSERT_EQ(map.as<sol::table>()["x"], sol::nil);
         ASSERT_EQ(map.as<sol::table>()["y"], 2);
         ASSERT_EQ(map.as<sol::table>()[4], 5);
 
-        sol::object array = LuaUtil::YamlLoader::load("[ 3, 4 ]", lua);
+        sol::object array = LuaUtil::loadYaml("[ 3, 4 ]", lua);
         ASSERT_EQ(array.as<sol::table>()[1], 3);
 
-        sol::object emptyTable = LuaUtil::YamlLoader::load("{}", lua);
+        sol::object emptyTable = LuaUtil::loadYaml("{}", lua);
         ASSERT_TRUE(emptyTable.as<sol::table>().empty());
 
-        sol::object emptyArray = LuaUtil::YamlLoader::load("[]", lua);
+        sol::object emptyArray = LuaUtil::loadYaml("[]", lua);
         ASSERT_TRUE(emptyArray.as<sol::table>().empty());
 
-        ASSERT_THROW(LuaUtil::YamlLoader::load("{ null: 1 }", lua), std::runtime_error);
-        ASSERT_THROW(LuaUtil::YamlLoader::load("{ .nan: 1 }", lua), std::runtime_error);
+        ASSERT_THROW(LuaUtil::loadYaml("{ null: 1 }", lua), std::runtime_error);
+        ASSERT_THROW(LuaUtil::loadYaml("{ .nan: 1 }", lua), std::runtime_error);
 
         const std::string scalarArrayInput = R"(
             - First Scalar
             - 1
             - true)";
 
-        sol::object scalarArray = LuaUtil::YamlLoader::load(scalarArrayInput, lua);
+        sol::object scalarArray = LuaUtil::loadYaml(scalarArrayInput, lua);
         ASSERT_EQ(scalarArray.as<sol::table>()[1], std::string("First Scalar"));
         ASSERT_EQ(scalarArray.as<sol::table>()[2], 1);
         ASSERT_EQ(scalarArray.as<sol::table>()[3], true);
@@ -213,7 +215,7 @@ namespace
             float: 0.278 # Float value
             bool: false # Boolean value)";
 
-        sol::object scalarMapWithComments = LuaUtil::YamlLoader::load(scalarMapWithCommentsInput, lua);
+        sol::object scalarMapWithComments = LuaUtil::loadYaml(scalarMapWithCommentsInput, lua);
         ASSERT_EQ(scalarMapWithComments.as<sol::table>()["string"], std::string("str"));
         ASSERT_EQ(scalarMapWithComments.as<sol::table>()["integer"], 65);
         ASSERT_EQ(scalarMapWithComments.as<sol::table>()["float"], 0.278);
@@ -229,7 +231,7 @@ namespace
             - false
             - 1)";
 
-        sol::object mapOfArrays = LuaUtil::YamlLoader::load(mapOfArraysInput, lua);
+        sol::object mapOfArrays = LuaUtil::loadYaml(mapOfArraysInput, lua);
         ASSERT_EQ(mapOfArrays.as<sol::table>()["x"][3], true);
         ASSERT_EQ(mapOfArrays.as<sol::table>()["y"][1], std::string("aaa"));
 
@@ -243,7 +245,7 @@ namespace
               hr:   63
               avg:  0.288)";
 
-        sol::object arrayOfMaps = LuaUtil::YamlLoader::load(arrayOfMapsInput, lua);
+        sol::object arrayOfMaps = LuaUtil::loadYaml(arrayOfMapsInput, lua);
         ASSERT_EQ(arrayOfMaps.as<sol::table>()[1]["avg"], 0.278);
         ASSERT_EQ(arrayOfMaps.as<sol::table>()[2]["name"], std::string("Name2"));
 
@@ -251,7 +253,7 @@ namespace
             - [Name1, 65, 0.278]
             - [Name2  , 63, 0.288])";
 
-        sol::object arrayOfArrays = LuaUtil::YamlLoader::load(arrayOfArraysInput, lua);
+        sol::object arrayOfArrays = LuaUtil::loadYaml(arrayOfArraysInput, lua);
         ASSERT_EQ(arrayOfArrays.as<sol::table>()[1][2], 65);
         ASSERT_EQ(arrayOfArrays.as<sol::table>()[2][1], std::string("Name2"));
 
@@ -262,7 +264,7 @@ namespace
                 avg: 0.288,
              })";
 
-        sol::object mapOfMaps = LuaUtil::YamlLoader::load(mapOfMapsInput, lua);
+        sol::object mapOfMaps = LuaUtil::loadYaml(mapOfMapsInput, lua);
         ASSERT_EQ(mapOfMaps.as<sol::table>()["Name1"]["hr"], 65);
         ASSERT_EQ(mapOfMaps.as<sol::table>()["Name2"]["avg"], 0.288);
     }
@@ -282,7 +284,7 @@ namespace
               "    - 3\n"
               "    - false";
 
-        sol::object twoDocuments = LuaUtil::YamlLoader::load(twoDocumentsInput, lua);
+        sol::object twoDocuments = LuaUtil::loadYaml(twoDocumentsInput, lua);
         ASSERT_EQ(twoDocuments.as<sol::table>()[1][1], std::string("First Scalar"));
         ASSERT_EQ(twoDocuments.as<sol::table>()[2][3], false);
 
@@ -295,7 +297,7 @@ namespace
             - *a # Subsequent occurrence
             - Name2)";
 
-        sol::object anchor = LuaUtil::YamlLoader::load(anchorInput, lua);
+        sol::object anchor = LuaUtil::loadYaml(anchorInput, lua);
         ASSERT_EQ(anchor.as<sol::table>()["y"][1], std::string("Value1"));
 
         const std::string compoundKeyInput = R"(
@@ -307,7 +309,7 @@ namespace
                 String4 ]
             : [ 2, 3, 4 ])";
 
-        ASSERT_THROW(LuaUtil::YamlLoader::load(compoundKeyInput, lua), std::runtime_error);
+        ASSERT_THROW(LuaUtil::loadYaml(compoundKeyInput, lua), std::runtime_error);
 
         const std::string compactNestedMappingInput = R"(
             - item    : Item1
@@ -317,7 +319,7 @@ namespace
             - item    : Item3
               quantity: 11)";
 
-        sol::object compactNestedMapping = LuaUtil::YamlLoader::load(compactNestedMappingInput, lua);
+        sol::object compactNestedMapping = LuaUtil::loadYaml(compactNestedMappingInput, lua);
         ASSERT_EQ(compactNestedMapping.as<sol::table>()[2]["quantity"], 4);
     }
 
@@ -347,7 +349,7 @@ namespace
             quoted: "So does this
               quoted scalar.\n")";
 
-        sol::object multiLinePlanarScalars = LuaUtil::YamlLoader::load(multiLinePlanarScalarsInput, lua);
+        sol::object multiLinePlanarScalars = LuaUtil::loadYaml(multiLinePlanarScalarsInput, lua);
         ASSERT_TRUE(
             multiLinePlanarScalars.as<sol::table>()["plain"] == std::string("This unquoted scalar spans many lines."));
         ASSERT_TRUE(multiLinePlanarScalars.as<sol::table>()["quoted"] == std::string("So does this quoted scalar.\n"));
