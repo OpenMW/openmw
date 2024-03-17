@@ -965,17 +965,17 @@ void OMW::Engine::go()
     }
 
     // Setup profiler
-    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler(stats.is_open(), mVFS.get());
+    osg::ref_ptr<Resource::Profiler> statsHandler = new Resource::Profiler(stats.is_open(), *mVFS);
 
-    initStatsHandler(*statshandler);
+    initStatsHandler(*statsHandler);
 
-    mViewer->addEventHandler(statshandler);
+    mViewer->addEventHandler(statsHandler);
 
-    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler(stats.is_open(), mVFS.get());
-    mViewer->addEventHandler(resourceshandler);
+    osg::ref_ptr<Resource::StatsHandler> resourcesHandler = new Resource::StatsHandler(stats.is_open(), *mVFS);
+    mViewer->addEventHandler(resourcesHandler);
 
     if (stats.is_open())
-        Resource::CollectStatistics(mViewer);
+        Resource::collectStatistics(*mViewer);
 
     // Start the game
     if (!mSaveGameFile.empty())
