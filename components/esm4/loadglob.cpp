@@ -41,16 +41,16 @@ void ESM4::GlobalVariable::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
             case ESM::fourCC("XALG"): // FO76
                 reader.get(mExtraFlags2);
                 break;
-            case ESM4::SUB_FNAM:
+            case ESM::fourCC("FNAM"):
                 reader.get(mType);
                 break;
-            case ESM4::SUB_FLTV:
+            case ESM::fourCC("FLTV"):
                 reader.get(mValue);
                 break;
             case ESM::fourCC("NTWK"): // FO76

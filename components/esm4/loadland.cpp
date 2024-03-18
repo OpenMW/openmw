@@ -65,18 +65,18 @@ void ESM4::Land::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 reader.get(mLandFlags);
                 break;
             }
-            case ESM4::SUB_VNML: // vertex normals, 33x33x(1+1+1) = 3267
+            case ESM::fourCC("VNML"): // vertex normals, 33x33x(1+1+1) = 3267
             {
                 reader.get(mVertNorm);
                 mDataTypes |= LAND_VNML;
                 break;
             }
-            case ESM4::SUB_VHGT: // vertex height gradient, 4+33x33+3 = 4+1089+3 = 1096
+            case ESM::fourCC("VHGT"): // vertex height gradient, 4+33x33+3 = 4+1089+3 = 1096
             {
 #if 0
                 reader.get(mHeightMap.heightOffset);
@@ -88,13 +88,13 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 mDataTypes |= LAND_VHGT;
                 break;
             }
-            case ESM4::SUB_VCLR: // vertex colours, 24bit RGB, 33x33x(1+1+1) = 3267
+            case ESM::fourCC("VCLR"): // vertex colours, 24bit RGB, 33x33x(1+1+1) = 3267
             {
                 reader.get(mVertColr);
                 mDataTypes |= LAND_VCLR;
                 break;
             }
-            case ESM4::SUB_BTXT:
+            case ESM::fourCC("BTXT"):
             {
                 BTXT base;
                 if (reader.getExact(base))
@@ -112,7 +112,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_ATXT:
+            case ESM::fourCC("ATXT"):
             {
                 if (currentAddQuad != -1)
                 {
@@ -144,7 +144,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 currentAddQuad = layer.texture.quadrant;
                 break;
             }
-            case ESM4::SUB_VTXT:
+            case ESM::fourCC("VTXT"):
             {
                 if (currentAddQuad == -1)
                     throw std::runtime_error("VTXT without ATXT found");
@@ -177,7 +177,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 // std::cout << "VTXT: count " << std::dec << count << std::endl;
                 break;
             }
-            case ESM4::SUB_VTEX: // only in Oblivion?
+            case ESM::fourCC("VTEX"): // only in Oblivion?
             {
                 const std::uint16_t count = reader.subRecordHeader().dataSize / sizeof(ESM::FormId32);
                 if ((reader.subRecordHeader().dataSize % sizeof(ESM::FormId32)) != 0)
@@ -191,7 +191,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_MPCD: // FO4
+            case ESM::fourCC("MPCD"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

@@ -42,10 +42,10 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
             {
                 if (mFullName.empty())
                 {
@@ -64,7 +64,7 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
                     break;
                 }
             }
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 if (subHdr.dataSize == 8) // FO3 is size 4 even though VER_094
@@ -74,49 +74,49 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIcon);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_ENIT:
+            case ESM::fourCC("ENIT"):
                 reader.get(mEnchantment);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_SCIT:
+            case ESM::fourCC("SCIT"):
             {
                 reader.get(mEffect);
                 reader.adjustFormId(mEffect.formId);
                 break;
             }
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_EFID:
-            case ESM4::SUB_EFIT:
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_VMAD:
-            case ESM4::SUB_YNAM:
-            case ESM4::SUB_ZNAM:
-            case ESM4::SUB_ETYP: // FO3
-            case ESM4::SUB_DAMC: // Destructible
-            case ESM4::SUB_DEST:
-            case ESM4::SUB_DMDC:
-            case ESM4::SUB_DMDL:
-            case ESM4::SUB_DMDT:
-            case ESM4::SUB_DMDS:
-            case ESM4::SUB_DSTA:
-            case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF: // Destructible end
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("EFID"):
+            case ESM::fourCC("EFIT"):
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("VMAD"):
+            case ESM::fourCC("YNAM"):
+            case ESM::fourCC("ZNAM"):
+            case ESM::fourCC("ETYP"): // FO3
+            case ESM::fourCC("DAMC"): // Destructible
+            case ESM::fourCC("DEST"):
+            case ESM::fourCC("DMDC"):
+            case ESM::fourCC("DMDL"):
+            case ESM::fourCC("DMDT"):
+            case ESM::fourCC("DMDS"):
+            case ESM::fourCC("DSTA"):
+            case ESM::fourCC("DSTD"):
+            case ESM::fourCC("DSTF"): // Destructible end
             {
                 reader.skipSubRecordData();
                 break;

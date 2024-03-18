@@ -41,55 +41,55 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getZString(mFullName);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mData);
                 break;
-            case ESM4::SUB_BMDT:
+            case ESM::fourCC("BMDT"):
                 reader.get(mClothingFlags);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_ENAM:
+            case ESM::fourCC("ENAM"):
                 reader.getFormId(mEnchantment);
                 break;
-            case ESM4::SUB_ANAM:
+            case ESM::fourCC("ANAM"):
                 reader.get(mEnchantmentPoints);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModelMale);
                 break;
-            case ESM4::SUB_MOD2:
+            case ESM::fourCC("MOD2"):
                 reader.getZString(mModelMaleWorld);
                 break;
-            case ESM4::SUB_MOD3:
+            case ESM::fourCC("MOD3"):
                 reader.getZString(mModelFemale);
                 break;
-            case ESM4::SUB_MOD4:
+            case ESM::fourCC("MOD4"):
                 reader.getZString(mModelFemaleWorld);
                 break;
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIconMale);
                 break;
-            case ESM4::SUB_ICO2:
+            case ESM::fourCC("ICO2"):
                 reader.getZString(mIconFemale);
                 break;
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_MO2B:
-            case ESM4::SUB_MO3B:
-            case ESM4::SUB_MO4B:
-            case ESM4::SUB_MO2T:
-            case ESM4::SUB_MO3T:
-            case ESM4::SUB_MO4T:
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("MO2B"):
+            case ESM::fourCC("MO3B"):
+            case ESM::fourCC("MO4B"):
+            case ESM::fourCC("MO2T"):
+            case ESM::fourCC("MO3T"):
+            case ESM::fourCC("MO4T"):
                 reader.skipSubRecordData();
                 break;
             default:
