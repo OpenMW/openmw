@@ -23,11 +23,11 @@ import termtables
               help='Print a list of all present keys in the input file.')
 @click.option('--regexp_match', is_flag=True,
               help='Use all metric that match given key. '
-                   'Can be used with stats, timeseries, commulative_timeseries, hist, hist_threshold')
+                   'Can be used with stats, timeseries, cumulative_timeseries, hist, hist_threshold')
 @click.option('--timeseries', type=str, multiple=True,
               help='Show a graph for given metric over time.')
-@click.option('--commulative_timeseries', type=str, multiple=True,
-              help='Show a graph for commulative sum of a given metric over time.')
+@click.option('--cumulative_timeseries', type=str, multiple=True,
+              help='Show a graph for cumulative sum of a given metric over time.')
 @click.option('--timeseries_delta', type=str, multiple=True,
               help='Show a graph for delta between neighbouring frames of a given metric over time.')
 @click.option('--hist', type=str, multiple=True,
@@ -54,8 +54,8 @@ import termtables
               help='Format floating point numbers with given precision')
 @click.option('--timeseries_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries metrics.')
-@click.option('--commulative_timeseries_sum', is_flag=True,
-              help='Add a graph to timeseries for a sum per frame of all given commulative timeseries.')
+@click.option('--cumulative_timeseries_sum', is_flag=True,
+              help='Add a graph to timeseries for a sum per frame of all given cumulative timeseries.')
 @click.option('--timeseries_delta_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries delta.')
 @click.option('--begin_frame', type=int, default=0,
@@ -75,7 +75,7 @@ import termtables
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
-         commulative_timeseries, commulative_timeseries_sum, frame_number_name,
+         cumulative_timeseries, cumulative_timeseries_sum, frame_number_name,
          hist_threshold, threshold_name, threshold_value, show_common_path_prefix, stats_sort_by,
          timeseries_delta, timeseries_delta_sum, stats_table_format):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
@@ -97,8 +97,8 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if timeseries:
         draw_timeseries(sources=frames, keys=matching_keys(timeseries), add_sum=timeseries_sum,
                         begin_frame=begin_frame, end_frame=end_frame)
-    if commulative_timeseries:
-        draw_commulative_timeseries(sources=frames, keys=matching_keys(commulative_timeseries), add_sum=commulative_timeseries_sum,
+    if cumulative_timeseries:
+        draw_cumulative_timeseries(sources=frames, keys=matching_keys(cumulative_timeseries), add_sum=cumulative_timeseries_sum,
                                     begin_frame=begin_frame, end_frame=end_frame)
     if timeseries_delta:
         draw_timeseries_delta(sources=frames, keys=matching_keys(timeseries_delta), add_sum=timeseries_delta_sum,
@@ -194,7 +194,7 @@ def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     fig.canvas.manager.set_window_title('timeseries')
 
 
-def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
+def draw_cumulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
@@ -206,7 +206,7 @@ def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
             ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
-    fig.canvas.manager.set_window_title('commulative_timeseries')
+    fig.canvas.manager.set_window_title('cumulative_timeseries')
 
 
 def draw_timeseries_delta(sources, keys, add_sum, begin_frame, end_frame):
