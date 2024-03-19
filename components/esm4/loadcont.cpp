@@ -53,7 +53,7 @@ void ESM4::Container::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_CNTO:
             {
-                static InventoryItem inv; // FIXME: use unique_ptr here?
+                InventoryItem inv; // FIXME: use unique_ptr here?
                 reader.get(inv);
                 reader.adjustFormId(inv.item);
                 mInventory.push_back(inv);

@@ -58,7 +58,7 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_LVLO:
             {
-                static LVLO lvlo;
+                LVLO lvlo;
                 if (subHdr.dataSize != 12)
                 {
                     if (subHdr.dataSize == 8)

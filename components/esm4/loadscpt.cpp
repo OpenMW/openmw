@@ -36,7 +36,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    static ScriptLocalVariableData localVar;
+    ScriptLocalVariableData localVar;
 
     while (reader.getSubRecordHeader())
     {

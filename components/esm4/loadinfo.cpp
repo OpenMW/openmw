@@ -41,7 +41,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
     mEditorId = ESM::RefId(mId).serializeText(); // FIXME: quick workaround to use existing code
 
-    static ScriptLocalVariableData localVar;
+    ScriptLocalVariableData localVar;
     bool ignore = false;
 
     while (reader.getSubRecordHeader())

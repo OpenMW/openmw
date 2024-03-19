@@ -68,7 +68,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_PGRR:
             {
-                static PGRR link;
+                PGRR link;
 
                 for (std::size_t i = 0; i < std::size_t(mData); ++i) // keep gcc quiet
                 {
@@ -105,7 +105,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_PGRL:
             {
-                static PGRL objLink;
+                PGRL objLink;
                 reader.getFormId(objLink.object);
                 //                                        object             linkedNode
                 std::size_t numNodes = (subHdr.dataSize - sizeof(int32_t)) / sizeof(int32_t);
