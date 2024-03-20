@@ -293,10 +293,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     std::unordered_set<QString> visitedDirectories;
     for (const Config::SettingValue& currentDir : directories)
     {
-        // normalize user supplied directories: resolve symlink, convert to native separator
-        const QString canonicalDirPath = QDir(QDir::cleanPath(currentDir.value)).canonicalPath();
-
-        if (!visitedDirectories.insert(canonicalDirPath).second)
+        if (!visitedDirectories.insert(currentDir.value).second)
             continue;
 
         // add new achives files presents in current directory
@@ -305,7 +302,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         QStringList tooltip;
 
         // add content files presents in current directory
-        mSelector->addFiles(currentDir.value, mNewDataDirs.contains(canonicalDirPath));
+        mSelector->addFiles(currentDir.value, mNewDataDirs.contains(currentDir.value));
 
         // add current directory to list
         ui.directoryListWidget->addItem(currentDir.originalRepresentation);
@@ -317,7 +314,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             tooltip << tr("Resolved as %1").arg(currentDir.value);
 
         // Display new content with custom formatting
-        if (mNewDataDirs.contains(canonicalDirPath))
+        if (mNewDataDirs.contains(currentDir.value))
         {
             tooltip << tr("Will be added to the current profile");
             QFont font = item->font();
