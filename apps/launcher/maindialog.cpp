@@ -373,7 +373,10 @@ bool Launcher::MainDialog::setupGameData()
                 << "*.omwaddon";
 
         if (!dir.entryList(filters).isEmpty())
+        {
             foundData = true;
+            break;
+        }
     }
 
     if (!foundData)
