@@ -588,7 +588,7 @@ namespace ESM4
 
         // Extended storage subrecord redefines the following subrecord's size.
         // Would need to redesign the loader to support that, so skip over both subrecords.
-        if (result && mCtx.subRecordHeader.typeId == ESM4::SUB_XXXX)
+        if (result && mCtx.subRecordHeader.typeId == ESM::fourCC("XXXX"))
         {
             std::uint32_t extDataSize;
             get(extDataSize);
