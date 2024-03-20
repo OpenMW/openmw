@@ -246,6 +246,11 @@ bool Launcher::SettingsPage::loadSettings()
         int shadowResIndex = shadowResolutionComboBox->findText(QString::number(shadowRes));
         if (shadowResIndex != -1)
             shadowResolutionComboBox->setCurrentIndex(shadowResIndex);
+        else
+        {
+            shadowResolutionComboBox->addItem(QString::number(shadowRes));
+            shadowResolutionComboBox->setCurrentIndex(shadowResolutionComboBox->count() - 1);
+        }
 
         connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotShadowDistLimitToggled);
 
