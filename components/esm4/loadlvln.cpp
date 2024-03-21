@@ -59,7 +59,7 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("LVLO"):
             {
-                static LVLO lvlo;
+                LVLO lvlo;
                 if (subHdr.dataSize != 12)
                 {
                     if (subHdr.dataSize == 8)

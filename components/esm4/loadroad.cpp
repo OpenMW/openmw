@@ -59,8 +59,8 @@ void ESM4::Road::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("PGRR"):
             {
-                static PGRR link;
-                static RDRP linkPt;
+                PGRR link;
+                RDRP linkPt;
 
                 for (std::size_t i = 0; i < mNodes.size(); ++i)
                 {
