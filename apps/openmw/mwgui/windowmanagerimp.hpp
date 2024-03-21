@@ -313,7 +313,7 @@ namespace MWGui
 
         void setEnemy(const MWWorld::Ptr& enemy) override;
 
-        int getMessagesCount() const override;
+        std::size_t getMessagesCount() const override;
 
         const Translation::Storage& getTranslationDataStorage() const override;
 

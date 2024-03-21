@@ -6,17 +6,21 @@
 
 #include <lz4frame.h>
 
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-
 #if defined(_MSC_VER)
+// why is this necessary? These are included with /external:I
 #pragma warning(push)
 #pragma warning(disable : 4706)
+#pragma warning(disable : 4702)
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #pragma warning(pop)
 #else
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #endif
 
 #include <boost/iostreams/device/array.hpp>

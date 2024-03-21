@@ -1685,9 +1685,9 @@ namespace MWGui
         mHud->setEnemy(enemy);
     }
 
-    int WindowManager::getMessagesCount() const
+    std::size_t WindowManager::getMessagesCount() const
     {
-        int count = 0;
+        std::size_t count = 0;
         if (mMessageBoxManager)
             count = mMessageBoxManager->getMessagesCount();
 

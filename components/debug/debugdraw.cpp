@@ -124,7 +124,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         float theta = (float(i) / float(subdiv)) * osg::PI * 2.;
-        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
         pos *= radius;
         pos.z() = height / 2.;
         vertices->push_back(pos);
@@ -150,7 +150,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         float theta = float(i) / float(subdiv) * osg::PI * 2.;
-        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
         pos *= radius;
         pos.z() = -height / 2.;
         vertices->push_back(pos);
@@ -162,7 +162,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         float theta = float(i) / float(subdiv) * osg::PI * 2.;
-        osg::Vec3 normal = sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        osg::Vec3 normal = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
         auto posTop = normal;
         posTop *= radius;
         auto posBot = posTop;

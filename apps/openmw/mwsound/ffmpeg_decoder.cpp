@@ -21,7 +21,9 @@ namespace MWSound
             std::streamsize count = stream.gcount();
             if (count == 0)
                 return AVERROR_EOF;
-            return count;
+            if (count > std::numeric_limits<int>::max())
+                return AVERROR_BUG;
+            return static_cast<int>(count);
         }
         catch (std::exception&)
         {
@@ -72,7 +74,7 @@ namespace MWSound
         if (!mStream)
             return false;
 
-        int stream_idx = mStream - mFormatCtx->streams;
+        std::ptrdiff_t stream_idx = mStream - mFormatCtx->streams;
         while (av_read_frame(mFormatCtx, &mPacket) >= 0)
         {
             /* Check if the packet belongs to this stream */
@@ -427,9 +429,9 @@ namespace MWSound
 
     size_t FFmpeg_Decoder::getSampleOffset()
     {
-        int delay = (mFrameSize - mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout)
+        std::size_t delay = (mFrameSize - mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout)
             / av_get_bytes_per_sample(mOutputSampleFormat);
-        return (int)(mNextPts * mCodecCtx->sample_rate) - delay;
+        return static_cast<std::size_t>(mNextPts * mCodecCtx->sample_rate) - delay;
     }
 
     FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)

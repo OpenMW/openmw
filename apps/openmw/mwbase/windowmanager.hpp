@@ -290,7 +290,7 @@ namespace MWBase
 
         virtual void setEnemy(const MWWorld::Ptr& enemy) = 0;
 
-        virtual int getMessagesCount() const = 0;
+        virtual std::size_t getMessagesCount() const = 0;
 
         virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 

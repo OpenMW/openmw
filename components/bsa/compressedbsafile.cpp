@@ -30,16 +30,18 @@
 
 #include <lz4frame.h>
 
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4706)
+#pragma warning(disable : 4702)
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #pragma warning(pop)
 #else
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #endif
 
 #include <boost/iostreams/device/array.hpp>
@@ -168,7 +170,7 @@ namespace Bsa
                     name.resize(input.gcount());
                     if (name.back() != '\0')
                         fail("Failed to read a filename: filename is too long");
-                    mHeader.mFileNamesLength -= input.gcount();
+                    mHeader.mFileNamesLength -= static_cast<std::uint32_t>(input.gcount());
                     file.mName.insert(file.mName.begin(), folder.mName.begin(), folder.mName.end());
                     file.mName.insert(file.mName.begin() + folder.mName.size(), '\\');
                 }
