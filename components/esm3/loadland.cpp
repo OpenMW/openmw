@@ -25,7 +25,7 @@ namespace ESM
 
         // Loads data and marks it as loaded. Return true if data is actually loaded from reader, false otherwise
         // including the case when data is already loaded.
-        bool condLoad(ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, unsigned int size)
+        bool condLoad(ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, std::size_t size)
         {
             if ((targetFlags & dataFlag) == 0 && (flags & dataFlag) != 0)
             {
@@ -94,7 +94,7 @@ namespace ESM
                     mDataTypes |= DATA_VHGT;
                     break;
                 case fourCC("WNAM"):
-                    esm.getHExact(mWnam.data(), static_cast<int>(mWnam.size()));
+                    esm.getHExact(mWnam.data(), mWnam.size());
                     mDataTypes |= DATA_WNAM;
                     break;
                 case fourCC("VCLR"):

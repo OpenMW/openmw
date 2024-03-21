@@ -238,10 +238,10 @@ namespace ESM
         void skipHRefId();
 
         // Read the given number of bytes from a subrecord
-        void getHExact(void* p, int size);
+        void getHExact(void* p, std::size_t size);
 
         // Read the given number of bytes from a named subrecord
-        void getHNExact(void* p, int size, NAME name);
+        void getHNExact(void* p, std::size_t size, NAME name);
 
         ESM::FormId getFormId(bool wide = false, NAME tag = "FRMR");
 
@@ -275,7 +275,7 @@ namespace ESM
         void skipHSub();
 
         // Skip sub record and check its size
-        void skipHSubSize(int size);
+        void skipHSubSize(std::size_t size);
 
         // Skip all subrecords until the given subrecord or no more subrecords remaining
         void skipHSubUntil(NAME name);
