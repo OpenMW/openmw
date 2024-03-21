@@ -94,7 +94,7 @@ namespace ESM
                     mDataTypes |= DATA_VHGT;
                     break;
                 case fourCC("WNAM"):
-                    esm.getHExact(mWnam.data(), mWnam.size());
+                    esm.getHExact(mWnam.data(), static_cast<int>(mWnam.size()));
                     mDataTypes |= DATA_WNAM;
                     break;
                 case fourCC("VCLR"):
@@ -206,7 +206,7 @@ namespace ESM
             mLandData = std::make_unique<LandData>();
 
         mLandData->mHeightOffset = 0;
-        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0);
+        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0.0f);
         mLandData->mMinHeight = 0;
         mLandData->mMaxHeight = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)

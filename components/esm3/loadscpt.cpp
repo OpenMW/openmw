@@ -150,7 +150,7 @@ namespace ESM
         if (!hasHeader)
             esm.fail("Missing SCHD subrecord");
         // Reported script data size is not always trustworthy, so override it with actual data size
-        mData.mScriptDataSize = mScriptData.size();
+        mData.mScriptDataSize = static_cast<uint32_t>(mScriptData.size());
     }
 
     void Script::save(ESMWriter& esm, bool isDeleted) const
