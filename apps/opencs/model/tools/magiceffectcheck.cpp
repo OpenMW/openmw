@@ -58,7 +58,7 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages& messa
         return;
 
     ESM::MagicEffect effect = record.get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_MagicEffect, effect.mId);
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_MagicEffect, CSMWorld::getRecordId(effect));
 
     if (effect.mDescription.empty())
     {
