@@ -96,6 +96,8 @@ namespace MWGui
         Gui::AutoSizedEditBox* mShaderInfo;
 
         std::string mOverrideHint;
+
+        int mOffset = 0;
     };
 }
 

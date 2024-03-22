@@ -451,21 +451,21 @@ To use the sampler, define the appropriately named `sampler2D` in any of your pa
 It is possible to define settings for your shaders that can be adjusted by either users or a Lua script.
 
 
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-| Block           | default  | min      | max      | static  | step     | description  |  display_name     | header  |
-+=================+==========+==========+==========+=========+==========+==============+===================+=========+
-|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_float``| float    | float    | float    | boolean | float    | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+| Block           | default  | min      | max      | static  | step     | description  |  display_name     | header  |  widget_type |
++=================+==========+==========+==========+=========+==========+==============+===================+=========+==============+
+|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_float``| float    | float    | float    | boolean | float    | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
 
 The ``description`` field is used to display a toolip when viewed in the in-game HUD. The ``header`` field
 field can be used to organize uniforms into groups in the HUD. The ``display_name`` field can be used to create a
@@ -507,6 +507,21 @@ These uniform blocks must be defined with the new ``size`` parameter.
 
     uniform_vec3 uArray {
         size = 10;
+    }
+
+You may also define a dropdown list for users to select specific values from instead of the default sliders using the ``widget_type`` field.
+Each item in the dropdown has an associated display name, which can be a localized string.
+
+.. code-block:: none
+
+    uniform_int uStrength {
+        default = 2;
+        display_name = "Strength";
+        widget_type = choice(
+            "Low" = 1,
+            "Medium" = 2,
+            "High" = 3
+        );
     }
 
 ``render_target``
