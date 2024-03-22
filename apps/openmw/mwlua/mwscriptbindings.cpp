@@ -67,6 +67,19 @@ namespace MWLua
         return 0;
     }
 
+    void setGlobalVariableValue(const std::string_view globalId, float value)
+    {
+        char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
+        if (varType == 'f')
+        {
+            MWBase::Environment::get().getWorld()->setGlobalFloat(globalId, value);
+        }
+        else if (varType == 's' || varType == 'l')
+        {
+            MWBase::Environment::get().getWorld()->setGlobalInt(globalId, value);
+        }
+    }
+
     sol::table initMWScriptBindings(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
@@ -155,14 +168,22 @@ namespace MWLua
                 std::string globalId = g->mId.serializeText();
                 return getGlobalVariableValue(globalId);
             });
-
-        globalStoreT[sol::meta_function::new_index]
-            = sol::overload([](const GlobalStore& store, std::string_view globalId, float val) {
-                  auto g = store.search(ESM::RefId::deserializeText(globalId));
-                  if (g == nullptr)
-                      throw std::runtime_error("No variable \"" + std::string(globalId) + "\" in GlobalStore");
-                  return getGlobalVariableValue(globalId);
-              });
+        globalStoreT[sol::meta_function::new_index] = sol::overload(
+            [](const GlobalStore& store, std::string_view globalId, float val) -> void {
+                auto g = store.search(ESM::RefId::deserializeText(globalId));
+                if (g == nullptr)
+                    throw std::runtime_error("No variable \"" + std::string(globalId) + "\" in GlobalStore");
+                setGlobalVariableValue(globalId, val);
+            },
+            [](const GlobalStore& store, size_t index, float val) {
+                if (index < 1 || store.getSize() < index)
+                    return;
+                auto g = store.at(index - 1);
+                if (g == nullptr)
+                    return;
+                std::string globalId = g->mId.serializeText();
+                setGlobalVariableValue(globalId, val);
+            });
         globalStoreT[sol::meta_function::pairs] = [](const GlobalStore& store) {
             size_t index = 0;
             return sol::as_function(
