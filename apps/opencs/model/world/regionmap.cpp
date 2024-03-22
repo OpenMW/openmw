@@ -41,11 +41,6 @@ namespace CSMWorld
     }
 }
 
-CSMWorld::RegionMap::CellDescription::CellDescription()
-    : mDeleted(false)
-{
-}
-
 CSMWorld::RegionMap::CellDescription::CellDescription(const Record<Cell>& cell, float landHeight)
 {
     const Cell& cell2 = cell.get();

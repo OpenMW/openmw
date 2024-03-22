@@ -45,8 +45,6 @@ namespace CSMWorld
             ESM::RefId mRegion;
             std::string mName;
 
-            CellDescription();
-
             CellDescription(const Record<Cell>& cell, float landHeight);
         };
 
