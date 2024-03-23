@@ -183,8 +183,6 @@ namespace MWBase
         /// generate a name.
         virtual std::string_view getCellName(const MWWorld::Cell& cell) const = 0;
 
-        virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
-
         virtual void removeRefScript(const MWWorld::CellRef* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts
 

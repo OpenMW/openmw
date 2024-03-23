@@ -27,6 +27,7 @@
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loaddoor.hpp>
 #include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadwrld.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
@@ -662,25 +663,29 @@ namespace MWWorld
         if (!cell.isExterior() || !cell.getDisplayName().empty())
             return cell.getDisplayName();
 
-        return ESM::visit(ESM::VisitOverload{
-                              [&](const ESM::Cell& cellIn) -> std::string_view { return getCellName(&cellIn); },
-                              [&](const ESM4::Cell& cellIn) -> std::string_view {
-                                  return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
-                              },
-                          },
-            cell);
-    }
-
-    std::string_view World::getCellName(const ESM::Cell* cell) const
-    {
-        if (cell)
+        if (!cell.getRegion().empty())
         {
-            if (!cell->isExterior() || !cell->mName.empty())
-                return cell->mName;
-
-            if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
-                return region->mName;
+            std::string_view regionName
+                = ESM::visit(ESM::VisitOverload{
+                                 [&](const ESM::Cell& cellIn) -> std::string_view {
+                                     if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getRegion()))
+                                         return !region->mName.empty() ? region->mName : region->mId.getRefIdString();
+                                     return {};
+                                 },
+                                 [&](const ESM4::Cell& cellIn) -> std::string_view { return {}; },
+                             },
+                    cell);
+            if (!regionName.empty())
+                return regionName;
         }
+
+        if (!cell.getWorldSpace().empty() && ESM::isEsm4Ext(cell.getWorldSpace()))
+        {
+            if (const ESM4::World* worldspace = mStore.get<ESM4::World>().search(cell.getWorldSpace()))
+                if (!worldspace->mFullName.empty())
+                    return worldspace->mFullName;
+        }
+
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
     }
 
