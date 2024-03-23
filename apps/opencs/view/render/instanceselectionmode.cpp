@@ -58,7 +58,8 @@ namespace CSVRender
 
     InstanceSelectionMode::~InstanceSelectionMode()
     {
-        mParentNode->removeChild(mBaseNode);
+        if (mBaseNode)
+            mParentNode->removeChild(mBaseNode);
     }
 
     void InstanceSelectionMode::setDragStart(const osg::Vec3d& dragStart)

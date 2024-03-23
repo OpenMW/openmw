@@ -99,6 +99,7 @@
     Bug #7415: Unbreakable lock discrepancies
     Bug #7416: Modpccrimelevel is different from vanilla
     Bug #7428: AutoCalc flag is not used to calculate enchantment costs
+    Bug #7447: OpenMW-CS: Dragging a cell of a different type (from the initial type) into the 3D view crashes OpenMW-CS
     Bug #7450: Evading obstacles does not work for actors missing certain animations
     Bug #7459: Icons get stacked on the cursor when picking up multiple items simultaneously
     Bug #7472: Crash when enchanting last projectiles
