@@ -224,6 +224,8 @@ namespace Resource
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
         bool getSupportsNormalsRT() const { return mSupportsNormalsRT; }
 
+        void setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled);
+
         void setSoftParticles(bool enabled) { mSoftParticles = enabled; }
         bool getSoftParticles() const { return mSoftParticles; }
 
