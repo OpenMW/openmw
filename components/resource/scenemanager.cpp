@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include <osg/AlphaFunc>
+#include <osg/ColorMaski>
 #include <osg/Group>
 #include <osg/Node>
 #include <osg/UserDataContainer>
@@ -509,6 +510,13 @@ namespace Resource
     bool SceneManager::checkLoaded(const std::string& name, double timeStamp)
     {
         return mCache->checkInObjectCache(VFS::Path::normalizeFilename(name), timeStamp);
+    }
+
+    void SceneManager::setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled)
+    {
+        if (!getSupportsNormalsRT())
+            return;
+        stateset->setAttributeAndModes(new osg::ColorMaski(1, enabled, enabled, enabled, enabled));
     }
 
     /// @brief Callback to read image files from the VFS.

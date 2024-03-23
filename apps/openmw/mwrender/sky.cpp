@@ -274,6 +274,7 @@ namespace MWRender
         if (!mSceneManager->getForceShaders())
             skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
                 osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED | osg::StateAttribute::ON);
+        mSceneManager->setUpNormalsRTForStateSet(skyroot->getOrCreateStateSet(), false);
         SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*skyroot->getOrCreateStateSet());
         parentNode->addChild(skyroot);
 
