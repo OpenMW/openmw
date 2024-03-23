@@ -68,23 +68,23 @@ end
 local function testMWScript()
     local variableStoreCount = 18
     local variableStore = world.mwscript.getGlobalVariables(player)
-    testing.expectEqual(variableStoreCount,#variableStore)
+    testing.expectEqual(variableStoreCount, #variableStore)
     
-    variableStore.year = variableStoreCount
-    testing.expectEqual(variableStoreCount,variableStore.year)
+    variableStore.year = 5
+    testing.expectEqual(5, variableStore.year)
     variableStore.year = 1
     local indexCheck = 0
     for index, value in ipairs(variableStore) do
-        testing.expectEqual(variableStore[index],value)
+        testing.expectEqual(variableStore[index], value)
         indexCheck = indexCheck + 1
     end
-    testing.expectEqual(variableStoreCount,indexCheck)
+    testing.expectEqual(variableStoreCount, indexCheck)
     indexCheck = 0
     for index, value in pairs(variableStore) do
-        testing.expectEqual(variableStore[index],value)
+        testing.expectEqual(variableStore[index], value)
         indexCheck = indexCheck + 1
     end
-    testing.expectEqual(variableStoreCount,indexCheck)
+    testing.expectEqual(variableStoreCount, indexCheck)
 end
 
 local function initPlayer()
