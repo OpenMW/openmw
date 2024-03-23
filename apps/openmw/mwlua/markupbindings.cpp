@@ -19,12 +19,11 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         api["loadYaml"] = [lua = context.mLua, vfs](std::string_view fileName) {
-            auto normalizedName = VFS::Path::normalizeFilename(fileName);
-            auto file = vfs->getNormalized(normalizedName);
-            return LuaUtil::YamlLoader::load(*file, lua->sol());
+            Files::IStreamPtr file = vfs->get(VFS::Path::Normalized(fileName));
+            return LuaUtil::loadYaml(*file, lua->sol());
         };
         api["decodeYaml"] = [lua = context.mLua](std::string_view inputData) {
-            return LuaUtil::YamlLoader::load(std::string(inputData), lua->sol());
+            return LuaUtil::loadYaml(std::string(inputData), lua->sol());
         };
 
         return LuaUtil::makeReadOnly(api);
