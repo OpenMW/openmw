@@ -5,6 +5,8 @@
 
 namespace MWLua
 {
+    struct Context;
+
     sol::table initAnimationPackage(const Context& context);
     sol::table initCoreVfxBindings(const Context& context);
 }

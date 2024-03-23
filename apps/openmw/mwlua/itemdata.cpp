@@ -1,12 +1,10 @@
 #include "itemdata.hpp"
 
 #include "context.hpp"
-
 #include "luamanagerimp.hpp"
+#include "objectvariant.hpp"
 
 #include "../mwworld/class.hpp"
-
-#include "objectvariant.hpp"
 
 namespace
 {

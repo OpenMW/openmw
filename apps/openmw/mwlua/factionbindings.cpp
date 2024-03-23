@@ -3,14 +3,9 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/lua/luastate.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
-
-#include "../mwmechanics/npcstats.hpp"
+#include "../mwworld/store.hpp"
 
 #include "idcollectionbindings.hpp"
-#include "luamanagerimp.hpp"
 
 namespace
 {

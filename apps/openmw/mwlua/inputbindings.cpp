@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwinput/actions.hpp"
+
 #include "luamanagerimp.hpp"
 
 namespace sol

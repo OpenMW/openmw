@@ -1,6 +1,9 @@
 #include "vfsbindings.hpp"
 
+#include <sol/object.hpp>
+
 #include <components/files/istreamptr.hpp>
+#include <components/lua/luastate.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
@@ -10,7 +13,6 @@
 #include "../mwbase/environment.hpp"
 
 #include "context.hpp"
-#include "luamanagerimp.hpp"
 
 namespace MWLua
 {
