@@ -70,6 +70,26 @@ namespace SceneUtil
         NodeMap& mMap;
     };
 
+    /// Maps names to bone nodes
+    class NodeMapVisitorBoneOnly : public osg::NodeVisitor
+    {
+    public:
+        typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash,
+            Misc::StringUtils::CiEqual>
+            NodeMap;
+
+        NodeMapVisitorBoneOnly(NodeMap& map)
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+            , mMap(map)
+        {
+        }
+
+        void apply(osg::MatrixTransform& trans) override;
+
+    private:
+        NodeMap& mMap;
+    };
+
     /// @brief Base class for visitors that remove nodes from a scene graph.
     /// Subclasses need to fill the mToRemove vector.
     /// To use, node->accept(removeVisitor); removeVisitor.remove();

@@ -5,6 +5,8 @@
 #include <osg/TexMat>
 #include <osg/Texture2D>
 
+#include <osgAnimation/Bone>
+
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
@@ -405,6 +407,18 @@ namespace NifOsg
             // Note: doing it like this means RollControllers are not compatible with KeyframeControllers.
             // KeyframeController currently wins the conflict.
             // However unlikely that is, NetImmerse might combine the transformations somehow.
+
+            // If we are linked to a bone we must call setMatrixInSkeletonSpace
+            const osg::Matrix matrix = node->getMatrix();
+            osgAnimation::Bone* b = dynamic_cast<osgAnimation::Bone*>(node);
+            if (b)
+            {
+                osgAnimation::Bone* parent = b->getBoneParent();
+                if (parent)
+                    b->setMatrixInSkeletonSpace(matrix * parent->getMatrixInSkeletonSpace());
+                else
+                    b->setMatrixInSkeletonSpace(matrix);
+            }
         }
     }
 

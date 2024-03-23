@@ -10,6 +10,7 @@
 #include <osgAnimation/Sampler>
 #include <osgAnimation/UpdateMatrixTransform>
 
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/animation.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -17,26 +18,6 @@
 
 namespace SceneUtil
 {
-    inline bool isEqualCharUnderscores(char a, char b)
-    {
-        if (a == '_') a = ' '; // Treat underscore as space
-        if (b == '_') b = ' '; // Treat underscore as space
-        return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
-    }
-
-    inline bool isEqualWithUnderscores(const std::string_view& str1, const std::string_view& str2)
-    {
-        if (str1.length() != str2.length())
-            return false;
-
-        for (size_t i = 0; i < str1.length(); ++i)
-        {
-            if (!isEqualCharUnderscores(str1[i], str2[i]))
-                return false;
-        }
-        return true;
-    }
-
     LinkVisitor::LinkVisitor()
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
     {
@@ -45,6 +26,10 @@ namespace SceneUtil
 
     void LinkVisitor::link(osgAnimation::UpdateMatrixTransform* umt)
     {
+        // If osgAnimation had underscores, we should update the umt name also
+        // otherwise the animation channel and updates wont be applied
+        umt->setName(Misc::StringUtils::underscoresToSpaces(umt->getName()));
+
         const osgAnimation::ChannelList& channels = mAnimation->getChannels();
         for (const auto& channel : channels)
         {
@@ -174,7 +159,7 @@ namespace SceneUtil
 
             for (const auto& channel : channels)
             {
-                if (!isEqualWithUnderscores(channel->getTargetName(), name) || channel->getName() != "transform")
+                if (!Misc::StringUtils::ciEqual(name, channel->getTargetName()) || channel->getName() != "transform")
                     continue;
 
                 if (osgAnimation::MatrixLinearSampler* templateSampler

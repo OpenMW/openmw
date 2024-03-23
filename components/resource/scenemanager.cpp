@@ -10,6 +10,9 @@
 #include <osg/UserDataContainer>
 
 #include <osgAnimation/RigGeometry>
+#include <osgAnimation/UpdateBone>
+#include <osgAnimation/Skeleton>
+#include <osgAnimation/Bone>
 
 #include <osgParticle/ParticleSystem>
 
@@ -353,6 +356,63 @@ namespace Resource
         std::vector<osg::ref_ptr<SceneUtil::RigGeometryHolder>> mRigGeometryHolders;
     };
 
+    void updateVertexInfluenceMap(osgAnimation::RigGeometry& rig)
+    {
+        osgAnimation::VertexInfluenceMap* vertexInfluenceMap = rig.getInfluenceMap();
+        if (!vertexInfluenceMap) return;
+
+        std::vector<std::pair<std::string, std::string>> renameList;
+
+        // Collecting updates
+        for (const auto& influence : *vertexInfluenceMap) {
+            const std::string& oldBoneName = influence.first;
+            std::string newBoneName = Misc::StringUtils::underscoresToSpaces(oldBoneName);
+            if (newBoneName != oldBoneName) {
+                renameList.emplace_back(oldBoneName, newBoneName);
+            }
+        }
+
+        // Applying updates (cant update map while iterating it!)
+        for (const auto& rename : renameList) {
+            const std::string& oldName = rename.first;
+            const std::string& newName = rename.second;
+
+            // Check if new name already exists to avoid overwriting
+            if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end()) {
+                (*vertexInfluenceMap)[newName] = std::move((*vertexInfluenceMap)[oldName]);
+            }
+
+            vertexInfluenceMap->erase(oldName);
+        }
+    }
+
+    class RenameBonesVisitor : public osg::NodeVisitor
+    {
+    public:
+        RenameBonesVisitor()
+        : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+
+        void apply(osg::MatrixTransform& node) override
+        {
+            node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
+
+            // osgAnimation update callback name must match bone name/channel targets
+            osg::Callback* cb = node.getUpdateCallback();
+            while (cb)
+            {
+                osgAnimation::AnimationUpdateCallback<osg::NodeCallback>* animCb =
+                    dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
+
+                if (animCb)
+                    animCb->setName(Misc::StringUtils::underscoresToSpaces(animCb->getName()));
+
+                cb = cb->getNestedCallback();
+            }
+
+            traverse(node);
+        }
+    };
+
     SceneManager::SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
         Resource::NifFileManager* nifFileManager, double expiryDelay)
         : ResourceManager(vfs, expiryDelay)
@@ -556,6 +616,7 @@ namespace Resource
             VFS::Path::NormalizedView normalizedFilename, std::istream& model, Resource::ImageManager* imageManager)
         {
             const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
+            const bool isColladaFile = ext == "dae";
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
             if (!reader)
             {
@@ -571,7 +632,7 @@ namespace Resource
             // findFileCallback would be necessary. but findFileCallback does not support virtual files, so we can't
             // implement it.
             options->setReadFileCallback(new ImageReadCallback(imageManager));
-            if (ext == "dae")
+            if (isColladaFile)
                 options->setOptionString("daeUseSequencedTextureUnits");
 
             const std::array<std::uint64_t, 2> fileHash = Files::getHash(normalizedFilename.value(), model);
@@ -602,6 +663,10 @@ namespace Resource
                 if (foundRigNode->libraryName() == std::string("osgAnimation"))
                 {
                     osgAnimation::RigGeometry* foundRigGeometry = static_cast<osgAnimation::RigGeometry*>(foundRigNode);
+
+                    if (isColladaFile)
+                        Resource::updateVertexInfluenceMap(*foundRigGeometry);
+
                     osg::ref_ptr<SceneUtil::RigGeometryHolder> newRig
                         = new SceneUtil::RigGeometryHolder(*foundRigGeometry, osg::CopyOp::DEEP_COPY_ALL);
 
@@ -616,13 +681,18 @@ namespace Resource
                 }
             }
 
-            if (ext == "dae")
+            if (isColladaFile)
             {
                 Resource::ColladaDescriptionVisitor colladaDescriptionVisitor;
                 node->accept(colladaDescriptionVisitor);
 
                 if (colladaDescriptionVisitor.mSkeleton)
                 {
+                    // Collada bones may have underscores in place of spaces due to a collada limitation
+                    // we should rename the bones and update callbacks here at load time
+                    Resource::RenameBonesVisitor renameBoneVisitor;
+                    node->accept(renameBoneVisitor);
+
                     if (osg::Group* group = dynamic_cast<osg::Group*>(node))
                     {
                         group->removeChildren(0, group->getNumChildren());
@@ -651,6 +721,7 @@ namespace Resource
                                 new TemplateRef(newRiggeometryHolder->getGeometry(0)));
                         }
                     }
+
                 }
 
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
