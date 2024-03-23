@@ -25,7 +25,7 @@ namespace ESM
 
         // Loads data and marks it as loaded. Return true if data is actually loaded from reader, false otherwise
         // including the case when data is already loaded.
-        bool condLoad(ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, unsigned int size)
+        bool condLoad(ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, std::size_t size)
         {
             if ((targetFlags & dataFlag) == 0 && (flags & dataFlag) != 0)
             {
@@ -206,7 +206,7 @@ namespace ESM
             mLandData = std::make_unique<LandData>();
 
         mLandData->mHeightOffset = 0;
-        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0);
+        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0.0f);
         mLandData->mMinHeight = 0;
         mLandData->mMaxHeight = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)

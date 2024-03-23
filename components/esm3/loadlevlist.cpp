@@ -87,7 +87,7 @@ namespace ESM
 
         esm.writeHNT("DATA", mFlags);
         esm.writeHNT("NNAM", mChanceNone);
-        esm.writeHNT<uint32_t>("INDX", mList.size());
+        esm.writeHNT("INDX", static_cast<uint32_t>(mList.size()));
 
         for (const auto& item : mList)
         {

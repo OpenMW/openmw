@@ -87,7 +87,7 @@ namespace MWDialogue
                 // some keywords might be longer variations of other keywords, so we definitely need a list of
                 // candidates the first element in the pair is length of the match, i.e. depth from the first character
                 // on
-                std::vector<typename std::pair<int, typename Entry::childen_t::const_iterator>> candidates;
+                std::vector<typename std::pair<std::ptrdiff_t, typename Entry::childen_t::const_iterator>> candidates;
 
                 while ((j + 1) != end)
                 {
@@ -148,11 +148,11 @@ namespace MWDialogue
             // resolve overlapping keywords
             while (!matches.empty())
             {
-                int longestKeywordSize = 0;
+                std::size_t longestKeywordSize = 0;
                 typename std::vector<Match>::iterator longestKeyword = matches.begin();
                 for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end(); ++it)
                 {
-                    int size = it->mEnd - it->mBeg;
+                    std::size_t size = it->mEnd - it->mBeg;
                     if (size > longestKeywordSize)
                     {
                         longestKeywordSize = size;
@@ -199,7 +199,7 @@ namespace MWDialogue
 
         void seed_impl(std::string_view keyword, value_t value, size_t depth, Entry& entry)
         {
-            int ch = Misc::StringUtils::toLower(keyword.at(depth));
+            auto ch = Misc::StringUtils::toLower(keyword.at(depth));
 
             typename Entry::childen_t::iterator j = entry.mChildren.find(ch);
 

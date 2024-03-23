@@ -244,16 +244,16 @@ namespace ESM
         skipHString();
     }
 
-    void ESMReader::getHExact(void* p, int size)
+    void ESMReader::getHExact(void* p, std::size_t size)
     {
         getSubHeader();
-        if (size != static_cast<int>(mCtx.leftSub))
+        if (size != mCtx.leftSub)
             reportSubSizeMismatch(size, mCtx.leftSub);
         getExact(p, size);
     }
 
     // Read the given number of bytes from a named subrecord
-    void ESMReader::getHNExact(void* p, int size, NAME name)
+    void ESMReader::getHNExact(void* p, std::size_t size, NAME name)
     {
         getSubNameIs(name);
         getHExact(p, size);
@@ -326,10 +326,10 @@ namespace ESM
         skip(mCtx.leftSub);
     }
 
-    void ESMReader::skipHSubSize(int size)
+    void ESMReader::skipHSubSize(std::size_t size)
     {
         skipHSub();
-        if (static_cast<int>(mCtx.leftSub) != size)
+        if (mCtx.leftSub != size)
             reportSubSizeMismatch(mCtx.leftSub, size);
     }
 
