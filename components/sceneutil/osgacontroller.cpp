@@ -19,10 +19,8 @@ namespace SceneUtil
 {
     inline bool isEqualCharUnderscores(char a, char b)
     {
-        if (a == '_')
-            a = ' '; // Treat underscore as space
-        if (b == '_')
-            b = ' '; // Treat underscore as space
+        if (a == '_') a = ' '; // Treat underscore as space
+        if (b == '_') b = ' '; // Treat underscore as space
         return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
     }
 
