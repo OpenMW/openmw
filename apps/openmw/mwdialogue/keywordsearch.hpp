@@ -87,7 +87,7 @@ namespace MWDialogue
                 // some keywords might be longer variations of other keywords, so we definitely need a list of
                 // candidates the first element in the pair is length of the match, i.e. depth from the first character
                 // on
-                std::vector<typename std::pair<int, typename Entry::childen_t::const_iterator>> candidates;
+                std::vector<typename std::pair<std::ptrdiff_t, typename Entry::childen_t::const_iterator>> candidates;
 
                 while ((j + 1) != end)
                 {
