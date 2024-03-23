@@ -148,11 +148,11 @@ namespace MWDialogue
             // resolve overlapping keywords
             while (!matches.empty())
             {
-                int longestKeywordSize = 0;
+                std::size_t longestKeywordSize = 0;
                 typename std::vector<Match>::iterator longestKeyword = matches.begin();
                 for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end(); ++it)
                 {
-                    int size = it->mEnd - it->mBeg;
+                    std::size_t size = it->mEnd - it->mBeg;
                     if (size > longestKeywordSize)
                     {
                         longestKeywordSize = size;
@@ -199,7 +199,7 @@ namespace MWDialogue
 
         void seed_impl(std::string_view keyword, value_t value, size_t depth, Entry& entry)
         {
-            int ch = Misc::StringUtils::toLower(keyword.at(depth));
+            auto ch = Misc::StringUtils::toLower(keyword.at(depth));
 
             typename Entry::childen_t::iterator j = entry.mChildren.find(ch);
 
