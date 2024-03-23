@@ -77,6 +77,9 @@ void main()
     vec3 specularColor = getSpecularColor().xyz;
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
+#if @reconstructNormalZ
+    normalTex.z = sqrt(1.0 - dot(normalTex.xy, normalTex.xy));
+#endif
     vec3 viewNormal = normalToView(normalTex.xyz * 2.0 - 1.0);
     specularColor *= normalTex.a;
 #else
