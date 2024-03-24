@@ -111,6 +111,7 @@
     Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
     Bug #7573: Drain Fatigue can't bring fatigue below zero by default
     Bug #7585: Difference in interior lighting between OpenMW with legacy lighting method enabled and vanilla Morrowind
+    Bug #7587: Quick load related crash
     Bug #7603: Scripts menu size is not updated properly
     Bug #7604: Goblins Grunt becomes idle once injured
     Bug #7609: ForceGreeting should not open dialogue for werewolves
