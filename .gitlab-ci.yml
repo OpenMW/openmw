@@ -748,6 +748,7 @@ macOS15_Xcode16_arm64:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64_Ninja\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -N -b -t -C $multiview -E
     - cd MSVC2022_64_Ninja
@@ -813,6 +814,8 @@ macOS15_Xcode16_arm64:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   # This is capped at 2h by GitLab for Windows Shared Runners
   timeout: 2h
+  variables:
+    CCACHE_SIZE: 1.5G
 
 .Windows_Ninja_Release:
   extends:
