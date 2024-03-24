@@ -1029,7 +1029,7 @@ Windows_Ninja_CacheInit:
     - job: "Windows_MSBuild_Debug"
       artifacts: true
 
-.Windows_MSBuild_RelWithDebInfo:
+Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
