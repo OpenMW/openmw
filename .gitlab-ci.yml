@@ -1036,6 +1036,22 @@ Windows_Ninja_CacheInit:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - CMakeLists.txt
+          - "**/CMakeLists.txt"
+          - "**/*.cmake"
+          - "CI/*msvc*"
+    - if: $CI_PIPELINE_SOURCE == "push"
+      #changes:
+      #  paths:
+      #    - CMakeLists.txt
+      #    - "**/CMakeLists.txt"
+      #    - "**/*.cmake"
+      #    - "CI/*msvc*"
+      #  compare_to: the last time this job worked for a parent commit
 
 Windows_MSBuild_RelWithDebInfo_GroupOne:
   extends:
