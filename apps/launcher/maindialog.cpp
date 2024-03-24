@@ -351,6 +351,7 @@ bool Launcher::MainDialog::setupGameSettings()
 
     for (const auto& path : Files::getActiveConfigPathsQString(mCfgMgr))
     {
+        Log(Debug::Verbose) << "Loading config file: " << path.toUtf8().constData();
         if (!loadFile(path, &Config::GameSettings::readFile))
             return false;
     }
