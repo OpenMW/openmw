@@ -239,8 +239,11 @@ namespace LuaUtil
         assert(mData.empty()); // Shouldn't be used before loading
         try
         {
-            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << std::filesystem::file_size(path)
-                             << " bytes)";
+            std::uintmax_t fileSize = std::filesystem::file_size(path);
+            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << fileSize << " bytes)";
+            if (fileSize == 0)
+                throw std::runtime_error("Storage file has zero length");
+
             std::ifstream fin(path, std::fstream::binary);
             std::string serializedData((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
             sol::table data = deserialize(mLua, serializedData);
@@ -253,7 +256,7 @@ namespace LuaUtil
         }
         catch (std::exception& e)
         {
-            Log(Debug::Error) << "Can not read \"" << path << "\": " << e.what();
+            Log(Debug::Error) << "Cannot read \"" << path << "\": " << e.what();
         }
     }
 
