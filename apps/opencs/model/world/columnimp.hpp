@@ -971,7 +971,7 @@ namespace CSMWorld
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-            record2.mScale = data.toFloat();
+            record2.mScale = std::clamp(data.toFloat(), 0.5f, 2.0f);
             record.setModified(record2);
         }
 
