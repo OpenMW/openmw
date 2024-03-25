@@ -539,8 +539,7 @@ namespace MWRender
         if (mesh.empty())
             return std::string();
 
-        std::string holsteredName = mesh;
-        holsteredName = holsteredName.replace(holsteredName.size() - 4, 4, "_sh.nif");
+        const std::string holsteredName = addSuffixBeforeExtension(mesh, "_sh");
         if (mResourceSystem->getVFS()->exists(holsteredName))
         {
             osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);
