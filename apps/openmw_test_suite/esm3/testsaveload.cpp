@@ -530,29 +530,30 @@ namespace ESM
         TEST_P(Esm3SaveLoadRecordTest, enamShouldNotChange)
         {
             EffectList record;
-            record.mList.emplace_back(ENAMstruct{
-                .mEffectID = 1,
-                .mSkill = 2,
-                .mAttribute = 3,
-                .mRange = 4,
-                .mArea = 5,
-                .mDuration = 6,
-                .mMagnMin = 7,
-                .mMagnMax = 8,
-            });
+            record.mList.emplace_back(IndexedENAMstruct{ {
+                                                             .mEffectID = 1,
+                                                             .mSkill = 2,
+                                                             .mAttribute = 3,
+                                                             .mRange = 4,
+                                                             .mArea = 5,
+                                                             .mDuration = 6,
+                                                             .mMagnMin = 7,
+                                                             .mMagnMax = 8,
+                                                         },
+                0 });
 
             EffectList result;
             saveAndLoadRecord(record, GetParam(), result);
 
             EXPECT_EQ(result.mList.size(), record.mList.size());
-            EXPECT_EQ(result.mList[0].mEffectID, record.mList[0].mEffectID);
-            EXPECT_EQ(result.mList[0].mSkill, record.mList[0].mSkill);
-            EXPECT_EQ(result.mList[0].mAttribute, record.mList[0].mAttribute);
-            EXPECT_EQ(result.mList[0].mRange, record.mList[0].mRange);
-            EXPECT_EQ(result.mList[0].mArea, record.mList[0].mArea);
-            EXPECT_EQ(result.mList[0].mDuration, record.mList[0].mDuration);
-            EXPECT_EQ(result.mList[0].mMagnMin, record.mList[0].mMagnMin);
-            EXPECT_EQ(result.mList[0].mMagnMax, record.mList[0].mMagnMax);
+            EXPECT_EQ(result.mList[0].mData.mEffectID, record.mList[0].mData.mEffectID);
+            EXPECT_EQ(result.mList[0].mData.mSkill, record.mList[0].mData.mSkill);
+            EXPECT_EQ(result.mList[0].mData.mAttribute, record.mList[0].mData.mAttribute);
+            EXPECT_EQ(result.mList[0].mData.mRange, record.mList[0].mData.mRange);
+            EXPECT_EQ(result.mList[0].mData.mArea, record.mList[0].mData.mArea);
+            EXPECT_EQ(result.mList[0].mData.mDuration, record.mList[0].mData.mDuration);
+            EXPECT_EQ(result.mList[0].mData.mMagnMin, record.mList[0].mData.mMagnMin);
+            EXPECT_EQ(result.mList[0].mData.mMagnMax, record.mList[0].mData.mMagnMax);
         }
 
         TEST_P(Esm3SaveLoadRecordTest, weaponShouldNotChange)

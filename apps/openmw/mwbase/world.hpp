@@ -463,7 +463,7 @@ namespace MWBase
          */
         virtual MWWorld::SpellCastState startSpellCast(const MWWorld::Ptr& actor) = 0;
 
-        virtual void castSpell(const MWWorld::Ptr& actor, bool manualSpell = false) = 0;
+        virtual void castSpell(const MWWorld::Ptr& actor, bool scriptedSpell = false) = 0;
 
         virtual void launchMagicBolt(const ESM::RefId& spellId, const MWWorld::Ptr& caster,
             const osg::Vec3f& fallbackDirection, ESM::RefNum item)

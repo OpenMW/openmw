@@ -46,8 +46,8 @@ namespace MWWorld
 
             for (auto& effect : spell->mEffects.mList)
             {
-                if (effect.mEffectID == ESM::MagicEffect::DrainAttribute)
-                    stats.mWorsenings[effect.mAttribute] = oldStats.mWorsenings;
+                if (effect.mData.mEffectID == ESM::MagicEffect::DrainAttribute)
+                    stats.mWorsenings[effect.mData.mAttribute] = oldStats.mWorsenings;
             }
             creatureStats.mCorprusSpells[id] = stats;
         }
@@ -58,30 +58,30 @@ namespace MWWorld
             if (!spell || spell->mData.mType == ESM::Spell::ST_Spell || spell->mData.mType == ESM::Spell::ST_Power)
                 continue;
             ESM::ActiveSpells::ActiveSpellParams params;
-            params.mId = id;
+            params.mSourceSpellId = id;
             params.mDisplayName = spell->mName;
             params.mCasterActorId = creatureStats.mActorId;
             if (spell->mData.mType == ESM::Spell::ST_Ability)
-                params.mType = ESM::ActiveSpells::Type_Ability;
+                params.mFlags = ESM::Compatibility::ActiveSpells::Type_Ability_Flags;
             else
-                params.mType = ESM::ActiveSpells::Type_Permanent;
+                params.mFlags = ESM::Compatibility::ActiveSpells::Type_Permanent_Flags;
             params.mWorsenings = -1;
             params.mNextWorsening = ESM::TimeStamp();
-            int effectIndex = 0;
             for (const auto& enam : spell->mEffects.mList)
             {
-                if (oldParams.mPurgedEffects.find(effectIndex) == oldParams.mPurgedEffects.end())
+                if (oldParams.mPurgedEffects.find(enam.mIndex) == oldParams.mPurgedEffects.end())
                 {
                     ESM::ActiveEffect effect;
-                    effect.mEffectId = enam.mEffectID;
-                    effect.mArg = MWMechanics::EffectKey(enam).mArg;
+                    effect.mEffectId = enam.mData.mEffectID;
+                    effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;
                     effect.mDuration = -1;
                     effect.mTimeLeft = -1;
-                    effect.mEffectIndex = effectIndex;
-                    auto rand = oldParams.mEffectRands.find(effectIndex);
+                    effect.mEffectIndex = enam.mIndex;
+                    auto rand = oldParams.mEffectRands.find(enam.mIndex);
                     if (rand != oldParams.mEffectRands.end())
                     {
-                        float magnitude = (enam.mMagnMax - enam.mMagnMin) * rand->second + enam.mMagnMin;
+                        float magnitude
+                            = (enam.mData.mMagnMax - enam.mData.mMagnMin) * rand->second + enam.mData.mMagnMin;
                         effect.mMagnitude = magnitude;
                         effect.mMinMagnitude = magnitude;
                         effect.mMaxMagnitude = magnitude;
@@ -92,13 +92,12 @@ namespace MWWorld
                     else
                     {
                         effect.mMagnitude = 0.f;
-                        effect.mMinMagnitude = enam.mMagnMin;
-                        effect.mMaxMagnitude = enam.mMagnMax;
+                        effect.mMinMagnitude = enam.mData.mMagnMin;
+                        effect.mMaxMagnitude = enam.mData.mMagnMax;
                         effect.mFlags = ESM::ActiveEffect::Flag_None;
                     }
                     params.mEffects.emplace_back(effect);
                 }
-                effectIndex++;
             }
             creatureStats.mActiveSpells.mSpells.emplace_back(params);
         }
@@ -132,30 +131,28 @@ namespace MWWorld
             if (!enchantment)
                 continue;
             ESM::ActiveSpells::ActiveSpellParams params;
-            params.mId = id;
+            params.mSourceSpellId = id;
             params.mDisplayName = std::move(name);
             params.mCasterActorId = creatureStats.mActorId;
-            params.mType = ESM::ActiveSpells::Type_Enchantment;
+            params.mFlags = ESM::Compatibility::ActiveSpells::Type_Enchantment_Flags;
             params.mWorsenings = -1;
             params.mNextWorsening = ESM::TimeStamp();
-            for (std::size_t effectIndex = 0;
-                 effectIndex < oldMagnitudes.size() && effectIndex < enchantment->mEffects.mList.size(); ++effectIndex)
+            for (const auto& enam : enchantment->mEffects.mList)
             {
-                const auto& enam = enchantment->mEffects.mList[effectIndex];
-                auto [random, multiplier] = oldMagnitudes[effectIndex];
-                float magnitude = (enam.mMagnMax - enam.mMagnMin) * random + enam.mMagnMin;
+                auto [random, multiplier] = oldMagnitudes[enam.mIndex];
+                float magnitude = (enam.mData.mMagnMax - enam.mData.mMagnMin) * random + enam.mData.mMagnMin;
                 magnitude *= multiplier;
                 if (magnitude <= 0)
                     continue;
                 ESM::ActiveEffect effect;
-                effect.mEffectId = enam.mEffectID;
+                effect.mEffectId = enam.mData.mEffectID;
                 effect.mMagnitude = magnitude;
                 effect.mMinMagnitude = magnitude;
                 effect.mMaxMagnitude = magnitude;
-                effect.mArg = MWMechanics::EffectKey(enam).mArg;
+                effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;
                 effect.mDuration = -1;
                 effect.mTimeLeft = -1;
-                effect.mEffectIndex = static_cast<int>(effectIndex);
+                effect.mEffectIndex = enam.mIndex;
                 // Prevent recalculation of resistances and don't reflect or absorb the effect
                 effect.mFlags = ESM::ActiveEffect::Flag_Ignore_Resistances | ESM::ActiveEffect::Flag_Ignore_Reflect
                     | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
@@ -172,7 +169,7 @@ namespace MWWorld
         {
             auto it
                 = std::find_if(creatureStats.mActiveSpells.mSpells.begin(), creatureStats.mActiveSpells.mSpells.end(),
-                    [&](const auto& params) { return params.mId == spell.first; });
+                    [&](const auto& params) { return params.mSourceSpellId == spell.first; });
             if (it != creatureStats.mActiveSpells.mSpells.end())
             {
                 it->mNextWorsening = spell.second.mNextWorsening;
@@ -188,7 +185,7 @@ namespace MWWorld
                 continue;
             for (auto& params : creatureStats.mActiveSpells.mSpells)
             {
-                if (params.mId == key.mSourceId)
+                if (params.mSourceSpellId == key.mSourceId)
                 {
                     bool found = false;
                     for (auto& effect : params.mEffects)

@@ -261,10 +261,10 @@ namespace MWMechanics
             mObjects.addObject(ptr);
     }
 
-    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell)
+    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell)
     {
         if (ptr.getClass().isActor())
-            mActors.castSpell(ptr, spellId, manualSpell);
+            mActors.castSpell(ptr, spellId, scriptedSpell);
     }
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr, bool keepActive)
@@ -1978,11 +1978,7 @@ namespace MWMechanics
 
             // Transforming removes all temporary effects
             actor.getClass().getCreatureStats(actor).getActiveSpells().purge(
-                [](const auto& params) {
-                    return params.getType() == ESM::ActiveSpells::Type_Consumable
-                        || params.getType() == ESM::ActiveSpells::Type_Temporary;
-                },
-                actor);
+                [](const auto& params) { return params.hasFlag(ESM::ActiveSpells::Flag_Temporary); }, actor);
             mActors.updateActor(actor, 0.f);
 
             if (werewolf)

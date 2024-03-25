@@ -136,7 +136,7 @@ namespace MWClass
                 const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(ESM::MagicEffect::Telekinesis);
 
                 animation->addSpellCastGlow(
-                    effect, 1); // 1 second glow to match the time taken for a door opening or closing
+                    effect->getColor(), 1); // 1 second glow to match the time taken for a door opening or closing
             }
         }
 

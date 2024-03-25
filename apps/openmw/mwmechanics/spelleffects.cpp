@@ -289,7 +289,7 @@ namespace
             animation->addEffect(Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel),
                 ESM::MagicEffect::indexToName(ESM::MagicEffect::SpellAbsorption), false);
         int spellCost = 0;
-        if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellParams.getId()))
+        if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellParams.getSourceSpellId()))
         {
             spellCost = MWMechanics::calcSpellCost(*spell);
         }
@@ -314,8 +314,7 @@ namespace
         auto& stats = target.getClass().getCreatureStats(target);
         auto& magnitudes = stats.getMagicEffects();
         // Apply reflect and spell absorption
-        if (target != caster && spellParams.getType() != ESM::ActiveSpells::Type_Enchantment
-            && spellParams.getType() != ESM::ActiveSpells::Type_Permanent)
+        if (target != caster && spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary))
         {
             bool canReflect = !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable)
                 && !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Reflect)
@@ -358,9 +357,8 @@ namespace
         // Apply resistances
         if (!(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Resistances))
         {
-            const ESM::Spell* spell = nullptr;
-            if (spellParams.getType() == ESM::ActiveSpells::Type_Temporary)
-                spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellParams.getId());
+            const ESM::Spell* spell
+                = spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary) ? spellParams.getSpell() : nullptr;
             float magnitudeMult
                 = MWMechanics::getEffectMultiplier(effect.mEffectId, target, caster, spell, &magnitudes);
             if (magnitudeMult == 0)
@@ -429,10 +427,9 @@ namespace MWMechanics
                 // Dispel removes entire spells at once
                 target.getClass().getCreatureStats(target).getActiveSpells().purge(
                     [magnitude = effect.mMagnitude](const ActiveSpells::ActiveSpellParams& params) {
-                        if (params.getType() == ESM::ActiveSpells::Type_Temporary)
+                        if (params.hasFlag(ESM::ActiveSpells::Flag_Temporary))
                         {
-                            const ESM::Spell* spell
-                                = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(params.getId());
+                            const ESM::Spell* spell = params.getSpell();
                             if (spell && spell->mData.mType == ESM::Spell::ST_Spell)
                             {
                                 auto& prng = MWBase::Environment::get().getWorld()->getPrng();
@@ -645,7 +642,7 @@ namespace MWMechanics
                     else if (effect.mEffectId == ESM::MagicEffect::DamageFatigue)
                         index = 2;
                     // Damage "Dynamic" abilities reduce the base value
-                    if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                    if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                         modDynamicStat(target, index, -effect.mMagnitude);
                     else
                     {
@@ -666,7 +663,7 @@ namespace MWMechanics
                 else if (!godmode)
                 {
                     // Damage Skill abilities reduce base skill :todd:
-                    if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                    if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                     {
                         auto& npcStats = target.getClass().getNpcStats(target);
                         SkillValue& skill = npcStats.getSkill(effect.getSkillOrAttribute());
@@ -725,7 +722,7 @@ namespace MWMechanics
             case ESM::MagicEffect::FortifyHealth:
             case ESM::MagicEffect::FortifyMagicka:
             case ESM::MagicEffect::FortifyFatigue:
-                if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                     modDynamicStat(target, effect.mEffectId - ESM::MagicEffect::FortifyHealth, effect.mMagnitude);
                 else
                     adjustDynamicStat(
@@ -737,7 +734,7 @@ namespace MWMechanics
                 break;
             case ESM::MagicEffect::FortifyAttribute:
                 // Abilities affect base stats, but not for drain
-                if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                 {
                     auto& creatureStats = target.getClass().getCreatureStats(target);
                     auto attribute = effect.getSkillOrAttribute();
@@ -757,7 +754,7 @@ namespace MWMechanics
             case ESM::MagicEffect::FortifySkill:
                 if (!target.getClass().isNpc())
                     invalid = true;
-                else if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                else if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                 {
                     // Abilities affect base stats, but not for drain
                     auto& npcStats = target.getClass().getNpcStats(target);
@@ -922,7 +919,7 @@ namespace MWMechanics
             {
                 MWRender::Animation* animation = world->getAnimation(target);
                 if (animation)
-                    animation->addSpellCastGlow(magicEffect);
+                    animation->addSpellCastGlow(magicEffect->getColor());
                 int magnitude = static_cast<int>(roll(effect));
                 if (target.getCellRef().getLockLevel()
                     < magnitude) // If the door is not already locked to a higher value, lock it to spell magnitude
@@ -947,7 +944,7 @@ namespace MWMechanics
 
                 MWRender::Animation* animation = world->getAnimation(target);
                 if (animation)
-                    animation->addSpellCastGlow(magicEffect);
+                    animation->addSpellCastGlow(magicEffect->getColor());
                 int magnitude = static_cast<int>(roll(effect));
                 if (target.getCellRef().getLockLevel() <= magnitude)
                 {
@@ -985,7 +982,7 @@ namespace MWMechanics
                 return { MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth };
             auto& stats = target.getClass().getCreatureStats(target);
             auto& magnitudes = stats.getMagicEffects();
-            if (spellParams.getType() != ESM::ActiveSpells::Type_Ability
+            if (!spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues)
                 && !(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
             {
                 MagicApplicationResult::Type result
@@ -998,10 +995,9 @@ namespace MWMechanics
                 oldMagnitude = effect.mMagnitude;
             else
             {
-                if (spellParams.getType() != ESM::ActiveSpells::Type_Enchantment)
-                    playEffects(target, *magicEffect,
-                        spellParams.getType() == ESM::ActiveSpells::Type_Consumable
-                            || spellParams.getType() == ESM::ActiveSpells::Type_Temporary);
+                if (!spellParams.hasFlag(ESM::ActiveSpells::Flag_Equipment)
+                    && !spellParams.hasFlag(ESM::ActiveSpells::Flag_Lua))
+                    playEffects(target, *magicEffect, spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary));
                 if (effect.mEffectId == ESM::MagicEffect::Soultrap && !target.getClass().isNpc()
                     && target.getType() == ESM::Creature::sRecordId
                     && target.get<ESM::Creature>()->mBase->mData.mSoul == 0 && caster == getPlayer())
@@ -1016,8 +1012,7 @@ namespace MWMechanics
                 if (effect.mDuration != 0)
                 {
                     float mult = dt;
-                    if (spellParams.getType() == ESM::ActiveSpells::Type_Consumable
-                        || spellParams.getType() == ESM::ActiveSpells::Type_Temporary)
+                    if (spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary))
                         mult = std::min(effect.mTimeLeft, dt);
                     effect.mMagnitude *= mult;
                 }
@@ -1195,7 +1190,7 @@ namespace MWMechanics
             case ESM::MagicEffect::FortifyHealth:
             case ESM::MagicEffect::FortifyMagicka:
             case ESM::MagicEffect::FortifyFatigue:
-                if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                     modDynamicStat(target, effect.mEffectId - ESM::MagicEffect::FortifyHealth, -effect.mMagnitude);
                 else
                     adjustDynamicStat(
@@ -1206,7 +1201,7 @@ namespace MWMechanics
                 break;
             case ESM::MagicEffect::FortifyAttribute:
                 // Abilities affect base stats, but not for drain
-                if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                 {
                     auto& creatureStats = target.getClass().getCreatureStats(target);
                     auto attribute = effect.getSkillOrAttribute();
@@ -1222,7 +1217,7 @@ namespace MWMechanics
                 break;
             case ESM::MagicEffect::FortifySkill:
                 // Abilities affect base stats, but not for drain
-                if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
+                if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
                 {
                     auto& npcStats = target.getClass().getNpcStats(target);
                     auto& skill = npcStats.getSkill(effect.getSkillOrAttribute());

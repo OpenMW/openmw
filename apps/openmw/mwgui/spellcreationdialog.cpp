@@ -470,9 +470,7 @@ namespace MWGui
                 y *= 1.5;
         }
 
-        ESM::EffectList effectList;
-        effectList.mList = mEffects;
-        mSpell.mEffects = std::move(effectList);
+        mSpell.mEffects.populate(mEffects);
         mSpell.mData.mCost = int(y);
         mSpell.mData.mType = ESM::Spell::ST_Spell;
         mSpell.mData.mFlags = 0;
@@ -528,10 +526,11 @@ namespace MWGui
             if (spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
 
-            for (const ESM::ENAMstruct& effectInfo : spell->mEffects.mList)
+            for (const ESM::IndexedENAMstruct& effectInfo : spell->mEffects.mList)
             {
+                int16_t effectId = effectInfo.mData.mEffectID;
                 const ESM::MagicEffect* effect
-                    = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectInfo.mEffectID);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
 
                 // skip effects that do not allow spellmaking/enchanting
                 int requiredFlags
@@ -539,8 +538,8 @@ namespace MWGui
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
 
-                if (std::find(knownEffects.begin(), knownEffects.end(), effectInfo.mEffectID) == knownEffects.end())
-                    knownEffects.push_back(effectInfo.mEffectID);
+                if (std::find(knownEffects.begin(), knownEffects.end(), effectId) == knownEffects.end())
+                    knownEffects.push_back(effectId);
             }
         }
 

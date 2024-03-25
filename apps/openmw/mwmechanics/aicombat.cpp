@@ -275,7 +275,7 @@ namespace MWMechanics
             if (!spellId.empty())
             {
                 const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
-                if (spell->mEffects.mList.empty() || spell->mEffects.mList[0].mRange != ESM::RT_Target)
+                if (spell->mEffects.mList.empty() || spell->mEffects.mList[0].mData.mRange != ESM::RT_Target)
                     canShout = false;
             }
             storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat, canShout);

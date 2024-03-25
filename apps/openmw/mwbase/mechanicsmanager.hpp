@@ -265,7 +265,7 @@ namespace MWBase
         virtual bool isReadyToBlock(const MWWorld::Ptr& ptr) const = 0;
         virtual bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const = 0;
 
-        virtual void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell) = 0;
+        virtual void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell) = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& settings) = 0;
 

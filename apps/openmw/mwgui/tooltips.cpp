@@ -222,17 +222,17 @@ namespace MWGui
                         = store->get<ESM::Spell>().find(ESM::RefId::deserialize(focus->getUserString("Spell")));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
-                    for (const ESM::ENAMstruct& spellEffect : spell->mEffects.mList)
+                    for (const ESM::IndexedENAMstruct& spellEffect : spell->mEffects.mList)
                     {
                         Widgets::SpellEffectParams params;
-                        params.mEffectID = spellEffect.mEffectID;
-                        params.mSkill = ESM::Skill::indexToRefId(spellEffect.mSkill);
-                        params.mAttribute = ESM::Attribute::indexToRefId(spellEffect.mAttribute);
-                        params.mDuration = spellEffect.mDuration;
-                        params.mMagnMin = spellEffect.mMagnMin;
-                        params.mMagnMax = spellEffect.mMagnMax;
-                        params.mRange = spellEffect.mRange;
-                        params.mArea = spellEffect.mArea;
+                        params.mEffectID = spellEffect.mData.mEffectID;
+                        params.mSkill = ESM::Skill::indexToRefId(spellEffect.mData.mSkill);
+                        params.mAttribute = ESM::Attribute::indexToRefId(spellEffect.mData.mAttribute);
+                        params.mDuration = spellEffect.mData.mDuration;
+                        params.mMagnMin = spellEffect.mData.mMagnMin;
+                        params.mMagnMax = spellEffect.mData.mMagnMax;
+                        params.mRange = spellEffect.mData.mRange;
+                        params.mArea = spellEffect.mData.mArea;
                         params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);
