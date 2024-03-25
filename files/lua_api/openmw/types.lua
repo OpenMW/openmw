@@ -302,17 +302,59 @@
 -- end
 
 ---
--- Get whether a specific spell is active on the actor.
+-- Get whether any instance of the specific spell is active on the actor.
 -- @function [parent=#ActorActiveSpells] isSpellActive
 -- @param self
--- @param #any recordOrId record or string record ID of the active spell's source. valid records are @{openmw.core#Spell}, @{openmw.core#Enchantment}, #IngredientRecord, or #PotionRecord
+-- @param #any recordOrId A record or string record ID. Valid records are @{openmw.core#Spell}, enchanted @{#Item}, @{#IngredientRecord}, or @{#PotionRecord}.
 -- @return true if spell is active, false otherwise
 
 ---
--- Remove the given spell and all its effects from the given actor's active spells.
+-- If true, the actor has not used this power in the last 24h. Will return true for powers the actor does not have.
+-- @function [parent=#ActorActiveSpells] canUsePower
+-- @param self
+-- @param #any spellOrId A @{openmw.core#Spell} or string record id.
+
+---
+-- Remove an active spell based on active spell ID (see @{openmw.core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw.core#ActiveSpell.temporary}).
 -- @function [parent=#ActorActiveSpells] remove
 -- @param self
--- @param #any spellOrId @{openmw.core#Spell} or string spell id
+-- @param #any id Active spell ID.
+
+---
+-- Adds a new spell to the list of active spells (only in global scripts or on self). 
+-- Note that this does not play any related VFX or sounds.
+-- @function [parent=#ActorActiveSpells] add
+-- @param self
+-- @param #table options A table of parameters. Must contain the following required parameters:
+--
+--   * `id` - A string record ID. Valid records are @{openmw.core#Spell}, enchanted @{#Item}, @{#IngredientRecord}, or @{#PotionRecord}.
+--   * `effects` - A list of indexes of the effects to be applied. These indexes must be in range of the record's list of @{openmw.core#MagicEffectWithParams}. Note that for Ingredients, normal ingredient consumption rules will be applied to effects.
+--
+-- And may contain the following optional parameters:
+--
+--   * `name` - The name to show in the list of active effects in the UI. Default: Name of the record identified by the id.
+--   * `ignoreResistances` - If true, resistances will be ignored. Default: false
+--   * `ignoreSpellAbsorption` - If true, spell absorption will not be applied. Default: false.
+--   * `ignoreReflect` - If true, reflects will not be applied. Default: false.
+--   * `caster` - A game object that identifies the caster. Default: nil
+--   * `item` - A game object that identifies the specific enchanted item instance used to cast the spell. Default: nil
+--   * `stackable` - If true, the spell will be able to stack. If false, existing instances of spells with the same id from the same source (where source is caster + item)
+--   * `quiet` - If true, no messages will be printed if the spell is an Ingredient and it had no effect. Always true if the target is not the player.
+-- @usage
+-- -- Adds the effect of the chameleon spell to the character
+-- Actor.activeSpells(self):add({id = 'chameleon', effects = { 0 }})
+-- @usage
+-- -- Adds the effect of a standard potion of intelligence, without consuming any potions from the character's inventory.
+-- -- Note that stackable = true to let the effect stack like a potion should.
+-- Actor.activeSpells(self):add({id = 'p_fortify_intelligence_s', effects = { 0 }, stackable = true})
+-- @usage
+-- -- Adds the negative effect of Greef twice over, and renames it to Good Greef.
+-- Actor.activeSpells(self):add({id = 'potion_comberry_brandy_01', effects = { 1, 1 }, stackable = true, name = 'Good Greef'})
+-- @usage
+-- -- Has the same effect as if the actor ate a chokeweed. With the same variable effect based on skill / random chance.
+-- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { 0 }, stackable = true, name = 'Chokeweed'})
+-- -- Same as above, but uses a different index. Note that if multiple indexes are used, the randomicity is applied separately for each effect.
+-- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { 1 }, stackable = true, name = 'Chokeweed'})
 
 ---
 -- Return the spells (@{#ActorSpells}) of the given actor.

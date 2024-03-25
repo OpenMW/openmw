@@ -560,7 +560,7 @@ namespace MWScript
                 runtime.pop();
 
                 if (ptr.getClass().isActor())
-                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().removeEffects(ptr, spellid);
+                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().removeEffectsBySourceSpellId(ptr, spellid);
             }
         };
 

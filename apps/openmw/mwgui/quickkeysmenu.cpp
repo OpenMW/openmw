@@ -299,7 +299,8 @@ namespace MWGui
         mSelected->button->setUserString("Spell", spellId.serialize());
 
         // use the icon of the first effect
-        const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
+        const ESM::MagicEffect* effect
+            = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mData.mEffectID);
 
         std::string path = effect->mIcon;
         std::replace(path.begin(), path.end(), '/', '\\');

@@ -1155,8 +1155,8 @@ namespace MWMechanics
         else if (groupname == "spellcast" && action == mAttackType + " release")
         {
             if (mCanCast)
-                MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell);
-            mCastingManualSpell = false;
+                MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingScriptedSpell);
+            mCastingScriptedSpell = false;
             mCanCast = false;
         }
         else if (groupname == "containeropen" && action == "loot")
@@ -1526,9 +1526,9 @@ namespace MWMechanics
                     bool isMagicItem = false;
 
                     // Play hand VFX and allow castSpell use (assuming an animation is going to be played) if
-                    // spellcasting is successful. Manual spellcasting bypasses restrictions.
+                    // spellcasting is successful. Scripted spellcasting bypasses restrictions.
                     MWWorld::SpellCastState spellCastResult = MWWorld::SpellCastState::Success;
-                    if (!mCastingManualSpell)
+                    if (!mCastingScriptedSpell)
                         spellCastResult = world->startSpellCast(mPtr);
                     mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
@@ -1558,9 +1558,9 @@ namespace MWMechanics
                     else if (!spellid.empty() && spellCastResult != MWWorld::SpellCastState::PowerAlreadyUsed)
                     {
                         world->breakInvisibility(mPtr);
-                        MWMechanics::CastSpell cast(mPtr, {}, false, mCastingManualSpell);
+                        MWMechanics::CastSpell cast(mPtr, {}, false, mCastingScriptedSpell);
 
-                        const std::vector<ESM::ENAMstruct>* effects{ nullptr };
+                        const std::vector<ESM::IndexedENAMstruct>* effects{ nullptr };
                         const MWWorld::ESMStore& store = world->getStore();
                         if (isMagicItem)
                         {
@@ -1579,7 +1579,7 @@ namespace MWMechanics
                             if (mCanCast)
                             {
                                 const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(
-                                    effects->back().mEffectID); // use last effect of list for color of VFX_Hands
+                                    effects->back().mData.mEffectID); // use last effect of list for color of VFX_Hands
 
                                 const ESM::Static* castStatic
                                     = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
@@ -1593,7 +1593,7 @@ namespace MWMechanics
                                         "", false, "Bip01 R Hand", effect->mParticle);
                             }
                             // first effect used for casting animation
-                            const ESM::ENAMstruct& firstEffect = effects->front();
+                            const ESM::ENAMstruct& firstEffect = effects->front().mData;
 
                             std::string startKey;
                             std::string stopKey;
@@ -1602,9 +1602,9 @@ namespace MWMechanics
                                 startKey = "start";
                                 stopKey = "stop";
                                 if (mCanCast)
-                                    world->castSpell(
-                                        mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
-                                mCastingManualSpell = false;
+                                    world->castSpell(mPtr,
+                                        mCastingScriptedSpell); // No "release" text key to use, so cast immediately
+                                mCastingScriptedSpell = false;
                                 mCanCast = false;
                             }
                             else
@@ -2735,7 +2735,7 @@ namespace MWMechanics
         // Make sure we canceled the current attack or spellcasting,
         // because we disabled attack animations anyway.
         mCanCast = false;
-        mCastingManualSpell = false;
+        mCastingScriptedSpell = false;
         setAttackingOrSpell(false);
         if (mUpperBodyState != UpperBodyState::None)
             mUpperBodyState = UpperBodyState::WeaponEquipped;
@@ -2887,7 +2887,7 @@ namespace MWMechanics
 
     bool CharacterController::isCastingSpell() const
     {
-        return mCastingManualSpell || mUpperBodyState == UpperBodyState::Casting;
+        return mCastingScriptedSpell || mUpperBodyState == UpperBodyState::Casting;
     }
 
     bool CharacterController::isReadyToBlock() const
@@ -2941,10 +2941,10 @@ namespace MWMechanics
         mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(attackingOrSpell);
     }
 
-    void CharacterController::castSpell(const ESM::RefId& spellId, bool manualSpell)
+    void CharacterController::castSpell(const ESM::RefId& spellId, bool scriptedSpell)
     {
         setAttackingOrSpell(true);
-        mCastingManualSpell = manualSpell;
+        mCastingScriptedSpell = scriptedSpell;
         ActionSpell action = ActionSpell(spellId);
         action.prepare(mPtr);
     }

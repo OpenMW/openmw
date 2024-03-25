@@ -1228,11 +1228,11 @@ namespace MWMechanics
         }
     }
 
-    void Actors::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell) const
+    void Actors::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
-            iter->second->getCharacterController().castSpell(spellId, manualSpell);
+            iter->second->getCharacterController().castSpell(spellId, scriptedSpell);
     }
 
     bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer) const

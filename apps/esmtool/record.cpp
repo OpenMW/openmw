@@ -180,22 +180,23 @@ namespace
     void printEffectList(const ESM::EffectList& effects)
     {
         int i = 0;
-        for (const ESM::ENAMstruct& effect : effects.mList)
+        for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mEffectID) << " (" << effect.mEffectID
-                      << ")" << std::endl;
-            if (effect.mSkill != -1)
-                std::cout << "    Skill: " << skillLabel(effect.mSkill) << " (" << (int)effect.mSkill << ")"
+            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mData.mEffectID) << " ("
+                      << effect.mData.mEffectID << ")" << std::endl;
+            if (effect.mData.mSkill != -1)
+                std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
                           << std::endl;
-            if (effect.mAttribute != -1)
-                std::cout << "    Attribute: " << attributeLabel(effect.mAttribute) << " (" << (int)effect.mAttribute
-                          << ")" << std::endl;
-            std::cout << "    Range: " << rangeTypeLabel(effect.mRange) << " (" << effect.mRange << ")" << std::endl;
+            if (effect.mData.mAttribute != -1)
+                std::cout << "    Attribute: " << attributeLabel(effect.mData.mAttribute) << " ("
+                          << (int)effect.mData.mAttribute << ")" << std::endl;
+            std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
+                      << std::endl;
             // Area is always zero if range type is "Self"
-            if (effect.mRange != ESM::RT_Self)
-                std::cout << "    Area: " << effect.mArea << std::endl;
-            std::cout << "    Duration: " << effect.mDuration << std::endl;
-            std::cout << "    Magnitude: " << effect.mMagnMin << "-" << effect.mMagnMax << std::endl;
+            if (effect.mData.mRange != ESM::RT_Self)
+                std::cout << "    Area: " << effect.mData.mArea << std::endl;
+            std::cout << "    Duration: " << effect.mData.mDuration << std::endl;
+            std::cout << "    Magnitude: " << effect.mData.mMagnMin << "-" << effect.mData.mMagnMax << std::endl;
             i++;
         }
     }

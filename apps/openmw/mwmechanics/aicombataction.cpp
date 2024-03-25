@@ -355,14 +355,14 @@ namespace MWMechanics
             {
                 const ESM::Spell* spell
                     = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(selectedSpellId);
-                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin();
+                for (std::vector<ESM::IndexedENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin();
                      effectIt != spell->mEffects.mList.end(); ++effectIt)
                 {
-                    if (effectIt->mRange == ESM::RT_Target)
+                    if (effectIt->mData.mRange == ESM::RT_Target)
                     {
                         const ESM::MagicEffect* effect
                             = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-                                effectIt->mEffectID);
+                                effectIt->mData.mEffectID);
                         dist = effect->mData.mSpeed;
                         break;
                     }
@@ -375,14 +375,14 @@ namespace MWMechanics
                 {
                     const ESM::Enchantment* ench
                         = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(enchId);
-                    for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = ench->mEffects.mList.begin();
+                    for (std::vector<ESM::IndexedENAMstruct>::const_iterator effectIt = ench->mEffects.mList.begin();
                          effectIt != ench->mEffects.mList.end(); ++effectIt)
                     {
-                        if (effectIt->mRange == ESM::RT_Target)
+                        if (effectIt->mData.mRange == ESM::RT_Target)
                         {
                             const ESM::MagicEffect* effect
                                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-                                    effectIt->mEffectID);
+                                    effectIt->mData.mEffectID);
                             dist = effect->mData.mSpeed;
                             break;
                         }

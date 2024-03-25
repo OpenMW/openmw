@@ -174,7 +174,7 @@ namespace MWMechanics
     {
         for (const auto& effectIt : spell->mEffects.mList)
         {
-            if (effectIt.mEffectID == ESM::MagicEffect::Corprus)
+            if (effectIt.mData.mEffectID == ESM::MagicEffect::Corprus)
             {
                 return true;
             }

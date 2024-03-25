@@ -3,10 +3,14 @@
 
 #include <components/esm3/loadskil.hpp>
 
+#include <optional>
+
 namespace ESM
 {
+    struct EffectList;
     struct ENAMstruct;
     struct Enchantment;
+    struct Ingredient;
     struct MagicEffect;
     struct Potion;
     struct Spell;
@@ -36,6 +40,8 @@ namespace MWMechanics
     int getEnchantmentCharge(const ESM::Enchantment& enchantment);
 
     int getPotionValue(const ESM::Potion& potion);
+    std::optional<ESM::EffectList> rollIngredientEffect(
+        MWWorld::Ptr caster, const ESM::Ingredient* ingredient, uint32_t index = 0);
 
     /**
      * @param spell spell to cast

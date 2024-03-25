@@ -162,7 +162,7 @@ namespace MWWorld
         std::vector<StoreBase*> mStores;
         std::vector<DynamicStore*> mDynamicStores;
 
-        unsigned int mDynamicCount;
+        uint64_t mDynamicCount;
 
         mutable std::unordered_map<ESM::RefId, std::weak_ptr<MWMechanics::SpellList>> mSpellListCache;
 
@@ -209,6 +209,7 @@ namespace MWWorld
 
         void clearDynamic();
         void rebuildIdsIndex();
+        ESM::RefId generateId() { return ESM::RefId::generated(mDynamicCount++); }
 
         void movePlayerRecord();
 
@@ -229,7 +230,7 @@ namespace MWWorld
         template <class T>
         const T* insert(const T& x)
         {
-            const ESM::RefId id = ESM::RefId::generated(mDynamicCount++);
+            const ESM::RefId id = generateId();
 
             Store<T>& store = getWritable<T>();
             if (store.search(id) != nullptr)

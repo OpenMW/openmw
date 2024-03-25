@@ -79,18 +79,17 @@ namespace
         int count = 0;
         speed = 0.0f;
         ESM::EffectList projectileEffects;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter(effects->mList.begin()); iter != effects->mList.end();
-             ++iter)
+        for (const ESM::IndexedENAMstruct& effect : effects->mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(iter->mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mData.mEffectID);
 
             // Speed of multi-effect projectiles should be the average of the constituent effects,
             // based on observation of the original engine.
             speed += magicEffect->mData.mSpeed;
             count++;
 
-            if (iter->mRange != ESM::RT_Target)
+            if (effect.mData.mRange != ESM::RT_Target)
                 continue;
 
             if (magicEffect->mBolt.empty())
@@ -106,7 +105,7 @@ namespace
                                    ->get<ESM::Skill>()
                                    .find(magicEffect->mData.mSchool)
                                    ->mSchool->mBoltSound);
-            projectileEffects.mList.push_back(*iter);
+            projectileEffects.mList.push_back(effect);
         }
 
         if (count != 0)
@@ -117,7 +116,7 @@ namespace
         {
             const ESM::MagicEffect* magicEffect
                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-                    effects->mList.begin()->mEffectID);
+                    effects->mList.begin()->mData.mEffectID);
             texture = magicEffect->mParticle;
         }
 
@@ -136,10 +135,10 @@ namespace
     {
         // Calculate combined light diffuse color from magical effects
         osg::Vec4 lightDiffuseColor;
-        for (const ESM::ENAMstruct& enam : effects.mList)
+        for (const ESM::IndexedENAMstruct& enam : effects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mData.mEffectID);
             lightDiffuseColor += magicEffect->getColor();
         }
         int numberOfEffects = effects.mList.size();

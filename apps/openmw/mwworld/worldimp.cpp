@@ -2940,14 +2940,14 @@ namespace MWWorld
         return result;
     }
 
-    void World::castSpell(const Ptr& actor, bool manualSpell)
+    void World::castSpell(const Ptr& actor, bool scriptedSpell)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
         const bool casterIsPlayer = actor == MWMechanics::getPlayer();
         MWWorld::Ptr target;
         // For scripted spells we should not use hit contact
-        if (manualSpell)
+        if (scriptedSpell)
         {
             if (!casterIsPlayer)
             {
@@ -3015,7 +3015,7 @@ namespace MWWorld
 
         const ESM::RefId& selectedSpell = stats.getSpells().getSelectedSpell();
 
-        MWMechanics::CastSpell cast(actor, target, false, manualSpell);
+        MWMechanics::CastSpell cast(actor, target, false, scriptedSpell);
         cast.mHitPosition = hitPosition;
 
         if (!selectedSpell.empty())
@@ -3703,22 +3703,22 @@ namespace MWWorld
 
     void World::preloadEffects(const ESM::EffectList* effectList)
     {
-        for (const ESM::ENAMstruct& effectInfo : effectList->mList)
+        for (const ESM::IndexedENAMstruct& effectInfo : effectList->mList)
         {
-            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
+            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mData.mEffectID);
 
-            if (MWMechanics::isSummoningEffect(effectInfo.mEffectID))
+            if (MWMechanics::isSummoningEffect(effectInfo.mData.mEffectID))
             {
                 preload(mWorldScene.get(), mStore, ESM::RefId::stringRefId("VFX_Summon_Start"));
-                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(effectInfo.mEffectID));
+                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(effectInfo.mData.mEffectID));
             }
 
             preload(mWorldScene.get(), mStore, effect->mCasting);
             preload(mWorldScene.get(), mStore, effect->mHit);
 
-            if (effectInfo.mArea > 0)
+            if (effectInfo.mData.mArea > 0)
                 preload(mWorldScene.get(), mStore, effect->mArea);
-            if (effectInfo.mRange == ESM::RT_Target)
+            if (effectInfo.mData.mRange == ESM::RT_Target)
                 preload(mWorldScene.get(), mStore, effect->mBolt);
         }
     }
