@@ -11,10 +11,6 @@
 -- @field [parent=#core] #number API_REVISION
 
 ---
--- A read-only list of all @{#FactionRecord}s in the world database.
--- @field [parent=#core] #list<#FactionRecord> factions
-
----
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.
 -- @function [parent=#core] quit
 
@@ -622,40 +618,51 @@
 -- @field #number Curse Curse
 -- @field #number Power Power, can be used once a day
 
+--- @{#Spells}: Spells
+-- @field [parent=#Magic] #Spells spells
 
 --- List of all @{#Spell}s.
--- @field [parent=#Magic] #list<#Spell> spells
--- @usage local spell = core.magic.spells['thunder fist']  -- get by id
--- @usage local spell = core.magic.spells[1]  -- get by index
+-- @field [parent=#Spells] #list<#Spell> records A read-only list of all @{#Spell} records in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #Spell. 
+-- @usage local spell = core.magic.spells.records['thunder fist']  -- get by id
+-- @usage local spell = core.magic.spells.records[1]  -- get by index
 -- @usage -- Print all powers
--- for _, spell in pairs(core.magic.spells) do
+-- for _, spell in pairs(core.magic.spells.records) do
 --     if spell.types == core.magic.SPELL_TYPE.Power then
 --         print(spell.name)
 --     end
 -- end
 
+--- @{#Effects}: Magic Effects
+-- @field [parent=#Magic] #Effects effects
+
 --- Map from @{#MagicEffectId} to @{#MagicEffect}
--- @field [parent=#Magic] #map<#number, #MagicEffect> effects
+-- @field [parent=#Effects] #map<#number, #MagicEffect> records
 -- @usage -- Print all harmful effects
--- for _, effect in pairs(core.magic.effects) do
+-- for _, effect in pairs(core.magic.effects.records) do
 --     if effect.harmful then
 --         print(effect.name)
 --     end
 -- end
 -- @usage -- Look up the record of a specific effect and print its icon
--- local mgef = core.magic.effects[core.magic.EFFECT_TYPE.Reflect]
+-- local mgef = core.magic.effects.records[core.magic.EFFECT_TYPE.Reflect]
 -- print('Reflect Icon: '..tostring(mgef.icon))
 
---- List of all @{#Enchantment}s.
--- @field [parent=#Magic] #list<#Enchantment> enchantments
--- @usage local enchantment = core.magic.enchantments['marara's boon']  -- get by id
--- @usage local enchantment = core.magic.enchantments[1]  -- get by index
+--- @{#Enchantments}: Enchantments
+-- @field [parent=#Magic] #Enchantments enchantments
+
+--- A read-only list of all @{#Enchantment} records in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) and [iterables#Map](iterables.html#map-iterable) of #Enchantment.
+-- @field [parent=#Enchantments] #list<#Enchantment> records
+-- @usage local enchantment = core.magic.enchantments.records['marara's boon']  -- get by id
+-- @usage local enchantment = core.magic.enchantments.records[1]  -- get by index
 -- @usage -- Print all enchantments with constant effect
--- for _, ench in pairs(core.magic.enchantments) do
+-- for _, ench in pairs(core.magic.enchantments.records) do
 --     if ench.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
 --         print(ench.id)
 --     end
 -- end
+
 
 ---
 -- @type Spell
@@ -825,11 +832,12 @@
 -- @field #number maxRange Raw maximal range value, from 0 to 255
 
 --- List of all @{#SoundRecord}s.
--- @field [parent=#Sound] #list<#SoundRecord> sounds
--- @usage local sound = core.sound.sounds['Ashstorm']  -- get by id
--- @usage local sound = core.sound.sounds[1]  -- get by index
+-- @field [parent=#Sound] #list<#SoundRecord> records A read-only list of all @{#SoundRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #SoundRecord. 
+-- @usage local sound = core.sound.records['Ashstorm']  -- get by id
+-- @usage local sound = core.sound.records[1]  -- get by index
 -- @usage -- Print all sound files paths
--- for _, sound in pairs(core.sound.sounds) do
+-- for _, sound in pairs(core.sound.records) do
 --     print(sound.fileName)
 -- end
 
@@ -842,7 +850,10 @@
 
 --- `core.stats.Attribute`
 -- @type Attribute
--- @field #list<#AttributeRecord> records A read-only list of all @{#AttributeRecord}s in the world database.
+-- @field #list<#AttributeRecord> records A read-only list of all @{#AttributeRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #AttributeRecord. 
+-- @usage local record = core.stats.Attribute.records['example_recordid']
+-- @usage local record = core.stats.Attribute.records[1]
 
 ---
 -- Returns a read-only @{#AttributeRecord}
@@ -855,7 +866,10 @@
 
 --- `core.stats.Skill`
 -- @type Skill
--- @field #list<#SkillRecord> records A read-only list of all @{#SkillRecord}s in the world database.
+-- @field #list<#SkillRecord> records A read-only list of all @{#SkillRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #SkillRecord. 
+-- @usage local record = core.stats.Skill.records['example_recordid']
+-- @usage local record = core.stats.Skill.records[1]
 
 ---
 -- Returns a read-only @{#SkillRecord}
@@ -889,6 +903,15 @@
 -- @field #string castSound VFS path to the cast sound
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
+
+--- @{#Factions}: Factions
+-- @field [parent=#core] #Factions factions
+
+---
+-- A read-only list of all @{#FactionRecord}s in the world database.
+-- @field [parent=#Factions] #list<#FactionRecord> records
+-- @usage local record = core.factions.records['example_recordid']
+-- @usage local record = core.factions.records[1]
 
 ---
 -- Faction data record

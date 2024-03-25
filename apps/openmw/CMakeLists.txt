@@ -63,7 +63,7 @@ add_openmw_dir (mwlua
     luamanagerimp object objectlists userdataserializer luaevents engineevents objectvariant
     context menuscripts globalscripts localscripts playerscripts luabindings objectbindings cellbindings
     mwscriptbindings camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings
-    postprocessingbindings stats debugbindings corebindings worldbindings worker magicbindings factionbindings
+    postprocessingbindings stats recordstore debugbindings corebindings worldbindings worker magicbindings factionbindings
     classbindings itemdata inputprocessor animationbindings birthsignbindings racebindings markupbindings
     types/types types/door types/item types/actor types/container types/lockable types/weapon types/npc
     types/creature types/player types/activator types/book types/lockpick types/probe types/apparatus

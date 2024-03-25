@@ -22,7 +22,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "objectvariant.hpp"
-#include "types/types.hpp"
+#include "recordstore.hpp"
 
 namespace
 {
