@@ -154,6 +154,7 @@
     Bug #7785: OpenMW-CS initialising Skill and Attribute fields to 0 instead of -1 on non-FortifyStat spells
     Bug #7794: Fleeing NPCs name tooltip doesn't appear
     Bug #7796: Absorbed enchantments don't restore magicka
+    Bug #7823: Game crashes when launching it.
     Bug #7832: Ingredient tooltips show magnitude for Fortify Maximum Magicka effect
     Bug #7840: First run of the launcher doesn't save viewing distance as the default value
     Bug #7841: Editor: "Dirty" water heights are saved in modified CELLs
