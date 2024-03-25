@@ -31,6 +31,7 @@
 #include "luamanagerimp.hpp"
 #include "object.hpp"
 #include "objectvariant.hpp"
+#include "recordstore.hpp"
 
 namespace MWLua
 {
@@ -135,10 +136,6 @@ namespace MWLua
 
 namespace sol
 {
-    template <typename T>
-    struct is_automagical<typename MWWorld::Store<T>> : std::false_type
-    {
-    };
     template <>
     struct is_automagical<ESM::Spell> : std::false_type
     {
@@ -228,50 +225,18 @@ namespace MWLua
         }
 
         // Spell store
-        using SpellStore = MWWorld::Store<ESM::Spell>;
-        const SpellStore* spellStore = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
-        sol::usertype<SpellStore> spellStoreT = lua.new_usertype<SpellStore>("ESM3_SpellStore");
-        spellStoreT[sol::meta_function::to_string]
-            = [](const SpellStore& store) { return "ESM3_SpellStore{" + std::to_string(store.getSize()) + " spells}"; };
-        spellStoreT[sol::meta_function::length] = [](const SpellStore& store) { return store.getSize(); };
-        spellStoreT[sol::meta_function::index] = sol::overload(
-            [](const SpellStore& store, size_t index) -> const ESM::Spell* {
-                if (index == 0 || index > store.getSize())
-                    return nullptr;
-                return store.at(index - 1);
-            },
-            [](const SpellStore& store, std::string_view spellId) -> const ESM::Spell* {
-                return store.search(ESM::RefId::deserializeText(spellId));
-            });
-        spellStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
-        spellStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
-
-        magicApi["spells"] = spellStore;
+        sol::table spells(lua, sol::create);
+        addRecordFunctionBinding<ESM::Spell>(spells, context);
+        magicApi["spells"] = LuaUtil::makeReadOnly(spells);
 
         // Enchantment store
-        using EnchantmentStore = MWWorld::Store<ESM::Enchantment>;
-        const EnchantmentStore* enchantmentStore
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>();
-        sol::usertype<EnchantmentStore> enchantmentStoreT = lua.new_usertype<EnchantmentStore>("ESM3_EnchantmentStore");
-        enchantmentStoreT[sol::meta_function::to_string] = [](const EnchantmentStore& store) {
-            return "ESM3_EnchantmentStore{" + std::to_string(store.getSize()) + " enchantments}";
-        };
-        enchantmentStoreT[sol::meta_function::length] = [](const EnchantmentStore& store) { return store.getSize(); };
-        enchantmentStoreT[sol::meta_function::index] = sol::overload(
-            [](const EnchantmentStore& store, size_t index) -> const ESM::Enchantment* {
-                if (index == 0 || index > store.getSize())
-                    return nullptr;
-                return store.at(index - 1);
-            },
-            [](const EnchantmentStore& store, std::string_view enchantmentId) -> const ESM::Enchantment* {
-                return store.search(ESM::RefId::deserializeText(enchantmentId));
-            });
-        enchantmentStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
-        enchantmentStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
-
-        magicApi["enchantments"] = enchantmentStore;
+        sol::table enchantments(lua, sol::create);
+        addRecordFunctionBinding<ESM::Enchantment>(enchantments, context);
+        magicApi["enchantments"] = LuaUtil::makeReadOnly(enchantments);
 
         // MagicEffect store
+        sol::table magicEffects(lua, sol::create);
+        magicApi["effects"] = LuaUtil::makeReadOnly(magicEffects);
         using MagicEffectStore = MWWorld::Store<ESM::MagicEffect>;
         const MagicEffectStore* magicEffectStore
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
@@ -303,8 +268,10 @@ namespace MWLua
         };
         magicEffectStoreT[sol::meta_function::pairs]
             = [iter = sol::make_object(lua, magicEffectsIter)] { return iter; };
+        magicEffectStoreT[sol::meta_function::ipairs]
+            = [iter = sol::make_object(lua, magicEffectsIter)] { return iter; };
 
-        magicApi["effects"] = magicEffectStore;
+        magicEffects["records"] = magicEffectStore;
 
         // Spell record
         auto spellT = lua.new_usertype<ESM::Spell>("ESM3_Spell");

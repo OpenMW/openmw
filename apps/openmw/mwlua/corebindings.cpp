@@ -97,8 +97,7 @@ namespace MWLua
         api["magic"] = initCoreMagicBindings(context);
         api["stats"] = initCoreStatsBindings(context);
 
-        initCoreFactionBindings(context);
-        api["factions"] = &MWBase::Environment::get().getESMStore()->get<ESM::Faction>();
+        api["factions"] = initCoreFactionBindings(context);
 
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore
