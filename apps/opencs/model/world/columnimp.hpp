@@ -1137,7 +1137,8 @@ namespace CSMWorld
     struct TeleportColumn : public Column<ESXRecordT>
     {
         TeleportColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean)
+            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean,
+                ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh)
         {
         }
 
@@ -1165,6 +1166,8 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            if (!record.get().mTeleport)
+                return QVariant(QVariant::UserType);
             return QString::fromUtf8(record.get().mDestCell.c_str());
         }
 
@@ -1320,6 +1323,10 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            int column = this->mColumnId;
+            if (!record.get().mTeleport && column >= Columns::ColumnId_DoorPositionXPos
+                && column <= Columns::ColumnId_DoorPositionZPos)
+                return QVariant(QVariant::UserType);
             const ESM::Position& position = record.get().*mPosition;
             return position.pos[mIndex];
         }
@@ -1354,6 +1361,10 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            int column = this->mColumnId;
+            if (!record.get().mTeleport && column >= Columns::ColumnId_DoorPositionXRot
+                && column <= Columns::ColumnId::ColumnId_DoorPositionZRot)
+                return QVariant(QVariant::UserType);
             const ESM::Position& position = record.get().*mPosition;
             return osg::RadiansToDegrees(position.rot[mIndex]);
         }
