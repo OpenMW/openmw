@@ -95,4 +95,26 @@
 -- @return #boolean
 -- @usage local isPlaying = ambient.isMusicPlaying();
 
+---
+-- Play an ambient voiceover.
+-- @function [parent=#ambient] say
+-- @param #string fileName Path to sound file in VFS
+-- @param #string text Subtitle text (optional)
+-- @usage -- play voiceover and print messagebox
+-- ambient.say("Sound\\Vo\\Misc\\voice.mp3", "Subtitle text")
+-- @usage -- play voiceover, without messagebox
+-- ambient.say("Sound\\Vo\\Misc\\voice.mp3")
+
+---
+-- Stop an ambient voiceover
+-- @function [parent=#ambient] stopSay
+-- @param #string fileName Path to sound file in VFS
+-- @usage ambient.stopSay();
+
+---
+-- Check if an ambient voiceover is playing
+-- @function [parent=#Sound] isSayActive
+-- @return #boolean
+-- @usage local isActive = isSayActive();
+
 return nil
