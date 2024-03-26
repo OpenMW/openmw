@@ -712,6 +712,9 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
         if (!ui.directoryListWidget->findItems(rootPath, Qt::MatchFixedString).isEmpty())
             return;
         ui.directoryListWidget->addItem(rootPath);
+        auto row = ui.directoryListWidget->count() - 1;
+        auto* item = ui.directoryListWidget->item(row);
+        item->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue(rootPath)));
         mNewDataDirs.push_back(rootPath);
         refreshDataFilesView();
         return;
@@ -741,8 +744,11 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
         const auto* dir = select.dirListWidget->item(i);
         if (dir->checkState() == Qt::Checked)
         {
-            ui.directoryListWidget->insertItem(selectedRow++, dir->text());
+            ui.directoryListWidget->insertItem(selectedRow, dir->text());
+            auto* item = ui.directoryListWidget->item(selectedRow);
+            item->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue(dir->text())));
             mNewDataDirs.push_back(dir->text());
+            ++selectedRow;
         }
     }
 
