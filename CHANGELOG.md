@@ -162,6 +162,7 @@
     Bug #7859: AutoCalc flag is not used to calculate potion value
     Bug #7872: Region sounds use wrong odds
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
+    Bug #7898: Editor: Invalid reference scales are allowed
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
