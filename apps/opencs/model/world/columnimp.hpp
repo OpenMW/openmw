@@ -1136,9 +1136,8 @@ namespace CSMWorld
     template <typename ESXRecordT>
     struct TeleportColumn : public Column<ESXRecordT>
     {
-        TeleportColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean,
-                ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh)
+        TeleportColumn(int flags)
+            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean, flags)
         {
         }
 
