@@ -67,7 +67,6 @@ namespace ESM
             int32_t mCasterActorId;
             RefNum mItem;
             Flags mFlags;
-            bool mStackable;
             int32_t mWorsenings;
             TimeStamp mNextWorsening;
         };
