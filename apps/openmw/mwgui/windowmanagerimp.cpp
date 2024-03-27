@@ -914,6 +914,9 @@ namespace MWGui
         if (isConsoleMode())
             mConsole->onFrame(frameDuration);
 
+        if (isSettingsWindowVisible())
+            mSettingsWindow->onFrame(frameDuration);
+
         if (!gameRunning)
             return;
 
@@ -1470,10 +1473,6 @@ namespace MWGui
     {
         return mPostProcessorHud;
     }
-    MWGui::SettingsWindow* WindowManager::getSettingsWindow()
-    {
-        return mSettingsWindow;
-    }
 
     void WindowManager::useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions)
     {
@@ -1547,6 +1546,11 @@ namespace MWGui
     bool WindowManager::isPostProcessorHudVisible() const
     {
         return mPostProcessorHud && mPostProcessorHud->isVisible();
+    }
+
+    bool WindowManager::isSettingsWindowVisible() const
+    {
+        return mSettingsWindow && mSettingsWindow->isVisible();
     }
 
     bool WindowManager::isInteractiveMessageBoxActive() const
@@ -2123,6 +2127,21 @@ namespace MWGui
             mKeyboardNavigation->saveFocus(mGuiModes.back());
 
         mPostProcessorHud->setVisible(!visible);
+
+        if (visible && !mGuiModes.empty())
+            mKeyboardNavigation->restoreFocus(mGuiModes.back());
+
+        updateVisible();
+    }
+
+    void WindowManager::toggleSettingsWindow()
+    {
+        bool visible = mSettingsWindow->isVisible();
+
+        if (!visible && !mGuiModes.empty())
+            mKeyboardNavigation->saveFocus(mGuiModes.back());
+
+        mSettingsWindow->setVisible(!visible);
 
         if (visible && !mGuiModes.empty())
             mKeyboardNavigation->restoreFocus(mGuiModes.back());
