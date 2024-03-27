@@ -59,6 +59,7 @@ namespace CSMWorld
             { ColumnId_StackCount, "Count" },
             { ColumnId_Teleport, "Teleport" },
             { ColumnId_TeleportCell, "Teleport Cell" },
+            { ColumnId_IsLocked, "Locked" },
             { ColumnId_LockLevel, "Lock Level" },
             { ColumnId_Key, "Key" },
             { ColumnId_Trap, "Trap" },
