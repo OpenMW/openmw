@@ -292,7 +292,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
     if (!QFile::exists(path))
         return true;
 
-    Log(Debug::Verbose) << "Loading config file: " << path.toUtf8().constData();
+    Log(Debug::Info) << "Loading config file: " << path.toUtf8().constData();
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -351,7 +351,7 @@ bool Launcher::MainDialog::setupGameSettings()
 
     for (const auto& path : Files::getActiveConfigPathsQString(mCfgMgr))
     {
-        Log(Debug::Verbose) << "Loading config file: " << path.toUtf8().constData();
+        Log(Debug::Info) << "Loading config file: " << path.toUtf8().constData();
         if (!loadFile(path, &Config::GameSettings::readFile))
             return false;
     }
