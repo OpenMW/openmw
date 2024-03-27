@@ -1183,6 +1183,26 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
+    struct IsLockedColumn : public Column<ESXRecordT>
+    {
+        IsLockedColumn(int flags)
+            : Column<ESXRecordT>(Columns::ColumnId_IsLocked, ColumnBase::Display_Boolean, flags)
+        {
+        }
+
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mIsLocked; }
+
+        void set(Record<ESXRecordT>& record, const QVariant& data) override
+        {
+            ESXRecordT record2 = record.get();
+            record2.mIsLocked = data.toBool();
+            record.setModified(record2);
+        }
+
+        bool isEditable() const override { return true; }
+    };
+
+    template <typename ESXRecordT>
     struct LockLevelColumn : public Column<ESXRecordT>
     {
         LockLevelColumn()
@@ -1190,7 +1210,12 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mLockLevel; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            if (record.get().mIsLocked)
+                return record.get().mLockLevel;
+            return QVariant();
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
@@ -1212,7 +1237,9 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mKey.getRefIdString().c_str());
+            if (record.get().mIsLocked)
+                return QString::fromUtf8(record.get().mKey.getRefIdString().c_str());
+            return QVariant();
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override

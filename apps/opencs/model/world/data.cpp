@@ -599,6 +599,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 0, true));
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 1, true));
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 2, true));
+    mRefs.addColumn(new IsLockedColumn<CellRef>(
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mRefs.addColumn(new LockLevelColumn<CellRef>);
     mRefs.addColumn(new KeyColumn<CellRef>);
     mRefs.addColumn(new TrapColumn<CellRef>);

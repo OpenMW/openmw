@@ -230,12 +230,14 @@ namespace ESM
 
         if (!inInventory)
         {
-            int lockLevel = mLockLevel;
-            if (lockLevel == 0 && mIsLocked)
-                lockLevel = ZeroLock;
-            if (lockLevel != 0)
+            if (mIsLocked)
+            {
+                int lockLevel = mLockLevel;
+                if (lockLevel == 0)
+                    lockLevel = ZeroLock;
                 esm.writeHNT("FLTV", lockLevel);
-            esm.writeHNOCRefId("KNAM", mKey);
+                esm.writeHNOCRefId("KNAM", mKey);
+            }
             esm.writeHNOCRefId("TNAM", mTrap);
         }
 
