@@ -42,10 +42,8 @@ namespace MWMechanics
     {
         const auto world = MWBase::Environment::get().getWorld();
         std::map<MWWorld::Ptr, std::vector<ESM::IndexedENAMstruct>> toApply;
-        int index = -1;
         for (const ESM::IndexedENAMstruct& effectInfo : effects.mList)
         {
-            ++index;
             const ESM::MagicEffect* effect = world->getStore().get<ESM::MagicEffect>().find(effectInfo.mData.mEffectID);
 
             if (effectInfo.mData.mRange != rangeType
