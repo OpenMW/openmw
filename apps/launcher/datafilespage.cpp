@@ -867,9 +867,8 @@ bool Launcher::DataFilesPage::moveArchive(QListWidgetItem* listItem, int step)
     if (selectedRow == -1 || newRow < 0 || newRow > ui.archiveListWidget->count() - 1)
         return false;
 
-    const QListWidgetItem* item = ui.archiveListWidget->takeItem(selectedRow);
-
-    addArchive(item->text(), item->checkState(), newRow);
+    QListWidgetItem* item = ui.archiveListWidget->takeItem(selectedRow);
+    ui.archiveListWidget->insertItem(newRow, item);
     ui.archiveListWidget->setCurrentRow(newRow);
     return true;
 }
@@ -880,6 +879,7 @@ void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState sel
         row = ui.archiveListWidget->count();
     ui.archiveListWidget->insertItem(row, name);
     ui.archiveListWidget->item(row)->setCheckState(selected);
+    ui.archiveListWidget->item(row)->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue{ name }));
     if (mKnownArchives.filter(name).isEmpty()) // XXX why contains doesn't work here ???
     {
         auto item = ui.archiveListWidget->item(row);
