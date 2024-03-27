@@ -897,9 +897,6 @@ namespace EsmTool
         if (const ESM::Land::LandData* data = mData.getLandData(mData.mDataTypes))
         {
             std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
-            // Lots of missing members.
-            std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
-            std::cout << "  Unknown2: " << static_cast<unsigned>(data->mUnk2) << std::endl;
         }
         mData.unloadData();
         std::cout << "  Deleted: " << mIsDeleted << std::endl;

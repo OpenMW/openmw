@@ -237,12 +237,6 @@ namespace ESM
 
         void skipHRefId();
 
-        // Read the given number of bytes from a subrecord
-        void getHExact(void* p, std::size_t size);
-
-        // Read the given number of bytes from a named subrecord
-        void getHNExact(void* p, std::size_t size, NAME name);
-
         ESM::FormId getFormId(bool wide = false, NAME tag = "FRMR");
 
         /*************************************************************************
@@ -354,7 +348,7 @@ namespace ESM
         }
 
         /// Used for error handling
-        [[noreturn]] void fail(const std::string& msg);
+        [[noreturn]] void fail(std::string_view msg);
 
         /// Sets font encoder for ESM strings
         void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; }

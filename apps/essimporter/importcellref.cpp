@@ -1,10 +1,30 @@
 #include "importcellref.hpp"
 
 #include <components/esm3/esmreader.hpp>
+#include <components/misc/concepts.hpp>
+
 #include <cstdint>
 
 namespace ESSImport
 {
+    template <Misc::SameAsWithoutCvref<ACDT> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mUnknown, v.mFlags, v.mBreathMeter, v.mUnknown2, v.mDynamic, v.mUnknown3, v.mAttributes, v.mMagicEffects,
+            v.mUnknown4, v.mGoldPool, v.mCountDown, v.mUnknown5);
+    }
+
+    template <Misc::SameAsWithoutCvref<ACSC> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mUnknown1, v.mFlags, v.mUnknown2, v.mCorpseClearCountdown, v.mUnknown3);
+    }
+
+    template <Misc::SameAsWithoutCvref<ANIS> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mGroupIndex, v.mUnknown, v.mTime);
+    }
 
     void CellRef::load(ESM::ESMReader& esm)
     {
@@ -45,14 +65,9 @@ namespace ESSImport
         bool isDeleted = false;
         ESM::CellRef::loadData(esm, isDeleted);
 
-        mActorData.mHasACDT
-            = esm.getHNOT("ACDT", mActorData.mACDT.mUnknown, mActorData.mACDT.mFlags, mActorData.mACDT.mBreathMeter,
-                mActorData.mACDT.mUnknown2, mActorData.mACDT.mDynamic, mActorData.mACDT.mUnknown3,
-                mActorData.mACDT.mAttributes, mActorData.mACDT.mMagicEffects, mActorData.mACDT.mUnknown4,
-                mActorData.mACDT.mGoldPool, mActorData.mACDT.mCountDown, mActorData.mACDT.mUnknown5);
+        mActorData.mHasACDT = esm.getOptionalComposite("ACDT", mActorData.mACDT);
 
-        mActorData.mHasACSC = esm.getHNOT("ACSC", mActorData.mACSC.mUnknown1, mActorData.mACSC.mFlags,
-            mActorData.mACSC.mUnknown2, mActorData.mACSC.mCorpseClearCountdown, mActorData.mACSC.mUnknown3);
+        mActorData.mHasACSC = esm.getOptionalComposite("ACSC", mActorData.mACSC);
 
         if (esm.isNextSub("ACSL"))
             esm.skipHSubSize(112);
@@ -127,8 +142,7 @@ namespace ESSImport
         if (esm.isNextSub("ND3D"))
             esm.skipHSub();
 
-        mActorData.mHasANIS
-            = esm.getHNOT("ANIS", mActorData.mANIS.mGroupIndex, mActorData.mANIS.mUnknown, mActorData.mANIS.mTime);
+        mActorData.mHasANIS = esm.getOptionalComposite("ANIS", mActorData.mANIS);
 
         if (esm.isNextSub("LVCR"))
         {
@@ -146,7 +160,7 @@ namespace ESSImport
         // I've seen DATA *twice* on a creature record, and with the exact same content too! weird
         // alarmvoi0000.ess
         for (int i = 0; i < 2; ++i)
-            esm.getHNOT("DATA", mPos.pos, mPos.rot);
+            esm.getOptionalComposite("DATA", mPos);
 
         mDeleted = 0;
         if (esm.isNextSub("DELE"))

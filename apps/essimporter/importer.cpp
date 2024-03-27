@@ -135,7 +135,7 @@ namespace ESSImport
                 sub.mFileOffset = esm.getFileOffset();
                 sub.mName = esm.retSubName().toString();
                 sub.mData.resize(esm.getSubSize());
-                esm.getExact(&sub.mData[0], sub.mData.size());
+                esm.getExact(sub.mData.data(), sub.mData.size());
                 rec.mSubrecords.push_back(sub);
             }
             file.mRecords.push_back(rec);
