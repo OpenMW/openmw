@@ -57,6 +57,7 @@ namespace CSMWorld
             { ColumnId_Charges, "Charges" },
             { ColumnId_Enchantment, "Enchantment" },
             { ColumnId_StackCount, "Count" },
+            { ColumnId_GoldValue, "Value" },
             { ColumnId_Teleport, "Teleport" },
             { ColumnId_TeleportCell, "Teleport Cell" },
             { ColumnId_IsLocked, "Locked" },
