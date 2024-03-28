@@ -54,7 +54,7 @@ namespace LuaUi
             if (!ext->isRoot())
                 destroyWidget(ext);
             else
-                ext->detachFromParent(false);
+                ext->detachFromParent();
         }
 
         void detachElements(WidgetExtension* ext)

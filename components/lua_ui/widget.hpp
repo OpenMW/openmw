@@ -34,7 +34,7 @@ namespace LuaUi
 
         bool isRoot() const { return mElementRoot; }
         WidgetExtension* getParent() const { return mParent; }
-        void detachFromParent(bool updateParent);
+        void detachFromParent();
 
         void detachChildrenIf(auto&& predicate) { detachChildrenIf(predicate, mChildren); }
         void detachTemplateChildrenIf(auto&& predicate) { detachChildrenIf(predicate, mTemplateChildren); }
@@ -185,7 +185,7 @@ namespace LuaUi
             {
                 if (predicate(*it))
                 {
-                    (*it)->detachFromParent(false);
+                    (*it)->detachFromParent();
                     it = children.erase(it);
                 }
                 else
