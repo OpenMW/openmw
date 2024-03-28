@@ -101,7 +101,7 @@ namespace LuaUi
     void WidgetExtension::attach(WidgetExtension* ext)
     {
         if (ext->mParent != this)
-            ext->detachFromParent();
+            ext->detachFromParent(true);
         ext->mParent = this;
         ext->mTemplateChild = false;
         ext->widget()->attachToWidget(mSlot->widget());
@@ -114,13 +114,16 @@ namespace LuaUi
         ext->widget()->attachToWidget(widget());
     }
 
-    void WidgetExtension::detachFromParent()
+    void WidgetExtension::detachFromParent(bool updateParent)
     {
         if (mParent)
         {
-            auto children = mParent->children();
-            std::erase(children, this);
-            mParent->setChildren(children);
+            if (updateParent)
+            {
+                auto children = mParent->children();
+                std::erase(children, this);
+                mParent->setChildren(children);
+            }
             mParent = nullptr;
         }
         widget()->detachFromWidget();
@@ -307,7 +310,7 @@ namespace LuaUi
             w->updateCoord();
     }
 
-    MyGUI::IntSize WidgetExtension::parentSize()
+    MyGUI::IntSize WidgetExtension::parentSize() const
     {
         if (!mParent)
             return widget()->getParentSize(); // size of the layer
@@ -317,7 +320,7 @@ namespace LuaUi
             return mParent->childScalingSize();
     }
 
-    MyGUI::IntSize WidgetExtension::calculateSize()
+    MyGUI::IntSize WidgetExtension::calculateSize() const
     {
         if (mForceSize)
             return mForcedCoord.size();
@@ -330,7 +333,7 @@ namespace LuaUi
         return newSize;
     }
 
-    MyGUI::IntPoint WidgetExtension::calculatePosition(const MyGUI::IntSize& size)
+    MyGUI::IntPoint WidgetExtension::calculatePosition(const MyGUI::IntSize& size) const
     {
         if (mForcePosition)
             return mForcedCoord.point();
@@ -342,7 +345,7 @@ namespace LuaUi
         return newPosition;
     }
 
-    MyGUI::IntCoord WidgetExtension::calculateCoord()
+    MyGUI::IntCoord WidgetExtension::calculateCoord() const
     {
         MyGUI::IntCoord newCoord;
         newCoord = calculateSize();
@@ -350,12 +353,12 @@ namespace LuaUi
         return newCoord;
     }
 
-    MyGUI::IntSize WidgetExtension::childScalingSize()
+    MyGUI::IntSize WidgetExtension::childScalingSize() const
     {
         return mSlot->widget()->getSize();
     }
 
-    MyGUI::IntSize WidgetExtension::templateScalingSize()
+    MyGUI::IntSize WidgetExtension::templateScalingSize() const
     {
         return widget()->getSize();
     }
