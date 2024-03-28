@@ -112,6 +112,8 @@ namespace SceneUtil
     protected:
         osg::ref_ptr<osg::OperationQueue> mOperationQueue;
     };
+
+    bool isRedGreenPixelFormat(GLenum format);
 }
 
 #endif

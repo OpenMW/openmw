@@ -286,4 +286,18 @@ namespace SceneUtil
         mOperationQueue->add(operation);
     }
 
+    bool isRedGreenPixelFormat(GLenum format)
+    {
+        switch (format)
+        {
+            case GL_RG:
+            case GL_RG_INTEGER:
+            case GL_COMPRESSED_RED_GREEN_RGTC2_EXT:
+            case GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT:
+                return true;
+        }
+
+        return false;
+    }
+
 }

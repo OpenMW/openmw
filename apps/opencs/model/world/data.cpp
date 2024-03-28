@@ -152,7 +152,6 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mResourceSystem
         = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay, &mEncoder.getStatelessEncoder());
 
-    // FIXME: this is severely out of date (see #7595)
     Shader::ShaderManager::DefineMap defines
         = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
     Shader::ShaderManager::DefineMap shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();

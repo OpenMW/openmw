@@ -26,6 +26,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
 #include <components/vfs/manager.hpp>
@@ -445,17 +446,11 @@ namespace Shader
 
             if (normalMap != nullptr && normalMap->getImage(0))
             {
-                // Special handling for red-green normal maps (e.g. BC5 or R8G8).
-                switch (normalMap->getImage(0)->getPixelFormat())
+                // Special handling for red-green normal maps (e.g. BC5 or R8G8)
+                if (SceneUtil::isRedGreenPixelFormat(normalMap->getImage(0)->getPixelFormat()))
                 {
-                    case GL_RG:
-                    case GL_RG_INTEGER:
-                    case GL_COMPRESSED_RED_GREEN_RGTC2_EXT:
-                    case GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT:
-                    {
-                        mRequirements.back().mReconstructNormalZ = true;
-                        mRequirements.back().mNormalHeight = false;
-                    }
+                    mRequirements.back().mReconstructNormalZ = true;
+                    mRequirements.back().mNormalHeight = false;
                 }
             }
 
