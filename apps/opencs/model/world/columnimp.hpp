@@ -2080,6 +2080,26 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
+    struct ProjectileSpeedColumn : public Column<ESXRecordT>
+    {
+        ProjectileSpeedColumn()
+            : Column<ESXRecordT>(Columns::ColumnId_ProjectileSpeed, ColumnBase::Display_Float)
+        {
+        }
+
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mSpeed; }
+
+        void set(Record<ESXRecordT>& record, const QVariant& data) override
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mSpeed = data.toFloat();
+            record.setModified(record2);
+        }
+
+        bool isEditable() const override { return true; }
+    };
+
+    template <typename ESXRecordT>
     struct SchoolColumn : public Column<ESXRecordT>
     {
         SchoolColumn()

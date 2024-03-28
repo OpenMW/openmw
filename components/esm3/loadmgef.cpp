@@ -588,7 +588,7 @@ namespace ESM
         mData.mRed = 0;
         mData.mGreen = 0;
         mData.mBlue = 0;
-        mData.mSpeed = 0;
+        mData.mSpeed = 1;
 
         mIcon.clear();
         mParticle.clear();
