@@ -164,6 +164,7 @@
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
+    Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
     Bug #6723: "Turn to movement direction" makes the player rotate wildly with COLLADA
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
