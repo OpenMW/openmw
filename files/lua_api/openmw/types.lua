@@ -446,6 +446,12 @@
 -- @field #number progress [0-1] The NPC's skill progress.
 
 ---
+-- @type AIStat
+-- @field #number base The stat's base value.
+-- @field #number modifier The stat's modifier.
+-- @field #number modified The actor's current ai value (read-only.)
+
+---
 -- @type DynamicStats
 
 ---
@@ -465,6 +471,33 @@
 -- @function [parent=#DynamicStats] fatigue
 -- @param openmw.core#GameObject actor
 -- @return #DynamicStat
+
+---
+-- @type AIStats
+
+---
+-- Alarm (returns @{#AIStat})
+-- @function [parent=#AIStats] alarm
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
+
+---
+-- Fight (returns @{#AIStat})
+-- @function [parent=#AIStats] fight
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
+
+---
+-- Flee (returns @{#AIStat})
+-- @function [parent=#AIStats] flee
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
+
+---
+-- Hello (returns @{#AIStat})
+-- @function [parent=#AIStats] hello
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
 
 ---
 -- @type AttributeStats
@@ -686,6 +719,7 @@
 -- @type ActorStats
 -- @field #DynamicStats dynamic
 -- @field #AttributeStats attributes
+-- @field #AIStats ai
 
 ---
 -- Level (returns @{#LevelStat})

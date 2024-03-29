@@ -217,6 +217,7 @@
     Feature #7792: Support Timescale Clouds
     Feature #7795: Support MaxNumberRipples INI setting
     Feature #7805: Lua Menu context
+    Feature #7860: Lua: Expose NPC AI settings (fight, alarm, flee)
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
