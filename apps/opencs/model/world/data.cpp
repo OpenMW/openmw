@@ -593,7 +593,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRefs.addColumn(new ChargesColumn<CellRef>);
     mRefs.addColumn(new EnchantmentChargesColumn<CellRef>);
     mRefs.addColumn(new StackSizeColumn<CellRef>);
-    mRefs.addColumn(new TeleportColumn<CellRef>);
+    mRefs.addColumn(new TeleportColumn<CellRef>(
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mRefs.addColumn(new TeleportCellColumn<CellRef>);
     mRefs.addColumn(new PosColumn<CellRef>(&CellRef::mDoorDest, 0, true));
     mRefs.addColumn(new PosColumn<CellRef>(&CellRef::mDoorDest, 1, true));

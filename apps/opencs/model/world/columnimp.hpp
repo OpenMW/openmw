@@ -1136,8 +1136,8 @@ namespace CSMWorld
     template <typename ESXRecordT>
     struct TeleportColumn : public Column<ESXRecordT>
     {
-        TeleportColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean)
+        TeleportColumn(int flags)
+            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean, flags)
         {
         }
 
@@ -1165,6 +1165,8 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            if (!record.get().mTeleport)
+                return QVariant();
             return QString::fromUtf8(record.get().mDestCell.c_str());
         }
 
@@ -1309,17 +1311,21 @@ namespace CSMWorld
     {
         ESM::Position ESXRecordT::*mPosition;
         int mIndex;
+        bool mIsDoor;
 
         PosColumn(ESM::Position ESXRecordT::*position, int index, bool door)
             : Column<ESXRecordT>((door ? Columns::ColumnId_DoorPositionXPos : Columns::ColumnId_PositionXPos) + index,
                 ColumnBase::Display_Float)
             , mPosition(position)
             , mIndex(index)
+            , mIsDoor(door)
         {
         }
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            if (!record.get().mTeleport && mIsDoor)
+                return QVariant();
             const ESM::Position& position = record.get().*mPosition;
             return position.pos[mIndex];
         }
@@ -1343,17 +1349,21 @@ namespace CSMWorld
     {
         ESM::Position ESXRecordT::*mPosition;
         int mIndex;
+        bool mIsDoor;
 
         RotColumn(ESM::Position ESXRecordT::*position, int index, bool door)
             : Column<ESXRecordT>((door ? Columns::ColumnId_DoorPositionXRot : Columns::ColumnId_PositionXRot) + index,
                 ColumnBase::Display_Double)
             , mPosition(position)
             , mIndex(index)
+            , mIsDoor(door)
         {
         }
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            if (!record.get().mTeleport && mIsDoor)
+                return QVariant();
             const ESM::Position& position = record.get().*mPosition;
             return osg::RadiansToDegrees(position.rot[mIndex]);
         }
