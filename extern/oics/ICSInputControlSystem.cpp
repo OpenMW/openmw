@@ -42,6 +42,7 @@ namespace ICS
         , mXmouseAxisBinded(false), mYmouseAxisBinded(false)
         , mClientWidth(1)
         , mClientHeight(1)
+        , mMouseAxisBindingInitialValues{0}
 	{
 		ICS_LOG(" - Creating InputControlSystem - ");
 
