@@ -9,10 +9,10 @@
 #include <osg/Node>
 #include <osg/UserDataContainer>
 
-#include <osgAnimation/RigGeometry>
-#include <osgAnimation/UpdateBone>
-#include <osgAnimation/Skeleton>
 #include <osgAnimation/Bone>
+#include <osgAnimation/RigGeometry>
+#include <osgAnimation/Skeleton>
+#include <osgAnimation/UpdateBone>
 
 #include <osgParticle/ParticleSystem>
 
@@ -359,28 +359,29 @@ namespace Resource
     void updateVertexInfluenceMap(osgAnimation::RigGeometry& rig)
     {
         osgAnimation::VertexInfluenceMap* vertexInfluenceMap = rig.getInfluenceMap();
-        if (!vertexInfluenceMap) return;
+        if (!vertexInfluenceMap)
+            return;
 
         std::vector<std::pair<std::string, std::string>> renameList;
 
         // Collecting updates
-        for (const auto& influence : *vertexInfluenceMap) {
+        for (const auto& influence : *vertexInfluenceMap)
+        {
             const std::string& oldBoneName = influence.first;
             std::string newBoneName = Misc::StringUtils::underscoresToSpaces(oldBoneName);
-            if (newBoneName != oldBoneName) {
+            if (newBoneName != oldBoneName)
                 renameList.emplace_back(oldBoneName, newBoneName);
-            }
         }
 
         // Applying updates (cant update map while iterating it!)
-        for (const auto& rename : renameList) {
+        for (const auto& rename : renameList)
+        {
             const std::string& oldName = rename.first;
             const std::string& newName = rename.second;
 
             // Check if new name already exists to avoid overwriting
-            if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end()) {
+            if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end())
                 (*vertexInfluenceMap)[newName] = std::move((*vertexInfluenceMap)[oldName]);
-            }
 
             vertexInfluenceMap->erase(oldName);
         }
@@ -390,7 +391,9 @@ namespace Resource
     {
     public:
         RenameBonesVisitor()
-        : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+        {
+        }
 
         void apply(osg::MatrixTransform& node) override
         {
@@ -400,8 +403,8 @@ namespace Resource
             osg::Callback* cb = node.getUpdateCallback();
             while (cb)
             {
-                osgAnimation::AnimationUpdateCallback<osg::NodeCallback>* animCb =
-                    dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
+                osgAnimation::AnimationUpdateCallback<osg::NodeCallback>* animCb
+                    = dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
 
                 if (animCb)
                     animCb->setName(Misc::StringUtils::underscoresToSpaces(animCb->getName()));
@@ -721,7 +724,6 @@ namespace Resource
                                 new TemplateRef(newRiggeometryHolder->getGeometry(0)));
                         }
                     }
-
                 }
 
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));

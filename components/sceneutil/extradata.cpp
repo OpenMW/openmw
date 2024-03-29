@@ -9,10 +9,10 @@
 #include <yaml-cpp/yaml.h>
 
 #include <components/misc/osguservalues.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/shader/shadermanager.hpp>
-#include <components/misc/strings/algorithm.hpp>
 
 namespace SceneUtil
 {

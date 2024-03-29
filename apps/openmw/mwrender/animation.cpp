@@ -1457,9 +1457,7 @@ namespace MWRender
             }
         }
 
-        osg::ref_ptr<osg::Node> created
-            = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
-
+        osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
         if (!forceskeleton)
         {
             mInsert->addChild(created);
