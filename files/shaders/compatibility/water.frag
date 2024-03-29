@@ -41,12 +41,13 @@ const float BUMP_RAIN = 2.5;
 const float REFL_BUMP = 0.10;                      // reflection distortion amount
 const float REFR_BUMP = 0.07;                      // refraction distortion amount
 
+#if @sunlightScattering
 const float SCATTER_AMOUNT = 0.3;                  // amount of sunlight scattering
 const vec3 SCATTER_COLOUR = vec3(0.0,1.0,0.95);    // colour of sunlight scattering
+const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       // sunlight extinction
+#endif
 
-const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 const float SUN_SPEC_FADING_THRESHOLD = 0.15;       // visibility at which sun specularity starts to fade
-
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
 const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
@@ -57,7 +58,9 @@ const float WIND_SPEED = 0.2f;
 
 const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
 
+#if @wobblyShores
 const float WOBBLY_SHORE_FADE_DISTANCE = 6200.0;   // fade out wobbly shores to mask precision errors, the effect is almost impossible to see at a distance
+#endif
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
 
@@ -213,7 +216,7 @@ void main(void)
         refraction = mix(refraction, waterColor, clamp(factor, 0.0, 1.0));
     }
 
-    // sunlight scattering
+#if @sunlightScattering
     // normal for sunlight scattering
     vec3 lNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
                     normal3 * midWaves.y * 0.2 + normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 + rippleAdd);
@@ -222,9 +225,13 @@ void main(void)
     vec3 scatterColour = mix(SCATTER_COLOUR*vec3(1.0,0.4,0.0), SCATTER_COLOUR, clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
     vec3 lR = reflect(lVec, lNormal);
     float lightScatter = clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0) * SCATTER_AMOUNT * sunFade * sunSpec.a * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
-    gl_FragData[0].xyz = mix(mix(refraction,  scatterColour,  lightScatter), reflection, fresnel) + specular * sunSpec.rgb * sunSpec.a + rainSpecular;
+    refraction = mix(refraction, scatterColour, lightScatter);
+#endif
+
+    gl_FragData[0].xyz = mix(refraction, reflection, fresnel) + specular * sunSpec.rgb * sunSpec.a + rainSpecular;
     gl_FragData[0].w = 1.0;
 
+#if @wobblyShores
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping
     vec3 normalShoreRippleRain = texture2D(normalMap,normalCoords(UV, 2.0, 2.7, -1.0*waterTimer,  0.05,  0.1,  normal3)).rgb - 0.5
                                + texture2D(normalMap,normalCoords(UV, 2.0, 2.7,      waterTimer,  0.04, -0.13, normal4)).rgb - 0.5;
@@ -234,6 +241,8 @@ void main(void)
     shoreOffset *= fuzzFactor;
     shoreOffset = clamp(mix(shoreOffset, 1.0, clamp(linearDepth / WOBBLY_SHORE_FADE_DISTANCE, 0.0, 1.0)), 0.0, 1.0);
     gl_FragData[0].xyz = mix(rawRefraction, gl_FragData[0].xyz, shoreOffset);
+#endif
+
 #else
     gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * sunSpec.rgb  * sunSpec.a + rainSpecular;
     gl_FragData[0].w = clamp(fresnel*6.0 + specular * sunSpec.a, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.a, 0.0, 1.0);
