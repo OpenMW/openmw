@@ -20,7 +20,7 @@ namespace LuaUi
         void updateProperties() override;
         void updateCoord() override;
         void updateChildren() override;
-        MyGUI::IntSize calculateSize() override;
+        MyGUI::IntSize calculateSize() const override;
 
     private:
         void textChange(MyGUI::EditBox*);

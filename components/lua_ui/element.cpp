@@ -59,20 +59,14 @@ namespace LuaUi
 
         void detachElements(WidgetExtension* ext)
         {
-            for (auto* child : ext->children())
-            {
+            auto predicate = [](WidgetExtension* child) {
                 if (child->isRoot())
-                    child->detachFromParent();
-                else
-                    detachElements(child);
-            }
-            for (auto* child : ext->templateChildren())
-            {
-                if (child->isRoot())
-                    child->detachFromParent();
-                else
-                    detachElements(child);
-            }
+                    return true;
+                detachElements(child);
+                return false;
+            };
+            ext->detachChildrenIf(predicate);
+            ext->detachTemplateChildrenIf(predicate);
         }
 
         void destroyRoot(WidgetExtension* ext)
@@ -194,8 +188,8 @@ namespace LuaUi
                 throw std::logic_error(std::string("Invalid widget type ") += type);
 
             std::string name = layout.get_or(LayoutKeys::name, std::string());
-            MyGUI::Widget* widget = MyGUI::Gui::getInstancePtr()->createWidgetT(
-                type, "", MyGUI::IntCoord(), MyGUI::Align::Default, std::string(), name);
+            MyGUI::Widget* widget
+                = MyGUI::Gui::getInstancePtr()->createWidgetT(type, {}, {}, MyGUI::Align::Default, {}, name);
 
             WidgetExtension* ext = dynamic_cast<WidgetExtension*>(widget);
             if (!ext)
