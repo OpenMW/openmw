@@ -180,13 +180,10 @@ namespace DetourNavigator
         if (!playerTileChanged && changedTiles.empty())
             return;
 
-        const int maxTiles
-            = std::min(mSettings.get().mMaxTilesNumber, navMeshCacheItem->lockConst()->getImpl().getParams()->maxTiles);
-
         std::unique_lock lock(mMutex);
 
         if (playerTileChanged)
-            updateJobs(mWaiting, playerTile, maxTiles);
+            updateJobs(mWaiting, playerTile, mSettings.get().mMaxTilesNumber);
 
         for (const auto& [changedTile, changeType] : changedTiles)
         {
@@ -221,7 +218,7 @@ namespace DetourNavigator
         lock.unlock();
 
         if (playerTileChanged && mDbWorker != nullptr)
-            mDbWorker->updateJobs(playerTile, maxTiles);
+            mDbWorker->updateJobs(playerTile, mSettings.get().mMaxTilesNumber);
     }
 
     void AsyncNavMeshUpdater::wait(WaitConditionType waitConditionType, Loading::Listener* listener)
@@ -376,10 +373,8 @@ namespace DetourNavigator
             return JobStatus::Done;
 
         const auto playerTile = *mPlayerTile.lockConst();
-        const int maxTiles
-            = std::min(mSettings.get().mMaxTilesNumber, navMeshCacheItem->lockConst()->getImpl().getParams()->maxTiles);
 
-        if (!shouldAddTile(job.mChangedTile, playerTile, maxTiles))
+        if (!shouldAddTile(job.mChangedTile, playerTile, mSettings.get().mMaxTilesNumber))
         {
             Log(Debug::Debug) << "Ignore add tile by job " << job.mId << ": too far from player";
             navMeshCacheItem->lock()->removeTile(job.mChangedTile);

@@ -181,7 +181,7 @@ namespace DetourNavigator
         {
             const auto locked = cached->lockConst();
             const auto& navMesh = locked->getImpl();
-            const auto maxTiles = std::min(mSettings.mMaxTilesNumber, navMesh.getParams()->maxTiles);
+            const int maxTiles = mSettings.mMaxTilesNumber;
             getTilesPositions(range, [&](const TilePosition& tile) {
                 if (changedTiles.find(tile) != changedTiles.end())
                     return;
