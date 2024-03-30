@@ -135,7 +135,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
     if (topic.mState == CSMWorld::RecordBase::State_Deleted)
     {
         // if the topic is deleted, we do not need to bother with INFO records.
-        ESM::Dialogue dialogue = topic.get();
+        const ESM::Dialogue& dialogue = topic.get();
         writer.startRecord(dialogue.sRecordId);
         dialogue.save(writer, true);
         writer.endRecord(dialogue.sRecordId);
@@ -187,6 +187,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
                 {
                     ESM::DialInfo info = record.get();
                     info.mId = record.get().mOriginalId;
+                    info.mData.mType = topic.get().mType;
 
                     if (iter == infos.begin())
                         info.mPrev = ESM::RefId();

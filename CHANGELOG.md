@@ -160,6 +160,7 @@
     Bug #7840: First run of the launcher doesn't save viewing distance as the default value
     Bug #7841: Editor: "Dirty" water heights are saved in modified CELLs
     Bug #7859: AutoCalc flag is not used to calculate potion value
+    Bug #7861: OpenMW-CS: Incorrect DIAL's type in INFO records
     Bug #7872: Region sounds use wrong odds
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
     Bug #7898: Editor: Invalid reference scales are allowed
