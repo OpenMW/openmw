@@ -27,6 +27,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/recursivedirectoryiterator.hpp>
@@ -142,6 +143,8 @@ namespace
             box->setIndexSelected(MyGUI::ITEM_NONE);
     }
 }
+
+extern Files::ConfigurationManager *g_cfgMgr;
 
 namespace MWGui
 {
@@ -460,6 +463,8 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
+        const std::string settingspath = (g_cfgMgr->getUserConfigPath() / "settings.cfg").string();
+        Settings::Manager::saveUser(settingspath);
         setVisible(false);
     }
 
@@ -627,6 +632,8 @@ namespace MWGui
 
     void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
         Settings::shaders().mMaxLights.set(8 * (pos + 1));
         apply();
         configureWidgets(mMainWidget, false);

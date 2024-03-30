@@ -1624,6 +1624,7 @@ namespace MWRender
 
                 if (it->second == "max lights" && !lightManager->usingFFP())
                 {
+/*
                     mViewer->stopThreading();
 
                     lightManager->updateMaxLights(Settings::shaders().mMaxLights);
@@ -1636,7 +1637,9 @@ namespace MWRender
                     mStateUpdater->reset();
 
                     mViewer->startThreading();
+*/
                 }
+
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
             {
