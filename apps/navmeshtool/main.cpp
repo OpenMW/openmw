@@ -51,8 +51,8 @@
 
 namespace NavMeshTool
 {
-    namespace
-    {
+//    namespace
+//    {
         namespace bpo = boost::program_options;
 
         using StringsVector = std::vector<std::string>;
@@ -251,10 +251,11 @@ namespace NavMeshTool
 
             return 0;
         }
-    }
+//    }
 }
-
+/*
 int main(int argc, char* argv[])
 {
     return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
 }
+*/
