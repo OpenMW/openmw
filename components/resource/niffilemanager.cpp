@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include <osg/Object>
-#include <osg/Stats>
 
 #include <components/vfs/manager.hpp>
 
@@ -59,7 +58,7 @@ namespace Resource
 
     void NifFileManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Nif", mCache->getCacheSize());
+        Resource::reportStats("Nif", frameNumber, mCache->getStats(), *stats);
     }
 
 }

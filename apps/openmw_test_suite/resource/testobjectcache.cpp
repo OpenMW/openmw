@@ -114,9 +114,11 @@ namespace Resource
 
             cache->update(referenceTime, expiryDelay);
             ASSERT_THAT(cache->getRefFromObjectCacheOrNone(key), Optional(_));
+            ASSERT_EQ(cache->getStats().mExpired, 0);
 
             cache->update(referenceTime + expiryDelay, expiryDelay);
             EXPECT_EQ(cache->getRefFromObjectCacheOrNone(key), std::nullopt);
+            ASSERT_EQ(cache->getStats().mExpired, 1);
         }
 
         TEST(ResourceGenericObjectCacheTest, updateShouldKeepExternallyReferencedItems)
@@ -249,7 +251,7 @@ namespace Resource
             EXPECT_THAT(actual, ElementsAre(Pair(1, value1.get()), Pair(2, value2.get()), Pair(3, value3.get())));
         }
 
-        TEST(ResourceGenericObjectCacheTest, getCacheSizeShouldReturnNumberOrAddedItems)
+        TEST(ResourceGenericObjectCacheTest, getStatsShouldReturnNumberOrAddedItems)
         {
             osg::ref_ptr<GenericObjectCache<int>> cache(new GenericObjectCache<int>);
 
@@ -258,7 +260,33 @@ namespace Resource
             cache->addEntryToObjectCache(13, value1);
             cache->addEntryToObjectCache(42, value2);
 
-            EXPECT_EQ(cache->getCacheSize(), 2);
+            const CacheStats stats = cache->getStats();
+
+            EXPECT_EQ(stats.mSize, 2);
+        }
+
+        TEST(ResourceGenericObjectCacheTest, getStatsShouldReturnNumberOrGetsAndHits)
+        {
+            osg::ref_ptr<GenericObjectCache<int>> cache(new GenericObjectCache<int>);
+
+            {
+                const CacheStats stats = cache->getStats();
+
+                EXPECT_EQ(stats.mGet, 0);
+                EXPECT_EQ(stats.mHit, 0);
+            }
+
+            osg::ref_ptr<Object> value(new Object);
+            cache->addEntryToObjectCache(13, value);
+            cache->getRefFromObjectCache(13);
+            cache->getRefFromObjectCache(42);
+
+            {
+                const CacheStats stats = cache->getStats();
+
+                EXPECT_EQ(stats.mGet, 2);
+                EXPECT_EQ(stats.mHit, 1);
+            }
         }
 
         TEST(ResourceGenericObjectCacheTest, lowerBoundShouldReturnFirstNotLessThatGivenKey)

@@ -3786,6 +3786,7 @@ namespace MWWorld
     {
         DetourNavigator::reportStats(mNavigator->getStats(), frameNumber, stats);
         mPhysics->reportStats(frameNumber, stats);
+        mWorldScene->reportStats(frameNumber, stats);
     }
 
     void World::updateSkyDate()

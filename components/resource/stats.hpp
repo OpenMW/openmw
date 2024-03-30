@@ -28,57 +28,47 @@ namespace Resource
     class Profiler : public osgViewer::StatsHandler
     {
     public:
-        Profiler(bool offlineCollect, VFS::Manager* vfs);
+        explicit Profiler(bool offlineCollect, const VFS::Manager& vfs);
+
         bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
     private:
         void setUpFonts();
 
-        bool _offlineCollect;
-        bool _initFonts;
-        osg::ref_ptr<osgText::Font> _textFont;
+        bool mInitFonts = false;
+        bool mOfflineCollect;
+        osg::ref_ptr<osgText::Font> mTextFont;
     };
 
     class StatsHandler : public osgGA::GUIEventHandler
     {
     public:
-        StatsHandler(bool offlineCollect, VFS::Manager* vfs);
-
-        void setKey(int key) { _key = key; }
-        int getKey() const { return _key; }
+        explicit StatsHandler(bool offlineCollect, const VFS::Manager& vfs);
 
         bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
-
-        void setWindowSize(int w, int h);
-
-        void toggle(osgViewer::ViewerBase* viewer);
-
-        void setUpHUDCamera(osgViewer::ViewerBase* viewer);
-        void setUpScene(osgViewer::ViewerBase* viewer);
 
         /** Get the keyboard and mouse usage of this manipulator.*/
         void getUsage(osg::ApplicationUsage& usage) const override;
 
     private:
-        osg::ref_ptr<osg::Switch> _switch;
-        int _key;
-        osg::ref_ptr<osg::Camera> _camera;
-        bool _initialized;
-        bool _statsType;
-        bool _offlineCollect;
+        unsigned mPage = 0;
+        bool mInitialized = false;
+        bool mOfflineCollect;
+        osg::ref_ptr<osg::Switch> mSwitch;
+        osg::ref_ptr<osg::Camera> mCamera;
+        osg::ref_ptr<osgText::Font> mTextFont;
+        std::vector<std::string> mStatNames;
 
-        float _statsWidth;
-        float _statsHeight;
+        void setWindowSize(int w, int h);
 
-        float _characterSize;
+        void toggle(osgViewer::ViewerBase& viewer);
 
-        int _resourceStatsChildNum;
+        void setUpHUDCamera(osgViewer::ViewerBase& viewer);
 
-        osg::ref_ptr<osgText::Font> _textFont;
+        void setUpScene(osgViewer::ViewerBase& viewer);
     };
 
-    void CollectStatistics(osgViewer::ViewerBase* viewer);
-
+    void collectStatistics(osgViewer::ViewerBase& viewer);
 }
 
 #endif

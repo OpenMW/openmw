@@ -463,6 +463,6 @@ namespace MWRender
 
     void Groundcover::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Groundcover Chunk", mCache->getCacheSize());
+        Resource::reportStats("Groundcover Chunk", frameNumber, mCache->getStats(), *stats);
     }
 }

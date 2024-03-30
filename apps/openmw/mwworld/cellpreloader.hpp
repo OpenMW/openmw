@@ -2,10 +2,19 @@
 #define OPENMW_MWWORLD_CELLPRELOADER_H
 
 #include <components/sceneutil/workqueue.hpp>
+
 #include <map>
+
 #include <osg/Vec3f>
 #include <osg/Vec4i>
 #include <osg/ref_ptr>
+
+#include <map>
+
+namespace osg
+{
+    class Stats;
+}
 
 namespace Resource
 {
@@ -76,6 +85,8 @@ namespace MWWorld
         bool isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const;
         void setTerrain(Terrain::World* terrain);
 
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+
     private:
         void clearAllTasks();
 
@@ -118,6 +129,10 @@ namespace MWWorld
 
         std::vector<PositionCellGrid> mLoadedTerrainPositions;
         double mLoadedTerrainTimestamp;
+        std::size_t mEvicted = 0;
+        std::size_t mAdded = 0;
+        std::size_t mExpired = 0;
+        std::size_t mLoaded = 0;
     };
 
 }

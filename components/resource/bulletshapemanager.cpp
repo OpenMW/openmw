@@ -213,8 +213,8 @@ namespace Resource
 
     void BulletShapeManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Shape", mCache->getCacheSize());
-        stats->setAttribute(frameNumber, "Shape Instance", mInstanceCache->getCacheSize());
+        Resource::reportStats("Shape", frameNumber, mCache->getStats(), *stats);
+        Resource::reportStats("Shape Instance", frameNumber, mInstanceCache->getStats(), *stats);
     }
 
 }
