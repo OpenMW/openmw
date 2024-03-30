@@ -1135,9 +1135,9 @@ namespace MWRender
     void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
         if (mGroundcover)
-            stats->setAttribute(frameNumber, "Groundcover Chunk", mCache->getCacheSize());
+            Resource::reportStats("Groundcover Chunk", frameNumber, mCache->getStats(), *stats);
         else
-            stats->setAttribute(frameNumber, "Object Chunk", mCache->getCacheSize());
+            Resource::reportStats("Object Chunk", frameNumber, mCache->getStats(), *stats);
     }
 
 }

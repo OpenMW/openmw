@@ -16,6 +16,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/algorithm.hpp>
 #include <components/settings/values.hpp>
 
 #include <osg/Image>
@@ -61,13 +62,19 @@ void MWState::StateManager::cleanup(bool force)
         MWBase::Environment::get().getInputManager()->clear();
         MWBase::Environment::get().getMechanicsManager()->clear();
 
-        mState = State_NoGame;
         mCharacterManager.setCurrentCharacter(nullptr);
         mTimePlayed = 0;
-
+        mLastSavegame.clear();
         MWMechanics::CreatureStats::cleanup();
+
+        mState = State_NoGame;
+        MWBase::Environment::get().getLuaManager()->noGame();
     }
-    MWBase::Environment::get().getLuaManager()->clear();
+    else
+    {
+        // TODO: do we need this cleanup?
+        MWBase::Environment::get().getLuaManager()->clear();
+    }
 }
 
 std::map<int, int> MWState::StateManager::buildContentFileIndexMap(const ESM::ESMReader& reader) const
@@ -80,10 +87,8 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap(const ESM::ES
 
     for (int iPrev = 0; iPrev < static_cast<int>(prev.size()); ++iPrev)
     {
-        std::string id = Misc::StringUtils::lowerCase(prev[iPrev].name);
-
         for (int iCurrent = 0; iCurrent < static_cast<int>(current.size()); ++iCurrent)
-            if (id == Misc::StringUtils::lowerCase(current[iCurrent]))
+            if (Misc::StringUtils::ciEqual(prev[iPrev].name, current[iCurrent]))
             {
                 map.insert(std::make_pair(iPrev, iCurrent));
                 break;
@@ -119,14 +124,27 @@ void MWState::StateManager::askLoadRecent()
 
     if (!mAskLoadRecent)
     {
-        const MWState::Character* character = getCurrentCharacter();
-        if (!character || character->begin() == character->end()) // no saves
+        if (mLastSavegame.empty()) // no saves
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
         }
         else
         {
-            MWState::Slot lastSave = *character->begin();
+            std::string saveName = Files::pathToUnicodeString(mLastSavegame.filename());
+            // Assume the last saved game belongs to the current character's slot list.
+            const Character* character = getCurrentCharacter();
+            if (character)
+            {
+                for (const auto& slot : *character)
+                {
+                    if (slot.mPath == mLastSavegame)
+                    {
+                        saveName = slot.mProfile.mDescription;
+                        break;
+                    }
+                }
+            }
+
             std::vector<std::string> buttons;
             buttons.emplace_back("#{Interface:Yes}");
             buttons.emplace_back("#{Interface:No}");
@@ -134,7 +152,7 @@ void MWState::StateManager::askLoadRecent()
                 = MWBase::Environment::get().getL10nManager()->getMessage("OMWEngine", "AskLoadLastSave");
             std::string_view tag = "%s";
             size_t pos = message.find(tag);
-            message.replace(pos, tag.length(), lastSave.mProfile.mDescription);
+            message.replace(pos, tag.length(), saveName);
             MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
             mAskLoadRecent = true;
         }
@@ -157,10 +175,10 @@ void MWState::StateManager::newGame(bool bypass)
     {
         Log(Debug::Info) << "Starting a new game";
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-        MWBase::Environment::get().getLuaManager()->newGameStarted();
         MWBase::Environment::get().getWorld()->startNewGame(bypass);
 
         mState = State_Running;
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
@@ -184,11 +202,13 @@ void MWState::StateManager::newGame(bool bypass)
 void MWState::StateManager::endGame()
 {
     mState = State_Ended;
+    MWBase::Environment::get().getLuaManager()->gameEnded();
 }
 
 void MWState::StateManager::resumeGame()
 {
     mState = State_Running;
+    MWBase::Environment::get().getLuaManager()->gameLoaded();
 }
 
 void MWState::StateManager::saveGame(std::string_view description, const Slot* slot)
@@ -322,6 +342,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
             throw std::runtime_error("Write operation failed (file stream)");
 
         Settings::saves().mCharacter.set(Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
+        mLastSavegame = slot->mPath;
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -395,9 +416,38 @@ void MWState::StateManager::loadGame(const std::filesystem::path& filepath)
     loadGame(character, filepath);
 }
 
-struct VersionMismatchError : public std::runtime_error
+struct SaveFormatVersionError : public std::exception
 {
-    using std::runtime_error::runtime_error;
+    using std::exception::exception;
+
+    SaveFormatVersionError(ESM::FormatVersion savegameFormat, const std::string& message)
+        : mSavegameFormat(savegameFormat)
+        , mErrorMessage(message)
+    {
+    }
+
+    const char* what() const noexcept override { return mErrorMessage.c_str(); }
+    ESM::FormatVersion getFormatVersion() const { return mSavegameFormat; }
+
+protected:
+    ESM::FormatVersion mSavegameFormat = ESM::DefaultFormatVersion;
+    std::string mErrorMessage;
+};
+
+struct SaveVersionTooOldError : SaveFormatVersionError
+{
+    SaveVersionTooOldError(ESM::FormatVersion savegameFormat)
+        : SaveFormatVersionError(savegameFormat, "format version " + std::to_string(savegameFormat) + " is too old")
+    {
+    }
+};
+
+struct SaveVersionTooNewError : SaveFormatVersionError
+{
+    SaveVersionTooNewError(ESM::FormatVersion savegameFormat)
+        : SaveFormatVersionError(savegameFormat, "format version " + std::to_string(savegameFormat) + " is too new")
+    {
+    }
 };
 
 void MWState::StateManager::loadGame(const Character* character, const std::filesystem::path& filepath)
@@ -413,23 +463,9 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         ESM::FormatVersion version = reader.getFormatVersion();
         if (version > ESM::CurrentSaveGameFormatVersion)
-            throw VersionMismatchError("#{OMWEngine:LoadingRequiresNewVersionError}");
+            throw SaveVersionTooNewError(version);
         else if (version < ESM::MinSupportedSaveGameFormatVersion)
-        {
-            const char* release;
-            // Report the last version still capable of reading this save
-            if (version <= ESM::OpenMW0_48SaveGameFormatVersion)
-                release = "OpenMW 0.48.0";
-            else
-            {
-                // Insert additional else if statements above to cover future releases
-                static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_49SaveGameFormatVersion);
-                release = "OpenMW 0.49.0";
-            }
-            auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
-            std::string message = l10n->formatMessage("LoadingRequiresOldVersionError", { "version" }, { release });
-            throw VersionMismatchError(message);
-        }
+            throw SaveVersionTooOldError(version);
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap(reader);
         reader.setContentFileMapping(&contentFileMap);
@@ -561,6 +597,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         if (character)
             Settings::saves().mCharacter.set(Files::pathToUnicodeString(character->getPath().filename()));
+        mLastSavegame = filepath;
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
         MWBase::Environment::get().getWorld()->saveLoaded();
@@ -610,21 +647,47 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         MWBase::Environment::get().getLuaManager()->gameLoaded();
     }
+    catch (const SaveVersionTooNewError& e)
+    {
+        std::string error = "#{OMWEngine:LoadingRequiresNewVersionError}";
+        printSavegameFormatError(e.what(), error);
+    }
+    catch (const SaveVersionTooOldError& e)
+    {
+        const char* release;
+        // Report the last version still capable of reading this save
+        if (e.getFormatVersion() <= ESM::OpenMW0_48SaveGameFormatVersion)
+            release = "OpenMW 0.48.0";
+        else
+        {
+            // Insert additional else if statements above to cover future releases
+            static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_49SaveGameFormatVersion);
+            release = "OpenMW 0.49.0";
+        }
+        auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+        std::string error = l10n->formatMessage("LoadingRequiresOldVersionError", { "version" }, { release });
+        printSavegameFormatError(e.what(), error);
+    }
     catch (const std::exception& e)
     {
-        Log(Debug::Error) << "Failed to load saved game: " << e.what();
-
-        cleanup(true);
-
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
-
-        std::vector<std::string> buttons;
-        buttons.emplace_back("#{Interface:OK}");
-
         std::string error = "#{OMWEngine:LoadingFailed}: " + std::string(e.what());
-
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error, buttons);
+        printSavegameFormatError(e.what(), error);
     }
+}
+
+void MWState::StateManager::printSavegameFormatError(
+    const std::string& exceptionText, const std::string& messageBoxText)
+{
+    Log(Debug::Error) << "Failed to load saved game: " << exceptionText;
+
+    cleanup(true);
+
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
+
+    std::vector<std::string> buttons;
+    buttons.emplace_back("#{Interface:OK}");
+
+    MWBase::Environment::get().getWindowManager()->interactiveMessageBox(messageBoxText, buttons);
 }
 
 void MWState::StateManager::quickLoad()
@@ -633,13 +696,22 @@ void MWState::StateManager::quickLoad()
     {
         if (currentCharacter->begin() == currentCharacter->end())
             return;
-        loadGame(currentCharacter, currentCharacter->begin()->mPath); // Get newest save
+        // use requestLoad, otherwise we can crash by loading during the wrong part of the frame
+        requestLoad(currentCharacter->begin()->mPath);
     }
 }
 
 void MWState::StateManager::deleteGame(const MWState::Character* character, const MWState::Slot* slot)
 {
+    const std::filesystem::path savePath = slot->mPath;
     mCharacterManager.deleteSlot(character, slot);
+    if (mLastSavegame == savePath)
+    {
+        if (character->begin() != character->end())
+            mLastSavegame = character->begin()->mPath;
+        else
+            mLastSavegame.clear();
+    }
 }
 
 MWState::Character* MWState::StateManager::getCurrentCharacter()
@@ -670,15 +742,27 @@ void MWState::StateManager::update(float duration)
         {
             mAskLoadRecent = false;
             // Load last saved game for current character
-
-            MWState::Slot lastSave = *curCharacter->begin();
-            loadGame(curCharacter, lastSave.mPath);
+            // loadGame resets the game state along with mLastSavegame so we want to preserve it
+            const std::filesystem::path filePath = std::move(mLastSavegame);
+            loadGame(curCharacter, filePath);
         }
         else if (iButton == 1)
         {
             mAskLoadRecent = false;
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
         }
+    }
+
+    if (mNewGameRequest)
+    {
+        newGame();
+        mNewGameRequest = false;
+    }
+
+    if (mLoadRequest)
+    {
+        loadGame(*mLoadRequest);
+        mLoadRequest = std::nullopt;
     }
 }
 

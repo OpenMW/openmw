@@ -12,8 +12,10 @@
 
 #include <components/to_utf8/to_utf8.hpp>
 
+#include "components/esm/decompose.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
+
 #include "loadtes3.hpp"
 
 namespace ESM
@@ -53,9 +55,9 @@ namespace ESM
          *
          *************************************************************************/
 
-        int getVer() const { return mHeader.mData.version; }
+        int getVer() const { return mHeader.mData.version.ui; }
         int getRecordCount() const { return mHeader.mData.records; }
-        float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
+        float esmVersionF() const { return (mHeader.mData.version.f); }
         const std::string& getAuthor() const { return mHeader.mData.author; }
         const std::string& getDesc() const { return mHeader.mData.desc; }
         const std::vector<Header::MasterData>& getGameFiles() const { return mHeader.mMaster; }
@@ -177,6 +179,31 @@ namespace ESM
             (getT(args), ...);
         }
 
+        void getNamedComposite(NAME name, auto& value)
+        {
+            decompose(value, [&](auto&... args) { getHNT(name, args...); });
+        }
+
+        bool getOptionalComposite(NAME name, auto& value)
+        {
+            if (isNextSub(name))
+            {
+                getSubComposite(value);
+                return true;
+            }
+            return false;
+        }
+
+        void getComposite(auto& value)
+        {
+            decompose(value, [&](auto&... args) { (getT(args), ...); });
+        }
+
+        void getSubComposite(auto& value)
+        {
+            decompose(value, [&](auto&... args) { getHT(args...); });
+        }
+
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
         void skipHT()
         {
@@ -210,12 +237,6 @@ namespace ESM
 
         void skipHRefId();
 
-        // Read the given number of bytes from a subrecord
-        void getHExact(void* p, int size);
-
-        // Read the given number of bytes from a named subrecord
-        void getHNExact(void* p, int size, NAME name);
-
         ESM::FormId getFormId(bool wide = false, NAME tag = "FRMR");
 
         /*************************************************************************
@@ -248,7 +269,7 @@ namespace ESM
         void skipHSub();
 
         // Skip sub record and check its size
-        void skipHSubSize(int size);
+        void skipHSubSize(std::size_t size);
 
         // Skip all subrecords until the given subrecord or no more subrecords remaining
         void skipHSubUntil(NAME name);
@@ -327,7 +348,7 @@ namespace ESM
         }
 
         /// Used for error handling
-        [[noreturn]] void fail(const std::string& msg);
+        [[noreturn]] void fail(std::string_view msg);
 
         /// Sets font encoder for ESM strings
         void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; }

@@ -50,6 +50,7 @@
 
 #include "cameracontroller.hpp"
 #include "instancemode.hpp"
+#include "mask.hpp"
 #include "object.hpp"
 #include "pathgridmode.hpp"
 
@@ -135,6 +136,15 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
     connect(abortShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &WorldspaceWidget::abortDrag);
 
+    connect(new CSMPrefs::Shortcut("scene-toggle-visibility", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::toggleHiddenInstances);
+
+    connect(new CSMPrefs::Shortcut("scene-unhide-all", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::unhideAll);
+
+    connect(new CSMPrefs::Shortcut("scene-clear-selection", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        [this] { this->clearSelection(Mask_Reference); });
+
     mInConstructor = false;
 }
 
@@ -174,11 +184,11 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 
 void CSVRender::WorldspaceWidget::centerOrbitCameraOnSelection()
 {
-    std::vector<osg::ref_ptr<TagBase>> selection = getSelection(~0u);
+    std::vector<osg::ref_ptr<TagBase>> selection = getSelection(Mask_Reference);
 
     for (std::vector<osg::ref_ptr<TagBase>>::iterator it = selection.begin(); it != selection.end(); ++it)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(it->get()))
+        if (CSVRender::ObjectTag* objectTag = static_cast<CSVRender::ObjectTag*>(it->get()))
         {
             mOrbitCamControl->setCenter(objectTag->mObject->getPosition().asVec3());
         }
@@ -430,7 +440,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
             osg::Node* node = *nodeIter;
             if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase*>(node->getUserData()))
             {
-                WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
+                WorldspaceHitResult hit = { true, std::move(tag), 0, 0, 0, intersection.getWorldIntersectPoint() };
                 if (intersection.indexList.size() >= 3)
                 {
                     hit.index0 = intersection.indexList[0];
@@ -738,6 +748,24 @@ void CSVRender::WorldspaceWidget::tertiarySelect(bool activate)
 void CSVRender::WorldspaceWidget::speedMode(bool activate)
 {
     mSpeedMode = activate;
+}
+
+void CSVRender::WorldspaceWidget::toggleHiddenInstances()
+{
+    const std::vector<osg::ref_ptr<TagBase>> selection = getSelection(Mask_Reference);
+
+    if (selection.empty())
+        return;
+
+    const CSVRender::ObjectTag* firstSelection = static_cast<CSVRender::ObjectTag*>(selection.begin()->get());
+    assert(firstSelection != nullptr);
+
+    const CSVRender::Mask firstMask
+        = firstSelection->mObject->getRootNode()->getNodeMask() == Mask_Hidden ? Mask_Reference : Mask_Hidden;
+
+    for (const auto& object : selection)
+        if (const auto objectTag = static_cast<CSVRender::ObjectTag*>(object.get()))
+            objectTag->mObject->getRootNode()->setNodeMask(firstMask);
 }
 
 void CSVRender::WorldspaceWidget::handleInteraction(InteractionType type, bool activate)

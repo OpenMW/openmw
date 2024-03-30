@@ -115,20 +115,20 @@ namespace LuaUtil
                     std::string_view handlerName = cast<std::string_view>(key);
                     sol::function fn = cast<sol::function>(handler);
                     if (handlerName == HANDLER_INIT)
-                        onInit = fn;
+                        onInit = std::move(fn);
                     else if (handlerName == HANDLER_LOAD)
-                        onLoad = fn;
+                        onLoad = std::move(fn);
                     else if (handlerName == HANDLER_SAVE)
-                        script.mOnSave = fn;
+                        script.mOnSave = std::move(fn);
                     else if (handlerName == HANDLER_INTERFACE_OVERRIDE)
-                        script.mOnOverride = fn;
+                        script.mOnOverride = std::move(fn);
                     else
                     {
                         auto it = mEngineHandlers.find(handlerName);
                         if (it == mEngineHandlers.end())
                             Log(Debug::Error) << "Not supported handler '" << handlerName << "' in " << debugName;
                         else
-                            insertHandler(it->second->mList, scriptId, fn);
+                            insertHandler(it->second->mList, scriptId, std::move(fn));
                     }
                 }
             }
@@ -590,7 +590,7 @@ namespace LuaUtil
         updateTimerQueue(mGameTimersQueue, gameTime);
     }
 
-    static constexpr float instructionCountAvgCoef = 1.0 / 30; // averaging over approximately 30 frames
+    static constexpr float instructionCountAvgCoef = 1.0f / 30; // averaging over approximately 30 frames
 
     void ScriptsContainer::statsNextFrame()
     {

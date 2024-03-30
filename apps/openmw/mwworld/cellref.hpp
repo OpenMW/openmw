@@ -231,18 +231,20 @@ namespace MWWorld
         }
         void setTrap(const ESM::RefId& trap);
 
-        // This is 5 for Gold_005 references, 100 for Gold_100 and so on.
-        int getGoldValue() const
+        int getCount(bool absolute = true) const
         {
             struct Visitor
             {
-                int operator()(const ESM::CellRef& ref) { return ref.mGoldValue; }
-                int operator()(const ESM4::Reference& /*ref*/) { return 0; }
-                int operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
+                int operator()(const ESM::CellRef& ref) { return ref.mCount; }
+                int operator()(const ESM4::Reference& ref) { return ref.mCount; }
+                int operator()(const ESM4::ActorCharacter& ref) { return ref.mCount; }
             };
-            return std::visit(Visitor(), mCellRef.mVariant);
+            int count = std::visit(Visitor(), mCellRef.mVariant);
+            if (absolute)
+                return std::abs(count);
+            return count;
         }
-        void setGoldValue(int value);
+        void setCount(int value);
 
         // Write the content of this CellRef into the given ObjectState
         void writeState(ESM::ObjectState& state) const;

@@ -110,7 +110,7 @@ namespace MWRender
         MWWorld::ConstPtr item = *it;
 
         std::string_view bonename;
-        std::string itemModel = item.getClass().getModel(item);
+        std::string itemModel = item.getClass().getCorrectedModel(item);
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
         {
             if (item.getType() == ESM::Weapon::sRecordId)
@@ -168,9 +168,9 @@ namespace MWRender
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
                 source = mWeaponAnimationTime;
             else
-                source = std::make_shared<NullAnimationTime>();
+                source = mAnimationTimePtr[0];
 
-            SceneUtil::AssignControllerSourcesVisitor assignVisitor(source);
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::move(source));
             attached->accept(assignVisitor);
         }
         catch (std::exception& e)

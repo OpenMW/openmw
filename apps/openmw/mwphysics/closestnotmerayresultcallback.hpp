@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWPHYSICS_CLOSESTNOTMERAYRESULTCALLBACK_H
 #define OPENMW_MWPHYSICS_CLOSESTNOTMERAYRESULTCALLBACK_H
 
-#include <vector>
+#include <span>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -14,14 +14,19 @@ namespace MWPhysics
     class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
     {
     public:
-        ClosestNotMeRayResultCallback(const btCollisionObject* me, std::vector<const btCollisionObject*> targets,
-            const btVector3& from, const btVector3& to);
+        explicit ClosestNotMeRayResultCallback(std::span<const btCollisionObject*> ignore,
+            std::span<const btCollisionObject*> targets, const btVector3& from, const btVector3& to)
+            : btCollisionWorld::ClosestRayResultCallback(from, to)
+            , mIgnoreList(ignore)
+            , mTargets(targets)
+        {
+        }
 
         btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override;
 
     private:
-        const btCollisionObject* mMe;
-        const std::vector<const btCollisionObject*> mTargets;
+        const std::span<const btCollisionObject*> mIgnoreList;
+        const std::span<const btCollisionObject*> mTargets;
     };
 }
 

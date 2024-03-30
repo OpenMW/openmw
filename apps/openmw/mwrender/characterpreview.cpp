@@ -247,7 +247,7 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
 
-        SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *stateset);
+        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);
 
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)
@@ -436,7 +436,7 @@ namespace MWRender
 
                 // We still should use one-handed animation as fallback
                 if (mAnimation->hasAnimation(inventoryGroup))
-                    groupname = inventoryGroup;
+                    groupname = std::move(inventoryGroup);
                 else
                 {
                     static const std::string oneHandFallback
@@ -456,15 +456,15 @@ namespace MWRender
 
         mAnimation->showCarriedLeft(showCarriedLeft);
 
-        mCurrentAnimGroup = groupname;
-        mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mCurrentAnimGroup = std::move(groupname);
+        mAnimation->play(mCurrentAnimGroup, 1, BlendMask::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if (torch != inv.end() && torch->getType() == ESM::Light::sRecordId && showCarriedLeft)
         {
             if (!mAnimation->getInfo("torch"))
-                mAnimation->play(
-                    "torch", 2, Animation::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f, ~0ul, true);
+                mAnimation->play("torch", 2, BlendMask::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f,
+                    std::numeric_limits<uint32_t>::max(), true);
         }
         else if (mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
@@ -591,7 +591,7 @@ namespace MWRender
     void RaceSelectionPreview::onSetup()
     {
         CharacterPreview::onSetup();
-        mAnimation->play("idle", 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mAnimation->play("idle", 1, BlendMask::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->runAnimation(0.f);
 
         // attach camera to follow the head node

@@ -50,6 +50,7 @@ namespace MyGUI
 
 namespace MWWorld
 {
+    class Cell;
     class ESMStore;
 }
 
@@ -161,6 +162,7 @@ namespace MWGui
 
         bool isConsoleMode() const override;
         bool isPostProcessorHudVisible() const override;
+        bool isSettingsWindowVisible() const override;
         bool isInteractiveMessageBoxActive() const override;
 
         void toggleVisible(GuiWindow wnd) override;
@@ -191,7 +193,8 @@ namespace MWGui
         void setConsoleSelectedObject(const MWWorld::Ptr& object) override;
         MWWorld::Ptr getConsoleSelectedObject() const override;
         void printToConsole(const std::string& msg, std::string_view color) override;
-        void setConsoleMode(const std::string& mode) override;
+        void setConsoleMode(std::string_view mode) override;
+        const std::string& getConsoleMode() override;
 
         /// Set time left for the player to start drowning (update the drowning bar)
         /// @param time time left to start drowning
@@ -213,9 +216,6 @@ namespace MWGui
         bool toggleFogOfWar() override;
         bool toggleFullHelp() override; ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const override;
-
-        void setActiveMap(int x, int y, bool interior) override;
-        ///< set the indices of the map texture that should be used
 
         /// sets the visibility of the drowning bar
         void setDrowningBarVisibility(bool visible) override;
@@ -313,7 +313,7 @@ namespace MWGui
 
         void setEnemy(const MWWorld::Ptr& enemy) override;
 
-        int getMessagesCount() const override;
+        std::size_t getMessagesCount() const override;
 
         const Translation::Storage& getTranslationDataStorage() const override;
 
@@ -364,6 +364,7 @@ namespace MWGui
         void toggleConsole() override;
         void toggleDebugWindow() override;
         void togglePostProcessorHud() override;
+        void toggleSettingsWindow() override;
 
         /// Cycle to next or previous spell
         void cycleSpell(bool next) override;
@@ -586,6 +587,9 @@ namespace MWGui
 
         void setCullMask(uint32_t mask) override;
         uint32_t getCullMask() override;
+
+        void setActiveMap(const MWWorld::Cell& cell);
+        ///< set the indices of the map texture that should be used
 
         Files::ConfigurationManager& mCfgMgr;
     };

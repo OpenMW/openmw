@@ -39,7 +39,7 @@ namespace
     {
         const std::string mText;
         const Response mResponses[3];
-        const std::string mSound;
+        const VFS::Path::Normalized mSound;
     };
 
     Step sGenerateClassSteps(int number)
@@ -63,17 +63,17 @@ namespace
         switch (order)
         {
             case 0:
-                return { question, { r0, r1, r2 }, sound };
+                return { std::move(question), { std::move(r0), std::move(r1), std::move(r2) }, std::move(sound) };
             case 1:
-                return { question, { r0, r2, r1 }, sound };
+                return { std::move(question), { std::move(r0), std::move(r2), std::move(r1) }, std::move(sound) };
             case 2:
-                return { question, { r1, r0, r2 }, sound };
+                return { std::move(question), { std::move(r1), std::move(r0), std::move(r2) }, std::move(sound) };
             case 3:
-                return { question, { r1, r2, r0 }, sound };
+                return { std::move(question), { std::move(r1), std::move(r2), std::move(r0) }, std::move(sound) };
             case 4:
-                return { question, { r2, r0, r1 }, sound };
+                return { std::move(question), { std::move(r2), std::move(r0), std::move(r1) }, std::move(sound) };
             default:
-                return { question, { r2, r1, r0 }, sound };
+                return { std::move(question), { std::move(r2), std::move(r1), std::move(r0) }, std::move(sound) };
         }
     }
 }
@@ -333,10 +333,10 @@ namespace MWGui
             if (!classId.empty())
                 MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
 
-            const ESM::Class* klass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(classId);
-            if (klass)
+            const ESM::Class* pickedClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(classId);
+            if (pickedClass)
             {
-                mPlayerClass = *klass;
+                mPlayerClass = *pickedClass;
             }
             MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mPickClassDialog));
         }
@@ -454,30 +454,30 @@ namespace MWGui
     {
         if (mCreateClassDialog)
         {
-            ESM::Class klass;
-            klass.mName = mCreateClassDialog->getName();
-            klass.mDescription = mCreateClassDialog->getDescription();
-            klass.mData.mSpecialization = mCreateClassDialog->getSpecializationId();
-            klass.mData.mIsPlayable = 0x1;
-            klass.mRecordFlags = 0;
+            ESM::Class createdClass;
+            createdClass.mName = mCreateClassDialog->getName();
+            createdClass.mDescription = mCreateClassDialog->getDescription();
+            createdClass.mData.mSpecialization = mCreateClassDialog->getSpecializationId();
+            createdClass.mData.mIsPlayable = 0x1;
+            createdClass.mRecordFlags = 0;
 
             std::vector<ESM::RefId> attributes = mCreateClassDialog->getFavoriteAttributes();
-            assert(attributes.size() >= klass.mData.mAttribute.size());
-            for (size_t i = 0; i < klass.mData.mAttribute.size(); ++i)
-                klass.mData.mAttribute[i] = ESM::Attribute::refIdToIndex(attributes[i]);
+            assert(attributes.size() >= createdClass.mData.mAttribute.size());
+            for (size_t i = 0; i < createdClass.mData.mAttribute.size(); ++i)
+                createdClass.mData.mAttribute[i] = ESM::Attribute::refIdToIndex(attributes[i]);
 
             std::vector<ESM::RefId> majorSkills = mCreateClassDialog->getMajorSkills();
             std::vector<ESM::RefId> minorSkills = mCreateClassDialog->getMinorSkills();
-            assert(majorSkills.size() >= klass.mData.mSkills.size());
-            assert(minorSkills.size() >= klass.mData.mSkills.size());
-            for (size_t i = 0; i < klass.mData.mSkills.size(); ++i)
+            assert(majorSkills.size() >= createdClass.mData.mSkills.size());
+            assert(minorSkills.size() >= createdClass.mData.mSkills.size());
+            for (size_t i = 0; i < createdClass.mData.mSkills.size(); ++i)
             {
-                klass.mData.mSkills[i][1] = ESM::Skill::refIdToIndex(majorSkills[i]);
-                klass.mData.mSkills[i][0] = ESM::Skill::refIdToIndex(minorSkills[i]);
+                createdClass.mData.mSkills[i][1] = ESM::Skill::refIdToIndex(majorSkills[i]);
+                createdClass.mData.mSkills[i][0] = ESM::Skill::refIdToIndex(minorSkills[i]);
             }
 
-            MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
-            mPlayerClass = klass;
+            MWBase::Environment::get().getMechanicsManager()->setPlayerClass(createdClass);
+            mPlayerClass = std::move(createdClass);
 
             // Do not delete dialog, so that choices are remembered in case we want to go back and adjust them later
             mCreateClassDialog->setVisible(false);
@@ -666,9 +666,10 @@ namespace MWGui
 
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
-        const ESM::Class* klass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(mGenerateClass);
+        const ESM::Class* generatedClass
+            = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(mGenerateClass);
 
-        mPlayerClass = *klass;
+        mPlayerClass = *generatedClass;
     }
 
     void CharacterCreation::onGenerateClassBack()

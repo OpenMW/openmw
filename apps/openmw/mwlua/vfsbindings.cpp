@@ -1,15 +1,18 @@
 #include "vfsbindings.hpp"
 
+#include <sol/object.hpp>
+
 #include <components/files/istreamptr.hpp>
+#include <components/lua/luastate.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
 
 #include "context.hpp"
-#include "luamanagerimp.hpp"
 
 namespace MWLua
 {
@@ -161,7 +164,8 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         sol::usertype<FileHandle> handle = context.mLua->sol().new_usertype<FileHandle>("FileHandle");
-        handle["fileName"] = sol::readonly_property([](const FileHandle& self) { return self.mFileName; });
+        handle["fileName"]
+            = sol::readonly_property([](const FileHandle& self) -> std::string_view { return self.mFileName; });
         handle[sol::meta_function::to_string] = [](const FileHandle& self) {
             return "FileHandle{'" + self.mFileName + "'" + (!self.mFilePtr ? ", closed" : "") + "}";
         };
@@ -326,7 +330,8 @@ namespace MWLua
             },
             [](const sol::object&) -> sol::object { return sol::nil; });
 
-        api["fileExists"] = [vfs](std::string_view fileName) -> bool { return vfs->exists(fileName); };
+        api["fileExists"]
+            = [vfs](std::string_view fileName) -> bool { return vfs->exists(VFS::Path::Normalized(fileName)); };
         api["pathsWithPrefix"] = [vfs](std::string_view prefix) {
             auto iterator = vfs->getRecursiveDirectoryIterator(prefix);
             return sol::as_function([iterator, current = iterator.begin()]() mutable -> sol::optional<std::string> {

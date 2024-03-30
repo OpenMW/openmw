@@ -15,7 +15,7 @@ namespace ESM
 
         esm.getHNT("LKEP", mLastKnownExteriorPosition);
 
-        mHasMark = esm.getHNOT("MARK", mMarkedPosition.pos, mMarkedPosition.rot);
+        mHasMark = esm.getOptionalComposite("MARK", mMarkedPosition);
         if (mHasMark)
             mMarkedCell = esm.getCellId();
 
@@ -30,16 +30,12 @@ namespace ESM
         mPaidCrimeId = -1;
         esm.getHNOT(mPaidCrimeId, "PAYD");
 
-        bool checkPrevItems = true;
-        while (checkPrevItems)
+        while (esm.peekNextSub("BOUN"))
         {
-            ESM::RefId boundItemId = esm.getHNORefId("BOUN");
-            ESM::RefId prevItemId = esm.getHNORefId("PREV");
+            ESM::RefId boundItemId = esm.getHNRefId("BOUN");
+            ESM::RefId prevItemId = esm.getHNRefId("PREV");
 
-            if (!boundItemId.empty())
-                mPreviousItems[boundItemId] = prevItemId;
-            else
-                checkPrevItems = false;
+            mPreviousItems[boundItemId] = prevItemId;
         }
 
         if (esm.getFormatVersion() <= MaxOldSkillsAndAttributesFormatVersion)
@@ -94,7 +90,7 @@ namespace ESM
 
         if (mHasMark)
         {
-            esm.writeHNT("MARK", mMarkedPosition, 24);
+            esm.writeNamedComposite("MARK", mMarkedPosition);
             esm.writeCellId(mMarkedCell);
         }
 
@@ -103,10 +99,10 @@ namespace ESM
         esm.writeHNT("CURD", mCurrentCrimeId);
         esm.writeHNT("PAYD", mPaidCrimeId);
 
-        for (PreviousItems::const_iterator it = mPreviousItems.begin(); it != mPreviousItems.end(); ++it)
+        for (const auto& [bound, prev] : mPreviousItems)
         {
-            esm.writeHNRefId("BOUN", it->first);
-            esm.writeHNRefId("PREV", it->second);
+            esm.writeHNRefId("BOUN", bound);
+            esm.writeHNRefId("PREV", prev);
         }
 
         esm.writeHNT("WWAT", mSaveAttributes);

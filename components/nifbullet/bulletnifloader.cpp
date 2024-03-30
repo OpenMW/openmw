@@ -50,7 +50,7 @@ namespace NifBullet
             if (node)
                 roots.emplace_back(node);
         }
-        mShape->mFileName = Files::pathToUnicodeString(nif.getFilename());
+        mShape->mFileName = nif.getFilename();
         if (roots.empty())
         {
             warn("Found no root nodes in NIF file " + mShape->mFileName);

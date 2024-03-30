@@ -39,7 +39,7 @@ namespace MWClass
         }
     }
 
-    std::string Clothing::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Clothing::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Clothing>(ptr);
     }
@@ -164,15 +164,15 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.enchant = ref->mBase->mEnchant;
         if (!info.enchant.empty())
             info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

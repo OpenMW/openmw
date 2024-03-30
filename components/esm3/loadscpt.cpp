@@ -4,12 +4,19 @@
 #include <sstream>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/concepts.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Script::SCHDstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mNumShorts, v.mNumLongs, v.mNumFloats, v.mScriptDataSize, v.mStringTableSize);
+    }
+
     void Script::loadSCVR(ESMReader& esm)
     {
         uint32_t s = mData.mStringTableSize;
@@ -99,11 +106,7 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     mId = esm.getMaybeFixedRefIdSize(32);
-                    esm.getT(mData.mNumShorts);
-                    esm.getT(mData.mNumLongs);
-                    esm.getT(mData.mNumFloats);
-                    esm.getT(mData.mScriptDataSize);
-                    esm.getT(mData.mStringTableSize);
+                    esm.getComposite(mData);
 
                     hasHeader = true;
                     break;
@@ -146,6 +149,8 @@ namespace ESM
 
         if (!hasHeader)
             esm.fail("Missing SCHD subrecord");
+        // Reported script data size is not always trustworthy, so override it with actual data size
+        mData.mScriptDataSize = static_cast<uint32_t>(mScriptData.size());
     }
 
     void Script::save(ESMWriter& esm, bool isDeleted) const
@@ -157,7 +162,7 @@ namespace ESM
 
         esm.startSubRecord("SCHD");
         esm.writeMaybeFixedSizeRefId(mId, 32);
-        esm.writeT(mData, 20);
+        esm.writeComposite(mData);
         esm.endRecord("SCHD");
 
         if (isDeleted)

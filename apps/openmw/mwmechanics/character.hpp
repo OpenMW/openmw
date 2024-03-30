@@ -134,13 +134,17 @@ namespace MWMechanics
         struct AnimationQueueEntry
         {
             std::string mGroup;
-            size_t mLoopCount;
+            uint32_t mLoopCount;
             float mTime;
             bool mLooping;
             bool mScripted;
+            std::string mStartKey;
+            std::string mStopKey;
+            float mSpeed;
         };
         typedef std::deque<AnimationQueueEntry> AnimationQueue;
         AnimationQueue mAnimQueue;
+        bool mLuaAnimations{ false };
 
         CharacterState mIdleState{ CharState_None };
         std::string mCurrentIdle;
@@ -188,7 +192,7 @@ namespace MWMechanics
 
         bool mCanCast{ false };
 
-        bool mCastingManualSpell{ false };
+        bool mCastingScriptedSpell{ false };
 
         bool mIsMovingBackward{ false };
         osg::Vec2f mSmoothedSpeed;
@@ -209,15 +213,12 @@ namespace MWMechanics
         void refreshMovementAnims(CharacterState movement, bool force = false);
         void refreshIdleAnims(CharacterState idle, bool force = false);
 
-        void clearAnimQueue(bool clearScriptedAnims = false);
-
         bool updateWeaponState();
         void updateIdleStormState(bool inwater) const;
 
         std::string chooseRandomAttackAnimation() const;
         static bool isRandomAttackAnimation(std::string_view group);
 
-        bool isScriptedAnimPlaying() const;
         bool isMovementAnimationControlled() const;
 
         void updateAnimQueue();
@@ -248,8 +249,6 @@ namespace MWMechanics
 
         void prepareHit();
 
-        bool isLoopingAnimation(std::string_view group) const;
-
     public:
         CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation* anim);
         virtual ~CharacterController();
@@ -275,9 +274,17 @@ namespace MWMechanics
         void persistAnimationState() const;
         void unpersistAnimationState();
 
-        bool playGroup(std::string_view groupname, int mode, int count, bool scripted = false);
+        void playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority, int blendMask,
+            bool autodisable, float speedmult, std::string_view start, std::string_view stop, float startpoint,
+            uint32_t loops, bool loopfallback = false) const;
+        bool playGroup(std::string_view groupname, int mode, uint32_t count, bool scripted = false);
+        bool playGroupLua(std::string_view groupname, float speed, std::string_view startKey, std::string_view stopKey,
+            uint32_t loops, bool forceLoop);
+        void enableLuaAnimations(bool enable);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
+        bool isScriptedAnimPlaying() const;
+        void clearAnimQueue(bool clearScriptedAnims = false);
 
         enum KillResult
         {
@@ -305,7 +312,7 @@ namespace MWMechanics
         bool isAttackingOrSpell() const;
 
         void setVisibility(float visibility) const;
-        void castSpell(const ESM::RefId& spellId, bool manualSpell = false);
+        void castSpell(const ESM::RefId& spellId, bool scriptedSpell = false);
         void setAIAttackType(std::string_view attackType);
         static std::string_view getRandomAttackType();
 

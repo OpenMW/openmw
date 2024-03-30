@@ -31,7 +31,6 @@ namespace Launcher
         void slotFullScreenChanged(int state);
         void slotStandardToggled(bool checked);
         void slotFramerateLimitToggled(bool checked);
-        void slotShadowDistLimitToggled(bool checked);
 
     private:
         QVector<QStringList> mResolutionsPerScreen;

@@ -43,7 +43,19 @@ namespace testing
     }
 
     template <>
+    inline testing::Message& Message::operator<<(const osg::Vec2i& value)
+    {
+        return (*this) << "{" << value.x() << ", " << value.y() << '}';
+    }
+
+    template <>
     inline testing::Message& Message::operator<<(const Wrapper<osg::Vec3f>& value)
+    {
+        return (*this) << value.mValue;
+    }
+
+    template <>
+    inline testing::Message& Message::operator<<(const Wrapper<osg::Vec2i>& value)
     {
         return (*this) << value.mValue;
     }
@@ -68,6 +80,12 @@ namespace testing
 
     template <>
     inline testing::Message& Message::operator<<(const std::vector<osg::Vec3f>& value)
+    {
+        return writeRange(*this, value, 1);
+    }
+
+    template <>
+    inline testing::Message& Message::operator<<(const std::vector<osg::Vec2i>& value)
     {
         return writeRange(*this, value, 1);
     }

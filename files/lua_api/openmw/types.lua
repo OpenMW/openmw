@@ -16,8 +16,14 @@
 -- @return #number
 
 ---
--- Check if the given actor is dead.
+-- Check if the given actor is dead (health reached 0, so death process started).
 -- @function [parent=#Actor] isDead
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
+-- Check if the given actor's death process is finished.
+-- @function [parent=#Actor] isDeathFinished
 -- @param openmw.core#GameObject actor
 -- @return #boolean
 
@@ -68,7 +74,7 @@
 -- @field #number Ammunition
 
 ---
--- Available @{#EQUIPMENT_SLOT} values. Used in `Actor.equipment(obj)` and `Actor.setEquipment(obj, eqp)`.
+-- Available @{#EQUIPMENT_SLOT} values. Used in `Actor.getEquipment(obj)` and `Actor.setEquipment(obj, eqp)`.
 -- @field [parent=#Actor] #EQUIPMENT_SLOT EQUIPMENT_SLOT
 
 ---
@@ -210,14 +216,14 @@
 -- end
 -- @usage -- Check for a specific effect
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.Telekinesis)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Telekinesis effect')
 -- end
 -- @usage -- Check for a specific effect targeting a specific attribute.
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, core.ATTRIBUTE.Luck)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Fortify Luck effect')
@@ -229,7 +235,7 @@
 -- @param self
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
--- @return openmw.core#ActiveEffect if such an effect is active, nil otherwise
+-- @return openmw.core#ActiveEffect
 
 ---
 -- Completely removes the active effect from the actor.
@@ -296,17 +302,59 @@
 -- end
 
 ---
--- Get whether a specific spell is active on the actor.
+-- Get whether any instance of the specific spell is active on the actor.
 -- @function [parent=#ActorActiveSpells] isSpellActive
 -- @param self
--- @param #any recordOrId record or string record ID of the active spell's source. valid records are @{openmw.core#Spell}, @{openmw.core#Enchantment}, #IngredientRecord, or #PotionRecord
+-- @param #any recordOrId A record or string record ID. Valid records are @{openmw.core#Spell}, enchanted @{#Item}, @{#IngredientRecord}, or @{#PotionRecord}.
 -- @return true if spell is active, false otherwise
 
 ---
--- Remove the given spell and all its effects from the given actor's active spells.
+-- If true, the actor has not used this power in the last 24h. Will return true for powers the actor does not have.
+-- @function [parent=#ActorActiveSpells] canUsePower
+-- @param self
+-- @param #any spellOrId A @{openmw.core#Spell} or string record id.
+
+---
+-- Remove an active spell based on active spell ID (see @{openmw.core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw.core#ActiveSpell.temporary}).
 -- @function [parent=#ActorActiveSpells] remove
 -- @param self
--- @param #any spellOrId @{openmw.core#Spell} or string spell id
+-- @param #any id Active spell ID.
+
+---
+-- Adds a new spell to the list of active spells (only in global scripts or on self). 
+-- Note that this does not play any related VFX or sounds.
+-- @function [parent=#ActorActiveSpells] add
+-- @param self
+-- @param #table options A table of parameters. Must contain the following required parameters:
+--
+--   * `id` - A string record ID. Valid records are @{openmw.core#Spell}, enchanted @{#Item}, @{#IngredientRecord}, or @{#PotionRecord}.
+--   * `effects` - A list of indexes of the effects to be applied. These indexes must be in range of the record's list of @{openmw.core#MagicEffectWithParams}. Note that for Ingredients, normal ingredient consumption rules will be applied to effects.
+--
+-- And may contain the following optional parameters:
+--
+--   * `name` - The name to show in the list of active effects in the UI. Default: Name of the record identified by the id.
+--   * `ignoreResistances` - If true, resistances will be ignored. Default: false
+--   * `ignoreSpellAbsorption` - If true, spell absorption will not be applied. Default: false.
+--   * `ignoreReflect` - If true, reflects will not be applied. Default: false.
+--   * `caster` - A game object that identifies the caster. Default: nil
+--   * `item` - A game object that identifies the specific enchanted item instance used to cast the spell. Default: nil
+--   * `stackable` - If true, the spell will be able to stack. If false, existing instances of spells with the same id from the same source (where source is caster + item)
+--   * `quiet` - If true, no messages will be printed if the spell is an Ingredient and it had no effect. Always true if the target is not the player.
+-- @usage
+-- -- Adds the effect of the chameleon spell to the character
+-- Actor.activeSpells(self):add({id = 'chameleon', effects = { 0 }})
+-- @usage
+-- -- Adds the effect of a standard potion of intelligence, without consuming any potions from the character's inventory.
+-- -- Note that stackable = true to let the effect stack like a potion should.
+-- Actor.activeSpells(self):add({id = 'p_fortify_intelligence_s', effects = { 0 }, stackable = true})
+-- @usage
+-- -- Adds the negative effect of Greef twice over, and renames it to Good Greef.
+-- Actor.activeSpells(self):add({id = 'potion_comberry_brandy_01', effects = { 1, 1 }, stackable = true, name = 'Good Greef'})
+-- @usage
+-- -- Has the same effect as if the actor ate a chokeweed. With the same variable effect based on skill / random chance.
+-- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { 0 }, stackable = true, name = 'Chokeweed'})
+-- -- Same as above, but uses a different index. Note that if multiple indexes are used, the randomicity is applied separately for each effect.
+-- Actor.activeSpells(self):add({id = 'ingred_chokeweed_01', effects = { 1 }, stackable = true, name = 'Chokeweed'})
 
 ---
 -- Return the spells (@{#ActorSpells}) of the given actor.
@@ -352,10 +400,29 @@
 -- @function [parent=#ActorSpells] clear
 -- @param self
 
+--- Values affect how much each attribute can be increased at level up, and are all reset to 0 upon level up.
+-- @type SkillIncreasesForAttributeStats
+-- @field #number agility Number of contributions to agility for the next level up.
+-- @field #number endurance Number of contributions to endurance for the next level up.
+-- @field #number intelligence Number of contributions to intelligence for the next level up.
+-- @field #number luck Number of contributions to luck for the next level up.
+-- @field #number personality Number of contributions to personality for the next level up.
+-- @field #number speed Number of contributions to speed for the next level up.
+-- @field #number strength Number of contributions to strength for the next level up.
+-- @field #number willpower Number of contributions to willpower for the next level up.
+
+--- Values affect the graphic used on the level up screen, and are all reset to 0 upon level up.
+-- @type SkillIncreasesForSpecializationStats
+-- @field #number combat Number of contributions to combat specialization for the next level up.
+-- @field #number magic Number of contributions to magic specialization for the next level up.
+-- @field #number stealth Number of contributions to stealth specialization for the next level up.
+
 ---
 -- @type LevelStat
 -- @field #number current The actor's current level.
--- @field #number progress The NPC's level progress (read-only.)
+-- @field #number progress The NPC's level progress.
+-- @field #SkillIncreasesForAttributeStats skillIncreasesForAttribute The NPC's attribute contributions towards the next level up. Values affect how much each attribute can be increased at level up.
+-- @field #SkillIncreasesForSpecializationStats skillIncreasesForSpecialization The NPC's attribute contributions towards the next level up. Values affect the graphic used on the level up screen.
 
 ---
 -- @type DynamicStat
@@ -652,7 +719,7 @@
 -- Get this item's current enchantment charge.
 -- @function [parent=#Item] getEnchantmentCharge
 -- @param openmw.core#GameObject item
--- @return #number The charge remaining. -1 if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of -1.
+-- @return #number The charge remaining. `nil` if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of `nil`.
 
 ---
 -- Checks if the item restocks.
@@ -665,7 +732,7 @@
 -- Set this item's enchantment charge.
 -- @function [parent=#Item] setEnchantmentCharge
 -- @param openmw.core#GameObject item
--- @param #number charge
+-- @param #number charge Can be `nil` to reset the unused state / full
 
 ---
 -- Whether the object is supposed to be carriable. It is true for all items except
@@ -693,7 +760,13 @@
 -- @type Creature
 -- @extends #Actor
 -- @field #Actor baseType @{#Actor}
--- @field #list<#CreatureRecord> records A read-only list of all @{#CreatureRecord}s in the world database.
+
+---
+-- A read-only list of all @{#CreatureRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #CreatureRecord. 
+-- @field [parent=#Creature] #list<#CreatureRecord> records
+-- @usage local record = types.NPC.classes['example_recordid']
+-- @usage local record = types.NPC.classes[1]
 
 ---
 -- Whether the object is a creature.
@@ -718,6 +791,11 @@
 -- @return #CreatureRecord
 
 ---
+-- @type CreatureAttack
+-- @field #number minDamage Minimum attack damage.
+-- @field #number maxDamage Maximum attack damage.
+
+---
 -- @type CreatureRecord
 -- @field #string id The record ID of the creature
 -- @field #string name
@@ -727,6 +805,10 @@
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
 -- @field #number baseGold The base barter gold of the creature
+-- @field #number combatSkill The base combat skill of the creature. This is the skill value used for all skills with a 'combat' specialization
+-- @field #number magicSkill The base magic skill of the creature. This is the skill value used for all skills with a 'magic' specialization
+-- @field #number stealthSkill The base stealth skill of the creature. This is the skill value used for all skills with a 'stealth' specialization
+-- @field #list<#number> attack A table of the 3 randomly selected attacks used by creatures that do not carry weapons. The table consists of 6 numbers split into groups of 2 values corresponding to minimum and maximum damage in that order.
 -- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 
 
@@ -738,7 +820,13 @@
 -- @extends #Actor
 -- @field #Actor baseType @{#Actor}
 -- @field [parent=#NPC] #NpcStats stats
--- @field #list<#NpcRecord> records A read-only list of all @{#NpcRecord}s in the world database.
+
+---
+-- A read-only list of all @{#NpcRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #NpcRecord. 
+-- @field [parent=#NPC] #map<#NpcRecord> records
+-- @usage local record = types.NPC.classes['example_recordid']
+-- @usage local record = types.NPC.classes[1]
 
 ---
 -- Whether the object is an NPC or a Player.
@@ -891,8 +979,11 @@
 -- @field [parent=#NPC] #Classes classes
 
 ---
--- A read-only list of all @{#ClassRecord}s in the world database.
+-- A read-only list of all @{#ClassRecord}s in the world database, may be indexed by recordId. 
+-- Implements [iterables#List](iterables.html#List) of #ClassRecord. 
 -- @field [parent=#Classes] #list<#ClassRecord> records
+-- @usage local record = types.NPC.classes['example_recordid']
+-- @usage local record = types.NPC.classes[1]
 
 ---
 -- Returns a read-only @{#ClassRecord}
@@ -924,12 +1015,50 @@
 -- @param #any objectOrRecordId
 -- @return #NpcRecord
 
+--- @{#Races}: Race data
+-- @field [parent=#NPC] #Races races
+
+---
+-- A read-only list of all @{#RaceRecord}s in the world database.
+-- Implements [iterables#List](iterables.html#List) of #RaceRecord. 
+-- @field [parent=#Races] #list<#RaceRecord> records
+-- @usage local record = types.NPC.classes['example_recordid']
+-- @usage local record = types.NPC.classes[1]
+
+---
+-- Returns a read-only @{#RaceRecord}
+-- @function [parent=#Races] record
+-- @param #string recordId
+-- @return #RaceRecord
+
+---
+-- Race data record
+-- @type RaceRecord
+-- @field #string id Race id
+-- @field #string name Race name
+-- @field #string description Race description
+-- @field #map<#string, #number> skills A map of bonus skill points by skill ID
+-- @field #list<#string> spells A read-only list containing the ids of all spells inherent to the race
+-- @field #bool isPlayable True if the player can pick this race in character generation
+-- @field #bool isBeast True if this race is a beast race
+-- @field #GenderedNumber height Height values
+-- @field #GenderedNumber weight Weight values
+-- @field #map<#string, #GenderedNumber> attributes A read-only table of attribute ID to base value
+-- @usage -- Get base strength for men
+-- strength = types.NPC.races.records[1].attributes.strength.male
+
+---
+-- @type GenderedNumber
+-- @field #number male Male value
+-- @field #number female Female value
+
 ---
 -- @type NpcRecord
 -- @field #string id The record ID of the NPC
 -- @field #string name
 -- @field #string race
 -- @field #string class Name of the NPC's class (e. g. Acrobat)
+-- @field #string model Path to the model associated with this NPC, used for animations.
 -- @field #string mwscript MWScript that is attached to this NPC
 -- @field #string hair Path to the hair body part model
 -- @field #string head Path to the head body part model
@@ -1035,6 +1164,48 @@
 -- Values that can be used with getControlSwitch/setControlSwitch.
 -- @field [parent=#Player] #CONTROL_SWITCH CONTROL_SWITCH
 
+---
+-- @function [parent=#Player] getBirthSign
+-- @param openmw.core#GameObject player
+-- @return #string The player's birth sign
+
+---
+-- Can be used only in global scripts. Note that this does not update the player's spells.
+-- @function [parent=#Player] setBirthSign
+-- @param openmw.core#GameObject player
+-- @param #any recordOrId Record or string ID of the birth sign to assign
+
+--- @{#BirthSigns}: Birth Sign Data
+-- @field [parent=#Player] #BirthSigns birthSigns
+
+---
+-- A read-only list of all @{#BirthSignRecord}s in the world database.
+-- Implements [iterables#List](iterables.html#List) of #BirthSignRecord. 
+-- @field [parent=#BirthSigns] #list<#BirthSignRecord> records
+-- @usage local record = types.NPC.classes['example_recordid']
+-- @usage local record = types.NPC.classes[1]
+
+---
+-- Returns a read-only @{#BirthSignRecord}
+-- @function [parent=#BirthSigns] record
+-- @param #string recordId
+-- @return #BirthSignRecord
+
+---
+-- Birth sign data record
+-- @type BirthSignRecord
+-- @field #string id Birth sign id
+-- @field #string name Birth sign name
+-- @field #string description Birth sign description
+-- @field #string texture Birth sign texture
+-- @field #list<#string> spells A read-only list containing the ids of all spells gained from this sign.
+
+---
+-- Send an event to menu scripts.
+-- @function [parent=#Player] sendMenuEvent
+-- @param openmw.core#GameObject player
+-- @param #string eventName
+-- @param eventData
 
 --------------------------------------------------------------------------------
 -- @{#Armor} functions
@@ -1044,7 +1215,6 @@
 -- @type Armor
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#ArmorRecord> records A read-only list of all @{#ArmorRecord}s in the world database.
 
 ---
 -- Whether the object is an Armor.
@@ -1065,6 +1235,13 @@
 -- @field #number Shield
 -- @field #number LBracer
 -- @field #number RBracer
+
+---
+-- A read-only list of all @{#ArmorRecord}s in the world database.
+-- Implements [iterables#List](iterables.html#List) of #ArmorRecord.
+-- @field [parent=#Armor] #list<#ArmorRecord> records
+-- @usage local record = types.Armor.records['example_recordid']
+-- @usage local record = types.Armor.records[1]
 
 --- @{#ArmorTYPE}
 -- @field [parent=#Armor] #ArmorTYPE TYPE
@@ -1111,7 +1288,13 @@
 -- @type Book
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#BookRecord> records A read-only list of all @{#BookRecord}s in the world database.
+
+---
+-- A read-only list of all @{#BookRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #BookRecord.
+-- @field [parent=#Book] #list<#BookRecord> records
+-- @usage local record = types.Book.records['example_recordid']
+-- @usage local record = types.Book.records[1]
 
 ---
 -- Whether the object is a Book.
@@ -1187,7 +1370,13 @@
 -- @type Clothing
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#ClothingRecord> records A read-only list of all @{#ClothingRecord}s in the world database.
+
+---
+-- A read-only list of all @{#ClothingRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #ClothingRecord.
+-- @field [parent=#Clothing] #list<#ClothingRecord> records
+-- @usage local record = types.Clothing.records['example_recordid']
+-- @usage local record = types.Clothing.records[1]
 
 ---
 -- Whether the object is a Clothing.
@@ -1253,7 +1442,13 @@
 -- @type Ingredient
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#IngredientRecord> records A read-only list of all @{#IngredientRecord}s in the world database.
+
+---
+-- A read-only list of all @{#IngredientRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #IngredientRecord.
+-- @field [parent=#Ingredient] #list<#IngredientRecord> records
+-- @usage local record = types.Ingredient.records['example_recordid']
+-- @usage local record = types.Ingredient.records[1]
 
 ---
 -- Whether the object is an Ingredient.
@@ -1340,7 +1535,13 @@
 -- @type Light
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#LightRecord> records A read-only list of all @{#LightRecord}s in the world database.
+
+---
+-- A read-only list of all @{#LightRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #LightRecord.
+-- @field [parent=#Light] #list<#LightRecord> records
+-- @usage local record = types.Light.records['example_recordid']
+-- @usage local record = types.Light.records[1]
 
 ---
 -- Whether the object is a Light.
@@ -1378,7 +1579,13 @@
 -- @type Miscellaneous
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#MiscellaneousRecord> records A read-only list of all @{#MiscellaneousRecord}s in the world database.
+
+---
+-- A read-only list of all @{#MiscellaneousRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #MiscellaneousRecord.
+-- @field [parent=#Miscellaneous] #list<#MiscellaneousRecord> records
+-- @usage local record = types.Miscellaneous.records['example_recordid']
+-- @usage local record = types.Miscellaneous.records[1]
 
 ---
 -- Whether the object is a Miscellaneous.
@@ -1429,7 +1636,13 @@
 -- @type Potion
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#PotionRecord> records A read-only list of all @{#PotionRecord}s in the world database.
+
+---
+-- A read-only list of all @{#PotionRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #PotionRecord.
+-- @field [parent=#Potion] #list<#PotionRecord> records
+-- @usage local record = types.Potion.records['example_recordid']
+-- @usage local record = types.Potion.records[1]
 
 ---
 -- Whether the object is a Potion.
@@ -1470,7 +1683,13 @@
 -- @type Weapon
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#WeaponRecord> records A read-only list of all @{#WeaponRecord}s in the world database.
+
+---
+-- A read-only list of all @{#WeaponRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #WeaponRecord.
+-- @field [parent=#Weapon] #list<#WeaponRecord> records
+-- @usage local record = types.Weapon.records['example_recordid']
+-- @usage local record = types.Weapon.records[1]
 
 ---
 -- Whether the object is a Weapon.
@@ -1542,7 +1761,14 @@
 -- @type Apparatus
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#ApparatusRecord> records A read-only list of all @{#ApparatusRecord}s in the world database.
+
+
+---
+-- A read-only list of all @{#ApparatusRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #ApparatusRecord.
+-- @field [parent=#Apparatus] #list<#ApparatusRecord> records
+-- @usage local record = types.Apparatus.records['example_recordid']
+-- @usage local record = types.Apparatus.records[1]
 
 ---
 -- Whether the object is an Apparatus.
@@ -1585,7 +1811,13 @@
 -- @type Lockpick
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#LockpickRecord> records A read-only list of all @{#LockpickRecord}s in the world database.
+
+---
+-- A read-only list of all @{#LockpickRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #LockpickRecord.
+-- @field [parent=#Lockpick] #list<#LockpickRecord> records
+-- @usage local record = types.Lockpick.records['example_recordid']
+-- @usage local record = types.Lockpick.records[1]
 
 ---
 -- Whether the object is a Lockpick.
@@ -1618,7 +1850,13 @@
 -- @type Probe
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#ProbeRecord> records A read-only list of all @{#ProbeRecord}s in the world database.
+
+---
+-- A read-only list of all @{#ProbeRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #ProbeRecord.
+-- @field [parent=#Probe] #list<#ProbeRecord> records
+-- @usage local record = types.Probe.records['example_recordid']
+-- @usage local record = types.Probe.records[1]
 
 ---
 -- Whether the object is a Probe.
@@ -1651,7 +1889,13 @@
 -- @type Repair
 -- @extends #Item
 -- @field #Item baseType @{#Item}
--- @field #list<#RepairRecord> records A read-only list of all @{#RepairRecord}s in the world database.
+
+---
+-- A read-only list of all @{#RepairRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #RepairRecord.
+-- @field [parent=#Repair] #list<#RepairRecord> records
+-- @usage local record = types.Repair.records['example_recordid']
+-- @usage local record = types.Repair.records[1]
 
 ---
 -- Whether the object is a Repair.
@@ -1682,7 +1926,13 @@
 
 ---
 -- @type Activator
--- @field #list<#ActivatorRecord> records A read-only list of all @{#ActivatorRecord}s in the world database.
+
+---
+-- A read-only list of all @{#ActivatorRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #ActivatorRecord.
+-- @field [parent=#Activator] #list<#ActivatorRecord> records
+-- @usage local record = types.Activator.records['example_recordid']
+-- @usage local record = types.Activator.records[1]
 
 ---
 -- Whether the object is an Activator.
@@ -1719,7 +1969,13 @@
 -- @type Container
 -- @extends #Lockable
 -- @field #Lockable baseType @{#Lockable}
--- @field #list<#ContainerRecord> records A read-only list of all @{#ContainerRecord}s in the world database.
+
+---
+-- A read-only list of all @{#ContainerRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #ContainerRecord.
+-- @field [parent=#Container] #list<#ContainerRecord> records
+-- @usage local record = types.Container.records['example_recordid']
+-- @usage local record = types.Container.records[1]
 
 ---
 -- Container content.
@@ -1774,7 +2030,13 @@
 -- @type Door
 -- @extends #Lockable
 -- @field #Lockable baseType @{#Lockable}
--- @field #list<#DoorRecord> records A read-only list of all @{#DoorRecord}s in the world database.
+
+---
+-- A read-only list of all @{#DoorRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #DoorRecord.
+-- @field [parent=#Door] #list<#DoorRecord> records
+-- @usage local record = types.Door.records['example_recordid']
+-- @usage local record = types.Door.records[1]
 
 ---
 -- Whether the object is a Door.
@@ -1828,7 +2090,13 @@
 
 ---
 -- @type Static
--- @field #list<#StaticRecord> records A read-only list of all @{#StaticRecord}s in the world database.
+
+---
+-- A read-only list of all @{#StaticRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #StaticRecord.
+-- @field [parent=#Static] #list<#StaticRecord> records
+-- @usage local record = types.Static.records['example_recordid']
+-- @usage local record = types.Static.records[1]
 
 ---
 -- Whether the object is a Static.
@@ -1853,7 +2121,13 @@
 
 ---
 -- @type CreatureLevelledList
--- @field #list<#CreatureLevelledListRecord> records A read-only list of all @{#CreatureLevelledListRecord}s in the world database.
+
+---
+-- A read-only list of all @{#CreatureLevelledListRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #CreatureLevelledListRecord.
+-- @field [parent=#CreatureLevelledList] #list<#CreatureLevelledListRecord> records
+-- @usage local record = types.CreatureLevelledList.records['example_recordid']
+-- @usage local record = types.CreatureLevelledList.records[1]
 
 ---
 -- Whether the object is a CreatureLevelledList.
@@ -1937,7 +2211,13 @@
 
 ---
 -- @type ESM4Terminal
--- @field #list<#ESM4TerminalRecord> records A read-only list of all @{#ESM4TerminalRecord}s in the world database.
+
+---
+-- A read-only list of all @{#ESM4TerminalRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #ESM4TerminalRecord.
+-- @field [parent=#ESM4Terminal] #list<#ESM4TerminalRecord> records
+-- @usage local record = types.ESM4Terminal.records['example_recordid']
+-- @usage local record = types.ESM4Terminal.records[1]
 
 ---
 -- Whether the object is a ESM4Terminal.
@@ -2002,9 +2282,11 @@
 -- @return #ESM4DoorRecord
 
 ---
--- Returns a read-only list of all @{#ESM4DoorRecord}s in the world database.
--- @function [parent=#ESM4Door] records
--- @return #list<#ESM4DoorRecord>
+-- A read-only list of all @{#ESM4DoorRecord}s in the world database. 
+-- Implements [iterables#List](iterables.html#List) of #ESM4DoorRecord.
+-- @field [parent=#ESM4Door] #list<#ESM4DoorRecord> records
+-- @usage local record = types.ESM4Door.records['example_recordid']
+-- @usage local record = types.ESM4Door.records[1]
 
 ---
 -- @type ESM4DoorRecord

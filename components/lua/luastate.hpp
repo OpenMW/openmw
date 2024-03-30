@@ -232,16 +232,36 @@ namespace LuaUtil
         }
     }
 
+    // work around for a (likely) sol3 bug
+    // when the index meta method throws, simply calling table.get crashes instead of re-throwing the error
+    template <class Key>
+    sol::object safeGet(const sol::table& table, const Key& key)
+    {
+        auto index = table.traverse_raw_get<sol::optional<sol::main_protected_function>>(
+            sol::metatable_key, sol::meta_function::index);
+        if (index)
+        {
+            sol::protected_function_result result = index.value()(table, key);
+            if (result.valid())
+                return result.get<sol::object>();
+            else
+                throw result.get<sol::error>();
+        }
+        else
+            return table.raw_get<sol::object>(key);
+    }
+
     // getFieldOrNil(table, "a", "b", "c") returns table["a"]["b"]["c"] or nil if some of the fields doesn't exist.
     template <class... Str>
     sol::object getFieldOrNil(const sol::object& table, std::string_view first, const Str&... str)
     {
         if (!table.is<sol::table>())
             return sol::nil;
+        sol::object value = safeGet(table.as<sol::table>(), first);
         if constexpr (sizeof...(str) == 0)
-            return table.as<sol::table>()[first];
+            return value;
         else
-            return getFieldOrNil(table.as<sol::table>()[first], str...);
+            return getFieldOrNil(value, str...);
     }
 
     // String representation of a Lua object. Should be used for debugging/logging purposes only.

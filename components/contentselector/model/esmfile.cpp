@@ -1,10 +1,5 @@
 #include "esmfile.hpp"
 
-#include <QDataStream>
-#include <QIODevice>
-
-int ContentSelectorModel::EsmFile::sPropertyCount = 7;
-
 ContentSelectorModel::EsmFile::EsmFile(const QString& fileName, ModelItem* parent)
     : ModelItem(parent)
     , mFileName(fileName)
@@ -26,7 +21,7 @@ void ContentSelectorModel::EsmFile::setDate(const QDateTime& modified)
     mModified = modified;
 }
 
-void ContentSelectorModel::EsmFile::setFormat(int format)
+void ContentSelectorModel::EsmFile::setFormat(const QString& format)
 {
     mVersion = format;
 }
@@ -44,17 +39,6 @@ void ContentSelectorModel::EsmFile::setGameFiles(const QStringList& gamefiles)
 void ContentSelectorModel::EsmFile::setDescription(const QString& description)
 {
     mDescription = description;
-}
-
-QByteArray ContentSelectorModel::EsmFile::encodedData() const
-{
-    QByteArray encodedData;
-    QDataStream stream(&encodedData, QIODevice::WriteOnly);
-
-    stream << mFileName << mAuthor << QString::number(mVersion) << mModified.toString() << mPath << mDescription
-           << mGameFiles;
-
-    return encodedData;
 }
 
 bool ContentSelectorModel::EsmFile::isGameFile() const
@@ -114,11 +98,11 @@ void ContentSelectorModel::EsmFile::setFileProperty(const FileProperty prop, con
             break;
 
         case FileProperty_Format:
-            mVersion = value.toInt();
+            mVersion = value;
             break;
 
         case FileProperty_DateModified:
-            mModified = QDateTime::fromString(value);
+            mModified = QDateTime::fromString(value, Qt::ISODate);
             break;
 
         case FileProperty_FilePath:

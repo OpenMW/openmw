@@ -44,10 +44,10 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 if (subHdr.dataSize == 36) // TES4
                     reader.get(&mLighting, 36);
                 if (subHdr.dataSize == 40) // FO3/FONV
@@ -60,7 +60,7 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
                 else
                     reader.skipSubRecordData(); // throw?
                 break;
-            case ESM4::SUB_DALC: // TES5
+            case ESM::fourCC("DALC"): // TES5
                 reader.skipSubRecordData();
                 break;
             default:

@@ -36,7 +36,7 @@ namespace MWClass
         }
     }
 
-    std::string Repair::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Repair::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Repair>(ptr);
     }
@@ -119,11 +119,11 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

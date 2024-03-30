@@ -29,6 +29,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -131,7 +132,7 @@ namespace
     void updateMaxLightsComboBox(MyGUI::ComboBox* box)
     {
         constexpr int min = 8;
-        constexpr int max = 32;
+        constexpr int max = 64;
         constexpr int increment = 8;
         const int maxLights = Settings::shaders().mMaxLights;
         // show increments of 8 in dropdown
@@ -265,6 +266,9 @@ namespace MWGui
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
+        getWidget(mWaterRefractionButton, "WaterRefractionButton");
+        getWidget(mSunlightScatteringButton, "SunlightScatteringButton");
+        getWidget(mWobblyShoresButton, "WobblyShoresButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
         getWidget(mWaterRainRippleDetail, "WaterRainRippleDetail");
@@ -305,6 +309,8 @@ namespace MWGui
             += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
+        mWaterRefractionButton->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onRefractionButtonClicked);
         mWaterTextureSize->eventComboChangePosition
             += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
         mWaterReflectionDetail->eventComboChangePosition
@@ -375,6 +381,10 @@ namespace MWGui
 
         const int waterRainRippleDetail = Settings::water().mRainRippleDetail;
         mWaterRainRippleDetail->setIndexSelected(waterRainRippleDetail);
+
+        const bool waterRefraction = Settings::water().mRefraction;
+        mSunlightScatteringButton->setEnabled(waterRefraction);
+        mWobblyShoresButton->setEnabled(waterRefraction);
 
         updateMaxLightsComboBox(mMaxLights);
 
@@ -450,7 +460,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+        setVisible(false);
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -501,6 +511,14 @@ namespace MWGui
                 break;
             }
         }
+    }
+
+    void SettingsWindow::onRefractionButtonClicked(MyGUI::Widget* _sender)
+    {
+        const bool refractionEnabled = Settings::water().mRefraction;
+
+        mSunlightScatteringButton->setEnabled(refractionEnabled);
+        mWobblyShoresButton->setEnabled(refractionEnabled);
     }
 
     void SettingsWindow::onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos)

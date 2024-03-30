@@ -1,5 +1,5 @@
 ControlsPage: "Управление OpenMW"
-ControlsPageDescription: "Дополнительные настройки, связанные с управлением игроком"
+ControlsPageDescription: "Дополнительные настройки, связанные с управлением игроком."
 
 MovementSettings: "Движение"
 
@@ -14,3 +14,72 @@ toggleSneakDescription: |
     чтобы красться, её достаточно нажать единожды для переключения положения, а не зажимать.
     Игрокам, которые много времени крадутся, может быть проще управлять персонажем, когда опция включена.
 
+smoothControllerMovement: "Плавное движение на геймпаде"
+smoothControllerMovementDescription: |
+    Эта настройка сглаживает движение при использовании стика. Это делает переход от ходьбы к бегу не таким резким.
+
+TogglePOV_name: "Изменить вид"
+TogglePOV_description: "Переключиться между видами от первого и третьего лица. При зажатии будет включен режим предпросмотра."
+
+Zoom3rdPerson_name: "Приблизить/отдалить камеру"
+Zoom3rdPerson_description: "Приблизить или отдалить от персонажа камеру в виде от третьего лица."
+
+MoveForward_name: "Двигаться вперед"
+MoveForward_description: "Одновременное зажатие кнопки движения назад отменит движение."
+
+MoveBackward_name: "Двигаться назад"
+MoveBackward_description: "Одновременное зажатие кнопки движения вперед отменит движение."
+
+MoveLeft_name: "Двигаться влево"
+MoveLeft_description: "Одновременное зажатие кнопки движения вправо отменит движение."
+
+MoveRight_name: "Двигаться вправо"
+MoveRight_description: "Одновременное зажатие кнопки движения влево отменит движение."
+
+Use_name: "Использовать"
+Use_description: "Совершить атаку оружием или использовать заклинание в зависимости от текущей стойки."
+
+Run_name: "Бежать"
+Run_description: "Бежать или идти при зажатии (в зависимости от значения настройки постоянного бега)."
+
+AlwaysRun_name: "Постоянный бег"
+AlwaysRun_description: "Переключить настройку постоянного бега."
+
+Jump_name: "Прыгать"
+Jump_description: "Прыгнуть, если вы находитесь на земле."
+
+AutoMove_name: "Автоматический бег"
+AutoMove_description: "Переключить непрерывное движение вперед."
+
+Sneak_name: "Красться"
+Sneak_description: "Красться при зажатии, если настройка переключения движения крадучись выключена."
+
+ToggleSneak_name: "Переключить движение крадучись"
+ToggleSneak_description: "Переключить движение крадучись, если соответствующая настройка включена."
+
+ToggleWeapon_name: "Приготовить оружие"
+ToggleWeapon_description: "Принять стойку оружия или покинуть её."
+
+ToggleSpell_name: "Приготовить магию"
+ToggleSpell_description: "Принять стойку магии или покинуть её."
+
+Inventory_name: "Инвентарь"
+Inventory_description: "Открыть инвентарь."
+
+Journal_name: "Дневник"
+Journal_description: "Открыть дневник."
+
+QuickKeysMenu_name: "Меню быстрых клавиш"
+QuickKeysMenu_description: "Открыть меню быстрых клавиш."
+
+SmoothMoveForward_name: "Плавно двигаться вперед"
+SmoothMoveForward_description: "Движение вперед с плавными переходами от ходьбы к бегу."
+
+SmoothMoveBackward_name: "Плавно двигаться назад"
+SmoothMoveBackward_description: "Движение назад с плавными переходами от ходьбы к бегу."
+
+SmoothMoveLeft_name: "Плавно двигаться влево"
+SmoothMoveLeft_description: "Движение влево с плавными переходами от ходьбы к бегу."
+
+SmoothMoveRight_name: "Плавно двигаться вправо"
+SmoothMoveRight_description: "Движение вправо с плавными переходами от ходьбы к бегу."

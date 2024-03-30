@@ -2,12 +2,15 @@
 #include "esmfile.hpp"
 
 #include <fstream>
+#include <memory>
 #include <stdexcept>
 #include <unordered_set>
 
+#include <QDataStream>
 #include <QDebug>
 #include <QDir>
 #include <QFont>
+#include <QIODevice>
 
 #include <components/esm/format.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -127,7 +130,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
                 continue;
 
             noGameFiles = false;
-            if (isChecked(depFile->filePath()))
+            if (mCheckedFiles.contains(depFile))
             {
                 gamefileChecked = true;
                 break;
@@ -214,7 +217,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
             if (file == mGameFile)
                 return QVariant();
 
-            return mCheckStates[file->filePath()];
+            return mCheckedFiles.contains(file) ? Qt::Checked : Qt::Unchecked;
         }
 
         case Qt::UserRole:
@@ -228,7 +231,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
         }
 
         case Qt::UserRole + 1:
-            return isChecked(file->filePath());
+            return mCheckedFiles.contains(file);
     }
     return QVariant();
 }
@@ -276,12 +279,12 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
         {
             int checkValue = value.toInt();
             bool setState = false;
-            if ((checkValue == Qt::Checked) && !isChecked(file->filePath()))
+            if (checkValue == Qt::Checked && !mCheckedFiles.contains(file))
             {
                 setState = true;
                 success = true;
             }
-            else if ((checkValue == Qt::Checked) && isChecked(file->filePath()))
+            else if (checkValue == Qt::Checked && mCheckedFiles.contains(file))
                 setState = true;
             else if (checkValue == Qt::Unchecked)
                 setState = true;
@@ -314,34 +317,12 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
 
 bool ContentSelectorModel::ContentModel::insertRows(int position, int rows, const QModelIndex& parent)
 {
-    if (parent.isValid())
-        return false;
-
-    beginInsertRows(parent, position, position + rows - 1);
-    {
-        for (int row = 0; row < rows; ++row)
-            mFiles.insert(position, new EsmFile);
-    }
-    endInsertRows();
-
-    return true;
+    return false;
 }
 
 bool ContentSelectorModel::ContentModel::removeRows(int position, int rows, const QModelIndex& parent)
 {
-    if (parent.isValid())
-        return false;
-
-    beginRemoveRows(parent, position, position + rows - 1);
-    {
-        for (int row = 0; row < rows; ++row)
-            delete mFiles.takeAt(position);
-    }
-    endRemoveRows();
-
-    // at this point we know that drag and drop has finished.
-    checkForLoadOrderErrors();
-    return true;
+    return false;
 }
 
 Qt::DropActions ContentSelectorModel::ContentModel::supportedDropActions() const
@@ -357,13 +338,14 @@ QStringList ContentSelectorModel::ContentModel::mimeTypes() const
 QMimeData* ContentSelectorModel::ContentModel::mimeData(const QModelIndexList& indexes) const
 {
     QByteArray encodedData;
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
     for (const QModelIndex& index : indexes)
     {
         if (!index.isValid())
             continue;
 
-        encodedData.append(item(index.row())->encodedData());
+        stream << index.row();
     }
 
     QMimeData* mimeData = new QMimeData();
@@ -395,26 +377,31 @@ bool ContentSelectorModel::ContentModel::dropMimeData(
     QByteArray encodedData = data->data(mMimeType);
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
 
+    std::vector<EsmFile*> toMove;
     while (!stream.atEnd())
     {
-
-        QString value;
-        QStringList values;
-        QStringList gamefiles;
-
-        for (int i = 0; i < EsmFile::FileProperty_GameFile; ++i)
-        {
-            stream >> value;
-            values << value;
-        }
-
-        stream >> gamefiles;
-
-        insertRows(beginRow, 1);
-
-        QModelIndex idx = index(beginRow++, 0, QModelIndex());
-        setData(idx, QStringList() << values << gamefiles, Qt::EditRole);
+        int sourceRow;
+        stream >> sourceRow;
+        toMove.emplace_back(mFiles.at(sourceRow));
     }
+    int minRow = mFiles.size();
+    int maxRow = 0;
+    for (EsmFile* file : toMove)
+    {
+        int from = mFiles.indexOf(file);
+        int to = beginRow;
+        if (from < beginRow)
+            to--;
+        else if (from > beginRow)
+            beginRow++;
+        minRow = std::min(minRow, std::min(to, from));
+        maxRow = std::max(maxRow, std::max(to, from));
+        mFiles.move(from, to);
+    }
+
+    dataChanged(index(minRow, 0), index(maxRow, 0));
+    // at this point we know that drag and drop has finished.
+    checkForLoadOrderErrors();
 
     return true;
 }
@@ -447,26 +434,37 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
     {
         QFileInfo info(dir.absoluteFilePath(path2));
 
-        if (item(info.fileName()))
-            continue;
-
         // Enabled by default in system openmw.cfg; shouldn't be shown in content list.
         if (info.fileName().compare("builtin.omwscripts", Qt::CaseInsensitive) == 0)
             continue;
 
+        EsmFile* file = const_cast<EsmFile*>(item(info.fileName()));
+        bool add = file == nullptr;
+        std::unique_ptr<EsmFile> newFile;
+        if (add)
+        {
+            newFile = std::make_unique<EsmFile>(path2);
+            file = newFile.get();
+        }
+        else
+        {
+            // We've found the same file in a higher priority dir, update our existing entry
+            file->setFileName(path2);
+            file->setGameFiles({});
+        }
+
         if (info.fileName().endsWith(".omwscripts", Qt::CaseInsensitive))
         {
-            EsmFile* file = new EsmFile(path2);
             file->setDate(info.lastModified());
             file->setFilePath(info.absoluteFilePath());
-            addFile(file);
+            if (add)
+                addFile(newFile.release());
             setNew(file->fileName(), newfiles);
             continue;
         }
 
         try
         {
-            EsmFile* file = new EsmFile(path2);
             file->setDate(info.lastModified());
             file->setFilePath(info.absoluteFilePath());
             std::filesystem::path filepath = Files::pathFromQString(info.absoluteFilePath());
@@ -489,7 +487,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
                     fileReader.setEncoder(&encoder);
                     fileReader.open(std::move(stream), filepath);
                     file->setAuthor(QString::fromUtf8(fileReader.getAuthor().c_str()));
-                    file->setFormat(fileReader.getFormatVersion());
+                    file->setFormat(QString::number(fileReader.esmVersionF()));
                     file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
                     for (const auto& master : fileReader.getGameFiles())
                         file->addGameFile(QString::fromUtf8(master.name.c_str()));
@@ -505,11 +503,11 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
                 case ESM::Format::Tes4:
                 {
                     ToUTF8::StatelessUtf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
-                    ESM4::Reader reader(std::move(stream), filepath, nullptr, &encoder, true);
-                    file->setAuthor(QString::fromUtf8(reader.getAuthor().c_str()));
-                    file->setFormat(reader.esmVersion());
-                    file->setDescription(QString::fromUtf8(reader.getDesc().c_str()));
-                    for (const auto& master : reader.getGameFiles())
+                    ESM4::Reader fileReader(std::move(stream), filepath, nullptr, &encoder, true);
+                    file->setAuthor(QString::fromUtf8(fileReader.getAuthor().c_str()));
+                    file->setFormat(QString::number(fileReader.esmVersionF()));
+                    file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
+                    for (const auto& master : fileReader.getGameFiles())
                         file->addGameFile(QString::fromUtf8(master.name.c_str()));
                     break;
                 }
@@ -522,14 +520,14 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
             }
 
             // Put the file in the table
-            addFile(file);
+            if (add)
+                addFile(newFile.release());
             setNew(file->fileName(), newfiles);
         }
         catch (std::runtime_error& e)
         {
             // An error occurred while reading the .esp
             qWarning() << "Error reading addon file: " << e.what();
-            continue;
         }
     }
 }
@@ -554,6 +552,7 @@ void ContentSelectorModel::ContentModel::clearFiles()
     if (filesCount > 0)
     {
         beginRemoveRows(QModelIndex(), 0, filesCount - 1);
+        qDeleteAll(mFiles);
         mFiles.clear();
         endRemoveRows();
     }
@@ -616,14 +615,6 @@ void ContentSelectorModel::ContentModel::sortFiles()
     emit layoutChanged();
 }
 
-bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) const
-{
-    const auto it = mCheckStates.find(filepath);
-    if (it == mCheckStates.end())
-        return false;
-    return it.value() == Qt::Checked;
-}
-
 bool ContentSelectorModel::ContentModel::isEnabled(const QModelIndex& index) const
 {
     return (flags(index) & Qt::ItemIsEnabled);
@@ -684,7 +675,7 @@ void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
 {
     for (int row = 0; row < mFiles.count(); ++row)
     {
-        EsmFile* file = item(row);
+        EsmFile* file = mFiles.at(row);
         bool isRowInError = checkForLoadOrderErrors(file, row).count() != 0;
         if (isRowInError)
         {
@@ -711,7 +702,7 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
         }
         else
         {
-            if (!isChecked(dependentFile->filePath()))
+            if (!mCheckedFiles.contains(dependentFile))
             {
                 errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
             }
@@ -732,8 +723,10 @@ QString ContentSelectorModel::ContentModel::toolTip(const EsmFile* file) const
         int index = indexFromItem(item(file->filePath())).row();
         for (const LoadOrderError& error : checkForLoadOrderErrors(file, index))
         {
+            assert(error.errorCode() != LoadOrderError::ErrorCode::ErrorCode_None);
+
             text += "<p>";
-            text += error.toolTip();
+            text += mErrorToolTips[error.errorCode() - 1].arg(error.fileName());
             text += "</p>";
         }
         text += ("</b>");
@@ -761,19 +754,18 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
     if (!file)
         return false;
 
-    Qt::CheckState state = Qt::Unchecked;
-
     if (checkState)
-        state = Qt::Checked;
+        mCheckedFiles.insert(file);
+    else
+        mCheckedFiles.erase(file);
 
-    mCheckStates[filepath] = state;
     emit dataChanged(indexFromItem(item(filepath)), indexFromItem(item(filepath)));
 
     if (file->isGameFile())
         refreshModel();
 
     // if we're checking an item, ensure all "upstream" files (dependencies) are checked as well.
-    if (state == Qt::Checked)
+    if (checkState)
     {
         for (const QString& upstreamName : file->gameFiles())
         {
@@ -782,14 +774,13 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
             if (!upstreamFile)
                 continue;
 
-            if (!isChecked(upstreamFile->filePath()))
-                mCheckStates[upstreamFile->filePath()] = Qt::Checked;
+            mCheckedFiles.insert(upstreamFile);
 
             emit dataChanged(indexFromItem(upstreamFile), indexFromItem(upstreamFile));
         }
     }
     // otherwise, if we're unchecking an item (or the file is a game file) ensure all downstream files are unchecked.
-    if (state == Qt::Unchecked)
+    else
     {
         for (const EsmFile* downstreamFile : mFiles)
         {
@@ -798,8 +789,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
 
             if (downstreamFile->gameFiles().contains(filename, Qt::CaseInsensitive))
             {
-                if (mCheckStates.contains(downstreamFile->filePath()))
-                    mCheckStates[downstreamFile->filePath()] = Qt::Unchecked;
+                mCheckedFiles.erase(downstreamFile);
 
                 emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
             }
@@ -817,7 +807,7 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
     // First search for game files and next addons,
     // so we get more or less correct game files vs addons order.
     for (EsmFile* file : mFiles)
-        if (isChecked(file->filePath()))
+        if (mCheckedFiles.contains(file))
             list << file;
 
     return list;
@@ -826,6 +816,6 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
 void ContentSelectorModel::ContentModel::uncheckAll()
 {
     emit layoutAboutToBeChanged();
-    mCheckStates.clear();
+    mCheckedFiles.clear();
     emit layoutChanged();
 }

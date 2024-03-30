@@ -13,6 +13,7 @@
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -171,12 +172,12 @@ namespace MWSound
         return std::make_shared<FFmpeg_Decoder>(mVFS);
     }
 
-    DecoderPtr SoundManager::loadVoice(const std::string& voicefile)
+    DecoderPtr SoundManager::loadVoice(VFS::Path::NormalizedView voicefile)
     {
         try
         {
             DecoderPtr decoder = getDecoder();
-            decoder->open(Misc::ResourceHelpers::correctSoundPath(voicefile, decoder->mResourceMgr));
+            decoder->open(Misc::ResourceHelpers::correctSoundPath(voicefile, *decoder->mResourceMgr));
             return decoder;
         }
         catch (std::exception& e)
@@ -222,7 +223,7 @@ namespace MWSound
                 params.mFlags = PlayMode::NoEnv | Type::Voice | Play_2D;
                 return params;
             }());
-            played = mOutput->streamSound(decoder, sound.get(), true);
+            played = mOutput->streamSound(std::move(decoder), sound.get(), true);
         }
         else
         {
@@ -235,7 +236,7 @@ namespace MWSound
                 params.mFlags = PlayMode::Normal | Type::Voice | Play_3D;
                 return params;
             }());
-            played = mOutput->streamSound3D(decoder, sound.get(), true);
+            played = mOutput->streamSound3D(std::move(decoder), sound.get(), true);
         }
         if (!played)
             return nullptr;
@@ -281,7 +282,7 @@ namespace MWSound
             params.mFlags = PlayMode::NoEnvNoScaling | Type::Music | Play_2D;
             return params;
         }());
-        mOutput->streamSound(decoder, mMusic.get());
+        mOutput->streamSound(std::move(decoder), mMusic.get());
     }
 
     void SoundManager::advanceMusic(const std::string& filename, float fadeOut)
@@ -365,7 +366,7 @@ namespace MWSound
             for (const auto& name : mVFS->getRecursiveDirectoryIterator(playlistPath))
                 filelist.push_back(name);
 
-            mMusicFiles[playlist] = filelist;
+            mMusicFiles[playlist] = std::move(filelist);
         }
 
         // No Battle music? Use Explore playlist
@@ -379,7 +380,7 @@ namespace MWSound
         startRandomTitle();
     }
 
-    void SoundManager::say(const MWWorld::ConstPtr& ptr, const std::string& filename)
+    void SoundManager::say(const MWWorld::ConstPtr& ptr, VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
@@ -392,7 +393,7 @@ namespace MWSound
         const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
 
         stopSay(ptr);
-        StreamPtr sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
+        StreamPtr sound = playVoice(std::move(decoder), pos, (ptr == MWMechanics::getPlayer()));
         if (!sound)
             return;
 
@@ -411,7 +412,7 @@ namespace MWSound
         return 0.0f;
     }
 
-    void SoundManager::say(const std::string& filename)
+    void SoundManager::say(VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
@@ -421,7 +422,7 @@ namespace MWSound
             return;
 
         stopSay(MWWorld::ConstPtr());
-        StreamPtr sound = playVoice(decoder, osg::Vec3f(), true);
+        StreamPtr sound = playVoice(std::move(decoder), osg::Vec3f(), true);
         if (!sound)
             return;
 
@@ -899,8 +900,9 @@ namespace MWSound
         if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
             return;
 
-        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion()))
-            mCurrentRegionSound = playSound(*next, 1.0f, 1.0f);
+        ESM::RefId next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion());
+        if (!next.empty())
+            mCurrentRegionSound = playSound(next, 1.0f, 1.0f);
     }
 
     void SoundManager::updateWaterSound()

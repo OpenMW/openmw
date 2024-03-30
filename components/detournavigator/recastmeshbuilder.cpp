@@ -189,42 +189,18 @@ namespace DetourNavigator
     void RecastMeshBuilder::addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType)
     {
         constexpr std::array<int, 36> indices{ {
-            0,
-            2,
-            3,
-            3,
-            1,
-            0,
-            0,
-            4,
-            6,
-            6,
-            2,
-            0,
-            0,
-            1,
-            5,
-            5,
-            4,
-            0,
-            7,
-            5,
-            1,
-            1,
-            3,
-            7,
-            7,
-            3,
-            2,
-            2,
-            6,
-            7,
-            7,
-            6,
-            4,
-            4,
-            5,
-            7,
+            0, 2, 3, // triangle 0
+            3, 1, 0, // triangle 1
+            0, 4, 6, // triangle 2
+            6, 2, 0, // triangle 3
+            0, 1, 5, // triangle 4
+            5, 4, 0, // triangle 5
+            7, 5, 1, // triangle 6
+            1, 3, 7, // triangle 7
+            7, 3, 2, // triangle 8
+            2, 6, 7, // triangle 9
+            7, 6, 4, // triangle 10
+            4, 5, 7, // triangle 11
         } };
 
         for (std::size_t i = 0; i < indices.size(); i += 3)

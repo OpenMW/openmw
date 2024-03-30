@@ -1,6 +1,5 @@
 #include "texturemanager.hpp"
 
-#include <osg/Stats>
 #include <osg/Texture2D>
 
 #include <components/resource/imagemanager.hpp>
@@ -56,7 +55,7 @@ namespace Terrain
 
     void TextureManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Terrain Texture", mCache->getCacheSize());
+        Resource::reportStats("Terrain Texture", frameNumber, mCache->getStats(), *stats);
     }
 
 }

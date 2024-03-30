@@ -101,5 +101,5 @@ MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& 
             throw std::logic_error("failed to create manual cell ref for " + name.toDebugString() + " (unknown type)");
     }
 
-    mPtr.getRefData().setCount(count);
+    mPtr.getCellRef().setCount(count);
 }

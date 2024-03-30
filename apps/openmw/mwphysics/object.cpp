@@ -23,6 +23,7 @@ namespace MWPhysics
         , mPosition(ptr.getRefData().getPosition().asVec3())
         , mRotation(rotation)
         , mTaskScheduler(scheduler)
+        , mCollidedWith(ScriptedCollisionType_None)
     {
         mCollisionObject = BulletHelpers::makeCollisionObject(mShapeInstance->mCollisionShape.get(),
             Misc::Convert::toBullet(mPosition), Misc::Convert::toBullet(rotation));
@@ -110,6 +111,9 @@ namespace MWPhysics
         if (mShapeInstance->mAnimatedShapes.empty())
             return false;
 
+        if (!mPtr.getRefData().getBaseNode())
+            return false;
+
         assert(mShapeInstance->mCollisionShape->isCompound());
 
         btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->mCollisionShape.get());
@@ -162,5 +166,21 @@ namespace MWPhysics
             }
         }
         return result;
+    }
+
+    bool Object::collidedWith(ScriptedCollisionType type) const
+    {
+        return mCollidedWith & type;
+    }
+
+    void Object::addCollision(ScriptedCollisionType type)
+    {
+        std::unique_lock<std::mutex> lock(mPositionMutex);
+        mCollidedWith |= type;
+    }
+
+    void Object::resetCollisions()
+    {
+        mCollidedWith = ScriptedCollisionType_None;
     }
 }

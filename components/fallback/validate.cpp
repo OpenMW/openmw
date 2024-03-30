@@ -7,14 +7,12 @@
 
 static const std::set<std::string_view> allowedKeysInt = { "LightAttenuation_LinearMethod",
     "LightAttenuation_OutQuadInLin", "LightAttenuation_QuadraticMethod", "LightAttenuation_UseConstant",
-    "LightAttenuation_UseLinear", "LightAttenuation_UseQuadratic", "Water_NearWaterRadius", "Water_NearWaterPoints",
-    "Water_RippleFrameCount", "Water_SurfaceTileCount", "Water_SurfaceFrameCount", "Weather_Clear_Using_Precip",
-    "Weather_Cloudy_Using_Precip", "Weather_Foggy_Using_Precip", "Weather_Overcast_Using_Precip",
-    "Weather_Rain_Using_Precip", "Weather_Thunderstorm_Using_Precip", "Weather_Ashstorm_Using_Precip",
-    "Weather_Blight_Using_Precip", "Weather_Snow_Using_Precip", "Weather_Blizzard_Using_Precip",
-    "Weather_Clear_Ripples", "Weather_Cloudy_Ripples", "Weather_Foggy_Ripples", "Weather_Overcast_Ripples",
-    "Weather_Rain_Ripples", "Weather_Thunderstorm_Ripples", "Weather_Ashstorm_Ripples", "Weather_Blight_Ripples",
-    "Weather_Snow_Ripples", "Weather_Blizzard_Ripples" };
+    "LightAttenuation_UseLinear", "LightAttenuation_UseQuadratic", "Water_MaxNumberRipples", "Water_NearWaterRadius",
+    "Water_NearWaterPoints", "Water_RippleFrameCount", "Water_SurfaceTileCount", "Water_SurfaceFrameCount",
+    "Weather_Clear_Using_Precip", "Weather_Cloudy_Using_Precip", "Weather_Foggy_Using_Precip",
+    "Weather_Overcast_Using_Precip", "Weather_Rain_Using_Precip", "Weather_Thunderstorm_Using_Precip",
+    "Weather_Ashstorm_Using_Precip", "Weather_Blight_Using_Precip", "Weather_Snow_Using_Precip",
+    "Weather_Blizzard_Using_Precip", "Weather_Rain_Ripples", "Weather_Snow_Ripples", "Weather_Timescale_Clouds" };
 
 static const std::set<std::string_view> allowedKeysFloat = { "General_Werewolf_FOV", "Inventory_DirectionalAmbientB",
     "Inventory_DirectionalAmbientG", "Inventory_DirectionalAmbientR", "Inventory_DirectionalDiffuseB",
@@ -188,7 +186,7 @@ static const std::set<std::string_view> allowedKeysNonNumeric = { "Blood_Model_0
     "Weather_Thunderstorm_Sun_Disc_Sunset_Color", "Weather_Thunderstorm_Sun_Night_Color",
     "Weather_Thunderstorm_Sun_Sunrise_Color", "Weather_Thunderstorm_Sun_Sunset_Color",
     "Weather_Thunderstorm_Thunder_Sound_ID_0", "Weather_Thunderstorm_Thunder_Sound_ID_1",
-    "Weather_Thunderstorm_Thunder_Sound_ID_2", "Weather_Thunderstorm_Thunder_Sound_ID_3", "Weather_Timescale_Clouds",
+    "Weather_Thunderstorm_Thunder_Sound_ID_2", "Weather_Thunderstorm_Thunder_Sound_ID_3",
     "Weather_Clear_Thunder_Sound_ID_0", "Weather_Clear_Thunder_Sound_ID_1", "Weather_Clear_Thunder_Sound_ID_2",
     "Weather_Clear_Thunder_Sound_ID_3", "Weather_Cloudy_Thunder_Sound_ID_0", "Weather_Cloudy_Thunder_Sound_ID_1",
     "Weather_Cloudy_Thunder_Sound_ID_2", "Weather_Cloudy_Thunder_Sound_ID_3", "Weather_Foggy_Thunder_Sound_ID_0",
@@ -220,7 +218,7 @@ static const std::set<std::string_view> allowedKeysUnused = { "Inventory_Uniform
     "Map_Travel_Boat_Blue", "Map_Travel_Boat_Green", "Map_Travel_Boat_Red", "Map_Travel_Magic_Blue",
     "Map_Travel_Magic_Green", "Map_Travel_Magic_Red", "Map_Travel_Siltstrider_Blue", "Map_Travel_Siltstrider_Green",
     "Map_Travel_Siltstrider_Red", "Movies_Game_Logo", "PixelWater_Resolution", "PixelWater_SurfaceFPS",
-    "PixelWater_TileCount", "Movies_Loading", "Movies_Options_Menu", "Movies_Project_Logo", "Water_MaxNumberRipples",
+    "PixelWater_TileCount", "Movies_Loading", "Movies_Options_Menu", "Movies_Project_Logo",
     "Water_NearWaterUnderwaterFreq", "Water_NearWaterUnderwaterVolume", "Water_PSWaterReflectTerrain",
     "Water_PSWaterReflectUpdate", "Water_RippleAlphas", "Water_RippleScale", "Water_SurfaceTextureSize",
     "Water_TileTextureDivisor", "Weather_AlphaReduce", "Weather_Ashstorm_Storm_Threshold",

@@ -13,7 +13,7 @@ which should usually be sufficient, but if you need to explicitly specify a devi
 
 The names of detected devices can be found in the openmw.log file in your configuration directory.
 
-This setting can be configured by editing the settings configuration file, or in the Audio tab of the OpenMW Launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 master volume
 -------------
@@ -111,7 +111,8 @@ Enabling HRTF may also require an OpenAL Soft version greater than 1.17.0,
 and possibly some operating system configuration.
 A value of 0 disables HRTF processing, while a value of 1 explicitly enables HRTF processing.
 The default value is -1, which should enable the feature automatically for most users when possible.
-This setting can be configured by editing the settings configuration file, or in the Audio tab of the OpenMW Launcher.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 hrtf
 ----
@@ -123,6 +124,19 @@ hrtf
 This setting specifies which HRTF profile to use when HRTF is enabled. Blank means use the default.
 This setting has no effect if HRTF is not enabled based on the hrtf enable setting.
 Allowed values for this field are enumerated in openmw.log file is an HRTF enabled audio system is installed.
-
 The default value is empty, which uses the default profile.
-This setting can be configured by editing the settings configuration file, or in the Audio tab of the OpenMW Launcher.
+
+This setting can be controlled in the Settings tab of the launcher.
+
+camera listener
+---------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+When true, uses the camera position and direction for audio instead of the player position.
+This makes audio in third person sound relative to camera instead of the player.
+False is vanilla Morrowind behaviour.
+
+This setting can be controlled in the Settings tab of the launcher.

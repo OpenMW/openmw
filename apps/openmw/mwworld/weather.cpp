@@ -1,5 +1,7 @@
 #include "weather.hpp"
 
+#include <components/settings/values.hpp>
+
 #include <components/misc/rng.hpp>
 
 #include <components/esm3/esmreader.hpp>
@@ -45,7 +47,8 @@ namespace MWWorld
         osg::Vec3f calculateStormDirection(const std::string& particleEffect)
         {
             osg::Vec3f stormDirection = MWWorld::Weather::defaultDirection();
-            if (particleEffect == "meshes\\ashcloud.nif" || particleEffect == "meshes\\blightcloud.nif")
+            if (particleEffect == Settings::models().mWeatherashcloud.get()
+                || particleEffect == Settings::models().mWeatherblightcloud.get())
             {
                 osg::Vec3f playerPos = MWMechanics::getPlayer().getRefData().getPosition().asVec3();
                 playerPos.z() = 0;
@@ -175,13 +178,11 @@ namespace MWWorld
         , mRainMaxHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Max"))
         , mParticleEffect(particleEffect)
         , mRainEffect(Fallback::Map::getBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
-        , mRipples(Fallback::Map::getBool("Weather_" + name + "_Ripples"))
         , mStormDirection(Weather::defaultDirection())
         , mCloudsMaximumPercent(Fallback::Map::getFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
         , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
         , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
         , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
-        , mThunderSoundID()
         , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
         , mFlashBrightness(0.0f)
     {
@@ -196,21 +197,19 @@ namespace MWWorld
         mThunderSoundID[3]
             = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3"));
 
-        // TODO: support weathers that have both "Ambient Loop Sound ID" and "Rain Loop Sound ID", need to play both
-        // sounds at the same time.
-
         if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing
                                   // Using_Precip has no effect
         {
-            mAmbientLoopSoundID
+            mRainLoopSoundID
                 = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID"));
-            if (mAmbientLoopSoundID.empty()) // default to "rain" if not set
-                mAmbientLoopSoundID = ESM::RefId::stringRefId("rain");
+            if (mRainLoopSoundID.empty()) // default to "rain" if not set
+                mRainLoopSoundID = ESM::RefId::stringRefId("rain");
+            else if (mRainLoopSoundID == "None")
+                mRainLoopSoundID = ESM::RefId();
         }
-        else
-            mAmbientLoopSoundID
-                = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
 
+        mAmbientLoopSoundID
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
         if (mAmbientLoopSoundID == "None")
             mAmbientLoopSoundID = ESM::RefId();
     }
@@ -553,8 +552,6 @@ namespace MWWorld
         , mQueuedWeather(0)
         , mRegions()
         , mResult()
-        , mAmbientSound(nullptr)
-        , mPlayingSoundID()
     {
         mTimeSettings.mNightStart = mSunsetTime + mSunsetDuration;
         mTimeSettings.mNightEnd = mSunriseTime;
@@ -587,10 +584,10 @@ namespace MWWorld
         addWeather("Overcast", 0.7f, 0.0f); // 3
         addWeather("Rain", 0.5f, 10.0f); // 4
         addWeather("Thunderstorm", 0.5f, 20.0f); // 5
-        addWeather("Ashstorm", 0.2f, 50.0f, "meshes\\ashcloud.nif"); // 6
-        addWeather("Blight", 0.2f, 60.0f, "meshes\\blightcloud.nif"); // 7
-        addWeather("Snow", 0.5f, 40.0f, "meshes\\snow.nif"); // 8
-        addWeather("Blizzard", 0.16f, 70.0f, "meshes\\blizzard.nif"); // 9
+        addWeather("Ashstorm", 0.2f, 50.0f, Settings::models().mWeatherashcloud.get()); // 6
+        addWeather("Blight", 0.2f, 60.0f, Settings::models().mWeatherblightcloud.get()); // 7
+        addWeather("Snow", 0.5f, 40.0f, Settings::models().mWeathersnow.get()); // 8
+        addWeather("Blizzard", 0.16f, 70.0f, Settings::models().mWeatherblizzard.get()); // 9
 
         Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
         for (; it != store.get<ESM::Region>().end(); ++it)
@@ -726,7 +723,7 @@ namespace MWWorld
 
         // For some reason Ash Storm is not considered as a precipitation weather in game
         mPrecipitation = !(mResult.mParticleEffect.empty() && mResult.mRainEffect.empty())
-            && mResult.mParticleEffect != "meshes\\ashcloud.nif";
+            && mResult.mParticleEffect != Settings::models().mWeatherashcloud.get();
 
         mStormDirection = calculateStormDirection(mResult.mParticleEffect);
         mRendering.getSkyManager()->setStormParticleDirection(mStormDirection);
@@ -753,21 +750,21 @@ namespace MWWorld
             const float dayDuration = adjustedNightStart - mSunriseTime;
             const float nightDuration = 24.f - dayDuration;
 
-            double theta;
+            float orbit;
             if (!is_night)
             {
-                theta = static_cast<float>(osg::PI) * (adjustedHour - mSunriseTime) / dayDuration;
+                float t = (adjustedHour - mSunriseTime) / dayDuration;
+                orbit = 1.f - 2.f * t;
             }
             else
             {
-                theta = static_cast<float>(osg::PI)
-                    - static_cast<float>(osg::PI) * (adjustedHour - adjustedNightStart) / nightDuration;
+                float t = (adjustedHour - adjustedNightStart) / nightDuration;
+                orbit = 2.f * t - 1.f;
             }
 
-            osg::Vec3f final(static_cast<float>(cos(theta)),
-                -0.268f, // approx tan( -15 degrees )
-                static_cast<float>(sin(theta)));
-            mRendering.setSunDirection(final * -1);
+            // Hardcoded constant from Morrowind
+            const osg::Vec3f sunDir(-400.f * orbit, 75.f, -100.f);
+            mRendering.setSunDirection(sunDir);
             mRendering.setNight(is_night);
         }
 
@@ -795,24 +792,62 @@ namespace MWWorld
         mRendering.getSkyManager()->setWeather(mResult);
 
         // Play sounds
-        if (mPlayingSoundID != mResult.mAmbientLoopSoundID)
+        if (mPlayingAmbientSoundID != mResult.mAmbientLoopSoundID)
         {
-            stopSounds();
+            if (mAmbientSound)
+            {
+                MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
+                mAmbientSound = nullptr;
+            }
             if (!mResult.mAmbientLoopSoundID.empty())
                 mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mAmbientLoopSoundID,
                     mResult.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            mPlayingSoundID = mResult.mAmbientLoopSoundID;
+            mPlayingAmbientSoundID = mResult.mAmbientLoopSoundID;
         }
         else if (mAmbientSound)
             mAmbientSound->setVolume(mResult.mAmbientSoundVolume);
+
+        if (mPlayingRainSoundID != mResult.mRainLoopSoundID)
+        {
+            if (mRainSound)
+            {
+                MWBase::Environment::get().getSoundManager()->stopSound(mRainSound);
+                mRainSound = nullptr;
+            }
+            if (!mResult.mRainLoopSoundID.empty())
+                mRainSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mRainLoopSoundID,
+                    mResult.mAmbientSoundVolume, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
+            mPlayingRainSoundID = mResult.mRainLoopSoundID;
+        }
+        else if (mRainSound)
+            mRainSound->setVolume(mResult.mAmbientSoundVolume);
     }
 
     void WeatherManager::stopSounds()
     {
+        MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         if (mAmbientSound)
-            MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
-        mAmbientSound = nullptr;
-        mPlayingSoundID = ESM::RefId();
+        {
+            sndMgr->stopSound(mAmbientSound);
+            mAmbientSound = nullptr;
+        }
+        mPlayingAmbientSoundID = ESM::RefId();
+
+        if (mRainSound)
+        {
+            sndMgr->stopSound(mRainSound);
+            mRainSound = nullptr;
+        }
+        mPlayingRainSoundID = ESM::RefId();
+
+        for (ESM::RefId soundId : mWeatherSettings[mCurrentWeather].mThunderSoundID)
+            if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
+
+        if (inTransition())
+            for (ESM::RefId soundId : mWeatherSettings[mNextWeather].mThunderSoundID)
+                if (!soundId.empty() && sndMgr->getSoundPlaying(MWWorld::ConstPtr(), soundId))
+                    sndMgr->stopSound3D(MWWorld::ConstPtr(), soundId);
     }
 
     float WeatherManager::getWindSpeed() const
@@ -1119,6 +1154,7 @@ namespace MWWorld
         mResult.mCloudSpeed = current.mCloudSpeed;
         mResult.mGlareView = current.mGlareView;
         mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+        mResult.mRainLoopSoundID = current.mRainLoopSoundID;
         mResult.mAmbientSoundVolume = 1.f;
         mResult.mPrecipitationAlpha = 1.f;
 
@@ -1130,7 +1166,6 @@ namespace MWWorld
         mResult.mRainMinHeight = current.mRainMinHeight;
         mResult.mRainMaxHeight = current.mRainMaxHeight;
         mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
-        mResult.mRipples = current.mRipples;
 
         mResult.mParticleEffect = current.mParticleEffect;
         mResult.mRainEffect = current.mRainEffect;
@@ -1239,11 +1274,11 @@ namespace MWWorld
             mResult.mAmbientSoundVolume = 1.f - factor / threshold;
             mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
             mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+            mResult.mRainLoopSoundID = current.mRainLoopSoundID;
             mResult.mRainDiameter = current.mRainDiameter;
             mResult.mRainMinHeight = current.mRainMinHeight;
             mResult.mRainMaxHeight = current.mRainMaxHeight;
             mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
-            mResult.mRipples = current.mRipples;
         }
         else
         {
@@ -1255,12 +1290,12 @@ namespace MWWorld
             mResult.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
             mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
             mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+            mResult.mRainLoopSoundID = other.mRainLoopSoundID;
 
             mResult.mRainDiameter = other.mRainDiameter;
             mResult.mRainMinHeight = other.mRainMinHeight;
             mResult.mRainMaxHeight = other.mRainMaxHeight;
             mResult.mRainMaxRaindrops = other.mRainMaxRaindrops;
-            mResult.mRipples = other.mRipples;
         }
     }
 }

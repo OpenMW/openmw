@@ -51,6 +51,7 @@
 #include <components/l10n/manager.hpp>
 
 #include <components/lua_ui/util.hpp>
+#include <components/lua_ui/widget.hpp>
 
 #include <components/settings/values.hpp>
 
@@ -408,7 +409,6 @@ namespace MWGui
         mSettingsWindow = settingsWindow.get();
         mWindows.push_back(std::move(settingsWindow));
         trackWindow(mSettingsWindow, makeSettingsWindowSettingValues());
-        mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
         auto confirmationDialog = std::make_unique<ConfirmationDialog>();
         mConfirmationDialog = confirmationDialog.get();
@@ -547,7 +547,8 @@ namespace MWGui
     {
         try
         {
-            LuaUi::clearUserInterface();
+            LuaUi::clearGameInterface();
+            LuaUi::clearMenuInterface();
 
             mStatsWatcher.reset();
 
@@ -843,7 +844,7 @@ namespace MWGui
 
         if (!player.getCell()->isExterior())
         {
-            setActiveMap(x, y, true);
+            setActiveMap(*player.getCell()->getCell());
         }
         // else: need to know the current grid center, call setActiveMap from changeCell
 
@@ -913,6 +914,9 @@ namespace MWGui
         if (isConsoleMode())
             mConsole->onFrame(frameDuration);
 
+        if (isSettingsWindowVisible())
+            mSettingsWindow->onFrame(frameDuration);
+
         if (!gameRunning)
             return;
 
@@ -981,29 +985,23 @@ namespace MWGui
                 mMap->addVisitedLocation(name, cellCommon->getGridX(), cellCommon->getGridY());
 
             mMap->cellExplored(cellCommon->getGridX(), cellCommon->getGridY());
-
-            setActiveMap(cellCommon->getGridX(), cellCommon->getGridY(), false);
         }
         else
         {
-            mMap->setCellPrefix(std::string(cellCommon->getNameId()));
-            mHud->setCellPrefix(std::string(cellCommon->getNameId()));
-
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
                 worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
             else
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x(), worldPos.y());
-
-            setActiveMap(0, 0, true);
         }
+        setActiveMap(*cellCommon);
     }
 
-    void WindowManager::setActiveMap(int x, int y, bool interior)
+    void WindowManager::setActiveMap(const MWWorld::Cell& cell)
     {
-        mMap->setActiveCell(x, y, interior);
-        mHud->setActiveCell(x, y, interior);
+        mMap->setActiveCell(cell);
+        mHud->setActiveCell(cell);
     }
 
     void WindowManager::setDrowningBarVisibility(bool visible)
@@ -1550,6 +1548,11 @@ namespace MWGui
         return mPostProcessorHud && mPostProcessorHud->isVisible();
     }
 
+    bool WindowManager::isSettingsWindowVisible() const
+    {
+        return mSettingsWindow && mSettingsWindow->isVisible();
+    }
+
     bool WindowManager::isInteractiveMessageBoxActive() const
     {
         return mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox();
@@ -1672,7 +1675,10 @@ namespace MWGui
 
     void WindowManager::onKeyFocusChanged(MyGUI::Widget* widget)
     {
-        if (widget && widget->castType<MyGUI::EditBox>(false))
+        bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
+        LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
+        bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
+        if (widget && capturesInput)
             SDL_StartTextInput();
         else
             SDL_StopTextInput();
@@ -1683,9 +1689,9 @@ namespace MWGui
         mHud->setEnemy(enemy);
     }
 
-    int WindowManager::getMessagesCount() const
+    std::size_t WindowManager::getMessagesCount() const
     {
-        int count = 0;
+        std::size_t count = 0;
         if (mMessageBoxManager)
             count = mMessageBoxManager->getMessagesCount();
 
@@ -2128,6 +2134,21 @@ namespace MWGui
         updateVisible();
     }
 
+    void WindowManager::toggleSettingsWindow()
+    {
+        bool visible = mSettingsWindow->isVisible();
+
+        if (!visible && !mGuiModes.empty())
+            mKeyboardNavigation->saveFocus(mGuiModes.back());
+
+        mSettingsWindow->setVisible(!visible);
+
+        if (visible && !mGuiModes.empty())
+            mKeyboardNavigation->restoreFocus(mGuiModes.back());
+
+        updateVisible();
+    }
+
     void WindowManager::cycleSpell(bool next)
     {
         if (!isGuiMode())
@@ -2170,9 +2191,14 @@ namespace MWGui
         mConsole->print(msg, color);
     }
 
-    void WindowManager::setConsoleMode(const std::string& mode)
+    void WindowManager::setConsoleMode(std::string_view mode)
     {
         mConsole->setConsoleMode(mode);
+    }
+
+    const std::string& WindowManager::getConsoleMode()
+    {
+        return mConsole->getConsoleMode();
     }
 
     void WindowManager::createCursors()

@@ -149,7 +149,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mResourcesManager.setVFS(mVFS.get());
 
     constexpr double expiryDelay = 0;
-    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay);
+    mResourceSystem
+        = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay, &mEncoder.getStatelessEncoder());
 
     Shader::ShaderManager::DefineMap defines
         = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -300,8 +301,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRegions.addColumn(new NestedParentColumn<ESM::Region>(Columns::ColumnId_RegionWeather));
     index = mRegions.getColumns() - 1;
     mRegions.addAdapter(std::make_pair(&mRegions.getColumn(index), new RegionWeatherAdapter()));
-    mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn(Columns::ColumnId_WeatherName, ColumnBase::Display_String, false));
+    mRegions.getNestableColumn(index)->addColumn(new NestedChildColumn(
+        Columns::ColumnId_WeatherName, ColumnBase::Display_String, ColumnBase::Flag_Dialogue, false));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_WeatherChance, ColumnBase::Display_UnsignedInteger8));
     // Region Sounds
@@ -312,6 +313,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
         new NestedChildColumn(Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_SoundChance, ColumnBase::Display_UnsignedInteger8));
+    mRegions.getNestableColumn(index)->addColumn(new NestedChildColumn(
+        Columns::ColumnId_SoundProbability, ColumnBase::Display_String, ColumnBase::Flag_Dialogue, false));
 
     mBirthsigns.addColumn(new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn(new RecordStateColumn<ESM::BirthSign>);
@@ -499,6 +502,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mMagicEffects.addColumn(new FixedRecordTypeColumn<ESM::MagicEffect>(UniversalId::Type_MagicEffect));
     mMagicEffects.addColumn(new SchoolColumn<ESM::MagicEffect>);
     mMagicEffects.addColumn(new BaseCostColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn(new ProjectileSpeedColumn<ESM::MagicEffect>);
     mMagicEffects.addColumn(new EffectTextureColumn<ESM::MagicEffect>(Columns::ColumnId_Icon));
     mMagicEffects.addColumn(new EffectTextureColumn<ESM::MagicEffect>(Columns::ColumnId_Particle));
     mMagicEffects.addColumn(new EffectObjectColumn<ESM::MagicEffect>(Columns::ColumnId_CastingObject));
@@ -509,6 +513,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mMagicEffects.addColumn(new EffectSoundColumn<ESM::MagicEffect>(Columns::ColumnId_HitSound));
     mMagicEffects.addColumn(new EffectSoundColumn<ESM::MagicEffect>(Columns::ColumnId_AreaSound));
     mMagicEffects.addColumn(new EffectSoundColumn<ESM::MagicEffect>(Columns::ColumnId_BoltSound));
+
     mMagicEffects.addColumn(
         new FlagColumn<ESM::MagicEffect>(Columns::ColumnId_AllowSpellmaking, ESM::MagicEffect::AllowSpellmaking));
     mMagicEffects.addColumn(
@@ -587,8 +592,9 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRefs.addColumn(new FactionIndexColumn<CellRef>);
     mRefs.addColumn(new ChargesColumn<CellRef>);
     mRefs.addColumn(new EnchantmentChargesColumn<CellRef>);
-    mRefs.addColumn(new GoldValueColumn<CellRef>);
-    mRefs.addColumn(new TeleportColumn<CellRef>);
+    mRefs.addColumn(new StackSizeColumn<CellRef>);
+    mRefs.addColumn(new TeleportColumn<CellRef>(
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mRefs.addColumn(new TeleportCellColumn<CellRef>);
     mRefs.addColumn(new PosColumn<CellRef>(&CellRef::mDoorDest, 0, true));
     mRefs.addColumn(new PosColumn<CellRef>(&CellRef::mDoorDest, 1, true));
@@ -596,6 +602,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 0, true));
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 1, true));
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 2, true));
+    mRefs.addColumn(new IsLockedColumn<CellRef>(
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mRefs.addColumn(new LockLevelColumn<CellRef>);
     mRefs.addColumn(new KeyColumn<CellRef>);
     mRefs.addColumn(new TrapColumn<CellRef>);
@@ -619,6 +627,11 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
         new FlagColumn2<ESM::DebugProfile>(Columns::ColumnId_GlobalProfile, ESM::DebugProfile::Flag_Global));
     mDebugProfiles.addColumn(new DescriptionColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn(new ScriptColumn<ESM::DebugProfile>(ScriptColumn<ESM::DebugProfile>::Type_Lines));
+
+    mSelectionGroups.addColumn(new StringIdColumn<ESM::SelectionGroup>);
+    mSelectionGroups.addColumn(new RecordStateColumn<ESM::SelectionGroup>);
+    mSelectionGroups.addColumn(new FixedRecordTypeColumn<ESM::SelectionGroup>(UniversalId::Type_SelectionGroup));
+    mSelectionGroups.addColumn(new SelectionGroupColumn);
 
     mMetaData.appendBlankRecord(ESM::RefId::stringRefId("sys::meta"));
 
@@ -664,6 +677,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     addModel(new ResourceTable(&mResourcesManager.get(UniversalId::Type_Textures)), UniversalId::Type_Texture);
     addModel(new ResourceTable(&mResourcesManager.get(UniversalId::Type_Videos)), UniversalId::Type_Video);
     addModel(new IdTable(&mMetaData), UniversalId::Type_MetaData);
+    addModel(new IdTable(&mSelectionGroups), UniversalId::Type_SelectionGroup);
 
     mActorAdapter = std::make_unique<ActorAdapter>(*this);
 
@@ -908,6 +922,16 @@ CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
     return mDebugProfiles;
 }
 
+CSMWorld::IdCollection<ESM::SelectionGroup>& CSMWorld::Data::getSelectionGroups()
+{
+    return mSelectionGroups;
+}
+
+const CSMWorld::IdCollection<ESM::SelectionGroup>& CSMWorld::Data::getSelectionGroups() const
+{
+    return mSelectionGroups;
+}
+
 const CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand() const
 {
     return mLand;
@@ -1091,7 +1115,7 @@ void CSMWorld::Data::loadFallbackEntries()
             newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Static>>();
-            record->mBase = newMarker;
+            record->mBase = std::move(newMarker);
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord(std::move(record), CSMWorld::UniversalId::Type_Static);
         }
@@ -1107,7 +1131,7 @@ void CSMWorld::Data::loadFallbackEntries()
             newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Door>>();
-            record->mBase = newMarker;
+            record->mBase = std::move(newMarker);
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord(std::move(record), CSMWorld::UniversalId::Type_Door);
         }
@@ -1367,6 +1391,17 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
             }
 
             mDebugProfiles.load(*mReader, mBase);
+            break;
+
+        case ESM::REC_SELG:
+
+            if (!mProject)
+            {
+                unhandledRecord = true;
+                break;
+            }
+
+            mSelectionGroups.load(*mReader, mBase);
             break;
 
         default:

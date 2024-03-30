@@ -68,18 +68,40 @@ You will find ``Morrowind.esm`` there.
 Users of other platforms running Wine, will find it at
 ``~/.wine/drive_c/Program Files/Bethesda Softworks/Morrowind``
 
------
-Steam
------
+Innoextract
+^^^^^^^^^^^
 
-Windows
--------
+macOS and Linux
+~~~~~~~~~~~~~~~
 
-Windows users can download Morrowind through Steam.
-Afterwards, you can point OpenMW to the Steam install location at
-``C:\Program Files\Steam\SteamApps\common\Morrowind\Data Files\``
-and find ``Morrowind.esm`` there.
+If you have purchased "The Elder Scrolls III: Morrowind" `from GOG <https://www.gog.com/en/game/the_elder_scrolls_iii_morrowind_goty_edition>`_ and wish to extract the game files on a Linux system without using Wine, or on macOS, you can do so using `innoextract <https://constexpr.org/innoextract/>`_. First install innoextract.
 
+For Distributions Using `apt` (e.g., Ubuntu, Debian)
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. code:: console
+
+    sudo apt update
+    sudo apt install innoextract
+
+For macOS using Homebrew
+++++++++++++++++++++++++
+
+.. code:: console
+
+    brew install innoextract
+
+Once innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
+
+.. code:: console
+
+    $ innoextract ./setup_tes_morrowind_goty_2.0.0.7.exe -d ~/Documents/Games/Morrowind/
+
+Assuming you used the filepath above, your ``.esm`` files will be located in ``~/Documents/Games/Morrowind/app/Data Files/``.
+
+You can now run the OpenMW launcher, and from there run the installation wizard. Point it to your ``Morrowind.esm`` in the folder you extracted it to, and follow the instructions.
+
+---------------------
 XBox Game Pass for PC
 ---------------------
 
@@ -92,8 +114,21 @@ option and the app will prompt you to move the Morrowind files to a
 new folder. Once done you can find ``Morrowind.esm`` in the folder you 
 chose.
 
-macOS
 -----
+Steam
+-----
+
+Windows
+^^^^^^^
+
+Windows users can download Morrowind through Steam.
+Afterwards, you can point OpenMW to the Steam install location at
+``C:\Program Files\Steam\SteamApps\common\Morrowind\Data Files\``
+and find ``Morrowind.esm`` there.
+
+
+macOS
+^^^^^
 
 If you are running macOS, you can also download Morrowind through Steam:
 
@@ -118,9 +153,9 @@ If you are running macOS, you can also download Morrowind through Steam:
 	``~/Library/Application Support/Steam/steamapps/common/The Elder Scrolls III - Morrowind/Data Files/``
 
 Linux
------
+^^^^^
 Debian/Ubuntu - using "Steam Proton" & "OpenMW launcher".
----------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #. Install Steam from "Ubuntu Software" Center  
 #. Enable Proton (basically WINE under the hood). This is done in the Steam client menu drop down. Select, "Steam | Settings" then in the "SteamPlay" section check the box next to "enable steam play for all other titles"  
 #. Now Morrowind should be selectable in your game list (as long as you own it). You can install it like any other game, choose to install it and remember the directory path of the location you pick.
@@ -128,10 +163,10 @@ Debian/Ubuntu - using "Steam Proton" & "OpenMW launcher".
 #. Launch "OpenMW launcher" and follow the setup wizard, when asked, point it at the location you installed Morrowind to, we will be looking for the directory that contains the Morrowing.esm file, for example '/steam library/steamapps/common/Morrowind/Data Files/'.
 #. Everything should now be in place, click that big "PLAY" button and fire up OpenMW.
 
-Nb. Bloodmoon.esm needs to be below Tribunal.esm in your datafiles list, if you dont have the right order a red "!" will apear next to the filename in the datafiles section of the OpenMW launcher, just drag bloodmoon below tribunal to fix it.
+Note, Bloodmoon.esm needs to be below Tribunal.esm in your datafiles list, if you don't have the right order a red "!" will apear next to the filename in the datafiles section of the OpenMW launcher, just drag bloodmoon below tribunal to fix it.
 
 Wine
-----
+~~~~
 
 Users of other platforms running Wine can run Steam within it
 and find ``Morrowind.esm`` at

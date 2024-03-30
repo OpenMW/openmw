@@ -43,6 +43,8 @@
 #include <components/esm4/loadtree.hpp>
 #include <components/esm4/loadweap.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/worldmodel.hpp"
 
@@ -113,6 +115,13 @@ namespace MWLua
             return cell == c.mStore || (cell->getCell()->getWorldSpace() == c.mStore->getCell()->getWorldSpace());
         };
 
+        cellT["waterLevel"] = sol::readonly_property([](const CellT& c) -> sol::optional<float> {
+            if (c.mStore->getCell()->hasWater())
+                return c.mStore->getWaterLevel();
+            else
+                return sol::nullopt;
+        });
+
         if constexpr (std::is_same_v<CellT, GCell>)
         { // only for global scripts
             cellT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
@@ -121,7 +130,7 @@ namespace MWLua
                     cell.mStore->load();
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
-                    if (ptr.getRefData().isDeleted())
+                    if (ptr.mRef->isDeleted())
                         return true;
                     MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     if (getLiveCellRefType(ptr.mRef) == ptr.getType())
@@ -268,7 +277,7 @@ namespace MWLua
                 if (!ok)
                     throw std::runtime_error(
                         std::string("Incorrect type argument in cell:getAll: " + LuaUtil::toString(*type)));
-                return GObjectList{ res };
+                return GObjectList{ std::move(res) };
             };
         }
     }

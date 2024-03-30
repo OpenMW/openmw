@@ -34,7 +34,6 @@ Launcher::GraphicsPage::GraphicsPage(QWidget* parent)
     connect(standardRadioButton, &QRadioButton::toggled, this, &GraphicsPage::slotStandardToggled);
     connect(screenComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &GraphicsPage::screenChanged);
     connect(framerateLimitCheckBox, &QCheckBox::toggled, this, &GraphicsPage::slotFramerateLimitToggled);
-    connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &GraphicsPage::slotShadowDistLimitToggled);
 }
 
 bool Launcher::GraphicsPage::setupSDL()
@@ -126,58 +125,6 @@ bool Launcher::GraphicsPage::loadSettings()
         framerateLimitSpinBox->setValue(fpsLimit);
     }
 
-    // Lighting
-    int lightingMethod = 1;
-    switch (Settings::shaders().mLightingMethod)
-    {
-        case SceneUtil::LightingMethod::FFP:
-            lightingMethod = 0;
-            break;
-        case SceneUtil::LightingMethod::PerObjectUniform:
-            lightingMethod = 1;
-            break;
-        case SceneUtil::LightingMethod::SingleUBO:
-            lightingMethod = 2;
-            break;
-    }
-    lightingMethodComboBox->setCurrentIndex(lightingMethod);
-
-    // Shadows
-    if (Settings::shadows().mActorShadows)
-        actorShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::shadows().mPlayerShadows)
-        playerShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::shadows().mTerrainShadows)
-        terrainShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::shadows().mObjectShadows)
-        objectShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::shadows().mEnableIndoorShadows)
-        indoorShadowsCheckBox->setCheckState(Qt::Checked);
-
-    auto boundMethod = Settings::shadows().mComputeSceneBounds.get();
-    if (boundMethod == "bounds")
-        shadowComputeSceneBoundsComboBox->setCurrentIndex(0);
-    else if (boundMethod == "primitives")
-        shadowComputeSceneBoundsComboBox->setCurrentIndex(1);
-    else
-        shadowComputeSceneBoundsComboBox->setCurrentIndex(2);
-
-    const int shadowDistLimit = Settings::shadows().mMaximumShadowMapDistance;
-    if (shadowDistLimit > 0)
-    {
-        shadowDistanceCheckBox->setCheckState(Qt::Checked);
-        shadowDistanceSpinBox->setValue(shadowDistLimit);
-    }
-
-    const float shadowFadeStart = Settings::shadows().mShadowFadeStart;
-    if (shadowFadeStart != 0)
-        fadeStartSpinBox->setValue(shadowFadeStart);
-
-    const int shadowRes = Settings::shadows().mShadowMapResolution;
-    int shadowResIndex = shadowResolutionComboBox->findText(QString::number(shadowRes));
-    if (shadowResIndex != -1)
-        shadowResolutionComboBox->setCurrentIndex(shadowResIndex);
-
     return true;
 }
 
@@ -220,53 +167,6 @@ void Launcher::GraphicsPage::saveSettings()
     {
         Settings::video().mFramerateLimit.set(0);
     }
-
-    // Lighting
-    static constexpr std::array<SceneUtil::LightingMethod, 3> lightingMethodMap = {
-        SceneUtil::LightingMethod::FFP,
-        SceneUtil::LightingMethod::PerObjectUniform,
-        SceneUtil::LightingMethod::SingleUBO,
-    };
-    Settings::shaders().mLightingMethod.set(lightingMethodMap[lightingMethodComboBox->currentIndex()]);
-
-    // Shadows
-    const int cShadowDist = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
-    Settings::shadows().mMaximumShadowMapDistance.set(cShadowDist);
-    const float cFadeStart = fadeStartSpinBox->value();
-    if (cShadowDist > 0)
-        Settings::shadows().mShadowFadeStart.set(cFadeStart);
-
-    const bool cActorShadows = actorShadowsCheckBox->checkState() != Qt::Unchecked;
-    const bool cObjectShadows = objectShadowsCheckBox->checkState() != Qt::Unchecked;
-    const bool cTerrainShadows = terrainShadowsCheckBox->checkState() != Qt::Unchecked;
-    const bool cPlayerShadows = playerShadowsCheckBox->checkState() != Qt::Unchecked;
-    if (cActorShadows || cObjectShadows || cTerrainShadows || cPlayerShadows)
-    {
-        Settings::shadows().mEnableShadows.set(true);
-        Settings::shadows().mActorShadows.set(cActorShadows);
-        Settings::shadows().mPlayerShadows.set(cPlayerShadows);
-        Settings::shadows().mObjectShadows.set(cObjectShadows);
-        Settings::shadows().mTerrainShadows.set(cTerrainShadows);
-    }
-    else
-    {
-        Settings::shadows().mEnableShadows.set(false);
-        Settings::shadows().mActorShadows.set(false);
-        Settings::shadows().mPlayerShadows.set(false);
-        Settings::shadows().mObjectShadows.set(false);
-        Settings::shadows().mTerrainShadows.set(false);
-    }
-
-    Settings::shadows().mEnableIndoorShadows.set(indoorShadowsCheckBox->checkState() != Qt::Unchecked);
-    Settings::shadows().mShadowMapResolution.set(shadowResolutionComboBox->currentText().toInt());
-
-    auto index = shadowComputeSceneBoundsComboBox->currentIndex();
-    if (index == 0)
-        Settings::shadows().mComputeSceneBounds.set("bounds");
-    else if (index == 1)
-        Settings::shadows().mComputeSceneBounds.set("primitives");
-    else
-        Settings::shadows().mComputeSceneBounds.set("none");
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
@@ -376,10 +276,4 @@ void Launcher::GraphicsPage::slotStandardToggled(bool checked)
 void Launcher::GraphicsPage::slotFramerateLimitToggled(bool checked)
 {
     framerateLimitSpinBox->setEnabled(checked);
-}
-
-void Launcher::GraphicsPage::slotShadowDistLimitToggled(bool checked)
-{
-    shadowDistanceSpinBox->setEnabled(checked);
-    fadeStartSpinBox->setEnabled(checked);
 }

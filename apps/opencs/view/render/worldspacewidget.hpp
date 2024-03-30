@@ -201,6 +201,10 @@ namespace CSVRender
 
         virtual std::vector<osg::ref_ptr<TagBase>> getSelection(unsigned int elementMask) const = 0;
 
+        virtual void selectGroup(const std::vector<std::string>&) const = 0;
+
+        virtual void unhideAll() const = 0;
+
         virtual std::vector<osg::ref_ptr<TagBase>> getEdited(unsigned int elementMask) const = 0;
 
         virtual void setSubMode(int subMode, unsigned int elementMask) = 0;
@@ -299,6 +303,8 @@ namespace CSVRender
         void tertiarySelect(bool activate);
 
         void speedMode(bool activate);
+
+        void toggleHiddenInstances();
 
     protected slots:
 

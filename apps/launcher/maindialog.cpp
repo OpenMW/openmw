@@ -118,13 +118,14 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
     const auto& userConfigDir = mCfgMgr.getUserConfigPath();
     if (!exists(userConfigDir))
     {
-        if (!create_directories(userConfigDir))
+        std::error_code ec;
+        if (!create_directories(userConfigDir, ec))
         {
-            cfgError(tr("Error opening OpenMW configuration file"),
+            cfgError(tr("Error creating OpenMW configuration directory: code %0").arg(ec.value()),
                 tr("<br><b>Could not create directory %0</b><br><br>"
-                   "Please make sure you have the right permissions "
-                   "and try again.<br>")
-                    .arg(Files::pathToQString(canonical(userConfigDir))));
+                   "%1<br>")
+                    .arg(Files::pathToQString(userConfigDir))
+                    .arg(QString(ec.message().c_str())));
             return FirstRunDialogResultFailure;
         }
     }
@@ -457,13 +458,14 @@ bool Launcher::MainDialog::writeSettings()
 
     if (!exists(userPath))
     {
-        if (!create_directories(userPath))
+        std::error_code ec;
+        if (!create_directories(userPath, ec))
         {
-            cfgError(tr("Error creating OpenMW configuration directory"),
-                tr("<br><b>Could not create %0</b><br><br>"
-                   "Please make sure you have the right permissions "
-                   "and try again.<br>")
-                    .arg(Files::pathToQString(userPath)));
+            cfgError(tr("Error creating OpenMW configuration directory: code %0").arg(ec.value()),
+                tr("<br><b>Could not create directory %0</b><br><br>"
+                   "%1<br>")
+                    .arg(Files::pathToQString(userPath))
+                    .arg(QString(ec.message().c_str())));
             return false;
         }
     }

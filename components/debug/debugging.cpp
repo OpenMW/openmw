@@ -6,7 +6,15 @@
 #include <map>
 #include <memory>
 
+#ifdef _MSC_VER
+// TODO: why is this necessary? this has /external:I
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
 #include <boost/iostreams/stream.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/conversion.hpp>
@@ -111,7 +119,7 @@ namespace Debug
                 msg = msg.substr(1);
 
             char prefix[32];
-            int prefixSize;
+            std::size_t prefixSize;
             {
                 prefix[0] = '[';
                 const auto now = std::chrono::system_clock::now();
@@ -352,8 +360,7 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
 #else
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
             // install the crash handler as soon as possible.
-            crashCatcherInstall(
-                argc, argv, Files::pathToUnicodeString(std::filesystem::temp_directory_path() / crashLogName));
+            crashCatcherInstall(argc, argv, std::filesystem::temp_directory_path() / crashLogName);
 #endif
             ret = innerApplication(argc, argv);
         }

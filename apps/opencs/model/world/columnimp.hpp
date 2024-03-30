@@ -16,6 +16,7 @@
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/esm3/selectiongroup.hpp>
 #include <components/esm3/variant.hpp>
 
 #include <optional>
@@ -584,19 +585,22 @@ namespace CSMWorld
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
+
+            float bodyAttr = std::clamp(data.toFloat(), 0.5f, 2.0f);
+
             if (mWeight)
             {
                 if (mMale)
-                    record2.mData.mMaleWeight = data.toFloat();
+                    record2.mData.mMaleWeight = bodyAttr;
                 else
-                    record2.mData.mFemaleWeight = data.toFloat();
+                    record2.mData.mFemaleWeight = bodyAttr;
             }
             else
             {
                 if (mMale)
-                    record2.mData.mMaleHeight = data.toFloat();
+                    record2.mData.mMaleHeight = bodyAttr;
                 else
-                    record2.mData.mFemaleHeight = data.toFloat();
+                    record2.mData.mFemaleHeight = bodyAttr;
             }
             record.setModified(record2);
         }
@@ -967,7 +971,7 @@ namespace CSMWorld
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-            record2.mScale = data.toFloat();
+            record2.mScale = std::clamp(data.toFloat(), 0.5f, 2.0f);
             record.setModified(record2);
         }
 
@@ -1110,19 +1114,19 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
-    struct GoldValueColumn : public Column<ESXRecordT>
+    struct StackSizeColumn : public Column<ESXRecordT>
     {
-        GoldValueColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_CoinValue, ColumnBase::Display_Integer)
+        StackSizeColumn()
+            : Column<ESXRecordT>(Columns::ColumnId_StackCount, ColumnBase::Display_Integer)
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mGoldValue; }
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mCount; }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-            record2.mGoldValue = data.toInt();
+            record2.mCount = data.toInt();
             record.setModified(record2);
         }
 
@@ -1132,8 +1136,8 @@ namespace CSMWorld
     template <typename ESXRecordT>
     struct TeleportColumn : public Column<ESXRecordT>
     {
-        TeleportColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean)
+        TeleportColumn(int flags)
+            : Column<ESXRecordT>(Columns::ColumnId_Teleport, ColumnBase::Display_Boolean, flags)
         {
         }
 
@@ -1161,6 +1165,8 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            if (!record.get().mTeleport)
+                return QVariant();
             return QString::fromUtf8(record.get().mDestCell.c_str());
         }
 
@@ -1179,6 +1185,26 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
+    struct IsLockedColumn : public Column<ESXRecordT>
+    {
+        IsLockedColumn(int flags)
+            : Column<ESXRecordT>(Columns::ColumnId_IsLocked, ColumnBase::Display_Boolean, flags)
+        {
+        }
+
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mIsLocked; }
+
+        void set(Record<ESXRecordT>& record, const QVariant& data) override
+        {
+            ESXRecordT record2 = record.get();
+            record2.mIsLocked = data.toBool();
+            record.setModified(record2);
+        }
+
+        bool isEditable() const override { return true; }
+    };
+
+    template <typename ESXRecordT>
     struct LockLevelColumn : public Column<ESXRecordT>
     {
         LockLevelColumn()
@@ -1186,7 +1212,12 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mLockLevel; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            if (record.get().mIsLocked)
+                return record.get().mLockLevel;
+            return QVariant();
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
@@ -1208,7 +1239,9 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mKey.getRefIdString().c_str());
+            if (record.get().mIsLocked)
+                return QString::fromUtf8(record.get().mKey.getRefIdString().c_str());
+            return QVariant();
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
@@ -1278,17 +1311,21 @@ namespace CSMWorld
     {
         ESM::Position ESXRecordT::*mPosition;
         int mIndex;
+        bool mIsDoor;
 
         PosColumn(ESM::Position ESXRecordT::*position, int index, bool door)
             : Column<ESXRecordT>((door ? Columns::ColumnId_DoorPositionXPos : Columns::ColumnId_PositionXPos) + index,
                 ColumnBase::Display_Float)
             , mPosition(position)
             , mIndex(index)
+            , mIsDoor(door)
         {
         }
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            if (!record.get().mTeleport && mIsDoor)
+                return QVariant();
             const ESM::Position& position = record.get().*mPosition;
             return position.pos[mIndex];
         }
@@ -1312,17 +1349,21 @@ namespace CSMWorld
     {
         ESM::Position ESXRecordT::*mPosition;
         int mIndex;
+        bool mIsDoor;
 
         RotColumn(ESM::Position ESXRecordT::*position, int index, bool door)
             : Column<ESXRecordT>((door ? Columns::ColumnId_DoorPositionXRot : Columns::ColumnId_PositionXRot) + index,
                 ColumnBase::Display_Double)
             , mPosition(position)
             , mIndex(index)
+            , mIsDoor(door)
         {
         }
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
+            if (!record.get().mTeleport && mIsDoor)
+                return QVariant();
             const ESM::Position& position = record.get().*mPosition;
             return osg::RadiansToDegrees(position.rot[mIndex]);
         }
@@ -2049,6 +2090,26 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
+    struct ProjectileSpeedColumn : public Column<ESXRecordT>
+    {
+        ProjectileSpeedColumn()
+            : Column<ESXRecordT>(Columns::ColumnId_ProjectileSpeed, ColumnBase::Display_Float)
+        {
+        }
+
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mSpeed; }
+
+        void set(Record<ESXRecordT>& record, const QVariant& data) override
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mSpeed = data.toFloat();
+            record.setModified(record2);
+        }
+
+        bool isEditable() const override { return true; }
+    };
+
+    template <typename ESXRecordT>
     struct SchoolColumn : public Column<ESXRecordT>
     {
         SchoolColumn()
@@ -2389,6 +2450,17 @@ namespace CSMWorld
 
         QVariant get(const Record<ESM::BodyPart>& record) const override;
         void set(Record<ESM::BodyPart>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
+    struct SelectionGroupColumn : public Column<ESM::SelectionGroup>
+    {
+        SelectionGroupColumn();
+
+        QVariant get(const Record<ESM::SelectionGroup>& record) const override;
+
+        void set(Record<ESM::SelectionGroup>& record, const QVariant& data) override;
+
         bool isEditable() const override;
     };
 }

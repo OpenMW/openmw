@@ -180,8 +180,8 @@ namespace DetourNavigator
         if (!playerTileChanged && changedTiles.empty())
             return;
 
-        const dtNavMeshParams params = *navMeshCacheItem->lockConst()->getImpl().getParams();
-        const int maxTiles = std::min(mSettings.get().mMaxTilesNumber, params.maxTiles);
+        const int maxTiles
+            = std::min(mSettings.get().mMaxTilesNumber, navMeshCacheItem->lockConst()->getImpl().getParams()->maxTiles);
 
         std::unique_lock lock(mMutex);
 
@@ -376,9 +376,10 @@ namespace DetourNavigator
             return JobStatus::Done;
 
         const auto playerTile = *mPlayerTile.lockConst();
-        const auto params = *navMeshCacheItem->lockConst()->getImpl().getParams();
+        const int maxTiles
+            = std::min(mSettings.get().mMaxTilesNumber, navMeshCacheItem->lockConst()->getImpl().getParams()->maxTiles);
 
-        if (!shouldAddTile(job.mChangedTile, playerTile, std::min(mSettings.get().mMaxTilesNumber, params.maxTiles)))
+        if (!shouldAddTile(job.mChangedTile, playerTile, maxTiles))
         {
             Log(Debug::Debug) << "Ignore add tile by job " << job.mId << ": too far from player";
             navMeshCacheItem->lock()->removeTile(job.mChangedTile);
@@ -600,7 +601,7 @@ namespace DetourNavigator
             if (mSettings.get().mEnableRecastMeshFileNameRevision)
                 recastMeshRevision = revision;
             if (mSettings.get().mEnableNavMeshFileNameRevision)
-                navMeshRevision = revision;
+                navMeshRevision = std::move(revision);
         }
         if (recastMesh && mSettings.get().mEnableWriteRecastMeshToFile)
             writeToFile(*recastMesh,
@@ -812,6 +813,23 @@ namespace DetourNavigator
                         mWriteToDb = false;
                         Log(Debug::Warning)
                             << "Writes to navmeshdb are disabled to avoid concurrent writes from multiple processes";
+                    }
+                    else if (message.find("UNIQUE constraint failed: tiles.tile_id") != std::string_view::npos)
+                    {
+                        Log(Debug::Warning) << "Found duplicate navmeshdb tile_id, please report the "
+                                               "issue to https://gitlab.com/OpenMW/openmw/-/issues, attach openmw.log: "
+                                            << mNextTileId;
+                        try
+                        {
+                            mNextTileId = TileId(mDb->getMaxTileId() + 1);
+                            Log(Debug::Info) << "Updated navmeshdb tile_id to: " << mNextTileId;
+                        }
+                        catch (const std::exception& e)
+                        {
+                            mWriteToDb = false;
+                            Log(Debug::Warning)
+                                << "Failed to update next tile_id, writes to navmeshdb are disabled: " << e.what();
+                        }
                     }
                 }
             }

@@ -68,7 +68,7 @@ namespace ToUTF8
         /// ASCII-only string. Otherwise returns a view to the input.
         std::string_view getLegacyEnc(std::string_view input);
 
-        StatelessUtf8Encoder getStatelessEncoder() const { return mImpl; }
+        const StatelessUtf8Encoder& getStatelessEncoder() const { return mImpl; }
 
     private:
         std::string mBuffer;

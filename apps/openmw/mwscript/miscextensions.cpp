@@ -715,7 +715,7 @@ namespace MWScript
                         MWWorld::ConstContainerStoreIterator it = store.getSlot(slot);
                         if (it != store.end() && it->getCellRef().getRefId() == item)
                         {
-                            numNotEquipped -= it->getRefData().getCount();
+                            numNotEquipped -= it->getCellRef().getCount();
                         }
                     }
 
@@ -724,7 +724,7 @@ namespace MWScript
                         MWWorld::ContainerStoreIterator it = store.getSlot(slot);
                         if (it != store.end() && it->getCellRef().getRefId() == item)
                         {
-                            int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
+                            int numToRemove = std::min(amount - numNotEquipped, it->getCellRef().getCount());
                             store.unequipItemQuantity(*it, numToRemove);
                             numNotEquipped += numToRemove;
                         }
@@ -1418,7 +1418,7 @@ namespace MWScript
 
                 if (ptr.getRefData().isDeletedByContentFile())
                     msg << "[Deleted by content file]" << std::endl;
-                if (!ptr.getRefData().getCount())
+                if (!ptr.getCellRef().getCount())
                     msg << "[Deleted]" << std::endl;
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
@@ -1435,7 +1435,7 @@ namespace MWScript
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                     std::string model
-                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), vfs);
+                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs);
                     msg << "Model: " << model << std::endl;
                     if (!model.empty())
                     {
@@ -1473,7 +1473,7 @@ namespace MWScript
 
                                 if (lastTextureSrc.empty() || textureSrc != lastTextureSrc)
                                 {
-                                    lastTextureSrc = textureSrc;
+                                    lastTextureSrc = std::move(textureSrc);
                                     if (lastTextureSrc.empty())
                                         lastTextureSrc = "[No Source]";
 
@@ -1711,7 +1711,7 @@ namespace MWScript
                 for (const T& record : store.get<T>())
                 {
                     MWWorld::ManualRef ref(store, record.mId);
-                    std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+                    std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
                     if (!model.empty())
                     {
                         sceneManager->getTemplate(model);

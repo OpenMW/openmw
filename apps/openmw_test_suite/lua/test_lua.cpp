@@ -51,6 +51,9 @@ return {
 }
 )X");
 
+    TestingOpenMW::VFSTestFile metaIndexErrorFile(
+        "return setmetatable({}, { __index = function(t, key) error('meta index error') end })");
+
     std::string genBigScript()
     {
         std::stringstream buf;
@@ -70,7 +73,7 @@ return {
     {
         std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { "aaa/counter.lua", &counterFile },
             { "bbb/tests.lua", &testsFile }, { "invalid.lua", &invalidScriptFile }, { "big.lua", &bigScriptFile },
-            { "requireBig.lua", &requireBigScriptFile } });
+            { "requireBig.lua", &requireBigScriptFile }, { "metaIndexError.lua", &metaIndexErrorFile } });
 
         LuaUtil::ScriptsConfiguration mCfg;
         LuaUtil::LuaState mLua{ mVFS.get(), &mCfg };
@@ -222,5 +225,12 @@ return {
         int64_t memWithoutScript = getMem();
         // At this moment all instances of the script should be garbage-collected.
         EXPECT_LT(memWithoutScript, memWithScript);
+    }
+
+    TEST_F(LuaStateTest, SafeIndexMetamethod)
+    {
+        sol::table t = mLua.runInNewSandbox("metaIndexError.lua");
+        // without safe get we crash here
+        EXPECT_ERROR(LuaUtil::safeGet(t, "any key"), "meta index error");
     }
 }

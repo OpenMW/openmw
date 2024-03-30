@@ -528,8 +528,12 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
-if ! [ -z $USE_CCACHE ]; then
-	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+if [ -n "$USE_CCACHE" ]; then
+	if [ -n "$NMAKE" ] || [ -n "$NINJA" ]; then
+		add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPRECOMPILE_HEADERS_WITH_MSVC=OFF"
+	else
+		echo "Ignoring -C (CCache) as it is incompatible with Visual Studio CMake generators"
+	fi
 fi
 
 # turn on LTO by default
@@ -902,8 +906,6 @@ printf "Qt ${QT_VER}... "
 	fi
 
 	cd $QT_SDK
-	add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
-		-DCMAKE_PREFIX_PATH="$QT_SDK"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
 		if [ $CONFIGURATION == "Debug" ]; then
 			DLLSUFFIX="d"

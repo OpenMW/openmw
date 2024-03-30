@@ -363,7 +363,7 @@ namespace MWRender
             imageDest.mImage = image;
             imageDest.mX = x;
             imageDest.mY = y;
-            mPendingImageDest[camera] = imageDest;
+            mPendingImageDest[camera] = std::move(imageDest);
         }
 
         // Create a quad rendering the updated texture
@@ -422,7 +422,8 @@ namespace MWRender
         if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
             return;
 
-        requestOverlayTextureUpdate(originX, mHeight - originY, cellSize, cellSize, localMapTexture, false, true);
+        requestOverlayTextureUpdate(
+            originX, mHeight - originY, cellSize, cellSize, std::move(localMapTexture), false, true);
     }
 
     void GlobalMap::clear()
@@ -554,7 +555,7 @@ namespace MWRender
         {
             mOverlayImage = image;
 
-            requestOverlayTextureUpdate(0, 0, mWidth, mHeight, texture, true, false);
+            requestOverlayTextureUpdate(0, 0, mWidth, mHeight, std::move(texture), true, false);
         }
         else
         {
@@ -562,7 +563,7 @@ namespace MWRender
             // In the latter case, we'll want filtering.
             // Create a RTT Camera and draw the image onto mOverlayImage in the next frame.
             requestOverlayTextureUpdate(destBox.mLeft, destBox.mTop, destBox.mRight - destBox.mLeft,
-                destBox.mBottom - destBox.mTop, texture, true, true, srcBox.mLeft / float(imageWidth),
+                destBox.mBottom - destBox.mTop, std::move(texture), true, true, srcBox.mLeft / float(imageWidth),
                 srcBox.mTop / float(imageHeight), srcBox.mRight / float(imageWidth),
                 srcBox.mBottom / float(imageHeight));
         }

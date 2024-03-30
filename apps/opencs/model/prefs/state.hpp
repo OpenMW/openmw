@@ -32,6 +32,7 @@ namespace CSMPrefs
     class ModifierSetting;
     class Setting;
     class StringSetting;
+    class EnumSettingValue;
     struct Values;
 
     /// \brief User settings state
@@ -65,15 +66,15 @@ namespace CSMPrefs
 
         IntSetting& declareInt(Settings::SettingValue<int>& value, const QString& label);
 
-        DoubleSetting& declareDouble(const std::string& key, const QString& label, double default_);
+        DoubleSetting& declareDouble(Settings::SettingValue<double>& value, const QString& label);
 
         BoolSetting& declareBool(Settings::SettingValue<bool>& value, const QString& label);
 
-        EnumSetting& declareEnum(const std::string& key, const QString& label, EnumValue default_);
+        EnumSetting& declareEnum(EnumSettingValue& value, const QString& label);
 
-        ColourSetting& declareColour(const std::string& key, const QString& label, QColor default_);
+        ColourSetting& declareColour(Settings::SettingValue<std::string>& value, const QString& label);
 
-        ShortcutSetting& declareShortcut(const std::string& key, const QString& label, const QKeySequence& default_);
+        ShortcutSetting& declareShortcut(Settings::SettingValue<std::string>& value, const QString& label);
 
         StringSetting& declareString(Settings::SettingValue<std::string>& value, const QString& label);
 

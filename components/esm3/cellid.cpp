@@ -3,9 +3,15 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include <components/misc/algorithm.hpp>
+#include <components/misc/concepts.hpp>
 
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<CellId::CellIndex> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mX, v.mY);
+    }
 
     void CellId::load(ESMReader& esm)
     {
@@ -13,7 +19,7 @@ namespace ESM
 
         mIndex.mX = 0;
         mIndex.mY = 0;
-        mPaged = esm.getHNOT("CIDX", mIndex.mX, mIndex.mY);
+        mPaged = esm.getOptionalComposite("CIDX", mIndex);
     }
 
     void CellId::save(ESMWriter& esm) const
@@ -21,7 +27,7 @@ namespace ESM
         esm.writeHNString("SPAC", mWorldspace);
 
         if (mPaged)
-            esm.writeHNT("CIDX", mIndex, 8);
+            esm.writeNamedComposite("CIDX", mIndex);
     }
 
     struct VisitCellRefId

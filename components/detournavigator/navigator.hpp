@@ -1,6 +1,7 @@
 ﻿#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 
+#include <cassert>
 #include <filesystem>
 
 #include "heightfieldshape.hpp"

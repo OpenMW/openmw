@@ -315,8 +315,7 @@ namespace Stereo
         else
         {
             auto* ds = osg::DisplaySettings::instance().get();
-            auto viewMatrix = mMainCamera->getViewMatrix();
-            auto projectionMatrix = mMainCamera->getProjectionMatrix();
+            const auto& projectionMatrix = mMainCamera->getProjectionMatrix();
             auto s = ds->getEyeSeparation() * Constants::UnitsPerMeter;
             mViewOffsetMatrix[0]
                 = osg::Matrixd(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, s, 0.0, 0.0, 1.0);

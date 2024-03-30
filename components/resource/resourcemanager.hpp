@@ -3,6 +3,8 @@
 
 #include <osg/ref_ptr>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "objectcache.hpp"
 
 namespace VFS
@@ -49,11 +51,7 @@ namespace Resource
         virtual ~GenericResourceManager() = default;
 
         /// Clear cache entries that have not been referenced for longer than expiryDelay.
-        void updateCache(double referenceTime) override
-        {
-            mCache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
-            mCache->removeExpiredObjectsInCache(referenceTime - mExpiryDelay);
-        }
+        void updateCache(double referenceTime) override { mCache->update(referenceTime, mExpiryDelay); }
 
         /// Clear all cache entries.
         void clearCache() override { mCache->clear(); }
@@ -78,7 +76,7 @@ namespace Resource
     {
     public:
         explicit ResourceManager(const VFS::Manager* vfs, double expiryDelay)
-            : GenericResourceManager<std::string>(vfs, expiryDelay)
+            : GenericResourceManager(vfs, expiryDelay)
         {
         }
     };

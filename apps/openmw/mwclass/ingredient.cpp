@@ -39,7 +39,7 @@ namespace MWClass
         }
     }
 
-    std::string Ingredient::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Ingredient::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Ingredient>(ptr);
     }
@@ -117,8 +117,8 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -143,9 +143,9 @@ namespace MWClass
 
             list.push_back(params);
         }
-        info.effects = list;
+        info.effects = std::move(list);
 
-        info.text = text;
+        info.text = std::move(text);
         info.isIngredient = true;
 
         return info;

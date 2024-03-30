@@ -43,7 +43,7 @@ namespace CSMPrefs
         mEventHandler->removeShortcut(shortcut);
     }
 
-    bool ShortcutManager::getSequence(const std::string& name, QKeySequence& sequence) const
+    bool ShortcutManager::getSequence(std::string_view name, QKeySequence& sequence) const
     {
         SequenceMap::const_iterator item = mSequences.find(name);
         if (item != mSequences.end())
@@ -56,7 +56,7 @@ namespace CSMPrefs
             return false;
     }
 
-    void ShortcutManager::setSequence(const std::string& name, const QKeySequence& sequence)
+    void ShortcutManager::setSequence(std::string_view name, const QKeySequence& sequence)
     {
         // Add to map/modify
         SequenceMap::iterator item = mSequences.find(name);

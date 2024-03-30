@@ -9,8 +9,6 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-
 #include "store.hpp"
 
 namespace MWWorld

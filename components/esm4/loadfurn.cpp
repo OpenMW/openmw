@@ -41,77 +41,77 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
             {
                 std::string name;
                 reader.getLocalizedString(name);
                 // FIXME: subsequent FULL subrecords name object combinations (FO4)
                 if (mFullName.empty())
-                    mFullName = name;
+                    mFullName = std::move(name);
                 break;
             }
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_MNAM:
+            case ESM::fourCC("MNAM"):
                 reader.get(mActiveMarkerFlags);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_DAMC: // Destructible
-            case ESM4::SUB_DEST:
-            case ESM4::SUB_DMDC:
-            case ESM4::SUB_DMDL:
-            case ESM4::SUB_DMDT:
-            case ESM4::SUB_DMDS:
-            case ESM4::SUB_DSTA:
-            case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF: // Destructible end
-            case ESM4::SUB_ENAM:
-            case ESM4::SUB_FNAM:
-            case ESM4::SUB_FNMK:
-            case ESM4::SUB_FNPR:
-            case ESM4::SUB_KNAM:
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_NAM0:
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_PNAM:
-            case ESM4::SUB_VMAD:
-            case ESM4::SUB_WBDT:
-            case ESM4::SUB_XMRK:
-            case ESM4::SUB_PRPS:
-            case ESM4::SUB_CTDA:
-            case ESM4::SUB_CIS1:
-            case ESM4::SUB_CIS2:
-            case ESM4::SUB_APPR: // FO4
-            case ESM4::SUB_ATTX: // FO4
-            case ESM4::SUB_CITC: // FO4
-            case ESM4::SUB_CNTO: // FO4
-            case ESM4::SUB_COCT: // FO4
-            case ESM4::SUB_COED: // FO4
-            case ESM4::SUB_FTYP: // FO4
-            case ESM4::SUB_NAM1: // FO4
-            case ESM4::SUB_NTRM: // FO4
-            case ESM4::SUB_NVNM: // FO4
-            case ESM4::SUB_PTRN: // FO4
-            case ESM4::SUB_SNAM: // FO4
-            case ESM4::SUB_WNAM: // FO4
-            case ESM4::SUB_OBTE: // FO4 object template start
-            case ESM4::SUB_OBTF:
-            case ESM4::SUB_OBTS:
-            case ESM4::SUB_STOP: // FO4 object template end
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("DAMC"): // Destructible
+            case ESM::fourCC("DEST"):
+            case ESM::fourCC("DMDC"):
+            case ESM::fourCC("DMDL"):
+            case ESM::fourCC("DMDT"):
+            case ESM::fourCC("DMDS"):
+            case ESM::fourCC("DSTA"):
+            case ESM::fourCC("DSTD"):
+            case ESM::fourCC("DSTF"): // Destructible end
+            case ESM::fourCC("ENAM"):
+            case ESM::fourCC("FNAM"):
+            case ESM::fourCC("FNMK"):
+            case ESM::fourCC("FNPR"):
+            case ESM::fourCC("KNAM"):
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("NAM0"):
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("PNAM"):
+            case ESM::fourCC("VMAD"):
+            case ESM::fourCC("WBDT"):
+            case ESM::fourCC("XMRK"):
+            case ESM::fourCC("PRPS"):
+            case ESM::fourCC("CTDA"):
+            case ESM::fourCC("CIS1"):
+            case ESM::fourCC("CIS2"):
+            case ESM::fourCC("APPR"): // FO4
+            case ESM::fourCC("ATTX"): // FO4
+            case ESM::fourCC("CITC"): // FO4
+            case ESM::fourCC("CNTO"): // FO4
+            case ESM::fourCC("COCT"): // FO4
+            case ESM::fourCC("COED"): // FO4
+            case ESM::fourCC("FTYP"): // FO4
+            case ESM::fourCC("NAM1"): // FO4
+            case ESM::fourCC("NTRM"): // FO4
+            case ESM::fourCC("NVNM"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
+            case ESM::fourCC("SNAM"): // FO4
+            case ESM::fourCC("WNAM"): // FO4
+            case ESM::fourCC("OBTE"): // FO4 object template start
+            case ESM::fourCC("OBTF"):
+            case ESM::fourCC("OBTS"):
+            case ESM::fourCC("STOP"): // FO4 object template end
                 reader.skipSubRecordData();
                 break;
             default:

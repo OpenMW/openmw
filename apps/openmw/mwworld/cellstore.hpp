@@ -118,7 +118,7 @@ namespace MWWorld
         /// scripting compatibility, and the fact that objects may be "un-deleted" in the original game).
         static bool isAccessible(const MWWorld::RefData& refdata, const MWWorld::CellRef& cref)
         {
-            return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || refdata.getCount() > 0);
+            return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || cref.getCount() > 0);
         }
 
         /// Moves object from this cell to the given cell.
@@ -209,8 +209,8 @@ namespace MWWorld
         /// false will abort the iteration.
         /// \note Prefer using forEachConst when possible.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class Visitor>
         bool forEach(Visitor&& visitor)
         {
@@ -224,12 +224,12 @@ namespace MWWorld
 
             mHasState = true;
 
-            for (unsigned int i = 0; i < mMergedRefs.size(); ++i)
+            for (LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
-                if (!visitor(MWWorld::Ptr(mMergedRefs[i], this)))
+                if (!visitor(MWWorld::Ptr(mergedRef, this)))
                     return false;
             }
             return true;
@@ -238,8 +238,8 @@ namespace MWWorld
         /// Call visitor (MWWorld::ConstPtr) for each reference. visitor must return a bool. Returning
         /// false will abort the iteration.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class Visitor>
         bool forEachConst(Visitor&& visitor) const
         {
@@ -249,12 +249,12 @@ namespace MWWorld
             if (mMergedRefsNeedsUpdate)
                 updateMergedRefs();
 
-            for (unsigned int i = 0; i < mMergedRefs.size(); ++i)
+            for (const LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
-                if (!visitor(MWWorld::ConstPtr(mMergedRefs[i], this)))
+                if (!visitor(MWWorld::ConstPtr(mergedRef, this)))
                     return false;
             }
             return true;
@@ -263,8 +263,8 @@ namespace MWWorld
         /// Call visitor (ref) for each reference of given type. visitor must return a bool. Returning
         /// false will abort the iteration.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class T, class Visitor>
         bool forEachType(Visitor&& visitor)
         {

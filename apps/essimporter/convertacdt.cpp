@@ -85,7 +85,7 @@ namespace ESSImport
             Misc::StringUtils::lowerCaseInPlace(group);
 
             ESM::AnimationState::ScriptedAnimation scriptedAnim;
-            scriptedAnim.mGroup = group;
+            scriptedAnim.mGroup = std::move(group);
             scriptedAnim.mTime = anis.mTime;
             scriptedAnim.mAbsolute = true;
             // Neither loop count nor queueing seems to be supported by the ess format.

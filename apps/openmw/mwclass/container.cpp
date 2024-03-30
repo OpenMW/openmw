@@ -126,7 +126,7 @@ namespace MWClass
         physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string Container::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Container::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Container>(ptr);
     }
@@ -265,13 +265,13 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
             if (ptr.getCellRef().getRefId() == "stolen_goods")
-                text += "\nYou can not use evidence chests";
+                info.extra += "\nYou cannot use evidence chests";
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

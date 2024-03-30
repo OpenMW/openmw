@@ -9,7 +9,7 @@ namespace ESM
 
     void Header::blank()
     {
-        mData.version = VER_13;
+        mData.version.ui = VER_130;
         mData.type = 0;
         mData.author.clear();
         mData.desc.clear();
@@ -26,7 +26,7 @@ namespace ESM
         if (esm.isNextSub("HEDR"))
         {
             esm.getSubHeader();
-            esm.getT(mData.version);
+            esm.getT(mData.version.ui);
             esm.getT(mData.type);
             mData.author = esm.getMaybeFixedStringSize(32);
             mData.desc = esm.getMaybeFixedStringSize(256);

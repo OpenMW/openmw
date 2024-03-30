@@ -16,8 +16,10 @@ Lua API reference
     openmw_storage
     openmw_core
     openmw_types
+    openmw_animation
     openmw_async
     openmw_vfs
+    openmw_markup
     openmw_world
     openmw_self
     openmw_nearby
@@ -27,17 +29,20 @@ Lua API reference
     openmw_camera
     openmw_postprocessing
     openmw_debug
+    openmw_menu
     openmw_aux_calendar
     openmw_aux_util
     openmw_aux_time
     openmw_aux_ui
     interface_activation
     interface_ai
+    interface_animation
     interface_camera
     interface_controls
     interface_item_usage
     interface_mwui
     interface_settings
+    interface_skill_progression
     interface_ui
     iterables
 

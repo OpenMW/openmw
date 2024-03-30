@@ -56,6 +56,7 @@ namespace MWPhysics
     class Actor;
     class PhysicsTaskScheduler;
     class Projectile;
+    enum ScriptedCollisionType : char;
 
     using ActorMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Actor>>;
 
@@ -79,7 +80,7 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel);
+        ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel, bool isPlayer);
         osg::Vec3f mPosition;
         osg::Vec3f mInertia;
         const btCollisionObject* mStandingOn;
@@ -102,6 +103,7 @@ namespace MWPhysics
         const bool mIsAquatic;
         const bool mWaterCollision;
         const bool mSkipCollisionDetection;
+        const bool mIsPlayer;
     };
 
     struct ProjectileFrameData
@@ -207,12 +209,11 @@ namespace MWPhysics
             const MWWorld::ConstPtr& ptr, int collisionGroup, int collisionMask) const;
         osg::Vec3f traceDown(const MWWorld::Ptr& ptr, const osg::Vec3f& position, float maxHeight);
 
-        /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all
-        /// other actors.
+        /// @param ignore Optional, a list of Ptr to ignore in the list of results. targets are actors to filter for,
+        /// ignoring all other actors.
         RayCastingResult castRay(const osg::Vec3f& from, const osg::Vec3f& to,
-            const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
-            const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(), int mask = CollisionType_Default,
-            int group = 0xff) const override;
+            const std::vector<MWWorld::ConstPtr>& ignore = {}, const std::vector<MWWorld::Ptr>& targets = {},
+            int mask = CollisionType_Default, int group = 0xff) const override;
         using RayCastingInterface::castRay;
 
         RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius,
@@ -258,9 +259,8 @@ namespace MWPhysics
         /// Get the handle of all actors standing on \a object in this frame.
         void getActorsStandingOn(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;
 
-        /// Return true if \a actor has collided with \a object in this frame.
-        /// This will detect running into objects, but will not detect climbing stairs, stepping up a small object, etc.
-        bool isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const;
+        /// Return true if an object of the given type has collided with this object
+        bool isObjectCollidingWith(const MWWorld::ConstPtr& object, ScriptedCollisionType type) const;
 
         /// Get the handle of all actors colliding with \a object in this frame.
         void getActorsCollidingWith(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;

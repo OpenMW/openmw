@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "../mwsound/type.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -129,11 +131,11 @@ namespace MWBase
         /// \param name of the folder that contains the playlist
         /// Title music playlist is predefined
 
-        virtual void say(const MWWorld::ConstPtr& reference, const std::string& filename) = 0;
+        virtual void say(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView filename) = 0;
         ///< Make an actor say some text.
         /// \param filename name of a sound file in the VFS
 
-        virtual void say(const std::string& filename) = 0;
+        virtual void say(VFS::Path::NormalizedView filename) = 0;
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in the VFS
 

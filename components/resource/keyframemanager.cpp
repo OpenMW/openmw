@@ -4,7 +4,6 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <osg/Stats>
 #include <osgAnimation/Animation>
 #include <osgAnimation/BasicAnimationManager>
 #include <osgAnimation/Channel>
@@ -123,7 +122,7 @@ namespace Resource
                     mergedAnimationTrack->addChannel(channel.get()->clone());
                 }
 
-                callback->addMergedAnimationTrack(mergedAnimationTrack);
+                callback->addMergedAnimationTrack(std::move(mergedAnimationTrack));
 
                 float startTime = animation->getStartTime();
                 float stopTime = startTime + animation->getDuration();
@@ -207,9 +206,11 @@ namespace Resource
 namespace Resource
 {
 
-    KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay)
+    KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
+        const ToUTF8::StatelessUtf8Encoder* encoder)
         : ResourceManager(vfs, expiryDelay)
         , mSceneManager(sceneManager)
+        , mEncoder(encoder)
     {
     }
 
@@ -226,7 +227,7 @@ namespace Resource
             if (Misc::getFileExtension(normalized) == "kf")
             {
                 auto file = std::make_shared<Nif::NIFFile>(normalized);
-                Nif::Reader reader(*file);
+                Nif::Reader reader(*file, mEncoder);
                 reader.parse(mVFS->getNormalized(normalized));
                 NifOsg::Loader::loadKf(*file, *loaded.get());
             }
@@ -237,7 +238,7 @@ namespace Resource
                     = dynamic_cast<osgAnimation::BasicAnimationManager*>(scene->getUpdateCallback());
                 if (bam)
                 {
-                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), bam, normalized, mVFS);
+                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), normalized, mVFS);
                     scene->accept(rav);
                 }
             }
@@ -248,7 +249,7 @@ namespace Resource
 
     void KeyframeManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Keyframe", mCache->getCacheSize());
+        Resource::reportStats("Keyframe", frameNumber, mCache->getStats(), *stats);
     }
 
 }

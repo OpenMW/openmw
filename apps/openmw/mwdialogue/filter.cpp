@@ -375,12 +375,18 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
             return mChoice;
 
         case SelectWrapper::Function_AiSetting:
+        {
+            int argument = select.getArgument();
+            if (argument < 0 || argument > 3)
+            {
+                throw std::runtime_error("AiSetting index is out of range");
+            }
 
             return mActor.getClass()
                 .getCreatureStats(mActor)
-                .getAiSetting((MWMechanics::AiSetting)select.getArgument())
+                .getAiSetting(static_cast<MWMechanics::AiSetting>(argument))
                 .getModified(false);
-
+        }
         case SelectWrapper::Function_PcAttribute:
         {
             ESM::RefId attribute = ESM::Attribute::indexToRefId(select.getArgument());

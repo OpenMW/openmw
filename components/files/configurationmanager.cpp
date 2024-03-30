@@ -194,6 +194,10 @@ namespace Files
             "instead of being appended");
         addOption("user-data", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
             "set user data directory (used for saves, screenshots, etc)");
+        addOption("resources",
+            boost::program_options::value<Files::MaybeQuotedPath>()->default_value(
+                Files::MaybeQuotedPath(), "resources"),
+            "set resources directory");
     }
 
     bpo::variables_map separateComposingVariables(
@@ -309,7 +313,7 @@ namespace Files
                     tempPath /= str.substr(pos + 1, str.length() - pos);
                 }
 
-                path = tempPath;
+                path = std::move(tempPath);
             }
             else
             {

@@ -6,6 +6,7 @@
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadsoun.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -118,13 +119,8 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
-    void Class::block(const Ptr& ptr) const
-    {
-        throw std::runtime_error("class cannot block");
-    }
-
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker,
-        const osg::Vec3f& hitPosition, bool successful) const
+        const osg::Vec3f& hitPosition, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
         throw std::runtime_error("class cannot be hit");
     }
@@ -149,7 +145,7 @@ namespace MWWorld
         throw std::runtime_error("class does not have an inventory store");
     }
 
-    bool Class::hasInventoryStore(const Ptr& ptr) const
+    bool Class::hasInventoryStore(const ConstPtr& ptr) const
     {
         return false;
     }
@@ -310,8 +306,16 @@ namespace MWWorld
 
     void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const {}
 
-    std::string Class::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Class::getModel(const MWWorld::ConstPtr& ptr) const
     {
+        return {};
+    }
+
+    std::string Class::getCorrectedModel(const MWWorld::ConstPtr& ptr) const
+    {
+        std::string_view model = getModel(ptr);
+        if (!model.empty())
+            return Misc::ResourceHelpers::correctMeshPath(model);
         return {};
     }
 
@@ -320,9 +324,9 @@ namespace MWWorld
         return false;
     }
 
-    void Class::getModelsToPreload(const Ptr& ptr, std::vector<std::string>& models) const
+    void Class::getModelsToPreload(const ConstPtr& ptr, std::vector<std::string_view>& models) const
     {
-        std::string model = getModel(ptr);
+        std::string_view model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
     }
@@ -373,7 +377,7 @@ namespace MWWorld
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
-        newPtr.getRefData().setCount(count);
+        newPtr.getCellRef().setCount(count);
         newPtr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
         return newPtr;
@@ -528,7 +532,7 @@ namespace MWWorld
             return result;
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(
-            enchantment->mEffects.mList.front().mEffectID);
+            enchantment->mEffects.mList.front().mData.mEffectID);
         if (!magicEffect)
             return result;
 

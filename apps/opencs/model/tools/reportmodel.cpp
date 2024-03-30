@@ -171,7 +171,7 @@ void CSMTools::ReportModel::flagAsReplaced(int index)
 
     hint[0] = 'r';
 
-    line.mHint = hint;
+    line.mHint = std::move(hint);
 
     emit dataChanged(this->index(index, 0), this->index(index, columnCount()));
 }

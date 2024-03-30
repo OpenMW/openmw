@@ -71,6 +71,8 @@ openmw_add_executable(openmw-launcher
     ${UI_HDRS}
 )
 
+add_dependencies(openmw-launcher qm-files)
+
 if (WIN32)
     INSTALL(TARGETS openmw-launcher RUNTIME DESTINATION ".")
 endif (WIN32)
@@ -92,7 +94,7 @@ if(USE_QT)
     set_property(TARGET openmw-launcher PROPERTY AUTOMOC ON)
 endif(USE_QT)
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-launcher PRIVATE
         <boost/program_options/options_description.hpp>
 

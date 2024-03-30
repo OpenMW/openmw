@@ -10,6 +10,9 @@
   * - :ref:`AI <Interface AI>`
     - by local scripts
     - Control basic AI of NPCs and creatures.
+  * - :ref:`AnimationController <Interface AnimationController>`
+    - by local scripts
+    - Control animations of NPCs and creatures.
   * - :ref:`Camera <Interface Camera>`
     - by player scripts
     - | Allows to alter behavior of the built-in camera script
@@ -22,6 +25,10 @@
     - by global scripts
     - | Allows to extend or override built-in item usage
       | mechanics.
+  * - :ref:`SkillProgression <Interface SkillProgression>`
+    - by local scripts
+    - | Control, extend, and override skill progression of the 
+      | player.
   * - :ref:`Settings <Interface Settings>`
     - by player and global scripts
     - Save, display and track changes of setting values.

@@ -8,26 +8,19 @@ namespace
     TEST(CorrectSoundPath, wav_files_not_overridden_with_mp3_in_vfs_are_not_corrected)
     {
         std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { "sound/bar.wav", nullptr } });
-        EXPECT_EQ(correctSoundPath("sound/bar.wav", mVFS.get()), "sound/bar.wav");
+        EXPECT_EQ(correctSoundPath("sound/bar.wav", *mVFS), "sound/bar.wav");
     }
 
     TEST(CorrectSoundPath, wav_files_overridden_with_mp3_in_vfs_are_corrected)
     {
         std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { "sound/foo.mp3", nullptr } });
-        EXPECT_EQ(correctSoundPath("sound/foo.wav", mVFS.get()), "sound/foo.mp3");
+        EXPECT_EQ(correctSoundPath("sound/foo.wav", *mVFS), "sound/foo.mp3");
     }
 
     TEST(CorrectSoundPath, corrected_path_does_not_check_existence_in_vfs)
     {
         std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({});
-        EXPECT_EQ(correctSoundPath("sound/foo.wav", mVFS.get()), "sound/foo.mp3");
-    }
-
-    TEST(CorrectSoundPath, correct_path_normalize_paths)
-    {
-        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({});
-        EXPECT_EQ(correctSoundPath("sound\\foo.wav", mVFS.get()), "sound/foo.mp3");
-        EXPECT_EQ(correctSoundPath("SOUND\\foo.WAV", mVFS.get()), "sound/foo.mp3");
+        EXPECT_EQ(correctSoundPath("sound/foo.wav", *mVFS), "sound/foo.mp3");
     }
 
     namespace

@@ -71,6 +71,22 @@ namespace MWLua
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
         void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }
         void onTeleported() { callEngineHandlers(mOnTeleportedHandlers); }
+        void onAnimationTextKey(std::string_view groupname, std::string_view key)
+        {
+            callEngineHandlers(mOnAnimationTextKeyHandlers, groupname, key);
+        }
+        void onPlayAnimation(std::string_view groupname, const sol::table& options)
+        {
+            callEngineHandlers(mOnPlayAnimationHandlers, groupname, options);
+        }
+        void onSkillUse(std::string_view skillId, int useType, float scale)
+        {
+            callEngineHandlers(mOnSkillUse, skillId, useType, scale);
+        }
+        void onSkillLevelUp(std::string_view skillId, std::string_view source)
+        {
+            callEngineHandlers(mOnSkillLevelUp, skillId, source);
+        }
 
         void applyStatsCache();
 
@@ -83,6 +99,10 @@ namespace MWLua
         EngineHandlerList mOnConsumeHandlers{ "onConsume" };
         EngineHandlerList mOnActivatedHandlers{ "onActivated" };
         EngineHandlerList mOnTeleportedHandlers{ "onTeleported" };
+        EngineHandlerList mOnAnimationTextKeyHandlers{ "_onAnimationTextKey" };
+        EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
+        EngineHandlerList mOnSkillUse{ "_onSkillUse" };
+        EngineHandlerList mOnSkillLevelUp{ "_onSkillLevelUp" };
     };
 
 }

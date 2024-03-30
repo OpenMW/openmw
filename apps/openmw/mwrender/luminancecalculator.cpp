@@ -19,7 +19,7 @@ namespace MWRender
         auto resolveFragment = shaderManager.getShader("luminance/resolve.frag", defines);
 
         mResolveProgram = shaderManager.getProgram(vertex, std::move(resolveFragment));
-        mLuminanceProgram = shaderManager.getProgram(vertex, std::move(luminanceFragment));
+        mLuminanceProgram = shaderManager.getProgram(std::move(vertex), std::move(luminanceFragment));
 
         for (auto& buffer : mBuffers)
         {

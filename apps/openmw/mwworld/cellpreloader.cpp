@@ -4,11 +4,14 @@
 #include <atomic>
 #include <limits>
 
+#include <osg/Stats>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
@@ -52,21 +55,14 @@ namespace MWWorld
 
     struct ListModelsVisitor
     {
-        ListModelsVisitor(std::vector<std::string>& out)
-            : mOut(out)
-        {
-        }
-
-        virtual bool operator()(const MWWorld::Ptr& ptr)
+        bool operator()(const MWWorld::ConstPtr& ptr)
         {
             ptr.getClass().getModelsToPreload(ptr, mOut);
 
             return true;
         }
 
-        virtual ~ListModelsVisitor() = default;
-
-        std::vector<std::string>& mOut;
+        std::vector<std::string_view>& mOut;
     };
 
     /// Worker thread item: preload models in a cell.
@@ -90,8 +86,8 @@ namespace MWWorld
         {
             mTerrainView = mTerrain->createView();
 
-            ListModelsVisitor visitor(mMeshes);
-            cell->forEach(visitor);
+            ListModelsVisitor visitor{ mMeshes };
+            cell->forEachConst(visitor);
         }
 
         void abort() override { mAbort = true; }
@@ -112,28 +108,28 @@ namespace MWWorld
                 }
             }
 
-            for (std::string& mesh : mMeshes)
+            std::string mesh;
+            std::string kfname;
+            for (std::string_view path : mMeshes)
             {
                 if (mAbort)
                     break;
 
                 try
                 {
+                    mesh = Misc::ResourceHelpers::correctMeshPath(path);
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size() - 1)
                     {
-                        Misc::StringUtils::lowerCaseInPlace(mesh);
-                        if (mesh[slashpos + 1] == 'x')
+                        if (Misc::StringUtils::toLower(mesh[slashpos + 1]) == 'x'
+                            && Misc::StringUtils::ciEndsWith(mesh, ".nif"))
                         {
-                            if (mesh.size() > 4 && mesh.ends_with(".nif"))
-                            {
-                                std::string kfname = mesh;
-                                kfname.replace(kfname.size() - 4, 4, ".kf");
-                                if (mSceneManager->getVFS()->exists(kfname))
-                                    mPreloadedObjects.insert(mKeyframeManager->get(kfname));
-                            }
+                            kfname = mesh;
+                            kfname.replace(kfname.size() - 4, 4, ".kf");
+                            if (mSceneManager->getVFS()->exists(kfname))
+                                mPreloadedObjects.insert(mKeyframeManager->get(kfname));
                         }
                     }
                     mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
@@ -151,11 +147,10 @@ namespace MWWorld
         }
 
     private:
-        typedef std::vector<std::string> MeshList;
         bool mIsExterior;
         int mX;
         int mY;
-        MeshList mMeshes;
+        std::vector<std::string_view> mMeshes;
         Resource::SceneManager* mSceneManager;
         Resource::BulletShapeManager* mBulletShapeManager;
         Resource::KeyframeManager* mKeyframeManager;
@@ -283,6 +278,7 @@ namespace MWWorld
             {
                 oldestCell->second.mWorkItem->abort();
                 mPreloadCells.erase(oldestCell);
+                ++mEvicted;
             }
             else
                 return;
@@ -292,7 +288,8 @@ namespace MWWorld
             mResourceSystem->getKeyframeManager(), mTerrain, mLandManager, mPreloadInstances));
         mWorkQueue->addWorkItem(item);
 
-        mPreloadCells[&cell] = PreloadEntry(timestamp, item);
+        mPreloadCells.emplace(&cell, PreloadEntry(timestamp, item));
+        ++mAdded;
     }
 
     void CellPreloader::notifyLoaded(CellStore* cell)
@@ -307,6 +304,7 @@ namespace MWWorld
             }
 
             mPreloadCells.erase(found);
+            ++mLoaded;
         }
     }
 
@@ -336,6 +334,7 @@ namespace MWWorld
                     it->second.mWorkItem = nullptr;
                 }
                 mPreloadCells.erase(it++);
+                ++mExpired;
             }
             else
                 ++it;
@@ -474,4 +473,12 @@ namespace MWWorld
         mPreloadCells.clear();
     }
 
+    void CellPreloader::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        stats.setAttribute(frameNumber, "CellPreloader Count", mPreloadCells.size());
+        stats.setAttribute(frameNumber, "CellPreloader Added", mAdded);
+        stats.setAttribute(frameNumber, "CellPreloader Evicted", mEvicted);
+        stats.setAttribute(frameNumber, "CellPreloader Loaded", mLoaded);
+        stats.setAttribute(frameNumber, "CellPreloader Expired", mExpired);
+    }
 }

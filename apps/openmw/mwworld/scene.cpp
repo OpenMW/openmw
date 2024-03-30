@@ -96,8 +96,12 @@ namespace
     {
         if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId()))
             return {};
-        return ptr.getClass().getModel(ptr);
+        return ptr.getClass().getCorrectedModel(ptr);
     }
+
+    // Null node meant to distinguish objects that aren't in the scene from paged objects
+    // TODO: find a more clever way to make paging exclusion more reliable?
+    static osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pagedNode = new SceneUtil::PositionAttitudeTransform;
 
     void addObject(const MWWorld::Ptr& ptr, const MWWorld::World& world, const std::vector<ESM::RefNum>& pagedRefs,
         MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering)
@@ -115,9 +119,7 @@ namespace
         if (!refnum.hasContentFile() || !std::binary_search(pagedRefs.begin(), pagedRefs.end(), refnum))
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
         else
-            ptr.getRefData().setBaseNode(
-                new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend
-                                                           // on basenode
+            ptr.getRefData().setBaseNode(pagedNode);
         setNodeRotation(ptr, rendering, rotation);
 
         if (ptr.getClass().useAnim())
@@ -161,13 +163,13 @@ namespace
                     Misc::Convert::makeBulletQuaternion(ptr.getCellRef().getPosition()), transform.getOrigin());
 
                 const auto start = Misc::Convert::toOsg(closedDoorTransform(center + toPoint));
-                const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), ptr, {},
+                const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), { ptr }, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap
                         | MWPhysics::CollisionType_Water);
                 const auto connectionStart = startPoint.mHit ? startPoint.mHitPos : start;
 
                 const auto end = Misc::Convert::toOsg(closedDoorTransform(center - toPoint));
-                const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), ptr, {},
+                const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), { ptr }, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap
                         | MWPhysics::CollisionType_Water);
                 const auto connectionEnd = endPoint.mHit ? endPoint.mHitPos : end;
@@ -226,7 +228,7 @@ namespace
     {
         for (MWWorld::Ptr& ptr : mToInsert)
         {
-            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+            if (!ptr.mRef->isDeleted() && ptr.getRefData().isEnabled())
             {
                 try
                 {
@@ -271,7 +273,6 @@ namespace
 
 namespace MWWorld
 {
-
     void Scene::removeFromPagedRefs(const Ptr& ptr)
     {
         ESM::RefNum refnum = ptr.getCellRef().getRefNum();
@@ -283,6 +284,11 @@ namespace MWWorld
             setNodeRotation(ptr, mRendering, makeNodeRotation(ptr, RotationOrder::direct));
             reloadTerrain();
         }
+    }
+
+    bool Scene::isPagedRef(const Ptr& ptr) const
+    {
+        return ptr.getRefData().getBaseNode() == pagedNode.get();
     }
 
     void Scene::updateObjectRotation(const Ptr& ptr, RotationOrder order)
@@ -648,7 +654,7 @@ namespace MWWorld
                 if (ptr.mRef->mData.mPhysicsPostponed)
                 {
                     ptr.mRef->mData.mPhysicsPostponed = false;
-                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0)
+                    if (ptr.mRef->mData.isEnabled() && ptr.mRef->mRef.getCount() > 0)
                     {
                         std::string model = getModel(ptr);
                         if (!model.empty())
@@ -1278,5 +1284,10 @@ namespace MWWorld
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
         }
+    }
+
+    void Scene::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        mPreloader->reportStats(frameNumber, stats);
     }
 }

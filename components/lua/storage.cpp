@@ -17,6 +17,15 @@ namespace LuaUtil
 {
     LuaStorage::Value LuaStorage::Section::sEmpty;
 
+    void LuaStorage::registerLifeTime(LuaUtil::LuaState& luaState, sol::table& res)
+    {
+        res["LIFE_TIME"] = LuaUtil::makeStrictReadOnly(luaState.tableFromPairs<std::string_view, Section::LifeTime>({
+            { "Persistent", Section::LifeTime::Persistent },
+            { "GameSession", Section::LifeTime::GameSession },
+            { "Temporary", Section::LifeTime::Temporary },
+        }));
+    }
+
     sol::object LuaStorage::Value::getCopy(lua_State* L) const
     {
         return deserialize(L, mSerializedValue);
@@ -31,6 +40,7 @@ namespace LuaUtil
 
     const LuaStorage::Value& LuaStorage::Section::get(std::string_view key) const
     {
+        checkIfActive();
         auto it = mValues.find(key);
         if (it != mValues.end())
             return it->second;
@@ -49,6 +59,14 @@ namespace LuaUtil
                                  return !valid;
                              }),
             mCallbacks.end());
+        mMenuScriptsCallbacks.erase(std::remove_if(mMenuScriptsCallbacks.begin(), mMenuScriptsCallbacks.end(),
+                                        [&](const Callback& callback) {
+                                            bool valid = callback.isValid();
+                                            if (valid)
+                                                callback.tryCall(mSectionName, changedKey);
+                                            return !valid;
+                                        }),
+            mMenuScriptsCallbacks.end());
         mStorage->mRunningCallbacks.erase(this);
     }
 
@@ -64,6 +82,7 @@ namespace LuaUtil
 
     void LuaStorage::Section::set(std::string_view key, const sol::object& value)
     {
+        checkIfActive();
         throwIfCallbackRecursionIsTooDeep();
         if (value != sol::nil)
             mValues[std::string(key)] = Value(value);
@@ -80,6 +99,7 @@ namespace LuaUtil
 
     void LuaStorage::Section::setAll(const sol::optional<sol::table>& values)
     {
+        checkIfActive();
         throwIfCallbackRecursionIsTooDeep();
         mValues.clear();
         if (values)
@@ -94,6 +114,7 @@ namespace LuaUtil
 
     sol::table LuaStorage::Section::asTable()
     {
+        checkIfActive();
         sol::table res(mStorage->mLua, sol::create);
         for (const auto& [k, v] : mValues)
             res[k] = v.getCopy(mStorage->mLua);
@@ -112,7 +133,8 @@ namespace LuaUtil
         };
         sview["asTable"] = [](const SectionView& section) { return section.mSection->asTable(); };
         sview["subscribe"] = [](const SectionView& section, const sol::table& callback) {
-            std::vector<Callback>& callbacks = section.mSection->mCallbacks;
+            std::vector<Callback>& callbacks
+                = section.mForMenuScripts ? section.mSection->mMenuScriptsCallbacks : section.mSection->mCallbacks;
             if (!callbacks.empty() && callbacks.size() == callbacks.capacity())
             {
                 callbacks.erase(
@@ -129,7 +151,12 @@ namespace LuaUtil
         sview["removeOnExit"] = [](const SectionView& section) {
             if (section.mReadOnly)
                 throw std::runtime_error("Access to storage is read only");
-            section.mSection->mPermanent = false;
+            section.mSection->mLifeTime = Section::Temporary;
+        };
+        sview["setLifeTime"] = [](const SectionView& section, Section::LifeTime lifeTime) {
+            if (section.mReadOnly)
+                throw std::runtime_error("Access to storage is read only");
+            section.mSection->mLifeTime = lifeTime;
         };
         sview["set"] = [](const SectionView& section, std::string_view key, const sol::object& value) {
             if (section.mReadOnly)
@@ -138,30 +165,52 @@ namespace LuaUtil
         };
     }
 
-    sol::table LuaStorage::initGlobalPackage(lua_State* lua, LuaStorage* globalStorage)
+    sol::table LuaStorage::initGlobalPackage(LuaUtil::LuaState& luaState, LuaStorage* globalStorage)
     {
-        sol::table res(lua, sol::create);
+        sol::table res(luaState.sol(), sol::create);
+        registerLifeTime(luaState, res);
+
         res["globalSection"]
             = [globalStorage](std::string_view section) { return globalStorage->getMutableSection(section); };
         res["allGlobalSections"] = [globalStorage]() { return globalStorage->getAllSections(); };
         return LuaUtil::makeReadOnly(res);
     }
 
-    sol::table LuaStorage::initLocalPackage(lua_State* lua, LuaStorage* globalStorage)
+    sol::table LuaStorage::initLocalPackage(LuaUtil::LuaState& luaState, LuaStorage* globalStorage)
     {
-        sol::table res(lua, sol::create);
+        sol::table res(luaState.sol(), sol::create);
+        registerLifeTime(luaState, res);
+
         res["globalSection"]
             = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
         return LuaUtil::makeReadOnly(res);
     }
 
-    sol::table LuaStorage::initPlayerPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage)
+    sol::table LuaStorage::initPlayerPackage(
+        LuaUtil::LuaState& luaState, LuaStorage* globalStorage, LuaStorage* playerStorage)
     {
-        sol::table res(lua, sol::create);
+        sol::table res(luaState.sol(), sol::create);
+        registerLifeTime(luaState, res);
+
         res["globalSection"]
             = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
         res["playerSection"]
             = [playerStorage](std::string_view section) { return playerStorage->getMutableSection(section); };
+        res["allPlayerSections"] = [playerStorage]() { return playerStorage->getAllSections(); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
+    sol::table LuaStorage::initMenuPackage(
+        LuaUtil::LuaState& luaState, LuaStorage* globalStorage, LuaStorage* playerStorage)
+    {
+        sol::table res(luaState.sol(), sol::create);
+        registerLifeTime(luaState, res);
+
+        res["playerSection"] = [playerStorage](std::string_view section) {
+            return playerStorage->getMutableSection(section, /*forMenuScripts=*/true);
+        };
+        res["globalSection"]
+            = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
         res["allPlayerSections"] = [playerStorage]() { return playerStorage->getAllSections(); };
         return LuaUtil::makeReadOnly(res);
     }
@@ -172,8 +221,11 @@ namespace LuaUtil
         while (it != mData.end())
         {
             it->second->mCallbacks.clear();
-            if (!it->second->mPermanent)
+            // Note that we don't clear menu callbacks for permanent sections
+            // because starting/loading a game doesn't reset menu scripts.
+            if (it->second->mLifeTime == Section::Temporary)
             {
+                it->second->mMenuScriptsCallbacks.clear();
                 it->second->mValues.clear();
                 it = mData.erase(it);
             }
@@ -187,8 +239,11 @@ namespace LuaUtil
         assert(mData.empty()); // Shouldn't be used before loading
         try
         {
-            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << std::filesystem::file_size(path)
-                             << " bytes)";
+            std::uintmax_t fileSize = std::filesystem::file_size(path);
+            Log(Debug::Info) << "Loading Lua storage \"" << path << "\" (" << fileSize << " bytes)";
+            if (fileSize == 0)
+                throw std::runtime_error("Storage file has zero length");
+
             std::ifstream fin(path, std::fstream::binary);
             std::string serializedData((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
             sol::table data = deserialize(mLua, serializedData);
@@ -201,7 +256,7 @@ namespace LuaUtil
         }
         catch (std::exception& e)
         {
-            Log(Debug::Error) << "Can not read \"" << path << "\": " << e.what();
+            Log(Debug::Error) << "Cannot read \"" << path << "\": " << e.what();
         }
     }
 
@@ -210,7 +265,7 @@ namespace LuaUtil
         sol::table data(mLua, sol::create);
         for (const auto& [sectionName, section] : mData)
         {
-            if (section->mPermanent && !section->mValues.empty())
+            if (section->mLifeTime == Section::Persistent && !section->mValues.empty())
                 data[sectionName] = section->asTable();
         }
         std::string serializedData = serialize(data);
@@ -222,6 +277,7 @@ namespace LuaUtil
 
     const std::shared_ptr<LuaStorage::Section>& LuaStorage::getSection(std::string_view sectionName)
     {
+        checkIfActive();
         auto it = mData.find(sectionName);
         if (it != mData.end())
             return it->second;
@@ -231,14 +287,16 @@ namespace LuaUtil
         return newIt->second;
     }
 
-    sol::object LuaStorage::getSection(std::string_view sectionName, bool readOnly)
+    sol::object LuaStorage::getSection(std::string_view sectionName, bool readOnly, bool forMenuScripts)
     {
+        checkIfActive();
         const std::shared_ptr<Section>& section = getSection(sectionName);
-        return sol::make_object<SectionView>(mLua, SectionView{ section, readOnly });
+        return sol::make_object<SectionView>(mLua, SectionView{ section, readOnly, forMenuScripts });
     }
 
     sol::table LuaStorage::getAllSections(bool readOnly)
     {
+        checkIfActive();
         sol::table res(mLua, sol::create);
         for (const auto& [sectionName, _] : mData)
             res[sectionName] = getSection(sectionName, readOnly);

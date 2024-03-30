@@ -41,7 +41,7 @@ namespace MWWorld
         void clearCell(CellStore* cell);
         ///< Remove all scripts belonging to \a cell.
 
-        void remove(RefData* ref);
+        void remove(const MWWorld::CellRef* ref);
 
         void remove(const Ptr& ptr);
         ///< Remove script for given reference (ignored if reference does not have a script listed).

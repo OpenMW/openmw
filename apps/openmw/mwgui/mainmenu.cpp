@@ -18,6 +18,7 @@
 #include "backgroundimage.hpp"
 #include "confirmationdialog.hpp"
 #include "savegamedialog.hpp"
+#include "settingswindow.hpp"
 #include "videowidget.hpp"
 
 namespace MWGui
@@ -97,7 +98,9 @@ namespace MWGui
             winMgr->removeGuiMode(GM_MainMenu);
         }
         else if (name == "options")
-            winMgr->pushGuiMode(GM_Settings);
+        {
+            winMgr->toggleSettingsWindow();
+        }
         else if (name == "credits")
             winMgr->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
@@ -209,6 +212,12 @@ namespace MWGui
 
     bool MainMenu::exit()
     {
+        if (MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible())
+        {
+            MWBase::Environment::get().getWindowManager()->toggleSettingsWindow();
+            return false;
+        }
+
         return MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Running;
     }
 

@@ -514,7 +514,7 @@ void CSVRender::PagedWorldspaceWidget::moveCellSelection(int x, int y)
             addCellToScene(*iter);
     }
 
-    mSelection = newSelection;
+    mSelection = std::move(newSelection);
 }
 
 void CSVRender::PagedWorldspaceWidget::addCellToSceneFromCamera(int offsetX, int offsetY)
@@ -873,6 +873,18 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::
     }
 
     return result;
+}
+
+void CSVRender::PagedWorldspaceWidget::selectGroup(const std::vector<std::string>& group) const
+{
+    for (const auto& [_, cell] : mCells)
+        cell->selectFromGroup(group);
+}
+
+void CSVRender::PagedWorldspaceWidget::unhideAll() const
+{
+    for (const auto& [_, cell] : mCells)
+        cell->unhideAll();
 }
 
 std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::getEdited(

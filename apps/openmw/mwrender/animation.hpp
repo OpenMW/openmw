@@ -1,6 +1,10 @@
 #ifndef GAME_RENDER_ANIMATION_H
 #define GAME_RENDER_ANIMATION_H
 
+#include "animationpriority.hpp"
+#include "blendmask.hpp"
+#include "bonegroup.hpp"
+
 #include "../mwworld/movementdirection.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -84,7 +88,7 @@ namespace MWRender
         std::string mModelName; // Just here so we don't add the same effect twice
         std::shared_ptr<EffectAnimationTime> mAnimTime;
         float mMaxControllerLength;
-        int mEffectId;
+        std::string mEffectId;
         bool mLoop;
         std::string mBoneName;
     };
@@ -92,60 +96,9 @@ namespace MWRender
     class Animation : public osg::Referenced
     {
     public:
-        enum BoneGroup
-        {
-            BoneGroup_LowerBody = 0,
-            BoneGroup_Torso,
-            BoneGroup_LeftArm,
-            BoneGroup_RightArm
-        };
-
-        enum BlendMask
-        {
-            BlendMask_LowerBody = 1 << 0,
-            BlendMask_Torso = 1 << 1,
-            BlendMask_LeftArm = 1 << 2,
-            BlendMask_RightArm = 1 << 3,
-
-            BlendMask_UpperBody = BlendMask_Torso | BlendMask_LeftArm | BlendMask_RightArm,
-
-            BlendMask_All = BlendMask_LowerBody | BlendMask_UpperBody
-        };
-        /* This is the number of *discrete* blend masks. */
-        static constexpr size_t sNumBlendMasks = 4;
-
-        /// Holds an animation priority value for each BoneGroup.
-        struct AnimPriority
-        {
-            /// Convenience constructor, initialises all priorities to the same value.
-            AnimPriority(int priority)
-            {
-                for (unsigned int i = 0; i < sNumBlendMasks; ++i)
-                    mPriority[i] = priority;
-            }
-
-            bool operator==(const AnimPriority& other) const
-            {
-                for (unsigned int i = 0; i < sNumBlendMasks; ++i)
-                    if (other.mPriority[i] != mPriority[i])
-                        return false;
-                return true;
-            }
-
-            int& operator[](BoneGroup n) { return mPriority[n]; }
-
-            const int& operator[](BoneGroup n) const { return mPriority[n]; }
-
-            bool contains(int priority) const
-            {
-                for (unsigned int i = 0; i < sNumBlendMasks; ++i)
-                    if (priority == mPriority[i])
-                        return true;
-                return false;
-            }
-
-            int mPriority[sNumBlendMasks];
-        };
+        using BlendMask = MWRender::BlendMask;
+        using BoneGroup = MWRender::BoneGroup;
+        using AnimPriority = MWRender::AnimPriority;
 
         class TextKeyListener
         {
@@ -200,7 +153,7 @@ namespace MWRender
 
             bool mPlaying;
             bool mLoopingEnabled;
-            size_t mLoopCount;
+            uint32_t mLoopCount;
 
             AnimPriority mPriority;
             int mBlendMask;
@@ -384,19 +337,21 @@ namespace MWRender
          * @param texture override the texture specified in the model's materials - if empty, do not override
          * @note Will not add an effect twice.
          */
-        void addEffect(const std::string& model, int effectId, bool loop = false, std::string_view bonename = {},
-            std::string_view texture = {});
-        void removeEffect(int effectId);
+        void addEffect(std::string_view model, std::string_view effectId, bool loop = false,
+            std::string_view bonename = {}, std::string_view texture = {});
+        void removeEffect(std::string_view effectId);
         void removeEffects();
-        void getLoopingEffects(std::vector<int>& out) const;
+        std::vector<std::string_view> getLoopingEffects() const;
 
         // Add a spell casting glow to an object. From measuring video taken from the original engine,
         // the glow seems to be about 1.5 seconds except for telekinesis, which is 1 second.
-        void addSpellCastGlow(const ESM::MagicEffect* effect, float glowDuration = 1.5);
+        void addSpellCastGlow(const osg::Vec4f& color, float glowDuration = 1.5);
 
         virtual void updatePtr(const MWWorld::Ptr& ptr);
 
         bool hasAnimation(std::string_view anim) const;
+
+        bool isLoopingAnimation(std::string_view group) const;
 
         // Specifies the axis' to accumulate on. Non-accumulated axis will just
         // move visually, but not affect the actual movement. Each x/y/z value
@@ -424,7 +379,7 @@ namespace MWRender
          *                     the "start" and "stop" keys for looping?
          */
         void play(std::string_view groupname, const AnimPriority& priority, int blendMask, bool autodisable,
-            float speedmult, std::string_view start, std::string_view stop, float startpoint, size_t loops,
+            float speedmult, std::string_view start, std::string_view stop, float startpoint, uint32_t loops,
             bool loopfallback = false);
 
         /** Adjust the speed multiplier of an already playing animation.
@@ -446,6 +401,9 @@ namespace MWRender
         bool getInfo(std::string_view groupname, float* complete = nullptr, float* speedmult = nullptr,
             size_t* loopcount = nullptr) const;
 
+        /// Returns the group name of the animation currently active on that bone group.
+        std::string_view getActiveGroup(BoneGroup boneGroup) const;
+
         /// Get the absolute position in the animation track of the first text key with the given group.
         float getStartTime(const std::string& groupname) const;
 
@@ -454,7 +412,7 @@ namespace MWRender
 
         /// Get the current absolute position in the animation track for the animation that is currently playing from
         /// the given group.
-        float getCurrentTime(const std::string& groupname) const;
+        float getCurrentTime(std::string_view groupname) const;
 
         /** Disables the specified animation group;
          * \param groupname Animation group to disable.

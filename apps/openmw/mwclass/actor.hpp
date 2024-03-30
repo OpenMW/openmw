@@ -45,8 +45,6 @@ namespace MWClass
 
         bool useAnim() const override;
 
-        void block(const MWWorld::Ptr& ptr) const override;
-
         osg::Vec3f getRotationVector(const MWWorld::Ptr& ptr) const override;
         ///< Return desired rotations, as euler angles. Sets getMovementSettings(ptr).mRotation to zero.
 

@@ -61,7 +61,7 @@ namespace MWRender
         bool mPostprocessing = false;
 
         fx::DispatchArray mPasses;
-        fx::FlagsType mMask;
+        fx::FlagsType mMask = 0;
 
         osg::ref_ptr<osg::Program> mFallbackProgram;
         osg::ref_ptr<osg::Program> mMultiviewResolveProgram;

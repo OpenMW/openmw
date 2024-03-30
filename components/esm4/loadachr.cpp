@@ -42,22 +42,22 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getZString(mFullName);
                 break;
-            case ESM4::SUB_NAME:
+            case ESM::fourCC("NAME"):
                 reader.getFormId(mBaseObj);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mPos);
                 break;
-            case ESM4::SUB_XSCL:
+            case ESM::fourCC("XSCL"):
                 reader.get(mScale);
                 break;
-            case ESM4::SUB_XOWN:
+            case ESM::fourCC("XOWN"):
             {
                 switch (subHdr.dataSize)
                 {
@@ -78,53 +78,57 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_XESP:
+            case ESM::fourCC("XESP"):
                 reader.getFormId(mEsp.parent);
                 reader.get(mEsp.flags);
                 break;
-            case ESM4::SUB_XRGD: // ragdoll
-            case ESM4::SUB_XRGB: // ragdoll biped
-            case ESM4::SUB_XHRS: // horse formId
-            case ESM4::SUB_XMRC: // merchant container formId
+            case ESM::fourCC("XCNT"):
+            {
+                reader.get(mCount);
+                break;
+            }
+            case ESM::fourCC("XRGD"): // ragdoll
+            case ESM::fourCC("XRGB"): // ragdoll biped
+            case ESM::fourCC("XHRS"): // horse formId
+            case ESM::fourCC("XMRC"): // merchant container formId
             // TES5
-            case ESM4::SUB_XAPD: // activation parent
-            case ESM4::SUB_XAPR: // active parent
-            case ESM4::SUB_XEZN: // encounter zone
-            case ESM4::SUB_XHOR:
-            case ESM4::SUB_XLCM: // levelled creature
-            case ESM4::SUB_XLCN: // location
-            case ESM4::SUB_XLKR: // location route?
-            case ESM4::SUB_XLRT: // location type
+            case ESM::fourCC("XAPD"): // activation parent
+            case ESM::fourCC("XAPR"): // active parent
+            case ESM::fourCC("XEZN"): // encounter zone
+            case ESM::fourCC("XHOR"):
+            case ESM::fourCC("XLCM"): // levelled creature
+            case ESM::fourCC("XLCN"): // location
+            case ESM::fourCC("XLKR"): // location route?
+            case ESM::fourCC("XLRT"): // location type
             //
-            case ESM4::SUB_XPRD:
-            case ESM4::SUB_XPPA:
-            case ESM4::SUB_INAM:
-            case ESM4::SUB_PDTO:
+            case ESM::fourCC("XPRD"):
+            case ESM::fourCC("XPPA"):
+            case ESM::fourCC("INAM"):
+            case ESM::fourCC("PDTO"):
             //
-            case ESM4::SUB_XIS2:
-            case ESM4::SUB_XPCI: // formId
-            case ESM4::SUB_XLOD:
-            case ESM4::SUB_VMAD:
-            case ESM4::SUB_XLRL: // Unofficial Skyrim Patch
-            case ESM4::SUB_XRDS: // FO3
-            case ESM4::SUB_XIBS: // FO3
-            case ESM4::SUB_SCHR: // FO3
-            case ESM4::SUB_TNAM: // FO3
-            case ESM4::SUB_XATO: // FONV
-            case ESM4::SUB_MNAM: // FO4
-            case ESM4::SUB_XATP: // FO4
-            case ESM4::SUB_XCNT: // FO4
-            case ESM4::SUB_XEMI: // FO4
-            case ESM4::SUB_XFVC: // FO4
-            case ESM4::SUB_XHLT: // FO4
-            case ESM4::SUB_XHTW: // FO4
-            case ESM4::SUB_XLKT: // FO4
-            case ESM4::SUB_XLYR: // FO4
-            case ESM4::SUB_XMBR: // FO4
-            case ESM4::SUB_XMSP: // FO4
-            case ESM4::SUB_XPLK: // FO4
-            case ESM4::SUB_XRFG: // FO4
-            case ESM4::SUB_XRNK: // FO4
+            case ESM::fourCC("XIS2"):
+            case ESM::fourCC("XPCI"): // formId
+            case ESM::fourCC("XLOD"):
+            case ESM::fourCC("VMAD"):
+            case ESM::fourCC("XLRL"): // Unofficial Skyrim Patch
+            case ESM::fourCC("XRDS"): // FO3
+            case ESM::fourCC("XIBS"): // FO3
+            case ESM::fourCC("SCHR"): // FO3
+            case ESM::fourCC("TNAM"): // FO3
+            case ESM::fourCC("XATO"): // FONV
+            case ESM::fourCC("MNAM"): // FO4
+            case ESM::fourCC("XATP"): // FO4
+            case ESM::fourCC("XEMI"): // FO4
+            case ESM::fourCC("XFVC"): // FO4
+            case ESM::fourCC("XHLT"): // FO4
+            case ESM::fourCC("XHTW"): // FO4
+            case ESM::fourCC("XLKT"): // FO4
+            case ESM::fourCC("XLYR"): // FO4
+            case ESM::fourCC("XMBR"): // FO4
+            case ESM::fourCC("XMSP"): // FO4
+            case ESM::fourCC("XPLK"): // FO4
+            case ESM::fourCC("XRFG"): // FO4
+            case ESM::fourCC("XRNK"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

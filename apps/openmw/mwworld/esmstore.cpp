@@ -83,12 +83,22 @@ namespace
         throw std::runtime_error("List of NPC classes is empty!");
     }
 
+    const ESM::RefId& getDefaultRace(const MWWorld::Store<ESM::Race>& races)
+    {
+        auto it = races.begin();
+        if (it != races.end())
+            return it->mId;
+        throw std::runtime_error("List of NPC races is empty!");
+    }
+
     std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions,
-        const MWWorld::Store<ESM::Class>& classes, const MWWorld::Store<ESM::Script>& scripts,
-        const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
+        const MWWorld::Store<ESM::Class>& classes, const MWWorld::Store<ESM::Race>& races,
+        const MWWorld::Store<ESM::Script>& scripts, const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         const ESM::RefId& defaultCls = getDefaultClass(classes);
+        // Same for races
+        const ESM::RefId& defaultRace = getDefaultRace(races);
 
         // Validate NPCs for non-existing class and faction.
         // We will replace invalid entries by fixed ones
@@ -113,13 +123,21 @@ namespace
                 }
             }
 
-            const ESM::RefId& npcClass = npc.mClass;
-            const ESM::Class* cls = classes.search(npcClass);
+            const ESM::Class* cls = classes.search(npc.mClass);
             if (!cls)
             {
                 Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent class "
                                     << npc.mClass << ", using " << defaultCls << " class as replacement.";
                 npc.mClass = defaultCls;
+                changed = true;
+            }
+
+            const ESM::Race* race = races.search(npc.mRace);
+            if (!race)
+            {
+                Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent race " << npc.mRace
+                                    << ", using " << defaultRace << " race as replacement.";
+                npc.mRace = defaultRace;
                 changed = true;
             }
 
@@ -153,31 +171,31 @@ namespace
             auto iter = spell.mEffects.mList.begin();
             while (iter != spell.mEffects.mList.end())
             {
-                const ESM::MagicEffect* mgef = magicEffects.search(iter->mEffectID);
+                const ESM::MagicEffect* mgef = magicEffects.search(iter->mData.mEffectID);
                 if (!mgef)
                 {
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
-                                        << ": dropping invalid effect (index " << iter->mEffectID << ")";
+                                        << ": dropping invalid effect (index " << iter->mData.mEffectID << ")";
                     iter = spell.mEffects.mList.erase(iter);
                     changed = true;
                     continue;
                 }
 
-                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute) && iter->mAttribute != -1)
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute) && iter->mData.mAttribute != -1)
                 {
-                    iter->mAttribute = -1;
+                    iter->mData.mAttribute = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected attribute argument of "
-                                        << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect";
+                                        << ESM::MagicEffect::indexToGmstString(iter->mData.mEffectID) << " effect";
                     changed = true;
                 }
 
-                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetSkill) && iter->mSkill != -1)
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetSkill) && iter->mData.mSkill != -1)
                 {
-                    iter->mSkill = -1;
+                    iter->mData.mSkill = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected skill argument of "
-                                        << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect";
+                                        << ESM::MagicEffect::indexToGmstString(iter->mData.mEffectID) << " effect";
                     changed = true;
                 }
 
@@ -580,8 +598,8 @@ namespace MWWorld
     void ESMStore::validate()
     {
         auto& npcs = getWritable<ESM::NPC>();
-        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(
-            getWritable<ESM::Faction>(), getWritable<ESM::Class>(), getWritable<ESM::Script>(), npcs.mStatic);
+        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(),
+            getWritable<ESM::Race>(), getWritable<ESM::Script>(), npcs.mStatic);
 
         for (const ESM::NPC& npc : npcsToReplace)
         {
@@ -623,8 +641,8 @@ namespace MWWorld
         auto& npcs = getWritable<ESM::NPC>();
         auto& scripts = getWritable<ESM::Script>();
 
-        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(
-            getWritable<ESM::Faction>(), getWritable<ESM::Class>(), getWritable<ESM::Script>(), npcs.mDynamic);
+        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(),
+            getWritable<ESM::Race>(), getWritable<ESM::Script>(), npcs.mDynamic);
 
         for (const ESM::NPC& npc : npcsToReplace)
             npcs.insert(npc);
@@ -724,7 +742,16 @@ namespace MWWorld
 
             case ESM::REC_DYNA:
                 reader.getSubNameIs("COUN");
-                reader.getHT(mDynamicCount);
+                if (reader.getFormatVersion() <= ESM::MaxActiveSpellTypeVersion)
+                {
+                    uint32_t dynamicCount32 = 0;
+                    reader.getHT(dynamicCount32);
+                    mDynamicCount = dynamicCount32;
+                }
+                else
+                {
+                    reader.getHT(mDynamicCount);
+                }
                 return true;
 
             default:

@@ -21,7 +21,7 @@ namespace LuaUi
                 Log(Debug::Warning) << "A script settings page has an empty name";
             if (!element.get())
                 Log(Debug::Warning) << "A script settings page has no UI element assigned";
-            return { std::move(name), std::move(searchHints), element };
+            return { std::move(name), std::move(searchHints), std::move(element) };
         }
     }
 
@@ -40,6 +40,11 @@ namespace LuaUi
         allPages.push_back(options);
     }
 
+    void removeSettingsPage(const sol::table& options)
+    {
+        std::erase_if(allPages, [options](const sol::table& it) { return it == options; });
+    }
+
     void clearSettings()
     {
         allPages.clear();
@@ -47,10 +52,10 @@ namespace LuaUi
 
     void attachPageAt(size_t index, LuaAdapter* adapter)
     {
+        adapter->detach();
         if (index < allPages.size())
         {
             ScriptSettingsPage page = parse(allPages[index]);
-            adapter->detach();
             if (page.mElement.get())
                 adapter->attach(page.mElement);
         }

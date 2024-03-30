@@ -1,10 +1,6 @@
 #ifndef MWLUA_GLOBALSCRIPTS_H
 #define MWLUA_GLOBALSCRIPTS_H
 
-#include <memory>
-#include <set>
-#include <string>
-
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
 

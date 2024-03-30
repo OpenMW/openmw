@@ -15,6 +15,7 @@ Programmers
     Nicolay Korslund - Project leader 2008-2010
     scrawl - Top contributor
 
+    AbduSharif
     Adam Hogan (aurix)
     Aesylwinn
     aegis
@@ -79,6 +80,7 @@ Programmers
     Eduard Cot (trombonecot)
     Eli2
     Emanuel Guével (potatoesmaster)
+    Epoch
     Eris Caffee (eris)
     eroen
     escondida
@@ -187,6 +189,7 @@ Programmers
     pkubik
     PLkolek
     PlutonicOverkill
+    Qlonever
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
     Randy Davin (Kindi)
@@ -245,6 +248,7 @@ Programmers
     xyzz
     Yohaulticetl
     Yuri Krupenin
+    Yury Stepovikov
     zelurker
 
 Documentation

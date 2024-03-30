@@ -86,7 +86,7 @@ namespace MWRender
             MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
             if (ammo == inv.end())
                 return;
-            std::string model = ammo->getClass().getModel(*ammo);
+            std::string model = ammo->getClass().getCorrectedModel(*ammo);
 
             osg::ref_ptr<osg::Node> arrow = getResourceSystem()->getSceneManager()->getInstance(model, parent);
 

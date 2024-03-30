@@ -288,6 +288,8 @@ namespace MWRender
                             pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
                                 .getTexture()));
 
+                        assert(texture != nullptr);
+
                         texture->setTextureSize(w, h);
                         texture->setNumMipmapLevels(pass.mRenderTexture->getNumMipmapLevels());
                         texture->dirtyTextureObject();

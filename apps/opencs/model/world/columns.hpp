@@ -45,7 +45,7 @@ namespace CSMWorld
             ColumnId_FactionIndex = 31,
             ColumnId_Charges = 32,
             ColumnId_Enchantment = 33,
-            ColumnId_CoinValue = 34,
+            ColumnId_StackCount = 34,
             ColumnId_Teleport = 35,
             ColumnId_TeleportCell = 36,
             ColumnId_LockLevel = 37,
@@ -346,6 +346,14 @@ namespace CSMWorld
             ColumnId_Blocked = 314,
 
             ColumnId_LevelledCreatureId = 315,
+
+            ColumnId_SelectionGroupObjects = 316,
+
+            ColumnId_SoundProbability = 317,
+
+            ColumnId_IsLocked = 318,
+
+            ColumnId_ProjectileSpeed = 319,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

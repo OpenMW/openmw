@@ -7,7 +7,7 @@
 
 namespace MWLua
 {
-    sol::table initCoreClassBindings(const Context& context);
+    sol::table initClassRecordBindings(const Context& context);
 }
 
 #endif // MWLUA_CLASSBINDINGS_H

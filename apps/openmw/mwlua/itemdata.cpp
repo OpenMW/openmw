@@ -1,12 +1,10 @@
 #include "itemdata.hpp"
 
 #include "context.hpp"
-
 #include "luamanagerimp.hpp"
+#include "objectvariant.hpp"
 
 #include "../mwworld/class.hpp"
-
-#include "objectvariant.hpp"
 
 namespace
 {
@@ -42,7 +40,7 @@ namespace MWLua
         ObjectVariant mObject;
 
     public:
-        ItemData(ObjectVariant object)
+        ItemData(const ObjectVariant& object)
             : mObject(object)
         {
         }
@@ -116,7 +114,7 @@ namespace MWLua
         item["itemData"] = [](const sol::object& object) -> sol::optional<ItemData> {
             ObjectVariant o(object);
             if (o.ptr().getClass().isItem(o.ptr()) || o.ptr().mRef->getType() == ESM::REC_LIGH)
-                return ItemData(std::move(o));
+                return ItemData(o);
             return {};
         };
 

@@ -3,8 +3,34 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    namespace
+    {
+        struct NPDTstruct12
+        {
+            NPC::NPDTstruct52& mStruct;
+        };
+    }
+
+    template <Misc::SameAsWithoutCvref<NPC::NPDTstruct52> T>
+    void decompose(T&& v, const auto& f)
+    {
+        char padding1 = 0;
+        char padding2 = 0;
+        f(v.mLevel, v.mAttributes, v.mSkills, padding1, v.mHealth, v.mMana, v.mFatigue, v.mDisposition, v.mReputation,
+            v.mRank, padding2, v.mGold);
+    }
+
+    template <Misc::SameAsWithoutCvref<NPDTstruct12> T>
+    void decompose(T&& v, const auto& f)
+    {
+        char padding[] = { 0, 0, 0 };
+        f(v.mStruct.mLevel, v.mStruct.mDisposition, v.mStruct.mReputation, v.mStruct.mRank, padding, v.mStruct.mGold);
+    }
+
     void NPC::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -56,37 +82,25 @@ namespace ESM
                 case fourCC("NPDT"):
                     hasNpdt = true;
                     esm.getSubHeader();
-                    if (esm.getSubSize() == 52)
+                    if (esm.getSubSize() == getCompositeSize(mNpdt))
                     {
                         mNpdtType = NPC_DEFAULT;
-                        esm.getT(mNpdt.mLevel);
-                        esm.getT(mNpdt.mAttributes);
-                        esm.getT(mNpdt.mSkills);
-                        esm.getT(mNpdt.mUnknown1);
-                        esm.getT(mNpdt.mHealth);
-                        esm.getT(mNpdt.mMana);
-                        esm.getT(mNpdt.mFatigue);
-                        esm.getT(mNpdt.mDisposition);
-                        esm.getT(mNpdt.mReputation);
-                        esm.getT(mNpdt.mRank);
-                        esm.getT(mNpdt.mUnknown2);
-                        esm.getT(mNpdt.mGold);
-                    }
-                    else if (esm.getSubSize() == 12)
-                    {
-                        mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
-
-                        // Clearing the mNdpt struct to initialize all values
-                        blankNpdt();
-                        esm.getT(mNpdt.mLevel);
-                        esm.getT(mNpdt.mDisposition);
-                        esm.getT(mNpdt.mReputation);
-                        esm.getT(mNpdt.mRank);
-                        esm.skip(3);
-                        esm.getT(mNpdt.mGold);
+                        esm.getComposite(mNpdt);
                     }
                     else
-                        esm.fail("NPC_NPDT must be 12 or 52 bytes long");
+                    {
+                        NPDTstruct12 data{ mNpdt };
+                        if (esm.getSubSize() == getCompositeSize(data))
+                        {
+                            mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
+
+                            // Clearing the mNdpt struct to initialize all values
+                            blankNpdt();
+                            esm.getComposite(data);
+                        }
+                        else
+                            esm.fail("NPC_NPDT must be 12 or 52 bytes long");
+                    }
                     break;
                 case fourCC("FLAG"):
                     hasFlags = true;
@@ -102,7 +116,7 @@ namespace ESM
                     mInventory.add(esm);
                     break;
                 case fourCC("AIDT"):
-                    esm.getHExact(&mAiData, sizeof(mAiData));
+                    esm.getSubComposite(mAiData);
                     break;
                 case fourCC("DODT"):
                 case fourCC("DNAM"):
@@ -154,39 +168,18 @@ namespace ESM
 
         if (mNpdtType == NPC_DEFAULT)
         {
-            esm.startSubRecord("NPDT");
-            esm.writeT(mNpdt.mLevel);
-            esm.writeT(mNpdt.mAttributes);
-            esm.writeT(mNpdt.mSkills);
-            esm.writeT(mNpdt.mUnknown1);
-            esm.writeT(mNpdt.mHealth);
-            esm.writeT(mNpdt.mMana);
-            esm.writeT(mNpdt.mFatigue);
-            esm.writeT(mNpdt.mDisposition);
-            esm.writeT(mNpdt.mReputation);
-            esm.writeT(mNpdt.mRank);
-            esm.writeT(mNpdt.mUnknown2);
-            esm.writeT(mNpdt.mGold);
-            esm.endRecord("NPDT");
+            esm.writeNamedComposite("NPDT", mNpdt);
         }
         else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
         {
-            esm.startSubRecord("NPDT");
-            esm.writeT(mNpdt.mLevel);
-            esm.writeT(mNpdt.mDisposition);
-            esm.writeT(mNpdt.mReputation);
-            esm.writeT(mNpdt.mRank);
-            constexpr char padding[] = { 0, 0, 0 };
-            esm.writeT(padding);
-            esm.writeT(mNpdt.mGold);
-            esm.endRecord("NPDT");
+            esm.writeNamedComposite("NPDT", NPDTstruct12{ const_cast<NPDTstruct52&>(mNpdt) });
         }
 
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
 
         mInventory.save(esm);
         mSpells.save(esm);
-        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
+        esm.writeNamedComposite("AIDT", mAiData);
 
         mTransport.save(esm);
 
@@ -238,9 +231,7 @@ namespace ESM
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;
         mNpdt.mDisposition = 0;
-        mNpdt.mUnknown1 = 0;
         mNpdt.mRank = 0;
-        mNpdt.mUnknown2 = 0;
         mNpdt.mGold = 0;
     }
 

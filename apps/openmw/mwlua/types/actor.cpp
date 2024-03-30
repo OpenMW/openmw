@@ -6,8 +6,10 @@
 #include <components/lua/luastate.hpp>
 #include <components/settings/values.hpp>
 
+#include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
 #include "apps/openmw/mwbase/windowmanager.hpp"
+#include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwmechanics/actorutil.hpp"
 #include "apps/openmw/mwmechanics/creaturestats.hpp"
 #include "apps/openmw/mwmechanics/drawstate.hpp"
@@ -37,7 +39,7 @@ namespace MWLua
             itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(std::get<ObjectId>(item));
             if (old_it != store.end() && *old_it == itemPtr)
                 return { old_it, true }; // already equipped
-            if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0
+            if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0
                 || itemPtr.getContainerStore() != static_cast<const MWWorld::ContainerStore*>(&store))
             {
                 Log(Debug::Warning) << "Object" << std::get<ObjectId>(item).toString() << " is not in inventory";
@@ -51,7 +53,7 @@ namespace MWLua
             if (old_it != store.end() && old_it->getCellRef().getRefId() == recordId)
                 return { old_it, true }; // already equipped
             itemPtr = store.search(recordId);
-            if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0)
+            if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0)
             {
                 Log(Debug::Warning) << "There is no object with recordId='" << stringId << "' in inventory";
                 return { store.end(), false };
@@ -272,7 +274,8 @@ namespace MWLua
             {
                 ei = LuaUtil::cast<std::string>(item);
             }
-            context.mLuaManager->addAction([obj = Object(ptr), ei = ei] { setSelectedEnchantedItem(obj.ptr(), ei); },
+            context.mLuaManager->addAction(
+                [obj = Object(ptr), ei = std::move(ei)] { setSelectedEnchantedItem(obj.ptr(), ei); },
                 "setSelectedEnchantedItemAction");
         };
 
@@ -398,6 +401,11 @@ namespace MWLua
         actor["isDead"] = [](const Object& o) {
             const auto& target = o.ptr();
             return target.getClass().getCreatureStats(target).isDead();
+        };
+
+        actor["isDeathFinished"] = [](const Object& o) {
+            const auto& target = o.ptr();
+            return target.getClass().getCreatureStats(target).isDeathAnimationFinished();
         };
 
         actor["getEncumbrance"] = [](const Object& actor) -> float {

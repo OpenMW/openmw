@@ -376,8 +376,8 @@ namespace LuaUtil
 
     sol::protected_function_result LuaState::throwIfError(sol::protected_function_result&& res)
     {
-        if (!res.valid() && static_cast<int>(res.get_type()) == LUA_TSTRING)
-            throw std::runtime_error("Lua error: " + res.get<std::string>());
+        if (!res.valid())
+            throw std::runtime_error(std::string("Lua error: ") += res.get<sol::error>().what());
         else
             return std::move(res);
     }
@@ -397,7 +397,7 @@ namespace LuaUtil
         std::string fileContent(std::istreambuf_iterator<char>(*mVFS->get(path)), {});
         sol::load_result res = mSol.load(fileContent, path, sol::load_mode::text);
         if (!res.valid())
-            throw std::runtime_error("Lua error: " + res.get<std::string>());
+            throw std::runtime_error(std::string("Lua error: ") += res.get<sol::error>().what());
         return res;
     }
 

@@ -133,6 +133,7 @@ namespace CSMWorld
             Type_LandTexture,
             Type_Pathgrids,
             Type_Pathgrid,
+            Type_SelectionGroup,
             Type_StartScripts,
             Type_StartScript,
             Type_Search,
@@ -157,6 +158,8 @@ namespace CSMWorld
 
         UniversalId(Type type, int index);
         ///< Using a type for a non-index-argument UniversalId will throw an exception.
+
+        UniversalId(Type type, const UniversalId& id);
 
         Class getClass() const;
 

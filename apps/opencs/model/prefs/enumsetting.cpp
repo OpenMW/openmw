@@ -15,38 +15,10 @@
 #include "category.hpp"
 #include "state.hpp"
 
-CSMPrefs::EnumValue::EnumValue(const std::string& value, const std::string& tooltip)
-    : mValue(value)
-    , mTooltip(tooltip)
-{
-}
-
-CSMPrefs::EnumValue::EnumValue(const char* value)
-    : mValue(value)
-{
-}
-
-CSMPrefs::EnumValues& CSMPrefs::EnumValues::add(const EnumValues& values)
-{
-    mValues.insert(mValues.end(), values.mValues.begin(), values.mValues.end());
-    return *this;
-}
-
-CSMPrefs::EnumValues& CSMPrefs::EnumValues::add(const EnumValue& value)
-{
-    mValues.push_back(value);
-    return *this;
-}
-
-CSMPrefs::EnumValues& CSMPrefs::EnumValues::add(const std::string& value, const std::string& tooltip)
-{
-    mValues.emplace_back(value, tooltip);
-    return *this;
-}
-
-CSMPrefs::EnumSetting::EnumSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+CSMPrefs::EnumSetting::EnumSetting(Category* parent, QMutex* mutex, std::string_view key, const QString& label,
+    std::span<const EnumValueView> values, Settings::Index& index)
     : TypedSetting(parent, mutex, key, label, index)
+    , mValues(values)
     , mWidget(nullptr)
 {
 }
@@ -57,44 +29,27 @@ CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::setTooltip(const std::string& tool
     return *this;
 }
 
-CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::addValues(const EnumValues& values)
-{
-    mValues.add(values);
-    return *this;
-}
-
-CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::addValue(const EnumValue& value)
-{
-    mValues.add(value);
-    return *this;
-}
-
-CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::addValue(const std::string& value, const std::string& tooltip)
-{
-    mValues.add(value, tooltip);
-    return *this;
-}
-
 CSMPrefs::SettingWidgets CSMPrefs::EnumSetting::makeWidgets(QWidget* parent)
 {
     QLabel* label = new QLabel(getLabel(), parent);
 
     mWidget = new QComboBox(parent);
 
-    size_t index = 0;
-    const std::string value = getValue();
-
-    for (size_t i = 0; i < mValues.mValues.size(); ++i)
+    for (std::size_t i = 0; i < mValues.size(); ++i)
     {
-        if (value == mValues.mValues[i].mValue)
-            index = i;
+        const EnumValueView& v = mValues[i];
 
-        mWidget->addItem(QString::fromUtf8(mValues.mValues[i].mValue.c_str()));
+        mWidget->addItem(QString::fromUtf8(v.mValue.data(), static_cast<int>(v.mValue.size())));
 
-        if (!mValues.mValues[i].mTooltip.empty())
-            mWidget->setItemData(
-                static_cast<int>(i), QString::fromUtf8(mValues.mValues[i].mTooltip.c_str()), Qt::ToolTipRole);
+        if (!v.mTooltip.empty())
+            mWidget->setItemData(static_cast<int>(i),
+                QString::fromUtf8(v.mTooltip.data(), static_cast<int>(v.mTooltip.size())), Qt::ToolTipRole);
     }
+
+    const std::string value = getValue();
+    const std::size_t index = std::find_if(mValues.begin(), mValues.end(), [&](const EnumValueView& v) {
+        return v.mValue == value;
+    }) - mValues.begin();
 
     mWidget->setCurrentIndex(static_cast<int>(index));
 
@@ -117,6 +72,9 @@ void CSMPrefs::EnumSetting::updateWidget()
 
 void CSMPrefs::EnumSetting::valueChanged(int value)
 {
-    setValue(mValues.mValues.at(value).mValue);
+    if (value < 0 || static_cast<std::size_t>(value) >= mValues.size())
+        throw std::logic_error("Invalid enum setting \"" + getKey() + "\" value index: " + std::to_string(value));
+
+    setValue(std::string(mValues[value].mValue));
     getParent()->getState()->update(*this);
 }

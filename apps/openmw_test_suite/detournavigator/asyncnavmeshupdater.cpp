@@ -299,4 +299,41 @@ namespace
                     << " present=" << (present.find(tilePosition) != present.end());
             }
     }
+
+    TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, next_tile_id_should_be_updated_on_duplicate)
+    {
+        mRecastMeshManager.setWorldspace(mWorldspace, nullptr);
+        addHeightFieldPlane(mRecastMeshManager);
+        addObject(mBox, mRecastMeshManager);
+        auto db = std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max());
+        NavMeshDb* const dbPtr = db.get();
+        AsyncNavMeshUpdater updater(mSettings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db));
+
+        const TileId nextTileId(dbPtr->getMaxTileId() + 1);
+        ASSERT_EQ(dbPtr->insertTile(nextTileId, "worldspace", TilePosition{}, TileVersion{ 1 }, {}, {}), 1);
+
+        const auto navMeshCacheItem = std::make_shared<GuardedNavMeshCacheItem>(1, mSettings);
+        const TilePosition tilePosition{ 0, 0 };
+        const std::map<TilePosition, ChangeType> changedTiles{ { tilePosition, ChangeType::add } };
+
+        updater.post(mAgentBounds, navMeshCacheItem, mPlayerTile, mWorldspace, changedTiles);
+        updater.wait(WaitConditionType::allJobsDone, &mListener);
+
+        const AgentBounds agentBounds{ CollisionShapeType::Cylinder, { 29, 29, 66 } };
+        updater.post(agentBounds, navMeshCacheItem, mPlayerTile, mWorldspace, changedTiles);
+        updater.wait(WaitConditionType::allJobsDone, &mListener);
+
+        updater.stop();
+
+        const auto recastMesh = mRecastMeshManager.getMesh(mWorldspace, tilePosition);
+        ASSERT_NE(recastMesh, nullptr);
+        ShapeId nextShapeId{ 1 };
+        const std::vector<DbRefGeometryObject> objects = makeDbRefGeometryObjects(recastMesh->getMeshSources(),
+            [&](const MeshSource& v) { return resolveMeshSource(*dbPtr, v, nextShapeId); });
+        const auto tile = dbPtr->findTile(
+            mWorldspace, tilePosition, serialize(mSettings.mRecast, agentBounds, *recastMesh, objects));
+        ASSERT_TRUE(tile.has_value());
+        EXPECT_EQ(tile->mTileId, 2);
+        EXPECT_EQ(tile->mVersion, navMeshFormatVersion);
+    }
 }

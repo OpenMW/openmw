@@ -100,6 +100,8 @@ namespace MWWorld
             mWaterHeight = -1.f;
             mHasWater = true;
         }
+        else
+            mGridPos = {};
     }
 
     ESM::RefId Cell::getWorldSpace() const

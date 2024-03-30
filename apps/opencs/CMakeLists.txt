@@ -1,5 +1,4 @@
 set (OPENCS_SRC
-    ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc
     )
 
 opencs_units (. editor)
@@ -146,6 +145,9 @@ source_group (openmw-cs FILES main.cpp ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
     set(QT_USE_QTMAIN TRUE)
+    set(OPENCS_RC_FILE ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc)
+else(WIN32)
+    set(OPENCS_RC_FILE "")
 endif(WIN32)
 
 if (QT_VERSION_MAJOR VERSION_EQUAL 5)
@@ -170,7 +172,7 @@ else()
     set (OPENCS_OPENMW_CFG "")
 endif(APPLE)
 
-add_library(openmw-cs-lib
+add_library(openmw-cs-lib STATIC
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -186,6 +188,7 @@ if(BUILD_OPENCS)
         ${OPENCS_CFG}
         ${OPENCS_DEFAULT_FILTERS_FILE}
         ${OPENCS_OPENMW_CFG}
+        ${OPENCS_RC_FILE}
         main.cpp
     )
 
@@ -289,7 +292,7 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(openmw-cs-lib gcov)
 endif()
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-cs-lib PRIVATE
         <boost/program_options/options_description.hpp>
 

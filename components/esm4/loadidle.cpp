@@ -41,16 +41,16 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_DNAM:
+            case ESM::fourCC("DNAM"):
                 reader.getZString(mCollision);
                 break;
-            case ESM4::SUB_ENAM:
+            case ESM::fourCC("ENAM"):
                 reader.getZString(mEvent);
                 break;
-            case ESM4::SUB_ANAM:
+            case ESM::fourCC("ANAM"):
             {
                 switch (subHdr.dataSize)
                 {
@@ -74,21 +74,21 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_CTDA: // formId
-            case ESM4::SUB_CTDT:
-            case ESM4::SUB_CIS1:
-            case ESM4::SUB_CIS2:
-            case ESM4::SUB_DATA:
-            case ESM4::SUB_MODD:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_GNAM: // FO4
+            case ESM::fourCC("CTDA"): // formId
+            case ESM::fourCC("CTDT"):
+            case ESM::fourCC("CIS1"):
+            case ESM::fourCC("CIS2"):
+            case ESM::fourCC("DATA"):
+            case ESM::fourCC("MODD"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("GNAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

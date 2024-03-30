@@ -193,8 +193,10 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
         loadSettingBool(Settings::game().mPlayerMovementIgnoresAnimation, *playerMovementIgnoresAnimationCheckBox);
 
-        distantLandCheckBox->setCheckState(
-            Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging ? Qt::Checked : Qt::Unchecked);
+        connect(distantLandCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotDistantLandToggled);
+        bool distantLandEnabled = Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging;
+        distantLandCheckBox->setCheckState(distantLandEnabled ? Qt::Checked : Qt::Unchecked);
+        slotDistantLandToggled(distantLandEnabled);
 
         loadSettingBool(Settings::terrain().mObjectPagingActiveGrid, *activeGridObjectPagingCheckBox);
         viewingDistanceComboBox->setValue(convertToCells(Settings::camera().mViewingDistance));
@@ -212,6 +214,70 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingBool(Settings::fog().mExponentialFog, *exponentialFogCheckBox);
         loadSettingBool(Settings::fog().mSkyBlending, *skyBlendingCheckBox);
         skyBlendingStartComboBox->setValue(Settings::fog().mSkyBlendingStart);
+
+        loadSettingBool(Settings::shadows().mActorShadows, *actorShadowsCheckBox);
+        loadSettingBool(Settings::shadows().mPlayerShadows, *playerShadowsCheckBox);
+        loadSettingBool(Settings::shadows().mTerrainShadows, *terrainShadowsCheckBox);
+        loadSettingBool(Settings::shadows().mObjectShadows, *objectShadowsCheckBox);
+        loadSettingBool(Settings::shadows().mEnableIndoorShadows, *indoorShadowsCheckBox);
+
+        const auto& boundMethod = Settings::shadows().mComputeSceneBounds.get();
+        if (boundMethod == "bounds")
+            shadowComputeSceneBoundsComboBox->setCurrentIndex(0);
+        else if (boundMethod == "primitives")
+            shadowComputeSceneBoundsComboBox->setCurrentIndex(1);
+        else
+            shadowComputeSceneBoundsComboBox->setCurrentIndex(2);
+
+        const int shadowDistLimit = Settings::shadows().mMaximumShadowMapDistance;
+        if (shadowDistLimit > 0)
+        {
+            shadowDistanceCheckBox->setCheckState(Qt::Checked);
+            shadowDistanceSpinBox->setValue(shadowDistLimit);
+            shadowDistanceSpinBox->setEnabled(true);
+            fadeStartSpinBox->setEnabled(true);
+        }
+
+        const float shadowFadeStart = Settings::shadows().mShadowFadeStart;
+        if (shadowFadeStart != 0)
+            fadeStartSpinBox->setValue(shadowFadeStart);
+
+        const int shadowRes = Settings::shadows().mShadowMapResolution;
+        int shadowResIndex = shadowResolutionComboBox->findText(QString::number(shadowRes));
+        if (shadowResIndex != -1)
+            shadowResolutionComboBox->setCurrentIndex(shadowResIndex);
+        else
+        {
+            shadowResolutionComboBox->addItem(QString::number(shadowRes));
+            shadowResolutionComboBox->setCurrentIndex(shadowResolutionComboBox->count() - 1);
+        }
+
+        connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotShadowDistLimitToggled);
+
+        lightsMaxLightsSpinBox->setValue(Settings::shaders().mMaxLights);
+        lightsMaximumDistanceSpinBox->setValue(Settings::shaders().mMaximumLightDistance);
+        lightFadeMultiplierSpinBox->setValue(Settings::shaders().mLightFadeStart);
+        lightsBoundingSphereMultiplierSpinBox->setValue(Settings::shaders().mLightBoundsMultiplier);
+        lightsMinimumInteriorBrightnessSpinBox->setValue(Settings::shaders().mMinimumInteriorBrightness);
+
+        connect(lightingMethodComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this,
+            &SettingsPage::slotLightTypeCurrentIndexChanged);
+
+        int lightingMethod = 1;
+        switch (Settings::shaders().mLightingMethod)
+        {
+            case SceneUtil::LightingMethod::FFP:
+                lightingMethod = 0;
+                break;
+            case SceneUtil::LightingMethod::PerObjectUniform:
+                lightingMethod = 1;
+                break;
+            case SceneUtil::LightingMethod::SingleUBO:
+                lightingMethod = 2;
+                break;
+        }
+        lightingMethodComboBox->setCurrentIndex(lightingMethod);
+        slotLightTypeCurrentIndexChanged(lightingMethod);
     }
 
     // Audio
@@ -235,6 +301,7 @@ bool Launcher::SettingsPage::loadSettings()
                 hrtfProfileSelectorComboBox->setCurrentIndex(hrtfProfileIndex);
             }
         }
+        loadSettingBool(Settings::sound().mCameraListener, *cameraListenerCheckBox);
     }
 
     // Interface Changes
@@ -359,6 +426,58 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*exponentialFogCheckBox, Settings::fog().mExponentialFog);
         saveSettingBool(*skyBlendingCheckBox, Settings::fog().mSkyBlending);
         Settings::fog().mSkyBlendingStart.set(skyBlendingStartComboBox->value());
+
+        static constexpr std::array<SceneUtil::LightingMethod, 3> lightingMethodMap = {
+            SceneUtil::LightingMethod::FFP,
+            SceneUtil::LightingMethod::PerObjectUniform,
+            SceneUtil::LightingMethod::SingleUBO,
+        };
+        Settings::shaders().mLightingMethod.set(lightingMethodMap[lightingMethodComboBox->currentIndex()]);
+
+        const int cShadowDist
+            = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
+        Settings::shadows().mMaximumShadowMapDistance.set(cShadowDist);
+        const float cFadeStart = fadeStartSpinBox->value();
+        if (cShadowDist > 0)
+            Settings::shadows().mShadowFadeStart.set(cFadeStart);
+
+        const bool cActorShadows = actorShadowsCheckBox->checkState() != Qt::Unchecked;
+        const bool cObjectShadows = objectShadowsCheckBox->checkState() != Qt::Unchecked;
+        const bool cTerrainShadows = terrainShadowsCheckBox->checkState() != Qt::Unchecked;
+        const bool cPlayerShadows = playerShadowsCheckBox->checkState() != Qt::Unchecked;
+        if (cActorShadows || cObjectShadows || cTerrainShadows || cPlayerShadows)
+        {
+            Settings::shadows().mEnableShadows.set(true);
+            Settings::shadows().mActorShadows.set(cActorShadows);
+            Settings::shadows().mPlayerShadows.set(cPlayerShadows);
+            Settings::shadows().mObjectShadows.set(cObjectShadows);
+            Settings::shadows().mTerrainShadows.set(cTerrainShadows);
+        }
+        else
+        {
+            Settings::shadows().mEnableShadows.set(false);
+            Settings::shadows().mActorShadows.set(false);
+            Settings::shadows().mPlayerShadows.set(false);
+            Settings::shadows().mObjectShadows.set(false);
+            Settings::shadows().mTerrainShadows.set(false);
+        }
+
+        Settings::shadows().mEnableIndoorShadows.set(indoorShadowsCheckBox->checkState() != Qt::Unchecked);
+        Settings::shadows().mShadowMapResolution.set(shadowResolutionComboBox->currentText().toInt());
+
+        auto index = shadowComputeSceneBoundsComboBox->currentIndex();
+        if (index == 0)
+            Settings::shadows().mComputeSceneBounds.set("bounds");
+        else if (index == 1)
+            Settings::shadows().mComputeSceneBounds.set("primitives");
+        else
+            Settings::shadows().mComputeSceneBounds.set("none");
+
+        Settings::shaders().mMaxLights.set(lightsMaxLightsSpinBox->value());
+        Settings::shaders().mMaximumLightDistance.set(lightsMaximumDistanceSpinBox->value());
+        Settings::shaders().mLightFadeStart.set(lightFadeMultiplierSpinBox->value());
+        Settings::shaders().mLightBoundsMultiplier.set(lightsBoundingSphereMultiplierSpinBox->value());
+        Settings::shaders().mMinimumInteriorBrightness.set(lightsMinimumInteriorBrightnessSpinBox->value());
     }
 
     // Audio
@@ -379,6 +498,9 @@ void Launcher::SettingsPage::saveSettings()
             Settings::sound().mHrtf.set(hrtfProfileSelectorComboBox->currentText().toStdString());
         else
             Settings::sound().mHrtf.set({});
+
+        const bool cCameraListener = cameraListenerCheckBox->checkState() != Qt::Unchecked;
+        Settings::sound().mCameraListener.set(cCameraListener);
     }
 
     // Interface Changes
@@ -460,4 +582,25 @@ void Launcher::SettingsPage::slotSkyBlendingToggled(bool checked)
 {
     skyBlendingStartComboBox->setEnabled(checked);
     skyBlendingStartLabel->setEnabled(checked);
+}
+
+void Launcher::SettingsPage::slotShadowDistLimitToggled(bool checked)
+{
+    shadowDistanceSpinBox->setEnabled(checked);
+    fadeStartSpinBox->setEnabled(checked);
+}
+
+void Launcher::SettingsPage::slotDistantLandToggled(bool checked)
+{
+    activeGridObjectPagingCheckBox->setEnabled(checked);
+    objectPagingMinSizeComboBox->setEnabled(checked);
+}
+
+void Launcher::SettingsPage::slotLightTypeCurrentIndexChanged(int index)
+{
+    lightsMaximumDistanceSpinBox->setEnabled(index != 0);
+    lightFadeMultiplierSpinBox->setEnabled(index != 0);
+    lightsMaxLightsSpinBox->setEnabled(index != 0);
+    lightsBoundingSphereMultiplierSpinBox->setEnabled(index != 0);
+    lightsMinimumInteriorBrightnessSpinBox->setEnabled(index != 0);
 }

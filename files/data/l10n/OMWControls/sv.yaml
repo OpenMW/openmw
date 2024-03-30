@@ -1,7 +1,7 @@
 ControlsPage: "OpenMW Kontroller"
 ControlsPageDescription: "Ytterligare inställningar relaterade till spelarkontroller"
 
-MovementSettings: "Rörelse"
+MovementSettings: "Rörelser"
 
 alwaysRun: "Spring alltid"
 alwaysRunDescription: |
@@ -13,3 +13,73 @@ toggleSneakDescription: |
     Denna inställningen gör att smygknappen (förinställt till ctrl) slår smygning på eller av vid ett knapptryck
     istället för att att kräva att knappen hålls nedtryckt för att smyga.
     Spelare som spenderar mycket tid med att smyga lär ha lättare att kontrollera rollfiguren med denna funktion aktiverad.
+
+smoothControllerMovement: "Mjuka handkontrollsrörelser"
+smoothControllerMovementDescription: |
+   Aktiverar mjuka styrspaksrörelser för handkontroller. Gör övergången från gående till springande mindre abrubt.
+
+TogglePOV_name: "Växla perspektiv"
+TogglePOV_description: "Växlar mellan första- och tredjepersonsperspektiv. Håll in för att aktivera omloppskamera."
+
+Zoom3rdPerson_name: "Zooma in/ut"
+Zoom3rdPerson_description: "Flyttar kameran närmare / längre bort i tredjepersonsperspektivet."
+
+MoveForward_name: "Förflyttning framåt"
+MoveForward_description: "Kan avbrytas med Förflyttning bakåt."
+
+MoveBackward_name: "Förflyttning bakåt"
+MoveBackward_description: "Kan avbrytas med Förflyttning framåt."
+
+MoveLeft_name: "Förflyttning vänster"
+MoveLeft_description: "Kan avbrytas med Förflyttning höger."
+
+MoveRight_name: "Förflyttning höger"
+MoveRight_description: "Kan avbrytas med Förflyttning vänster."
+
+Use_name: "Använd"
+Use_description: "Attackera med ett vapen eller kasta en besvärjelse beroende på nuvarande hållning."
+
+Run_name: "Spring"
+Run_description: "Håll in för att springa/gå, beroende på Spring alltid-inställningen."
+
+AlwaysRun_name: "Spring alltid"
+AlwaysRun_description: "Aktiverar Spring alltid-funktionen."
+
+Jump_name: "Hoppa"
+Jump_description: "Hoppar när du är på marken."
+
+AutoMove_name: "Förflytta automatiskt"
+AutoMove_description: "Aktiverar konstant förflyttning framåt."
+
+Sneak_name: "Smyg"
+Sneak_description: "Håll in för att smyga, om Växla till smyg-inställningen är av."
+
+ToggleSneak_name: "Växla till smygläge"
+ToggleSneak_description: "Knappen för smyg växlar till smygläge med ett tryck om denna är på."
+
+ToggleWeapon_name: "Redo vapen"
+ToggleWeapon_description: "Gå in i eller lämna vapenposition."
+
+ToggleSpell_name: "Redo magi"
+ToggleSpell_description: "Gå in i eller lämna magiposition."
+
+Inventory_name: "Lager"
+Inventory_description: "Öppna lagret."
+
+Journal_name: "Dagbok"
+Journal_description: "Öppna dagboken."
+
+QuickKeysMenu_name: "Snabbknappsmeny"
+QuickKeysMenu_description: "Öppnar snabbknappsmenyn."
+
+SmoothMoveForward_name: "Mjuk förflyttning framåt"
+SmoothMoveForward_description: "Framåtförflyttning anpassad för mjuka övergångar från gång till spring."
+
+SmoothMoveBackward_name: "Mjuk förflyttning bakåt"
+SmoothMoveBackward_description: "Bakåtförflyttning anpassad för mjuka övergångar från gång till spring."
+
+SmoothMoveLeft_name: "Mjuk förflyttning vänster"
+SmoothMoveLeft_description: "Vänsterförflyttning anpassad för mjuka övergångar från gång till spring."
+
+SmoothMoveRight_name: "Mjuk förflyttning höger"
+SmoothMoveRight_description: "Högerförflyttning anpassad för mjuka övergångar från gång till spring."

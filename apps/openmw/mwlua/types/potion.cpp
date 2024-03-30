@@ -5,9 +5,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
+#include "apps/openmw/mwbase/environment.hpp"
 
 namespace sol
 {
@@ -48,7 +46,10 @@ namespace
             size_t numEffects = effectsTable.size();
             potion.mEffects.mList.resize(numEffects);
             for (size_t i = 0; i < numEffects; ++i)
-                potion.mEffects.mList[i] = LuaUtil::cast<ESM::ENAMstruct>(effectsTable[i + 1]);
+            {
+                potion.mEffects.mList[i] = LuaUtil::cast<ESM::IndexedENAMstruct>(effectsTable[i + 1]);
+            }
+            potion.mEffects.updateIndexes();
         }
         return potion;
     }
@@ -85,7 +86,7 @@ namespace MWLua
         record["effects"] = sol::readonly_property([context](const ESM::Potion& rec) -> sol::table {
             sol::table res(context.mLua->sol(), sol::create);
             for (size_t i = 0; i < rec.mEffects.mList.size(); ++i)
-                res[i + 1] = rec.mEffects.mList[i]; // ESM::ENAMstruct (effect params)
+                res[i + 1] = rec.mEffects.mList[i]; // ESM::IndexedENAMstruct (effect params)
             return res;
         });
     }

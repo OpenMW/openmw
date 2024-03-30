@@ -7,6 +7,7 @@ set of keys over given range of frames.
 
 import click
 import collections
+import json
 import matplotlib.pyplot
 import numpy
 import operator
@@ -22,11 +23,11 @@ import termtables
               help='Print a list of all present keys in the input file.')
 @click.option('--regexp_match', is_flag=True,
               help='Use all metric that match given key. '
-                   'Can be used with stats, timeseries, commulative_timeseries, hist, hist_threshold')
+                   'Can be used with stats, timeseries, cumulative_timeseries, hist, hist_threshold')
 @click.option('--timeseries', type=str, multiple=True,
               help='Show a graph for given metric over time.')
-@click.option('--commulative_timeseries', type=str, multiple=True,
-              help='Show a graph for commulative sum of a given metric over time.')
+@click.option('--cumulative_timeseries', type=str, multiple=True,
+              help='Show a graph for cumulative sum of a given metric over time.')
 @click.option('--timeseries_delta', type=str, multiple=True,
               help='Show a graph for delta between neighbouring frames of a given metric over time.')
 @click.option('--hist', type=str, multiple=True,
@@ -43,16 +44,20 @@ import termtables
                    'between Physics Actors and physics_time_taken. Format: --plot <x> <y> <function>.')
 @click.option('--stats', type=str, multiple=True,
               help='Print table with stats for a given metric containing min, max, mean, median etc.')
+@click.option('--stats_sum', is_flag=True,
+              help='Add a row to stats table for a sum per frame of all given stats metrics.')
+@click.option('--stats_sort_by', type=str, default=None, multiple=True,
+              help='Sort stats table by given fields (source, key, sum, min, max etc).')
+@click.option('--stats_table_format', type=click.Choice(['markdown', 'json']), default='markdown',
+              help='Print table with stats in given format.')
 @click.option('--precision', type=int,
               help='Format floating point numbers with given precision')
 @click.option('--timeseries_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries metrics.')
-@click.option('--commulative_timeseries_sum', is_flag=True,
-              help='Add a graph to timeseries for a sum per frame of all given commulative timeseries.')
+@click.option('--cumulative_timeseries_sum', is_flag=True,
+              help='Add a graph to timeseries for a sum per frame of all given cumulative timeseries.')
 @click.option('--timeseries_delta_sum', is_flag=True,
               help='Add a graph to timeseries for a sum per frame of all given timeseries delta.')
-@click.option('--stats_sum', is_flag=True,
-              help='Add a row to stats table for a sum per frame of all given stats metrics.')
 @click.option('--begin_frame', type=int, default=0,
               help='Start processing from this frame.')
 @click.option('--end_frame', type=int, default=sys.maxsize,
@@ -67,14 +72,12 @@ import termtables
               help='Threshold for hist_over.')
 @click.option('--show_common_path_prefix', is_flag=True,
               help='Show common path prefix when applied to multiple files.')
-@click.option('--stats_sort_by', type=str, default=None, multiple=True,
-              help='Sort stats table by given fields (source, key, sum, min, max etc).')
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
-         commulative_timeseries, commulative_timeseries_sum, frame_number_name,
+         cumulative_timeseries, cumulative_timeseries_sum, frame_number_name,
          hist_threshold, threshold_name, threshold_value, show_common_path_prefix, stats_sort_by,
-         timeseries_delta, timeseries_delta_sum):
+         timeseries_delta, timeseries_delta_sum, stats_table_format):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
     if not show_common_path_prefix and len(sources) > 1:
         longest_common_prefix = os.path.commonprefix(list(sources.keys()))
@@ -94,8 +97,8 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if timeseries:
         draw_timeseries(sources=frames, keys=matching_keys(timeseries), add_sum=timeseries_sum,
                         begin_frame=begin_frame, end_frame=end_frame)
-    if commulative_timeseries:
-        draw_commulative_timeseries(sources=frames, keys=matching_keys(commulative_timeseries), add_sum=commulative_timeseries_sum,
+    if cumulative_timeseries:
+        draw_cumulative_timeseries(sources=frames, keys=matching_keys(cumulative_timeseries), add_sum=cumulative_timeseries_sum,
                                     begin_frame=begin_frame, end_frame=end_frame)
     if timeseries_delta:
         draw_timeseries_delta(sources=frames, keys=matching_keys(timeseries_delta), add_sum=timeseries_delta_sum,
@@ -109,7 +112,8 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if plot:
         draw_plots(sources=frames, plots=plot)
     if stats:
-        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision, sort_by=stats_sort_by)
+        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision,
+                    sort_by=stats_sort_by, table_format=stats_table_format)
     if hist_threshold:
         draw_hist_threshold(sources=frames, keys=matching_keys(hist_threshold), begin_frame=begin_frame,
                             threshold_name=threshold_name, threshold_value=threshold_value)
@@ -145,17 +149,18 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
         for key in keys:
             result[name][key] = [None] * (end_frame - begin_frame)
     for name, frames in sources.items():
+        max_index = 0
         for frame in frames:
             number = frame[frame_number_name]
             if begin_frame <= number < end_frame:
                 index = number - begin_frame
+                max_index = max(max_index, index)
                 for key in keys:
                     if key in frame:
                         result[name][key][index] = frame[key]
-    for name in result.keys():
         for key in keys:
             prev = 0.0
-            values = result[name][key]
+            values = result[name][key][:max_index + 1]
             for i in range(len(values)):
                 if values[i] is not None:
                     prev = values[i]
@@ -179,26 +184,29 @@ def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            ax.plot(x, frames[key], label=f'{key}:{name}')
+            y = frames[key]
+            ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.sum(list(frames[k] for k in keys), axis=0), label=f'sum:{name}', linestyle='--')
+            y = numpy.sum(list(frames[k] for k in keys), axis=0)
+            ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('timeseries')
 
 
-def draw_commulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
+def draw_cumulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            ax.plot(x, numpy.cumsum(frames[key]), label=f'{key}:{name}')
+            y = numpy.cumsum(frames[key])
+            ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}',
-                    linestyle='--')
+            y = numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0))
+            ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
-    fig.canvas.manager.set_window_title('commulative_timeseries')
+    fig.canvas.manager.set_window_title('cumulative_timeseries')
 
 
 def draw_timeseries_delta(sources, keys, add_sum, begin_frame, end_frame):
@@ -206,10 +214,11 @@ def draw_timeseries_delta(sources, keys, add_sum, begin_frame, end_frame):
     x = numpy.array(range(begin_frame + 1, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            ax.plot(x, numpy.diff(frames[key]), label=f'{key}:{name}')
+            y = numpy.diff(frames[key])
+            ax.plot(x[:len(y)], numpy.diff(frames[key]), label=f'{key}:{name}')
         if add_sum:
-            ax.plot(x, numpy.diff(numpy.sum(list(frames[k] for k in keys), axis=0)), label=f'sum:{name}',
-                    linestyle='--')
+            y = numpy.diff(numpy.sum(list(frames[k] for k in keys), axis=0))
+            ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('timeseries_delta')
@@ -291,7 +300,7 @@ def draw_plots(sources, plots):
     fig.canvas.manager.set_window_title('plots')
 
 
-def print_stats(sources, keys, stats_sum, precision, sort_by):
+def print_stats(sources, keys, stats_sum, precision, sort_by, table_format):
     stats = list()
     for name, frames in sources.items():
         for key in keys:
@@ -301,11 +310,17 @@ def print_stats(sources, keys, stats_sum, precision, sort_by):
     metrics = list(stats[0].keys())
     if sort_by:
         stats.sort(key=operator.itemgetter(*sort_by))
-    termtables.print(
-        [list(v.values()) for v in stats],
-        header=metrics,
-        style=termtables.styles.markdown,
-    )
+    if table_format == 'markdown':
+        termtables.print(
+            [list(v.values()) for v in stats],
+            header=metrics,
+            style=termtables.styles.markdown,
+        )
+    elif table_format == 'json':
+        table = [dict(zip(metrics, row.values())) for row in stats]
+        print(json.dumps(table))
+    else:
+        print(f'Unsupported table format: {table_format}')
 
 
 def draw_hist_threshold(sources, keys, begin_frame, threshold_name, threshold_value):

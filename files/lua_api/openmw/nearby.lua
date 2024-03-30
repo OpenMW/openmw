@@ -90,6 +90,11 @@
 -- })
 
 ---
+-- A table of parameters for @{#nearby.castRenderingRay} and @{#nearby.asyncCastRenderingRay}
+-- @type CastRenderingRayOptions
+-- @field #table ignore A list of @{openmw.core#GameObject} to ignore while doing the ray cast
+
+---
 -- Cast ray from one point to another and find the first visual intersection with anything in the scene.
 -- As opposite to `castRay` can find an intersection with an object without collisions.
 -- In order to avoid threading issues can be used only in player scripts only in `onFrame` or
@@ -97,6 +102,7 @@
 -- @function [parent=#nearby] castRenderingRay
 -- @param openmw.util#Vector3 from Start point of the ray.
 -- @param openmw.util#Vector3 to End point of the ray.
+-- @param #CastRenderingRayOptions
 -- @return #RayCastingResult
 
 ---
@@ -105,6 +111,7 @@
 -- @param openmw.async#Callback callback The callback to pass the result to (should accept a single argument @{openmw.nearby#RayCastingResult}).
 -- @param openmw.util#Vector3 from Start point of the ray.
 -- @param openmw.util#Vector3 to End point of the ray.
+-- @param #CastRenderingRayOptions
 
 ---
 -- @type NAVIGATOR_FLAGS

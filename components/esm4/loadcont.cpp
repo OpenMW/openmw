@@ -41,65 +41,65 @@ void ESM4::Container::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mDataFlags);
                 reader.get(mWeight);
                 break;
-            case ESM4::SUB_CNTO:
+            case ESM::fourCC("CNTO"):
             {
-                static InventoryItem inv; // FIXME: use unique_ptr here?
+                InventoryItem inv; // FIXME: use unique_ptr here?
                 reader.get(inv);
                 reader.adjustFormId(inv.item);
                 mInventory.push_back(inv);
                 break;
             }
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_SNAM:
+            case ESM::fourCC("SNAM"):
                 reader.getFormId(mOpenSound);
                 break;
-            case ESM4::SUB_QNAM:
+            case ESM::fourCC("QNAM"):
                 reader.getFormId(mCloseSound);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_VMAD: // TES5 only
-            case ESM4::SUB_OBND: // TES5 only
-            case ESM4::SUB_COCT: // TES5 only
-            case ESM4::SUB_COED: // TES5 only
-            case ESM4::SUB_DAMC: // Destructible
-            case ESM4::SUB_DEST:
-            case ESM4::SUB_DMDC:
-            case ESM4::SUB_DMDL:
-            case ESM4::SUB_DMDT:
-            case ESM4::SUB_DMDS:
-            case ESM4::SUB_DSTA:
-            case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF: // Destructible end
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_ONAM:
-            case ESM4::SUB_RNAM: // FONV
-            case ESM4::SUB_TNAM:
-            case ESM4::SUB_FTYP: // FO4
-            case ESM4::SUB_NTRM: // FO4
-            case ESM4::SUB_PRPS: // FO4
-            case ESM4::SUB_PTRN: // FO4
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("VMAD"): // TES5 only
+            case ESM::fourCC("OBND"): // TES5 only
+            case ESM::fourCC("COCT"): // TES5 only
+            case ESM::fourCC("COED"): // TES5 only
+            case ESM::fourCC("DAMC"): // Destructible
+            case ESM::fourCC("DEST"):
+            case ESM::fourCC("DMDC"):
+            case ESM::fourCC("DMDL"):
+            case ESM::fourCC("DMDT"):
+            case ESM::fourCC("DMDS"):
+            case ESM::fourCC("DSTA"):
+            case ESM::fourCC("DSTD"):
+            case ESM::fourCC("DSTF"): // Destructible end
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("ONAM"):
+            case ESM::fourCC("RNAM"): // FONV
+            case ESM::fourCC("TNAM"):
+            case ESM::fourCC("FTYP"): // FO4
+            case ESM::fourCC("NTRM"): // FO4
+            case ESM::fourCC("PRPS"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

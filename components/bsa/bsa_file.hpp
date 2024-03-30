@@ -35,13 +35,13 @@
 namespace Bsa
 {
 
-    enum BsaVersion
+    enum class BsaVersion : std::uint32_t
     {
-        BSAVER_UNKNOWN = 0x0,
-        BSAVER_UNCOMPRESSED = 0x100,
-        BSAVER_COMPRESSED = 0x415342, // B, S, A,
-        BSAVER_BA2_GNRL, // used by FO4, BSA which contains files
-        BSAVER_BA2_DX10 // used by FO4, BSA which contains textures
+        Unknown = 0x0,
+        Uncompressed = 0x100,
+        Compressed = 0x415342, // B, S, A,
+        BA2GNRL, // used by FO4, BSA which contains files
+        BA2DX10 // used by FO4, BSA which contains textures
     };
 
     /**

@@ -79,18 +79,17 @@ namespace
         int count = 0;
         speed = 0.0f;
         ESM::EffectList projectileEffects;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter(effects->mList.begin()); iter != effects->mList.end();
-             ++iter)
+        for (const ESM::IndexedENAMstruct& effect : effects->mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(iter->mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mData.mEffectID);
 
             // Speed of multi-effect projectiles should be the average of the constituent effects,
             // based on observation of the original engine.
             speed += magicEffect->mData.mSpeed;
             count++;
 
-            if (iter->mRange != ESM::RT_Target)
+            if (effect.mData.mRange != ESM::RT_Target)
                 continue;
 
             if (magicEffect->mBolt.empty())
@@ -106,7 +105,7 @@ namespace
                                    ->get<ESM::Skill>()
                                    .find(magicEffect->mData.mSchool)
                                    ->mSchool->mBoltSound);
-            projectileEffects.mList.push_back(*iter);
+            projectileEffects.mList.push_back(effect);
         }
 
         if (count != 0)
@@ -117,7 +116,7 @@ namespace
         {
             const ESM::MagicEffect* magicEffect
                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-                    effects->mList.begin()->mEffectID);
+                    effects->mList.begin()->mData.mEffectID);
             texture = magicEffect->mParticle;
         }
 
@@ -136,10 +135,10 @@ namespace
     {
         // Calculate combined light diffuse color from magical effects
         osg::Vec4 lightDiffuseColor;
-        for (const ESM::ENAMstruct& enam : effects.mList)
+        for (const ESM::IndexedENAMstruct& enam : effects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mData.mEffectID);
             lightDiffuseColor += magicEffect->getColor();
         }
         int numberOfEffects = effects.mList.size();
@@ -188,7 +187,7 @@ namespace MWWorld
     };
 
     void ProjectileManager::createModel(State& state, const std::string& model, const osg::Vec3f& pos,
-        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture)
+        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, const std::string& texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -311,7 +310,7 @@ namespace MWWorld
 
         osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
 
-        auto model = ptr.getClass().getModel(ptr);
+        auto model = ptr.getClass().getCorrectedModel(ptr);
         createModel(state, model, pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -351,7 +350,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        const auto model = ptr.getClass().getModel(ptr);
+        const auto model = ptr.getClass().getCorrectedModel(ptr);
         createModel(state, model, pos, orient, false, false, osg::Vec4(0, 0, 0, 0));
         if (!ptr.getClass().getEnchantment(ptr).empty())
             SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
@@ -434,7 +433,7 @@ namespace MWWorld
             MWWorld::Ptr caster = magicBoltState.getCaster();
             if (!caster.isEmpty() && caster.getClass().isActor())
             {
-                if (caster.getRefData().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
+                if (caster.getCellRef().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
                 {
                     cleanupMagicBolt(magicBoltState);
                     continue;
@@ -696,7 +695,7 @@ namespace MWWorld
             {
                 MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
-                model = ptr.getClass().getModel(ptr);
+                model = ptr.getClass().getCorrectedModel(ptr);
                 int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
                 state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
 
@@ -749,7 +748,7 @@ namespace MWWorld
             {
                 MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), state.mIdMagic.at(0));
                 MWWorld::Ptr ptr = ref.getPtr();
-                model = ptr.getClass().getModel(ptr);
+                model = ptr.getClass().getCorrectedModel(ptr);
             }
             catch (...)
             {

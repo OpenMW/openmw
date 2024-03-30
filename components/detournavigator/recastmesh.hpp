@@ -10,6 +10,7 @@
 #include <osg/Vec2i>
 #include <osg/Vec3f>
 
+#include <cstdint>
 #include <memory>
 #include <numeric>
 #include <string>

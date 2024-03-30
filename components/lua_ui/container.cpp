@@ -10,12 +10,12 @@ namespace LuaUi
         updateSizeToFit();
     }
 
-    MyGUI::IntSize LuaContainer::childScalingSize()
+    MyGUI::IntSize LuaContainer::childScalingSize() const
     {
         return MyGUI::IntSize();
     }
 
-    MyGUI::IntSize LuaContainer::templateScalingSize()
+    MyGUI::IntSize LuaContainer::templateScalingSize() const
     {
         return mInnerSize;
     }
@@ -23,14 +23,14 @@ namespace LuaUi
     void LuaContainer::updateSizeToFit()
     {
         MyGUI::IntSize innerSize = MyGUI::IntSize();
-        for (auto w : children())
+        for (const auto w : children())
         {
             MyGUI::IntCoord coord = w->calculateCoord();
             innerSize.width = std::max(innerSize.width, coord.left + coord.width);
             innerSize.height = std::max(innerSize.height, coord.top + coord.height);
         }
         MyGUI::IntSize outerSize = innerSize;
-        for (auto w : templateChildren())
+        for (const auto w : templateChildren())
         {
             MyGUI::IntCoord coord = w->calculateCoord();
             outerSize.width = std::max(outerSize.width, coord.left + coord.width);
@@ -40,7 +40,7 @@ namespace LuaUi
         mOuterSize = outerSize;
     }
 
-    MyGUI::IntSize LuaContainer::calculateSize()
+    MyGUI::IntSize LuaContainer::calculateSize() const
     {
         return mOuterSize;
     }

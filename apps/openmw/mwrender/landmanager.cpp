@@ -1,7 +1,5 @@
 #include "landmanager.hpp"
 
-#include <osg/Stats>
-
 #include <components/esm4/loadwrld.hpp>
 #include <components/resource/objectcache.hpp>
 #include <components/settings/values.hpp>
@@ -53,7 +51,7 @@ namespace MWRender
 
     void LandManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Land", mCache->getCacheSize());
+        Resource::reportStats("Land", frameNumber, mCache->getStats(), *stats);
     }
 
 }

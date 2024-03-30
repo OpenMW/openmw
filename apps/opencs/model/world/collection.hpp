@@ -15,11 +15,13 @@
 #include <QVariant>
 
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
+#include "columnimp.hpp"
 #include "info.hpp"
 #include "land.hpp"
 #include "landtexture.hpp"
@@ -80,6 +82,17 @@ namespace CSMWorld
         LandTexture::parseUniqueRecordId(id.getRefIdString(), plugin, index);
         record.mPluginIndex = plugin;
         record.mIndex = index;
+    }
+
+    inline ESM::RefId getRecordId(const ESM::MagicEffect& record)
+    {
+        return ESM::RefId::stringRefId(CSMWorld::getStringId(record.mId));
+    }
+
+    inline void setRecordId(const ESM::RefId& id, ESM::MagicEffect& record)
+    {
+        int index = ESM::MagicEffect::indexNameToIndex(id.getRefIdString());
+        record.mId = ESM::RefId::index(ESM::REC_MGEF, static_cast<std::uint32_t>(index));
     }
 
     inline ESM::RefId getRecordId(const LandTexture& record)
@@ -504,7 +517,7 @@ namespace CSMWorld
 
         auto record2 = std::make_unique<Record<ESXRecordT>>();
         record2->mState = Record<ESXRecordT>::State_ModifiedOnly;
-        record2->mModified = record;
+        record2->mModified = std::move(record);
 
         insertRecord(std::move(record2), getAppendIndex(id, type), type);
     }

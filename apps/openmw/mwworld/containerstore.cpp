@@ -51,7 +51,7 @@ namespace
 
         for (const MWWorld::LiveCellRef<T>& liveCellRef : cellRefList.mList)
         {
-            if (const int count = liveCellRef.mData.getCount(); count > 0)
+            if (const int count = liveCellRef.mRef.getCount(); count > 0)
                 sum += count * liveCellRef.mBase->mData.mWeight;
         }
 
@@ -65,7 +65,7 @@ namespace
 
         for (MWWorld::LiveCellRef<T>& liveCellRef : list.mList)
         {
-            if ((liveCellRef.mBase->mId == id) && liveCellRef.mData.getCount())
+            if ((liveCellRef.mBase->mId == id) && liveCellRef.mRef.getCount())
             {
                 MWWorld::Ptr ptr(&liveCellRef, nullptr);
                 ptr.setContainerStore(store);
@@ -132,7 +132,7 @@ void MWWorld::ContainerStore::storeStates(
 {
     for (const LiveCellRef<T>& liveCellRef : collection.mList)
     {
-        if (liveCellRef.mData.getCount() == 0)
+        if (liveCellRef.mRef.getCount() == 0)
             continue;
         ESM::ObjectState state;
         storeState(liveCellRef, state);
@@ -192,7 +192,7 @@ int MWWorld::ContainerStore::count(const ESM::RefId& id) const
     int total = 0;
     for (const auto&& iter : *this)
         if (iter.getCellRef().getRefId() == id)
-            total += iter.getRefData().getCount();
+            total += iter.getCellRef().getCount();
     return total;
 }
 
@@ -219,9 +219,9 @@ void MWWorld::ContainerStore::setContListener(MWWorld::ContainerStoreListener* l
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr& ptr, int count)
 {
     resolve();
-    if (ptr.getRefData().getCount() <= count)
+    if (ptr.getCellRef().getCount() <= count)
         return end();
-    MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getRefData().getCount(false), count));
+    MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getCellRef().getCount(false), count));
 
     MWWorld::Ptr newPtr = *it;
     newPtr.getCellRef().unsetRefNum();
@@ -232,7 +232,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr& ptr,
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
-    remove(ptr, ptr.getRefData().getCount() - count);
+    remove(ptr, ptr.getCellRef().getCount() - count);
 
     return it;
 }
@@ -257,9 +257,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     {
         if (stacks(*iter, item))
         {
-            iter->getRefData().setCount(
-                addItems(iter->getRefData().getCount(false), item.getRefData().getCount(false)));
-            item.getRefData().setCount(0);
+            iter->getCellRef().setCount(
+                addItems(iter->getCellRef().getCount(false), item.getCellRef().getCount(false)));
+            item.getCellRef().setCount(0);
             retval = iter;
             break;
         }
@@ -385,22 +385,24 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const Ptr& ptr, 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for
     // detecting player gold)
+    // Note that adding 1 gold_100 is equivalent to adding 1 gold_001. Morrowind.exe resolves gold in leveled lists to
+    // gold_001 and TESCS disallows adding gold other than gold_001 to inventories. If a content file defines a
+    // container containing gold_100 anyway, the item is not turned to gold_001 until the player puts it down in the
+    // world and picks it up again. We just turn it into gold_001 here and ignore that oddity.
     if (ptr.getClass().isGold(ptr))
     {
-        int realCount = count * ptr.getClass().getValue(ptr);
-
         for (MWWorld::ContainerStoreIterator iter(begin(type)); iter != end(); ++iter)
         {
             if (iter->getCellRef().getRefId() == MWWorld::ContainerStore::sGoldId)
             {
-                iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), realCount));
+                iter->getCellRef().setCount(addItems(iter->getCellRef().getCount(false), count));
                 flagAsModified();
                 return iter;
             }
         }
 
-        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, realCount);
-        return addNewStack(ref.getPtr(), realCount);
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, count);
+        return addNewStack(ref.getPtr(), count);
     }
 
     // determine whether to stack or not
@@ -414,7 +416,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const Ptr& ptr, 
         if (stacks(*iter, ptr))
         {
             // stack
-            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), count));
+            iter->getCellRef().setCount(addItems(iter->getCellRef().getCount(false), count));
 
             flagAsModified();
             return iter;
@@ -480,7 +482,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack(const Const
             break;
     }
 
-    it->getRefData().setCount(count);
+    it->getCellRef().setCount(count);
 
     flagAsModified();
     return it;
@@ -562,7 +564,7 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, bool equipReplac
         resolve();
 
     int toRemove = count;
-    RefData& itemRef = item.getRefData();
+    CellRef& itemRef = item.getCellRef();
 
     if (itemRef.getCount() <= toRemove)
     {
@@ -667,7 +669,7 @@ void MWWorld::ContainerStore::addInitialItemImp(
 void MWWorld::ContainerStore::clear()
 {
     for (auto&& iter : *this)
-        iter.getRefData().setCount(0);
+        iter.getCellRef().setCount(0);
 
     flagAsModified();
     mModified = true;
@@ -690,7 +692,7 @@ void MWWorld::ContainerStore::resolve()
     if (!mResolved && !container.isEmpty() && container.getType() == ESM::REC_CONT)
     {
         for (const auto&& ptr : *this)
-            ptr.getRefData().setCount(0);
+            ptr.getCellRef().setCount(0);
         Misc::Rng::Generator prng{ mSeed };
         fill(container.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
         addScripts(*this, container.mCell);
@@ -712,12 +714,12 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
     if (!mResolved && !container.isEmpty() && container.getType() == ESM::REC_CONT)
     {
         for (const auto&& ptr : *this)
-            ptr.getRefData().setCount(0);
+            ptr.getCellRef().setCount(0);
         Misc::Rng::Generator prng{ mSeed };
         fill(container.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
         addScripts(*this, container.mCell);
     }
-    return { listener };
+    return { std::move(listener) };
 }
 
 void MWWorld::ContainerStore::unresolve()
@@ -729,7 +731,7 @@ void MWWorld::ContainerStore::unresolve()
     if (mResolved && !container.isEmpty() && container.getType() == ESM::REC_CONT)
     {
         for (const auto&& ptr : *this)
-            ptr.getRefData().setCount(0);
+            ptr.getCellRef().setCount(0);
         fillNonRandom(container.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), mSeed);
         addScripts(*this, container.mCell);
         mResolved = false;
@@ -1332,7 +1334,7 @@ MWWorld::ContainerStoreIteratorBase<PtrType>& MWWorld::ContainerStoreIteratorBas
     {
         if (incIterator())
             nextType();
-    } while (mType != -1 && !(**this).getRefData().getCount());
+    } while (mType != -1 && !(**this).getCellRef().getCount());
 
     return *this;
 }
@@ -1384,7 +1386,7 @@ MWWorld::ContainerStoreIteratorBase<PtrType>::ContainerStoreIteratorBase(int mas
 {
     nextType();
 
-    if (mType == -1 || (**this).getRefData().getCount())
+    if (mType == -1 || (**this).getCellRef().getCount())
         return;
 
     ++*this;

@@ -180,22 +180,23 @@ namespace
     void printEffectList(const ESM::EffectList& effects)
     {
         int i = 0;
-        for (const ESM::ENAMstruct& effect : effects.mList)
+        for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mEffectID) << " (" << effect.mEffectID
-                      << ")" << std::endl;
-            if (effect.mSkill != -1)
-                std::cout << "    Skill: " << skillLabel(effect.mSkill) << " (" << (int)effect.mSkill << ")"
+            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mData.mEffectID) << " ("
+                      << effect.mData.mEffectID << ")" << std::endl;
+            if (effect.mData.mSkill != -1)
+                std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
                           << std::endl;
-            if (effect.mAttribute != -1)
-                std::cout << "    Attribute: " << attributeLabel(effect.mAttribute) << " (" << (int)effect.mAttribute
-                          << ")" << std::endl;
-            std::cout << "    Range: " << rangeTypeLabel(effect.mRange) << " (" << effect.mRange << ")" << std::endl;
+            if (effect.mData.mAttribute != -1)
+                std::cout << "    Attribute: " << attributeLabel(effect.mData.mAttribute) << " ("
+                          << (int)effect.mData.mAttribute << ")" << std::endl;
+            std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
+                      << std::endl;
             // Area is always zero if range type is "Self"
-            if (effect.mRange != ESM::RT_Self)
-                std::cout << "    Area: " << effect.mArea << std::endl;
-            std::cout << "    Duration: " << effect.mDuration << std::endl;
-            std::cout << "    Magnitude: " << effect.mMagnMin << "-" << effect.mMagnMax << std::endl;
+            if (effect.mData.mRange != ESM::RT_Self)
+                std::cout << "    Area: " << effect.mData.mArea << std::endl;
+            std::cout << "    Duration: " << effect.mData.mDuration << std::endl;
+            std::cout << "    Magnitude: " << effect.mData.mMagnMin << "-" << effect.mData.mMagnMax << std::endl;
             i++;
         }
     }
@@ -464,7 +465,8 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 
@@ -478,7 +480,7 @@ namespace EsmTool
             std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
         std::cout << "  Value: " << mData.mData.mValue << std::endl;
-        std::cout << "  AutoCalc: " << mData.mData.mAutoCalc << std::endl;
+        std::cout << "  Flags: " << potionFlags(mData.mData.mFlags) << std::endl;
         printEffectList(mData.mEffects);
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -516,7 +518,8 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
         std::cout << "  Icon: " << mData.mIcon << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Type: " << apparatusTypeLabel(mData.mData.mType) << " (" << mData.mData.mType << ")"
                   << std::endl;
         std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
@@ -610,7 +613,6 @@ namespace EsmTool
         }
         else
             std::cout << "  Map Color: " << Misc::StringUtils::format("0x%08X", mData.mMapColor) << std::endl;
-        std::cout << "  Water Level Int: " << mData.mWaterInt << std::endl;
         std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -679,7 +681,8 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Flags: " << creatureFlags((int)mData.mFlags) << std::endl;
         std::cout << "  Blood Type: " << mData.mBloodType + 1 << std::endl;
         std::cout << "  Original: " << mData.mOriginal << std::endl;
@@ -719,9 +722,6 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
-        std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
-        std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
         std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
@@ -747,7 +747,8 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Model: " << mData.mModel << std::endl;
-        std::cout << "  Script: " << mData.mScript << std::endl;
+        if (!mData.mScript.empty())
+            std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  OpenSound: " << mData.mOpenSound << std::endl;
         std::cout << "  CloseSound: " << mData.mCloseSound << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
@@ -839,8 +840,7 @@ namespace EsmTool
 
         std::cout << "  Quest Status: " << questStatusLabel(mData.mQuestStatus) << " (" << mData.mQuestStatus << ")"
                   << std::endl;
-        std::cout << "  Unknown1: " << mData.mData.mUnknown1 << std::endl;
-        std::cout << "  Unknown2: " << (int)mData.mData.mUnknown2 << std::endl;
+        std::cout << "  Type: " << dialogTypeLabel(mData.mData.mType) << std::endl;
 
         for (const ESM::DialInfo::SelectStruct& rule : mData.mSelects)
             std::cout << "  Select Rule: " << ruleString(rule) << std::endl;
@@ -897,9 +897,6 @@ namespace EsmTool
         if (const ESM::Land::LandData* data = mData.getLandData(mData.mDataTypes))
         {
             std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
-            // Lots of missing members.
-            std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
-            std::cout << "  Unknown2: " << static_cast<unsigned>(data->mUnk2) << std::endl;
         }
         mData.unloadData();
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
@@ -1111,9 +1108,6 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
-        std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
-        std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
         std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
@@ -1140,7 +1134,6 @@ namespace EsmTool
             std::cout << "    Coordinates: (" << point.mX << "," << point.mY << "," << point.mZ << ")" << std::endl;
             std::cout << "    Auto-Generated: " << (int)point.mAutogenerated << std::endl;
             std::cout << "    Connections: " << (int)point.mConnectionNum << std::endl;
-            std::cout << "    Unknown: " << point.mUnknown << std::endl;
             i++;
         }
 
@@ -1338,28 +1331,26 @@ namespace EsmTool
     template <>
     void Record<CellState>::print()
     {
-        std::cout << "  Id:" << std::endl;
-        std::cout << "    CellId: " << mData.mCellState.mId << std::endl;
-        std::cout << "    Index:" << std::endl;
-        std::cout << "  WaterLevel: " << mData.mCellState.mWaterLevel << std::endl;
-        std::cout << "  HasFogOfWar: " << mData.mCellState.mHasFogOfWar << std::endl;
-        std::cout << "  LastRespawn:" << std::endl;
+        std::cout << "  Cell Id: \"" << mData.mCellState.mId.toString() << "\"" << std::endl;
+        std::cout << "  Water Level: " << mData.mCellState.mWaterLevel << std::endl;
+        std::cout << "  Has Fog Of War: " << mData.mCellState.mHasFogOfWar << std::endl;
+        std::cout << "  Last Respawn:" << std::endl;
         std::cout << "    Day:" << mData.mCellState.mLastRespawn.mDay << std::endl;
         std::cout << "    Hour:" << mData.mCellState.mLastRespawn.mHour << std::endl;
         if (mData.mCellState.mHasFogOfWar)
         {
-            std::cout << "  NorthMarkerAngle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
+            std::cout << "  North Marker Angle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
             std::cout << "  Bounds:" << std::endl;
-            std::cout << "    MinX: " << mData.mFogState.mBounds.mMinX << std::endl;
-            std::cout << "    MinY: " << mData.mFogState.mBounds.mMinY << std::endl;
-            std::cout << "    MaxX: " << mData.mFogState.mBounds.mMaxX << std::endl;
-            std::cout << "    MaxY: " << mData.mFogState.mBounds.mMaxY << std::endl;
+            std::cout << "    Min X: " << mData.mFogState.mBounds.mMinX << std::endl;
+            std::cout << "    Min Y: " << mData.mFogState.mBounds.mMinY << std::endl;
+            std::cout << "    Max X: " << mData.mFogState.mBounds.mMaxX << std::endl;
+            std::cout << "    Max Y: " << mData.mFogState.mBounds.mMaxY << std::endl;
             for (const ESM::FogTexture& fogTexture : mData.mFogState.mFogTextures)
             {
-                std::cout << "  FogTexture:" << std::endl;
+                std::cout << "  Fog Texture:" << std::endl;
                 std::cout << "    X: " << fogTexture.mX << std::endl;
                 std::cout << "    Y: " << fogTexture.mY << std::endl;
-                std::cout << "    ImageData: (" << fogTexture.mImageData.size() << ")" << std::endl;
+                std::cout << "    Image Data: (" << fogTexture.mImageData.size() << ")" << std::endl;
             }
         }
     }
@@ -1367,7 +1358,7 @@ namespace EsmTool
     template <>
     std::string Record<ESM::Cell>::getId() const
     {
-        return mData.mName;
+        return std::string(); // No ID for Cell record
     }
 
     template <>
@@ -1397,9 +1388,7 @@ namespace EsmTool
     template <>
     std::string Record<CellState>::getId() const
     {
-        std::ostringstream stream;
-        stream << mData.mCellState.mId;
-        return stream.str();
+        return std::string(); // No ID for CellState record
     }
 
 } // end namespace

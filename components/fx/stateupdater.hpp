@@ -43,6 +43,7 @@ namespace fx
         void setSunPos(const osg::Vec4f& pos, bool night)
         {
             mData.get<SunPos>() = pos;
+            mData.get<SunPos>().normalize();
 
             if (night)
                 mData.get<SunPos>().z() *= -1.f;

@@ -694,10 +694,10 @@ void CSVWorld::Table::previewRecord()
 
     if (selectedRows.size() == 1)
     {
-        std::string id = getUniversalId(selectedRows.begin()->row()).getId();
+        CSMWorld::UniversalId id = getUniversalId(selectedRows.begin()->row());
 
         QModelIndex index
-            = mModel->getModelIndex(id, mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Modification));
+            = mModel->getModelIndex(id.getId(), mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Modification));
 
         if (mModel->data(index) != CSMWorld::RecordBase::State_Deleted)
             emit editRequest(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, id), "");

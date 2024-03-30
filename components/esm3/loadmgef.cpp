@@ -588,7 +588,7 @@ namespace ESM
         mData.mRed = 0;
         mData.mGreen = 0;
         mData.mBlue = 0;
-        mData.mSpeed = 0;
+        mData.mSpeed = 1;
 
         mIcon.clear();
         mParticle.clear();
@@ -631,7 +631,7 @@ namespace ESM
     {
         auto name = sIndexNameToIndexMap.find(effect);
         if (name == sIndexNameToIndexMap.end())
-            throw std::runtime_error("Unimplemented effect " + std::string(effect));
+            return -1;
 
         return name->second;
     }
