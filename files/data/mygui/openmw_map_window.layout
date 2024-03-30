@@ -34,5 +34,15 @@
             <Property key="NeedKey" value="false"/>
         </Widget>
 
+        <!-- Zoom out button -->
+        <Widget type="AutoSizedButton" skin="MW_ZoomButton" position="243 45 61 22" align="Top Right" name="ZoomOutButton">
+            <Property key="Caption" value="-"/>
+        </Widget>
+
+        <!-- Zoom in button -->
+        <Widget type="AutoSizedButton" skin="MW_ZoomButton" position="242 15 61 22" align="Top Right" name="ZoomInButton">
+            <Property key="Caption" value="+"/>
+        </Widget>
+
     </Widget>
 </MyGUI>

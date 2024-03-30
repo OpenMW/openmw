@@ -119,4 +119,22 @@
             <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
    </Resource>
+
+    <!-- Zoom button widget -->
+    <Resource type="ResourceSkin" name="MW_ZoomButton" size="136 24" version="3.2.1">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+	<Property key="NeedKey" value="true"/>
+
+        <BasisSkin type="SimpleText" offset="4 3 128 16" align="Stretch">
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
+        </BasisSkin>
+   </Resource>
 </MyGUI>

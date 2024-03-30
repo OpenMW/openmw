@@ -270,9 +270,12 @@ namespace MWGui
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
+        void onZoomOutButtonClicked(MyGUI::Widget* _sender);
+        void onZoomInButtonClicked(MyGUI::Widget* _sender);
         void onMapDoubleClicked(MyGUI::Widget* sender);
         void onMapZoomed(MyGUI::Widget* sender, int rel);
         void zoomOnCursor(float speedDiff);
+        void zoomOnCenter(float speedDiff);
         void updateGlobalMap();
         void onCustomMarkerDoubleClicked(MyGUI::Widget* sender);
         void onNoteEditOk();
@@ -296,6 +299,8 @@ namespace MWGui
         MyGUI::ImageBox* mPlayerArrowLocal;
         MyGUI::ImageBox* mPlayerArrowGlobal;
         MyGUI::Button* mButton;
+        MyGUI::Button* mZoomOutButton;
+        MyGUI::Button* mZoomInButton;
         MyGUI::IntPoint mLastDragPos;
 
         MyGUI::IntCoord mLastScrollWindowCoordinates;
