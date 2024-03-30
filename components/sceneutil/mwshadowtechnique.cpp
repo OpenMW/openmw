@@ -555,8 +555,8 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
         _texture->setShadowTextureMode(osg::Texture2D::LUMINANCE);
     }
 
-    _texture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::LINEAR);
-    _texture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::LINEAR);
+    _texture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::NEAREST);
+    _texture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::NEAREST);
 
     // the shadow comparison should fail if object is outside the texture
     _texture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_BORDER);

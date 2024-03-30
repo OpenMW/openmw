@@ -463,6 +463,9 @@ namespace MWRender
 
         globalDefines["reverseZ"] = reverseZ ? "1" : "0";
 
+        globalDefines["shadowMapSize"] = std::to_string(Settings::shadows().mShadowMapResolution);
+        globalDefines["PCFSamples"] = std::to_string(Settings::shadows().mPercentageCloserFiltering);
+
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
