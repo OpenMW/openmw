@@ -152,23 +152,12 @@ void main(void)
     float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
     float fresnel = clamp(fresnel_dielectric(vVec, normal, ior), 0.0, 1.0);
 
-    float radialise = 1.0;
-
-#if @radialFog
-    float radialDepth = distance(position.xyz, cameraPos);
-    // TODO: Figure out how to properly radialise refraction depth and thus underwater fog
-    // while avoiding oddities when the water plane is close to the clipping plane
-    // radialise = radialDepth / linearDepth;
-#else
-    float radialDepth = 0.0;
-#endif
-
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
 #if REFRACTION
-    float depthSample = linearizeDepth(sampleRefractionDepthMap(screenCoords), near, far) * radialise;
-    float surfaceDepth = linearizeDepth(gl_FragCoord.z, near, far) * radialise;
+    float depthSample = linearizeDepth(sampleRefractionDepthMap(screenCoords), near, far);
+    float surfaceDepth = linearizeDepth(gl_FragCoord.z, near, far);
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
-    float depthSampleDistorted = linearizeDepth(sampleRefractionDepthMap(screenCoords - screenCoordsOffset), near, far) * radialise;
+    float depthSampleDistorted = linearizeDepth(sampleRefractionDepthMap(screenCoords - screenCoordsOffset), near, far);
     float waterDepthDistorted = max(depthSampleDistorted - surfaceDepth, 0.0);
     screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #endif
@@ -196,7 +185,7 @@ void main(void)
     if (cameraPos.z > 0.0 && realWaterDepth <= VISIBILITY_DEPTH && waterDepthDistorted > VISIBILITY_DEPTH)
         screenCoordsOffset = vec2(0.0);
 
-    depthSampleDistorted = linearizeDepth(sampleRefractionDepthMap(screenCoords - screenCoordsOffset), near, far) * radialise;
+    depthSampleDistorted = linearizeDepth(sampleRefractionDepthMap(screenCoords - screenCoordsOffset), near, far);
     waterDepthDistorted = max(depthSampleDistorted - surfaceDepth, 0.0);
 
     // fade to realWaterDepth at a distance to compensate for physically inaccurate depth calculation
@@ -246,6 +235,12 @@ void main(void)
 #else
     gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * sunSpec.rgb  * sunSpec.a + rainSpecular;
     gl_FragData[0].w = clamp(fresnel*6.0 + specular * sunSpec.a, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.a, 0.0, 1.0);
+#endif
+
+#if @radialFog
+    float radialDepth = distance(position.xyz, cameraPos);
+#else
+    float radialDepth = 0.0;
 #endif
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], radialDepth, linearDepth, far);
