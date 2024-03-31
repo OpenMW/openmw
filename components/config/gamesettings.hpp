@@ -132,6 +132,9 @@ namespace Config
 
         static bool isOrderedLine(const QString& line);
     };
+
+    QDataStream& operator<<(QDataStream& out, const SettingValue& settingValue);
+    QDataStream& operator>>(QDataStream& in, SettingValue& settingValue);
 }
 
 Q_DECLARE_METATYPE(Config::SettingValue)

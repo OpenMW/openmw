@@ -24,6 +24,11 @@ namespace
 Config::GameSettings::GameSettings(const Files::ConfigurationManager& cfg)
     : mCfgMgr(cfg)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    // this needs calling once so Qt can see its stream operators, which it needs when dragging and dropping
+    // it's automatic with Qt 6
+    qRegisterMetaTypeStreamOperators<SettingValue>("Config::SettingValue");
+#endif
 }
 
 void Config::GameSettings::validatePaths()
@@ -590,4 +595,20 @@ void Config::GameSettings::clear()
     mUserSettings.clear();
     mDataDirs.clear();
     mDataLocal.clear();
+}
+
+QDataStream& Config::operator<<(QDataStream& out, const SettingValue& settingValue)
+{
+    out << settingValue.value;
+    out << settingValue.originalRepresentation;
+    out << settingValue.context;
+    return out;
+}
+
+QDataStream& Config::operator>>(QDataStream& in, SettingValue& settingValue)
+{
+    in >> settingValue.value;
+    in >> settingValue.originalRepresentation;
+    in >> settingValue.context;
+    return in;
 }
