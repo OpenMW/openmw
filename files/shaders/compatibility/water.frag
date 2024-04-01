@@ -133,15 +133,15 @@ void main(void)
                    normal3 * midWaves.y + normal4 * smallWaves.x + normal5 * smallWaves.y + rippleAdd);
     normal = normalize(vec3(-normal.x * bump, -normal.y * bump, normal.z));
 
-    vec3 lVec = normalize((gl_ModelViewMatrixInverse * vec4(lcalcPosition(0).xyz, 0.0)).xyz);
+    vec3 sunWorldDir = normalize((gl_ModelViewMatrixInverse * vec4(lcalcPosition(0).xyz, 0.0)).xyz);
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
-    vec3 vVec = normalize(position.xyz - cameraPos.xyz);
+    vec3 viewDir = normalize(position.xyz - cameraPos.xyz);
 
     float sunFade = length(gl_LightModel.ambient.xyz);
 
     // fresnel
     float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
-    float fresnel = clamp(fresnel_dielectric(vVec, normal, ior), 0.0, 1.0);
+    float fresnel = clamp(fresnel_dielectric(viewDir, normal, ior), 0.0, 1.0);
 
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
 #if @refraction_enabled
@@ -162,7 +162,7 @@ void main(void)
     sunSpec.a = min(1.0, sunSpec.a / SUN_SPEC_FADING_THRESHOLD);
 
     // specular
-    float specular = pow(max(dot(reflect(vVec, normal), lVec), 0.0), SPEC_HARDNESS) * shadow * sunSpec.a;
+    float specular = pow(max(dot(reflect(viewDir, normal), sunWorldDir), 0.0), SPEC_HARDNESS) * shadow * sunSpec.a;
 
     // artificial specularity to make rain ripples more noticeable
     vec3 skyColorEstimate = vec3(max(0.0, mix(-0.3, 1.0, sunFade)));
@@ -195,14 +195,13 @@ void main(void)
     }
 
 #if @sunlightScattering
-    // normal for sunlight scattering
-    vec3 lNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
-                    normal3 * midWaves.y * 0.2 + normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 + rippleAdd);
-    lNormal = normalize(vec3(-lNormal.x * bump, -lNormal.y * bump, lNormal.z));
-    float sunHeight = lVec.z;
+    vec3 scatterNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
+                          normal3 * midWaves.y * 0.2 + normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 + rippleAdd);
+    scatterNormal = normalize(vec3(-scatterNormal.xy * bump, scatterNormal.z));
+    float sunHeight = sunWorldDir.z;
     vec3 scatterColour = mix(SCATTER_COLOUR * vec3(1.0, 0.4, 0.0), SCATTER_COLOUR, max(1.0 - exp(-sunHeight * SUN_EXT), 0.0));
-    float scatterLambert = max(dot(lVec, lNormal) * 0.7 + 0.3, 0.0);
-    float scatterReflectAngle = max(dot(reflect(lVec, lNormal), vVec) * 2.0 - 1.2, 0.0);
+    float scatterLambert = max(dot(sunWorldDir, scatterNormal) * 0.7 + 0.3, 0.0);
+    float scatterReflectAngle = max(dot(reflect(sunWorldDir, scatterNormal), viewDir) * 2.0 - 1.2, 0.0);
     float lightScatter = scatterLambert * scatterReflectAngle * SCATTER_AMOUNT * sunFade * sunSpec.a * max(1.0 - exp(-sunHeight), 0.0);
     refraction = mix(refraction, scatterColour, lightScatter);
 #endif
@@ -222,7 +221,7 @@ void main(void)
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping
     vec3 normalShoreRippleRain = texture2D(normalMap,normalCoords(UV, 2.0, 2.7, -1.0*waterTimer,  0.05,  0.1,  normal3)).rgb - 0.5
                                + texture2D(normalMap,normalCoords(UV, 2.0, 2.7,      waterTimer,  0.04, -0.13, normal4)).rgb - 0.5;
-    float viewFactor = mix(abs(vVec.z), 1.0, 0.2);
+    float viewFactor = mix(abs(viewDir.z), 1.0, 0.2);
     float verticalWaterDepth = realWaterDepth * viewFactor; // an estimate
     float shoreOffset = verticalWaterDepth - (normal2.r + mix(0.0, normalShoreRippleRain.r, rainIntensity) + 0.15)*8.0;
     float fuzzFactor = min(1.0, 1000.0 / surfaceDepth) * viewFactor;
