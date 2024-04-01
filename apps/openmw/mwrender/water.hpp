@@ -81,7 +81,7 @@ namespace MWRender
 
         void createSimpleWaterStateSet(osg::Node* node, float alpha);
 
-        void createShaderWaterStateSet(osg::Node* node);
+        void createShaderWaterStateSet(osg::Node* node, bool supportShaderWaterRipples);
 
         void updateWaterMaterial();
 

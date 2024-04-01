@@ -45,6 +45,7 @@ namespace MWRender
 #else
         constexpr float minimumGLVersionRequiredForCompute = 4.4;
         osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+        bool supportsHalfFloatLinear = osg::isGLExtensionSupported(exts.contextID, "GL_OES_texture_half_float_linear");
         mUseCompute = exts.glVersion >= minimumGLVersionRequiredForCompute
             && exts.glslLanguageVersion >= minimumGLVersionRequiredForCompute;
 #endif
@@ -74,8 +75,16 @@ namespace MWRender
             texture->setSourceFormat(GL_RGBA);
             texture->setSourceType(GL_HALF_FLOAT);
             texture->setInternalFormat(GL_RGBA16F);
-            texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::LINEAR);
-            texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::LINEAR);
+            if (supportsHalfFloatLinear)
+            {
+                texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::LINEAR);
+                texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::LINEAR);
+            }
+            else
+            {
+                texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::NEAREST);
+                texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::NEAREST);
+            }
             texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_BORDER);
             texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_BORDER);
             texture->setBorderColor(osg::Vec4(0, 0, 0, 0));

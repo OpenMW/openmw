@@ -23,6 +23,7 @@
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/waterutil.hpp>
+#include <components/sceneutil/glextensions.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/stereo/stereomanager.hpp>
@@ -554,13 +555,25 @@ namespace MWRender
                 mParent->addChild(mRefraction);
             }
 
+            osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+            bool supportHalfFloatTexture = osg::isGLExtensionSupported(exts.contextID, "GL_OES_texture_half_float");
+
+            if (supportHalfFloatTexture)
+            {
+                mRipples = new Ripples(mResourceSystem);
+                mSimulation->setRipples(mRipples);
+                mParent->addChild(mRipples);
+            }
+            else
+                Log(Debug::Info) << "Initialized simple water ripples, missing required features";
+
             mRipples = new Ripples(mResourceSystem);
             mSimulation->setRipples(mRipples);
             mParent->addChild(mRipples);
 
             showWorld(mShowWorld);
 
-            createShaderWaterStateSet(mWaterNode);
+            createShaderWaterStateSet(mWaterNode, supportHalfFloatTexture);
         }
         else
             createSimpleWaterStateSet(mWaterGeom, Fallback::Map::getFloat("Water_World_Alpha"));
@@ -696,7 +709,7 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> mNormalMap;
     };
 
-    void Water::createShaderWaterStateSet(osg::Node* node)
+    void Water::createShaderWaterStateSet(osg::Node* node, bool supportShaderWaterRipples)
     {
         // use a define map to conditionally compile the shader
         std::map<std::string, std::string> defineMap;
@@ -707,6 +720,7 @@ namespace MWRender
         defineMap["ripple_map_size"] = std::to_string(RipplesSurface::sRTTSize) + ".0";
         defineMap["sunlightScattering"] = Settings::water().mSunlightScattering ? "1" : "0";
         defineMap["wobblyShores"] = Settings::water().mWobblyShores ? "1" : "0";
+        defineMap["shaderRipples"] = supportShaderWaterRipples ? "1" : "0";
 
         Stereo::shaderStereoDefines(defineMap);
 
