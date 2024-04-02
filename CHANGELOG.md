@@ -167,6 +167,7 @@
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
+    Bug #7908: Key bindings names in the settings menu are layout-specific
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty

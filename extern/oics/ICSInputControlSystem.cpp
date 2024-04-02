@@ -803,11 +803,7 @@ namespace ICS
 
     std::string InputControlSystem::scancodeToString(SDL_Scancode key)
 	{
-        SDL_Keycode code = SDL_GetKeyFromScancode(key);
-        if (code == SDLK_UNKNOWN)
-            return std::string(SDL_GetScancodeName(key));
-        else
-            return std::string(SDL_GetKeyName(code));
+		return std::string(SDL_GetScancodeName(key));
 	}
 
     void InputControlSystem::adjustMouseRegion(Uint16 width, Uint16 height)
