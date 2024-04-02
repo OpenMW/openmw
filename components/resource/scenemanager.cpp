@@ -663,7 +663,7 @@ namespace Resource
             node->accept(rigFinder);
             for (osg::Node* foundRigNode : rigFinder.mFoundNodes)
             {
-                if (foundRigNode->libraryName() == std::string("osgAnimation"))
+                if (foundRigNode->libraryName() == std::string_view("osgAnimation"))
                 {
                     osgAnimation::RigGeometry* foundRigGeometry = static_cast<osgAnimation::RigGeometry*>(foundRigNode);
 

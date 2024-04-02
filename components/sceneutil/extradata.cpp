@@ -47,7 +47,7 @@ namespace SceneUtil
     {
         // If an osgAnimation bone/transform, ensure underscores in name are replaced with spaces
         // this is for compatibility reasons
-        if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone"))
+        if (node.libraryName() == std::string_view("osgAnimation") && node.className() == std::string_view("Bone"))
             node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
 
         if (!mSceneMgr->getSoftParticles())
