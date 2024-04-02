@@ -46,6 +46,7 @@
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6716: mwscript comparison operator handling is too restrictive
+    Bug #6723: "Turn to movement direction" makes the player rotate wildly with COLLADA
     Bug #6754: Beast to Non-beast transformation mod is not working on OpenMW
     Bug #6758: Main menu background video can be stopped by opening the options menu
     Bug #6807: Ultimate Galleon is not working properly
@@ -165,7 +166,6 @@
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
-    Bug #6723: "Turn to movement direction" makes the player rotate wildly with COLLADA
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
