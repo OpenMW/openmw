@@ -162,6 +162,7 @@
     Bug #7859: AutoCalc flag is not used to calculate potion value
     Bug #7861: OpenMW-CS: Incorrect DIAL's type in INFO records
     Bug #7872: Region sounds use wrong odds
+    Bug #7886: Equip and unequip animations can't share the animation track section
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
