@@ -1,5 +1,6 @@
 #include <components/sceneutil/osgacontroller.hpp>
 
+#include <osg/MatrixTransform>
 #include <osg/Node>
 #include <osg/NodeVisitor>
 #include <osg/ref_ptr>
@@ -9,6 +10,7 @@
 #include <osgAnimation/Sampler>
 #include <osgAnimation/UpdateMatrixTransform>
 
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/animation.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -24,6 +26,10 @@ namespace SceneUtil
 
     void LinkVisitor::link(osgAnimation::UpdateMatrixTransform* umt)
     {
+        // If osgAnimation had underscores, we should update the umt name also
+        // otherwise the animation channel and updates wont be applied
+        umt->setName(Misc::StringUtils::underscoresToSpaces(umt->getName()));
+
         const osgAnimation::ChannelList& channels = mAnimation->getChannels();
         for (const auto& channel : channels)
         {
@@ -128,6 +134,47 @@ namespace SceneUtil
         return osg::Vec3f();
     }
 
+    osg::Matrixf OsgAnimationController::getTransformForNode(float time, const std::string& name) const
+    {
+        std::string animationName;
+        float newTime = time;
+
+        // Find the correct animation based on time
+        for (const EmulatedAnimation& emulatedAnimation : mEmulatedAnimations)
+        {
+            if (time >= emulatedAnimation.mStartTime && time <= emulatedAnimation.mStopTime)
+            {
+                newTime = time - emulatedAnimation.mStartTime;
+                animationName = emulatedAnimation.mName;
+            }
+        }
+
+        // Find the bone's transform track in animation
+        for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
+        {
+            if (mergedAnimationTrack->getName() != animationName)
+                continue;
+
+            const osgAnimation::ChannelList& channels = mergedAnimationTrack->getChannels();
+
+            for (const auto& channel : channels)
+            {
+                if (!Misc::StringUtils::ciEqual(name, channel->getTargetName()) || channel->getName() != "transform")
+                    continue;
+
+                if (osgAnimation::MatrixLinearSampler* templateSampler
+                    = dynamic_cast<osgAnimation::MatrixLinearSampler*>(channel->getSampler()))
+                {
+                    osg::Matrixf matrix;
+                    templateSampler->getValueAt(newTime, matrix);
+                    return matrix;
+                }
+            }
+        }
+
+        return osg::Matrixf::identity();
+    }
+
     void OsgAnimationController::update(float time, const std::string& animationName)
     {
         for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
@@ -162,6 +209,12 @@ namespace SceneUtil
                     update(time - emulatedAnimation.mStartTime, emulatedAnimation.mName);
                 }
             }
+
+            // Reset the transform of this node to whats in the animation
+            // we force this here because downstream some code relies on the bone having a non-modified transform
+            // as this is how the NIF controller behaves. RotationController is a good example of this.
+            // Without this here, it causes osgAnimation skeletons to spin wildly
+            static_cast<osg::MatrixTransform*>(node)->setMatrix(getTransformForNode(time, node->getName()));
         }
 
         traverse(node, nv);
