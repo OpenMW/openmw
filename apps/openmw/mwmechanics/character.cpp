@@ -2479,9 +2479,7 @@ namespace MWMechanics
 
             movement.x() *= scale;
             movement.y() *= scale;
-            // Update movement
-            if (movement != osg::Vec3f())
-                world->queueMovement(mPtr, movement);
+            world->queueMovement(mPtr, movement);
         }
 
         mSkipAnim = false;
