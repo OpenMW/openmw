@@ -1,6 +1,7 @@
 #include "rotatecontroller.hpp"
 
 #include <osg/MatrixTransform>
+#include <osgAnimation/Bone>
 
 namespace MWRender
 {
@@ -40,8 +41,18 @@ namespace MWRender
         osg::Quat orient = worldOrient * mRotate * worldOrientInverse * matrix.getRotate();
         matrix.setRotate(orient);
         matrix.setTrans(matrix.getTrans() + worldOrientInverse * mOffset);
-
         node->setMatrix(matrix);
+
+        // If we are linked to a bone we must call setMatrixInSkeletonSpace
+        osgAnimation::Bone* b = dynamic_cast<osgAnimation::Bone*>(node);
+        if (b)
+        {
+            osgAnimation::Bone* parent = b->getBoneParent();
+            if (parent)
+                b->setMatrixInSkeletonSpace(matrix * parent->getMatrixInSkeletonSpace());
+            else
+                b->setMatrixInSkeletonSpace(matrix);
+        }
 
         traverse(node, nv);
     }
