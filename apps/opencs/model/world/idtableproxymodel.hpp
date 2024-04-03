@@ -10,6 +10,9 @@
 #include <QModelIndex>
 #include <QSortFilterProxyModel>
 #include <QString>
+#include <QTimer>
+
+#include "../prefs/state.hpp"
 
 #include "columns.hpp"
 
@@ -29,6 +32,8 @@ namespace CSMWorld
         Q_OBJECT
 
         std::shared_ptr<CSMFilter::Node> mFilter;
+        std::unique_ptr<QTimer> mFilterTimer;
+        std::shared_ptr<CSMFilter::Node> mAwaitingFilter;
         std::map<int, int> mColumnMap; // column ID, column index in this model (or -1)
 
         // Cache of enum values for enum columns (e.g. Modified, Record Type).
@@ -67,6 +72,10 @@ namespace CSMWorld
         virtual void sourceRowsRemoved(const QModelIndex& parent, int start, int end);
 
         virtual void sourceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+        void timerTimeout();
+
+        void settingChanged(const CSMPrefs::Setting* setting);
 
     signals:
 
