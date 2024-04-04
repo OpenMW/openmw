@@ -3,7 +3,65 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/concepts.hpp>
+#include <components/misc/strings/conversion.hpp>
+
+namespace
+{
+    enum class SelectRuleStatus
+    {
+        Valid,
+        Invalid,
+        Ignorable
+    };
+
+    SelectRuleStatus isValidSelectRule(std::string_view rule)
+    {
+        if (rule.size() < 5)
+            return SelectRuleStatus::Invalid;
+        if (rule[4] < '0' || rule[4] > '5') // Comparison operators
+            return SelectRuleStatus::Invalid;
+        if (rule[1] == '1') // Function
+        {
+            int function = Misc::StringUtils::toNumeric<int>(rule.substr(2, 2), -1);
+            if (function >= 0 && function <= 73)
+                return SelectRuleStatus::Valid;
+            return SelectRuleStatus::Invalid;
+        }
+        if (rule.size() == 5) // Missing ID
+            return SelectRuleStatus::Invalid;
+        if (rule[3] != 'X')
+            return SelectRuleStatus::Ignorable;
+        constexpr auto ignorable
+            = [](bool valid) { return valid ? SelectRuleStatus::Valid : SelectRuleStatus::Ignorable; };
+        switch (rule[1])
+        {
+            case '2':
+            case '3':
+            case 'C':
+                return ignorable(rule[2] == 's' || rule[2] == 'l' || rule[2] == 'f');
+            case '4':
+                return ignorable(rule[2] == 'J');
+            case '5':
+                return ignorable(rule[2] == 'I');
+            case '6':
+                return ignorable(rule[2] == 'D');
+            case '7':
+                return ignorable(rule[2] == 'X');
+            case '8':
+                return ignorable(rule[2] == 'F');
+            case '9':
+                return ignorable(rule[2] == 'C');
+            case 'A':
+                return ignorable(rule[2] == 'R');
+            case 'B':
+                return ignorable(rule[2] == 'L');
+            default:
+                return SelectRuleStatus::Invalid;
+        }
+    }
+}
 
 namespace ESM
 {
@@ -69,7 +127,18 @@ namespace ESM
                     SelectStruct ss;
                     ss.mSelectRule = esm.getHString();
                     ss.mValue.read(esm, Variant::Format_Info);
-                    mSelects.push_back(ss);
+                    auto valid = isValidSelectRule(ss.mSelectRule);
+                    if (ss.mValue.getType() != VT_Int && ss.mValue.getType() != VT_Float)
+                        valid = SelectRuleStatus::Invalid;
+                    if (valid == SelectRuleStatus::Invalid)
+                        Log(Debug::Warning) << "Skipping invalid SCVR for INFO " << mId;
+                    else
+                    {
+                        mSelects.push_back(ss);
+                        if (valid == SelectRuleStatus::Ignorable)
+                            Log(Debug::Info)
+                                << "Found malformed SCVR for INFO " << mId << " at index " << ss.mSelectRule[0];
+                    }
                     break;
                 }
                 case fourCC("BNAM"):

@@ -95,6 +95,10 @@ namespace MWDialogue
 
         std::string getName() const;
         ///< Return case-smashed name.
+
+        std::string_view getCellName() const;
+
+        ESM::RefId getId() const;
     };
 }
 

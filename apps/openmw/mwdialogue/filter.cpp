@@ -30,7 +30,7 @@ namespace
 {
     bool matchesStaticFilters(const MWDialogue::SelectWrapper& select, const MWWorld::Ptr& actor)
     {
-        const ESM::RefId selectId = ESM::RefId::stringRefId(select.getName());
+        const ESM::RefId selectId = select.getId();
         if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotId)
             return actor.getCellRef().getRefId() != selectId;
         if (actor.getClass().isNpc())
@@ -356,19 +356,18 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
     {
         case SelectWrapper::Function_Journal:
 
-            return MWBase::Environment::get().getJournal()->getJournalIndex(ESM::RefId::stringRefId(select.getName()));
+            return MWBase::Environment::get().getJournal()->getJournalIndex(select.getId());
 
         case SelectWrapper::Function_Item:
         {
             MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
-            return store.count(ESM::RefId::stringRefId(select.getName()));
+            return store.count(select.getId());
         }
 
         case SelectWrapper::Function_Dead:
 
-            return MWBase::Environment::get().getMechanicsManager()->countDeaths(
-                ESM::RefId::stringRefId(select.getName()));
+            return MWBase::Environment::get().getMechanicsManager()->countDeaths(select.getId());
 
         case SelectWrapper::Function_Choice:
 
@@ -546,24 +545,24 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case SelectWrapper::Function_NotId:
 
-            return !(mActor.getCellRef().getRefId() == ESM::RefId::stringRefId(select.getName()));
+            return mActor.getCellRef().getRefId() != select.getId();
 
         case SelectWrapper::Function_NotFaction:
 
-            return !(mActor.getClass().getPrimaryFaction(mActor) == ESM::RefId::stringRefId(select.getName()));
+            return mActor.getClass().getPrimaryFaction(mActor) != select.getId();
 
         case SelectWrapper::Function_NotClass:
 
-            return !(mActor.get<ESM::NPC>()->mBase->mClass == ESM::RefId::stringRefId(select.getName()));
+            return mActor.get<ESM::NPC>()->mBase->mClass != select.getId();
 
         case SelectWrapper::Function_NotRace:
 
-            return !(mActor.get<ESM::NPC>()->mBase->mRace == ESM::RefId::stringRefId(select.getName()));
+            return mActor.get<ESM::NPC>()->mBase->mRace != select.getId();
 
         case SelectWrapper::Function_NotCell:
         {
             std::string_view actorCell = MWBase::Environment::get().getWorld()->getCellName(mActor.getCell());
-            return !Misc::StringUtils::ciStartsWith(actorCell, select.getName());
+            return !Misc::StringUtils::ciStartsWith(actorCell, select.getCellName());
         }
         case SelectWrapper::Function_SameGender:
 

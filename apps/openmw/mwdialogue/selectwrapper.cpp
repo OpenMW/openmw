@@ -454,5 +454,15 @@ bool MWDialogue::SelectWrapper::selectCompare(bool value) const
 
 std::string MWDialogue::SelectWrapper::getName() const
 {
-    return Misc::StringUtils::lowerCase(std::string_view(mSelect.mSelectRule).substr(5));
+    return Misc::StringUtils::lowerCase(getCellName());
+}
+
+std::string_view MWDialogue::SelectWrapper::getCellName() const
+{
+    return std::string_view(mSelect.mSelectRule).substr(5);
+}
+
+ESM::RefId MWDialogue::SelectWrapper::getId() const
+{
+    return ESM::RefId::stringRefId(getCellName());
 }
