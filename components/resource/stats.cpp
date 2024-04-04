@@ -88,6 +88,7 @@ namespace Resource
                 "Terrain Chunk",
                 "Terrain Texture",
                 "Land",
+                "Blending Rules",
             };
 
             constexpr std::string_view cellPreloader[] = {
