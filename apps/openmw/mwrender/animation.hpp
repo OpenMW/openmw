@@ -8,13 +8,17 @@
 #include "../mwworld/movementdirection.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include "animblendcontroller.hpp"
 #include <components/misc/strings/algorithm.hpp>
+#include <components/sceneutil/animblendrules.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
 
+#include <map>
 #include <span>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -46,6 +50,8 @@ namespace MWRender
     class ResetAccumRootCallback;
     class RotateController;
     class TransparencyUpdater;
+
+    typedef std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> ActiveControllersVector;
 
     class EffectAnimationTime : public SceneUtil::ControllerSource
     {
@@ -158,8 +164,17 @@ namespace MWRender
             int mBlendMask = 0;
             bool mAutoDisable = true;
 
+            std::string mGroupname;
+            std::string mStartKey;
+
             float getTime() const { return *mTime; }
             void setTime(float time) { *mTime = time; }
+            bool blendMaskContains(size_t blendMask) const { return (mBlendMask & (1 << blendMask)); }
+            AnimBlendStateData asAnimBlendStateData() const
+            {
+                AnimBlendStateData stateData = { .mGroupname = mGroupname, .mStartKey = mStartKey };
+                return stateData;
+            }
 
             bool shouldLoop() const { return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0; }
         };
@@ -189,7 +204,11 @@ namespace MWRender
 
         // Keep track of controllers that we added to our scene graph.
         // We may need to rebuild these controllers when the active animation groups / sources change.
-        std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> mActiveControllers;
+        ActiveControllersVector mActiveControllers;
+
+        // Keep track of the animation controllers for easy access
+        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimBlendController>> mAnimBlendControllers;
+        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<BoneAnimBlendController>> mBoneAnimBlendControllers;
 
         std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
@@ -233,7 +252,9 @@ namespace MWRender
 
         const NodeMap& getNodeMap() const;
 
-        /* Sets the appropriate animations on the bone groups based on priority.
+        /* Sets the appropriate animations on the bone groups based on priority by finding
+         * the highest priority AnimationStates and linking the appropriate controllers stored
+         * in the AnimationState to the corresponding nodes.
          */
         void resetActiveGroups();
 
@@ -275,7 +296,7 @@ namespace MWRender
          * @param baseModel The filename of the mObjectRoot, only used for error messages.
          */
         void addAnimSource(std::string_view model, const std::string& baseModel);
-        void addSingleAnimSource(const std::string& model, const std::string& baseModel);
+        std::shared_ptr<AnimSource> addSingleAnimSource(const std::string& model, const std::string& baseModel);
 
         /** Adds an additional light to the given node using the specified ESM record. */
         void addExtraLight(osg::ref_ptr<osg::Group> parent, const SceneUtil::LightCommon& light);
@@ -343,6 +364,7 @@ namespace MWRender
         void setAccumulation(const osg::Vec3f& accum);
 
         /** Plays an animation.
+         * Creates or updates AnimationStates to represent and manage animation playback.
          * \param groupname Name of the animation group to play.
          * \param priority Priority of the animation. The animation will play on
          *                 bone groups that don't have another animation set of a
@@ -491,6 +513,5 @@ namespace MWRender
     private:
         double mStartingTime;
     };
-
 }
 #endif

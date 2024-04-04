@@ -23,7 +23,8 @@ namespace NifOsg
         // problems when a KeyframeController wants to change only one of these components. So
         // we store the scale and rotation components separately here.
         float mScale{ 0.f };
-        Nif::Matrix3 mRotationScale;
+
+        Nif::Matrix3 mRotation;
 
         // Utility methods to transform the node and keep these components up-to-date.
         // The matrix's components should not be overridden manually or using preMult/postMult
