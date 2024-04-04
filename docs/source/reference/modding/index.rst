@@ -31,5 +31,6 @@ about creating new content for OpenMW, please refer to
 	doors-and-teleports
 	custom-shader-effects
 	extended
+	animation-blending
 	paths
 	localisation
