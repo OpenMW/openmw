@@ -193,6 +193,7 @@
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
     Feature #5944: Option to use camera as sound listener
+    Feature #6009: Animation blending - smooth animation transitions with modding support
     Feature #6152: Playing music via lua scripts
     Feature #6188: Specular lighting from point light sources
     Feature #6411: Support translations in openmw-launcher

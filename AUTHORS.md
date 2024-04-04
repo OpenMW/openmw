@@ -61,6 +61,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     crussell187
+    Sam Hellawell (cykoder)
     Dan Vukelich (sanchezman)
     darkf
     Dave Corley (S3ctor)
@@ -144,6 +145,7 @@ Programmers
     Łukasz Gołębiewski (lukago)
     Lukasz Gromanowski (lgro)
     Mads Sandvei (Foal)
+    Maksim Eremenko (Max Yari)
     Marc Bouvier (CramitDeFrog)
     Marcin Hulist (Gohan)
     Mark Siewert (mark76)
