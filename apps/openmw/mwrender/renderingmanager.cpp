@@ -441,7 +441,7 @@ namespace MWRender
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
         globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
-        globalDefines["refraction_enabled"] = "0";
+        globalDefines["waterRefraction"] = "0";
         globalDefines["useGPUShader4"] = "0";
         globalDefines["useOVR_multiview"] = "0";
         globalDefines["numViews"] = "1";

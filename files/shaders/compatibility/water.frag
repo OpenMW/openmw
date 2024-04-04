@@ -144,7 +144,7 @@ void main(void)
     float fresnel = clamp(fresnel_dielectric(viewDir, normal, ior), 0.0, 1.0);
 
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
-#if @refraction_enabled
+#if @waterRefraction
     float depthSample = linearizeDepth(sampleRefractionDepthMap(screenCoords), near, far);
     float surfaceDepth = linearizeDepth(gl_FragCoord.z, near, far);
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
@@ -169,7 +169,7 @@ void main(void)
     vec3 rainSpecular = abs(rainRipple.w)*mix(skyColorEstimate, vec3(1.0), 0.05)*0.5;
     float waterTransparency = clamp(fresnel * 6.0 + specular, 0.0, 1.0);
 
-#if @refraction_enabled
+#if @waterRefraction
     // selectively nullify screenCoordsOffset to eliminate remaining shore artifacts, not needed for reflection
     if (cameraPos.z > 0.0 && realWaterDepth <= VISIBILITY_DEPTH && waterDepthDistorted > VISIBILITY_DEPTH)
         screenCoordsOffset = vec2(0.0);
@@ -217,7 +217,7 @@ void main(void)
 
     gl_FragData[0].rgb += specular * sunSpec.rgb + rainSpecular;
 
-#if @refraction_enabled && @wobblyShores
+#if @waterRefraction && @wobblyShores
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping
     vec3 normalShoreRippleRain = texture2D(normalMap,normalCoords(UV, 2.0, 2.7, -1.0*waterTimer,  0.05,  0.1,  normal3)).rgb - 0.5
                                + texture2D(normalMap,normalCoords(UV, 2.0, 2.7,      waterTimer,  0.04, -0.13, normal4)).rgb - 0.5;
