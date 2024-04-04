@@ -5,6 +5,8 @@
 #include <osg/TexMat>
 #include <osg/Texture2D>
 
+#include <osgAnimation/Bone>
+
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
@@ -175,25 +177,48 @@ namespace NifOsg
 
     void KeyframeController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
+        auto [translation, rotation, scale] = getCurrentTransformation(nv);
+
+        if (rotation)
+        {
+            node->setRotation(*rotation);
+        }
+        else
+        {
+            // This is necessary to prevent first person animations glitching out due to RotationController
+            node->setRotation(node->mRotation);
+        }
+
+        if (translation)
+            node->setTranslation(*translation);
+
+        if (scale)
+            node->setScale(*scale);
+
+        traverse(node, nv);
+    }
+
+    KeyframeController::KfTransform KeyframeController::getCurrentTransformation(osg::NodeVisitor* nv)
+    {
+        KfTransform out;
+
         if (hasInput())
         {
             float time = getInputValue(nv);
 
             if (!mRotations.empty())
-                node->setRotation(mRotations.interpKey(time));
+                out.mRotation = mRotations.interpKey(time);
             else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-                node->setRotation(getXYZRotation(time));
-            else
-                node->setRotation(node->mRotationScale);
+                out.mRotation = getXYZRotation(time);
 
             if (!mTranslations.empty())
-                node->setTranslation(mTranslations.interpKey(time));
+                out.mTranslation = mTranslations.interpKey(time);
 
             if (!mScales.empty())
-                node->setScale(mScales.interpKey(time));
+                out.mScale = mScales.interpKey(time);
         }
 
-        traverse(node, nv);
+        return out;
     }
 
     GeomMorpherController::GeomMorpherController() {}

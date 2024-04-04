@@ -28,6 +28,7 @@ namespace Resource
     class NifFileManager;
     class KeyframeManager;
     class BaseResourceManager;
+    class AnimBlendRulesManager;
 
     /// @brief Wrapper class that constructs and provides access to the most commonly used resource subsystems.
     /// @par Resource subsystems can be used with multiple OpenGL contexts, just like the OSG equivalents, but
@@ -43,6 +44,7 @@ namespace Resource
         ImageManager* getImageManager();
         NifFileManager* getNifFileManager();
         KeyframeManager* getKeyframeManager();
+        AnimBlendRulesManager* getAnimBlendRulesManager();
 
         /// Indicates to each resource manager to clear the cache, i.e. to drop cached objects that are no longer
         /// referenced.
@@ -76,6 +78,7 @@ namespace Resource
         std::unique_ptr<ImageManager> mImageManager;
         std::unique_ptr<NifFileManager> mNifFileManager;
         std::unique_ptr<KeyframeManager> mKeyframeManager;
+        std::unique_ptr<AnimBlendRulesManager> mAnimBlendRulesManager;
 
         // Store the base classes separately to get convenient access to the common interface
         // Here users can register their own resourcemanager as well

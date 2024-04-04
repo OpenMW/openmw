@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "animblendrulesmanager.hpp"
 #include "imagemanager.hpp"
 #include "keyframemanager.hpp"
 #include "niffilemanager.hpp"
@@ -18,12 +19,14 @@ namespace Resource
         mImageManager = std::make_unique<ImageManager>(vfs, expiryDelay);
         mSceneManager = std::make_unique<SceneManager>(vfs, mImageManager.get(), mNifFileManager.get(), expiryDelay);
         mKeyframeManager = std::make_unique<KeyframeManager>(vfs, mSceneManager.get(), expiryDelay, encoder);
+        mAnimBlendRulesManager = std::make_unique<AnimBlendRulesManager>(vfs, expiryDelay);
 
         addResourceManager(mNifFileManager.get());
         addResourceManager(mKeyframeManager.get());
         // note, scene references images so add images afterwards for correct implementation of updateCache()
         addResourceManager(mSceneManager.get());
         addResourceManager(mImageManager.get());
+        addResourceManager(mAnimBlendRulesManager.get());
     }
 
     ResourceSystem::~ResourceSystem()
@@ -51,6 +54,11 @@ namespace Resource
     KeyframeManager* ResourceSystem::getKeyframeManager()
     {
         return mKeyframeManager.get();
+    }
+
+    AnimBlendRulesManager* ResourceSystem::getAnimBlendRulesManager()
+    {
+        return mAnimBlendRulesManager.get();
     }
 
     void ResourceSystem::setExpiryDelay(double expiryDelay)
