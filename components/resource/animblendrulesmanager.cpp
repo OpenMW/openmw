@@ -58,7 +58,7 @@ namespace Resource
 
     osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(std::string_view path)
     {
-        const VFS::Path::Normalized normalizedPath = VFS::Path::Normalized(path);
+        const VFS::Path::Normalized normalizedPath(path);
         std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(normalizedPath);
         if (obj.has_value())
         {
@@ -67,15 +67,7 @@ namespace Resource
         else
         {
             osg::ref_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVfs, normalizedPath);
-            if (blendRules == nullptr)
-            {
-                // No blend rules were found in VFS, cache a nullptr.
-                osg::ref_ptr<AnimBlendRules> nullRules = nullptr;
-                mCache->addEntryToObjectCache(normalizedPath, nullRules);
-                // To avoid confusion - never return blend rules with 0 rules
-                return nullRules;
-            }
-            else
+            if (blendRules)
             {
                 // Blend rules were found in VFS, cache them.
                 mCache->addEntryToObjectCache(normalizedPath, blendRules);
@@ -83,7 +75,10 @@ namespace Resource
             }
         }
 
-        return nullptr;
+        // No blend rules were found in VFS, cache a nullptr.
+        osg::ref_ptr<AnimBlendRules> nullRules = nullptr;
+        mCache->addEntryToObjectCache(normalizedPath, nullRules);
+        return nullRules;
     }
 
     void AnimBlendRulesManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
