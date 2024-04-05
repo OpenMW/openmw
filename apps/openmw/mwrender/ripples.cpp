@@ -100,7 +100,7 @@ namespace MWRender
     {
         auto& shaderManager = mResourceSystem->getSceneManager()->getShaderManager();
 
-        Shader::ShaderManager::DefineMap defineMap = { { "ripple_map_size", std::to_string(sRTTSize) + ".0" } };
+        Shader::ShaderManager::DefineMap defineMap = { { "rippleMapSize", std::to_string(sRTTSize) + ".0" } };
 
         osg::ref_ptr<osg::Shader> vertex = shaderManager.getShader("fullscreen_tri.vert", {}, osg::Shader::VERTEX);
 
