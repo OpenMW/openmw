@@ -184,8 +184,6 @@ namespace DetourNavigator
         {
             case ChangeType::remove:
                 return stream << "ChangeType::remove";
-            case ChangeType::mixed:
-                return stream << "ChangeType::mixed";
             case ChangeType::add:
                 return stream << "ChangeType::add";
             case ChangeType::update:

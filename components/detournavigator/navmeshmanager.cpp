@@ -188,7 +188,7 @@ namespace DetourNavigator
                 if (shouldAdd && !presentInNavMesh)
                     tilesToPost.emplace(tile, locked->isEmptyTile(tile) ? ChangeType::update : ChangeType::add);
                 else if (!shouldAdd && presentInNavMesh)
-                    tilesToPost.emplace(tile, ChangeType::mixed);
+                    tilesToPost.emplace(tile, ChangeType::remove);
             });
             locked->forEachTilePosition([&](const TilePosition& tile) {
                 if (!shouldAddTile(tile, playerTile, maxTiles))
