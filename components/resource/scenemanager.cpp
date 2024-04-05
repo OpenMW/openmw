@@ -271,6 +271,11 @@ namespace Resource
 
         void apply(osg::Node& node) override
         {
+            // If an osgAnimation bone/transform, ensure underscores in name are replaced with spaces
+            // this is for compatibility reasons
+            if (node.libraryName() == std::string_view("osgAnimation") && node.className() == std::string_view("Bone"))
+                node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
+
             if (osg::StateSet* stateset = node.getStateSet())
             {
                 if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
@@ -362,27 +367,18 @@ namespace Resource
         if (!vertexInfluenceMap)
             return;
 
-        std::vector<std::pair<std::string, std::string>> renameList;
-
-        // Collecting updates
-        for (const auto& influence : *vertexInfluenceMap)
+        std::vector<std::string> renameList;
+        for (const auto& [boneName, unused] : *vertexInfluenceMap)
         {
-            const std::string& oldBoneName = influence.first;
-            std::string newBoneName = Misc::StringUtils::underscoresToSpaces(oldBoneName);
-            if (newBoneName != oldBoneName)
-                renameList.emplace_back(oldBoneName, newBoneName);
+            if (boneName.find('_') != std::string::npos)
+                renameList.push_back(boneName);
         }
 
-        // Applying updates (cant update map while iterating it!)
-        for (const auto& rename : renameList)
+        for (const std::string& oldName : renameList)
         {
-            const std::string& oldName = rename.first;
-            const std::string& newName = rename.second;
-
-            // Check if new name already exists to avoid overwriting
+            const std::string newName = Misc::StringUtils::underscoresToSpaces(oldName);
             if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end())
                 (*vertexInfluenceMap)[newName] = std::move((*vertexInfluenceMap)[oldName]);
-
             vertexInfluenceMap->erase(oldName);
         }
     }

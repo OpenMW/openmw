@@ -45,15 +45,11 @@ namespace SceneUtil
 
     void ProcessExtraDataVisitor::apply(osg::Node& node)
     {
-        // If an osgAnimation bone/transform, ensure underscores in name are replaced with spaces
-        // this is for compatibility reasons
-        if (node.libraryName() == std::string_view("osgAnimation") && node.className() == std::string_view("Bone"))
-            node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
-
         if (!mSceneMgr->getSoftParticles())
             return;
 
         std::string source;
+
         constexpr float defaultFalloffDepth = 300.f; // arbitrary value that simply looks good with common cases
 
         if (node.getUserValue(Misc::OsgUserValues::sExtraData, source) && !source.empty())

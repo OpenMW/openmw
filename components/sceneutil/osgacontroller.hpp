@@ -60,7 +60,7 @@ namespace SceneUtil
         osg::Vec3f getTranslation(float time) const override;
 
         /// @brief Handles finding bone position in the animation
-        osg::Matrixf getTransformForNode(float time, const std::string& name) const;
+        osg::Matrixf getTransformForNode(float time, const std::string_view name) const;
 
         /// @brief Calls animation track update()
         void update(float time, const std::string& animationName);

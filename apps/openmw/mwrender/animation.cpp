@@ -1457,9 +1457,10 @@ namespace MWRender
             }
         }
 
-        osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
         if (!forceskeleton)
         {
+            osg::ref_ptr<osg::Node> created
+                = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
             mInsert->addChild(created);
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
@@ -1475,6 +1476,8 @@ namespace MWRender
         }
         else
         {
+            osg::ref_ptr<osg::Node> created
+                = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
             osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
             if (!skel)
             {

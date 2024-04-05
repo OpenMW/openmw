@@ -134,7 +134,7 @@ namespace SceneUtil
         return osg::Vec3f();
     }
 
-    osg::Matrixf OsgAnimationController::getTransformForNode(float time, const std::string& name) const
+    osg::Matrixf OsgAnimationController::getTransformForNode(float time, const std::string_view name) const
     {
         std::string animationName;
         float newTime = time;

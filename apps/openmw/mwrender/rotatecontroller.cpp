@@ -41,6 +41,7 @@ namespace MWRender
         osg::Quat orient = worldOrient * mRotate * worldOrientInverse * matrix.getRotate();
         matrix.setRotate(orient);
         matrix.setTrans(matrix.getTrans() + worldOrientInverse * mOffset);
+
         node->setMatrix(matrix);
 
         // If we are linked to a bone we must call setMatrixInSkeletonSpace

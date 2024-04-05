@@ -15,7 +15,7 @@ namespace Misc::StringUtils
         bool operator()(char x, char y) const { return toLower(x) < toLower(y); }
     };
 
-    inline std::string underscoresToSpaces(const std::string_view& oldName)
+    inline std::string underscoresToSpaces(const std::string_view oldName)
     {
         std::string newName(oldName);
         std::replace(newName.begin(), newName.end(), '_', ' ');
