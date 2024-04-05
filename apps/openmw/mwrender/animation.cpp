@@ -1805,7 +1805,6 @@ namespace MWRender
         osg::ref_ptr<RotateController> controller(new RotateController(mObjectRoot.get()));
         node->addUpdateCallback(controller);
         mActiveControllers.emplace_back(node, controller);
-
         return controller;
     }
 
