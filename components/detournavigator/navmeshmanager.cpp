@@ -13,8 +13,6 @@
 
 #include <DetourNavMesh.h>
 
-#include <iterator>
-
 namespace
 {
     /// Safely reset shared_ptr with definite underlying object destrutor call.
@@ -179,9 +177,9 @@ namespace DetourNavigator
     {
         std::map<osg::Vec2i, ChangeType> tilesToPost = changedTiles;
         {
+            const int maxTiles = mSettings.mMaxTilesNumber;
             const auto locked = cached->lockConst();
             const auto& navMesh = locked->getImpl();
-            const int maxTiles = mSettings.mMaxTilesNumber;
             getTilesPositions(range, [&](const TilePosition& tile) {
                 if (changedTiles.find(tile) != changedTiles.end())
                     return;
@@ -191,6 +189,10 @@ namespace DetourNavigator
                     tilesToPost.emplace(tile, locked->isEmptyTile(tile) ? ChangeType::update : ChangeType::add);
                 else if (!shouldAdd && presentInNavMesh)
                     tilesToPost.emplace(tile, ChangeType::mixed);
+            });
+            locked->forEachTilePosition([&](const TilePosition& tile) {
+                if (!shouldAddTile(tile, playerTile, maxTiles))
+                    tilesToPost.emplace(tile, ChangeType::remove);
             });
         }
         mAsyncNavMeshUpdater.post(agentBounds, cached, playerTile, mWorldspace, tilesToPost);
