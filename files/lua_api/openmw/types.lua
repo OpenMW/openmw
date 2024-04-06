@@ -1124,7 +1124,7 @@
 -- @return #number
 
 ---
--- Sets the bounty or crime level of the player
+-- Sets the bounty or crime level of the player, may only be used in global scripts
 -- @function [parent=#Player] setCrimeLevel
 -- @param openmw.core#GameObject player
 -- @param #number crimeLevel The requested crime level
