@@ -186,6 +186,10 @@ namespace MWLua
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getNpcStats(o.ptr()).getBounty();
         };
+        player["setCrimeLevel"] = [](const Object& o, int amount) {
+            const MWWorld::Class& cls = o.ptr().getClass();
+            cls.getNpcStats(o.ptr()).setBounty(amount);
+        };
         player["isCharGenFinished"] = [](const Object&) -> bool {
             return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
         };
