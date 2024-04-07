@@ -273,7 +273,7 @@ namespace Resource
         {
             // If an osgAnimation bone/transform, ensure underscores in name are replaced with spaces
             // this is for compatibility reasons
-            if (node.libraryName() == std::string_view("osgAnimation") && node.className() == std::string_view("Bone"))
+            if (dynamic_cast<osgAnimation::Bone*>(&node))
                 node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
 
             if (osg::StateSet* stateset = node.getStateSet())
