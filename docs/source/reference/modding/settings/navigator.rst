@@ -245,6 +245,16 @@ Absent pieces usually mean a bug in recast mesh tiles building.
 Allows to do in-game debug.
 Potentially decreases performance.
 
+wait for all jobs on exit
+-------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Wait until all queued async navmesh jobs are processed before exiting the engine.
+Useful when a benchmark generates jobs to write into navmeshdb faster than they are processed.
+
 Expert settings
 ***************
 
