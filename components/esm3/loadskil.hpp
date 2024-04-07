@@ -75,7 +75,7 @@ namespace ESM
             Speechcraft_Fail = 1,
             Armorer_Repair = 0,
             Athletics_RunOneSecond = 0,
-            Athletics_SwimOneSecond = 0,
+            Athletics_SwimOneSecond = 1,
 
         };
 

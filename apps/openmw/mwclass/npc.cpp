@@ -635,11 +635,11 @@ namespace MWClass
         {
             const unsigned char* attack = nullptr;
             if (type == ESM::Weapon::AT_Chop)
-                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop.data();
             else if (type == ESM::Weapon::AT_Slash)
-                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash.data();
             else if (type == ESM::Weapon::AT_Thrust)
-                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust.data();
             if (attack)
             {
                 damage = attack[0] + ((attack[1] - attack[0]) * attackStrength);
@@ -1118,7 +1118,7 @@ namespace MWClass
         }
 
         if (fullHelp)
-            info.text = MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra = MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
 
         return info;
     }

@@ -109,7 +109,7 @@
     </message>
     <message>
         <source>&amp;New Content List</source>
-        <translation>Новый список плагинов</translation>
+        <translation>&amp;Новый список плагинов</translation>
     </message>
     <message>
         <source>Clone Content List</source>
@@ -527,7 +527,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;br&gt;&lt;b&gt;Could not create directory %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</source>
-        <translation>&lt;br&gt;&lt;b&gt;Не удалось создать директорию %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;</translation>
+        <translation>&lt;br&gt;&lt;b&gt;Не удалось создать директорию %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</translation>
     </message>
 </context>
 <context>
@@ -1046,7 +1046,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Size of characters in game texts.</source>
-        <translation>Размер символов в текстах</translation>
+        <translation>Размер символов в текстах.</translation>
     </message>
     <message>
         <source>Font size</source>
@@ -1409,7 +1409,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное расстояние, на котором будут отображаться источники света (во внутриигровых единицах измерения).&lt;/p&gt;&lt;p&gt;Если 0, то расстояние не ограничено.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Lights maximum distance</source>
+        <source>Maximum light distance</source>
         <translation>Дальность отображения источников света</translation>
     </message>
     <message>
@@ -1417,16 +1417,12 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное количество источников света для каждого объекта.&lt;/p&gt;&lt;p&gt;Низкие числа (близкие к значению по умолчанию) приводят к резким перепадам освещения, как при устаревшем методе освещения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Max light sources</source>
+        <source>Max lights</source>
         <translation>Макс. кол-во источников света</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fraction of maximum distance at which lights will start to fade.&lt;/p&gt;&lt;p&gt;Set this to a low value for slower transitions or a high value for quicker transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Доля расстояния (относительно дальности отображения источников света), на которой свет начинает затухать.&lt;/p&gt;&lt;p&gt;Низкие значения ведут к плавному затуханию, высокие - к резкому.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Lights fade multiplier</source>
-        <translation>Множитель начала затухания</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
@@ -1451,16 +1447,12 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Множитель размера ограничивающей сферы источников света.&lt;/p&gt;&lt;p&gt;Высокие значения делают затухание света плавнее, но требуют более высокого максимального количества источников света.&lt;/p&gt;&lt;p&gt;Настройка не влияет на уровень освещения или мощность источников света.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Lights bounding sphere multiplier</source>
+        <source>Bounding sphere multiplier</source>
         <translation>Множитель размера ограничивающей сферы</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum ambient interior brightness.&lt;/p&gt;&lt;p&gt;Increase this if you feel interiors are too dark.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Минимальный уровень фонового освещения в помещениях.&lt;/p&gt;&lt;p&gt;Увеличьте значение, если помещения в игре кажутся слишком темными.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Lights minimum interior brightness</source>
-        <translation>Минимальный уровень освещения в помещениях</translation>
     </message>
     <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
@@ -1469,6 +1461,10 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Use the camera as the sound listener</source>
         <translation>Использовать камеру как слушателя</translation>
+    </message>
+    <message>
+        <source>Minimum interior brightness</source>
+        <translation>Минимальный уровень освещения в помещениях</translation>
     </message>
 </context>
 </TS>

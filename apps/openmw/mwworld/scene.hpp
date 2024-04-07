@@ -19,6 +19,7 @@
 namespace osg
 {
     class Vec3f;
+    class Stats;
 }
 
 namespace ESM
@@ -203,6 +204,8 @@ namespace MWWorld
 
         void testExteriorCells();
         void testInteriorCells();
+
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
     };
 }
 

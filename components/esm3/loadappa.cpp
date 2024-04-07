@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Apparatus::AADTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mType, v.mQuality, v.mWeight, v.mValue);
+    }
+
     void Apparatus::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -28,7 +36,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("AADT"):
-                    esm.getHT(mData.mType, mData.mQuality, mData.mWeight, mData.mValue);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -65,7 +73,7 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNCString("FNAM", mName);
-        esm.writeHNT("AADT", mData, 16);
+        esm.writeNamedComposite("AADT", mData);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNCString("ITEX", mIcon);
     }

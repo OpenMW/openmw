@@ -8,6 +8,7 @@ namespace MWRender
 {
     const std::string& getActorSkeleton(bool firstPerson, bool female, bool beast, bool werewolf);
     bool isDefaultActorSkeleton(std::string_view model);
+    std::string addSuffixBeforeExtension(const std::string& filename, const std::string& suffix);
 }
 
 #endif

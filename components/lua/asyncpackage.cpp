@@ -94,7 +94,7 @@ namespace LuaUtil
 
         sol::table callbackMeta = Callback::makeMetatable(L);
         api["callback"] = [callbackMeta](const AsyncPackageId& asyncId, sol::main_protected_function fn) -> sol::table {
-            return Callback::make(asyncId, fn, callbackMeta);
+            return Callback::make(asyncId, std::move(fn), callbackMeta);
         };
 
         auto initializer = [](sol::table hiddenData) {

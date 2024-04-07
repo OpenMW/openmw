@@ -36,11 +36,13 @@ namespace l10n
 
     void Manager::readLangData(const std::string& name, MessageBundles& ctx, const icu::Locale& lang)
     {
-        std::string path = "l10n/";
-        path.append(name);
-        path.append("/");
-        path.append(lang.getName());
-        path.append(".yaml");
+        std::string langName(lang.getName());
+        langName += ".yaml";
+
+        VFS::Path::Normalized path("l10n");
+        path /= name;
+        path /= langName;
+
         if (!mVFS->exists(path))
             return;
 

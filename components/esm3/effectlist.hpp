@@ -9,9 +9,6 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
-#pragma pack(push)
-#pragma pack(1)
-
     /** Defines a spell effect. Shared between SPEL (Spells), ALCH
      (Potions) and ENCH (Item enchantments) records
      */
@@ -28,12 +25,22 @@ namespace ESM
         int32_t mRange; // 0 - self, 1 - touch, 2 - target (RangeType enum)
         int32_t mArea, mDuration, mMagnMin, mMagnMax;
     };
-#pragma pack(pop)
+
+    struct IndexedENAMstruct
+    {
+        bool operator!=(const IndexedENAMstruct& rhs) const;
+        bool operator==(const IndexedENAMstruct& rhs) const { return !(this->operator!=(rhs)); }
+        ENAMstruct mData;
+        uint32_t mIndex;
+    };
 
     /// EffectList, ENAM subrecord
     struct EffectList
     {
-        std::vector<ENAMstruct> mList;
+        std::vector<IndexedENAMstruct> mList;
+
+        void populate(const std::vector<ENAMstruct>& effects);
+        void updateIndexes();
 
         /// Load one effect, assumes subrecord name was already read
         void add(ESMReader& esm);

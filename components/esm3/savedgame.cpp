@@ -3,10 +3,17 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-#include "../misc/algorithm.hpp"
+#include <components/misc/algorithm.hpp>
+#include <components/misc/concepts.hpp>
 
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<EpochTimeStamp> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mGameHour, v.mDay, v.mMonth, v.mYear);
+    }
+
     void SavedGame::load(ESMReader& esm)
     {
         mPlayerName = esm.getHNString("PLNA");
@@ -19,7 +26,7 @@ namespace ESM
             mPlayerCellName = esm.getHNRefId("PLCE").toString();
         else
             mPlayerCellName = esm.getHNString("PLCE");
-        esm.getHNT("TSTM", mInGameTime.mGameHour, mInGameTime.mDay, mInGameTime.mMonth, mInGameTime.mYear);
+        esm.getNamedComposite("TSTM", mInGameTime);
         esm.getHNT(mTimePlayed, "TIME");
         mDescription = esm.getHNString("DESC");
 
@@ -47,12 +54,12 @@ namespace ESM
             esm.writeHNString("PLCN", mPlayerClassName);
 
         esm.writeHNString("PLCE", mPlayerCellName);
-        esm.writeHNT("TSTM", mInGameTime, 16);
+        esm.writeNamedComposite("TSTM", mInGameTime);
         esm.writeHNT("TIME", mTimePlayed);
         esm.writeHNString("DESC", mDescription);
 
-        for (std::vector<std::string>::const_iterator iter(mContentFiles.begin()); iter != mContentFiles.end(); ++iter)
-            esm.writeHNString("DEPE", *iter);
+        for (const std::string& dependency : mContentFiles)
+            esm.writeHNString("DEPE", dependency);
 
         esm.startSubRecord("SCRN");
         esm.write(mScreenshot.data(), mScreenshot.size());

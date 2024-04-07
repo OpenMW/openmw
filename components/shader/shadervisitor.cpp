@@ -22,6 +22,7 @@
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
@@ -676,8 +677,7 @@ namespace Shader
                 defineMap["adjustCoverage"] = "1";
 
             // Preventing alpha tested stuff shrinking as lower mip levels are used requires knowing the texture size
-            osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
-            if (exts && exts->isGpuShader4Supported)
+            if (SceneUtil::getGLExtensions().isGpuShader4Supported)
                 defineMap["useGPUShader4"] = "1";
             // We could fall back to a texture size uniform if EXT_gpu_shader4 is missing
         }

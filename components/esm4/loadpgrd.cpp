@@ -44,10 +44,10 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mData);
                 break;
-            case ESM4::SUB_PGRP:
+            case ESM::fourCC("PGRP"):
             {
                 std::size_t numNodes = subHdr.dataSize / sizeof(PGRP);
                 if (numNodes != std::size_t(mData)) // keep gcc quiet
@@ -66,9 +66,9 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PGRR:
+            case ESM::fourCC("PGRR"):
             {
-                static PGRR link;
+                PGRR link;
 
                 for (std::size_t i = 0; i < std::size_t(mData); ++i) // keep gcc quiet
                 {
@@ -91,7 +91,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PGRI:
+            case ESM::fourCC("PGRI"):
             {
                 std::size_t numForeign = subHdr.dataSize / sizeof(PGRI);
                 mForeign.resize(numForeign);
@@ -103,9 +103,9 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PGRL:
+            case ESM::fourCC("PGRL"):
             {
-                static PGRL objLink;
+                PGRL objLink;
                 reader.getFormId(objLink.object);
                 //                                        object             linkedNode
                 std::size_t numNodes = (subHdr.dataSize - sizeof(int32_t)) / sizeof(int32_t);
@@ -118,7 +118,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PGAG:
+            case ESM::fourCC("PGAG"):
             {
 #if 0
                 std::vector<unsigned char> mDataBuf(subHdr.dataSize);

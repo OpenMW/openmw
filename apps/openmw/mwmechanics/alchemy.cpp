@@ -250,7 +250,7 @@ const ESM::Potion* MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) co
 
         if (iter->mName != toFind.mName || iter->mScript != toFind.mScript
             || iter->mData.mWeight != toFind.mData.mWeight || iter->mData.mValue != toFind.mData.mValue
-            || iter->mData.mAutoCalc != toFind.mData.mAutoCalc)
+            || iter->mData.mFlags != toFind.mData.mFlags)
             continue;
 
         // Don't choose an ID that came from the content files, would have unintended side effects
@@ -262,13 +262,13 @@ const ESM::Potion* MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) co
 
         for (size_t i = 0; i < iter->mEffects.mList.size(); ++i)
         {
-            const ESM::ENAMstruct& first = iter->mEffects.mList[i];
+            const ESM::IndexedENAMstruct& first = iter->mEffects.mList[i];
             const ESM::ENAMstruct& second = mEffects[i];
 
-            if (first.mEffectID != second.mEffectID || first.mArea != second.mArea || first.mRange != second.mRange
-                || first.mSkill != second.mSkill || first.mAttribute != second.mAttribute
-                || first.mMagnMin != second.mMagnMin || first.mMagnMax != second.mMagnMax
-                || first.mDuration != second.mDuration)
+            if (first.mData.mEffectID != second.mEffectID || first.mData.mArea != second.mArea
+                || first.mData.mRange != second.mRange || first.mData.mSkill != second.mSkill
+                || first.mData.mAttribute != second.mAttribute || first.mData.mMagnMin != second.mMagnMin
+                || first.mData.mMagnMax != second.mMagnMax || first.mData.mDuration != second.mDuration)
             {
                 mismatch = true;
                 break;
@@ -310,7 +310,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
         newRecord.mData.mWeight /= countIngredients();
 
     newRecord.mData.mValue = mValue;
-    newRecord.mData.mAutoCalc = 0;
+    newRecord.mData.mFlags = 0;
     newRecord.mRecordFlags = 0;
 
     newRecord.mName = name;
@@ -324,7 +324,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
     newRecord.mModel = "m\\misc_potion_" + std::string(meshes[index]) + "_01.nif";
     newRecord.mIcon = "m\\tx_potion_" + std::string(meshes[index]) + "_01.dds";
 
-    newRecord.mEffects.mList = mEffects;
+    newRecord.mEffects.populate(mEffects);
 
     const ESM::Potion* record = getRecord(newRecord);
     if (!record)

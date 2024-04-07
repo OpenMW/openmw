@@ -4,7 +4,6 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <osg/Stats>
 #include <osgAnimation/Animation>
 #include <osgAnimation/BasicAnimationManager>
 #include <osgAnimation/Channel>
@@ -250,7 +249,7 @@ namespace Resource
 
     void KeyframeManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Keyframe", mCache->getCacheSize());
+        Resource::reportStats("Keyframe", frameNumber, mCache->getStats(), *stats);
     }
 
 }

@@ -112,7 +112,7 @@ namespace ESM
                     case fourCC("DODT"):
                         if constexpr (load)
                         {
-                            esm.getHT(cellRef.mDoorDest.pos, cellRef.mDoorDest.rot);
+                            esm.getSubComposite(cellRef.mDoorDest);
                             cellRef.mTeleport = true;
                         }
                         else
@@ -132,7 +132,7 @@ namespace ESM
                         break;
                     case fourCC("DATA"):
                         if constexpr (load)
-                            esm.getHT(cellRef.mPos.pos, cellRef.mPos.rot);
+                            esm.getSubComposite(cellRef.mPos);
                         else
                             esm.skipHSub();
                         break;
@@ -224,18 +224,20 @@ namespace ESM
 
         if (!inInventory && mTeleport)
         {
-            esm.writeHNT("DODT", mDoorDest);
+            esm.writeNamedComposite("DODT", mDoorDest);
             esm.writeHNOCString("DNAM", mDestCell);
         }
 
         if (!inInventory)
         {
-            int lockLevel = mLockLevel;
-            if (lockLevel == 0 && mIsLocked)
-                lockLevel = ZeroLock;
-            if (lockLevel != 0)
+            if (mIsLocked)
+            {
+                int lockLevel = mLockLevel;
+                if (lockLevel == 0)
+                    lockLevel = ZeroLock;
                 esm.writeHNT("FLTV", lockLevel);
-            esm.writeHNOCRefId("KNAM", mKey);
+                esm.writeHNOCRefId("KNAM", mKey);
+            }
             esm.writeHNOCRefId("TNAM", mTrap);
         }
 
@@ -243,7 +245,7 @@ namespace ESM
             esm.writeHNT("UNAM", mReferenceBlocked);
 
         if (!inInventory)
-            esm.writeHNT("DATA", mPos, 24);
+            esm.writeNamedComposite("DATA", mPos);
     }
 
     void CellRef::blank()

@@ -1,0 +1,53 @@
+#include "components/misc/osgpluginchecker.hpp"
+
+#include <components/debug/debuglog.hpp>
+#include <components/misc/strings/conversion.hpp>
+
+#include <osg/Config>
+#include <osg/Version>
+#include <osgDB/FileUtils>
+#include <osgDB/PluginQuery>
+
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <string_view>
+
+namespace Misc
+{
+#if defined(OSG_LIBRARY_STATIC) || defined(__APPLE__)
+
+    bool checkRequiredOSGPluginsArePresent()
+    {
+        // assume they were linked in at build time and CMake would have failed if they were missing
+        // true-ish for MacOS - they're copied into the package and that'd fail if they were missing,
+        // but if you don't actually make a MacOS package and run a local build, this won't notice.
+        // the workaround in the real implementation isn't powerful enough to make MacOS work, though.
+        return true;
+    }
+
+#else
+
+    namespace
+    {
+        constexpr auto USED_OSG_PLUGIN_NAMES = std::to_array<std::string_view>({${USED_OSG_PLUGIN_NAMES_FORMATTED}});
+    }
+
+    bool checkRequiredOSGPluginsArePresent()
+    {
+        // osgDB::listAllAvailablePlugins() lies, so don't use it
+        bool haveAllPlugins = true;
+        for (std::string_view plugin : USED_OSG_PLUGIN_NAMES)
+        {
+            std::string libraryName = osgDB::Registry::instance()->createLibraryNameForExtension(std::string{ plugin });
+            if (osgDB::findLibraryFile(libraryName).empty())
+            {
+                Log(Debug::Error) << "Missing OSG plugin: " << libraryName;
+                haveAllPlugins = false;
+            }
+        }
+        return haveAllPlugins;
+    }
+
+#endif
+}

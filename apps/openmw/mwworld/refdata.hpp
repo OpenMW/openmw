@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_REFDATA_H
 #define GAME_MWWORLD_REFDATA_H
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/animationstate.hpp>
 

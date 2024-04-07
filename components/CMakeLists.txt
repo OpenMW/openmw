@@ -12,8 +12,8 @@ set (VERSION_CPP_FILE "components/version/version.cpp")
 
 if (GIT_CHECKOUT)
     get_generator_is_multi_config(multi_config)
-    add_custom_command (
-       OUTPUT "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
+    add_custom_target (get-version
+       BYPRODUCTS "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
        DEPENDS "${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in"
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
@@ -21,18 +21,22 @@ if (GIT_CHECKOUT)
             -DOpenMW_BINARY_DIR=${OpenMW_BINARY_DIR}
             -DVERSION_RESOURCE_FILE_IN=${VERSION_RESOURCE_FILE_IN}
             -DVERSION_RESOURCE_FILE_RELATIVE=${VERSION_RESOURCE_FILE_RELATIVE}
-            -DVERSION_CPP_FILE=${VERSION_CPP_FILE}
+            -DVERSION_CPP_FILE_IN=${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in
+            -DVERSION_CPP_FILE_OUT=${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}.out
             -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
             -DOPENMW_LUA_API_REVISION=${OPENMW_LUA_API_REVISION}
             -DOPENMW_POSTPROCESSING_API_REVISION=${OPENMW_POSTPROCESSING_API_REVISION}
             -DOPENMW_VERSION=${OPENMW_VERSION}
+            -DOPENMW_DOC_BASEURL=${OPENMW_DOC_BASEURL}
             -DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
             "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
             -Dgenerator_is_multi_config_var=${multi_config}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
-            VERBATIM)
+        COMMAND ${CMAKE_COMMAND}
+            -E copy_if_different ${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}.out ${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}
+        VERBATIM)
 else (GIT_CHECKOUT)
     configure_resource_file(${VERSION_RESOURCE_FILE_IN} ${OpenMW_BINARY_DIR} ${VERSION_RESOURCE_FILE_RELATIVE})
     configure_file("${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
@@ -40,11 +44,22 @@ endif (GIT_CHECKOUT)
 
 list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 
+# OSG plugin checker
+# Helpfully, OSG doesn't export this to its CMake config as it doesn't have one
+list(TRANSFORM USED_OSG_PLUGINS REPLACE "^osgdb_" "" OUTPUT_VARIABLE USED_OSG_PLUGIN_NAMES)
+list(TRANSFORM USED_OSG_PLUGIN_NAMES PREPEND "\"" OUTPUT_VARIABLE USED_OSG_PLUGIN_NAMES_FORMATTED)
+list(TRANSFORM USED_OSG_PLUGIN_NAMES_FORMATTED APPEND "\"")
+list(JOIN USED_OSG_PLUGIN_NAMES_FORMATTED ", " USED_OSG_PLUGIN_NAMES_FORMATTED)
+
+set(OSG_PLUGIN_CHECKER_CPP_FILE "components/misc/osgpluginchecker.cpp")
+configure_file("${OpenMW_SOURCE_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+list(APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+
 # source files
 
 add_component_dir (lua
     luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
-    shapes/box inputactions
+    shapes/box inputactions yamlloader
     )
 
 add_component_dir (l10n
@@ -110,7 +125,7 @@ add_component_dir (vfs
 
 add_component_dir (resource
     scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem
-    resourcemanager stats animation foreachbulletobject errormarker
+    resourcemanager stats animation foreachbulletobject errormarker cachestats
     )
 
 add_component_dir (shader
@@ -122,7 +137,7 @@ add_component_dir (sceneutil
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
     detourdebugdraw navmesh agentpath shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
     screencapture depth color riggeometryosgaextension extradata unrefqueue lightcommon lightingmethod clearcolor
-    cullsafeboundsvisitor keyframe nodecallback textkeymap
+    cullsafeboundsvisitor keyframe nodecallback textkeymap glextensions
     )
 
 add_component_dir (nif
@@ -274,8 +289,8 @@ add_component_dir (esm4
 
 add_component_dir (misc
     barrier budgetmeasurement color compression constants convert coordinateconverter display endianness float16 frameratelimiter
-    guarded math mathutil messageformatparser notnullptr objectpool osguservalues progressreporter resourcehelpers rng
-    strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
+    guarded math mathutil messageformatparser notnullptr objectpool osgpluginchecker osguservalues progressreporter resourcehelpers
+    rng strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
     )
 
 add_component_dir (misc/strings
@@ -526,15 +541,15 @@ if (USE_QT)
     QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
-if (ANDROID)
-    set_property(TARGET components PROPERTY POSTION_INDEPENDENT_CODE ON)
-endif()
-
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(SQLite3 REQUIRED)
 
 add_library(components STATIC ${COMPONENT_FILES})
+
+if (ANDROID)
+    set_property(TARGET components PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif()
 
 target_link_libraries(components
     ${COLLADA_DOM_LIBRARIES}
@@ -596,7 +611,6 @@ endif()
 if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
-    target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 
     if (BUILD_LAUNCHER OR BUILD_WIZARD)
         add_dependencies(components_qt qm-files)
@@ -636,6 +650,7 @@ endif()
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
 
 target_compile_definitions(components PUBLIC BT_USE_DOUBLE_PRECISION)
+target_compile_definitions(components PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 
 if(OSG_STATIC)
     unset(_osg_plugins_static_files)
@@ -669,7 +684,7 @@ if(USE_QT)
     set_property(TARGET components_qt PROPERTY AUTOMOC ON)
 endif(USE_QT)
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(components PUBLIC
         <sol/sol.hpp>
 

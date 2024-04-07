@@ -172,12 +172,12 @@ namespace MWSound
         return std::make_shared<FFmpeg_Decoder>(mVFS);
     }
 
-    DecoderPtr SoundManager::loadVoice(const std::string& voicefile)
+    DecoderPtr SoundManager::loadVoice(VFS::Path::NormalizedView voicefile)
     {
         try
         {
             DecoderPtr decoder = getDecoder();
-            decoder->open(Misc::ResourceHelpers::correctSoundPath(voicefile, decoder->mResourceMgr));
+            decoder->open(Misc::ResourceHelpers::correctSoundPath(voicefile, *decoder->mResourceMgr));
             return decoder;
         }
         catch (std::exception& e)
@@ -380,7 +380,7 @@ namespace MWSound
         startRandomTitle();
     }
 
-    void SoundManager::say(const MWWorld::ConstPtr& ptr, const std::string& filename)
+    void SoundManager::say(const MWWorld::ConstPtr& ptr, VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
@@ -412,7 +412,7 @@ namespace MWSound
         return 0.0f;
     }
 
-    void SoundManager::say(const std::string& filename)
+    void SoundManager::say(VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
@@ -900,8 +900,9 @@ namespace MWSound
         if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
             return;
 
-        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion()))
-            mCurrentRegionSound = playSound(*next, 1.0f, 1.0f);
+        ESM::RefId next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion());
+        if (!next.empty())
+            mCurrentRegionSound = playSound(next, 1.0f, 1.0f);
     }
 
     void SoundManager::updateWaterSound()

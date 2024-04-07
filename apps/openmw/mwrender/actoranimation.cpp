@@ -35,6 +35,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include "actorutil.hpp"
 #include "vismask.hpp"
 
 namespace MWRender
@@ -144,8 +145,7 @@ namespace MWRender
         if (mesh.empty())
             return mesh;
 
-        std::string holsteredName = mesh;
-        holsteredName = holsteredName.replace(holsteredName.size() - 4, 4, "_sh.nif");
+        const std::string holsteredName = addSuffixBeforeExtension(mesh, "_sh");
         if (mResourceSystem->getVFS()->exists(holsteredName))
         {
             osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);
@@ -222,8 +222,7 @@ namespace MWRender
 
         std::string_view boneName = "Bip01 AttachShield";
         osg::Vec4f glowColor = shield->getClass().getEnchantmentColor(*shield);
-        std::string holsteredName = mesh;
-        holsteredName = holsteredName.replace(holsteredName.size() - 4, 4, "_sh.nif");
+        const std::string holsteredName = addSuffixBeforeExtension(mesh, "_sh");
         bool isEnchanted = !shield->getClass().getEnchantment(*shield).empty();
 
         // If we have no dedicated sheath model, use basic shield model as fallback.
@@ -340,14 +339,12 @@ namespace MWRender
             showHolsteredWeapons = false;
 
         std::string mesh = weapon->getClass().getCorrectedModel(*weapon);
-        std::string scabbardName = mesh;
-
         std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
         if (mesh.empty() || boneName.empty())
             return;
 
         // If the scabbard is not found, use the weapon mesh as fallback.
-        scabbardName = scabbardName.replace(scabbardName.size() - 4, 4, "_sh.nif");
+        const std::string scabbardName = addSuffixBeforeExtension(mesh, "_sh");
         bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
         if (!mResourceSystem->getVFS()->exists(scabbardName))
         {

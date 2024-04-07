@@ -67,7 +67,7 @@ namespace MWMechanics
 
         void resurrect(const MWWorld::Ptr& ptr) const;
 
-        void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell = false) const;
+        void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell = false) const;
 
         void updateActor(const MWWorld::Ptr& old, const MWWorld::Ptr& ptr) const;
         ///< Updates an actor with a new Ptr

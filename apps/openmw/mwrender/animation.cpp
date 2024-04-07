@@ -5,7 +5,6 @@
 #include <limits>
 
 #include <osg/BlendFunc>
-#include <osg/ColorMaski>
 #include <osg/LightModel>
 #include <osg/Material>
 #include <osg/MatrixTransform>
@@ -1512,7 +1511,7 @@ namespace MWRender
         return mObjectRoot.get();
     }
 
-    void Animation::addSpellCastGlow(const ESM::MagicEffect* effect, float glowDuration)
+    void Animation::addSpellCastGlow(const osg::Vec4f& color, float glowDuration)
     {
         if (!mGlowUpdater || (mGlowUpdater->isDone() || (mGlowUpdater->isPermanentGlowUpdater() == true)))
         {
@@ -1521,12 +1520,11 @@ namespace MWRender
 
             if (mGlowUpdater && mGlowUpdater->isPermanentGlowUpdater())
             {
-                mGlowUpdater->setColor(effect->getColor());
+                mGlowUpdater->setColor(color);
                 mGlowUpdater->setDuration(glowDuration);
             }
             else
-                mGlowUpdater
-                    = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, effect->getColor(), glowDuration);
+                mGlowUpdater = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, color, glowDuration);
         }
     }
 
@@ -1594,8 +1592,7 @@ namespace MWRender
         // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
         node->getOrCreateStateSet()->setAttributeAndModes(
             getVFXLightModelInstance(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-        if (mResourceSystem->getSceneManager()->getSupportsNormalsRT())
-            node->getOrCreateStateSet()->setAttribute(new osg::ColorMaski(1, false, false, false, false));
+        mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(node->getOrCreateStateSet(), false);
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
 

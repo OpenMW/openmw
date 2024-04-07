@@ -11,10 +11,6 @@
 -- @field [parent=#core] #number API_REVISION
 
 ---
--- A read-only list of all @{#FactionRecord}s in the world database.
--- @field [parent=#core] #list<#FactionRecord> factions
-
----
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.
 -- @function [parent=#core] quit
 
@@ -142,9 +138,9 @@
 -- @return #string
 -- @usage if obj.recordId == core.getFormId('Skyrim.esm', 0x4d7da) then ... end
 -- @usage -- In ESM3 content files (e.g. Morrowind) ids are human-readable strings
--- obj.ownerFactionId = 'blades'
+-- obj.owner.factionId = 'blades'
 -- -- In ESM4 (e.g. Skyrim) ids should be constructed using `core.getFormId`:
--- obj.ownerFactionId = core.getFormId('Skyrim.esm', 0x72834)
+-- obj.owner.factionId = core.getFormId('Skyrim.esm', 0x72834)
 -- @usage -- local scripts
 -- local obj = nearby.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
 -- @usage -- global scripts
@@ -343,6 +339,11 @@
 -- @field #string id Record id of the spell or item used to cast the spell
 -- @field #GameObject item The enchanted item used to cast the spell, or nil if the spell was not cast from an enchanted item. Note that if the spell was cast for a single-use enchantment such as a scroll, this will be nil.
 -- @field #GameObject caster The caster object, or nil if the spell has no defined caster
+-- @field #boolean fromEquipment If set, this spell is tied to an equipped item and can only be ended by unequipping the item.
+-- @field #boolean temporary If set, this spell effect is temporary and should end on its own. Either after a single application or after its duration has run out.
+-- @field #boolean affectsBaseValues If set, this spell affects the base values of affected stats, rather than modifying current values.
+-- @field #boolean stackable If set, this spell can be applied multiple times. If not set, the same spell can only be applied once from the same source (where source is determined by caster + item). In vanilla rules, consumables are stackable while spells and enchantments are not.
+-- @field #number activeSpellId A number uniquely identifying this active spell within the affected actor's list of active spells.
 -- @field #list<#ActiveSpellEffect> effects The active effects (@{#ActiveSpellEffect}) of this spell.
 
 ---
@@ -373,7 +374,7 @@
 -- @type Enchantment
 -- @field #string id Enchantment id
 -- @field #number type @{#EnchantmentType}
--- @field #number autocalcFlag If set, the casting cost should be computer rather than reading the cost field
+-- @field #boolean autocalcFlag If set, the casting cost should be computed based on the effect list rather than read from the cost field
 -- @field #number cost
 -- @field #number charge Charge capacity. Should not be confused with current charge.
 -- @field #list<#MagicEffectWithParams> effects The effects (@{#MagicEffectWithParams}) of the enchantment
@@ -622,40 +623,51 @@
 -- @field #number Curse Curse
 -- @field #number Power Power, can be used once a day
 
+--- @{#Spells}: Spells
+-- @field [parent=#Magic] #Spells spells
 
 --- List of all @{#Spell}s.
--- @field [parent=#Magic] #list<#Spell> spells
--- @usage local spell = core.magic.spells['thunder fist']  -- get by id
--- @usage local spell = core.magic.spells[1]  -- get by index
+-- @field [parent=#Spells] #list<#Spell> records A read-only list of all @{#Spell} records in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #Spell. 
+-- @usage local spell = core.magic.spells.records['thunder fist']  -- get by id
+-- @usage local spell = core.magic.spells.records[1]  -- get by index
 -- @usage -- Print all powers
--- for _, spell in pairs(core.magic.spells) do
+-- for _, spell in pairs(core.magic.spells.records) do
 --     if spell.types == core.magic.SPELL_TYPE.Power then
 --         print(spell.name)
 --     end
 -- end
 
+--- @{#Effects}: Magic Effects
+-- @field [parent=#Magic] #Effects effects
+
 --- Map from @{#MagicEffectId} to @{#MagicEffect}
--- @field [parent=#Magic] #map<#number, #MagicEffect> effects
+-- @field [parent=#Effects] #map<#number, #MagicEffect> records
 -- @usage -- Print all harmful effects
--- for _, effect in pairs(core.magic.effects) do
+-- for _, effect in pairs(core.magic.effects.records) do
 --     if effect.harmful then
 --         print(effect.name)
 --     end
 -- end
 -- @usage -- Look up the record of a specific effect and print its icon
--- local mgef = core.magic.effects[core.magic.EFFECT_TYPE.Reflect]
+-- local mgef = core.magic.effects.records[core.magic.EFFECT_TYPE.Reflect]
 -- print('Reflect Icon: '..tostring(mgef.icon))
 
---- List of all @{#Enchantment}s.
--- @field [parent=#Magic] #list<#Enchantment> enchantments
--- @usage local enchantment = core.magic.enchantments['marara's boon']  -- get by id
--- @usage local enchantment = core.magic.enchantments[1]  -- get by index
+--- @{#Enchantments}: Enchantments
+-- @field [parent=#Magic] #Enchantments enchantments
+
+--- A read-only list of all @{#Enchantment} records in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) and [iterables#Map](iterables.html#map-iterable) of #Enchantment.
+-- @field [parent=#Enchantments] #list<#Enchantment> records
+-- @usage local enchantment = core.magic.enchantments.records['marara's boon']  -- get by id
+-- @usage local enchantment = core.magic.enchantments.records[1]  -- get by index
 -- @usage -- Print all enchantments with constant effect
--- for _, ench in pairs(core.magic.enchantments) do
+-- for _, ench in pairs(core.magic.enchantments.records) do
 --     if ench.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
 --         print(ench.id)
 --     end
 -- end
+
 
 ---
 -- @type Spell
@@ -664,6 +676,8 @@
 -- @field #number type @{#SpellType}
 -- @field #number cost
 -- @field #list<#MagicEffectWithParams> effects The effects (@{#MagicEffectWithParams}) of the spell
+-- @field #boolean alwaysSucceedFlag If set, the spell should ignore skill checks and always succeed.
+-- @field #boolean autocalcFlag If set, the casting cost should be computed based on the effect list rather than read from the cost field
 
 ---
 -- @type MagicEffect
@@ -673,16 +687,28 @@
 -- @field #string school Skill ID that is this effect's school
 -- @field #number baseCost
 -- @field openmw.util#Color color
--- @field #boolean harmful
+-- @field #boolean harmful If set, the effect is considered harmful and should elicit a hostile reaction from affected NPCs.
 -- @field #boolean continuousVfx Whether the magic effect's vfx should loop or not
+-- @field #boolean hasDuration If set, the magic effect has a duration. As an example, divine intervention has no duration while fire damage does.
+-- @field #boolean hasMagnitude If set, the magic effect depends on a magnitude. As an example, cure common disease has no magnitude while chameleon does.
+-- @field #boolean isAppliedOnce If set, the magic effect is applied fully on cast, rather than being continuously applied over the effect's duration. For example, chameleon is applied once, while fire damage is continuously applied for the duration.
+-- @field #boolean casterLinked If set, it is implied the magic effect links back to the caster in some way and should end immediately or never be applied if the caster dies or is not an actor.
+-- @field #boolean nonRecastable If set, this effect cannot be re-applied until it has ended. This is used by bound equipment spells.
 -- @field #string particle Identifier of the particle texture
--- @field #string castingStatic Identifier of the vfx static used for casting
+-- @field #string castStatic Identifier of the vfx static used for casting
 -- @field #string hitStatic Identifier of the vfx static used on hit
 -- @field #string areaStatic Identifier of the vfx static used for AOE spells
+-- @field #string boltStatic Identifier of the projectile vfx static used for ranged spells
+-- @field #string castSound Identifier of the sound used for casting
+-- @field #string hitSound Identifier of the sound used on hit
+-- @field #string areaSound Identifier of the sound used for AOE spells
+-- @field #string boltSound Identifier of the projectile sound used for ranged spells
+
 
 ---
 -- @type MagicEffectWithParams
 -- @field #MagicEffect effect @{#MagicEffect}
+-- @field #string id ID of the associated @{#MagicEffect}
 -- @field #string affectedSkill Optional skill ID
 -- @field #string affectedAttribute Optional attribute ID
 -- @field #number range
@@ -690,6 +716,7 @@
 -- @field #number magnitudeMin
 -- @field #number magnitudeMax
 -- @field #number duration
+-- @field #number index Index of this effect within the original list of @{#MagicEffectWithParams} of the spell/enchantment/potion this effect came from.
 
 ---
 -- @type ActiveEffect
@@ -701,6 +728,7 @@
 -- @field #number magnitude current magnitude of the effect. Will be set to 0 when effect is removed or expires.
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
+-- @field #number index Index of this effect within the original list of @{#MagicEffectWithParams} of the spell/enchantment/potion this effect came from.
 
 --- @{#Sound}: Sounds and Speech
 -- @field [parent=#core] #Sound sound
@@ -714,6 +742,8 @@
 
 ---
 -- Play a 3D sound, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] playSound3d
 -- @param #string soundId ID of Sound record to play
 -- @param #GameObject object Object to which we attach the sound
@@ -733,6 +763,8 @@
 
 ---
 -- Play a 3D sound file, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] playSoundFile3d
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object to which we attach the sound
@@ -752,6 +784,8 @@
 
 ---
 -- Stop a 3D sound, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] stopSound3d
 -- @param #string soundId ID of Sound record to stop
 -- @param #GameObject object Object on which we want to stop sound
@@ -759,6 +793,8 @@
 
 ---
 -- Stop a 3D sound file, attached to object
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] stopSoundFile3d
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object on which we want to stop sound
@@ -781,42 +817,32 @@
 -- @usage local isPlaying = core.sound.isSoundFilePlaying("Sound\\test.mp3", object);
 
 ---
--- Play an animated voiceover. Has two overloads:
---
---   * With an "object" argument: play sound for given object, with speaking animation if possible
---   * Without an "object" argument: play sound globally, without object
+-- Play an animated voiceover.
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] say
 -- @param #string fileName Path to sound file in VFS
--- @param #GameObject object Object on which we want to play an animated voiceover (optional)
+-- @param #GameObject object Object on which we want to play an animated voiceover
 -- @param #string text Subtitle text (optional)
 -- @usage -- play voiceover for object and print messagebox
 -- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", object, "Subtitle text")
--- @usage -- play voiceover globally and print messagebox
--- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", "Subtitle text")
--- @usage -- play voiceover for object without messagebox
+-- @usage -- play voiceover for object, without messagebox
 -- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", object)
--- @usage -- play voiceover globally without messagebox
--- core.sound.say("Sound\\Vo\\Misc\\voice.mp3")
 
 ---
--- Stop animated voiceover
+-- Stop an animated voiceover
+--
+-- In local scripts can be used only on self.
 -- @function [parent=#Sound] stopSay
 -- @param #string fileName Path to sound file in VFS
--- @param #GameObject object Object on which we want to stop an animated voiceover (optional)
--- @usage -- stop voice for given object
--- core.sound.stopSay(object);
--- @usage -- stop global voice
--- core.sound.stopSay();
+-- @param #GameObject object Object on which we want to stop an animated voiceover
+-- @usage core.sound.stopSay(object);
 
 ---
--- Check if animated voiceover is playing
+-- Check if an animated voiceover is playing
 -- @function [parent=#Sound] isSayActive
--- @param #GameObject object Object on which we want to check an animated voiceover (optional)
+-- @param #GameObject object Object on which we want to check an animated voiceover
 -- @return #boolean
--- @usage -- check voice for given object
--- local isActive = isSayActive(object);
--- @usage -- check global voice
--- local isActive = isSayActive();
+-- @usage local isActive = isSayActive(object);
 
 ---
 -- @type SoundRecord
@@ -827,11 +853,12 @@
 -- @field #number maxRange Raw maximal range value, from 0 to 255
 
 --- List of all @{#SoundRecord}s.
--- @field [parent=#Sound] #list<#SoundRecord> sounds
--- @usage local sound = core.sound.sounds['Ashstorm']  -- get by id
--- @usage local sound = core.sound.sounds[1]  -- get by index
+-- @field [parent=#Sound] #list<#SoundRecord> records A read-only list of all @{#SoundRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #SoundRecord. 
+-- @usage local sound = core.sound.records['Ashstorm']  -- get by id
+-- @usage local sound = core.sound.records[1]  -- get by index
 -- @usage -- Print all sound files paths
--- for _, sound in pairs(core.sound.sounds) do
+-- for _, sound in pairs(core.sound.records) do
 --     print(sound.fileName)
 -- end
 
@@ -844,7 +871,10 @@
 
 --- `core.stats.Attribute`
 -- @type Attribute
--- @field #list<#AttributeRecord> records A read-only list of all @{#AttributeRecord}s in the world database.
+-- @field #list<#AttributeRecord> records A read-only list of all @{#AttributeRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #AttributeRecord. 
+-- @usage local record = core.stats.Attribute.records['example_recordid']
+-- @usage local record = core.stats.Attribute.records[1]
 
 ---
 -- Returns a read-only @{#AttributeRecord}
@@ -857,7 +887,10 @@
 
 --- `core.stats.Skill`
 -- @type Skill
--- @field #list<#SkillRecord> records A read-only list of all @{#SkillRecord}s in the world database.
+-- @field #list<#SkillRecord> records A read-only list of all @{#SkillRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #SkillRecord. 
+-- @usage local record = core.stats.Skill.records['example_recordid']
+-- @usage local record = core.stats.Skill.records[1]
 
 ---
 -- Returns a read-only @{#SkillRecord}
@@ -891,6 +924,15 @@
 -- @field #string castSound VFS path to the cast sound
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
+
+--- @{#Factions}: Factions
+-- @field [parent=#core] #Factions factions
+
+---
+-- A read-only list of all @{#FactionRecord}s in the world database.
+-- @field [parent=#Factions] #list<#FactionRecord> records
+-- @usage local record = core.factions.records['example_recordid']
+-- @usage local record = core.factions.records[1]
 
 ---
 -- Faction data record

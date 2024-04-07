@@ -90,6 +90,7 @@ void CSMPrefs::State::declare()
         .setTooltip(
             "When editing a record, open the view in a new window,"
             " rather than docked in the main view.");
+    declareInt(mValues->mIdTables.mFilterDelay, "Delay before applying a filter (in miliseconds)");
 
     declareCategory("ID Dialogues");
     declareBool(mValues->mIdDialogues.mToolbar, "Show toolbar");

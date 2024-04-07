@@ -1,7 +1,9 @@
 #include "regionmap.hpp"
 
+#include <QApplication>
 #include <QBrush>
 #include <QModelIndex>
+#include <QPalette>
 #include <QSize>
 #include <QVariant>
 
@@ -21,20 +23,33 @@
 #include "data.hpp"
 #include "universalid.hpp"
 
-CSMWorld::RegionMap::CellDescription::CellDescription()
-    : mDeleted(false)
+namespace CSMWorld
 {
+    float getLandHeight(const CSMWorld::Cell& cell, CSMWorld::Data& data)
+    {
+        const IdCollection<Land>& lands = data.getLand();
+        int landIndex = lands.searchId(cell.mId);
+        if (landIndex == -1)
+            return 0.0f;
+
+        // If any part of land is above water, returns > 0 - otherwise returns < 0
+        const Land& land = lands.getRecord(landIndex).get();
+        if (land.getLandData())
+            return land.getLandData()->mMaxHeight - cell.mWater;
+
+        return 0.0f;
+    }
 }
 
-CSMWorld::RegionMap::CellDescription::CellDescription(const Record<Cell>& cell)
+CSMWorld::RegionMap::CellDescription::CellDescription(const Record<Cell>& cell, float landHeight)
 {
     const Cell& cell2 = cell.get();
 
     if (!cell2.isExterior())
         throw std::logic_error("Interior cell in region map");
 
+    mMaxLandHeight = landHeight;
     mDeleted = cell.isDeleted();
-
     mRegion = cell2.mRegion;
     mName = cell2.mName;
 }
@@ -92,7 +107,7 @@ void CSMWorld::RegionMap::buildMap()
 
         if (cell2.isExterior())
         {
-            CellDescription description(cell);
+            CellDescription description(cell, getLandHeight(cell2, mData));
 
             CellCoordinates index = getIndex(cell2);
 
@@ -140,7 +155,7 @@ void CSMWorld::RegionMap::addCells(int start, int end)
         {
             CellCoordinates index = getIndex(cell2);
 
-            CellDescription description(cell);
+            CellDescription description(cell, getLandHeight(cell.get(), mData));
 
             addCell(index, description);
         }
@@ -335,10 +350,11 @@ QVariant CSMWorld::RegionMap::data(const QModelIndex& index, int role) const
             auto iter = mColours.find(cell->second.mRegion);
 
             if (iter != mColours.end())
-                return QBrush(QColor(iter->second & 0xff, (iter->second >> 8) & 0xff, (iter->second >> 16) & 0xff));
+                return QBrush(QColor(iter->second & 0xff, (iter->second >> 8) & 0xff, (iter->second >> 16) & 0xff),
+                    cell->second.mMaxLandHeight > 0 ? Qt::SolidPattern : Qt::CrossPattern);
 
-            if (cell->second.mRegion.empty())
-                return QBrush(Qt::Dense6Pattern); // no region
+            if (cell->second.mRegion.empty()) // no region
+                return QBrush(cell->second.mMaxLandHeight > 0 ? Qt::Dense3Pattern : Qt::Dense6Pattern);
 
             return QBrush(Qt::red, Qt::Dense6Pattern); // invalid region
         }

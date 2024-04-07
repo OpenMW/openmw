@@ -273,7 +273,7 @@ namespace MWGui
 
     void EnchantingDialog::notifyEffectsChanged()
     {
-        mEffectList.mList = mEffects;
+        mEffectList.populate(mEffects);
         mEnchanting.setEffect(mEffectList);
         updateLabels();
     }

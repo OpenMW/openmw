@@ -67,10 +67,10 @@ namespace ESM4
             const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
             switch (subHdr.typeId)
             {
-                case ESM4::SUB_EDID:
+                case ESM::fourCC("EDID"):
                     reader.getZString(mEditorId);
                     break;
-                case ESM4::SUB_DATA:
+                case ESM::fourCC("DATA"):
                     mData = readData(mId, mEditorId, reader);
                     break;
                 default:

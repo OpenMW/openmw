@@ -83,10 +83,8 @@ namespace ESM
             // mSkill can grow up to 200, it must be unsigned
             std::array<unsigned char, Skill::Length> mSkills;
 
-            char mUnknown1;
             uint16_t mHealth, mMana, mFatigue;
             unsigned char mDisposition, mReputation, mRank;
-            char mUnknown2;
             int32_t mGold;
         }; // 52 bytes
 

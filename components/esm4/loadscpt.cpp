@@ -36,19 +36,19 @@ void ESM4::Script::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    static ScriptLocalVariableData localVar;
+    ScriptLocalVariableData localVar;
 
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
             {
                 reader.getZString(mEditorId);
                 break;
             }
-            case ESM4::SUB_SCHR:
+            case ESM::fourCC("SCHR"):
             {
                 // For debugging only
 #if 0
@@ -73,12 +73,12 @@ void ESM4::Script::load(ESM4::Reader& reader)
 #endif
                 break;
             }
-            case ESM4::SUB_SCTX:
+            case ESM::fourCC("SCTX"):
                 reader.getString(mScript.scriptSource);
                 // if (mEditorId == "CTrapLogs01SCRIPT")
                 // std::cout << mScript.scriptSource << std::endl;
                 break;
-            case ESM4::SUB_SCDA: // compiled script data
+            case ESM::fourCC("SCDA"): // compiled script data
             {
                 // For debugging only
 #if 0
@@ -112,10 +112,10 @@ void ESM4::Script::load(ESM4::Reader& reader)
 #endif
                 break;
             }
-            case ESM4::SUB_SCRO:
+            case ESM::fourCC("SCRO"):
                 reader.getFormId(mScript.globReference);
                 break;
-            case ESM4::SUB_SLSD:
+            case ESM::fourCC("SLSD"):
             {
                 localVar.clear();
                 reader.get(localVar.index);
@@ -128,11 +128,11 @@ void ESM4::Script::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_SCVR: // assumed always pair with SLSD
+            case ESM::fourCC("SCVR"): // assumed always pair with SLSD
                 reader.getZString(localVar.variableName);
                 mScript.localVarData.push_back(localVar);
                 break;
-            case ESM4::SUB_SCRV:
+            case ESM::fourCC("SCRV"):
             {
                 std::uint32_t index;
                 reader.get(index);

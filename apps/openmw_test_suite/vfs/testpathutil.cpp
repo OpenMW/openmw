@@ -65,6 +65,60 @@ namespace VFS::Path
             EXPECT_EQ(stream.str(), "foo/bar/baz");
         }
 
+        TEST(NormalizedTest, shouldSupportOperatorDivEqual)
+        {
+            Normalized value("foo/bar");
+            value /= NormalizedView("baz");
+            EXPECT_EQ(value.value(), "foo/bar/baz");
+        }
+
+        TEST(NormalizedTest, shouldSupportOperatorDivEqualWithStringView)
+        {
+            Normalized value("foo/bar");
+            value /= std::string_view("BAZ");
+            EXPECT_EQ(value.value(), "foo/bar/baz");
+        }
+
+        TEST(NormalizedTest, changeExtensionShouldReplaceAfterLastDot)
+        {
+            Normalized value("foo/bar.a");
+            ASSERT_TRUE(value.changeExtension("so"));
+            EXPECT_EQ(value.value(), "foo/bar.so");
+        }
+
+        TEST(NormalizedTest, changeExtensionShouldNormalizeExtension)
+        {
+            Normalized value("foo/bar.a");
+            ASSERT_TRUE(value.changeExtension("SO"));
+            EXPECT_EQ(value.value(), "foo/bar.so");
+        }
+
+        TEST(NormalizedTest, changeExtensionShouldIgnorePathWithoutADot)
+        {
+            Normalized value("foo/bar");
+            ASSERT_FALSE(value.changeExtension("so"));
+            EXPECT_EQ(value.value(), "foo/bar");
+        }
+
+        TEST(NormalizedTest, changeExtensionShouldIgnorePathWithDotBeforeSeparator)
+        {
+            Normalized value("foo.bar/baz");
+            ASSERT_FALSE(value.changeExtension("so"));
+            EXPECT_EQ(value.value(), "foo.bar/baz");
+        }
+
+        TEST(NormalizedTest, changeExtensionShouldThrowExceptionOnExtensionWithDot)
+        {
+            Normalized value("foo.a");
+            EXPECT_THROW(value.changeExtension(".so"), std::invalid_argument);
+        }
+
+        TEST(NormalizedTest, changeExtensionShouldThrowExceptionOnExtensionWithSeparator)
+        {
+            Normalized value("foo.a");
+            EXPECT_THROW(value.changeExtension("/so"), std::invalid_argument);
+        }
+
         template <class T>
         struct NormalizedOperatorsTest : Test
         {
@@ -134,6 +188,14 @@ namespace VFS::Path
         TEST(NormalizedViewTest, constructorShouldThrowExceptionOnNotNormalized)
         {
             EXPECT_THROW([] { NormalizedView("Foo\\Bar/baz"); }(), std::invalid_argument);
+        }
+
+        TEST(NormalizedView, shouldSupportOperatorDiv)
+        {
+            const NormalizedView a("foo/bar");
+            const NormalizedView b("baz");
+            const Normalized result = a / b;
+            EXPECT_EQ(result.value(), "foo/bar/baz");
         }
     }
 }

@@ -83,18 +83,16 @@ local function skillLevelUpHandler(skillid, source, params)
     if not source or source == I.SkillProgression.SKILL_INCREASE_SOURCES.Usage then skillStat.progress = 0 end
 end
 
-local function skillUsedHandler(skillid, useType, params)
+local function skillUsedHandler(skillid, params)
     if NPC.isWerewolf(self) then
         return false
     end
 
-    if params.skillGain then
-        local skillStat = NPC.stats.skills[skillid](self)
-        skillStat.progress = skillStat.progress + params.skillGain
+    local skillStat = NPC.stats.skills[skillid](self)
+    skillStat.progress = skillStat.progress + params.skillGain / I.SkillProgression.getSkillProgressRequirement(skillid)
 
-        if skillStat.progress >= 1 then
-            I.SkillProgression.skillLevelUp(skillid, I.SkillProgression.SKILL_INCREASE_SOURCES.Usage)
-        end
+    if skillStat.progress >= 1 then
+        I.SkillProgression.skillLevelUp(skillid, I.SkillProgression.SKILL_INCREASE_SOURCES.Usage)
     end
 end
 
@@ -106,14 +104,11 @@ local function onUpdate()
     processAutomaticDoors()
 end
 
-local function onActive()
-    I.SkillProgression.addSkillUsedHandler(skillUsedHandler)
-    I.SkillProgression.addSkillLevelUpHandler(skillLevelUpHandler)
-end
+I.SkillProgression.addSkillUsedHandler(skillUsedHandler)
+I.SkillProgression.addSkillLevelUpHandler(skillLevelUpHandler)
 
 return {
     engineHandlers = {
         onUpdate = onUpdate,
-        onActive = onActive,
     },
 }

@@ -65,7 +65,7 @@ Arguments:
 </source>
         <translation>
 Параметры:
-        </translation>
+</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not find %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The application is not found.&lt;/p&gt;&lt;p&gt;Please make sure OpenMW is installed correctly and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>

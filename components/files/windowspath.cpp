@@ -101,7 +101,7 @@ namespace Files
         {
             // Key existed, let's try to read the install dir
             std::array<wchar_t, 512> buf{};
-            DWORD len = buf.size() * sizeof(wchar_t);
+            DWORD len = static_cast<DWORD>(buf.size() * sizeof(wchar_t));
 
             if (RegQueryValueExW(hKey, L"Installed Path", nullptr, nullptr, reinterpret_cast<LPBYTE>(buf.data()), &len)
                 == ERROR_SUCCESS)

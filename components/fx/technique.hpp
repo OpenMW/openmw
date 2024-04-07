@@ -13,6 +13,8 @@
 #include <osg/StateSet>
 #include <osg/Texture2D>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "lexer.hpp"
 #include "pass.hpp"
 #include "types.hpp"
@@ -103,8 +105,8 @@ namespace fx
         using UniformMap = std::vector<std::shared_ptr<Types::UniformBase>>;
         using RenderTargetMap = std::unordered_map<std::string_view, Types::RenderTarget>;
 
-        inline static std::string sExt = ".omwfx";
-        inline static std::string sSubdir = "shaders";
+        static constexpr std::string_view sExt = ".omwfx";
+        static constexpr std::string_view sSubdir = "shaders";
 
         enum class Status
         {
@@ -128,7 +130,7 @@ namespace fx
 
         std::string getName() const;
 
-        std::string getFileName() const;
+        const VFS::Path::Normalized& getFileName() const { return mFilePath; }
 
         bool setLastModificationTime(std::filesystem::file_time_type timeStamp);
 
@@ -251,7 +253,7 @@ namespace fx
 
         std::string mShared;
         std::string mName;
-        std::string mFileName;
+        VFS::Path::Normalized mFilePath;
         std::string_view mBlockName;
         std::string_view mAuthor;
         std::string_view mDescription;

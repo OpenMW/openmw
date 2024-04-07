@@ -19,6 +19,7 @@ Lua API reference
     openmw_animation
     openmw_async
     openmw_vfs
+    openmw_markup
     openmw_world
     openmw_self
     openmw_nearby

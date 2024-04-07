@@ -3,11 +3,11 @@
 
 #include <string>
 
-#include "components/esm/defs.hpp"
-#include "npcstate.hpp"
+#include <components/esm/attr.hpp>
+#include <components/esm/position.hpp>
 
-#include "components/esm/attr.hpp"
 #include "loadskil.hpp"
+#include "npcstate.hpp"
 
 namespace ESM
 {

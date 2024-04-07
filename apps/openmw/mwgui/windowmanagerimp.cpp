@@ -844,7 +844,7 @@ namespace MWGui
 
         if (!player.getCell()->isExterior())
         {
-            setActiveMap(x, y, true);
+            setActiveMap(*player.getCell()->getCell());
         }
         // else: need to know the current grid center, call setActiveMap from changeCell
 
@@ -914,6 +914,9 @@ namespace MWGui
         if (isConsoleMode())
             mConsole->onFrame(frameDuration);
 
+        if (isSettingsWindowVisible())
+            mSettingsWindow->onFrame(frameDuration);
+
         if (!gameRunning)
             return;
 
@@ -982,29 +985,23 @@ namespace MWGui
                 mMap->addVisitedLocation(name, cellCommon->getGridX(), cellCommon->getGridY());
 
             mMap->cellExplored(cellCommon->getGridX(), cellCommon->getGridY());
-
-            setActiveMap(cellCommon->getGridX(), cellCommon->getGridY(), false);
         }
         else
         {
-            mMap->setCellPrefix(std::string(cellCommon->getNameId()));
-            mHud->setCellPrefix(std::string(cellCommon->getNameId()));
-
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
                 worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
             else
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x(), worldPos.y());
-
-            setActiveMap(0, 0, true);
         }
+        setActiveMap(*cellCommon);
     }
 
-    void WindowManager::setActiveMap(int x, int y, bool interior)
+    void WindowManager::setActiveMap(const MWWorld::Cell& cell)
     {
-        mMap->setActiveCell(x, y, interior);
-        mHud->setActiveCell(x, y, interior);
+        mMap->setActiveCell(cell);
+        mHud->setActiveCell(cell);
     }
 
     void WindowManager::setDrowningBarVisibility(bool visible)
@@ -1203,6 +1200,8 @@ namespace MWGui
             const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
             window->setPosition(MyGUI::IntPoint(static_cast<int>(rect.mX * x), static_cast<int>(rect.mY * y)));
             window->setSize(MyGUI::IntSize(static_cast<int>(rect.mW * x), static_cast<int>(rect.mH * y)));
+
+            WindowBase::clampWindowCoordinates(window);
         }
 
         for (const auto& window : mWindows)
@@ -1476,10 +1475,6 @@ namespace MWGui
     {
         return mPostProcessorHud;
     }
-    MWGui::SettingsWindow* WindowManager::getSettingsWindow()
-    {
-        return mSettingsWindow;
-    }
 
     void WindowManager::useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions)
     {
@@ -1553,6 +1548,11 @@ namespace MWGui
     bool WindowManager::isPostProcessorHudVisible() const
     {
         return mPostProcessorHud && mPostProcessorHud->isVisible();
+    }
+
+    bool WindowManager::isSettingsWindowVisible() const
+    {
+        return mSettingsWindow && mSettingsWindow->isVisible();
     }
 
     bool WindowManager::isInteractiveMessageBoxActive() const
@@ -1691,9 +1691,9 @@ namespace MWGui
         mHud->setEnemy(enemy);
     }
 
-    int WindowManager::getMessagesCount() const
+    std::size_t WindowManager::getMessagesCount() const
     {
-        int count = 0;
+        std::size_t count = 0;
         if (mMessageBoxManager)
             count = mMessageBoxManager->getMessagesCount();
 
@@ -1716,13 +1716,15 @@ namespace MWGui
 
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
 
-        layout->mMainWidget->setPosition(
+        MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
+        window->setPosition(
             MyGUI::IntPoint(static_cast<int>(rect.mX * viewSize.width), static_cast<int>(rect.mY * viewSize.height)));
-        layout->mMainWidget->setSize(
+        window->setSize(
             MyGUI::IntSize(static_cast<int>(rect.mW * viewSize.width), static_cast<int>(rect.mH * viewSize.height)));
 
-        MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
         window->eventWindowChangeCoord += MyGUI::newDelegate(this, &WindowManager::onWindowChangeCoord);
+        WindowBase::clampWindowCoordinates(window);
+
         mTrackedWindows.emplace(window, settings);
     }
 
@@ -1751,6 +1753,8 @@ namespace MWGui
         const auto it = mTrackedWindows.find(window);
         if (it == mTrackedWindows.end())
             return;
+
+        WindowBase::clampWindowCoordinates(window);
 
         const WindowSettingValues& settings = it->second;
 
@@ -2129,6 +2133,21 @@ namespace MWGui
             mKeyboardNavigation->saveFocus(mGuiModes.back());
 
         mPostProcessorHud->setVisible(!visible);
+
+        if (visible && !mGuiModes.empty())
+            mKeyboardNavigation->restoreFocus(mGuiModes.back());
+
+        updateVisible();
+    }
+
+    void WindowManager::toggleSettingsWindow()
+    {
+        bool visible = mSettingsWindow->isVisible();
+
+        if (!visible && !mGuiModes.empty())
+            mKeyboardNavigation->saveFocus(mGuiModes.back());
+
+        mSettingsWindow->setVisible(!visible);
 
         if (visible && !mGuiModes.empty())
             mKeyboardNavigation->restoreFocus(mGuiModes.back());

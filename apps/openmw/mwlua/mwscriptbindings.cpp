@@ -53,6 +53,33 @@ namespace sol
 namespace MWLua
 {
 
+    float getGlobalVariableValue(const std::string_view globalId)
+    {
+        char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
+        if (varType == 'f')
+        {
+            return MWBase::Environment::get().getWorld()->getGlobalFloat(globalId);
+        }
+        else if (varType == 's' || varType == 'l')
+        {
+            return static_cast<float>(MWBase::Environment::get().getWorld()->getGlobalInt(globalId));
+        }
+        return 0;
+    }
+
+    void setGlobalVariableValue(const std::string_view globalId, float value)
+    {
+        char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
+        if (varType == 'f')
+        {
+            MWBase::Environment::get().getWorld()->setGlobalFloat(globalId, value);
+        }
+        else if (varType == 's' || varType == 'l')
+        {
+            MWBase::Environment::get().getWorld()->setGlobalInt(globalId, value);
+        }
+    }
+
     sol::table initMWScriptBindings(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
@@ -125,37 +152,55 @@ namespace MWLua
             return "ESM3_GlobalStore{" + std::to_string(store.getSize()) + " globals}";
         };
         globalStoreT[sol::meta_function::length] = [](const GlobalStore& store) { return store.getSize(); };
-        globalStoreT[sol::meta_function::index]
-            = sol::overload([](const GlobalStore& store, std::string_view globalId) -> sol::optional<float> {
-                  auto g = store.search(ESM::RefId::deserializeText(globalId));
-                  if (g == nullptr)
-                      return sol::nullopt;
-                  char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
-                  if (varType == 's' || varType == 'l')
-                  {
-                      return static_cast<float>(MWBase::Environment::get().getWorld()->getGlobalInt(globalId));
-                  }
-                  else
-                  {
-                      return MWBase::Environment::get().getWorld()->getGlobalFloat(globalId);
-                  }
-              });
-        globalStoreT[sol::meta_function::new_index]
-            = sol::overload([](const GlobalStore& store, std::string_view globalId, float val) {
-                  auto g = store.search(ESM::RefId::deserializeText(globalId));
-                  if (g == nullptr)
-                      throw std::runtime_error("No variable \"" + std::string(globalId) + "\" in GlobalStore");
-                  char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
-                  if (varType == 's' || varType == 'l')
-                  {
-                      MWBase::Environment::get().getWorld()->setGlobalInt(globalId, static_cast<int>(val));
-                  }
-                  else
-                  {
-                      MWBase::Environment::get().getWorld()->setGlobalFloat(globalId, val);
-                  }
-              });
-        globalStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
+        globalStoreT[sol::meta_function::index] = sol::overload(
+            [](const GlobalStore& store, std::string_view globalId) -> sol::optional<float> {
+                auto g = store.search(ESM::RefId::deserializeText(globalId));
+                if (g == nullptr)
+                    return sol::nullopt;
+                return getGlobalVariableValue(globalId);
+            },
+            [](const GlobalStore& store, size_t index) -> sol::optional<float> {
+                if (index < 1 || store.getSize() < index)
+                    return sol::nullopt;
+                auto g = store.at(index - 1);
+                if (g == nullptr)
+                    return sol::nullopt;
+                std::string globalId = g->mId.serializeText();
+                return getGlobalVariableValue(globalId);
+            });
+        globalStoreT[sol::meta_function::new_index] = sol::overload(
+            [](const GlobalStore& store, std::string_view globalId, float val) -> void {
+                auto g = store.search(ESM::RefId::deserializeText(globalId));
+                if (g == nullptr)
+                    throw std::runtime_error("No variable \"" + std::string(globalId) + "\" in GlobalStore");
+                setGlobalVariableValue(globalId, val);
+            },
+            [](const GlobalStore& store, size_t index, float val) {
+                if (index < 1 || store.getSize() < index)
+                    return;
+                auto g = store.at(index - 1);
+                if (g == nullptr)
+                    return;
+                std::string globalId = g->mId.serializeText();
+                setGlobalVariableValue(globalId, val);
+            });
+        globalStoreT[sol::meta_function::pairs] = [](const GlobalStore& store) {
+            size_t index = 0;
+            return sol::as_function(
+                [index, &store](sol::this_state ts) mutable -> sol::optional<std::tuple<std::string, float>> {
+                    if (index >= store.getSize())
+                        return sol::nullopt;
+
+                    const ESM::Global* global = store.at(index++);
+                    if (!global)
+                        return sol::nullopt;
+
+                    std::string globalId = global->mId.serializeText();
+                    float value = getGlobalVariableValue(globalId);
+
+                    return std::make_tuple(globalId, value);
+                });
+        };
         globalStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         api["getGlobalVariables"] = [globalStore](sol::optional<GObject> player) {
             if (player.has_value() && player->ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())

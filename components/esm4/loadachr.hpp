@@ -30,6 +30,7 @@
 #include <cstdint>
 
 #include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 
 #include "reference.hpp" // Placement, EnableParent

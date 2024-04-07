@@ -5,6 +5,7 @@
 #include <string>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/concepts.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 #include "esmreader.hpp"
@@ -40,6 +41,18 @@ namespace ESM
 namespace ESM
 {
     const StringRefId Cell::sDefaultWorldspaceId = StringRefId("sys::default");
+
+    template <Misc::SameAsWithoutCvref<Cell::DATAstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mFlags, v.mX, v.mY);
+    }
+
+    template <Misc::SameAsWithoutCvref<Cell::AMBIstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mAmbient, v.mSunlight, v.mFog, v.mFogDensity);
+    }
 
     // Some overloaded compare operators.
     bool operator==(const MovedCellRef& ref, const RefNum& refNum)
@@ -93,7 +106,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("DATA"):
-                    esm.getHT(mData.mFlags, mData.mX, mData.mY);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case SREC_DELE:
@@ -118,6 +131,7 @@ namespace ESM
         bool overriding = !mName.empty();
         bool isLoaded = false;
         mHasAmbi = false;
+        mHasWaterHeightSub = false;
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
@@ -126,13 +140,13 @@ namespace ESM
                 case fourCC("INTV"):
                     int32_t waterl;
                     esm.getHT(waterl);
+                    mHasWaterHeightSub = true;
                     mWater = static_cast<float>(waterl);
-                    mWaterInt = true;
                     break;
                 case fourCC("WHGT"):
                     float waterLevel;
                     esm.getHT(waterLevel);
-                    mWaterInt = false;
+                    mHasWaterHeightSub = true;
                     if (!std::isfinite(waterLevel))
                     {
                         if (!overriding)
@@ -144,7 +158,7 @@ namespace ESM
                         mWater = waterLevel;
                     break;
                 case fourCC("AMBI"):
-                    esm.getHT(mAmbi.mAmbient, mAmbi.mSunlight, mAmbi.mFog, mAmbi.mFogDensity);
+                    esm.getSubComposite(mAmbi);
                     mHasAmbi = true;
                     break;
                 case fourCC("RGNN"):
@@ -180,7 +194,7 @@ namespace ESM
     void Cell::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mName);
-        esm.writeHNT("DATA", mData, 12);
+        esm.writeNamedComposite("DATA", mData);
 
         if (isDeleted)
         {
@@ -190,25 +204,15 @@ namespace ESM
 
         if (mData.mFlags & Interior)
         {
-            if (mWaterInt)
-            {
-                int32_t water = (mWater >= 0) ? static_cast<int32_t>(mWater + 0.5) : static_cast<int32_t>(mWater - 0.5);
-                esm.writeHNT("INTV", water);
-            }
-            else
-            {
+            // Try to avoid saving ambient information when it's unnecessary.
+            // This is to fix black lighting and flooded water
+            // in resaved cell records that lack this information.
+            if (mHasWaterHeightSub)
                 esm.writeHNT("WHGT", mWater);
-            }
-
             if (mData.mFlags & QuasiEx)
                 esm.writeHNOCRefId("RGNN", mRegion);
-            else
-            {
-                // Try to avoid saving ambient lighting information when it's unnecessary.
-                // This is to fix black lighting in resaved cell records that lack this information.
-                if (mHasAmbi)
-                    esm.writeHNT("AMBI", mAmbi, 16);
-            }
+            else if (mHasAmbi)
+                esm.writeNamedComposite("AMBI", mAmbi);
         }
         else
         {
@@ -324,7 +328,6 @@ namespace ESM
         mName.clear();
         mRegion = ESM::RefId();
         mWater = 0;
-        mWaterInt = false;
         mMapColor = 0;
         mRefNumCounter = 0;
 
@@ -333,6 +336,7 @@ namespace ESM
         mData.mY = 0;
 
         mHasAmbi = true;
+        mHasWaterHeightSub = true;
         mAmbi.mAmbient = 0;
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;

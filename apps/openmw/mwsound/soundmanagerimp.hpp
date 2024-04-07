@@ -116,7 +116,7 @@ namespace MWSound
         Sound_Buffer* insertSound(const std::string& soundId, const ESM::Sound* sound);
 
         // returns a decoder to start streaming, or nullptr if the sound was not found
-        DecoderPtr loadVoice(const std::string& voicefile);
+        DecoderPtr loadVoice(VFS::Path::NormalizedView voicefile);
 
         SoundPtr getSoundRef();
         StreamPtr getStreamRef();
@@ -188,11 +188,11 @@ namespace MWSound
         /// \param name of the folder that contains the playlist
         /// Title music playlist is predefined
 
-        void say(const MWWorld::ConstPtr& reference, const std::string& filename) override;
+        void say(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView filename) override;
         ///< Make an actor say some text.
         /// \param filename name of a sound file in the VFS
 
-        void say(const std::string& filename) override;
+        void say(VFS::Path::NormalizedView filename) override;
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in the VFS
 

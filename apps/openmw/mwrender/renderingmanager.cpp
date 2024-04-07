@@ -329,13 +329,56 @@ namespace MWRender
         const SceneUtil::LightingMethod lightingMethod = Settings::shaders().mLightingMethod;
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
-        // Shadows and radial fog have problems with fixed-function mode.
-        bool forceShaders = Settings::fog().mRadialFog || Settings::fog().mExponentialFog
-            || Settings::shaders().mSoftParticles || Settings::shaders().mForceShaders
-            || Settings::shadows().mEnableShadows || lightingMethod != SceneUtil::LightingMethod::FFP || reverseZ
-            || mSkyBlending || Stereo::getMultiview();
-        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
 
+        // Figure out which pipeline must be used by default and inform the user
+        bool forceShaders = Settings::shaders().mForceShaders;
+        {
+            std::vector<std::string> requesters;
+            if (!forceShaders)
+            {
+                if (Settings::fog().mRadialFog)
+                    requesters.push_back("radial fog");
+                if (Settings::fog().mExponentialFog)
+                    requesters.push_back("exponential fog");
+                if (mSkyBlending)
+                    requesters.push_back("sky blending");
+                if (Settings::shaders().mSoftParticles)
+                    requesters.push_back("soft particles");
+                if (Settings::shadows().mEnableShadows)
+                    requesters.push_back("shadows");
+                if (lightingMethod != SceneUtil::LightingMethod::FFP)
+                    requesters.push_back("lighting method");
+                if (reverseZ)
+                    requesters.push_back("reverse-Z depth buffer");
+                if (Stereo::getMultiview())
+                    requesters.push_back("stereo multiview");
+
+                if (!requesters.empty())
+                    forceShaders = true;
+            }
+
+            if (forceShaders)
+            {
+                std::string message = "Using rendering with shaders by default";
+                if (requesters.empty())
+                {
+                    message += " (forced)";
+                }
+                else
+                {
+                    message += ", requested by:";
+                    for (size_t i = 0; i < requesters.size(); i++)
+                        message += "\n - " + requesters[i];
+                }
+                Log(Debug::Info) << message;
+            }
+            else
+            {
+                Log(Debug::Info) << "Using fixed-function rendering by default";
+            }
+        }
+
+        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::shaders().mClampLighting);
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::shaders().mAutoUseObjectNormalMaps);
@@ -398,7 +441,7 @@ namespace MWRender
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
         globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
-        globalDefines["refraction_enabled"] = "0";
+        globalDefines["waterRefraction"] = "0";
         globalDefines["useGPUShader4"] = "0";
         globalDefines["useOVR_multiview"] = "0";
         globalDefines["numViews"] = "1";
@@ -506,6 +549,8 @@ namespace MWRender
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));
+
+        resourceSystem->getSceneManager()->setUpNormalsRTForStateSet(sceneRoot->getOrCreateStateSet(), true);
 
         mFog = std::make_unique<FogManager>();
 

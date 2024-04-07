@@ -14,7 +14,7 @@ namespace
         return (arg.get_type() == sol::type::lua_nil || arg.get_type() == sol::type::none);
     }
 
-    inline double getInteger(const sol::stack_proxy arg, const size_t n, std::string_view name)
+    inline std::int64_t getInteger(const sol::stack_proxy arg, const size_t n, std::string_view name)
     {
         double integer;
         if (!arg.is<double>())
@@ -25,7 +25,7 @@ namespace
             throw std::runtime_error(
                 Misc::StringUtils::format("bad argument #%i to '%s' (number has no integer representation)", n, name));
 
-        return integer;
+        return static_cast<std::int64_t>(integer);
     }
 
     // If the input 'pos' is negative, it is treated as counting from the end of the string,
@@ -104,7 +104,8 @@ namespace LuaUtf8
                     throw std::runtime_error(
                         "bad argument #" + std::to_string(i + 1) + " to 'char' (value out of range)");
 
-                result += converter.to_bytes(codepoint);
+                // this feels dodgy if wchar_t is 16-bit as MAXUTF won't fit in sixteen bits
+                result += converter.to_bytes(static_cast<wchar_t>(codepoint));
             }
             return result;
         };

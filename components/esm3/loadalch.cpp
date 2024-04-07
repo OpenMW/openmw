@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Potion::ALDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mWeight, v.mValue, v.mFlags);
+    }
+
     void Potion::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -36,7 +44,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("ALDT"):
-                    esm.getHT(mData.mWeight, mData.mValue, mData.mAutoCalc);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("ENAM"):
@@ -71,7 +79,7 @@ namespace ESM
         esm.writeHNOCString("TEXT", mIcon);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNT("ALDT", mData, 12);
+        esm.writeNamedComposite("ALDT", mData);
         mEffects.save(esm);
     }
 
@@ -80,7 +88,7 @@ namespace ESM
         mRecordFlags = 0;
         mData.mWeight = 0;
         mData.mValue = 0;
-        mData.mAutoCalc = 0;
+        mData.mFlags = 0;
         mName.clear();
         mModel.clear();
         mIcon.clear();

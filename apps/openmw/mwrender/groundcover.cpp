@@ -95,6 +95,8 @@ namespace MWRender
                     {
                         // Other objects are likely cheaper and should let us skip all but a few groundcover instances
                         cullVisitor.computeNearPlane();
+                        computedZNear = cullVisitor.getCalculatedNearPlane();
+                        computedZFar = cullVisitor.getCalculatedFarPlane();
 
                         if (dNear < computedZNear)
                         {
@@ -461,6 +463,6 @@ namespace MWRender
 
     void Groundcover::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Groundcover Chunk", mCache->getCacheSize());
+        Resource::reportStats("Groundcover Chunk", frameNumber, mCache->getStats(), *stats);
     }
 }

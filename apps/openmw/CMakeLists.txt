@@ -63,8 +63,8 @@ add_openmw_dir (mwlua
     luamanagerimp object objectlists userdataserializer luaevents engineevents objectvariant
     context menuscripts globalscripts localscripts playerscripts luabindings objectbindings cellbindings
     mwscriptbindings camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings
-    postprocessingbindings stats debugbindings corebindings worldbindings worker magicbindings factionbindings
-    classbindings itemdata inputprocessor animationbindings birthsignbindings
+    postprocessingbindings stats recordstore debugbindings corebindings worldbindings worker magicbindings factionbindings
+    classbindings itemdata inputprocessor animationbindings birthsignbindings racebindings markupbindings
     types/types types/door types/item types/actor types/container types/lockable types/weapon types/npc
     types/creature types/player types/activator types/book types/lockpick types/probe types/apparatus
     types/potion types/ingredient types/misc types/repair types/armor types/light types/static
@@ -103,7 +103,7 @@ add_openmw_dir (mwmechanics
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor aibreathe
     aicast aiescort aiface aiactivate aicombat recharge repair enchanting pathfinding pathgrid security spellcasting spellresistance
     disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction summoning
-    character actors objects aistate trading weaponpriority spellpriority weapontype spellutil
+    character actors objects aistate weaponpriority spellpriority weapontype spellutil
     spelleffects
     )
 
@@ -161,7 +161,7 @@ target_link_libraries(openmw
     components
 )
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw PRIVATE
         <boost/program_options/options_description.hpp>
 

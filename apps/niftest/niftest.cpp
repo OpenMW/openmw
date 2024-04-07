@@ -42,29 +42,10 @@ bool isBSA(const std::filesystem::path& filename)
     return hasExtension(filename, ".bsa") || hasExtension(filename, ".ba2");
 }
 
-std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
-{
-    switch (Bsa::BSAFile::detectVersion(path))
-    {
-        case Bsa::BSAVER_COMPRESSED:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_COMPRESSED>::type>(path);
-        case Bsa::BSAVER_BA2_GNRL:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_BA2_GNRL>::type>(path);
-        case Bsa::BSAVER_BA2_DX10:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_BA2_DX10>::type>(path);
-        case Bsa::BSAVER_UNCOMPRESSED:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_UNCOMPRESSED>::type>(path);
-        case Bsa::BSAVER_UNKNOWN:
-        default:
-            std::cerr << "'" << Files::pathToUnicodeString(path) << "' is not a recognized BSA archive" << std::endl;
-            return nullptr;
-    }
-}
-
 std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
 {
     if (isBSA(path))
-        return makeBsaArchive(path);
+        return VFS::makeBsaArchive(path);
     if (std::filesystem::is_directory(path))
         return std::make_unique<VFS::FileSystemArchive>(path);
     return nullptr;
@@ -84,10 +65,10 @@ void readNIF(
             std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
         std::cout << std::endl;
     }
-    std::filesystem::path fullPath = !source.empty() ? source / path : path;
+    const std::filesystem::path fullPath = !source.empty() ? source / path : path;
     try
     {
-        Nif::NIFFile file(fullPath);
+        Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
         Nif::Reader reader(file, nullptr);
         if (vfs != nullptr)
             reader.parse(vfs->get(pathStr));
@@ -124,17 +105,23 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 
     if (!archivePath.empty() && !isBSA(archivePath))
     {
-        Files::PathContainer dataDirs = { archivePath };
-        const Files::Collections fileCollections = Files::Collections(dataDirs);
+        const Files::Collections fileCollections({ archivePath });
         const Files::MultiDirCollection& bsaCol = fileCollections.getCollection(".bsa");
         const Files::MultiDirCollection& ba2Col = fileCollections.getCollection(".ba2");
-        for (auto& file : bsaCol)
+        for (const Files::MultiDirCollection& collection : { bsaCol, ba2Col })
         {
-            readVFS(makeBsaArchive(file.second), file.second, quiet);
-        }
-        for (auto& file : ba2Col)
-        {
-            readVFS(makeBsaArchive(file.second), file.second, quiet);
+            for (auto& file : collection)
+            {
+                try
+                {
+                    readVFS(VFS::makeBsaArchive(file.second), file.second, quiet);
+                }
+                catch (const std::exception& e)
+                {
+                    std::cerr << "Failed to read archive file '" << Files::pathToUnicodeString(file.second)
+                              << "': " << e.what() << std::endl;
+                }
+            }
         }
     }
 }

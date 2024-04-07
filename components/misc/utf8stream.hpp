@@ -75,7 +75,7 @@ public:
             return std::make_pair(chr, cur);
         }
 
-        int octets;
+        std::size_t octets;
         UnicodeChar chr;
 
         std::tie(octets, chr) = getOctetCount(*cur++);

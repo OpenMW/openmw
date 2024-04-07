@@ -22,7 +22,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "objectvariant.hpp"
-#include "types/types.hpp"
+#include "recordstore.hpp"
 
 namespace
 {
@@ -31,7 +31,7 @@ namespace
     using Index = const SelfObject::CachedStat::Index&;
 
     template <class T>
-    auto addIndexedAccessor(Index index)
+    auto addIndexedAccessor(auto index)
     {
         return [index](const sol::object& o) { return T::create(ObjectVariant(o), index); };
     }
@@ -425,6 +425,62 @@ namespace MWLua
             stats.setSkill(id, stat);
         }
     };
+
+    class AIStat
+    {
+        ObjectVariant mObject;
+        MWMechanics::AiSetting mIndex;
+
+        AIStat(ObjectVariant object, MWMechanics::AiSetting index)
+            : mObject(std::move(object))
+            , mIndex(index)
+        {
+        }
+
+    public:
+        template <class G>
+        sol::object get(const Context& context, std::string_view prop, G getter) const
+        {
+            return getValue(context, mObject, &AIStat::setValue, static_cast<int>(mIndex), prop,
+                [this, getter](const MWWorld::Ptr& ptr) {
+                    return (ptr.getClass().getCreatureStats(ptr).getAiSetting(mIndex).*getter)();
+                });
+        }
+
+        int getModified(const Context& context) const
+        {
+            auto base = LuaUtil::cast<int>(get(context, "base", &MWMechanics::Stat<int>::getBase));
+            auto modifier = LuaUtil::cast<int>(get(context, "modifier", &MWMechanics::Stat<int>::getModifier));
+            return std::max(0, base + modifier);
+        }
+
+        static std::optional<AIStat> create(ObjectVariant object, MWMechanics::AiSetting index)
+        {
+            if (!object.ptr().getClass().isActor())
+                return {};
+            return AIStat{ std::move(object), index };
+        }
+
+        void cache(const Context& context, std::string_view prop, const sol::object& value) const
+        {
+            SelfObject* obj = mObject.asSelfObject();
+            addStatUpdateAction(context.mLuaManager, *obj);
+            obj->mStatsCache[SelfObject::CachedStat{ &AIStat::setValue, static_cast<int>(mIndex), prop }] = value;
+        }
+
+        static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+        {
+            auto index = static_cast<MWMechanics::AiSetting>(std::get<int>(i));
+            auto& stats = ptr.getClass().getCreatureStats(ptr);
+            auto stat = stats.getAiSetting(index);
+            int intValue = LuaUtil::cast<int>(value);
+            if (prop == "base")
+                stat.setBase(intValue);
+            else if (prop == "modifier")
+                stat.setModifier(intValue);
+            stats.setAiSetting(index, stat);
+        }
+    };
 }
 
 namespace sol
@@ -465,6 +521,10 @@ namespace sol
     struct is_automagical<ESM::MagicSchool> : std::false_type
     {
     };
+    template <>
+    struct is_automagical<MWLua::AIStat> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -476,7 +536,7 @@ namespace MWLua
 
         auto skillIncreasesForAttributeStatsT
             = context.mLua->sol().new_usertype<SkillIncreasesForAttributeStats>("SkillIncreasesForAttributeStats");
-        for (auto attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
+        for (const auto& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
             skillIncreasesForAttributeStatsT[ESM::RefId(attribute.mId).serializeText()] = sol::property(
                 [=](const SkillIncreasesForAttributeStats& stat) { return stat.get(context, attribute.mId); },
@@ -529,6 +589,17 @@ namespace MWLua
         stats["attributes"] = LuaUtil::makeReadOnly(attributes);
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
             attributes[ESM::RefId(attribute.mId).serializeText()] = addIndexedAccessor<AttributeStat>(attribute.mId);
+
+        auto aiStatT = context.mLua->sol().new_usertype<AIStat>("AIStat");
+        addProp(context, aiStatT, "base", &MWMechanics::Stat<int>::getBase);
+        addProp(context, aiStatT, "modifier", &MWMechanics::Stat<int>::getModifier);
+        aiStatT["modified"] = sol::readonly_property([=](const AIStat& stat) { return stat.getModified(context); });
+        sol::table ai(context.mLua->sol(), sol::create);
+        stats["ai"] = LuaUtil::makeReadOnly(ai);
+        ai["alarm"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Alarm);
+        ai["fight"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Fight);
+        ai["flee"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Flee);
+        ai["hello"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Hello);
     }
 
     void addNpcStatsBindings(sol::table& npc, const Context& context)

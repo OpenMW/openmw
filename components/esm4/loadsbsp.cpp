@@ -41,10 +41,10 @@ void ESM4::SubSpace::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_DNAM:
+            case ESM::fourCC("DNAM"):
             {
                 reader.get(mDimension.x);
                 reader.get(mDimension.y);

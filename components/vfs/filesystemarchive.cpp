@@ -24,11 +24,11 @@ namespace VFS
 
         for (auto it = std::filesystem::begin(iterator), end = std::filesystem::end(iterator); it != end;)
         {
-            const auto& i = *it;
+            const std::filesystem::directory_entry& entry = *it;
 
-            if (!std::filesystem::is_directory(i))
+            if (!entry.is_directory())
             {
-                const std::filesystem::path& filePath = i.path();
+                const std::filesystem::path& filePath = entry.path();
                 const std::string proper = Files::pathToUnicodeString(filePath);
                 VFS::Path::Normalized searchable(std::string_view{ proper }.substr(prefix));
                 FileSystemArchiveFile file(filePath);
@@ -43,7 +43,7 @@ namespace VFS
             // Exception thrown by the operator++ may not contain the context of the error like what exact path caused
             // the problem which makes it hard to understand what's going on when iteration happens over a directory
             // with thousands of files and subdirectories.
-            const std::filesystem::path prevPath = i.path();
+            const std::filesystem::path prevPath = entry.path();
             std::error_code ec;
             it.increment(ec);
             if (ec != std::error_code())

@@ -43,6 +43,11 @@ namespace VFS
         return getNormalized(name);
     }
 
+    Files::IStreamPtr Manager::get(Path::NormalizedView name) const
+    {
+        return getNormalized(name.value());
+    }
+
     Files::IStreamPtr Manager::getNormalized(std::string_view normalizedName) const
     {
         assert(Path::isNormalized(normalizedName));
@@ -53,6 +58,11 @@ namespace VFS
     }
 
     bool Manager::exists(const Path::Normalized& name) const
+    {
+        return mIndex.find(name) != mIndex.end();
+    }
+
+    bool Manager::exists(Path::NormalizedView name) const
     {
         return mIndex.find(name) != mIndex.end();
     }

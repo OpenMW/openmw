@@ -183,9 +183,8 @@ namespace MWSound
         min = std::max(min, 1.0f);
         max = std::max(min, max);
 
-        Sound_Buffer& sfx
-            = mSoundBuffers.emplace_back(Misc::ResourceHelpers::correctSoundPath(sound.mSound), volume, min, max);
-        VFS::Path::normalizeFilenameInPlace(sfx.mResourceName);
+        Sound_Buffer& sfx = mSoundBuffers.emplace_back(
+            Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(sound.mSound)), volume, min, max);
 
         mBufferNameMap.emplace(soundId, &sfx);
         return &sfx;

@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <iosfwd>
-
+#include <string>
 #include <utility>
 
 #include <components/misc/hash.hpp>

@@ -10,6 +10,10 @@
 #include <components/bsa/bsa_file.hpp>
 #include <components/bsa/compressedbsafile.hpp>
 
+#include <algorithm>
+#include <memory>
+#include <stdexcept>
+
 namespace VFS
 {
     template <typename FileType>
@@ -44,10 +48,11 @@ namespace VFS
             for (Bsa::BSAFile::FileList::const_iterator it = filelist.begin(); it != filelist.end(); ++it)
             {
                 mResources.emplace_back(&*it, mFile.get());
+                mFiles.emplace_back(it->name());
             }
-        }
 
-        virtual ~BsaArchive() {}
+            std::sort(mFiles.begin(), mFiles.end());
+        }
 
         void listResources(FileMap& out) override
         {
@@ -57,12 +62,7 @@ namespace VFS
 
         bool contains(Path::NormalizedView file) const override
         {
-            for (const auto& it : mResources)
-            {
-                if (Path::pathEqual(file.value(), it.mInfo->name()))
-                    return true;
-            }
-            return false;
+            return std::binary_search(mFiles.begin(), mFiles.end(), file);
         }
 
         std::string getDescription() const override { return std::string{ "BSA: " } + mFile->getFilename(); }
@@ -70,36 +70,27 @@ namespace VFS
     private:
         std::unique_ptr<BSAFileType> mFile;
         std::vector<BsaArchiveFile<BSAFileType>> mResources;
+        std::vector<VFS::Path::Normalized> mFiles;
     };
 
-    template <Bsa::BsaVersion>
-    struct ArchiveSelector
+    inline std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
     {
-    };
+        switch (Bsa::BSAFile::detectVersion(path))
+        {
+            case Bsa::BsaVersion::Unknown:
+                break;
+            case Bsa::BsaVersion::Uncompressed:
+                return std::make_unique<BsaArchive<Bsa::BSAFile>>(path);
+            case Bsa::BsaVersion::Compressed:
+                return std::make_unique<BsaArchive<Bsa::CompressedBSAFile>>(path);
+            case Bsa::BsaVersion::BA2GNRL:
+                return std::make_unique<BsaArchive<Bsa::BA2GNRLFile>>(path);
+            case Bsa::BsaVersion::BA2DX10:
+                return std::make_unique<BsaArchive<Bsa::BA2DX10File>>(path);
+        }
 
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_UNCOMPRESSED>
-    {
-        using type = BsaArchive<Bsa::BSAFile>;
-    };
-
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_COMPRESSED>
-    {
-        using type = BsaArchive<Bsa::CompressedBSAFile>;
-    };
-
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_BA2_GNRL>
-    {
-        using type = BsaArchive<Bsa::BA2GNRLFile>;
-    };
-
-    template <>
-    struct ArchiveSelector<Bsa::BSAVER_BA2_DX10>
-    {
-        using type = BsaArchive<Bsa::BA2DX10File>;
-    };
+        throw std::runtime_error("Unknown archive type '" + Files::pathToUnicodeString(path) + "'");
+    }
 }
 
 #endif

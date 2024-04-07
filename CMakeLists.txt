@@ -44,6 +44,7 @@ option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 option(BUILD_BULLETOBJECTTOOL   "Build Bullet object tool" ON)
 option(BUILD_OPENCS_TESTS       "Build OpenMW Construction Set tests" OFF)
+option(PRECOMPILE_HEADERS_WITH_MSVC "Precompile most common used headers with MSVC (alternative to ccache)" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
@@ -80,7 +81,7 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 54)
+set(OPENMW_LUA_API_REVISION 59)
 set(OPENMW_POSTPROCESSING_API_REVISION 1)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -89,7 +90,7 @@ set(OPENMW_VERSION_COMMITDATE "")
 
 set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
-set(OPENMW_DOC_BASEURL "https://openmw.readthedocs.io/en/stable/")
+set(OPENMW_DOC_BASEURL "https://openmw.readthedocs.io/en/")
 
 set(GIT_CHECKOUT FALSE)
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
@@ -190,6 +191,22 @@ if (MSVC)
     add_compile_options(/bigobj)
 
     add_compile_options(/Zc:__cplusplus)
+
+    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER)
+        if (CMAKE_GENERATOR MATCHES "Visual Studio")
+            message(STATUS "A compiler launcher was specified, but will be unused by the current generator (${CMAKE_GENERATOR})")
+        else()
+            foreach (config_lower ${CMAKE_CONFIGURATION_TYPES})
+                string(TOUPPER "${config_lower}" config)
+                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
+                endif()
+                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_${config} "${CMAKE_CXX_FLAGS_${config}}")
+                endif()
+            endforeach()
+        endif()
+    endif()
 endif()
 
 # Set up common paths
@@ -718,67 +735,66 @@ if (WIN32)
             )
 
         foreach(d ${WARNINGS_DISABLE})
-            set(WARNINGS "${WARNINGS} /wd${d}")
+            list(APPEND WARNINGS "/wd${d}")
         endforeach(d)
 
         if(OPENMW_MSVC_WERROR)
-            set(WARNINGS "${WARNINGS} /WX")
+            list(APPEND WARNINGS "/WX")
         endif()
 
-        set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
-        set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+        target_compile_options(components PRIVATE ${WARNINGS})
+        target_compile_options(osg-ffmpeg-videoplayer PRIVATE ${WARNINGS})
 
         if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
             target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
         endif()
 
         if (BUILD_BSATOOL)
-            set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(bsatool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESMTOOL)
-            set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(esmtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESSIMPORTER)
-            set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-essimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_LAUNCHER)
-            set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-launcher PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_MWINIIMPORTER)
-            set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-iniimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENCS)
-            set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-cs PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENMW)
-            set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_WIZARD)
-            set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-wizard PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_UNITTESTS)
-            set_target_properties(openmw_test_suite PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw_test_suite PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BENCHMARKS)
-            set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_NAVMESHTOOL)
-            set_target_properties(openmw-navmeshtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-navmeshtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BULLETOBJECTTOOL)
-            set(WARNINGS "${WARNINGS} ${MT_BUILD}")
-            set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
         endif()
     endif(MSVC)
 
@@ -1090,17 +1106,17 @@ if (USE_QT)
     file(GLOB COMPONENTS_TS_FILES ${CMAKE_SOURCE_DIR}/files/lang/components_*.ts)
     get_target_property(QT_LUPDATE_EXECUTABLE Qt::lupdate IMPORTED_LOCATION)
     add_custom_target(translations
-    COMMAND ${QT_LUPDATE_EXECUTABLE} ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
+    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
     VERBATIM
     COMMAND_EXPAND_LISTS
 
-    COMMAND ${QT_LUPDATE_EXECUTABLE} ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
+    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
     VERBATIM
     COMMAND_EXPAND_LISTS
 
-    COMMAND ${QT_LUPDATE_EXECUTABLE} ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
+    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
     VERBATIM
     COMMAND_EXPAND_LISTS)

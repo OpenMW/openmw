@@ -136,6 +136,7 @@ namespace MWBase
 
         virtual bool isConsoleMode() const = 0;
         virtual bool isPostProcessorHudVisible() const = 0;
+        virtual bool isSettingsWindowVisible() const = 0;
         virtual bool isInteractiveMessageBoxActive() const = 0;
 
         virtual void toggleVisible(MWGui::GuiWindow wnd) = 0;
@@ -157,7 +158,6 @@ namespace MWBase
         virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
         virtual MWGui::TradeWindow* getTradeWindow() = 0;
         virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
-        virtual MWGui::SettingsWindow* getSettingsWindow() = 0;
 
         /// Make the player use an item, while updating GUI state accordingly
         virtual void useItem(const MWWorld::Ptr& item, bool force = false) = 0;
@@ -201,9 +201,6 @@ namespace MWBase
         ///< show extra info in item tooltips (owner, script)
 
         virtual bool getFullHelp() const = 0;
-
-        virtual void setActiveMap(int x, int y, bool interior) = 0;
-        ///< set the indices of the map texture that should be used
 
         /// sets the visibility of the drowning bar
         virtual void setDrowningBarVisibility(bool visible) = 0;
@@ -293,7 +290,7 @@ namespace MWBase
 
         virtual void setEnemy(const MWWorld::Ptr& enemy) = 0;
 
-        virtual int getMessagesCount() const = 0;
+        virtual std::size_t getMessagesCount() const = 0;
 
         virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
@@ -345,6 +342,7 @@ namespace MWBase
         virtual void toggleConsole() = 0;
         virtual void toggleDebugWindow() = 0;
         virtual void togglePostProcessorHud() = 0;
+        virtual void toggleSettingsWindow() = 0;
 
         /// Cycle to next or previous spell
         virtual void cycleSpell(bool next) = 0;

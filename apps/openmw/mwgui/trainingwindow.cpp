@@ -189,8 +189,8 @@ namespace MWGui
         mProgressBar.setProgress(0, 2);
         mTimeAdvancer.run(2);
 
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2);
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2, false, 0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2f);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2f, false, 0.2f);
     }
 
     void TrainingWindow::onTrainingProgressChanged(int cur, int total)

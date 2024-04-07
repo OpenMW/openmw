@@ -41,24 +41,24 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_TNAM:
+            case ESM::fourCC("TNAM"):
                 reader.getFormId(mTemplate);
                 break;
-            case ESM4::SUB_LVLD:
+            case ESM::fourCC("LVLD"):
                 reader.get(mChanceNone);
                 break;
-            case ESM4::SUB_LVLF:
+            case ESM::fourCC("LVLF"):
                 reader.get(mLvlCreaFlags);
                 break;
-            case ESM4::SUB_LVLO:
+            case ESM::fourCC("LVLO"):
             {
-                static LVLO lvlo;
+                LVLO lvlo;
                 if (subHdr.dataSize != 12)
                 {
                     if (subHdr.dataSize == 8)
@@ -83,7 +83,7 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
                 mLvlObject.push_back(lvlo);
                 break;
             }
-            case ESM4::SUB_OBND: // FO3
+            case ESM::fourCC("OBND"): // FO3
                 reader.skipSubRecordData();
                 break;
             default:

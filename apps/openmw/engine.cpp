@@ -31,6 +31,7 @@
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
 
+#include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/files/configurationmanager.hpp>
@@ -600,6 +601,7 @@ void OMW::Engine::createWindow()
     mViewer->setRealizeOperation(realizeOperations);
     osg::ref_ptr<IdentifyOpenGLOperation> identifyOp = new IdentifyOpenGLOperation();
     realizeOperations->add(identifyOp);
+    realizeOperations->add(new SceneUtil::GetGLExtensionsOperation());
 
     if (Debug::shouldDebugOpenGL())
         realizeOperations->add(new Debug::EnableGLDebugOperation());
@@ -780,13 +782,13 @@ void OMW::Engine::prepareEngine()
     // gui needs our shaders path before everything else
     mResourceSystem->getSceneManager()->setShaderPath(mResDir / "shaders");
 
-    osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
-    bool shadersSupported = exts && (exts->glslLanguageVersion >= 1.2f);
+    osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+    bool shadersSupported = exts.glslLanguageVersion >= 1.2f;
 
 #if OSG_VERSION_LESS_THAN(3, 6, 6)
     // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
-    if (exts)
-        exts->glRenderbufferStorageMultisampleCoverageNV = nullptr;
+    if (!osg::isGLExtensionSupported(exts.contextID, "NV_framebuffer_multisample_coverage"))
+        exts.glRenderbufferStorageMultisampleCoverageNV = nullptr;
 #endif
 
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
@@ -963,17 +965,17 @@ void OMW::Engine::go()
     }
 
     // Setup profiler
-    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler(stats.is_open(), mVFS.get());
+    osg::ref_ptr<Resource::Profiler> statsHandler = new Resource::Profiler(stats.is_open(), *mVFS);
 
-    initStatsHandler(*statshandler);
+    initStatsHandler(*statsHandler);
 
-    mViewer->addEventHandler(statshandler);
+    mViewer->addEventHandler(statsHandler);
 
-    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler(stats.is_open(), mVFS.get());
-    mViewer->addEventHandler(resourceshandler);
+    osg::ref_ptr<Resource::StatsHandler> resourcesHandler = new Resource::StatsHandler(stats.is_open(), *mVFS);
+    mViewer->addEventHandler(resourcesHandler);
 
     if (stats.is_open())
-        Resource::CollectStatistics(mViewer);
+        Resource::collectStatistics(*mViewer);
 
     // Start the game
     if (!mSaveGameFile.empty())

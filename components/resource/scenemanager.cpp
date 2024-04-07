@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include <osg/AlphaFunc>
+#include <osg/ColorMaski>
 #include <osg/Group>
 #include <osg/Node>
 #include <osg/UserDataContainer>
@@ -511,6 +512,13 @@ namespace Resource
         return mCache->checkInObjectCache(VFS::Path::normalizeFilename(name), timeStamp);
     }
 
+    void SceneManager::setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled)
+    {
+        if (!getSupportsNormalsRT())
+            return;
+        stateset->setAttributeAndModes(new osg::ColorMaski(1, enabled, enabled, enabled, enabled));
+    }
+
     /// @brief Callback to read image files from the VFS.
     class ImageReadCallback : public osgDB::ReadFileCallback
     {
@@ -545,9 +553,9 @@ namespace Resource
     namespace
     {
         osg::ref_ptr<osg::Node> loadNonNif(
-            const std::string& normalizedFilename, std::istream& model, Resource::ImageManager* imageManager)
+            VFS::Path::NormalizedView normalizedFilename, std::istream& model, Resource::ImageManager* imageManager)
         {
-            auto ext = Misc::getFileExtension(normalizedFilename);
+            const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
             if (!reader)
             {
@@ -566,7 +574,7 @@ namespace Resource
             if (ext == "dae")
                 options->setOptionString("daeUseSequencedTextureUnits");
 
-            const std::array<std::uint64_t, 2> fileHash = Files::getHash(normalizedFilename, model);
+            const std::array<std::uint64_t, 2> fileHash = Files::getHash(normalizedFilename.value(), model);
 
             osgDB::ReaderWriter::ReadResult result = reader->readNode(model, options);
             if (!result.success())
@@ -721,10 +729,10 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> load(const std::string& normalizedFilename, const VFS::Manager* vfs,
+    osg::ref_ptr<osg::Node> load(VFS::Path::NormalizedView normalizedFilename, const VFS::Manager* vfs,
         Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
     {
-        auto ext = Misc::getFileExtension(normalizedFilename);
+        const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
         if (ext == "nif")
             return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager);
         else if (ext == "spt")
@@ -778,12 +786,12 @@ namespace Resource
         }
     };
 
-    bool canOptimize(const std::string& filename)
+    static bool canOptimize(std::string_view filename)
     {
-        size_t slashpos = filename.find_last_of("\\/");
-        if (slashpos != std::string::npos && slashpos + 1 < filename.size())
+        const std::string_view::size_type slashpos = filename.find_last_of('/');
+        if (slashpos != std::string_view::npos && slashpos + 1 < filename.size())
         {
-            std::string basename = filename.substr(slashpos + 1);
+            const std::string_view basename = filename.substr(slashpos + 1);
             // xmesh.nif can not be optimized because there are keyframes added in post
             if (!basename.empty() && basename[0] == 'x')
                 return false;
@@ -796,7 +804,7 @@ namespace Resource
 
         // For spell VFX, DummyXX nodes must remain intact. Not adding those to reservedNames to avoid being overly
         // cautious - instead, decide on filename
-        if (filename.find("vfx_pattern") != std::string::npos)
+        if (filename.find("vfx_pattern") != std::string_view::npos)
             return false;
         return true;
     }
@@ -843,11 +851,12 @@ namespace Resource
     {
         try
         {
+            VFS::Path::Normalized path("meshes/marker_error.****");
             for (const auto meshType : { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" })
             {
-                const std::string normalized = "meshes/marker_error." + std::string(meshType);
-                if (mVFS->exists(normalized))
-                    return load(normalized, mVFS, mImageManager, mNifFileManager);
+                path.changeExtension(meshType);
+                if (mVFS->exists(path))
+                    return load(path, mVFS, mImageManager, mNifFileManager);
             }
         }
         catch (const std::exception& e)
@@ -869,7 +878,7 @@ namespace Resource
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(std::string_view name, bool compile)
     {
-        std::string normalized = VFS::Path::normalizeFilename(name);
+        const VFS::Path::Normalized normalized(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
@@ -1116,7 +1125,7 @@ namespace Resource
             stats->setAttribute(frameNumber, "StateSet", mSharedStateManager->getNumSharedStateSets());
         }
 
-        stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
+        Resource::reportStats("Node", frameNumber, mCache->getStats(), *stats);
     }
 
     osg::ref_ptr<Shader::ShaderVisitor> SceneManager::createShaderVisitor(const std::string& shaderPrefix)

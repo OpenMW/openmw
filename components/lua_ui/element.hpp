@@ -21,10 +21,18 @@ namespace LuaUi
         WidgetExtension* mRoot;
         sol::object mLayout;
         std::string mLayer;
-        bool mUpdate;
-        bool mDestroy;
 
-        void create();
+        enum State
+        {
+            New,
+            Created,
+            Update,
+            Destroy,
+            Destroyed,
+        };
+        State mState;
+
+        void create(uint64_t dept = 0);
 
         void update();
 

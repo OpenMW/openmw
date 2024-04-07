@@ -42,24 +42,24 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_LLCT:
+            case ESM::fourCC("LLCT"):
                 reader.get(mListCount);
                 break;
-            case ESM4::SUB_LVLD:
+            case ESM::fourCC("LVLD"):
                 reader.get(mChanceNone);
                 break;
-            case ESM4::SUB_LVLF:
+            case ESM::fourCC("LVLF"):
                 reader.get(mLvlActorFlags);
                 break;
-            case ESM4::SUB_LVLO:
+            case ESM::fourCC("LVLO"):
             {
-                static LVLO lvlo;
+                LVLO lvlo;
                 if (subHdr.dataSize != 12)
                 {
                     if (subHdr.dataSize == 8)
@@ -89,15 +89,15 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
                 mLvlObject.push_back(lvlo);
                 break;
             }
-            case ESM4::SUB_COED: // owner
-            case ESM4::SUB_OBND: // object bounds
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_LLKC: // FO4
-            case ESM4::SUB_LVLG: // FO4
-            case ESM4::SUB_LVLM: // FO4
+            case ESM::fourCC("COED"): // owner
+            case ESM::fourCC("OBND"): // object bounds
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("LLKC"): // FO4
+            case ESM::fourCC("LVLG"): // FO4
+            case ESM::fourCC("LVLM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

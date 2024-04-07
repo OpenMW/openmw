@@ -83,8 +83,8 @@ namespace ESM4
 
             stream.next_in = reinterpret_cast<Bytef*>(compressed.data());
             stream.next_out = reinterpret_cast<Bytef*>(decompressed.data());
-            stream.avail_in = compressed.size();
-            stream.avail_out = decompressed.size();
+            stream.avail_in = static_cast<uInt>(compressed.size());
+            stream.avail_out = static_cast<uInt>(decompressed.size());
 
             if (const int ec = inflateInit(&stream); ec != Z_OK)
                 return getError("inflateInit error", ec, stream.msg);
@@ -112,9 +112,9 @@ namespace ESM4
                 const auto prevTotalIn = stream.total_in;
                 const auto prevTotalOut = stream.total_out;
                 stream.next_in = reinterpret_cast<Bytef*>(compressed.data());
-                stream.avail_in = std::min(blockSize, compressed.size());
+                stream.avail_in = static_cast<uInt>(std::min(blockSize, compressed.size()));
                 stream.next_out = reinterpret_cast<Bytef*>(decompressed.data());
-                stream.avail_out = std::min(blockSize, decompressed.size());
+                stream.avail_out = static_cast<uInt>(std::min(blockSize, decompressed.size()));
                 const int ec = inflate(&stream, Z_NO_FLUSH);
                 if (ec == Z_STREAM_END)
                     break;
@@ -588,7 +588,7 @@ namespace ESM4
 
         // Extended storage subrecord redefines the following subrecord's size.
         // Would need to redesign the loader to support that, so skip over both subrecords.
-        if (result && mCtx.subRecordHeader.typeId == ESM4::SUB_XXXX)
+        if (result && mCtx.subRecordHeader.typeId == ESM::fourCC("XXXX"))
         {
             std::uint32_t extDataSize;
             get(extDataSize);

@@ -21,13 +21,36 @@ namespace SceneUtil
             mFoundNode = &group;
             return true;
         }
+
+        // FIXME: can the nodes/bones be renamed at loading stage rather than each time?
+        // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses
+        // whitespace-separated names)
+        std::string nodeName = group.getName();
+        std::replace(nodeName.begin(), nodeName.end(), '_', ' ');
+        if (Misc::StringUtils::ciEqual(nodeName, mNameToFind))
+        {
+            mFoundNode = &group;
+            return true;
+        }
         return false;
     }
 
     void FindByClassVisitor::apply(osg::Node& node)
     {
         if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
+        {
             mFoundNodes.push_back(&node);
+        }
+        else
+        {
+            // FIXME: can the nodes/bones be renamed at loading stage rather than each time?
+            // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses
+            // whitespace-separated names)
+            std::string nodeName = node.className();
+            std::replace(nodeName.begin(), nodeName.end(), '_', ' ');
+            if (Misc::StringUtils::ciEqual(nodeName, mNameToFind))
+                mFoundNodes.push_back(&node);
+        }
 
         traverse(node);
     }
@@ -53,6 +76,8 @@ namespace SceneUtil
         if (trans.libraryName() == std::string_view("osgAnimation"))
         {
             std::string nodeName = trans.getName();
+
+            // FIXME: can the nodes/bones be renamed at loading stage rather than each time?
             // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses
             // whitespace-separated names)
             std::replace(nodeName.begin(), nodeName.end(), '_', ' ');

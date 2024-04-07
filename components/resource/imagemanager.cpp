@@ -5,6 +5,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
 
@@ -65,12 +66,13 @@ namespace Resource
             case (GL_COMPRESSED_RGBA_S3TC_DXT3_EXT):
             case (GL_COMPRESSED_RGBA_S3TC_DXT5_EXT):
             {
-                osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
-                if (exts
-                    && !exts->isTextureCompressionS3TCSupported
+                if (!SceneUtil::glExtensionsReady())
+                    return true; // hashtag yolo (CS might not have context when loading assets)
+                osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+                if (!exts.isTextureCompressionS3TCSupported
                     // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a
                     // patch to OSG.
-                    && !osg::isGLExtensionSupported(0, "GL_S3_s3tc"))
+                    && !osg::isGLExtensionSupported(exts.contextID, "GL_S3_s3tc"))
                 {
                     return false;
                 }
@@ -200,7 +202,7 @@ namespace Resource
 
     void ImageManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Image", mCache->getCacheSize());
+        Resource::reportStats("Image", frameNumber, mCache->getStats(), *stats);
     }
 
 }

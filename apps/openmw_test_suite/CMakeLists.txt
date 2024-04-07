@@ -29,6 +29,7 @@ file(GLOB UNITTEST_SRC_FILES
     lua/test_storage.cpp
     lua/test_async.cpp
     lua/test_inputactions.cpp
+    lua/test_yaml.cpp
 
     lua/test_ui_content.cpp
 
@@ -126,7 +127,7 @@ target_compile_definitions(openmw_test_suite
     PRIVATE OPENMW_DATA_DIR=u8"${CMAKE_CURRENT_BINARY_DIR}/data"
             OPENMW_PROJECT_SOURCE_DIR=u8"${PROJECT_SOURCE_DIR}")
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw_test_suite PRIVATE
         <boost/program_options/options_description.hpp>
 

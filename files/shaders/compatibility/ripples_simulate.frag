@@ -6,9 +6,9 @@ uniform sampler2D imageIn;
 
 void main()
 {
-    vec2 uv = gl_FragCoord.xy / @ripple_map_size;
+    vec2 uv = gl_FragCoord.xy / @rippleMapSize;
 
-    float pixelSize = 1.0 / @ripple_map_size;
+    float pixelSize = 1.0 / @rippleMapSize;
 
     float oneOffset = pixelSize;
     float oneAndHalfOffset = 1.5 * pixelSize;
