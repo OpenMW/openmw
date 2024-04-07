@@ -109,7 +109,7 @@
     </message>
     <message>
         <source>&amp;New Content List</source>
-        <translation>Новый список плагинов</translation>
+        <translation>&amp;Новый список плагинов</translation>
     </message>
     <message>
         <source>Clone Content List</source>
@@ -547,7 +547,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;br&gt;&lt;b&gt;Could not create directory %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</source>
-        <translation>&lt;br&gt;&lt;b&gt;Не удалось создать директорию %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;</translation>
+        <translation>&lt;br&gt;&lt;b&gt;Не удалось создать директорию %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</translation>
     </message>
 </context>
 <context>
@@ -1066,7 +1066,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Size of characters in game texts.</source>
-        <translation>Размер символов в текстах</translation>
+        <translation>Размер символов в текстах.</translation>
     </message>
     <message>
         <source>Font size</source>
