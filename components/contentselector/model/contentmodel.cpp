@@ -110,7 +110,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
         return Qt::NoItemFlags;
 
     if (file->builtIn() || file->fromAnotherConfigFile())
-        return Qt::NoItemFlags;
+        return Qt::ItemIsEnabled;
 
     // game files can always be checked
     if (file == mGameFile)
@@ -228,7 +228,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
         {
             if (file == mGameFile)
                 return ContentType_GameFile;
-            else
+            else if (flags(index))
                 return ContentType_Addon;
 
             break;
