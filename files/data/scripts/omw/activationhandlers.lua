@@ -33,6 +33,9 @@ local function onActivate(obj, actor)
     if world.isWorldPaused() then
         return
     end
+    if obj.parentContainer then
+        return
+    end
     local handlers = handlersPerObject[obj.id]
     if handlers then
         for i = #handlers, 1, -1 do
