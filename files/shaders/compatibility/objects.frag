@@ -85,11 +85,9 @@ varying vec3 passNormal;
 varying vec4 passTangent;
 #endif
 
-/*
 #if @additiveBlending
 #define ADDITIVE_BLENDING
 #endif
-*/
 
 #include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"

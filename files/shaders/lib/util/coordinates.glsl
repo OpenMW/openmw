@@ -5,7 +5,7 @@
 
 vec3 sphericalCoords(vec2 coords)
 {
-    coords.x = -1 * coords.x * 2 * PI;
+    coords.x = -1.0 * coords.x * 2.0 * PI;
     coords.y = (coords.y - 0.5) * PI;
  
     vec3 result = vec3(0.0,cos(coords.y),sin(coords.y));
@@ -16,7 +16,7 @@ vec3 sphericalCoords(vec2 coords)
 
 vec3 cylindricalCoords(vec2 coords)
 {
-    return normalize(vec3(cos(-1 * coords.x * 2 * PI),sin(-1 * coords.x * 2 * PI),coords.y * 2.0 - 1.0));
+    return normalize(vec3(cos(-1.0 * coords.x * 2.0 * PI),sin(-1.0 * coords.x * 2.0 * PI),coords.y * 2.0 - 1.0));
 }
 
 vec3 planetCoords(vec2 coords)

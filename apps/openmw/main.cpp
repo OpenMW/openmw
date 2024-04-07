@@ -118,6 +118,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         if (!contentDedupe.insert(contentFile).second)
         {
             Log(Debug::Error) << "Content file specified more than once: " << contentFile << ". Aborting...";
+            throw std::runtime_error("Content file specified more than once: " + contentFile + ". Aborting...");
             return false;
         }
     }
