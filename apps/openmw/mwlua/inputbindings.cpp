@@ -214,6 +214,12 @@ namespace MWLua
             input->setGamepadGuiCursorEnabled(v);
             MWBase::Environment::get().getWindowManager()->setCursorActive(v);
         };
+        api["_selectNextMenuElement"] = []() {
+              MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Period, 0, false);
+        };
+        api["_selectPrevMenuElement"] = []() {
+              MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Slash, 0, false);
+        };
         api["getMouseMoveX"] = [input]() { return input->getMouseMoveX(); };
         api["getMouseMoveY"] = [input]() { return input->getMouseMoveY(); };
         api["getAxisValue"] = [input](int axis) {

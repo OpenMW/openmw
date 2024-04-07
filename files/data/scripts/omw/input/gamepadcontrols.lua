@@ -25,5 +25,17 @@ return {
         setGamepadCursorActive = function(state)
             input._setGamepadCursorActive(state)
         end,
+
+        --- Sends an event to the interface to select the next menu element
+        -- @function [parent=#GamepadControls] selectNextMenuElement
+        selectNextMenuElement = function(state)
+            input._selectNextMenuElement()
+        end,
+
+        --- Sends an event to the interface to select the next menu element
+        -- @function [parent=#GamepadControls] selectPrevMenuElement
+        selectPrevMenuElement = function(state)
+            input._selectPrevMenuElement()
+        end,
     }
 }
