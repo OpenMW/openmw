@@ -102,7 +102,7 @@ I.Settings.registerRenderer('inputBinding', function(id, set, arg)
     local info = inputTypes[arg.type][arg.key]
     if not info then print(string.format('inputBinding: %s %s not found', arg.type, arg.key)) return end
 
-    local l10n = core.l10n(info.key)
+    local l10n = core.l10n(info.l10n)
 
     local name = {
         template = I.MWUI.templates.textNormal,
