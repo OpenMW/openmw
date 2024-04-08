@@ -26,7 +26,7 @@
         <item row="3" column="0">
          <widget class="QLabel" name="windowModeLabel">
           <property name="text">
-           <string>Window mode</string>
+           <string>Window Mode</string>
           </property>
          </widget>
         </item>
@@ -111,14 +111,14 @@
         <item row="1" column="0">
          <widget class="QCheckBox" name="framerateLimitCheckBox">
           <property name="text">
-           <string>Framerate limit</string>
+           <string>Framerate Limit</string>
           </property>
          </widget>
         </item>
         <item row="0" column="0">
          <widget class="QCheckBox" name="windowBorderCheckBox">
           <property name="text">
-           <string>Window border</string>
+           <string>Window Border</string>
           </property>
          </widget>
         </item>
@@ -207,14 +207,14 @@
         <item row="4" column="0">
          <widget class="QLabel" name="antiAliasingLabel">
           <property name="text">
-           <string>Anti-aliasing</string>
+           <string>Anti-Aliasing</string>
           </property>
          </widget>
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="vSyncLabel">
           <property name="text">
-           <string>Vertical synchronization</string>
+           <string>Vertical Synchronization</string>
           </property>
          </widget>
         </item>

@@ -81,15 +81,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Import settings from Morrowind.ini</source>
+        <source>Import Settings From Morrowind.ini</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Import add-on and plugin selection</source>
+        <source>Import Add-on and Plugin Selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Import bitmap fonts setup from Morrowind.ini</source>
+        <source>Import Bitmap Fonts Setup From Morrowind.ini</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
