@@ -223,6 +223,7 @@
     Feature #7860: Lua: Expose NPC AI settings (fight, alarm, flee)
     Feature #7875: Disable MyGUI windows snapping
     Feature #7914: Do not allow to move GUI windows out of screen
+    Feature #7923: Don't show non-existent higher ranks for factions with fewer than 9 ranks
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
