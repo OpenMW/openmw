@@ -86,7 +86,7 @@
     </message>
     <message>
         <source>Import Add-on and Plugin Selection</source>
-        <translation>Импортировать список подключенных плагинов</translation>
+        <translation>Импортировать список подключенных аддонов и плагинов</translation>
     </message>
     <message>
         <source>Import Bitmap Fonts Setup From Morrowind.ini</source>
