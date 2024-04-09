@@ -606,7 +606,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-v8
+    key: ninja-v9
     paths:
     - ccache
     - deps
@@ -722,7 +722,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-v8
+    key: msbuild-v9
     paths:
     - deps
     - MSVC2019_64/deps/Qt
