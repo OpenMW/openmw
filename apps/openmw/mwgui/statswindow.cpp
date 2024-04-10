@@ -582,9 +582,8 @@ namespace MWGui
             const std::set<ESM::RefId>& expelled = PCstats.getExpelled();
 
             bool firstFaction = true;
-            for (auto& factionPair : mFactions)
+            for (const auto& [factionId, factionRank] : mFactions)
             {
-                const ESM::RefId& factionId = factionPair.first;
                 const ESM::Faction* faction = store.get<ESM::Faction>().find(factionId);
                 if (faction->mData.mIsHidden == 1)
                     continue;
@@ -611,10 +610,10 @@ namespace MWGui
                     text += "\n#{fontcolourhtml=normal}#{sExpelled}";
                 else
                 {
-                    const int rank = std::clamp(factionPair.second, 0, 9);
-                    text += std::string("\n#{fontcolourhtml=normal}") + faction->mRanks[rank];
-
-                    if (rank < 9)
+                    const auto rank = static_cast<size_t>(std::max(0, factionRank));
+                    if (rank < faction->mRanks.size())
+                        text += std::string("\n#{fontcolourhtml=normal}") + faction->mRanks[rank];
+                    if (rank + 1 < faction->mRanks.size() && !faction->mRanks[rank + 1].empty())
                     {
                         // player doesn't have max rank yet
                         text += std::string("\n\n#{fontcolourhtml=header}#{sNextRank} ") + faction->mRanks[rank + 1];
