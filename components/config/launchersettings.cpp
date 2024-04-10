@@ -223,9 +223,25 @@ QStringList Config::LauncherSettings::getContentLists()
 void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
 {
     // obtain content list from game settings (if present)
-    QStringList dirs(gameSettings.getDataDirs());
-    const QStringList archives(gameSettings.getArchiveList());
-    const QStringList files(gameSettings.getContentList());
+    QList<SettingValue> dirs(gameSettings.getDataDirs());
+    dirs.erase(std::remove_if(
+                   dirs.begin(), dirs.end(), [&](const SettingValue& dir) { return !gameSettings.isUserSetting(dir); }),
+        dirs.end());
+    // archives and content files aren't preprocessed, so we don't need to track their original form
+    const QList<SettingValue> archivesOriginal(gameSettings.getArchiveList());
+    QStringList archives;
+    for (const auto& archive : archivesOriginal)
+    {
+        if (gameSettings.isUserSetting(archive))
+            archives.push_back(archive.value);
+    }
+    const QList<SettingValue> filesOriginal(gameSettings.getContentList());
+    QStringList files;
+    for (const auto& file : filesOriginal)
+    {
+        if (gameSettings.isUserSetting(file))
+            files.push_back(file.value);
+    }
 
     // if openmw.cfg has no content, exit so we don't create an empty content list.
     if (dirs.isEmpty() || files.isEmpty())
@@ -233,17 +249,28 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
         return;
     }
 
-    // global and local data directories are not part of any profile
-    const auto globalDataDir = Files::pathToQString(gameSettings.getGlobalDataDir());
+    // local data directory and resources/vfs are not part of any profile
+    const auto resourcesVfs = gameSettings.getResourcesVfs();
     const auto dataLocal = gameSettings.getDataLocal();
-    dirs.removeAll(globalDataDir);
-    dirs.removeAll(dataLocal);
+    dirs.erase(
+        std::remove_if(dirs.begin(), dirs.end(), [&](const SettingValue& dir) { return dir.value == resourcesVfs; }),
+        dirs.end());
+    dirs.erase(
+        std::remove_if(dirs.begin(), dirs.end(), [&](const SettingValue& dir) { return dir.value == dataLocal; }),
+        dirs.end());
 
     // if any existing profile in launcher matches the content list, make that profile the default
     for (const QString& listName : getContentLists())
     {
-        if (files == getContentListFiles(listName) && archives == getArchiveList(listName)
-            && dirs == getDataDirectoryList(listName))
+        const auto& listDirs = getDataDirectoryList(listName);
+        if (dirs.length() != listDirs.length())
+            continue;
+        for (int i = 0; i < dirs.length(); ++i)
+        {
+            if (dirs[i].value != listDirs[i])
+                continue;
+        }
+        if (files == getContentListFiles(listName) && archives == getArchiveList(listName))
         {
             setCurrentContentListName(listName);
             return;
@@ -253,7 +280,10 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     // otherwise, add content list
     QString newContentListName(makeNewContentListName());
     setCurrentContentListName(newContentListName);
-    setContentList(newContentListName, dirs, archives, files);
+    QStringList newListDirs;
+    for (const auto& dir : dirs)
+        newListDirs.push_back(dir.value);
+    setContentList(newContentListName, newListDirs, archives, files);
 }
 
 void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames,

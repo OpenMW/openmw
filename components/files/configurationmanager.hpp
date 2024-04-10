@@ -45,7 +45,6 @@ namespace Files
         const std::filesystem::path& getGlobalPath() const;
         const std::filesystem::path& getLocalPath() const;
 
-        const std::filesystem::path& getGlobalDataPath() const;
         const std::filesystem::path& getUserConfigPath() const;
         const std::filesystem::path& getUserDataPath() const;
         const std::filesystem::path& getLocalDataPath() const;

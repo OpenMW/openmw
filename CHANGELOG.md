@@ -49,6 +49,7 @@
     Bug #6754: Beast to Non-beast transformation mod is not working on OpenMW
     Bug #6758: Main menu background video can be stopped by opening the options menu
     Bug #6807: Ultimate Galleon is not working properly
+    Bug #6846: Launcher only works with default config paths
     Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
     Bug #6894: Added item combines with equipped stack instead of creating a new unequipped stack
     Bug #6932: Creatures flee from my followers and we have to chase after them

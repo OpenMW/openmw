@@ -123,6 +123,11 @@ void ContentSelectorView::ContentSelector::buildContextMenu()
     mContextMenu->addAction(tr("&Copy Path(s) to Clipboard"), this, SLOT(slotCopySelectedItemsPaths()));
 }
 
+void ContentSelectorView::ContentSelector::setNonUserContent(const QStringList& fileList)
+{
+    mContentModel->setNonUserContent(fileList);
+}
+
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& fileList)
 {
     clearCheckStates();
