@@ -188,6 +188,9 @@ namespace MWMechanics
 
         for (auto& enam : effects.mList)
         {
+            if (target.isEmpty())
+                break;
+
             if (enam.mData.mRange != range)
                 continue;
             const ESM::MagicEffect* magicEffect = store.find(enam.mData.mEffectID);
