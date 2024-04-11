@@ -58,12 +58,12 @@ namespace MWWorld
 
     RefData::RefData()
         : mBaseNode(nullptr)
+        , mCustomData(nullptr)
+        , mFlags(0)
         , mDeletedByContentFile(false)
         , mEnabled(true)
         , mPhysicsPostponed(false)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0)
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -74,50 +74,50 @@ namespace MWWorld
 
     RefData::RefData(const ESM::CellRef& cellRef)
         : mBaseNode(nullptr)
+        , mPosition(cellRef.mPos)
+        , mCustomData(nullptr)
+        , mFlags(0) // Loading from ESM/ESP files -> assume unchanged
         , mDeletedByContentFile(false)
         , mEnabled(true)
         , mPhysicsPostponed(false)
-        , mPosition(cellRef.mPos)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0) // Loading from ESM/ESP files -> assume unchanged
     {
     }
 
     RefData::RefData(const ESM4::Reference& ref)
         : mBaseNode(nullptr)
+        , mPosition(ref.mPos)
+        , mCustomData(nullptr)
+        , mFlags(0)
         , mDeletedByContentFile(ref.mFlags & ESM4::Rec_Deleted)
         , mEnabled(!(ref.mFlags & ESM4::Rec_Disabled))
         , mPhysicsPostponed(false)
-        , mPosition(ref.mPos)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0)
     {
     }
 
     RefData::RefData(const ESM4::ActorCharacter& ref)
         : mBaseNode(nullptr)
+        , mPosition(ref.mPos)
+        , mCustomData(nullptr)
+        , mFlags(0)
         , mDeletedByContentFile(ref.mFlags & ESM4::Rec_Deleted)
         , mEnabled(!(ref.mFlags & ESM4::Rec_Disabled))
         , mPhysicsPostponed(false)
-        , mPosition(ref.mPos)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0)
     {
     }
 
     RefData::RefData(const ESM::ObjectState& objectState, bool deletedByContentFile)
         : mBaseNode(nullptr)
-        , mDeletedByContentFile(deletedByContentFile)
-        , mEnabled(objectState.mEnabled != 0)
-        , mPhysicsPostponed(false)
         , mPosition(objectState.mPosition)
         , mAnimationState(objectState.mAnimationState)
         , mCustomData(nullptr)
-        , mChanged(true)
         , mFlags(objectState.mFlags) // Loading from a savegame -> assume changed
+        , mDeletedByContentFile(deletedByContentFile)
+        , mEnabled(objectState.mEnabled != 0)
+        , mPhysicsPostponed(false)
+        , mChanged(true)
     {
         // "Note that the ActivationFlag_UseEnabled is saved to the reference,
         // which will result in permanently suppressed activation if the reference script is removed.
