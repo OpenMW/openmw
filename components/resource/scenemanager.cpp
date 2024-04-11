@@ -399,9 +399,7 @@ namespace Resource
             osg::Callback* cb = node.getUpdateCallback();
             while (cb)
             {
-                osgAnimation::AnimationUpdateCallback<osg::NodeCallback>* animCb
-                    = dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
-
+                auto animCb = dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
                 if (animCb)
                     animCb->setName(Misc::StringUtils::underscoresToSpaces(animCb->getName()));
 

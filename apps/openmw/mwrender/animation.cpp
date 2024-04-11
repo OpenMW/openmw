@@ -1491,7 +1491,7 @@ namespace MWRender
 
         // osgAnimation formats with skeletons should have their nodemap be bone instances
         // FIXME: better way to detect osgAnimation here instead of relying on extension?
-        mRequiresBoneMap = mSkeleton != nullptr && !Misc::StringUtils::ciEndsWith(model, "nif");
+        mRequiresBoneMap = mSkeleton != nullptr && !Misc::StringUtils::ciEndsWith(model, ".nif");
 
         if (previousStateset)
             mObjectRoot->setStateSet(previousStateset);

@@ -50,9 +50,9 @@ namespace MWRender
         {
             osgAnimation::Bone* parent = b->getBoneParent();
             if (parent)
-                b->setMatrixInSkeletonSpace(matrix * parent->getMatrixInSkeletonSpace());
-            else
-                b->setMatrixInSkeletonSpace(matrix);
+                matrix *= parent->getMatrixInSkeletonSpace();
+
+            b->setMatrixInSkeletonSpace(matrix);
         }
 
         traverse(node, nv);
