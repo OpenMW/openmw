@@ -538,13 +538,11 @@ namespace CSMWorld
     {
         Info info = record.get();
 
-        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+        auto& conditions = info.mSelects;
 
         // default row
-        ESM::DialInfo::SelectStruct condStruct;
-        condStruct.mSelectRule = "01000";
-        condStruct.mValue = ESM::Variant();
-        condStruct.mValue.setType(ESM::VT_Int);
+        ESM::DialogueCondition condStruct;
+        condStruct.mIndex = conditions.size();
 
         conditions.insert(conditions.begin() + position, condStruct);
 
@@ -555,7 +553,7 @@ namespace CSMWorld
     {
         Info info = record.get();
 
-        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+        auto& conditions = info.mSelects;
 
         if (rowToRemove < 0 || rowToRemove >= static_cast<int>(conditions.size()))
             throw std::runtime_error("index out of range");
@@ -569,8 +567,8 @@ namespace CSMWorld
     {
         Info info = record.get();
 
-        info.mSelects = static_cast<const NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct>>&>(nestedTable)
-                            .mNestedTable;
+        info.mSelects
+            = static_cast<const NestedTableWrapper<std::vector<ESM::DialogueCondition>>&>(nestedTable).mNestedTable;
 
         record.setModified(info);
     }
@@ -578,14 +576,14 @@ namespace CSMWorld
     NestedTableWrapperBase* InfoConditionAdapter::table(const Record<Info>& record) const
     {
         // deleted by dtor of NestedTableStoring
-        return new NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct>>(record.get().mSelects);
+        return new NestedTableWrapper<std::vector<ESM::DialogueCondition>>(record.get().mSelects);
     }
 
     QVariant InfoConditionAdapter::getData(const Record<Info>& record, int subRowIndex, int subColIndex) const
     {
         Info info = record.get();
 
-        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+        auto& conditions = info.mSelects;
 
         if (subRowIndex < 0 || subRowIndex >= static_cast<int>(conditions.size()))
             throw std::runtime_error("index out of range");
@@ -611,19 +609,7 @@ namespace CSMWorld
             }
             case 3:
             {
-                switch (infoSelectWrapper.getVariant().getType())
-                {
-                    case ESM::VT_Int:
-                    {
-                        return infoSelectWrapper.getVariant().getInteger();
-                    }
-                    case ESM::VT_Float:
-                    {
-                        return infoSelectWrapper.getVariant().getFloat();
-                    }
-                    default:
-                        return QVariant();
-                }
+                return infoSelectWrapper.getValue();
             }
             default:
                 throw std::runtime_error("Info condition subcolumn index out of range");
@@ -635,7 +621,7 @@ namespace CSMWorld
     {
         Info info = record.get();
 
-        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+        auto& conditions = info.mSelects;
 
         if (subRowIndex < 0 || subRowIndex >= static_cast<int>(conditions.size()))
             throw std::runtime_error("index out of range");
@@ -647,27 +633,17 @@ namespace CSMWorld
         {
             case 0: // Function
             {
-                infoSelectWrapper.setFunctionName(static_cast<ConstInfoSelectWrapper::FunctionName>(value.toInt()));
-
-                if (infoSelectWrapper.getComparisonType() != ConstInfoSelectWrapper::Comparison_Numeric
-                    && infoSelectWrapper.getVariant().getType() != ESM::VT_Int)
-                {
-                    infoSelectWrapper.getVariant().setType(ESM::VT_Int);
-                }
-
-                infoSelectWrapper.update();
+                infoSelectWrapper.setFunctionName(static_cast<ESM::DialogueCondition::Function>(value.toInt()));
                 break;
             }
             case 1: // Variable
             {
                 infoSelectWrapper.setVariableName(value.toString().toUtf8().constData());
-                infoSelectWrapper.update();
                 break;
             }
             case 2: // Relation
             {
-                infoSelectWrapper.setRelationType(static_cast<ConstInfoSelectWrapper::RelationType>(value.toInt()));
-                infoSelectWrapper.update();
+                infoSelectWrapper.setRelationType(static_cast<ESM::DialogueCondition::Comparison>(value.toInt()));
                 break;
             }
             case 3: // Value
@@ -679,13 +655,11 @@ namespace CSMWorld
                         // QVariant seems to have issues converting 0
                         if ((value.toInt(&conversionResult) && conversionResult) || value.toString().compare("0") == 0)
                         {
-                            infoSelectWrapper.getVariant().setType(ESM::VT_Int);
-                            infoSelectWrapper.getVariant().setInteger(value.toInt());
+                            infoSelectWrapper.setValue(value.toInt());
                         }
                         else if (value.toFloat(&conversionResult) && conversionResult)
                         {
-                            infoSelectWrapper.getVariant().setType(ESM::VT_Float);
-                            infoSelectWrapper.getVariant().setFloat(value.toFloat());
+                            infoSelectWrapper.setValue(value.toFloat());
                         }
                         break;
                     }
@@ -694,8 +668,7 @@ namespace CSMWorld
                     {
                         if ((value.toInt(&conversionResult) && conversionResult) || value.toString().compare("0") == 0)
                         {
-                            infoSelectWrapper.getVariant().setType(ESM::VT_Int);
-                            infoSelectWrapper.getVariant().setInteger(value.toInt());
+                            infoSelectWrapper.setValue(value.toInt());
                         }
                         break;
                     }

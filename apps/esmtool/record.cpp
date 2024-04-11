@@ -57,112 +57,82 @@ namespace
             std::cout << "    Cell Name: " << p.mCellName << std::endl;
     }
 
-    std::string ruleString(const ESM::DialInfo::SelectStruct& ss)
+    std::string ruleString(const ESM::DialogueCondition& ss)
     {
-        std::string rule = ss.mSelectRule;
+        std::string_view type_str = "INVALID";
+        std::string_view func_str;
 
-        if (rule.length() < 5)
-            return "INVALID";
-
-        char type = rule[1];
-        char indicator = rule[2];
-
-        std::string type_str = "INVALID";
-        std::string func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1, 3));
-        int func = Misc::StringUtils::toNumeric<int>(rule.substr(2, 2), 0);
-
-        switch (type)
+        switch (ss.mFunction)
         {
-            case '1':
-                type_str = "Function";
-                func_str = std::string(ruleFunction(func));
+            case ESM::DialogueCondition::Function_Global:
+                type_str = "Global";
+                func_str = ss.mVariable;
                 break;
-            case '2':
-                if (indicator == 's')
-                    type_str = "Global short";
-                else if (indicator == 'l')
-                    type_str = "Global long";
-                else if (indicator == 'f')
-                    type_str = "Global float";
+            case ESM::DialogueCondition::Function_Local:
+                type_str = "Local";
+                func_str = ss.mVariable;
                 break;
-            case '3':
-                if (indicator == 's')
-                    type_str = "Local short";
-                else if (indicator == 'l')
-                    type_str = "Local long";
-                else if (indicator == 'f')
-                    type_str = "Local float";
+            case ESM::DialogueCondition::Function_Journal:
+                type_str = "Journal";
+                func_str = ss.mVariable;
                 break;
-            case '4':
-                if (indicator == 'J')
-                    type_str = "Journal";
+            case ESM::DialogueCondition::Function_Item:
+                type_str = "Item count";
+                func_str = ss.mVariable;
                 break;
-            case '5':
-                if (indicator == 'I')
-                    type_str = "Item type";
+            case ESM::DialogueCondition::Function_Dead:
+                type_str = "Dead";
+                func_str = ss.mVariable;
                 break;
-            case '6':
-                if (indicator == 'D')
-                    type_str = "NPC Dead";
+            case ESM::DialogueCondition::Function_NotId:
+                type_str = "Not ID";
+                func_str = ss.mVariable;
                 break;
-            case '7':
-                if (indicator == 'X')
-                    type_str = "Not ID";
+            case ESM::DialogueCondition::Function_NotFaction:
+                type_str = "Not Faction";
+                func_str = ss.mVariable;
                 break;
-            case '8':
-                if (indicator == 'F')
-                    type_str = "Not Faction";
+            case ESM::DialogueCondition::Function_NotClass:
+                type_str = "Not Class";
+                func_str = ss.mVariable;
                 break;
-            case '9':
-                if (indicator == 'C')
-                    type_str = "Not Class";
+            case ESM::DialogueCondition::Function_NotRace:
+                type_str = "Not Race";
+                func_str = ss.mVariable;
                 break;
-            case 'A':
-                if (indicator == 'R')
-                    type_str = "Not Race";
+            case ESM::DialogueCondition::Function_NotCell:
+                type_str = "Not Cell";
+                func_str = ss.mVariable;
                 break;
-            case 'B':
-                if (indicator == 'L')
-                    type_str = "Not Cell";
-                break;
-            case 'C':
-                if (indicator == 's')
-                    type_str = "Not Local";
+            case ESM::DialogueCondition::Function_NotLocal:
+                type_str = "Not Local";
+                func_str = ss.mVariable;
                 break;
             default:
+                type_str = "Function";
+                func_str = ruleFunction(ss.mFunction);
                 break;
         }
 
-        // Append the variable name to the function string if any.
-        if (type != '1')
-            func_str = rule.substr(5);
-
-        // In the previous switch, we assumed that the second char was X
-        // for all types not qual to one.  If this wasn't true, go back to
-        // the error message.
-        if (type != '1' && rule[3] != 'X')
-            func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1, 3));
-
-        char oper = rule[4];
-        std::string oper_str = "??";
-        switch (oper)
+        std::string_view oper_str = "??";
+        switch (ss.mComparison)
         {
-            case '0':
+            case ESM::DialogueCondition::Comp_Eq:
                 oper_str = "==";
                 break;
-            case '1':
+            case ESM::DialogueCondition::Comp_Ne:
                 oper_str = "!=";
                 break;
-            case '2':
+            case ESM::DialogueCondition::Comp_Gt:
                 oper_str = "> ";
                 break;
-            case '3':
+            case ESM::DialogueCondition::Comp_Ge:
                 oper_str = ">=";
                 break;
-            case '4':
+            case ESM::DialogueCondition::Comp_Ls:
                 oper_str = "< ";
                 break;
-            case '5':
+            case ESM::DialogueCondition::Comp_Le:
                 oper_str = "<=";
                 break;
             default:
@@ -170,7 +140,7 @@ namespace
         }
 
         std::ostringstream stream;
-        stream << ss.mValue;
+        std::visit([&](auto value) { stream << value; }, ss.mValue);
 
         std::string result
             = Misc::StringUtils::format("%-12s %-32s %2s %s", type_str, func_str, oper_str, stream.str());
@@ -842,7 +812,7 @@ namespace EsmTool
                   << std::endl;
         std::cout << "  Type: " << dialogTypeLabel(mData.mData.mType) << std::endl;
 
-        for (const ESM::DialInfo::SelectStruct& rule : mData.mSelects)
+        for (const auto& rule : mData.mSelects)
             std::cout << "  Select Rule: " << ruleString(rule) << std::endl;
 
         if (!mData.mResultScript.empty())
