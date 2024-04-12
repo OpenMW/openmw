@@ -715,8 +715,6 @@ namespace MWRender
 
         osg::ref_ptr<osg::Texture2D> normalMap(
             new osg::Texture2D(mResourceSystem->getImageManager()->getImage("textures/omw/water_nm.png")));
-        if (normalMap->getImage())
-            normalMap->getImage()->flipVertical();
         normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
         normalMap->setMaxAnisotropy(16);
