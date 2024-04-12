@@ -197,8 +197,6 @@ namespace DetourNavigator
 
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
 
-        void repost(JobIt job);
-
         bool lockTile(std::size_t jobId, const AgentBounds& agentBounds, const TilePosition& changedTile);
 
         void unlockTile(std::size_t jobId, const AgentBounds& agentBounds, const TilePosition& changedTile);

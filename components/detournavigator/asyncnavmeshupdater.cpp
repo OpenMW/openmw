@@ -343,7 +343,8 @@ namespace DetourNavigator
                                 removeJob(job);
                             break;
                         case JobStatus::Fail:
-                            repost(job);
+                            unlockTile(job->mId, job->mAgentBounds, job->mChangedTile);
+                            removeJob(job);
                             break;
                         case JobStatus::MemoryCacheMiss:
                         {
@@ -606,26 +607,6 @@ namespace DetourNavigator
         if (mSettings.get().mEnableWriteNavMeshToFile)
             if (const auto shared = job.mNavMeshCacheItem.lock())
                 writeToFile(shared->lockConst()->getImpl(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
-    }
-
-    void AsyncNavMeshUpdater::repost(JobIt job)
-    {
-        unlockTile(job->mId, job->mAgentBounds, job->mChangedTile);
-
-        if (mShouldStop || job->mTryNumber > 2)
-            return;
-
-        const std::lock_guard<std::mutex> lock(mMutex);
-
-        if (mPushed.emplace(job->mAgentBounds, job->mChangedTile).second)
-        {
-            ++job->mTryNumber;
-            insertPrioritizedJob(job, mWaiting);
-            mHasJob.notify_all();
-            return;
-        }
-
-        mJobs.erase(job);
     }
 
     bool AsyncNavMeshUpdater::lockTile(
