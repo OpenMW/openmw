@@ -2479,9 +2479,7 @@ namespace MWMechanics
 
             movement.x() *= scale;
             movement.y() *= scale;
-            // Update movement
-            if (movement != osg::Vec3f())
-                world->queueMovement(mPtr, movement);
+            world->queueMovement(mPtr, movement);
         }
 
         mSkipAnim = false;
@@ -2698,6 +2696,9 @@ namespace MWMechanics
 
     bool CharacterController::isMovementAnimationControlled() const
     {
+        if (mHitState != CharState_None)
+            return true;
+
         if (Settings::game().mPlayerMovementIgnoresAnimation && mPtr == getPlayer())
             return false;
 
