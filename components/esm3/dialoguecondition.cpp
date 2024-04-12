@@ -45,7 +45,7 @@ namespace ESM
                 return {};
             }
         }
-        else if (rule[1] > '1' && rule[1] <= '9' || rule[1] >= 'A' && rule[1] <= 'C')
+        else if ((rule[1] > '1' && rule[1] <= '9') || (rule[1] >= 'A' && rule[1] <= 'C'))
         {
             if (rule.size() == 5)
             {
@@ -134,6 +134,8 @@ namespace ESM
     void DialogueCondition::save(ESMWriter& esm) const
     {
         auto variant = std::visit([](auto value) { return ESM::Variant(value); }, mValue);
+        if (variant.getType() != VT_Float)
+            variant.setType(VT_Int);
         std::string rule;
         rule.reserve(5 + mVariable.size());
         rule += static_cast<char>(mIndex + '0');
@@ -189,7 +191,7 @@ namespace ESM
                 start--;
             else
                 start -= 2;
-            auto result = std::to_chars(start, end, mFunction);
+            auto result = std::to_chars(start, end, static_cast<int>(mFunction));
             if (result.ec != std::errc())
             {
                 Log(Debug::Error) << "Failed to save SCVR rule";

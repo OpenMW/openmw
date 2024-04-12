@@ -618,7 +618,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
             return player.getClass().getCreatureStats(player).hasBlightDisease();
 
-        case ESM::DialogueCondition::Function_PcCorpus:
+        case ESM::DialogueCondition::Function_PcCorprus:
 
             return player.getClass()
                        .getCreatureStats(player)

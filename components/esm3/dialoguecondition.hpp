@@ -75,7 +75,7 @@ namespace ESM
             Function_PcEndurance,
             Function_PcPersonality,
             Function_PcLuck,
-            Function_PcCorpus,
+            Function_PcCorprus,
             Function_Weather,
             Function_PcVampire,
             Function_Level,

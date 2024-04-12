@@ -65,7 +65,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] = {
     "PC Endurance",
     "PC Personality",
     "PC Luck",
-    "PC Corpus",
+    "PC Corprus",
     "Weather",
     "PC Vampire",
     "Level",
@@ -105,37 +105,21 @@ const char* CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[] = {
     nullptr,
 };
 
-const char* CSMWorld::ConstInfoSelectWrapper::ComparisonEnumStrings[] = {
-    "Boolean",
-    "Integer",
-    "Numeric",
-    nullptr,
-};
-
-// static functions
-
-std::string CSMWorld::ConstInfoSelectWrapper::convertToString(ESM::DialogueCondition::Function name)
+namespace
 {
-    if (name < ESM::DialogueCondition::Function_None)
-        return FunctionEnumStrings[name];
-    else
+    std::string_view convertToString(ESM::DialogueCondition::Function name)
+    {
+        if (name < ESM::DialogueCondition::Function_None)
+            return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[name];
         return "(Invalid Data: Function)";
-}
+    }
 
-std::string CSMWorld::ConstInfoSelectWrapper::convertToString(ESM::DialogueCondition::Comparison type)
-{
-    if (type < ESM::DialogueCondition::Comp_None)
-        return RelationEnumStrings[type];
-    else
+    std::string_view convertToString(ESM::DialogueCondition::Comparison type)
+    {
+        if (type != ESM::DialogueCondition::Comp_None)
+            return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[type - ESM::DialogueCondition::Comp_Eq];
         return "(Invalid Data: Relation)";
-}
-
-std::string CSMWorld::ConstInfoSelectWrapper::convertToString(ComparisonType type)
-{
-    if (type < Comparison_None)
-        return ComparisonEnumStrings[type];
-    else
-        return "(Invalid Data: Comparison)";
+    }
 }
 
 // ConstInfoSelectWrapper
@@ -269,7 +253,7 @@ void CSMWorld::ConstInfoSelectWrapper::updateComparisonType()
         case ESM::DialogueCondition::Function_SameFaction:
         case ESM::DialogueCondition::Function_Detected:
         case ESM::DialogueCondition::Function_Alarmed:
-        case ESM::DialogueCondition::Function_PcCorpus:
+        case ESM::DialogueCondition::Function_PcCorprus:
         case ESM::DialogueCondition::Function_PcVampire:
         case ESM::DialogueCondition::Function_Attacked:
         case ESM::DialogueCondition::Function_TalkedToPc:
@@ -457,7 +441,7 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case ESM::DialogueCondition::Function_SameFaction:
         case ESM::DialogueCondition::Function_Detected:
         case ESM::DialogueCondition::Function_Alarmed:
-        case ESM::DialogueCondition::Function_PcCorpus:
+        case ESM::DialogueCondition::Function_PcCorprus:
         case ESM::DialogueCondition::Function_PcVampire:
         case ESM::DialogueCondition::Function_Attacked:
         case ESM::DialogueCondition::Function_TalkedToPc:

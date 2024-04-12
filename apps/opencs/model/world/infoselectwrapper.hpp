@@ -25,11 +25,6 @@ namespace CSMWorld
 
         static const char* FunctionEnumStrings[];
         static const char* RelationEnumStrings[];
-        static const char* ComparisonEnumStrings[];
-
-        static std::string convertToString(ESM::DialogueCondition::Function name);
-        static std::string convertToString(ESM::DialogueCondition::Comparison type);
-        static std::string convertToString(ComparisonType type);
 
         ConstInfoSelectWrapper(const ESM::DialogueCondition& select);
 

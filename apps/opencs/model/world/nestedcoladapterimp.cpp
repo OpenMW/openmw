@@ -605,7 +605,7 @@ namespace CSMWorld
             }
             case 2:
             {
-                return infoSelectWrapper.getRelationType();
+                return infoSelectWrapper.getRelationType() - ESM::DialogueCondition::Comp_Eq;
             }
             case 3:
             {
@@ -643,7 +643,8 @@ namespace CSMWorld
             }
             case 2: // Relation
             {
-                infoSelectWrapper.setRelationType(static_cast<ESM::DialogueCondition::Comparison>(value.toInt()));
+                infoSelectWrapper.setRelationType(
+                    static_cast<ESM::DialogueCondition::Comparison>(value.toInt() + ESM::DialogueCondition::Comp_Eq));
                 break;
             }
             case 3: // Value

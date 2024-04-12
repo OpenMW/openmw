@@ -26,9 +26,9 @@ namespace
                 return value1 < value2;
             case ESM::DialogueCondition::Comp_Le:
                 return value1 <= value2;
+            default:
+                throw std::runtime_error("unknown compare type in dialogue info select");
         }
-
-        throw std::runtime_error("unknown compare type in dialogue info select");
     }
 
     template <typename T>
@@ -226,7 +226,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         case ESM::DialogueCondition::Function_SameFaction:
         case ESM::DialogueCondition::Function_PcCommonDisease:
         case ESM::DialogueCondition::Function_PcBlightDisease:
-        case ESM::DialogueCondition::Function_PcCorpus:
+        case ESM::DialogueCondition::Function_PcCorprus:
         case ESM::DialogueCondition::Function_PcExpelled:
         case ESM::DialogueCondition::Function_PcVampire:
         case ESM::DialogueCondition::Function_TalkedToPc:
