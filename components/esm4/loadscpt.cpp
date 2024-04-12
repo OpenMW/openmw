@@ -36,8 +36,6 @@ void ESM4::Script::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    ScriptLocalVariableData localVar;
-
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
@@ -117,20 +115,24 @@ void ESM4::Script::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("SLSD"):
             {
-                localVar.clear();
+                ScriptLocalVariableData localVar;
                 reader.get(localVar.index);
                 reader.get(localVar.unknown1);
                 reader.get(localVar.unknown2);
                 reader.get(localVar.unknown3);
                 reader.get(localVar.type);
                 reader.get(localVar.unknown4);
+                mScript.localVarData.push_back(std::move(localVar));
                 // WARN: assumes SCVR will follow immediately
 
                 break;
             }
             case ESM::fourCC("SCVR"): // assumed always pair with SLSD
-                reader.getZString(localVar.variableName);
-                mScript.localVarData.push_back(localVar);
+                if (!mScript.localVarData.empty())
+                    reader.getZString(mScript.localVarData.back().variableName);
+                else
+                    reader.skipSubRecordData();
+
                 break;
             case ESM::fourCC("SCRV"):
             {
