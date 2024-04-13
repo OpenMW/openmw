@@ -256,9 +256,17 @@ namespace Debug
     private:
         static bool useColoredOutput()
         {
-            // Note: cmd.exe in Win10 should support ANSI colors, but in its own way.
 #if defined(_WIN32)
-            return 0;
+            if (getenv("NO_COLOR"))
+                return false;
+
+            DWORD mode;
+            if (GetConsoleMode(GetStdHandle(STD_ERROR_HANDLE), &mode) && mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+                return true;
+
+            // some console emulators may not use the Win32 API, so try the Unixy approach
+            char* term = getenv("TERM");
+            return term && GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_CHAR;
 #else
             char* term = getenv("TERM");
             bool useColor = term && !getenv("NO_COLOR") && isatty(fileno(stderr));
