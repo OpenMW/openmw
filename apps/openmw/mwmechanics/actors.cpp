@@ -39,6 +39,8 @@
 
 #include "../mwrender/vismask.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "actor.hpp"
 #include "actorutil.hpp"
 #include "aicombataction.hpp"
@@ -1798,7 +1800,7 @@ namespace MWMechanics
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
                     // Play Death Music if it was the player dying
                     MWBase::Environment::get().getSoundManager()->streamMusic(
-                        "Music/Special/MW_Death.mp3", MWSound::MusicType::Special);
+                        MWSound::deathMusic, MWSound::MusicType::Special);
                 }
                 else
                 {

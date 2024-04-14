@@ -64,6 +64,7 @@
 #include "mwscript/interpretercontext.hpp"
 #include "mwscript/scriptmanagerimp.hpp"
 
+#include "mwsound/constants.hpp"
 #include "mwsound/soundmanagerimp.hpp"
 
 #include "mwworld/class.hpp"
@@ -987,9 +988,8 @@ void OMW::Engine::go()
         // start in main menu
         mWindowManager->pushGuiMode(MWGui::GM_MainMenu);
 
-        std::string titlefile = "music/special/morrowind title.mp3";
-        if (mVFS->exists(titlefile))
-            mSoundManager->streamMusic(titlefile, MWSound::MusicType::Special);
+        if (mVFS->exists(MWSound::titleMusic))
+            mSoundManager->streamMusic(MWSound::titleMusic, MWSound::MusicType::Special);
         else
             Log(Debug::Warning) << "Title music not found";
 

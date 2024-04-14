@@ -252,13 +252,13 @@ namespace MWSound
         }
     }
 
-    void SoundManager::streamMusicFull(const std::string& filename)
+    void SoundManager::streamMusicFull(VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
 
         stopMusic();
-        if (filename.empty())
+        if (filename.value().empty())
             return;
 
         Log(Debug::Info) << "Playing \"" << filename << "\"";
@@ -267,9 +267,9 @@ namespace MWSound
         DecoderPtr decoder = getDecoder();
         try
         {
-            decoder->open(VFS::Path::Normalized(filename));
+            decoder->open(filename);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             Log(Debug::Error) << "Failed to load audio from \"" << filename << "\": " << e.what();
             return;
@@ -285,7 +285,7 @@ namespace MWSound
         mOutput->streamSound(std::move(decoder), mMusic.get());
     }
 
-    void SoundManager::advanceMusic(const std::string& filename, float fadeOut)
+    void SoundManager::advanceMusic(VFS::Path::NormalizedView filename, float fadeOut)
     {
         if (!isMusicPlaying())
         {
@@ -304,7 +304,7 @@ namespace MWSound
 
         if (playlist == mMusicFiles.end() || playlist->second.empty())
         {
-            advanceMusic(std::string());
+            advanceMusic(VFS::Path::NormalizedView());
             return;
         }
 
@@ -338,7 +338,7 @@ namespace MWSound
         return mMusic && mOutput->isStreamPlaying(mMusic.get());
     }
 
-    void SoundManager::streamMusic(const std::string& filename, MusicType type, float fade)
+    void SoundManager::streamMusic(VFS::Path::NormalizedView filename, MusicType type, float fade)
     {
         const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
 
@@ -347,10 +347,8 @@ namespace MWSound
             && type != MusicType::Special)
             return;
 
-        std::string normalizedName = VFS::Path::normalizeFilename(filename);
-
         mechanicsManager->setMusicType(type);
-        advanceMusic(normalizedName, fade);
+        advanceMusic(filename, fade);
         if (type == MWSound::MusicType::Battle)
             mCurrentPlaylist = battlePlaylist;
         else if (type == MWSound::MusicType::Explore)
@@ -367,8 +365,8 @@ namespace MWSound
         if (it == mMusicFiles.end())
         {
             std::vector<VFS::Path::Normalized> filelist;
-            constexpr VFS::Path::NormalizedView music("music");
-            const VFS::Path::Normalized playlistPath = music / playlist / VFS::Path::NormalizedView();
+            const VFS::Path::Normalized playlistPath
+                = Misc::ResourceHelpers::correctMusicPath(playlist) / VFS::Path::NormalizedView();
             for (const auto& name : mVFS->getRecursiveDirectoryIterator(VFS::Path::NormalizedView(playlistPath)))
                 filelist.push_back(name);
 
@@ -1143,10 +1141,10 @@ namespace MWSound
         if (!mMusic || !mMusic->updateFade(duration) || !mOutput->isStreamPlaying(mMusic.get()))
         {
             stopMusic();
-            if (!mNextMusic.empty())
+            if (!mNextMusic.value().empty())
             {
                 streamMusicFull(mNextMusic);
-                mNextMusic.clear();
+                mNextMusic = VFS::Path::Normalized();
             }
         }
         else
@@ -1166,9 +1164,8 @@ namespace MWSound
 
         if (isMainMenu && !isMusicPlaying())
         {
-            std::string titlefile = "music/special/morrowind title.mp3";
-            if (mVFS->exists(titlefile))
-                streamMusic(titlefile, MWSound::MusicType::Special);
+            if (mVFS->exists(MWSound::titleMusic))
+                streamMusic(MWSound::titleMusic, MWSound::MusicType::Special);
         }
 
         updateSounds(duration);
