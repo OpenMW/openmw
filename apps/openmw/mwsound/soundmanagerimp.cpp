@@ -267,7 +267,7 @@ namespace MWSound
         DecoderPtr decoder = getDecoder();
         try
         {
-            decoder->open(filename);
+            decoder->open(VFS::Path::Normalized(filename));
         }
         catch (std::exception& e)
         {

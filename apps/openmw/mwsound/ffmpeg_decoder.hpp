@@ -93,7 +93,7 @@ namespace MWSound
         bool getAVAudioData();
         size_t readAVAudioData(void* data, size_t length);
 
-        void open(const std::string& fname) override;
+        void open(VFS::Path::NormalizedView fname) override;
         void close() override;
 
         std::string getName() override;

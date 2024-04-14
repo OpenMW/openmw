@@ -208,7 +208,7 @@ namespace MWSound
         return dec;
     }
 
-    void FFmpeg_Decoder::open(const std::string& fname)
+    void FFmpeg_Decoder::open(VFS::Path::NormalizedView fname)
     {
         close();
         mDataStream = mResourceMgr->get(fname);
@@ -224,7 +224,7 @@ namespace MWSound
         formatCtx->pb = ioCtx.get();
 
         // avformat_open_input frees user supplied AVFormatContext on failure
-        if (avformat_open_input(&formatCtx, fname.c_str(), nullptr, nullptr) != 0)
+        if (avformat_open_input(&formatCtx, fname.value().data(), nullptr, nullptr) != 0)
             throw std::runtime_error("Failed to open input");
 
         AVFormatContextPtr formatCtxPtr(std::exchange(formatCtx, nullptr));
