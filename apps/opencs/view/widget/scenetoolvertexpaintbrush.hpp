@@ -101,6 +101,7 @@ namespace CSVWidget
         const QString toolTipPoint = "Paint single point";
         const QString toolTipSquare = "Paint with square brush";
         const QString toolTipCircle = "Paint with circle brush";
+        const QString toolTipCustom = "Paint with custom brush";
 
     private:
         CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;

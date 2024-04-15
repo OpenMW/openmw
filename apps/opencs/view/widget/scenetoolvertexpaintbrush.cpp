@@ -200,6 +200,12 @@ void CSVWidget::SceneToolVertexPaintBrush::setButtonIcon(CSVWidget::BrushShape b
             setIcon(QIcon(QPixmap(":scenetoolbar/brush-circle")));
             tooltip += mVertexPaintBrushWindow->toolTipCircle;
             break;
+
+        case BrushShape_Custom:
+
+            setIcon(QIcon(QPixmap(":scenetoolbar/brush-custom")));
+            tooltip += mVertexPaintBrushWindow->toolTipCustom;
+            break;
     }
 
     setToolTip(tooltip);
