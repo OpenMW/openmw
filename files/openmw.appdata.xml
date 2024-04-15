@@ -21,6 +21,9 @@ Copyright 2020 Bret Curtis <psi29a@gmail.com>
   </p>
  </description>
  <launchable type="desktop-id">org.openmw.launcher.desktop</launchable>
+ <developer id="org.openmw">
+   <name>OpenMW Contributors</name>
+ </developer>
 
  <branding>
   <color type="primary" scheme_preference="light">#dcccb8</color>
