@@ -1,7 +1,7 @@
 #include "dialoguebindings.hpp"
+#include "apps/openmw/mwworld/store.hpp"
 #include "context.hpp"
 #include "recordstore.hpp"
-#include "apps/openmw/mwworld/store.hpp"
 #include <components/esm3/loaddial.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -71,10 +71,11 @@ namespace
             }
             if (not mwDialogueInfo.mSound.empty())
             {
-                infoElement["sound"] = Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(mwDialogueInfo.mSound)).value();
+                infoElement["sound"]
+                    = Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(mwDialogueInfo.mSound)).value();
             }
-            //mResultScript TODO
-            //mSelects TODO
+            // mResultScript TODO
+            // mSelects TODO
             preparedInfos[index++] = infoElement;
         }
 
@@ -91,7 +92,8 @@ namespace MWLua
         sol::state_view& lua = context.mLua->sol();
         sol::table api(lua, sol::create);
 
-        const MWWorld::Store<ESM::Dialogue>& mwDialogueStore = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
+        const MWWorld::Store<ESM::Dialogue>& mwDialogueStore
+            = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
 
         sol::table journalRecordsByQuestId(lua, sol::create);
         sol::table topicRecordsByTopicId(lua, sol::create);

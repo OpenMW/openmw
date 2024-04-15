@@ -19,11 +19,11 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "animationbindings.hpp"
+#include "dialoguebindings.hpp"
 #include "factionbindings.hpp"
 #include "luaevents.hpp"
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
-#include "dialoguebindings.hpp"
 #include "stats.hpp"
 
 namespace MWLua
