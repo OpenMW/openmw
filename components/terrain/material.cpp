@@ -282,10 +282,17 @@ namespace Terrain
 
                     // Special handling for red-green normal maps (e.g. BC5 or R8G8).
                     const osg::Image* image = it->mNormalMap->getImage(0);
-                    if (image && SceneUtil::isRedGreenPixelFormat(image->getPixelFormat()))
+                    if (image)
                     {
-                        reconstructNormalZ = true;
-                        parallax = false;
+                        switch (SceneUtil::computeUnsizedPixelFormat(image->getPixelFormat()))
+                        {
+                            case GL_RG:
+                            case GL_RG_INTEGER:
+                            {
+                                reconstructNormalZ = true;
+                                parallax = false;
+                            }
+                        }
                     }
                 }
 

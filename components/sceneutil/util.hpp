@@ -113,7 +113,9 @@ namespace SceneUtil
         osg::ref_ptr<osg::OperationQueue> mOperationQueue;
     };
 
-    bool isRedGreenPixelFormat(GLenum format);
+    // Compute the unsized format equivalent to the given pixel format
+    // Unlike osg::Image::computePixelFormat, this also covers compressed formats
+    GLenum computeUnsizedPixelFormat(GLenum format);
 }
 
 #endif

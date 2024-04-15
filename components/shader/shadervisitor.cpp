@@ -447,10 +447,14 @@ namespace Shader
             if (normalMap != nullptr && normalMap->getImage(0))
             {
                 // Special handling for red-green normal maps (e.g. BC5 or R8G8)
-                if (SceneUtil::isRedGreenPixelFormat(normalMap->getImage(0)->getPixelFormat()))
+                switch (SceneUtil::computeUnsizedPixelFormat(normalMap->getImage(0)->getPixelFormat()))
                 {
-                    mRequirements.back().mReconstructNormalZ = true;
-                    mRequirements.back().mNormalHeight = false;
+                    case GL_RG:
+                    case GL_RG_INTEGER:
+                    {
+                        mRequirements.back().mReconstructNormalZ = true;
+                        mRequirements.back().mNormalHeight = false;
+                    }
                 }
             }
 
