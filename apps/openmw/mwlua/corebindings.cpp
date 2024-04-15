@@ -23,6 +23,7 @@
 #include "luaevents.hpp"
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
+#include "dialoguebindings.hpp"
 #include "stats.hpp"
 
 namespace MWLua
@@ -98,7 +99,7 @@ namespace MWLua
         api["stats"] = initCoreStatsBindings(context);
 
         api["factions"] = initCoreFactionBindings(context);
-
+        api["dialogue"] = initCoreDialogueBindings(context);
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
