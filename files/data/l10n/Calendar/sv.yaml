@@ -30,7 +30,7 @@ monthInGenitive12: "december"
 
 # Standard Swedish date format: d MMMM YYYY
 # Source: http://www4.sprakochfolkminnen.se/cgi-bin/srfl/visasvar.py?sok=datum&svar=26089
-# Example: "23 Februari 1337"
+# Example: "23 februari 1337"
 dateFormat: "{day} {month} {year, number, :: group-off}"
 
 # The Swedish week starts with monday actually, but whatever.
