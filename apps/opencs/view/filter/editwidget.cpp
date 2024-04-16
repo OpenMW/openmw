@@ -44,7 +44,7 @@ CSVFilter::EditWidget::EditWidget(CSMWorld::Data& data, QWidget* parent)
 
     mHelpAction = new QAction(tr("Help"), this);
     connect(mHelpAction, &QAction::triggered, this, &EditWidget::openHelp);
-    mHelpAction->setIcon(QIcon(":/info.png"));
+    mHelpAction->setIcon(QIcon(":info"));
     addAction(mHelpAction);
     auto* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
     openHelpShortcut->associateAction(mHelpAction);

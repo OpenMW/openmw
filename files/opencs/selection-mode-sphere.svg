@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="48pt"
+   height="48pt"
+   viewBox="0 0 16.933333 16.933333"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="Main">
+      <stop
+         style="stop-color:#4d4d4d;stop-opacity:1;"
+         offset="0"
+         id="stop2082" />
+    </linearGradient>
+    <linearGradient
+       id="Main-6">
+      <stop
+         style="stop-color:#4d4d4d;stop-opacity:1;"
+         offset="0"
+         id="stop2082-2" />
+    </linearGradient>
+  </defs>
+  <g
+     id="selection-mode-sphere"
+     style="display:inline"
+     transform="matrix(0.95633709,0,0,0.97689208,-70.52014,-63.444673)">
+    <path
+       style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-opacity:1"
+       d="m 76.785755,76.027483 8.191425,-1.499019 3.414563,3.919074 -8.247271,1.611427 z"
+       id="path6-9"
+       transform="translate(-5.9617219e-7)" />
+    <path
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.1;stroke-opacity:1"
+       d="m 84.979715,67.165089 0.01,7.39939"
+       id="path9"
+       transform="translate(-5.9617219e-7)" />
+    <g
+       id="layer1"
+       transform="matrix(1.0456564,0,0,1.0236545,73.739836,64.945427)"
+       style="display:inline">
+      <ellipse
+         style="fill:#1d99fd;fill-opacity:1;stroke:none;stroke-width:0.100474;stroke-opacity:1"
+         id="path11"
+         cx="8.4666662"
+         cy="8.4666662"
+         rx="3.477541"
+         ry="3.4775405" />
+    </g>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1;stroke-opacity:1"
+       d="m 76.752352,68.631388 -0.0042,7.375694"
+       id="path7" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1;stroke-opacity:1"
+       d="m 80.140033,72.652014 -8.65e-4,7.421467"
+       id="path8" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.1;stroke-opacity:1"
+       d="m 88.436992,71.102838 -0.0041,7.377141"
+       id="path10" />
+    <path
+       style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-opacity:1"
+       d="m 76.792965,68.663942 8.191425,-1.499019 3.414563,3.919074 -8.247271,1.611427 z"
+       id="path6-9-9" />
+  </g>
+</svg>

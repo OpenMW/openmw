@@ -81,7 +81,7 @@ int runApplication(int argc, char* argv[])
 
     Application application(argc, argv);
 
-    application.setWindowIcon(QIcon(":./openmw-cs.png"));
+    application.setWindowIcon(QIcon(":openmw-cs"));
 
     CS::Editor editor(argc, argv);
 #ifdef __linux__
