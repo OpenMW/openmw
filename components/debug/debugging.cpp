@@ -73,16 +73,19 @@ namespace Debug
             {
                 _wfreopen(L"CON", L"r", stdin);
                 freopen("CON", "r", stdin);
+                std::cin.clear();
             }
             if (!outRedirected)
             {
                 _wfreopen(L"CON", L"w", stdout);
                 freopen("CON", "w", stdout);
+                std::cout.clear();
             }
             if (!errRedirected)
             {
                 _wfreopen(L"CON", L"w", stderr);
                 freopen("CON", "w", stderr);
+                std::cerr.clear();
             }
 
             return true;
