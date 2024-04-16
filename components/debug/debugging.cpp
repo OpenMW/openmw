@@ -61,6 +61,10 @@ namespace Debug
         bool outRedirected = isRedirected(STD_OUTPUT_HANDLE);
         bool errRedirected = isRedirected(STD_ERROR_HANDLE);
 
+        // Note: Do not spend three days reinvestigating this PowerShell bug thinking its our bug.
+        // https://gitlab.com/OpenMW/openmw/-/merge_requests/408#note_447467393
+        // The handles look valid, but GetFinalPathNameByHandleA can't tell what files they go to and writing to them doesn't work.
+
         if (AttachConsole(ATTACH_PARENT_PROCESS))
         {
             fflush(stdout);
