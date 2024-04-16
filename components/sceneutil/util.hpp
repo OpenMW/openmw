@@ -112,6 +112,10 @@ namespace SceneUtil
     protected:
         osg::ref_ptr<osg::OperationQueue> mOperationQueue;
     };
+
+    // Compute the unsized format equivalent to the given pixel format
+    // Unlike osg::Image::computePixelFormat, this also covers compressed formats
+    GLenum computeUnsizedPixelFormat(GLenum format);
 }
 
 #endif

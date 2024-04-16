@@ -10,6 +10,7 @@
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/stereomanager.hpp>
 
@@ -271,18 +272,37 @@ namespace Terrain
                     stateset->addUniform(UniformCollection::value().mBlendMap);
                 }
 
+                bool parallax = it->mNormalMap && it->mParallax;
+                bool reconstructNormalZ = false;
+
                 if (it->mNormalMap)
                 {
                     stateset->setTextureAttributeAndModes(2, it->mNormalMap);
                     stateset->addUniform(UniformCollection::value().mNormalMap);
+
+                    // Special handling for red-green normal maps (e.g. BC5 or R8G8).
+                    const osg::Image* image = it->mNormalMap->getImage(0);
+                    if (image)
+                    {
+                        switch (SceneUtil::computeUnsizedPixelFormat(image->getPixelFormat()))
+                        {
+                            case GL_RG:
+                            case GL_RG_INTEGER:
+                            {
+                                reconstructNormalZ = true;
+                                parallax = false;
+                            }
+                        }
+                    }
                 }
 
                 Shader::ShaderManager::DefineMap defineMap;
                 defineMap["normalMap"] = (it->mNormalMap) ? "1" : "0";
                 defineMap["blendMap"] = (!blendmaps.empty()) ? "1" : "0";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
-                defineMap["parallax"] = (it->mNormalMap && it->mParallax) ? "1" : "0";
+                defineMap["parallax"] = parallax ? "1" : "0";
                 defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
+                defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
                 stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));

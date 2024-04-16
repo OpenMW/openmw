@@ -110,6 +110,7 @@ namespace Shader
 
             bool mDiffuseHeight; // true if diffuse map has height info in alpha channel
             bool mNormalHeight; // true if normal map has height info in alpha channel
+            bool mReconstructNormalZ; // used for red-green normal maps (e.g. BC5)
 
             // -1 == no tangents required
             int mTexStageRequiringTangents;
