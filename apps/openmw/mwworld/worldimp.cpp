@@ -591,6 +591,12 @@ namespace MWWorld
         // Must be cleared before mRendering is destroyed
         if (mProjectileManager)
             mProjectileManager->clear();
+
+        if (Settings::navigator().mWaitForAllJobsOnExit)
+        {
+            Log(Debug::Verbose) << "Waiting for all navmesh jobs to be done...";
+            mNavigator->wait(DetourNavigator::WaitConditionType::allJobsDone, nullptr);
+        }
     }
 
     void World::setRandomSeed(uint32_t seed)
