@@ -91,49 +91,6 @@ namespace SceneUtil
         }
     }
 
-    osg::Vec3f OsgAnimationController::getTranslation(float time) const
-    {
-        osg::Vec3f translationValue;
-        std::string animationName;
-        float newTime = time;
-
-        // Find the correct animation based on time
-        for (const EmulatedAnimation& emulatedAnimation : mEmulatedAnimations)
-        {
-            if (time >= emulatedAnimation.mStartTime && time <= emulatedAnimation.mStopTime)
-            {
-                newTime = time - emulatedAnimation.mStartTime;
-                animationName = emulatedAnimation.mName;
-            }
-        }
-
-        // Find the root transform track in animation
-        for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
-        {
-            if (mergedAnimationTrack->getName() != animationName)
-                continue;
-
-            const osgAnimation::ChannelList& channels = mergedAnimationTrack->getChannels();
-
-            for (const auto& channel : channels)
-            {
-                if (channel->getTargetName() != "bip01" || channel->getName() != "transform")
-                    continue;
-
-                if (osgAnimation::MatrixLinearSampler* templateSampler
-                    = dynamic_cast<osgAnimation::MatrixLinearSampler*>(channel->getSampler()))
-                {
-                    osg::Matrixf matrix;
-                    templateSampler->getValueAt(newTime, matrix);
-                    translationValue = matrix.getTrans();
-                    return osg::Vec3f(translationValue[0], translationValue[1], translationValue[2]);
-                }
-            }
-        }
-
-        return osg::Vec3f();
-    }
-
     osg::Matrixf OsgAnimationController::getTransformForNode(float time, const std::string_view name) const
     {
         std::string animationName;
@@ -146,6 +103,7 @@ namespace SceneUtil
             {
                 newTime = time - emulatedAnimation.mStartTime;
                 animationName = emulatedAnimation.mName;
+                break;
             }
         }
 
@@ -173,6 +131,11 @@ namespace SceneUtil
         }
 
         return osg::Matrixf::identity();
+    }
+
+    osg::Vec3f OsgAnimationController::getTranslation(float time) const
+    {
+        return getTransformForNode(time, "bip01").getTrans();
     }
 
     void OsgAnimationController::update(float time, const std::string& animationName)
