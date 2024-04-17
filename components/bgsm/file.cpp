@@ -17,6 +17,7 @@ namespace Bgsm
         stream.read(mAlphaTestThreshold);
         stream.read(mAlphaTest);
         stream.read(mDepthWrite);
+        stream.read(mDepthTest);
         stream.read(mSSR);
         stream.read(mWetnessControlSSR);
         stream.read(mDecal);
