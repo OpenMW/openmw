@@ -68,7 +68,7 @@ namespace Bgsm
         std::string mEnvMap;
         std::string mInnerLayerMap;
         std::string mDisplacementMap;
-        bool mEnableEditorAlphaRef;
+        bool mEnableEditorAlphaThreshold;
         bool mTranslucency;
         bool mTranslucencyThickObject;
         bool mTranslucencyMixAlbedoWithSubsurfaceColor;
@@ -78,7 +78,7 @@ namespace Bgsm
         bool mRimLighting;
         float mRimPower;
         float mBackLightPower;
-        bool mSursurfaceLighting;
+        bool mSubsurfaceLighting;
         float mSubsurfaceLightingRolloff;
         bool mSpecularEnabled;
         osg::Vec4f mSpecularColor;
@@ -120,7 +120,7 @@ namespace Bgsm
         bool mSkinTint;
         bool mTessellate;
         osg::Vec2f mDisplacementMapParams;
-        osg::Vec3f mTesselationParams;
+        osg::Vec3f mTessellationParams;
         float mGrayscaleToPaletteScale;
         bool mSkewSpecularAlpha;
         bool mTerrain;

@@ -45,6 +45,130 @@ namespace Bgsm
     void BGSMFile::read(BGSMStream& stream)
     {
         MaterialFile::read(stream);
+
+        stream.read(mDiffuseMap);
+        stream.read(mNormalMap);
+        stream.read(mSmoothSpecMap);
+        stream.read(mGreyscaleMap);
+        if (mVersion >= 3)
+        {
+            stream.read(mGlowMap);
+            stream.read(mWrinkleMap);
+            stream.read(mSpecularMap);
+            stream.read(mLightingMap);
+            stream.read(mFlowMap);
+            if (mVersion >= 17)
+            {
+                stream.read(mDistanceFieldAlphaMap);
+            }
+        }
+        else
+        {
+            stream.read(mEnvMap);
+            stream.read(mGlowMap);
+            stream.read(mInnerLayerMap);
+            stream.read(mWrinkleMap);
+            stream.read(mDisplacementMap);
+        }
+        stream.read(mEnableEditorAlphaThreshold);
+        if (mVersion >= 8)
+        {
+            stream.read(mTranslucency);
+            stream.read(mTranslucencyThickObject);
+            stream.read(mTranslucencyMixAlbedoWithSubsurfaceColor);
+            stream.read(mTranslucencySubsurfaceColor);
+            stream.read(mTranslucencyTransmissiveScale);
+            stream.read(mTranslucencyTurbulence);
+        }
+        else
+        {
+            stream.read(mRimLighting);
+            stream.read(mRimPower);
+            stream.read(mBackLightPower);
+            stream.read(mSubsurfaceLighting);
+            stream.read(mSubsurfaceLightingRolloff);
+        }
+        stream.read(mSpecularEnabled);
+        stream.read(mSpecularColor);
+        stream.read(mSpecularMult);
+        stream.read(mSmoothness);
+        stream.read(mFresnelPower);
+        stream.read(mWetnessControlSpecScale);
+        stream.read(mWetnessControlSpecPowerScale);
+        stream.read(mWetnessControlSpecMinvar);
+        if (mVersion < 10)
+        {
+            stream.read(mWetnessControlEnvMapScale);
+        }
+        stream.read(mWetnessControlFresnelPower);
+        stream.read(mWetnessControlMetalness);
+        if (mVersion >= 3)
+        {
+            stream.read(mPBR);
+            if (mVersion >= 9)
+            {
+                stream.read(mCustomPorosity);
+                stream.read(mPorosityValue);
+            }
+        }
+        stream.read(mRootMaterialPath);
+        stream.read(mAnisoLighting);
+        stream.read(mEmitEnabled);
+        if (mEmitEnabled)
+        {
+            stream.read(mEmittanceColor);
+        }
+        stream.read(mEmittanceMult);
+        stream.read(mModelSpaceNormals);
+        stream.read(mExternalEmittance);
+        if (mVersion >= 12)
+        {
+            stream.read(mLumEmittance);
+            if (mVersion >= 13)
+            {
+                stream.read(mUseAdaptiveEmissive);
+                stream.read(mAdaptiveEmissiveExposureParams);
+            }
+        }
+        else if (mVersion < 8)
+        {
+            stream.read(mBackLighting);
+        }
+        stream.read(mReceiveShadows);
+        stream.read(mHideSecret);
+        stream.read(mCastShadows);
+        stream.read(mDissolveFade);
+        stream.read(mAssumeShadowmask);
+        stream.read(mHasGlowMap);
+        if (mVersion < 7)
+        {
+            stream.read(mEnvMapWindow);
+            stream.read(mEnvMapEye);
+        }
+        stream.read(mHair);
+        stream.read(mHairTintColor);
+        stream.read(mTree);
+        stream.read(mFacegen);
+        stream.read(mSkinTint);
+        stream.read(mTessellate);
+        if (mVersion < 3)
+        {
+            stream.read(mDisplacementMapParams);
+            stream.read(mTessellationParams);
+        }
+        stream.read(mGrayscaleToPaletteScale);
+        if (mVersion >= 1)
+        {
+            stream.read(mSkewSpecularAlpha);
+            stream.read(mTerrain);
+            if (mTerrain)
+            {
+                if (mVersion == 3)
+                    stream.skip(4); // Unknown
+
+                stream.read(mTerrainParams);
+            }
+        }
     }
 
     void BGEMFile::read(BGSMStream& stream)
