@@ -72,7 +72,7 @@ namespace Bgsm
         bool mTranslucency;
         bool mTranslucencyThickObject;
         bool mTranslucencyMixAlbedoWithSubsurfaceColor;
-        osg::Vec4f mTranslucencySubsurfaceColor;
+        osg::Vec3f mTranslucencySubsurfaceColor;
         float mTranslucencyTransmissiveScale;
         float mTranslucencyTurbulence;
         bool mRimLighting;
@@ -81,7 +81,7 @@ namespace Bgsm
         bool mSubsurfaceLighting;
         float mSubsurfaceLightingRolloff;
         bool mSpecularEnabled;
-        osg::Vec4f mSpecularColor;
+        osg::Vec3f mSpecularColor;
         float mSpecularMult;
         float mSmoothness;
         float mFresnelPower;
@@ -97,7 +97,7 @@ namespace Bgsm
         std::string mRootMaterialPath;
         bool mAnisoLighting;
         bool mEmitEnabled;
-        osg::Vec4f mEmittanceColor;
+        osg::Vec3f mEmittanceColor;
         float mEmittanceMult;
         bool mModelSpaceNormals;
         bool mExternalEmittance;
@@ -114,7 +114,7 @@ namespace Bgsm
         bool mEnvMapWindow;
         bool mEnvMapEye;
         bool mHair;
-        osg::Vec4f mHairTintColor;
+        osg::Vec3f mHairTintColor;
         bool mTree;
         bool mFacegen;
         bool mSkinTint;
@@ -145,13 +145,13 @@ namespace Bgsm
         bool mFalloffColor;
         bool mGrayscaleToPaletteAlpha;
         bool mSoft;
-        osg::Vec4f mBaseColor;
+        osg::Vec3f mBaseColor;
         float mBaseColorScale;
         osg::Vec4f mFalloffParams;
         float mLightingInfluence;
         std::uint8_t mEnvmapMinLOD;
         float mSoftDepth;
-        osg::Vec4f mEmittanceColor;
+        osg::Vec3f mEmittanceColor;
         osg::Vec3f mAdaptiveEmissiveExposureParams;
         bool mHasGlowMap;
         bool mEffectPbrSpecular;
