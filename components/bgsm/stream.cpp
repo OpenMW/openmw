@@ -41,6 +41,9 @@ namespace Bgsm
 
     std::string BGSMStream::getSizedString(size_t length)
     {
+        // Prevent potential memory allocation freezes; strings this long are not expected in BGSM
+        if (length > 1024)
+            throw std::runtime_error("Requested string length is too large: " + std::to_string(length));
         std::string str(length, '\0');
         mStream->read(str.data(), length);
         if (mStream->bad())
