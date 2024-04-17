@@ -1135,7 +1135,7 @@ fi
 			echo "    $(basename $DLL)"
 			cp "$DLL" "${DLL_PREFIX}styles"
 		done
-
+		echo
 		echo "- Qt Image Format DLLs..."
 		mkdir -p ${DLL_PREFIX}imageformats
 		for DLL in ${QT_IMAGEFORMATS[$CONFIGURATION]}; do
