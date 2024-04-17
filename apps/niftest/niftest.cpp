@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <components/bgsm/reader.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
@@ -36,6 +37,13 @@ bool isNIF(const std::filesystem::path& filename)
 {
     return hasExtension(filename, ".nif") || hasExtension(filename, ".kf");
 }
+
+/// Check if the file is a material file.
+bool isMaterial(const std::filesystem::path& filename)
+{
+    return hasExtension(filename, ".bgem") || hasExtension(filename, ".bgsm");
+}
+
 /// See if the file has the "bsa" extension.
 bool isBSA(const std::filesystem::path& filename)
 {
@@ -81,6 +89,36 @@ void readNIF(
     }
 }
 
+
+void readMaterial(
+    const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
+{
+    const std::string pathStr = Files::pathToUnicodeString(path);
+    if (!quiet)
+    {
+        if (hasExtension(path, ".bgem"))
+            std::cout << "Reading BGEM file '" << pathStr << "'";
+        else
+            std::cout << "Reading BGSM file '" << pathStr << "'";
+        if (!source.empty())
+            std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
+        std::cout << std::endl;
+    }
+    const std::filesystem::path fullPath = !source.empty() ? source / path : path;
+    try
+    {
+        Bgsm::Reader reader;
+        if (vfs != nullptr)
+            reader.parse(vfs->get(pathStr));
+        else
+            reader.parse(Files::openConstrainedFileStream(fullPath));
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Failed to read '" << pathStr << "':" << std::endl << e.what() << std::endl;
+    }
+}
+
 /// Check all the nif files in a given VFS::Archive
 /// \note Can not read a bsa file inside of a bsa file.
 void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::path& archivePath, bool quiet)
@@ -100,6 +138,10 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
         if (isNIF(name.value()))
         {
             readNIF(archivePath, name.value(), &vfs, quiet);
+        }
+        else if (isMaterial(name.value()))
+        {
+            readMaterial(archivePath, name.value(), &vfs, quiet);
         }
     }
 
@@ -129,10 +171,10 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 bool parseOptions(int argc, char** argv, Files::PathContainer& files, Files::PathContainer& archives,
     bool& writeDebugLog, bool& quiet)
 {
-    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF, KF and BSA/BA2 files
+    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF, KF, BGEM/BGSM and BSA/BA2 files
 
 Usages:
-  niftest <nif files, kf files, BSA/BA2 files, or directories>
+  niftest <nif files, kf files, bgem/bgsm files, BSA/BA2 files, or directories>
       Scan the file or directories for NIF errors.
 
 Allowed options)");
@@ -224,6 +266,10 @@ int main(int argc, char** argv)
             if (isNIF(path))
             {
                 readNIF({}, path, vfs.get(), quiet);
+            }
+            else if (isMaterial(path))
+            {
+                readMaterial({}, path, vfs.get(), quiet);
             }
             else if (auto archive = makeArchive(path))
             {
