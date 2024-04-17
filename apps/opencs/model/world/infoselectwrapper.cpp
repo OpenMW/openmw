@@ -6,16 +6,9 @@
 
 #include <components/esm3/variant.hpp>
 
-const size_t CSMWorld::ConstInfoSelectWrapper::RuleMinSize = 5;
-
-const size_t CSMWorld::ConstInfoSelectWrapper::FunctionPrefixOffset = 1;
-const size_t CSMWorld::ConstInfoSelectWrapper::FunctionIndexOffset = 2;
-const size_t CSMWorld::ConstInfoSelectWrapper::RelationIndexOffset = 4;
-const size_t CSMWorld::ConstInfoSelectWrapper::VarNameOffset = 5;
-
 const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] = {
-    "Rank Low",
-    "Rank High",
+    "Faction Reaction Low",
+    "Faction Reaction High",
     "Rank Requirement",
     "Reputation",
     "Health Percent",
@@ -72,7 +65,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] = {
     "PC Endurance",
     "PC Personality",
     "PC Luck",
-    "PC Corpus",
+    "PC Corprus",
     "Weather",
     "PC Vampire",
     "Level",
@@ -112,55 +105,40 @@ const char* CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[] = {
     nullptr,
 };
 
-const char* CSMWorld::ConstInfoSelectWrapper::ComparisonEnumStrings[] = {
-    "Boolean",
-    "Integer",
-    "Numeric",
-    nullptr,
-};
-
-// static functions
-
-std::string CSMWorld::ConstInfoSelectWrapper::convertToString(FunctionName name)
+namespace
 {
-    if (name < Function_None)
-        return FunctionEnumStrings[name];
-    else
+    std::string_view convertToString(ESM::DialogueCondition::Function name)
+    {
+        if (name < ESM::DialogueCondition::Function_None)
+            return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[name];
         return "(Invalid Data: Function)";
-}
+    }
 
-std::string CSMWorld::ConstInfoSelectWrapper::convertToString(RelationType type)
-{
-    if (type < Relation_None)
-        return RelationEnumStrings[type];
-    else
+    std::string_view convertToString(ESM::DialogueCondition::Comparison type)
+    {
+        if (type != ESM::DialogueCondition::Comp_None)
+            return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings[type - ESM::DialogueCondition::Comp_Eq];
         return "(Invalid Data: Relation)";
-}
-
-std::string CSMWorld::ConstInfoSelectWrapper::convertToString(ComparisonType type)
-{
-    if (type < Comparison_None)
-        return ComparisonEnumStrings[type];
-    else
-        return "(Invalid Data: Comparison)";
+    }
 }
 
 // ConstInfoSelectWrapper
 
-CSMWorld::ConstInfoSelectWrapper::ConstInfoSelectWrapper(const ESM::DialInfo::SelectStruct& select)
+CSMWorld::ConstInfoSelectWrapper::ConstInfoSelectWrapper(const ESM::DialogueCondition& select)
     : mConstSelect(select)
 {
-    readRule();
+    updateHasVariable();
+    updateComparisonType();
 }
 
-CSMWorld::ConstInfoSelectWrapper::FunctionName CSMWorld::ConstInfoSelectWrapper::getFunctionName() const
+ESM::DialogueCondition::Function CSMWorld::ConstInfoSelectWrapper::getFunctionName() const
 {
-    return mFunctionName;
+    return mConstSelect.mFunction;
 }
 
-CSMWorld::ConstInfoSelectWrapper::RelationType CSMWorld::ConstInfoSelectWrapper::getRelationType() const
+ESM::DialogueCondition::Comparison CSMWorld::ConstInfoSelectWrapper::getRelationType() const
 {
-    return mRelationType;
+    return mConstSelect.mComparison;
 }
 
 CSMWorld::ConstInfoSelectWrapper::ComparisonType CSMWorld::ConstInfoSelectWrapper::getComparisonType() const
@@ -175,24 +153,21 @@ bool CSMWorld::ConstInfoSelectWrapper::hasVariable() const
 
 const std::string& CSMWorld::ConstInfoSelectWrapper::getVariableName() const
 {
-    return mVariableName;
+    return mConstSelect.mVariable;
 }
 
 bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue() const
 {
-    if (!variantTypeIsValid())
-        return false;
-
     if (mComparisonType == Comparison_Boolean || mComparisonType == Comparison_Integer)
     {
-        if (mConstSelect.mValue.getType() == ESM::VT_Float)
+        if (std::holds_alternative<float>(mConstSelect.mValue))
             return conditionIsAlwaysTrue(getConditionFloatRange(), getValidIntRange());
         else
             return conditionIsAlwaysTrue(getConditionIntRange(), getValidIntRange());
     }
     else if (mComparisonType == Comparison_Numeric)
     {
-        if (mConstSelect.mValue.getType() == ESM::VT_Float)
+        if (std::holds_alternative<float>(mConstSelect.mValue))
             return conditionIsAlwaysTrue(getConditionFloatRange(), getValidFloatRange());
         else
             return conditionIsAlwaysTrue(getConditionIntRange(), getValidFloatRange());
@@ -203,19 +178,16 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue() const
 
 bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue() const
 {
-    if (!variantTypeIsValid())
-        return false;
-
     if (mComparisonType == Comparison_Boolean || mComparisonType == Comparison_Integer)
     {
-        if (mConstSelect.mValue.getType() == ESM::VT_Float)
+        if (std::holds_alternative<float>(mConstSelect.mValue))
             return conditionIsNeverTrue(getConditionFloatRange(), getValidIntRange());
         else
             return conditionIsNeverTrue(getConditionIntRange(), getValidIntRange());
     }
     else if (mComparisonType == Comparison_Numeric)
     {
-        if (mConstSelect.mValue.getType() == ESM::VT_Float)
+        if (std::holds_alternative<float>(mConstSelect.mValue))
             return conditionIsNeverTrue(getConditionFloatRange(), getValidFloatRange());
         else
             return conditionIsNeverTrue(getConditionIntRange(), getValidFloatRange());
@@ -224,170 +196,36 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue() const
     return false;
 }
 
-bool CSMWorld::ConstInfoSelectWrapper::variantTypeIsValid() const
-{
-    return (mConstSelect.mValue.getType() == ESM::VT_Int || mConstSelect.mValue.getType() == ESM::VT_Float);
-}
-
-const ESM::Variant& CSMWorld::ConstInfoSelectWrapper::getVariant() const
-{
-    return mConstSelect.mValue;
-}
-
 std::string CSMWorld::ConstInfoSelectWrapper::toString() const
 {
     std::ostringstream stream;
-    stream << convertToString(mFunctionName) << " ";
+    stream << convertToString(getFunctionName()) << " ";
 
     if (mHasVariable)
-        stream << mVariableName << " ";
+        stream << getVariableName() << " ";
 
-    stream << convertToString(mRelationType) << " ";
+    stream << convertToString(getRelationType()) << " ";
 
-    switch (mConstSelect.mValue.getType())
-    {
-        case ESM::VT_Int:
-            stream << mConstSelect.mValue.getInteger();
-            break;
-
-        case ESM::VT_Float:
-            stream << mConstSelect.mValue.getFloat();
-            break;
-
-        default:
-            stream << "(Invalid value type)";
-            break;
-    }
+    std::visit([&](auto value) { stream << value; }, mConstSelect.mValue);
 
     return stream.str();
 }
 
-void CSMWorld::ConstInfoSelectWrapper::readRule()
-{
-    if (mConstSelect.mSelectRule.size() < RuleMinSize)
-        throw std::runtime_error("InfoSelectWrapper: rule is to small");
-
-    readFunctionName();
-    readRelationType();
-    readVariableName();
-    updateHasVariable();
-    updateComparisonType();
-}
-
-void CSMWorld::ConstInfoSelectWrapper::readFunctionName()
-{
-    char functionPrefix = mConstSelect.mSelectRule[FunctionPrefixOffset];
-    std::string functionIndex = mConstSelect.mSelectRule.substr(FunctionIndexOffset, 2);
-    int convertedIndex = -1;
-
-    // Read in function index, form ## from 00 .. 73, skip leading zero
-    if (functionIndex[0] == '0')
-        functionIndex = functionIndex[1];
-
-    std::stringstream stream;
-    stream << functionIndex;
-    stream >> convertedIndex;
-
-    switch (functionPrefix)
-    {
-        case '1':
-            if (convertedIndex >= 0 && convertedIndex <= 73)
-                mFunctionName = static_cast<FunctionName>(convertedIndex);
-            else
-                mFunctionName = Function_None;
-            break;
-
-        case '2':
-            mFunctionName = Function_Global;
-            break;
-        case '3':
-            mFunctionName = Function_Local;
-            break;
-        case '4':
-            mFunctionName = Function_Journal;
-            break;
-        case '5':
-            mFunctionName = Function_Item;
-            break;
-        case '6':
-            mFunctionName = Function_Dead;
-            break;
-        case '7':
-            mFunctionName = Function_NotId;
-            break;
-        case '8':
-            mFunctionName = Function_NotFaction;
-            break;
-        case '9':
-            mFunctionName = Function_NotClass;
-            break;
-        case 'A':
-            mFunctionName = Function_NotRace;
-            break;
-        case 'B':
-            mFunctionName = Function_NotCell;
-            break;
-        case 'C':
-            mFunctionName = Function_NotLocal;
-            break;
-        default:
-            mFunctionName = Function_None;
-            break;
-    }
-}
-
-void CSMWorld::ConstInfoSelectWrapper::readRelationType()
-{
-    char relationIndex = mConstSelect.mSelectRule[RelationIndexOffset];
-
-    switch (relationIndex)
-    {
-        case '0':
-            mRelationType = Relation_Equal;
-            break;
-        case '1':
-            mRelationType = Relation_NotEqual;
-            break;
-        case '2':
-            mRelationType = Relation_Greater;
-            break;
-        case '3':
-            mRelationType = Relation_GreaterOrEqual;
-            break;
-        case '4':
-            mRelationType = Relation_Less;
-            break;
-        case '5':
-            mRelationType = Relation_LessOrEqual;
-            break;
-        default:
-            mRelationType = Relation_None;
-    }
-}
-
-void CSMWorld::ConstInfoSelectWrapper::readVariableName()
-{
-    if (mConstSelect.mSelectRule.size() >= VarNameOffset)
-        mVariableName = mConstSelect.mSelectRule.substr(VarNameOffset);
-    else
-        mVariableName.clear();
-}
-
 void CSMWorld::ConstInfoSelectWrapper::updateHasVariable()
 {
-    switch (mFunctionName)
+    switch (getFunctionName())
     {
-        case Function_Global:
-        case Function_Local:
-        case Function_Journal:
-        case Function_Item:
-        case Function_Dead:
-        case Function_NotId:
-        case Function_NotFaction:
-        case Function_NotClass:
-        case Function_NotRace:
-        case Function_NotCell:
-        case Function_NotLocal:
+        case ESM::DialogueCondition::Function_Global:
+        case ESM::DialogueCondition::Function_Local:
+        case ESM::DialogueCondition::Function_Journal:
+        case ESM::DialogueCondition::Function_Item:
+        case ESM::DialogueCondition::Function_Dead:
+        case ESM::DialogueCondition::Function_NotId:
+        case ESM::DialogueCondition::Function_NotFaction:
+        case ESM::DialogueCondition::Function_NotClass:
+        case ESM::DialogueCondition::Function_NotRace:
+        case ESM::DialogueCondition::Function_NotCell:
+        case ESM::DialogueCondition::Function_NotLocal:
             mHasVariable = true;
             break;
 
@@ -399,103 +237,103 @@ void CSMWorld::ConstInfoSelectWrapper::updateHasVariable()
 
 void CSMWorld::ConstInfoSelectWrapper::updateComparisonType()
 {
-    switch (mFunctionName)
+    switch (getFunctionName())
     {
         // Boolean
-        case Function_NotId:
-        case Function_NotFaction:
-        case Function_NotClass:
-        case Function_NotRace:
-        case Function_NotCell:
-        case Function_PcExpelled:
-        case Function_PcCommonDisease:
-        case Function_PcBlightDisease:
-        case Function_SameSex:
-        case Function_SameRace:
-        case Function_SameFaction:
-        case Function_Detected:
-        case Function_Alarmed:
-        case Function_PcCorpus:
-        case Function_PcVampire:
-        case Function_Attacked:
-        case Function_TalkedToPc:
-        case Function_ShouldAttack:
-        case Function_Werewolf:
+        case ESM::DialogueCondition::Function_NotId:
+        case ESM::DialogueCondition::Function_NotFaction:
+        case ESM::DialogueCondition::Function_NotClass:
+        case ESM::DialogueCondition::Function_NotRace:
+        case ESM::DialogueCondition::Function_NotCell:
+        case ESM::DialogueCondition::Function_PcExpelled:
+        case ESM::DialogueCondition::Function_PcCommonDisease:
+        case ESM::DialogueCondition::Function_PcBlightDisease:
+        case ESM::DialogueCondition::Function_SameSex:
+        case ESM::DialogueCondition::Function_SameRace:
+        case ESM::DialogueCondition::Function_SameFaction:
+        case ESM::DialogueCondition::Function_Detected:
+        case ESM::DialogueCondition::Function_Alarmed:
+        case ESM::DialogueCondition::Function_PcCorprus:
+        case ESM::DialogueCondition::Function_PcVampire:
+        case ESM::DialogueCondition::Function_Attacked:
+        case ESM::DialogueCondition::Function_TalkedToPc:
+        case ESM::DialogueCondition::Function_ShouldAttack:
+        case ESM::DialogueCondition::Function_Werewolf:
             mComparisonType = Comparison_Boolean;
             break;
 
         // Integer
-        case Function_Journal:
-        case Function_Item:
-        case Function_Dead:
-        case Function_RankLow:
-        case Function_RankHigh:
-        case Function_RankRequirement:
-        case Function_Reputation:
-        case Function_PcReputation:
-        case Function_PcLevel:
-        case Function_PcStrength:
-        case Function_PcBlock:
-        case Function_PcArmorer:
-        case Function_PcMediumArmor:
-        case Function_PcHeavyArmor:
-        case Function_PcBluntWeapon:
-        case Function_PcLongBlade:
-        case Function_PcAxe:
-        case Function_PcSpear:
-        case Function_PcAthletics:
-        case Function_PcEnchant:
-        case Function_PcDestruction:
-        case Function_PcAlteration:
-        case Function_PcIllusion:
-        case Function_PcConjuration:
-        case Function_PcMysticism:
-        case Function_PcRestoration:
-        case Function_PcAlchemy:
-        case Function_PcUnarmored:
-        case Function_PcSecurity:
-        case Function_PcSneak:
-        case Function_PcAcrobatics:
-        case Function_PcLightArmor:
-        case Function_PcShortBlade:
-        case Function_PcMarksman:
-        case Function_PcMerchantile:
-        case Function_PcSpeechcraft:
-        case Function_PcHandToHand:
-        case Function_PcGender:
-        case Function_PcClothingModifier:
-        case Function_PcCrimeLevel:
-        case Function_FactionRankDifference:
-        case Function_Choice:
-        case Function_PcIntelligence:
-        case Function_PcWillpower:
-        case Function_PcAgility:
-        case Function_PcSpeed:
-        case Function_PcEndurance:
-        case Function_PcPersonality:
-        case Function_PcLuck:
-        case Function_Weather:
-        case Function_Level:
-        case Function_CreatureTarget:
-        case Function_FriendHit:
-        case Function_Fight:
-        case Function_Hello:
-        case Function_Alarm:
-        case Function_Flee:
-        case Function_PcWerewolfKills:
+        case ESM::DialogueCondition::Function_Journal:
+        case ESM::DialogueCondition::Function_Item:
+        case ESM::DialogueCondition::Function_Dead:
+        case ESM::DialogueCondition::Function_FacReactionLowest:
+        case ESM::DialogueCondition::Function_FacReactionHighest:
+        case ESM::DialogueCondition::Function_RankRequirement:
+        case ESM::DialogueCondition::Function_Reputation:
+        case ESM::DialogueCondition::Function_PcReputation:
+        case ESM::DialogueCondition::Function_PcLevel:
+        case ESM::DialogueCondition::Function_PcStrength:
+        case ESM::DialogueCondition::Function_PcBlock:
+        case ESM::DialogueCondition::Function_PcArmorer:
+        case ESM::DialogueCondition::Function_PcMediumArmor:
+        case ESM::DialogueCondition::Function_PcHeavyArmor:
+        case ESM::DialogueCondition::Function_PcBluntWeapon:
+        case ESM::DialogueCondition::Function_PcLongBlade:
+        case ESM::DialogueCondition::Function_PcAxe:
+        case ESM::DialogueCondition::Function_PcSpear:
+        case ESM::DialogueCondition::Function_PcAthletics:
+        case ESM::DialogueCondition::Function_PcEnchant:
+        case ESM::DialogueCondition::Function_PcDestruction:
+        case ESM::DialogueCondition::Function_PcAlteration:
+        case ESM::DialogueCondition::Function_PcIllusion:
+        case ESM::DialogueCondition::Function_PcConjuration:
+        case ESM::DialogueCondition::Function_PcMysticism:
+        case ESM::DialogueCondition::Function_PcRestoration:
+        case ESM::DialogueCondition::Function_PcAlchemy:
+        case ESM::DialogueCondition::Function_PcUnarmored:
+        case ESM::DialogueCondition::Function_PcSecurity:
+        case ESM::DialogueCondition::Function_PcSneak:
+        case ESM::DialogueCondition::Function_PcAcrobatics:
+        case ESM::DialogueCondition::Function_PcLightArmor:
+        case ESM::DialogueCondition::Function_PcShortBlade:
+        case ESM::DialogueCondition::Function_PcMarksman:
+        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcSpeechcraft:
+        case ESM::DialogueCondition::Function_PcHandToHand:
+        case ESM::DialogueCondition::Function_PcGender:
+        case ESM::DialogueCondition::Function_PcClothingModifier:
+        case ESM::DialogueCondition::Function_PcCrimeLevel:
+        case ESM::DialogueCondition::Function_FactionRankDifference:
+        case ESM::DialogueCondition::Function_Choice:
+        case ESM::DialogueCondition::Function_PcIntelligence:
+        case ESM::DialogueCondition::Function_PcWillpower:
+        case ESM::DialogueCondition::Function_PcAgility:
+        case ESM::DialogueCondition::Function_PcSpeed:
+        case ESM::DialogueCondition::Function_PcEndurance:
+        case ESM::DialogueCondition::Function_PcPersonality:
+        case ESM::DialogueCondition::Function_PcLuck:
+        case ESM::DialogueCondition::Function_Weather:
+        case ESM::DialogueCondition::Function_Level:
+        case ESM::DialogueCondition::Function_CreatureTarget:
+        case ESM::DialogueCondition::Function_FriendHit:
+        case ESM::DialogueCondition::Function_Fight:
+        case ESM::DialogueCondition::Function_Hello:
+        case ESM::DialogueCondition::Function_Alarm:
+        case ESM::DialogueCondition::Function_Flee:
+        case ESM::DialogueCondition::Function_PcWerewolfKills:
             mComparisonType = Comparison_Integer;
             break;
 
         // Numeric
-        case Function_Global:
-        case Function_Local:
-        case Function_NotLocal:
+        case ESM::DialogueCondition::Function_Global:
+        case ESM::DialogueCondition::Function_Local:
+        case ESM::DialogueCondition::Function_NotLocal:
 
-        case Function_Health_Percent:
-        case Function_PcHealthPercent:
-        case Function_PcMagicka:
-        case Function_PcFatigue:
-        case Function_PcHealth:
+        case ESM::DialogueCondition::Function_Health_Percent:
+        case ESM::DialogueCondition::Function_PcHealthPercent:
+        case ESM::DialogueCondition::Function_PcMagicka:
+        case ESM::DialogueCondition::Function_PcFatigue:
+        case ESM::DialogueCondition::Function_PcHealth:
             mComparisonType = Comparison_Numeric;
             break;
 
@@ -511,15 +349,15 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getConditionIntRange() con
     const int IntMin = std::numeric_limits<int>::min();
     const std::pair<int, int> InvalidRange(IntMax, IntMin);
 
-    int value = mConstSelect.mValue.getInteger();
+    int value = std::get<int>(mConstSelect.mValue);
 
-    switch (mRelationType)
+    switch (getRelationType())
     {
-        case Relation_Equal:
-        case Relation_NotEqual:
+        case ESM::DialogueCondition::Comp_Eq:
+        case ESM::DialogueCondition::Comp_Ne:
             return std::pair<int, int>(value, value);
 
-        case Relation_Greater:
+        case ESM::DialogueCondition::Comp_Gt:
             if (value == IntMax)
             {
                 return InvalidRange;
@@ -530,10 +368,10 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getConditionIntRange() con
             }
             break;
 
-        case Relation_GreaterOrEqual:
+        case ESM::DialogueCondition::Comp_Ge:
             return std::pair<int, int>(value, IntMax);
 
-        case Relation_Less:
+        case ESM::DialogueCondition::Comp_Ls:
             if (value == IntMin)
             {
                 return InvalidRange;
@@ -543,7 +381,7 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getConditionIntRange() con
                 return std::pair<int, int>(IntMin, value - 1);
             }
 
-        case Relation_LessOrEqual:
+        case ESM::DialogueCondition::Comp_Le:
             return std::pair<int, int>(IntMin, value);
 
         default:
@@ -557,24 +395,24 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getConditionFloatRange
     const float FloatMin = -std::numeric_limits<float>::infinity();
     const float Epsilon = std::numeric_limits<float>::epsilon();
 
-    float value = mConstSelect.mValue.getFloat();
+    float value = std::get<float>(mConstSelect.mValue);
 
-    switch (mRelationType)
+    switch (getRelationType())
     {
-        case Relation_Equal:
-        case Relation_NotEqual:
+        case ESM::DialogueCondition::Comp_Eq:
+        case ESM::DialogueCondition::Comp_Ne:
             return std::pair<float, float>(value, value);
 
-        case Relation_Greater:
+        case ESM::DialogueCondition::Comp_Gt:
             return std::pair<float, float>(value + Epsilon, FloatMax);
 
-        case Relation_GreaterOrEqual:
+        case ESM::DialogueCondition::Comp_Ge:
             return std::pair<float, float>(value, FloatMax);
 
-        case Relation_Less:
+        case ESM::DialogueCondition::Comp_Ls:
             return std::pair<float, float>(FloatMin, value - Epsilon);
 
-        case Relation_LessOrEqual:
+        case ESM::DialogueCondition::Comp_Le:
             return std::pair<float, float>(FloatMin, value);
 
         default:
@@ -587,120 +425,120 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
     const int IntMax = std::numeric_limits<int>::max();
     const int IntMin = std::numeric_limits<int>::min();
 
-    switch (mFunctionName)
+    switch (getFunctionName())
     {
         // Boolean
-        case Function_NotId:
-        case Function_NotFaction:
-        case Function_NotClass:
-        case Function_NotRace:
-        case Function_NotCell:
-        case Function_PcExpelled:
-        case Function_PcCommonDisease:
-        case Function_PcBlightDisease:
-        case Function_SameSex:
-        case Function_SameRace:
-        case Function_SameFaction:
-        case Function_Detected:
-        case Function_Alarmed:
-        case Function_PcCorpus:
-        case Function_PcVampire:
-        case Function_Attacked:
-        case Function_TalkedToPc:
-        case Function_ShouldAttack:
-        case Function_Werewolf:
+        case ESM::DialogueCondition::Function_NotId:
+        case ESM::DialogueCondition::Function_NotFaction:
+        case ESM::DialogueCondition::Function_NotClass:
+        case ESM::DialogueCondition::Function_NotRace:
+        case ESM::DialogueCondition::Function_NotCell:
+        case ESM::DialogueCondition::Function_PcExpelled:
+        case ESM::DialogueCondition::Function_PcCommonDisease:
+        case ESM::DialogueCondition::Function_PcBlightDisease:
+        case ESM::DialogueCondition::Function_SameSex:
+        case ESM::DialogueCondition::Function_SameRace:
+        case ESM::DialogueCondition::Function_SameFaction:
+        case ESM::DialogueCondition::Function_Detected:
+        case ESM::DialogueCondition::Function_Alarmed:
+        case ESM::DialogueCondition::Function_PcCorprus:
+        case ESM::DialogueCondition::Function_PcVampire:
+        case ESM::DialogueCondition::Function_Attacked:
+        case ESM::DialogueCondition::Function_TalkedToPc:
+        case ESM::DialogueCondition::Function_ShouldAttack:
+        case ESM::DialogueCondition::Function_Werewolf:
             return std::pair<int, int>(0, 1);
 
         // Integer
-        case Function_RankLow:
-        case Function_RankHigh:
-        case Function_Reputation:
-        case Function_PcReputation:
-        case Function_Journal:
+        case ESM::DialogueCondition::Function_FacReactionLowest:
+        case ESM::DialogueCondition::Function_FacReactionHighest:
+        case ESM::DialogueCondition::Function_Reputation:
+        case ESM::DialogueCondition::Function_PcReputation:
+        case ESM::DialogueCondition::Function_Journal:
             return std::pair<int, int>(IntMin, IntMax);
 
-        case Function_Item:
-        case Function_Dead:
-        case Function_PcLevel:
-        case Function_PcStrength:
-        case Function_PcBlock:
-        case Function_PcArmorer:
-        case Function_PcMediumArmor:
-        case Function_PcHeavyArmor:
-        case Function_PcBluntWeapon:
-        case Function_PcLongBlade:
-        case Function_PcAxe:
-        case Function_PcSpear:
-        case Function_PcAthletics:
-        case Function_PcEnchant:
-        case Function_PcDestruction:
-        case Function_PcAlteration:
-        case Function_PcIllusion:
-        case Function_PcConjuration:
-        case Function_PcMysticism:
-        case Function_PcRestoration:
-        case Function_PcAlchemy:
-        case Function_PcUnarmored:
-        case Function_PcSecurity:
-        case Function_PcSneak:
-        case Function_PcAcrobatics:
-        case Function_PcLightArmor:
-        case Function_PcShortBlade:
-        case Function_PcMarksman:
-        case Function_PcMerchantile:
-        case Function_PcSpeechcraft:
-        case Function_PcHandToHand:
-        case Function_PcClothingModifier:
-        case Function_PcCrimeLevel:
-        case Function_Choice:
-        case Function_PcIntelligence:
-        case Function_PcWillpower:
-        case Function_PcAgility:
-        case Function_PcSpeed:
-        case Function_PcEndurance:
-        case Function_PcPersonality:
-        case Function_PcLuck:
-        case Function_Level:
-        case Function_PcWerewolfKills:
+        case ESM::DialogueCondition::Function_Item:
+        case ESM::DialogueCondition::Function_Dead:
+        case ESM::DialogueCondition::Function_PcLevel:
+        case ESM::DialogueCondition::Function_PcStrength:
+        case ESM::DialogueCondition::Function_PcBlock:
+        case ESM::DialogueCondition::Function_PcArmorer:
+        case ESM::DialogueCondition::Function_PcMediumArmor:
+        case ESM::DialogueCondition::Function_PcHeavyArmor:
+        case ESM::DialogueCondition::Function_PcBluntWeapon:
+        case ESM::DialogueCondition::Function_PcLongBlade:
+        case ESM::DialogueCondition::Function_PcAxe:
+        case ESM::DialogueCondition::Function_PcSpear:
+        case ESM::DialogueCondition::Function_PcAthletics:
+        case ESM::DialogueCondition::Function_PcEnchant:
+        case ESM::DialogueCondition::Function_PcDestruction:
+        case ESM::DialogueCondition::Function_PcAlteration:
+        case ESM::DialogueCondition::Function_PcIllusion:
+        case ESM::DialogueCondition::Function_PcConjuration:
+        case ESM::DialogueCondition::Function_PcMysticism:
+        case ESM::DialogueCondition::Function_PcRestoration:
+        case ESM::DialogueCondition::Function_PcAlchemy:
+        case ESM::DialogueCondition::Function_PcUnarmored:
+        case ESM::DialogueCondition::Function_PcSecurity:
+        case ESM::DialogueCondition::Function_PcSneak:
+        case ESM::DialogueCondition::Function_PcAcrobatics:
+        case ESM::DialogueCondition::Function_PcLightArmor:
+        case ESM::DialogueCondition::Function_PcShortBlade:
+        case ESM::DialogueCondition::Function_PcMarksman:
+        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcSpeechcraft:
+        case ESM::DialogueCondition::Function_PcHandToHand:
+        case ESM::DialogueCondition::Function_PcClothingModifier:
+        case ESM::DialogueCondition::Function_PcCrimeLevel:
+        case ESM::DialogueCondition::Function_Choice:
+        case ESM::DialogueCondition::Function_PcIntelligence:
+        case ESM::DialogueCondition::Function_PcWillpower:
+        case ESM::DialogueCondition::Function_PcAgility:
+        case ESM::DialogueCondition::Function_PcSpeed:
+        case ESM::DialogueCondition::Function_PcEndurance:
+        case ESM::DialogueCondition::Function_PcPersonality:
+        case ESM::DialogueCondition::Function_PcLuck:
+        case ESM::DialogueCondition::Function_Level:
+        case ESM::DialogueCondition::Function_PcWerewolfKills:
             return std::pair<int, int>(0, IntMax);
 
-        case Function_Fight:
-        case Function_Hello:
-        case Function_Alarm:
-        case Function_Flee:
+        case ESM::DialogueCondition::Function_Fight:
+        case ESM::DialogueCondition::Function_Hello:
+        case ESM::DialogueCondition::Function_Alarm:
+        case ESM::DialogueCondition::Function_Flee:
             return std::pair<int, int>(0, 100);
 
-        case Function_Weather:
+        case ESM::DialogueCondition::Function_Weather:
             return std::pair<int, int>(0, 9);
 
-        case Function_FriendHit:
+        case ESM::DialogueCondition::Function_FriendHit:
             return std::pair<int, int>(0, 4);
 
-        case Function_RankRequirement:
+        case ESM::DialogueCondition::Function_RankRequirement:
             return std::pair<int, int>(0, 3);
 
-        case Function_CreatureTarget:
+        case ESM::DialogueCondition::Function_CreatureTarget:
             return std::pair<int, int>(0, 2);
 
-        case Function_PcGender:
+        case ESM::DialogueCondition::Function_PcGender:
             return std::pair<int, int>(0, 1);
 
-        case Function_FactionRankDifference:
+        case ESM::DialogueCondition::Function_FactionRankDifference:
             return std::pair<int, int>(-9, 9);
 
         // Numeric
-        case Function_Global:
-        case Function_Local:
-        case Function_NotLocal:
+        case ESM::DialogueCondition::Function_Global:
+        case ESM::DialogueCondition::Function_Local:
+        case ESM::DialogueCondition::Function_NotLocal:
             return std::pair<int, int>(IntMin, IntMax);
 
-        case Function_PcMagicka:
-        case Function_PcFatigue:
-        case Function_PcHealth:
+        case ESM::DialogueCondition::Function_PcMagicka:
+        case ESM::DialogueCondition::Function_PcFatigue:
+        case ESM::DialogueCondition::Function_PcHealth:
             return std::pair<int, int>(0, IntMax);
 
-        case Function_Health_Percent:
-        case Function_PcHealthPercent:
+        case ESM::DialogueCondition::Function_Health_Percent:
+        case ESM::DialogueCondition::Function_PcHealthPercent:
             return std::pair<int, int>(0, 100);
 
         default:
@@ -713,21 +551,21 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getValidFloatRange() c
     const float FloatMax = std::numeric_limits<float>::infinity();
     const float FloatMin = -std::numeric_limits<float>::infinity();
 
-    switch (mFunctionName)
+    switch (getFunctionName())
     {
         // Numeric
-        case Function_Global:
-        case Function_Local:
-        case Function_NotLocal:
+        case ESM::DialogueCondition::Function_Global:
+        case ESM::DialogueCondition::Function_Local:
+        case ESM::DialogueCondition::Function_NotLocal:
             return std::pair<float, float>(FloatMin, FloatMax);
 
-        case Function_PcMagicka:
-        case Function_PcFatigue:
-        case Function_PcHealth:
+        case ESM::DialogueCondition::Function_PcMagicka:
+        case ESM::DialogueCondition::Function_PcFatigue:
+        case ESM::DialogueCondition::Function_PcHealth:
             return std::pair<float, float>(0, FloatMax);
 
-        case Function_Health_Percent:
-        case Function_PcHealthPercent:
+        case ESM::DialogueCondition::Function_Health_Percent:
+        case ESM::DialogueCondition::Function_PcHealthPercent:
             return std::pair<float, float>(0, 100);
 
         default:
@@ -768,19 +606,19 @@ template <typename T1, typename T2>
 bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue(
     std::pair<T1, T1> conditionRange, std::pair<T2, T2> validRange) const
 {
-    switch (mRelationType)
+    switch (getRelationType())
     {
-        case Relation_Equal:
+        case ESM::DialogueCondition::Comp_Eq:
             return false;
 
-        case Relation_NotEqual:
+        case ESM::DialogueCondition::Comp_Ne:
             // If value is not within range, it will always be true
             return !rangeContains(conditionRange.first, validRange);
 
-        case Relation_Greater:
-        case Relation_GreaterOrEqual:
-        case Relation_Less:
-        case Relation_LessOrEqual:
+        case ESM::DialogueCondition::Comp_Gt:
+        case ESM::DialogueCondition::Comp_Ge:
+        case ESM::DialogueCondition::Comp_Ls:
+        case ESM::DialogueCondition::Comp_Le:
             // If the valid range is completely within the condition range, it will always be true
             return rangeFullyContains(conditionRange, validRange);
 
@@ -795,18 +633,18 @@ template <typename T1, typename T2>
 bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(
     std::pair<T1, T1> conditionRange, std::pair<T2, T2> validRange) const
 {
-    switch (mRelationType)
+    switch (getRelationType())
     {
-        case Relation_Equal:
+        case ESM::DialogueCondition::Comp_Eq:
             return !rangeContains(conditionRange.first, validRange);
 
-        case Relation_NotEqual:
+        case ESM::DialogueCondition::Comp_Ne:
             return false;
 
-        case Relation_Greater:
-        case Relation_GreaterOrEqual:
-        case Relation_Less:
-        case Relation_LessOrEqual:
+        case ESM::DialogueCondition::Comp_Gt:
+        case ESM::DialogueCondition::Comp_Ge:
+        case ESM::DialogueCondition::Comp_Ls:
+        case ESM::DialogueCondition::Comp_Le:
             // If ranges do not overlap, it will never be true
             return !rangesOverlap(conditionRange, validRange);
 
@@ -817,153 +655,47 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(
     return false;
 }
 
+QVariant CSMWorld::ConstInfoSelectWrapper::getValue() const
+{
+    return std::visit([](auto value) { return QVariant(value); }, mConstSelect.mValue);
+}
+
 // InfoSelectWrapper
 
-CSMWorld::InfoSelectWrapper::InfoSelectWrapper(ESM::DialInfo::SelectStruct& select)
+CSMWorld::InfoSelectWrapper::InfoSelectWrapper(ESM::DialogueCondition& select)
     : CSMWorld::ConstInfoSelectWrapper(select)
     , mSelect(select)
 {
 }
 
-void CSMWorld::InfoSelectWrapper::setFunctionName(FunctionName name)
+void CSMWorld::InfoSelectWrapper::setFunctionName(ESM::DialogueCondition::Function name)
 {
-    mFunctionName = name;
+    mSelect.mFunction = name;
     updateHasVariable();
     updateComparisonType();
+    if (getComparisonType() != ConstInfoSelectWrapper::Comparison_Numeric
+        && std::holds_alternative<float>(mSelect.mValue))
+    {
+        mSelect.mValue = std::visit([](auto value) { return static_cast<int>(value); }, mSelect.mValue);
+    }
 }
 
-void CSMWorld::InfoSelectWrapper::setRelationType(RelationType type)
+void CSMWorld::InfoSelectWrapper::setRelationType(ESM::DialogueCondition::Comparison type)
 {
-    mRelationType = type;
+    mSelect.mComparison = type;
 }
 
 void CSMWorld::InfoSelectWrapper::setVariableName(const std::string& name)
 {
-    mVariableName = name;
+    mSelect.mVariable = name;
 }
 
-void CSMWorld::InfoSelectWrapper::setDefaults()
+void CSMWorld::InfoSelectWrapper::setValue(int value)
 {
-    if (!variantTypeIsValid())
-        mSelect.mValue.setType(ESM::VT_Int);
-
-    switch (mComparisonType)
-    {
-        case Comparison_Boolean:
-            setRelationType(Relation_Equal);
-            mSelect.mValue.setInteger(1);
-            break;
-
-        case Comparison_Integer:
-        case Comparison_Numeric:
-            setRelationType(Relation_Greater);
-            mSelect.mValue.setInteger(0);
-            break;
-
-        default:
-            // Do nothing
-            break;
-    }
-
-    update();
+    mSelect.mValue = value;
 }
 
-void CSMWorld::InfoSelectWrapper::update()
+void CSMWorld::InfoSelectWrapper::setValue(float value)
 {
-    std::ostringstream stream;
-
-    // Leading 0
-    stream << '0';
-
-    // Write Function
-
-    bool writeIndex = false;
-    size_t functionIndex = static_cast<size_t>(mFunctionName);
-
-    switch (mFunctionName)
-    {
-        case Function_None:
-            stream << '0';
-            break;
-        case Function_Global:
-            stream << '2';
-            break;
-        case Function_Local:
-            stream << '3';
-            break;
-        case Function_Journal:
-            stream << '4';
-            break;
-        case Function_Item:
-            stream << '5';
-            break;
-        case Function_Dead:
-            stream << '6';
-            break;
-        case Function_NotId:
-            stream << '7';
-            break;
-        case Function_NotFaction:
-            stream << '8';
-            break;
-        case Function_NotClass:
-            stream << '9';
-            break;
-        case Function_NotRace:
-            stream << 'A';
-            break;
-        case Function_NotCell:
-            stream << 'B';
-            break;
-        case Function_NotLocal:
-            stream << 'C';
-            break;
-        default:
-            stream << '1';
-            writeIndex = true;
-            break;
-    }
-
-    if (writeIndex && functionIndex < 10) // leading 0
-        stream << '0' << functionIndex;
-    else if (writeIndex)
-        stream << functionIndex;
-    else
-        stream << "00";
-
-    // Write Relation
-    switch (mRelationType)
-    {
-        case Relation_Equal:
-            stream << '0';
-            break;
-        case Relation_NotEqual:
-            stream << '1';
-            break;
-        case Relation_Greater:
-            stream << '2';
-            break;
-        case Relation_GreaterOrEqual:
-            stream << '3';
-            break;
-        case Relation_Less:
-            stream << '4';
-            break;
-        case Relation_LessOrEqual:
-            stream << '5';
-            break;
-        default:
-            stream << '0';
-            break;
-    }
-
-    if (mHasVariable)
-        stream << mVariableName;
-
-    mSelect.mSelectRule = stream.str();
-}
-
-ESM::Variant& CSMWorld::InfoSelectWrapper::getVariant()
-{
-    return mSelect.mValue;
+    mSelect.mValue = value;
 }
