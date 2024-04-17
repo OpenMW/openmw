@@ -1,7 +1,7 @@
 #include <components/sceneutil/osgacontroller.hpp>
 
-#include <osgAnimation/Channel>
 #include <gtest/gtest.h>
+#include <osgAnimation/Channel>
 
 #include <filesystem>
 #include <fstream>
@@ -36,7 +36,7 @@ namespace
         std::vector<EmulatedAnimation> emulatedAnimations;
         emulatedAnimations.push_back({ 0.0f, 1.0f, "test1" }); // should sample this
         emulatedAnimations.push_back({ 1.1f, 2.0f, "test2" }); // should ignore this
-      
+
         OsgAnimationController controller;
         controller.setEmulatedAnimations(emulatedAnimations);
 
@@ -46,7 +46,8 @@ namespace
         endTransform.setTrans(1.0f, 1.0f, 1.0f);
         controller.addMergedAnimationTrack(createMergedAnimationTrack("test1", startTransform, endTransform));
         endTransform2.setTrans(2.0f, 2.0f, 2.0f);
-        controller.addMergedAnimationTrack(createMergedAnimationTrack("test2", endTransform, endTransform2, 0.1f, 0.9f));
+        controller.addMergedAnimationTrack(
+            createMergedAnimationTrack("test2", endTransform, endTransform2, 0.1f, 0.9f));
 
         // should be halfway between 0,0,0 and 1,1,1
         osg::Vec3f translation = controller.getTranslation(0.5f);
@@ -109,7 +110,7 @@ namespace
         std::vector<EmulatedAnimation> emulatedAnimations;
         emulatedAnimations.push_back({ 0.0f, 1.0f, "test1" }); // should sample this
         emulatedAnimations.push_back({ 1.1f, 2.0f, "test2" }); // should ignore this
-      
+
         OsgAnimationController controller;
         controller.setEmulatedAnimations(emulatedAnimations);
 
@@ -119,7 +120,8 @@ namespace
         controller.addMergedAnimationTrack(createMergedAnimationTrack("test1", startTransform, endTransform));
         osg::Matrixf endTransform2 = osg::Matrixf::identity();
         endTransform2.setTrans(2.0f, 2.0f, 2.0f);
-        controller.addMergedAnimationTrack(createMergedAnimationTrack("test2", endTransform, endTransform2, 0.1f, 0.9f));
+        controller.addMergedAnimationTrack(
+            createMergedAnimationTrack("test2", endTransform, endTransform2, 0.1f, 0.9f));
 
         EXPECT_EQ(controller.getTransformForNode(0.0f, ROOT_BONE_NAME), startTransform); // start of test1
         EXPECT_EQ(controller.getTransformForNode(1.0f, ROOT_BONE_NAME), endTransform); // end of test1
