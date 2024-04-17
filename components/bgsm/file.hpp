@@ -27,10 +27,10 @@ namespace Bgsm
         std::uint32_t mClamp;
         osg::Vec2f mUVOffset, mUVScale;
         float mTransparency;
-        std::uint8_t mSourceBlendMode;
+        bool mAlphaBlend;
+        std::uint32_t mSourceBlendMode;
         std::uint32_t mDestinationBlendMode;
-        std::uint32_t mAlphaTestMode;
-        std::uint8_t mAlphaTestRef;
+        std::uint8_t mAlphaTestThreshold;
         bool mAlphaTest;
         bool mDepthWrite, mDepthTest;
         bool mSSR;
