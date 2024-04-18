@@ -773,7 +773,7 @@ namespace NifOsg
 
             if (isGeometry && !args.mSkipMeshes)
             {
-                bool skip;
+                bool skip = false;
                 if (args.mNifVersion <= Nif::NIFFile::NIFVersion::VER_MW)
                 {
                     skip = (args.mHasMarkers && Misc::StringUtils::ciStartsWith(nifNode->mName, "tri editormarker"))
@@ -781,7 +781,10 @@ namespace NifOsg
                         || Misc::StringUtils::ciStartsWith(nifNode->mName, "tri shadow");
                 }
                 else
-                    skip = args.mHasMarkers && Misc::StringUtils::ciStartsWith(nifNode->mName, "EditorMarker");
+                {
+                    if (args.mHasMarkers)
+                        skip = Misc::StringUtils::ciStartsWith(nifNode->mName, "EditorMarker") || Misc::StringUtils::ciStartsWith(nifNode->mName, "VisibilityEditorMarker");
+                }
                 if (!skip)
                 {
                     if (isNiGeometry)
@@ -2165,7 +2168,8 @@ namespace NifOsg
             if (!mMaterialMgr)
                 return;
 
-            Bgsm::MaterialFilePtr material = mMaterialMgr->get(VFS::Path::Normalized(path));
+            std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, mMaterialMgr->getVFS());
+            Bgsm::MaterialFilePtr material = mMaterialMgr->get(VFS::Path::Normalized(normalizedPath));
             if (!material)
                 return;
 
@@ -2211,12 +2215,8 @@ namespace NifOsg
                     boundTextures.emplace_back(uvSet);
                 }
 
-                if (bgsm->mTwoSided)
-                    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                 if (bgsm->mTree)
                     stateset->addUniform(new osg::Uniform("useTreeAnim", true));
-
-                handleDepthFlags(stateset, bgsm->mDepthTest, bgsm->mDepthWrite);
             }
             else
             {
@@ -2247,8 +2247,18 @@ namespace NifOsg
                 stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
                 if (useFalloff)
                     stateset->addUniform(new osg::Uniform("falloffParams", bgem->mFalloffParams));
-                handleDepthFlags(stateset, bgem->mDepthTest, bgem->mDepthWrite);
             }
+
+            if (material->mTwoSided)
+                stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+            if (material->mDecal)
+            {
+                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
+                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
+                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+            }
+            handleDepthFlags(stateset, material->mDepthTest, material->mDepthWrite);
         }
 
         void handleTextureSet(const Nif::BSShaderTextureSet* textureSet, unsigned int clamp,
@@ -2517,10 +2527,9 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    std::string normalizedName = Misc::ResourceHelpers::correctMaterialPath(texprop->mName, mMaterialMgr->getVFS());
-                    if (normalizedName.ends_with(".bgsm"))
+                    if (Misc::StringUtils::ciEndsWith(texprop->mName, ".bgsm"))
                     {
-                        handleShaderMaterial(normalizedName, stateset, imageManager, boundTextures);
+                        handleShaderMaterial(texprop->mName, stateset, imageManager, boundTextures);
                         break;
                     }
                     if (!texprop->mTextureSet.empty())
@@ -2544,10 +2553,9 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string("bs/nolighting"));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    std::string normalizedName = Misc::ResourceHelpers::correctMaterialPath(texprop->mName, mMaterialMgr->getVFS());
-                    if (normalizedName.ends_with(".bgem"))
+                    if (Misc::StringUtils::ciEndsWith(texprop->mName, ".bgem"))
                     {
-                        handleShaderMaterial(normalizedName, stateset, imageManager, boundTextures);
+                        handleShaderMaterial(texprop->mName, stateset, imageManager, boundTextures);
                         break;
                     }
                     if (!texprop->mSourceTexture.empty())
