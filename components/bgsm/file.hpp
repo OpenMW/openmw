@@ -42,7 +42,7 @@ namespace Bgsm
         bool mRefraction;
         bool mRefractionFalloff;
         float mRefractionPower;
-        bool mEnvMap;
+        bool mEnvMapEnabled;
         float mEnvMapMaskScale;
         bool mDepthBias;
         bool mGrayscaleToPaletteColor;
@@ -58,7 +58,7 @@ namespace Bgsm
         std::string mDiffuseMap;
         std::string mNormalMap;
         std::string mSmoothSpecMap;
-        std::string mGreyscaleMap;
+        std::string mGrayscaleMap;
         std::string mGlowMap;
         std::string mWrinkleMap;
         std::string mSpecularMap;
@@ -110,7 +110,7 @@ namespace Bgsm
         bool mCastShadows;
         bool mDissolveFade;
         bool mAssumeShadowmask;
-        bool mHasGlowMap;
+        bool mGlowMapEnabled;
         bool mEnvMapWindow;
         bool mEnvMapEye;
         bool mHair;
@@ -153,7 +153,7 @@ namespace Bgsm
         float mSoftDepth;
         osg::Vec3f mEmittanceColor;
         osg::Vec3f mAdaptiveEmissiveExposureParams;
-        bool mHasGlowMap;
+        bool mGlowMapEnabled;
         bool mEffectPbrSpecular;
 
         void read(BGSMStream& stream) override;
