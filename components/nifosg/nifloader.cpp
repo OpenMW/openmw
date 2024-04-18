@@ -240,7 +240,8 @@ namespace NifOsg
     {
     public:
         /// @param filename used for warning messages.
-        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver, Resource::BgsmFileManager* materialMgr)
+        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver,
+            Resource::BgsmFileManager* materialMgr)
             : mFilename(filename)
             , mVersion(ver)
             , mUserVersion(userver)
@@ -783,7 +784,8 @@ namespace NifOsg
                 else
                 {
                     if (args.mHasMarkers)
-                        skip = Misc::StringUtils::ciStartsWith(nifNode->mName, "EditorMarker") || Misc::StringUtils::ciStartsWith(nifNode->mName, "VisibilityEditorMarker");
+                        skip = Misc::StringUtils::ciStartsWith(nifNode->mName, "EditorMarker")
+                            || Misc::StringUtils::ciStartsWith(nifNode->mName, "VisibilityEditorMarker");
                 }
                 if (!skip)
                 {
@@ -2162,8 +2164,8 @@ namespace NifOsg
             handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
         }
 
-        void handleShaderMaterial(const std::string& path, osg::StateSet* stateset, Resource::ImageManager* imageManager,
-            std::vector<unsigned int>& boundTextures)
+        void handleShaderMaterial(const std::string& path, osg::StateSet* stateset,
+            Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures)
         {
             if (!mMaterialMgr)
                 return;
@@ -2229,8 +2231,8 @@ namespace NifOsg
                             stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                         boundTextures.clear();
                     }
-                    std::string filename = Misc::ResourceHelpers::correctTexturePath(
-                        bgem->mBaseMap, imageManager->getVFS());
+                    std::string filename
+                        = Misc::ResourceHelpers::correctTexturePath(bgem->mBaseMap, imageManager->getVFS());
                     osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
                     osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                     texture2d->setName("diffuseMap");
@@ -2976,9 +2978,11 @@ namespace NifOsg
         }
     };
 
-    osg::ref_ptr<osg::Node> Loader::load(Nif::FileView file, Resource::ImageManager* imageManager, Resource::BgsmFileManager* materialMgr)
+    osg::ref_ptr<osg::Node> Loader::load(
+        Nif::FileView file, Resource::ImageManager* imageManager, Resource::BgsmFileManager* materialMgr)
     {
-        LoaderImpl impl(file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion(), materialMgr);
+        LoaderImpl impl(
+            file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion(), materialMgr);
         return impl.load(file, imageManager);
     }
 

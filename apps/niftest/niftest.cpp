@@ -89,7 +89,6 @@ void readNIF(
     }
 }
 
-
 void readMaterial(
     const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
 {

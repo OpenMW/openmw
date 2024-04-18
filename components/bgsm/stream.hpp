@@ -3,9 +3,9 @@
 
 #include <array>
 #include <cassert>
+#include <cstdint>
 #include <istream>
 #include <stdexcept>
-#include <cstdint>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -58,8 +58,7 @@ namespace Bgsm
         Files::IStreamPtr mStream;
 
     public:
-        explicit BGSMStream(
-            const Reader& reader, Files::IStreamPtr&& stream)
+        explicit BGSMStream(const Reader& reader, Files::IStreamPtr&& stream)
             : mReader(reader)
             , mStream(std::move(stream))
         {

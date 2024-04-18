@@ -31,7 +31,8 @@ namespace NifOsg
     public:
         /// Create a scene graph for the given NIF. Auto-detects when skinning is used and wraps the graph in a Skeleton
         /// if so.
-        static osg::ref_ptr<osg::Node> load(Nif::FileView file, Resource::ImageManager* imageManager, Resource::BgsmFileManager* materialManager);
+        static osg::ref_ptr<osg::Node> load(
+            Nif::FileView file, Resource::ImageManager* imageManager, Resource::BgsmFileManager* materialManager);
 
         /// Load keyframe controllers from the given kf file.
         static void loadKf(Nif::FileView kf, SceneUtil::KeyframeHolder& target);

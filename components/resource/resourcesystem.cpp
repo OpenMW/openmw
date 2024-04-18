@@ -18,7 +18,8 @@ namespace Resource
         mNifFileManager = std::make_unique<NifFileManager>(vfs, encoder);
         mBgsmFileManager = std::make_unique<BgsmFileManager>(vfs, expiryDelay);
         mImageManager = std::make_unique<ImageManager>(vfs, expiryDelay);
-        mSceneManager = std::make_unique<SceneManager>(vfs, mImageManager.get(), mNifFileManager.get(), mBgsmFileManager.get(), expiryDelay);
+        mSceneManager = std::make_unique<SceneManager>(
+            vfs, mImageManager.get(), mNifFileManager.get(), mBgsmFileManager.get(), expiryDelay);
         mKeyframeManager = std::make_unique<KeyframeManager>(vfs, mSceneManager.get(), expiryDelay, encoder);
 
         addResourceManager(mNifFileManager.get());

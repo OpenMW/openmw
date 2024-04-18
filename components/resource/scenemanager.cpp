@@ -797,7 +797,8 @@ namespace Resource
     }
 
     osg::ref_ptr<osg::Node> load(VFS::Path::NormalizedView normalizedFilename, const VFS::Manager* vfs,
-        Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* materialMgr)
+        Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager,
+        Resource::BgsmFileManager* materialMgr)
     {
         const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
         if (ext == "nif")
