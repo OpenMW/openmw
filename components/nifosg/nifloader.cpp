@@ -2164,17 +2164,21 @@ namespace NifOsg
             handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
         }
 
-        void handleShaderMaterial(const std::string& path, osg::StateSet* stateset,
-            Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures)
+        Bgsm::MaterialFilePtr getShaderMaterial(const std::string& path)
         {
             if (!mMaterialMgr)
-                return;
+                return nullptr;
+
+            if (!Misc::StringUtils::ciEndsWith(path, ".bgem") && !Misc::StringUtils::ciEndsWith(path, ".bgsm"))
+                return nullptr;
 
             std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, mMaterialMgr->getVFS());
-            Bgsm::MaterialFilePtr material = mMaterialMgr->get(VFS::Path::Normalized(normalizedPath));
-            if (!material)
-                return;
+            return mMaterialMgr->get(VFS::Path::Normalized(normalizedPath));
+        }
 
+        void handleShaderMaterial(Bgsm::MaterialFilePtr material, osg::StateSet* stateset,
+            Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures)
+        {
             if (material->mShaderType == Bgsm::ShaderType::Lighting)
             {
                 const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material.get());
@@ -2253,13 +2257,6 @@ namespace NifOsg
 
             if (material->mTwoSided)
                 stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-            if (material->mDecal)
-            {
-                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
-                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
-                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
-                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
-            }
             handleDepthFlags(stateset, material->mDepthTest, material->mDepthWrite);
         }
 
@@ -2529,9 +2526,10 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    if (Misc::StringUtils::ciEndsWith(texprop->mName, ".bgsm"))
+                    Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName);
+                    if (material)
                     {
-                        handleShaderMaterial(texprop->mName, stateset, imageManager, boundTextures);
+                        handleShaderMaterial(material, stateset, imageManager, boundTextures);
                         break;
                     }
                     if (!texprop->mTextureSet.empty())
@@ -2555,9 +2553,10 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string("bs/nolighting"));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    if (Misc::StringUtils::ciEndsWith(texprop->mName, ".bgem"))
+                    Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName);
+                    if (material)
                     {
-                        handleShaderMaterial(texprop->mName, stateset, imageManager, boundTextures);
+                        handleShaderMaterial(material, stateset, imageManager, boundTextures);
                         break;
                     }
                     if (!texprop->mSourceTexture.empty())
@@ -2832,6 +2831,52 @@ namespace NifOsg
                     case Nif::RC_BSLightingShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
+                        Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName);
+                        if (shaderMat)
+                        {
+                            mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
+                            if (shaderMat->mAlphaTest)
+                            {
+                                osg::StateSet* stateset = node->getOrCreateStateSet();
+                                osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(
+                                    osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold / 255.f));
+                                alphaFunc = shareAttribute(alphaFunc);
+                                stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                            }
+                            if (shaderMat->mAlphaBlend)
+                            {
+                                osg::StateSet* stateset = node->getOrCreateStateSet();
+                                osg::ref_ptr<osg::BlendFunc> blendFunc(
+                                    new osg::BlendFunc(getBlendMode(shaderMat->mSourceBlendMode),
+                                        getBlendMode(shaderMat->mDestinationBlendMode)));
+                                blendFunc = shareAttribute(blendFunc);
+                                stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+                                hasSortAlpha = true;
+                                if (!mPushedSorter)
+                                    setBin_Transparent(stateset);
+                            }
+                            if (shaderMat->mDecal)
+                            {
+                                osg::StateSet* stateset = node->getOrCreateStateSet();
+                                if (!mPushedSorter && !hasSortAlpha)
+                                    stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
+                                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
+                                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+                                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
+                                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+                            }
+                            if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
+                            {
+                                auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
+                                specEnabled
+                                    = false; // bgsm->mSpecularEnabled; disabled until it can be implemented properly
+                                specStrength = bgsm->mSpecularMult;
+                                emissiveMult = bgsm->mEmittanceMult;
+                                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mEmittanceColor, 1.f));
+                                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mSpecularColor, 1.f));
+                            }
+                            break;
+                        }
                         mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderprop->mAlpha);
                         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mEmissive, 1.f));
                         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mSpecular, 1.f));
@@ -2855,6 +2900,49 @@ namespace NifOsg
                     case Nif::RC_BSEffectShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
+                        Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName);
+                        if (shaderMat)
+                        {
+                            mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
+                            if (shaderMat->mAlphaTest)
+                            {
+                                osg::StateSet* stateset = node->getOrCreateStateSet();
+                                osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(
+                                    osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold / 255.f));
+                                alphaFunc = shareAttribute(alphaFunc);
+                                stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                            }
+                            if (shaderMat->mAlphaBlend)
+                            {
+                                osg::StateSet* stateset = node->getOrCreateStateSet();
+                                osg::ref_ptr<osg::BlendFunc> blendFunc(
+                                    new osg::BlendFunc(getBlendMode(shaderMat->mSourceBlendMode),
+                                        getBlendMode(shaderMat->mDestinationBlendMode)));
+                                blendFunc = shareAttribute(blendFunc);
+                                stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+                                hasSortAlpha = true;
+                                if (!mPushedSorter)
+                                    setBin_Transparent(stateset);
+                            }
+                            if (shaderMat->mDecal)
+                            {
+                                osg::StateSet* stateset = node->getOrCreateStateSet();
+                                if (!mPushedSorter && !hasSortAlpha)
+                                    stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
+                                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
+                                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+                                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
+                                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+                            }
+                            if (shaderMat->mShaderType == Bgsm::ShaderType::Effect)
+                            {
+                                auto bgem = static_cast<const Bgsm::BGEMFile*>(shaderMat.get());
+                                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgem->mEmittanceColor, 1.f));
+                                if (bgem->mSoft)
+                                    SceneUtil::setupSoftEffect(*node, bgem->mSoftDepth, true, bgem->mSoftDepth);
+                            }
+                            break;
+                        }
                         if (shaderprop->decal())
                         {
                             osg::StateSet* stateset = node->getOrCreateStateSet();
