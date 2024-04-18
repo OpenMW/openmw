@@ -20,6 +20,8 @@ namespace Bgsm
         void parse(Files::IStreamPtr&& stream);
 
         std::uint32_t getVersion() const { return mFile->mVersion; }
+
+        std::unique_ptr<MaterialFile>& getFile() { return mFile; }
     };
 }
 #endif
