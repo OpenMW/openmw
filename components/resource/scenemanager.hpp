@@ -32,6 +32,7 @@ namespace Resource
 {
     class ImageManager;
     class NifFileManager;
+    class BgsmFileManager;
     class SharedStateManager;
 }
 
@@ -90,7 +91,7 @@ namespace Resource
     {
     public:
         explicit SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
-            Resource::NifFileManager* nifFileManager, double expiryDelay);
+            Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay);
         ~SceneManager();
 
         Shader::ShaderManager& getShaderManager();
@@ -259,6 +260,7 @@ namespace Resource
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
+        Resource::BgsmFileManager* mBgsmFileManager;
 
         osg::Texture::FilterMode mMinFilter;
         osg::Texture::FilterMode mMagFilter;

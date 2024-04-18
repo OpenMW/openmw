@@ -70,7 +70,7 @@ namespace
         init(node);
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
-        auto result = Loader::load(file, &mImageManager);
+        auto result = Loader::load(file, &mImageManager, nullptr);
         EXPECT_EQ(serialize(*result), R"(
 osg::Group {
   UniqueID 1
@@ -259,7 +259,7 @@ osg::Group {
         node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
-        auto result = Loader::load(file, &mImageManager);
+        auto result = Loader::load(file, &mImageManager, nullptr);
         EXPECT_EQ(serialize(*result), formatOsgNodeForBSShaderProperty(GetParam().mExpectedShaderPrefix));
     }
 
@@ -289,7 +289,7 @@ osg::Group {
         node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
-        auto result = Loader::load(file, &mImageManager);
+        auto result = Loader::load(file, &mImageManager, nullptr);
         EXPECT_EQ(serialize(*result), formatOsgNodeForBSLightingShaderProperty(GetParam().mExpectedShaderPrefix));
     }
 

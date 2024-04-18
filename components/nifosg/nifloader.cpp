@@ -21,6 +21,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/nif/parent.hpp>
+#include <components/resource/bgsmfilemanager.hpp>
 #include <components/resource/imagemanager.hpp>
 
 // particle
@@ -42,6 +43,7 @@
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>
 
+#include <components/bgsm/file.hpp>
 #include <components/nif/effect.hpp>
 #include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
@@ -238,15 +240,17 @@ namespace NifOsg
     {
     public:
         /// @param filename used for warning messages.
-        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver)
+        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver, Resource::BgsmFileManager* materialMgr)
             : mFilename(filename)
             , mVersion(ver)
             , mUserVersion(userver)
             , mBethVersion(bethver)
+            , mMaterialMgr(materialMgr)
         {
         }
         std::filesystem::path mFilename;
         unsigned int mVersion, mUserVersion, mBethVersion;
+        Resource::BgsmFileManager* mMaterialMgr;
 
         size_t mFirstRootTextureIndex{ ~0u };
         bool mFoundFirstRootTexturingProperty = false;
@@ -2155,6 +2159,98 @@ namespace NifOsg
             handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
         }
 
+        void handleShaderMaterial(const std::string& path, osg::StateSet* stateset, Resource::ImageManager* imageManager,
+            std::vector<unsigned int>& boundTextures)
+        {
+            if (!mMaterialMgr)
+                return;
+
+            Bgsm::MaterialFilePtr material = mMaterialMgr->get(VFS::Path::Normalized(path));
+            if (!material)
+                return;
+
+            if (material->mShaderType == Bgsm::ShaderType::Lighting)
+            {
+                const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material.get());
+
+                if (!boundTextures.empty())
+                {
+                    for (unsigned int i = 0; i < boundTextures.size(); ++i)
+                        stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                    boundTextures.clear();
+                }
+
+                const unsigned int uvSet = 0;
+                if (!bgsm->mDiffuseMap.empty())
+                {
+                    std::string filename
+                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mDiffuseMap, imageManager->getVFS());
+                    osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                    osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
+                    if (image)
+                        texture2d->setTextureSize(image->s(), image->t());
+                    handleTextureWrapping(texture2d, (bgsm->mClamp >> 1) & 0x1, bgsm->mClamp & 0x1);
+                    unsigned int texUnit = boundTextures.size();
+                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+                    texture2d->setName("diffuseMap");
+                    boundTextures.emplace_back(uvSet);
+                }
+
+                if (!bgsm->mNormalMap.empty())
+                {
+                    std::string filename
+                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mNormalMap, imageManager->getVFS());
+                    osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                    osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
+                    if (image)
+                        texture2d->setTextureSize(image->s(), image->t());
+                    handleTextureWrapping(texture2d, (bgsm->mClamp >> 1) & 0x1, bgsm->mClamp & 0x1);
+                    unsigned int texUnit = boundTextures.size();
+                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+                    texture2d->setName("normalMap");
+                    boundTextures.emplace_back(uvSet);
+                }
+
+                if (bgsm->mTwoSided)
+                    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+                if (bgsm->mTree)
+                    stateset->addUniform(new osg::Uniform("useTreeAnim", true));
+
+                handleDepthFlags(stateset, bgsm->mDepthTest, bgsm->mDepthWrite);
+            }
+            else
+            {
+                const Bgsm::BGEMFile* bgem = static_cast<const Bgsm::BGEMFile*>(material.get());
+                if (!bgem->mBaseMap.empty())
+                {
+                    if (!boundTextures.empty())
+                    {
+                        for (unsigned int i = 0; i < boundTextures.size(); ++i)
+                            stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                        boundTextures.clear();
+                    }
+                    std::string filename = Misc::ResourceHelpers::correctTexturePath(
+                        bgem->mBaseMap, imageManager->getVFS());
+                    osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                    osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
+                    texture2d->setName("diffuseMap");
+                    if (image)
+                        texture2d->setTextureSize(image->s(), image->t());
+                    handleTextureWrapping(texture2d, (bgem->mClamp >> 1) & 0x1, bgem->mClamp & 0x1);
+                    const unsigned int texUnit = 0;
+                    const unsigned int uvSet = 0;
+                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+                    boundTextures.push_back(uvSet);
+                }
+
+                bool useFalloff = bgem->mFalloff;
+                stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
+                if (useFalloff)
+                    stateset->addUniform(new osg::Uniform("falloffParams", bgem->mFalloffParams));
+                handleDepthFlags(stateset, bgem->mDepthTest, bgem->mDepthWrite);
+            }
+        }
+
         void handleTextureSet(const Nif::BSShaderTextureSet* textureSet, unsigned int clamp,
             const std::string& nodeName, osg::StateSet* stateset, Resource::ImageManager* imageManager,
             std::vector<unsigned int>& boundTextures)
@@ -2421,6 +2517,12 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
+                    std::string normalizedName = Misc::ResourceHelpers::correctMaterialPath(texprop->mName, mMaterialMgr->getVFS());
+                    if (normalizedName.ends_with(".bgsm"))
+                    {
+                        handleShaderMaterial(normalizedName, stateset, imageManager, boundTextures);
+                        break;
+                    }
                     if (!texprop->mTextureSet.empty())
                         handleTextureSet(texprop->mTextureSet.getPtr(), texprop->mClamp, node->getName(), stateset,
                             imageManager, boundTextures);
@@ -2442,6 +2544,12 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string("bs/nolighting"));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
+                    std::string normalizedName = Misc::ResourceHelpers::correctMaterialPath(texprop->mName, mMaterialMgr->getVFS());
+                    if (normalizedName.ends_with(".bgem"))
+                    {
+                        handleShaderMaterial(normalizedName, stateset, imageManager, boundTextures);
+                        break;
+                    }
                     if (!texprop->mSourceTexture.empty())
                     {
                         if (!boundTextures.empty())
@@ -2860,15 +2968,15 @@ namespace NifOsg
         }
     };
 
-    osg::ref_ptr<osg::Node> Loader::load(Nif::FileView file, Resource::ImageManager* imageManager)
+    osg::ref_ptr<osg::Node> Loader::load(Nif::FileView file, Resource::ImageManager* imageManager, Resource::BgsmFileManager* materialMgr)
     {
-        LoaderImpl impl(file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion());
+        LoaderImpl impl(file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion(), materialMgr);
         return impl.load(file, imageManager);
     }
 
     void Loader::loadKf(Nif::FileView kf, SceneUtil::KeyframeHolder& target)
     {
-        LoaderImpl impl(kf.getFilename(), kf.getVersion(), kf.getUserVersion(), kf.getBethVersion());
+        LoaderImpl impl(kf.getFilename(), kf.getVersion(), kf.getUserVersion(), kf.getBethVersion(), nullptr);
         impl.loadKf(kf, target);
     }
 
