@@ -241,6 +241,11 @@ namespace MWLua
             mGlobalScripts.newGameStarted();
         }
 
+        if (MWBase::Environment::get().getIsServer())
+        {
+            return;
+        }
+
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
         mProcessingInputEvents = true;
         PlayerScripts* playerScripts
