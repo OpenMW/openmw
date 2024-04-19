@@ -53,16 +53,23 @@ void MWState::StateManager::cleanup(bool force)
 {
     if (mState != State_NoGame || force)
     {
-        MWBase::Environment::get().getSoundManager()->clear();
+        bool isServer = MWBase::Environment::get().getIsServer();
+        if (!isServer)
+        {
+            MWBase::Environment::get().getSoundManager()->clear();
+            MWBase::Environment::get().getWindowManager()->clear();
+            MWBase::Environment::get().getInputManager()->clear();
+        }
         MWBase::Environment::get().getDialogueManager()->clear();
         MWBase::Environment::get().getJournal()->clear();
         MWBase::Environment::get().getScriptManager()->clear();
-        MWBase::Environment::get().getWindowManager()->clear();
         MWBase::Environment::get().getWorld()->clear();
-        MWBase::Environment::get().getInputManager()->clear();
         MWBase::Environment::get().getMechanicsManager()->clear();
 
-        mCharacterManager.setCurrentCharacter(nullptr);
+        if (!isServer)
+        {
+            mCharacterManager.setCurrentCharacter(nullptr);
+        }
         mTimePlayed = 0;
         mLastSavegame.clear();
         MWMechanics::CreatureStats::cleanup();
@@ -180,8 +187,11 @@ void MWState::StateManager::newGame(bool bypass)
         mState = State_Running;
         MWBase::Environment::get().getLuaManager()->newGameStarted();
 
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
+        if (!MWBase::Environment::get().getIsServer())
+        {
+            MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
+        }
     }
     catch (std::exception& e)
     {
