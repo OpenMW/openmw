@@ -93,39 +93,49 @@ namespace MWLua
         context.mLuaEvents = &mLuaEvents;
         context.mSerializer = mGlobalSerializer.get();
 
-        Context localContext = context;
-        localContext.mIsGlobal = false;
-        localContext.mSerializer = mLocalSerializer.get();
-
-        Context menuContext = context;
-        menuContext.mIsMenu = true;
-
         for (const auto& [name, package] : initCommonPackages(context))
             mLua.addCommonPackage(name, package);
+
+        bool isServer = MWBase::Environment::get().getIsServer();
+
+        if (!isServer)
+        {
+            Context localContext = context;
+            localContext.mIsGlobal = false;
+            localContext.mSerializer = mLocalSerializer.get();
+
+            Context menuContext = context;
+            menuContext.mIsMenu = true;
+            for (const auto& [name, package] : initMenuPackages(menuContext))
+                mMenuScripts.addPackage(name, package);
+
+            mLocalPackages = initLocalPackages(localContext);
+
+            mPlayerPackages = initPlayerPackages(localContext);
+            mPlayerPackages.insert(mLocalPackages.begin(), mLocalPackages.end());
+        }
+
         for (const auto& [name, package] : initGlobalPackages(context))
             mGlobalScripts.addPackage(name, package);
-        for (const auto& [name, package] : initMenuPackages(menuContext))
-            mMenuScripts.addPackage(name, package);
-
-        mLocalPackages = initLocalPackages(localContext);
-
-        mPlayerPackages = initPlayerPackages(localContext);
-        mPlayerPackages.insert(mLocalPackages.begin(), mLocalPackages.end());
 
         LuaUtil::LuaStorage::initLuaBindings(mLua.sol());
         mGlobalScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(mLua, &mGlobalStorage));
-        mMenuScripts.addPackage(
-            "openmw.storage", LuaUtil::LuaStorage::initMenuPackage(mLua, &mGlobalStorage, &mPlayerStorage));
-        mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua, &mGlobalStorage);
-        mPlayerPackages["openmw.storage"]
-            = LuaUtil::LuaStorage::initPlayerPackage(mLua, &mGlobalStorage, &mPlayerStorage);
+        if (!isServer)
+        {
+            mMenuScripts.addPackage(
+                "openmw.storage", LuaUtil::LuaStorage::initMenuPackage(mLua, &mGlobalStorage, &mPlayerStorage));
+            mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua, &mGlobalStorage);
+            mPlayerPackages["openmw.storage"]
+                = LuaUtil::LuaStorage::initPlayerPackage(mLua, &mGlobalStorage, &mPlayerStorage);
 
-        mPlayerStorage.setActive(true);
-        mGlobalStorage.setActive(false);
+            mPlayerStorage.setActive(true);
+            mGlobalStorage.setActive(false);
+        }
 
         initConfiguration();
         mInitialized = true;
-        mMenuScripts.addAutoStartedScripts();
+        if (!isServer)
+            mMenuScripts.addAutoStartedScripts();
     }
 
     void LuaManager::loadPermanentStorage(const std::filesystem::path& userConfigPath)
@@ -152,16 +162,20 @@ namespace MWLua
         if (const int steps = Settings::lua().mGcStepsPerFrame; steps > 0)
             lua_gc(mLua.sol(), LUA_GCSTEP, steps);
 
-        if (mPlayer.isEmpty())
-            return; // The game is not started yet.
+        bool isServer = MWBase::Environment::get().getIsServer();
 
-        MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (!(getId(mPlayer) == getId(newPlayerPtr)))
-            throw std::logic_error("Player RefNum was changed unexpectedly");
-        if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
+        if (!isServer)
         {
-            mPlayer = newPlayerPtr; // player was moved to another cell, update ptr in registry
-            MWBase::Environment::get().getWorldModel()->registerPtr(mPlayer);
+            if (mPlayer.isEmpty())
+                return; // The game is not started yet.
+            MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            if (!(getId(mPlayer) == getId(newPlayerPtr)))
+                throw std::logic_error("Player RefNum was changed unexpectedly");
+            if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
+            {
+                mPlayer = newPlayerPtr; // player was moved to another cell, update ptr in registry
+                MWBase::Environment::get().getWorldModel()->registerPtr(mPlayer);
+            }
         }
 
         mObjectLists.update();
@@ -310,14 +324,18 @@ namespace MWLua
 
     void LuaManager::clear()
     {
+        bool isServer = MWBase::Environment::get().getIsServer();
         LuaUi::clearGameInterface();
         mUiResourceManager.clear();
-        MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
-        mActiveLocalScripts.clear();
+        if (!isServer)
+        {
+            MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
+            mActiveLocalScripts.clear();
+            mInputEvents.clear();
+            mMenuInputEvents.clear();
+        }
         mLuaEvents.clear();
         mEngineEvents.clear();
-        mInputEvents.clear();
-        mMenuInputEvents.clear();
         mObjectLists.clear();
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
@@ -332,9 +350,12 @@ namespace MWLua
         mGlobalStorage.setActive(true);
         mGlobalStorage.clearTemporaryAndRemoveCallbacks();
         mGlobalStorage.setActive(false);
-        mPlayerStorage.clearTemporaryAndRemoveCallbacks();
-        mInputActions.clear();
-        mInputTriggers.clear();
+        if (!isServer)
+        {
+            mPlayerStorage.clearTemporaryAndRemoveCallbacks();
+            mInputActions.clear();
+            mInputTriggers.clear();
+        }
         for (int i = 0; i < 5; ++i)
             lua_gc(mLua.sol(), LUA_GCCOLLECT, 0);
     }
