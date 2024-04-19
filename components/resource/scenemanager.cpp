@@ -383,18 +383,16 @@ namespace Resource
         }
     }
 
-    class RenameBonesVisitor : public osg::NodeVisitor
+    class RenameAnimCallbacksVisitor : public osg::NodeVisitor
     {
     public:
-        RenameBonesVisitor()
+        RenameAnimCallbacksVisitor()
             : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
         {
         }
 
         void apply(osg::MatrixTransform& node) override
         {
-            node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
-
             // osgAnimation update callback name must match bone name/channel targets
             osg::Callback* cb = node.getUpdateCallback();
             while (cb)
@@ -687,7 +685,7 @@ namespace Resource
                 {
                     // Collada bones may have underscores in place of spaces due to a collada limitation
                     // we should rename the bones and update callbacks here at load time
-                    Resource::RenameBonesVisitor renameBoneVisitor;
+                    Resource::RenameAnimCallbacksVisitor renameBoneVisitor;
                     node->accept(renameBoneVisitor);
 
                     if (osg::Group* group = dynamic_cast<osg::Group*>(node))
