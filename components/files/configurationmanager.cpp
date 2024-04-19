@@ -201,6 +201,9 @@ namespace Files
             boost::program_options::value<Files::MaybeQuotedPath>()->default_value(
                 Files::MaybeQuotedPath(), "resources"),
             "set resources directory");
+        addOption("net-type", bpo::value<unsigned int>()->default_value(0, "0"),
+            "set networking type, eg whether this instance of openmw is a server, client, or both. "
+            "0 is mixed, 1 is client-only, 2 is server-only.");
     }
 
     bpo::variables_map separateComposingVariables(

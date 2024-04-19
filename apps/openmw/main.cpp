@@ -63,6 +63,8 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         return false;
     }
 
+    engine.setNetType(variables["net-type"].as<unsigned int>());
+
     cfgMgr.readConfiguration(variables, desc);
 
     setupLogging(cfgMgr.getLogPath(), "OpenMW");

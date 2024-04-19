@@ -172,6 +172,7 @@ namespace OMW
         bool mGrab;
 
         unsigned int mRandomSeed;
+        unsigned int mNetType;
 
         Compiler::Extensions mExtensions;
         std::unique_ptr<Compiler::Context> mScriptContext;
@@ -261,6 +262,8 @@ namespace OMW
         void setSaveGameFile(const std::filesystem::path& savegame);
 
         void setRandomSeed(unsigned int seed);
+
+        void setNetType(const unsigned int netType);
 
     private:
         Files::ConfigurationManager& mCfgMgr;

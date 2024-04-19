@@ -87,6 +87,14 @@
 
 namespace
 {
+
+    enum NetType
+    {
+        Host = 0,
+        Client = 1,
+        Server = 2,
+    };
+
     void checkSDLError(int ret)
     {
         if (ret != 0)
@@ -365,23 +373,12 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mActivationDistanceOverride(-1)
     , mGrab(true)
     , mRandomSeed(0)
+    , mNetType(0)
     , mScriptBlacklistUse(true)
     , mNewGame(false)
     , mCfgMgr(configurationManager)
     , mGlMaxTextureImageUnits(0)
 {
-    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0"); // We use only gamepads
-
-    Uint32 flags
-        = SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_SENSOR;
-    if (SDL_WasInit(flags) == 0)
-    {
-        SDL_SetMainReady();
-        if (SDL_Init(flags) != 0)
-        {
-            throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
-        }
-    }
 }
 
 OMW::Engine::~Engine()
@@ -1118,4 +1115,46 @@ void OMW::Engine::setSaveGameFile(const std::filesystem::path& savegame)
 void OMW::Engine::setRandomSeed(unsigned int seed)
 {
     mRandomSeed = seed;
+}
+
+void OMW::Engine::setNetType(const unsigned int netType)
+{
+    bool doSDL = false;
+    bool doServer = false;
+    switch (netType)
+    {
+        case NetType::Host:
+            doSDL = true;
+            doServer = true;
+            mNetType = netType;
+            break;
+        case NetType::Client:
+            doSDL = true;
+            mNetType = netType;
+            break;
+        case NetType::Server:
+            doServer = true;
+            mNetType = netType;
+            break;
+        default:
+            Log(Debug::Warning) << "Invalid netType " << netType << ", defaulting to host";
+            mNetType = NetType::Host;
+    }
+
+    if (doSDL)
+    {
+        SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0"); // We use only gamepads
+
+        Uint32 flags
+            = SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_SENSOR;
+        if (SDL_WasInit(flags) == 0)
+        {
+            SDL_SetMainReady();
+            if (SDL_Init(flags) != 0)
+            {
+                throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
+            }
+        }
+    }
+    Log(Debug::Warning) << "Net type is... " << netType;
 }

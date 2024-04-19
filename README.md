@@ -55,6 +55,10 @@ Command line options
                                             set fallback BSA archives (later
                                             archives have higher priority)
       --resources arg (=resources)          set resources directory
+      --net-type arg (=0)                   set networking type, eg whether this 
+                                            instance of openmw is a server, client,
+                                            or both. 0 is mixed, 1 is client-only, 
+                                            2 is server-only.
       --start arg                           set initial cell
       --content arg                         content file(s): esm/esp, or
                                             omwgame/omwaddon
