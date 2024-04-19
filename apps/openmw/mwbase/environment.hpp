@@ -43,6 +43,7 @@ namespace MWBase
     {
         static Environment* sThis;
 
+        bool mIsServer = false;
         World* mWorld = nullptr;
         MWWorld::WorldModel* mWorldModel = nullptr;
         MWWorld::Scene* mWorldScene = nullptr;
@@ -97,6 +98,8 @@ namespace MWBase
 
         void setL10nManager(l10n::Manager& value) { mL10nManager = &value; }
 
+        void setIsServer(bool isServer) { mIsServer = isServer; }
+
         Misc::NotNullPtr<World> getWorld() const { return mWorld; }
         Misc::NotNullPtr<MWWorld::WorldModel> getWorldModel() const { return mWorldModel; }
         Misc::NotNullPtr<MWWorld::Scene> getWorldScene() const { return mWorldScene; }
@@ -123,6 +126,8 @@ namespace MWBase
         Misc::NotNullPtr<Resource::ResourceSystem> getResourceSystem() const { return mResourceSystem; }
 
         Misc::NotNullPtr<l10n::Manager> getL10nManager() const { return mL10nManager; }
+
+        bool getIsServer() const { return mIsServer; }
 
         float getFrameRateLimit() const { return mFrameRateLimit; }
 
