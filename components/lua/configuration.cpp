@@ -47,7 +47,7 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg)
+    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg, bool globalOnly)
     {
         mScripts.clear();
         mPathToIndex.clear();
@@ -59,6 +59,11 @@ namespace LuaUtil
         {
             const ESM::LuaScriptCfg& script = cfg.mScripts[i];
             bool global = script.mFlags & ESM::LuaScriptCfg::sGlobal;
+            if ((!global && globalOnly) || (global && !globalOnly)) // Server/client scripts
+            {
+                skip[i] = true;
+                continue;
+            }
             if (global && (script.mFlags & ~ESM::LuaScriptCfg::sMerge) != ESM::LuaScriptCfg::sGlobal)
                 throw std::runtime_error(std::string("Global script can not have local flags: ") + script.mScriptPath);
             if (global && (!script.mTypes.empty() || !script.mRecords.empty() || !script.mRefs.empty()))

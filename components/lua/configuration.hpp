@@ -14,7 +14,7 @@ namespace LuaUtil
     class ScriptsConfiguration
     {
     public:
-        void init(ESM::LuaScriptsCfg);
+        void init(ESM::LuaScriptsCfg, bool globalOnly);
 
         size_t size() const { return mScripts.size(); }
         const ESM::LuaScriptCfg& operator[](int id) const { return mScripts[id]; }
