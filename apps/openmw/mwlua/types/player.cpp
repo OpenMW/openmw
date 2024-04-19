@@ -156,16 +156,34 @@ namespace MWLua
                 { "VanityMode", "vanitymode" },
             }));
 
-        MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
-        player["getControlSwitch"] = [input](const Object& player, std::string_view key) {
-            verifyPlayer(player);
-            return input->getControlSwitch(key);
+        // HACK: Disable input bindings completely due to server things
+        player["getControlSwitch"] = [](const Object& player, std::string_view key) {
+            if (MWBase::Environment::get().getIsServer())
+            {
+                Log(Debug::Warning) << "getControlSwitch called on server, returning false";
+                return false;
+            }
+            else
+            {
+                MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+                verifyPlayer(player);
+                return input->getControlSwitch(key);
+            }
         };
-        player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
-            verifyPlayer(player);
-            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
-                throw std::runtime_error("Only player and global scripts can toggle control switches.");
-            input->toggleControlSwitch(key, v);
+        player["setControlSwitch"] = [](const Object& player, std::string_view key, bool v) {
+            if (MWBase::Environment::get().getIsServer())
+            {
+                Log(Debug::Warning) << "setControlSwitch called on server! Not implemented!";
+                return;
+            }
+            else
+            {
+                MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+                verifyPlayer(player);
+                if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+                    throw std::runtime_error("Only player and global scripts can toggle control switches.");
+                input->toggleControlSwitch(key, v);
+            }
         };
         player["isTeleportingEnabled"] = [](const Object& player) -> bool {
             verifyPlayer(player);
