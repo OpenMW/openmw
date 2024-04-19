@@ -337,78 +337,83 @@ namespace MWWorld
         mScriptsEnabled = true;
         mSky = true;
 
-        // Rebuild player
-        setupPlayer();
-
-        renderPlayer();
-        mRendering->getCamera()->reset();
-
-        // we don't want old weather to persist on a new game
-        // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
-        mWeatherManager.reset();
-        mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering.get(), mStore);
-
-        if (!bypass)
+        if (!MWBase::Environment::get().getIsServer())
         {
-            // set new game mark
-            mGlobalVariables[Globals::sCharGenState].setInteger(1);
-        }
-        else
-            mGlobalVariables[Globals::sCharGenState].setInteger(-1);
+            // Rebuild player
+            setupPlayer();
 
-        if (bypass && !mStartCell.empty())
-        {
-            ESM::Position pos;
-            ESM::RefId cellId = findExteriorPosition(mStartCell, pos);
-            if (!cellId.empty())
+            renderPlayer();
+            mRendering->getCamera()->reset();
+
+            // we don't want old weather to persist on a new game
+            // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
+            mWeatherManager.reset();
+            mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering.get(), mStore);
+
+            if (!bypass)
             {
-                changeToCell(cellId, pos, true);
-                adjustPosition(getPlayerPtr(), false);
+                // set new game mark
+                mGlobalVariables[Globals::sCharGenState].setInteger(1);
+            }
+            else
+                mGlobalVariables[Globals::sCharGenState].setInteger(-1);
+
+            if (bypass && !mStartCell.empty())
+            {
+                ESM::Position pos;
+                ESM::RefId cellId = findExteriorPosition(mStartCell, pos);
+                if (!cellId.empty())
+                {
+                    changeToCell(cellId, pos, true);
+                    adjustPosition(getPlayerPtr(), false);
+                }
+                else
+                {
+                    findInteriorPosition(mStartCell, pos);
+                    changeToInteriorCell(mStartCell, pos, true);
+                }
             }
             else
             {
-                findInteriorPosition(mStartCell, pos);
-                changeToInteriorCell(mStartCell, pos, true);
+                for (int i = 0; i < 5; ++i)
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+                if (!getPlayerPtr().isInCell())
+                {
+                    ESM::Position pos;
+                    const int cellSize = Constants::CellSizeInUnits;
+                    pos.pos[0] = cellSize / 2;
+                    pos.pos[1] = cellSize / 2;
+                    pos.pos[2] = 0;
+                    pos.rot[0] = 0;
+                    pos.rot[1] = 0;
+                    pos.rot[2] = 0;
+
+                    ESM::ExteriorCellLocation exteriorCellPos
+                        = ESM::positionToExteriorCellLocation(pos.pos[0], pos.pos[1]);
+                    ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.mX, exteriorCellPos.mY);
+                    mWorldScene->changeToExteriorCell(cellId, pos, true);
+                }
             }
-        }
-        else
-        {
-            for (int i = 0; i < 5; ++i)
-                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
-            if (!getPlayerPtr().isInCell())
+
+            if (!bypass)
             {
-                ESM::Position pos;
-                const int cellSize = Constants::CellSizeInUnits;
-                pos.pos[0] = cellSize / 2;
-                pos.pos[1] = cellSize / 2;
-                pos.pos[2] = 0;
-                pos.rot[0] = 0;
-                pos.rot[1] = 0;
-                pos.rot[2] = 0;
-
-                ESM::ExteriorCellLocation exteriorCellPos = ESM::positionToExteriorCellLocation(pos.pos[0], pos.pos[1]);
-                ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.mX, exteriorCellPos.mY);
-                mWorldScene->changeToExteriorCell(cellId, pos, true);
+                std::string_view video = Fallback::Map::getString("Movies_New_Game");
+                if (!video.empty())
+                {
+                    // Make sure that we do not continue to play a Title music after a new game video.
+                    MWBase::Environment::get().getSoundManager()->stopMusic();
+                    MWBase::Environment::get().getSoundManager()->playPlaylist(sMWSound::explorePlaylist);
+                    MWBase::Environment::get().getWindowManager()->playVideo(video, true);
+                }
             }
+
+            // enable collision
+            if (!mPhysics->toggleCollisionMode())
+                mPhysics->toggleCollisionMode();
+
+            MWBase::Environment::get().getWindowManager()->updatePlayer();
         }
 
-        if (!bypass)
-        {
-            std::string_view video = Fallback::Map::getString("Movies_New_Game");
-            if (!video.empty())
-            {
-                // Make sure that we do not continue to play a Title music after a new game video.
-                MWBase::Environment::get().getSoundManager()->stopMusic();
-                MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
-                MWBase::Environment::get().getWindowManager()->playVideo(video, true);
-            }
-        }
-
-        // enable collision
-        if (!mPhysics->toggleCollisionMode())
-            mPhysics->toggleCollisionMode();
-
-        MWBase::Environment::get().getWindowManager()->updatePlayer();
         mTimeManager->setup(mGlobalVariables);
 
         // Initial seed.
