@@ -520,28 +520,18 @@ namespace NifOsg
             sequenceNode->setMode(osg::Sequence::START);
         }
 
-        osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st)
+        osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st) const
         {
-            if (!st)
-                return nullptr;
-
-            osg::ref_ptr<osg::Image> image;
-            if (st->mExternal)
+            if (st)
             {
-                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->mFile, mImageManager->getVFS());
-                image = mImageManager->getImage(filename);
-            }
-            else if (!st->mData.empty())
-            {
-                image = handleInternalTexture(st->mData.getPtr());
-            }
-            return image;
-        }
+                if (st->mExternal)
+                    return getTextureImage(st->mFile);
 
-        void handleTextureWrapping(osg::Texture2D* texture, bool wrapS, bool wrapT)
-        {
-            texture->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-            texture->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                if (!st->mData.empty())
+                    return handleInternalTexture(st->mData.getPtr());
+            }
+
+            return nullptr;
         }
 
         bool handleEffect(const Nif::NiAVObject* nifNode, osg::StateSet* stateset)
@@ -587,16 +577,12 @@ namespace NifOsg
                     return false;
             }
 
-            osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->mTexture.getPtr()));
-            osg::ref_ptr<osg::Texture2D> texture2d(new osg::Texture2D(image));
-            if (image)
-                texture2d->setTextureSize(image->s(), image->t());
-            texture2d->setName("envMap");
-            handleTextureWrapping(texture2d, textureEffect->wrapS(), textureEffect->wrapT());
-
-            int texUnit = 3; // FIXME
-
-            stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+            const unsigned int uvSet = 0;
+            const unsigned int texUnit = 3; // FIXME
+            std::vector<unsigned int> boundTextures;
+            boundTextures.resize(3); // Dummy vector for attachNiSourceTexture
+            attachNiSourceTexture("envMap", textureEffect->mTexture.getPtr(), textureEffect->wrapS(),
+                textureEffect->wrapT(), uvSet, stateset, boundTextures);
             stateset->setTextureAttributeAndModes(texUnit, texGen, osg::StateAttribute::ON);
             stateset->setTextureAttributeAndModes(texUnit, createEmissiveTexEnv(), osg::StateAttribute::ON);
 
@@ -1026,6 +1012,54 @@ namespace NifOsg
             }
         }
 
+        osg::ref_ptr<osg::Image> getTextureImage(std::string_view path) const
+        {
+            if (!mImageManager)
+                return nullptr;
+
+            std::string filename = Misc::ResourceHelpers::correctTexturePath(path, mImageManager->getVFS());
+            return mImageManager->getImage(filename);
+        }
+
+        osg::ref_ptr<osg::Texture2D> attachTexture(const std::string& name, osg::ref_ptr<osg::Image> image, bool wrapS,
+            bool wrapT, unsigned int uvSet, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures) const
+        {
+            osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
+            if (image)
+                texture2d->setTextureSize(image->s(), image->t());
+            texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+            texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+            unsigned int texUnit = boundTextures.size();
+            if (stateset)
+                stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+            texture2d->setName(name);
+            boundTextures.emplace_back(uvSet);
+            return texture2d;
+        }
+
+        osg::ref_ptr<osg::Texture2D> attachExternalTexture(const std::string& name, const std::string& path, bool wrapS,
+            bool wrapT, unsigned int uvSet, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures) const
+        {
+            return attachTexture(name, getTextureImage(path), wrapS, wrapT, uvSet, stateset, boundTextures);
+        }
+
+        osg::ref_ptr<osg::Texture2D> attachNiSourceTexture(const std::string& name, const Nif::NiSourceTexture* st,
+            bool wrapS, bool wrapT, unsigned int uvSet, osg::StateSet* stateset,
+            std::vector<unsigned int>& boundTextures) const
+        {
+            return attachTexture(name, handleSourceTexture(st), wrapS, wrapT, uvSet, stateset, boundTextures);
+        }
+
+        static void clearBoundTextures(osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
+        {
+            if (!boundTextures.empty())
+            {
+                for (unsigned int i = 0; i < boundTextures.size(); ++i)
+                    stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                boundTextures.clear();
+            }
+        }
+
         void handleTextureControllers(const Nif::NiProperty* texProperty,
             SceneUtil::CompositeStateSetUpdater* composite, osg::StateSet* stateset, int animflags)
         {
@@ -1056,17 +1090,16 @@ namespace NifOsg
                         wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
                     }
 
+                    const unsigned int uvSet = 0;
+                    std::vector<unsigned int> boundTextures; // Dummy list for attachTexture
                     for (const auto& source : flipctrl->mSources)
                     {
                         if (source.empty())
                             continue;
 
-                        osg::ref_ptr<osg::Image> image(handleSourceTexture(source.getPtr()));
-                        osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D(image));
-                        if (image)
-                            texture->setTextureSize(image->s(), image->t());
-                        texture->setWrap(osg::Texture::WRAP_S, wrapS);
-                        texture->setWrap(osg::Texture::WRAP_T, wrapT);
+                        // NB: not changing the stateset
+                        osg::ref_ptr<osg::Texture2D> texture
+                            = attachNiSourceTexture({}, source.getPtr(), wrapS, wrapT, uvSet, nullptr, boundTextures);
                         textures.push_back(texture);
                     }
                     osg::ref_ptr<FlipController> callback(new FlipController(flipctrl, textures));
@@ -1811,7 +1844,7 @@ namespace NifOsg
             }
         }
 
-        osg::ref_ptr<osg::Image> handleInternalTexture(const Nif::NiPixelData* pixelData)
+        osg::ref_ptr<osg::Image> handleInternalTexture(const Nif::NiPixelData* pixelData) const
         {
             if (pixelData->mMipmaps.empty())
                 return nullptr;
@@ -1946,7 +1979,7 @@ namespace NifOsg
             return image;
         }
 
-        osg::ref_ptr<osg::TexEnvCombine> createEmissiveTexEnv()
+        static osg::ref_ptr<osg::TexEnvCombine> createEmissiveTexEnv()
         {
             osg::ref_ptr<osg::TexEnvCombine> texEnv(new osg::TexEnvCombine);
             // Sum the previous colour and the emissive colour.
@@ -1979,31 +2012,40 @@ namespace NifOsg
             osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite,
             std::vector<unsigned int>& boundTextures, int animflags)
         {
-            if (!boundTextures.empty())
-            {
-                // overriding a parent NiTexturingProperty, so remove what was previously bound
-                for (unsigned int i = 0; i < boundTextures.size(); ++i)
-                    stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                boundTextures.clear();
-            }
+            // overriding a parent NiTexturingProperty, so remove what was previously bound
+            clearBoundTextures(stateset, boundTextures);
 
             // If this loop is changed such that the base texture isn't guaranteed to end up in texture unit 0, the
             // shadow casting shader will need to be updated accordingly.
             for (size_t i = 0; i < texprop->mTextures.size(); ++i)
             {
-                if (texprop->mTextures[i].mEnabled
-                    || (i == Nif::NiTexturingProperty::BaseTexture && !texprop->mController.empty()))
+                const Nif::NiTexturingProperty::Texture& tex = texprop->mTextures[i];
+                if (tex.mEnabled || (i == Nif::NiTexturingProperty::BaseTexture && !texprop->mController.empty()))
                 {
+                    std::string textureName;
                     switch (i)
                     {
                         // These are handled later on
                         case Nif::NiTexturingProperty::BaseTexture:
+                            textureName = "diffuseMap";
+                            break;
                         case Nif::NiTexturingProperty::GlowTexture:
+                            textureName = "glowMap";
+                            break;
                         case Nif::NiTexturingProperty::DarkTexture:
+                            textureName = "darkMap";
+                            break;
                         case Nif::NiTexturingProperty::BumpTexture:
+                            textureName = "bumpMap";
+                            break;
                         case Nif::NiTexturingProperty::DetailTexture:
+                            textureName = "detailMap";
+                            break;
                         case Nif::NiTexturingProperty::DecalTexture:
+                            textureName = "decalMap";
+                            break;
                         case Nif::NiTexturingProperty::GlossTexture:
+                            textureName = "glossMap";
                             break;
                         default:
                         {
@@ -2013,12 +2055,9 @@ namespace NifOsg
                         }
                     }
 
-                    unsigned int uvSet = 0;
-                    // create a new texture, will later attempt to share using the SharedStateManager
-                    osg::ref_ptr<osg::Texture2D> texture2d;
-                    if (texprop->mTextures[i].mEnabled)
+                    const unsigned int texUnit = boundTextures.size();
+                    if (tex.mEnabled)
                     {
-                        const Nif::NiTexturingProperty::Texture& tex = texprop->mTextures[i];
                         if (tex.mSourceTexture.empty() && texprop->mController.empty())
                         {
                             if (i == 0)
@@ -2028,31 +2067,17 @@ namespace NifOsg
                         }
 
                         if (!tex.mSourceTexture.empty())
-                        {
-                            const Nif::NiSourceTexture* st = tex.mSourceTexture.getPtr();
-                            osg::ref_ptr<osg::Image> image = handleSourceTexture(st);
-                            texture2d = new osg::Texture2D(image);
-                            if (image)
-                                texture2d->setTextureSize(image->s(), image->t());
-                        }
+                            attachNiSourceTexture(textureName, tex.mSourceTexture.getPtr(), tex.wrapS(), tex.wrapT(),
+                                tex.mUVSet, stateset, boundTextures);
                         else
-                            texture2d = new osg::Texture2D;
-
-                        handleTextureWrapping(texture2d, tex.wrapS(), tex.wrapT());
-
-                        uvSet = tex.mUVSet;
+                            attachTexture(
+                                textureName, nullptr, tex.wrapS(), tex.wrapT(), tex.mUVSet, stateset, boundTextures);
                     }
                     else
                     {
                         // Texture only comes from NiFlipController, so tex is ignored, set defaults
-                        texture2d = new osg::Texture2D;
-                        handleTextureWrapping(texture2d, true, true);
-                        uvSet = 0;
+                        attachTexture(textureName, nullptr, true, true, 0, stateset, boundTextures);
                     }
-
-                    unsigned int texUnit = boundTextures.size();
-
-                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
 
                     if (i == Nif::NiTexturingProperty::GlowTexture)
                     {
@@ -2121,41 +2146,12 @@ namespace NifOsg
                         texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
                         stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                     }
-
-                    switch (i)
-                    {
-                        case Nif::NiTexturingProperty::BaseTexture:
-                            texture2d->setName("diffuseMap");
-                            break;
-                        case Nif::NiTexturingProperty::BumpTexture:
-                            texture2d->setName("bumpMap");
-                            break;
-                        case Nif::NiTexturingProperty::GlowTexture:
-                            texture2d->setName("emissiveMap");
-                            break;
-                        case Nif::NiTexturingProperty::DarkTexture:
-                            texture2d->setName("darkMap");
-                            break;
-                        case Nif::NiTexturingProperty::DetailTexture:
-                            texture2d->setName("detailMap");
-                            break;
-                        case Nif::NiTexturingProperty::DecalTexture:
-                            texture2d->setName("decalMap");
-                            break;
-                        case Nif::NiTexturingProperty::GlossTexture:
-                            texture2d->setName("glossMap");
-                            break;
-                        default:
-                            break;
-                    }
-
-                    boundTextures.push_back(uvSet);
                 }
             }
             handleTextureControllers(texprop, composite, stateset, animflags);
         }
 
-        Bgsm::MaterialFilePtr getShaderMaterial(const std::string& path)
+        Bgsm::MaterialFilePtr getShaderMaterial(std::string_view path) const
         {
             if (!mMaterialManager)
                 return nullptr;
@@ -2164,81 +2160,43 @@ namespace NifOsg
                 return nullptr;
 
             std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, mMaterialManager->getVFS());
-            return mMaterialManager->get(VFS::Path::Normalized(normalizedPath));
+            try
+            {
+                return mMaterialManager->get(VFS::Path::Normalized(normalizedPath));
+            }
+            catch (std::exception& e)
+            {
+                Log(Debug::Error) << "Failed to load shader material: " << e.what();
+                return nullptr;
+            }
         }
 
-        void handleShaderMaterial(
+        void handleShaderMaterialNodeProperties(
             Bgsm::MaterialFilePtr material, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
+            const unsigned int uvSet = 0;
+            const bool wrapS = (material->mClamp >> 1) & 0x1;
+            const bool wrapT = material->mClamp & 0x1;
             if (material->mShaderType == Bgsm::ShaderType::Lighting)
             {
                 const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material.get());
 
-                if (!boundTextures.empty())
-                {
-                    for (unsigned int i = 0; i < boundTextures.size(); ++i)
-                        stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                    boundTextures.clear();
-                }
-
-                const unsigned int uvSet = 0;
                 if (!bgsm->mDiffuseMap.empty())
-                {
-                    std::string filename
-                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mDiffuseMap, mImageManager->getVFS());
-                    osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
-                    osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
-                    if (image)
-                        texture2d->setTextureSize(image->s(), image->t());
-                    handleTextureWrapping(texture2d, (bgsm->mClamp >> 1) & 0x1, bgsm->mClamp & 0x1);
-                    unsigned int texUnit = boundTextures.size();
-                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-                    texture2d->setName("diffuseMap");
-                    boundTextures.emplace_back(uvSet);
-                }
+                    attachExternalTexture(
+                        "diffuseMap", bgsm->mDiffuseMap, wrapS, wrapT, uvSet, stateset, boundTextures);
 
                 if (!bgsm->mNormalMap.empty())
-                {
-                    std::string filename
-                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mNormalMap, mImageManager->getVFS());
-                    osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
-                    osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
-                    if (image)
-                        texture2d->setTextureSize(image->s(), image->t());
-                    handleTextureWrapping(texture2d, (bgsm->mClamp >> 1) & 0x1, bgsm->mClamp & 0x1);
-                    unsigned int texUnit = boundTextures.size();
-                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-                    texture2d->setName("normalMap");
-                    boundTextures.emplace_back(uvSet);
-                }
+                    attachExternalTexture("normalMap", bgsm->mNormalMap, wrapS, wrapT, uvSet, stateset, boundTextures);
 
                 if (bgsm->mTree)
                     stateset->addUniform(new osg::Uniform("useTreeAnim", true));
             }
-            else
+            else if (material->mShaderType == Bgsm::ShaderType::Effect)
             {
                 const Bgsm::BGEMFile* bgem = static_cast<const Bgsm::BGEMFile*>(material.get());
+
                 if (!bgem->mBaseMap.empty())
-                {
-                    if (!boundTextures.empty())
-                    {
-                        for (unsigned int i = 0; i < boundTextures.size(); ++i)
-                            stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                        boundTextures.clear();
-                    }
-                    std::string filename
-                        = Misc::ResourceHelpers::correctTexturePath(bgem->mBaseMap, mImageManager->getVFS());
-                    osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
-                    osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
-                    texture2d->setName("diffuseMap");
-                    if (image)
-                        texture2d->setTextureSize(image->s(), image->t());
-                    handleTextureWrapping(texture2d, (bgem->mClamp >> 1) & 0x1, bgem->mClamp & 0x1);
-                    const unsigned int texUnit = 0;
-                    const unsigned int uvSet = 0;
-                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-                    boundTextures.push_back(uvSet);
-                }
+                    attachExternalTexture("diffuseMap", bgem->mBaseMap, wrapS, wrapT, uvSet, stateset, boundTextures);
 
                 bool useFalloff = bgem->mFalloff;
                 stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
@@ -2251,16 +2209,55 @@ namespace NifOsg
             handleDepthFlags(stateset, material->mDepthTest, material->mDepthWrite);
         }
 
-        void handleTextureSet(const Nif::BSShaderTextureSet* textureSet, unsigned int clamp,
+        void handleShaderMaterialDrawableProperties(
+            Bgsm::MaterialFilePtr shaderMat, osg::ref_ptr<osg::Material> mat, osg::Node& node, bool& hasSortAlpha)
+        {
+            mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
+            if (shaderMat->mAlphaTest)
+            {
+                osg::StateSet* stateset = node.getOrCreateStateSet();
+                osg::ref_ptr<osg::AlphaFunc> alphaFunc(
+                    new osg::AlphaFunc(osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold / 255.f));
+                alphaFunc = shareAttribute(alphaFunc);
+                stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+            }
+            if (shaderMat->mAlphaBlend)
+            {
+                osg::StateSet* stateset = node.getOrCreateStateSet();
+                osg::ref_ptr<osg::BlendFunc> blendFunc(new osg::BlendFunc(
+                    getBlendMode(shaderMat->mSourceBlendMode), getBlendMode(shaderMat->mDestinationBlendMode)));
+                blendFunc = shareAttribute(blendFunc);
+                stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+                hasSortAlpha = true;
+            }
+            if (shaderMat->mDecal)
+            {
+                osg::StateSet* stateset = node.getOrCreateStateSet();
+                if (!mPushedSorter && !hasSortAlpha)
+                    stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
+                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
+                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
+                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+            }
+            if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
+            {
+                auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
+                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mEmittanceColor, 1.f));
+                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mSpecularColor, 1.f));
+            }
+            else if (shaderMat->mShaderType == Bgsm::ShaderType::Effect)
+            {
+                auto bgem = static_cast<const Bgsm::BGEMFile*>(shaderMat.get());
+                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgem->mEmittanceColor, 1.f));
+                if (bgem->mSoft)
+                    SceneUtil::setupSoftEffect(node, bgem->mSoftDepth, true, bgem->mSoftDepth);
+            }
+        }
+
+        void handleTextureSet(const Nif::BSShaderTextureSet* textureSet, bool wrapS, bool wrapT,
             const std::string& nodeName, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
-            if (!boundTextures.empty())
-            {
-                for (unsigned int i = 0; i < boundTextures.size(); ++i)
-                    stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                boundTextures.clear();
-            }
-
             const unsigned int uvSet = 0;
 
             for (size_t i = 0; i < textureSet->mTextures.size(); ++i)
@@ -2270,8 +2267,16 @@ namespace NifOsg
                 switch (static_cast<Nif::BSShaderTextureSet::TextureType>(i))
                 {
                     case Nif::BSShaderTextureSet::TextureType::Base:
+                        attachExternalTexture(
+                            "diffuseMap", textureSet->mTextures[i], wrapS, wrapT, uvSet, stateset, boundTextures);
+                        break;
                     case Nif::BSShaderTextureSet::TextureType::Normal:
+                        attachExternalTexture(
+                            "normalMap", textureSet->mTextures[i], wrapS, wrapT, uvSet, stateset, boundTextures);
+                        break;
                     case Nif::BSShaderTextureSet::TextureType::Glow:
+                        attachExternalTexture(
+                            "emissiveMap", textureSet->mTextures[i], wrapS, wrapT, uvSet, stateset, boundTextures);
                         break;
                     default:
                     {
@@ -2280,31 +2285,6 @@ namespace NifOsg
                         continue;
                     }
                 }
-                std::string filename
-                    = Misc::ResourceHelpers::correctTexturePath(textureSet->mTextures[i], mImageManager->getVFS());
-                osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
-                osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
-                if (image)
-                    texture2d->setTextureSize(image->s(), image->t());
-                handleTextureWrapping(texture2d, (clamp >> 1) & 0x1, clamp & 0x1);
-                unsigned int texUnit = boundTextures.size();
-                stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-                // BSShaderTextureSet presence means there's no need for FFP support for the affected node
-                switch (static_cast<Nif::BSShaderTextureSet::TextureType>(i))
-                {
-                    case Nif::BSShaderTextureSet::TextureType::Base:
-                        texture2d->setName("diffuseMap");
-                        break;
-                    case Nif::BSShaderTextureSet::TextureType::Normal:
-                        texture2d->setName("normalMap");
-                        break;
-                    case Nif::BSShaderTextureSet::TextureType::Glow:
-                        texture2d->setName("emissiveMap");
-                        break;
-                    default:
-                        break;
-                }
-                boundTextures.emplace_back(uvSet);
             }
         }
 
@@ -2458,11 +2438,12 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
+                    clearBoundTextures(stateset, boundTextures);
+                    const bool wrapS = (texprop->mClamp >> 1) & 0x1;
+                    const bool wrapT = texprop->mClamp & 0x1;
                     if (!texprop->mTextureSet.empty())
-                    {
-                        auto textureSet = texprop->mTextureSet.getPtr();
-                        handleTextureSet(textureSet, texprop->mClamp, node->getName(), stateset, boundTextures);
-                    }
+                        handleTextureSet(
+                            texprop->mTextureSet.getPtr(), wrapS, wrapT, node->getName(), stateset, boundTextures);
                     handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->refraction())
                         SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
@@ -2476,31 +2457,17 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
+                    clearBoundTextures(stateset, boundTextures);
                     if (!texprop->mFilename.empty())
                     {
-                        if (!boundTextures.empty())
-                        {
-                            for (unsigned int i = 0; i < boundTextures.size(); ++i)
-                                stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                            boundTextures.clear();
-                        }
-                        std::string filename
-                            = Misc::ResourceHelpers::correctTexturePath(texprop->mFilename, mImageManager->getVFS());
-                        osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
-                        osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
-                        texture2d->setName("diffuseMap");
-                        if (image)
-                            texture2d->setTextureSize(image->s(), image->t());
-                        handleTextureWrapping(texture2d, texprop->wrapS(), texprop->wrapT());
-                        const unsigned int texUnit = 0;
                         const unsigned int uvSet = 0;
-                        stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-                        boundTextures.push_back(uvSet);
-                        if (mBethVersion >= 27)
-                        {
-                            useFalloff = true;
-                            stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
-                        }
+                        attachExternalTexture("diffuseMap", texprop->mFilename, texprop->wrapS(), texprop->wrapT(),
+                            uvSet, stateset, boundTextures);
+                    }
+                    if (mBethVersion >= 27)
+                    {
+                        useFalloff = true;
+                        stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
                     }
                     stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
                     handleTextureControllers(texprop, composite, stateset, animflags);
@@ -2514,15 +2481,17 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName);
-                    if (material)
+                    clearBoundTextures(stateset, boundTextures);
+                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName))
                     {
-                        handleShaderMaterial(material, stateset, boundTextures);
+                        handleShaderMaterialNodeProperties(material, stateset, boundTextures);
                         break;
                     }
+                    const bool wrapS = (texprop->mClamp >> 1) & 0x1;
+                    const bool wrapT = texprop->mClamp & 0x1;
                     if (!texprop->mTextureSet.empty())
                         handleTextureSet(
-                            texprop->mTextureSet.getPtr(), texprop->mClamp, node->getName(), stateset, boundTextures);
+                            texprop->mTextureSet.getPtr(), wrapS, wrapT, node->getName(), stateset, boundTextures);
                     handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->doubleSided())
                         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -2541,33 +2510,20 @@ namespace NifOsg
                     node->setUserValue("shaderPrefix", std::string("bs/nolighting"));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName);
-                    if (material)
+                    clearBoundTextures(stateset, boundTextures);
+                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName))
                     {
-                        handleShaderMaterial(material, stateset, boundTextures);
+                        handleShaderMaterialNodeProperties(material, stateset, boundTextures);
                         break;
                     }
                     if (!texprop->mSourceTexture.empty())
                     {
-                        if (!boundTextures.empty())
-                        {
-                            for (unsigned int i = 0; i < boundTextures.size(); ++i)
-                                stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                            boundTextures.clear();
-                        }
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(
-                            texprop->mSourceTexture, mImageManager->getVFS());
-                        osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
-                        osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
-                        texture2d->setName("diffuseMap");
-                        if (image)
-                            texture2d->setTextureSize(image->s(), image->t());
-                        handleTextureWrapping(texture2d, (texprop->mClamp >> 1) & 0x1, texprop->mClamp & 0x1);
-                        const unsigned int texUnit = 0;
                         const unsigned int uvSet = 0;
-                        stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-                        boundTextures.push_back(uvSet);
-
+                        const bool wrapS = (texprop->mClamp >> 1) & 0x1;
+                        const bool wrapT = texprop->mClamp & 0x1;
+                        unsigned int texUnit = boundTextures.size();
+                        attachExternalTexture(
+                            "diffuseMap", texprop->mSourceTexture, wrapS, wrapT, uvSet, stateset, boundTextures);
                         {
                             osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
                             // This handles 20.2.0.7 UV settings like 4.0.0.2 UV settings (see NifOsg::UVController)
@@ -2819,40 +2775,11 @@ namespace NifOsg
                     case Nif::RC_BSLightingShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
-                        Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName);
-                        if (shaderMat)
+                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName))
                         {
-                            mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
-                            if (shaderMat->mAlphaTest)
-                            {
-                                osg::StateSet* stateset = node->getOrCreateStateSet();
-                                osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(
-                                    osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold / 255.f));
-                                alphaFunc = shareAttribute(alphaFunc);
-                                stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-                            }
-                            if (shaderMat->mAlphaBlend)
-                            {
-                                osg::StateSet* stateset = node->getOrCreateStateSet();
-                                osg::ref_ptr<osg::BlendFunc> blendFunc(
-                                    new osg::BlendFunc(getBlendMode(shaderMat->mSourceBlendMode),
-                                        getBlendMode(shaderMat->mDestinationBlendMode)));
-                                blendFunc = shareAttribute(blendFunc);
-                                stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
-                                hasSortAlpha = true;
-                                if (!mPushedSorter)
-                                    setBin_Transparent(stateset);
-                            }
-                            if (shaderMat->mDecal)
-                            {
-                                osg::StateSet* stateset = node->getOrCreateStateSet();
-                                if (!mPushedSorter && !hasSortAlpha)
-                                    stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
-                                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
-                                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
-                                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
-                                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
-                            }
+                            handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
+                            if (shaderMat->mAlphaBlend && !mPushedSorter)
+                                setBin_Transparent(node->getOrCreateStateSet());
                             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
                             {
                                 auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
@@ -2860,8 +2787,6 @@ namespace NifOsg
                                     = false; // bgsm->mSpecularEnabled; disabled until it can be implemented properly
                                 specStrength = bgsm->mSpecularMult;
                                 emissiveMult = bgsm->mEmittanceMult;
-                                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mEmittanceColor, 1.f));
-                                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mSpecularColor, 1.f));
                             }
                             break;
                         }
@@ -2888,47 +2813,11 @@ namespace NifOsg
                     case Nif::RC_BSEffectShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
-                        Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName);
-                        if (shaderMat)
+                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName))
                         {
-                            mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
-                            if (shaderMat->mAlphaTest)
-                            {
-                                osg::StateSet* stateset = node->getOrCreateStateSet();
-                                osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(
-                                    osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold / 255.f));
-                                alphaFunc = shareAttribute(alphaFunc);
-                                stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-                            }
-                            if (shaderMat->mAlphaBlend)
-                            {
-                                osg::StateSet* stateset = node->getOrCreateStateSet();
-                                osg::ref_ptr<osg::BlendFunc> blendFunc(
-                                    new osg::BlendFunc(getBlendMode(shaderMat->mSourceBlendMode),
-                                        getBlendMode(shaderMat->mDestinationBlendMode)));
-                                blendFunc = shareAttribute(blendFunc);
-                                stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
-                                hasSortAlpha = true;
-                                if (!mPushedSorter)
-                                    setBin_Transparent(stateset);
-                            }
-                            if (shaderMat->mDecal)
-                            {
-                                osg::StateSet* stateset = node->getOrCreateStateSet();
-                                if (!mPushedSorter && !hasSortAlpha)
-                                    stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
-                                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
-                                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
-                                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
-                                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
-                            }
-                            if (shaderMat->mShaderType == Bgsm::ShaderType::Effect)
-                            {
-                                auto bgem = static_cast<const Bgsm::BGEMFile*>(shaderMat.get());
-                                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgem->mEmittanceColor, 1.f));
-                                if (bgem->mSoft)
-                                    SceneUtil::setupSoftEffect(*node, bgem->mSoftDepth, true, bgem->mSoftDepth);
-                            }
+                            handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
+                            if (shaderMat->mAlphaBlend && !mPushedSorter)
+                                setBin_Transparent(node->getOrCreateStateSet());
                             break;
                         }
                         if (shaderprop->decal())
