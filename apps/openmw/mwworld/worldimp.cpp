@@ -307,15 +307,18 @@ namespace MWWorld
             mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
-        mRendering = std::make_unique<MWRender::RenderingManager>(
-            viewer, rootNode, mResourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
-        mProjectileManager = std::make_unique<ProjectileManager>(
-            mRendering->getLightRoot()->asGroup(), mResourceSystem, mRendering.get(), mPhysics.get());
-        mRendering->preloadCommonAssets();
+        if (!MWBase::Environment::get().getIsServer())
+        {
+            mRendering = std::make_unique<MWRender::RenderingManager>(
+                viewer, rootNode, mResourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
+            mProjectileManager = std::make_unique<ProjectileManager>(
+                mRendering->getLightRoot()->asGroup(), mResourceSystem, mRendering.get(), mPhysics.get());
+            mRendering->preloadCommonAssets();
 
-        mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering, mStore);
+            mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering, mStore);
 
-        mWorldScene = std::make_unique<Scene>(*this, *mRendering.get(), mPhysics.get(), *mNavigator);
+            mWorldScene = std::make_unique<Scene>(*this, *mRendering.get(), mPhysics.get(), *mNavigator);
+        }
     }
 
     void World::fillGlobalVariables()
