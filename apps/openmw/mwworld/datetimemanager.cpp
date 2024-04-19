@@ -264,6 +264,11 @@ namespace MWWorld
 
     void DateTimeManager::updateIsPaused()
     {
+        if (MWBase::Environment::get().getIsServer())
+        {
+            mPaused = false;
+            return;
+        }
         auto stateManager = MWBase::Environment::get().getStateManager();
         auto wm = MWBase::Environment::get().getWindowManager();
         mPaused = !mPausedTags.empty() || wm->isConsoleMode() || wm->isPostProcessorHudVisible()
