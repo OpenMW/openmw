@@ -865,7 +865,8 @@ namespace Resource
                                 << ", using embedded marker_error instead";
         }
         Files::IMemStream file(ErrorMarker::sValue.data(), ErrorMarker::sValue.size());
-        return loadNonNif("error_marker.osgt", file, mImageManager);
+        constexpr VFS::Path::NormalizedView errorMarker("error_marker.osgt");
+        return loadNonNif(errorMarker, file, mImageManager);
     }
 
     osg::ref_ptr<osg::Node> SceneManager::cloneErrorMarker()

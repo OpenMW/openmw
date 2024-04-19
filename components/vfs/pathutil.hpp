@@ -79,7 +79,7 @@ namespace VFS::Path
     public:
         constexpr NormalizedView() noexcept = default;
 
-        constexpr NormalizedView(const char* value)
+        constexpr explicit NormalizedView(const char* value)
             : mValue(value)
         {
             if (!isNormalized(mValue))

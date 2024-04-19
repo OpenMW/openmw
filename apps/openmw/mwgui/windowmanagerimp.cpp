@@ -356,7 +356,8 @@ namespace MWGui
         mWindows.push_back(std::move(console));
         trackWindow(mConsole, makeConsoleWindowSettingValues());
 
-        bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
+        constexpr VFS::Path::NormalizedView menubookOptionsOverTexture("textures/tx_menubook_options_over.dds");
+        const bool questList = mResourceSystem->getVFS()->exists(menubookOptionsOverTexture);
         auto journal = JournalWindow::create(JournalViewModel::create(), questList, mEncoding);
         mGuiModeStates[GM_Journal] = GuiModeState(journal.get());
         mWindows.push_back(std::move(journal));
