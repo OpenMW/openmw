@@ -2209,36 +2209,79 @@ namespace NifOsg
             handleDepthFlags(stateset, material->mDepthTest, material->mDepthWrite);
         }
 
+        void handleDecal(bool hasSortAlpha, osg::ref_ptr<osg::StateSet> stateset)
+        {
+            osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
+            polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+            polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
+            polygonOffset = shareAttribute(polygonOffset);
+            stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+            if (!mPushedSorter && !hasSortAlpha)
+                stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
+        }
+
+        void handleAlphaTesting(
+            bool enabled, osg::AlphaFunc::ComparisonFunction function, int threshold, osg::Node& node)
+        {
+            if (enabled)
+            {
+                osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(function, threshold / 255.f));
+                alphaFunc = shareAttribute(alphaFunc);
+                node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+            }
+            else if (osg::StateSet* stateset = node.getStateSet())
+            {
+                stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
+                stateset->removeMode(GL_ALPHA_TEST);
+            }
+        }
+
+        void handleAlphaBlending(
+            bool enabled, int sourceMode, int destMode, bool sort, bool& hasSortAlpha, osg::Node& node)
+        {
+            if (enabled)
+            {
+                osg::ref_ptr<osg::StateSet> stateset = node.getOrCreateStateSet();
+                osg::ref_ptr<osg::BlendFunc> blendFunc(
+                    new osg::BlendFunc(getBlendMode(sourceMode), getBlendMode(destMode)));
+                // on AMD hardware, alpha still seems to be stored with an RGBA framebuffer with OpenGL.
+                // This might be mandated by the OpenGL 2.1 specification section 2.14.9, or might be a bug.
+                // Either way, D3D8.1 doesn't do that, so adapt the destination factor.
+                if (blendFunc->getDestination() == GL_DST_ALPHA)
+                    blendFunc->setDestination(GL_ONE);
+                blendFunc = shareAttribute(blendFunc);
+                stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+
+                if (sort)
+                {
+                    hasSortAlpha = true;
+                    if (!mPushedSorter)
+                        stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                }
+                else if (!mPushedSorter)
+                {
+                    stateset->setRenderBinToInherit();
+                }
+            }
+            else if (osg::ref_ptr<osg::StateSet> stateset = node.getStateSet())
+            {
+                stateset->removeAttribute(osg::StateAttribute::BLENDFUNC);
+                stateset->removeMode(GL_BLEND);
+                if (!mPushedSorter)
+                    stateset->setRenderBinToInherit();
+            }
+        }
+
         void handleShaderMaterialDrawableProperties(
             Bgsm::MaterialFilePtr shaderMat, osg::ref_ptr<osg::Material> mat, osg::Node& node, bool& hasSortAlpha)
         {
             mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
-            if (shaderMat->mAlphaTest)
-            {
-                osg::StateSet* stateset = node.getOrCreateStateSet();
-                osg::ref_ptr<osg::AlphaFunc> alphaFunc(
-                    new osg::AlphaFunc(osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold / 255.f));
-                alphaFunc = shareAttribute(alphaFunc);
-                stateset->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-            }
-            if (shaderMat->mAlphaBlend)
-            {
-                osg::StateSet* stateset = node.getOrCreateStateSet();
-                osg::ref_ptr<osg::BlendFunc> blendFunc(new osg::BlendFunc(
-                    getBlendMode(shaderMat->mSourceBlendMode), getBlendMode(shaderMat->mDestinationBlendMode)));
-                blendFunc = shareAttribute(blendFunc);
-                stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
-                hasSortAlpha = true;
-            }
+            handleAlphaTesting(shaderMat->mAlphaTest, osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold, node);
+            handleAlphaBlending(shaderMat->mAlphaBlend, shaderMat->mSourceBlendMode, shaderMat->mDestinationBlendMode,
+                true, hasSortAlpha, node);
             if (shaderMat->mDecal)
             {
-                osg::StateSet* stateset = node.getOrCreateStateSet();
-                if (!mPushedSorter && !hasSortAlpha)
-                    stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
-                osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
-                polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
-                polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
-                stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+                handleDecal(hasSortAlpha, node.getOrCreateStateSet());
             }
             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
             {
@@ -2627,12 +2670,9 @@ namespace NifOsg
 
             bool hasMatCtrl = false;
             bool hasSortAlpha = false;
-            osg::StateSet* blendFuncStateSet = nullptr;
 
-            auto setBin_Transparent = [](osg::StateSet* ss) { ss->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); };
             auto setBin_BackToFront = [](osg::StateSet* ss) { ss->setRenderBinDetails(0, "SORT_BACK_TO_FRONT"); };
             auto setBin_Traversal = [](osg::StateSet* ss) { ss->setRenderBinDetails(2, "TraversalOrderBin"); };
-            auto setBin_Inherit = [](osg::StateSet* ss) { ss->setRenderBinToInherit(); };
 
             auto lightmode = Nif::NiVertexColorProperty::LightMode::LightMode_EmiAmbDif;
             float emissiveMult = 1.f;
@@ -2718,52 +2758,10 @@ namespace NifOsg
                     case Nif::RC_NiAlphaProperty:
                     {
                         const Nif::NiAlphaProperty* alphaprop = static_cast<const Nif::NiAlphaProperty*>(property);
-                        if (alphaprop->useAlphaBlending())
-                        {
-                            osg::ref_ptr<osg::BlendFunc> blendFunc(
-                                new osg::BlendFunc(getBlendMode(alphaprop->sourceBlendMode()),
-                                    getBlendMode(alphaprop->destinationBlendMode())));
-                            // on AMD hardware, alpha still seems to be stored with an RGBA framebuffer with OpenGL.
-                            // This might be mandated by the OpenGL 2.1 specification section 2.14.9, or might be a bug.
-                            // Either way, D3D8.1 doesn't do that, so adapt the destination factor.
-                            if (blendFunc->getDestination() == GL_DST_ALPHA)
-                                blendFunc->setDestination(GL_ONE);
-                            blendFunc = shareAttribute(blendFunc);
-                            node->getOrCreateStateSet()->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
-
-                            if (!alphaprop->noSorter())
-                            {
-                                hasSortAlpha = true;
-                                if (!mPushedSorter)
-                                    setBin_Transparent(node->getStateSet());
-                            }
-                            else
-                            {
-                                if (!mPushedSorter)
-                                    setBin_Inherit(node->getStateSet());
-                            }
-                        }
-                        else if (osg::StateSet* stateset = node->getStateSet())
-                        {
-                            stateset->removeAttribute(osg::StateAttribute::BLENDFUNC);
-                            stateset->removeMode(GL_BLEND);
-                            blendFuncStateSet = stateset;
-                            if (!mPushedSorter)
-                                blendFuncStateSet->setRenderBinToInherit();
-                        }
-
-                        if (alphaprop->useAlphaTesting())
-                        {
-                            osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(
-                                getTestMode(alphaprop->alphaTestMode()), alphaprop->mThreshold / 255.f));
-                            alphaFunc = shareAttribute(alphaFunc);
-                            node->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-                        }
-                        else if (osg::StateSet* stateset = node->getStateSet())
-                        {
-                            stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
-                            stateset->removeMode(GL_ALPHA_TEST);
-                        }
+                        handleAlphaBlending(alphaprop->useAlphaBlending(), alphaprop->sourceBlendMode(),
+                            alphaprop->destinationBlendMode(), !alphaprop->noSorter(), hasSortAlpha, *node);
+                        handleAlphaTesting(alphaprop->useAlphaTesting(), getTestMode(alphaprop->alphaTestMode()),
+                            alphaprop->mThreshold, *node);
                         break;
                     }
                     case Nif::RC_BSShaderPPLightingProperty:
@@ -2778,8 +2776,6 @@ namespace NifOsg
                         if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName))
                         {
                             handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
-                            if (shaderMat->mAlphaBlend && !mPushedSorter)
-                                setBin_Transparent(node->getOrCreateStateSet());
                             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
                             {
                                 auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
@@ -2799,15 +2795,7 @@ namespace NifOsg
                         specStrength = shaderprop->mSpecStrength;
                         specEnabled = shaderprop->specular();
                         if (shaderprop->decal())
-                        {
-                            osg::StateSet* stateset = node->getOrCreateStateSet();
-                            if (!mPushedSorter && !hasSortAlpha)
-                                stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
-                            osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
-                            polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
-                            polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
-                            stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
-                        }
+                            handleDecal(hasSortAlpha, node->getOrCreateStateSet());
                         break;
                     }
                     case Nif::RC_BSEffectShaderProperty:
@@ -2816,20 +2804,10 @@ namespace NifOsg
                         if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName))
                         {
                             handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
-                            if (shaderMat->mAlphaBlend && !mPushedSorter)
-                                setBin_Transparent(node->getOrCreateStateSet());
                             break;
                         }
                         if (shaderprop->decal())
-                        {
-                            osg::StateSet* stateset = node->getOrCreateStateSet();
-                            if (!mPushedSorter && !hasSortAlpha)
-                                stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
-                            osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
-                            polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
-                            polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
-                            stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
-                        }
+                            handleDecal(hasSortAlpha, node->getOrCreateStateSet());
                         if (shaderprop->softEffect())
                             SceneUtil::setupSoftEffect(
                                 *node, shaderprop->mFalloffDepth, true, shaderprop->mFalloffDepth);
