@@ -875,35 +875,54 @@ namespace MWRender
         return Mask_Static;
     }
 
-    struct ClearCacheFunctor
+    namespace
     {
-        void operator()(MWRender::ChunkId id, osg::Object* obj)
+        class CollectIntersecting
         {
-            if (intersects(id, mPosition))
-                mToClear.insert(id);
-        }
-        bool intersects(ChunkId id, osg::Vec3f pos)
-        {
-            if (mActiveGridOnly && !std::get<2>(id))
-                return false;
-            pos /= getCellSize(mWorldspace);
-            clampToCell(pos);
-            osg::Vec2f center = std::get<0>(id);
-            float halfSize = std::get<1>(id) / 2;
-            return pos.x() >= center.x() - halfSize && pos.y() >= center.y() - halfSize
-                && pos.x() <= center.x() + halfSize && pos.y() <= center.y() + halfSize;
-        }
-        void clampToCell(osg::Vec3f& cellPos)
-        {
-            cellPos.x() = std::clamp<float>(cellPos.x(), mCell.x(), mCell.x() + 1);
-            cellPos.y() = std::clamp<float>(cellPos.y(), mCell.y(), mCell.y() + 1);
-        }
-        osg::Vec3f mPosition;
-        osg::Vec2i mCell;
-        ESM::RefId mWorldspace;
-        std::set<MWRender::ChunkId> mToClear;
-        bool mActiveGridOnly = false;
-    };
+        public:
+            explicit CollectIntersecting(
+                bool activeGridOnly, const osg::Vec3f& position, const osg::Vec2i& cell, ESM::RefId worldspace)
+                : mActiveGridOnly(activeGridOnly)
+                , mPosition(position)
+                , mCell(cell)
+                , mWorldspace(worldspace)
+            {
+            }
+
+            void operator()(const ChunkId& id, osg::Object* /*obj*/)
+            {
+                if (mActiveGridOnly && !std::get<2>(id))
+                    return;
+                if (intersects(id, mPosition))
+                    mCollected.insert(id);
+            }
+
+            const std::set<ChunkId>& getCollected() const { return mCollected; }
+
+        private:
+            bool intersects(ChunkId id, osg::Vec3f pos) const
+            {
+                pos /= getCellSize(mWorldspace);
+                clampToCell(pos);
+                osg::Vec2f center = std::get<0>(id);
+                float halfSize = std::get<1>(id) / 2;
+                return pos.x() >= center.x() - halfSize && pos.y() >= center.y() - halfSize
+                    && pos.x() <= center.x() + halfSize && pos.y() <= center.y() + halfSize;
+            }
+
+            void clampToCell(osg::Vec3f& cellPos) const
+            {
+                cellPos.x() = std::clamp<float>(cellPos.x(), mCell.x(), mCell.x() + 1);
+                cellPos.y() = std::clamp<float>(cellPos.y(), mCell.y(), mCell.y() + 1);
+            }
+
+            bool mActiveGridOnly;
+            osg::Vec3f mPosition;
+            osg::Vec2i mCell;
+            ESM::RefId mWorldspace;
+            std::set<ChunkId> mCollected;
+        };
+    }
 
     bool ObjectPaging::enableObject(
         int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled)
@@ -921,14 +940,11 @@ namespace MWRender
                 return false;
         }
 
-        ClearCacheFunctor ccf;
-        ccf.mPosition = pos;
-        ccf.mCell = cell;
-        ccf.mWorldspace = mWorldspace;
+        CollectIntersecting ccf(false, pos, cell, mWorldspace);
         mCache->call(ccf);
-        if (ccf.mToClear.empty())
+        if (ccf.getCollected().empty())
             return false;
-        for (const auto& chunk : ccf.mToClear)
+        for (const ChunkId& chunk : ccf.getCollected())
             mCache->removeFromObjectCache(chunk);
         return true;
     }
@@ -946,15 +962,11 @@ namespace MWRender
                 return false;
         }
 
-        ClearCacheFunctor ccf;
-        ccf.mPosition = pos;
-        ccf.mCell = cell;
-        ccf.mActiveGridOnly = true;
-        ccf.mWorldspace = mWorldspace;
+        CollectIntersecting ccf(true, pos, cell, mWorldspace);
         mCache->call(ccf);
-        if (ccf.mToClear.empty())
+        if (ccf.getCollected().empty())
             return false;
-        for (const auto& chunk : ccf.mToClear)
+        for (const ChunkId& chunk : ccf.getCollected())
             mCache->removeFromObjectCache(chunk);
         return true;
     }
