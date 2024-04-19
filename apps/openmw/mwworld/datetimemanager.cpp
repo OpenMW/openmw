@@ -252,7 +252,10 @@ namespace MWWorld
     void DateTimeManager::setSimulationTimeScale(float scale)
     {
         mSimulationTimeScale = std::max(0.f, scale);
-        MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
+        if (!MWBase::Environment::get().getIsServer())
+        {
+            MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
+        }
     }
 
     void DateTimeManager::unpause(std::string_view tag)
