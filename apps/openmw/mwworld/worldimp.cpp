@@ -912,11 +912,21 @@ namespace MWWorld
             rechargeItems(duration, false);
         }
 
-        mWeatherManager->advanceTime(hours, incremental);
-        mTimeManager->advanceTime(hours, mGlobalVariables);
-        updateSkyDate();
+        bool isServer = MWBase::Environment::get().getIsServer();
 
-        if (!incremental)
+        if (!isServer)
+        {
+            mWeatherManager->advanceTime(hours, incremental);
+        }
+
+        mTimeManager->advanceTime(hours, mGlobalVariables);
+
+        if (!isServer)
+        {
+            updateSkyDate();
+        }
+
+        if (!isServer && !incremental)
         {
             mRendering->notifyWorldSpaceChanged();
             mProjectileManager->clear();
