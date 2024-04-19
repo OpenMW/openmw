@@ -240,18 +240,17 @@ namespace NifOsg
     {
     public:
         /// @param filename used for warning messages.
-        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver,
-            Resource::BgsmFileManager* materialMgr)
+        LoaderImpl(const std::filesystem::path& filename, unsigned int ver, unsigned int userver, unsigned int bethver)
             : mFilename(filename)
             , mVersion(ver)
             , mUserVersion(userver)
             , mBethVersion(bethver)
-            , mMaterialMgr(materialMgr)
         {
         }
         std::filesystem::path mFilename;
         unsigned int mVersion, mUserVersion, mBethVersion;
-        Resource::BgsmFileManager* mMaterialMgr;
+        Resource::BgsmFileManager* mMaterialManager{ nullptr };
+        Resource::ImageManager* mImageManager{ nullptr };
 
         size_t mFirstRootTextureIndex{ ~0u };
         bool mFoundFirstRootTexturingProperty = false;
@@ -344,7 +343,6 @@ namespace NifOsg
         struct HandleNodeArgs
         {
             unsigned int mNifVersion;
-            Resource::ImageManager* mImageManager;
             SceneUtil::TextKeyMap* mTextKeys;
             std::vector<unsigned int> mBoundTextures = {};
             int mAnimFlags = 0;
@@ -354,7 +352,7 @@ namespace NifOsg
             osg::Node* mRootNode = nullptr;
         };
 
-        osg::ref_ptr<osg::Node> load(Nif::FileView nif, Resource::ImageManager* imageManager)
+        osg::ref_ptr<osg::Node> load(Nif::FileView nif)
         {
             const size_t numRoots = nif.numRoots();
             std::vector<const Nif::NiAVObject*> roots;
@@ -376,10 +374,8 @@ namespace NifOsg
             created->setDataVariance(osg::Object::STATIC);
             for (const Nif::NiAVObject* root : roots)
             {
-                auto node = handleNode(root, nullptr, nullptr,
-                    { .mNifVersion = nif.getVersion(),
-                        .mImageManager = imageManager,
-                        .mTextKeys = &textkeys->mTextKeys });
+                auto node = handleNode(
+                    root, nullptr, nullptr, { .mNifVersion = nif.getVersion(), .mTextKeys = &textkeys->mTextKeys });
                 created->addChild(node);
             }
             if (mHasNightDayLabel)
@@ -410,8 +406,7 @@ namespace NifOsg
         }
 
         void applyNodeProperties(const Nif::NiAVObject* nifNode, osg::Node* applyTo,
-            SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
-            std::vector<unsigned int>& boundTextures, int animflags)
+            SceneUtil::CompositeStateSetUpdater* composite, std::vector<unsigned int>& boundTextures, int animflags)
         {
             bool hasStencilProperty = false;
 
@@ -449,8 +444,7 @@ namespace NifOsg
                         if (property.getPtr()->recIndex == mFirstRootTextureIndex)
                             applyTo->setUserValue("overrideFx", 1);
                     }
-                    handleProperty(property.getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
-                        hasStencilProperty);
+                    handleProperty(property.getPtr(), applyTo, composite, boundTextures, animflags, hasStencilProperty);
                 }
             }
 
@@ -462,8 +456,7 @@ namespace NifOsg
                 shaderprop = static_cast<const Nif::BSTriShape*>(nifNode)->mShaderProperty;
 
             if (!shaderprop.empty())
-                handleProperty(shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
-                    hasStencilProperty);
+                handleProperty(shaderprop.getPtr(), applyTo, composite, boundTextures, animflags, hasStencilProperty);
         }
 
         static void setupController(const Nif::NiTimeController* ctrl, SceneUtil::Controller* toSetup, int animflags)
@@ -527,8 +520,7 @@ namespace NifOsg
             sequenceNode->setMode(osg::Sequence::START);
         }
 
-        osg::ref_ptr<osg::Image> handleSourceTexture(
-            const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
+        osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st)
         {
             if (!st)
                 return nullptr;
@@ -536,8 +528,8 @@ namespace NifOsg
             osg::ref_ptr<osg::Image> image;
             if (st->mExternal)
             {
-                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->mFile, imageManager->getVFS());
-                image = imageManager->getImage(filename);
+                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->mFile, mImageManager->getVFS());
+                image = mImageManager->getImage(filename);
             }
             else if (!st->mData.empty())
             {
@@ -552,7 +544,7 @@ namespace NifOsg
             texture->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
         }
 
-        bool handleEffect(const Nif::NiAVObject* nifNode, osg::StateSet* stateset, Resource::ImageManager* imageManager)
+        bool handleEffect(const Nif::NiAVObject* nifNode, osg::StateSet* stateset)
         {
             if (nifNode->recType != Nif::RC_NiTextureEffect)
             {
@@ -595,7 +587,7 @@ namespace NifOsg
                     return false;
             }
 
-            osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->mTexture.getPtr(), imageManager));
+            osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->mTexture.getPtr()));
             osg::ref_ptr<osg::Texture2D> texture2d(new osg::Texture2D(image));
             if (image)
                 texture2d->setTextureSize(image->s(), image->t());
@@ -766,7 +758,7 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
-            applyNodeProperties(nifNode, node, composite, args.mImageManager, args.mBoundTextures, args.mAnimFlags);
+            applyNodeProperties(nifNode, node, composite, args.mBoundTextures, args.mAnimFlags);
 
             const bool isNiGeometry = isTypeNiGeometry(nifNode->recType);
             const bool isBSGeometry = isTypeBSGeometry(nifNode->recType);
@@ -868,7 +860,7 @@ namespace NifOsg
                     if (!effect.empty())
                     {
                         osg::ref_ptr<osg::StateSet> effectStateSet = new osg::StateSet;
-                        if (handleEffect(effect.getPtr(), effectStateSet, args.mImageManager))
+                        if (handleEffect(effect.getPtr(), effectStateSet))
                             for (unsigned int i = 0; i < currentNode->getNumChildren(); ++i)
                                 currentNode->getChild(i)->getOrCreateStateSet()->merge(*effectStateSet);
                     }
@@ -1035,8 +1027,7 @@ namespace NifOsg
         }
 
         void handleTextureControllers(const Nif::NiProperty* texProperty,
-            SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
-            osg::StateSet* stateset, int animflags)
+            SceneUtil::CompositeStateSetUpdater* composite, osg::StateSet* stateset, int animflags)
         {
             for (Nif::NiTimeControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
@@ -1070,7 +1061,7 @@ namespace NifOsg
                         if (source.empty())
                             continue;
 
-                        osg::ref_ptr<osg::Image> image(handleSourceTexture(source.getPtr(), imageManager));
+                        osg::ref_ptr<osg::Image> image(handleSourceTexture(source.getPtr()));
                         osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D(image));
                         if (image)
                             texture->setTextureSize(image->s(), image->t());
@@ -1986,7 +1977,7 @@ namespace NifOsg
 
         void handleTextureProperty(const Nif::NiTexturingProperty* texprop, const std::string& nodeName,
             osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite,
-            Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
+            std::vector<unsigned int>& boundTextures, int animflags)
         {
             if (!boundTextures.empty())
             {
@@ -2039,7 +2030,7 @@ namespace NifOsg
                         if (!tex.mSourceTexture.empty())
                         {
                             const Nif::NiSourceTexture* st = tex.mSourceTexture.getPtr();
-                            osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+                            osg::ref_ptr<osg::Image> image = handleSourceTexture(st);
                             texture2d = new osg::Texture2D(image);
                             if (image)
                                 texture2d->setTextureSize(image->s(), image->t());
@@ -2161,23 +2152,23 @@ namespace NifOsg
                     boundTextures.push_back(uvSet);
                 }
             }
-            handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+            handleTextureControllers(texprop, composite, stateset, animflags);
         }
 
         Bgsm::MaterialFilePtr getShaderMaterial(const std::string& path)
         {
-            if (!mMaterialMgr)
+            if (!mMaterialManager)
                 return nullptr;
 
             if (!Misc::StringUtils::ciEndsWith(path, ".bgem") && !Misc::StringUtils::ciEndsWith(path, ".bgsm"))
                 return nullptr;
 
-            std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, mMaterialMgr->getVFS());
-            return mMaterialMgr->get(VFS::Path::Normalized(normalizedPath));
+            std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, mMaterialManager->getVFS());
+            return mMaterialManager->get(VFS::Path::Normalized(normalizedPath));
         }
 
-        void handleShaderMaterial(Bgsm::MaterialFilePtr material, osg::StateSet* stateset,
-            Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures)
+        void handleShaderMaterial(
+            Bgsm::MaterialFilePtr material, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
             if (material->mShaderType == Bgsm::ShaderType::Lighting)
             {
@@ -2194,8 +2185,8 @@ namespace NifOsg
                 if (!bgsm->mDiffuseMap.empty())
                 {
                     std::string filename
-                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mDiffuseMap, imageManager->getVFS());
-                    osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mDiffuseMap, mImageManager->getVFS());
+                    osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
                     osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                     if (image)
                         texture2d->setTextureSize(image->s(), image->t());
@@ -2209,8 +2200,8 @@ namespace NifOsg
                 if (!bgsm->mNormalMap.empty())
                 {
                     std::string filename
-                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mNormalMap, imageManager->getVFS());
-                    osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                        = Misc::ResourceHelpers::correctTexturePath(bgsm->mNormalMap, mImageManager->getVFS());
+                    osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
                     osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                     if (image)
                         texture2d->setTextureSize(image->s(), image->t());
@@ -2236,8 +2227,8 @@ namespace NifOsg
                         boundTextures.clear();
                     }
                     std::string filename
-                        = Misc::ResourceHelpers::correctTexturePath(bgem->mBaseMap, imageManager->getVFS());
-                    osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                        = Misc::ResourceHelpers::correctTexturePath(bgem->mBaseMap, mImageManager->getVFS());
+                    osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
                     osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                     texture2d->setName("diffuseMap");
                     if (image)
@@ -2261,8 +2252,7 @@ namespace NifOsg
         }
 
         void handleTextureSet(const Nif::BSShaderTextureSet* textureSet, unsigned int clamp,
-            const std::string& nodeName, osg::StateSet* stateset, Resource::ImageManager* imageManager,
-            std::vector<unsigned int>& boundTextures)
+            const std::string& nodeName, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
             if (!boundTextures.empty())
             {
@@ -2291,8 +2281,8 @@ namespace NifOsg
                     }
                 }
                 std::string filename
-                    = Misc::ResourceHelpers::correctTexturePath(textureSet->mTextures[i], imageManager->getVFS());
-                osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                    = Misc::ResourceHelpers::correctTexturePath(textureSet->mTextures[i], mImageManager->getVFS());
+                osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
                 osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                 if (image)
                     texture2d->setTextureSize(image->s(), image->t());
@@ -2374,8 +2364,8 @@ namespace NifOsg
         }
 
         void handleProperty(const Nif::NiProperty* property, osg::Node* node,
-            SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
-            std::vector<unsigned int>& boundTextures, int animflags, bool hasStencilProperty)
+            SceneUtil::CompositeStateSetUpdater* composite, std::vector<unsigned int>& boundTextures, int animflags,
+            bool hasStencilProperty)
         {
             switch (property->recType)
             {
@@ -2457,8 +2447,7 @@ namespace NifOsg
                 {
                     const Nif::NiTexturingProperty* texprop = static_cast<const Nif::NiTexturingProperty*>(property);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    handleTextureProperty(
-                        texprop, node->getName(), stateset, composite, imageManager, boundTextures, animflags);
+                    handleTextureProperty(texprop, node->getName(), stateset, composite, boundTextures, animflags);
                     node->setUserValue("applyMode", static_cast<int>(texprop->mApplyMode));
                     break;
                 }
@@ -2472,10 +2461,9 @@ namespace NifOsg
                     if (!texprop->mTextureSet.empty())
                     {
                         auto textureSet = texprop->mTextureSet.getPtr();
-                        handleTextureSet(
-                            textureSet, texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
+                        handleTextureSet(textureSet, texprop->mClamp, node->getName(), stateset, boundTextures);
                     }
-                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->refraction())
                         SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
                     break;
@@ -2497,8 +2485,8 @@ namespace NifOsg
                             boundTextures.clear();
                         }
                         std::string filename
-                            = Misc::ResourceHelpers::correctTexturePath(texprop->mFilename, imageManager->getVFS());
-                        osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                            = Misc::ResourceHelpers::correctTexturePath(texprop->mFilename, mImageManager->getVFS());
+                        osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
                         osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                         texture2d->setName("diffuseMap");
                         if (image)
@@ -2515,7 +2503,7 @@ namespace NifOsg
                         }
                     }
                     stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
-                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    handleTextureControllers(texprop, composite, stateset, animflags);
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
                     break;
                 }
@@ -2529,13 +2517,13 @@ namespace NifOsg
                     Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName);
                     if (material)
                     {
-                        handleShaderMaterial(material, stateset, imageManager, boundTextures);
+                        handleShaderMaterial(material, stateset, boundTextures);
                         break;
                     }
                     if (!texprop->mTextureSet.empty())
-                        handleTextureSet(texprop->mTextureSet.getPtr(), texprop->mClamp, node->getName(), stateset,
-                            imageManager, boundTextures);
-                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                        handleTextureSet(
+                            texprop->mTextureSet.getPtr(), texprop->mClamp, node->getName(), stateset, boundTextures);
+                    handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->doubleSided())
                         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     if (texprop->treeAnim())
@@ -2556,7 +2544,7 @@ namespace NifOsg
                     Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName);
                     if (material)
                     {
-                        handleShaderMaterial(material, stateset, imageManager, boundTextures);
+                        handleShaderMaterial(material, stateset, boundTextures);
                         break;
                     }
                     if (!texprop->mSourceTexture.empty())
@@ -2568,8 +2556,8 @@ namespace NifOsg
                             boundTextures.clear();
                         }
                         std::string filename = Misc::ResourceHelpers::correctTexturePath(
-                            texprop->mSourceTexture, imageManager->getVFS());
-                        osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                            texprop->mSourceTexture, mImageManager->getVFS());
+                        osg::ref_ptr<osg::Image> image = mImageManager->getImage(filename);
                         osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                         texture2d->setName("diffuseMap");
                         if (image)
@@ -2601,7 +2589,7 @@ namespace NifOsg
                     stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
                     if (useFalloff)
                         stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
-                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->doubleSided())
                         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
@@ -3067,16 +3055,17 @@ namespace NifOsg
     };
 
     osg::ref_ptr<osg::Node> Loader::load(
-        Nif::FileView file, Resource::ImageManager* imageManager, Resource::BgsmFileManager* materialMgr)
+        Nif::FileView file, Resource::ImageManager* imageManager, Resource::BgsmFileManager* materialManager)
     {
-        LoaderImpl impl(
-            file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion(), materialMgr);
-        return impl.load(file, imageManager);
+        LoaderImpl impl(file.getFilename(), file.getVersion(), file.getUserVersion(), file.getBethVersion());
+        impl.mMaterialManager = materialManager;
+        impl.mImageManager = imageManager;
+        return impl.load(file);
     }
 
     void Loader::loadKf(Nif::FileView kf, SceneUtil::KeyframeHolder& target)
     {
-        LoaderImpl impl(kf.getFilename(), kf.getVersion(), kf.getUserVersion(), kf.getBethVersion(), nullptr);
+        LoaderImpl impl(kf.getFilename(), kf.getVersion(), kf.getUserVersion(), kf.getBethVersion());
         impl.loadKf(kf, target);
     }
 
