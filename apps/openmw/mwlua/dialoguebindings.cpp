@@ -36,6 +36,7 @@ namespace
         {
             using DecoratedIterator = MWWorld::Store<ESM::Dialogue>::iterator;
             DecoratedIterator mIter;
+            DecoratedIterator mEndIter;
 
         public:
             using iterator_category = DecoratedIterator::iterator_category;
@@ -44,8 +45,9 @@ namespace
             using pointer = DecoratedIterator::pointer;
             using reference = DecoratedIterator::reference;
 
-            FilteredDialogueIterator(const DecoratedIterator& decoratedIterator)
-                : mIter{ decoratedIterator }
+            FilteredDialogueIterator(const DecoratedIterator& pointingIterator, const DecoratedIterator& end)
+                : mIter{ pointingIterator }
+                , mEndIter{ end }
             {
             }
 
@@ -53,8 +55,8 @@ namespace
             {
                 do
                 {
-                    std::advance(mIter, 1);
-                } while (mIter->mType != filter);
+                    ++mIter;
+                } while (mIter->mType != filter and mIter != mEndIter);
                 return *this;
             }
 
@@ -63,17 +65,17 @@ namespace
                 FilteredDialogueIterator iter = *this;
                 do
                 {
-                    std::advance(mIter, 1);
-                } while (mIter->mType != filter);
+                    ++mIter;
+                } while (mIter->mType != filter and mIter != mEndIter);
                 return iter;
             }
 
             FilteredDialogueIterator& operator+=(difference_type advance)
             {
-                while (advance > 0)
+                while (advance > 0 and mIter != mEndIter)
                 {
-                    std::advance(mIter, 1);
-                    if (mIter->mType != filter)
+                    ++mIter;
+                    if (mIter->mType == filter)
                     {
                         --advance;
                     }
@@ -105,7 +107,7 @@ namespace
             }
 
             auto result = begin();
-            std::advance(result, index);
+            result += index;
 
             return &(*result);
         }
@@ -118,15 +120,15 @@ namespace
 
         iterator begin() const
         {
-            iterator result{ mDialogueStore.begin() };
+            iterator result{ mDialogueStore.begin(), mDialogueStore.end() };
             while (result != end() and result->mType != filter)
             {
-                std::advance(result, 1);
+                ++result;
             }
             return result;
         }
 
-        iterator end() const { return iterator{ mDialogueStore.end() }; }
+        iterator end() const { return iterator{ mDialogueStore.end(), mDialogueStore.end() }; }
     };
 
     template <ESM::Dialogue::Type filter>
