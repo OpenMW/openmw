@@ -563,7 +563,7 @@ ICU_VER="70_1"
 LUAJIT_VER="v2.1.0-beta3-452-g7a0cf5fd"
 LZ4_VER="1.9.2"
 OPENAL_VER="1.23.0"
-QT_VER="5.15.2"
+QT_VER="6.6.2"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
 OSG_ARCHIVE="OSGoS-3.6.5-123-g68c5c573d-msvc${OSG_MSVC_YEAR}-win${BITS}"
@@ -894,7 +894,7 @@ printf "Qt ${QT_VER}... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		pushd "$DEPS" > /dev/null
-		AQT_VERSION="v3.1.7"
+		AQT_VERSION="v3.1.12"
 		if ! [ -f "aqt_x64-${AQT_VERSION}.exe" ]; then
 			download "aqt ${AQT_VERSION}"\
 				"https://github.com/miurahr/aqtinstall/releases/download/${AQT_VERSION}/aqt_x64.exe" \
@@ -915,6 +915,9 @@ printf "Qt ${QT_VER}... "
 		echo Done.
 	fi
 
+	QT_MAJOR_VER=$(echo "${QT_VER}" | awk -F '[.]' '{printf "%d", $1}')
+	QT_MINOR_VER=$(echo "${QT_VER}" | awk -F '[.]' '{printf "%d", $2}')
+
 	cd $QT_SDK
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
 		if [ $CONFIGURATION == "Debug" ]; then
@@ -922,13 +925,22 @@ printf "Qt ${QT_VER}... "
 		else
 			DLLSUFFIX=""
 		fi
-		if [ "${QT_VER:0:1}" -eq "6" ]; then
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
+
+		if [ "${QT_MAJOR_VER}" -eq 6 ]; then
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
+
+			# Since Qt 6.7.0 plugin is called "qmodernwindowsstyle"
+			if [ "${QT_MINOR_VER}" -ge 7 ]; then
+				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qmodernwindowsstyle${DLLSUFFIX}.dll"
+			else
+				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
+			fi
 		else
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,Widgets,Svg}${DLLSUFFIX}.dll
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,Widgets,Svg}${DLLSUFFIX}.dll
+			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 		fi
+
 		add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
-		add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 		add_qt_image_dlls $CONFIGURATION "$(pwd)/plugins/imageformats/qsvg${DLLSUFFIX}.dll"
 	done
 	echo Done.
@@ -1123,7 +1135,7 @@ fi
 			echo "    $(basename $DLL)"
 			cp "$DLL" "${DLL_PREFIX}styles"
 		done
-
+		echo
 		echo "- Qt Image Format DLLs..."
 		mkdir -p ${DLL_PREFIX}imageformats
 		for DLL in ${QT_IMAGEFORMATS[$CONFIGURATION]}; do

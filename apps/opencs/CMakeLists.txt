@@ -257,6 +257,7 @@ endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
+    target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/openmw-cs.exe.manifest)
 endif()
 
 if (WIN32 AND BUILD_OPENCS)
