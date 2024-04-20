@@ -819,26 +819,31 @@ void OMW::Engine::prepareEngine()
     mEnvironment.setWorldModel(mWorld->getWorldModel());
     mEnvironment.setESMStore(mWorld->getStore());
 
-    Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-    Loading::AsyncListener asyncListener(*listener);
+    Loading::Listener listener = mNetType == NetType::Server
+        ? Loading::Listener()
+        : *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+    Loading::AsyncListener asyncListener(listener);
     auto dataLoading = std::async(std::launch::async,
         [&] { mWorld->loadData(mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get(), &asyncListener); });
 
-    if (!mSkipMenu)
+    if (mNetType != NetType::Server)
     {
-        std::string_view logo = Fallback::Map::getString("Movies_Company_Logo");
-        if (!logo.empty())
-            mWindowManager->playVideo(logo, true);
+        if (!mSkipMenu)
+        {
+            std::string_view logo = Fallback::Map::getString("Movies_Company_Logo");
+            if (!logo.empty())
+                mWindowManager->playVideo(logo, true);
+        }
     }
 
-    listener->loadingOn();
+    listener.loadingOn();
     {
         using namespace std::chrono_literals;
         while (dataLoading.wait_for(50ms) != std::future_status::ready)
             asyncListener.update();
         dataLoading.get();
     }
-    listener->loadingOff();
+    listener.loadingOff();
 
     mWorld->init(mViewer, std::move(rootNode), mWorkQueue.get(), *mUnrefQueue);
     mEnvironment.setWorldScene(mWorld->getWorldScene());
