@@ -26,7 +26,7 @@
 namespace bpo = boost::program_options;
 
 /// See if the file has the named extension
-bool hasExtension(const std::filesystem::path& filename, const std::string& extensionToFind)
+bool hasExtension(const std::filesystem::path& filename, std::string_view extensionToFind)
 {
     const auto extension = Files::pathToUnicodeString(filename.extension());
     return Misc::StringUtils::ciEqual(extension, extensionToFind);
@@ -59,16 +59,17 @@ std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
     return nullptr;
 }
 
-void readNIF(
+void readFile(
     const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
 {
     const std::string pathStr = Files::pathToUnicodeString(path);
+    const bool isNif = isNIF(path);
     if (!quiet)
     {
-        if (hasExtension(path, ".kf"))
-            std::cout << "Reading KF file '" << pathStr << "'";
+        if (isNif)
+            std::cout << "Reading " << (hasExtension(path, ".nif") ? "NIF" : "KF") << " file '" << pathStr << "'";
         else
-            std::cout << "Reading NIF file '" << pathStr << "'";
+            std::cout << "Reading " << (hasExtension(path, ".bgsm") ? "BGSM" : "BGEM") << " file '" << pathStr << "'";
         if (!source.empty())
             std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
         std::cout << std::endl;
@@ -76,41 +77,23 @@ void readNIF(
     const std::filesystem::path fullPath = !source.empty() ? source / path : path;
     try
     {
-        Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
-        Nif::Reader reader(file, nullptr);
-        if (vfs != nullptr)
-            reader.parse(vfs->get(pathStr));
+        if (isNif)
+        {
+            Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
+            Nif::Reader reader(file, nullptr);
+            if (vfs != nullptr)
+                reader.parse(vfs->get(pathStr));
+            else
+                reader.parse(Files::openConstrainedFileStream(fullPath));
+        }
         else
-            reader.parse(Files::openConstrainedFileStream(fullPath));
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << "Failed to read '" << pathStr << "':" << std::endl << e.what() << std::endl;
-    }
-}
-
-void readMaterial(
-    const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
-{
-    const std::string pathStr = Files::pathToUnicodeString(path);
-    if (!quiet)
-    {
-        if (hasExtension(path, ".bgem"))
-            std::cout << "Reading BGEM file '" << pathStr << "'";
-        else
-            std::cout << "Reading BGSM file '" << pathStr << "'";
-        if (!source.empty())
-            std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
-        std::cout << std::endl;
-    }
-    const std::filesystem::path fullPath = !source.empty() ? source / path : path;
-    try
-    {
-        Bgsm::Reader reader;
-        if (vfs != nullptr)
-            reader.parse(vfs->get(pathStr));
-        else
-            reader.parse(Files::openConstrainedFileStream(fullPath));
+        {
+            Bgsm::Reader reader;
+            if (vfs != nullptr)
+                reader.parse(vfs->get(pathStr));
+            else
+                reader.parse(Files::openConstrainedFileStream(fullPath));
+        }
     }
     catch (std::exception& e)
     {
@@ -134,13 +117,9 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 
     for (const auto& name : vfs.getRecursiveDirectoryIterator(""))
     {
-        if (isNIF(name.value()))
+        if (isNIF(name.value()) || isMaterial(name.value()))
         {
-            readNIF(archivePath, name.value(), &vfs, quiet);
-        }
-        else if (isMaterial(name.value()))
-        {
-            readMaterial(archivePath, name.value(), &vfs, quiet);
+            readFile(archivePath, name.value(), &vfs, quiet);
         }
     }
 
@@ -262,13 +241,9 @@ int main(int argc, char** argv)
         const std::string pathStr = Files::pathToUnicodeString(path);
         try
         {
-            if (isNIF(path))
+            if (isNIF(path) || isMaterial(path))
             {
-                readNIF({}, path, vfs.get(), quiet);
-            }
-            else if (isMaterial(path))
-            {
-                readMaterial({}, path, vfs.get(), quiet);
+                readFile({}, path, vfs.get(), quiet);
             }
             else if (auto archive = makeArchive(path))
             {
@@ -276,7 +251,7 @@ int main(int argc, char** argv)
             }
             else
             {
-                std::cerr << "Error: '" << pathStr << "' is not a NIF/KF file, BSA/BA2 archive, or directory"
+                std::cerr << "Error: '" << pathStr << "' is not a NIF/KF/BGEM/BGSM file, BSA/BA2 archive, or directory"
                           << std::endl;
             }
         }
