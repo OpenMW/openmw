@@ -297,11 +297,14 @@ bool OMW::Engine::frame(float frametime)
 
         // update world
         {
-            ScopedProfile<UserStatsType::World> profile(frameStart, frameNumber, *timer, *stats);
-
-            if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
+            if (!mEnvironment.getIsServer())
             {
-                mWorld->update(frametime, paused);
+                ScopedProfile<UserStatsType::World> profile(frameStart, frameNumber, *timer, *stats);
+
+                if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
+                {
+                    mWorld->update(frametime, paused);
+                }
             }
         }
 
