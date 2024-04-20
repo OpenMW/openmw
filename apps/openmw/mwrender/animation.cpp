@@ -530,6 +530,7 @@ namespace MWRender
         , mHasMagicEffects(false)
         , mAlpha(1.f)
         , mPlayScriptedOnly(false)
+        , mRequiresBoneMap(false)
     {
         for (size_t i = 0; i < sNumBlendMasks; i++)
             mAnimationTimePtr[i] = std::make_shared<AnimationTime>();
@@ -964,8 +965,17 @@ namespace MWRender
     {
         if (!mNodeMapCreated && mObjectRoot)
         {
-            SceneUtil::NodeMapVisitor visitor(mNodeMap);
-            mObjectRoot->accept(visitor);
+            // If the base of this animation is an osgAnimation, we should map the bones not matrix transforms
+            if (mRequiresBoneMap)
+            {
+                SceneUtil::NodeMapVisitorBoneOnly visitor(mNodeMap);
+                mObjectRoot->accept(visitor);
+            }
+            else
+            {
+                SceneUtil::NodeMapVisitor visitor(mNodeMap);
+                mObjectRoot->accept(visitor);
+            }
             mNodeMapCreated = true;
         }
         return mNodeMap;
@@ -1478,6 +1488,10 @@ namespace MWRender
             mObjectRoot = skel;
             mInsert->addChild(mObjectRoot);
         }
+
+        // osgAnimation formats with skeletons should have their nodemap be bone instances
+        // FIXME: better way to detect osgAnimation here instead of relying on extension?
+        mRequiresBoneMap = mSkeleton != nullptr && !Misc::StringUtils::ciEndsWith(model, ".nif");
 
         if (previousStateset)
             mObjectRoot->setStateSet(previousStateset);

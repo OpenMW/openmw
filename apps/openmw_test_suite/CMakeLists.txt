@@ -100,6 +100,8 @@ file(GLOB UNITTEST_SRC_FILES
     resource/testobjectcache.cpp
 
     vfs/testpathutil.cpp
+
+    sceneutil/osgacontroller.cpp
 )
 
 source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

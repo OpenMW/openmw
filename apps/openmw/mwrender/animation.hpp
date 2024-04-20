@@ -246,6 +246,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
         bool mPlayScriptedOnly;
+        bool mRequiresBoneMap;
 
         const NodeMap& getNodeMap() const;
 
