@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <string>
 
-#include "file.hpp"
 #include "stream.hpp"
 
 namespace Bgsm

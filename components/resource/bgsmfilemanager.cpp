@@ -43,7 +43,7 @@ namespace Resource
         {
             Bgsm::Reader reader;
             reader.parse(mVFS->get(name));
-            Bgsm::MaterialFilePtr file = std::move(reader.getFile());
+            Bgsm::MaterialFilePtr file = reader.getFile();
             obj = new BgsmFileHolder(file);
             mCache->addEntryToObjectCache(name.value(), obj);
             return file;
