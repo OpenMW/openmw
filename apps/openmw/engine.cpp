@@ -199,9 +199,10 @@ bool OMW::Engine::frame(float frametime)
 
     try
     {
+        const bool isServer = mEnvironment.getIsServer();
         // update input
         {
-            if (!mEnvironment.getIsServer())
+            if (!isServer)
             {
                 ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
                 mInputManager->update(frametime, false);
@@ -213,7 +214,7 @@ bool OMW::Engine::frame(float frametime)
         // changing widget textures (fixed in MyGUI 3.3.2), and destroyed widgets will not be deleted (not fixed yet,
         // https://github.com/MyGUI/mygui/issues/21)
         {
-            if (!mEnvironment.getIsServer())
+            if (!isServer)
             {
                 ScopedProfile<UserStatsType::Sound> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -251,7 +252,7 @@ bool OMW::Engine::frame(float frametime)
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                if (!mEnvironment.getIsServer() && !mWindowManager->containsMode(MWGui::GM_MainMenu))
+                if (!isServer && !mWindowManager->containsMode(MWGui::GM_MainMenu))
                 {
                     if (mWorld->getScriptsEnabled())
                     {
@@ -269,7 +270,7 @@ bool OMW::Engine::frame(float frametime)
                 {
                     double hours = (frametime * mWorld->getTimeManager()->getGameTimeScale()) / 3600.0;
                     mWorld->advanceTime(hours, true);
-                    if (!mEnvironment.getIsServer())
+                    if (!isServer)
                     {
                         mWorld->rechargeItems(frametime, true);
                     }
@@ -279,7 +280,7 @@ bool OMW::Engine::frame(float frametime)
 
         // update mechanics
         {
-            if (!mEnvironment.getIsServer())
+            if (!isServer)
             {
                 ScopedProfile<UserStatsType::Mechanics> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -299,7 +300,7 @@ bool OMW::Engine::frame(float frametime)
 
         // update physics
         {
-            if (!mEnvironment.getIsServer())
+            if (!isServer)
             {
                 ScopedProfile<UserStatsType::Physics> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -312,7 +313,7 @@ bool OMW::Engine::frame(float frametime)
 
         // update world
         {
-            if (!mEnvironment.getIsServer())
+            if (!isServer)
             {
                 ScopedProfile<UserStatsType::World> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -325,7 +326,7 @@ bool OMW::Engine::frame(float frametime)
 
         // update GUI
         {
-            if (!mEnvironment.getIsServer())
+            if (!isServer)
             {
                 ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
                 mWindowManager->update(frametime);
@@ -358,7 +359,9 @@ bool OMW::Engine::frame(float frametime)
         mLuaManager->reportStats(frameNumber, *stats);
     }
 
-    if (!mEnvironment.getIsServer())
+    const bool isServer = mEnvironment.getIsServer();
+
+    if (!isServer)
     {
 
         mStereoManager->updateSettings(Settings::camera().mNearClip, Settings::camera().mViewingDistance);
@@ -375,7 +378,7 @@ bool OMW::Engine::frame(float frametime)
 
     mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
 
-    if (!mEnvironment.getIsServer())
+    if (!isServer)
     {
         mViewer->renderingTraversals();
     }
