@@ -337,20 +337,27 @@ bool OMW::Engine::frame(float frametime)
         mLuaManager->reportStats(frameNumber, *stats);
     }
 
-    mStereoManager->updateSettings(Settings::camera().mNearClip, Settings::camera().mViewingDistance);
-
-    mViewer->eventTraversal();
-    mViewer->updateTraversal();
-
-    // update GUI by world data
+    if (!mEnvironment.getIsServer())
     {
-        ScopedProfile<UserStatsType::WindowManager> profile(frameStart, frameNumber, *timer, *stats);
-        mWorld->updateWindowManager();
+
+        mStereoManager->updateSettings(Settings::camera().mNearClip, Settings::camera().mViewingDistance);
+
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+
+        // update GUI by world data
+        {
+            ScopedProfile<UserStatsType::WindowManager> profile(frameStart, frameNumber, *timer, *stats);
+            mWorld->updateWindowManager();
+        }
     }
 
     mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
 
-    mViewer->renderingTraversals();
+    if (!mEnvironment.getIsServer())
+    {
+        mViewer->renderingTraversals();
+    }
 
     mLuaWorker->finishUpdate();
 
