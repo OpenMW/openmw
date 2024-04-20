@@ -201,8 +201,11 @@ bool OMW::Engine::frame(float frametime)
     {
         // update input
         {
-            ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
-            mInputManager->update(frametime, false);
+            if (!mEnvironment.getIsServer())
+            {
+                ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
+                mInputManager->update(frametime, false);
+            }
         }
 
         // When the window is minimized, pause the game. Currently this *has* to be here to work around a MyGUI bug.
