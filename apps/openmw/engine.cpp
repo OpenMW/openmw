@@ -307,8 +307,11 @@ bool OMW::Engine::frame(float frametime)
 
         // update GUI
         {
-            ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
-            mWindowManager->update(frametime);
+            if (!mEnvironment.getIsServer())
+            {
+                ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
+                mWindowManager->update(frametime);
+            }
         }
     }
     catch (const std::exception& e)
