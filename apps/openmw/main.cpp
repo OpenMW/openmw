@@ -63,7 +63,9 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         return false;
     }
 
-    engine.setNetType(variables["net-type"].as<unsigned int>());
+    unsigned int netType = variables["net-type"].as<unsigned int>();
+    engine.setServerPid(netType);
+    engine.setNetType(netType);
 
     cfgMgr.readConfiguration(variables, desc);
 

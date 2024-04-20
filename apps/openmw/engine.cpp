@@ -1125,6 +1125,10 @@ void OMW::Engine::go()
     {
         Settings::ShaderManager::get().save();
     }
+    else if (mNetType == NetType::Host)
+    {
+        kill(mServerPid, SIGABRT);
+    }
     mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath());
 
     Log(Debug::Info) << "Quitting peacefully.";
@@ -1192,13 +1196,16 @@ void OMW::Engine::setRandomSeed(unsigned int seed)
 
 void OMW::Engine::setNetType(const unsigned int netType)
 {
+    if (mServerPid == 0 && netType == NetType::Host)
+    {
+        mNetType = NetType::Server;
+        return;
+    }
     bool doSDL = false;
-    bool doServer = false;
     switch (netType)
     {
         case NetType::Host:
             doSDL = true;
-            doServer = true;
             mNetType = netType;
             break;
         case NetType::Client:
@@ -1206,7 +1213,6 @@ void OMW::Engine::setNetType(const unsigned int netType)
             mNetType = netType;
             break;
         case NetType::Server:
-            doServer = true;
             mNetType = netType;
             break;
         default:
@@ -1229,5 +1235,21 @@ void OMW::Engine::setNetType(const unsigned int netType)
             }
         }
     }
-    Log(Debug::Warning) << "Net type is... " << netType;
+}
+
+void OMW::Engine::setServerPid(const unsigned int netType)
+{
+    if (netType != NetType::Host)
+    {
+        return;
+    }
+
+    const pid_t serverPid = fork();
+
+    if (serverPid == -1)
+    {
+        throw std::logic_error("Failed to fork server process");
+    }
+
+    mServerPid = serverPid;
 }

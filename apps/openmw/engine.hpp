@@ -173,6 +173,7 @@ namespace OMW
 
         unsigned int mRandomSeed;
         unsigned int mNetType;
+        pid_t mServerPid;
 
         Compiler::Extensions mExtensions;
         std::unique_ptr<Compiler::Context> mScriptContext;
@@ -264,6 +265,8 @@ namespace OMW
         void setRandomSeed(unsigned int seed);
 
         void setNetType(const unsigned int netType);
+
+        void setServerPid(const unsigned int netType);
 
     private:
         Files::ConfigurationManager& mCfgMgr;
