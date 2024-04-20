@@ -11,7 +11,7 @@ namespace Bgsm
 {
     void Reader::parse(Files::IStreamPtr&& inputStream)
     {
-        BGSMStream stream(*this, std::move(inputStream));
+        BGSMStream stream(std::move(inputStream));
 
         std::array<char, 4> signature;
         stream.readArray(signature);
