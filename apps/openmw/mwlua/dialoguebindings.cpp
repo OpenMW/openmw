@@ -38,7 +38,11 @@ namespace
             DecoratedIterator mIter;
 
         public:
+            using iterator_category = DecoratedIterator::iterator_category;
+            using value_type = DecoratedIterator::value_type;
             using difference_type = DecoratedIterator::difference_type;
+            using pointer = DecoratedIterator::pointer;
+            using reference = DecoratedIterator::reference;
 
             FilteredDialogueIterator(const DecoratedIterator& decoratedIterator)
                 : mIter{ decoratedIterator }
@@ -64,14 +68,28 @@ namespace
                 return iter;
             }
 
+            FilteredDialogueIterator& operator+=(difference_type advance)
+            {
+                while (advance > 0)
+                {
+                    std::advance(mIter, 1);
+                    if (mIter->mType != filter)
+                    {
+                        --advance;
+                    }
+                }
+                return *this;
+            }
+
             bool operator==(const FilteredDialogueIterator& x) const { return mIter == x.mIter; }
 
             bool operator!=(const FilteredDialogueIterator& x) const { return not(*this == x); }
 
-            const ESM::Dialogue& operator*() const { return *mIter; }
+            const value_type& operator*() const { return *mIter; }
 
-            const ESM::Dialogue* operator->() const { return &(*mIter); }
+            const value_type* operator->() const { return &(*mIter); }
         };
+
         using iterator = FilteredDialogueIterator;
 
         const ESM::Dialogue* search(const ESM::RefId& id) const
