@@ -842,7 +842,10 @@ void OMW::Engine::prepareEngine()
 
     mWorld->init(mViewer, std::move(rootNode), mWorkQueue.get(), *mUnrefQueue);
     mEnvironment.setWorldScene(mWorld->getWorldScene());
-    mWorld->setupPlayer();
+    if (mNetType != NetType::Server)
+    {
+        mWorld->setupPlayer();
+    }
     mWorld->setRandomSeed(mRandomSeed);
 
     const MWWorld::Store<ESM::GameSetting>* gmst = &mWorld->getStore().get<ESM::GameSetting>();
