@@ -1,7 +1,5 @@
 #include "bgsmfilemanager.hpp"
 
-#include <iostream>
-
 #include <osg/Object>
 
 #include <components/bgsm/reader.hpp>
@@ -35,8 +33,6 @@ namespace Resource
         : ResourceManager(vfs, expiryDelay)
     {
     }
-
-    BgsmFileManager::~BgsmFileManager() = default;
 
     Bgsm::MaterialFilePtr BgsmFileManager::get(VFS::Path::NormalizedView name)
     {

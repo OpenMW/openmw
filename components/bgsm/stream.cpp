@@ -2,7 +2,6 @@
 
 namespace Bgsm
 {
-
     template <>
     void BGSMStream::read<osg::Vec2f>(osg::Vec2f& vec)
     {
@@ -37,5 +36,4 @@ namespace Bgsm
         if (end != std::string::npos)
             str.erase(end);
     }
-
 }

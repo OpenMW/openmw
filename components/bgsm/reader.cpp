@@ -31,5 +31,4 @@ namespace Bgsm
 
         mFile->read(stream);
     }
-
 }

@@ -2151,18 +2151,19 @@ namespace NifOsg
             handleTextureControllers(texprop, composite, stateset, animflags);
         }
 
-        Bgsm::MaterialFilePtr getShaderMaterial(std::string_view path) const
+        static Bgsm::MaterialFilePtr getShaderMaterial(
+            std::string_view path, Resource::BgsmFileManager* materialManager)
         {
-            if (!mMaterialManager)
+            if (!materialManager)
                 return nullptr;
 
             if (!Misc::StringUtils::ciEndsWith(path, ".bgem") && !Misc::StringUtils::ciEndsWith(path, ".bgsm"))
                 return nullptr;
 
-            std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, mMaterialManager->getVFS());
+            std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, materialManager->getVFS());
             try
             {
-                return mMaterialManager->get(VFS::Path::Normalized(normalizedPath));
+                return materialManager->get(VFS::Path::Normalized(normalizedPath));
             }
             catch (std::exception& e)
             {
@@ -2528,7 +2529,7 @@ namespace NifOsg
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     clearBoundTextures(stateset, boundTextures);
-                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName))
+                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName, mMaterialManager))
                     {
                         handleShaderMaterialNodeProperties(material, stateset, boundTextures);
                         break;
@@ -2557,7 +2558,7 @@ namespace NifOsg
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     clearBoundTextures(stateset, boundTextures);
-                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName))
+                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName, mMaterialManager))
                     {
                         handleShaderMaterialNodeProperties(material, stateset, boundTextures);
                         break;
@@ -2776,15 +2777,14 @@ namespace NifOsg
                     case Nif::RC_BSLightingShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
-                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName))
+                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName, mMaterialManager))
                         {
                             handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
                             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
                             {
                                 auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
-                                specEnabled
-                                    = false; // bgsm->mSpecularEnabled; disabled until it can be implemented properly
-                                specStrength = bgsm->mSpecularMult;
+                                specEnabled = false; // bgsm->mSpecularEnabled; TODO: PBR specular lighting
+                                specStrength = 1.f; // bgsm->mSpecularMult;
                                 emissiveMult = bgsm->mEmittanceMult;
                             }
                             break;
@@ -2803,7 +2803,7 @@ namespace NifOsg
                     case Nif::RC_BSEffectShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
-                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName))
+                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName, mMaterialManager))
                         {
                             handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
                             break;

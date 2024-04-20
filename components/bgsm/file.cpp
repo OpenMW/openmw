@@ -38,9 +38,7 @@ namespace Bgsm
         }
         stream.read(mGrayscaleToPaletteColor);
         if (mVersion >= 6)
-        {
             stream.read(mMaskWrites);
-        }
     }
 
     void BGSMFile::read(BGSMStream& stream)
@@ -59,9 +57,7 @@ namespace Bgsm
             stream.read(mLightingMap);
             stream.read(mFlowMap);
             if (mVersion >= 17)
-            {
                 stream.read(mDistanceFieldAlphaMap);
-            }
         }
         else
         {
@@ -98,9 +94,7 @@ namespace Bgsm
         stream.read(mWetnessControlSpecPowerScale);
         stream.read(mWetnessControlSpecMinvar);
         if (mVersion < 10)
-        {
             stream.read(mWetnessControlEnvMapScale);
-        }
         stream.read(mWetnessControlFresnelPower);
         stream.read(mWetnessControlMetalness);
         if (mVersion >= 3)
@@ -116,9 +110,7 @@ namespace Bgsm
         stream.read(mAnisoLighting);
         stream.read(mEmitEnabled);
         if (mEmitEnabled)
-        {
             stream.read(mEmittanceColor);
-        }
         stream.read(mEmittanceMult);
         stream.read(mModelSpaceNormals);
         stream.read(mExternalEmittance);
@@ -181,14 +173,14 @@ namespace Bgsm
         stream.read(mEnvMap);
         stream.read(mNormalMap);
         stream.read(mEnvMapMask);
+        if (mVersion >= 11)
+        {
+            stream.read(mSpecularMap);
+            stream.read(mLightingMap);
+            stream.read(mGlowMap);
+        }
         if (mVersion >= 10)
         {
-            if (mVersion >= 11)
-            {
-                stream.read(mSpecularMap);
-                stream.read(mLightingMap);
-                stream.read(mGlowMap);
-            }
             stream.read(mEnvMapEnabled);
             stream.read(mEnvMapMaskScale);
         }
@@ -205,20 +197,12 @@ namespace Bgsm
         stream.read(mEnvmapMinLOD);
         stream.read(mSoftDepth);
         if (mVersion >= 11)
-        {
             stream.read(mEmittanceColor);
-            if (mVersion >= 15)
-            {
-                stream.read(mAdaptiveEmissiveExposureParams);
-                if (mVersion >= 16)
-                {
-                    stream.read(mGlowMapEnabled);
-                    if (mVersion >= 20)
-                    {
-                        stream.read(mEffectPbrSpecular);
-                    }
-                }
-            }
-        }
+        if (mVersion >= 15)
+            stream.read(mAdaptiveEmissiveExposureParams);
+        if (mVersion >= 16)
+            stream.read(mGlowMapEnabled);
+        if (mVersion >= 20)
+            stream.read(mEffectPbrSpecular);
     }
 }

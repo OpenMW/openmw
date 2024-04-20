@@ -50,7 +50,7 @@ namespace Bgsm
 
         MaterialFile() = default;
         virtual void read(BGSMStream& stream);
-        virtual ~MaterialFile() {}
+        virtual ~MaterialFile() = default;
     };
 
     struct BGSMFile : MaterialFile

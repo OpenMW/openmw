@@ -14,7 +14,7 @@ namespace Resource
     {
     public:
         BgsmFileManager(const VFS::Manager* vfs, double expiryDelay);
-        ~BgsmFileManager();
+        ~BgsmFileManager() = default;
 
         /// Retrieve a material file from the cache or load it from the VFS if not cached yet.
         Bgsm::MaterialFilePtr get(VFS::Path::NormalizedView name);
