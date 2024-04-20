@@ -66,10 +66,9 @@ namespace ESM
                     break;
                 case fourCC("SCVR"):
                 {
-                    SelectStruct ss;
-                    ss.mSelectRule = esm.getHString();
-                    ss.mValue.read(esm, Variant::Format_Info);
-                    mSelects.push_back(ss);
+                    auto filter = DialogueCondition::load(esm, mId);
+                    if (filter)
+                        mSelects.emplace_back(std::move(*filter));
                     break;
                 }
                 case fourCC("BNAM"):
@@ -120,11 +119,8 @@ namespace ESM
         esm.writeHNOCString("SNAM", mSound);
         esm.writeHNOString("NAME", mResponse);
 
-        for (std::vector<SelectStruct>::const_iterator it = mSelects.begin(); it != mSelects.end(); ++it)
-        {
-            esm.writeHNString("SCVR", it->mSelectRule);
-            it->mValue.write(esm, Variant::Format_Info);
-        }
+        for (const auto& rule : mSelects)
+            rule.save(esm);
 
         esm.writeHNOString("BNAM", mResultScript);
 

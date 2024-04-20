@@ -347,6 +347,16 @@ add_qt_style_dlls() {
 	QT_STYLES[$CONFIG]="${QT_STYLES[$CONFIG]} $@"
 }
 
+declare -A QT_IMAGEFORMATS
+QT_IMAGEFORMATS["Release"]=""
+QT_IMAGEFORMATS["Debug"]=""
+QT_IMAGEFORMATS["RelWithDebInfo"]=""
+add_qt_image_dlls() {
+	local CONFIG=$1
+	shift
+	QT_IMAGEFORMATS[$CONFIG]="${QT_IMAGEFORMATS[$CONFIG]} $@"
+}
+
 if [ -z $PLATFORM ]; then
 	PLATFORM="$(uname -m)"
 fi
@@ -913,12 +923,13 @@ printf "Qt ${QT_VER}... "
 			DLLSUFFIX=""
 		fi
 		if [ "${QT_VER:0:1}" -eq "6" ]; then
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets}${DLLSUFFIX}.dll
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
 		else
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,Widgets,Svg}${DLLSUFFIX}.dll
 		fi
 		add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
 		add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
+		add_qt_image_dlls $CONFIGURATION "$(pwd)/plugins/imageformats/qsvg${DLLSUFFIX}.dll"
 	done
 	echo Done.
 }
@@ -1111,6 +1122,13 @@ fi
 		for DLL in ${QT_STYLES[$CONFIGURATION]}; do
 			echo "    $(basename $DLL)"
 			cp "$DLL" "${DLL_PREFIX}styles"
+		done
+
+		echo "- Qt Image Format DLLs..."
+		mkdir -p ${DLL_PREFIX}imageformats
+		for DLL in ${QT_IMAGEFORMATS[$CONFIGURATION]}; do
+			echo "    $(basename $DLL)"
+			cp "$DLL" "${DLL_PREFIX}imageformats"
 		done
 		echo
 	done

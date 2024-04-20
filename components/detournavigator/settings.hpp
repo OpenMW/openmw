@@ -55,10 +55,6 @@ namespace DetourNavigator
 
     inline constexpr std::int64_t navMeshFormatVersion = 2;
 
-    RecastSettings makeRecastSettingsFromSettingsManager();
-
-    DetourSettings makeDetourSettingsFromSettingsManager();
-
     Settings makeSettingsFromSettingsManager();
 }
 

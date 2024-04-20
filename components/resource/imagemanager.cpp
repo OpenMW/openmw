@@ -78,8 +78,7 @@ namespace Resource
                 }
                 break;
             }
-            // not bothering with checks for other compression formats right now, we are unlikely to ever use those
-            // anyway
+            // not bothering with checks for other compression formats right now
             default:
                 return true;
         }

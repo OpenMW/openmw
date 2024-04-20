@@ -1,5 +1,6 @@
 #include "labels.hpp"
 
+#include <components/esm3/dialoguecondition.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -572,13 +573,14 @@ std::string_view enchantTypeLabel(int idx)
 
 std::string_view ruleFunction(int idx)
 {
-    if (idx >= 0 && idx <= 72)
+    if (idx >= ESM::DialogueCondition::Function_FacReactionLowest
+        && idx <= ESM::DialogueCondition::Function_PcWerewolfKills)
     {
         static constexpr std::string_view ruleFunctions[] = {
-            "Reaction Low",
-            "Reaction High",
+            "Lowest Faction Reaction",
+            "Highest Faction Reaction",
             "Rank Requirement",
-            "NPC? Reputation",
+            "NPC Reputation",
             "Health Percent",
             "Player Reputation",
             "NPC Level",
@@ -648,6 +650,7 @@ std::string_view ruleFunction(int idx)
             "Flee",
             "Should Attack",
             "Werewolf",
+            "Werewolf Kills",
         };
         return ruleFunctions[idx];
     }

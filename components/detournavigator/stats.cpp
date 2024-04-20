@@ -9,16 +9,18 @@ namespace DetourNavigator
         void reportStats(const AsyncNavMeshUpdaterStats& stats, unsigned int frameNumber, osg::Stats& out)
         {
             out.setAttribute(frameNumber, "NavMesh Jobs", static_cast<double>(stats.mJobs));
-            out.setAttribute(frameNumber, "NavMesh Waiting", static_cast<double>(stats.mWaiting));
+            out.setAttribute(frameNumber, "NavMesh Removing", static_cast<double>(stats.mWaiting.mRemoving));
+            out.setAttribute(frameNumber, "NavMesh Updating", static_cast<double>(stats.mWaiting.mUpdating));
+            out.setAttribute(frameNumber, "NavMesh Delayed", static_cast<double>(stats.mWaiting.mDelayed));
             out.setAttribute(frameNumber, "NavMesh Pushed", static_cast<double>(stats.mPushed));
             out.setAttribute(frameNumber, "NavMesh Processing", static_cast<double>(stats.mProcessing));
 
             if (stats.mDb.has_value())
             {
                 out.setAttribute(
-                    frameNumber, "NavMesh DbJobs Write", static_cast<double>(stats.mDb->mJobs.mWritingJobs));
-                out.setAttribute(
                     frameNumber, "NavMesh DbJobs Read", static_cast<double>(stats.mDb->mJobs.mReadingJobs));
+                out.setAttribute(
+                    frameNumber, "NavMesh DbJobs Write", static_cast<double>(stats.mDb->mJobs.mWritingJobs));
 
                 out.setAttribute(frameNumber, "NavMesh DbCache Get", static_cast<double>(stats.mDb->mGetTileCount));
                 out.setAttribute(frameNumber, "NavMesh DbCache Hit", static_cast<double>(stats.mDbGetTileHits));

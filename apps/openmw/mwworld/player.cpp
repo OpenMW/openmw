@@ -325,6 +325,7 @@ namespace MWWorld
                 player.mObject.mEnabled = true;
             }
 
+            MWBase::Environment::get().getWorldModel()->deregisterLiveCellRef(mPlayer);
             mPlayer.load(player.mObject);
 
             for (size_t i = 0; i < mSaveAttributes.size(); ++i)
