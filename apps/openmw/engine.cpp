@@ -703,15 +703,20 @@ void OMW::Engine::prepareEngine()
     mEnvironment.setIsServer(mNetType == NetType::Server);
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
+    osg::ref_ptr<osg::Group> rootNode = nullptr;
 
-    const bool stereoEnabled = Settings::stereo().mStereoEnabled || osg::DisplaySettings::instance().get()->getStereo();
-    mStereoManager = std::make_unique<Stereo::Manager>(
-        mViewer, stereoEnabled, Settings::camera().mNearClip, Settings::camera().mViewingDistance);
+    if (mNetType != NetType::Server)
+    {
+        const bool stereoEnabled
+            = Settings::stereo().mStereoEnabled || osg::DisplaySettings::instance().get()->getStereo();
+        mStereoManager = std::make_unique<Stereo::Manager>(
+            mViewer, stereoEnabled, Settings::camera().mNearClip, Settings::camera().mViewingDistance);
 
-    osg::ref_ptr<osg::Group> rootNode(new osg::Group);
-    mViewer->setSceneData(rootNode);
+        rootNode = new osg::Group;
+        mViewer->setSceneData(rootNode);
 
-    createWindow();
+        createWindow();
+    }
 
     mVFS = std::make_unique<VFS::Manager>();
 
