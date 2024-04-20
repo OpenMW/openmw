@@ -1,0 +1,67 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build_and_test:
+    name: Build & test
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        configuration: [release, debug]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: recursive
+    - name: Setup premake
+      uses: abel0b/setup-premake@v1
+    
+    # Install libsodium from apt
+    - name: Setup (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get install libsodium-dev
+  
+    # Install libsodium from brew
+    - name: Setup (MacOS)
+      if: runner.os == 'MacOS'
+      run: brew install libsodium
+
+    # Build with premake + make
+    - name: Build (gmake)
+      if: runner.os != 'Windows'
+      run: |
+        premake5 gmake
+        make clean
+        make all config=${{ matrix.configuration }}
+
+    # Run the tests with sh syntax
+    - name: Test (gmake)
+      if: runner.os != 'Windows'
+      run: ./bin/test
+
+    ## Windows-specific build steps
+    # Set up PATH variables to point to MSBuild from at least VS 16.1 (2019)
+    - name: Setup (vs2019)
+      if: runner.os == 'Windows'
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '16.1.0'
+
+    # Build with premake + msbuild
+    - name: Build (vs2019)
+      if: runner.os == 'Windows'
+      run: |
+        premake5 vs2019
+        msbuild yojimbo.sln -nologo -m -t:Clean  -p:Configuration=${{ matrix.configuration }}
+        msbuild yojimbo.sln -nologo -m -p:Configuration=${{ matrix.configuration }}
+
+    # Run the tests with Powershell syntax
+    - name: Test (vs2019)
+      if: runner.os == 'Windows'
+      run: "& ./bin/${{ matrix.configuration }}/test.exe"
+      

@@ -1,0 +1,38 @@
+# Visual Studio
+*.db
+*.opendb
+*.vcproj
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filter
+*.vcxproj.filters
+*.sln
+
+# Makefiles
+Makefile
+*.make
+
+# Misc
+*.txt
+!CMakeLists.txt
+*.7z
+*.zip
+*.tar.gz
+
+# Sublime text
+*.sublime-project
+*.sublime-workspace
+
+# Directories we don't ever want to commit
+bin
+obj
+ipch
+Debug
+release
+Release
+Secure
+.vs
+cov-int
+docker/yojimbo
+valgrind/yojimbo
+docs
