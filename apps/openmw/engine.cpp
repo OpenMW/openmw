@@ -287,11 +287,14 @@ bool OMW::Engine::frame(float frametime)
 
         // update physics
         {
-            ScopedProfile<UserStatsType::Physics> profile(frameStart, frameNumber, *timer, *stats);
-
-            if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
+            if (!mEnvironment.getIsServer())
             {
-                mWorld->updatePhysics(frametime, paused, frameStart, frameNumber, *stats);
+                ScopedProfile<UserStatsType::Physics> profile(frameStart, frameNumber, *timer, *stats);
+
+                if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
+                {
+                    mWorld->updatePhysics(frametime, paused, frameStart, frameNumber, *stats);
+                }
             }
         }
 
