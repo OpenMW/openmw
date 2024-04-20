@@ -924,7 +924,10 @@ void OMW::Engine::go()
 
     Misc::Rng::init(mRandomSeed);
 
-    Settings::ShaderManager::get().load(mCfgMgr.getUserConfigPath() / "shaders.yaml");
+    if (mNetType != NetType::Server)
+    {
+        Settings::ShaderManager::get().load(mCfgMgr.getUserConfigPath() / "shaders.yaml");
+    }
 
     MWClass::registerClasses();
 
@@ -1052,7 +1055,10 @@ void OMW::Engine::go()
 
     // Save user settings
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
-    Settings::ShaderManager::get().save();
+    if (mNetType != NetType::Server)
+    {
+        Settings::ShaderManager::get().save();
+    }
     mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath());
 
     Log(Debug::Info) << "Quitting peacefully.";
