@@ -719,11 +719,15 @@ void OMW::Engine::prepareEngine()
 
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(
         mVFS.get(), Settings::cells().mCacheExpiryDelay, &mEncoder.get()->getStatelessEncoder());
-    mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
-    mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
-        false); // keep to Off for now to allow better state sharing
-    mResourceSystem->getSceneManager()->setFilterSettings(Settings::general().mTextureMagFilter,
-        Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap, Settings::general().mAnisotropy);
+    if (mNetType != NetType::Server)
+    {
+        mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
+        mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
+            false); // keep to Off for now to allow better state sharing
+        mResourceSystem->getSceneManager()->setFilterSettings(Settings::general().mTextureMagFilter,
+            Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap, Settings::general().mAnisotropy);
+    }
+
     mEnvironment.setResourceSystem(*mResourceSystem);
 
     mWorkQueue = new SceneUtil::WorkQueue(Settings::cells().mPreloadNumThreads);
