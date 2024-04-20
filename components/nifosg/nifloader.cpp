@@ -2209,8 +2209,11 @@ namespace NifOsg
             handleDepthFlags(stateset, material->mDepthTest, material->mDepthWrite);
         }
 
-        void handleDecal(bool hasSortAlpha, osg::ref_ptr<osg::StateSet> stateset)
+        void handleDecal(bool enabled, bool hasSortAlpha, osg::Node& node)
         {
+            if (!enabled)
+                return;
+            osg::ref_ptr<osg::StateSet> stateset = node.getOrCreateStateSet();
             osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
             polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
             polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
@@ -2279,10 +2282,7 @@ namespace NifOsg
             handleAlphaTesting(shaderMat->mAlphaTest, osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold, node);
             handleAlphaBlending(shaderMat->mAlphaBlend, shaderMat->mSourceBlendMode, shaderMat->mDestinationBlendMode,
                 true, hasSortAlpha, node);
-            if (shaderMat->mDecal)
-            {
-                handleDecal(hasSortAlpha, node.getOrCreateStateSet());
-            }
+            handleDecal(shaderMat->mDecal, hasSortAlpha, node);
             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
             {
                 auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
@@ -2794,8 +2794,7 @@ namespace NifOsg
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
                         specEnabled = shaderprop->specular();
-                        if (shaderprop->decal())
-                            handleDecal(hasSortAlpha, node->getOrCreateStateSet());
+                        handleDecal(shaderprop->decal(), hasSortAlpha, *node);
                         break;
                     }
                     case Nif::RC_BSEffectShaderProperty:
@@ -2806,8 +2805,7 @@ namespace NifOsg
                             handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
                             break;
                         }
-                        if (shaderprop->decal())
-                            handleDecal(hasSortAlpha, node->getOrCreateStateSet());
+                        handleDecal(shaderprop->decal(), hasSortAlpha, *node);
                         if (shaderprop->softEffect())
                             SceneUtil::setupSoftEffect(
                                 *node, shaderprop->mFalloffDepth, true, shaderprop->mFalloffDepth);
