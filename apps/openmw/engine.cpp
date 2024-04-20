@@ -210,19 +210,22 @@ bool OMW::Engine::frame(float frametime)
         // changing widget textures (fixed in MyGUI 3.3.2), and destroyed widgets will not be deleted (not fixed yet,
         // https://github.com/MyGUI/mygui/issues/21)
         {
-            ScopedProfile<UserStatsType::Sound> profile(frameStart, frameNumber, *timer, *stats);
-
-            if (!mWindowManager->isWindowVisible())
+            if (!mEnvironment.getIsServer())
             {
-                mSoundManager->pausePlayback();
-                return false;
-            }
-            else
-                mSoundManager->resumePlayback();
+                ScopedProfile<UserStatsType::Sound> profile(frameStart, frameNumber, *timer, *stats);
 
-            // sound
-            if (mUseSound)
-                mSoundManager->update(frametime);
+                if (!mWindowManager->isWindowVisible())
+                {
+                    mSoundManager->pausePlayback();
+                    return false;
+                }
+                else
+                    mSoundManager->resumePlayback();
+
+                // sound
+                if (mUseSound)
+                    mSoundManager->update(frametime);
+            }
         }
 
         {
