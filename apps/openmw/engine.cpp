@@ -263,7 +263,10 @@ bool OMW::Engine::frame(float frametime)
                 {
                     double hours = (frametime * mWorld->getTimeManager()->getGameTimeScale()) / 3600.0;
                     mWorld->advanceTime(hours, true);
-                    mWorld->rechargeItems(frametime, true);
+                    if (!mEnvironment.getIsServer())
+                    {
+                        mWorld->rechargeItems(frametime, true);
+                    }
                 }
             }
         }
