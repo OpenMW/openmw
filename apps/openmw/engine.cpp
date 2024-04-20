@@ -749,65 +749,68 @@ void OMW::Engine::prepareEngine()
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    const auto keybinderUser = mCfgMgr.getUserConfigPath() / "input_v3.xml";
-    bool keybinderUserExists = std::filesystem::exists(keybinderUser);
-    if (!keybinderUserExists)
+    if (mNetType != NetType::Server)
     {
-        const auto input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml");
-        if (std::filesystem::exists(input2))
+        const auto keybinderUser = mCfgMgr.getUserConfigPath() / "input_v3.xml";
+        bool keybinderUserExists = std::filesystem::exists(keybinderUser);
+        if (!keybinderUserExists)
         {
-            keybinderUserExists = std::filesystem::copy_file(input2, keybinderUser);
-            Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
+            const auto input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml");
+            if (std::filesystem::exists(input2))
+            {
+                keybinderUserExists = std::filesystem::copy_file(input2, keybinderUser);
+                Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
+            }
         }
-    }
-    else
-        Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
+        else
+            Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
 
-    const auto userdefault = mCfgMgr.getUserConfigPath() / "gamecontrollerdb.txt";
-    const auto localdefault = mCfgMgr.getLocalPath() / "gamecontrollerdb.txt";
-    const auto globaldefault = mCfgMgr.getGlobalPath() / "gamecontrollerdb.txt";
+        const auto userdefault = mCfgMgr.getUserConfigPath() / "gamecontrollerdb.txt";
+        const auto localdefault = mCfgMgr.getLocalPath() / "gamecontrollerdb.txt";
+        const auto globaldefault = mCfgMgr.getGlobalPath() / "gamecontrollerdb.txt";
 
-    std::filesystem::path userGameControllerdb;
-    if (std::filesystem::exists(userdefault))
-        userGameControllerdb = userdefault;
+        std::filesystem::path userGameControllerdb;
+        if (std::filesystem::exists(userdefault))
+            userGameControllerdb = userdefault;
 
-    std::filesystem::path gameControllerdb;
-    if (std::filesystem::exists(localdefault))
-        gameControllerdb = localdefault;
-    else if (std::filesystem::exists(globaldefault))
-        gameControllerdb = globaldefault;
-    // else if it doesn't exist, pass in an empty string
+        std::filesystem::path gameControllerdb;
+        if (std::filesystem::exists(localdefault))
+            gameControllerdb = localdefault;
+        else if (std::filesystem::exists(globaldefault))
+            gameControllerdb = globaldefault;
+        // else if it doesn't exist, pass in an empty string
 
-    // gui needs our shaders path before everything else
-    mResourceSystem->getSceneManager()->setShaderPath(mResDir / "shaders");
+        // gui needs our shaders path before everything else
+        mResourceSystem->getSceneManager()->setShaderPath(mResDir / "shaders");
 
-    osg::GLExtensions& exts = SceneUtil::getGLExtensions();
-    bool shadersSupported = exts.glslLanguageVersion >= 1.2f;
+        osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+        bool shadersSupported = exts.glslLanguageVersion >= 1.2f;
 
 #if OSG_VERSION_LESS_THAN(3, 6, 6)
-    // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
-    if (!osg::isGLExtensionSupported(exts.contextID, "NV_framebuffer_multisample_coverage"))
-        exts.glRenderbufferStorageMultisampleCoverageNV = nullptr;
+        // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
+        if (!osg::isGLExtensionSupported(exts.contextID, "NV_framebuffer_multisample_coverage"))
+            exts.glRenderbufferStorageMultisampleCoverageNV = nullptr;
 #endif
 
-    osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
-    guiRoot->setName("GUI Root");
-    guiRoot->setNodeMask(MWRender::Mask_GUI);
-    mStereoManager->disableStereoForNode(guiRoot);
-    rootNode->addChild(guiRoot);
+        osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
+        guiRoot->setName("GUI Root");
+        guiRoot->setNodeMask(MWRender::Mask_GUI);
+        mStereoManager->disableStereoForNode(guiRoot);
+        rootNode->addChild(guiRoot);
 
-    mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(),
-        mWorkQueue.get(), mCfgMgr.getLogPath(), mScriptConsoleMode, mTranslationDataStorage, mEncoding,
-        Version::getOpenmwVersionDescription(), shadersSupported, mCfgMgr);
-    mEnvironment.setWindowManager(*mWindowManager);
+        mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(),
+            mWorkQueue.get(), mCfgMgr.getLogPath(), mScriptConsoleMode, mTranslationDataStorage, mEncoding,
+            Version::getOpenmwVersionDescription(), shadersSupported, mCfgMgr);
+        mEnvironment.setWindowManager(*mWindowManager);
 
-    mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler,
-        mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
-    mEnvironment.setInputManager(*mInputManager);
+        mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler,
+            mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
+        mEnvironment.setInputManager(*mInputManager);
 
-    // Create sound system
-    mSoundManager = std::make_unique<MWSound::SoundManager>(mVFS.get(), mUseSound);
-    mEnvironment.setSoundManager(*mSoundManager);
+        // Create sound system
+        mSoundManager = std::make_unique<MWSound::SoundManager>(mVFS.get(), mUseSound);
+        mEnvironment.setSoundManager(*mSoundManager);
+    }
 
     // Create the world
     mWorld = std::make_unique<MWWorld::World>(
@@ -859,8 +862,11 @@ void OMW::Engine::prepareEngine()
             }
         });
 
-    mWindowManager->setStore(mWorld->getStore());
-    mWindowManager->initUI();
+    if (mNetType != NetType::Server)
+    {
+        mWindowManager->setStore(mWorld->getStore());
+        mWindowManager->initUI();
+    }
 
     // Load translation data
     mTranslationDataStorage.setEncoder(mEncoder.get());
