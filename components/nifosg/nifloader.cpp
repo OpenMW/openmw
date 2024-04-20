@@ -2188,6 +2188,9 @@ namespace NifOsg
                 if (!bgsm->mNormalMap.empty())
                     attachExternalTexture("normalMap", bgsm->mNormalMap, wrapS, wrapT, uvSet, stateset, boundTextures);
 
+                if (bgsm->mGlowMapEnabled && !bgsm->mGlowMap.empty())
+                    attachExternalTexture("emissiveMap", bgsm->mGlowMap, wrapS, wrapT, uvSet, stateset, boundTextures);
+
                 if (bgsm->mTree)
                     stateset->addUniform(new osg::Uniform("useTreeAnim", true));
             }
