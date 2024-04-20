@@ -979,8 +979,12 @@ void OMW::Engine::go()
     if (stats.is_open())
         Resource::collectStatistics(*mViewer);
 
+    if (mNetType == NetType::Server)
+    {
+        mStateManager->newGame(true);
+    }
     // Start the game
-    if (!mSaveGameFile.empty())
+    else if (!mSaveGameFile.empty())
     {
         mStateManager->loadGame(mSaveGameFile);
     }
