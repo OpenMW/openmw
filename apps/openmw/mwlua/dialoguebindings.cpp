@@ -38,6 +38,8 @@ namespace
             DecoratedIterator mIter;
 
         public:
+            using difference_type = DecoratedIterator::difference_type;
+
             FilteredDialogueIterator(const DecoratedIterator& decoratedIterator)
                 : mIter{ decoratedIterator }
             {
@@ -93,7 +95,7 @@ namespace
         size_t getSize() const
         {
             return std::count_if(
-                mDialogueStore.begin(), mDialogueStore.end(), [this](const auto& d) { return d.mType == filter; });
+                mDialogueStore.begin(), mDialogueStore.end(), [](const auto& d) { return d.mType == filter; });
         }
 
         iterator begin() const
@@ -381,7 +383,6 @@ namespace sol
 
 namespace MWLua
 {
-
     sol::table initCoreDialogueBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
