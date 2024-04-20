@@ -270,18 +270,21 @@ bool OMW::Engine::frame(float frametime)
 
         // update mechanics
         {
-            ScopedProfile<UserStatsType::Mechanics> profile(frameStart, frameNumber, *timer, *stats);
-
-            if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
+            if (!mEnvironment.getIsServer())
             {
-                mMechanicsManager->update(frametime, paused);
-            }
+                ScopedProfile<UserStatsType::Mechanics> profile(frameStart, frameNumber, *timer, *stats);
 
-            if (mStateManager->getState() == MWBase::StateManager::State_Running)
-            {
-                MWWorld::Ptr player = mWorld->getPlayerPtr();
-                if (!paused && player.getClass().getCreatureStats(player).isDead())
-                    mStateManager->endGame();
+                if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
+                {
+                    mMechanicsManager->update(frametime, paused);
+                }
+
+                if (mStateManager->getState() == MWBase::StateManager::State_Running)
+                {
+                    MWWorld::Ptr player = mWorld->getPlayerPtr();
+                    if (!paused && player.getClass().getCreatureStats(player).isDead())
+                        mStateManager->endGame();
+                }
             }
         }
 
