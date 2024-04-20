@@ -190,7 +190,8 @@ namespace
         {
             const DetourNavigator::AgentBounds agentBounds = world.getPathfindingAgentBounds(ptr);
             if (!navigator.addAgent(agentBounds))
-                Log(Debug::Warning) << "Agent bounds are not supported by navigator: " << agentBounds;
+                Log(Debug::Warning) << "Agent bounds are not supported by navigator for " << ptr.toString() << ": "
+                                    << agentBounds;
         }
     }
 
