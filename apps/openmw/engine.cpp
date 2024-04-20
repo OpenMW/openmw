@@ -1003,7 +1003,8 @@ void OMW::Engine::go()
         mStateManager->newGame(!mNewGame);
     }
 
-    if (!mStartupScript.empty() && mStateManager->getState() == MWState::StateManager::State_Running)
+    if (mNetType != NetType::Server && !mStartupScript.empty()
+        && mStateManager->getState() == MWState::StateManager::State_Running)
     {
         mWindowManager->executeInConsole(mStartupScript);
     }
