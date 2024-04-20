@@ -219,6 +219,7 @@
     Feature #7652: Sort inactive post processing shaders list properly
     Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
+    Feature #7777: Support external Bethesda material files (BGSM/BGEM)
     Feature #7792: Support Timescale Clouds
     Feature #7795: Support MaxNumberRipples INI setting
     Feature #7805: Lua Menu context
