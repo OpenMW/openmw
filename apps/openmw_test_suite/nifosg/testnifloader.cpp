@@ -3,6 +3,7 @@
 #include <components/nif/node.hpp>
 #include <components/nif/property.hpp>
 #include <components/nifosg/nifloader.hpp>
+#include <components/resource/bgsmfilemanager.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/serialize.hpp>
 #include <components/vfs/manager.hpp>
@@ -29,6 +30,7 @@ namespace
     {
         VFS::Manager mVfs;
         Resource::ImageManager mImageManager{ &mVfs, 0 };
+        Resource::BgsmFileManager mMaterialManager{ &mVfs, 0 };
         const osgDB::ReaderWriter* mReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("osgt");
         osg::ref_ptr<osgDB::Options> mOptions = new osgDB::Options;
 
@@ -70,7 +72,7 @@ namespace
         init(node);
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
-        auto result = Loader::load(file, &mImageManager, nullptr);
+        auto result = Loader::load(file, &mImageManager, &mMaterialManager);
         EXPECT_EQ(serialize(*result), R"(
 osg::Group {
   UniqueID 1
@@ -259,7 +261,7 @@ osg::Group {
         node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
-        auto result = Loader::load(file, &mImageManager, nullptr);
+        auto result = Loader::load(file, &mImageManager, &mMaterialManager);
         EXPECT_EQ(serialize(*result), formatOsgNodeForBSShaderProperty(GetParam().mExpectedShaderPrefix));
     }
 
@@ -289,7 +291,7 @@ osg::Group {
         node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
-        auto result = Loader::load(file, &mImageManager, nullptr);
+        auto result = Loader::load(file, &mImageManager, &mMaterialManager);
         EXPECT_EQ(serialize(*result), formatOsgNodeForBSLightingShaderProperty(GetParam().mExpectedShaderPrefix));
     }
 
