@@ -82,7 +82,6 @@ namespace MWRender
 
     namespace
     {
-        // Helper methods
         osg::Vec3f vec3fLerp(float t, const osg::Vec3f& A, const osg::Vec3f& B)
         {
             return A + (B - A) * t;
@@ -103,11 +102,12 @@ namespace MWRender
     void AnimBlendControllerBase<NodeClass>::setKeyframeTrack(osg::ref_ptr<SceneUtil::KeyframeController> kft,
         AnimBlendStateData newState, osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
     {
+        // If aimation has changed, start blending
         if (newState.mGroupname != mAnimState.mGroupname || newState.mStartKey != mAnimState.mStartKey
             || kft != mKeyframeTrack)
         {
-            // Animation have changed, start blending!
-            // Log(Debug::Info) << "Animation change to: " << newState.mGroupname << ":" << newState.mStartKey;
+            // Allow logging of cahnge to aid with implementing animations for developers/modders
+            // Log(Debug::Verbose) << "Animation change to: " << newState.mGroupname << ":" << newState.mStartKey;
 
             // Default blend settings
             mBlendDuration = 0;
@@ -118,11 +118,7 @@ namespace MWRender
                 // Finds a matching blend rule either in this or previous ruleset
                 auto blendRule = blendRules->findBlendingRule(
                     mAnimState.mGroupname, mAnimState.mStartKey, newState.mGroupname, newState.mStartKey);
-                // This will also check the previous ruleset, not sure it's a good idea though, commenting out
-                // for now.
-                /*if (!blendRule && mAnimBlendRules)
-                    blendRule = mAnimBlendRules->findBlendingRule(
-                        mAnimState.mGroupname, mAnimState.mStartKey, newState.mGroupname, newState.mStartKey);*/
+
                 if (blendRule)
                 {
                     if (Easings::easingsMap.contains(blendRule->mEasing))
@@ -171,10 +167,10 @@ namespace MWRender
 
         // Shouldnt happen, but potentially an edge case where a new bone was added
         // between gatherRecursiveBoneTransforms and this update
-        // so far OpenMW will never do this, so this check shouldn't be needed in production
+        // currently OpenMW will never do this, but potentially useful
         assert(mBlendBoneTransforms.find(bone) != mBlendBoneTransforms.end());
 
-        // every frame the osgAnimation controller updates this
+        // Every frame the osgAnimation controller updates this
         // so it is ok that we update it directly below
         osg::Matrixf currentSampledMatrix = bone->getMatrix();
         const osg::Matrixf& lastSampledMatrix = mBlendBoneTransforms.at(bone);
@@ -275,7 +271,6 @@ namespace MWRender
 
         if (mInterpActive)
         {
-            // Interpolate node's rotation
             if (rotation)
             {
                 osg::Quat lerpedRot;
@@ -288,7 +283,6 @@ namespace MWRender
                 node->setRotation(node->mRotation);
             }
 
-            // Update node's translation
             if (translation)
             {
                 osg::Vec3f lerpedTrans = vec3fLerp(mInterpFactor, mBlendStartTrans, *translation);
@@ -297,7 +291,6 @@ namespace MWRender
         }
         else
         {
-            // Update node's translation
             if (translation)
                 node->setTranslation(*translation);
 
@@ -307,7 +300,6 @@ namespace MWRender
                 node->setRotation(node->mRotation);
         }
 
-        // Update node's scale
         if (scale)
             // Scale is not lerped based on the idea that it is much more likely that scale animation will be used to
             // instantly hide/show objects in which case the scale interpolation is undesirable.

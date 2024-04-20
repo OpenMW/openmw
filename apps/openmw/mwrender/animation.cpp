@@ -421,7 +421,7 @@ namespace MWRender
             osg::Callback* updateCb = bone->getUpdateCallback();
             while (updateCb)
             {
-                if (updateCb->className() == std::string(controller->className()))
+                if (updateCb->className() == std::string_view(controller->className()))
                 {
                     osg::ref_ptr<osg::Callback> nextCb = updateCb->getNestedCallback();
                     bone->removeUpdateCallback(updateCb);
@@ -438,7 +438,7 @@ namespace MWRender
             updateCb = bone->getUpdateCallback();
             while (updateCb)
             {
-                if (updateCb->className() == std::string("UpdateBone"))
+                if (updateCb->className() == std::string_view("UpdateBone"))
                 {
                     // Override the immediate callback after the UpdateBone
                     osg::ref_ptr<osg::Callback> lastCb = updateCb->getNestedCallback();
@@ -452,7 +452,7 @@ namespace MWRender
             }
         }
 
-        // Traverse childrne if this is a group
+        // Traverse child bones if this is a group
         osg::Group* group = parent->asGroup();
         if (group)
             for (unsigned int i = 0; i < group->getNumChildren(); ++i)
@@ -900,8 +900,6 @@ namespace MWRender
         if (!mObjectRoot || mAnimSources.empty())
             return;
 
-        // Log(Debug::Info) << "Please play: " << groupname << ":" << start << "..." << stop << " mask: " << blendMask;
-
         if (groupname.empty())
         {
             resetActiveGroups();
@@ -918,8 +916,6 @@ namespace MWRender
         while (stateiter != mStates.end())
         {
             if (stateiter->second.mPriority == priority && stateiter->first != groupname)
-                // This MIGH be a problem since we want old states to be still running so the AnimBlendingController can
-                // blend them properly
                 mStates.erase(stateiter++);
             else
                 ++stateiter;
