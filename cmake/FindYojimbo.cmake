@@ -14,67 +14,65 @@ SET(Yojimbo_Root ${CMAKE_SOURCE_DIR}/extern/yojimbo)
 SET(Yojimbo_Output ${Yojimbo_Root}/bin)
 
 MACRO(add_yojimbo_library NAME)
-  find_library(${NAME}_LIBRARY
-    NAMES lib${NAME}
-    HINTS ${Yojimbo_Output}
-  )
-
-  IF(NOT ${${NAME}_LIBRARY})
-    file(GLOB ${NAME}_Sources
-      "${Yojimbo_Root}/${NAME}/${NAME}.h"
-      "${Yojimbo_Root}/${NAME}/${NAME}.c"
+    find_library(${NAME}_LIBRARY
+        NAMES lib${NAME}
+        HINTS ${Yojimbo_Output}
     )
 
-    add_library(${NAME} STATIC ${${NAME}_Sources})
+    IF(NOT ${${NAME}_LIBRARY})
+        file(GLOB ${NAME}_Sources
+            "${Yojimbo_Root}/${NAME}/${NAME}.h"
+            "${Yojimbo_Root}/${NAME}/${NAME}.c"
+        )
 
-    set_target_properties(${NAME} PROPERTIES
-      ARCHIVE_OUTPUT_DIRECTORY ${Yojimbo_Output}
-    )
+        add_library(${NAME} STATIC ${${NAME}_Sources})
 
-    IF(WIN32)
-      set(${${NAME}_LIBRARY} ${Yojimbo_Output}/lib${NAME}.lib)
-    ELSE()
-      set(${${NAME}_LIBRARY} ${Yojimbo_Output}/lib${NAME}.a)
+        set_target_properties(${NAME} PROPERTIES
+            ARCHIVE_OUTPUT_DIRECTORY ${Yojimbo_Output}
+        )
+
+        IF(WIN32)
+            set(${${NAME}_LIBRARY} ${Yojimbo_Output}/lib${NAME}.lib)
+        ELSE()
+            set(${${NAME}_LIBRARY} ${Yojimbo_Output}/lib${NAME}.a)
+        ENDIF()
     ENDIF()
-  ENDIF()
-  set(Yojimbo_LIBRARIES ${Yojimbo_LIBRARIES} ${NAME})
+    set(Yojimbo_LIBRARIES ${Yojimbo_LIBRARIES} ${NAME})
 ENDMACRO()
 
-add_yojimbo_library(tlsf)
-add_yojimbo_library(netcode)
-add_yojimbo_library(reliable)
-
 find_library(Yojimbo_LIBRARY
-  NAMES libyojimbo
-  HINTS ${Yojimbo_Output}
-)
-
-find_library(Sodium_LIBRARY
-  NAMES libsodium
-  HINTS ${Yojimbo_Output}
+    NAMES libyojimbo
+    HINTS ${Yojimbo_Output}
 )
 
 IF(NOT Yojimbo_LIBRARY)
-  file(GLOB Yojimbo_Sources
-    "${Yojimbo_Root}/include/*.h"
-    "${Yojimbo_Root}/source/*.cpp"
-  )
+    file(GLOB Yojimbo_Sources
+      "${Yojimbo_Root}/include/*.h"
+      "${Yojimbo_Root}/source/*.cpp"
+    )
 
-  add_library(yojimbo STATIC ${Yojimbo_Sources})
+    add_library(yojimbo STATIC ${Yojimbo_Sources})
 
-  set_target_properties(yojimbo PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${Yojimbo_Output}
-  )
+    set_target_properties(yojimbo PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${Yojimbo_Output}
+    )
 
-  if (WIN32)
-    set(Yojimbo_LIBRARY ${Yojimbo_Output}/libyojimbo.lib)
-  else ()
-    set(Yojimbo_LIBRARY ${Yojimbo_Output}/libyojimbo.a)
-  endif ()
-
-  set(Yojimbo_LIBRARIES ${Yojimbo_LIBRARIES} yojimbo)
-
+    if (WIN32)
+      set(Yojimbo_LIBRARY ${Yojimbo_Output}/libyojimbo.lib)
+    else ()
+      set(Yojimbo_LIBRARY ${Yojimbo_Output}/libyojimbo.a)
+    endif ()
+    set(Yojimbo_LIBRARIES ${Yojimbo_LIBRARIES} yojimbo)
 ENDIF(NOT Yojimbo_LIBRARY)
+
+add_yojimbo_library(reliable)
+
+add_yojimbo_library(netcode)
+
+find_library(Sodium_LIBRARY
+    NAMES libsodium
+    HINTS ${Yojimbo_Output}
+)
 
 IF(NOT Sodium_LIBRARY)
   file(GLOB Sodium_Sources
@@ -97,7 +95,7 @@ IF(NOT Sodium_LIBRARY)
   else ()
     set(Sodium_LIBRARY ${Yojimbo_Output}/libsodium.a)
   endif ()
-
-  set(Yojimbo_LIBRARIES ${Yojimbo_LIBRARIES} sodium)
-
+    set(Yojimbo_LIBRARIES ${Yojimbo_LIBRARIES} sodium)
 ENDIF(NOT Sodium_LIBRARY)
+
+add_yojimbo_library(tlsf)

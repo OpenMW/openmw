@@ -246,6 +246,8 @@ find_package(OpenGL REQUIRED)
 
 find_package(LZ4 REQUIRED)
 
+find_package(Yojimbo REQUIRED)
+
 if (USE_QT)
     find_package(QT REQUIRED COMPONENTS Core NAMES Qt6 Qt5)
     if (QT_VERSION_MAJOR VERSION_EQUAL 5)
