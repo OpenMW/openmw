@@ -19,6 +19,7 @@
 #include <components/files/conversion.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/platform/platform.hpp>
+#include <components/resource/bgsmfilemanager.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/niffilemanager.hpp>
@@ -220,7 +221,8 @@ namespace NavMeshTool
 
             Resource::ImageManager imageManager(&vfs, expiryDelay);
             Resource::NifFileManager nifFileManager(&vfs, &encoder.getStatelessEncoder());
-            Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, expiryDelay);
+            Resource::BgsmFileManager bgsmFileManager(&vfs, expiryDelay);
+            Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, &bgsmFileManager, expiryDelay);
             Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
             DetourNavigator::RecastGlobalAllocator::init();
             DetourNavigator::Settings navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();

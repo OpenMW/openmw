@@ -55,6 +55,7 @@
 #include <components/files/hash.hpp>
 #include <components/files/memorystream.hpp>
 
+#include "bgsmfilemanager.hpp"
 #include "errormarker.hpp"
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -409,7 +410,7 @@ namespace Resource
     };
 
     SceneManager::SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
-        Resource::NifFileManager* nifFileManager, double expiryDelay)
+        Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay)
         : ResourceManager(vfs, expiryDelay)
         , mShaderManager(new Shader::ShaderManager)
         , mForceShaders(false)
@@ -424,6 +425,7 @@ namespace Resource
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
+        , mBgsmFileManager(bgsmFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
         , mMagFilter(osg::Texture::LINEAR)
         , mMaxAnisotropy(1)
@@ -795,11 +797,12 @@ namespace Resource
     }
 
     osg::ref_ptr<osg::Node> load(VFS::Path::NormalizedView normalizedFilename, const VFS::Manager* vfs,
-        Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+        Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager,
+        Resource::BgsmFileManager* materialMgr)
     {
         const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
         if (ext == "nif")
-            return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager);
+            return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager, materialMgr);
         else if (ext == "spt")
         {
             Log(Debug::Warning) << "Ignoring SpeedTree data file " << normalizedFilename;
@@ -921,7 +924,7 @@ namespace Resource
             {
                 path.changeExtension(meshType);
                 if (mVFS->exists(path))
-                    return load(path, mVFS, mImageManager, mNifFileManager);
+                    return load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
             }
         }
         catch (const std::exception& e)
@@ -953,7 +956,7 @@ namespace Resource
             osg::ref_ptr<osg::Node> loaded;
             try
             {
-                loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
+                loaded = load(normalized, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
 
                 SceneUtil::ProcessExtraDataVisitor extraDataVisitor(this);
                 loaded->accept(extraDataVisitor);
