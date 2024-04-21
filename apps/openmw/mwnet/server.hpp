@@ -1,24 +1,27 @@
-#ifndef SERVER_H_
-#define SERVER_H_
+#ifndef MWNET_SERVER_H_
+#define MWNET_SERVER_H_
 #include <memory>
 #include <yojimbo.h>
+
+#include "networkmessages.hpp"
 
 namespace MWNet
 {
     class Server
     {
-        Server();
-
         std::unique_ptr<yojimbo::Server> CreateServerInstance();
 
-        yojimbo::Adapter mAdapter;
+        BaseAdapter mAdapter;
+        std::unique_ptr<yojimbo::Server> mServer;
 
     public:
+        Server();
+
+        int run();
+
         void ClientConnected(int clientIndex);
 
         void ClientDisconnected(int clientIndex);
-
-        int run();
 
         yojimbo::Server getServer() { return *mServer; }
 
@@ -26,10 +29,7 @@ namespace MWNet
 
         constexpr static const int DefaultPort = 40000;
         constexpr static const int DefaultMaxClients = 64;
-
-    private:
-        std::unique_ptr<yojimbo::Server> mServer;
     };
 }
 
-#endif // SERVER_H_
+#endif // MWNET_SERVER_H_
