@@ -533,7 +533,7 @@ macOS14_Xcode15_arm64:
 
 .Windows_Ninja_Base:
   tags:
-    - windows
+    - saas-windows-medium-amd64
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
@@ -656,7 +656,7 @@ macOS14_Xcode15_arm64:
 
 .Windows_MSBuild_Base:
   tags:
-    - windows
+    - saas-windows-medium-amd64
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
