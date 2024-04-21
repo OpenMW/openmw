@@ -1,16 +1,16 @@
 SET(Yojimbo_INCLUDES
-  ${CMAKE_SOURCE_DIR}/extern/yojimbo/
-  ${CMAKE_SOURCE_DIR}/extern/yojimbo/include
-  ${CMAKE_SOURCE_DIR}/extern/yojimbo/netcode
-  ${CMAKE_SOURCE_DIR}/extern/yojimbo/reliable
-  ${CMAKE_SOURCE_DIR}/extern/yojimbo/serialize
-  ${CMAKE_SOURCE_DIR}/extern/yojimbo/sodium
-  ${CMAKE_SOURCE_DIR}/extern/yojimbo/tlsf
+  ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo/
+  ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo/include
+  ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo/netcode
+  ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo/reliable
+  ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo/serialize
+  ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo/sodium
+  ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo/tlsf
 )
 
 include_directories(${Yojimbo_INCLUDES})
 
-SET(Yojimbo_Root ${CMAKE_SOURCE_DIR}/extern/yojimbo)
+SET(Yojimbo_Root ${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo)
 SET(Yojimbo_Output ${Yojimbo_Root}/bin)
 
 MACRO(add_yojimbo_library NAME)
