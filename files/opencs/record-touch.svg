@@ -117,27 +117,36 @@
        xlink:href="#Main-3"
        id="linearGradient2163"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(19.999965,19.999991)"
+       gradientTransform="matrix(0.2267857,0,0,0.24804749,6.7279756,5.1096472)"
        x1="122"
        y1="189"
        x2="136"
        y2="189" />
+    <linearGradient
+       xlink:href="#Main-6"
+       id="linearGradient2178"
+       x1="122"
+       y1="189"
+       x2="136"
+       y2="189"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.85714286,0,0,0.93750007,-102.57143,-168.68751)" />
   </defs>
   <g
-     id="error-log"
+     id="record-touch"
      transform="matrix(3.7795278,0,0,3.7795176,-128.00003,-187.99948)"
      style="display:inline">
     <path
-       id="path2008"
-       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:url(#linearGradient2163);fill-opacity:1;stroke:none;stroke-width:0.999999px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
-       d="m 142,201 v 16 h 11.40625 v -1 H 143 v -14 h 12 v 9.18499 h 1 V 201 Z"
-       transform="matrix(0.26458333,0,0,0.26458333,-3.4395741,-3.439581)" />
+       id="rect2091"
+       style="font-variation-settings:normal;display:inline;vector-effect:none;fill:url(#linearGradient2178);fill-opacity:1;stroke:none;stroke-width:0.89642px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;paint-order:fill markers stroke;stop-color:#000000"
+       d="M 2,1 V 16.000002 H 13.999997 V 1 Z M 2.8571402,1.9374994 H 13.142856 V 15.062503 H 2.8571402 Z"
+       transform="matrix(0.26458331,0,0,0.26458402,33.866672,49.74166)" />
     <ellipse
-       style="fill:#fdb433;fill-opacity:1;stroke:#000000;stroke-width:0"
+       style="display:inline;fill:#fdb433;fill-opacity:1;stroke:#000000;stroke-width:0"
        id="path1"
-       cx="37.184597"
-       cy="53.039677"
-       rx="0.9260416"
-       ry="0.92604411" />
+       cx="37.306255"
+       cy="51.329163"
+       rx="0.79374993"
+       ry="0.79375207" />
   </g>
 </svg>
