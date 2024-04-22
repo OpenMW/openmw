@@ -117,7 +117,7 @@ add_openmw_dir (mwbase
     )
 
 add_openmw_dir (mwnet
-    server
+    server client
     )
 
 # Main executable
