@@ -7,26 +7,24 @@
 
 namespace MWNet
 {
-    class Client
+    class Client : public MWNet::Connection
     {
-        std::unique_ptr<yojimbo::Client> CreateClientInstance();
+        std::unique_ptr<yojimbo::Client> createClientInstance();
 
-        BaseAdapter mAdapter;
         std::unique_ptr<yojimbo::Client> mClient;
-        double mTime;
 
     public:
         Client();
 
-        int tick();
+        int tick() override;
 
-        void ClientConnected(int clientIndex);
+        void updateConnection() override;
 
-        void ClientDisconnected(int clientIndex);
+        void clientConnected(int clientIndex) override;
+
+        void clientDisconnected(int clientIndex) override;
 
         yojimbo::Client& getClient() { return *mClient; }
-
-        yojimbo::Adapter getAdapter() { return mAdapter; }
     };
 }
 

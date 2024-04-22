@@ -181,10 +181,24 @@ namespace MWNet
     static BaseAdapter GameAdapter;
     constexpr const int DefaultClientPort = 30000;
     constexpr const int DefaultServerPort = 40000;
-    constexpr const char* LocalHost("127.0.0.1");
+    constexpr const int DefaultMaxClients = 64;
+    constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
     constexpr const double TimeAdvanceUnits = 100.0;
     constexpr const double TickRate = 1.0 / 60.0;
-    constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
+    constexpr const char* LocalHost("127.0.0.1");
+
+    class Connection
+    {
+    public:
+        double mTime;
+        BaseAdapter mAdapter = GameAdapter;
+        virtual ~Connection() = default;
+        virtual int tick() = 0;
+        virtual void updateConnection() = 0;
+        virtual void clientConnected(int clientIndex) = 0;
+        virtual void clientDisconnected(int clientIndex) = 0;
+        BaseAdapter getAdapter() { return mAdapter; }
+    };
 }
 
 #endif // #ifndef SHARED_H

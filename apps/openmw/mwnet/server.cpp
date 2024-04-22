@@ -15,15 +15,13 @@ void server_interrupt_handler(int)
 }
 
 MWNet::Server::Server()
-    : mAdapter(MWNet::GameAdapter)
-    , mTime(0)
 {
     if (!InitializeYojimbo())
     {
         throw std::logic_error("error: failed to initialize Yojimbo!\n");
     }
 
-    mServer = CreateServerInstance();
+    mServer = createServerInstance();
 
     yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
 
@@ -38,14 +36,14 @@ MWNet::Server::Server()
     signal(SIGINT, server_interrupt_handler);
 }
 
-std::unique_ptr<yojimbo::Server> MWNet::Server::CreateServerInstance()
+std::unique_ptr<yojimbo::Server> MWNet::Server::createServerInstance()
 {
-    Log(Debug::Info) << "started server on port " << DefaultPort << " (insecure)";
+    Log(Debug::Info) << "started server on port " << MWNet::DefaultServerPort << " (insecure)";
 
     yojimbo::ClientServerConfig config;
 
     std::unique_ptr<yojimbo::Server> server = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(),
-        MWNet::DefaultPrivateKey, yojimbo::Address(MWNet::LocalHost, DefaultPort), config, mAdapter, 0.0);
+        MWNet::DefaultPrivateKey, yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), config, mAdapter, 0.0);
 
     if (!server)
     {
@@ -70,11 +68,7 @@ int MWNet::Server::tick()
     double currentTime = yojimbo_time();
     if (mTime <= currentTime)
     {
-        mTime += MWNet::TickRate;
-        mServer->AdvanceTime(mTime);
-        mServer->ReceivePackets();
-        // Actually process messages in between
-        mServer->SendPackets();
+        updateConnection();
     }
     else
     {
@@ -84,12 +78,21 @@ int MWNet::Server::tick()
     return 0;
 }
 
-void MWNet::Server::ClientConnected(int clientIndex)
+void MWNet::Server::updateConnection()
+{
+    mTime += MWNet::TickRate;
+    mServer->AdvanceTime(mTime);
+    mServer->ReceivePackets();
+    // Actually process messages in between
+    mServer->SendPackets();
+}
+
+void MWNet::Server::clientConnected(int clientIndex)
 {
     Log(Debug::Info) << "client connected: " << clientIndex << "\n";
 }
 
-void MWNet::Server::ClientDisconnected(int clientIndex)
+void MWNet::Server::clientDisconnected(int clientIndex)
 {
     Log(Debug::Info) << "client disconnected: " << clientIndex << "\n";
 }

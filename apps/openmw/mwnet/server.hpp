@@ -7,29 +7,24 @@
 
 namespace MWNet
 {
-    class Server
+    class Server : public MWNet::Connection
     {
-        std::unique_ptr<yojimbo::Server> CreateServerInstance();
+        std::unique_ptr<yojimbo::Server> createServerInstance();
 
-        BaseAdapter mAdapter;
         std::unique_ptr<yojimbo::Server> mServer;
-        double mTime;
 
     public:
         Server();
 
-        int tick();
+        int tick() override;
 
-        void ClientConnected(int clientIndex);
+        void updateConnection() override;
 
-        void ClientDisconnected(int clientIndex);
+        void clientConnected(int clientIndex) override;
+
+        void clientDisconnected(int clientIndex) override;
 
         yojimbo::Server& getServer() { return *mServer; }
-
-        yojimbo::Adapter getAdapter() { return mAdapter; }
-
-        constexpr static const int DefaultPort = 40000;
-        constexpr static const int DefaultMaxClients = 64;
     };
 }
 
