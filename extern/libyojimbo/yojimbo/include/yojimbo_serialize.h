@@ -173,9 +173,9 @@ namespace yojimbo
      */
 
     #define YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()                                                               \
-        bool SerializeInternal( class yojimbo::ReadStream & stream ) { return Serialize( stream ); };           \
-        bool SerializeInternal( class yojimbo::WriteStream & stream ) { return Serialize( stream ); };          \
-        bool SerializeInternal( class yojimbo::MeasureStream & stream ) { return Serialize( stream ); };
+        bool SerializeInternal( class yojimbo::ReadStream & stream ) { return Serialize( stream ); }           \
+        bool SerializeInternal( class yojimbo::WriteStream & stream ) { return Serialize( stream ); }          \
+        bool SerializeInternal( class yojimbo::MeasureStream & stream ) { return Serialize( stream ); }
 }
 
 #endif // #ifndef YOJIMBO_SERIALIZE_H
