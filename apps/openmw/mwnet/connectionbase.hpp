@@ -12,6 +12,16 @@ namespace MWNet
         GAMESTATE = 1
     };
 
+    constexpr const int DefaultClientPort = 30000;
+    constexpr const int DefaultServerPort = 40000;
+    constexpr const int DefaultMaxClients = 64;
+    constexpr const int MaxPacketSize = 16 * 1024;
+    constexpr const int MaxSnapshotSize = 8 * 1024;
+    constexpr const int MaxBlockSize = 10 * 1024;
+    constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
+    constexpr const double TickRate = 1.0 / 60.0;
+    constexpr const char* LocalHost("127.0.0.1");
+
     class BaseAdapter : public Adapter
     {
     public:
@@ -33,13 +43,6 @@ namespace MWNet
             channel[ChannelName::GAMESTATE].type = yojimbo::CHANNEL_TYPE_UNRELIABLE_UNORDERED;
         }
     };
-
-    constexpr const int DefaultClientPort = 30000;
-    constexpr const int DefaultServerPort = 40000;
-    constexpr const int DefaultMaxClients = 64;
-    constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
-    constexpr const double TickRate = 1.0 / 60.0;
-    constexpr const char* LocalHost("127.0.0.1");
 
     class Connection
     {
