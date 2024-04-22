@@ -1,9 +1,37 @@
 #include "file.hpp"
 
+#include <array>
+#include <stdexcept>
+
 #include "stream.hpp"
 
 namespace Bgsm
 {
+    MaterialFilePtr parse(Files::IStreamPtr&& inputStream)
+    {
+        std::shared_ptr<Bgsm::MaterialFile> file;
+        BGSMStream stream(std::move(inputStream));
+
+        std::array<char, 4> signature;
+        stream.readArray(signature);
+        std::string shaderType(signature.data(), 4);
+        if (shaderType == "BGEM")
+        {
+            file = std::make_shared<BGEMFile>();
+            file->mShaderType = Bgsm::ShaderType::Effect;
+        }
+        else if (shaderType == "BGSM")
+        {
+            file = std::make_shared<BGSMFile>();
+            file->mShaderType = Bgsm::ShaderType::Lighting;
+        }
+        else
+            throw std::runtime_error("Invalid material file");
+
+        file->read(stream);
+        return file;
+    }
+
     void MaterialFile::read(BGSMStream& stream)
     {
         stream.read(mVersion);
