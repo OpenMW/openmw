@@ -24,7 +24,7 @@ namespace MWNet
 
         void ClientDisconnected(int clientIndex);
 
-        yojimbo::Server getServer() { return *mServer; }
+        yojimbo::Server& getServer() { return *mServer; }
 
         yojimbo::Adapter getAdapter() { return mAdapter; }
 
