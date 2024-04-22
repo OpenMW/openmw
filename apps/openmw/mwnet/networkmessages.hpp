@@ -167,4 +167,34 @@ YOJIMBO_MESSAGE_FACTORY_START(SingleBlockTestMessageFactory, NUM_SINGLE_BLOCK_TE
 YOJIMBO_DECLARE_MESSAGE_TYPE(SINGLE_BLOCK_TEST_MESSAGE, TestBlockMessage);
 YOJIMBO_MESSAGE_FACTORY_FINISH()
 
+enum UnorderedSyncedMessage
+{
+    PLAYER_LOGIN_MESSAGE,
+    NUM_UNORDERED_SYNC_MESSAGES,
+};
+
+class PlayerLoginMessage : public yojimbo::Message
+{
+public:
+    float posData;
+
+    PlayerLoginMessage()
+        : posData(0)
+    {
+    }
+
+    template <typename Stream>
+    bool Serialize(Stream& stream)
+    {
+        serialize_float(stream, posData);
+        return true;
+    }
+
+    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS();
+};
+
+YOJIMBO_MESSAGE_FACTORY_START(MWNetUnorderedMessageFactory, NUM_UNORDERED_SYNC_MESSAGES);
+YOJIMBO_DECLARE_MESSAGE_TYPE(PLAYER_LOGIN_MESSAGE, PlayerLoginMessage);
+YOJIMBO_MESSAGE_FACTORY_FINISH();
+
 #endif // #ifndef SHARED_H
