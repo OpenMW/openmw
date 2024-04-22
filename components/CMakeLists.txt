@@ -515,7 +515,7 @@ set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
 if (USE_QT)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
-        model/naturalsort model/contentmodel
+        model/contentmodel
         model/loadordererror
         view/combobox view/contentselector
         )
