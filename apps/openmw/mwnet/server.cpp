@@ -78,7 +78,6 @@ int MWNet::Server::tick()
     }
     else
     {
-        Log(Debug::Warning) << "Sleeping for ... " << (mTime - currentTime);
         yojimbo_sleep(mTime - currentTime);
     }
 
