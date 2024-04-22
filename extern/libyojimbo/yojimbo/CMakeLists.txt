@@ -1,5 +1,3 @@
-# Not a real 'find' package, but it works for now.
-
 function(yojimbo_glob
     ret # The name of the return variable
     directories # The locations of the directories to glob from, as a list
@@ -57,15 +55,13 @@ endfunction()
 
 # --- END FUNCTIONS ---
 
-set(YOJIMBO_HOME "${CMAKE_SOURCE_DIR}/extern/libyojimbo/yojimbo")
-
-set(Yojimbo_SERIALIZE_INCLUDE_DIR "${YOJIMBO_HOME}/serialize")
-set(Yojimbo_NETCODE_INCLUDE_DIR "${YOJIMBO_HOME}/netcode")
-set(Yojimbo_RELIABLE_INCLUDE_DIR "${YOJIMBO_HOME}/reliable")
-set(Yojimbo_SODIUM_INCLUDE_DIR "${YOJIMBO_HOME}/sodium")
-set(Yojimbo_TLSF_INCLUDE_DIR "${YOJIMBO_HOME}/tlsf")
-set(Yojimbo_INCLUDE_DIR "${YOJIMBO_HOME}/include")
-set(Yojimbo_SOURCE_DIR "${YOJIMBO_HOME}/source")
+set(Yojimbo_SERIALIZE_INCLUDE_DIR "serialize")
+set(Yojimbo_NETCODE_INCLUDE_DIR "netcode")
+set(Yojimbo_RELIABLE_INCLUDE_DIR "reliable")
+set(Yojimbo_SODIUM_INCLUDE_DIR "sodium")
+set(Yojimbo_TLSF_INCLUDE_DIR "tlsf")
+set(Yojimbo_INCLUDE_DIR "include")
+set(Yojimbo_SOURCE_DIR "source")
 
 yojimbo_adlib_interface(serialize INTERFACE
     "${Yojimbo_SERIALIZE_INCLUDE_DIR}" "h"
@@ -112,7 +108,7 @@ yojimbo_adlib(yojimbo STATIC
 set_target_properties(yojimbo PROPERTIES OUTPUT_NAME yojimbo)
 
 # yojimbo_allocator.cpp:32 " #include "tlsf/tlsf.h" "
-target_include_directories(yojimbo PRIVATE "${YOJIMBO_HOME}")
+target_include_directories(yojimbo PRIVATE "." PUBLIC Yojimbo_INCLUDE_DIR)
 
 target_link_libraries(yojimbo
     PUBLIC
@@ -127,12 +123,4 @@ target_link_libraries(yojimbo
         tlsf
         # yojimbo.h, yojimbo_constants.h
         serialize
-    )
-
-include(FindPackageHandleStandardArgs)
-
-set(Yojimbo_LIBRARIES "${yojimbo}")
-
-find_package_handle_standard_args(Yojimbo
-    REQUIRED_VARS yojimbo Yojimbo_INCLUDE_DIR
     )

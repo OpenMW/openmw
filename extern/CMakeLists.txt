@@ -204,6 +204,8 @@ endif()
 
 add_subdirectory(smhasher)
 
+add_subdirectory(libyojimbo/yojimbo)
+
 if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
 
     set(BENCHMARK_ENABLE_TESTING OFF)

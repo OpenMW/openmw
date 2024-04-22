@@ -246,8 +246,6 @@ find_package(OpenGL REQUIRED)
 
 find_package(LZ4 REQUIRED)
 
-find_package(Yojimbo REQUIRED)
-
 if (USE_QT)
     find_package(QT REQUIRED COMPONENTS Core NAMES Qt6 Qt5)
     if (QT_VERSION_MAJOR VERSION_EQUAL 5)
@@ -378,8 +376,8 @@ endif()
 # Platform specific
 if (WIN32)
     if(NOT MINGW)
-    set(Boost_USE_STATIC_LIBS   ON)
-    add_definitions(-DBOOST_ALL_NO_LIB)
+        set(Boost_USE_STATIC_LIBS   ON)
+        add_definitions(-DBOOST_ALL_NO_LIB)
     endif(NOT MINGW)
 
     # Suppress WinMain(), provided by SDL

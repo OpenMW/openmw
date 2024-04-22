@@ -160,7 +160,7 @@ target_link_libraries(openmw
     ${MyGUI_LIBRARIES}
     SDL2::SDL2
     ${RecastNavigation_LIBRARIES}
-    ${Yojimbo_LIBRARIES}
+    "yojimbo"
     "osg-ffmpeg-videoplayer"
     "oics"
     components
