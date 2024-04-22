@@ -9,7 +9,7 @@
 
 static volatile int quit = 0;
 
-void interrupt_handler(int)
+void server_interrupt_handler(int)
 {
     quit = 1;
 }
@@ -35,7 +35,7 @@ MWNet::Server::Server()
     mServer->GetAddress().ToString(addressString, sizeof(addressString));
     Log(Debug::Info) << "server address is " << addressString << "\n";
 
-    signal(SIGINT, interrupt_handler);
+    signal(SIGINT, server_interrupt_handler);
 }
 
 std::unique_ptr<yojimbo::Server> MWNet::Server::CreateServerInstance()
