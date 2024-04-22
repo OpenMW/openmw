@@ -33,13 +33,13 @@ MWNet::Client::Client()
 
     uint64_t clientId = 0;
     yojimbo_random_bytes((uint8_t*)&clientId, 8);
-    Log(Debug::Warning) << "Client id is" << clientId << "\n";
+    Log(Debug::Warning) << "Client id is" << clientId;
 
     mClient->InsecureConnect(MWNet::DefaultPrivateKey, clientId, serverAddress);
 
     char addressString[256];
     mClient->GetAddress().ToString(addressString, sizeof(addressString));
-    Log(Debug::Warning) << "Client address is " << addressString << "\n";
+    Log(Debug::Warning) << "Client address is " << addressString;
 }
 
 std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()

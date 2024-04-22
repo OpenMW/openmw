@@ -31,7 +31,7 @@ MWNet::Server::Server()
 
     char addressString[256];
     mServer->GetAddress().ToString(addressString, sizeof(addressString));
-    Log(Debug::Info) << "server address is " << addressString << "\n";
+    Log(Debug::Info) << "server address is " << addressString;
 
     signal(SIGINT, server_interrupt_handler);
 }
@@ -89,10 +89,10 @@ void MWNet::Server::updateConnection()
 
 void MWNet::Server::clientConnected(int clientIndex)
 {
-    Log(Debug::Info) << "client connected: " << clientIndex << "\n";
+    Log(Debug::Info) << "client connected: " << clientIndex;
 }
 
 void MWNet::Server::clientDisconnected(int clientIndex)
 {
-    Log(Debug::Info) << "client disconnected: " << clientIndex << "\n";
+    Log(Debug::Info) << "client disconnected: " << clientIndex;
 }
