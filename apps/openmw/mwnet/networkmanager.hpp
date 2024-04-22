@@ -27,7 +27,15 @@ namespace MWNet
             }
         }
 
-        void update();
+        bool update()
+        {
+            if (!mConnection->tick())
+            {
+                ShutdownYojimbo();
+                return false;
+            }
+            return true;
+        }
 
         bool isServer() { return mIsServer; }
 

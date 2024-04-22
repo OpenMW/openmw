@@ -201,13 +201,17 @@ bool OMW::Engine::frame(float frametime)
 
     try
     {
-        const bool isServer = mEnvironment.getIsServer();
+        const bool isServer = mEnvironment.getNetworkManager()->isServer();
         // update input
         {
             if (!isServer)
             {
                 ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
                 mInputManager->update(frametime, false);
+            }
+            if (!mNetworkManager->update())
+            {
+                mEnvironment.getStateManager()->requestQuit();
             }
         }
 
