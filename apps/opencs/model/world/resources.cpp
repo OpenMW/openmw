@@ -28,7 +28,7 @@ void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char* const* e
 
     size_t baseSize = mBaseDirectory.size();
 
-    for (const auto& filepath : vfs->getRecursiveDirectoryIterator(""))
+    for (const auto& filepath : vfs->getRecursiveDirectoryIterator())
     {
         const std::string_view view = filepath.view();
         if (view.size() < baseSize + 1 || !view.starts_with(mBaseDirectory) || view[baseSize] != '/')

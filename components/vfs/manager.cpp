@@ -99,4 +99,21 @@ namespace VFS
         ++normalized.back();
         return { it, mIndex.lower_bound(normalized) };
     }
+
+    RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(VFS::Path::NormalizedView path) const
+    {
+        if (path.value().empty())
+            return { mIndex.begin(), mIndex.end() };
+        const auto it = mIndex.lower_bound(path);
+        if (it == mIndex.end() || !it->first.view().starts_with(path.value()))
+            return { it, it };
+        std::string copy(path.value());
+        ++copy.back();
+        return { it, mIndex.lower_bound(copy) };
+    }
+
+    RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator() const
+    {
+        return { mIndex.begin(), mIndex.end() };
+    }
 }

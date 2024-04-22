@@ -115,7 +115,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
     vfs.addArchive(std::move(archive));
     vfs.buildIndex();
 
-    for (const auto& name : vfs.getRecursiveDirectoryIterator(""))
+    for (const auto& name : vfs.getRecursiveDirectoryIterator())
     {
         if (isNIF(name.value()) || isMaterial(name.value()))
         {

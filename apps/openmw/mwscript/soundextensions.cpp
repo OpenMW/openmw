@@ -63,7 +63,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string music{ runtime.getStringLiteral(runtime[0].mInteger) };
+                const VFS::Path::Normalized music(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWBase::Environment::get().getSoundManager()->streamMusic(

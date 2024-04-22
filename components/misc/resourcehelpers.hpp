@@ -39,11 +39,11 @@ namespace Misc
         // Adds "meshes\\".
         std::string correctMeshPath(std::string_view resPath);
 
-        // Adds "sound\\".
+        // Prepends "sound/".
         VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath);
 
-        // Adds "music\\".
-        std::string correctMusicPath(const std::string& resPath);
+        // Prepends "music/".
+        VFS::Path::Normalized correctMusicPath(VFS::Path::NormalizedView resPath);
 
         // Removes "meshes\\".
         std::string_view meshPathForESM3(std::string_view resPath);
