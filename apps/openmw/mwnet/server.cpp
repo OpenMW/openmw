@@ -16,6 +16,7 @@ void interrupt_handler(int)
 
 MWNet::Server::Server()
     : mAdapter(MWNet::GameAdapter)
+    , mTime(0)
 {
     if (!InitializeYojimbo())
     {
@@ -26,8 +27,15 @@ MWNet::Server::Server()
 
     yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
 
-    // Seed the random number generator
     srand((unsigned int)time(NULL));
+
+    mServer->Start(DefaultMaxClients);
+
+    char addressString[256];
+    mServer->GetAddress().ToString(addressString, sizeof(addressString));
+    Log(Debug::Info) << "server address is " << addressString << "\n";
+
+    signal(SIGINT, interrupt_handler);
 }
 
 std::unique_ptr<yojimbo::Server> MWNet::Server::CreateServerInstance()
@@ -36,9 +44,8 @@ std::unique_ptr<yojimbo::Server> MWNet::Server::CreateServerInstance()
 
     yojimbo::ClientServerConfig config;
 
-    std::unique_ptr<yojimbo::Server> server
-        = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,
-            yojimbo::Address(MWNet::LocalHost, DefaultPort), config, mAdapter, MWNet::TimeAdvanceUnits);
+    std::unique_ptr<yojimbo::Server> server = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(),
+        MWNet::DefaultPrivateKey, yojimbo::Address(MWNet::LocalHost, DefaultPort), config, mAdapter, 0.0);
 
     if (!server)
     {
@@ -48,35 +55,32 @@ std::unique_ptr<yojimbo::Server> MWNet::Server::CreateServerInstance()
     return server;
 }
 
-int MWNet::Server::run()
+int MWNet::Server::tick()
 {
-    double time = MWNet::TimeAdvanceUnits;
-
-    mServer->Start(DefaultMaxClients);
-
-    char addressString[256];
-    mServer->GetAddress().ToString(addressString, sizeof(addressString));
-    Log(Debug::Info) << "server address is " << addressString << "\n"; // I think log gives us a newline?
-
-    signal(SIGINT, interrupt_handler);
-
-    while (!quit)
+    if (quit)
     {
-        mServer->SendPackets();
-
-        mServer->ReceivePackets();
-
-        time += MWNet::TickRate;
-
-        mServer->AdvanceTime(time);
-
-        if (!mServer->IsRunning())
-            break;
-
-        yojimbo_sleep(MWNet::TickRate);
+        mServer->Stop();
+        return 1;
+    }
+    else if (!mServer->IsRunning())
+    {
+        return 1;
     }
 
-    mServer->Stop();
+    double currentTime = yojimbo_time();
+    if (mTime <= currentTime)
+    {
+        mTime += MWNet::TickRate;
+        mServer->AdvanceTime(mTime);
+        mServer->ReceivePackets();
+        // Actually process messages in between
+        mServer->SendPackets();
+    }
+    else
+    {
+        Log(Debug::Warning) << "Sleeping for ... " << (mTime - currentTime);
+        yojimbo_sleep(mTime - currentTime);
+    }
 
     return 0;
 }

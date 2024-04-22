@@ -13,11 +13,12 @@ namespace MWNet
 
         BaseAdapter mAdapter;
         std::unique_ptr<yojimbo::Server> mServer;
+        double mTime;
 
     public:
         Server();
 
-        int run();
+        int tick();
 
         void ClientConnected(int clientIndex);
 
