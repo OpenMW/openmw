@@ -83,6 +83,8 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "mwnet/networkmanager.hpp"
+
 #include "profile.hpp"
 
 namespace
@@ -731,7 +733,8 @@ void OMW::Engine::setWindowIcon()
 
 void OMW::Engine::prepareEngine()
 {
-    mEnvironment.setIsServer(mNetType == NetType::Server);
+    mNetworkManager = std::make_unique<MWNet::NetworkManager>(mNetType == NetType::Server);
+    mEnvironment.setNetworkManager(*mNetworkManager);
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
     osg::ref_ptr<osg::Group> rootNode = nullptr;
