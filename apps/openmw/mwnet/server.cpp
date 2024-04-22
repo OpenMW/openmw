@@ -48,16 +48,8 @@ std::unique_ptr<yojimbo::Server> MWNet::Server::createServerInstance()
 {
     Log(Debug::Info) << "started server on port " << MWNet::DefaultServerPort << " (insecure)";
 
-    std::unique_ptr<yojimbo::Server> server
-        = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,
-            yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), mConfig, *mAdapter, 0.0);
-
-    if (!server)
-    {
-        throw std::logic_error("MWNet: failed to create yojimbo server!\n");
-    }
-
-    return server;
+    return std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,
+        yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), mConfig, *mAdapter, 0.0);
 }
 
 bool MWNet::Server::tick()

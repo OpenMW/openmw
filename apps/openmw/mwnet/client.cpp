@@ -48,15 +48,8 @@ std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()
 {
     Log(Debug::Info) << "started client on port " << MWNet::DefaultClientPort << " (insecure)";
 
-    std::unique_ptr<yojimbo::Client> client = std::make_unique<yojimbo::Client>(yojimbo::GetDefaultAllocator(),
+    return std::make_unique<yojimbo::Client>(yojimbo::GetDefaultAllocator(),
         yojimbo::Address(MWNet::LocalHost, MWNet::DefaultClientPort), mConfig, *mAdapter, 0.0);
-
-    if (!client)
-    {
-        throw std::logic_error("MWNet: failed to create yojimbo client!\n");
-    }
-
-    return client;
 }
 
 bool MWNet::Client::tick()
