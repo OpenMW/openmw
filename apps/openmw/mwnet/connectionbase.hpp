@@ -6,6 +6,12 @@
 
 namespace MWNet
 {
+    enum ChannelName
+    {
+        EVENTSQUEUE = 0,
+        GAMESTATE = 1
+    };
+
     class BaseAdapter : public Adapter
     {
     public:
@@ -23,8 +29,8 @@ namespace MWNet
         GameConnectionConfig()
         {
             numChannels = 2;
-            channel[0].type = yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED;
-            channel[1].type = yojimbo::CHANNEL_TYPE_UNRELIABLE_UNORDERED;
+            channel[ChannelName::EVENTSQUEUE].type = yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED;
+            channel[ChannelName::GAMESTATE].type = yojimbo::CHANNEL_TYPE_UNRELIABLE_UNORDERED;
         }
     };
 
