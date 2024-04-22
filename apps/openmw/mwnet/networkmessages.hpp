@@ -39,9 +39,6 @@ using namespace yojimbo;
 
 const uint64_t ProtocolId = 0x11223344556677ULL;
 
-const int ClientPort = 30000;
-const int ServerPort = 40000;
-
 inline int GetNumBitsForMessage(uint16_t sequence)
 {
     static int messageBitsArray[]
@@ -182,6 +179,8 @@ public:
 namespace MWNet
 {
     static BaseAdapter GameAdapter;
+    constexpr const int DefaultClientPort = 30000;
+    constexpr const int DefaultServerPort = 40000;
     constexpr const char* LocalHost("127.0.0.1");
     constexpr const double TimeAdvanceUnits = 100.0;
     constexpr const double TickRate = 1.0 / 60.0;
