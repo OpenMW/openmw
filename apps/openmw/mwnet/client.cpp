@@ -53,7 +53,7 @@ std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()
 
     if (!client)
     {
-        throw std::logic_error("MWNet: failed to create server!\n");
+        throw std::logic_error("MWNet: failed to create yojimbo client!\n");
     }
 
     return client;
