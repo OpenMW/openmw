@@ -7,6 +7,21 @@
 
 namespace MWNet
 {
+    class ServerAdapter : public MWNet::BaseAdapter
+    {
+        MWNet::Connection& mServer;
+
+        void OnServerClientConnected(int clientIndex) override { mServer.clientConnected(clientIndex); }
+
+        void OnServerClientDisconnected(int clientIndex) override { mServer.clientDisconnected(clientIndex); }
+
+    public:
+        ServerAdapter(MWNet::Connection& server)
+            : mServer(server)
+        {
+        }
+    };
+
     class Server : public MWNet::Connection
     {
         std::unique_ptr<yojimbo::Server> createServerInstance();

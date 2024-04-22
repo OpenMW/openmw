@@ -167,23 +167,24 @@ YOJIMBO_MESSAGE_FACTORY_START(SingleBlockTestMessageFactory, NUM_SINGLE_BLOCK_TE
 YOJIMBO_DECLARE_MESSAGE_TYPE(SINGLE_BLOCK_TEST_MESSAGE, TestBlockMessage);
 YOJIMBO_MESSAGE_FACTORY_FINISH()
 
-class BaseAdapter : public Adapter
-{
-public:
-    MessageFactory* CreateMessageFactory(Allocator& allocator)
-    {
-        return YOJIMBO_NEW(allocator, TestMessageFactory, allocator);
-    }
-};
-
 namespace MWNet
 {
-    static BaseAdapter GameAdapter;
+    class BaseAdapter : public Adapter
+    {
+    public:
+        MessageFactory* CreateMessageFactory(Allocator& allocator)
+        {
+            return YOJIMBO_NEW(allocator, TestMessageFactory, allocator);
+        }
+
+        virtual void OnServerClientConnected(int clientIndex) {}
+        virtual void OnServerClientDisconnected(int clientIndex) {}
+    };
+
     constexpr const int DefaultClientPort = 30000;
     constexpr const int DefaultServerPort = 40000;
     constexpr const int DefaultMaxClients = 64;
     constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
-    constexpr const double TimeAdvanceUnits = 100.0;
     constexpr const double TickRate = 1.0 / 60.0;
     constexpr const char* LocalHost("127.0.0.1");
 
@@ -191,13 +192,13 @@ namespace MWNet
     {
     public:
         double mTime;
-        BaseAdapter mAdapter = GameAdapter;
+        std::unique_ptr<BaseAdapter> mAdapter;
         virtual ~Connection() = default;
         virtual int tick() = 0;
         virtual void updateConnection() = 0;
         virtual void clientConnected(int clientIndex) = 0;
         virtual void clientDisconnected(int clientIndex) = 0;
-        BaseAdapter getAdapter() { return mAdapter; }
+        BaseAdapter getAdapter() { return *mAdapter; }
     };
 }
 

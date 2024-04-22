@@ -21,6 +21,8 @@ MWNet::Server::Server()
         throw std::logic_error("error: failed to initialize Yojimbo!\n");
     }
 
+    mAdapter = std::make_unique<MWNet::ServerAdapter>(*this);
+
     mServer = createServerInstance();
 
     yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
@@ -28,6 +30,11 @@ MWNet::Server::Server()
     srand((unsigned int)time(NULL));
 
     mServer->Start(DefaultMaxClients);
+
+    if (!mServer->IsRunning())
+    {
+        throw std::logic_error("error: failed to start server!\n");
+    }
 
     char addressString[256];
     mServer->GetAddress().ToString(addressString, sizeof(addressString));
@@ -43,7 +50,7 @@ std::unique_ptr<yojimbo::Server> MWNet::Server::createServerInstance()
     yojimbo::ClientServerConfig config;
 
     std::unique_ptr<yojimbo::Server> server = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(),
-        MWNet::DefaultPrivateKey, yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), config, mAdapter, 0.0);
+        MWNet::DefaultPrivateKey, yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), config, *mAdapter, 0.0);
 
     if (!server)
     {
@@ -89,10 +96,10 @@ void MWNet::Server::updateConnection()
 
 void MWNet::Server::clientConnected(int clientIndex)
 {
-    Log(Debug::Info) << "client connected: " << clientIndex;
+    Log(Debug::Info) << "SERVER: client connected: " << clientIndex;
 }
 
 void MWNet::Server::clientDisconnected(int clientIndex)
 {
-    Log(Debug::Info) << "client disconnected: " << clientIndex;
+    Log(Debug::Info) << "SERVER: client disconnected: " << clientIndex;
 }

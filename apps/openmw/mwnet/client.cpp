@@ -21,6 +21,8 @@ MWNet::Client::Client()
         throw std::logic_error("error: failed to initialize Yojimbo!\n");
     }
 
+    mAdapter = std::make_unique<MWNet::ClientAdapter>(*this);
+
     mClient = createClientInstance();
 
     yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
@@ -49,7 +51,7 @@ std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()
     yojimbo::ClientServerConfig config;
 
     std::unique_ptr<yojimbo::Client> client = std::make_unique<yojimbo::Client>(yojimbo::GetDefaultAllocator(),
-        yojimbo::Address(MWNet::LocalHost, MWNet::DefaultClientPort), config, mAdapter, 0.0);
+        yojimbo::Address(MWNet::LocalHost, MWNet::DefaultClientPort), config, *mAdapter, 0.0);
 
     if (!client)
     {
@@ -91,14 +93,4 @@ void MWNet::Client::updateConnection()
     mClient->ReceivePackets();
     // Actually process messages in between
     mClient->SendPackets();
-}
-
-void MWNet::Client::clientConnected(int clientIndex)
-{
-    Log(Debug::Info) << "client connected: " << clientIndex << "\n";
-}
-
-void MWNet::Client::clientDisconnected(int clientIndex)
-{
-    Log(Debug::Info) << "client disconnected: " << clientIndex << "\n";
 }
