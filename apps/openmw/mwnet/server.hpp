@@ -43,7 +43,7 @@ namespace MWNet
     public:
         Server();
 
-        int tick() override;
+        bool tick() override;
     };
 }
 

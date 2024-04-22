@@ -59,7 +59,7 @@ std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()
     return client;
 }
 
-int MWNet::Client::tick()
+bool MWNet::Client::tick()
 {
     if (quit || mClient->ConnectionFailed() || mClient->IsDisconnected())
     {
@@ -67,7 +67,7 @@ int MWNet::Client::tick()
         {
             mClient->Disconnect();
         }
-        return 1;
+        return false;
     }
 
     double currentTime = yojimbo_time();
@@ -80,7 +80,7 @@ int MWNet::Client::tick()
         yojimbo_sleep(mTime - currentTime);
     }
 
-    return 0;
+    return true;
 }
 
 void MWNet::Client::updateConnection()

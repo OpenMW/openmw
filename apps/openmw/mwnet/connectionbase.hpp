@@ -48,7 +48,7 @@ namespace MWNet
         std::unique_ptr<BaseAdapter> mAdapter;
         GameConnectionConfig mConfig = GameConnectionConfig();
         virtual ~Connection() = default;
-        virtual int tick() = 0;
+        virtual bool tick() = 0;
         virtual void updateConnection() = 0;
         virtual void processMessages() = 0;
         virtual void clientConnected(int clientIndex) = 0;

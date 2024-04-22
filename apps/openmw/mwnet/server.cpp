@@ -60,16 +60,16 @@ std::unique_ptr<yojimbo::Server> MWNet::Server::createServerInstance()
     return server;
 }
 
-int MWNet::Server::tick()
+bool MWNet::Server::tick()
 {
     if (quit)
     {
         mServer->Stop();
-        return 1;
+        return false;
     }
     else if (!mServer->IsRunning())
     {
-        return 1;
+        return false;
     }
 
     double currentTime = yojimbo_time();
@@ -82,7 +82,7 @@ int MWNet::Server::tick()
         yojimbo_sleep(mTime - currentTime);
     }
 
-    return 0;
+    return true;
 }
 
 void MWNet::Server::updateConnection()

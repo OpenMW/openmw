@@ -39,7 +39,7 @@ namespace MWNet
     public:
         Client();
 
-        int tick() override;
+        bool tick() override;
 
         // std::unique_ptr<yojimbo::Client>* getClient() override { return &mClient; }
     };
