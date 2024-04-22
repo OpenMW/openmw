@@ -3,7 +3,7 @@
 #include <memory>
 #include <yojimbo.h>
 
-#include "networkmessages.hpp"
+#include "connectionbase.hpp"
 
 namespace MWNet
 {
