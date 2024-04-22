@@ -28,18 +28,22 @@ namespace MWNet
 
         std::unique_ptr<yojimbo::Server> mServer;
 
-    public:
-        Server();
-
-        int tick() override;
-
         void updateConnection() override;
+
+        void processMessages() override;
 
         void clientConnected(int clientIndex) override;
 
         void clientDisconnected(int clientIndex) override;
 
-        yojimbo::Server& getServer() { return *mServer; }
+        void processMessage(int clientIndex, yojimbo::Message* message);
+
+        void processTestMessage(int clientIndex, TestMessage* message);
+
+    public:
+        Server();
+
+        int tick() override;
     };
 }
 

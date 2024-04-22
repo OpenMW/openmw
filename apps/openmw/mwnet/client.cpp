@@ -48,10 +48,8 @@ std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()
 {
     Log(Debug::Info) << "started client on port " << MWNet::DefaultClientPort << " (insecure)";
 
-    yojimbo::ClientServerConfig config;
-
     std::unique_ptr<yojimbo::Client> client = std::make_unique<yojimbo::Client>(yojimbo::GetDefaultAllocator(),
-        yojimbo::Address(MWNet::LocalHost, MWNet::DefaultClientPort), config, *mAdapter, 0.0);
+        yojimbo::Address(MWNet::LocalHost, MWNet::DefaultClientPort), mConfig, *mAdapter, 0.0);
 
     if (!client)
     {
@@ -63,13 +61,12 @@ std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()
 
 int MWNet::Client::tick()
 {
-    if (quit)
+    if (quit || mClient->ConnectionFailed() || mClient->IsDisconnected())
     {
-        return 1;
-    }
-    else if (mClient->ConnectionFailed() || mClient->IsDisconnected())
-    {
-        mClient->Disconnect();
+        if (mClient->IsConnected())
+        {
+            mClient->Disconnect();
+        }
         return 1;
     }
 
@@ -91,6 +88,53 @@ void MWNet::Client::updateConnection()
     mTime += MWNet::TickRate;
     mClient->AdvanceTime(mTime);
     mClient->ReceivePackets();
+    processMessages();
+
+    TestMessage* message = (TestMessage*)mClient->CreateMessage((int)TestMessageType::TEST_MESSAGE);
+    message->sequence = 42;
+    mClient->SendMessage((int)yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED, message);
+
     // Actually process messages in between
     mClient->SendPackets();
+}
+
+void MWNet::Client::processMessages()
+{
+    if (!mClient->IsConnected())
+    {
+        return;
+    }
+
+    for (int i = 0; i < mConfig.numChannels; ++i)
+    {
+        yojimbo::Message* message = mClient->ReceiveMessage(i);
+
+        while (message)
+        {
+            processMessage(message);
+
+            mClient->ReleaseMessage(message);
+
+            message = mClient->ReceiveMessage(i);
+        }
+    }
+}
+
+void MWNet::Client::processMessage(yojimbo::Message* message)
+{
+    switch (message->GetType())
+    {
+        case (int)TestMessageType::TEST_MESSAGE:
+            processTestMessage((TestMessage*)message);
+            break;
+        default:
+            break;
+    }
+}
+
+// void MWNet::Client::sendMessage
+
+void MWNet::Client::processTestMessage(TestMessage* message)
+{
+    Log(Debug::Info) << "CLIENT: received test message from server: " << message->sequence;
 }

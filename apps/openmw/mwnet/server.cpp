@@ -1,3 +1,4 @@
+#include <apps/openmw/mwnet/networkmessages.hpp>
 #include <csignal>
 #include <stdexcept>
 #include <time.h>
@@ -47,10 +48,9 @@ std::unique_ptr<yojimbo::Server> MWNet::Server::createServerInstance()
 {
     Log(Debug::Info) << "started server on port " << MWNet::DefaultServerPort << " (insecure)";
 
-    yojimbo::ClientServerConfig config;
-
-    std::unique_ptr<yojimbo::Server> server = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(),
-        MWNet::DefaultPrivateKey, yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), config, *mAdapter, 0.0);
+    std::unique_ptr<yojimbo::Server> server
+        = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,
+            yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), mConfig, *mAdapter, 0.0);
 
     if (!server)
     {
@@ -90,8 +90,54 @@ void MWNet::Server::updateConnection()
     mTime += MWNet::TickRate;
     mServer->AdvanceTime(mTime);
     mServer->ReceivePackets();
+    processMessages();
     // Actually process messages in between
     mServer->SendPackets();
+}
+
+void MWNet::Server::processMessages()
+{
+    for (unsigned int i = 0; i < MWNet::DefaultMaxClients; i++)
+    {
+        if (!mServer->IsClientConnected(i))
+        {
+            continue;
+        }
+
+        for (int j = 0; j < mConfig.numChannels; j++)
+        {
+            yojimbo::Message* message = mServer->ReceiveMessage(i, j);
+            while (message)
+            {
+                processMessage(i, message);
+
+                mServer->ReleaseMessage(i, message);
+
+                message = mServer->ReceiveMessage(i, j);
+            }
+        }
+    }
+}
+
+void MWNet::Server::processMessage(int clientIndex, yojimbo::Message* message)
+{
+    switch (message->GetType())
+    {
+        case (int)TestMessageType::TEST_MESSAGE:
+            processTestMessage(clientIndex, (TestMessage*)message);
+            break;
+        default:
+            break;
+    }
+}
+
+void MWNet::Server::processTestMessage(int clientIndex, TestMessage* message)
+{
+    Log(Debug::Info) << "SERVER: received test message from client " << clientIndex << ": " << message->sequence;
+
+    TestMessage* response = (TestMessage*)mServer->CreateMessage((int)TestMessageType::TEST_MESSAGE, clientIndex);
+    response->sequence = 24;
+    mServer->SendMessage((int)yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED, clientIndex, response);
 }
 
 void MWNet::Server::clientConnected(int clientIndex)
