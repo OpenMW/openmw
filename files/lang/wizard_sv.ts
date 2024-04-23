@@ -131,10 +131,6 @@ de ordinarie fonterna i Morrowind. Bocka i denna ruta om du ändå föredrar ord
         <translation>Var ska Morrowind installeras?</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Morrowind will be installed to the following location. </source>
         <translation>Morrowind kommer installeras på följande plats. </translation>
     </message>
@@ -173,10 +169,6 @@ de ordinarie fonterna i Morrowind. Bocka i denna ruta om du ändå föredrar ord
         <translation>Vad är språket på Morrowindinstallationen?</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/preferences-desktop-locale.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/preferences-desktop-locale.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Select the language of the Morrowind installation.</source>
         <translation>Välj språket på Morrowindinstallationen.</translation>
     </message>
@@ -200,10 +192,6 @@ de ordinarie fonterna i Morrowind. Bocka i denna ruta om du ändå föredrar ord
         <translation>Köpt CD/DVD</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/system-installer.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/system-installer.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Install from a retail disc to a new location.</source>
         <translation>Installera från en köpt skiva till en ny plats.</translation>
     </message>
@@ -212,20 +200,12 @@ de ordinarie fonterna i Morrowind. Bocka i denna ruta om du ändå föredrar ord
         <translation>Befintlig installation</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Select an existing installation.</source>
         <translation>Välj en befintlig installation.</translation>
     </message>
     <message>
         <source>Don&apos;t have a copy?</source>
         <translation>Äger du inte spelet?</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/dollar.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/dollar.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Buy the game</source>
