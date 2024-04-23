@@ -51,6 +51,9 @@ namespace Bgsm
         MaterialFile() = default;
         virtual void read(BGSMStream& stream);
         virtual ~MaterialFile() = default;
+
+        bool wrapT() const { return mClamp & 1; }
+        bool wrapS() const { return mClamp & 2; }
     };
 
     struct BGSMFile : MaterialFile

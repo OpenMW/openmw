@@ -338,6 +338,9 @@ namespace Nif
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
 
+        bool wrapT() const { return mClamp & 1; }
+        bool wrapS() const { return mClamp & 2; }
+
         bool doubleSided() const { return mShaderFlags2 & BSLSFlag2_DoubleSided; }
         bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
     };
@@ -365,6 +368,9 @@ namespace Nif
         BSSPLuminanceParams mLuminance;
 
         void read(NIFStream* nif) override;
+
+        bool wrapT() const { return mClamp & 1; }
+        bool wrapS() const { return mClamp & 2; }
 
         bool useFalloff() const { return mShaderFlags1 & BSLSFlag1_Falloff; }
         bool softEffect() const { return mShaderFlags1 & BSLSFlag1_SoftEffect; }

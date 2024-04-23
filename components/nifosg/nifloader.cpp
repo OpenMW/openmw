@@ -2176,8 +2176,8 @@ namespace NifOsg
             Bgsm::MaterialFilePtr material, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
             const unsigned int uvSet = 0;
-            const bool wrapS = (material->mClamp >> 1) & 0x1;
-            const bool wrapT = material->mClamp & 0x1;
+            const bool wrapS = material->wrapS();
+            const bool wrapT = material->wrapT();
             if (material->mShaderType == Bgsm::ShaderType::Lighting)
             {
                 const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material.get());
@@ -2486,11 +2486,9 @@ namespace NifOsg
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     clearBoundTextures(stateset, boundTextures);
-                    const bool wrapS = (texprop->mClamp >> 1) & 0x1;
-                    const bool wrapT = texprop->mClamp & 0x1;
                     if (!texprop->mTextureSet.empty())
-                        handleTextureSet(
-                            texprop->mTextureSet.getPtr(), wrapS, wrapT, node->getName(), stateset, boundTextures);
+                        handleTextureSet(texprop->mTextureSet.getPtr(), texprop->wrapS(), texprop->wrapT(),
+                            node->getName(), stateset, boundTextures);
                     handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->refraction())
                         SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
@@ -2534,11 +2532,9 @@ namespace NifOsg
                         handleShaderMaterialNodeProperties(material, stateset, boundTextures);
                         break;
                     }
-                    const bool wrapS = (texprop->mClamp >> 1) & 0x1;
-                    const bool wrapT = texprop->mClamp & 0x1;
                     if (!texprop->mTextureSet.empty())
-                        handleTextureSet(
-                            texprop->mTextureSet.getPtr(), wrapS, wrapT, node->getName(), stateset, boundTextures);
+                        handleTextureSet(texprop->mTextureSet.getPtr(), texprop->wrapS(), texprop->wrapT(),
+                            node->getName(), stateset, boundTextures);
                     handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->doubleSided())
                         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -2566,11 +2562,9 @@ namespace NifOsg
                     if (!texprop->mSourceTexture.empty())
                     {
                         const unsigned int uvSet = 0;
-                        const bool wrapS = (texprop->mClamp >> 1) & 0x1;
-                        const bool wrapT = texprop->mClamp & 0x1;
                         unsigned int texUnit = boundTextures.size();
-                        attachExternalTexture(
-                            "diffuseMap", texprop->mSourceTexture, wrapS, wrapT, uvSet, stateset, boundTextures);
+                        attachExternalTexture("diffuseMap", texprop->mSourceTexture, texprop->wrapS(), texprop->wrapT(),
+                            uvSet, stateset, boundTextures);
                         {
                             osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
                             // This handles 20.2.0.7 UV settings like 4.0.0.2 UV settings (see NifOsg::UVController)
