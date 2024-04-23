@@ -1110,7 +1110,16 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
 {
     QRect rect;
     if (isGrowLimit)
-        rect = QApplication::screenAt(pos())->geometry();
+    {
+        // Widget position can be negative, we should clamp it.
+        QPoint position = pos();
+        if (position.x() <= 0)
+            position.setX(0);
+        if (position.y() <= 0)
+            position.setY(0);
+
+        rect = QApplication::screenAt(position)->geometry();
+    }
     else
         rect = desktopRect();
 
