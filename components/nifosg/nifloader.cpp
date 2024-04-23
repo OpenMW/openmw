@@ -2817,7 +2817,11 @@ namespace NifOsg
 
             // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
             if (mVersion <= Nif::NIFFile::VER_MW || !specEnabled)
+            {
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+                mat->setShininess(osg::Material::FRONT_AND_BACK, 0.f);
+                specStrength = 1.f;
+            }
 
             if (lightmode == Nif::NiVertexColorProperty::LightMode::LightMode_Emissive)
             {
@@ -2848,32 +2852,31 @@ namespace NifOsg
                 mat->setColorMode(osg::Material::OFF);
             }
 
-            if (!mPushedSorter && !hasSortAlpha && mHasStencilProperty)
-                setBin_Traversal(node->getOrCreateStateSet());
-
-            if (!mPushedSorter && !hasMatCtrl && mat->getColorMode() == osg::Material::OFF
-                && mat->getEmission(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0, 0, 0, 1)
-                && mat->getDiffuse(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1, 1, 1, 1)
-                && mat->getAmbient(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1, 1, 1, 1)
-                && mat->getShininess(osg::Material::FRONT_AND_BACK) == 0
-                && mat->getSpecular(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0.f, 0.f, 0.f, 0.f))
+            if (hasMatCtrl || mat->getColorMode() != osg::Material::OFF
+                || mat->getEmission(osg::Material::FRONT_AND_BACK) != osg::Vec4f(0, 0, 0, 1)
+                || mat->getDiffuse(osg::Material::FRONT_AND_BACK) != osg::Vec4f(1, 1, 1, 1)
+                || mat->getAmbient(osg::Material::FRONT_AND_BACK) != osg::Vec4f(1, 1, 1, 1)
+                || mat->getShininess(osg::Material::FRONT_AND_BACK) != 0
+                || mat->getSpecular(osg::Material::FRONT_AND_BACK) != osg::Vec4f(0.f, 0.f, 0.f, 0.f))
             {
-                // default state, skip
+                mat = shareAttribute(mat);
+                node->getOrCreateStateSet()->setAttributeAndModes(mat, osg::StateAttribute::ON);
+            }
+
+            if (emissiveMult != 1.f)
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
+
+            if (specStrength != 1.f)
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", specStrength));
+
+            if (!mPushedSorter)
+            {
+                if (!hasSortAlpha && mHasStencilProperty)
+                    setBin_Traversal(node->getOrCreateStateSet());
                 return;
             }
 
-            mat = shareAttribute(mat);
-
             osg::StateSet* stateset = node->getOrCreateStateSet();
-            stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
-            if (emissiveMult != 1.f)
-                stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
-            if (specStrength != 1.f)
-                stateset->addUniform(new osg::Uniform("specStrength", specStrength));
-
-            if (!mPushedSorter)
-                return;
-
             auto assignBin = [&](Nif::NiSortAdjustNode::SortingMode mode, int type) {
                 if (mode == Nif::NiSortAdjustNode::SortingMode::Off)
                 {
