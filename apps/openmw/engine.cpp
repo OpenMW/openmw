@@ -375,7 +375,7 @@ bool OMW::Engine::frame(float frametime)
         mLuaManager->reportStats(frameNumber, *stats);
     }
 
-    const bool isServer = mEnvironment.getIsServer();
+    const bool isServer = mEnvironment.getNetworkManager()->isServer();
 
     if (!isServer)
     {

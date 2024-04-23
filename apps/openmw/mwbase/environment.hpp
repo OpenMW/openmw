@@ -48,7 +48,6 @@ namespace MWBase
     {
         static Environment* sThis;
 
-        bool mIsServer = false;
         World* mWorld = nullptr;
         MWWorld::WorldModel* mWorldModel = nullptr;
         MWWorld::Scene* mWorldScene = nullptr;

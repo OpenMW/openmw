@@ -18,6 +18,7 @@ namespace MWNet
     constexpr const int MaxPacketSize = 16 * 1024;
     constexpr const int MaxSnapshotSize = 8 * 1024;
     constexpr const int MaxBlockSize = 10 * 1024;
+    constexpr const short MAX_RETRIES = 128;
     constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
     constexpr const double TickRate = 1.0 / 60.0;
     constexpr const char* LocalHost("127.0.0.1");
@@ -47,6 +48,7 @@ namespace MWNet
     class Connection
     {
     public:
+        short mRetries = 0;
         double mTime;
         std::unique_ptr<BaseAdapter> mAdapter;
         GameConnectionConfig mConfig = GameConnectionConfig();

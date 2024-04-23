@@ -45,6 +45,8 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwnet/networkmanager.hpp"
+
 #include "../mwscript/globalscripts.hpp"
 
 #include "quicksavemanager.hpp"
@@ -53,7 +55,7 @@ void MWState::StateManager::cleanup(bool force)
 {
     if (mState != State_NoGame || force)
     {
-        bool isServer = MWBase::Environment::get().getIsServer();
+        bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
         if (!isServer)
         {
             MWBase::Environment::get().getSoundManager()->clear();
@@ -187,7 +189,7 @@ void MWState::StateManager::newGame(bool bypass)
         mState = State_Running;
         MWBase::Environment::get().getLuaManager()->newGameStarted();
 
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);

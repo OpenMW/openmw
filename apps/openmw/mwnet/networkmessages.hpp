@@ -34,6 +34,7 @@ using namespace yojimbo;
 
 const uint64_t ProtocolId = 0x11223344556677ULL;
 
+// TODO: Figure out what kind of magic todd bullshit this is
 inline int GetNumBitsForMessage(uint16_t sequence)
 {
     static int messageBitsArray[]

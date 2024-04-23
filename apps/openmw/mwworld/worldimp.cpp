@@ -92,6 +92,8 @@
 
 #include "../mwsound/constants.hpp"
 
+#include "../mwnet/networkmanager.hpp"
+
 #include "actionteleport.hpp"
 #include "cellstore.hpp"
 #include "containerstore.hpp"
@@ -307,7 +309,7 @@ namespace MWWorld
             mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
             mRendering = std::make_unique<MWRender::RenderingManager>(
                 viewer, rootNode, mResourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
@@ -337,7 +339,7 @@ namespace MWWorld
         mScriptsEnabled = true;
         mSky = true;
 
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
             // Rebuild player
             setupPlayer();
@@ -402,7 +404,7 @@ namespace MWWorld
                 {
                     // Make sure that we do not continue to play a Title music after a new game video.
                     MWBase::Environment::get().getSoundManager()->stopMusic();
-                    MWBase::Environment::get().getSoundManager()->playPlaylist(sMWSound::explorePlaylist);
+                    MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
                     MWBase::Environment::get().getWindowManager()->playVideo(video, true);
                 }
             }
@@ -422,7 +424,7 @@ namespace MWWorld
 
     void World::clear()
     {
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
 
             mWeatherManager->clear();
@@ -923,7 +925,7 @@ namespace MWWorld
             rechargeItems(duration, false);
         }
 
-        bool isServer = MWBase::Environment::get().getIsServer();
+        bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
 
         if (!isServer)
         {
