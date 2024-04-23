@@ -1101,18 +1101,17 @@ namespace MWWorld
         if (mPreloadEnabled)
         {
             if (mPreloadDoors)
-                preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
+                preloadTeleportDoorDestinations(playerPos, predictedPos);
             if (mPreloadExteriorGrid)
                 preloadExteriorGrid(playerPos, predictedPos);
             if (mPreloadFastTravel)
-                preloadFastTravelDestinations(playerPos, predictedPos, exteriorPositions);
+                preloadFastTravelDestinations(playerPos, exteriorPositions);
         }
 
         mPreloader->setTerrainPreloadPositions(exteriorPositions);
     }
 
-    void Scene::preloadTeleportDoorDestinations(
-        const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<PositionCellGrid>& exteriorPositions)
+    void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos)
     {
         std::vector<MWWorld::ConstPtr> teleportDoors;
         for (const MWWorld::CellStore* cellStore : mActiveCells)
@@ -1281,12 +1280,10 @@ namespace MWWorld
         std::vector<ESM::Transport::Dest> mList;
     };
 
-    void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/,
-        std::vector<PositionCellGrid>& exteriorPositions) // ignore predictedPos here since opening dialogue with
-                                                          // travel service takes extra time
+    void Scene::preloadFastTravelDestinations(
+        const osg::Vec3f& playerPos, std::vector<PositionCellGrid>& exteriorPositions)
     {
-        const MWWorld::ConstPtr player = mWorld.getPlayerPtr();
-        ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
+        ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, playerPos);
         ESM::RefId extWorldspace = mWorld.getCurrentWorldspace();
         for (MWWorld::CellStore* cellStore : mActiveCells)
         {
