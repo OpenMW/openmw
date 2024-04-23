@@ -2603,6 +2603,7 @@ namespace NifOsg
                         fog->setMode(osg::Fog::LINEAR);
                         fog->setColor(osg::Vec4f(fogprop->mColour, 1.f));
                         fog->setDepth(fogprop->mFogDepth);
+                        fog = shareAttribute(fog);
                         stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
                         // Intentionally ignoring radial fog flag
                         // We don't really want to override the global setting
@@ -2614,6 +2615,7 @@ namespace NifOsg
                         fog->setMode(osg::Fog::LINEAR);
                         fog->setStart(10000000);
                         fog->setEnd(10000000);
+                        fog = shareAttribute(fog);
                         stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
                     }
                     break;
