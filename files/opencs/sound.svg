@@ -120,7 +120,8 @@
        x1="17.991667"
        y1="30.691668"
        x2="21.960417"
-       y2="30.691668" />
+       y2="30.691668"
+       gradientTransform="matrix(1.5999994,0,0,1,-10.794989,8.2675378e-8)" />
     <linearGradient
        xlink:href="#Main-3"
        id="linearGradient2264"
@@ -129,7 +130,7 @@
        x2="11.641667"
        y2="30.691668"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(3.7795264,0,0,3.7795263,-27.999988,-107.99997)" />
+       gradientTransform="matrix(1.5,0,0,1.6,6.0324979,-18.415001)" />
   </defs>
   <g
      id="sound"
@@ -145,8 +146,8 @@
        rx="1.9824198e-15" />
     <path
        id="path3127"
-       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:url(#linearGradient3131);fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
-       d="m 18.520833,28.575001 v 4.233334 h 0.264583 v -4.233334 z m 0.529166,0.529167 v 3.175 h 0.264584 v -3.175 z m 1.058334,0.264583 v 2.645834 h 0.264583 v -2.645834 z m -2.116667,0.529167 v 1.5875 h 0.264583 v -1.5875 z m 1.5875,0 v 1.5875 h 0.264583 v -1.5875 z m 1.058333,0.264583 v 1.058334 h 0.264584 v -1.058334 z m 0.529167,0.264584 v 0.529166 h 0.264583 v -0.529166 z m 0.529167,0 v 0.529166 h 0.264583 v -0.529166 z" />
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:url(#linearGradient3131);fill-opacity:1;stroke:none;stroke-width:0.334674px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 18.838333,28.575001 v 4.233334 h 0.423332 v -4.233334 z m 0.846662,0.846667 v 2.540001 h 0.423336 v -2.540001 z m 1.693335,0 v 2.540001 h 0.423334 v -2.540001 z m -3.386665,0.423334 v 1.693333 h 0.423333 v -1.693333 z m 2.539997,0 v 1.693333 h 0.423335 v -1.693333 z m 1.693334,0 v 1.693333 h 0.423336 v -1.693333 z" />
     <rect
        style="display:inline;opacity:0;fill:#a51d2d;stroke-width:0.999998px;paint-order:fill markers stroke;stop-color:#000000"
        id="rect1435"
@@ -158,8 +159,7 @@
        transform="matrix(0.42333331,0,0,0.42333347,16.721665,27.305001)" />
     <path
        id="rect1042"
-       style="font-variation-settings:normal;display:inline;vector-effect:none;fill:url(#linearGradient2264);fill-opacity:1;stroke:none;stroke-width:0.999998px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
-       d="M 5e-6,0 V 15.999997 H 16 V 0 Z M 1.000003,1.0000022 H 14.999998 V 14.999995 H 1.000003 Z"
-       transform="matrix(0.42333331,0,0,0.42333347,16.721665,27.305001)" />
+       style="font-variation-settings:normal;display:inline;vector-effect:none;fill:url(#linearGradient2264);fill-opacity:1;stroke:none;stroke-width:0.40989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
+       d="m 17.144998,27.305001 v 6.773334 h 6.35 v -6.773334 z m 0.396874,0.423334 h 5.55625 v 5.926666 h -5.55625 z" />
   </g>
 </svg>
