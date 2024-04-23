@@ -20,6 +20,11 @@ namespace MWNet
 
     class Client : public MWNet::Connection
     {
+        uint64_t mClientId = 0;
+
+        yojimbo::Address mAddress;
+        yojimbo::Address mDestination;
+
         std::unique_ptr<yojimbo::Client> createClientInstance();
 
         std::unique_ptr<yojimbo::Client> mClient;

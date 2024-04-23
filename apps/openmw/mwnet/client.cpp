@@ -1,3 +1,4 @@
+#include <apps/openmw/mwnet/connectionbase.hpp>
 #include <csignal>
 #include <stdexcept>
 #include <time.h>
@@ -14,7 +15,10 @@ void clientInterruptHandler(int)
     quit = 1;
 }
 
+// Upgrade later to accept a destination & source address
 MWNet::Client::Client()
+    : mAddress(MWNet::LocalHost, MWNet::DefaultClientPort)
+    , mDestination(MWNet::LocalHost, MWNet::DefaultServerPort)
 {
     if (!InitializeYojimbo())
     {
@@ -59,7 +63,7 @@ std::unique_ptr<yojimbo::Client> MWNet::Client::createClientInstance()
 
 bool MWNet::Client::tick()
 {
-    if (quit || mClient->ConnectionFailed() || mClient->IsDisconnected())
+    if (quit || mClient->ConnectionFailed())
     {
         if (mClient->IsConnected())
         {
@@ -83,7 +87,7 @@ bool MWNet::Client::tick()
 
 void MWNet::Client::updateConnection()
 {
-    if (!mClient->IsConnected() || !mClient->IsConnecting())
+    if (!mClient->IsConnected() && !mClient->IsConnecting())
     {
         return;
     }
