@@ -1,6 +1,9 @@
 #ifndef ESMSERIALIZE_H_
 #define ESMSERIALIZE_H_
 
+#include <components/esm3/cellref.hpp>
+#include <cstdint>
+#include <limits>
 #include <osg/Vec3f>
 #include <serialize.h>
 
@@ -113,7 +116,36 @@ namespace serialize
             return false;                                                                                              \
         }                                                                                                              \
     } while (0)
+
     // ESM::RefNum
+    template <typename Stream>
+    bool serialize_ref_num_internal(Stream& stream, ESM::RefNum& refNum)
+    {
+        serialize_int(stream, refNum.mContentFile, 0, std::numeric_limits<int32_t>::max());
+        serialize_int(stream, refNum.mIndex, 0, std::numeric_limits<uint32_t>::max());
+        return true;
+    }
+
+    /**
+        DREAMWEAVE SERIALIZATION:
+        Serialize an std::string to the stream (read/write/measure).
+        This is a helper macro to make writing unified serialize functions easier.
+        Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
+       an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
+       macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
+       method must have a bool return value.
+        @param stream The stream object. May be a read, write or measure stream.
+        @param esm::refnum The object's refnum. Internally this serializer uses the toUint32 method of refId.
+     */
+
+#define serialize_ref_num(stream, refNum)                                                                              \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!serialize::serialize_ref_num_internal(stream, refNum))                                                    \
+        {                                                                                                              \
+            return false;                                                                                              \
+        }                                                                                                              \
+    } while (0)
     // DynamicStats
     // ESM::Skill
     // ESM::Attribute
