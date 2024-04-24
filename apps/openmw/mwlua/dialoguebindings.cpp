@@ -254,7 +254,7 @@ namespace
             }
             return sol::make_object(lua, rec.mData.mJournalIndex);
         });
-        recordInfoBindingsClass["questFinished"]
+        recordInfoBindingsClass["isQuestFinished"]
             = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
                   if (rec.mData.mType != ESM::Dialogue::Type::Journal)
                   {
@@ -262,7 +262,7 @@ namespace
                   }
                   return sol::make_object(lua, rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Finished);
               });
-        recordInfoBindingsClass["questRestart"]
+        recordInfoBindingsClass["isQuestRestart"]
             = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
                   if (rec.mData.mType != ESM::Dialogue::Type::Journal)
                   {
@@ -270,6 +270,13 @@ namespace
                   }
                   return sol::make_object(lua, rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Restart);
               });
+        recordInfoBindingsClass["isQuestName"] = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
+            if (rec.mData.mType != ESM::Dialogue::Type::Journal)
+            {
+                return sol::nil;
+            }
+            return sol::make_object(lua, rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Name);
+        });
         recordInfoBindingsClass["filterActorId"]
             = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
                   if (rec.mData.mType == ESM::Dialogue::Type::Journal)

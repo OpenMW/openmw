@@ -628,7 +628,7 @@
 
 --- List of all @{#Spell}s.
 -- @field [parent=#Spells] #list<#Spell> records A read-only list of all @{#Spell} records in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #Spell. 
+-- Implements [iterables#List](iterables.html#List) of #Spell.
 -- @usage local spell = core.magic.spells.records['thunder fist']  -- get by id
 -- @usage local spell = core.magic.spells.records[1]  -- get by index
 -- @usage -- Print all powers
@@ -854,7 +854,7 @@
 
 --- List of all @{#SoundRecord}s.
 -- @field [parent=#Sound] #list<#SoundRecord> records A read-only list of all @{#SoundRecord}s in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #SoundRecord. 
+-- Implements [iterables#List](iterables.html#List) of #SoundRecord.
 -- @usage local sound = core.sound.records['Ashstorm']  -- get by id
 -- @usage local sound = core.sound.records[1]  -- get by index
 -- @usage -- Print all sound files paths
@@ -872,7 +872,7 @@
 --- `core.stats.Attribute`
 -- @type Attribute
 -- @field #list<#AttributeRecord> records A read-only list of all @{#AttributeRecord}s in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #AttributeRecord. 
+-- Implements [iterables#List](iterables.html#List) of #AttributeRecord.
 -- @usage local record = core.stats.Attribute.records['example_recordid']
 -- @usage local record = core.stats.Attribute.records[1]
 
@@ -888,7 +888,7 @@
 --- `core.stats.Skill`
 -- @type Skill
 -- @field #list<#SkillRecord> records A read-only list of all @{#SkillRecord}s in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #SkillRecord. 
+-- Implements [iterables#List](iterables.html#List) of #SkillRecord.
 -- @usage local record = core.stats.Skill.records['example_recordid']
 -- @usage local record = core.stats.Skill.records[1]
 
@@ -924,6 +924,134 @@
 -- @field #string castSound VFS path to the cast sound
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
+
+--- @{#Dialogue}: Dialogue
+-- @field [parent=#core] #Dialogue dialogue
+
+---
+-- @{#DialogueRecords} functions for journal (quest) read-only records.
+-- @field [parent=#Dialogue] journal
+-- @usage --print the name of the record, which is a capitalized version of its id
+-- print(core.dialogue.journal.record("ms_fargothring").name) -- MS_FargothRing
+-- @usage --print ids of all journal records
+-- for _, journalRecord in pairs(core.dialogue.journal.records) do
+--     print(journalRecord.id)
+-- end
+-- @usage --print quest names for all quests the player has inside a player script
+-- for _, quest in pairs(types.Player.quests(self)) do
+--     print(quest.id, core.dialogue.journal.record(quest.id).questName)
+-- end
+
+---
+-- @{#DialogueRecords} functions for topic read-only records.
+-- @field [parent=#Dialogue] topic
+-- @usage --print ids of all topic records
+-- for _, topicRecord in pairs(core.dialogue.topic.records) do
+--     print(topicRecord.id)
+-- end
+-- @usage --print all NPC lines for "vivec"
+-- for idx, topicInfo in pairs(core.dialogue.topic.record("vivec").infos) do
+--     print(idx, topicInfo.text)
+-- end
+
+---
+-- @{#DialogueRecords} functions for voice read-only records.
+-- @field [parent=#Dialogue] voice
+-- @usage --print ids of all voice records
+-- for _, voiceRecord in pairs(core.dialogue.voice.records) do
+--     print(voiceRecord.id)
+-- end
+-- @usage --print all NPC lines & sounds for "flee"
+-- for idx, voiceInfo in pairs(core.dialogue.voice.record("flee").infos) do
+--     print(idx, voiceInfo.text, voiceInfo.sound)
+-- end
+
+---
+-- @{#DialogueRecords} functions for greeting read-only records.
+-- @field [parent=#Dialogue] greeting
+-- @usage --print ids of all greeting records
+-- for _, greetingRecord in pairs(core.dialogue.greeting.records) do
+--     print(greetingRecord.id)
+-- end
+-- @usage --print all NPC lines for "greeting 0"
+-- for idx, greetingInfo in pairs(core.dialogue.greeting.record("greeting 0").infos) do
+--     print(idx, greetingInfo.text)
+-- end
+
+---
+-- @{#DialogueRecords} functions for persuasion read-only records.
+-- @field [parent=#Dialogue] persuasion
+-- @usage --print ids of all persuasion records
+-- for _, persuasionRecord in pairs(core.dialogue.persuasion.records) do
+--     print(persuasionRecord.id)
+-- end
+-- @usage --print all NPC lines for "admire success"
+-- for idx, persuasionInfo in pairs(core.dialogue.persuasion.record("admire success").infos) do
+--     print(idx, persuasionInfo.text)
+-- end
+
+---
+-- A read-only list of all @{#DialogueRecord}s in the world database, may be indexed by recordId, which doesn't have to be lowercase.
+-- @field [parent=#DialogueRecords] #list<#DialogueRecord> records
+-- Indexing is not case-sensitive.
+-- Implements [iterables#List](iterables.html#List) of #DialogueRecord.
+-- @usage local record = core.dialogue.journal.records['ms_fargothring']
+-- @usage local record = core.dialogue.journal.records['MS_FargothRing']
+-- @usage local record = core.dialogue.journal.records[1]
+-- @usage local record = core.dialogue.topic.records[1]
+-- @usage local record = core.dialogue.topic.records['background']
+-- @usage local record = core.dialogue.greeting.records[1]
+-- @usage local record = core.dialogue.persuasion.records[1]
+-- @usage local record = core.dialogue.voice.records[1]
+
+---
+-- Returns a read-only @{#DialogueRecord}
+-- @function [parent=#DialogueRecords] record
+-- @param #string recordId Doesn't have to be lowercase.
+-- @return #DialogueRecord
+-- @usage local record = core.dialogue.journal.record('a1_2_antabolisinformant')
+-- @usage local record = core.dialogue.journal.record('A1_2_AntabolisInformant')
+-- @usage local record = core.dialogue.topic.record('my trade')
+-- @usage local record = core.dialogue.greeting.record('greeting 0')
+-- @usage local record = core.dialogue.persuasion.record('admire success')
+-- @usage local record = core.dialogue.voice.record('flee')
+
+---
+-- Depending on which store this read-only dialogue record is from, it may either be a journal, topic, greeting, persuasion or voice.
+-- @type DialogueRecord
+-- @field #string id Record identifier
+-- @field #string name Same as id, but with upper cases preserved.
+-- @field #string questName Non-nil only for journal records with available value. Holds the quest name for this journal entry. Same info may be available under `infos[1].text` as well, but this variable is made for convenience.
+-- @field #list<#DialogueRecordInfo> infos A read-only list containing all @{#DialogueRecordInfo}s for this record, in order.
+-- @usage local journalId = core.dialogue.journal.record('A2_4_MiloGone').id -- "a2_4_milogone"
+-- @usage local journalName = core.dialogue.journal.record('A2_4_MiloGone').name -- "A2_4_MiloGone"
+-- @usage local questName = core.dialogue.journal.record('A2_4_MiloGone').questName -- "Mehra Milo and the Lost Prophecies"
+
+---
+-- Holds the read-only data for one of many info entries inside a dialogue record. Depending on the type of the dialogue record (journal, topic, greeting, persuasion or voice), it could be, for example, a single journal entry or a NPC dialogue line.
+-- @type DialogueRecordInfo
+-- @field #string id Identifier for this info entry. Is unique only within the @{#DialogueRecord} it belongs to.
+-- @field #string text Text associated with this info entry.
+-- @field #number questStage Non-nil only for journal records. Quest stage (same as in @{openmw_types#PlayerQuest.stage}) this info entry is associated with.
+-- @field #boolean isQuestFinished Non-nil only for journal records. True if this info entry has the "Finished" flag checked.
+-- @field #boolean isQuestRestart Non-nil only for journal records. True if this info entry has the "Restart" flag checked.
+-- @field #boolean isQuestName Non-nil only for journal records. True if this info entry has the "Quest Name" flag checked. If true, then the @{#DialogueRecord}, to which this info entry belongs, should have this info entry's @{#DialogueRecordInfo.text} value available in its @{#DialogueRecord.questName}.
+-- @field #string filterActorId Non-nil only for non-journal records with available value for this parameter. Speaker ID allowing for this info entry to appear.
+-- @field #string filterActorRace Non-nil only for non-journal records with available value for this parameter. Speaker race allowing for this info entry to appear.
+-- @field #string filterActorClass Non-nil only for non-journal records with available value for this parameter. Speaker class allowing for this info entry to appear.
+-- @field #string filterActorFaction Non-nil only for non-journal records with available value for this parameter. Faction of which the speaker must be a member for this info entry to appear.
+-- @field #number filterActorFactionRank Non-nil only for non-journal records with available value for this parameter. Minimum rank in the speakerFactionRequired allowing for this info entry to appear.
+-- @field #string filterActorCell Non-nil only for non-journal records with available value for this parameter. Cell name of location where speaker must be for this info entry to appear.
+-- @field #number filterActorDisposition Non-nil only for non-journal records with available value for this parameter. Minimum speaker disposition allowing for this info entry to appear. 0 if not defined.
+-- @field #number filterActorGender Non-nil only for non-journal records with available value for this parameter. Speaker gender allowing for this info entry to appear. 1 if female, 0 if male.
+-- @field #string filterPlayerFaction Non-nil only for non-journal records with available value for this parameter. Faction of which the player must be a member for this info entry to appear.
+-- @field #number filterPlayerFactionRank Non-nil only for non-journal records with available value for this parameter. Minimum rank in playerFactionRequired allowing for this info entry to appear.
+-- @field #string sound Non-nil only for non-journal records with available value for this parameter. Sound file path for this info entry.
+-- @field #string resultScript Non-nil only for non-journal records with available value for this parameter. MWScript (full script text) executed when this info is chosen.
+-- @usage --Variable `aa` below is "Congratulations, %PCName. You are now %PCName the %NextPCRank." in vanilla MW:
+-- local aa = core.dialogue.topic.record('advancement').infos[100].text
+-- @usage --Variable `bb` below is "sound/vo/a/f/fle_af003.mp3" in vanilla MW:
+-- local bb = core.dialogue.voice.record('flee').infos[149].sound
 
 --- @{#Factions}: Factions
 -- @field [parent=#core] #Factions factions
