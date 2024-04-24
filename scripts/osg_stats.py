@@ -159,13 +159,7 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
                     if key in frame:
                         result[name][key][index] = frame[key]
         for key in keys:
-            prev = 0.0
             values = result[name][key][:max_index + 1]
-            for i in range(len(values)):
-                if values[i] is not None:
-                    prev = values[i]
-                else:
-                    values[i] = prev
             result[name][key] = numpy.array(values)
     return result, begin_frame, end_frame
 
@@ -187,7 +181,7 @@ def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
             y = frames[key]
             ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            y = numpy.sum(list(frames[k] for k in keys), axis=0)
+            y = sum_arrays_with_none([frames[k] for k in keys])
             ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
@@ -199,10 +193,10 @@ def draw_cumulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            y = numpy.cumsum(frames[key])
+            y = cumsum_with_none(frames[key])
             ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            y = numpy.cumsum(numpy.sum(list(frames[k] for k in keys), axis=0))
+            y = sum_arrays_with_none([cumsum_with_none(frames[k]) for k in keys])
             ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
@@ -214,10 +208,10 @@ def draw_timeseries_delta(sources, keys, add_sum, begin_frame, end_frame):
     x = numpy.array(range(begin_frame + 1, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            y = numpy.diff(frames[key])
-            ax.plot(x[:len(y)], numpy.diff(frames[key]), label=f'{key}:{name}')
+            y = diff_with_none(frames[key])
+            ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            y = numpy.diff(numpy.sum(list(frames[k] for k in keys), axis=0))
+            y = sum_arrays_with_none([diff_with_none(frames[k]) for k in keys])
             ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
@@ -367,13 +361,13 @@ def make_stats(source, key, values, precision):
         source=source,
         key=key,
         number=len(values),
-        min=fixed_float(min(values), precision),
-        max=fixed_float(max(values), precision),
-        sum=fixed_float(sum(values), precision),
-        mean=fixed_float(statistics.mean(values), precision),
-        median=fixed_float(statistics.median(values), precision),
-        stdev=fixed_float(statistics.stdev(float(v) for v in values), precision),
-        q95=fixed_float(numpy.quantile(values, 0.95), precision),
+        min=fixed_float(min(values), precision) if values else '-',
+        max=fixed_float(max(values), precision) if values else '-',
+        sum=fixed_float(sum(values), precision) if values else '-',
+        mean=fixed_float(statistics.mean(values), precision) if values else '-',
+        median=fixed_float(statistics.median(values), precision) if values else '-',
+        stdev=fixed_float(statistics.stdev(float(v) for v in values), precision) if values else '-',
+        q95=fixed_float(numpy.quantile(values, 0.95), precision) if values else '-',
     )
 
 
@@ -382,6 +376,50 @@ def to_number(value):
         return int(value)
     except ValueError:
         return float(value)
+
+
+def cumsum_with_none(values):
+    cumsum = None
+    result = list()
+    for v in values:
+        if v is None:
+            result.append(None)
+        elif cumsum is None:
+            cumsum = v
+            result.append(cumsum)
+        else:
+            cumsum += v
+            result.append(cumsum)
+    return numpy.array(result)
+
+
+def diff_with_none(values):
+    if len(values) < 2:
+        return numpy.array([])
+    prev = values[0]
+    result = list()
+    for v in values[1:]:
+        if prev is None:
+            result.append(v)
+            prev = v
+        elif v is None:
+            result.append(v)
+        else:
+            result.append(v - prev)
+            prev = v
+    return numpy.array(result)
+
+
+def sum_arrays_with_none(arrays):
+    size = max(len(v) for v in arrays)
+    result = list()
+    for i in range(size):
+        not_none_values = [v[i] for v in arrays if v[i] is not None]
+        if not_none_values:
+            result.append(sum(not_none_values))
+        else:
+            result.append(None)
+    return numpy.array(result)
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@
 
 #include <components/fallback/fallback.hpp>
 #include <components/misc/objectpool.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/soundmanager.hpp"
@@ -52,9 +53,10 @@ namespace MWSound
         std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
-        std::unordered_map<std::string, std::vector<std::string>> mMusicFiles;
+        std::unordered_map<VFS::Path::Normalized, std::vector<VFS::Path::Normalized>, VFS::Path::Hash, std::equal_to<>>
+            mMusicFiles;
         std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
-        std::string mLastPlayedMusic; // The music file that was last played
+        VFS::Path::Normalized mLastPlayedMusic; // The music file that was last played
 
         WaterSoundUpdater mWaterSoundUpdater;
 
@@ -90,7 +92,7 @@ namespace MWSound
         TrackList mActiveTracks;
 
         StreamPtr mMusic;
-        std::string mCurrentPlaylist;
+        VFS::Path::Normalized mCurrentPlaylist;
 
         bool mListenerUnderwater;
         osg::Vec3f mListenerPos;
@@ -102,7 +104,7 @@ namespace MWSound
         Sound* mUnderwaterSound;
         Sound* mNearWaterSound;
 
-        std::string mNextMusic;
+        VFS::Path::Normalized mNextMusic;
         bool mPlaybackPaused;
 
         RegionSoundSelector mRegionSoundSelector;
@@ -123,8 +125,8 @@ namespace MWSound
 
         StreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f& pos, bool playlocal);
 
-        void streamMusicFull(const std::string& filename);
-        void advanceMusic(const std::string& filename, float fadeOut = 1.f);
+        void streamMusicFull(VFS::Path::NormalizedView filename);
+        void advanceMusic(VFS::Path::NormalizedView filename, float fadeOut = 1.f);
         void startRandomTitle();
 
         void cull3DSound(SoundBase* sound);
@@ -174,7 +176,7 @@ namespace MWSound
         void stopMusic() override;
         ///< Stops music if it's playing
 
-        void streamMusic(const std::string& filename, MWSound::MusicType type, float fade = 1.f) override;
+        void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) override;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
         /// \param type music type.
@@ -183,7 +185,7 @@ namespace MWSound
         bool isMusicPlaying() override;
         ///< Returns true if music is playing
 
-        void playPlaylist(const std::string& playlist) override;
+        void playPlaylist(VFS::Path::NormalizedView playlist) override;
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
         /// Title music playlist is predefined

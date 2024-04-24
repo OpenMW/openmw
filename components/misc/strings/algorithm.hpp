@@ -15,6 +15,13 @@ namespace Misc::StringUtils
         bool operator()(char x, char y) const { return toLower(x) < toLower(y); }
     };
 
+    inline std::string underscoresToSpaces(const std::string_view oldName)
+    {
+        std::string newName(oldName);
+        std::replace(newName.begin(), newName.end(), '_', ' ');
+        return newName;
+    }
+
     inline bool ciLess(std::string_view x, std::string_view y)
     {
         return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), CiCharLess());

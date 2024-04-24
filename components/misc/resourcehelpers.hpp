@@ -34,15 +34,16 @@ namespace Misc
         /// Use "xfoo.nif" instead of "foo.nif" if "xfoo.kf" is available
         /// Note that if "xfoo.nif" is actually unavailable, we can't fall back to "foo.nif". :(
         std::string correctActorModelPath(const std::string& resPath, const VFS::Manager* vfs);
+        std::string correctMaterialPath(std::string_view resPath, const VFS::Manager* vfs);
 
         // Adds "meshes\\".
         std::string correctMeshPath(std::string_view resPath);
 
-        // Adds "sound\\".
+        // Prepends "sound/".
         VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath);
 
-        // Adds "music\\".
-        std::string correctMusicPath(const std::string& resPath);
+        // Prepends "music/".
+        VFS::Path::Normalized correctMusicPath(VFS::Path::NormalizedView resPath);
 
         // Removes "meshes\\".
         std::string_view meshPathForESM3(std::string_view resPath);

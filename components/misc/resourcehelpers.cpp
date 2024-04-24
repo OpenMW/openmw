@@ -173,6 +173,11 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string& resP
     return mdlname;
 }
 
+std::string Misc::ResourceHelpers::correctMaterialPath(std::string_view resPath, const VFS::Manager* vfs)
+{
+    return correctResourcePath({ { "materials" } }, resPath, vfs);
+}
+
 std::string Misc::ResourceHelpers::correctMeshPath(std::string_view resPath)
 {
     std::string res = "meshes\\";
@@ -186,9 +191,10 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normali
     return prefix / resPath;
 }
 
-std::string Misc::ResourceHelpers::correctMusicPath(const std::string& resPath)
+VFS::Path::Normalized Misc::ResourceHelpers::correctMusicPath(VFS::Path::NormalizedView resPath)
 {
-    return "music\\" + resPath;
+    static constexpr VFS::Path::NormalizedView prefix("music");
+    return prefix / resPath;
 }
 
 std::string_view Misc::ResourceHelpers::meshPathForESM3(std::string_view resPath)

@@ -94,7 +94,6 @@ uniform vec2 screenRes;
 void main(void)
 {
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
-    UV.y *= -1.0;
 
     float shadow = unshadowedLightRatio(linearDepth);
 

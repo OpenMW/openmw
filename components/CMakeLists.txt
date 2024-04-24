@@ -107,6 +107,10 @@ add_component_dir (settings
     windowmode
     )
 
+add_component_dir (bgsm
+    stream file
+    )
+
 add_component_dir (bsa
     bsa_file compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
@@ -125,7 +129,7 @@ add_component_dir (vfs
 
 add_component_dir (resource
     scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem
-    resourcemanager stats animation foreachbulletobject errormarker cachestats
+    resourcemanager stats animation foreachbulletobject errormarker cachestats bgsmfilemanager
     )
 
 add_component_dir (shader
@@ -511,7 +515,7 @@ set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
 if (USE_QT)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
-        model/naturalsort model/contentmodel
+        model/contentmodel
         model/loadordererror
         view/combobox view/contentselector
         )
