@@ -4,7 +4,7 @@
 #define OPENMW_COMPONENTS_NIF_NIFFILE_HPP
 
 #include <atomic>
-#include <filesystem>
+#include <cstdint>
 #include <vector>
 
 #include <components/files/istreamptr.hpp>
@@ -45,7 +45,7 @@ namespace Nif
         std::uint32_t mBethVersion = 0;
 
         /// File name, used for error messages and opening the file
-        std::filesystem::path mPath;
+        std::string mPath;
         std::string mHash;
 
         /// Record list
@@ -56,7 +56,7 @@ namespace Nif
 
         bool mUseSkinning = false;
 
-        explicit NIFFile(const std::filesystem::path& path)
+        explicit NIFFile(std::string_view path)
             : mPath(path)
         {
         }
@@ -77,7 +77,7 @@ namespace Nif
         std::size_t numRoots() const { return mFile->mRoots.size(); }
 
         /// Get the name of the file
-        const std::filesystem::path& getFilename() const { return mFile->mPath; }
+        const std::string& getFilename() const { return mFile->mPath; }
 
         const std::string& getHash() const { return mFile->mHash; }
 
@@ -104,7 +104,7 @@ namespace Nif
         std::uint32_t& mBethVersion;
 
         /// File name, used for error messages and opening the file
-        std::filesystem::path& mFilename;
+        std::string_view mFilename;
         std::string& mHash;
 
         /// Record list
@@ -144,7 +144,7 @@ namespace Nif
         void setUseSkinning(bool skinning);
 
         /// Get the name of the file
-        std::filesystem::path getFilename() const { return mFilename; }
+        std::string_view getFilename() const { return mFilename; }
 
         /// Get the version of the NIF format used
         std::uint32_t getVersion() const { return mVersion; }

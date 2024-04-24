@@ -112,13 +112,12 @@ namespace MWLua
         mPlayerPackages.insert(mLocalPackages.begin(), mLocalPackages.end());
 
         LuaUtil::LuaStorage::initLuaBindings(mLua.sol());
-        mGlobalScripts.addPackage(
-            "openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(mLua.sol(), &mGlobalStorage));
+        mGlobalScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(mLua, &mGlobalStorage));
         mMenuScripts.addPackage(
-            "openmw.storage", LuaUtil::LuaStorage::initMenuPackage(mLua.sol(), &mGlobalStorage, &mPlayerStorage));
-        mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua.sol(), &mGlobalStorage);
+            "openmw.storage", LuaUtil::LuaStorage::initMenuPackage(mLua, &mGlobalStorage, &mPlayerStorage));
+        mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua, &mGlobalStorage);
         mPlayerPackages["openmw.storage"]
-            = LuaUtil::LuaStorage::initPlayerPackage(mLua.sol(), &mGlobalStorage, &mPlayerStorage);
+            = LuaUtil::LuaStorage::initPlayerPackage(mLua, &mGlobalStorage, &mPlayerStorage);
 
         mPlayerStorage.setActive(true);
         mGlobalStorage.setActive(false);
@@ -454,6 +453,17 @@ namespace MWLua
         //  break.
         if (auto* scripts = actor.getRefData().getLuaScripts())
             scripts->onPlayAnimation(groupname, options);
+    }
+
+    void LuaManager::skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale)
+    {
+        mEngineEvents.addToQueue(EngineEvents::OnSkillUse{ getId(actor), skillId.serializeText(), useType, scale });
+    }
+
+    void LuaManager::skillLevelUp(const MWWorld::Ptr& actor, ESM::RefId skillId, std::string_view source)
+    {
+        mEngineEvents.addToQueue(
+            EngineEvents::OnSkillLevelUp{ getId(actor), skillId.serializeText(), std::string(source) });
     }
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)

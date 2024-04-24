@@ -212,8 +212,8 @@ if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
 
     include(FetchContent)
     FetchContent_Declare(benchmark
-        URL https://github.com/google/benchmark/archive/refs/tags/v1.7.1.zip
-        URL_HASH SHA512=bec4016263587a57648e02b094c69e838c0a21e16c3dcfc6f03100397ab8f95d5fab1f5fd0d7e0e8adbb8212fff1eb574581158fdda1fa7fd6ff12762154b0cc
+        URL https://github.com/google/benchmark/archive/refs/tags/v1.8.3.zip
+        URL_HASH SHA512=d73587ad9c49338749e1d117a6f8c7ff9c603a91a2ffa91a7355c7df7dea82710b9a810d34ddfef20973ecdc77092ec10fb2b4e4cc8d2e7810cbed79617b3828
         SOURCE_DIR fetched/benchmark
     )
     FetchContent_MakeAvailableExcludeFromAll(benchmark)
@@ -234,7 +234,7 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
     )
     FetchContent_MakeAvailableExcludeFromAll(yaml-cpp)
 
-    if (MSVC)
+    if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
         target_precompile_headers(yaml-cpp PRIVATE <algorithm>)
     endif()
 endif()

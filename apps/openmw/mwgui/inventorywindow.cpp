@@ -417,6 +417,8 @@ namespace MWGui
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
     {
+        WindowBase::clampWindowCoordinates(_sender);
+
         adjustPanes();
         const WindowSettingValues settings = getModeSettings(mGuiMode);
 

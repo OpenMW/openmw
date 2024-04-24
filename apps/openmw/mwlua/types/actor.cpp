@@ -403,6 +403,11 @@ namespace MWLua
             return target.getClass().getCreatureStats(target).isDead();
         };
 
+        actor["isDeathFinished"] = [](const Object& o) {
+            const auto& target = o.ptr();
+            return target.getClass().getCreatureStats(target).isDeathAnimationFinished();
+        };
+
         actor["getEncumbrance"] = [](const Object& actor) -> float {
             const MWWorld::Ptr ptr = actor.ptr();
             return ptr.getClass().getEncumbrance(ptr);

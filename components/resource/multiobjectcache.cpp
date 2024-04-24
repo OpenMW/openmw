@@ -25,6 +25,7 @@ namespace Resource
                 {
                     objectsToRemove.push_back(oitr->second);
                     _objectCache.erase(oitr++);
+                    ++mExpired;
                 }
                 else
                 {
@@ -57,13 +58,15 @@ namespace Resource
     osg::ref_ptr<osg::Object> MultiObjectCache::takeFromObjectCache(const std::string& fileName)
     {
         std::lock_guard<std::mutex> lock(_objectCacheMutex);
+        ++mGet;
         ObjectCacheMap::iterator found = _objectCache.find(fileName);
         if (found == _objectCache.end())
             return osg::ref_ptr<osg::Object>();
         else
         {
-            osg::ref_ptr<osg::Object> object = found->second;
+            osg::ref_ptr<osg::Object> object = std::move(found->second);
             _objectCache.erase(found);
+            ++mHit;
             return object;
         }
     }
@@ -79,10 +82,15 @@ namespace Resource
         }
     }
 
-    unsigned int MultiObjectCache::getCacheSize() const
+    CacheStats MultiObjectCache::getStats() const
     {
         std::lock_guard<std::mutex> lock(_objectCacheMutex);
-        return _objectCache.size();
+        return CacheStats{
+            .mSize = _objectCache.size(),
+            .mGet = mGet,
+            .mHit = mHit,
+            .mExpired = mExpired,
+        };
     }
 
 }

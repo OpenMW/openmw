@@ -6,7 +6,7 @@
 
 vec4 sampleReflectionMap(vec2 uv);
 
-#if @refraction_enabled
+#if @waterRefraction
 vec4 sampleRefractionMap(vec2 uv);
 float sampleRefractionDepthMap(vec2 uv);
 #endif

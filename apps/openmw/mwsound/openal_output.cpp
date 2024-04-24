@@ -1034,7 +1034,7 @@ namespace MWSound
         return ret;
     }
 
-    std::pair<Sound_Handle, size_t> OpenAL_Output::loadSound(const std::string& fname)
+    std::pair<Sound_Handle, size_t> OpenAL_Output::loadSound(VFS::Path::NormalizedView fname)
     {
         getALError();
 
@@ -1045,7 +1045,7 @@ namespace MWSound
         try
         {
             DecoderPtr decoder = mManager.getDecoder();
-            decoder->open(Misc::ResourceHelpers::correctSoundPath(fname, decoder->mResourceMgr));
+            decoder->open(Misc::ResourceHelpers::correctSoundPath(fname, *decoder->mResourceMgr));
 
             ChannelConfig chans;
             SampleType type;

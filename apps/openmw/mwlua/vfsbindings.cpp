@@ -1,6 +1,9 @@
 #include "vfsbindings.hpp"
 
+#include <sol/object.hpp>
+
 #include <components/files/istreamptr.hpp>
+#include <components/lua/luastate.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
@@ -10,7 +13,6 @@
 #include "../mwbase/environment.hpp"
 
 #include "context.hpp"
-#include "luamanagerimp.hpp"
 
 namespace MWLua
 {
@@ -328,7 +330,8 @@ namespace MWLua
             },
             [](const sol::object&) -> sol::object { return sol::nil; });
 
-        api["fileExists"] = [vfs](std::string_view fileName) -> bool { return vfs->exists(fileName); };
+        api["fileExists"]
+            = [vfs](std::string_view fileName) -> bool { return vfs->exists(VFS::Path::Normalized(fileName)); };
         api["pathsWithPrefix"] = [vfs](std::string_view prefix) {
             auto iterator = vfs->getRecursiveDirectoryIterator(prefix);
             return sol::as_function([iterator, current = iterator.begin()]() mutable -> sol::optional<std::string> {

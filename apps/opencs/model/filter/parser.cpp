@@ -452,7 +452,10 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
         return std::shared_ptr<Node>();
     }
 
-    return std::make_shared<TextNode>(columnId, text);
+    auto node = std::make_shared<TextNode>(columnId, text);
+    if (!node->isValid())
+        error();
+    return node;
 }
 
 std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()

@@ -41,6 +41,16 @@ void ContentSelectorModel::EsmFile::setDescription(const QString& description)
     mDescription = description;
 }
 
+void ContentSelectorModel::EsmFile::setBuiltIn(bool builtIn)
+{
+    mBuiltIn = builtIn;
+}
+
+void ContentSelectorModel::EsmFile::setFromAnotherConfigFile(bool fromAnotherConfigFile)
+{
+    mFromAnotherConfigFile = fromAnotherConfigFile;
+}
+
 bool ContentSelectorModel::EsmFile::isGameFile() const
 {
     return (mGameFiles.size() == 0)
@@ -74,6 +84,14 @@ QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) co
 
         case FileProperty_Description:
             return mDescription;
+            break;
+
+        case FileProperty_BuiltIn:
+            return mBuiltIn;
+            break;
+
+        case FileProperty_FromAnotherConfigFile:
+            return mFromAnotherConfigFile;
             break;
 
         case FileProperty_GameFile:
@@ -111,6 +129,15 @@ void ContentSelectorModel::EsmFile::setFileProperty(const FileProperty prop, con
 
         case FileProperty_Description:
             mDescription = value;
+            break;
+
+        // todo: check these work
+        case FileProperty_BuiltIn:
+            mBuiltIn = value == "true";
+            break;
+
+        case FileProperty_FromAnotherConfigFile:
+            mFromAnotherConfigFile = value == "true";
             break;
 
         case FileProperty_GameFile:

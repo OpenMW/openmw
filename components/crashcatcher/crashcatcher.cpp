@@ -583,8 +583,6 @@ static bool isDebuggerPresent()
 
 void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& crashLogPath)
 {
-#if (defined(__APPLE__) || (defined(__linux) && !defined(ANDROID)) || (defined(__unix) && !defined(ANDROID))           \
-    || defined(__posix))
     if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
         handleCrash(Files::pathToUnicodeString(crashLogPath).c_str());
 
@@ -595,5 +593,4 @@ void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& cra
         Log(Debug::Info) << "Crash handler installed";
     else
         Log(Debug::Warning) << "Installing crash handler failed";
-#endif
 }

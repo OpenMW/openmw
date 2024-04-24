@@ -56,56 +56,56 @@ void ESM4::BodyPartData::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_BPTN:
+            case ESM::fourCC("BPTN"):
                 reader.getLocalizedString(bodyPart.mPartName);
                 break;
-            case ESM4::SUB_BPNN:
+            case ESM::fourCC("BPNN"):
                 reader.getZString(bodyPart.mNodeName);
                 break;
-            case ESM4::SUB_BPNT:
+            case ESM::fourCC("BPNT"):
                 reader.getZString(bodyPart.mVATSTarget);
                 break;
-            case ESM4::SUB_BPNI:
+            case ESM::fourCC("BPNI"):
                 reader.getZString(bodyPart.mIKStartNode);
                 break;
-            case ESM4::SUB_BPND:
+            case ESM::fourCC("BPND"):
                 if (subHdr.dataSize == sizeof(bodyPart.mData))
                     reader.get(bodyPart.mData);
                 // FIXME: FO4
                 else
                     reader.skipSubRecordData();
                 break;
-            case ESM4::SUB_NAM1:
+            case ESM::fourCC("NAM1"):
                 reader.getZString(bodyPart.mLimbReplacementModel);
                 break;
-            case ESM4::SUB_NAM4: // FIXME: assumed occurs last
+            case ESM::fourCC("NAM4"): // FIXME: assumed occurs last
                 reader.getZString(bodyPart.mGoreEffectsTarget); // target bone
                 mBodyParts.push_back(bodyPart); // FIXME: possible without copying?
                 bodyPart.clear();
                 break;
-            case ESM4::SUB_NAM5:
-            case ESM4::SUB_RAGA: // ragdoll
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_BNAM: // FO4
-            case ESM4::SUB_CNAM: // FO4
-            case ESM4::SUB_DNAM: // FO4
-            case ESM4::SUB_ENAM: // FO4
-            case ESM4::SUB_FNAM: // FO4
-            case ESM4::SUB_INAM: // FO4
-            case ESM4::SUB_JNAM: // FO4
-            case ESM4::SUB_NAM2: // FO4
+            case ESM::fourCC("NAM5"):
+            case ESM::fourCC("RAGA"): // ragdoll
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("BNAM"): // FO4
+            case ESM::fourCC("CNAM"): // FO4
+            case ESM::fourCC("DNAM"): // FO4
+            case ESM::fourCC("ENAM"): // FO4
+            case ESM::fourCC("FNAM"): // FO4
+            case ESM::fourCC("INAM"): // FO4
+            case ESM::fourCC("JNAM"): // FO4
+            case ESM::fourCC("NAM2"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

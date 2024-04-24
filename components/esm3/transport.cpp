@@ -13,7 +13,7 @@ namespace ESM
         if (esm.retSubName().toInt() == fourCC("DODT"))
         {
             Dest dodt;
-            esm.getHExact(&dodt.mPos, 24);
+            esm.getSubComposite(dodt.mPos);
             mList.push_back(dodt);
         }
         else if (esm.retSubName().toInt() == fourCC("DNAM"))
@@ -28,11 +28,10 @@ namespace ESM
 
     void Transport::save(ESMWriter& esm) const
     {
-        typedef std::vector<Dest>::const_iterator DestIter;
-        for (DestIter it = mList.begin(); it != mList.end(); ++it)
+        for (const Dest& dest : mList)
         {
-            esm.writeHNT("DODT", it->mPos, sizeof(it->mPos));
-            esm.writeHNOCString("DNAM", it->mCellName);
+            esm.writeNamedComposite("DODT", dest.mPos);
+            esm.writeHNOCString("DNAM", dest.mCellName);
         }
     }
 

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "components/esm/defs.hpp"
+#include <components/esm/position.hpp>
 
 namespace ESM
 {

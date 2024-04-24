@@ -7,7 +7,7 @@
 
 namespace MWLua
 {
-    void initCoreFactionBindings(const Context& context);
+    sol::table initCoreFactionBindings(const Context& context);
 }
 
 #endif // MWLUA_FACTIONBINDINGS_H

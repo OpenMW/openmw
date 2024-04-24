@@ -2,11 +2,11 @@
 
 ConsoleWindow: "Console"
 
-
 # Debug window
 
 DebugWindow: "Fenêtre de débogage"
 LogViewer: "Journal"
+LuaProfiler: "Profileur Lua"
 PhysicsProfiler: "Profileur des performances de la physique"
 
 
@@ -22,21 +22,18 @@ LoadingInProgress: "Chargement de la sauvegarde"
 LoadingRequiresNewVersionError: |-
     Ce fichier de sauvegarde provient d'une version plus récente d'OpenMW, il n'est par consequent pas supporté.
     Mettez à jour votre version d'OpenMW afin de pouvoir charger cette sauvegarde.
-# LoadingRequiresOldVersionError: |-
-#     This save file was created using an older version of OpenMW in a format that is no longer supported.
-#     Load and save this file using {version} to upgrade it.
+LoadingRequiresOldVersionError: |-
+    Ce fichier de sauvegarde provient d'une version trop ancienne d'OpenMW, il n'est par consequent pas supporté.
+    Ouvrez et enregistez cette sauvegarde avec {version} pour la mettre à jour.
 NewGameConfirmation: "Voulez-vous démarrer une nouvelle partie ? Toute progression non sauvegardée sera perdue."
 QuitGameConfirmation: "Quitter la partie ?"
 SaveGameDenied: "Sauvegarde impossible"
 SavingInProgress: "Sauvegarde en cours..."
-#ScreenshotFailed: "Failed to save screenshot"
-#ScreenshotMade: "%s has been saved"
+ScreenshotFailed: "Échec de la sauvegarde de la capture d'écran"
+ScreenshotMade: "Capture d'écran %s sauvegardée"
 
 
 # Save game menu
-
-SelectCharacter: "Sélection du personnage..."
-TimePlayed: "Temps de jeu"
 
 DeleteGame: "Supprimer la partie"
 DeleteGameConfirmation: "Voulez-vous réellement supprimer cette partie sauvegardée ?"
@@ -46,19 +43,21 @@ MissingContentFilesConfirmation: |-
     Les données de jeu actuellement sélectionnées ne correspondent pas à celle indiquée dans cette sauvegarde.
     Cela peut entraîner des erreurs lors du chargement, mais aussi lors de votre partie.
     Voulez-vous continuer ?
-#MissingContentFilesList: |-
-#  {files, plural,
-#    one{\n\nFound missing file: }
-#    few{\n\nFound {files} missing files:\n}
-#    other{\n\nFound {files} missing files:\n}
-#  }
-#MissingContentFilesListCopy: |-
-#  {files, plural,
-#    one{\n\nPress Copy to place its name to the clipboard.}
-#    few{\n\nPress Copy to place their names to the clipboard.}
-#    other{\n\nPress Copy to place their names to the clipboard.}
-#  }
+MissingContentFilesList: |-
+  {files, plural,
+    one{\n\nUn fichier manquant trouvé : }
+    few{\n\n{files} fichiers manquant trouvés :\n}
+    other{\n\n{files} fichiers manquant trouvés :\n}
+  }
+MissingContentFilesListCopy: |-
+  {files, plural,
+    one{\n\nCliquez sur Copier pour placer ce nom dans le presse-papier.}
+    few{\n\nCliquez sur Copier pour placer ces noms dans le presse-papier.}
+    other{\n\nCliquez sur Copier pour placer ces noms dans le presse-papier.}
+  }
 OverwriteGameConfirmation: "Écraser la sauvegarde précédente ?"
+SelectCharacter: "Sélection du personnage..."
+TimePlayed: "Temps de jeu"
 
 
 # Settings menu
@@ -100,31 +99,31 @@ InvertXAxis: "Inverser l'axe X"
 InvertYAxis: "Inverser l'axe Y"
 Language: "Localisation"
 LanguageNote: "Note: Ce paramètre n'affecte pas les textes des fichiers ESM."
-LightingMethodLegacy: "Traditionnelle"
 LightingMethod: "Méthode d'affichage des lumières"
-LightingMethodShadersCompatibility: "Shaders (mode de compatibilité)"
+LightingMethodLegacy: "Traditionnelle"
 LightingMethodShaders: "Shaders"
+LightingMethodShadersCompatibility: "Shaders (mode de compatibilité)"
 LightingResetToDefaults: "Voulez-vous réinitialiser les paramètres d'affichage des lumières à leur valeur par défaut ? Ces changements requièrent un redémarrage de l'application."
+Lights: "Sources lumineuses"
 LightsBoundingSphereMultiplier: "Multiplicateur de sphère englobante"
 LightsBoundingSphereMultiplierTooltip: "valeur par défaut: 1.65\nMultiplicateur pour le rayon de la sphère incluant les sources lumineuses.\nUn multiplicateur plus élevé permet une extinction plus douce, mais applique un plus grand nombre de sources lumineuses sur chaque objet.\n\nCe paramètre ne modifie ni l'intensité ni la luminance des lumières."
 LightsFadeStartMultiplier: "Seuil de perte d'éclat lumineux"
 LightsFadeStartMultiplierTooltip: "valeur par défaut: 0.85\nFraction de la distance maximale d'une source à partir de laquelle l'intensité lumineuse commence à décroître.\n\nSélectionnez une valeur basse pour une transition douce ou une valeur plus élevée pour une transition plus abrupte."
-#LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
-#    \"Legacy\" always uses 8 lights per object and provides a lighting closest to an original game.\n\n
-#    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
-#    \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
+LightsLightingMethodTooltip: "Définit la gestion des sources lumineuses :\n\n
+    \"Traditionnelle\" Chaque objet est éclairé par 8 sources lumineuses. Cet méthode est la plus proche du jeu original.\n\n
+    \"Shaders (mode de compatibilité)\" supprime la limite des 8 sources lumineuses. Cette méthode permet d'éclairer la végétation au sol, mais aussi de configurer à quel distance une source lumineuse s'estompe. Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.\n\n
+    \"Shaders\" offre tous les bénéfices apportés par \"Shaders (mode de compatibilité)\", mais utilise une approche moderne. Celle-ci permet, sur du matériel moderne, d'augmenter le nombre de sources lumineuses par objet sans perte de performance."
 LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
 LightsMinimumInteriorBrightness: "Luminosité intérieure minimale"
 LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres."
-Lights: "Sources lumineuses"
 MaxLights: "Maximum de sources lumineuses"
 MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles obtenues avec la méthode d'éclairage traditionnelle."
 MenuHelpDelay: "Délai d'affichage du menu d'aide"
 MenuTransparency: "Transparence des menus"
 MouseAndKeyboard: "Souris/Clavier"
-PostProcessingIsNotEnabled: "Le post-traitement est désactivé"
 PostProcessing: "Post-traitement"
+PostProcessingIsNotEnabled: "Le post-traitement est désactivé"
 PostProcessingTooltip: "Modifiable dans le HUD de post-traitement, accessible à partir les paramètres de contrôle."
 Preferences: "Préférences"
 PrimaryLanguage: "Localisation principale"
@@ -147,19 +146,20 @@ ReflectionShaderDetailWorld: "Monde"
 Refraction: "Réfraction"
 ResetControls: "Réinitialiser les contrôles"
 Screenshot: "Capture d'écran"
-ScriptsDisabled: "Chargez une sauvegarde pour accéder aux paramètres des scripts."
 Scripts: "Scripts"
+ScriptsDisabled: "Chargez une sauvegarde pour accéder aux paramètres des scripts."
 SecondaryLanguage: "Localisation secondaire"
 SecondaryLanguageTooltip: "Localisation utilisée si le texte est absent de la localisation principale."
 SensitivityHigh: "Haute"
 SensitivityLow: "Faible"
 SettingsWindow: "Options"
 Subtitles: "Sous-titres"
+SunlightScattering: "Diffusion des rayons solaires"
 TestingExteriorCells: "Vérification des espaces (cells) extérieurs"
 TestingInteriorCells: "Vérification des espaces (cells) intérieurs"
+TextureFiltering: "Filtre appliqué aux textures"
 TextureFilteringBilinear: "Bilinéaire"
 TextureFilteringDisabled: "Aucun"
-TextureFiltering: "Filtre appliqué aux textures"
 TextureFilteringOther: "Autre"
 TextureFilteringTrilinear: "Trilinéaire"
 ToggleHUD: "Afficher/masquer le HUD"
@@ -169,11 +169,14 @@ TransparencyNone: "Basse"
 Video: "Graphisme"
 ViewDistance: "Distance d'affichage"
 VSync: "VSync"
+VSyncAdaptive: "Adaptif"
 Water: "Eau"
 WaterShader: "Shader pour l'eau"
 WaterShaderTextureQuality: "Qualité des textures"
 WindowBorder: "Bordure de fenêtre"
-WindowModeFullscreen: "Plein écran"
 WindowMode: "Mode d'affichage"
+WindowModeFullscreen: "Plein écran"
+WindowModeHint: "Info : Le mode \"Fenêtré plein écran\" utilise toujours la résolution native de l'écran."
 WindowModeWindowed: "Fenêtré"
 WindowModeWindowedFullscreen: "Fenêtré plein écran"
+WobblyShores: "Rivages vacillants"

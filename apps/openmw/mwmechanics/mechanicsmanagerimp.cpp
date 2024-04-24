@@ -29,6 +29,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "actor.hpp"
 #include "actors.hpp"
 #include "actorutil.hpp"
@@ -261,10 +263,10 @@ namespace MWMechanics
             mObjects.addObject(ptr);
     }
 
-    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell)
+    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell)
     {
         if (ptr.getClass().isActor())
-            mActors.castSpell(ptr, spellId, manualSpell);
+            mActors.castSpell(ptr, spellId, scriptedSpell);
     }
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr, bool keepActive)
@@ -1678,12 +1680,12 @@ namespace MWMechanics
         if (mMusicType != MWSound::MusicType::Explore && !hasHostiles
             && !(player.getClass().getCreatureStats(player).isDead() && musicPlaying))
         {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
+            MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
             mMusicType = MWSound::MusicType::Explore;
         }
         else if (mMusicType != MWSound::MusicType::Battle && hasHostiles)
         {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
+            MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::battlePlaylist);
             mMusicType = MWSound::MusicType::Battle;
         }
     }
@@ -1978,11 +1980,7 @@ namespace MWMechanics
 
             // Transforming removes all temporary effects
             actor.getClass().getCreatureStats(actor).getActiveSpells().purge(
-                [](const auto& params) {
-                    return params.getType() == ESM::ActiveSpells::Type_Consumable
-                        || params.getType() == ESM::ActiveSpells::Type_Temporary;
-                },
-                actor);
+                [](const auto& params) { return params.hasFlag(ESM::ActiveSpells::Flag_Temporary); }, actor);
             mActors.updateActor(actor, 0.f);
 
             if (werewolf)

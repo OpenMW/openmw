@@ -1013,7 +1013,7 @@ namespace MWRender
 
     void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Object Chunk", mCache->getCacheSize());
+        Resource::reportStats("Object Chunk", frameNumber, mCache->getStats(), *stats);
     }
 
 }

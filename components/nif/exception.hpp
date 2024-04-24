@@ -1,18 +1,21 @@
 #ifndef OPENMW_COMPONENTS_NIF_EXCEPTION_HPP
 #define OPENMW_COMPONENTS_NIF_EXCEPTION_HPP
 
-#include <filesystem>
 #include <stdexcept>
 #include <string>
-
-#include <components/files/conversion.hpp>
 
 namespace Nif
 {
     struct Exception : std::runtime_error
     {
-        explicit Exception(const std::string& message, const std::filesystem::path& path)
-            : std::runtime_error("NIFFile Error: " + message + " when reading " + Files::pathToUnicodeString(path))
+        explicit Exception(std::string_view message, std::string_view path)
+            : std::runtime_error([&] {
+                std::string result = "NIFFile Error: ";
+                result += message;
+                result += " when reading ";
+                result += path;
+                return result;
+            }())
         {
         }
     };

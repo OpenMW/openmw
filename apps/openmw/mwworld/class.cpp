@@ -532,7 +532,7 @@ namespace MWWorld
             return result;
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(
-            enchantment->mEffects.mList.front().mEffectID);
+            enchantment->mEffects.mList.front().mData.mEffectID);
         if (!magicEffect)
             return result;
 

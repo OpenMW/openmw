@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout" version="3.2.0">
-    <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="MainMenu" name="_Main">
+    <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="Settings" name="_Main">
         <Property key="MinSize" value="640 490"/>
         <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
@@ -457,13 +457,41 @@
                                 <UserString key="HStretch" value="true"/>
                                 <UserString key="VStretch" value="false"/>
 
-                                <Widget type="AutoSizedButton" skin="MW_Button">
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="WaterRefractionButton">
                                     <UserString key="SettingCategory" value="Water"/>
                                     <UserString key="SettingName" value="refraction"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText">
                                     <Property key="Caption" value="#{OMWEngine:Refraction}"/>
+                                </Widget>
+                            </Widget>
+
+                            <Widget type="HBox" align="Stretch">
+                                <UserString key="HStretch" value="true"/>
+                                <UserString key="VStretch" value="false"/>
+
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="SunlightScatteringButton">
+                                    <UserString key="SettingCategory" value="Water"/>
+                                    <UserString key="SettingName" value="sunlight scattering"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText">
+                                    <Property key="Caption" value="#{OMWEngine:SunlightScattering}"/>
+                                </Widget>
+                            </Widget>
+
+                            <Widget type="HBox" align="Stretch">
+                                <UserString key="HStretch" value="true"/>
+                                <UserString key="VStretch" value="false"/>
+
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="WobblyShoresButton">
+                                    <UserString key="SettingCategory" value="Water"/>
+                                    <UserString key="SettingName" value="wobbly shores"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText">
+                                    <Property key="Caption" value="#{OMWEngine:WobblyShores}"/>
                                 </Widget>
                             </Widget>
 

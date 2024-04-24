@@ -128,7 +128,7 @@ Table with the following optional fields:
     - Disables changing the setting from the UI
 
 inputBinding
------
+------------
 
 Allows the user to bind inputs to an action or trigger
 
@@ -143,10 +143,9 @@ Table with the following fields:
   * - name
     - type (default)
     - description
-  * - type
-    - 'keyboardPress', 'keyboardHold'
-    - The type of input that's allowed to be bound
   * - key
     - #string
     - Key of the action or trigger to which the input is bound
-
+  * - type
+    - 'action', 'trigger'
+    - Type of the key

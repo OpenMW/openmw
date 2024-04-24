@@ -15,7 +15,7 @@ namespace ESM
 
         esm.getHNT("LKEP", mLastKnownExteriorPosition);
 
-        mHasMark = esm.getHNOT("MARK", mMarkedPosition.pos, mMarkedPosition.rot);
+        mHasMark = esm.getOptionalComposite("MARK", mMarkedPosition);
         if (mHasMark)
             mMarkedCell = esm.getCellId();
 
@@ -90,7 +90,7 @@ namespace ESM
 
         if (mHasMark)
         {
-            esm.writeHNT("MARK", mMarkedPosition, 24);
+            esm.writeNamedComposite("MARK", mMarkedPosition);
             esm.writeCellId(mMarkedCell);
         }
 

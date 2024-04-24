@@ -220,7 +220,7 @@ namespace
             camera->setNodeMask(MWRender::Mask_RenderToTexture);
             camera->setCullMask(MWRender::Mask_Sky);
             camera->addChild(mEarlyRenderBinRoot);
-            SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *camera->getOrCreateStateSet());
+            SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*camera->getOrCreateStateSet());
         }
 
     private:
@@ -274,7 +274,8 @@ namespace MWRender
         if (!mSceneManager->getForceShaders())
             skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
                 osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED | osg::StateAttribute::ON);
-        SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *skyroot->getOrCreateStateSet());
+        mSceneManager->setUpNormalsRTForStateSet(skyroot->getOrCreateStateSet(), false);
+        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*skyroot->getOrCreateStateSet());
         parentNode->addChild(skyroot);
 
         mEarlyRenderBinRoot = new osg::Group;
@@ -528,7 +529,7 @@ namespace MWRender
         if (hasRain())
             return mRainRipplesEnabled;
 
-        if (mParticleNode && mCurrentParticleEffect == "meshes\\snow.nif")
+        if (mParticleNode && mCurrentParticleEffect == Settings::models().mWeathersnow.get())
             return mSnowRipplesEnabled;
 
         return false;
@@ -554,7 +555,7 @@ namespace MWRender
             osg::Quat quat;
             quat.makeRotate(MWWorld::Weather::defaultDirection(), mStormParticleDirection);
             // Morrowind deliberately rotates the blizzard mesh, so so should we.
-            if (mCurrentParticleEffect == "meshes\\blizzard.nif")
+            if (mCurrentParticleEffect == Settings::models().mWeatherblizzard.get())
                 quat.makeRotate(osg::Vec3f(-1, 0, 0), mStormParticleDirection);
             mParticleNode->setAttitude(quat);
         }
@@ -726,7 +727,7 @@ namespace MWRender
 
                 const osg::Vec3 defaultWrapRange = osg::Vec3(1024, 1024, 800);
                 const bool occlusionEnabledForEffect
-                    = !mRainEffect.empty() || mCurrentParticleEffect == "meshes\\snow.nif";
+                    = !mRainEffect.empty() || mCurrentParticleEffect == Settings::models().mWeathersnow.get();
 
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {

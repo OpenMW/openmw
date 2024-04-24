@@ -9,7 +9,7 @@ vec4 sampleReflectionMap(vec2 uv)
     return texture2D(reflectionMap, uv);
 }
 
-#if @refraction_enabled
+#if @waterRefraction
 uniform sampler2D refractionMap;
 uniform sampler2D refractionDepthMap;
 

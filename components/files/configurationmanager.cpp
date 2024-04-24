@@ -68,6 +68,9 @@ namespace Files
         bool silent = mSilent;
         mSilent = quiet;
 
+        // ensure defaults are present
+        bpo::store(bpo::parsed_options(&description), variables);
+
         std::optional<bpo::variables_map> config = loadConfig(mFixedPath.getLocalPath(), description);
         if (config)
             mActiveConfigPaths.push_back(mFixedPath.getLocalPath());
@@ -409,11 +412,6 @@ namespace Files
     const std::filesystem::path& ConfigurationManager::getLocalPath() const
     {
         return mFixedPath.getLocalPath();
-    }
-
-    const std::filesystem::path& ConfigurationManager::getGlobalDataPath() const
-    {
-        return mFixedPath.getGlobalDataPath();
     }
 
     const std::filesystem::path& ConfigurationManager::getCachePath() const

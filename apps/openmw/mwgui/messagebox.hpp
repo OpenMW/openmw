@@ -29,7 +29,7 @@ namespace MWGui
             bool immediate = false, int defaultFocus = -1);
         bool isInteractiveMessageBox();
 
-        int getMessagesCount();
+        std::size_t getMessagesCount();
 
         const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe.get(); }
 

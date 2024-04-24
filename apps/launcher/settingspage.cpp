@@ -193,8 +193,10 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
         loadSettingBool(Settings::game().mPlayerMovementIgnoresAnimation, *playerMovementIgnoresAnimationCheckBox);
 
-        distantLandCheckBox->setCheckState(
-            Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging ? Qt::Checked : Qt::Unchecked);
+        connect(distantLandCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotDistantLandToggled);
+        bool distantLandEnabled = Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging;
+        distantLandCheckBox->setCheckState(distantLandEnabled ? Qt::Checked : Qt::Unchecked);
+        slotDistantLandToggled(distantLandEnabled);
 
         loadSettingBool(Settings::terrain().mObjectPagingActiveGrid, *activeGridObjectPagingCheckBox);
         viewingDistanceComboBox->setValue(convertToCells(Settings::camera().mViewingDistance));
@@ -244,6 +246,11 @@ bool Launcher::SettingsPage::loadSettings()
         int shadowResIndex = shadowResolutionComboBox->findText(QString::number(shadowRes));
         if (shadowResIndex != -1)
             shadowResolutionComboBox->setCurrentIndex(shadowResIndex);
+        else
+        {
+            shadowResolutionComboBox->addItem(QString::number(shadowRes));
+            shadowResolutionComboBox->setCurrentIndex(shadowResolutionComboBox->count() - 1);
+        }
 
         connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotShadowDistLimitToggled);
 
@@ -295,6 +302,7 @@ bool Launcher::SettingsPage::loadSettings()
                 hrtfProfileSelectorComboBox->setCurrentIndex(hrtfProfileIndex);
             }
         }
+        loadSettingBool(Settings::sound().mCameraListener, *cameraListenerCheckBox);
     }
 
     // Interface Changes
@@ -338,7 +346,7 @@ bool Launcher::SettingsPage::loadSettings()
     {
         loadSettingBool(Settings::input().mGrabCursor, *grabCursorCheckBox);
 
-        bool skipMenu = mGameSettings.value("skip-menu").toInt() == 1;
+        bool skipMenu = mGameSettings.value("skip-menu").value.toInt() == 1;
         if (skipMenu)
         {
             skipMenuCheckBox->setCheckState(Qt::Checked);
@@ -346,8 +354,8 @@ bool Launcher::SettingsPage::loadSettings()
         startDefaultCharacterAtLabel->setEnabled(skipMenu);
         startDefaultCharacterAtField->setEnabled(skipMenu);
 
-        startDefaultCharacterAtField->setText(mGameSettings.value("start"));
-        runScriptAfterStartupField->setText(mGameSettings.value("script-run"));
+        startDefaultCharacterAtField->setText(mGameSettings.value("start").value);
+        runScriptAfterStartupField->setText(mGameSettings.value("script-run").value);
     }
     return true;
 }
@@ -492,6 +500,9 @@ void Launcher::SettingsPage::saveSettings()
             Settings::sound().mHrtf.set(hrtfProfileSelectorComboBox->currentText().toStdString());
         else
             Settings::sound().mHrtf.set({});
+
+        const bool cCameraListener = cameraListenerCheckBox->checkState() != Qt::Unchecked;
+        Settings::sound().mCameraListener.set(cCameraListener);
     }
 
     // Interface Changes
@@ -532,17 +543,17 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*grabCursorCheckBox, Settings::input().mGrabCursor);
 
         int skipMenu = skipMenuCheckBox->checkState() == Qt::Checked;
-        if (skipMenu != mGameSettings.value("skip-menu").toInt())
-            mGameSettings.setValue("skip-menu", QString::number(skipMenu));
+        if (skipMenu != mGameSettings.value("skip-menu").value.toInt())
+            mGameSettings.setValue("skip-menu", { QString::number(skipMenu) });
 
         QString startCell = startDefaultCharacterAtField->text();
-        if (startCell != mGameSettings.value("start"))
+        if (startCell != mGameSettings.value("start").value)
         {
-            mGameSettings.setValue("start", startCell);
+            mGameSettings.setValue("start", { startCell });
         }
         QString scriptRun = runScriptAfterStartupField->text();
-        if (scriptRun != mGameSettings.value("script-run"))
-            mGameSettings.setValue("script-run", scriptRun);
+        if (scriptRun != mGameSettings.value("script-run").value)
+            mGameSettings.setValue("script-run", { scriptRun });
     }
 }
 
@@ -581,9 +592,16 @@ void Launcher::SettingsPage::slotShadowDistLimitToggled(bool checked)
     fadeStartSpinBox->setEnabled(checked);
 }
 
+void Launcher::SettingsPage::slotDistantLandToggled(bool checked)
+{
+    activeGridObjectPagingCheckBox->setEnabled(checked);
+    objectPagingMinSizeComboBox->setEnabled(checked);
+}
+
 void Launcher::SettingsPage::slotLightTypeCurrentIndexChanged(int index)
 {
     lightsMaximumDistanceSpinBox->setEnabled(index != 0);
+    lightFadeMultiplierSpinBox->setEnabled(index != 0);
     lightsMaxLightsSpinBox->setEnabled(index != 0);
     lightsBoundingSphereMultiplierSpinBox->setEnabled(index != 0);
     lightsMinimumInteriorBrightnessSpinBox->setEnabled(index != 0);

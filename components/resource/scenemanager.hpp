@@ -32,6 +32,7 @@ namespace Resource
 {
     class ImageManager;
     class NifFileManager;
+    class BgsmFileManager;
     class SharedStateManager;
 }
 
@@ -90,7 +91,7 @@ namespace Resource
     {
     public:
         explicit SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
-            Resource::NifFileManager* nifFileManager, double expiryDelay);
+            Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay);
         ~SceneManager();
 
         Shader::ShaderManager& getShaderManager();
@@ -224,6 +225,8 @@ namespace Resource
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
         bool getSupportsNormalsRT() const { return mSupportsNormalsRT; }
 
+        void setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled);
+
         void setSoftParticles(bool enabled) { mSoftParticles = enabled; }
         bool getSoftParticles() const { return mSoftParticles; }
 
@@ -257,6 +260,7 @@ namespace Resource
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
+        Resource::BgsmFileManager* mBgsmFileManager;
 
         osg::Texture::FilterMode mMinFilter;
         osg::Texture::FilterMode mMagFilter;

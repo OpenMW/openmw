@@ -8,7 +8,7 @@
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 
 #include "tagbase.hpp"

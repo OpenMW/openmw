@@ -9,6 +9,8 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
 
     setupUi(this);
 
+    flagIconLabel->setPixmap(QIcon(":preferences-desktop-locale").pixmap(QSize(48, 48)));
+
     registerField(QLatin1String("installation.language"), languageComboBox, "currentData", "currentDataChanged");
 }
 

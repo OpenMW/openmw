@@ -1,11 +1,11 @@
 #include <QApplication>
 #include <QDir>
-#include <QTranslator>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
 #include <components/files/qtconversion.hpp>
+#include <components/l10n/qttranslations.hpp>
 
 #include "mainwizard.hpp"
 
@@ -45,18 +45,9 @@ int main(int argc, char* argv[])
         resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
     }
 
-    // Internationalization
-    QString locale = QLocale::system().name().section('_', 0, 0);
+    l10n::installQtTranslations(app, "wizard", resourcesPath);
 
-    QTranslator appTranslator;
-    appTranslator.load(resourcesPath + "/translations/wizard_" + locale + ".qm");
-    app.installTranslator(&appTranslator);
-
-    QTranslator componentsAppTranslator;
-    componentsAppTranslator.load(resourcesPath + "/translations/components_" + locale + ".qm");
-    app.installTranslator(&componentsAppTranslator);
-
-    Wizard::MainWizard wizard;
+    Wizard::MainWizard wizard(std::move(configurationManager));
 
     wizard.show();
     return app.exec();

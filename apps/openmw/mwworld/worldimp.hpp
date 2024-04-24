@@ -273,7 +273,6 @@ namespace MWWorld
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
         std::string_view getCellName(const MWWorld::Cell& cell) const override;
-        std::string_view getCellName(const ESM::Cell* cell) const override;
 
         void removeRefScript(const MWWorld::CellRef* ref) override;
         //< Remove the script attached to ref from mLocalScripts
@@ -392,7 +391,7 @@ namespace MWWorld
         const MWPhysics::RayCastingInterface* getRayCasting() const override;
 
         bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-            bool ignorePlayer, bool ignoreActors) override;
+            bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList) override;
 
         void setActorCollisionMode(const Ptr& ptr, bool internal, bool external) override;
         bool isActorCollisionEnabled(const Ptr& ptr) override;

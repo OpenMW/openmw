@@ -22,6 +22,16 @@ namespace Files
     {
         return Files::pathToQString(cfgMgr.getGlobalPath() / openmwCfgFile);
     }
+
+    inline QStringList getActiveConfigPathsQString(const Files::ConfigurationManager& cfgMgr)
+    {
+        const auto& activePaths = cfgMgr.getActiveConfigPaths();
+        QStringList result;
+        result.reserve(static_cast<int>(activePaths.size()));
+        for (const auto& path : activePaths)
+            result.append(Files::pathToQString(path / openmwCfgFile));
+        return result;
+    }
 }
 
 #endif // OPENMW_COMPONENTS_FILES_QTCONFIGPATH_H

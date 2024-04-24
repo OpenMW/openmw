@@ -1,3 +1,5 @@
+#include "animationbindings.hpp"
+
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/asyncpackage.hpp>
@@ -17,27 +19,6 @@
 #include "context.hpp"
 #include "luamanagerimp.hpp"
 #include "objectvariant.hpp"
-
-#include "animationbindings.hpp"
-#include <array>
-
-namespace MWLua
-{
-    struct AnimationGroup;
-    struct TextKeyCallback;
-}
-
-namespace sol
-{
-    template <>
-    struct is_automagical<MWLua::AnimationGroup> : std::false_type
-    {
-    };
-    template <>
-    struct is_automagical<std::shared_ptr<MWLua::TextKeyCallback>> : std::false_type
-    {
-    };
-}
 
 namespace MWLua
 {

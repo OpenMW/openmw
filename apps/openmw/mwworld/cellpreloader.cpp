@@ -4,6 +4,8 @@
 #include <atomic>
 #include <limits>
 
+#include <osg/Stats>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/loadinglistener/reporter.hpp>
@@ -276,6 +278,7 @@ namespace MWWorld
             {
                 oldestCell->second.mWorkItem->abort();
                 mPreloadCells.erase(oldestCell);
+                ++mEvicted;
             }
             else
                 return;
@@ -285,7 +288,8 @@ namespace MWWorld
             mResourceSystem->getKeyframeManager(), mTerrain, mLandManager, mPreloadInstances));
         mWorkQueue->addWorkItem(item);
 
-        mPreloadCells[&cell] = PreloadEntry(timestamp, item);
+        mPreloadCells.emplace(&cell, PreloadEntry(timestamp, item));
+        ++mAdded;
     }
 
     void CellPreloader::notifyLoaded(CellStore* cell)
@@ -300,6 +304,7 @@ namespace MWWorld
             }
 
             mPreloadCells.erase(found);
+            ++mLoaded;
         }
     }
 
@@ -329,6 +334,7 @@ namespace MWWorld
                     it->second.mWorkItem = nullptr;
                 }
                 mPreloadCells.erase(it++);
+                ++mExpired;
             }
             else
                 ++it;
@@ -467,4 +473,12 @@ namespace MWWorld
         mPreloadCells.clear();
     }
 
+    void CellPreloader::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        stats.setAttribute(frameNumber, "CellPreloader Count", mPreloadCells.size());
+        stats.setAttribute(frameNumber, "CellPreloader Added", mAdded);
+        stats.setAttribute(frameNumber, "CellPreloader Evicted", mEvicted);
+        stats.setAttribute(frameNumber, "CellPreloader Loaded", mLoaded);
+        stats.setAttribute(frameNumber, "CellPreloader Expired", mExpired);
+    }
 }

@@ -36,7 +36,7 @@ namespace
         (result.emplace_back(makeString(args)), ...);
         for (int i = 1; i <= std::numeric_limits<char>::max(); ++i)
             if (i != '&' && i != '"' && i != ' ' && i != '\n')
-                result.push_back(std::string(1, i));
+                result.push_back(std::string(1, static_cast<char>(i)));
         return result;
     }
 

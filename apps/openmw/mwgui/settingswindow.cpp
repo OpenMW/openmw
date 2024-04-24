@@ -241,7 +241,7 @@ namespace MWGui
     }
 
     SettingsWindow::SettingsWindow()
-        : WindowModal("openmw_settings_window.layout")
+        : WindowBase("openmw_settings_window.layout")
         , mKeyboardMode(true)
         , mCurrentPage(-1)
     {
@@ -266,6 +266,9 @@ namespace MWGui
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
+        getWidget(mWaterRefractionButton, "WaterRefractionButton");
+        getWidget(mSunlightScatteringButton, "SunlightScatteringButton");
+        getWidget(mWobblyShoresButton, "WobblyShoresButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
         getWidget(mWaterRainRippleDetail, "WaterRainRippleDetail");
@@ -306,6 +309,8 @@ namespace MWGui
             += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
+        mWaterRefractionButton->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onRefractionButtonClicked);
         mWaterTextureSize->eventComboChangePosition
             += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
         mWaterReflectionDetail->eventComboChangePosition
@@ -377,6 +382,10 @@ namespace MWGui
         const int waterRainRippleDetail = Settings::water().mRainRippleDetail;
         mWaterRainRippleDetail->setIndexSelected(waterRainRippleDetail);
 
+        const bool waterRefraction = Settings::water().mRefraction;
+        mSunlightScatteringButton->setEnabled(waterRefraction);
+        mWobblyShoresButton->setEnabled(waterRefraction);
+
         updateMaxLightsComboBox(mMaxLights);
 
         const Settings::WindowMode windowMode = Settings::video().mWindowMode;
@@ -393,7 +402,8 @@ namespace MWGui
 
         std::vector<std::string> availableLanguages;
         const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        for (const auto& path : vfs->getRecursiveDirectoryIterator("l10n/"))
+        constexpr VFS::Path::NormalizedView l10n("l10n/");
+        for (const auto& path : vfs->getRecursiveDirectoryIterator(l10n))
         {
             if (Misc::getFileExtension(path) == "yaml")
             {
@@ -502,6 +512,14 @@ namespace MWGui
                 break;
             }
         }
+    }
+
+    void SettingsWindow::onRefractionButtonClicked(MyGUI::Widget* _sender)
+    {
+        const bool refractionEnabled = Settings::water().mRefraction;
+
+        mSunlightScatteringButton->setEnabled(refractionEnabled);
+        mWobblyShoresButton->setEnabled(refractionEnabled);
     }
 
     void SettingsWindow::onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos)
@@ -1042,8 +1060,6 @@ namespace MWGui
 
     void SettingsWindow::onOpen()
     {
-        WindowModal::onOpen();
-
         highlightCurrentResolution();
         updateControlsBox();
         updateLightSettings();

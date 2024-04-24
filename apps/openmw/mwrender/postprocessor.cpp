@@ -346,7 +346,7 @@ namespace MWRender
 
         for (auto& technique : mTechniques)
         {
-            if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
+            if (!technique || technique->getStatus() == fx::Technique::Status::File_Not_exists)
                 continue;
 
             const auto lastWriteTime = std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
@@ -564,7 +564,7 @@ namespace MWRender
 
         for (const auto& technique : mTechniques)
         {
-            if (!technique->isValid())
+            if (!technique || !technique->isValid())
                 continue;
 
             if (technique->getGLSLVersion() > mGLSLVersion)
@@ -718,7 +718,7 @@ namespace MWRender
 
     PostProcessor::Status PostProcessor::disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty)
     {
-        if (technique->getLocked())
+        if (!technique || technique->getLocked())
             return Status_Error;
 
         auto it = std::find(mTechniques.begin(), mTechniques.end(), technique);
@@ -734,6 +734,9 @@ namespace MWRender
 
     bool PostProcessor::isTechniqueEnabled(const std::shared_ptr<fx::Technique>& technique) const
     {
+        if (!technique)
+            return false;
+
         if (auto it = std::find(mTechniques.begin(), mTechniques.end(), technique); it == mTechniques.end())
             return false;
 
@@ -815,7 +818,7 @@ namespace MWRender
     void PostProcessor::disableDynamicShaders()
     {
         for (auto& technique : mTechniques)
-            if (technique->getDynamic())
+            if (technique && technique->getDynamic())
                 disableTechnique(technique);
     }
 

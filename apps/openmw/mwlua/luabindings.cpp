@@ -14,6 +14,7 @@
 #include "debugbindings.hpp"
 #include "inputbindings.hpp"
 #include "localscripts.hpp"
+#include "markupbindings.hpp"
 #include "menuscripts.hpp"
 #include "nearbybindings.hpp"
 #include "objectbindings.hpp"
@@ -35,6 +36,7 @@ namespace MWLua
             { "openmw.async",
                 LuaUtil::getAsyncPackageInitializer(
                     lua, [tm] { return tm->getSimulationTime(); }, [tm] { return tm->getGameTime(); }) },
+            { "openmw.markup", initMarkupPackage(context) },
             { "openmw.util", LuaUtil::initUtilPackage(lua) },
             { "openmw.vfs", initVFSPackage(context) },
         };

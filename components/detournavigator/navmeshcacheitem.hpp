@@ -131,6 +131,15 @@ namespace DetourNavigator
                     function(position, tile.mVersion, *meshTile);
         }
 
+        template <class Function>
+        void forEachTilePosition(Function&& function) const
+        {
+            for (const auto& [position, tile] : mUsedTiles)
+                function(position);
+            for (const TilePosition& position : mEmptyTiles)
+                function(position);
+        }
+
     private:
         struct Tile
         {

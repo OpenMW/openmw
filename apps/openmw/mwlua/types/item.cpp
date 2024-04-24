@@ -24,6 +24,8 @@ namespace MWLua
         item["isRestocking"]
             = [](const Object& object) -> bool { return object.ptr().getCellRef().getCount(false) < 0; };
 
+        item["isCarriable"] = [](const Object& object) -> bool { return object.ptr().getClass().isItem(object.ptr()); };
+
         addItemDataBindings(item, context);
     }
 }

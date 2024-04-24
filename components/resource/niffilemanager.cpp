@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include <osg/Object>
-#include <osg/Stats>
 
 #include <components/vfs/manager.hpp>
 
@@ -41,25 +40,25 @@ namespace Resource
 
     NifFileManager::~NifFileManager() = default;
 
-    Nif::NIFFilePtr NifFileManager::get(const std::string& name)
+    Nif::NIFFilePtr NifFileManager::get(VFS::Path::NormalizedView name)
     {
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(name);
         if (obj)
             return static_cast<NifFileHolder*>(obj.get())->mNifFile;
         else
         {
-            auto file = std::make_shared<Nif::NIFFile>(name);
+            auto file = std::make_shared<Nif::NIFFile>(name.value());
             Nif::Reader reader(*file, mEncoder);
             reader.parse(mVFS->get(name));
             obj = new NifFileHolder(file);
-            mCache->addEntryToObjectCache(name, obj);
+            mCache->addEntryToObjectCache(name.value(), obj);
             return file;
         }
     }
 
     void NifFileManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Nif", mCache->getCacheSize());
+        Resource::reportStats("Nif", frameNumber, mCache->getStats(), *stats);
     }
 
 }

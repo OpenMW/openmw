@@ -32,53 +32,58 @@ namespace MWPhysics
         return obj->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor;
     }
 
-    class ContactCollectionCallback : public btCollisionWorld::ContactResultCallback
+    namespace
     {
-    public:
-        ContactCollectionCallback(const btCollisionObject* me, osg::Vec3f velocity)
-            : mMe(me)
+        class ContactCollectionCallback : public btCollisionWorld::ContactResultCallback
         {
-            m_collisionFilterGroup = me->getBroadphaseHandle()->m_collisionFilterGroup;
-            m_collisionFilterMask = me->getBroadphaseHandle()->m_collisionFilterMask & ~CollisionType_Projectile;
-            mVelocity = Misc::Convert::toBullet(velocity);
-        }
-        btScalar addSingleResult(btManifoldPoint& contact, const btCollisionObjectWrapper* colObj0Wrap, int partId0,
-            int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) override
-        {
-            if (isActor(colObj0Wrap->getCollisionObject()) && isActor(colObj1Wrap->getCollisionObject()))
-                return 0.0;
-            // ignore overlap if we're moving in the same direction as it would push us out (don't change this to >=,
-            // that would break detection when not moving)
-            if (contact.m_normalWorldOnB.dot(mVelocity) > 0.0)
-                return 0.0;
-            auto delta = contact.m_normalWorldOnB * -contact.m_distance1;
-            mContactSum += delta;
-            mMaxX = std::max(std::abs(delta.x()), mMaxX);
-            mMaxY = std::max(std::abs(delta.y()), mMaxY);
-            mMaxZ = std::max(std::abs(delta.z()), mMaxZ);
-            if (contact.m_distance1 < mDistance)
+        public:
+            explicit ContactCollectionCallback(const btCollisionObject& me, const osg::Vec3f& velocity)
+                : mVelocity(Misc::Convert::toBullet(velocity))
             {
-                mDistance = contact.m_distance1;
-                mNormal = contact.m_normalWorldOnB;
-                mDelta = delta;
-                return mDistance;
+                m_collisionFilterGroup = me.getBroadphaseHandle()->m_collisionFilterGroup;
+                m_collisionFilterMask = me.getBroadphaseHandle()->m_collisionFilterMask & ~CollisionType_Projectile;
             }
-            else
+
+            btScalar addSingleResult(btManifoldPoint& contact, const btCollisionObjectWrapper* colObj0Wrap,
+                int /*partId0*/, int /*index0*/, const btCollisionObjectWrapper* colObj1Wrap, int /*partId1*/,
+                int /*index1*/) override
             {
-                return 0.0;
+                if (isActor(colObj0Wrap->getCollisionObject()) && isActor(colObj1Wrap->getCollisionObject()))
+                    return 0.0;
+                // ignore overlap if we're moving in the same direction as it would push us out (don't change this to
+                // >=, that would break detection when not moving)
+                if (contact.m_normalWorldOnB.dot(mVelocity) > 0.0)
+                    return 0.0;
+                auto delta = contact.m_normalWorldOnB * -contact.m_distance1;
+                mContactSum += delta;
+                mMaxX = std::max(std::abs(delta.x()), mMaxX);
+                mMaxY = std::max(std::abs(delta.y()), mMaxY);
+                mMaxZ = std::max(std::abs(delta.z()), mMaxZ);
+                if (contact.m_distance1 < mDistance)
+                {
+                    mDistance = contact.m_distance1;
+                    mNormal = contact.m_normalWorldOnB;
+                    mDelta = delta;
+                    return mDistance;
+                }
+                else
+                {
+                    return 0.0;
+                }
             }
-        }
-        btScalar mMaxX = 0.0;
-        btScalar mMaxY = 0.0;
-        btScalar mMaxZ = 0.0;
-        btVector3 mContactSum{ 0.0, 0.0, 0.0 };
-        btVector3 mNormal{ 0.0, 0.0, 0.0 }; // points towards "me"
-        btVector3 mDelta{ 0.0, 0.0, 0.0 }; // points towards "me"
-        btScalar mDistance = 0.0; // negative or zero
-    protected:
-        btVector3 mVelocity;
-        const btCollisionObject* mMe;
-    };
+
+            btScalar mMaxX = 0.0;
+            btScalar mMaxY = 0.0;
+            btScalar mMaxZ = 0.0;
+            btVector3 mContactSum{ 0.0, 0.0, 0.0 };
+            btVector3 mNormal{ 0.0, 0.0, 0.0 }; // points towards "me"
+            btVector3 mDelta{ 0.0, 0.0, 0.0 }; // points towards "me"
+            btScalar mDistance = 0.0; // negative or zero
+
+        protected:
+            btVector3 mVelocity;
+        };
+    }
 
     osg::Vec3f MovementSolver::traceDown(const MWWorld::Ptr& ptr, const osg::Vec3f& position, Actor* actor,
         btCollisionWorld* collisionWorld, float maxHeight)
@@ -454,8 +459,10 @@ namespace MWPhysics
         if (btFrom == btTo)
             return;
 
+        assert(projectile.mProjectile != nullptr);
+
         ProjectileConvexCallback resultCallback(
-            projectile.mCaster, projectile.mCollisionObject, btFrom, btTo, projectile.mProjectile);
+            projectile.mCaster, projectile.mCollisionObject, btFrom, btTo, *projectile.mProjectile);
         resultCallback.m_collisionFilterMask = CollisionType_AnyPhysical;
         resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
 
@@ -524,7 +531,7 @@ namespace MWPhysics
             newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
             actor.mCollisionObject->setWorldTransform(newTransform);
 
-            ContactCollectionCallback callback{ actor.mCollisionObject, velocity };
+            ContactCollectionCallback callback(*actor.mCollisionObject, velocity);
             ContactTestWrapper::contactTest(
                 const_cast<btCollisionWorld*>(collisionWorld), actor.mCollisionObject, callback);
             return callback;

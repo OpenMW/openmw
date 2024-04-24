@@ -29,6 +29,7 @@ namespace MWGui
 
         std::string caption;
         std::string text;
+        std::string extra;
         std::string icon;
         int imageSize;
 

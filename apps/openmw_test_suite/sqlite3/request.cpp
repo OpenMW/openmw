@@ -151,7 +151,7 @@ namespace
         const std::int64_t value = 1099511627776;
         EXPECT_EQ(execute(*mDb, insert, value), 1);
         Statement select(*mDb, GetAll("ints"));
-        std::vector<std::tuple<int>> result;
+        std::vector<std::tuple<std::int64_t>> result;
         request(*mDb, select, std::back_inserter(result), std::numeric_limits<std::size_t>::max());
         EXPECT_THAT(result, ElementsAre(std::tuple(value)));
     }
@@ -205,7 +205,7 @@ namespace
         const std::int64_t value = 1099511627776;
         EXPECT_EQ(execute(*mDb, insert, value), 1);
         Statement select(*mDb, GetExact<std::int64_t>("ints"));
-        std::vector<std::tuple<int>> result;
+        std::vector<std::tuple<std::int64_t>> result;
         request(*mDb, select, std::back_inserter(result), std::numeric_limits<std::size_t>::max(), value);
         EXPECT_THAT(result, ElementsAre(std::tuple(value)));
     }

@@ -37,9 +37,9 @@ Launcher::ImportPage::ImportPage(const Files::ConfigurationManager& cfg, Config:
     // Detect Morrowind configuration files
     QStringList iniPaths;
 
-    for (const QString& path : mGameSettings.getDataDirs())
+    for (const auto& path : mGameSettings.getDataDirs())
     {
-        QDir dir(path);
+        QDir dir(path.value);
         dir.setPath(dir.canonicalPath()); // Resolve symlinks
 
         if (dir.exists(QString("Morrowind.ini")))
@@ -125,7 +125,7 @@ void Launcher::ImportPage::on_importerButton_clicked()
         arguments.append(QString("--fonts"));
 
     arguments.append(QString("--encoding"));
-    arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
+    arguments.append(mGameSettings.value(QString("encoding"), { "win1252" }).value);
     arguments.append(QString("--ini"));
     arguments.append(settingsComboBox->currentText());
     arguments.append(QString("--cfg"));

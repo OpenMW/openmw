@@ -132,9 +132,9 @@ const MWState::Slot* MWState::Character::createSlot(const ESM::SavedGame& profil
 
 void MWState::Character::deleteSlot(const Slot* slot)
 {
-    int index = slot - mSlots.data();
+    std::ptrdiff_t index = slot - mSlots.data();
 
-    if (index < 0 || index >= static_cast<int>(mSlots.size()))
+    if (index < 0 || static_cast<std::size_t>(index) >= mSlots.size())
     {
         // sanity check; not entirely reliable
         throw std::logic_error("slot not found");
@@ -147,9 +147,9 @@ void MWState::Character::deleteSlot(const Slot* slot)
 
 const MWState::Slot* MWState::Character::updateSlot(const Slot* slot, const ESM::SavedGame& profile)
 {
-    int index = slot - mSlots.data();
+    std::ptrdiff_t index = slot - mSlots.data();
 
-    if (index < 0 || index >= static_cast<int>(mSlots.size()))
+    if (index < 0 || static_cast<std::size_t>(index) >= mSlots.size())
     {
         // sanity check; not entirely reliable
         throw std::logic_error("slot not found");

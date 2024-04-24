@@ -15,6 +15,15 @@
 --     end
 -- end))
 
+--- Possible @{#LifeTime} values
+-- @field [parent=#storage] #LifeTime LIFE_TIME
+
+--- `storage.LIFE_TIME`
+-- @type LifeTime
+-- @field #number Persistent "0" Data is stored for the whole game session and remains on disk after quitting the game
+-- @field #number GameSession "1" Data is stored for the whole game session
+-- @field #number Temporary "2" Data is stored until script context reset
+
 ---
 -- Get a section of the global storage; can be used by any script, but only global scripts can change values.
 -- Menu scripts can only access it when a game is running.
@@ -83,12 +92,28 @@
 -- @param #table values (optional) New values
 
 ---
--- Make the whole section temporary: will be removed on exit or when load a save.
+-- (DEPRECATED, use `setLifeTime(openmw.storage.LIFE_TIME.Temporary)`) Make the whole section temporary: will be removed on exit or when load a save.
 -- Temporary sections have the same interface to get/set values, the only difference is they will not
 -- be saved to the permanent storage on exit.
--- This function can not be used for a global storage section from a local script.
+-- This function can be used for a global storage section from a global script or for a player storage section from a player or menu script.
 -- @function [parent=#StorageSection] removeOnExit
 -- @param self
+-- @usage
+-- local storage = require('openmw.storage')
+-- local myModData = storage.globalSection('MyModExample')
+-- myModData:removeOnExit()
+
+---
+-- Set the life time of given storage section.
+-- New sections initially have a Persistent life time.
+-- This function can be used for a global storage section from a global script or for a player storage section from a player or menu script.
+-- @function [parent=#StorageSection] setLifeTime
+-- @param self
+-- @param #LifeTime lifeTime Section life time
+-- @usage
+-- local storage = require('openmw.storage')
+-- local myModData = storage.globalSection('MyModExample')
+-- myModData:setLifeTime(storage.LIFE_TIME.Temporary)
 
 ---
 -- Set value by a string key; can not be used for global storage from a local script.

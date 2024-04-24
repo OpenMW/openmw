@@ -46,41 +46,41 @@ QWidget* CSVWorld::IdCompletionDelegate::createEditor(QWidget* parent, const QSt
 
         switch (conditionFunction)
         {
-            case CSMWorld::ConstInfoSelectWrapper::Function_Global:
+            case ESM::DialogueCondition::Function_Global:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_GlobalVariable);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_Journal:
+            case ESM::DialogueCondition::Function_Journal:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_Journal);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_Item:
+            case ESM::DialogueCondition::Function_Item:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_Referenceable);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_Dead:
-            case CSMWorld::ConstInfoSelectWrapper::Function_NotId:
+            case ESM::DialogueCondition::Function_Dead:
+            case ESM::DialogueCondition::Function_NotId:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_Referenceable);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_NotFaction:
+            case ESM::DialogueCondition::Function_NotFaction:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_Faction);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_NotClass:
+            case ESM::DialogueCondition::Function_NotClass:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_Class);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_NotRace:
+            case ESM::DialogueCondition::Function_NotRace:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_Race);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_NotCell:
+            case ESM::DialogueCondition::Function_NotCell:
             {
                 return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_Cell);
             }
-            case CSMWorld::ConstInfoSelectWrapper::Function_Local:
-            case CSMWorld::ConstInfoSelectWrapper::Function_NotLocal:
+            case ESM::DialogueCondition::Function_Local:
+            case ESM::DialogueCondition::Function_NotLocal:
             {
                 return new CSVWidget::DropLineEdit(display, parent);
             }

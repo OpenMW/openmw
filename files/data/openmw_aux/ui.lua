@@ -24,7 +24,7 @@ function aux_ui.deepLayoutCopy(layout)
     for k, v in pairs(layout) do
         if k == 'content' then
             result[k] = deepContentCopy(v)
-        elseif type(v) == 'table' then
+        elseif type(v) == 'table' and getmetatable(v) == nil then
             result[k] = aux_ui.deepLayoutCopy(v)
         else
             result[k] = v

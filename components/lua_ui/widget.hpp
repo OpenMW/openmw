@@ -31,10 +31,13 @@ namespace LuaUi
         virtual void deinitialize();
 
         MyGUI::Widget* widget() const { return mWidget; }
-        WidgetExtension* slot() const { return mSlot; }
 
         bool isRoot() const { return mElementRoot; }
         WidgetExtension* getParent() const { return mParent; }
+        void detachFromParent();
+
+        void detachChildrenIf(auto&& predicate) { detachChildrenIf(predicate, mChildren); }
+        void detachTemplateChildrenIf(auto&& predicate) { detachChildrenIf(predicate, mTemplateChildren); }
 
         void reset();
 
@@ -64,14 +67,14 @@ namespace LuaUi
         void setLayout(const sol::table& layout) { mLayout = layout; }
 
         template <typename T>
-        T externalValue(std::string_view name, const T& defaultValue)
+        T externalValue(std::string_view name, const T& defaultValue) const
         {
             return parseExternal(mExternal, name, defaultValue);
         }
 
-        virtual MyGUI::IntSize calculateSize();
-        virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size);
-        MyGUI::IntCoord calculateCoord();
+        virtual MyGUI::IntSize calculateSize() const;
+        virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size) const;
+        MyGUI::IntCoord calculateCoord() const;
 
         virtual bool isTextInput() { return false; }
 
@@ -84,9 +87,9 @@ namespace LuaUi
         sol::object keyEvent(MyGUI::KeyCode) const;
         sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
 
-        MyGUI::IntSize parentSize();
-        virtual MyGUI::IntSize childScalingSize();
-        virtual MyGUI::IntSize templateScalingSize();
+        MyGUI::IntSize parentSize() const;
+        virtual MyGUI::IntSize childScalingSize() const;
+        virtual MyGUI::IntSize templateScalingSize() const;
 
         template <typename T>
         T propertyValue(std::string_view name, const T& defaultValue)
@@ -175,6 +178,20 @@ namespace LuaUi
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
 
         void updateVisible();
+
+        void detachChildrenIf(auto&& predicate, std::vector<WidgetExtension*> children)
+        {
+            for (auto it = children.begin(); it != children.end();)
+            {
+                if (predicate(*it))
+                {
+                    (*it)->detachFromParent();
+                    it = children.erase(it);
+                }
+                else
+                    ++it;
+            }
+        }
     };
 
     class LuaWidget : public MyGUI::Widget, public WidgetExtension

@@ -184,9 +184,24 @@ namespace ESM
             decompose(value, [&](auto&... args) { getHNT(name, args...); });
         }
 
+        bool getOptionalComposite(NAME name, auto& value)
+        {
+            if (isNextSub(name))
+            {
+                getSubComposite(value);
+                return true;
+            }
+            return false;
+        }
+
         void getComposite(auto& value)
         {
             decompose(value, [&](auto&... args) { (getT(args), ...); });
+        }
+
+        void getSubComposite(auto& value)
+        {
+            decompose(value, [&](auto&... args) { getHT(args...); });
         }
 
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
@@ -222,12 +237,6 @@ namespace ESM
 
         void skipHRefId();
 
-        // Read the given number of bytes from a subrecord
-        void getHExact(void* p, int size);
-
-        // Read the given number of bytes from a named subrecord
-        void getHNExact(void* p, int size, NAME name);
-
         ESM::FormId getFormId(bool wide = false, NAME tag = "FRMR");
 
         /*************************************************************************
@@ -260,7 +269,7 @@ namespace ESM
         void skipHSub();
 
         // Skip sub record and check its size
-        void skipHSubSize(int size);
+        void skipHSubSize(std::size_t size);
 
         // Skip all subrecords until the given subrecord or no more subrecords remaining
         void skipHSubUntil(NAME name);
@@ -339,7 +348,7 @@ namespace ESM
         }
 
         /// Used for error handling
-        [[noreturn]] void fail(const std::string& msg);
+        [[noreturn]] void fail(std::string_view msg);
 
         /// Sets font encoder for ESM strings
         void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; }

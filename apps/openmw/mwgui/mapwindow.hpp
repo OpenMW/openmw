@@ -27,6 +27,7 @@ namespace ESM
 
 namespace MWWorld
 {
+    class Cell;
     class CellStore;
 }
 
@@ -77,8 +78,7 @@ namespace MWGui
         virtual ~LocalMapBase();
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance = Constants::CellGridRadius);
 
-        void setCellPrefix(const std::string& prefix);
-        void setActiveCell(const int x, const int y, bool interior = false);
+        void setActiveCell(const MWWorld::Cell& cell);
         void requestMapRender(const MWWorld::CellStore* cell);
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(int cellX, int cellY, const float nx, const float ny);
@@ -115,15 +115,12 @@ namespace MWGui
         float mLocalMapZoom = 1.f;
         MWRender::LocalMap* mLocalMapRender;
 
-        int mCurX, mCurY; // the position of the active cell on the global map (in cell coords)
+        const MWWorld::Cell* mActiveCell;
         bool mHasALastActiveCell = false;
         osg::Vec2f mCurPos; // the position of the player in the world (in cell coords)
 
-        bool mInterior;
         MyGUI::ScrollView* mLocalMap;
         MyGUI::ImageBox* mCompass;
-        std::string mPrefix;
-        bool mChanged;
         bool mFogOfWarToggled;
         bool mFogOfWarEnabled;
 

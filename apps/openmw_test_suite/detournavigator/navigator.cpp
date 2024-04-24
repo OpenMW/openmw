@@ -1055,6 +1055,96 @@ namespace
         }
     }
 
+    TEST_P(DetourNavigatorUpdateTest, update_should_change_covered_area_when_player_moves_without_waiting_for_all)
+    {
+        Loading::Listener listener;
+        Settings settings = makeSettings();
+        settings.mMaxTilesNumber = 1;
+        settings.mWaitUntilMinDistanceToPlayer = 1;
+        NavigatorImpl navigator(settings, nullptr);
+        const AgentBounds agentBounds{ CollisionShapeType::Aabb, { 29, 29, 66 } };
+        ASSERT_TRUE(navigator.addAgent(agentBounds));
+
+        GetParam()(navigator);
+
+        {
+            auto updateGuard = navigator.makeUpdateGuard();
+            navigator.update(osg::Vec3f(3000, 3000, 0), updateGuard.get());
+        }
+
+        navigator.wait(WaitConditionType::requiredTilesPresent, &listener);
+
+        {
+            const auto navMesh = navigator.getNavMesh(agentBounds);
+            ASSERT_NE(navMesh, nullptr);
+
+            const TilePosition expectedTile(4, 4);
+            const auto usedTiles = getUsedTiles(*navMesh->lockConst());
+            EXPECT_THAT(usedTiles, Contains(expectedTile)) << usedTiles;
+        }
+
+        {
+            auto updateGuard = navigator.makeUpdateGuard();
+            navigator.update(osg::Vec3f(6000, 3000, 0), updateGuard.get());
+        }
+
+        navigator.wait(WaitConditionType::requiredTilesPresent, &listener);
+
+        {
+            const auto navMesh = navigator.getNavMesh(agentBounds);
+            ASSERT_NE(navMesh, nullptr);
+
+            const TilePosition expectedTile(8, 4);
+            const auto usedTiles = getUsedTiles(*navMesh->lockConst());
+            EXPECT_THAT(usedTiles, Contains(expectedTile)) << usedTiles;
+        }
+    }
+
+    TEST_P(DetourNavigatorUpdateTest, update_should_change_covered_area_when_player_moves_with_db)
+    {
+        Loading::Listener listener;
+        Settings settings = makeSettings();
+        settings.mMaxTilesNumber = 1;
+        settings.mWaitUntilMinDistanceToPlayer = 1;
+        NavigatorImpl navigator(settings, std::make_unique<NavMeshDb>(":memory:", settings.mMaxDbFileSize));
+        const AgentBounds agentBounds{ CollisionShapeType::Aabb, { 29, 29, 66 } };
+        ASSERT_TRUE(navigator.addAgent(agentBounds));
+
+        GetParam()(navigator);
+
+        {
+            auto updateGuard = navigator.makeUpdateGuard();
+            navigator.update(osg::Vec3f(3000, 3000, 0), updateGuard.get());
+        }
+
+        navigator.wait(WaitConditionType::requiredTilesPresent, &listener);
+
+        {
+            const auto navMesh = navigator.getNavMesh(agentBounds);
+            ASSERT_NE(navMesh, nullptr);
+
+            const TilePosition expectedTile(4, 4);
+            const auto usedTiles = getUsedTiles(*navMesh->lockConst());
+            EXPECT_THAT(usedTiles, Contains(expectedTile)) << usedTiles;
+        }
+
+        {
+            auto updateGuard = navigator.makeUpdateGuard();
+            navigator.update(osg::Vec3f(6000, 3000, 0), updateGuard.get());
+        }
+
+        navigator.wait(WaitConditionType::requiredTilesPresent, &listener);
+
+        {
+            const auto navMesh = navigator.getNavMesh(agentBounds);
+            ASSERT_NE(navMesh, nullptr);
+
+            const TilePosition expectedTile(8, 4);
+            const auto usedTiles = getUsedTiles(*navMesh->lockConst());
+            EXPECT_THAT(usedTiles, Contains(expectedTile)) << usedTiles;
+        }
+    }
+
     struct AddHeightfieldSurface
     {
         static constexpr std::size_t sSize = 65;

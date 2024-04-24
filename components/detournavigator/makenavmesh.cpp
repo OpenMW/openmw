@@ -480,15 +480,6 @@ namespace DetourNavigator
             return true;
         }
 
-        template <class T>
-        unsigned long getMinValuableBitsNumber(const T value)
-        {
-            unsigned long power = 0;
-            while (power < sizeof(T) * 8 && (static_cast<T>(1) << power) < value)
-                ++power;
-            return power;
-        }
-
         std::pair<float, float> getBoundsByZ(
             const RecastMesh& recastMesh, float agentHalfExtentsZ, const RecastSettings& settings)
         {
@@ -528,10 +519,7 @@ namespace DetourNavigator
             return { minZ, maxZ };
         }
     }
-} // namespace DetourNavigator
 
-namespace DetourNavigator
-{
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
         std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds,
         const RecastSettings& settings)
@@ -621,22 +609,12 @@ namespace DetourNavigator
 
     void initEmptyNavMesh(const Settings& settings, dtNavMesh& navMesh)
     {
-        // Max tiles and max polys affect how the tile IDs are caculated.
-        // There are 22 bits available for identifying a tile and a polygon.
-        const int polysAndTilesBits = 22;
-        const auto polysBits = getMinValuableBitsNumber(settings.mDetour.mMaxPolys);
-
-        if (polysBits >= polysAndTilesBits)
-            throw InvalidArgument("Too many polygons per tile");
-
-        const auto tilesBits = polysAndTilesBits - polysBits;
-
         dtNavMeshParams params;
         std::fill_n(params.orig, 3, 0.0f);
         params.tileWidth = settings.mRecast.mTileSize * settings.mRecast.mCellSize;
         params.tileHeight = settings.mRecast.mTileSize * settings.mRecast.mCellSize;
-        params.maxTiles = 1 << tilesBits;
-        params.maxPolys = 1 << polysBits;
+        params.maxTiles = settings.mMaxTilesNumber;
+        params.maxPolys = settings.mDetour.mMaxPolys;
 
         const auto status = navMesh.init(&params);
 
