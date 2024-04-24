@@ -28,21 +28,20 @@ namespace serialize
 
     /**
         DREAMWEAVE SERIALIZATION:
-        Serialize an std::string to the stream (read/write/measure).
+        Serialize an osg::Vec3f to the stream (read/write/measure).
         This is a helper macro to make writing unified serialize functions easier.
         Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
        an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
        macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
        method must have a bool return value.
         @param stream The stream object. May be a read, write or measure stream.
-        @param osg::Vec3f Vector to serialize to.
-       buffer.
+        @param vec3 An instance of an osg::Vec3f to read/write.
      */
 
-#define serialize_vec3f(stream, string)                                                                                \
+#define serialize_vec3f(stream, vec3f)                                                                                 \
     do                                                                                                                 \
     {                                                                                                                  \
-        if (!serialize::serialize_vec3f_internal(stream, string))                                                      \
+        if (!serialize::serialize_vec3f_internal(stream, vec3f))                                                       \
         {                                                                                                              \
             return false;                                                                                              \
         }                                                                                                              \
@@ -63,14 +62,14 @@ namespace serialize
 
     /**
         DREAMWEAVE SERIALIZATION:
-        Serialize an std::string to the stream (read/write/measure).
+        Serialize an ESM::Position to the stream (read/write/measure).
         This is a helper macro to make writing unified serialize functions easier.
         Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
        an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
        macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
        method must have a bool return value.
         @param stream The stream object. May be a read, write or measure stream.
-        @param esm::position The object position. Note that esm::position is composed of position and rotation.
+        @param position The object position. Note that ESM::Position is composed of position and rotation.
      */
 
 #define serialize_esm_position(stream, position)                                                                       \
@@ -104,14 +103,14 @@ namespace serialize
 
     /**
         DREAMWEAVE SERIALIZATION:
-        Serialize an std::string to the stream (read/write/measure).
+        Serialize an ESM::RefId to the stream (read/write/measure).
         This is a helper macro to make writing unified serialize functions easier.
         Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
        an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
        macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
        method must have a bool return value.
         @param stream The stream object. May be a read, write or measure stream.
-        @param esm::refid The object's id. Internally this serializer uses the toString method of refId.
+        @param refid The object's id. Internally this serializer uses the toString method of ESM::RefId.
      */
 
 #define serialize_ref_id(stream, refId)                                                                                \
@@ -134,14 +133,14 @@ namespace serialize
 
     /**
         DREAMWEAVE SERIALIZATION:
-        Serialize an std::string to the stream (read/write/measure).
+        Serialize an ESM::RefNum to the stream (read/write/measure).
         This is a helper macro to make writing unified serialize functions easier.
         Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
        an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
        macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
        method must have a bool return value.
         @param stream The stream object. May be a read, write or measure stream.
-        @param esm::refnum The object's refnum; an int32 and uint32.
+        @param refnum The object's refnum; an int32 and uint32.
         Note that `hasContentFile` is a method, so we're unsure what implications may be associated with just making up
        refNums on the fly.
      */
@@ -208,14 +207,14 @@ namespace serialize
 
     /**
         DREAMWEAVE SERIALIZATION:
-        Serialize an std::string to the stream (read/write/measure).
+        Serialize ESM3::Skills to the stream (read/write/measure).
         This is a helper macro to make writing unified serialize functions easier.
         Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
        an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
        macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
        method must have a bool return value.
         @param stream The stream object. May be a read, write or measure stream.
-        @param esm::refnum The object's refnum; an int32 and uint32.
+        @param skillsMap The object's skills; a std::map of ESM::RefIds to MWMechanics::SkillValues.
         Note that `hasContentFile` is a method, so we're unsure what implications may be associated with just making up
        refNums on the fly.
      */
