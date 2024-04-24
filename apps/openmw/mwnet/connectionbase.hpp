@@ -17,6 +17,29 @@ namespace MWNet
     constexpr const double TickRate = 1.0 / 60.0;
     constexpr const char* LocalHost("127.0.0.1");
 
+    struct MessageEntry
+    {
+        uint channelName;
+        yojimbo::Message* message;
+
+        MessageEntry(uint channelName, yojimbo::Message* msg)
+            : channelName(channelName)
+            , message(msg)
+        {
+        }
+    };
+
+    struct ServerMessageEntry : public MessageEntry
+    {
+        uint clientId;
+
+        ServerMessageEntry(uint client, uint channelName, yojimbo::Message* msg)
+            : MessageEntry(channelName, msg)
+            , clientId(client)
+        {
+        }
+    };
+
     class BaseAdapter : public Adapter
     {
     public:
@@ -46,12 +69,15 @@ namespace MWNet
         double mTime;
         std::unique_ptr<BaseAdapter> mAdapter;
         GameConnectionConfig mConfig = GameConnectionConfig();
+        std::vector<MessageEntry> mMessageQueue;
         virtual ~Connection() = default;
         virtual bool tick() = 0;
         virtual void updateConnection() = 0;
         virtual void processMessages() = 0;
         virtual void clientConnected(int clientIndex) = 0;
         virtual void clientDisconnected(int clientIndex) = 0;
+        virtual void queueMessage(MessageEntry message) {}
+        virtual yojimbo::Client* getClient() { return nullptr; }
         BaseAdapter getAdapter() { return *mAdapter; }
     };
 }
