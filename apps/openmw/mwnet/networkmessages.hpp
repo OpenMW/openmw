@@ -209,18 +209,7 @@ public:
     template <typename Stream>
     bool Serialize(Stream& stream)
     {
-        if (Stream::IsReading)
-        {
-            char localScriptId[MAX_STRING_LENGTH];
-            serialize_string(stream, localScriptId, MAX_STRING_LENGTH);
-            scriptId = std::string(localScriptId);
-        }
-
-        if (Stream::IsWriting)
-        {
-            serialize_string(stream, scriptId.data(), MAX_STRING_LENGTH);
-        }
-
+        serialize_std_string(stream, scriptId, MAX_STRING_LENGTH);
         return true;
     }
     YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
