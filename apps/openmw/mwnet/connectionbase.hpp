@@ -1,6 +1,7 @@
 #ifndef CONNECTIONBASE_H_
 #define CONNECTIONBASE_H_
 #include <memory>
+#include <vector>
 
 #include "networkmessages.hpp"
 

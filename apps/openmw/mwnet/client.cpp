@@ -96,12 +96,6 @@ void MWNet::Client::updateConnection()
     mClient->AdvanceTime(mTime);
     mClient->ReceivePackets();
     processMessages();
-
-    TestMessage* message = (TestMessage*)mClient->CreateMessage((int)TestMessageType::TEST_MESSAGE);
-    message->sequence = 42;
-    mClient->SendMessage((int)yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED, message);
-
-    // Actually process messages in between
     mClient->SendPackets();
 }
 
@@ -111,6 +105,13 @@ void MWNet::Client::processMessages()
     {
         return;
     }
+
+    for (const auto& entry : mMessageQueue)
+    {
+        mClient->SendMessage(entry.channelName, entry.message);
+    }
+
+    mMessageQueue.clear();
 
     for (int i = 0; i < mConfig.numChannels; ++i)
     {
@@ -137,11 +138,4 @@ void MWNet::Client::processMessage(yojimbo::Message* message)
         default:
             break;
     }
-}
-
-// void MWNet::Client::sendMessage
-
-void MWNet::Client::processTestMessage(TestMessage* message)
-{
-    Log(Debug::Info) << "CLIENT: received test message from server: " << message->sequence;
 }

@@ -25,9 +25,9 @@ namespace MWNet
         yojimbo::Address mAddress;
         yojimbo::Address mDestination;
 
-        std::unique_ptr<yojimbo::Client> createClientInstance();
-
         std::unique_ptr<yojimbo::Client> mClient;
+
+        std::unique_ptr<yojimbo::Client> createClientInstance();
 
         void updateConnection() override;
 
@@ -35,13 +35,15 @@ namespace MWNet
 
         void processMessage(yojimbo::Message* message);
 
-        void processTestMessage(TestMessage* message);
-
         void clientConnected(int clientIndex) override {}
 
         void clientDisconnected(int clientIndex) override {}
 
     public:
+        yojimbo::Client* getClient() override { return mClient.get(); }
+
+        void queueMessage(MessageEntry message) override { mMessageQueue.push_back(std::move(message)); }
+
         Client();
 
         bool tick() override;

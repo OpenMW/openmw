@@ -7,6 +7,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/worldmodel.hpp"
 
+#include "../mwnet/networkmanager.hpp"
+
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
 #include "object.hpp"
@@ -28,7 +30,17 @@ namespace MWLua
             if (ptr.isEmpty())
                 return;
             if (ptr.getCellRef().getRefId() == "player")
-                mGlobalScripts.playerAdded(GObject(ptr));
+            {
+                const auto& netMan = MWBase::Environment::get().getNetworkManager();
+                if (!netMan->isServer())
+                {
+                    netMan->queuePlayerLoginMessage(ptr);
+                }
+                else
+                {
+                    mGlobalScripts.playerAdded(GObject(ptr));
+                }
+            }
             else
             {
                 mGlobalScripts.objectActive(GObject(ptr));
