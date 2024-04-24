@@ -62,6 +62,7 @@ namespace ContentSelectorModel
         bool setCheckState(const QString& filepath, bool isChecked);
         bool isNew(const QString& filepath) const;
         void setNew(const QString& filepath, bool isChecked);
+        void setNonUserContent(const QStringList& fileList);
         void setContentList(const QStringList& fileList);
         ContentFileList checkedItems() const;
         void uncheckAll();
@@ -85,7 +86,7 @@ namespace ContentSelectorModel
 
         const EsmFile* mGameFile;
         ContentFileList mFiles;
-        QStringList mArchives;
+        QSet<QString> mNonUserContent;
         std::set<const EsmFile*> mCheckedFiles;
         QHash<QString, bool> mNewFiles;
         QSet<QString> mPluginsWithLoadOrderError;

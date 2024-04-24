@@ -114,7 +114,10 @@ namespace MWRender
                 }
 
                 // move the plane back along its normal a little bit to prevent bleeding at the water shore
-                const float clipFudge = -5;
+                float fov = Settings::camera().mFieldOfView;
+                const float clipFudgeMin = 2.5; // minimum offset of clip plane
+                const float clipFudgeScale = -15000.0;
+                float clipFudge = abs(abs((*mCullPlane)[3]) - eyePoint.z()) * fov / clipFudgeScale - clipFudgeMin;
                 modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipFudge);
 
                 cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
@@ -273,8 +276,7 @@ namespace MWRender
             camera->setNodeMask(Mask_RenderToTexture);
 
             if (Settings::water().mRefractionScale != 1) // TODO: to be removed with issue #5709
-                SceneUtil::ShadowManager::disableShadowsForStateSet(
-                    Settings::shadows(), *camera->getOrCreateStateSet());
+                SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*camera->getOrCreateStateSet());
         }
 
         void apply(osg::Camera* camera) override
@@ -350,7 +352,7 @@ namespace MWRender
             camera->addChild(mClipCullNode);
             camera->setNodeMask(Mask_RenderToTexture);
 
-            SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *camera->getOrCreateStateSet());
+            SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*camera->getOrCreateStateSet());
         }
 
         void apply(osg::Camera* camera) override
@@ -698,11 +700,13 @@ namespace MWRender
     {
         // use a define map to conditionally compile the shader
         std::map<std::string, std::string> defineMap;
-        defineMap["refraction_enabled"] = std::string(mRefraction ? "1" : "0");
+        defineMap["waterRefraction"] = std::string(mRefraction ? "1" : "0");
         const int rippleDetail = Settings::water().mRainRippleDetail;
-        defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
-        defineMap["ripple_map_world_scale"] = std::to_string(RipplesSurface::mWorldScaleFactor);
-        defineMap["ripple_map_size"] = std::to_string(RipplesSurface::mRTTSize) + ".0";
+        defineMap["rainRippleDetail"] = std::to_string(rippleDetail);
+        defineMap["rippleMapWorldScale"] = std::to_string(RipplesSurface::sWorldScaleFactor);
+        defineMap["rippleMapSize"] = std::to_string(RipplesSurface::sRTTSize) + ".0";
+        defineMap["sunlightScattering"] = Settings::water().mSunlightScattering ? "1" : "0";
+        defineMap["wobblyShores"] = Settings::water().mWobblyShores ? "1" : "0";
 
         Stereo::shaderStereoDefines(defineMap);
 
@@ -711,8 +715,6 @@ namespace MWRender
 
         osg::ref_ptr<osg::Texture2D> normalMap(
             new osg::Texture2D(mResourceSystem->getImageManager()->getImage("textures/omw/water_nm.png")));
-        if (normalMap->getImage())
-            normalMap->getImage()->flipVertical();
         normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
         normalMap->setMaxAnisotropy(16);

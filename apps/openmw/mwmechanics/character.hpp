@@ -192,7 +192,7 @@ namespace MWMechanics
 
         bool mCanCast{ false };
 
-        bool mCastingManualSpell{ false };
+        bool mCastingScriptedSpell{ false };
 
         bool mIsMovingBackward{ false };
         osg::Vec2f mSmoothedSpeed;
@@ -312,7 +312,7 @@ namespace MWMechanics
         bool isAttackingOrSpell() const;
 
         void setVisibility(float visibility) const;
-        void castSpell(const ESM::RefId& spellId, bool manualSpell = false);
+        void castSpell(const ESM::RefId& spellId, bool scriptedSpell = false);
         void setAIAttackType(std::string_view attackType);
         static std::string_view getRandomAttackType();
 

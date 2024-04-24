@@ -34,7 +34,7 @@ namespace
             if (effectFilter == -1)
             {
                 const ESM::Spell* spell
-                    = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(it->getId());
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(it->getSourceSpellId());
                 if (!spell || spell->mData.mType != ESM::Spell::ST_Spell)
                     continue;
             }
@@ -67,7 +67,7 @@ namespace
         const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
         for (MWMechanics::ActiveSpells::TIterator it = activeSpells.begin(); it != activeSpells.end(); ++it)
         {
-            if (it->getId() != spellId)
+            if (it->getSourceSpellId() != spellId)
                 continue;
 
             const MWMechanics::ActiveSpells::ActiveSpellParams& params = *it;
@@ -85,7 +85,7 @@ namespace
         int actorId = caster.getClass().getCreatureStats(caster).getActorId();
         const auto& active = target.getClass().getCreatureStats(target).getActiveSpells();
         return std::find_if(active.begin(), active.end(), [&](const auto& spell) {
-            return spell.getCasterActorId() == actorId && spell.getId() == id;
+            return spell.getCasterActorId() == actorId && spell.getSourceSpellId() == id;
         }) != active.end();
     }
 
@@ -110,13 +110,13 @@ namespace MWMechanics
     int getRangeTypes(const ESM::EffectList& effects)
     {
         int types = 0;
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = effects.mList.begin(); it != effects.mList.end(); ++it)
+        for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            if (it->mRange == ESM::RT_Self)
+            if (effect.mData.mRange == ESM::RT_Self)
                 types |= RangeTypes::Self;
-            else if (it->mRange == ESM::RT_Touch)
+            else if (effect.mData.mRange == ESM::RT_Touch)
                 types |= RangeTypes::Touch;
-            else if (it->mRange == ESM::RT_Target)
+            else if (effect.mData.mRange == ESM::RT_Target)
                 types |= RangeTypes::Target;
         }
         return types;
@@ -735,12 +735,12 @@ namespace MWMechanics
         static const float fAIMagicSpellMult = gmst.find("fAIMagicSpellMult")->mValue.getFloat();
         static const float fAIRangeMagicSpellMult = gmst.find("fAIRangeMagicSpellMult")->mValue.getFloat();
 
-        for (const ESM::ENAMstruct& effect : list.mList)
+        for (const ESM::IndexedENAMstruct& effect : list.mList)
         {
-            float effectRating = rateEffect(effect, actor, enemy);
+            float effectRating = rateEffect(effect.mData, actor, enemy);
             if (useSpellMult)
             {
-                if (effect.mRange == ESM::RT_Target)
+                if (effect.mData.mRange == ESM::RT_Target)
                     effectRating *= fAIRangeMagicSpellMult;
                 else
                     effectRating *= fAIMagicSpellMult;
@@ -760,10 +760,10 @@ namespace MWMechanics
 
         float mult = fAIMagicSpellMult;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin();
+        for (std::vector<ESM::IndexedENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin();
              effectIt != spell->mEffects.mList.end(); ++effectIt)
         {
-            if (effectIt->mRange == ESM::RT_Target)
+            if (effectIt->mData.mRange == ESM::RT_Target)
             {
                 if (!MWBase::Environment::get().getWorld()->isSwimming(enemy))
                     mult = fAIRangeMagicSpellMult;

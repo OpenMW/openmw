@@ -3,8 +3,15 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Armor::AODTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mType, v.mWeight, v.mValue, v.mHealth, v.mEnchant, v.mArmor);
+    }
 
     void PartReferenceList::add(ESMReader& esm)
     {
@@ -59,7 +66,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("AODT"):
-                    esm.getHT(mData.mType, mData.mWeight, mData.mValue, mData.mHealth, mData.mEnchant, mData.mArmor);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -103,7 +110,7 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCRefId("SCRI", mScript);
-        esm.writeHNT("AODT", mData, 24);
+        esm.writeNamedComposite("AODT", mData);
         esm.writeHNOCString("ITEX", mIcon);
         mParts.save(esm);
         esm.writeHNOCRefId("ENAM", mEnchant);

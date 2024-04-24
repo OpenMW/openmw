@@ -329,17 +329,19 @@ int main(int argc, char** argv)
 
         switch (bsaVersion)
         {
-            case Bsa::BSAVER_COMPRESSED:
-                return call<Bsa::CompressedBSAFile>(info);
-            case Bsa::BSAVER_BA2_GNRL:
-                return call<Bsa::BA2GNRLFile>(info);
-            case Bsa::BSAVER_BA2_DX10:
-                return call<Bsa::BA2DX10File>(info);
-            case Bsa::BSAVER_UNCOMPRESSED:
+            case Bsa::BsaVersion::Unknown:
+                break;
+            case Bsa::BsaVersion::Uncompressed:
                 return call<Bsa::BSAFile>(info);
-            default:
-                throw std::runtime_error("Unrecognised BSA archive");
+            case Bsa::BsaVersion::Compressed:
+                return call<Bsa::CompressedBSAFile>(info);
+            case Bsa::BsaVersion::BA2GNRL:
+                return call<Bsa::BA2GNRLFile>(info);
+            case Bsa::BsaVersion::BA2DX10:
+                return call<Bsa::BA2DX10File>(info);
         }
+
+        throw std::runtime_error("Unrecognised BSA archive");
     }
     catch (std::exception& e)
     {

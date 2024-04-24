@@ -21,7 +21,7 @@ namespace LuaUi
         bool mAutoSized;
 
     protected:
-        MyGUI::IntSize calculateSize() override;
+        MyGUI::IntSize calculateSize() const override;
     };
 }
 

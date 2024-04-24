@@ -172,7 +172,7 @@ else()
     set (OPENCS_OPENMW_CFG "")
 endif(APPLE)
 
-add_library(openmw-cs-lib
+add_library(openmw-cs-lib STATIC
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -250,13 +250,14 @@ target_link_libraries(openmw-cs-lib
 )
 
 if (QT_VERSION_MAJOR VERSION_EQUAL 6)
-    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets)
+    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets Qt::Svg)
 else()
-    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
+    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::Svg)
 endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
+    target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/openmw-cs.exe.manifest)
 endif()
 
 if (WIN32 AND BUILD_OPENCS)
@@ -292,7 +293,7 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(openmw-cs-lib gcov)
 endif()
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-cs-lib PRIVATE
         <boost/program_options/options_description.hpp>
 

@@ -12,6 +12,7 @@
 #include <components/files/multidircollection.hpp>
 #include <components/misc/strings/conversion.hpp>
 #include <components/platform/platform.hpp>
+#include <components/resource/bgsmfilemanager.hpp>
 #include <components/resource/bulletshape.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/foreachbulletobject.hpp>
@@ -146,7 +147,9 @@ namespace
         dataDirs.insert(dataDirs.begin(), resDir / "vfs");
         const Files::Collections fileCollections(dataDirs);
         const auto& archives = variables["fallback-archive"].as<StringsVector>();
-        const auto& contentFiles = variables["content"].as<StringsVector>();
+        StringsVector contentFiles{ "builtin.omwscripts" };
+        const auto& configContentFiles = variables["content"].as<StringsVector>();
+        contentFiles.insert(contentFiles.end(), configContentFiles.begin(), configContentFiles.end());
 
         Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
 
@@ -171,7 +174,8 @@ namespace
         constexpr double expiryDelay = 0;
         Resource::ImageManager imageManager(&vfs, expiryDelay);
         Resource::NifFileManager nifFileManager(&vfs, &encoder.getStatelessEncoder());
-        Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, expiryDelay);
+        Resource::BgsmFileManager bgsmFileManager(&vfs, expiryDelay);
+        Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, &bgsmFileManager, expiryDelay);
         Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
 
         Resource::forEachBulletObject(

@@ -183,8 +183,6 @@ namespace MWBase
         /// generate a name.
         virtual std::string_view getCellName(const MWWorld::Cell& cell) const = 0;
 
-        virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
-
         virtual void removeRefScript(const MWWorld::CellRef* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts
 
@@ -304,7 +302,7 @@ namespace MWBase
         virtual const MWPhysics::RayCastingInterface* getRayCasting() const = 0;
 
         virtual bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-            bool ignorePlayer, bool ignoreActors)
+            bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList = {})
             = 0;
 
         virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external) = 0;
@@ -463,7 +461,7 @@ namespace MWBase
          */
         virtual MWWorld::SpellCastState startSpellCast(const MWWorld::Ptr& actor) = 0;
 
-        virtual void castSpell(const MWWorld::Ptr& actor, bool manualSpell = false) = 0;
+        virtual void castSpell(const MWWorld::Ptr& actor, bool scriptedSpell = false) = 0;
 
         virtual void launchMagicBolt(const ESM::RefId& spellId, const MWWorld::Ptr& caster,
             const osg::Vec3f& fallbackDirection, ESM::RefNum item)

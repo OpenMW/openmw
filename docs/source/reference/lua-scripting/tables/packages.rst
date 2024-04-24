@@ -19,6 +19,8 @@
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.vfs <Package openmw.vfs>`                      | everywhere         | | Read-only access to data directories via VFS.               |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.markup <Package openmw.markup>`                | everywhere         | | API to work with markup languages.                          |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.world <Package openmw.world>`                  | by global scripts  | | Read-write access to the game world.                        |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.self <Package openmw.self>`                    | by local scripts   | | Full access to the object the script is attached to.        |

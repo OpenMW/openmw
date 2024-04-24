@@ -136,7 +136,7 @@ namespace MWClass
                 const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(ESM::MagicEffect::Telekinesis);
 
                 animation->addSpellCastGlow(
-                    effect, 1); // 1 second glow to match the time taken for a door opening or closing
+                    effect->getColor(), 1); // 1 second glow to match the time taken for a door opening or closing
             }
         }
 
@@ -290,8 +290,8 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
         info.text = std::move(text);
 

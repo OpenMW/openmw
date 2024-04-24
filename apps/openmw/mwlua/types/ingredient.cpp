@@ -47,15 +47,16 @@ namespace MWLua
             {
                 if (rec.mData.mEffectID[i] < 0)
                     continue;
-                ESM::ENAMstruct effect;
-                effect.mEffectID = rec.mData.mEffectID[i];
-                effect.mSkill = rec.mData.mSkills[i];
-                effect.mAttribute = rec.mData.mAttributes[i];
-                effect.mRange = ESM::RT_Self;
-                effect.mArea = 0;
-                effect.mDuration = 0;
-                effect.mMagnMin = 0;
-                effect.mMagnMax = 0;
+                ESM::IndexedENAMstruct effect;
+                effect.mData.mEffectID = rec.mData.mEffectID[i];
+                effect.mData.mSkill = rec.mData.mSkills[i];
+                effect.mData.mAttribute = rec.mData.mAttributes[i];
+                effect.mData.mRange = ESM::RT_Self;
+                effect.mData.mArea = 0;
+                effect.mData.mDuration = 0;
+                effect.mData.mMagnMin = 0;
+                effect.mData.mMagnMax = 0;
+                effect.mIndex = i;
                 res[i + 1] = effect;
             }
             return res;

@@ -134,7 +134,10 @@ namespace MWLua
         };
 
         api["updateAll"] = [luaManager = context.mLuaManager, menu]() {
-            LuaUi::Element::forEach(menu, [](LuaUi::Element* e) { e->mUpdate = true; });
+            LuaUi::Element::forEach(menu, [](LuaUi::Element* e) {
+                if (e->mState == LuaUi::Element::Created)
+                    e->mState = LuaUi::Element::Update;
+            });
             luaManager->addAction([menu]() { LuaUi::Element::forEach(menu, [](LuaUi::Element* e) { e->update(); }); },
                 "Update all menu UI elements");
         };
@@ -305,15 +308,15 @@ namespace MWLua
         element["layout"] = sol::property([](const LuaUi::Element& element) { return element.mLayout; },
             [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
         element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
-            if (element->mDestroy || element->mUpdate)
+            if (element->mState != LuaUi::Element::Created)
                 return;
-            element->mUpdate = true;
+            element->mState = LuaUi::Element::Update;
             luaManager->addAction([element] { wrapAction(element, [&] { element->update(); }); }, "Update UI");
         };
         element["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
-            if (element->mDestroy)
+            if (element->mState == LuaUi::Element::Destroyed)
                 return;
-            element->mDestroy = true;
+            element->mState = LuaUi::Element::Destroy;
             luaManager->addAction(
                 [element] { wrapAction(element, [&] { LuaUi::Element::erase(element.get()); }); }, "Destroy UI");
         };

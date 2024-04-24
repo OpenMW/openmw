@@ -41,91 +41,91 @@ void ESM4::MediaSet::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getZString(mFullName);
                 break;
-            case ESM4::SUB_NAM1:
+            case ESM::fourCC("NAM1"):
                 reader.get(mSetType);
                 break;
-            case ESM4::SUB_PNAM:
+            case ESM::fourCC("PNAM"):
                 reader.get(mEnabled);
                 break;
-            case ESM4::SUB_NAM2:
+            case ESM::fourCC("NAM2"):
                 reader.getZString(mSet2);
                 break;
-            case ESM4::SUB_NAM3:
+            case ESM::fourCC("NAM3"):
                 reader.getZString(mSet3);
                 break;
-            case ESM4::SUB_NAM4:
+            case ESM::fourCC("NAM4"):
                 reader.getZString(mSet4);
                 break;
-            case ESM4::SUB_NAM5:
+            case ESM::fourCC("NAM5"):
                 reader.getZString(mSet5);
                 break;
-            case ESM4::SUB_NAM6:
+            case ESM::fourCC("NAM6"):
                 reader.getZString(mSet6);
                 break;
-            case ESM4::SUB_NAM7:
+            case ESM::fourCC("NAM7"):
                 reader.getZString(mSet7);
                 break;
-            case ESM4::SUB_HNAM:
+            case ESM::fourCC("HNAM"):
                 reader.getFormId(mSoundIntro);
                 break;
-            case ESM4::SUB_INAM:
+            case ESM::fourCC("INAM"):
                 reader.getFormId(mSoundOutro);
                 break;
-            case ESM4::SUB_NAM8:
+            case ESM::fourCC("NAM8"):
                 reader.get(mLevel8);
                 break;
-            case ESM4::SUB_NAM9:
+            case ESM::fourCC("NAM9"):
                 reader.get(mLevel9);
                 break;
-            case ESM4::SUB_NAM0:
+            case ESM::fourCC("NAM0"):
                 reader.get(mLevel0);
                 break;
-            case ESM4::SUB_ANAM:
+            case ESM::fourCC("ANAM"):
                 reader.get(mLevelA);
                 break;
-            case ESM4::SUB_BNAM:
+            case ESM::fourCC("BNAM"):
                 reader.get(mLevelB);
                 break;
-            case ESM4::SUB_CNAM:
+            case ESM::fourCC("CNAM"):
                 reader.get(mLevelC);
                 break;
-            case ESM4::SUB_JNAM:
+            case ESM::fourCC("JNAM"):
                 reader.get(mBoundaryDayOuter);
                 break;
-            case ESM4::SUB_KNAM:
+            case ESM::fourCC("KNAM"):
                 reader.get(mBoundaryDayMiddle);
                 break;
-            case ESM4::SUB_LNAM:
+            case ESM::fourCC("LNAM"):
                 reader.get(mBoundaryDayInner);
                 break;
-            case ESM4::SUB_MNAM:
+            case ESM::fourCC("MNAM"):
                 reader.get(mBoundaryNightOuter);
                 break;
-            case ESM4::SUB_NNAM:
+            case ESM::fourCC("NNAM"):
                 reader.get(mBoundaryNightMiddle);
                 break;
-            case ESM4::SUB_ONAM:
+            case ESM::fourCC("ONAM"):
                 reader.get(mBoundaryNightInner);
                 break;
-            case ESM4::SUB_DNAM:
+            case ESM::fourCC("DNAM"):
                 reader.get(mTime1);
                 break;
-            case ESM4::SUB_ENAM:
+            case ESM::fourCC("ENAM"):
                 reader.get(mTime2);
                 break;
-            case ESM4::SUB_FNAM:
+            case ESM::fourCC("FNAM"):
                 reader.get(mTime3);
                 break;
-            case ESM4::SUB_GNAM:
+            case ESM::fourCC("GNAM"):
                 reader.get(mTime4);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.skipSubRecordData();
                 break;
             default:

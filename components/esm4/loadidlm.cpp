@@ -43,13 +43,13 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_IDLF:
+            case ESM::fourCC("IDLF"):
                 reader.get(mIdleFlags);
                 break;
-            case ESM4::SUB_IDLC:
+            case ESM::fourCC("IDLC"):
                 if (subHdr.dataSize != 1) // FO3 can have 4?
                 {
                     reader.skipSubRecordData();
@@ -58,10 +58,10 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
 
                 reader.get(mIdleCount);
                 break;
-            case ESM4::SUB_IDLT:
+            case ESM::fourCC("IDLT"):
                 reader.get(mIdleTimer);
                 break;
-            case ESM4::SUB_IDLA:
+            case ESM::fourCC("IDLA"):
             {
                 bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
                 if (esmVer == ESM::VER_094 || isFONV) // FO3? 4 or 8 bytes
@@ -75,17 +75,17 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                     reader.getFormId(value);
                 break;
             }
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_OBND: // object bounds
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_QNAM:
+            case ESM::fourCC("OBND"): // object bounds
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("QNAM"):
                 reader.skipSubRecordData();
                 break;
             default:

@@ -32,17 +32,46 @@ extern "C"
 
 namespace MWSound
 {
+    struct AVIOContextDeleter
+    {
+        void operator()(AVIOContext* ptr) const;
+    };
+
+    using AVIOContextPtr = std::unique_ptr<AVIOContext, AVIOContextDeleter>;
+
+    struct AVFormatContextDeleter
+    {
+        void operator()(AVFormatContext* ptr) const;
+    };
+
+    using AVFormatContextPtr = std::unique_ptr<AVFormatContext, AVFormatContextDeleter>;
+
+    struct AVCodecContextDeleter
+    {
+        void operator()(AVCodecContext* ptr) const;
+    };
+
+    using AVCodecContextPtr = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>;
+
+    struct AVFrameDeleter
+    {
+        void operator()(AVFrame* ptr) const;
+    };
+
+    using AVFramePtr = std::unique_ptr<AVFrame, AVFrameDeleter>;
+
     class FFmpeg_Decoder final : public Sound_Decoder
     {
-        AVFormatContext* mFormatCtx;
-        AVCodecContext* mCodecCtx;
+        AVIOContextPtr mIoCtx;
+        AVFormatContextPtr mFormatCtx;
+        AVCodecContextPtr mCodecCtx;
         AVStream** mStream;
 
         AVPacket mPacket;
-        AVFrame* mFrame;
+        AVFramePtr mFrame;
 
-        int mFrameSize;
-        int mFramePos;
+        std::size_t mFrameSize;
+        std::size_t mFramePos;
 
         double mNextPts;
 
@@ -64,7 +93,7 @@ namespace MWSound
         bool getAVAudioData();
         size_t readAVAudioData(void* data, size_t length);
 
-        void open(const std::string& fname) override;
+        void open(VFS::Path::NormalizedView fname) override;
         void close() override;
 
         std::string getName() override;

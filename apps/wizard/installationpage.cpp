@@ -18,7 +18,7 @@ Wizard::InstallationPage::InstallationPage(QWidget* parent, Config::GameSettings
     mFinished = false;
 
     mThread = std::make_unique<QThread>();
-    mUnshield = std::make_unique<UnshieldWorker>(mGameSettings.value("morrowind-bsa-filesize").toLongLong());
+    mUnshield = std::make_unique<UnshieldWorker>(mGameSettings.value("morrowind-bsa-filesize").value.toLongLong());
     mUnshield->moveToThread(mThread.get());
 
     connect(mThread.get(), &QThread::started, mUnshield.get(), &UnshieldWorker::extract);

@@ -4,11 +4,15 @@
 #include <filesystem>
 
 #include <osg/AlphaFunc>
+#include <osg/ColorMaski>
 #include <osg/Group>
 #include <osg/Node>
 #include <osg/UserDataContainer>
 
+#include <osgAnimation/Bone>
 #include <osgAnimation/RigGeometry>
+#include <osgAnimation/Skeleton>
+#include <osgAnimation/UpdateBone>
 
 #include <osgParticle/ParticleSystem>
 
@@ -51,6 +55,7 @@
 #include <components/files/hash.hpp>
 #include <components/files/memorystream.hpp>
 
+#include "bgsmfilemanager.hpp"
 #include "errormarker.hpp"
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -267,6 +272,11 @@ namespace Resource
 
         void apply(osg::Node& node) override
         {
+            // If an osgAnimation bone/transform, ensure underscores in name are replaced with spaces
+            // this is for compatibility reasons
+            if (dynamic_cast<osgAnimation::Bone*>(&node))
+                node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
+
             if (osg::StateSet* stateset = node.getStateSet())
             {
                 if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
@@ -352,8 +362,55 @@ namespace Resource
         std::vector<osg::ref_ptr<SceneUtil::RigGeometryHolder>> mRigGeometryHolders;
     };
 
+    void updateVertexInfluenceMap(osgAnimation::RigGeometry& rig)
+    {
+        osgAnimation::VertexInfluenceMap* vertexInfluenceMap = rig.getInfluenceMap();
+        if (!vertexInfluenceMap)
+            return;
+
+        std::vector<std::string> renameList;
+        for (const auto& [boneName, unused] : *vertexInfluenceMap)
+        {
+            if (boneName.find('_') != std::string::npos)
+                renameList.push_back(boneName);
+        }
+
+        for (const std::string& oldName : renameList)
+        {
+            const std::string newName = Misc::StringUtils::underscoresToSpaces(oldName);
+            if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end())
+                (*vertexInfluenceMap)[newName] = std::move((*vertexInfluenceMap)[oldName]);
+            vertexInfluenceMap->erase(oldName);
+        }
+    }
+
+    class RenameAnimCallbacksVisitor : public osg::NodeVisitor
+    {
+    public:
+        RenameAnimCallbacksVisitor()
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        void apply(osg::MatrixTransform& node) override
+        {
+            // osgAnimation update callback name must match bone name/channel targets
+            osg::Callback* cb = node.getUpdateCallback();
+            while (cb)
+            {
+                auto animCb = dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
+                if (animCb)
+                    animCb->setName(Misc::StringUtils::underscoresToSpaces(animCb->getName()));
+
+                cb = cb->getNestedCallback();
+            }
+
+            traverse(node);
+        }
+    };
+
     SceneManager::SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
-        Resource::NifFileManager* nifFileManager, double expiryDelay)
+        Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay)
         : ResourceManager(vfs, expiryDelay)
         , mShaderManager(new Shader::ShaderManager)
         , mForceShaders(false)
@@ -368,6 +425,7 @@ namespace Resource
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
+        , mBgsmFileManager(bgsmFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
         , mMagFilter(osg::Texture::LINEAR)
         , mMaxAnisotropy(1)
@@ -511,6 +569,13 @@ namespace Resource
         return mCache->checkInObjectCache(VFS::Path::normalizeFilename(name), timeStamp);
     }
 
+    void SceneManager::setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled)
+    {
+        if (!getSupportsNormalsRT())
+            return;
+        stateset->setAttributeAndModes(new osg::ColorMaski(1, enabled, enabled, enabled, enabled));
+    }
+
     /// @brief Callback to read image files from the VFS.
     class ImageReadCallback : public osgDB::ReadFileCallback
     {
@@ -545,9 +610,10 @@ namespace Resource
     namespace
     {
         osg::ref_ptr<osg::Node> loadNonNif(
-            const std::string& normalizedFilename, std::istream& model, Resource::ImageManager* imageManager)
+            VFS::Path::NormalizedView normalizedFilename, std::istream& model, Resource::ImageManager* imageManager)
         {
-            auto ext = Misc::getFileExtension(normalizedFilename);
+            const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
+            const bool isColladaFile = ext == "dae";
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
             if (!reader)
             {
@@ -563,10 +629,10 @@ namespace Resource
             // findFileCallback would be necessary. but findFileCallback does not support virtual files, so we can't
             // implement it.
             options->setReadFileCallback(new ImageReadCallback(imageManager));
-            if (ext == "dae")
+            if (isColladaFile)
                 options->setOptionString("daeUseSequencedTextureUnits");
 
-            const std::array<std::uint64_t, 2> fileHash = Files::getHash(normalizedFilename, model);
+            const std::array<std::uint64_t, 2> fileHash = Files::getHash(normalizedFilename.value(), model);
 
             osgDB::ReaderWriter::ReadResult result = reader->readNode(model, options);
             if (!result.success())
@@ -591,9 +657,13 @@ namespace Resource
             node->accept(rigFinder);
             for (osg::Node* foundRigNode : rigFinder.mFoundNodes)
             {
-                if (foundRigNode->libraryName() == std::string("osgAnimation"))
+                if (foundRigNode->libraryName() == std::string_view("osgAnimation"))
                 {
                     osgAnimation::RigGeometry* foundRigGeometry = static_cast<osgAnimation::RigGeometry*>(foundRigNode);
+
+                    if (isColladaFile)
+                        Resource::updateVertexInfluenceMap(*foundRigGeometry);
+
                     osg::ref_ptr<SceneUtil::RigGeometryHolder> newRig
                         = new SceneUtil::RigGeometryHolder(*foundRigGeometry, osg::CopyOp::DEEP_COPY_ALL);
 
@@ -608,13 +678,18 @@ namespace Resource
                 }
             }
 
-            if (ext == "dae")
+            if (isColladaFile)
             {
                 Resource::ColladaDescriptionVisitor colladaDescriptionVisitor;
                 node->accept(colladaDescriptionVisitor);
 
                 if (colladaDescriptionVisitor.mSkeleton)
                 {
+                    // Collada bones may have underscores in place of spaces due to a collada limitation
+                    // we should rename the bones and update callbacks here at load time
+                    Resource::RenameAnimCallbacksVisitor renameBoneVisitor;
+                    node->accept(renameBoneVisitor);
+
                     if (osg::Group* group = dynamic_cast<osg::Group*>(node))
                     {
                         group->removeChildren(0, group->getNumChildren());
@@ -721,12 +796,13 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> load(const std::string& normalizedFilename, const VFS::Manager* vfs,
-        Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
+    osg::ref_ptr<osg::Node> load(VFS::Path::NormalizedView normalizedFilename, const VFS::Manager* vfs,
+        Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager,
+        Resource::BgsmFileManager* materialMgr)
     {
-        auto ext = Misc::getFileExtension(normalizedFilename);
+        const std::string_view ext = Misc::getFileExtension(normalizedFilename.value());
         if (ext == "nif")
-            return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager);
+            return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager, materialMgr);
         else if (ext == "spt")
         {
             Log(Debug::Warning) << "Ignoring SpeedTree data file " << normalizedFilename;
@@ -778,12 +854,12 @@ namespace Resource
         }
     };
 
-    bool canOptimize(const std::string& filename)
+    static bool canOptimize(std::string_view filename)
     {
-        size_t slashpos = filename.find_last_of("\\/");
-        if (slashpos != std::string::npos && slashpos + 1 < filename.size())
+        const std::string_view::size_type slashpos = filename.find_last_of('/');
+        if (slashpos != std::string_view::npos && slashpos + 1 < filename.size())
         {
-            std::string basename = filename.substr(slashpos + 1);
+            const std::string_view basename = filename.substr(slashpos + 1);
             // xmesh.nif can not be optimized because there are keyframes added in post
             if (!basename.empty() && basename[0] == 'x')
                 return false;
@@ -796,7 +872,7 @@ namespace Resource
 
         // For spell VFX, DummyXX nodes must remain intact. Not adding those to reservedNames to avoid being overly
         // cautious - instead, decide on filename
-        if (filename.find("vfx_pattern") != std::string::npos)
+        if (filename.find("vfx_pattern") != std::string_view::npos)
             return false;
         return true;
     }
@@ -843,11 +919,12 @@ namespace Resource
     {
         try
         {
+            VFS::Path::Normalized path("meshes/marker_error.****");
             for (const auto meshType : { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" })
             {
-                const std::string normalized = "meshes/marker_error." + std::string(meshType);
-                if (mVFS->exists(normalized))
-                    return load(normalized, mVFS, mImageManager, mNifFileManager);
+                path.changeExtension(meshType);
+                if (mVFS->exists(path))
+                    return load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
             }
         }
         catch (const std::exception& e)
@@ -856,7 +933,8 @@ namespace Resource
                                 << ", using embedded marker_error instead";
         }
         Files::IMemStream file(ErrorMarker::sValue.data(), ErrorMarker::sValue.size());
-        return loadNonNif("error_marker.osgt", file, mImageManager);
+        constexpr VFS::Path::NormalizedView errorMarker("error_marker.osgt");
+        return loadNonNif(errorMarker, file, mImageManager);
     }
 
     osg::ref_ptr<osg::Node> SceneManager::cloneErrorMarker()
@@ -869,7 +947,7 @@ namespace Resource
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(std::string_view name, bool compile)
     {
-        std::string normalized = VFS::Path::normalizeFilename(name);
+        const VFS::Path::Normalized normalized(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
@@ -879,7 +957,7 @@ namespace Resource
             osg::ref_ptr<osg::Node> loaded;
             try
             {
-                loaded = load(normalized, mVFS, mImageManager, mNifFileManager);
+                loaded = load(normalized, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
 
                 SceneUtil::ProcessExtraDataVisitor extraDataVisitor(this);
                 loaded->accept(extraDataVisitor);
@@ -1116,7 +1194,7 @@ namespace Resource
             stats->setAttribute(frameNumber, "StateSet", mSharedStateManager->getNumSharedStateSets());
         }
 
-        stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
+        Resource::reportStats("Node", frameNumber, mCache->getStats(), *stats);
     }
 
     osg::ref_ptr<Shader::ShaderVisitor> SceneManager::createShaderVisitor(const std::string& shaderPrefix)

@@ -93,7 +93,6 @@ void CSMDoc::Runner::start(bool delayed)
         arguments << "--data=\"" + Files::pathToQString(mProjectPath.parent_path()) + "\"";
 
         arguments << "--replace=content";
-        arguments << "--content=builtin.omwscripts";
 
         for (const auto& mContentFile : mContentFiles)
         {

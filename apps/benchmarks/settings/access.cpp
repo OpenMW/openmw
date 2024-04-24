@@ -38,7 +38,7 @@ namespace
     {
         for (auto _ : state)
         {
-            static const float v = Settings::Manager::getFloat("sky blending start", "Fog");
+            static float v = Settings::Manager::getFloat("sky blending start", "Fog");
             benchmark::DoNotOptimize(v);
         }
     }
@@ -47,8 +47,8 @@ namespace
     {
         for (auto _ : state)
         {
-            static const float v1 = Settings::Manager::getFloat("near clip", "Camera");
-            static const bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
+            static float v1 = Settings::Manager::getFloat("near clip", "Camera");
+            static bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
             benchmark::DoNotOptimize(v1);
             benchmark::DoNotOptimize(v2);
         }
@@ -58,9 +58,9 @@ namespace
     {
         for (auto _ : state)
         {
-            static const float v1 = Settings::Manager::getFloat("near clip", "Camera");
-            static const bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
-            static const int v3 = Settings::Manager::getInt("reflection detail", "Water");
+            static float v1 = Settings::Manager::getFloat("near clip", "Camera");
+            static bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
+            static int v3 = Settings::Manager::getInt("reflection detail", "Water");
             benchmark::DoNotOptimize(v1);
             benchmark::DoNotOptimize(v2);
             benchmark::DoNotOptimize(v3);
@@ -71,7 +71,8 @@ namespace
     {
         for (auto _ : state)
         {
-            benchmark::DoNotOptimize(Settings::fog().mSkyBlendingStart.get());
+            float v = Settings::fog().mSkyBlendingStart.get();
+            benchmark::DoNotOptimize(v);
         }
     }
 
@@ -79,8 +80,10 @@ namespace
     {
         for (auto _ : state)
         {
-            benchmark::DoNotOptimize(Settings::postProcessing().mTransparentPostpass.get());
-            benchmark::DoNotOptimize(Settings::camera().mNearClip.get());
+            bool v1 = Settings::postProcessing().mTransparentPostpass.get();
+            float v2 = Settings::camera().mNearClip.get();
+            benchmark::DoNotOptimize(v1);
+            benchmark::DoNotOptimize(v2);
         }
     }
 
@@ -88,9 +91,12 @@ namespace
     {
         for (auto _ : state)
         {
-            benchmark::DoNotOptimize(Settings::postProcessing().mTransparentPostpass.get());
-            benchmark::DoNotOptimize(Settings::camera().mNearClip.get());
-            benchmark::DoNotOptimize(Settings::water().mReflectionDetail.get());
+            bool v1 = Settings::postProcessing().mTransparentPostpass.get();
+            float v2 = Settings::camera().mNearClip.get();
+            int v3 = Settings::water().mReflectionDetail.get();
+            benchmark::DoNotOptimize(v1);
+            benchmark::DoNotOptimize(v2);
+            benchmark::DoNotOptimize(v3);
         }
     }
 

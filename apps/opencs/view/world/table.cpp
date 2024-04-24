@@ -385,7 +385,7 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
 
     mViewAction = new QAction(tr("View"), this);
     connect(mViewAction, &QAction::triggered, this, &Table::viewRecord);
-    mViewAction->setIcon(QIcon(":/cell.png"));
+    mViewAction->setIcon(QIcon(":cell"));
     addAction(mViewAction);
     CSMPrefs::Shortcut* viewShortcut = new CSMPrefs::Shortcut("table-view", this);
     viewShortcut->associateAction(mViewAction);
@@ -417,7 +417,7 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
 
     mHelpAction = new QAction(tr("Help"), this);
     connect(mHelpAction, &QAction::triggered, this, &Table::openHelp);
-    mHelpAction->setIcon(QIcon(":/info.png"));
+    mHelpAction->setIcon(QIcon(":info"));
     addAction(mHelpAction);
     CSMPrefs::Shortcut* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
     openHelpShortcut->associateAction(mHelpAction);

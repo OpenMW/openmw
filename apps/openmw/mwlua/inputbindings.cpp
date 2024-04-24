@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwinput/actions.hpp"
+
 #include "luamanagerimp.hpp"
 
 namespace sol
@@ -220,7 +221,7 @@ namespace MWLua
         api["getControlSwitch"] = [input](std::string_view key) { return input->getControlSwitch(key); };
         api["setControlSwitch"] = [input](std::string_view key, bool v) { input->toggleControlSwitch(key, v); };
 
-        api["getKeyName"] = [](SDL_Scancode code) { return SDL_GetKeyName(SDL_GetKeyFromScancode(code)); };
+        api["getKeyName"] = [](SDL_Scancode code) { return SDL_GetScancodeName(code); };
 
         api["ACTION"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWInput::Actions>({
             { "GameMenu", MWInput::A_GameMenu },

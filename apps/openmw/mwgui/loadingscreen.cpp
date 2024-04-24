@@ -67,7 +67,8 @@ namespace MWGui
                 != supported_extensions.end();
         };
 
-        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator("Splash/"))
+        constexpr VFS::Path::NormalizedView splash("splash/");
+        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(splash))
         {
             if (isSupportedExtension(Misc::getFileExtension(name)))
                 mSplashScreens.push_back(name);

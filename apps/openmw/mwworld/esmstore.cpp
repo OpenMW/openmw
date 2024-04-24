@@ -171,31 +171,31 @@ namespace
             auto iter = spell.mEffects.mList.begin();
             while (iter != spell.mEffects.mList.end())
             {
-                const ESM::MagicEffect* mgef = magicEffects.search(iter->mEffectID);
+                const ESM::MagicEffect* mgef = magicEffects.search(iter->mData.mEffectID);
                 if (!mgef)
                 {
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
-                                        << ": dropping invalid effect (index " << iter->mEffectID << ")";
+                                        << ": dropping invalid effect (index " << iter->mData.mEffectID << ")";
                     iter = spell.mEffects.mList.erase(iter);
                     changed = true;
                     continue;
                 }
 
-                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute) && iter->mAttribute != -1)
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute) && iter->mData.mAttribute != -1)
                 {
-                    iter->mAttribute = -1;
+                    iter->mData.mAttribute = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected attribute argument of "
-                                        << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect";
+                                        << ESM::MagicEffect::indexToGmstString(iter->mData.mEffectID) << " effect";
                     changed = true;
                 }
 
-                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetSkill) && iter->mSkill != -1)
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetSkill) && iter->mData.mSkill != -1)
                 {
-                    iter->mSkill = -1;
+                    iter->mData.mSkill = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected skill argument of "
-                                        << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect";
+                                        << ESM::MagicEffect::indexToGmstString(iter->mData.mEffectID) << " effect";
                     changed = true;
                 }
 
@@ -742,7 +742,16 @@ namespace MWWorld
 
             case ESM::REC_DYNA:
                 reader.getSubNameIs("COUN");
-                reader.getHT(mDynamicCount);
+                if (reader.getFormatVersion() <= ESM::MaxActiveSpellTypeVersion)
+                {
+                    uint32_t dynamicCount32 = 0;
+                    reader.getHT(dynamicCount32);
+                    mDynamicCount = dynamicCount32;
+                }
+                else
+                {
+                    reader.getHT(mDynamicCount);
+                }
                 return true;
 
             default:

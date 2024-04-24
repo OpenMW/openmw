@@ -7,7 +7,6 @@
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "../mwclass/container.hpp"
 

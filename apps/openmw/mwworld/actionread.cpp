@@ -5,6 +5,7 @@
 #include <components/esm3/loadskil.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -49,12 +50,7 @@ namespace MWWorld
         ESM::RefId skill = ESM::Skill::indexToRefId(ref->mBase->mData.mSkillId);
         if (!skill.empty() && !npcStats.hasBeenUsed(ref->mBase->mId))
         {
-            MWWorld::LiveCellRef<ESM::NPC>* playerRef = actor.get<ESM::NPC>();
-
-            const ESM::Class* class_
-                = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(playerRef->mBase->mClass);
-
-            npcStats.increaseSkill(skill, *class_, true, true);
+            MWBase::Environment::get().getLuaManager()->skillLevelUp(actor, skill, "book");
 
             npcStats.flagAsUsed(ref->mBase->mId);
         }

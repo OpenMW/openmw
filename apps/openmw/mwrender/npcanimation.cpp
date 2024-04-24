@@ -312,9 +312,8 @@ namespace MWRender
     class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
     {
     public:
-        DepthClearCallback(Resource::ResourceSystem* resourceSystem)
+        DepthClearCallback()
         {
-            mPassNormals = resourceSystem->getSceneManager()->getSupportsNormalsRT();
             mDepth = new SceneUtil::AutoDepth;
             mDepth->setWriteMask(true);
 
@@ -335,11 +334,6 @@ namespace MWRender
             unsigned int frameId = state->getFrameStamp()->getFrameNumber() % 2;
 
             postProcessor->getFbo(PostProcessor::FBO_FirstPerson, frameId)->apply(*state);
-            if (mPassNormals)
-            {
-                state->get<osg::GLExtensions>()->glColorMaski(1, true, true, true, true);
-                state->haveAppliedAttribute(osg::StateAttribute::COLORMASK);
-            }
             glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             // color accumulation pass
             bin->drawImplementation(renderInfo, previous);
@@ -360,7 +354,6 @@ namespace MWRender
             state->checkGLErrors("after DepthClearCallback::drawImplementation");
         }
 
-        bool mPassNormals;
         osg::ref_ptr<osg::Depth> mDepth;
         osg::ref_ptr<osg::StateSet> mStateSet;
     };
@@ -409,7 +402,7 @@ namespace MWRender
             if (!prototypeAdded)
             {
                 osg::ref_ptr<osgUtil::RenderBin> depthClearBin(new osgUtil::RenderBin);
-                depthClearBin->setDrawCallback(new DepthClearCallback(mResourceSystem));
+                depthClearBin->setDrawCallback(new DepthClearCallback());
                 osgUtil::RenderBin::addRenderBinPrototype("DepthClear", depthClearBin);
                 prototypeAdded = true;
             }
@@ -546,8 +539,7 @@ namespace MWRender
         if (mesh.empty())
             return std::string();
 
-        std::string holsteredName = mesh;
-        holsteredName = holsteredName.replace(holsteredName.size() - 4, 4, "_sh.nif");
+        const std::string holsteredName = addSuffixBeforeExtension(mesh, "_sh");
         if (mResourceSystem->getVFS()->exists(holsteredName))
         {
             osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);

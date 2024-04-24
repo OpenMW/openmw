@@ -2,7 +2,6 @@
 # Modifications should be done on the user openmw.cfg file instead
 # (see: https://openmw.readthedocs.io/en/master/reference/modding/paths.html)
 
-content=builtin.omwscripts
 data-local="?userdata?data"
 user-data="?userdata?"
 config="?userconfig?"

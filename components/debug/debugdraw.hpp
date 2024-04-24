@@ -70,6 +70,9 @@ namespace Debug
     {
     public:
         DebugCustomDraw();
+        DebugCustomDraw(const DebugCustomDraw& copy, const osg::CopyOp& copyop);
+
+        META_Node(Debug, DebugCustomDraw)
 
         mutable std::vector<DrawCall> mShapesToDraw;
         osg::ref_ptr<osg::Geometry> mLinesToDraw;
@@ -81,12 +84,15 @@ namespace Debug
         virtual void drawImplementation(osg::RenderInfo&) const override;
     };
 
-    struct DebugDrawer
+    struct DebugDrawer : public osg::Node
     {
-        friend DebugDrawCallback;
+        DebugDrawer() = default;
+        DebugDrawer(const DebugDrawer& copy, const osg::CopyOp& copyop);
+        DebugDrawer(Shader::ShaderManager& shaderManager);
 
-        DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode);
-        ~DebugDrawer();
+        META_Node(Debug, DebugDrawer)
+
+        void traverse(osg::NodeVisitor& nv) override;
 
         void drawCube(
             osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50., 50., 50.), osg::Vec3f mColor = colorWhite);
@@ -95,11 +101,9 @@ namespace Debug
         void addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color = colorWhite);
 
     private:
-        long long int mCurrentFrame;
+        unsigned int mCurrentFrame = 0;
 
         std::array<osg::ref_ptr<DebugCustomDraw>, 2> mCustomDebugDrawer;
-        osg::ref_ptr<osg::Group> mDebugDrawSceneObjects;
-        osg::ref_ptr<osg::Group> mParentNode;
     };
 }
 #endif // !

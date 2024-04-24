@@ -30,7 +30,7 @@ namespace fx
         public:
             struct Block
             {
-                int line;
+                std::size_t line;
                 std::string_view content;
             };
 

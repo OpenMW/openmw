@@ -1,15 +1,12 @@
 #include "factionbindings.hpp"
+#include "recordstore.hpp"
 
 #include <components/esm3/loadfact.hpp>
 #include <components/lua/luastate.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
+#include "../mwworld/store.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
-
-#include "luamanagerimp.hpp"
+#include "idcollectionbindings.hpp"
 
 namespace
 {
@@ -36,10 +33,6 @@ namespace sol
     {
     };
     template <>
-    struct is_automagical<MWWorld::Store<ESM::Faction>> : std::false_type
-    {
-    };
-    template <>
     struct is_automagical<MWWorld::Store<FactionRank>> : std::false_type
     {
     };
@@ -47,27 +40,11 @@ namespace sol
 
 namespace MWLua
 {
-    using FactionStore = MWWorld::Store<ESM::Faction>;
-
-    void initCoreFactionBindings(const Context& context)
+    sol::table initCoreFactionBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
-        sol::usertype<FactionStore> factionStoreT = lua.new_usertype<FactionStore>("ESM3_FactionStore");
-        factionStoreT[sol::meta_function::to_string] = [](const FactionStore& store) {
-            return "ESM3_FactionStore{" + std::to_string(store.getSize()) + " factions}";
-        };
-        factionStoreT[sol::meta_function::length] = [](const FactionStore& store) { return store.getSize(); };
-        factionStoreT[sol::meta_function::index] = sol::overload(
-            [](const FactionStore& store, size_t index) -> const ESM::Faction* {
-                if (index == 0 || index > store.getSize())
-                    return nullptr;
-                return store.at(index - 1);
-            },
-            [](const FactionStore& store, std::string_view factionId) -> const ESM::Faction* {
-                return store.search(ESM::RefId::deserializeText(factionId));
-            });
-        factionStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
-        factionStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
+        sol::table factions(lua, sol::create);
+        addRecordFunctionBinding<ESM::Faction>(factions, context);
         // Faction record
         auto factionT = lua.new_usertype<ESM::Faction>("ESM3_Faction");
         factionT[sol::meta_function::to_string]
@@ -96,26 +73,10 @@ namespace MWLua
             return res;
         });
         factionT["attributes"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
-            sol::table res(lua, sol::create);
-            for (auto attributeIndex : rec.mData.mAttribute)
-            {
-                ESM::RefId id = ESM::Attribute::indexToRefId(attributeIndex);
-                if (!id.empty())
-                    res.add(id.serializeText());
-            }
-
-            return res;
+            return createReadOnlyRefIdTable(lua, rec.mData.mAttribute, ESM::Attribute::indexToRefId);
         });
         factionT["skills"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
-            sol::table res(lua, sol::create);
-            for (auto skillIndex : rec.mData.mSkills)
-            {
-                ESM::RefId id = ESM::Skill::indexToRefId(skillIndex);
-                if (!id.empty())
-                    res.add(id.serializeText());
-            }
-
-            return res;
+            return createReadOnlyRefIdTable(lua, rec.mData.mSkills, ESM::Skill::indexToRefId);
         });
         auto rankT = lua.new_usertype<FactionRank>("ESM3_FactionRank");
         rankT[sol::meta_function::to_string] = [](const FactionRank& rec) -> std::string {
@@ -133,5 +94,6 @@ namespace MWLua
             res.add(rec.mAttribute2);
             return res;
         });
+        return LuaUtil::makeReadOnly(factions);
     }
 }

@@ -590,7 +590,7 @@ namespace LuaUtil
         updateTimerQueue(mGameTimersQueue, gameTime);
     }
 
-    static constexpr float instructionCountAvgCoef = 1.0 / 30; // averaging over approximately 30 frames
+    static constexpr float instructionCountAvgCoef = 1.0f / 30; // averaging over approximately 30 frames
 
     void ScriptsContainer::statsNextFrame()
     {

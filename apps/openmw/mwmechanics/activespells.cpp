@@ -8,6 +8,7 @@
 
 #include <components/misc/strings/algorithm.hpp>
 
+#include <components/esm/generatedrefid.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadstat.hpp>
@@ -49,16 +50,15 @@ namespace
     void addEffects(
         std::vector<ESM::ActiveEffect>& effects, const ESM::EffectList& list, bool ignoreResistances = false)
     {
-        int currentEffectIndex = 0;
         for (const auto& enam : list.mList)
         {
             ESM::ActiveEffect effect;
-            effect.mEffectId = enam.mEffectID;
-            effect.mArg = MWMechanics::EffectKey(enam).mArg;
+            effect.mEffectId = enam.mData.mEffectID;
+            effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;
             effect.mMagnitude = 0.f;
-            effect.mMinMagnitude = enam.mMagnMin;
-            effect.mMaxMagnitude = enam.mMagnMax;
-            effect.mEffectIndex = currentEffectIndex++;
+            effect.mMinMagnitude = enam.mData.mMagnMin;
+            effect.mMaxMagnitude = enam.mData.mMagnMax;
+            effect.mEffectIndex = enam.mIndex;
             effect.mFlags = ESM::ActiveEffect::Flag_None;
             if (ignoreResistances)
                 effect.mFlags |= ESM::ActiveEffect::Flag_Ignore_Resistances;
@@ -82,12 +82,13 @@ namespace MWMechanics
         mActiveSpells.mIterating = false;
     }
 
-    ActiveSpells::ActiveSpellParams::ActiveSpellParams(const CastSpell& cast, const MWWorld::Ptr& caster)
-        : mId(cast.mId)
-        , mDisplayName(cast.mSourceName)
+    ActiveSpells::ActiveSpellParams::ActiveSpellParams(
+        const MWWorld::Ptr& caster, const ESM::RefId& id, std::string_view sourceName, ESM::RefNum item)
+        : mSourceSpellId(id)
+        , mDisplayName(sourceName)
         , mCasterActorId(-1)
-        , mItem(cast.mItem)
-        , mType(cast.mType)
+        , mItem(item)
+        , mFlags()
         , mWorsenings(-1)
     {
         if (!caster.isEmpty() && caster.getClass().isActor())
@@ -96,48 +97,52 @@ namespace MWMechanics
 
     ActiveSpells::ActiveSpellParams::ActiveSpellParams(
         const ESM::Spell* spell, const MWWorld::Ptr& actor, bool ignoreResistances)
-        : mId(spell->mId)
+        : mSourceSpellId(spell->mId)
         , mDisplayName(spell->mName)
         , mCasterActorId(actor.getClass().getCreatureStats(actor).getActorId())
-        , mType(spell->mData.mType == ESM::Spell::ST_Ability ? ESM::ActiveSpells::Type_Ability
-                                                             : ESM::ActiveSpells::Type_Permanent)
+        , mFlags()
         , mWorsenings(-1)
     {
         assert(spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power);
+        setFlag(ESM::ActiveSpells::Flag_SpellStore);
+        if (spell->mData.mType == ESM::Spell::ST_Ability)
+            setFlag(ESM::ActiveSpells::Flag_AffectsBaseValues);
         addEffects(mEffects, spell->mEffects, ignoreResistances);
     }
 
     ActiveSpells::ActiveSpellParams::ActiveSpellParams(
         const MWWorld::ConstPtr& item, const ESM::Enchantment* enchantment, const MWWorld::Ptr& actor)
-        : mId(item.getCellRef().getRefId())
+        : mSourceSpellId(item.getCellRef().getRefId())
         , mDisplayName(item.getClass().getName(item))
         , mCasterActorId(actor.getClass().getCreatureStats(actor).getActorId())
         , mItem(item.getCellRef().getRefNum())
-        , mType(ESM::ActiveSpells::Type_Enchantment)
+        , mFlags()
         , mWorsenings(-1)
     {
         assert(enchantment->mData.mType == ESM::Enchantment::ConstantEffect);
         addEffects(mEffects, enchantment->mEffects);
+        setFlag(ESM::ActiveSpells::Flag_Equipment);
     }
 
     ActiveSpells::ActiveSpellParams::ActiveSpellParams(const ESM::ActiveSpells::ActiveSpellParams& params)
-        : mId(params.mId)
+        : mActiveSpellId(params.mActiveSpellId)
+        , mSourceSpellId(params.mSourceSpellId)
         , mEffects(params.mEffects)
         , mDisplayName(params.mDisplayName)
         , mCasterActorId(params.mCasterActorId)
         , mItem(params.mItem)
-        , mType(params.mType)
+        , mFlags(params.mFlags)
         , mWorsenings(params.mWorsenings)
         , mNextWorsening({ params.mNextWorsening })
     {
     }
 
     ActiveSpells::ActiveSpellParams::ActiveSpellParams(const ActiveSpellParams& params, const MWWorld::Ptr& actor)
-        : mId(params.mId)
+        : mSourceSpellId(params.mSourceSpellId)
         , mDisplayName(params.mDisplayName)
         , mCasterActorId(actor.getClass().getCreatureStats(actor).getActorId())
         , mItem(params.mItem)
-        , mType(params.mType)
+        , mFlags(params.mFlags)
         , mWorsenings(-1)
     {
     }
@@ -145,15 +150,21 @@ namespace MWMechanics
     ESM::ActiveSpells::ActiveSpellParams ActiveSpells::ActiveSpellParams::toEsm() const
     {
         ESM::ActiveSpells::ActiveSpellParams params;
-        params.mId = mId;
+        params.mActiveSpellId = mActiveSpellId;
+        params.mSourceSpellId = mSourceSpellId;
         params.mEffects = mEffects;
         params.mDisplayName = mDisplayName;
         params.mCasterActorId = mCasterActorId;
         params.mItem = mItem;
-        params.mType = mType;
+        params.mFlags = mFlags;
         params.mWorsenings = mWorsenings;
         params.mNextWorsening = mNextWorsening.toEsm();
         return params;
+    }
+
+    void ActiveSpells::ActiveSpellParams::setFlag(ESM::ActiveSpells::Flags flag)
+    {
+        mFlags = static_cast<ESM::ActiveSpells::Flags>(mFlags | flag);
     }
 
     void ActiveSpells::ActiveSpellParams::worsen()
@@ -178,19 +189,29 @@ namespace MWMechanics
     {
         // Enchantment id is not stored directly. Instead the enchanted item is stored.
         const auto& store = MWBase::Environment::get().getESMStore();
-        switch (store->find(mId))
+        switch (store->find(mSourceSpellId))
         {
             case ESM::REC_ARMO:
-                return store->get<ESM::Armor>().find(mId)->mEnchant;
+                return store->get<ESM::Armor>().find(mSourceSpellId)->mEnchant;
             case ESM::REC_BOOK:
-                return store->get<ESM::Book>().find(mId)->mEnchant;
+                return store->get<ESM::Book>().find(mSourceSpellId)->mEnchant;
             case ESM::REC_CLOT:
-                return store->get<ESM::Clothing>().find(mId)->mEnchant;
+                return store->get<ESM::Clothing>().find(mSourceSpellId)->mEnchant;
             case ESM::REC_WEAP:
-                return store->get<ESM::Weapon>().find(mId)->mEnchant;
+                return store->get<ESM::Weapon>().find(mSourceSpellId)->mEnchant;
             default:
                 return {};
         }
+    }
+
+    const ESM::Spell* ActiveSpells::ActiveSpellParams::getSpell() const
+    {
+        return MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(getSourceSpellId());
+    }
+
+    bool ActiveSpells::ActiveSpellParams::hasFlag(ESM::ActiveSpells::Flags flags) const
+    {
+        return static_cast<ESM::ActiveSpells::Flags>(mFlags & flags) == flags;
     }
 
     void ActiveSpells::update(const MWWorld::Ptr& ptr, float duration)
@@ -203,8 +224,7 @@ namespace MWMechanics
         // Erase no longer active spells and effects
         for (auto spellIt = mSpells.begin(); spellIt != mSpells.end();)
         {
-            if (spellIt->mType != ESM::ActiveSpells::Type_Temporary
-                && spellIt->mType != ESM::ActiveSpells::Type_Consumable)
+            if (!spellIt->hasFlag(ESM::ActiveSpells::Flag_Temporary))
             {
                 ++spellIt;
                 continue;
@@ -244,7 +264,10 @@ namespace MWMechanics
         {
             if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power
                 && !isSpellActive(spell->mId))
+            {
                 mSpells.emplace_back(ActiveSpellParams{ spell, ptr });
+                mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
+            }
         }
 
         bool updateSpellWindow = false;
@@ -270,8 +293,8 @@ namespace MWMechanics
                     if (std::find_if(mSpells.begin(), mSpells.end(),
                             [&](const ActiveSpellParams& params) {
                                 return params.mItem == slot->getCellRef().getRefNum()
-                                    && params.mType == ESM::ActiveSpells::Type_Enchantment
-                                    && params.mId == slot->getCellRef().getRefId();
+                                    && params.hasFlag(ESM::ActiveSpells::Flag_Equipment)
+                                    && params.mSourceSpellId == slot->getCellRef().getRefId();
                             })
                         != mSpells.end())
                         continue;
@@ -279,8 +302,8 @@ namespace MWMechanics
                     // invisibility manually
                     purgeEffect(ptr, ESM::MagicEffect::Invisibility);
                     applyPurges(ptr);
-                    const ActiveSpellParams& params
-                        = mSpells.emplace_back(ActiveSpellParams{ *slot, enchantment, ptr });
+                    ActiveSpellParams& params = mSpells.emplace_back(ActiveSpellParams{ *slot, enchantment, ptr });
+                    params.setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
                     for (const auto& effect : params.mEffects)
                         MWMechanics::playEffects(
                             ptr, *world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId), playNonLooping);
@@ -350,12 +373,11 @@ namespace MWMechanics
                 continue;
 
             bool remove = false;
-            if (spellIt->mType == ESM::ActiveSpells::Type_Ability
-                || spellIt->mType == ESM::ActiveSpells::Type_Permanent)
+            if (spellIt->hasFlag(ESM::ActiveSpells::Flag_SpellStore))
             {
                 try
                 {
-                    remove = !spells.hasSpell(spellIt->mId);
+                    remove = !spells.hasSpell(spellIt->mSourceSpellId);
                 }
                 catch (const std::runtime_error& e)
                 {
@@ -363,9 +385,9 @@ namespace MWMechanics
                     Log(Debug::Error) << "Removing active effect: " << e.what();
                 }
             }
-            else if (spellIt->mType == ESM::ActiveSpells::Type_Enchantment)
+            else if (spellIt->hasFlag(ESM::ActiveSpells::Flag_Equipment))
             {
-                // Remove constant effect enchantments that have been unequipped
+                // Remove effects tied to equipment that has been unequipped
                 const auto& store = ptr.getClass().getInventoryStore(ptr);
                 remove = true;
                 for (int slotIndex = 0; slotIndex < MWWorld::InventoryStore::Slots; slotIndex++)
@@ -411,11 +433,11 @@ namespace MWMechanics
 
     void ActiveSpells::addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell)
     {
-        if (spell.mType != ESM::ActiveSpells::Type_Consumable)
+        if (!spell.hasFlag(ESM::ActiveSpells::Flag_Stackable))
         {
             auto found = std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& existing) {
-                return spell.mId == existing.mId && spell.mCasterActorId == existing.mCasterActorId
-                    && spell.mItem == existing.mItem;
+                return spell.mSourceSpellId == existing.mSourceSpellId
+                    && spell.mCasterActorId == existing.mCasterActorId && spell.mItem == existing.mItem;
             });
             if (found != mSpells.end())
             {
@@ -428,6 +450,7 @@ namespace MWMechanics
             }
         }
         mSpells.emplace_back(spell);
+        mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
     }
 
     ActiveSpells::ActiveSpells()
@@ -445,10 +468,19 @@ namespace MWMechanics
         return mSpells.end();
     }
 
+    ActiveSpells::TIterator ActiveSpells::getActiveSpellById(const ESM::RefId& id)
+    {
+        for (TIterator it = begin(); it != end(); it++)
+            if (it->getActiveSpellId() == id)
+                return it;
+        return end();
+    }
+
     bool ActiveSpells::isSpellActive(const ESM::RefId& id) const
     {
-        return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) { return spell.mId == id; })
-            != mSpells.end();
+        return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) {
+            return spell.mSourceSpellId == id;
+        }) != mSpells.end();
     }
 
     bool ActiveSpells::isEnchantmentActive(const ESM::RefId& id) const
@@ -557,9 +589,14 @@ namespace MWMechanics
         return removedCurrentSpell;
     }
 
-    void ActiveSpells::removeEffects(const MWWorld::Ptr& ptr, const ESM::RefId& id)
+    void ActiveSpells::removeEffectsBySourceSpellId(const MWWorld::Ptr& ptr, const ESM::RefId& id)
     {
-        purge([=](const ActiveSpellParams& params) { return params.mId == id; }, ptr);
+        purge([=](const ActiveSpellParams& params) { return params.mSourceSpellId == id; }, ptr);
+    }
+
+    void ActiveSpells::removeEffectsByActiveSpellId(const MWWorld::Ptr& ptr, const ESM::RefId& id)
+    {
+        purge([=](const ActiveSpellParams& params) { return params.mActiveSpellId == id; }, ptr);
     }
 
     void ActiveSpells::purgeEffect(const MWWorld::Ptr& ptr, int effectId, ESM::RefId effectArg)
@@ -604,19 +641,19 @@ namespace MWMechanics
     void ActiveSpells::readState(const ESM::ActiveSpells& state)
     {
         for (const ESM::ActiveSpells::ActiveSpellParams& spell : state.mSpells)
+        {
             mSpells.emplace_back(ActiveSpellParams{ spell });
+            // Generate ID for older saves that didn't have any.
+            if (mSpells.back().getActiveSpellId().empty())
+                mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
+        }
         for (const ESM::ActiveSpells::ActiveSpellParams& spell : state.mQueue)
             mQueue.emplace_back(ActiveSpellParams{ spell });
     }
 
     void ActiveSpells::unloadActor(const MWWorld::Ptr& ptr)
     {
-        purge(
-            [](const auto& spell) {
-                return spell.getType() == ESM::ActiveSpells::Type_Consumable
-                    || spell.getType() == ESM::ActiveSpells::Type_Temporary;
-            },
-            ptr);
+        purge([](const auto& spell) { return spell.hasFlag(ESM::ActiveSpells::Flag_Temporary); }, ptr);
         mQueue.clear();
     }
 }

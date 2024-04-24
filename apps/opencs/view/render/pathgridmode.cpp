@@ -36,8 +36,8 @@ class QWidget;
 namespace CSVRender
 {
     PathgridMode::PathgridMode(WorldspaceWidget* worldspaceWidget, QWidget* parent)
-        : EditMode(worldspaceWidget, QIcon(":placeholder"), Mask_Pathgrid | Mask_Terrain | Mask_Reference, getTooltip(),
-            parent)
+        : EditMode(worldspaceWidget, QIcon(":scenetoolbar/editing-pathgrid"),
+            Mask_Pathgrid | Mask_Terrain | Mask_Reference, getTooltip(), parent)
         , mDragMode(DragMode_None)
         , mFromNode(0)
         , mSelectionMode(nullptr)

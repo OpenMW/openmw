@@ -763,7 +763,7 @@ namespace MWRender
 
         lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *stateset);
+        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);
 
         // override sun for local map
         SceneUtil::configureStateSetSunOverride(static_cast<SceneUtil::LightManager*>(mSceneRoot), light, stateset);

@@ -1,5 +1,7 @@
 #include "labels.hpp"
 
+#include <components/esm3/dialoguecondition.hpp>
+#include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadcont.hpp>
@@ -571,13 +573,14 @@ std::string_view enchantTypeLabel(int idx)
 
 std::string_view ruleFunction(int idx)
 {
-    if (idx >= 0 && idx <= 72)
+    if (idx >= ESM::DialogueCondition::Function_FacReactionLowest
+        && idx <= ESM::DialogueCondition::Function_PcWerewolfKills)
     {
         static constexpr std::string_view ruleFunctions[] = {
-            "Reaction Low",
-            "Reaction High",
+            "Lowest Faction Reaction",
+            "Highest Faction Reaction",
             "Rank Requirement",
-            "NPC? Reputation",
+            "NPC Reputation",
             "Health Percent",
             "Player Reputation",
             "NPC Level",
@@ -647,6 +650,7 @@ std::string_view ruleFunction(int idx)
             "Flee",
             "Should Attack",
             "Werewolf",
+            "Werewolf Kills",
         };
         return ruleFunctions[idx];
     }
@@ -983,6 +987,19 @@ std::string recordFlags(uint32_t flags)
         properties += "Blocked ";
     int unused = ~(ESM::FLAG_Deleted | ESM::FLAG_Persistent | ESM::FLAG_Ignored | ESM::FLAG_Blocked);
     if (flags & unused)
+        properties += "Invalid ";
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
+    return properties;
+}
+
+std::string potionFlags(int flags)
+{
+    std::string properties;
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Potion::Autocalc)
+        properties += "Autocalc ";
+    if (flags & (0xFFFFFFFF ^ ESM::Enchantment::Autocalc))
         properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;

@@ -43,10 +43,14 @@ namespace VFS
         /// @note May be called from any thread once the index has been built.
         bool exists(const Path::Normalized& name) const;
 
+        bool exists(Path::NormalizedView name) const;
+
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
         Files::IStreamPtr get(const Path::Normalized& name) const;
+
+        Files::IStreamPtr get(Path::NormalizedView name) const;
 
         /// Retrieve a file by name (name is already normalized).
         /// @note Throws an exception if the file can not be found.
@@ -60,6 +64,10 @@ namespace VFS
         /// @note the path is normalized
         /// @note May be called from any thread once the index has been built.
         RecursiveDirectoryRange getRecursiveDirectoryIterator(std::string_view path) const;
+
+        RecursiveDirectoryRange getRecursiveDirectoryIterator(VFS::Path::NormalizedView path) const;
+
+        RecursiveDirectoryRange getRecursiveDirectoryIterator() const;
 
         /// Retrieve the absolute path to the file
         /// @note Throws an exception if the file can not be found.

@@ -39,6 +39,8 @@
 
 #include "../mwrender/vismask.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "actor.hpp"
 #include "actorutil.hpp"
 #include "aicombataction.hpp"
@@ -1228,11 +1230,11 @@ namespace MWMechanics
         }
     }
 
-    void Actors::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell) const
+    void Actors::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
-            iter->second->getCharacterController().castSpell(spellId, manualSpell);
+            iter->second->getCharacterController().castSpell(spellId, scriptedSpell);
     }
 
     bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer) const
@@ -1309,7 +1311,8 @@ namespace MWMechanics
                 if (inProcessingRange)
                 {
                     MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
-                    if (!stats.isDead() && stats.getAiSequence().isInCombat())
+                    bool isDead = stats.isDead() && stats.isDeathAnimationFinished();
+                    if (!isDead && stats.getAiSequence().isInCombat())
                     {
                         hasHostiles = true;
                         break;
@@ -1797,7 +1800,7 @@ namespace MWMechanics
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
                     // Play Death Music if it was the player dying
                     MWBase::Environment::get().getSoundManager()->streamMusic(
-                        "Music/Special/MW_Death.mp3", MWSound::MusicType::Special);
+                        MWSound::deathMusic, MWSound::MusicType::Special);
                 }
                 else
                 {
@@ -1955,7 +1958,7 @@ namespace MWMechanics
                 mSneakSkillTimer = 0.f;
 
             if (avoidedNotice && mSneakSkillTimer == 0.f)
-                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
+                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, ESM::Skill::Sneak_AvoidNotice);
 
             if (!detected)
                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);

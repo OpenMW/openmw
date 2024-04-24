@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <components/bgsm/file.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
@@ -25,7 +26,7 @@
 namespace bpo = boost::program_options;
 
 /// See if the file has the named extension
-bool hasExtension(const std::filesystem::path& filename, const std::string& extensionToFind)
+bool hasExtension(const std::filesystem::path& filename, std::string_view extensionToFind)
 {
     const auto extension = Files::pathToUnicodeString(filename.extension());
     return Misc::StringUtils::ciEqual(extension, extensionToFind);
@@ -36,63 +37,62 @@ bool isNIF(const std::filesystem::path& filename)
 {
     return hasExtension(filename, ".nif") || hasExtension(filename, ".kf");
 }
+
+/// Check if the file is a material file.
+bool isMaterial(const std::filesystem::path& filename)
+{
+    return hasExtension(filename, ".bgem") || hasExtension(filename, ".bgsm");
+}
+
 /// See if the file has the "bsa" extension.
 bool isBSA(const std::filesystem::path& filename)
 {
     return hasExtension(filename, ".bsa") || hasExtension(filename, ".ba2");
 }
 
-std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
-{
-    switch (Bsa::BSAFile::detectVersion(path))
-    {
-        case Bsa::BSAVER_COMPRESSED:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_COMPRESSED>::type>(path);
-        case Bsa::BSAVER_BA2_GNRL:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_BA2_GNRL>::type>(path);
-        case Bsa::BSAVER_BA2_DX10:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_BA2_DX10>::type>(path);
-        case Bsa::BSAVER_UNCOMPRESSED:
-            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_UNCOMPRESSED>::type>(path);
-        case Bsa::BSAVER_UNKNOWN:
-        default:
-            std::cerr << "'" << Files::pathToUnicodeString(path) << "' is not a recognized BSA archive" << std::endl;
-            return nullptr;
-    }
-}
-
 std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
 {
     if (isBSA(path))
-        return makeBsaArchive(path);
+        return VFS::makeBsaArchive(path);
     if (std::filesystem::is_directory(path))
         return std::make_unique<VFS::FileSystemArchive>(path);
     return nullptr;
 }
 
-void readNIF(
+void readFile(
     const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
 {
     const std::string pathStr = Files::pathToUnicodeString(path);
+    const bool isNif = isNIF(path);
     if (!quiet)
     {
-        if (hasExtension(path, ".kf"))
-            std::cout << "Reading KF file '" << pathStr << "'";
+        if (isNif)
+            std::cout << "Reading " << (hasExtension(path, ".nif") ? "NIF" : "KF") << " file '" << pathStr << "'";
         else
-            std::cout << "Reading NIF file '" << pathStr << "'";
+            std::cout << "Reading " << (hasExtension(path, ".bgsm") ? "BGSM" : "BGEM") << " file '" << pathStr << "'";
         if (!source.empty())
             std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
         std::cout << std::endl;
     }
-    std::filesystem::path fullPath = !source.empty() ? source / path : path;
+    const std::filesystem::path fullPath = !source.empty() ? source / path : path;
     try
     {
-        Nif::NIFFile file(fullPath);
-        Nif::Reader reader(file, nullptr);
-        if (vfs != nullptr)
-            reader.parse(vfs->get(pathStr));
+        if (isNif)
+        {
+            Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
+            Nif::Reader reader(file, nullptr);
+            if (vfs != nullptr)
+                reader.parse(vfs->get(pathStr));
+            else
+                reader.parse(Files::openConstrainedFileStream(fullPath));
+        }
         else
-            reader.parse(Files::openConstrainedFileStream(fullPath));
+        {
+            if (vfs != nullptr)
+                Bgsm::parse(vfs->get(pathStr));
+            else
+                Bgsm::parse(Files::openConstrainedFileStream(fullPath));
+        }
     }
     catch (std::exception& e)
     {
@@ -114,27 +114,33 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
     vfs.addArchive(std::move(archive));
     vfs.buildIndex();
 
-    for (const auto& name : vfs.getRecursiveDirectoryIterator(""))
+    for (const auto& name : vfs.getRecursiveDirectoryIterator())
     {
-        if (isNIF(name.value()))
+        if (isNIF(name.value()) || isMaterial(name.value()))
         {
-            readNIF(archivePath, name.value(), &vfs, quiet);
+            readFile(archivePath, name.value(), &vfs, quiet);
         }
     }
 
     if (!archivePath.empty() && !isBSA(archivePath))
     {
-        Files::PathContainer dataDirs = { archivePath };
-        const Files::Collections fileCollections = Files::Collections(dataDirs);
+        const Files::Collections fileCollections({ archivePath });
         const Files::MultiDirCollection& bsaCol = fileCollections.getCollection(".bsa");
         const Files::MultiDirCollection& ba2Col = fileCollections.getCollection(".ba2");
-        for (auto& file : bsaCol)
+        for (const Files::MultiDirCollection& collection : { bsaCol, ba2Col })
         {
-            readVFS(makeBsaArchive(file.second), file.second, quiet);
-        }
-        for (auto& file : ba2Col)
-        {
-            readVFS(makeBsaArchive(file.second), file.second, quiet);
+            for (auto& file : collection)
+            {
+                try
+                {
+                    readVFS(VFS::makeBsaArchive(file.second), file.second, quiet);
+                }
+                catch (const std::exception& e)
+                {
+                    std::cerr << "Failed to read archive file '" << Files::pathToUnicodeString(file.second)
+                              << "': " << e.what() << std::endl;
+                }
+            }
         }
     }
 }
@@ -142,10 +148,10 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 bool parseOptions(int argc, char** argv, Files::PathContainer& files, Files::PathContainer& archives,
     bool& writeDebugLog, bool& quiet)
 {
-    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF, KF and BSA/BA2 files
+    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF, KF, BGEM/BGSM and BSA/BA2 files
 
 Usages:
-  niftest <nif files, kf files, BSA/BA2 files, or directories>
+  niftest <nif files, kf files, bgem/bgsm files, BSA/BA2 files, or directories>
       Scan the file or directories for NIF errors.
 
 Allowed options)");
@@ -234,9 +240,9 @@ int main(int argc, char** argv)
         const std::string pathStr = Files::pathToUnicodeString(path);
         try
         {
-            if (isNIF(path))
+            if (isNIF(path) || isMaterial(path))
             {
-                readNIF({}, path, vfs.get(), quiet);
+                readFile({}, path, vfs.get(), quiet);
             }
             else if (auto archive = makeArchive(path))
             {
@@ -244,7 +250,7 @@ int main(int argc, char** argv)
             }
             else
             {
-                std::cerr << "Error: '" << pathStr << "' is not a NIF/KF file, BSA/BA2 archive, or directory"
+                std::cerr << "Error: '" << pathStr << "' is not a NIF/KF/BGEM/BGSM file, BSA/BA2 archive, or directory"
                           << std::endl;
             }
         }

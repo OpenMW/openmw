@@ -11,10 +11,17 @@ namespace osg
 
 namespace DetourNavigator
 {
+    struct JobQueueStats
+    {
+        std::size_t mRemoving = 0;
+        std::size_t mUpdating = 0;
+        std::size_t mDelayed = 0;
+    };
+
     struct DbJobQueueStats
     {
-        std::size_t mWritingJobs = 0;
         std::size_t mReadingJobs = 0;
+        std::size_t mWritingJobs = 0;
     };
 
     struct DbWorkerStats
@@ -35,7 +42,7 @@ namespace DetourNavigator
     struct AsyncNavMeshUpdaterStats
     {
         std::size_t mJobs = 0;
-        std::size_t mWaiting = 0;
+        JobQueueStats mWaiting;
         std::size_t mPushed = 0;
         std::size_t mProcessing = 0;
         std::size_t mDbGetTileHits = 0;

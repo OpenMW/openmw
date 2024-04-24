@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_REFDATA_H
 #define GAME_MWWORLD_REFDATA_H
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/animationstate.hpp>
 
@@ -47,6 +47,10 @@ namespace MWWorld
 
         MWScript::Locals mLocals;
         std::shared_ptr<MWLua::LocalScripts> mLuaScripts;
+        ESM::Position mPosition;
+        ESM::AnimationState mAnimationState;
+        std::unique_ptr<CustomData> mCustomData;
+        unsigned int mFlags;
 
         /// separate delete flag used for deletion by a content file
         /// @note not stored in the save game file.
@@ -58,19 +62,11 @@ namespace MWWorld
         bool mPhysicsPostponed : 1;
 
     private:
-        ESM::Position mPosition;
-
-        ESM::AnimationState mAnimationState;
-
-        std::unique_ptr<CustomData> mCustomData;
+        bool mChanged : 1;
 
         void copy(const RefData& refData);
 
         void cleanup();
-
-        bool mChanged;
-
-        unsigned int mFlags;
 
     public:
         RefData();

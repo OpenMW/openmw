@@ -24,8 +24,10 @@ namespace MWSound
     private:
         MWSound::MovieAudioDecoder* mDecoder;
 
-        void open(const std::string& fname) override;
-        void close() override;
+        void open(VFS::Path::NormalizedView fname) override { throw std::runtime_error("Method not implemented"); }
+
+        void close() override {}
+
         std::string getName() override;
         void getInfo(int* samplerate, ChannelConfig* chans, SampleType* type) override;
         size_t read(char* buffer, size_t bytes) override;
@@ -91,12 +93,6 @@ namespace MWSound
         MWBase::SoundStream* mAudioTrack;
         std::shared_ptr<MWSoundDecoderBridge> mDecoderBridge;
     };
-
-    void MWSoundDecoderBridge::open(const std::string& fname)
-    {
-        throw std::runtime_error("Method not implemented");
-    }
-    void MWSoundDecoderBridge::close() {}
 
     std::string MWSoundDecoderBridge::getName()
     {

@@ -138,6 +138,7 @@ namespace CSMPrefs
         EnumSettingValue mJumpToAdded{ mIndex, sName, "jump-to-added", sJumpAndSelectValues, 0 };
         Settings::SettingValue<bool> mExtendedConfig{ mIndex, sName, "extended-config", false };
         Settings::SettingValue<bool> mSubviewNewWindow{ mIndex, sName, "subview-new-window", false };
+        Settings::SettingValue<int> mFilterDelay{ mIndex, sName, "filter-delay", 500 };
     };
 
     struct IdDialoguesCategory : Settings::WithIndex

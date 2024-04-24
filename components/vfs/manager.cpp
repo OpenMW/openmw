@@ -43,6 +43,11 @@ namespace VFS
         return getNormalized(name);
     }
 
+    Files::IStreamPtr Manager::get(Path::NormalizedView name) const
+    {
+        return getNormalized(name.value());
+    }
+
     Files::IStreamPtr Manager::getNormalized(std::string_view normalizedName) const
     {
         assert(Path::isNormalized(normalizedName));
@@ -53,6 +58,11 @@ namespace VFS
     }
 
     bool Manager::exists(const Path::Normalized& name) const
+    {
+        return mIndex.find(name) != mIndex.end();
+    }
+
+    bool Manager::exists(Path::NormalizedView name) const
     {
         return mIndex.find(name) != mIndex.end();
     }
@@ -88,5 +98,22 @@ namespace VFS
             return { it, it };
         ++normalized.back();
         return { it, mIndex.lower_bound(normalized) };
+    }
+
+    RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(VFS::Path::NormalizedView path) const
+    {
+        if (path.value().empty())
+            return { mIndex.begin(), mIndex.end() };
+        const auto it = mIndex.lower_bound(path);
+        if (it == mIndex.end() || !it->first.view().starts_with(path.value()))
+            return { it, it };
+        std::string copy(path.value());
+        ++copy.back();
+        return { it, mIndex.lower_bound(copy) };
+    }
+
+    RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator() const
+    {
+        return { mIndex.begin(), mIndex.end() };
     }
 }

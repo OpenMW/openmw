@@ -28,7 +28,7 @@ namespace MWGui
         MessageBoxManager::clear();
     }
 
-    int MessageBoxManager::getMessagesCount()
+    std::size_t MessageBoxManager::getMessagesCount()
     {
         return mMessageBoxes.size();
     }

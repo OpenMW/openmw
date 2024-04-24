@@ -41,19 +41,19 @@ void ESM4::Static::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM::fourCC("MODT"):
             {
                 // version is only availabe in TES5 (seems to be 27 or 28?)
                 // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
@@ -72,7 +72,7 @@ void ESM4::Static::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_MNAM:
+            case ESM::fourCC("MNAM"):
             {
                 for (std::string& level : mLOD)
                 {
@@ -84,18 +84,18 @@ void ESM4::Static::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_MODC: // More model data
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_DNAM:
-            case ESM4::SUB_BRUS: // FONV
-            case ESM4::SUB_RNAM: // FONV
-            case ESM4::SUB_FTYP: // FO4
-            case ESM4::SUB_NVNM: // FO4
-            case ESM4::SUB_PRPS: // FO4
-            case ESM4::SUB_PTRN: // FO4
-            case ESM4::SUB_VMAD: // FO4
+            case ESM::fourCC("MODC"): // More model data
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("DNAM"):
+            case ESM::fourCC("BRUS"): // FONV
+            case ESM::fourCC("RNAM"): // FONV
+            case ESM::fourCC("FTYP"): // FO4
+            case ESM::fourCC("NVNM"): // FO4
+            case ESM::fourCC("PRPS"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
+            case ESM::fourCC("VMAD"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

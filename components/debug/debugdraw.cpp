@@ -124,7 +124,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         float theta = (float(i) / float(subdiv)) * osg::PI * 2.;
-        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
         pos *= radius;
         pos.z() = height / 2.;
         vertices->push_back(pos);
@@ -150,7 +150,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         float theta = float(i) / float(subdiv) * osg::PI * 2.;
-        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
         pos *= radius;
         pos.z() = -height / 2.;
         vertices->push_back(pos);
@@ -162,7 +162,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         float theta = float(i) / float(subdiv) * osg::PI * 2.;
-        osg::Vec3 normal = sphereCoordToCartesian(theta, osg::PI_2, 1.);
+        osg::Vec3 normal = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
         auto posTop = normal;
         posTop *= radius;
         auto posBot = posTop;
@@ -215,12 +215,12 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     geom.addPrimitiveSet(indices);
 }
 
-static int getIdexBufferReadFromFrame(const long long int& nFrame)
+static int getIndexBufferReadFromFrame(const unsigned int& nFrame)
 {
     return nFrame % 2;
 }
 
-static int getIdexBufferWriteFromFrame(const long long int& nFrame)
+static int getIndexBufferWriteFromFrame(const unsigned int& nFrame)
 {
     return (nFrame + 1) % 2;
 }
@@ -232,7 +232,7 @@ namespace Debug
         auto vertices = new osg::Vec3Array;
         auto color = new osg::Vec3Array;
         lines.setDataVariance(osg::Object::STATIC);
-        lines.setUseVertexArrayObject(true);
+        lines.setUseVertexBufferObjects(true);
         lines.setUseDisplayList(false);
         lines.setCullingActive(false);
 
@@ -248,6 +248,16 @@ namespace Debug
         makeLineInstance(*mLinesToDraw);
     }
 
+    DebugCustomDraw::DebugCustomDraw(const DebugCustomDraw& copy, const osg::CopyOp& copyop)
+        : Drawable(copy, copyop)
+        , mShapesToDraw(copy.mShapesToDraw)
+        , mLinesToDraw(copy.mLinesToDraw)
+        , mCubeGeometry(copy.mCubeGeometry)
+        , mCylinderGeometry(copy.mCylinderGeometry)
+        , mWireCubeGeometry(copy.mWireCubeGeometry)
+    {
+    }
+
     void DebugCustomDraw::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         auto state = renderInfo.getState();
@@ -255,96 +265,61 @@ namespace Debug
 
         const osg::StateSet* stateSet = getStateSet();
 
-        auto program = static_cast<const osg::Program*>(stateSet->getAttribute(osg::StateAttribute::PROGRAM));
-        const osg::Program::PerContextProgram* pcp = program->getPCP(*state);
-        if (!pcp)
-        {
-            return;
-        }
+        const osg::Program::PerContextProgram& pcp = *state->getLastAppliedProgramObject();
+        auto transLocation = pcp.getUniformLocation(stateSet->getUniform("trans")->getNameID());
+        auto colLocation = pcp.getUniformLocation(stateSet->getUniform("color")->getNameID());
+        auto scaleLocation = pcp.getUniformLocation(stateSet->getUniform("scale")->getNameID());
+        auto normalAsColorLocation = pcp.getUniformLocation(stateSet->getUniform("useNormalAsColor")->getNameID());
 
-        const osg::Uniform* uTrans = stateSet->getUniform("trans");
-        const osg::Uniform* uCol = stateSet->getUniform("color");
-        const osg::Uniform* uScale = stateSet->getUniform("scale");
-        const osg::Uniform* uUseNormalAsColor = stateSet->getUniform("useNormalAsColor");
+        auto drawPrimitive = [&](const osg::Drawable* primitive, const osg::Vec3f& pos, const osg::Vec3f& color,
+                                 const osg::Vec3f& scale, const bool normalAsColor) {
+            ext->glUniform3f(transLocation, pos.x(), pos.y(), pos.z());
+            ext->glUniform3f(colLocation, color.x(), color.y(), color.z());
+            ext->glUniform3f(scaleLocation, scale.x(), scale.y(), scale.z());
+            ext->glUniform1i(normalAsColorLocation, normalAsColor);
+            primitive->drawImplementation(renderInfo);
+        };
 
-        auto transLocation = pcp->getUniformLocation(uTrans->getNameID());
-        auto colLocation = pcp->getUniformLocation(uCol->getNameID());
-        auto scaleLocation = pcp->getUniformLocation(uScale->getNameID());
-        auto normalAsColorLocation = pcp->getUniformLocation(uUseNormalAsColor->getNameID());
-
-        ext->glUniform3f(transLocation, 0., 0., 0.);
-        ext->glUniform3f(colLocation, 1., 1., 1.);
-        ext->glUniform3f(scaleLocation, 1., 1., 1.);
-        ext->glUniform1i(normalAsColorLocation, true);
-
-        mLinesToDraw->drawImplementation(renderInfo);
-
-        ext->glUniform1i(normalAsColorLocation, false);
+        drawPrimitive(mLinesToDraw, { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f }, { 1.f, 1.f, 1.f }, true);
 
         for (const auto& shapeToDraw : mShapesToDraw)
         {
-            osg::Vec3f translation = shapeToDraw.mPosition;
-            osg::Vec3f color = shapeToDraw.mColor;
-            osg::Vec3f scale = shapeToDraw.mDims;
-
-            ext->glUniform3f(transLocation, translation.x(), translation.y(), translation.z());
-            ext->glUniform3f(colLocation, color.x(), color.y(), color.z());
-            ext->glUniform3f(scaleLocation, scale.x(), scale.y(), scale.z());
-
+            const osg::Geometry* geometry = nullptr;
             switch (shapeToDraw.mDrawShape)
             {
                 case DrawShape::Cube:
-                    mCubeGeometry->drawImplementation(renderInfo);
+                    geometry = mCubeGeometry;
                     break;
                 case DrawShape::Cylinder:
-                    mCylinderGeometry->drawImplementation(renderInfo);
+                    geometry = mCylinderGeometry;
                     break;
                 case DrawShape::WireCube:
-                    mWireCubeGeometry->drawImplementation(renderInfo);
+                    geometry = mWireCubeGeometry;
                     break;
             }
+            drawPrimitive(geometry, shapeToDraw.mPosition, shapeToDraw.mColor, shapeToDraw.mDims, false);
         }
         mShapesToDraw.clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getVertexArray())->clear();
         static_cast<osg::Vec3Array*>(mLinesToDraw->getNormalArray())->clear();
+        static_cast<osg::DrawArrays*>(mLinesToDraw->getPrimitiveSet(0))->setCount(0);
+        pcp.resetAppliedUniforms();
     }
-
-    class DebugDrawCallback : public SceneUtil::NodeCallback<DebugDrawCallback>
-    {
-    public:
-        DebugDrawCallback(Debug::DebugDrawer& debugDrawer)
-            : mDebugDrawer(debugDrawer)
-        {
-        }
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            mDebugDrawer.mCurrentFrame = nv->getTraversalNumber();
-            int indexRead = getIdexBufferReadFromFrame(mDebugDrawer.mCurrentFrame);
-            auto& lines = mDebugDrawer.mCustomDebugDrawer[indexRead]->mLinesToDraw;
-            lines->removePrimitiveSet(0, 1);
-            lines->addPrimitiveSet(new osg::DrawArrays(
-                osg::PrimitiveSet::LINES, 0, static_cast<osg::Vec3Array*>(lines->getVertexArray())->size()));
-
-            nv->pushOntoNodePath(mDebugDrawer.mCustomDebugDrawer[indexRead]);
-            nv->apply(*mDebugDrawer.mCustomDebugDrawer[indexRead]);
-            nv->popFromNodePath();
-        }
-
-        Debug::DebugDrawer& mDebugDrawer;
-    };
 }
 
-Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
-    : mParentNode(std::move(parentNode))
+Debug::DebugDrawer::DebugDrawer(const DebugDrawer& copy, const osg::CopyOp& copyop)
+    : Node(copy, copyop)
+    , mCurrentFrame(copy.mCurrentFrame)
+    , mCustomDebugDrawer(copy.mCustomDebugDrawer)
 {
-    mCurrentFrame = 0;
+}
 
+Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager)
+{
     auto program = shaderManager.getProgram("debug");
 
-    mDebugDrawSceneObjects = new osg::Group;
-    mDebugDrawSceneObjects->setCullingActive(false);
-    osg::StateSet* stateset = mDebugDrawSceneObjects->getOrCreateStateSet();
+    setCullingActive(false);
+    osg::StateSet* stateset = getOrCreateStateSet();
     stateset->addUniform(new osg::Uniform("color", osg::Vec3f(1., 1., 1.)));
     stateset->addUniform(new osg::Uniform("trans", osg::Vec3f(0., 0., 0.)));
     stateset->addUniform(new osg::Uniform("scale", osg::Vec3f(1., 1., 1.)));
@@ -378,19 +353,17 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
         mCustomDebugDrawer[i]->mCubeGeometry = cubeGeometry;
         mCustomDebugDrawer[i]->mCylinderGeometry = cylinderGeom;
     }
-    mDebugDrawSceneObjects->addCullCallback(new DebugDrawCallback(*this));
-
-    mParentNode->addChild(mDebugDrawSceneObjects);
 }
 
-Debug::DebugDrawer::~DebugDrawer()
+void Debug::DebugDrawer::traverse(osg::NodeVisitor& nv)
 {
-    mParentNode->removeChild(mDebugDrawSceneObjects);
+    mCurrentFrame = nv.getTraversalNumber();
+    mCustomDebugDrawer[getIndexBufferReadFromFrame(mCurrentFrame)]->accept(nv);
 }
 
 void Debug::DebugDrawer::drawCube(osg::Vec3f mPosition, osg::Vec3f mDims, osg::Vec3f mColor)
 {
-    mCustomDebugDrawer[getIdexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(
+    mCustomDebugDrawer[getIndexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(
         { mPosition, mDims, mColor, DrawShape::Cube });
 }
 
@@ -403,15 +376,16 @@ void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec
 
 void Debug::DebugDrawer::addDrawCall(const DrawCall& draw)
 {
-    mCustomDebugDrawer[getIdexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(draw);
+    mCustomDebugDrawer[getIndexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(draw);
 }
 
 void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color)
 {
-    const int indexWrite = getIdexBufferWriteFromFrame(mCurrentFrame);
+    const int indexWrite = getIndexBufferWriteFromFrame(mCurrentFrame);
     const auto& lines = mCustomDebugDrawer[indexWrite]->mLinesToDraw;
     auto vertices = static_cast<osg::Vec3Array*>(lines->getVertexArray());
     auto colors = static_cast<osg::Vec3Array*>(lines->getNormalArray());
+    auto primitive = static_cast<osg::DrawArrays*>(lines->getPrimitiveSet(0));
 
     vertices->push_back(start);
     vertices->push_back(end);
@@ -420,4 +394,6 @@ void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, c
     colors->push_back(color);
     colors->push_back(color);
     colors->dirty();
+
+    primitive->setCount(vertices->size());
 }

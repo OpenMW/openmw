@@ -26,7 +26,9 @@ namespace ContentSelectorModel
             FileProperty_DateModified = 3,
             FileProperty_FilePath = 4,
             FileProperty_Description = 5,
-            FileProperty_GameFile = 6
+            FileProperty_BuiltIn = 6,
+            FileProperty_FromAnotherConfigFile = 7,
+            FileProperty_GameFile = 8,
         };
 
         EsmFile(const QString& fileName = QString(), ModelItem* parent = nullptr);
@@ -40,6 +42,8 @@ namespace ContentSelectorModel
         void setFilePath(const QString& path);
         void setGameFiles(const QStringList& gameFiles);
         void setDescription(const QString& description);
+        void setBuiltIn(bool builtIn);
+        void setFromAnotherConfigFile(bool fromAnotherConfigFile);
 
         void addGameFile(const QString& name) { mGameFiles.append(name); }
         QVariant fileProperty(const FileProperty prop) const;
@@ -49,18 +53,29 @@ namespace ContentSelectorModel
         QDateTime modified() const { return mModified; }
         QString formatVersion() const { return mVersion; }
         QString filePath() const { return mPath; }
+        bool builtIn() const { return mBuiltIn; }
+        bool fromAnotherConfigFile() const { return mFromAnotherConfigFile; }
 
         /// @note Contains file names, not paths.
         const QStringList& gameFiles() const { return mGameFiles; }
         QString description() const { return mDescription; }
         QString toolTip() const
         {
-            return mTooltipTemlate.arg(mAuthor)
-                .arg(mVersion)
-                .arg(mModified.toString(Qt::ISODate))
-                .arg(mPath)
-                .arg(mDescription)
-                .arg(mGameFiles.join(", "));
+            QString tooltip = mTooltipTemlate.arg(mAuthor)
+                                  .arg(mVersion)
+                                  .arg(mModified.toString(Qt::ISODate))
+                                  .arg(mPath)
+                                  .arg(mDescription)
+                                  .arg(mGameFiles.join(", "));
+
+            if (mBuiltIn)
+                tooltip += tr("<br/><b>This content file cannot be disabled because it is part of OpenMW.</b><br/>");
+            else if (mFromAnotherConfigFile)
+                tooltip += tr(
+                    "<br/><b>This content file cannot be disabled because it is enabled in a config file other than "
+                    "the user one.</b><br/>");
+
+            return tooltip;
         }
 
         bool isGameFile() const;
@@ -82,6 +97,8 @@ namespace ContentSelectorModel
         QStringList mGameFiles;
         QString mDescription;
         QString mToolTip;
+        bool mBuiltIn = false;
+        bool mFromAnotherConfigFile = false;
     };
 }
 

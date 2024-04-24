@@ -18,7 +18,7 @@ target_link_libraries(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} SDL2::SDL2)
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} PUBLIC
         <memory>
         <string>

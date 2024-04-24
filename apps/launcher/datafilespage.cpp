@@ -142,7 +142,7 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     ui.setupUi(this);
     setObjectName("DataFilesPage");
     mSelector = new ContentSelectorView::ContentSelector(ui.contentSelectorWidget, /*showOMWScripts=*/true);
-    const QString encoding = mGameSettings.value("encoding", "win1252");
+    const QString encoding = mGameSettings.value("encoding", { "win1252" }).value;
     mSelector->setEncoding(encoding);
 
     QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
@@ -163,11 +163,11 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     connect(ui.directoryInsertButton, &QPushButton::released, this, [this]() { this->addSubdirectories(false); });
     connect(ui.directoryUpButton, &QPushButton::released, this, [this]() { this->moveDirectory(-1); });
     connect(ui.directoryDownButton, &QPushButton::released, this, [this]() { this->moveDirectory(1); });
-    connect(ui.directoryRemoveButton, &QPushButton::released, this, [this]() { this->removeDirectory(); });
+    connect(ui.directoryRemoveButton, &QPushButton::released, this, &DataFilesPage::removeDirectory);
     connect(ui.archiveUpButton, &QPushButton::released, this, [this]() { this->moveArchives(-1); });
     connect(ui.archiveDownButton, &QPushButton::released, this, [this]() { this->moveArchives(1); });
-    connect(
-        ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, [this]() { this->sortDirectories(); });
+    connect(ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, &DataFilesPage::sortDirectories);
+    connect(ui.archiveListWidget->model(), &QAbstractItemModel::rowsMoved, this, &DataFilesPage::sortArchives);
 
     buildView();
     loadSettings();
@@ -271,65 +271,79 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     ui.archiveListWidget->clear();
     ui.directoryListWidget->clear();
 
-    QStringList directories = mLauncherSettings.getDataDirectoryList(contentModelName);
-    if (directories.isEmpty())
-        directories = mGameSettings.getDataDirs();
+    QList<Config::SettingValue> directories = mGameSettings.getDataDirs();
+    QStringList contentModelDirectories = mLauncherSettings.getDataDirectoryList(contentModelName);
+    if (!contentModelDirectories.isEmpty())
+    {
+        directories.erase(std::remove_if(directories.begin(), directories.end(),
+                              [&](const Config::SettingValue& dir) { return mGameSettings.isUserSetting(dir); }),
+            directories.end());
+        for (const auto& dir : contentModelDirectories)
+            directories.push_back({ dir });
+    }
 
     mDataLocal = mGameSettings.getDataLocal();
     if (!mDataLocal.isEmpty())
-        directories.insert(0, mDataLocal);
+        directories.insert(0, { mDataLocal });
 
-    const auto& globalDataDir = mGameSettings.getGlobalDataDir();
-    if (!globalDataDir.empty())
-        directories.insert(0, Files::pathToQString(globalDataDir));
+    const auto& resourcesVfs = mGameSettings.getResourcesVfs();
+    if (!resourcesVfs.isEmpty())
+        directories.insert(0, { resourcesVfs });
 
     std::unordered_set<QString> visitedDirectories;
-    for (const QString& currentDir : directories)
+    for (const Config::SettingValue& currentDir : directories)
     {
-        // normalize user supplied directories: resolve symlink, convert to native separator, make absolute
-        const QString canonicalDirPath = QDir(QDir::cleanPath(currentDir)).canonicalPath();
-
-        if (!visitedDirectories.insert(canonicalDirPath).second)
+        if (!visitedDirectories.insert(currentDir.value).second)
             continue;
 
         // add new achives files presents in current directory
-        addArchivesFromDir(currentDir);
+        addArchivesFromDir(currentDir.value);
 
-        QString tooltip;
+        QStringList tooltip;
 
         // add content files presents in current directory
-        mSelector->addFiles(currentDir, mNewDataDirs.contains(canonicalDirPath));
+        mSelector->addFiles(currentDir.value, mNewDataDirs.contains(currentDir.value));
 
         // add current directory to list
-        ui.directoryListWidget->addItem(currentDir);
+        ui.directoryListWidget->addItem(currentDir.originalRepresentation);
         auto row = ui.directoryListWidget->count() - 1;
         auto* item = ui.directoryListWidget->item(row);
+        item->setData(Qt::UserRole, QVariant::fromValue(currentDir));
+
+        if (currentDir.value != currentDir.originalRepresentation)
+            tooltip << tr("Resolved as %1").arg(currentDir.value);
 
         // Display new content with custom formatting
-        if (mNewDataDirs.contains(canonicalDirPath))
+        if (mNewDataDirs.contains(currentDir.value))
         {
-            tooltip += tr("Will be added to the current profile");
+            tooltip << tr("Will be added to the current profile");
             QFont font = item->font();
             font.setBold(true);
             font.setItalic(true);
             item->setFont(font);
         }
 
-        // deactivate data-local and global data directory: they are always included
-        if (currentDir == mDataLocal || Files::pathFromQString(currentDir) == globalDataDir)
+        // deactivate data-local and resources/vfs: they are always included
+        // same for ones from non-user config files
+        if (currentDir.value == mDataLocal || currentDir.value == resourcesVfs
+            || !mGameSettings.isUserSetting(currentDir))
         {
             auto flags = item->flags();
             item->setFlags(flags & ~(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled));
+            if (currentDir.value == mDataLocal)
+                tooltip << tr("This is the data-local directory and cannot be disabled");
+            else if (currentDir.value == resourcesVfs)
+                tooltip << tr("This directory is part of OpenMW and cannot be disabled");
+            else
+                tooltip << tr("This directory is enabled in an openmw.cfg other than the user one");
         }
 
         // Add a "data file" icon if the directory contains a content file
-        if (mSelector->containsDataFiles(currentDir))
+        if (mSelector->containsDataFiles(currentDir.value))
         {
             item->setIcon(QIcon(":/images/openmw-plugin.png"));
-            if (!tooltip.isEmpty())
-                tooltip += "\n";
 
-            tooltip += tr("Contains content file(s)");
+            tooltip << tr("Contains content file(s)");
         }
         else
         {
@@ -339,19 +353,26 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             auto emptyIcon = QIcon(pixmap);
             item->setIcon(emptyIcon);
         }
-        item->setToolTip(tooltip);
+        item->setToolTip(tooltip.join('\n'));
     }
     mSelector->sortFiles();
 
-    QStringList selectedArchives = mLauncherSettings.getArchiveList(contentModelName);
-    if (selectedArchives.isEmpty())
-        selectedArchives = mGameSettings.getArchiveList();
+    QList<Config::SettingValue> selectedArchives = mGameSettings.getArchiveList();
+    QStringList contentModelSelectedArchives = mLauncherSettings.getArchiveList(contentModelName);
+    if (contentModelSelectedArchives.isEmpty())
+    {
+        selectedArchives.erase(std::remove_if(selectedArchives.begin(), selectedArchives.end(),
+                                   [&](const Config::SettingValue& dir) { return mGameSettings.isUserSetting(dir); }),
+            selectedArchives.end());
+        for (const auto& dir : contentModelSelectedArchives)
+            selectedArchives.push_back({ dir });
+    }
 
     // sort and tick BSA according to profile
     int row = 0;
     for (const auto& archive : selectedArchives)
     {
-        const auto match = ui.archiveListWidget->findItems(archive, Qt::MatchExactly);
+        const auto match = ui.archiveListWidget->findItems(archive.value, Qt::MatchExactly);
         if (match.isEmpty())
             continue;
         const auto name = match[0]->text();
@@ -359,9 +380,25 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         ui.archiveListWidget->takeItem(oldrow);
         ui.archiveListWidget->insertItem(row, name);
         ui.archiveListWidget->item(row)->setCheckState(Qt::Checked);
+        ui.archiveListWidget->item(row)->setData(Qt::UserRole, QVariant::fromValue(archive));
+        if (!mGameSettings.isUserSetting(archive))
+        {
+            auto flags = ui.archiveListWidget->item(row)->flags();
+            ui.archiveListWidget->item(row)->setFlags(
+                flags & ~(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled));
+            ui.archiveListWidget->item(row)->setToolTip(
+                tr("This archive is enabled in an openmw.cfg other than the user one"));
+        }
         row++;
     }
 
+    QStringList nonUserContent;
+    for (const auto& content : mGameSettings.getContentList())
+    {
+        if (!mGameSettings.isUserSetting(content))
+            nonUserContent.push_back(content.value);
+    }
+    mSelector->setNonUserContent(nonUserContent);
     mSelector->setProfileContent(mLauncherSettings.getContentListFiles(contentModelName));
 }
 
@@ -389,7 +426,19 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
     {
         fileNames.append(item->fileName());
     }
-    mLauncherSettings.setContentList(profileName, dirList, selectedArchivePaths(), fileNames);
+    QStringList dirNames;
+    for (const auto& dir : dirList)
+    {
+        if (mGameSettings.isUserSetting(dir))
+            dirNames.push_back(dir.originalRepresentation);
+    }
+    QStringList archiveNames;
+    for (const auto& archive : selectedArchivePaths())
+    {
+        if (mGameSettings.isUserSetting(archive))
+            archiveNames.push_back(archive.originalRepresentation);
+    }
+    mLauncherSettings.setContentList(profileName, dirNames, archiveNames, fileNames);
     mGameSettings.setContentList(dirList, selectedArchivePaths(), fileNames);
 
     QString language(mSelector->languageBox()->currentData().toString());
@@ -398,38 +447,38 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
 
     if (language == QLatin1String("Polish"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1250"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1250" });
     }
     else if (language == QLatin1String("Russian"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1251" });
     }
     else
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1252" });
     }
 }
 
-QStringList Launcher::DataFilesPage::selectedDirectoriesPaths() const
+QList<Config::SettingValue> Launcher::DataFilesPage::selectedDirectoriesPaths() const
 {
-    QStringList dirList;
+    QList<Config::SettingValue> dirList;
     for (int i = 0; i < ui.directoryListWidget->count(); ++i)
     {
         const QListWidgetItem* item = ui.directoryListWidget->item(i);
         if (item->flags() & Qt::ItemIsEnabled)
-            dirList.append(item->text());
+            dirList.append(qvariant_cast<Config::SettingValue>(item->data(Qt::UserRole)));
     }
     return dirList;
 }
 
-QStringList Launcher::DataFilesPage::selectedArchivePaths() const
+QList<Config::SettingValue> Launcher::DataFilesPage::selectedArchivePaths() const
 {
-    QStringList archiveList;
+    QList<Config::SettingValue> archiveList;
     for (int i = 0; i < ui.archiveListWidget->count(); ++i)
     {
         const QListWidgetItem* item = ui.archiveListWidget->item(i);
         if (item->checkState() == Qt::Checked)
-            archiveList.append(item->text());
+            archiveList.append(qvariant_cast<Config::SettingValue>(item->data(Qt::UserRole)));
     }
     return archiveList;
 }
@@ -583,7 +632,20 @@ void Launcher::DataFilesPage::on_cloneProfileAction_triggered()
     if (profile.isEmpty())
         return;
 
-    mLauncherSettings.setContentList(profile, selectedDirectoriesPaths(), selectedArchivePaths(), selectedFilePaths());
+    const auto& dirList = selectedDirectoriesPaths();
+    QStringList dirNames;
+    for (const auto& dir : dirList)
+    {
+        if (mGameSettings.isUserSetting(dir))
+            dirNames.push_back(dir.originalRepresentation);
+    }
+    QStringList archiveNames;
+    for (const auto& archive : selectedArchivePaths())
+    {
+        if (mGameSettings.isUserSetting(archive))
+            archiveNames.push_back(archive.originalRepresentation);
+    }
+    mLauncherSettings.setContentList(profile, dirNames, archiveNames, selectedFilePaths());
     addProfile(profile, true);
 }
 
@@ -650,6 +712,9 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
         if (!ui.directoryListWidget->findItems(rootPath, Qt::MatchFixedString).isEmpty())
             return;
         ui.directoryListWidget->addItem(rootPath);
+        auto row = ui.directoryListWidget->count() - 1;
+        auto* item = ui.directoryListWidget->item(row);
+        item->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue{ rootPath }));
         mNewDataDirs.push_back(rootPath);
         refreshDataFilesView();
         return;
@@ -679,8 +744,11 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
         const auto* dir = select.dirListWidget->item(i);
         if (dir->checkState() == Qt::Checked)
         {
-            ui.directoryListWidget->insertItem(selectedRow++, dir->text());
+            ui.directoryListWidget->insertItem(selectedRow, dir->text());
+            auto* item = ui.directoryListWidget->item(selectedRow);
+            item->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue{ dir->text() }));
             mNewDataDirs.push_back(dir->text());
+            ++selectedRow;
         }
     }
 
@@ -698,6 +766,21 @@ void Launcher::DataFilesPage::sortDirectories()
             const auto item = ui.directoryListWidget->takeItem(i);
             ui.directoryListWidget->insertItem(i - 1, item);
             ui.directoryListWidget->setCurrentRow(i);
+        }
+    }
+}
+
+void Launcher::DataFilesPage::sortArchives()
+{
+    // Ensure disabled entries (aka ones from non-user config files) are always at the top.
+    for (auto i = 1; i < ui.archiveListWidget->count(); ++i)
+    {
+        if (!(ui.archiveListWidget->item(i)->flags() & Qt::ItemIsEnabled)
+            && (ui.archiveListWidget->item(i - 1)->flags() & Qt::ItemIsEnabled))
+        {
+            const auto item = ui.archiveListWidget->takeItem(i);
+            ui.archiveListWidget->insertItem(i - 1, item);
+            ui.archiveListWidget->setCurrentRow(i);
         }
     }
 }
@@ -784,9 +867,8 @@ bool Launcher::DataFilesPage::moveArchive(QListWidgetItem* listItem, int step)
     if (selectedRow == -1 || newRow < 0 || newRow > ui.archiveListWidget->count() - 1)
         return false;
 
-    const QListWidgetItem* item = ui.archiveListWidget->takeItem(selectedRow);
-
-    addArchive(item->text(), item->checkState(), newRow);
+    QListWidgetItem* item = ui.archiveListWidget->takeItem(selectedRow);
+    ui.archiveListWidget->insertItem(newRow, item);
     ui.archiveListWidget->setCurrentRow(newRow);
     return true;
 }
@@ -797,6 +879,7 @@ void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState sel
         row = ui.archiveListWidget->count();
     ui.archiveListWidget->insertItem(row, name);
     ui.archiveListWidget->item(row)->setCheckState(selected);
+    ui.archiveListWidget->item(row)->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue{ name }));
     if (mKnownArchives.filter(name).isEmpty()) // XXX why contains doesn't work here ???
     {
         auto item = ui.archiveListWidget->item(row);
@@ -819,7 +902,7 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
     for (const auto& fileinfo : dir.entryInfoList(archiveFilter))
     {
         const auto absPath = fileinfo.absoluteFilePath();
-        if (Bsa::BSAFile::detectVersion(Files::pathFromQString(absPath)) == Bsa::BSAVER_UNKNOWN)
+        if (Bsa::BSAFile::detectVersion(Files::pathFromQString(absPath)) == Bsa::BsaVersion::Unknown)
             continue;
 
         const auto fileName = fileinfo.fileName();

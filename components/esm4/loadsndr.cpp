@@ -41,10 +41,10 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_CTDA:
+            case ESM::fourCC("CTDA"):
                 reader.get(&mTargetCondition, 20);
                 reader.get(mTargetCondition.runOn);
                 reader.get(mTargetCondition.reference);
@@ -52,22 +52,22 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
                     reader.adjustFormId(mTargetCondition.reference);
                 reader.skipSubRecordData(4); // unknown
                 break;
-            case ESM4::SUB_GNAM:
+            case ESM::fourCC("GNAM"):
                 reader.getFormId(mSoundCategory);
                 break;
-            case ESM4::SUB_SNAM:
+            case ESM::fourCC("SNAM"):
                 reader.getFormId(mSoundId);
                 break;
-            case ESM4::SUB_ONAM:
+            case ESM::fourCC("ONAM"):
                 reader.getFormId(mOutputModel);
                 break;
-            case ESM4::SUB_ANAM:
+            case ESM::fourCC("ANAM"):
                 reader.getZString(mSoundFile);
                 break;
-            case ESM4::SUB_LNAM:
+            case ESM::fourCC("LNAM"):
                 reader.get(mLoopInfo);
                 break;
-            case ESM4::SUB_BNAM:
+            case ESM::fourCC("BNAM"):
             {
                 if (subHdr.dataSize == 6)
                     reader.get(mData);
@@ -77,16 +77,16 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
                     reader.skipSubRecordData();
                 break;
             }
-            case ESM4::SUB_CIS1:
-            case ESM4::SUB_CIS2:
-            case ESM4::SUB_CNAM: // CRC32 hash
-            case ESM4::SUB_DNAM: // FO4
-            case ESM4::SUB_FNAM: // unknown
-            case ESM4::SUB_INTV: // FO4
-            case ESM4::SUB_ITMC: // FO4
-            case ESM4::SUB_ITME: // FO4
-            case ESM4::SUB_ITMS: // FO4
-            case ESM4::SUB_NNAM: // FO4
+            case ESM::fourCC("CIS1"):
+            case ESM::fourCC("CIS2"):
+            case ESM::fourCC("CNAM"): // CRC32 hash
+            case ESM::fourCC("DNAM"): // FO4
+            case ESM::fourCC("FNAM"): // unknown
+            case ESM::fourCC("INTV"): // FO4
+            case ESM::fourCC("ITMC"): // FO4
+            case ESM::fourCC("ITME"): // FO4
+            case ESM::fourCC("ITMS"): // FO4
+            case ESM::fourCC("NNAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

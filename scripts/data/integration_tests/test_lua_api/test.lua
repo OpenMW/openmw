@@ -2,6 +2,8 @@ local testing = require('testing_util')
 local core = require('openmw.core')
 local async = require('openmw.async')
 local util = require('openmw.util')
+local types = require('openmw.types')
+local world = require('openmw.world')
 
 local function testTimers()
     testing.expectAlmostEqual(core.getGameTimeScale(), 30, 'incorrect getGameTimeScale() result')
@@ -64,6 +66,67 @@ local function testGetGMST()
     testing.expectEqual(core.getGMST('Level_Up_Level2'), 'something')
 end
 
+local function testMWScript()
+    local variableStoreCount = 18
+    local variableStore = world.mwscript.getGlobalVariables(player)
+    testing.expectEqual(variableStoreCount, #variableStore)
+    
+    variableStore.year = 5
+    testing.expectEqual(5, variableStore.year)
+    variableStore.year = 1
+    local indexCheck = 0
+    for index, value in ipairs(variableStore) do
+        testing.expectEqual(variableStore[index], value)
+        indexCheck = indexCheck + 1
+    end
+    testing.expectEqual(variableStoreCount, indexCheck)
+    indexCheck = 0
+    for index, value in pairs(variableStore) do
+        testing.expectEqual(variableStore[index], value)
+        indexCheck = indexCheck + 1
+    end
+    testing.expectEqual(variableStoreCount, indexCheck)
+end
+
+local function testRecordStore(store,storeName,skipPairs)
+    testing.expect(store.records)
+    local firstRecord = store.records[1]
+    if not firstRecord then return end
+    testing.expectEqual(firstRecord.id,store.records[firstRecord.id].id)
+    local status, _ = pcall(function()
+            for index, value in ipairs(store.records) do
+                if value.id == firstRecord.id then
+                    testing.expectEqual(index,1,storeName)
+                    break
+                end
+            end 
+    end)
+
+    testing.expectEqual(status,true,storeName)
+    
+end
+
+local function testRecordStores()
+    for key, type in pairs(types) do
+        if type.records then
+            testRecordStore(type,key)
+        end
+    end
+    testRecordStore(core.magic.enchantments,"enchantments")
+    testRecordStore(core.magic.effects,"effects",true)
+    testRecordStore(core.magic.spells,"spells")
+
+    testRecordStore(core.stats.Attribute,"Attribute")
+    testRecordStore(core.stats.Skill,"Skill")
+
+    testRecordStore(core.sound,"sound")
+    testRecordStore(core.factions,"factions")
+
+    testRecordStore(types.NPC.classes,"classes")
+    testRecordStore(types.NPC.races,"races")
+    testRecordStore(types.Player.birthSigns,"birthSigns")
+end
+
 local function initPlayer()
     player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
     coroutine.yield()
@@ -101,6 +164,8 @@ tests = {
     end},
     {'teleport', testTeleport},
     {'getGMST', testGetGMST},
+    {'recordStores', testRecordStores},
+    {'mwscript', testMWScript},
 }
 
 return {

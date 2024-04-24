@@ -209,12 +209,11 @@ namespace MWPhysics
             const MWWorld::ConstPtr& ptr, int collisionGroup, int collisionMask) const;
         osg::Vec3f traceDown(const MWWorld::Ptr& ptr, const osg::Vec3f& position, float maxHeight);
 
-        /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all
-        /// other actors.
+        /// @param ignore Optional, a list of Ptr to ignore in the list of results. targets are actors to filter for,
+        /// ignoring all other actors.
         RayCastingResult castRay(const osg::Vec3f& from, const osg::Vec3f& to,
-            const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
-            const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(), int mask = CollisionType_Default,
-            int group = 0xff) const override;
+            const std::vector<MWWorld::ConstPtr>& ignore = {}, const std::vector<MWWorld::Ptr>& targets = {},
+            int mask = CollisionType_Default, int group = 0xff) const override;
         using RayCastingInterface::castRay;
 
         RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius,

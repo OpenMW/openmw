@@ -3,7 +3,7 @@
 
 #include <BulletCollision/Gimpact/btBoxCollision.h>
 
-#include <cstdint>
+#include <cstddef>
 
 namespace DetourNavigator
 {

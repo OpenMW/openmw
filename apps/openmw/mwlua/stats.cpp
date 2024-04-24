@@ -22,7 +22,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "objectvariant.hpp"
-#include "types/types.hpp"
+#include "recordstore.hpp"
 
 namespace
 {
@@ -31,7 +31,7 @@ namespace
     using Index = const SelfObject::CachedStat::Index&;
 
     template <class T>
-    auto addIndexedAccessor(Index index)
+    auto addIndexedAccessor(auto index)
     {
         return [index](const sol::object& o) { return T::create(ObjectVariant(o), index); };
     }
@@ -73,6 +73,96 @@ namespace MWLua
             "StatUpdateAction");
     }
 
+    static void setCreatureValue(Index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+    {
+        auto& stats = ptr.getClass().getCreatureStats(ptr);
+        if (prop == "current")
+            stats.setLevel(LuaUtil::cast<int>(value));
+    }
+
+    static void setNpcValue(Index index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+    {
+        auto& stats = ptr.getClass().getNpcStats(ptr);
+        if (prop == "progress")
+            stats.setLevelProgress(LuaUtil::cast<int>(value));
+        else if (prop == "skillIncreasesForAttribute")
+            stats.setSkillIncreasesForAttribute(
+                *std::get<ESM::RefId>(index).getIf<ESM::StringRefId>(), LuaUtil::cast<int>(value));
+        else if (prop == "skillIncreasesForSpecialization")
+            stats.setSkillIncreasesForSpecialization(
+                static_cast<ESM::Class::Specialization>(std::get<int>(index)), LuaUtil::cast<int>(value));
+    }
+
+    class SkillIncreasesForAttributeStats
+    {
+        ObjectVariant mObject;
+
+    public:
+        SkillIncreasesForAttributeStats(ObjectVariant object)
+            : mObject(std::move(object))
+        {
+        }
+
+        sol::object get(const Context& context, ESM::StringRefId attributeId) const
+        {
+            const auto& ptr = mObject.ptr();
+            if (!ptr.getClass().isNpc())
+                return sol::nil;
+
+            return getValue(context, mObject, &setNpcValue, attributeId, "skillIncreasesForAttribute",
+                [attributeId](const MWWorld::Ptr& ptr) {
+                    return ptr.getClass().getNpcStats(ptr).getSkillIncreasesForAttribute(attributeId);
+                });
+        }
+
+        void set(const Context& context, ESM::StringRefId attributeId, const sol::object& value) const
+        {
+            const auto& ptr = mObject.ptr();
+            if (!ptr.getClass().isNpc())
+                return;
+
+            SelfObject* obj = mObject.asSelfObject();
+            addStatUpdateAction(context.mLuaManager, *obj);
+            obj->mStatsCache[SelfObject::CachedStat{ &setNpcValue, attributeId, "skillIncreasesForAttribute" }] = value;
+        }
+    };
+
+    class SkillIncreasesForSpecializationStats
+    {
+        ObjectVariant mObject;
+
+    public:
+        SkillIncreasesForSpecializationStats(ObjectVariant object)
+            : mObject(std::move(object))
+        {
+        }
+
+        sol::object get(const Context& context, int specialization) const
+        {
+            const auto& ptr = mObject.ptr();
+            if (!ptr.getClass().isNpc())
+                return sol::nil;
+
+            return getValue(context, mObject, &setNpcValue, specialization, "skillIncreasesForSpecialization",
+                [specialization](const MWWorld::Ptr& ptr) {
+                    return ptr.getClass().getNpcStats(ptr).getSkillIncreasesForSpecialization(
+                        static_cast<ESM::Class::Specialization>(specialization));
+                });
+        }
+
+        void set(const Context& context, int specialization, const sol::object& value) const
+        {
+            const auto& ptr = mObject.ptr();
+            if (!ptr.getClass().isNpc())
+                return;
+
+            SelfObject* obj = mObject.asSelfObject();
+            addStatUpdateAction(context.mLuaManager, *obj);
+            obj->mStatsCache[SelfObject::CachedStat{ &setNpcValue, specialization, "skillIncreasesForSpecialization" }]
+                = value;
+        }
+    };
+
     class LevelStat
     {
         ObjectVariant mObject;
@@ -85,7 +175,7 @@ namespace MWLua
     public:
         sol::object getCurrent(const Context& context) const
         {
-            return getValue(context, mObject, &LevelStat::setValue, std::monostate{}, "current",
+            return getValue(context, mObject, &setCreatureValue, std::monostate{}, "current",
                 [](const MWWorld::Ptr& ptr) { return ptr.getClass().getCreatureStats(ptr).getLevel(); });
         }
 
@@ -93,7 +183,7 @@ namespace MWLua
         {
             SelfObject* obj = mObject.asSelfObject();
             addStatUpdateAction(context.mLuaManager, *obj);
-            obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, std::monostate{}, "current" }] = value;
+            obj->mStatsCache[SelfObject::CachedStat{ &setCreatureValue, std::monostate{}, "current" }] = value;
         }
 
         sol::object getProgress(const Context& context) const
@@ -101,7 +191,30 @@ namespace MWLua
             const auto& ptr = mObject.ptr();
             if (!ptr.getClass().isNpc())
                 return sol::nil;
-            return sol::make_object(context.mLua->sol(), ptr.getClass().getNpcStats(ptr).getLevelProgress());
+
+            return getValue(context, mObject, &setNpcValue, std::monostate{}, "progress",
+                [](const MWWorld::Ptr& ptr) { return ptr.getClass().getNpcStats(ptr).getLevelProgress(); });
+        }
+
+        void setProgress(const Context& context, const sol::object& value) const
+        {
+            const auto& ptr = mObject.ptr();
+            if (!ptr.getClass().isNpc())
+                return;
+
+            SelfObject* obj = mObject.asSelfObject();
+            addStatUpdateAction(context.mLuaManager, *obj);
+            obj->mStatsCache[SelfObject::CachedStat{ &setNpcValue, std::monostate{}, "progress" }] = value;
+        }
+
+        SkillIncreasesForAttributeStats getSkillIncreasesForAttributeStats() const
+        {
+            return SkillIncreasesForAttributeStats{ mObject };
+        }
+
+        SkillIncreasesForSpecializationStats getSkillIncreasesForSpecializationStats() const
+        {
+            return SkillIncreasesForSpecializationStats{ mObject };
         }
 
         static std::optional<LevelStat> create(ObjectVariant object, Index)
@@ -109,13 +222,6 @@ namespace MWLua
             if (!object.ptr().getClass().isActor())
                 return {};
             return LevelStat{ std::move(object) };
-        }
-
-        static void setValue(Index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
-        {
-            auto& stats = ptr.getClass().getCreatureStats(ptr);
-            if (prop == "current")
-                stats.setLevel(LuaUtil::cast<int>(value));
         }
     };
 
@@ -319,10 +425,74 @@ namespace MWLua
             stats.setSkill(id, stat);
         }
     };
+
+    class AIStat
+    {
+        ObjectVariant mObject;
+        MWMechanics::AiSetting mIndex;
+
+        AIStat(ObjectVariant object, MWMechanics::AiSetting index)
+            : mObject(std::move(object))
+            , mIndex(index)
+        {
+        }
+
+    public:
+        template <class G>
+        sol::object get(const Context& context, std::string_view prop, G getter) const
+        {
+            return getValue(context, mObject, &AIStat::setValue, static_cast<int>(mIndex), prop,
+                [this, getter](const MWWorld::Ptr& ptr) {
+                    return (ptr.getClass().getCreatureStats(ptr).getAiSetting(mIndex).*getter)();
+                });
+        }
+
+        int getModified(const Context& context) const
+        {
+            auto base = LuaUtil::cast<int>(get(context, "base", &MWMechanics::Stat<int>::getBase));
+            auto modifier = LuaUtil::cast<int>(get(context, "modifier", &MWMechanics::Stat<int>::getModifier));
+            return std::max(0, base + modifier);
+        }
+
+        static std::optional<AIStat> create(ObjectVariant object, MWMechanics::AiSetting index)
+        {
+            if (!object.ptr().getClass().isActor())
+                return {};
+            return AIStat{ std::move(object), index };
+        }
+
+        void cache(const Context& context, std::string_view prop, const sol::object& value) const
+        {
+            SelfObject* obj = mObject.asSelfObject();
+            addStatUpdateAction(context.mLuaManager, *obj);
+            obj->mStatsCache[SelfObject::CachedStat{ &AIStat::setValue, static_cast<int>(mIndex), prop }] = value;
+        }
+
+        static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+        {
+            auto index = static_cast<MWMechanics::AiSetting>(std::get<int>(i));
+            auto& stats = ptr.getClass().getCreatureStats(ptr);
+            auto stat = stats.getAiSetting(index);
+            int intValue = LuaUtil::cast<int>(value);
+            if (prop == "base")
+                stat.setBase(intValue);
+            else if (prop == "modifier")
+                stat.setModifier(intValue);
+            stats.setAiSetting(index, stat);
+        }
+    };
 }
 
 namespace sol
 {
+    template <>
+    struct is_automagical<MWLua::SkillIncreasesForAttributeStats> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<MWLua::SkillIncreasesForSpecializationStats> : std::false_type
+    {
+    };
     template <>
     struct is_automagical<MWLua::LevelStat> : std::false_type
     {
@@ -351,6 +521,10 @@ namespace sol
     struct is_automagical<ESM::MagicSchool> : std::false_type
     {
     };
+    template <>
+    struct is_automagical<MWLua::AIStat> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -360,10 +534,39 @@ namespace MWLua
         sol::table stats(context.mLua->sol(), sol::create);
         actor["stats"] = LuaUtil::makeReadOnly(stats);
 
+        auto skillIncreasesForAttributeStatsT
+            = context.mLua->sol().new_usertype<SkillIncreasesForAttributeStats>("SkillIncreasesForAttributeStats");
+        for (const auto& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
+        {
+            skillIncreasesForAttributeStatsT[ESM::RefId(attribute.mId).serializeText()] = sol::property(
+                [=](const SkillIncreasesForAttributeStats& stat) { return stat.get(context, attribute.mId); },
+                [=](const SkillIncreasesForAttributeStats& stat, const sol::object& value) {
+                    stat.set(context, attribute.mId, value);
+                });
+        }
+        // ESM::Class::specializationIndexToLuaId.at(rec.mData.mSpecialization)
+        auto skillIncreasesForSpecializationStatsT
+            = context.mLua->sol().new_usertype<SkillIncreasesForSpecializationStats>(
+                "skillIncreasesForSpecializationStats");
+        for (int i = 0; i < 3; i++)
+        {
+            std::string_view index = ESM::Class::specializationIndexToLuaId.at(i);
+            skillIncreasesForSpecializationStatsT[index]
+                = sol::property([=](const SkillIncreasesForSpecializationStats& stat) { return stat.get(context, i); },
+                    [=](const SkillIncreasesForSpecializationStats& stat, const sol::object& value) {
+                        stat.set(context, i, value);
+                    });
+        }
+
         auto levelStatT = context.mLua->sol().new_usertype<LevelStat>("LevelStat");
         levelStatT["current"] = sol::property([context](const LevelStat& stat) { return stat.getCurrent(context); },
             [context](const LevelStat& stat, const sol::object& value) { stat.setCurrent(context, value); });
-        levelStatT["progress"] = sol::property([context](const LevelStat& stat) { return stat.getProgress(context); });
+        levelStatT["progress"] = sol::property([context](const LevelStat& stat) { return stat.getProgress(context); },
+            [context](const LevelStat& stat, const sol::object& value) { stat.setProgress(context, value); });
+        levelStatT["skillIncreasesForAttribute"]
+            = sol::readonly_property([](const LevelStat& stat) { return stat.getSkillIncreasesForAttributeStats(); });
+        levelStatT["skillIncreasesForSpecialization"] = sol::readonly_property(
+            [](const LevelStat& stat) { return stat.getSkillIncreasesForSpecializationStats(); });
         stats["level"] = addIndexedAccessor<LevelStat>(0);
 
         auto dynamicStatT = context.mLua->sol().new_usertype<DynamicStat>("DynamicStat");
@@ -386,6 +589,17 @@ namespace MWLua
         stats["attributes"] = LuaUtil::makeReadOnly(attributes);
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
             attributes[ESM::RefId(attribute.mId).serializeText()] = addIndexedAccessor<AttributeStat>(attribute.mId);
+
+        auto aiStatT = context.mLua->sol().new_usertype<AIStat>("AIStat");
+        addProp(context, aiStatT, "base", &MWMechanics::Stat<int>::getBase);
+        addProp(context, aiStatT, "modifier", &MWMechanics::Stat<int>::getModifier);
+        aiStatT["modified"] = sol::readonly_property([=](const AIStat& stat) { return stat.getModified(context); });
+        sol::table ai(context.mLua->sol(), sol::create);
+        stats["ai"] = LuaUtil::makeReadOnly(ai);
+        ai["alarm"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Alarm);
+        ai["fight"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Fight);
+        ai["flee"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Flee);
+        ai["hello"] = addIndexedAccessor<AIStat>(MWMechanics::AiSetting::Hello);
     }
 
     void addNpcStatsBindings(sol::table& npc, const Context& context)
@@ -460,6 +674,13 @@ namespace MWLua
         });
         skillT["attribute"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string {
             return ESM::Attribute::indexToRefId(rec.mData.mAttribute).serializeText();
+        });
+        skillT["skillGain"] = sol::readonly_property([lua](const ESM::Skill& rec) -> sol::table {
+            sol::table res(lua, sol::create);
+            int index = 1;
+            for (auto skillGain : rec.mData.mUseValue)
+                res[index++] = skillGain;
+            return res;
         });
 
         auto schoolT = context.mLua->sol().new_usertype<ESM::MagicSchool>("MagicSchool");

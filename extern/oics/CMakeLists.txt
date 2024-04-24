@@ -22,6 +22,6 @@ endif()
 
 target_link_libraries(oics SDL2::SDL2)
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(oics PUBLIC <algorithm> <string>)
 endif()

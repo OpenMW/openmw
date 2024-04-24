@@ -26,7 +26,7 @@ namespace Resource
         /// Retrieve a NIF file from the cache, or load it from the VFS if not cached yet.
         /// @note For performance reasons the NifFileManager does not handle case folding, needs
         /// to be done in advance by other managers accessing the NifFileManager.
-        Nif::NIFFilePtr get(const std::string& name);
+        Nif::NIFFilePtr get(VFS::Path::NormalizedView name);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
     };

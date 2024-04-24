@@ -222,17 +222,17 @@ namespace MWGui
                         = store->get<ESM::Spell>().find(ESM::RefId::deserialize(focus->getUserString("Spell")));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
-                    for (const ESM::ENAMstruct& spellEffect : spell->mEffects.mList)
+                    for (const ESM::IndexedENAMstruct& spellEffect : spell->mEffects.mList)
                     {
                         Widgets::SpellEffectParams params;
-                        params.mEffectID = spellEffect.mEffectID;
-                        params.mSkill = ESM::Skill::indexToRefId(spellEffect.mSkill);
-                        params.mAttribute = ESM::Attribute::indexToRefId(spellEffect.mAttribute);
-                        params.mDuration = spellEffect.mDuration;
-                        params.mMagnMin = spellEffect.mMagnMin;
-                        params.mMagnMax = spellEffect.mMagnMax;
-                        params.mRange = spellEffect.mRange;
-                        params.mArea = spellEffect.mArea;
+                        params.mEffectID = spellEffect.mData.mEffectID;
+                        params.mSkill = ESM::Skill::indexToRefId(spellEffect.mData.mSkill);
+                        params.mAttribute = ESM::Attribute::indexToRefId(spellEffect.mData.mAttribute);
+                        params.mDuration = spellEffect.mData.mDuration;
+                        params.mMagnMin = spellEffect.mData.mMagnMin;
+                        params.mMagnMax = spellEffect.mData.mMagnMax;
+                        params.mRange = spellEffect.mData.mRange;
+                        params.mArea = spellEffect.mData.mArea;
                         params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);
@@ -410,10 +410,13 @@ namespace MWGui
         const std::string& image = info.icon;
         int imageSize = (!image.empty()) ? info.imageSize : 0;
         std::string text = info.text;
+        std::string_view extra = info.extra;
 
         // remove the first newline (easier this way)
-        if (text.size() > 0 && text[0] == '\n')
+        if (!text.empty() && text[0] == '\n')
             text.erase(0, 1);
+        if (!extra.empty() && extra[0] == '\n')
+            extra = extra.substr(1);
 
         const ESM::Enchantment* enchant = nullptr;
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -570,6 +573,24 @@ namespace MWGui
                 chargeWidget->setValue(charge, maxCharge);
                 totalSize.height += 24;
             }
+        }
+
+        if (!extra.empty())
+        {
+            Gui::EditBox* extraWidget = mDynamicToolTipBox->createWidget<Gui::EditBox>("SandText",
+                MyGUI::IntCoord(padding.left, totalSize.height + 12, 300 - padding.left, 300 - totalSize.height),
+                MyGUI::Align::Stretch, "ToolTipExtraText");
+
+            extraWidget->setEditStatic(true);
+            extraWidget->setEditMultiLine(true);
+            extraWidget->setEditWordWrap(info.wordWrap);
+            extraWidget->setCaptionWithReplacing(extra);
+            extraWidget->setTextAlign(MyGUI::Align::HCenter | MyGUI::Align::Top);
+            extraWidget->setNeedKeyFocus(false);
+
+            MyGUI::IntSize extraTextSize = extraWidget->getTextSize();
+            totalSize.height += extraTextSize.height + 4;
+            totalSize.width = std::max(totalSize.width, extraTextSize.width);
         }
 
         captionWidget->setCoord((totalSize.width - captionSize.width) / 2 + imageSize,

@@ -30,6 +30,7 @@
 #include <deque>
 #include <vector>
 
+#include "glextensions.hpp"
 #include "shadowsbin.hpp"
 
 namespace {
@@ -920,8 +921,7 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
 
     osg::ref_ptr<osg::Shader> castingVertexShader = shaderManager.getShader("shadowcasting.vert");
-    osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
-    std::string useGPUShader4 = exts && exts->isGpuShader4Supported ? "1" : "0";
+    std::string useGPUShader4 = SceneUtil::getGLExtensions().isGpuShader4Supported ? "1" : "0";
     for (int alphaFunc = GL_NEVER; alphaFunc <= GL_ALWAYS; ++alphaFunc)
     {
         auto& program = _castingPrograms[alphaFunc - GL_NEVER];
@@ -1025,7 +1025,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             {
                 dummyState->setTextureAttribute(i, _fallbackShadowMapTexture, osg::StateAttribute::ON);
                 dummyState->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseUnit)).c_str(), i));
-                dummyState->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseUnit)).c_str(), i));
             }
 
             cv.pushStateSet(dummyState);
@@ -1710,14 +1709,6 @@ void MWShadowTechnique::createShaders()
             osg::ref_ptr<osg::Uniform> shadowTextureSampler = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
             for (auto& perFrameUniformList : _uniforms)
                 perFrameUniformList.emplace_back(shadowTextureSampler.get());
-        }
-
-        {
-            std::stringstream sstr;
-            sstr<<"shadowTextureUnit"<<sm_i;
-            osg::ref_ptr<osg::Uniform> shadowTextureUnit = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
-            for (auto& perFrameUniformList : _uniforms)
-                perFrameUniformList.emplace_back(shadowTextureUnit.get());
         }
     }
 
