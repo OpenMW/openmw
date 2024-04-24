@@ -6,12 +6,6 @@
 
 namespace MWNet
 {
-    enum ChannelName
-    {
-        EVENTSQUEUE = 0,
-        GAMESTATE = 1
-    };
-
     constexpr const int DefaultClientPort = 30000;
     constexpr const int DefaultServerPort = 40000;
     constexpr const int DefaultMaxClients = 64;

@@ -163,9 +163,19 @@ YOJIMBO_MESSAGE_FACTORY_START(SingleBlockTestMessageFactory, NUM_SINGLE_BLOCK_TE
 YOJIMBO_DECLARE_MESSAGE_TYPE(SINGLE_BLOCK_TEST_MESSAGE, TestBlockMessage);
 YOJIMBO_MESSAGE_FACTORY_FINISH()
 
+constexpr uint MAX_STRING_LENGTH = 256 + sizeof(int) + 1;
+
+enum ChannelName
+{
+    EVENTSQUEUE,
+    GAMESTATE,
+    NUM_MWNET_CHANNELS,
+};
+
 enum UnorderedSyncedMessage
 {
     PLAYER_LOGIN_MESSAGE,
+    LUA_SCRIPT_ID,
     NUM_UNORDERED_SYNC_MESSAGES,
 };
 
@@ -189,8 +199,36 @@ public:
     YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
 };
 
+class LuaScriptIdMessage : public yojimbo::Message
+{
+public:
+    std::string scriptId;
+
+    LuaScriptIdMessage() {}
+
+    template <typename Stream>
+    bool Serialize(Stream& stream)
+    {
+        if (Stream::IsReading)
+        {
+            char localScriptId[MAX_STRING_LENGTH];
+            serialize_string(stream, localScriptId, MAX_STRING_LENGTH);
+            scriptId = std::string(localScriptId);
+        }
+
+        if (Stream::IsWriting)
+        {
+            serialize_string(stream, scriptId.data(), MAX_STRING_LENGTH);
+        }
+
+        return true;
+    }
+    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+};
+
 YOJIMBO_MESSAGE_FACTORY_START(MWNetUnorderedMessageFactory, NUM_UNORDERED_SYNC_MESSAGES);
 YOJIMBO_DECLARE_MESSAGE_TYPE(PLAYER_LOGIN_MESSAGE, PlayerLoginMessage);
+YOJIMBO_DECLARE_MESSAGE_TYPE(LUA_SCRIPT_ID, LuaScriptIdMessage);
 YOJIMBO_MESSAGE_FACTORY_FINISH()
 
 #endif // #ifndef NETWORKMESSAGES_H
