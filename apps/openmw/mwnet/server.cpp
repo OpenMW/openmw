@@ -1,10 +1,10 @@
-#include <apps/openmw/mwnet/networkmessages.hpp>
 #include <csignal>
 #include <stdexcept>
 #include <time.h>
 
 #include <yojimbo.h>
 
+#include "networkmessages.hpp"
 #include "server.hpp"
 #include <components/debug/debuglog.hpp>
 
@@ -83,53 +83,74 @@ void MWNet::Server::updateConnection()
     mServer->AdvanceTime(mTime);
     mServer->ReceivePackets();
     processMessages();
-    // Actually process messages in between
     mServer->SendPackets();
 }
 
 void MWNet::Server::processMessages()
 {
-    for (unsigned int i = 0; i < MWNet::DefaultMaxClients; i++)
+    for (unsigned int clientIndex = 0; clientIndex < MWNet::DefaultMaxClients; ++clientIndex)
     {
-        if (!mServer->IsClientConnected(i))
+        if (!mServer->IsClientConnected(clientIndex))
         {
             continue;
         }
 
-        for (int j = 0; j < mConfig.numChannels; j++)
+        for (int channelIndex = 0; channelIndex < ChannelName::NUM_MWNET_CHANNELS; ++channelIndex)
         {
-            yojimbo::Message* message = mServer->ReceiveMessage(i, j);
+            yojimbo::Message* message = mServer->ReceiveMessage(clientIndex, channelIndex);
             while (message)
             {
-                processMessage(i, message);
+                processMessage(clientIndex, channelIndex, message);
 
-                mServer->ReleaseMessage(i, message);
+                mServer->ReleaseMessage(clientIndex, message);
 
-                message = mServer->ReceiveMessage(i, j);
+                message = mServer->ReceiveMessage(clientIndex, channelIndex);
             }
         }
     }
 }
 
-void MWNet::Server::processMessage(int clientIndex, yojimbo::Message* message)
+bool MWNet::Server::processMessage(int clientIndex, int channelIndex, yojimbo::Message* message)
 {
-    switch (message->GetType())
+    const uint messageType = message->GetType();
+
+    switch (channelIndex)
     {
-        case (int)TestMessageType::TEST_MESSAGE:
-            processTestMessage(clientIndex, (TestMessage*)message);
-            break;
+        case ChannelName::EVENTSQUEUE:
+        {
+            Log(Debug::Info) << "SERVER: received message on EVENTSQUEUE channel";
+
+            if (messageType >= UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES)
+            {
+                Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "
+                                  << clientIndex;
+                mServer->DisconnectClient(clientIndex);
+                return false;
+            }
+            mMessageHandlers[messageType](clientIndex, message);
+            return true;
+        }
+        case ChannelName::GAMESTATE:
+        {
+            Log(Debug::Info) << "SERVER: received message on GAMESTATE channel";
+
+            if (messageType >= UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES)
+            {
+                Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "
+                                  << clientIndex;
+                return false;
+            }
+            mMessageHandlers[messageType](clientIndex, message);
+            return true;
+        }
         default:
-            break;
+        {
+            Log(Debug::Error) << "SERVER: received message on unknown channel: " << channelIndex << ", disconnecting "
+                              << clientIndex;
+            mServer->DisconnectClient(clientIndex);
+            return false;
+        }
     }
-}
-
-void MWNet::Server::processTestMessage(int clientIndex, TestMessage* message)
-{
-    Log(Debug::Info) << "SERVER: received test message from client " << clientIndex << ": " << message->sequence;
-
-    TestMessage* response = (TestMessage*)mServer->CreateMessage((int)TestMessageType::TEST_MESSAGE, clientIndex);
-    response->sequence = 24;
-    mServer->SendMessage((int)yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED, clientIndex, response);
 }
 
 void MWNet::Server::clientConnected(int clientIndex)
