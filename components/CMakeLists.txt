@@ -108,7 +108,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bgsm
-    reader stream file
+    stream file
     )
 
 add_component_dir (bsa

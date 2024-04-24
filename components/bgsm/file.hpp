@@ -10,6 +10,8 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
+#include <components/files/istreamptr.hpp>
+
 namespace Bgsm
 {
     class BGSMStream;
@@ -160,5 +162,6 @@ namespace Bgsm
     };
 
     using MaterialFilePtr = std::shared_ptr<const Bgsm::MaterialFile>;
+    MaterialFilePtr parse(Files::IStreamPtr&& stream);
 }
 #endif
