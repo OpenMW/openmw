@@ -340,11 +340,12 @@ bool OMW::Engine::frame(float frametime)
         mWorld->updateWindowManager();
     }
 
-    mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
+    // if there is a separate Lua thread, it starts the update now
+    mLuaWorker->allowUpdate(frameStart, frameNumber, *stats);
 
     mViewer->renderingTraversals();
 
-    mLuaWorker->finishUpdate();
+    mLuaWorker->finishUpdate(frameStart, frameNumber, *stats);
 
     return true;
 }
@@ -910,7 +911,7 @@ void OMW::Engine::prepareEngine()
     mLuaManager->init();
 
     // starts a separate lua thread if "lua num threads" > 0
-    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager, *mViewer);
+    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager);
 }
 
 // Initialise and enter main loop.
