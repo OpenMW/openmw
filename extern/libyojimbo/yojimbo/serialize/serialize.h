@@ -22,6 +22,7 @@
     USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <string>
 #ifndef SERIALIZE_SERIALIZE_CHECKS
 #define SERIALIZE_SERIALIZE_CHECKS 0
 #endif
@@ -1502,6 +1503,52 @@ namespace serialize
         }
         return true;
     }
+
+    template <typename Stream>
+    bool serialize_std_string_internal(Stream& stream, std::string& string, std::size_t buffer_size)
+    {
+        int length = 0;
+        if (Stream::IsWriting)
+        {
+            length = string.length();
+            serialize_assert(length < buffer_size);
+            serialize_assert(length < std::numeric_limits<uint16_t>::max());
+            serialize_int(stream, length, 0, buffer_size - 1);
+            serialize_bytes(stream, (uint8_t*)string.data(), length);
+        }
+
+        if (Stream::IsReading)
+        {
+            serialize_int(stream, length, 0, buffer_size - 1);
+            string.resize(length);
+            serialize_bytes(stream, (uint8_t*)string.data(), length);
+        }
+
+        return true;
+    }
+
+    /**
+        DREAMWEAVE SERIALIZATION:
+        Serialize an std::string to the stream (read/write/measure).
+        This is a helper macro to make writing unified serialize functions easier.
+        Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
+       an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
+       macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
+       method must have a bool return value.
+        @param stream The stream object. May be a read, write or measure stream.
+        @param std::string The string to serialize write/measure. Just stick an std::string in here.
+        @param buffer_size The size of the string buffer. String with terminating null character must fit into this
+       buffer.
+     */
+
+#define serialize_std_string(stream, string, buffer_size)                                                              \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!serialize::serialize_std_string_internal(stream, string, buffer_size))                                    \
+        {                                                                                                              \
+            return false;                                                                                              \
+        }                                                                                                              \
+    } while (0)
 
     /**
         Serialize a string to the stream (read/write/measure).
