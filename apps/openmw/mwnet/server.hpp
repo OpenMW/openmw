@@ -1,5 +1,6 @@
 #ifndef MWNET_SERVER_H_
 #define MWNET_SERVER_H_
+#include <components/debug/debuglog.hpp>
 #include <functional>
 #include <memory>
 
@@ -34,7 +35,8 @@ namespace MWNet
 
             if (!newMessage)
             {
-                std::cout << "SERVER: received invalid message from client " << clientIndex << ", disconnecting\n";
+                Log(Debug::Error) << "SERVER: received invalid message from client " << clientIndex
+                                  << ", disconnecting\n";
                 mServer->DisconnectClient(clientIndex);
             }
 
