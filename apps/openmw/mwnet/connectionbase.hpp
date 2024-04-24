@@ -22,7 +22,7 @@ namespace MWNet
     public:
         MessageFactory* CreateMessageFactory(Allocator& allocator)
         {
-            return YOJIMBO_NEW(allocator, TestMessageFactory, allocator);
+            return YOJIMBO_NEW(allocator, MWNetUnorderedMessageFactory, allocator);
         }
 
         virtual void OnServerClientConnected(int clientIndex) {}
