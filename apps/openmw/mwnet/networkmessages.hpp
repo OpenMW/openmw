@@ -28,6 +28,7 @@
 #define NETWORKMESSAGES_H
 
 #include <stdint.h>
+#include <string>
 #include <yojimbo.h>
 
 using namespace yojimbo;
@@ -163,7 +164,7 @@ YOJIMBO_MESSAGE_FACTORY_START(SingleBlockTestMessageFactory, NUM_SINGLE_BLOCK_TE
 YOJIMBO_DECLARE_MESSAGE_TYPE(SINGLE_BLOCK_TEST_MESSAGE, TestBlockMessage);
 YOJIMBO_MESSAGE_FACTORY_FINISH()
 
-constexpr uint MAX_STRING_LENGTH = 256 + sizeof(int) + 1;
+constexpr std::size_t MAX_STRING_LENGTH = 256 + sizeof(int) + 1;
 
 enum ChannelName
 {
@@ -182,17 +183,14 @@ enum UnorderedSyncedMessage
 class PlayerLoginMessage : public yojimbo::Message
 {
 public:
-    float posData;
+    MWLua::GObject player;
 
-    PlayerLoginMessage()
-        : posData(0)
-    {
-    }
+    PlayerLoginMessage() {}
 
     template <typename Stream>
     bool Serialize(Stream& stream)
     {
-        serialize_float(stream, posData);
+        serialize_bytes(stream, (uint8_t*)&player, sizeof(player));
         return true;
     }
 
