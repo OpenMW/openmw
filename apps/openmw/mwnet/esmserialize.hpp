@@ -1,9 +1,11 @@
 #ifndef ESMSERIALIZE_H_
 #define ESMSERIALIZE_H_
 
+#include <apps/openmw/mwmechanics/stat.hpp>
 #include <components/esm3/cellref.hpp>
 #include <cstdint>
 #include <limits>
+#include <map>
 #include <osg/Vec3f>
 #include <serialize.h>
 
@@ -50,8 +52,12 @@ namespace serialize
     template <typename Stream>
     bool serialize_esm_position_internal(Stream& stream, ESM::Position& position)
     {
-        serialize_vec3f_internal(stream, position.pos);
-        serialize_vec3f_internal(stream, position.rot);
+        serialize_float(stream, position.pos[0]);
+        serialize_float(stream, position.pos[1]);
+        serialize_float(stream, position.pos[2]);
+        serialize_float(stream, position.rot[0]);
+        serialize_float(stream, position.rot[1]);
+        serialize_float(stream, position.rot[2]);
         return true;
     }
 
@@ -70,7 +76,7 @@ namespace serialize
 #define serialize_esm_position(stream, position)                                                                       \
     do                                                                                                                 \
     {                                                                                                                  \
-        if (!serialize::serialize_esm_position_internal(stream, string))                                               \
+        if (!serialize::serialize_esm_position_internal(stream, position))                                             \
         {                                                                                                              \
             return false;                                                                                              \
         }                                                                                                              \
@@ -135,7 +141,9 @@ namespace serialize
        macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
        method must have a bool return value.
         @param stream The stream object. May be a read, write or measure stream.
-        @param esm::refnum The object's refnum. Internally this serializer uses the toUint32 method of refId.
+        @param esm::refnum The object's refnum; an int32 and uint32.
+        Note that `hasContentFile` is a method, so we're unsure what implications may be associated with just making up
+       refNums on the fly.
      */
 
 #define serialize_ref_num(stream, refNum)                                                                              \
@@ -146,8 +154,80 @@ namespace serialize
             return false;                                                                                              \
         }                                                                                                              \
     } while (0)
-    // DynamicStats
-    // ESM::Skill
+
+    // DynamicStats (CreatureStats)
+
+    // ESM3::Skills
+    template <typename Stream>
+    bool serialize_esm3_skills_internal(Stream& stream, std::map<ESM::RefId, MWMechanics::SkillValue>& skillsMap)
+    {
+        if (Stream::IsReading)
+        {
+            uint numSkills;
+            serialize_int(stream, numSkills, 0, std::numeric_limits<int>::max());
+
+            for (uint i = 0; i < numSkills; ++i)
+            {
+                float base, damage, modifier, progress;
+                ESM::RefId refId;
+                MWMechanics::SkillValue skillValue;
+                serialize_ref_id(stream, refId);
+                serialize_float(stream, base);
+                serialize_float(stream, damage);
+                serialize_float(stream, modifier);
+                serialize_float(stream, progress);
+                skillValue.setBase(base);
+                skillValue.setModifier(modifier);
+                skillValue.setProgress(progress);
+                skillValue.damage(damage);
+                skillsMap.insert(std::make_pair(refId, skillValue));
+            }
+        }
+
+        if (Stream::IsWriting)
+        {
+            uint numSkills = skillsMap.size();
+            serialize_int(stream, numSkills, 0, std::numeric_limits<int>::max());
+            for (const auto& pair : skillsMap)
+            {
+                float base = pair.second.getBase();
+                float damage = pair.second.getDamage();
+                float modifier = pair.second.getModifier();
+                float progress = pair.second.getProgress();
+                ESM::RefId refId = pair.first;
+                serialize_ref_id(stream, refId);
+                serialize_float(stream, base);
+                serialize_float(stream, damage);
+                serialize_float(stream, modifier);
+                serialize_float(stream, progress);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+        DREAMWEAVE SERIALIZATION:
+        Serialize an std::string to the stream (read/write/measure).
+        This is a helper macro to make writing unified serialize functions easier.
+        Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
+       an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
+       macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
+       method must have a bool return value.
+        @param stream The stream object. May be a read, write or measure stream.
+        @param esm::refnum The object's refnum; an int32 and uint32.
+        Note that `hasContentFile` is a method, so we're unsure what implications may be associated with just making up
+       refNums on the fly.
+     */
+
+#define serialize_esm3_skills(stream, skillsMap)                                                                       \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!serialize::serialize_esm3_skills_internal(stream, skillsMap))                                             \
+        {                                                                                                              \
+            return false;                                                                                              \
+        }                                                                                                              \
+    } while (0)
     // ESM::Attribute
     // ESM::Class ?
     // Whatever the spell list is
