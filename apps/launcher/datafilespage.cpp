@@ -349,7 +349,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         {
             // Pad to correct vertical alignment
             QPixmap pixmap(QSize(200, 200)); // Arbitrary big number, will be scaled down to widget size
-            pixmap.fill(ui.directoryListWidget->palette().base().color());
+            pixmap.fill(QColor(0, 0, 0, 0));
             auto emptyIcon = QIcon(pixmap);
             item->setIcon(emptyIcon);
         }
