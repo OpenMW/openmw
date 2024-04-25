@@ -54,6 +54,7 @@ namespace Resource
             constexpr std::string_view firstPage[] = {
                 "FrameNumber",
                 "",
+                "Loading",
                 "Compiling",
                 "WorkQueue",
                 "WorkThread",
@@ -72,7 +73,6 @@ namespace Resource
                 "Physics HeightFields",
                 "",
                 "Lua UsedMemory",
-                "",
                 "",
                 "",
                 "",
