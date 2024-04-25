@@ -33,7 +33,7 @@
    <item>
     <widget class="QCheckBox" name="importCheckBox">
      <property name="text">
-      <string>Import settings from Morrowind.ini</string>
+      <string>Import Settings From Morrowind.ini</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -43,7 +43,7 @@
    <item>
     <widget class="QCheckBox" name="addonsCheckBox">
      <property name="text">
-      <string>Import add-on and plugin selection</string>
+      <string>Import Add-on and Plugin Selection</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -53,7 +53,7 @@
    <item>
     <widget class="QCheckBox" name="fontsCheckBox">
      <property name="text">
-      <string>Import bitmap fonts setup from Morrowind.ini</string>
+      <string>Import Bitmap Fonts Setup From Morrowind.ini</string>
      </property>
      <property name="toolTip">
       <string>Fonts shipped with the original engine are blurry with UI scaling and support only a small amount of characters,

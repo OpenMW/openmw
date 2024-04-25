@@ -2,6 +2,7 @@
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/misc/osgpluginchecker.hpp>
 #include <components/misc/rng.hpp>
 #include <components/platform/platform.hpp>
 #include <components/version/version.hpp>
@@ -108,7 +109,8 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
         return false;
     }
-    std::set<std::string> contentDedupe;
+    engine.addContentFile("builtin.omwscripts");
+    std::set<std::string> contentDedupe{ "builtin.omwscripts" };
     for (const auto& contentFile : content)
     {
         if (!contentDedupe.insert(contentFile).second)
@@ -228,6 +230,9 @@ int runApplication(int argc, char* argv[])
 
     if (parseOptions(argc, argv, *engine, cfgMgr))
     {
+        if (!Misc::checkRequiredOSGPluginsArePresent())
+            return 1;
+
         engine->go();
     }
 

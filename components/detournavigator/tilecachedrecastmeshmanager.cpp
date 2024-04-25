@@ -10,7 +10,6 @@
 
 #include <boost/geometry/geometry.hpp>
 
-#include <algorithm>
 #include <limits>
 #include <vector>
 
@@ -416,7 +415,7 @@ namespace DetourNavigator
         if (tile == mChangedTiles.end())
             mChangedTiles.emplace(tilePosition, changeType);
         else
-            tile->second = addChangeType(tile->second, changeType);
+            tile->second = changeType == ChangeType::remove ? changeType : tile->second;
     }
 
     std::map<osg::Vec2i, ChangeType> TileCachedRecastMeshManager::takeChangedTiles(const UpdateGuard* guard)

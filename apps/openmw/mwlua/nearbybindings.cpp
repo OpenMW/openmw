@@ -16,6 +16,31 @@
 #include "luamanagerimp.hpp"
 #include "objectlists.hpp"
 
+namespace
+{
+    template <class T = MWWorld::Ptr>
+    std::vector<T> parseIgnoreList(const sol::table& options)
+    {
+        std::vector<T> ignore;
+
+        if (const auto& ignoreObj = options.get<sol::optional<MWLua::LObject>>("ignore"))
+        {
+            ignore.push_back(ignoreObj->ptr());
+        }
+        else if (const auto& ignoreTable = options.get<sol::optional<sol::table>>("ignore"))
+        {
+            ignoreTable->for_each([&](const auto& _, const sol::object& value) {
+                if (value.is<MWLua::LObject>())
+                {
+                    ignore.push_back(value.as<MWLua::LObject>().ptr());
+                }
+            });
+        }
+
+        return ignore;
+    }
+}
+
 namespace sol
 {
     template <>
@@ -71,24 +96,27 @@ namespace MWLua
             }));
 
         api["castRay"] = [](const osg::Vec3f& from, const osg::Vec3f& to, sol::optional<sol::table> options) {
-            MWWorld::Ptr ignore;
+            std::vector<MWWorld::ConstPtr> ignore;
             int collisionType = MWPhysics::CollisionType_Default;
             float radius = 0;
             if (options)
             {
-                sol::optional<LObject> ignoreObj = options->get<sol::optional<LObject>>("ignore");
-                if (ignoreObj)
-                    ignore = ignoreObj->ptr();
+                ignore = parseIgnoreList<MWWorld::ConstPtr>(*options);
                 collisionType = options->get<sol::optional<int>>("collisionType").value_or(collisionType);
                 radius = options->get<sol::optional<float>>("radius").value_or(0);
             }
             const MWPhysics::RayCastingInterface* rayCasting = MWBase::Environment::get().getWorld()->getRayCasting();
             if (radius <= 0)
-                return rayCasting->castRay(from, to, ignore, std::vector<MWWorld::Ptr>(), collisionType);
+            {
+                return rayCasting->castRay(from, to, ignore, {}, collisionType);
+            }
             else
             {
-                if (!ignore.isEmpty())
-                    throw std::logic_error("Currently castRay doesn't support `ignore` when radius > 0");
+                for (const auto& ptr : ignore)
+                {
+                    if (!ptr.isEmpty())
+                        throw std::logic_error("Currently castRay doesn't support `ignore` when radius > 0");
+                }
                 return rayCasting->castSphere(from, to, radius, collisionType);
             }
         };
@@ -108,22 +136,37 @@ namespace MWLua
             //       and use this callback from the main thread at the beginning of the next frame processing.
             rayCasting->asyncCastRay(callback, from, to, ignore, std::vector<MWWorld::Ptr>(), collisionType);
         };*/
-        api["castRenderingRay"] = [manager = context.mLuaManager](const osg::Vec3f& from, const osg::Vec3f& to) {
+        api["castRenderingRay"] = [manager = context.mLuaManager](const osg::Vec3f& from, const osg::Vec3f& to,
+                                      const sol::optional<sol::table>& options) {
             if (!manager->isProcessingInputEvents())
             {
                 throw std::logic_error(
                     "castRenderingRay can be used only in player scripts during processing of input events; "
                     "use asyncCastRenderingRay instead.");
             }
+
+            std::vector<MWWorld::Ptr> ignore;
+            if (options.has_value())
+            {
+                ignore = parseIgnoreList(*options);
+            }
+
             MWPhysics::RayCastingResult res;
-            MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false);
+            MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false, ignore);
             return res;
         };
-        api["asyncCastRenderingRay"] = [context](
-                                           const sol::table& callback, const osg::Vec3f& from, const osg::Vec3f& to) {
-            context.mLuaManager->addAction([context, callback = LuaUtil::Callback::fromLua(callback), from, to] {
+        api["asyncCastRenderingRay"] = [context](const sol::table& callback, const osg::Vec3f& from,
+                                           const osg::Vec3f& to, const sol::optional<sol::table>& options) {
+            std::vector<MWWorld::Ptr> ignore;
+            if (options.has_value())
+            {
+                ignore = parseIgnoreList(*options);
+            }
+
+            context.mLuaManager->addAction([context, ignore = std::move(ignore),
+                                               callback = LuaUtil::Callback::fromLua(callback), from, to] {
                 MWPhysics::RayCastingResult res;
-                MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false);
+                MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false, ignore);
                 context.mLuaManager->queueCallback(callback, sol::main_object(context.mLua->sol(), sol::in_place, res));
             });
         };

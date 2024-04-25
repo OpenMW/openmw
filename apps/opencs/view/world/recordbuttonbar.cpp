@@ -92,7 +92,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar(const CSMWorld::UniversalId& id, CSMW
     if (mTable.getFeatures() & CSMWorld::IdTable::Feature_View)
     {
         QToolButton* viewButton = new QToolButton(this);
-        viewButton->setIcon(QIcon(":/cell.png"));
+        viewButton->setIcon(QIcon(":cell"));
         viewButton->setToolTip("Open a scene view of the cell this record is located in");
         buttonsLayout->addWidget(viewButton);
         connect(viewButton, &QToolButton::clicked, this, &RecordButtonBar::viewRecord);

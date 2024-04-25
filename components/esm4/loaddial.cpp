@@ -42,19 +42,19 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mTopicName);
                 break;
-            case ESM4::SUB_QSTI:
+            case ESM::fourCC("QSTI"):
                 reader.getFormId(mQuests.emplace_back());
                 break;
-            case ESM4::SUB_QSTR: // Seems never used in TES4
+            case ESM::fourCC("QSTR"): // Seems never used in TES4
                 reader.getFormId(mQuestsRemoved.emplace_back());
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 if (subHdr.dataSize == 4) // TES5
                 {
@@ -74,20 +74,20 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PNAM:
+            case ESM::fourCC("PNAM"):
                 reader.get(mPriority);
                 break; // FO3/FONV
-            case ESM4::SUB_TDUM:
+            case ESM::fourCC("TDUM"):
                 reader.getZString(mTextDumb);
                 break; // FONV
-            case ESM4::SUB_SCRI:
-            case ESM4::SUB_INFC: // FONV info connection
-            case ESM4::SUB_INFX: // FONV info index
-            case ESM4::SUB_QNAM: // TES5
-            case ESM4::SUB_BNAM: // TES5
-            case ESM4::SUB_SNAM: // TES5
-            case ESM4::SUB_TIFC: // TES5
-            case ESM4::SUB_KNAM: // FO4
+            case ESM::fourCC("SCRI"):
+            case ESM::fourCC("INFC"): // FONV info connection
+            case ESM::fourCC("INFX"): // FONV info index
+            case ESM::fourCC("QNAM"): // TES5
+            case ESM::fourCC("BNAM"): // TES5
+            case ESM::fourCC("SNAM"): // TES5
+            case ESM::fourCC("TIFC"): // TES5
+            case ESM::fourCC("KNAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

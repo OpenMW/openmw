@@ -41,22 +41,22 @@ void ESM4::Colour::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_CNAM:
+            case ESM::fourCC("CNAM"):
                 reader.get(mColour.red);
                 reader.get(mColour.green);
                 reader.get(mColour.blue);
                 reader.get(mColour.custom);
                 break;
-            case ESM4::SUB_FNAM:
+            case ESM::fourCC("FNAM"):
                 reader.get(mPlayable);
                 break;
-            case ESM4::SUB_CTDA:
+            case ESM::fourCC("CTDA"):
                 reader.skipSubRecordData();
                 break;
             default:

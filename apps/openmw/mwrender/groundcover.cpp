@@ -95,6 +95,8 @@ namespace MWRender
                     {
                         // Other objects are likely cheaper and should let us skip all but a few groundcover instances
                         cullVisitor.computeNearPlane();
+                        computedZNear = cullVisitor.getCalculatedNearPlane();
+                        computedZFar = cullVisitor.getCalculatedFarPlane();
 
                         if (dNear < computedZNear)
                         {
@@ -194,6 +196,18 @@ namespace MWRender
                 , mInstances(instances)
                 , mChunkPosition(chunkPosition)
             {
+            }
+
+            void apply(osg::Group& group) override
+            {
+                for (unsigned int i = 0; i < group.getNumChildren();)
+                {
+                    if (group.getChild(i)->asDrawable() && !group.getChild(i)->asGeometry())
+                        group.removeChild(i);
+                    else
+                        ++i;
+                }
+                traverse(group);
             }
 
             void apply(osg::Geometry& geom) override
@@ -449,6 +463,6 @@ namespace MWRender
 
     void Groundcover::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Groundcover Chunk", mCache->getCacheSize());
+        Resource::reportStats("Groundcover Chunk", frameNumber, mCache->getStats(), *stats);
     }
 }

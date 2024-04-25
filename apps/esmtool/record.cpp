@@ -57,112 +57,82 @@ namespace
             std::cout << "    Cell Name: " << p.mCellName << std::endl;
     }
 
-    std::string ruleString(const ESM::DialInfo::SelectStruct& ss)
+    std::string ruleString(const ESM::DialogueCondition& ss)
     {
-        std::string rule = ss.mSelectRule;
+        std::string_view type_str = "INVALID";
+        std::string_view func_str;
 
-        if (rule.length() < 5)
-            return "INVALID";
-
-        char type = rule[1];
-        char indicator = rule[2];
-
-        std::string type_str = "INVALID";
-        std::string func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1, 3));
-        int func = Misc::StringUtils::toNumeric<int>(rule.substr(2, 2), 0);
-
-        switch (type)
+        switch (ss.mFunction)
         {
-            case '1':
-                type_str = "Function";
-                func_str = std::string(ruleFunction(func));
+            case ESM::DialogueCondition::Function_Global:
+                type_str = "Global";
+                func_str = ss.mVariable;
                 break;
-            case '2':
-                if (indicator == 's')
-                    type_str = "Global short";
-                else if (indicator == 'l')
-                    type_str = "Global long";
-                else if (indicator == 'f')
-                    type_str = "Global float";
+            case ESM::DialogueCondition::Function_Local:
+                type_str = "Local";
+                func_str = ss.mVariable;
                 break;
-            case '3':
-                if (indicator == 's')
-                    type_str = "Local short";
-                else if (indicator == 'l')
-                    type_str = "Local long";
-                else if (indicator == 'f')
-                    type_str = "Local float";
+            case ESM::DialogueCondition::Function_Journal:
+                type_str = "Journal";
+                func_str = ss.mVariable;
                 break;
-            case '4':
-                if (indicator == 'J')
-                    type_str = "Journal";
+            case ESM::DialogueCondition::Function_Item:
+                type_str = "Item count";
+                func_str = ss.mVariable;
                 break;
-            case '5':
-                if (indicator == 'I')
-                    type_str = "Item type";
+            case ESM::DialogueCondition::Function_Dead:
+                type_str = "Dead";
+                func_str = ss.mVariable;
                 break;
-            case '6':
-                if (indicator == 'D')
-                    type_str = "NPC Dead";
+            case ESM::DialogueCondition::Function_NotId:
+                type_str = "Not ID";
+                func_str = ss.mVariable;
                 break;
-            case '7':
-                if (indicator == 'X')
-                    type_str = "Not ID";
+            case ESM::DialogueCondition::Function_NotFaction:
+                type_str = "Not Faction";
+                func_str = ss.mVariable;
                 break;
-            case '8':
-                if (indicator == 'F')
-                    type_str = "Not Faction";
+            case ESM::DialogueCondition::Function_NotClass:
+                type_str = "Not Class";
+                func_str = ss.mVariable;
                 break;
-            case '9':
-                if (indicator == 'C')
-                    type_str = "Not Class";
+            case ESM::DialogueCondition::Function_NotRace:
+                type_str = "Not Race";
+                func_str = ss.mVariable;
                 break;
-            case 'A':
-                if (indicator == 'R')
-                    type_str = "Not Race";
+            case ESM::DialogueCondition::Function_NotCell:
+                type_str = "Not Cell";
+                func_str = ss.mVariable;
                 break;
-            case 'B':
-                if (indicator == 'L')
-                    type_str = "Not Cell";
-                break;
-            case 'C':
-                if (indicator == 's')
-                    type_str = "Not Local";
+            case ESM::DialogueCondition::Function_NotLocal:
+                type_str = "Not Local";
+                func_str = ss.mVariable;
                 break;
             default:
+                type_str = "Function";
+                func_str = ruleFunction(ss.mFunction);
                 break;
         }
 
-        // Append the variable name to the function string if any.
-        if (type != '1')
-            func_str = rule.substr(5);
-
-        // In the previous switch, we assumed that the second char was X
-        // for all types not qual to one.  If this wasn't true, go back to
-        // the error message.
-        if (type != '1' && rule[3] != 'X')
-            func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1, 3));
-
-        char oper = rule[4];
-        std::string oper_str = "??";
-        switch (oper)
+        std::string_view oper_str = "??";
+        switch (ss.mComparison)
         {
-            case '0':
+            case ESM::DialogueCondition::Comp_Eq:
                 oper_str = "==";
                 break;
-            case '1':
+            case ESM::DialogueCondition::Comp_Ne:
                 oper_str = "!=";
                 break;
-            case '2':
+            case ESM::DialogueCondition::Comp_Gt:
                 oper_str = "> ";
                 break;
-            case '3':
+            case ESM::DialogueCondition::Comp_Ge:
                 oper_str = ">=";
                 break;
-            case '4':
+            case ESM::DialogueCondition::Comp_Ls:
                 oper_str = "< ";
                 break;
-            case '5':
+            case ESM::DialogueCondition::Comp_Le:
                 oper_str = "<=";
                 break;
             default:
@@ -170,7 +140,7 @@ namespace
         }
 
         std::ostringstream stream;
-        stream << ss.mValue;
+        std::visit([&](auto value) { stream << value; }, ss.mValue);
 
         std::string result
             = Misc::StringUtils::format("%-12s %-32s %2s %s", type_str, func_str, oper_str, stream.str());
@@ -180,22 +150,23 @@ namespace
     void printEffectList(const ESM::EffectList& effects)
     {
         int i = 0;
-        for (const ESM::ENAMstruct& effect : effects.mList)
+        for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mEffectID) << " (" << effect.mEffectID
-                      << ")" << std::endl;
-            if (effect.mSkill != -1)
-                std::cout << "    Skill: " << skillLabel(effect.mSkill) << " (" << (int)effect.mSkill << ")"
+            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mData.mEffectID) << " ("
+                      << effect.mData.mEffectID << ")" << std::endl;
+            if (effect.mData.mSkill != -1)
+                std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
                           << std::endl;
-            if (effect.mAttribute != -1)
-                std::cout << "    Attribute: " << attributeLabel(effect.mAttribute) << " (" << (int)effect.mAttribute
-                          << ")" << std::endl;
-            std::cout << "    Range: " << rangeTypeLabel(effect.mRange) << " (" << effect.mRange << ")" << std::endl;
+            if (effect.mData.mAttribute != -1)
+                std::cout << "    Attribute: " << attributeLabel(effect.mData.mAttribute) << " ("
+                          << (int)effect.mData.mAttribute << ")" << std::endl;
+            std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
+                      << std::endl;
             // Area is always zero if range type is "Self"
-            if (effect.mRange != ESM::RT_Self)
-                std::cout << "    Area: " << effect.mArea << std::endl;
-            std::cout << "    Duration: " << effect.mDuration << std::endl;
-            std::cout << "    Magnitude: " << effect.mMagnMin << "-" << effect.mMagnMax << std::endl;
+            if (effect.mData.mRange != ESM::RT_Self)
+                std::cout << "    Area: " << effect.mData.mArea << std::endl;
+            std::cout << "    Duration: " << effect.mData.mDuration << std::endl;
+            std::cout << "    Magnitude: " << effect.mData.mMagnMin << "-" << effect.mData.mMagnMax << std::endl;
             i++;
         }
     }
@@ -479,7 +450,7 @@ namespace EsmTool
             std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
         std::cout << "  Value: " << mData.mData.mValue << std::endl;
-        std::cout << "  AutoCalc: " << mData.mData.mAutoCalc << std::endl;
+        std::cout << "  Flags: " << potionFlags(mData.mData.mFlags) << std::endl;
         printEffectList(mData.mEffects);
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -612,7 +583,6 @@ namespace EsmTool
         }
         else
             std::cout << "  Map Color: " << Misc::StringUtils::format("0x%08X", mData.mMapColor) << std::endl;
-        std::cout << "  Water Level Int: " << mData.mWaterInt << std::endl;
         std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -722,9 +692,6 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
-        std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
-        std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
         std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
@@ -843,10 +810,9 @@ namespace EsmTool
 
         std::cout << "  Quest Status: " << questStatusLabel(mData.mQuestStatus) << " (" << mData.mQuestStatus << ")"
                   << std::endl;
-        std::cout << "  Unknown1: " << mData.mData.mUnknown1 << std::endl;
-        std::cout << "  Unknown2: " << (int)mData.mData.mUnknown2 << std::endl;
+        std::cout << "  Type: " << dialogTypeLabel(mData.mData.mType) << std::endl;
 
-        for (const ESM::DialInfo::SelectStruct& rule : mData.mSelects)
+        for (const auto& rule : mData.mSelects)
             std::cout << "  Select Rule: " << ruleString(rule) << std::endl;
 
         if (!mData.mResultScript.empty())
@@ -901,9 +867,6 @@ namespace EsmTool
         if (const ESM::Land::LandData* data = mData.getLandData(mData.mDataTypes))
         {
             std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
-            // Lots of missing members.
-            std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
-            std::cout << "  Unknown2: " << static_cast<unsigned>(data->mUnk2) << std::endl;
         }
         mData.unloadData();
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
@@ -1115,9 +1078,6 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
-        std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
-        std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
         std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
@@ -1144,7 +1104,6 @@ namespace EsmTool
             std::cout << "    Coordinates: (" << point.mX << "," << point.mY << "," << point.mZ << ")" << std::endl;
             std::cout << "    Auto-Generated: " << (int)point.mAutogenerated << std::endl;
             std::cout << "    Connections: " << (int)point.mConnectionNum << std::endl;
-            std::cout << "    Unknown: " << point.mUnknown << std::endl;
             i++;
         }
 

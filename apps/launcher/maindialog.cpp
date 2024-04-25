@@ -292,7 +292,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
     if (!QFile::exists(path))
         return true;
 
-    Log(Debug::Verbose) << "Loading config file: " << path.toUtf8().constData();
+    Log(Debug::Info) << "Loading config file: " << path.toUtf8().constData();
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -320,7 +320,7 @@ bool Launcher::MainDialog::setupGameSettings()
 
     QFile file;
 
-    auto loadFile = [&](const QString& path, bool (Config::GameSettings::*reader)(QTextStream&, bool),
+    auto loadFile = [&](const QString& path, bool (Config::GameSettings::*reader)(QTextStream&, const QString&, bool),
                         bool ignoreContent = false) -> std::optional<bool> {
         file.setFileName(path);
         if (file.exists())
@@ -337,7 +337,7 @@ bool Launcher::MainDialog::setupGameSettings()
             QTextStream stream(&file);
             Misc::ensureUtf8Encoding(stream);
 
-            (mGameSettings.*reader)(stream, ignoreContent);
+            (mGameSettings.*reader)(stream, QFileInfo(path).dir().path(), ignoreContent);
             file.close();
             return true;
         }
@@ -349,29 +349,24 @@ bool Launcher::MainDialog::setupGameSettings()
     if (!loadFile(Files::getUserConfigPathQString(mCfgMgr), &Config::GameSettings::readUserFile))
         return false;
 
-    // Now the rest - priority: user > local > global
-    if (auto result = loadFile(Files::getLocalConfigPathQString(mCfgMgr), &Config::GameSettings::readFile, true))
+    for (const auto& path : Files::getActiveConfigPathsQString(mCfgMgr))
     {
-        // Load global if local wasn't found
-        if (!*result && !loadFile(Files::getGlobalConfigPathQString(mCfgMgr), &Config::GameSettings::readFile, true))
+        Log(Debug::Info) << "Loading config file: " << path.toUtf8().constData();
+        if (!loadFile(path, &Config::GameSettings::readFile))
             return false;
     }
-    else
-        return false;
-    if (!loadFile(Files::getUserConfigPathQString(mCfgMgr), &Config::GameSettings::readFile))
-        return false;
 
     return true;
 }
 
 bool Launcher::MainDialog::setupGameData()
 {
-    QStringList dataDirs;
+    bool foundData = false;
 
     // Check if the paths actually contain data files
-    for (const QString& path3 : mGameSettings.getDataDirs())
+    for (const auto& path3 : mGameSettings.getDataDirs())
     {
-        QDir dir(path3);
+        QDir dir(path3.value);
         QStringList filters;
         filters << "*.esp"
                 << "*.esm"
@@ -379,10 +374,13 @@ bool Launcher::MainDialog::setupGameData()
                 << "*.omwaddon";
 
         if (!dir.entryList(filters).isEmpty())
-            dataDirs.append(path3);
+        {
+            foundData = true;
+            break;
+        }
     }
 
-    if (dataDirs.isEmpty())
+    if (!foundData)
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error detecting Morrowind installation"));

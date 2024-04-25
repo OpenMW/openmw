@@ -86,19 +86,9 @@ namespace ESM
         // total number of textures per land
         static constexpr int LAND_NUM_TEXTURES = LandRecordData::sLandNumTextures;
 
-        static constexpr int LAND_GLOBAL_MAP_LOD_SIZE = 81;
+        static constexpr unsigned LAND_GLOBAL_MAP_LOD_SIZE = 81;
 
-        static constexpr int LAND_GLOBAL_MAP_LOD_SIZE_SQRT = 9;
-
-#pragma pack(push, 1)
-        struct VHGT
-        {
-            float mHeightOffset;
-            std::int8_t mHeightData[LAND_NUM_VERTS];
-            std::uint16_t mUnk1;
-            std::uint8_t mUnk2;
-        };
-#pragma pack(pop)
+        static constexpr unsigned LAND_GLOBAL_MAP_LOD_SIZE_SQRT = 9;
 
         using LandData = ESM::LandRecordData;
 
@@ -128,16 +118,10 @@ namespace ESM
         const LandData* getLandData(int flags) const;
 
         /// Return land data without loading first anything. Can return a 0-pointer.
-        const LandData* getLandData() const
-        {
-            return mLandData.get();
-        }
+        const LandData* getLandData() const { return mLandData.get(); }
 
         /// Return land data without loading first anything. Can return a 0-pointer.
-        LandData* getLandData()
-        {
-            return mLandData.get();
-        }
+        LandData* getLandData() { return mLandData.get(); }
 
         /// \attention Must not be called on objects that aren't fully loaded.
         ///

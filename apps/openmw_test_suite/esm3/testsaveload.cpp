@@ -1,11 +1,15 @@
 #include <components/esm/fourcc.hpp>
+#include <components/esm3/aipackage.hpp>
 #include <components/esm3/aisequence.hpp>
+#include <components/esm3/effectlist.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
+#include <components/esm3/loadweap.hpp>
 #include <components/esm3/player.hpp>
 #include <components/esm3/quickkeys.hpp>
 
@@ -90,7 +94,16 @@ namespace ESM
         constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
         template <class T>
-        void save(const T& record, ESMWriter& writer)
+        concept HasSave = requires(T v, ESMWriter& w)
+        {
+            v.save(w);
+        };
+
+        template <class T>
+        concept NotHasSave = !HasSave<T>;
+
+        template <HasSave T>
+        auto save(const T& record, ESMWriter& writer)
         {
             record.save(writer);
         }
@@ -98,6 +111,12 @@ namespace ESM
         void save(const CellRef& record, ESMWriter& writer)
         {
             record.save(writer, true);
+        }
+
+        template <NotHasSave T>
+        auto save(const T& record, ESMWriter& writer)
+        {
+            writer.writeComposite(record);
         }
 
         template <typename T>
@@ -113,36 +132,29 @@ namespace ESM
             return stream;
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasLoad : std::false_type
+        template <class T>
+        concept HasLoad = requires(T v, ESMReader& r)
         {
+            v.load(r);
         };
 
         template <class T>
-        struct HasLoad<T, std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>()))>> : std::true_type
+        concept HasLoadWithDelete = requires(T v, ESMReader& r, bool& d)
         {
+            v.load(r, d);
         };
 
         template <class T>
-        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoad<std::decay_t<T>>::value>
+        concept NotHasLoad = !HasLoad<T> && !HasLoadWithDelete<T>;
+
+        template <HasLoad T>
+        void load(ESMReader& reader, T& record)
         {
             record.load(reader);
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasLoadWithDelete : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasLoadWithDelete<T,
-            std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>(), std::declval<bool&>()))>>
-            : std::true_type
-        {
-        };
-
-        template <class T>
-        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoadWithDelete<std::decay_t<T>>::value>
+        template <HasLoadWithDelete T>
+        void load(ESMReader& reader, T& record)
         {
             bool deleted = false;
             record.load(reader, deleted);
@@ -152,6 +164,12 @@ namespace ESM
         {
             bool deleted = false;
             record.load(reader, deleted, true);
+        }
+
+        template <NotHasLoad T>
+        void load(ESMReader& reader, T& record)
+        {
+            reader.getComposite(record);
         }
 
         template <typename T>
@@ -488,6 +506,179 @@ namespace ESM
             EXPECT_EQ(result.mCellId, record.mCellId);
             EXPECT_EQ(result.mRemainingDuration, record.mRemainingDuration);
             EXPECT_EQ(result.mRepeat, record.mRepeat);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, aiDataShouldNotChange)
+        {
+            AIData record = {
+                .mHello = 1,
+                .mFight = 2,
+                .mFlee = 3,
+                .mAlarm = 4,
+                .mServices = 5,
+            };
+
+            AIData result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mHello, record.mHello);
+            EXPECT_EQ(result.mFight, record.mFight);
+            EXPECT_EQ(result.mFlee, record.mFlee);
+            EXPECT_EQ(result.mAlarm, record.mAlarm);
+            EXPECT_EQ(result.mServices, record.mServices);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, enamShouldNotChange)
+        {
+            EffectList record;
+            record.mList.emplace_back(IndexedENAMstruct{ {
+                                                             .mEffectID = 1,
+                                                             .mSkill = 2,
+                                                             .mAttribute = 3,
+                                                             .mRange = 4,
+                                                             .mArea = 5,
+                                                             .mDuration = 6,
+                                                             .mMagnMin = 7,
+                                                             .mMagnMax = 8,
+                                                         },
+                0 });
+
+            EffectList result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mList.size(), record.mList.size());
+            EXPECT_EQ(result.mList[0].mData.mEffectID, record.mList[0].mData.mEffectID);
+            EXPECT_EQ(result.mList[0].mData.mSkill, record.mList[0].mData.mSkill);
+            EXPECT_EQ(result.mList[0].mData.mAttribute, record.mList[0].mData.mAttribute);
+            EXPECT_EQ(result.mList[0].mData.mRange, record.mList[0].mData.mRange);
+            EXPECT_EQ(result.mList[0].mData.mArea, record.mList[0].mData.mArea);
+            EXPECT_EQ(result.mList[0].mData.mDuration, record.mList[0].mData.mDuration);
+            EXPECT_EQ(result.mList[0].mData.mMagnMin, record.mList[0].mData.mMagnMin);
+            EXPECT_EQ(result.mList[0].mData.mMagnMax, record.mList[0].mData.mMagnMax);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, weaponShouldNotChange)
+        {
+            Weapon record = {
+                .mData = {
+                    .mWeight = 0,
+                    .mValue = 1,
+                    .mType = 2,
+                    .mHealth = 3,
+                    .mSpeed = 4,
+                    .mReach = 5,
+                    .mEnchant = 6,
+                    .mChop = { 7, 8 },
+                    .mSlash = { 9, 10 },
+                    .mThrust = { 11, 12 },
+                    .mFlags = 13,
+                },
+                .mRecordFlags = 0,
+                .mId = generateRandomRefId(32),
+                .mEnchant = generateRandomRefId(32),
+                .mScript = generateRandomRefId(32),
+                .mName = generateRandomString(32),
+                .mModel = generateRandomString(32),
+                .mIcon = generateRandomString(32),
+            };
+
+            Weapon result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mWeight, record.mData.mWeight);
+            EXPECT_EQ(result.mData.mValue, record.mData.mValue);
+            EXPECT_EQ(result.mData.mType, record.mData.mType);
+            EXPECT_EQ(result.mData.mHealth, record.mData.mHealth);
+            EXPECT_EQ(result.mData.mSpeed, record.mData.mSpeed);
+            EXPECT_EQ(result.mData.mReach, record.mData.mReach);
+            EXPECT_EQ(result.mData.mEnchant, record.mData.mEnchant);
+            EXPECT_EQ(result.mData.mChop, record.mData.mChop);
+            EXPECT_EQ(result.mData.mSlash, record.mData.mSlash);
+            EXPECT_EQ(result.mData.mThrust, record.mData.mThrust);
+            EXPECT_EQ(result.mData.mFlags, record.mData.mFlags);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mEnchant, record.mEnchant);
+            EXPECT_EQ(result.mScript, record.mScript);
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mModel, record.mModel);
+            EXPECT_EQ(result.mIcon, record.mIcon);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, infoShouldNotChange)
+        {
+            DialInfo record = {
+                .mData = {
+                    .mType = ESM::Dialogue::Topic,
+                    .mDisposition = 1,
+                    .mRank = 2,
+                    .mGender = ESM::DialInfo::NA,
+                    .mPCrank = 3,
+                },
+                .mSelects = {
+                    ESM::DialogueCondition{
+                        .mVariable = {},
+                        .mValue = 42,
+                        .mIndex = 0,
+                        .mFunction = ESM::DialogueCondition::Function_Level,
+                        .mComparison = ESM::DialogueCondition::Comp_Eq
+                    },
+                    ESM::DialogueCondition{
+                        .mVariable = generateRandomString(32),
+                        .mValue = 0,
+                        .mIndex = 1,
+                        .mFunction = ESM::DialogueCondition::Function_NotLocal,
+                        .mComparison = ESM::DialogueCondition::Comp_Eq
+                    },
+                },
+                .mId = generateRandomRefId(32),
+                .mPrev = generateRandomRefId(32),
+                .mNext = generateRandomRefId(32),
+                .mActor = generateRandomRefId(32),
+                .mRace = generateRandomRefId(32),
+                .mClass = generateRandomRefId(32),
+                .mFaction = generateRandomRefId(32),
+                .mPcFaction = generateRandomRefId(32),
+                .mCell = generateRandomRefId(32),
+                .mSound = generateRandomString(32),
+                .mResponse = generateRandomString(32),
+                .mResultScript = generateRandomString(32),
+                .mFactionLess = false,
+                .mQuestStatus = ESM::DialInfo::QS_None,
+            };
+
+            DialInfo result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mType, record.mData.mType);
+            EXPECT_EQ(result.mData.mDisposition, record.mData.mDisposition);
+            EXPECT_EQ(result.mData.mRank, record.mData.mRank);
+            EXPECT_EQ(result.mData.mGender, record.mData.mGender);
+            EXPECT_EQ(result.mData.mPCrank, record.mData.mPCrank);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mPrev, record.mPrev);
+            EXPECT_EQ(result.mNext, record.mNext);
+            EXPECT_EQ(result.mActor, record.mActor);
+            EXPECT_EQ(result.mRace, record.mRace);
+            EXPECT_EQ(result.mClass, record.mClass);
+            EXPECT_EQ(result.mFaction, record.mFaction);
+            EXPECT_EQ(result.mPcFaction, record.mPcFaction);
+            EXPECT_EQ(result.mCell, record.mCell);
+            EXPECT_EQ(result.mSound, record.mSound);
+            EXPECT_EQ(result.mResponse, record.mResponse);
+            EXPECT_EQ(result.mResultScript, record.mResultScript);
+            EXPECT_EQ(result.mFactionLess, record.mFactionLess);
+            EXPECT_EQ(result.mQuestStatus, record.mQuestStatus);
+            EXPECT_EQ(result.mSelects.size(), record.mSelects.size());
+            for (size_t i = 0; i < result.mSelects.size(); ++i)
+            {
+                const auto& resultS = result.mSelects[i];
+                const auto& recordS = record.mSelects[i];
+                EXPECT_EQ(resultS.mVariable, recordS.mVariable);
+                EXPECT_EQ(resultS.mValue, recordS.mValue);
+                EXPECT_EQ(resultS.mIndex, recordS.mIndex);
+                EXPECT_EQ(resultS.mFunction, recordS.mFunction);
+                EXPECT_EQ(resultS.mComparison, recordS.mComparison);
+            }
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));

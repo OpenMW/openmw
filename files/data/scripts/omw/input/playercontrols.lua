@@ -83,6 +83,7 @@ end
 local movementControlsOverridden = false
 
 local autoMove = false
+local attemptToJump = false
 local function processMovement()
     local movement = input.getRangeActionValue('MoveForward') - input.getRangeActionValue('MoveBackward')
     local sideMovement = input.getRangeActionValue('MoveRight') - input.getRangeActionValue('MoveLeft')
@@ -97,6 +98,7 @@ local function processMovement()
     self.controls.movement = movement
     self.controls.sideMovement = sideMovement
     self.controls.run = run
+    self.controls.jump = attemptToJump
 
     if not settings:get('toggleSneak') then
         self.controls.sneak = input.getBooleanActionValue('Sneak')
@@ -115,7 +117,7 @@ end
 
 input.registerTriggerHandler('Jump', async:callback(function()
     if not movementAllowed() then return end
-    self.controls.jump = Player.getControlSwitch(self, Player.CONTROL_SWITCH.Jumping)
+    attemptToJump = Player.getControlSwitch(self, Player.CONTROL_SWITCH.Jumping)
 end))
 
 input.registerTriggerHandler('ToggleSneak', async:callback(function()
@@ -223,6 +225,7 @@ local function onFrame(_)
     if combatAllowed() then
         processAttacking()
     end
+    attemptToJump = false
 end
 
 local function onSave()

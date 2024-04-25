@@ -167,7 +167,7 @@ namespace MWMechanics
             blockerStats.setBlock(true);
 
             if (blocker == getPlayer())
-                blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
+                blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, ESM::Skill::Block_Success);
 
             return true;
         }
@@ -246,14 +246,16 @@ namespace MWMechanics
                 return;
             }
 
-            const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
-            damage = attack[0] + ((attack[1] - attack[0]) * attackStrength); // Bow/crossbow damage
-
-            // Arrow/bolt damage
-            // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
-            attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
-            damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
-
+            {
+                const auto& attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+                damage = attack[0] + ((attack[1] - attack[0]) * attackStrength); // Bow/crossbow damage
+            }
+            {
+                // Arrow/bolt damage
+                // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
+                const auto& attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
+                damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
+            }
             adjustWeaponDamage(damage, weapon, attacker);
         }
 
@@ -267,7 +269,7 @@ namespace MWMechanics
             applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
-                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
+                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, ESM::Skill::Weapon_SuccessfulHit);
 
             const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
             bool unaware = attacker == getPlayer() && !sequence.isInCombat()
@@ -585,18 +587,20 @@ namespace MWMechanics
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
 
+        // These GMSTs are not in degrees. They're tolerance angle sines multiplied by 90.
+        // With the default values of 60, the actual tolerance angles are roughly 41.8 degrees.
+        // Don't think too hard about it. In this place, thinking can cause permanent damage to your mental health.
+        const float fCombatAngleXY = store.find("fCombatAngleXY")->mValue.getFloat() / 90.f;
+        const float fCombatAngleZ = store.find("fCombatAngleZ")->mValue.getFloat() / 90.f;
+
         const ESM::Position& posdata = actor.getRefData().getPosition();
         const osg::Vec3f actorPos(posdata.asVec3());
-
-        // Morrowind uses body orientation or camera orientation if available
-        // The difference between that and this is subtle
-        osg::Quat actorRot
-            = osg::Quat(posdata.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0, 0, -1));
-
-        const float fCombatAngleXY = store.find("fCombatAngleXY")->mValue.getFloat();
-        const float fCombatAngleZ = store.find("fCombatAngleZ")->mValue.getFloat();
-        const float combatAngleXYcos = std::cos(osg::DegreesToRadians(fCombatAngleXY));
-        const float combatAngleZcos = std::cos(osg::DegreesToRadians(fCombatAngleZ));
+        const osg::Vec3f actorDirXY = osg::Quat(posdata.rot[2], osg::Vec3(0, 0, -1)) * osg::Vec3f(0, 1, 0);
+        // Only the player can look up, apparently.
+        const float actorVerticalAngle = actor == getPlayer() ? -std::sin(posdata.rot[0]) : 0.f;
+        const float actorEyeLevel = world->getHalfExtents(actor, true).z() * 2.f * 0.85f;
+        const osg::Vec3f actorEyePos{ actorPos.x(), actorPos.y(), actorPos.z() + actorEyeLevel };
+        const bool canMoveByZ = canActorMoveByZAxis(actor);
 
         // The player can target any active actor, non-playable actors only target their targets
         std::vector<MWWorld::Ptr> targets;
@@ -610,25 +614,39 @@ namespace MWMechanics
         {
             if (actor == target || target.getClass().getCreatureStats(target).isDead())
                 continue;
-            float dist = getDistanceToBounds(actor, target);
-            osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
-            osg::Vec3f dirToTarget = targetPos - actorPos;
-            if (dist >= reach || dist >= minDist || std::abs(dirToTarget.z()) >= reach)
+            const float dist = getDistanceToBounds(actor, target);
+            const osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
+            if (dist >= reach || dist >= minDist || std::abs(targetPos.z() - actorPos.z()) >= reach)
                 continue;
 
-            dirToTarget.normalize();
+            // Horizontal angle checks.
+            osg::Vec2f actorToTargetXY{ targetPos.x() - actorPos.x(), targetPos.y() - actorPos.y() };
+            actorToTargetXY.normalize();
 
-            // The idea is to use fCombatAngleXY and fCombatAngleZ as tolerance angles
-            // in XY and YZ planes of the coordinate system where the actor's orientation
-            // corresponds to (0, 1, 0) vector. This is not exactly what Morrowind does
-            // but Morrowind does something (even more) stupid here
-            osg::Vec3f hitDir = actorRot.inverse() * dirToTarget;
-            if (combatAngleXYcos * std::abs(hitDir.x()) > hitDir.y())
+            // Use dot product to check if the target is behind first...
+            if (actorToTargetXY.x() * actorDirXY.x() + actorToTargetXY.y() * actorDirXY.y() <= 0.f)
                 continue;
 
-            // Nice cliff racer hack Todd
-            if (combatAngleZcos * std::abs(hitDir.z()) > hitDir.y() && !MWMechanics::canActorMoveByZAxis(target))
+            // And then perp dot product to calculate the hit angle sine.
+            // This gives us a horizontal hit range of [-asin(fCombatAngleXY / 90); asin(fCombatAngleXY / 90)]
+            if (std::abs(actorToTargetXY.x() * actorDirXY.y() - actorToTargetXY.y() * actorDirXY.x()) > fCombatAngleXY)
                 continue;
+
+            // Vertical angle checks. Nice cliff racer hack, Todd.
+            if (!canMoveByZ)
+            {
+                // The idea is that the body should always be possible to hit.
+                // fCombatAngleZ is the tolerance for hitting the target's feet or head.
+                osg::Vec3f actorToTargetFeet = targetPos - actorEyePos;
+                osg::Vec3f actorToTargetHead = actorToTargetFeet;
+                actorToTargetFeet.normalize();
+                actorToTargetHead.z() += world->getHalfExtents(target, true).z() * 2.f;
+                actorToTargetHead.normalize();
+
+                if (actorVerticalAngle - actorToTargetHead.z() > fCombatAngleZ
+                    || actorVerticalAngle - actorToTargetFeet.z() < -fCombatAngleZ)
+                    continue;
+            }
 
             // Gotta use physics somehow!
             if (!world->getLOS(actor, target))

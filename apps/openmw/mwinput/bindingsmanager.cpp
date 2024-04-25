@@ -627,12 +627,12 @@ namespace MWInput
         return mInputBinder->detectingBindingState();
     }
 
-    void BindingsManager::mousePressed(const SDL_MouseButtonEvent& arg, int deviceID)
+    void BindingsManager::mousePressed(const SDL_MouseButtonEvent& arg, Uint8 deviceID)
     {
         mInputBinder->mousePressed(arg, deviceID);
     }
 
-    void BindingsManager::mouseReleased(const SDL_MouseButtonEvent& arg, int deviceID)
+    void BindingsManager::mouseReleased(const SDL_MouseButtonEvent& arg, Uint8 deviceID)
     {
         mInputBinder->mouseReleased(arg, deviceID);
     }

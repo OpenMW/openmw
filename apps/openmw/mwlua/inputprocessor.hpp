@@ -18,7 +18,7 @@ namespace MWLua
         {
             mScriptsContainer->registerEngineHandlers({ &mKeyPressHandlers, &mKeyReleaseHandlers,
                 &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers, &mActionHandlers, &mTouchpadPressed,
-                &mTouchpadReleased, &mTouchpadMoved });
+                &mTouchpadReleased, &mTouchpadMoved, &mMouseButtonPress, &mMouseButtonRelease, &mMouseWheel });
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
@@ -53,6 +53,16 @@ namespace MWLua
                 case InputEvent::TouchMoved:
                     mScriptsContainer->callEngineHandlers(mTouchpadMoved, std::get<SDLUtil::TouchEvent>(event.mValue));
                     break;
+                case InputEvent::MouseButtonPressed:
+                    mScriptsContainer->callEngineHandlers(mMouseButtonPress, std::get<int>(event.mValue));
+                    break;
+                case InputEvent::MouseButtonReleased:
+                    mScriptsContainer->callEngineHandlers(mMouseButtonRelease, std::get<int>(event.mValue));
+                    break;
+                case InputEvent::MouseWheel:
+                    auto wheelEvent = std::get<MWBase::LuaManager::InputEvent::WheelChange>(event.mValue);
+                    mScriptsContainer->callEngineHandlers(mMouseWheel, wheelEvent.y, wheelEvent.x);
+                    break;
             }
         }
 
@@ -66,6 +76,9 @@ namespace MWLua
         typename Container::EngineHandlerList mTouchpadPressed{ "onTouchPress" };
         typename Container::EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
         typename Container::EngineHandlerList mTouchpadMoved{ "onTouchMove" };
+        typename Container::EngineHandlerList mMouseButtonPress{ "onMouseButtonPress" };
+        typename Container::EngineHandlerList mMouseButtonRelease{ "onMouseButtonRelease" };
+        typename Container::EngineHandlerList mMouseWheel{ "onMouseWheel" };
     };
 }
 

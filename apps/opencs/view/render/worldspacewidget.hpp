@@ -222,8 +222,7 @@ namespace CSVRender
             Button_Reference = 0x1,
             Button_Pathgrid = 0x2,
             Button_Water = 0x4,
-            Button_Fog = 0x8,
-            Button_Terrain = 0x10
+            Button_Terrain = 0x8
         };
 
         virtual void addVisibilitySelectorButtons(CSVWidget::SceneToolToggle2* tool);

@@ -45,93 +45,93 @@ void ESM4::Creature::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getZString(mFullName);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_CNTO:
+            case ESM::fourCC("CNTO"):
             {
-                static InventoryItem inv; // FIXME: use unique_ptr here?
+                InventoryItem inv; // FIXME: use unique_ptr here?
                 reader.get(inv);
                 reader.adjustFormId(inv.item);
                 mInventory.push_back(inv);
                 break;
             }
-            case ESM4::SUB_SPLO:
+            case ESM::fourCC("SPLO"):
                 reader.getFormId(mSpell.emplace_back());
                 break;
-            case ESM4::SUB_PKID:
+            case ESM::fourCC("PKID"):
                 reader.getFormId(mAIPackages.emplace_back());
                 break;
-            case ESM4::SUB_SNAM:
+            case ESM::fourCC("SNAM"):
                 reader.get(mFaction);
                 reader.adjustFormId(mFaction.faction);
                 break;
-            case ESM4::SUB_INAM:
+            case ESM::fourCC("INAM"):
                 reader.getFormId(mDeathItem);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_AIDT:
+            case ESM::fourCC("AIDT"):
                 if (subHdr.dataSize == 20) // FO3
                     reader.skipSubRecordData();
                 else
                     reader.get(mAIData); // 12 bytes
                 break;
-            case ESM4::SUB_ACBS:
+            case ESM::fourCC("ACBS"):
                 // if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || mIsFONV)
                 if (subHdr.dataSize == 24)
                     reader.get(mBaseConfig);
                 else
                     reader.get(&mBaseConfig, 16); // TES4
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 if (subHdr.dataSize == 17) // FO3
                     reader.skipSubRecordData();
                 else
                     reader.get(mData);
                 break;
-            case ESM4::SUB_ZNAM:
+            case ESM::fourCC("ZNAM"):
                 reader.getFormId(mCombatStyle);
                 break;
-            case ESM4::SUB_CSCR:
+            case ESM::fourCC("CSCR"):
                 reader.getFormId(mSoundBase);
                 break;
-            case ESM4::SUB_CSDI:
+            case ESM::fourCC("CSDI"):
                 reader.getFormId(mSound);
                 break;
-            case ESM4::SUB_CSDC:
+            case ESM::fourCC("CSDC"):
                 reader.get(mSoundChance);
                 break;
-            case ESM4::SUB_BNAM:
+            case ESM::fourCC("BNAM"):
                 reader.get(mBaseScale);
                 break;
-            case ESM4::SUB_TNAM:
+            case ESM::fourCC("TNAM"):
                 reader.get(mTurningSpeed);
                 break;
-            case ESM4::SUB_WNAM:
+            case ESM::fourCC("WNAM"):
                 reader.get(mFootWeight);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_NAM0:
+            case ESM::fourCC("NAM0"):
                 reader.getZString(mBloodSpray);
                 break;
-            case ESM4::SUB_NAM1:
+            case ESM::fourCC("NAM1"):
                 reader.getZString(mBloodDecal);
                 break;
-            case ESM4::SUB_NIFZ:
+            case ESM::fourCC("NIFZ"):
                 if (!reader.getZeroTerminatedStringArray(mNif))
                     throw std::runtime_error("CREA NIFZ data read error");
                 break;
-            case ESM4::SUB_NIFT:
+            case ESM::fourCC("NIFT"):
             {
                 if (subHdr.dataSize != 4) // FIXME: FO3
                 {
@@ -147,33 +147,33 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                     Log(Debug::Verbose) << "CREA NIFT " << mId << ", non-zero " << nift;
                 break;
             }
-            case ESM4::SUB_KFFZ:
+            case ESM::fourCC("KFFZ"):
                 if (!reader.getZeroTerminatedStringArray(mKf))
                     throw std::runtime_error("CREA KFFZ data read error");
                 break;
-            case ESM4::SUB_TPLT:
+            case ESM::fourCC("TPLT"):
                 reader.getFormId(mBaseTemplate);
                 break; // FO3
-            case ESM4::SUB_PNAM: // FO3/FONV/TES5
+            case ESM::fourCC("PNAM"): // FO3/FONV/TES5
                 reader.getFormId(mBodyParts.emplace_back());
                 break;
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_RNAM:
-            case ESM4::SUB_CSDT:
-            case ESM4::SUB_OBND: // FO3
-            case ESM4::SUB_EAMT: // FO3
-            case ESM4::SUB_VTCK: // FO3
-            case ESM4::SUB_NAM4: // FO3
-            case ESM4::SUB_NAM5: // FO3
-            case ESM4::SUB_CNAM: // FO3
-            case ESM4::SUB_LNAM: // FO3
-            case ESM4::SUB_EITM: // FO3
-            case ESM4::SUB_DEST: // FO3
-            case ESM4::SUB_DSTD: // FO3
-            case ESM4::SUB_DSTF: // FO3
-            case ESM4::SUB_DMDL: // FO3
-            case ESM4::SUB_DMDT: // FO3
-            case ESM4::SUB_COED: // FO3
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("RNAM"):
+            case ESM::fourCC("CSDT"):
+            case ESM::fourCC("OBND"): // FO3
+            case ESM::fourCC("EAMT"): // FO3
+            case ESM::fourCC("VTCK"): // FO3
+            case ESM::fourCC("NAM4"): // FO3
+            case ESM::fourCC("NAM5"): // FO3
+            case ESM::fourCC("CNAM"): // FO3
+            case ESM::fourCC("LNAM"): // FO3
+            case ESM::fourCC("EITM"): // FO3
+            case ESM::fourCC("DEST"): // FO3
+            case ESM::fourCC("DSTD"): // FO3
+            case ESM::fourCC("DSTF"): // FO3
+            case ESM::fourCC("DMDL"): // FO3
+            case ESM::fourCC("DMDT"): // FO3
+            case ESM::fourCC("COED"): // FO3
                 reader.skipSubRecordData();
                 break;
             default:

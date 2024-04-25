@@ -6,7 +6,15 @@
 #include <map>
 #include <memory>
 
+#ifdef _MSC_VER
+// TODO: why is this necessary? this has /external:I
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
 #include <boost/iostreams/stream.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/conversion.hpp>
@@ -53,6 +61,11 @@ namespace Debug
         bool outRedirected = isRedirected(STD_OUTPUT_HANDLE);
         bool errRedirected = isRedirected(STD_ERROR_HANDLE);
 
+        // Note: Do not spend three days reinvestigating this PowerShell bug thinking its our bug.
+        // https://gitlab.com/OpenMW/openmw/-/merge_requests/408#note_447467393
+        // The handles look valid, but GetFinalPathNameByHandleA can't tell what files they go to and writing to them
+        // doesn't work.
+
         if (AttachConsole(ATTACH_PARENT_PROCESS))
         {
             fflush(stdout);
@@ -65,16 +78,19 @@ namespace Debug
             {
                 _wfreopen(L"CON", L"r", stdin);
                 freopen("CON", "r", stdin);
+                std::cin.clear();
             }
             if (!outRedirected)
             {
                 _wfreopen(L"CON", L"w", stdout);
                 freopen("CON", "w", stdout);
+                std::cout.clear();
             }
             if (!errRedirected)
             {
                 _wfreopen(L"CON", L"w", stderr);
                 freopen("CON", "w", stderr);
+                std::cerr.clear();
             }
 
             return true;
@@ -111,7 +127,7 @@ namespace Debug
                 msg = msg.substr(1);
 
             char prefix[32];
-            int prefixSize;
+            std::size_t prefixSize;
             {
                 prefix[0] = '[';
                 const auto now = std::chrono::system_clock::now();
@@ -248,9 +264,17 @@ namespace Debug
     private:
         static bool useColoredOutput()
         {
-            // Note: cmd.exe in Win10 should support ANSI colors, but in its own way.
 #if defined(_WIN32)
-            return 0;
+            if (getenv("NO_COLOR"))
+                return false;
+
+            DWORD mode;
+            if (GetConsoleMode(GetStdHandle(STD_ERROR_HANDLE), &mode) && mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+                return true;
+
+            // some console emulators may not use the Win32 API, so try the Unixy approach
+            char* term = getenv("TERM");
+            return term && GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_CHAR;
 #else
             char* term = getenv("TERM");
             bool useColor = term && !getenv("NO_COLOR") && isatty(fileno(stderr));

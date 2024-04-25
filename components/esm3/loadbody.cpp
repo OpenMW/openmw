@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<BodyPart::BYDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mPart, v.mVampire, v.mFlags, v.mType);
+    }
+
     void BodyPart::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -28,7 +36,7 @@ namespace ESM
                     mRace = esm.getRefId();
                     break;
                 case fourCC("BYDT"):
-                    esm.getHT(mData.mPart, mData.mVampire, mData.mFlags, mData.mType);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case SREC_DELE:
@@ -59,7 +67,7 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCRefId("FNAM", mRace);
-        esm.writeHNT("BYDT", mData, 4);
+        esm.writeNamedComposite("BYDT", mData);
     }
 
     void BodyPart::blank()

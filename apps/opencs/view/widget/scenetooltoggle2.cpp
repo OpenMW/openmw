@@ -88,7 +88,7 @@ void CSVWidget::SceneToolToggle2::addButton(
     stream << mSingleIcon << id;
 
     PushButton* button = new PushButton(
-        QIcon(QPixmap(stream.str().c_str())), PushButton::Type_Toggle, tooltip.isEmpty() ? name : tooltip, mPanel);
+        QIcon(stream.str().c_str()), PushButton::Type_Toggle, tooltip.isEmpty() ? name : tooltip, mPanel);
 
     button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize(QSize(mIconSize, mIconSize));

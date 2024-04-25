@@ -54,7 +54,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="importerLabel">
           <property name="text">
-           <string>File to import settings from:</string>
+           <string>File to Import Settings From:</string>
           </property>
          </widget>
         </item>
@@ -73,7 +73,7 @@
       <item>
        <widget class="QCheckBox" name="addonsCheckBox">
         <property name="text">
-         <string>Import add-on and plugin selection (creates a new Content List)</string>
+         <string>Import Add-on and Plugin Selection</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -88,7 +88,7 @@ so OpenMW provides another set of fonts to avoid these issues. These fonts use T
 to default Morrowind fonts. Check this box if you still prefer original fonts over OpenMW ones or if you use custom bitmap fonts.</string>
         </property>
         <property name="text">
-         <string>Import bitmap fonts setup</string>
+         <string>Import Bitmap Fonts</string>
         </property>
         <property name="checked">
          <bool>true</bool>

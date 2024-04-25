@@ -30,13 +30,12 @@ namespace VFS
 
         void listResources(FileMap& out) override;
 
-        bool contains(std::string_view file) const override;
+        bool contains(Path::NormalizedView file) const override;
 
         std::string getDescription() const override;
 
     private:
-        std::map<std::string, FileSystemArchiveFile, std::less<>> mIndex;
-        bool mBuiltIndex;
+        std::map<VFS::Path::Normalized, FileSystemArchiveFile, std::less<>> mIndex;
         std::filesystem::path mPath;
     };
 

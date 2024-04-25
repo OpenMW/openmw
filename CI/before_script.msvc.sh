@@ -347,6 +347,26 @@ add_qt_style_dlls() {
 	QT_STYLES[$CONFIG]="${QT_STYLES[$CONFIG]} $@"
 }
 
+declare -A QT_IMAGEFORMATS
+QT_IMAGEFORMATS["Release"]=""
+QT_IMAGEFORMATS["Debug"]=""
+QT_IMAGEFORMATS["RelWithDebInfo"]=""
+add_qt_image_dlls() {
+	local CONFIG=$1
+	shift
+	QT_IMAGEFORMATS[$CONFIG]="${QT_IMAGEFORMATS[$CONFIG]} $@"
+}
+
+declare -A QT_ICONENGINES
+QT_ICONENGINES["Release"]=""
+QT_ICONENGINES["Debug"]=""
+QT_ICONENGINES["RelWithDebInfo"]=""
+add_qt_icon_dlls() {
+	local CONFIG=$1
+	shift
+	QT_ICONENGINES[$CONFIG]="${QT_ICONENGINES[$CONFIG]} $@"
+}
+
 if [ -z $PLATFORM ]; then
 	PLATFORM="$(uname -m)"
 fi
@@ -528,8 +548,12 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
-if ! [ -z $USE_CCACHE ]; then
-	add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+if [ -n "$USE_CCACHE" ]; then
+	if [ -n "$NMAKE" ] || [ -n "$NINJA" ]; then
+		add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPRECOMPILE_HEADERS_WITH_MSVC=OFF"
+	else
+		echo "Ignoring -C (CCache) as it is incompatible with Visual Studio CMake generators"
+	fi
 fi
 
 # turn on LTO by default
@@ -549,7 +573,7 @@ ICU_VER="70_1"
 LUAJIT_VER="v2.1.0-beta3-452-g7a0cf5fd"
 LZ4_VER="1.9.2"
 OPENAL_VER="1.23.0"
-QT_VER="5.15.2"
+QT_VER="6.6.2"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
 OSG_ARCHIVE="OSGoS-3.6.5-123-g68c5c573d-msvc${OSG_MSVC_YEAR}-win${BITS}"
@@ -880,7 +904,7 @@ printf "Qt ${QT_VER}... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		pushd "$DEPS" > /dev/null
-		AQT_VERSION="v3.1.7"
+		AQT_VERSION="v3.1.12"
 		if ! [ -f "aqt_x64-${AQT_VERSION}.exe" ]; then
 			download "aqt ${AQT_VERSION}"\
 				"https://github.com/miurahr/aqtinstall/releases/download/${AQT_VERSION}/aqt_x64.exe" \
@@ -901,6 +925,9 @@ printf "Qt ${QT_VER}... "
 		echo Done.
 	fi
 
+	QT_MAJOR_VER=$(echo "${QT_VER}" | awk -F '[.]' '{printf "%d", $1}')
+	QT_MINOR_VER=$(echo "${QT_VER}" | awk -F '[.]' '{printf "%d", $2}')
+
 	cd $QT_SDK
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
 		if [ $CONFIGURATION == "Debug" ]; then
@@ -908,13 +935,24 @@ printf "Qt ${QT_VER}... "
 		else
 			DLLSUFFIX=""
 		fi
-		if [ "${QT_VER:0:1}" -eq "6" ]; then
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets}${DLLSUFFIX}.dll
+
+		if [ "${QT_MAJOR_VER}" -eq 6 ]; then
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
+
+			# Since Qt 6.7.0 plugin is called "qmodernwindowsstyle"
+			if [ "${QT_MINOR_VER}" -ge 7 ]; then
+				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qmodernwindowsstyle${DLLSUFFIX}.dll"
+			else
+				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
+			fi
 		else
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,Widgets,Svg}${DLLSUFFIX}.dll
+			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 		fi
+
 		add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
-		add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
+		add_qt_image_dlls $CONFIGURATION "$(pwd)/plugins/imageformats/qsvg${DLLSUFFIX}.dll"
+		add_qt_icon_dlls $CONFIGURATION "$(pwd)/plugins/iconengines/qsvgicon${DLLSUFFIX}.dll"
 	done
 	echo Done.
 }
@@ -1107,6 +1145,20 @@ fi
 		for DLL in ${QT_STYLES[$CONFIGURATION]}; do
 			echo "    $(basename $DLL)"
 			cp "$DLL" "${DLL_PREFIX}styles"
+		done
+		echo
+		echo "- Qt Image Format DLLs..."
+		mkdir -p ${DLL_PREFIX}imageformats
+		for DLL in ${QT_IMAGEFORMATS[$CONFIGURATION]}; do
+			echo "    $(basename $DLL)"
+			cp "$DLL" "${DLL_PREFIX}imageformats"
+		done
+		echo
+		echo "- Qt Icon Engine DLLs..."
+		mkdir -p ${DLL_PREFIX}iconengines
+		for DLL in ${QT_ICONENGINES[$CONFIGURATION]}; do
+			echo "    $(basename $DLL)"
+			cp "$DLL" "${DLL_PREFIX}iconengines"
 		done
 		echo
 	done

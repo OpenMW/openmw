@@ -47,7 +47,7 @@ namespace
     {
         std::string input;
         for (int c = 1; c <= std::numeric_limits<char>::max(); ++c)
-            input.push_back(c);
+            input.push_back(static_cast<char>(c));
         Utf8Encoder encoder(FromType::CP437);
         const std::string_view result = encoder.getUtf8(input);
         EXPECT_EQ(result.data(), input.data());
@@ -99,7 +99,7 @@ namespace
     {
         std::string input;
         for (int c = 1; c <= std::numeric_limits<char>::max(); ++c)
-            input.push_back(c);
+            input.push_back(static_cast<char>(c));
         Utf8Encoder encoder(FromType::CP437);
         const std::string_view result = encoder.getLegacyEnc(input);
         EXPECT_EQ(result.data(), input.data());

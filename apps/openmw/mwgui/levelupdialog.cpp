@@ -22,6 +22,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "class.hpp"
 
 namespace
@@ -164,8 +166,10 @@ namespace MWGui
         const MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         setClassImage(mClassImage,
-            ESM::RefId::stringRefId(getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
-                pcStats.getSkillIncreasesForSpecialization(1), pcStats.getSkillIncreasesForSpecialization(2))));
+            ESM::RefId::stringRefId(
+                getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(ESM::Class::Specialization::Combat),
+                    pcStats.getSkillIncreasesForSpecialization(ESM::Class::Specialization::Magic),
+                    pcStats.getSkillIncreasesForSpecialization(ESM::Class::Specialization::Stealth))));
 
         int level = creatureStats.getLevel() + 1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
@@ -214,8 +218,7 @@ namespace MWGui
         center();
 
         // Play LevelUp Music
-        MWBase::Environment::get().getSoundManager()->streamMusic(
-            "Music/Special/MW_Triumph.mp3", MWSound::MusicType::Special);
+        MWBase::Environment::get().getSoundManager()->streamMusic(MWSound::triumphMusic, MWSound::MusicType::Special);
     }
 
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)

@@ -232,7 +232,7 @@ namespace ESSImport
                 esm.skip(4);
             }
 
-            esm.getExact(nam8, 32);
+            esm.getT(nam8);
 
             newcell.mFogOfWar.reserve(16 * 16);
             for (int x = 0; x < 16; ++x)

@@ -17,6 +17,7 @@ set(LUA_API_FILES
     openmw/debug.lua
     openmw/input.lua
     openmw/interfaces.lua
+    openmw/markup.lua
     openmw/menu.lua
     openmw/nearby.lua
     openmw/postprocessing.lua

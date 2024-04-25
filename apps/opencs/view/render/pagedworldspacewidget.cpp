@@ -160,7 +160,6 @@ void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons(CSVWidget::S
 {
     WorldspaceWidget::addVisibilitySelectorButtons(tool);
     tool->addButton(Button_Terrain, Mask_Terrain, "Terrain");
-    tool->addButton(Button_Fog, Mask_Fog, "Fog", "", true);
 }
 
 void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons(CSVWidget::SceneToolMode* tool)
@@ -170,9 +169,10 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons(CSVWidget::Sce
     /// \todo replace EditMode with suitable subclasses
     tool->addButton(new TerrainShapeMode(this, mRootNode, tool), "terrain-shape");
     tool->addButton(new TerrainTextureMode(this, mRootNode, tool), "terrain-texture");
-    tool->addButton(
-        new EditMode(this, QIcon(":placeholder"), Mask_Reference, "Terrain vertex paint editing"), "terrain-vertex");
-    tool->addButton(new EditMode(this, QIcon(":placeholder"), Mask_Reference, "Terrain movement"), "terrain-move");
+    const QIcon vertexIcon = QIcon(":scenetoolbar/editing-terrain-vertex-paint");
+    const QIcon movementIcon = QIcon(":scenetoolbar/editing-terrain-movement");
+    tool->addButton(new EditMode(this, vertexIcon, Mask_Reference, "Terrain vertex paint editing"), "terrain-vertex");
+    tool->addButton(new EditMode(this, movementIcon, Mask_Reference, "Terrain movement"), "terrain-move");
 }
 
 void CSVRender::PagedWorldspaceWidget::handleInteractionPress(const WorldspaceHitResult& hit, InteractionType type)

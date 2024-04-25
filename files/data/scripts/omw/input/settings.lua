@@ -44,16 +44,65 @@ local bindingSection = storage.playerSection('OMWInputBindings')
 
 local recording = nil
 
+local mouseButtonNames = {
+    [1] = 'Left',
+    [2] = 'Middle',
+    [3] = 'Right',
+    [4] = '4',
+    [5] = '5',
+}
+
+-- TODO: support different controllers, use icons to render controller buttons
+local controllerButtonNames = {
+    [-1] = 'Invalid',
+    [input.CONTROLLER_BUTTON.A] = "A",
+    [input.CONTROLLER_BUTTON.B] = "B",
+    [input.CONTROLLER_BUTTON.X] = "X",
+    [input.CONTROLLER_BUTTON.Y] = "Y",
+    [input.CONTROLLER_BUTTON.Back] = "Back",
+    [input.CONTROLLER_BUTTON.Guide] = "Guide",
+    [input.CONTROLLER_BUTTON.Start] = "Start",
+    [input.CONTROLLER_BUTTON.LeftStick] = "Left Stick",
+    [input.CONTROLLER_BUTTON.RightStick] = "Right Stick",
+    [input.CONTROLLER_BUTTON.LeftShoulder] = "LB",
+    [input.CONTROLLER_BUTTON.RightShoulder] = "RB",
+    [input.CONTROLLER_BUTTON.DPadUp] = "D-pad Up",
+    [input.CONTROLLER_BUTTON.DPadDown] = "D-pad Down",
+    [input.CONTROLLER_BUTTON.DPadLeft] = "D-pad Left",
+    [input.CONTROLLER_BUTTON.DPadRight] = "D-pad Right",
+}
+
+local function bindingLabel(recording, binding)
+    if recording then
+        return interfaceL10n('N/A')
+    elseif not binding or not binding.button then
+        return interfaceL10n('None')
+    elseif binding.device == 'keyboard' then
+        return input.getKeyName(binding.button)
+    elseif binding.device == 'mouse' then
+        return string.format('Mouse %s', mouseButtonNames[binding.button] or 'Unknown')
+    elseif binding.device == 'controller' then
+        return string.format('Controller %s', controllerButtonNames[binding.button] or 'Unknown')
+    else
+        return 'Unknown'
+    end
+end
+
+local inputTypes = {
+    action = input.actions,
+    trigger = input.triggers,
+}
 
 I.Settings.registerRenderer('inputBinding', function(id, set, arg)
     if type(id) ~= 'string' then error('inputBinding: must have a string default value') end
     if not arg then error('inputBinding: argument with "key" and "type" is required') end
     if not arg.type then error('inputBinding: type argument is required') end
+    if not inputTypes[arg.type] then error('inputBinding: type must be "action" or "trigger"') end
     if not arg.key then error('inputBinding: key argument is required') end
-    local info = input.actions[arg.key] or input.triggers[arg.key]
-    if not info then return {} end
+    local info = inputTypes[arg.type][arg.key]
+    if not info then print(string.format('inputBinding: %s %s not found', arg.type, arg.key)) return end
 
-    local l10n = core.l10n(info.key)
+    local l10n = core.l10n(info.l10n)
 
     local name = {
         template = I.MWUI.templates.textNormal,
@@ -70,9 +119,7 @@ I.Settings.registerRenderer('inputBinding', function(id, set, arg)
     }
 
     local binding = bindingSection:get(id)
-    local label = interfaceL10n('None')
-    if binding then label = input.getKeyName(binding.code) end
-    if recording and recording.id == id then label = interfaceL10n('N/A') end
+    local label = bindingLabel(recording and recording.id == id, binding)
 
     local recorder = {
         template = I.MWUI.templates.textNormal,
@@ -115,22 +162,30 @@ I.Settings.registerRenderer('inputBinding', function(id, set, arg)
     return column
 end)
 
+local function bindButton(device, button)
+    if recording == nil then return end
+    local binding = {
+        device = device,
+        button = button,
+        type = recording.arg.type,
+        key = recording.arg.key,
+    }
+    bindingSection:set(recording.id, binding)
+    local refresh = recording.refresh
+    recording = nil
+    refresh()
+end
+
 return {
     engineHandlers = {
         onKeyPress = function(key)
-            if recording == nil then return end
-            local binding = {
-                code = key.code,
-                type = recording.arg.type,
-                key = recording.arg.key,
-            }
-            if key.code == input.KEY.Escape then -- TODO: prevent settings modal from closing
-                binding.code = nil
-            end
-            bindingSection:set(recording.id, binding)
-            local refresh = recording.refresh
-            recording = nil
-            refresh()
+            bindButton(key.code ~= input.KEY.Escape and 'keyboard' or nil, key.code)
+        end,
+        onMouseButtonPress = function(button)
+            bindButton('mouse', button)
+        end,
+        onControllerButtonPress = function(id)
+            bindButton('controller', id)
         end,
     }
 }

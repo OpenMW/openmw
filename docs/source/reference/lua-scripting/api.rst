@@ -19,6 +19,7 @@ Lua API reference
     openmw_animation
     openmw_async
     openmw_vfs
+    openmw_markup
     openmw_world
     openmw_self
     openmw_nearby
@@ -41,6 +42,7 @@ Lua API reference
     interface_item_usage
     interface_mwui
     interface_settings
+    interface_skill_progression
     interface_ui
     iterables
 

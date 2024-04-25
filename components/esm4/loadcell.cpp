@@ -78,7 +78,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
             {
                 if (!reader.getZString(mEditorId))
                     throw std::runtime_error("CELL EDID data read error");
@@ -89,7 +89,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #endif
                 break;
             }
-            case ESM4::SUB_XCLC:
+            case ESM::fourCC("XCLC"):
             {
                 //(X, Y) grid location of the cell followed by flags. Always in
                 // exterior cells and never in interior cells.
@@ -114,10 +114,10 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 if (subHdr.dataSize == 2)
                     reader.get(mCellFlags);
@@ -131,7 +131,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_XCLR: // for exterior cells
+            case ESM::fourCC("XCLR"): // for exterior cells
             {
                 mRegions.resize(subHdr.dataSize / sizeof(ESM::FormId32));
                 for (std::vector<ESM::FormId>::iterator it = mRegions.begin(); it != mRegions.end(); ++it)
@@ -145,7 +145,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_XOWN:
+            case ESM::fourCC("XOWN"):
             {
                 switch (subHdr.dataSize)
                 {
@@ -166,19 +166,19 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_XGLB:
+            case ESM::fourCC("XGLB"):
                 reader.getFormId(mGlobal);
                 break; // Oblivion only?
-            case ESM4::SUB_XCCM:
+            case ESM::fourCC("XCCM"):
                 reader.getFormId(mClimate);
                 break;
-            case ESM4::SUB_XCWT:
+            case ESM::fourCC("XCWT"):
                 reader.getFormId(mWater);
                 break;
-            case ESM4::SUB_XCLW:
+            case ESM::fourCC("XCLW"):
                 reader.get(mWaterHeight);
                 break;
-            case ESM4::SUB_XCLL:
+            case ESM::fourCC("XCLL"):
             {
                 switch (subHdr.dataSize)
                 {
@@ -197,45 +197,45 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_XCMT:
+            case ESM::fourCC("XCMT"):
                 reader.get(mMusicType);
                 break; // Oblivion only?
-            case ESM4::SUB_LTMP:
+            case ESM::fourCC("LTMP"):
                 reader.getFormId(mLightingTemplate);
                 break;
-            case ESM4::SUB_LNAM:
+            case ESM::fourCC("LNAM"):
                 reader.get(mLightingTemplateFlags);
                 break; // seems to always follow LTMP
-            case ESM4::SUB_XCMO:
+            case ESM::fourCC("XCMO"):
                 reader.getFormId(mMusic);
                 break;
-            case ESM4::SUB_XCAS:
+            case ESM::fourCC("XCAS"):
                 reader.getFormId(mAcousticSpace);
                 break;
-            case ESM4::SUB_TVDT:
-            case ESM4::SUB_MHDT:
-            case ESM4::SUB_XCGD:
-            case ESM4::SUB_XNAM:
-            case ESM4::SUB_XLCN:
-            case ESM4::SUB_XWCS:
-            case ESM4::SUB_XWCU:
-            case ESM4::SUB_XWCN:
-            case ESM4::SUB_XCIM:
-            case ESM4::SUB_XEZN:
-            case ESM4::SUB_XWEM:
-            case ESM4::SUB_XILL:
-            case ESM4::SUB_XRNK:
-            case ESM4::SUB_XCET: // FO3
-            case ESM4::SUB_IMPF: // FO3 Zeta
-            case ESM4::SUB_CNAM: // FO4
-            case ESM4::SUB_PCMB: // FO4
-            case ESM4::SUB_RVIS: // FO4
-            case ESM4::SUB_VISI: // FO4
-            case ESM4::SUB_XGDR: // FO4
-            case ESM4::SUB_XILW: // FO4
-            case ESM4::SUB_XCRI: // FO4
-            case ESM4::SUB_XPRI: // FO4
-            case ESM4::SUB_ZNAM: // FO4
+            case ESM::fourCC("TVDT"):
+            case ESM::fourCC("MHDT"):
+            case ESM::fourCC("XCGD"):
+            case ESM::fourCC("XNAM"):
+            case ESM::fourCC("XLCN"):
+            case ESM::fourCC("XWCS"):
+            case ESM::fourCC("XWCU"):
+            case ESM::fourCC("XWCN"):
+            case ESM::fourCC("XCIM"):
+            case ESM::fourCC("XEZN"):
+            case ESM::fourCC("XWEM"):
+            case ESM::fourCC("XILL"):
+            case ESM::fourCC("XRNK"):
+            case ESM::fourCC("XCET"): // FO3
+            case ESM::fourCC("IMPF"): // FO3 Zeta
+            case ESM::fourCC("CNAM"): // FO4
+            case ESM::fourCC("PCMB"): // FO4
+            case ESM::fourCC("RVIS"): // FO4
+            case ESM::fourCC("VISI"): // FO4
+            case ESM::fourCC("XGDR"): // FO4
+            case ESM::fourCC("XILW"): // FO4
+            case ESM::fourCC("XCRI"): // FO4
+            case ESM::fourCC("XPRI"): // FO4
+            case ESM::fourCC("ZNAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

@@ -7,6 +7,7 @@
 #include <osg/Group>
 #include <osg/MatrixTransform>
 #include <osg/Node>
+#include <osg/Vec3d>
 
 #include <apps/opencs/model/world/actoradapter.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
@@ -29,7 +30,7 @@ namespace CSVRender
     Actor::Actor(const ESM::RefId& id, CSMWorld::Data& data)
         : mId(id)
         , mData(data)
-        , mBaseNode(new osg::Group())
+        , mBaseNode(new osg::PositionAttitudeTransform())
         , mSkeleton(nullptr)
     {
         mActorData = mData.getActorAdapter()->getActorData(mId);
@@ -60,6 +61,10 @@ namespace CSVRender
 
             // Attach parts to skeleton
             loadBodyParts();
+
+            const osg::Vec2f& attributes = mActorData->getRaceWeightHeight();
+
+            mBaseNode->setScale(osg::Vec3d(attributes.x(), attributes.x(), attributes.y()));
         }
         else
         {

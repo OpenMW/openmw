@@ -59,6 +59,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/groundcoverstore.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "../mwgui/postprocessorhud.hpp"
 
@@ -328,13 +329,56 @@ namespace MWRender
         const SceneUtil::LightingMethod lightingMethod = Settings::shaders().mLightingMethod;
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
-        // Shadows and radial fog have problems with fixed-function mode.
-        bool forceShaders = Settings::fog().mRadialFog || Settings::fog().mExponentialFog
-            || Settings::shaders().mSoftParticles || Settings::shaders().mForceShaders
-            || Settings::shadows().mEnableShadows || lightingMethod != SceneUtil::LightingMethod::FFP || reverseZ
-            || mSkyBlending || Stereo::getMultiview();
-        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
 
+        // Figure out which pipeline must be used by default and inform the user
+        bool forceShaders = Settings::shaders().mForceShaders;
+        {
+            std::vector<std::string> requesters;
+            if (!forceShaders)
+            {
+                if (Settings::fog().mRadialFog)
+                    requesters.push_back("radial fog");
+                if (Settings::fog().mExponentialFog)
+                    requesters.push_back("exponential fog");
+                if (mSkyBlending)
+                    requesters.push_back("sky blending");
+                if (Settings::shaders().mSoftParticles)
+                    requesters.push_back("soft particles");
+                if (Settings::shadows().mEnableShadows)
+                    requesters.push_back("shadows");
+                if (lightingMethod != SceneUtil::LightingMethod::FFP)
+                    requesters.push_back("lighting method");
+                if (reverseZ)
+                    requesters.push_back("reverse-Z depth buffer");
+                if (Stereo::getMultiview())
+                    requesters.push_back("stereo multiview");
+
+                if (!requesters.empty())
+                    forceShaders = true;
+            }
+
+            if (forceShaders)
+            {
+                std::string message = "Using rendering with shaders by default";
+                if (requesters.empty())
+                {
+                    message += " (forced)";
+                }
+                else
+                {
+                    message += ", requested by:";
+                    for (size_t i = 0; i < requesters.size(); i++)
+                        message += "\n - " + requesters[i];
+                }
+                Log(Debug::Info) << message;
+            }
+            else
+            {
+                Log(Debug::Info) << "Using fixed-function rendering by default";
+            }
+        }
+
+        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::shaders().mClampLighting);
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::shaders().mAutoUseObjectNormalMaps);
@@ -397,7 +441,7 @@ namespace MWRender
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
         globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
-        globalDefines["refraction_enabled"] = "0";
+        globalDefines["waterRefraction"] = "0";
         globalDefines["useGPUShader4"] = "0";
         globalDefines["useOVR_multiview"] = "0";
         globalDefines["numViews"] = "1";
@@ -432,8 +476,10 @@ namespace MWRender
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::cells().mTargetFramerate);
         }
 
-        mDebugDraw
-            = std::make_unique<Debug::DebugDrawer>(mResourceSystem->getSceneManager()->getShaderManager(), mRootNode);
+        mDebugDraw = new Debug::DebugDrawer(mResourceSystem->getSceneManager()->getShaderManager());
+        mDebugDraw->setNodeMask(Mask_Debug);
+        sceneRoot->addChild(mDebugDraw);
+
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);
@@ -503,6 +549,8 @@ namespace MWRender
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));
+
+        resourceSystem->getSceneManager()->setUpNormalsRTForStateSet(sceneRoot->getOrCreateStateSet(), true);
 
         mFog = std::make_unique<FogManager>();
 
@@ -1014,20 +1062,17 @@ namespace MWRender
         return osg::Vec4f(min_x, min_y, max_x, max_y);
     }
 
-    RenderingManager::RayResult getIntersectionResult(osgUtil::LineSegmentIntersector* intersector)
+    RenderingManager::RayResult getIntersectionResult(osgUtil::LineSegmentIntersector* intersector,
+        const osg::ref_ptr<osgUtil::IntersectionVisitor>& visitor, std::span<const MWWorld::Ptr> ignoreList = {})
     {
         RenderingManager::RayResult result;
         result.mHit = false;
         result.mRatio = 0;
-        if (intersector->containsIntersections())
-        {
-            result.mHit = true;
-            osgUtil::LineSegmentIntersector::Intersection intersection = intersector->getFirstIntersection();
 
-            result.mHitPointWorld = intersection.getWorldIntersectPoint();
-            result.mHitNormalWorld = intersection.getWorldIntersectNormal();
-            result.mRatio = intersection.ratio;
+        if (!intersector->containsIntersections())
+            return result;
 
+        auto test = [&](const osgUtil::LineSegmentIntersector::Intersection& intersection) {
             PtrHolder* ptrHolder = nullptr;
             std::vector<RefnumMarker*> refnumMarkers;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end();
@@ -1039,9 +1084,16 @@ namespace MWRender
                 for (unsigned int i = 0; i < userDataContainer->getNumUserObjects(); ++i)
                 {
                     if (PtrHolder* p = dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
-                        ptrHolder = p;
+                    {
+                        if (std::find(ignoreList.begin(), ignoreList.end(), p->mPtr) == ignoreList.end())
+                        {
+                            ptrHolder = p;
+                        }
+                    }
                     if (RefnumMarker* r = dynamic_cast<RefnumMarker*>(userDataContainer->getUserObject(i)))
+                    {
                         refnumMarkers.push_back(r);
+                    }
                 }
             }
 
@@ -1056,21 +1108,113 @@ namespace MWRender
                     || (intersectionIndex >= vertexCounter
                         && intersectionIndex < vertexCounter + refnumMarkers[i]->mNumVertices))
                 {
-                    result.mHitRefnum = refnumMarkers[i]->mRefnum;
+                    auto it = std::find_if(
+                        ignoreList.begin(), ignoreList.end(), [target = refnumMarkers[i]->mRefnum](const auto& ptr) {
+                            return target == ptr.getCellRef().getRefNum();
+                        });
+
+                    if (it == ignoreList.end())
+                    {
+                        result.mHitRefnum = refnumMarkers[i]->mRefnum;
+                    }
+
                     break;
                 }
                 vertexCounter += refnumMarkers[i]->mNumVertices;
+            }
+
+            if (!result.mHitObject.isEmpty() || result.mHitRefnum.isSet())
+            {
+                result.mHit = true;
+                result.mHitPointWorld = intersection.getWorldIntersectPoint();
+                result.mHitNormalWorld = intersection.getWorldIntersectNormal();
+                result.mRatio = intersection.ratio;
+            }
+        };
+
+        if (ignoreList.empty() || intersector->getIntersectionLimit() != osgUtil::LineSegmentIntersector::NO_LIMIT)
+        {
+            test(intersector->getFirstIntersection());
+        }
+        else
+        {
+            for (const auto& intersection : intersector->getIntersections())
+            {
+                test(intersection);
+
+                if (result.mHit)
+                {
+                    break;
+                }
             }
         }
 
         return result;
     }
 
+    class IntersectionVisitorWithIgnoreList : public osgUtil::IntersectionVisitor
+    {
+    public:
+        bool skipTransform(osg::Transform& transform)
+        {
+            if (mContainsPagedRefs)
+                return false;
+
+            osg::UserDataContainer* userDataContainer = transform.getUserDataContainer();
+            if (!userDataContainer)
+                return false;
+
+            for (unsigned int i = 0; i < userDataContainer->getNumUserObjects(); ++i)
+            {
+                if (PtrHolder* p = dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
+                {
+                    if (std::find(mIgnoreList.begin(), mIgnoreList.end(), p->mPtr) != mIgnoreList.end())
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        void apply(osg::Transform& transform) override
+        {
+            if (skipTransform(transform))
+            {
+                return;
+            }
+            osgUtil::IntersectionVisitor::apply(transform);
+        }
+
+        void setIgnoreList(std::span<const MWWorld::Ptr> ignoreList) { mIgnoreList = ignoreList; }
+        void setContainsPagedRefs(bool contains) { mContainsPagedRefs = contains; }
+
+    private:
+        std::span<const MWWorld::Ptr> mIgnoreList;
+        bool mContainsPagedRefs = false;
+    };
+
     osg::ref_ptr<osgUtil::IntersectionVisitor> RenderingManager::getIntersectionVisitor(
-        osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors)
+        osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors,
+        std::span<const MWWorld::Ptr> ignoreList)
     {
         if (!mIntersectionVisitor)
-            mIntersectionVisitor = new osgUtil::IntersectionVisitor;
+            mIntersectionVisitor = new IntersectionVisitorWithIgnoreList;
+
+        mIntersectionVisitor->setIgnoreList(ignoreList);
+        mIntersectionVisitor->setContainsPagedRefs(false);
+
+        MWWorld::Scene* worldScene = MWBase::Environment::get().getWorldScene();
+        for (const auto& ptr : ignoreList)
+        {
+            if (worldScene->isPagedRef(ptr))
+            {
+                mIntersectionVisitor->setContainsPagedRefs(true);
+                intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+                break;
+            }
+        }
 
         mIntersectionVisitor->setTraversalNumber(mViewer->getFrameStamp()->getFrameNumber());
         mIntersectionVisitor->setFrameStamp(mViewer->getFrameStamp());
@@ -1088,16 +1232,16 @@ namespace MWRender
         return mIntersectionVisitor;
     }
 
-    RenderingManager::RayResult RenderingManager::castRay(
-        const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer, bool ignoreActors)
+    RenderingManager::RayResult RenderingManager::castRay(const osg::Vec3f& origin, const osg::Vec3f& dest,
+        bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList)
     {
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector(
             new osgUtil::LineSegmentIntersector(osgUtil::LineSegmentIntersector::MODEL, origin, dest));
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
 
-        mRootNode->accept(*getIntersectionVisitor(intersector, ignorePlayer, ignoreActors));
+        mRootNode->accept(*getIntersectionVisitor(intersector, ignorePlayer, ignoreActors, ignoreList));
 
-        return getIntersectionResult(intersector);
+        return getIntersectionResult(intersector, mIntersectionVisitor, ignoreList);
     }
 
     RenderingManager::RayResult RenderingManager::castCameraToViewportRay(
@@ -1117,7 +1261,7 @@ namespace MWRender
 
         mViewer->getCamera()->accept(*getIntersectionVisitor(intersector, ignorePlayer, ignoreActors));
 
-        return getIntersectionResult(intersector);
+        return getIntersectionResult(intersector, mIntersectionVisitor);
     }
 
     void RenderingManager::updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated)

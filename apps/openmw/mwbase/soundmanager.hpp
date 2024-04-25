@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "../mwsound/type.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -115,7 +117,7 @@ namespace MWBase
         virtual void stopMusic() = 0;
         ///< Stops music if it's playing
 
-        virtual void streamMusic(const std::string& filename, MWSound::MusicType type, float fade = 1.f) = 0;
+        virtual void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) = 0;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
         /// \param type music type.
@@ -124,16 +126,16 @@ namespace MWBase
         virtual bool isMusicPlaying() = 0;
         ///< Returns true if music is playing
 
-        virtual void playPlaylist(const std::string& playlist) = 0;
+        virtual void playPlaylist(VFS::Path::NormalizedView playlist) = 0;
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
         /// Title music playlist is predefined
 
-        virtual void say(const MWWorld::ConstPtr& reference, const std::string& filename) = 0;
+        virtual void say(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView filename) = 0;
         ///< Make an actor say some text.
         /// \param filename name of a sound file in the VFS
 
-        virtual void say(const std::string& filename) = 0;
+        virtual void say(VFS::Path::NormalizedView filename) = 0;
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in the VFS
 

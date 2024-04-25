@@ -161,7 +161,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     defines["radialFog"] = "0";
     defines["lightingModel"] = "0";
     defines["reverseZ"] = "0";
-    defines["refraction_enabled"] = "0";
+    defines["waterRefraction"] = "0";
     for (const auto& define : shadowDefines)
         defines[define.first] = define.second;
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
@@ -301,8 +301,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRegions.addColumn(new NestedParentColumn<ESM::Region>(Columns::ColumnId_RegionWeather));
     index = mRegions.getColumns() - 1;
     mRegions.addAdapter(std::make_pair(&mRegions.getColumn(index), new RegionWeatherAdapter()));
-    mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn(Columns::ColumnId_WeatherName, ColumnBase::Display_String, false));
+    mRegions.getNestableColumn(index)->addColumn(new NestedChildColumn(
+        Columns::ColumnId_WeatherName, ColumnBase::Display_String, ColumnBase::Flag_Dialogue, false));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_WeatherChance, ColumnBase::Display_UnsignedInteger8));
     // Region Sounds
@@ -313,6 +313,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
         new NestedChildColumn(Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_SoundChance, ColumnBase::Display_UnsignedInteger8));
+    mRegions.getNestableColumn(index)->addColumn(new NestedChildColumn(
+        Columns::ColumnId_SoundProbability, ColumnBase::Display_String, ColumnBase::Flag_Dialogue, false));
 
     mBirthsigns.addColumn(new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn(new RecordStateColumn<ESM::BirthSign>);
@@ -500,6 +502,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mMagicEffects.addColumn(new FixedRecordTypeColumn<ESM::MagicEffect>(UniversalId::Type_MagicEffect));
     mMagicEffects.addColumn(new SchoolColumn<ESM::MagicEffect>);
     mMagicEffects.addColumn(new BaseCostColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn(new ProjectileSpeedColumn<ESM::MagicEffect>);
     mMagicEffects.addColumn(new EffectTextureColumn<ESM::MagicEffect>(Columns::ColumnId_Icon));
     mMagicEffects.addColumn(new EffectTextureColumn<ESM::MagicEffect>(Columns::ColumnId_Particle));
     mMagicEffects.addColumn(new EffectObjectColumn<ESM::MagicEffect>(Columns::ColumnId_CastingObject));
@@ -510,6 +513,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mMagicEffects.addColumn(new EffectSoundColumn<ESM::MagicEffect>(Columns::ColumnId_HitSound));
     mMagicEffects.addColumn(new EffectSoundColumn<ESM::MagicEffect>(Columns::ColumnId_AreaSound));
     mMagicEffects.addColumn(new EffectSoundColumn<ESM::MagicEffect>(Columns::ColumnId_BoltSound));
+
     mMagicEffects.addColumn(
         new FlagColumn<ESM::MagicEffect>(Columns::ColumnId_AllowSpellmaking, ESM::MagicEffect::AllowSpellmaking));
     mMagicEffects.addColumn(
@@ -589,7 +593,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRefs.addColumn(new ChargesColumn<CellRef>);
     mRefs.addColumn(new EnchantmentChargesColumn<CellRef>);
     mRefs.addColumn(new StackSizeColumn<CellRef>);
-    mRefs.addColumn(new TeleportColumn<CellRef>);
+    mRefs.addColumn(new TeleportColumn<CellRef>(
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mRefs.addColumn(new TeleportCellColumn<CellRef>);
     mRefs.addColumn(new PosColumn<CellRef>(&CellRef::mDoorDest, 0, true));
     mRefs.addColumn(new PosColumn<CellRef>(&CellRef::mDoorDest, 1, true));
@@ -597,6 +602,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 0, true));
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 1, true));
     mRefs.addColumn(new RotColumn<CellRef>(&CellRef::mDoorDest, 2, true));
+    mRefs.addColumn(new IsLockedColumn<CellRef>(
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mRefs.addColumn(new LockLevelColumn<CellRef>);
     mRefs.addColumn(new KeyColumn<CellRef>);
     mRefs.addColumn(new TrapColumn<CellRef>);

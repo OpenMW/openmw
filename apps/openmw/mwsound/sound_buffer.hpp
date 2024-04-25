@@ -35,7 +35,7 @@ namespace MWSound
         {
         }
 
-        const std::string& getResourceName() const noexcept { return mResourceName; }
+        const VFS::Path::Normalized& getResourceName() const noexcept { return mResourceName; }
 
         Sound_Handle getHandle() const noexcept { return mHandle; }
 
@@ -46,7 +46,7 @@ namespace MWSound
         float getMaxDist() const noexcept { return mMaxDist; }
 
     private:
-        std::string mResourceName;
+        VFS::Path::Normalized mResourceName;
         float mVolume;
         float mMinDist;
         float mMaxDist;

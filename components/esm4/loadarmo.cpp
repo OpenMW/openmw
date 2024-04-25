@@ -41,13 +41,13 @@ void ESM4::Armor::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 switch (subHdr.dataSize)
                 {
@@ -69,12 +69,12 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_INDX: // FO4
+            case ESM::fourCC("INDX"): // FO4
             {
                 reader.get(currentIndex);
                 break;
             }
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
             {
                 if (subHdr.dataSize == 4)
                 {
@@ -97,28 +97,28 @@ void ESM4::Armor::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_MOD2:
+            case ESM::fourCC("MOD2"):
                 reader.getZString(mModelMaleWorld);
                 break;
-            case ESM4::SUB_MOD3:
+            case ESM::fourCC("MOD3"):
                 reader.getZString(mModelFemale);
                 break;
-            case ESM4::SUB_MOD4:
+            case ESM::fourCC("MOD4"):
                 reader.getZString(mModelFemaleWorld);
                 break;
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIconMale);
                 break;
-            case ESM4::SUB_MICO:
+            case ESM::fourCC("MICO"):
                 reader.getZString(mMiniIconMale);
                 break;
-            case ESM4::SUB_ICO2:
+            case ESM::fourCC("ICO2"):
                 reader.getZString(mIconFemale);
                 break;
-            case ESM4::SUB_MIC2:
+            case ESM::fourCC("MIC2"):
                 reader.getZString(mMiniIconFemale);
                 break;
-            case ESM4::SUB_BMDT:
+            case ESM::fourCC("BMDT"):
                 if (subHdr.dataSize == 8) // FO3
                 {
                     reader.get(mArmorFlags);
@@ -133,7 +133,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                     mGeneralFlags |= TYPE_TES4;
                 }
                 break;
-            case ESM4::SUB_BODT:
+            case ESM::fourCC("BODT"):
             {
                 reader.get(mArmorFlags);
                 uint32_t flags = 0;
@@ -146,7 +146,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                 mGeneralFlags |= TYPE_TES5;
                 break;
             }
-            case ESM4::SUB_BOD2:
+            case ESM::fourCC("BOD2"):
                 // FO4, TES5
                 if (subHdr.dataSize == 4 || subHdr.dataSize == 8)
                 {
@@ -163,75 +163,75 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                     reader.skipSubRecordData();
                 }
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_ANAM:
+            case ESM::fourCC("ANAM"):
                 reader.get(mEnchantmentPoints);
                 break;
-            case ESM4::SUB_ENAM:
+            case ESM::fourCC("ENAM"):
                 reader.getFormId(mEnchantment);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_DESC:
+            case ESM::fourCC("DESC"):
                 reader.getLocalizedString(mText);
                 break;
-            case ESM4::SUB_YNAM:
+            case ESM::fourCC("YNAM"):
                 reader.getFormId(mPickUpSound);
                 break;
-            case ESM4::SUB_ZNAM:
+            case ESM::fourCC("ZNAM"):
                 reader.getFormId(mDropSound);
                 break;
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_MO2B:
-            case ESM4::SUB_MO3B:
-            case ESM4::SUB_MO4B:
-            case ESM4::SUB_MO2T:
-            case ESM4::SUB_MO2S:
-            case ESM4::SUB_MO3T:
-            case ESM4::SUB_MO4T:
-            case ESM4::SUB_MO4S:
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_RNAM: // race formid
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_TNAM:
-            case ESM4::SUB_DNAM:
-            case ESM4::SUB_BAMT:
-            case ESM4::SUB_BIDS:
-            case ESM4::SUB_ETYP:
-            case ESM4::SUB_BMCT:
-            case ESM4::SUB_EAMT:
-            case ESM4::SUB_EITM:
-            case ESM4::SUB_VMAD:
-            case ESM4::SUB_REPL: // FO3
-            case ESM4::SUB_BIPL: // FO3
-            case ESM4::SUB_MODD: // FO3
-            case ESM4::SUB_MOSD: // FO3
-            case ESM4::SUB_MODS: // FO3
-            case ESM4::SUB_MO3S: // FO3
-            case ESM4::SUB_BNAM: // FONV
-            case ESM4::SUB_SNAM: // FONV
-            case ESM4::SUB_DAMC: // Destructible
-            case ESM4::SUB_DEST:
-            case ESM4::SUB_DMDC:
-            case ESM4::SUB_DMDL:
-            case ESM4::SUB_DMDT:
-            case ESM4::SUB_DMDS:
-            case ESM4::SUB_DSTA:
-            case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF: // Destructible end
-            case ESM4::SUB_APPR: // FO4
-            case ESM4::SUB_DAMA: // FO4
-            case ESM4::SUB_FNAM: // FO4
-            case ESM4::SUB_INRD: // FO4
-            case ESM4::SUB_PTRN: // FO4
-            case ESM4::SUB_OBTE: // FO4 object template start
-            case ESM4::SUB_OBTF:
-            case ESM4::SUB_OBTS:
-            case ESM4::SUB_STOP: // FO4 object template end
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("MO2B"):
+            case ESM::fourCC("MO3B"):
+            case ESM::fourCC("MO4B"):
+            case ESM::fourCC("MO2T"):
+            case ESM::fourCC("MO2S"):
+            case ESM::fourCC("MO3T"):
+            case ESM::fourCC("MO4T"):
+            case ESM::fourCC("MO4S"):
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("RNAM"): // race formid
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("TNAM"):
+            case ESM::fourCC("DNAM"):
+            case ESM::fourCC("BAMT"):
+            case ESM::fourCC("BIDS"):
+            case ESM::fourCC("ETYP"):
+            case ESM::fourCC("BMCT"):
+            case ESM::fourCC("EAMT"):
+            case ESM::fourCC("EITM"):
+            case ESM::fourCC("VMAD"):
+            case ESM::fourCC("REPL"): // FO3
+            case ESM::fourCC("BIPL"): // FO3
+            case ESM::fourCC("MODD"): // FO3
+            case ESM::fourCC("MOSD"): // FO3
+            case ESM::fourCC("MODS"): // FO3
+            case ESM::fourCC("MO3S"): // FO3
+            case ESM::fourCC("BNAM"): // FONV
+            case ESM::fourCC("SNAM"): // FONV
+            case ESM::fourCC("DAMC"): // Destructible
+            case ESM::fourCC("DEST"):
+            case ESM::fourCC("DMDC"):
+            case ESM::fourCC("DMDL"):
+            case ESM::fourCC("DMDT"):
+            case ESM::fourCC("DMDS"):
+            case ESM::fourCC("DSTA"):
+            case ESM::fourCC("DSTD"):
+            case ESM::fourCC("DSTF"): // Destructible end
+            case ESM::fourCC("APPR"): // FO4
+            case ESM::fourCC("DAMA"): // FO4
+            case ESM::fourCC("FNAM"): // FO4
+            case ESM::fourCC("INRD"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
+            case ESM::fourCC("OBTE"): // FO4 object template start
+            case ESM::fourCC("OBTF"):
+            case ESM::fourCC("OBTS"):
+            case ESM::fourCC("STOP"): // FO4 object template end
                 reader.skipSubRecordData();
                 break;
             default:

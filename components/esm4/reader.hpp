@@ -335,7 +335,7 @@ namespace ESM4
 
         // Get a subrecord of a particular type and data type
         template <typename T>
-        bool getSubRecord(const ESM4::SubRecordTypes type, T& t)
+        bool getSubRecord(const std::uint32_t type, T& t)
         {
             ESM4::SubRecordHeader hdr;
             if (!getExact(hdr) || (hdr.typeId != type) || (hdr.dataSize != sizeof(T)))

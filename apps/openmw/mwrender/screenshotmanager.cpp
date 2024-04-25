@@ -243,7 +243,7 @@ namespace MWRender
         osg::ref_ptr<osg::StateSet> stateset = quad->getOrCreateStateSet();
 
         Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
-        stateset->setAttributeAndModes(shaderMgr.getProgram("360"), osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(shaderMgr.getProgram("s360"), osg::StateAttribute::ON);
 
         stateset->addUniform(new osg::Uniform("cubeMap", 0));
         stateset->addUniform(new osg::Uniform("mapping", static_cast<int>(screenshotMapping)));
