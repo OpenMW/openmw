@@ -40,6 +40,7 @@
 #include <apps/opencs/view/render/tagbase.hpp>
 
 #include <components/esm/defs.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include "../../model/prefs/shortcut.hpp"
 #include "../../model/world/commandmacro.hpp"
@@ -253,8 +254,8 @@ void CSVRender::InstanceMode::getSelectionGroup(const int group)
 
 CSVRender::InstanceMode::InstanceMode(
     WorldspaceWidget* worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget* parent)
-    : EditMode(worldspaceWidget, QIcon(":scenetoolbar/editing-instance"), Mask_Reference | Mask_Terrain,
-        "Instance editing", parent)
+    : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-instance"),
+        Mask_Reference | Mask_Terrain, "Instance editing", parent)
     , mSubMode(nullptr)
     , mSubModeId("move")
     , mSelectionMode(nullptr)

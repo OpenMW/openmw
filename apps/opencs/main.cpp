@@ -11,6 +11,7 @@
 
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/misc/scalableicon.hpp>
 #include <components/platform/platform.hpp>
 
 #include "model/doc/messages.hpp"
@@ -32,6 +33,9 @@ private:
     {
         try
         {
+            if (event->type() == QEvent::ThemeChange || event->type() == QEvent::PaletteChange)
+                Misc::ScalableIcon::updateAllIcons();
+
             return QApplication::notify(receiver, event);
         }
         catch (const std::exception& exception)

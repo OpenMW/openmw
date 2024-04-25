@@ -230,6 +230,7 @@
     Feature #7923: Don't show non-existent higher ranks for factions with fewer than 9 ranks
     Feature #7932: Support two-channel normal maps
     Feature #7936: Scalable icons in Qt applications
+    Feature #7953: Allow to change SVG icons colors depending on color scheme
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
