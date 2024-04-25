@@ -3,6 +3,7 @@
 
 #include <apps/openmw/mwmechanics/stat.hpp>
 #include <components/esm3/cellref.hpp>
+#include <components/lua/serialization.hpp>
 #include <cstdint>
 #include <limits>
 #include <map>
@@ -13,6 +14,7 @@
 #include <components/esm/refid.hpp>
 
 constexpr std::size_t MAX_STRING_LENGTH = 256 + sizeof(int) + 1;
+constexpr std::size_t MAX_LUADATA_SIZE = 1024 * 512;
 
 namespace serialize
 {
@@ -228,9 +230,60 @@ namespace serialize
         }                                                                                                              \
     } while (0)
     // ESM::Attribute
+
     // ESM::Class ?
+
     // Whatever the spell list is
 
     // Inventory/ContainerStore
+
+    // BinaryData
+    // Lua binary data is internally a string,
+    // but we can't treat it as such because they may have \0
+    template <typename Stream>
+    bool serialize_lua_data_internal(Stream& stream, LuaUtil::BinaryData& luaData)
+    {
+
+        uint length;
+        if (Stream::IsReading)
+        {
+            serialize_int(stream, length, 0, MAX_LUADATA_SIZE);
+            serialize_assert(length < MAX_LUADATA_SIZE);
+            luaData.resize(length);
+            serialize_bytes(stream, (uint8_t*)luaData.data(), length);
+        }
+
+        if (Stream::IsWriting)
+        {
+            length = luaData.size();
+            serialize_assert(length < MAX_LUADATA_SIZE);
+            serialize_int(stream, length, 0, MAX_LUADATA_SIZE);
+            serialize_bytes(stream, (uint8_t*)luaData.data(), length);
+        }
+
+        return true;
+    }
+
+    /**
+        DREAMWEAVE SERIALIZATION:
+        Serialize LuaUtil::LuaData to the stream (read/write/measure).
+        This is a helper macro to make writing unified serialize functions easier.
+        Serialize macros returns false on error so we don't need to use exceptions for error handling on read. This is
+       an important safety measure because packet data comes from the network and may be malicious. IMPORTANT: This
+       macro must be called inside a templated serialize function with template \<typename Stream\>. The serialize
+       method must have a bool return value.
+        @param stream The stream object. May be a read, write or measure stream.
+        @param luaData an std::string, but actually BinaryData.
+        The difference is that serialized lua data can contain \0 who knows where.
+     */
+
+#define serialize_lua_data(stream, luaData)                                                                            \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!serialize::serialize_lua_data_internal(stream, luaData))                                                  \
+        {                                                                                                              \
+            return false;                                                                                              \
+        }                                                                                                              \
+    } while (0)
 }
 #endif // ESMSERIALIZE_H_

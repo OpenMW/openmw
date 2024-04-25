@@ -150,6 +150,8 @@ namespace MWBase
             = 0;
 
         virtual std::string formatResourceUsageStats() const = 0;
+
+        virtual void queueGlobalEventMessage(const std::string& eventName, const std::string& eventData) = 0;
     };
 
 }

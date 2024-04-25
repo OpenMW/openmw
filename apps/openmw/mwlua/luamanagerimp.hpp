@@ -159,6 +159,11 @@ namespace MWLua
         LuaUtil::InputAction::Registry& inputActions() { return mInputActions; }
         LuaUtil::InputTrigger::Registry& inputTriggers() { return mInputTriggers; }
 
+        virtual void queueGlobalEventMessage(const std::string& eventName, const std::string& eventData) override
+        {
+            mLuaEvents.addGlobalEvent({ std::move(eventName), eventData });
+        }
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,

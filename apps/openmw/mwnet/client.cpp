@@ -1,4 +1,5 @@
 #include <apps/openmw/mwnet/connectionbase.hpp>
+#include <apps/openmw/mwnet/networkmessages.hpp>
 #include <csignal>
 #include <stdexcept>
 #include <time.h>
@@ -10,10 +11,10 @@
 
 static volatile int quit = 0;
 
-void clientInterruptHandler(int)
-{
-    quit = 1;
-}
+// void clientInterruptHandler(int)
+// {
+//     quit = 1;
+// }
 
 // Upgrade later to accept a destination & source address
 MWNet::Client::Client()
@@ -33,7 +34,7 @@ MWNet::Client::Client()
 
     srand((unsigned int)time(NULL));
 
-    signal(SIGINT, clientInterruptHandler);
+    // signal(SIGINT, clientInterruptHandler);
 
     Address serverAddress(MWNet::LocalHost, MWNet::DefaultServerPort);
 
@@ -106,9 +107,35 @@ void MWNet::Client::processMessages()
         return;
     }
 
-    for (const auto& entry : mMessageQueue)
+    for (auto entry : mMessageQueue)
     {
-        mClient->SendMessage(entry.channelName, entry.message);
+        try
+        {
+            Log(Debug::Warning) << "Evaluating message type: " << entry->messageType;
+            switch (entry->messageType)
+            {
+                case UnorderedSyncedMessage::GLOBAL_EVENT_QUEUED:
+                {
+                    GlobalEventDataMessageEntry* messageEntry = static_cast<GlobalEventDataMessageEntry*>(entry.get());
+                    GlobalEventQueuedMessage* message
+                        = static_cast<GlobalEventQueuedMessage*>(mClient->CreateMessage(entry->messageType));
+                    message->eventName = messageEntry->eventName;
+                    message->eventData = messageEntry->eventData;
+                    mClient->SendMessage(messageEntry->channelName, message);
+                    break;
+                }
+                case UnorderedSyncedMessage::PLAYER_LOGIN_MESSAGE:
+                    // mClient->SendMessage(entry.channelName, entry.message);
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (...)
+        {
+            Log(Debug::Error)
+                << "Failed to send message network message; It may have been queued with an incorrect type.";
+        }
     }
 
     mMessageQueue.clear();
@@ -133,7 +160,7 @@ void MWNet::Client::processMessage(yojimbo::Message* message)
     switch (message->GetType())
     {
         case (int)TestMessageType::TEST_MESSAGE:
-            processTestMessage((TestMessage*)message);
+            // processTestMessage((TestMessage*)message);
             break;
         default:
             break;

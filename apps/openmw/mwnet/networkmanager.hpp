@@ -3,16 +3,17 @@
 
 #include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwmechanics/creaturestats.hpp>
+#include <apps/openmw/mwnet/connectionbase.hpp>
 #include <apps/openmw/mwnet/networkmessages.hpp>
 #include <apps/openmw/mwworld/cellstore.hpp>
 #include <apps/openmw/mwworld/class.hpp>
 #include <apps/openmw/mwworld/esmstore.hpp>
 #include <atomic>
 #include <components/esm3/loadnpc.hpp>
+#include <components/lua/serialization.hpp>
 #include <memory>
 
 #include "../mwbase/environment.hpp"
-#include "../mwlua/object.hpp"
 #include "client.hpp"
 #include "server.hpp"
 
@@ -66,6 +67,23 @@ namespace MWNet
             mIsWriting.store(false, std::memory_order_relaxed);
 
             return true;
+        }
+
+        void queueGlobalEventMessage(const std::string& eventName, const LuaUtil::BinaryData& eventData)
+        {
+            while (mIsWriting.load(std::memory_order_relaxed))
+            {
+                continue;
+            }
+
+            mIsWriting.store(true, std::memory_order_relaxed);
+
+            const std::shared_ptr<GlobalEventDataMessageEntry> messageEntry
+                = std::make_shared<GlobalEventDataMessageEntry>(eventName, eventData);
+
+            mConnection->queueMessage(std::move(messageEntry));
+
+            mIsWriting.store(false, std::memory_order_relaxed);
         }
 
         void queuePlayerLoginMessage(MWWorld::Ptr playerRef)

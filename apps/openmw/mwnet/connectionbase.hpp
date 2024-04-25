@@ -1,5 +1,6 @@
 #ifndef CONNECTIONBASE_H_
 #define CONNECTIONBASE_H_
+#include <components/lua/serialization.hpp>
 #include <memory>
 #include <vector>
 
@@ -20,12 +21,26 @@ namespace MWNet
 
     struct MessageEntry
     {
-        uint channelName;
-        yojimbo::Message* message;
+        ChannelName channelName;
+        UnorderedSyncedMessage messageType;
 
-        MessageEntry(uint channelName, yojimbo::Message* msg)
+        MessageEntry(ChannelName channelName, UnorderedSyncedMessage messageType)
             : channelName(channelName)
-            , message(msg)
+            , messageType(messageType)
+        {
+        }
+        virtual ~MessageEntry() = default;
+    };
+
+    struct GlobalEventDataMessageEntry : public MessageEntry
+    {
+        std::string eventName;
+        LuaUtil::BinaryData eventData;
+
+        GlobalEventDataMessageEntry(const std::string& eventName, const LuaUtil::BinaryData& eventData)
+            : MessageEntry(ChannelName::EVENTSQUEUE, UnorderedSyncedMessage::GLOBAL_EVENT_QUEUED)
+            , eventName(eventName)
+            , eventData(eventData)
         {
         }
     };
@@ -34,8 +49,8 @@ namespace MWNet
     {
         uint clientId;
 
-        ServerMessageEntry(uint client, uint channelName, yojimbo::Message* msg)
-            : MessageEntry(channelName, msg)
+        ServerMessageEntry(uint client, ChannelName channelName, UnorderedSyncedMessage messageType)
+            : MessageEntry(channelName, messageType)
             , clientId(client)
         {
         }
@@ -70,14 +85,14 @@ namespace MWNet
         double mTime;
         std::unique_ptr<BaseAdapter> mAdapter;
         GameConnectionConfig mConfig = GameConnectionConfig();
-        std::vector<MessageEntry> mMessageQueue;
+        std::vector<std::shared_ptr<MessageEntry>> mMessageQueue;
         virtual ~Connection() = default;
         virtual bool tick() = 0;
         virtual void updateConnection() = 0;
         virtual void processMessages() = 0;
         virtual void clientConnected(int clientIndex) = 0;
         virtual void clientDisconnected(int clientIndex) = 0;
-        virtual void queueMessage(MessageEntry message) {}
+        virtual void queueMessage(const std::shared_ptr<MessageEntry> message) {}
         virtual yojimbo::Client* getClient() { return nullptr; }
         BaseAdapter getAdapter() { return *mAdapter; }
     };

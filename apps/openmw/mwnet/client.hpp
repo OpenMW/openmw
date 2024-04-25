@@ -42,7 +42,7 @@ namespace MWNet
     public:
         yojimbo::Client* getClient() override { return mClient.get(); }
 
-        void queueMessage(MessageEntry message) override { mMessageQueue.push_back(std::move(message)); }
+        void queueMessage(const std::shared_ptr<MessageEntry> message) override { mMessageQueue.push_back(message); }
 
         Client();
 

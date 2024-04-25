@@ -1,5 +1,6 @@
 #include "corebindings.hpp"
 
+#include <apps/openmw/mwnet/networkmanager.hpp>
 #include <chrono>
 #include <stdexcept>
 
@@ -80,8 +81,17 @@ namespace MWLua
             MWBase::Environment::get().getStateManager()->requestQuit();
         };
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
-            context.mLuaEvents->addGlobalEvent(
-                { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+            const auto netMan = MWBase::Environment::get().getNetworkManager();
+            if (!netMan->isServer())
+            {
+                netMan->queueGlobalEventMessage(
+                    std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer));
+            }
+            else
+            {
+                context.mLuaEvents->addGlobalEvent(
+                    { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+            }
         };
         api["contentFiles"] = initContentFilesBindings(lua->sol());
         api["sound"] = initCoreSoundBindings(context);

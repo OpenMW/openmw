@@ -29,7 +29,10 @@
 
 #include <stdint.h>
 #include <string>
+
 #include <yojimbo.h>
+
+#include "esmserialize.hpp"
 
 using namespace yojimbo;
 
@@ -175,7 +178,27 @@ enum UnorderedSyncedMessage
 {
     PLAYER_LOGIN_MESSAGE,
     LUA_SCRIPT_ID,
+    GLOBAL_EVENT_QUEUED,
     NUM_UNORDERED_SYNC_MESSAGES,
+};
+
+class GlobalEventQueuedMessage : public yojimbo::Message
+{
+public:
+    std::string eventName;
+    LuaUtil::BinaryData eventData;
+
+    GlobalEventQueuedMessage() {}
+
+    template <typename Stream>
+    bool Serialize(Stream& stream)
+    {
+        serialize_std_string(stream, eventName, MAX_STRING_LENGTH);
+        serialize_lua_data(stream, eventData);
+        return true;
+    }
+
+    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
 };
 
 class PlayerLoginMessage : public yojimbo::Message
@@ -214,6 +237,7 @@ public:
 YOJIMBO_MESSAGE_FACTORY_START(MWNetUnorderedMessageFactory, NUM_UNORDERED_SYNC_MESSAGES);
 YOJIMBO_DECLARE_MESSAGE_TYPE(PLAYER_LOGIN_MESSAGE, PlayerLoginMessage);
 YOJIMBO_DECLARE_MESSAGE_TYPE(LUA_SCRIPT_ID, LuaScriptIdMessage);
+YOJIMBO_DECLARE_MESSAGE_TYPE(GLOBAL_EVENT_QUEUED, GlobalEventQueuedMessage);
 YOJIMBO_MESSAGE_FACTORY_FINISH()
 
 #endif // #ifndef NETWORKMESSAGES_H

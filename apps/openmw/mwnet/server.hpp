@@ -6,8 +6,10 @@
 
 #include <yojimbo.h>
 
+#include "../mwbase/environment.hpp"
 #include "connectionbase.hpp"
 #include "networkmessages.hpp"
+#include <apps/openmw/mwlua/luamanagerimp.hpp>
 
 namespace MWNet
 {
@@ -51,7 +53,7 @@ namespace MWNet
                     if (verifiedMessage)
                     {
                         Log(Debug::Warning) << "SERVER: received login message from client " << clientIndex << ": "
-                                            << verifiedMessage->player.toString();
+                                            << verifiedMessage->player;
                     }
                 },
                 [this](int clientIndex, yojimbo::Message* message) {
@@ -60,6 +62,19 @@ namespace MWNet
                     {
                         Log(Debug::Warning) << "SERVER: received scriptId message from client " << clientIndex
                                             << ": for script: " << verifiedMessage->scriptId;
+                    }
+                },
+                [this](int clientIndex, yojimbo::Message* message) {
+                    GlobalEventQueuedMessage* verifiedMessage
+                        = verifyMessage<GlobalEventQueuedMessage*>(message, clientIndex);
+                    if (verifiedMessage)
+                    {
+                        Log(Debug::Warning)
+                            << "SERVER: received Global event queued from client " << clientIndex << ": "
+                            << verifiedMessage->eventName << " with data: " << verifiedMessage->eventData
+                            << ", of size: " << verifiedMessage->eventData.size();
+                        MWBase::LuaManager* luaMan = MWBase::Environment::get().getLuaManager();
+                        luaMan->queueGlobalEventMessage(verifiedMessage->eventName, verifiedMessage->eventData);
                     }
                 },
             };
