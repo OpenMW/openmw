@@ -1479,7 +1479,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Force per-pixel lighting</source>
+        <source>Force Per-pixel Lighting</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
