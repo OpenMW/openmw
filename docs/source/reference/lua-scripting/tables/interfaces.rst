@@ -21,6 +21,10 @@
     - by player scripts
     - | Allows to alter behavior of the built-in script
       | that handles player controls.
+  * - :ref:`Controls <Interface GamepadControls>`
+    - by player scripts
+    - | Allows to alter behavior of the built-in script
+      | that handles player gamepad controls.
   * - :ref:`ItemUsage <Interface ItemUsage>`
     - by global scripts
     - | Allows to extend or override built-in item usage
