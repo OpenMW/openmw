@@ -342,7 +342,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Clone Content List</source>
-        <translation>Создать копию списка плагинов</translation>
+        <translation>Создать копию списка</translation>
     </message>
     <message>
         <source>Delete Content List</source>
