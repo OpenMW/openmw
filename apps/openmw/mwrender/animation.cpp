@@ -416,7 +416,7 @@ namespace MWRender
             // guaranteed to update before
             osg::ref_ptr<osg::Callback> cb = new BoneAnimBlendControllerWrapper(controller, bone);
 
-            // Ensure there is no other AnimBlendController - this can happen if using
+            // Ensure there is no other AnimBlendController - this can happen when using
             // multiple animations with different roots, such as NPC animation
             osg::Callback* updateCb = bone->getUpdateCallback();
             while (updateCb)
@@ -434,7 +434,7 @@ namespace MWRender
             }
 
             // Find UpdateBone callback and bind to just after that (order is important)
-            // NOTE: if it doesnt have an UpdateBone callback, we shouldnt be doing blending!
+            // NOTE: if it doesn't have an UpdateBone callback, we shouldn't be doing blending!
             updateCb = bone->getUpdateCallback();
             while (updateCb)
             {
@@ -666,7 +666,6 @@ namespace MWRender
 
         for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
-
             if (Misc::getFileExtension(name) == "kf")
             {
                 addSingleAnimSource(name, baseModel);
@@ -769,13 +768,22 @@ namespace MWRender
             Misc::StringUtils::replaceLast(yamlpath, ".dae", ".yaml");
 
             // globalBlendConfigPath is only used with actors! Objects have no default blending.
-            std::string_view globalBlendConfigPath = "animations/animation-config.yaml";
+            const VFS::Path::NormalizedView globalBlendConfigPath("animations/animation-config.yaml");
+            const VFS::Path::NormalizedView blendConfigPath(yamlpath);
 
             osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
             if (mPtr.getClass().isActor())
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(globalBlendConfigPath, yamlpath);
+            {
+                blendRules
+                    = mResourceSystem->getAnimBlendRulesManager()->getRules(globalBlendConfigPath, blendConfigPath);
+                if (blendRules == nullptr)
+                    Log(Debug::Warning) << "Animation blending files were not found '" << blendConfigPath.value()
+                                        << "' or '" << globalBlendConfigPath.value() << "'";
+            }
             else
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(yamlpath);
+            {
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(blendConfigPath);
+            }
 
             // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
             animsrc->mAnimBlendRules = blendRules;
@@ -1076,6 +1084,48 @@ namespace MWRender
         return mNodeMap;
     }
 
+    template <typename ControllerType, typename NodeType>
+    inline osg::Callback* Animation::handleBlendTransform(osg::ref_ptr<osg::Node> node,
+        osg::ref_ptr<SceneUtil::KeyframeController> keyframeController,
+        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimBlendControllerBase<NodeType>>>& blendControllers,
+        const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
+        const AnimState& active)
+    {
+        osg::ref_ptr<ControllerType> animController;
+
+        if (blendControllers.contains(node))
+        {
+            animController = blendControllers[node];
+            animController->setKeyframeTrack(keyframeController, stateData, blendRules);
+        }
+        else
+        {
+            animController = new ControllerType(keyframeController, stateData, blendRules);
+            blendControllers[node] = animController;
+
+            if constexpr (std::is_same_v<ControllerType, BoneAnimBlendController>)
+                assignBoneBlendCallbackRecursive(animController, mActiveControllers, node, true);
+        }
+
+        keyframeController->mTime = active.mTime;
+
+        if constexpr (std::is_same_v<ControllerType, BoneAnimBlendController>)
+        {
+            // IMPORTANT: we must gather all transforms at point of change before next update
+            // instead of at the root update callback because the root bone may require blending.
+            if (animController->getBlendTrigger())
+                animController->gatherRecursiveBoneTransforms(static_cast<osgAnimation::Bone*>(node.get()));
+
+            // Register blend callback after the initial animation callback
+            node->addUpdateCallback(animController->getAsCallback());
+            mActiveControllers.emplace_back(node, animController->getAsCallback());
+
+            return keyframeController->getAsCallback();
+        }
+
+        return animController->getAsCallback();
+    }
+
     void Animation::resetActiveGroups()
     {
         // remove all previous external controllers from the scene graph
@@ -1122,70 +1172,24 @@ namespace MWRender
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(
                         it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
-                    osg::Callback* callback;
                     const bool useSmoothAnims = Settings::game().mSmoothAnimTransitions;
-                    if (useSmoothAnims && dynamic_cast<NifOsg::MatrixTransform*>(node.get()))
+                    const bool isNifTransform = dynamic_cast<NifOsg::MatrixTransform*>(node.get()) != nullptr;
+                    const bool isBoneTransform = dynamic_cast<osgAnimation::Bone*>(node.get()) != nullptr;
+
+                    osg::Callback* callback = it->second->getAsCallback();
+                    if (useSmoothAnims)
                     {
-                        // Update an existing animation blending controller or create a new one for NIF animations
-                        osg::ref_ptr<AnimBlendController> animController;
-
-                        if (mAnimBlendControllers.contains(node))
+                        if (isNifTransform)
                         {
-                            animController = mAnimBlendControllers[node];
-                            animController->setKeyframeTrack(it->second, stateData, animsrc->mAnimBlendRules);
+                            callback = handleBlendTransform<AnimBlendController, NifOsg::MatrixTransform>(node,
+                                it->second, mAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
                         }
-                        else
+                        else if (isBoneTransform)
                         {
-                            animController = osg::ref_ptr<AnimBlendController>(
-                                new AnimBlendController(it->second, stateData, animsrc->mAnimBlendRules));
-
-                            mAnimBlendControllers[node] = animController;
+                            callback
+                                = handleBlendTransform<BoneAnimBlendController, osgAnimation::Bone>(node, it->second,
+                                    mBoneAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
                         }
-
-                        it->second->mTime = active->second.mTime;
-
-                        callback = animController->getAsCallback();
-                    }
-                    else if (useSmoothAnims && dynamic_cast<osgAnimation::Bone*>(node.get()))
-                    {
-                        // Update an existing animation blending controller or create a new one for osgAnimation
-                        osg::ref_ptr<BoneAnimBlendController> animController;
-
-                        if (mBoneAnimBlendControllers.contains(node))
-                        {
-                            animController = mBoneAnimBlendControllers[node];
-                            animController->setKeyframeTrack(it->second, stateData, animsrc->mAnimBlendRules);
-                        }
-                        else
-                        {
-                            animController = osg::ref_ptr<BoneAnimBlendController>(
-                                new BoneAnimBlendController(it->second, stateData, animsrc->mAnimBlendRules));
-
-                            mBoneAnimBlendControllers[node] = animController;
-
-                            assignBoneBlendCallbackRecursive(animController, mActiveControllers, node, true);
-                        }
-
-                        // IMPORTANT: we must gather all transforms at point of change before next update
-                        // instead of at the root update callback because the root bone may need blending
-                        if (animController->getBlendTrigger())
-                            animController->gatherRecursiveBoneTransforms(static_cast<osgAnimation::Bone*>(node.get()));
-
-                        it->second->mTime = active->second.mTime;
-
-                        // Register blend callback after the initial animation callback
-                        callback = animController->getAsCallback();
-
-                        node->addUpdateCallback(callback);
-                        mActiveControllers.emplace_back(node, callback);
-
-                        // Ensure the original animation update callback is still applied
-                        // this is because we need this to happen first to get the latest transform to blend to
-                        callback = it->second->getAsCallback();
-                    }
-                    else
-                    {
-                        callback = it->second->getAsCallback();
                     }
 
                     node->addUpdateCallback(callback);

@@ -51,7 +51,7 @@ namespace MWRender
     class RotateController;
     class TransparencyUpdater;
 
-    typedef std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> ActiveControllersVector;
+    using ActiveControllersVector = std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>>;
 
     class EffectAnimationTime : public SceneUtil::ControllerSource
     {
@@ -311,6 +311,13 @@ namespace MWRender
         virtual void addControllers();
 
         void removeFromSceneImpl();
+
+        template <typename ControllerType, typename NodeType>
+        inline osg::Callback* handleBlendTransform(osg::ref_ptr<osg::Node> node,
+            osg::ref_ptr<SceneUtil::KeyframeController> keyframeController,
+            std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimBlendControllerBase<NodeType>>>& blendControllers,
+            const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
+            const AnimState& active);
 
     public:
         Animation(

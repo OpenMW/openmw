@@ -49,7 +49,7 @@ namespace MWRender
         void gatherRecursiveBoneTransforms(osgAnimation::Bone* parent, bool isRoot = true);
         void applyBoneBlend(osgAnimation::Bone* parent);
 
-        const char* libraryName() const override { return "openmw"; }
+        const char* libraryName() const override { return "MWRender"; }
         const char* className() const override { return "AnimBlendController"; }
 
     protected:
@@ -77,8 +77,8 @@ namespace MWRender
         std::unordered_map<osg::Node*, osg::Matrixf> mBlendBoneTransforms;
     };
 
-    typedef AnimBlendControllerBase<NifOsg::MatrixTransform> AnimBlendController;
-    typedef AnimBlendControllerBase<osgAnimation::Bone> BoneAnimBlendController;
+    using AnimBlendController = AnimBlendControllerBase<NifOsg::MatrixTransform>;
+    using BoneAnimBlendController = AnimBlendControllerBase<osgAnimation::Bone>;
 
     // Assigned to child bones with an instance of AnimBlendControllerBase
     class BoneAnimBlendControllerWrapper : public osg::Callback

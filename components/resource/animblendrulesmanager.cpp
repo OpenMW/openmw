@@ -31,7 +31,7 @@ namespace Resource
     }
 
     osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::getRules(
-        std::string_view path, std::string_view overridePath)
+        const VFS::Path::NormalizedView path, const VFS::Path::NormalizedView overridePath)
     {
         // Note: Providing a non-existing path but an existing overridePath is not supported!
         auto tmpl = loadRules(path);
@@ -43,7 +43,7 @@ namespace Resource
         osg::ref_ptr<SceneUtil::AnimBlendRules> blendRules(new AnimBlendRules(*tmpl, osg::CopyOp::SHALLOW_COPY));
         blendRules->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(tmpl));
 
-        if (!overridePath.empty())
+        if (!overridePath.value().empty())
         {
             auto blendRuleOverrides = loadRules(overridePath);
             if (blendRuleOverrides)
@@ -56,28 +56,28 @@ namespace Resource
         return blendRules;
     }
 
-    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(std::string_view path)
+    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(VFS::Path::NormalizedView path)
     {
-        const VFS::Path::Normalized normalizedPath(path);
-        std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(normalizedPath);
+        const std::string normalized = VFS::Path::normalizeFilename(path.value());
+        std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(normalized);
         if (obj.has_value())
         {
             return osg::ref_ptr<AnimBlendRules>(static_cast<AnimBlendRules*>(obj->get()));
         }
         else
         {
-            osg::ref_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVfs, normalizedPath);
+            osg::ref_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVfs, path);
             if (blendRules)
             {
                 // Blend rules were found in VFS, cache them.
-                mCache->addEntryToObjectCache(normalizedPath, blendRules);
+                mCache->addEntryToObjectCache(normalized, blendRules);
                 return blendRules;
             }
         }
 
         // No blend rules were found in VFS, cache a nullptr.
         osg::ref_ptr<AnimBlendRules> nullRules = nullptr;
-        mCache->addEntryToObjectCache(normalizedPath, nullRules);
+        mCache->addEntryToObjectCache(normalized, nullRules);
         return nullRules;
     }
 

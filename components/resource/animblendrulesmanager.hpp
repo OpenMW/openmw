@@ -21,12 +21,12 @@ namespace Resource
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
         /// @note Throws an exception if the resource is not found.
         osg::ref_ptr<const SceneUtil::AnimBlendRules> getRules(
-            std::string_view path, std::string_view overridePath = "");
+            const VFS::Path::NormalizedView path, const VFS::Path::NormalizedView overridePath = "");
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
     private:
-        osg::ref_ptr<const SceneUtil::AnimBlendRules> loadRules(std::string_view path);
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> loadRules(VFS::Path::NormalizedView path);
 
         const VFS::Manager* mVfs;
     };

@@ -62,10 +62,7 @@ namespace SceneUtil
         Log(Debug::Debug) << "Attempting to load animation blending config '" << configPath << "'";
 
         if (!vfs->exists(configPath))
-        {
-            Log(Debug::Warning) << "Animation blending files was not found '" << configPath << "'";
             return nullptr;
-        }
 
         // Retrieving and parsing animation rules
         std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(configPath)), {});
@@ -147,22 +144,20 @@ namespace SceneUtil
         Misc::StringUtils::lowerCaseInPlace(toKey);
         for (auto rule = mRules.rbegin(); rule != mRules.rend(); ++rule)
         {
-            // TO DO: Also allow for partial wildcards at the end of groups and keys via std::string startswith method
             bool fromMatch = false;
             bool toMatch = false;
 
             // Pseudocode:
             // If not a wildcard and found a wildcard
             // starts with substr(0,wildcard)
-
             if (fitsRuleString(fromGroup, rule->mFromGroup)
-                && (fitsRuleString(fromKey, rule->mFromKey) || rule->mFromKey == ""))
+                && (rule->mFromKey.empty() || fitsRuleString(fromKey, rule->mFromKey)))
             {
                 fromMatch = true;
             }
 
             if ((fitsRuleString(toGroup, rule->mToGroup) || (rule->mToGroup == "$" && toGroup == fromGroup))
-                && (fitsRuleString(toKey, rule->mToKey) || rule->mToKey == ""))
+                && (rule->mToKey.empty() || fitsRuleString(toKey, rule->mToKey)))
             {
                 toMatch = true;
             }

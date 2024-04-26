@@ -102,13 +102,10 @@ namespace MWRender
     void AnimBlendControllerBase<NodeClass>::setKeyframeTrack(osg::ref_ptr<SceneUtil::KeyframeController> kft,
         AnimBlendStateData newState, osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
     {
-        // If aimation has changed, start blending
+        // If animation has changed then start blending
         if (newState.mGroupname != mAnimState.mGroupname || newState.mStartKey != mAnimState.mStartKey
             || kft != mKeyframeTrack)
         {
-            // Allow logging of cahnge to aid with implementing animations for developers/modders
-            // Log(Debug::Verbose) << "Animation change to: " << newState.mGroupname << ":" << newState.mStartKey;
-
             // Default blend settings
             mBlendDuration = 0;
             mEasingFn = &Easings::sineOut;
@@ -167,12 +164,12 @@ namespace MWRender
 
         // Shouldnt happen, but potentially an edge case where a new bone was added
         // between gatherRecursiveBoneTransforms and this update
-        // currently OpenMW will never do this, but potentially useful
+        // currently OpenMW will never do this
         assert(mBlendBoneTransforms.find(bone) != mBlendBoneTransforms.end());
 
         // Every frame the osgAnimation controller updates this
         // so it is ok that we update it directly below
-        osg::Matrixf currentSampledMatrix = bone->getMatrix();
+        const osg::Matrixf& currentSampledMatrix = bone->getMatrix();
         const osg::Matrixf& lastSampledMatrix = mBlendBoneTransforms.at(bone);
 
         const osg::Vec3f scale = currentSampledMatrix.getScale();
@@ -262,7 +259,7 @@ namespace MWRender
             mBlendTrigger = false;
             mBlendStartTime = time;
             // Nif mRotation is used here because it's unaffected by the side-effects of RotationController
-            mBlendStartRot = node->mRotation.toOsgMatrix().getRotate();
+            mBlendStartRot = node->mRotationScale.toOsgMatrix().getRotate();
             mBlendStartTrans = node->getMatrix().getTrans();
             mBlendStartScale = node->mScale;
         }
@@ -280,7 +277,7 @@ namespace MWRender
             else
             {
                 // This is necessary to prevent first person animation glitching out
-                node->setRotation(node->mRotation);
+                node->setRotation(node->mRotationScale);
             }
 
             if (translation)
@@ -297,7 +294,7 @@ namespace MWRender
             if (rotation)
                 node->setRotation(*rotation);
             else
-                node->setRotation(node->mRotation);
+                node->setRotation(node->mRotationScale);
         }
 
         if (scale)
