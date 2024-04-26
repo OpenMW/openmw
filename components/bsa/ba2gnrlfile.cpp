@@ -107,8 +107,8 @@ namespace Bsa
             input.read(reinterpret_cast<char*>(header), 16);
             input.read(reinterpret_cast<char*>(&fileTableOffset), 8);
 
-            if (header[0] == 0x00415342) /*"BSA\x00"*/
-                fail("Unrecognized compressed BSA format");
+            if (header[0] != ESM::fourCC("BTDX"))
+                fail("Unrecognized BA2 signature");
             mVersion = header[1];
             switch (static_cast<BA2Version>(mVersion))
             {
