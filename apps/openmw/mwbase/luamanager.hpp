@@ -152,7 +152,7 @@ namespace MWBase
 
         virtual std::string formatResourceUsageStats() const = 0;
 
-        virtual void queueGlobalEventMessage(const std::string& eventName, const std::string& eventData) = 0;
+        virtual void queueNetworkedGlobalEvent(const std::string& eventName, const std::string& eventData) = 0;
 
         virtual void addActivationAction(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
 

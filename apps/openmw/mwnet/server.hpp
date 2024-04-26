@@ -98,7 +98,7 @@ namespace MWNet
                                         << ", of size: " << verifiedMessage->eventData.size();
 
                     const auto luaMgr = MWBase::Environment::get().getLuaManager();
-                    luaMgr->queueGlobalEventMessage(verifiedMessage->eventName, verifiedMessage->eventData);
+                    luaMgr->queueNetworkedGlobalEvent(verifiedMessage->eventName, verifiedMessage->eventData);
                 },
             };
 
