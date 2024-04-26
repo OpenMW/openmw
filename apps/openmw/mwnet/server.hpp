@@ -2,13 +2,12 @@
 #define MWNET_SERVER_H_
 #include <functional>
 #include <memory>
-
-#include <yojimbo.h>
+#include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwlua/luamanagerimp.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "connectionbase.hpp"
 #include "networkmessages.hpp"
@@ -32,97 +31,96 @@ namespace MWNet
 
     class Server : public MWNet::Connection
     {
+        std::unique_ptr<yojimbo::Server> mServer;
+
         template <typename T>
-        T verifyMessage(yojimbo::Message* message, int clientIndex)
+        T verifyMessage(yojimbo::Message* message, const unsigned int clientIndex)
         {
             T newMessage = dynamic_cast<T>(message);
 
             if (!newMessage)
             {
-                Log(Debug::Error) << "SERVER: received invalid message from client " << clientIndex
-                                  << ", disconnecting\n";
                 mServer->DisconnectClient(clientIndex);
+                throw std::runtime_error(
+                    "SERVER: Disconnected client " + std::to_string(clientIndex) + " for sending an invalid message.");
             }
 
             return newMessage;
         }
 
-        const std::array<std::function<void(int clientIndex, yojimbo::Message*)>,
+        const std::array<std::function<void(const unsigned int clientIndex, yojimbo::Message*)>,
             UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES>
             mMessageHandlers = {
-                [this](int clientIndex, yojimbo::Message* message) {
-                    PlayerLoginMessage* verifiedMessage = verifyMessage<PlayerLoginMessage*>(message, clientIndex);
-                    if (verifiedMessage)
-                    {
-                        Log(Debug::Warning) << "SERVER: received login message from client " << clientIndex << ": "
-                                            << verifiedMessage->player;
-                    }
-                },
-                [this](int clientIndex, yojimbo::Message* message) {
-                    LuaScriptIdMessage* verifiedMessage = verifyMessage<LuaScriptIdMessage*>(message, clientIndex);
-                    if (verifiedMessage)
-                    {
-                        Log(Debug::Warning) << "SERVER: received scriptId message from client " << clientIndex
-                                            << ": for script: " << verifiedMessage->scriptId;
-                    }
-                },
-                [this](int clientIndex, yojimbo::Message* message) {
-                    UseOrActivateRequestMessage* verifiedMessage
-                        = verifyMessage<UseOrActivateRequestMessage*>(message, clientIndex);
-                    if (verifiedMessage)
-                    {
-                        Log(Debug::Warning) << "SERVER: received use or activation request from client " << clientIndex
-                                            << ": " << verifiedMessage->actor.toString()
-                                            << " wants to activate: " << verifiedMessage->object.toString()
-                                            << "\nBlanket granting permission because our shit is broke.";
-                        // HACK: This makes the behavior of activation work for players or the calling actor. Which is
-                        // great, kind of. The problem is that we've removed the handling of activation from global
-                        // scripts in doing this.
-                        // However there is presently no means by which we can actually allow global scripts to interact
-                        // with the player. This is just a stub to make things more usable for now.
-                        UseOrActivateRequestMessage* activationResponseMessage
-                            = static_cast<UseOrActivateRequestMessage*>(
-                                mServer->CreateMessage(clientIndex, UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST));
-                        activationResponseMessage->actor = verifiedMessage->actor;
-                        activationResponseMessage->object = verifiedMessage->object;
-                        activationResponseMessage->isActivation = verifiedMessage->isActivation;
+                [this](const unsigned int clientIndex, yojimbo::Message* message) {
+                    const auto* verifiedMessage = verifyMessage<PlayerLoginMessage*>(message, clientIndex);
 
-                        if (!verifiedMessage->isActivation)
-                        {
-                            activationResponseMessage->force = verifiedMessage->force;
-                        }
-
-                        mServer->SendMessage(clientIndex, ChannelName::EVENTSQUEUE, activationResponseMessage);
-                    }
+                    Log(Debug::Warning) << "SERVER: received login message from client " << clientIndex << ": "
+                                        << verifiedMessage->player;
                 },
-                [this](int clientIndex, yojimbo::Message* message) {
-                    GlobalEventQueuedMessage* verifiedMessage
-                        = verifyMessage<GlobalEventQueuedMessage*>(message, clientIndex);
-                    if (verifiedMessage)
+                [this](const unsigned int clientIndex, yojimbo::Message* message) {
+                    const auto* verifiedMessage = verifyMessage<LuaScriptIdMessage*>(message, clientIndex);
+
+                    Log(Debug::Warning) << "SERVER: received scriptId message from client " << clientIndex
+                                        << ": for script: " << verifiedMessage->scriptId;
+                },
+                [this](const unsigned int clientIndex, yojimbo::Message* message) {
+                    const auto* verifiedMessage = verifyMessage<UseOrActivateRequestMessage*>(message, clientIndex);
+
+                    Log(Debug::Warning) << "SERVER: received " << (verifiedMessage->isActivation ? "activate" : "use")
+                                        << " request from client " << clientIndex << ": "
+                                        << verifiedMessage->actor.toString()
+                                        << " wants to activate: " << verifiedMessage->object.toString()
+                                        << "\nBlanket granting permission because our shit is broke.";
+
+                    // HACK: This makes the behavior of activation work for players or the calling actor. Which is
+                    // great, kind of. The problem is that we've removed the handling of activation from global
+                    // scripts in doing this.
+                    // However there is presently no means by which we can actually allow global scripts to interact
+                    // with the player, or any object for that matter.
+                    // This is just a stub to make things more usable for now.
+                    auto* activationResponseMessage = dynamic_cast<UseOrActivateRequestMessage*>(
+                        mServer->CreateMessage(clientIndex, UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST));
+
+                    if (!activationResponseMessage)
                     {
-                        Log(Debug::Warning)
-                            << "SERVER: received Global event queued from client " << clientIndex << ": "
-                            << verifiedMessage->eventName << " with data: " << verifiedMessage->eventData
-                            << ", of size: " << verifiedMessage->eventData.size();
-                        MWBase::LuaManager* luaMan = MWBase::Environment::get().getLuaManager();
-                        luaMan->queueGlobalEventMessage(verifiedMessage->eventName, verifiedMessage->eventData);
+                        throw std::runtime_error(
+                            "SERVER: Activation/Use response failed, unable to allocate response message");
                     }
+
+                    activationResponseMessage->actor = verifiedMessage->actor;
+                    activationResponseMessage->object = verifiedMessage->object;
+                    activationResponseMessage->isActivation = verifiedMessage->isActivation;
+
+                    if (!verifiedMessage->isActivation)
+                    {
+                        activationResponseMessage->force = verifiedMessage->force;
+                    }
+
+                    mServer->SendMessage(clientIndex, ChannelName::EVENTSQUEUE, activationResponseMessage);
+                },
+                [this](const unsigned int clientIndex, yojimbo::Message* message) {
+                    const auto* verifiedMessage = verifyMessage<GlobalEventQueuedMessage*>(message, clientIndex);
+
+                    Log(Debug::Warning) << "SERVER: received Global event queued from client " << clientIndex << ": "
+                                        << verifiedMessage->eventName << " with data: " << verifiedMessage->eventData
+                                        << ", of size: " << verifiedMessage->eventData.size();
+
+                    const auto luaMgr = MWBase::Environment::get().getLuaManager();
+                    luaMgr->queueGlobalEventMessage(verifiedMessage->eventName, verifiedMessage->eventData);
                 },
             };
 
         std::unique_ptr<yojimbo::Server> createServerInstance();
 
-        std::unique_ptr<yojimbo::Server> mServer;
-
         void updateConnection() override;
 
         void processMessages() override;
 
-        void clientConnected(int clientIndex) override;
+        void clientConnected(const unsigned int clientIndex) override;
 
-        void clientDisconnected(int clientIndex) override;
+        void clientDisconnected(const unsigned int clientIndex) override;
 
-        bool processMessage(int clientIndex, int channelIndex, yojimbo::Message* message);
+        bool processMessage(const unsigned int clientIndex, const unsigned int channelIndex, yojimbo::Message* message);
 
     public:
         Server();

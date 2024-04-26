@@ -1,12 +1,4 @@
-#include <csignal>
-#include <stdexcept>
-#include <time.h>
-
-#include <yojimbo.h>
-
-#include "networkmessages.hpp"
 #include "server.hpp"
-#include <components/debug/debuglog.hpp>
 
 static volatile int quit = 0;
 
@@ -28,7 +20,7 @@ MWNet::Server::Server()
 
     yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
 
-    srand((unsigned int)time(NULL));
+    srand(time(nullptr));
 
     mServer->Start(DefaultMaxClients);
 
@@ -37,8 +29,8 @@ MWNet::Server::Server()
         throw std::logic_error("error: failed to start server!\n");
     }
 
-    char addressString[256];
-    mServer->GetAddress().ToString(addressString, sizeof(addressString));
+    std::string addressString(sizeof(yojimbo::Address), '\0');
+    mServer->GetAddress().ToString(addressString.data(), sizeof(yojimbo::Address));
     Log(Debug::Info) << "server address is " << addressString;
 
     signal(SIGINT, server_interrupt_handler);
@@ -110,34 +102,28 @@ void MWNet::Server::processMessages()
     }
 }
 
-bool MWNet::Server::processMessage(int clientIndex, int channelIndex, yojimbo::Message* message)
+bool MWNet::Server::processMessage(
+    const unsigned int clientIndex, const unsigned int channelIndex, yojimbo::Message* message)
 {
-    const uint messageType = message->GetType();
+    const unsigned int messageType = message->GetType();
+
+    if (messageType >= UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES)
+    {
+        Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "
+                          << clientIndex;
+        mServer->DisconnectClient(clientIndex);
+        return false;
+    }
 
     switch (channelIndex)
     {
         case ChannelName::EVENTSQUEUE:
         {
-            if (messageType >= UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES)
-            {
-                Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "
-                                  << clientIndex;
-                mServer->DisconnectClient(clientIndex);
-                return false;
-            }
             mMessageHandlers[messageType](clientIndex, message);
             return true;
         }
         case ChannelName::GAMESTATE:
         {
-            Log(Debug::Info) << "SERVER: received message on GAMESTATE channel";
-
-            if (messageType >= UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES)
-            {
-                Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "
-                                  << clientIndex;
-                return false;
-            }
             mMessageHandlers[messageType](clientIndex, message);
             return true;
         }
@@ -151,12 +137,12 @@ bool MWNet::Server::processMessage(int clientIndex, int channelIndex, yojimbo::M
     }
 }
 
-void MWNet::Server::clientConnected(int clientIndex)
+void MWNet::Server::clientConnected(const unsigned int clientIndex)
 {
     Log(Debug::Info) << "SERVER: client connected: " << clientIndex;
 }
 
-void MWNet::Server::clientDisconnected(int clientIndex)
+void MWNet::Server::clientDisconnected(const unsigned int clientIndex)
 {
     Log(Debug::Info) << "SERVER: client disconnected: " << clientIndex;
 }
