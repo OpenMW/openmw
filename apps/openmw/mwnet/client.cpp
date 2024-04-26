@@ -116,9 +116,9 @@ void MWNet::Client::processMessages()
         {
             switch (entry->messageType)
             {
-                case UnorderedSyncedMessage::PLAYER_LOGIN_MESSAGE:
+                case MessageId::PLAYER_LOGIN_MESSAGE:
                     break;
-                case UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST:
+                case MessageId::USE_OR_ACTIVATE_REQUEST:
                 {
                     UseOrActivationMessageEntry* messageEntry = static_cast<UseOrActivationMessageEntry*>(entry.get());
                     UseOrActivateRequestMessage* message
@@ -135,7 +135,7 @@ void MWNet::Client::processMessages()
                     mClient->SendMessage(messageEntry->channelName, message);
                     break;
                 }
-                case UnorderedSyncedMessage::GLOBAL_EVENT_QUEUED:
+                case MessageId::GLOBAL_EVENT_QUEUED:
                 {
                     GlobalEventDataMessageEntry* messageEntry = static_cast<GlobalEventDataMessageEntry*>(entry.get());
                     GlobalEventQueuedMessage* message
@@ -177,7 +177,7 @@ void MWNet::Client::processMessage(yojimbo::Message* message)
 {
     switch (message->GetType())
     {
-        case UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST:
+        case MessageId::USE_OR_ACTIVATE_REQUEST:
         {
             UseOrActivateRequestMessage* activationMessage = static_cast<UseOrActivateRequestMessage*>(message);
 

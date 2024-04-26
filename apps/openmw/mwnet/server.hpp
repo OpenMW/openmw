@@ -49,7 +49,7 @@ namespace MWNet
         }
 
         const std::array<std::function<void(const unsigned int clientIndex, yojimbo::Message*)>,
-            UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES>
+            MessageId::NUM_MWNET_MESSAGES>
             mMessageHandlers = {
                 [this](const unsigned int clientIndex, yojimbo::Message* message) {
                     const auto* verifiedMessage = verifyMessage<PlayerLoginMessage*>(message, clientIndex);
@@ -79,7 +79,7 @@ namespace MWNet
                     // with the player, or any object for that matter.
                     // This is just a stub to make things more usable for now.
                     auto* activationResponseMessage = dynamic_cast<UseOrActivateRequestMessage*>(
-                        mServer->CreateMessage(clientIndex, UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST));
+                        mServer->CreateMessage(clientIndex, MessageId::USE_OR_ACTIVATE_REQUEST));
 
                     if (!activationResponseMessage)
                     {
@@ -96,7 +96,7 @@ namespace MWNet
                         activationResponseMessage->force = verifiedMessage->force;
                     }
 
-                    mServer->SendMessage(clientIndex, ChannelName::EVENTSQUEUE, activationResponseMessage);
+                    mServer->SendMessage(clientIndex, ChannelId::EVENTSQUEUE, activationResponseMessage);
                 },
                 [this](const unsigned int clientIndex, yojimbo::Message* message) {
                     const auto* verifiedMessage = verifyMessage<GlobalEventQueuedMessage*>(message, clientIndex);

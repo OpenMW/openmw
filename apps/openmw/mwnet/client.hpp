@@ -1,9 +1,9 @@
 #ifndef MWNET_CLIENT_H_
 #define MWNET_CLIENT_H_
 #include <memory>
-#include <yojimbo.h>
 
 #include "connectionbase.hpp"
+#include "networkmessages.hpp"
 
 namespace MWNet
 {
@@ -35,20 +35,14 @@ namespace MWNet
 
         void processMessage(yojimbo::Message* message);
 
-        void clientConnected(int clientIndex) override {}
-
-        void clientDisconnected(int clientIndex) override {}
-
     public:
-        yojimbo::Client* getClient() override { return mClient.get(); }
+        Client();
 
         void queueMessage(const std::shared_ptr<MessageEntry> message) override { mMessageQueue.push_back(message); }
 
-        Client();
-
         bool tick() override;
 
-        // std::unique_ptr<yojimbo::Client>* getClient() override { return &mClient; }
+        yojimbo::Client* getClient() override { return mClient.get(); }
     };
 }
 

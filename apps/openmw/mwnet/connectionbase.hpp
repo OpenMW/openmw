@@ -1,10 +1,7 @@
 #ifndef CONNECTIONBASE_H_
 #define CONNECTIONBASE_H_
 #include <memory>
-#include <time.h>
 #include <vector>
-
-#include <components/lua/serialization.hpp>
 
 #include "networkmessages.hpp"
 
@@ -16,17 +13,16 @@ namespace MWNet
     constexpr const int MaxPacketSize = 16 * 1024;
     constexpr const int MaxSnapshotSize = 8 * 1024;
     constexpr const int MaxBlockSize = 10 * 1024;
-    constexpr const short MAX_RETRIES = 128;
     constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
     constexpr const double TickRate = 1.0 / 60.0;
     constexpr const char* LocalHost("127.0.0.1");
 
     struct MessageEntry
     {
-        ChannelName channelName;
-        UnorderedSyncedMessage messageType;
+        ChannelId channelName;
+        MessageId messageType;
 
-        MessageEntry(ChannelName channelName, UnorderedSyncedMessage messageType)
+        MessageEntry(ChannelId channelName, MessageId messageType)
             : channelName(channelName)
             , messageType(messageType)
         {
@@ -40,7 +36,7 @@ namespace MWNet
         LuaUtil::BinaryData eventData;
 
         GlobalEventDataMessageEntry(const std::string& eventName, const LuaUtil::BinaryData& eventData)
-            : MessageEntry(ChannelName::EVENTSQUEUE, UnorderedSyncedMessage::GLOBAL_EVENT_QUEUED)
+            : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::GLOBAL_EVENT_QUEUED)
             , eventName(eventName)
             , eventData(eventData)
         {
@@ -56,7 +52,7 @@ namespace MWNet
 
         UseOrActivationMessageEntry(
             const MWLua::GObject& object, const MWLua::GObject& actor, const bool isActivation, const bool force)
-            : MessageEntry(ChannelName::EVENTSQUEUE, UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST)
+            : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::USE_OR_ACTIVATE_REQUEST)
             , isActivation(isActivation)
             , force(force)
             , object(object)
@@ -69,17 +65,17 @@ namespace MWNet
     {
         uint clientId;
 
-        ServerMessageEntry(uint client, ChannelName channelName, UnorderedSyncedMessage messageType)
+        ServerMessageEntry(uint client, ChannelId channelName, MessageId messageType)
             : MessageEntry(channelName, messageType)
             , clientId(client)
         {
         }
     };
 
-    class BaseAdapter : public Adapter
+    class BaseAdapter : public yojimbo::Adapter
     {
     public:
-        MessageFactory* CreateMessageFactory(Allocator& allocator)
+        yojimbo::MessageFactory* CreateMessageFactory(yojimbo::Allocator& allocator)
         {
             return YOJIMBO_NEW(allocator, MWNetUnorderedMessageFactory, allocator);
         }
@@ -93,8 +89,8 @@ namespace MWNet
         GameConnectionConfig()
         {
             numChannels = 2;
-            channel[ChannelName::EVENTSQUEUE].type = yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED;
-            channel[ChannelName::GAMESTATE].type = yojimbo::CHANNEL_TYPE_UNRELIABLE_UNORDERED;
+            channel[ChannelId::EVENTSQUEUE].type = yojimbo::CHANNEL_TYPE_RELIABLE_ORDERED;
+            channel[ChannelId::GAMESTATE].type = yojimbo::CHANNEL_TYPE_UNRELIABLE_UNORDERED;
         }
     };
 

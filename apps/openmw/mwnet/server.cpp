@@ -87,7 +87,7 @@ void MWNet::Server::processMessages()
             continue;
         }
 
-        for (int channelIndex = 0; channelIndex < ChannelName::NUM_MWNET_CHANNELS; ++channelIndex)
+        for (int channelIndex = 0; channelIndex < ChannelId::NUM_MWNET_CHANNELS; ++channelIndex)
         {
             yojimbo::Message* message = mServer->ReceiveMessage(clientIndex, channelIndex);
             while (message)
@@ -107,7 +107,7 @@ bool MWNet::Server::processMessage(
 {
     const unsigned int messageType = message->GetType();
 
-    if (messageType >= UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES)
+    if (messageType >= MessageId::NUM_MWNET_MESSAGES)
     {
         Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "
                           << clientIndex;
@@ -117,12 +117,12 @@ bool MWNet::Server::processMessage(
 
     switch (channelIndex)
     {
-        case ChannelName::EVENTSQUEUE:
+        case ChannelId::EVENTSQUEUE:
         {
             mMessageHandlers[messageType](clientIndex, message);
             return true;
         }
-        case ChannelName::GAMESTATE:
+        case ChannelId::GAMESTATE:
         {
             mMessageHandlers[messageType](clientIndex, message);
             return true;

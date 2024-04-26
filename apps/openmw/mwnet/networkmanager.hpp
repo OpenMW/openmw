@@ -46,7 +46,7 @@ namespace MWNet
                 throw std::runtime_error("Cannot queue client message on server");
             }
 
-            if (channelName < 0 || channelName >= ChannelName::NUM_MWNET_CHANNELS)
+            if (channelName < 0 || channelName >= ChannelId::NUM_MWNET_CHANNELS)
             {
                 Log(Debug::Error) << "Invalid channel name: " << channelName;
                 return false;
@@ -124,11 +124,11 @@ namespace MWNet
             const ESM::NPC* playerRecord = esmStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player"));
 
             LuaScriptIdMessage* playerLoginMessage
-                = static_cast<LuaScriptIdMessage*>(client->CreateMessage(UnorderedSyncedMessage::LUA_SCRIPT_ID));
+                = static_cast<LuaScriptIdMessage*>(client->CreateMessage(MessageId::LUA_SCRIPT_ID));
 
             playerLoginMessage->scriptId = playerRecord->mName;
 
-            mConnection->queueMessage(MessageEntry(ChannelName::EVENTSQUEUE, playerLoginMessage));
+            // mConnection->queueMessage(MessageEntry(ChannelId::EVENTSQUEUE, playerLoginMessage));
 
             mIsWriting.store(false, std::memory_order_relaxed);
         }

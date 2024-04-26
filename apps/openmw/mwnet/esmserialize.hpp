@@ -1,17 +1,19 @@
 #ifndef ESMSERIALIZE_H_
 #define ESMSERIALIZE_H_
 
-#include <apps/openmw/mwmechanics/stat.hpp>
-#include <components/esm3/cellref.hpp>
-#include <components/lua/serialization.hpp>
 #include <cstdint>
 #include <limits>
 #include <map>
+
 #include <osg/Vec3f>
 #include <serialize.h>
 
 #include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/lua/serialization.hpp>
+
+#include "../mwmechanics/stat.hpp"
 
 constexpr std::size_t MAX_STRING_LENGTH = 256 + sizeof(int) + 1;
 constexpr std::size_t MAX_LUADATA_SIZE = 1024 * 512;

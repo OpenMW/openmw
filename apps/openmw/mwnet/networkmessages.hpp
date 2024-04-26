@@ -1,275 +1,118 @@
-/*
-    Shared Code for Tests and Examples.
-
-    Copyright © 2016 - 2024, Mas Bandwidth LLC.
-
-    Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
-   following conditions are met:
-
-        1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
-   following disclaimer.
-
-        2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
-   following disclaimer in the documentation and/or other materials provided with the distribution.
-
-        3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
-   products derived from this software without specific prior written permission.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
-    USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
 #ifndef NETWORKMESSAGES_H
 #define NETWORKMESSAGES_H
 
-#include <stdint.h>
 #include <string>
 
 #include <yojimbo.h>
 
-#include <components/debug/debuglog.hpp>
-
 #include "../mwlua/object.hpp"
 #include "esmserialize.hpp"
 
-using namespace yojimbo;
-
-const uint64_t ProtocolId = 0x11223344556677ULL;
-
-// TODO: Figure out what kind of magic todd bullshit this is
-inline int GetNumBitsForMessage(uint16_t sequence)
+namespace MWNet
 {
-    static int messageBitsArray[]
-        = { 1, 320, 120, 4, 256, 45, 11, 13, 101, 100, 84, 95, 203, 2, 3, 8, 512, 5, 3, 7, 50 };
-    const int modulus = sizeof(messageBitsArray) / sizeof(int);
-    const int index = sequence % modulus;
-    return messageBitsArray[index];
+    constexpr uint64_t PROTOCOL_ID = 0xA455ULL;
+
+    enum ChannelId
+    {
+        EVENTSQUEUE,
+        GAMESTATE,
+        NUM_MWNET_CHANNELS,
+    };
+
+    enum MessageId
+    {
+        PLAYER_LOGIN_MESSAGE,
+        LUA_SCRIPT_ID,
+        USE_OR_ACTIVATE_REQUEST,
+        GLOBAL_EVENT_QUEUED,
+        NUM_MWNET_MESSAGES,
+    };
+
+    class PlayerLoginMessage : public yojimbo::Message
+    {
+    public:
+        std::string player;
+
+        PlayerLoginMessage() {}
+
+        template <typename Stream>
+        bool Serialize(Stream& stream)
+        {
+            serialize_std_string(stream, player, MAX_STRING_LENGTH);
+            return true;
+        }
+
+        YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+    };
+
+    class LuaScriptIdMessage : public yojimbo::Message
+    {
+    public:
+        std::string scriptId;
+
+        LuaScriptIdMessage() {}
+
+        template <typename Stream>
+        bool Serialize(Stream& stream)
+        {
+            serialize_std_string(stream, scriptId, MAX_STRING_LENGTH);
+            return true;
+        }
+        YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+    };
+
+    class UseOrActivateRequestMessage : public yojimbo::Message
+    {
+    public:
+        MWLua::GObject object;
+        MWLua::GObject actor;
+        bool isActivation;
+        bool force;
+
+        UseOrActivateRequestMessage() {}
+
+        template <typename Stream>
+        bool Serialize(Stream& stream)
+        {
+            serialize_bytes(stream, (uint8_t*)&object, sizeof(object));
+            serialize_bytes(stream, (uint8_t*)&actor, sizeof(actor));
+            serialize_bool(stream, isActivation);
+
+            if (!isActivation)
+            {
+                serialize_bool(stream, force);
+            }
+
+            return true;
+        }
+        YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+    };
+
+    class GlobalEventQueuedMessage : public yojimbo::Message
+    {
+    public:
+        std::string eventName;
+        LuaUtil::BinaryData eventData;
+
+        GlobalEventQueuedMessage() {}
+
+        template <typename Stream>
+        bool Serialize(Stream& stream)
+        {
+            serialize_std_string(stream, eventName, MAX_STRING_LENGTH);
+            serialize_lua_data(stream, eventData);
+            return true;
+        }
+
+        YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
+    };
+
+    YOJIMBO_MESSAGE_FACTORY_START(MWNetUnorderedMessageFactory, NUM_MWNET_MESSAGES);
+    YOJIMBO_DECLARE_MESSAGE_TYPE(PLAYER_LOGIN_MESSAGE, PlayerLoginMessage);
+    YOJIMBO_DECLARE_MESSAGE_TYPE(LUA_SCRIPT_ID, LuaScriptIdMessage);
+    YOJIMBO_DECLARE_MESSAGE_TYPE(USE_OR_ACTIVATE_REQUEST, UseOrActivateRequestMessage);
+    YOJIMBO_DECLARE_MESSAGE_TYPE(GLOBAL_EVENT_QUEUED, GlobalEventQueuedMessage);
+    YOJIMBO_MESSAGE_FACTORY_FINISH()
 }
-
-struct TestMessage : public Message
-{
-    uint16_t sequence;
-
-    TestMessage() { sequence = 0; }
-
-    template <typename Stream>
-    bool Serialize(Stream& stream)
-    {
-        serialize_bits(stream, sequence, 16);
-
-        int numBits = GetNumBitsForMessage(sequence);
-        int numWords = numBits / 32;
-        uint32_t dummy = 0;
-        for (int i = 0; i < numWords; ++i)
-            serialize_bits(stream, dummy, 32);
-        int numRemainderBits = numBits - numWords * 32;
-        if (numRemainderBits > 0)
-            serialize_bits(stream, dummy, numRemainderBits);
-
-        return true;
-    }
-
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-struct TestBlockMessage : public BlockMessage
-{
-    uint16_t sequence;
-
-    TestBlockMessage() { sequence = 0; }
-
-    template <typename Stream>
-    bool Serialize(Stream& stream)
-    {
-        serialize_bits(stream, sequence, 16);
-        return true;
-    }
-
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-struct TestSerializeFailOnReadMessage : public Message
-{
-    template <typename Stream>
-    bool Serialize(Stream& /*stream*/)
-    {
-        return !Stream::IsReading;
-    }
-
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-struct TestExhaustStreamAllocatorOnReadMessage : public Message
-{
-    template <typename Stream>
-    bool Serialize(Stream& stream)
-    {
-        if (Stream::IsReading)
-        {
-            const int NumBuffers = 100;
-
-            void* buffers[NumBuffers];
-
-            memset(buffers, 0, sizeof(buffers));
-
-            for (int i = 0; i < NumBuffers; ++i)
-            {
-                buffers[i] = YOJIMBO_ALLOCATE(*(Allocator*)stream.GetAllocator(), 1024 * 1024);
-            }
-
-            for (int i = 0; i < NumBuffers; ++i)
-            {
-                YOJIMBO_FREE(*(Allocator*)stream.GetAllocator(), buffers[i]);
-            }
-        }
-
-        return true;
-    }
-
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-enum TestMessageType
-{
-    TEST_MESSAGE,
-    TEST_BLOCK_MESSAGE,
-    TEST_SERIALIZE_FAIL_ON_READ_MESSAGE,
-    TEST_EXHAUST_STREAM_ALLOCATOR_ON_READ_MESSAGE,
-    NUM_TEST_MESSAGE_TYPES
-};
-
-YOJIMBO_MESSAGE_FACTORY_START(TestMessageFactory, NUM_TEST_MESSAGE_TYPES);
-YOJIMBO_DECLARE_MESSAGE_TYPE(TEST_MESSAGE, TestMessage);
-YOJIMBO_DECLARE_MESSAGE_TYPE(TEST_BLOCK_MESSAGE, TestBlockMessage);
-YOJIMBO_DECLARE_MESSAGE_TYPE(TEST_SERIALIZE_FAIL_ON_READ_MESSAGE, TestSerializeFailOnReadMessage);
-YOJIMBO_DECLARE_MESSAGE_TYPE(TEST_EXHAUST_STREAM_ALLOCATOR_ON_READ_MESSAGE, TestExhaustStreamAllocatorOnReadMessage);
-YOJIMBO_MESSAGE_FACTORY_FINISH()
-
-enum SingleTestMessageType
-{
-    SINGLE_TEST_MESSAGE,
-    NUM_SINGLE_TEST_MESSAGE_TYPES
-};
-
-YOJIMBO_MESSAGE_FACTORY_START(SingleTestMessageFactory, NUM_SINGLE_TEST_MESSAGE_TYPES);
-YOJIMBO_DECLARE_MESSAGE_TYPE(SINGLE_TEST_MESSAGE, TestMessage);
-YOJIMBO_MESSAGE_FACTORY_FINISH()
-
-enum SingleBlockTestMessageType
-{
-    SINGLE_BLOCK_TEST_MESSAGE,
-    NUM_SINGLE_BLOCK_TEST_MESSAGE_TYPES
-};
-
-YOJIMBO_MESSAGE_FACTORY_START(SingleBlockTestMessageFactory, NUM_SINGLE_BLOCK_TEST_MESSAGE_TYPES);
-YOJIMBO_DECLARE_MESSAGE_TYPE(SINGLE_BLOCK_TEST_MESSAGE, TestBlockMessage);
-YOJIMBO_MESSAGE_FACTORY_FINISH()
-
-enum ChannelName
-{
-    EVENTSQUEUE,
-    GAMESTATE,
-    NUM_MWNET_CHANNELS,
-};
-
-enum UnorderedSyncedMessage
-{
-    PLAYER_LOGIN_MESSAGE,
-    LUA_SCRIPT_ID,
-    USE_OR_ACTIVATE_REQUEST,
-    GLOBAL_EVENT_QUEUED,
-    NUM_UNORDERED_SYNC_MESSAGES,
-};
-
-class PlayerLoginMessage : public yojimbo::Message
-{
-public:
-    std::string player;
-
-    PlayerLoginMessage() {}
-
-    template <typename Stream>
-    bool Serialize(Stream& stream)
-    {
-        serialize_std_string(stream, player, MAX_STRING_LENGTH);
-        return true;
-    }
-
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-class LuaScriptIdMessage : public yojimbo::Message
-{
-public:
-    std::string scriptId;
-
-    LuaScriptIdMessage() {}
-
-    template <typename Stream>
-    bool Serialize(Stream& stream)
-    {
-        serialize_std_string(stream, scriptId, MAX_STRING_LENGTH);
-        return true;
-    }
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-class UseOrActivateRequestMessage : public yojimbo::Message
-{
-public:
-    MWLua::GObject object;
-    MWLua::GObject actor;
-    bool isActivation;
-    bool force;
-
-    UseOrActivateRequestMessage() {}
-
-    template <typename Stream>
-    bool Serialize(Stream& stream)
-    {
-        serialize_bytes(stream, (uint8_t*)&object, sizeof(object));
-        serialize_bytes(stream, (uint8_t*)&actor, sizeof(actor));
-        serialize_bool(stream, isActivation);
-
-        if (!isActivation)
-        {
-            serialize_bool(stream, force);
-        }
-
-        return true;
-    }
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-class GlobalEventQueuedMessage : public yojimbo::Message
-{
-public:
-    std::string eventName;
-    LuaUtil::BinaryData eventData;
-
-    GlobalEventQueuedMessage() {}
-
-    template <typename Stream>
-    bool Serialize(Stream& stream)
-    {
-        serialize_std_string(stream, eventName, MAX_STRING_LENGTH);
-        serialize_lua_data(stream, eventData);
-        return true;
-    }
-
-    YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
-};
-
-YOJIMBO_MESSAGE_FACTORY_START(MWNetUnorderedMessageFactory, NUM_UNORDERED_SYNC_MESSAGES);
-YOJIMBO_DECLARE_MESSAGE_TYPE(PLAYER_LOGIN_MESSAGE, PlayerLoginMessage);
-YOJIMBO_DECLARE_MESSAGE_TYPE(LUA_SCRIPT_ID, LuaScriptIdMessage);
-YOJIMBO_DECLARE_MESSAGE_TYPE(USE_OR_ACTIVATE_REQUEST, UseOrActivateRequestMessage);
-YOJIMBO_DECLARE_MESSAGE_TYPE(GLOBAL_EVENT_QUEUED, GlobalEventQueuedMessage);
-YOJIMBO_MESSAGE_FACTORY_FINISH()
 
 #endif // #ifndef NETWORKMESSAGES_H
