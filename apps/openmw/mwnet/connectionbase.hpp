@@ -1,6 +1,7 @@
 #ifndef CONNECTIONBASE_H_
 #define CONNECTIONBASE_H_
 #include <memory>
+#include <time.h>
 #include <vector>
 
 #include <components/lua/serialization.hpp>
@@ -109,8 +110,8 @@ namespace MWNet
         virtual bool tick() = 0;
         virtual void updateConnection() = 0;
         virtual void processMessages() = 0;
-        virtual void clientConnected(int clientIndex) = 0;
-        virtual void clientDisconnected(int clientIndex) = 0;
+        virtual void clientConnected(const unsigned int clientIndex) {}
+        virtual void clientDisconnected(const unsigned int clientIndex) {}
         virtual void queueMessage(const std::shared_ptr<MessageEntry> message) {}
         virtual yojimbo::Client* getClient() { return nullptr; }
         BaseAdapter getAdapter() { return *mAdapter; }
