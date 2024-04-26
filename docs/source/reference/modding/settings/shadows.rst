@@ -55,17 +55,6 @@ This setting has no effect if the maximum shadow map distance is non-positive (i
 
 This setting can be controlled in the Settings tab of the launcher.
 
-allow shadow map overlap
-------------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	True
-
-If true, allow shadow maps to overlap.
-Counter-intuitively, will produce much better results when the light is behind the camera.
-When enabled, OpenMW uses Cascaded Shadow Maps and when disabled, it uses Parallel Split Shadow Maps.
-
 enable debug hud
 ----------------
 
