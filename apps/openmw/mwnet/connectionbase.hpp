@@ -2,7 +2,6 @@
 #define CONNECTIONBASE_H_
 
 #include <memory>
-#include <stdexcept>
 #include <vector>
 
 #include <components/debug/debuglog.hpp>
@@ -10,7 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
 
-#include "networkmessages.hpp"
+#include "messageentry.hpp"
 
 namespace MWNet
 {
@@ -22,74 +21,6 @@ namespace MWNet
     constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
     constexpr const double TickRate = 1.0 / 60.0;
     constexpr const char* LocalHost("127.0.0.1");
-
-    struct MessageEntry
-    {
-        const ChannelId channelName;
-        const MessageId messageType;
-
-        virtual ~MessageEntry() = default;
-        MessageEntry(ChannelId channelName, MessageId messageType)
-            : channelName(channelName)
-            , messageType(messageType)
-        {
-        }
-    };
-
-    struct GlobalEventDataMessageEntry : public MessageEntry
-    {
-        const std::string eventName;
-        const LuaUtil::BinaryData eventData;
-
-        GlobalEventDataMessageEntry(const std::string& eventName, const LuaUtil::BinaryData& eventData)
-            : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::GLOBAL_EVENT_QUEUED)
-            , eventName(eventName)
-            , eventData(eventData)
-        {
-        }
-    };
-
-    struct UseOrActivationMessageEntry : public MessageEntry
-    {
-        const bool isActivation;
-        const bool force;
-        const MWLua::GObject object;
-        const MWLua::GObject actor;
-
-        UseOrActivationMessageEntry(
-            const MWLua::GObject& object, const MWLua::GObject& actor, const bool isActivation, const bool force)
-            : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::USE_OR_ACTIVATE_REQUEST)
-            , isActivation(isActivation)
-            , force(force)
-            , object(object)
-            , actor(actor)
-        {
-        }
-    };
-
-    struct ServerMessageEntry : public MessageEntry
-    {
-        const unsigned int clientId;
-
-        ServerMessageEntry(ChannelId channelName, MessageId messageType, uint client = -1)
-            : MessageEntry(channelName, messageType)
-            , clientId(client)
-        {
-        }
-    };
-
-    template <typename T>
-    T downcastMessageEntry(MessageEntry* messageEntry)
-    {
-        T newMessageEntry = dynamic_cast<T>(messageEntry);
-
-        if (!newMessageEntry)
-        {
-            throw std::runtime_error("Failed to downcast queued message entry!");
-        }
-
-        return newMessageEntry;
-    }
 
     class BaseAdapter : public yojimbo::Adapter
     {
