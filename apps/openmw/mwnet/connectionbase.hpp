@@ -120,6 +120,7 @@ namespace MWNet
         GameConnectionConfig mConfig = GameConnectionConfig();
         std::unique_ptr<BaseAdapter> mAdapter;
         std::vector<std::shared_ptr<MessageEntry>> mMessageQueue;
+        std::mutex mMessageQueueMutex;
 
         virtual void updateConnection() = 0;
         virtual void processOutgoingMessages() = 0;
@@ -131,7 +132,11 @@ namespace MWNet
         virtual void clientConnected(const unsigned int clientIndex) {}
         virtual void clientDisconnected(const unsigned int clientIndex) {}
 
-        void queueMessage(const std::shared_ptr<MessageEntry> message) { mMessageQueue.push_back(message); }
+        void queueMessage(const std::shared_ptr<MessageEntry> message)
+        {
+            std::lock_guard<std::mutex> lock(mMessageQueueMutex);
+            mMessageQueue.push_back(message);
+        }
     };
 }
 
