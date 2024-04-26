@@ -36,6 +36,17 @@ namespace MWRender
         AnimBlendControllerBase(osg::ref_ptr<SceneUtil::KeyframeController> keyframeTrack, AnimBlendStateData animState,
             osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules);
 
+        AnimBlendControllerBase() {}
+
+        AnimBlendControllerBase(const AnimBlendControllerBase<NodeClass>& copy, const osg::CopyOp&)
+            : mTimeFactor(0.0f)
+            , mInterpFactor(0.0f)
+        {
+            setKeyframeTrack(copy.getKeyframeTrack(), copy.getAnimState(), copy.getBlendRules());
+        }
+
+        META_Object(MWRender, AnimBlendControllerBase<NodeClass>)
+
         void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
         void operator()(osgAnimation::Bone* node, osg::NodeVisitor* nv);
 
@@ -49,13 +60,9 @@ namespace MWRender
         void gatherRecursiveBoneTransforms(osgAnimation::Bone* parent, bool isRoot = true);
         void applyBoneBlend(osgAnimation::Bone* parent);
 
-        const char* libraryName() const override { return "MWRender"; }
-        const char* className() const override { return "AnimBlendController"; }
-
-    protected:
-        osg::ref_ptr<SceneUtil::KeyframeController> mKeyframeTrack;
-
-        inline void calculateInterpFactor(float time);
+        osg::ref_ptr<SceneUtil::KeyframeController> getKeyframeTrack() const { return mKeyframeTrack; }
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> getBlendRules() const { return mAnimBlendRules; }
+        AnimBlendStateData getAnimState() const { return mAnimState; }
 
     private:
         Easings::EasingFn mEasingFn;
@@ -73,8 +80,11 @@ namespace MWRender
 
         AnimBlendStateData mAnimState;
         osg::ref_ptr<const SceneUtil::AnimBlendRules> mAnimBlendRules;
+        osg::ref_ptr<SceneUtil::KeyframeController> mKeyframeTrack;
 
         std::unordered_map<osg::Node*, osg::Matrixf> mBlendBoneTransforms;
+
+        inline void calculateInterpFactor(float time);
     };
 
     using AnimBlendController = AnimBlendControllerBase<NifOsg::MatrixTransform>;
