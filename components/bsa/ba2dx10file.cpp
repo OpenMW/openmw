@@ -120,6 +120,7 @@ namespace Bsa
             {
                 case BA2Version::Fallout4:
                 case BA2Version::Fallout4NG:
+                case BA2Version::Fallout4NG2:
                     break;
                 case BA2Version::StarfieldDDS:
                     uint64_t dummy;
