@@ -19,8 +19,8 @@ namespace MWNet
 
     struct MessageEntry
     {
-        ChannelId channelName;
-        MessageId messageType;
+        const ChannelId channelName;
+        const MessageId messageType;
 
         MessageEntry(ChannelId channelName, MessageId messageType)
             : channelName(channelName)
@@ -32,8 +32,8 @@ namespace MWNet
 
     struct GlobalEventDataMessageEntry : public MessageEntry
     {
-        std::string eventName;
-        LuaUtil::BinaryData eventData;
+        const std::string eventName;
+        const LuaUtil::BinaryData eventData;
 
         GlobalEventDataMessageEntry(const std::string& eventName, const LuaUtil::BinaryData& eventData)
             : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::GLOBAL_EVENT_QUEUED)
@@ -45,10 +45,10 @@ namespace MWNet
 
     struct UseOrActivationMessageEntry : public MessageEntry
     {
-        bool isActivation;
-        bool force;
-        MWLua::GObject object;
-        MWLua::GObject actor;
+        const bool isActivation;
+        const bool force;
+        const MWLua::GObject object;
+        const MWLua::GObject actor;
 
         UseOrActivationMessageEntry(
             const MWLua::GObject& object, const MWLua::GObject& actor, const bool isActivation, const bool force)
@@ -63,7 +63,7 @@ namespace MWNet
 
     struct ServerMessageEntry : public MessageEntry
     {
-        uint clientId;
+        const unsigned int clientId;
 
         ServerMessageEntry(uint client, ChannelId channelName, MessageId messageType)
             : MessageEntry(channelName, messageType)
