@@ -62,7 +62,7 @@ namespace MWNet
 
             Log(Debug::Warning) << "Thread is locked, attempting message send";
 
-            mConnection->queueMessage(MessageEntry(channelName, message));
+            // mConnection->queueMessage(MessageEntry(channelName, message));
 
             mIsWriting.store(false, std::memory_order_relaxed);
 
@@ -117,18 +117,6 @@ namespace MWNet
             }
 
             mIsWriting.store(true, std::memory_order_relaxed);
-
-            yojimbo::Client* client = mConnection->getClient();
-
-            auto& esmStore = MWBase::Environment::get().getWorld()->getStore();
-            const ESM::NPC* playerRecord = esmStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player"));
-
-            LuaScriptIdMessage* playerLoginMessage
-                = static_cast<LuaScriptIdMessage*>(client->CreateMessage(MessageId::LUA_SCRIPT_ID));
-
-            playerLoginMessage->scriptId = playerRecord->mName;
-
-            // mConnection->queueMessage(MessageEntry(ChannelId::EVENTSQUEUE, playerLoginMessage));
 
             mIsWriting.store(false, std::memory_order_relaxed);
         }

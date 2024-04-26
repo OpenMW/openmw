@@ -16,7 +16,10 @@ MWNet::Server::Server()
 
     mAdapter = std::make_unique<MWNet::ServerAdapter>(*this);
 
-    mServer = createServerInstance();
+    mServer = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,
+        yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), mConfig, *mAdapter, 0.0);
+
+    Log(Debug::Info) << "started server on port " << mServer->GetAddress().GetPort() << " (insecure)";
 
     yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
 
@@ -34,14 +37,6 @@ MWNet::Server::Server()
     Log(Debug::Info) << "server address is " << addressString;
 
     signal(SIGINT, server_interrupt_handler);
-}
-
-std::unique_ptr<yojimbo::Server> MWNet::Server::createServerInstance()
-{
-    Log(Debug::Info) << "started server on port " << MWNet::DefaultServerPort << " (insecure)";
-
-    return std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,
-        yojimbo::Address(MWNet::LocalHost, MWNet::DefaultServerPort), mConfig, *mAdapter, 0.0);
 }
 
 bool MWNet::Server::tick()
@@ -74,11 +69,12 @@ void MWNet::Server::updateConnection()
     mTime += MWNet::TickRate;
     mServer->AdvanceTime(mTime);
     mServer->ReceivePackets();
-    processMessages();
+    processIncomingMessages();
+    processOutgoingMessages();
     mServer->SendPackets();
 }
 
-void MWNet::Server::processMessages()
+void MWNet::Server::processIncomingMessages()
 {
     for (unsigned int clientIndex = 0; clientIndex < MWNet::DefaultMaxClients; ++clientIndex)
     {
@@ -87,14 +83,27 @@ void MWNet::Server::processMessages()
             continue;
         }
 
+        bool disconnectClient = false;
+
         for (int channelIndex = 0; channelIndex < ChannelId::NUM_MWNET_CHANNELS; ++channelIndex)
         {
+            if (disconnectClient)
+            {
+                break;
+            }
+
             yojimbo::Message* message = mServer->ReceiveMessage(clientIndex, channelIndex);
+
             while (message)
             {
-                processMessage(clientIndex, channelIndex, message);
+                disconnectClient = processIncomingMessage(message, channelIndex, clientIndex);
 
                 mServer->ReleaseMessage(clientIndex, message);
+
+                if (disconnectClient)
+                {
+                    break;
+                }
 
                 message = mServer->ReceiveMessage(clientIndex, channelIndex);
             }
@@ -102,9 +111,17 @@ void MWNet::Server::processMessages()
     }
 }
 
-bool MWNet::Server::processMessage(
-    const unsigned int clientIndex, const unsigned int channelIndex, yojimbo::Message* message)
+bool MWNet::Server::processIncomingMessage(
+    yojimbo::Message* message, const unsigned int channelIndex, const unsigned int clientIndex)
 {
+    if (channelIndex >= ChannelId::NUM_MWNET_CHANNELS)
+    {
+        Log(Debug::Error) << "SERVER: received message on unknown channel: " << channelIndex << ", disconnecting "
+                          << clientIndex;
+        mServer->DisconnectClient(clientIndex);
+        return true;
+    }
+
     const unsigned int messageType = message->GetType();
 
     if (messageType >= MessageId::NUM_MWNET_MESSAGES)
@@ -112,29 +129,46 @@ bool MWNet::Server::processMessage(
         Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "
                           << clientIndex;
         mServer->DisconnectClient(clientIndex);
-        return false;
+        return true;
     }
 
-    switch (channelIndex)
+    try
     {
-        case ChannelId::EVENTSQUEUE:
+        mIncomingMessageHandlers[messageType](clientIndex, message);
+        return false;
+    }
+    catch (std::runtime_error& e)
+    {
+        Log(Debug::Error) << "Error processing incoming message from " << clientIndex
+                          << ", disconnecting them due to: " << e.what();
+        mServer->DisconnectClient(clientIndex);
+        return true;
+    }
+}
+
+void MWNet::Server::processOutgoingMessages()
+{
+    for (auto& entry : mMessageQueue)
+    {
+        unsigned int messageType = entry->messageType;
+
+        if (messageType >= MessageId::NUM_MWNET_MESSAGES)
         {
-            mMessageHandlers[messageType](clientIndex, message);
-            return true;
+            Log(Debug::Error) << "Invalid message type queued: " << messageType;
+            continue;
         }
-        case ChannelId::GAMESTATE:
+
+        try
         {
-            mMessageHandlers[messageType](clientIndex, message);
-            return true;
+            mOutgoingMessageHandlers[messageType](entry.get());
         }
-        default:
+        catch (std::runtime_error& e)
         {
-            Log(Debug::Error) << "SERVER: received message on unknown channel: " << channelIndex << ", disconnecting "
-                              << clientIndex;
-            mServer->DisconnectClient(clientIndex);
-            return false;
+            Log(Debug::Error) << "Error processing outgoing message: " << e.what();
         }
     }
+
+    mMessageQueue.clear();
 }
 
 void MWNet::Server::clientConnected(const unsigned int clientIndex)

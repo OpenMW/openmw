@@ -1,13 +1,19 @@
 #ifndef CONNECTIONBASE_H_
 #define CONNECTIONBASE_H_
+
 #include <memory>
+#include <stdexcept>
 #include <vector>
+
+#include <components/debug/debuglog.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "networkmessages.hpp"
 
 namespace MWNet
 {
-    constexpr const int DefaultClientPort = 30000;
     constexpr const int DefaultServerPort = 40000;
     constexpr const int DefaultMaxClients = 64;
     constexpr const int MaxPacketSize = 16 * 1024;
@@ -22,12 +28,12 @@ namespace MWNet
         const ChannelId channelName;
         const MessageId messageType;
 
+        virtual ~MessageEntry() = default;
         MessageEntry(ChannelId channelName, MessageId messageType)
             : channelName(channelName)
             , messageType(messageType)
         {
         }
-        virtual ~MessageEntry() = default;
     };
 
     struct GlobalEventDataMessageEntry : public MessageEntry
@@ -65,12 +71,25 @@ namespace MWNet
     {
         const unsigned int clientId;
 
-        ServerMessageEntry(uint client, ChannelId channelName, MessageId messageType)
+        ServerMessageEntry(ChannelId channelName, MessageId messageType, uint client = -1)
             : MessageEntry(channelName, messageType)
             , clientId(client)
         {
         }
     };
+
+    template <typename T>
+    T downcastMessageEntry(MessageEntry* messageEntry)
+    {
+        T newMessageEntry = dynamic_cast<T>(messageEntry);
+
+        if (!newMessageEntry)
+        {
+            throw std::runtime_error("Failed to downcast queued message entry!");
+        }
+
+        return newMessageEntry;
+    }
 
     class BaseAdapter : public yojimbo::Adapter
     {
@@ -96,21 +115,23 @@ namespace MWNet
 
     class Connection
     {
-    public:
-        short mRetries = 0;
+    protected:
         double mTime;
-        std::unique_ptr<BaseAdapter> mAdapter;
         GameConnectionConfig mConfig = GameConnectionConfig();
+        std::unique_ptr<BaseAdapter> mAdapter;
         std::vector<std::shared_ptr<MessageEntry>> mMessageQueue;
+
+        virtual void updateConnection() = 0;
+        virtual void processOutgoingMessages() = 0;
+        virtual void processIncomingMessages() = 0;
+
+    public:
         virtual ~Connection() = default;
         virtual bool tick() = 0;
-        virtual void updateConnection() = 0;
-        virtual void processMessages() = 0;
         virtual void clientConnected(const unsigned int clientIndex) {}
         virtual void clientDisconnected(const unsigned int clientIndex) {}
-        virtual void queueMessage(const std::shared_ptr<MessageEntry> message) {}
-        virtual yojimbo::Client* getClient() { return nullptr; }
-        BaseAdapter getAdapter() { return *mAdapter; }
+
+        void queueMessage(const std::shared_ptr<MessageEntry> message) { mMessageQueue.push_back(message); }
     };
 }
 

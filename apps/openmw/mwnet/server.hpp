@@ -1,13 +1,5 @@
 #ifndef MWNET_SERVER_H_
 #define MWNET_SERVER_H_
-#include <functional>
-#include <memory>
-#include <stdexcept>
-
-#include <components/debug/debuglog.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/luamanager.hpp"
 
 #include "connectionbase.hpp"
 #include "networkmessages.hpp"
@@ -50,7 +42,7 @@ namespace MWNet
 
         const std::array<std::function<void(const unsigned int clientIndex, yojimbo::Message*)>,
             MessageId::NUM_MWNET_MESSAGES>
-            mMessageHandlers = {
+            mIncomingMessageHandlers = {
                 [this](const unsigned int clientIndex, yojimbo::Message* message) {
                     const auto* verifiedMessage = verifyMessage<PlayerLoginMessage*>(message, clientIndex);
 
@@ -110,17 +102,26 @@ namespace MWNet
                 },
             };
 
-        std::unique_ptr<yojimbo::Server> createServerInstance();
+        const std::array<std::function<void(MessageEntry* messageEntry)>, MessageId::NUM_MWNET_MESSAGES>
+            mOutgoingMessageHandlers = {
+                [](MessageEntry* messageEntry) {},
+                [](MessageEntry* messageEntry) {},
+                [](MessageEntry* messageEntry) {},
+                [](MessageEntry* messageEntry) {},
+            };
 
         void updateConnection() override;
 
-        void processMessages() override;
+        void processIncomingMessages() override;
+
+        bool processIncomingMessage(
+            yojimbo::Message* message, const unsigned int channelIndex, const unsigned int clientIndex);
+
+        void processOutgoingMessages() override;
 
         void clientConnected(const unsigned int clientIndex) override;
 
         void clientDisconnected(const unsigned int clientIndex) override;
-
-        bool processMessage(const unsigned int clientIndex, const unsigned int channelIndex, yojimbo::Message* message);
 
     public:
         Server();

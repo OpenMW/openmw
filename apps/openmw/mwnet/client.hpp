@@ -1,21 +1,19 @@
 #ifndef MWNET_CLIENT_H_
 #define MWNET_CLIENT_H_
-#include <memory>
 
 #include "connectionbase.hpp"
 #include "networkmessages.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 
 namespace MWNet
 {
     class ClientAdapter : public MWNet::BaseAdapter
     {
-        MWNet::Connection& mClient;
 
     public:
-        ClientAdapter(MWNet::Connection& client)
-            : mClient(client)
-        {
-        }
+        ClientAdapter(MWNet::Connection& client) {}
     };
 
     class Client : public MWNet::Connection
@@ -27,22 +25,104 @@ namespace MWNet
 
         std::unique_ptr<yojimbo::Client> mClient;
 
-        std::unique_ptr<yojimbo::Client> createClientInstance();
+        template <typename T>
+        T verifyMessage(yojimbo::Message* message)
+        {
+            T newMessage = dynamic_cast<T>(message);
+
+            if (!newMessage)
+            {
+                mClient->Disconnect();
+                throw std::runtime_error(
+                    "CLIENT: Disconnecting due to receiving invalid messageType " + std::to_string(message->GetType()));
+            }
+
+            return newMessage;
+        }
+
+        const std::array<std::function<void(yojimbo::Message*)>, MessageId::NUM_MWNET_MESSAGES> mIncomingMessageHandlers
+            = {
+                  [this](yojimbo::Message* message) {
+                      const auto* verifiedMessage = verifyMessage<PlayerLoginMessage*>(message);
+
+                      Log(Debug::Warning) << "CLIENT: received login message: " << verifiedMessage->player;
+                  },
+                  [this](yojimbo::Message* message) {
+                      const auto* verifiedMessage = verifyMessage<LuaScriptIdMessage*>(message);
+
+                      Log(Debug::Warning) << "CLIENT: received scriptId message: " << verifiedMessage->scriptId;
+                  },
+                  [this](yojimbo::Message* message) {
+                      const auto* activationMessage = verifyMessage<UseOrActivateRequestMessage*>(message);
+
+                      Log(Debug::Warning)
+                          << "CLIENT: received message: " << (activationMessage->isActivation ? "activation" : "use")
+                          << " for object " << activationMessage->object.ptr().toString() << " by actor "
+                          << activationMessage->actor.ptr().toString();
+
+                      if (!activationMessage->object.ptr().getRefData().activate())
+                          return;
+
+                      MWBase::LuaManager* luaMan = MWBase::Environment::get().getLuaManager();
+                      if (activationMessage->isActivation)
+                      {
+                          luaMan->addActivationAction(activationMessage->object.ptr(), activationMessage->actor.ptr());
+                      }
+                      else
+                      {
+                          luaMan->addUseAction(activationMessage->object.ptr(), activationMessage->actor.ptr(),
+                              activationMessage->force);
+                      }
+                  },
+                  [this](yojimbo::Message* message) {
+                      throw std::runtime_error("CLIENT: received global event message! Disconnecting!");
+                      mClient->Disconnect();
+                  },
+              };
+
+        const std::array<std::function<void(MessageEntry* messageEntry)>, MessageId::NUM_MWNET_MESSAGES>
+            mOutgoingMessageHandlers = {
+                [](MessageEntry* messageEntry) {},
+                [](MessageEntry* messageEntry) {},
+                [this](MessageEntry* messageEntry) {
+                    const auto* activateEntry = downcastMessageEntry<UseOrActivationMessageEntry*>(messageEntry);
+                    auto* message = verifyMessage<UseOrActivateRequestMessage*>(
+                        mClient->CreateMessage(activateEntry->messageType));
+
+                    message->object = activateEntry->object;
+                    message->actor = activateEntry->actor;
+                    message->isActivation = activateEntry->isActivation;
+
+                    if (!message->isActivation)
+                    {
+                        message->force = activateEntry->force;
+                    }
+
+                    mClient->SendMessage(messageEntry->channelName, message);
+                },
+                [this](MessageEntry* messageEntry) {
+                    const auto* globalEntry = downcastMessageEntry<GlobalEventDataMessageEntry*>(messageEntry);
+                    auto* message
+                        = verifyMessage<GlobalEventQueuedMessage*>(mClient->CreateMessage(globalEntry->messageType));
+
+                    message->eventName = globalEntry->eventName;
+                    message->eventData = globalEntry->eventData;
+                    mClient->SendMessage(messageEntry->channelName, message);
+                },
+            };
 
         void updateConnection() override;
 
-        void processMessages() override;
+        void processIncomingMessages() override;
 
-        void processMessage(yojimbo::Message* message);
+        void processOutgoingMessages() override;
+
+        bool processIncomingMessage(yojimbo::Message* message);
 
     public:
         Client();
 
-        void queueMessage(const std::shared_ptr<MessageEntry> message) override { mMessageQueue.push_back(message); }
-
         bool tick() override;
-
-        yojimbo::Client* getClient() override { return mClient.get(); }
     };
 }
 
