@@ -388,7 +388,7 @@
 -- local function getEnchantment(item)
 --     local record = getRecord(item)
 --     if record and record.enchant then
---         return core.magic.enchantments[record.enchant]
+--         return core.magic.enchantments.records[record.enchant]
 --     end
 --     return nil
 -- end
@@ -968,7 +968,7 @@
 --   * `scale` - A number that scales the size of the vfx (Default: 1)
 --
 -- @usage -- Spawn a sanctuary effect near the player
--- local effect = core.magic.effects[core.magic.EFFECT_TYPE.Sanctuary]
+-- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
 -- pos = self.position + util.vector3(0, 100, 0)
 -- core.vfx.spawn(effect.castingStatic, pos)
 --

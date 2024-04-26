@@ -372,7 +372,7 @@
 -- for i = 1, #mySpells do print(mySpells[i].id) end
 -- @usage -- add ALL spells that exist in the world
 -- local mySpells = types.Actor.spells(self)
--- for _, spell in pairs(core.magic.spells) do
+-- for _, spell in pairs(core.magic.spells.records) do
 --     if spell.type == core.magic.SPELL_TYPE.Spell then
 --         mySpells:add(spell)
 --     end
