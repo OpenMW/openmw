@@ -1480,7 +1480,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Force Per-Pixel Lighting</source>
-        <translation>Forcer l'éclairage par pixel</translation>
+        <translation>Forcer l&apos;éclairage par pixel</translation>
     </message>
 </context>
 </TS>
