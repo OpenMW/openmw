@@ -122,7 +122,13 @@ namespace Bsa
                 case BA2Version::Fallout4NG:
                     break;
                 case BA2Version::StarfieldDDS:
-                    fail("Unsupported DDS BA2 version");
+                    uint64_t dummy;
+                    input.read(reinterpret_cast<char*>(&dummy), 8);
+                    uint32_t compressionMethod;
+                    input.read(reinterpret_cast<char*>(&compressionMethod), 4);
+                    if (compressionMethod == 3)
+                        fail("Unsupported LZ4-compressed DDS BA2");
+                    break;
                 default:
                     fail("Unrecognized DDS BA2 version");
             }
