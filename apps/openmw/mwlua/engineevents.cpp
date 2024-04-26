@@ -7,6 +7,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/worldmodel.hpp"
 
+#include "../mwnet/messageentry.hpp"
 #include "../mwnet/networkmanager.hpp"
 
 #include "globalscripts.hpp"
@@ -34,7 +35,6 @@ namespace MWLua
                 const auto& netMan = MWBase::Environment::get().getNetworkManager();
                 if (!netMan->isServer())
                 {
-                    netMan->queuePlayerLoginMessage(ptr);
                 }
                 else
                 {
@@ -72,8 +72,8 @@ namespace MWLua
             MWWorld::Ptr actor = getPtr(event.mActor);
             if (actor.isEmpty() || obj.isEmpty())
                 return;
-            MWBase::Environment::get().getNetworkManager()->queueUseOrActivateMessage(
-                GObject(obj), GObject(actor), true);
+            const auto activationMessage = std::make_shared<MWNet::UseOrActivationMessageEntry>(obj, actor, true);
+            MWBase::Environment::get().getNetworkManager()->queueMessage(activationMessage);
             if (auto* scripts = getLocalScripts(obj))
                 scripts->onActivated(LObject(actor));
         }
@@ -84,8 +84,9 @@ namespace MWLua
             MWWorld::Ptr actor = getPtr(event.mActor);
             if (actor.isEmpty() || obj.isEmpty())
                 return;
-            MWBase::Environment::get().getNetworkManager()->queueUseOrActivateMessage(
-                GObject(obj), GObject(actor), false, event.mForce);
+            const auto activationMessage
+                = std::make_shared<MWNet::UseOrActivationMessageEntry>(obj, actor, false, event.mForce);
+            MWBase::Environment::get().getNetworkManager()->queueMessage(std::move(activationMessage));
         }
 
         void operator()(const OnConsume& event) const

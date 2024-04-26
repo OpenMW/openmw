@@ -5,9 +5,9 @@
 #include <components/lua/serialization.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwnet/connectionbase.hpp"
 
 #include "client.hpp"
+#include "connectionbase.hpp"
 #include "server.hpp"
 
 namespace MWNet
@@ -31,25 +31,6 @@ namespace MWNet
             }
         }
 
-        void queueGlobalEventMessage(const std::string& eventName, const LuaUtil::BinaryData& eventData)
-        {
-            const std::shared_ptr<GlobalEventDataMessageEntry> messageEntry
-                = std::make_shared<GlobalEventDataMessageEntry>(eventName, eventData);
-
-            mConnection->queueMessage(std::move(messageEntry));
-        }
-
-        void queueUseOrActivateMessage(
-            const MWLua::GObject& object, const MWLua::GObject& actor, bool isActivate, bool force = false)
-        {
-            const std::shared_ptr<UseOrActivationMessageEntry> messageEntry
-                = std::make_shared<UseOrActivationMessageEntry>(object, actor, isActivate, force);
-
-            mConnection->queueMessage(std::move(messageEntry));
-        }
-
-        void queuePlayerLoginMessage(MWWorld::Ptr playerRef) {}
-
         bool update()
         {
             if (!mConnection->tick())
@@ -62,7 +43,7 @@ namespace MWNet
 
         bool isServer() { return mIsServer; }
 
-        Connection& getConnection() { return *mConnection; }
+        void queueMessage(const std::shared_ptr<MessageEntry> messageEntry) { mConnection->queueMessage(messageEntry); }
     };
 }
 

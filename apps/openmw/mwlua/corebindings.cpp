@@ -2,6 +2,7 @@
 
 #include <apps/openmw/mwnet/networkmanager.hpp>
 #include <chrono>
+#include <memory>
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
@@ -16,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwnet/messageentry.hpp"
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -84,8 +86,9 @@ namespace MWLua
             const auto netMan = MWBase::Environment::get().getNetworkManager();
             if (!netMan->isServer())
             {
-                netMan->queueGlobalEventMessage(
+                const auto globalEventMessage = std::make_shared<MWNet::GlobalEventDataMessageEntry>(
                     std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer));
+                netMan->queueMessage(globalEventMessage);
             }
             else
             {

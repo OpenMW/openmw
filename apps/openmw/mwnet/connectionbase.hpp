@@ -63,10 +63,10 @@ namespace MWNet
         virtual void clientConnected(const unsigned int clientIndex) {}
         virtual void clientDisconnected(const unsigned int clientIndex) {}
 
-        void queueMessage(const std::shared_ptr<MessageEntry> message)
+        void queueMessage(const std::shared_ptr<MessageEntry> messageEntry)
         {
             std::lock_guard<std::mutex> lock(mMessageQueueMutex);
-            mMessageQueue.push_back(message);
+            mMessageQueue.push_back(messageEntry);
         }
     };
 }
