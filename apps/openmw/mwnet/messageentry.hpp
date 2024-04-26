@@ -40,12 +40,12 @@ namespace MWNet
         const MWLua::GObject actor;
 
         UseOrActivationMessageEntry(
-            const MWLua::GObject& object, const MWLua::GObject& actor, const bool isActivation, const bool force)
+            const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const bool isActivation, const bool force = false)
             : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::USE_OR_ACTIVATE_REQUEST)
             , isActivation(isActivation)
             , force(force)
-            , object(object)
-            , actor(actor)
+            , object(MWLua::GObject(object))
+            , actor(MWLua::GObject(actor))
         {
         }
     };
