@@ -410,6 +410,7 @@
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
+    Feature #5197: Editor: terrain vertex paint editmode
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
     Feature #5944: Option to use camera as sound listener
