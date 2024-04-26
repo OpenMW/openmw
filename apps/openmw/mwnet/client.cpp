@@ -1,13 +1,16 @@
-#include <apps/openmw/mwnet/connectionbase.hpp>
-#include <apps/openmw/mwnet/networkmessages.hpp>
-#include <csignal>
 #include <stdexcept>
 #include <time.h>
 
 #include <yojimbo.h>
 
-#include "client.hpp"
 #include <components/debug/debuglog.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
+
+#include "client.hpp"
+#include "connectionbase.hpp"
+#include "networkmessages.hpp"
 
 static volatile int quit = 0;
 
@@ -111,9 +114,27 @@ void MWNet::Client::processMessages()
     {
         try
         {
-            Log(Debug::Warning) << "Evaluating message type: " << entry->messageType;
             switch (entry->messageType)
             {
+                case UnorderedSyncedMessage::PLAYER_LOGIN_MESSAGE:
+                    break;
+                case UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST:
+                {
+                    UseOrActivationMessageEntry* messageEntry = static_cast<UseOrActivationMessageEntry*>(entry.get());
+                    UseOrActivateRequestMessage* message
+                        = static_cast<UseOrActivateRequestMessage*>(mClient->CreateMessage(entry->messageType));
+                    message->object = messageEntry->object;
+                    message->actor = messageEntry->actor;
+                    message->isActivation = messageEntry->isActivation;
+
+                    if (!message->isActivation)
+                    {
+                        message->force = messageEntry->force;
+                    }
+
+                    mClient->SendMessage(messageEntry->channelName, message);
+                    break;
+                }
                 case UnorderedSyncedMessage::GLOBAL_EVENT_QUEUED:
                 {
                     GlobalEventDataMessageEntry* messageEntry = static_cast<GlobalEventDataMessageEntry*>(entry.get());
@@ -124,9 +145,6 @@ void MWNet::Client::processMessages()
                     mClient->SendMessage(messageEntry->channelName, message);
                     break;
                 }
-                case UnorderedSyncedMessage::PLAYER_LOGIN_MESSAGE:
-                    // mClient->SendMessage(entry.channelName, entry.message);
-                    break;
                 default:
                     break;
             }
@@ -159,9 +177,25 @@ void MWNet::Client::processMessage(yojimbo::Message* message)
 {
     switch (message->GetType())
     {
-        case (int)TestMessageType::TEST_MESSAGE:
-            // processTestMessage((TestMessage*)message);
+        case UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST:
+        {
+            UseOrActivateRequestMessage* activationMessage = static_cast<UseOrActivateRequestMessage*>(message);
+
+            if (!activationMessage->object.ptr().getRefData().activate())
+                return;
+
+            MWBase::LuaManager* luaMan = MWBase::Environment::get().getLuaManager();
+            if (activationMessage->isActivation)
+            {
+                luaMan->addActivationAction(activationMessage->object.ptr(), activationMessage->actor.ptr());
+            }
+            else
+            {
+                luaMan->addUseAction(
+                    activationMessage->object.ptr(), activationMessage->actor.ptr(), activationMessage->force);
+            }
             break;
+        }
         default:
             break;
     }

@@ -86,6 +86,24 @@ namespace MWNet
             mIsWriting.store(false, std::memory_order_relaxed);
         }
 
+        void queueUseOrActivateMessage(
+            const MWLua::GObject& object, const MWLua::GObject& actor, bool isActivate, bool force = false)
+        {
+            while (mIsWriting.load(std::memory_order_relaxed))
+            {
+                continue;
+            }
+
+            mIsWriting.store(true, std::memory_order_relaxed);
+
+            const std::shared_ptr<UseOrActivationMessageEntry> messageEntry
+                = std::make_shared<UseOrActivationMessageEntry>(object, actor, isActivate, force);
+
+            mConnection->queueMessage(std::move(messageEntry));
+
+            mIsWriting.store(false, std::memory_order_relaxed);
+        }
+
         void queuePlayerLoginMessage(MWWorld::Ptr playerRef)
         {
             if (mIsServer)

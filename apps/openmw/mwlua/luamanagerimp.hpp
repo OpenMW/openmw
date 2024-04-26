@@ -12,7 +12,11 @@
 #include <components/lua_ui/resources.hpp>
 #include <components/misc/color.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwworld/action.hpp"
+#include "../mwworld/class.hpp"
 
 #include "engineevents.hpp"
 #include "globalscripts.hpp"
@@ -162,6 +166,27 @@ namespace MWLua
         virtual void queueGlobalEventMessage(const std::string& eventName, const std::string& eventData) override
         {
             mLuaEvents.addGlobalEvent({ std::move(eventName), eventData });
+        }
+
+        virtual void addActivationAction(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override
+        {
+            addAction([object, actor] { object.getClass().activate(object, actor)->execute(actor); },
+                "_runStandardActivationAction");
+        }
+
+        virtual void addUseAction(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const bool force) override
+        {
+            addAction(
+                [object, actor, force] {
+                    if (actor.getCellRef().getRefId() == "player")
+                        MWBase::Environment::get().getWindowManager()->useItem(object, force);
+                    else
+                    {
+                        std::unique_ptr<MWWorld::Action> action = object.getClass().use(object, force);
+                        action->execute(actor, true);
+                    }
+                },
+                "_runStandardUseAction");
         }
 
     private:

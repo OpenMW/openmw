@@ -72,7 +72,8 @@ namespace MWLua
             MWWorld::Ptr actor = getPtr(event.mActor);
             if (actor.isEmpty() || obj.isEmpty())
                 return;
-            mGlobalScripts.onActivate(GObject(obj), GObject(actor));
+            MWBase::Environment::get().getNetworkManager()->queueUseOrActivateMessage(
+                GObject(obj), GObject(actor), true);
             if (auto* scripts = getLocalScripts(obj))
                 scripts->onActivated(LObject(actor));
         }
@@ -83,7 +84,8 @@ namespace MWLua
             MWWorld::Ptr actor = getPtr(event.mActor);
             if (actor.isEmpty() || obj.isEmpty())
                 return;
-            mGlobalScripts.onUseItem(GObject(obj), GObject(actor), event.mForce);
+            MWBase::Environment::get().getNetworkManager()->queueUseOrActivateMessage(
+                GObject(obj), GObject(actor), false, event.mForce);
         }
 
         void operator()(const OnConsume& event) const

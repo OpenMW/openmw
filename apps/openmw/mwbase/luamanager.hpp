@@ -1,6 +1,7 @@
 #ifndef GAME_MWBASE_LUAMANAGER_H
 #define GAME_MWBASE_LUAMANAGER_H
 
+#include <functional>
 #include <map>
 #include <string>
 #include <variant>
@@ -152,6 +153,10 @@ namespace MWBase
         virtual std::string formatResourceUsageStats() const = 0;
 
         virtual void queueGlobalEventMessage(const std::string& eventName, const std::string& eventData) = 0;
+
+        virtual void addActivationAction(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
+
+        virtual void addUseAction(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const bool force) = 0;
     };
 
 }

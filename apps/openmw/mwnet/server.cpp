@@ -118,8 +118,6 @@ bool MWNet::Server::processMessage(int clientIndex, int channelIndex, yojimbo::M
     {
         case ChannelName::EVENTSQUEUE:
         {
-            Log(Debug::Info) << "SERVER: received message on EVENTSQUEUE channel";
-
             if (messageType >= UnorderedSyncedMessage::NUM_UNORDERED_SYNC_MESSAGES)
             {
                 Log(Debug::Error) << "SERVER: received unknown message type: " << messageType << ", disconnecting "

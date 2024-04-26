@@ -1,8 +1,9 @@
 #ifndef CONNECTIONBASE_H_
 #define CONNECTIONBASE_H_
-#include <components/lua/serialization.hpp>
 #include <memory>
 #include <vector>
+
+#include <components/lua/serialization.hpp>
 
 #include "networkmessages.hpp"
 
@@ -41,6 +42,24 @@ namespace MWNet
             : MessageEntry(ChannelName::EVENTSQUEUE, UnorderedSyncedMessage::GLOBAL_EVENT_QUEUED)
             , eventName(eventName)
             , eventData(eventData)
+        {
+        }
+    };
+
+    struct UseOrActivationMessageEntry : public MessageEntry
+    {
+        bool isActivation;
+        bool force;
+        MWLua::GObject object;
+        MWLua::GObject actor;
+
+        UseOrActivationMessageEntry(
+            const MWLua::GObject& object, const MWLua::GObject& actor, const bool isActivation, const bool force)
+            : MessageEntry(ChannelName::EVENTSQUEUE, UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST)
+            , isActivation(isActivation)
+            , force(force)
+            , object(object)
+            , actor(actor)
         {
         }
     };

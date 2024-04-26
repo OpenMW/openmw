@@ -186,28 +186,10 @@ namespace MWLua
         api["_runStandardActivationAction"] = [context](const GObject& object, const GObject& actor) {
             if (!object.ptr().getRefData().activate())
                 return;
-            context.mLuaManager->addAction(
-                [object, actor] {
-                    const MWWorld::Ptr& objPtr = object.ptr();
-                    const MWWorld::Ptr& actorPtr = actor.ptr();
-                    objPtr.getClass().activate(objPtr, actorPtr)->execute(actorPtr);
-                },
-                "_runStandardActivationAction");
+            context.mLuaManager->addActivationAction(object.ptr(), actor.ptr());
         };
         api["_runStandardUseAction"] = [context](const GObject& object, const GObject& actor, bool force) {
-            context.mLuaManager->addAction(
-                [object, actor, force] {
-                    const MWWorld::Ptr& actorPtr = actor.ptr();
-                    const MWWorld::Ptr& objectPtr = object.ptr();
-                    if (actorPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                        MWBase::Environment::get().getWindowManager()->useItem(objectPtr, force);
-                    else
-                    {
-                        std::unique_ptr<MWWorld::Action> action = objectPtr.getClass().use(objectPtr, force);
-                        action->execute(actorPtr, true);
-                    }
-                },
-                "_runStandardUseAction");
+            context.mLuaManager->addUseAction(object.ptr(), actor.ptr(), force);
         };
 
         return LuaUtil::makeReadOnly(api);

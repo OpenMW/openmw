@@ -1,15 +1,17 @@
 #ifndef MWNET_SERVER_H_
 #define MWNET_SERVER_H_
-#include <components/debug/debuglog.hpp>
 #include <functional>
 #include <memory>
 
 #include <yojimbo.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include "../mwbase/environment.hpp"
+#include "../mwlua/luamanagerimp.hpp"
+
 #include "connectionbase.hpp"
 #include "networkmessages.hpp"
-#include <apps/openmw/mwlua/luamanagerimp.hpp>
 
 namespace MWNet
 {
@@ -62,6 +64,35 @@ namespace MWNet
                     {
                         Log(Debug::Warning) << "SERVER: received scriptId message from client " << clientIndex
                                             << ": for script: " << verifiedMessage->scriptId;
+                    }
+                },
+                [this](int clientIndex, yojimbo::Message* message) {
+                    UseOrActivateRequestMessage* verifiedMessage
+                        = verifyMessage<UseOrActivateRequestMessage*>(message, clientIndex);
+                    if (verifiedMessage)
+                    {
+                        Log(Debug::Warning) << "SERVER: received use or activation request from client " << clientIndex
+                                            << ": " << verifiedMessage->actor.toString()
+                                            << " wants to activate: " << verifiedMessage->object.toString()
+                                            << "\nBlanket granting permission because our shit is broke.";
+                        // HACK: This makes the behavior of activation work for players or the calling actor. Which is
+                        // great, kind of. The problem is that we've removed the handling of activation from global
+                        // scripts in doing this.
+                        // However there is presently no means by which we can actually allow global scripts to interact
+                        // with the player. This is just a stub to make things more usable for now.
+                        UseOrActivateRequestMessage* activationResponseMessage
+                            = static_cast<UseOrActivateRequestMessage*>(
+                                mServer->CreateMessage(clientIndex, UnorderedSyncedMessage::USE_OR_ACTIVATE_REQUEST));
+                        activationResponseMessage->actor = verifiedMessage->actor;
+                        activationResponseMessage->object = verifiedMessage->object;
+                        activationResponseMessage->isActivation = verifiedMessage->isActivation;
+
+                        if (!verifiedMessage->isActivation)
+                        {
+                            activationResponseMessage->force = verifiedMessage->force;
+                        }
+
+                        mServer->SendMessage(clientIndex, ChannelName::EVENTSQUEUE, activationResponseMessage);
                     }
                 },
                 [this](int clientIndex, yojimbo::Message* message) {
