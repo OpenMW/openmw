@@ -653,15 +653,15 @@ namespace MWPhysics
     void PhysicsTaskScheduler::addCollisionObject(
         btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask)
     {
-        mCollisionObjects.insert(collisionObject);
         MaybeExclusiveLock lock(mCollisionWorldMutex, mLockingPolicy);
+        mCollisionObjects.insert(collisionObject);
         mCollisionWorld->addCollisionObject(collisionObject, collisionFilterGroup, collisionFilterMask);
     }
 
     void PhysicsTaskScheduler::removeCollisionObject(btCollisionObject* collisionObject)
     {
-        mCollisionObjects.erase(collisionObject);
         MaybeExclusiveLock lock(mCollisionWorldMutex, mLockingPolicy);
+        mCollisionObjects.erase(collisionObject);
         mCollisionWorld->removeCollisionObject(collisionObject);
     }
 
