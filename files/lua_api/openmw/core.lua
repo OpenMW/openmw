@@ -932,14 +932,14 @@
 -- @{#DialogueRecords} functions for journal (quest) read-only records.
 -- @field [parent=#Dialogue] journal
 -- @usage --print the name of the record, which is a capitalized version of its id
--- print(core.dialogue.journal.record("ms_fargothring").name) -- MS_FargothRing
+-- print(core.dialogue.journal.records["ms_fargothring"].name) -- MS_FargothRing
 -- @usage --print ids of all journal records
 -- for _, journalRecord in pairs(core.dialogue.journal.records) do
 --     print(journalRecord.id)
 -- end
 -- @usage --print quest names for all quests the player has inside a player script
 -- for _, quest in pairs(types.Player.quests(self)) do
---     print(quest.id, core.dialogue.journal.record(quest.id).questName)
+--     print(quest.id, core.dialogue.journal.records[quest.id].questName)
 -- end
 
 ---
@@ -950,7 +950,7 @@
 --     print(topicRecord.id)
 -- end
 -- @usage --print all NPC lines for "vivec"
--- for idx, topicInfo in pairs(core.dialogue.topic.record("vivec").infos) do
+-- for idx, topicInfo in pairs(core.dialogue.topic.records["vivec"].infos) do
 --     print(idx, topicInfo.text)
 -- end
 
@@ -962,7 +962,7 @@
 --     print(voiceRecord.id)
 -- end
 -- @usage --print all NPC lines & sounds for "flee"
--- for idx, voiceInfo in pairs(core.dialogue.voice.record("flee").infos) do
+-- for idx, voiceInfo in pairs(core.dialogue.voice.records["flee"].infos) do
 --     print(idx, voiceInfo.text, voiceInfo.sound)
 -- end
 
@@ -974,7 +974,7 @@
 --     print(greetingRecord.id)
 -- end
 -- @usage --print all NPC lines for "greeting 0"
--- for idx, greetingInfo in pairs(core.dialogue.greeting.record("greeting 0").infos) do
+-- for idx, greetingInfo in pairs(core.dialogue.greeting.records["greeting 0"].infos) do
 --     print(idx, greetingInfo.text)
 -- end
 
@@ -986,35 +986,25 @@
 --     print(persuasionRecord.id)
 -- end
 -- @usage --print all NPC lines for "admire success"
--- for idx, persuasionInfo in pairs(core.dialogue.persuasion.record("admire success").infos) do
+-- for idx, persuasionInfo in pairs(core.dialogue.persuasion.records["admire success"].infos) do
 --     print(idx, persuasionInfo.text)
 -- end
 
 ---
 -- A read-only list of all @{#DialogueRecord}s in the world database, may be indexed by recordId, which doesn't have to be lowercase.
--- @field [parent=#DialogueRecords] #list<#DialogueRecord> records
--- Indexing is not case-sensitive.
 -- Implements [iterables#List](iterables.html#List) of #DialogueRecord.
+-- @field [parent=#DialogueRecords] #list<#DialogueRecord> records
 -- @usage local record = core.dialogue.journal.records['ms_fargothring']
 -- @usage local record = core.dialogue.journal.records['MS_FargothRing']
 -- @usage local record = core.dialogue.journal.records[1]
 -- @usage local record = core.dialogue.topic.records[1]
 -- @usage local record = core.dialogue.topic.records['background']
 -- @usage local record = core.dialogue.greeting.records[1]
+-- @usage local record = core.dialogue.greeting.records['greeting 0']
 -- @usage local record = core.dialogue.persuasion.records[1]
+-- @usage local record = core.dialogue.persuasion.records['admire success']
 -- @usage local record = core.dialogue.voice.records[1]
-
----
--- Returns a read-only @{#DialogueRecord}
--- @function [parent=#DialogueRecords] record
--- @param #string recordId Doesn't have to be lowercase.
--- @return #DialogueRecord
--- @usage local record = core.dialogue.journal.record('a1_2_antabolisinformant')
--- @usage local record = core.dialogue.journal.record('A1_2_AntabolisInformant')
--- @usage local record = core.dialogue.topic.record('my trade')
--- @usage local record = core.dialogue.greeting.record('greeting 0')
--- @usage local record = core.dialogue.persuasion.record('admire success')
--- @usage local record = core.dialogue.voice.record('flee')
+-- @usage local record = core.dialogue.voice.records["flee"]
 
 ---
 -- Depending on which store this read-only dialogue record is from, it may either be a journal, topic, greeting, persuasion or voice.
@@ -1023,9 +1013,9 @@
 -- @field #string name Same as id, but with upper cases preserved.
 -- @field #string questName Non-nil only for journal records with available value. Holds the quest name for this journal entry. Same info may be available under `infos[1].text` as well, but this variable is made for convenience.
 -- @field #list<#DialogueRecordInfo> infos A read-only list containing all @{#DialogueRecordInfo}s for this record, in order.
--- @usage local journalId = core.dialogue.journal.record('A2_4_MiloGone').id -- "a2_4_milogone"
--- @usage local journalName = core.dialogue.journal.record('A2_4_MiloGone').name -- "A2_4_MiloGone"
--- @usage local questName = core.dialogue.journal.record('A2_4_MiloGone').questName -- "Mehra Milo and the Lost Prophecies"
+-- @usage local journalId = core.dialogue.journal.records['A2_4_MiloGone'].id -- "a2_4_milogone"
+-- @usage local journalName = core.dialogue.journal.records['A2_4_MiloGone'].name -- "A2_4_MiloGone"
+-- @usage local questName = core.dialogue.journal.records['A2_4_MiloGone'].questName -- "Mehra Milo and the Lost Prophecies"
 
 ---
 -- Holds the read-only data for one of many info entries inside a dialogue record. Depending on the type of the dialogue record (journal, topic, greeting, persuasion or voice), it could be, for example, a single journal entry or a NPC dialogue line.
@@ -1049,9 +1039,9 @@
 -- @field #string sound Non-nil only for non-journal records with available value for this parameter. Sound file path for this info entry.
 -- @field #string resultScript Non-nil only for non-journal records with available value for this parameter. MWScript (full script text) executed when this info is chosen.
 -- @usage --Variable `aa` below is "Congratulations, %PCName. You are now %PCName the %NextPCRank." in vanilla MW:
--- local aa = core.dialogue.topic.record('advancement').infos[100].text
+-- local aa = core.dialogue.topic.records['advancement'].infos[100].text
 -- @usage --Variable `bb` below is "sound/vo/a/f/fle_af003.mp3" in vanilla MW:
--- local bb = core.dialogue.voice.record('flee').infos[149].sound
+-- local bb = core.dialogue.voice.records['flee'].infos[149].sound
 
 --- @{#Factions}: Factions
 -- @field [parent=#core] #Factions factions

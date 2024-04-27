@@ -19,7 +19,7 @@ namespace
 
         const ESM::Dialogue* foundDialogueFilteredOut(const ESM::Dialogue* possibleResult) const
         {
-            if (possibleResult and possibleResult->mType == filter)
+            if (possibleResult && possibleResult->mType == filter)
             {
                 return possibleResult;
             }
@@ -56,7 +56,7 @@ namespace
                 do
                 {
                     ++mIter;
-                } while (mIter->mType != filter and mIter != mEndIter);
+                } while (mIter->mType != filter && mIter != mEndIter);
                 return *this;
             }
 
@@ -66,13 +66,13 @@ namespace
                 do
                 {
                     ++mIter;
-                } while (mIter->mType != filter and mIter != mEndIter);
+                } while (mIter->mType != filter && mIter != mEndIter);
                 return iter;
             }
 
             FilteredDialogueIterator& operator+=(difference_type advance)
             {
-                while (advance > 0 and mIter != mEndIter)
+                while (advance > 0 && mIter != mEndIter)
                 {
                     ++mIter;
                     if (mIter->mType == filter)
@@ -85,7 +85,7 @@ namespace
 
             bool operator==(const FilteredDialogueIterator& x) const { return mIter == x.mIter; }
 
-            bool operator!=(const FilteredDialogueIterator& x) const { return not(*this == x); }
+            bool operator!=(const FilteredDialogueIterator& x) const { return !(*this == x); }
 
             const value_type& operator*() const { return *mIter; }
 
@@ -121,7 +121,7 @@ namespace
         iterator begin() const
         {
             iterator result{ mDialogueStore.begin(), mDialogueStore.end() };
-            while (result != end() and result->mType != filter)
+            while (result != end() && result->mType != filter)
             {
                 ++result;
             }
@@ -136,12 +136,6 @@ namespace
     {
         using StoreT = FilteredDialogueStore<filter>;
 
-        table["record"] = sol::overload(
-            [](const MWLua::Object& obj) -> const ESM::Dialogue* { return obj.ptr().get<ESM::Dialogue>()->mBase; },
-            [](std::string_view id) -> const ESM::Dialogue* {
-                return StoreT{}.search(ESM::RefId::deserializeText(Misc::StringUtils::lowerCase(id)));
-            });
-
         sol::state_view& lua = context.mLua->sol();
         sol::usertype<StoreT> storeBindingsClass
             = lua.new_usertype<StoreT>("ESM3_Dialogue_Type" + std::to_string(filter) + " Store");
@@ -151,7 +145,7 @@ namespace
         storeBindingsClass[sol::meta_function::length] = [](const StoreT& store) { return store.getSize(); };
         storeBindingsClass[sol::meta_function::index] = sol::overload(
             [](const StoreT& store, size_t index) -> const ESM::Dialogue* {
-                if (index == 0 or index > store.getSize())
+                if (index == 0 || index > store.getSize())
                 {
                     return nullptr;
                 }
@@ -224,7 +218,7 @@ namespace
         recordInfosBindingsClass[sol::meta_function::index]
             = [](const DialogueInfos& store, size_t index) -> const ESM::DialInfo* {
             const ESM::Dialogue* dialogueRecord = store.getDialogueRecord();
-            if (not dialogueRecord or index == 0 or index > dialogueRecord->mInfo.size())
+            if (!dialogueRecord || index == 0 || index > dialogueRecord->mInfo.size())
             {
                 return nullptr;
             }
@@ -367,7 +361,7 @@ namespace
                   return result == -1 ? sol::nil : sol::make_object(lua, result);
               });
         recordInfoBindingsClass["sound"] = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-            if (rec.mData.mType == ESM::Dialogue::Type::Journal or rec.mSound == "")
+            if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mSound == "")
             {
                 return sol::nil;
             }
