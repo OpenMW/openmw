@@ -402,7 +402,7 @@ namespace MWWorld
                 {
                     // Make sure that we do not continue to play a Title music after a new game video.
                     MWBase::Environment::get().getSoundManager()->stopMusic();
-                    MWBase::Environment::get().getSoundManager()->playPlaylist(sMWSound::explorePlaylist);
+                    MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
                     MWBase::Environment::get().getWindowManager()->playVideo(video, true);
                 }
             }
