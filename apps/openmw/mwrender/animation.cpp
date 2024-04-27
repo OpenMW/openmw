@@ -783,7 +783,7 @@ namespace MWRender
             }
             else
             {
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(blendConfigPath);
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(blendConfigPath, blendConfigPath);
             }
 
             // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
