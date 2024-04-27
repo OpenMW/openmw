@@ -77,25 +77,29 @@ namespace Misc
 
     QPixmap ScalableIcon::pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state)
     {
-        QImage img(size, QImage::Format_ARGB32);
-        img.fill(qRgba(0, 0, 0, 0));
-        QPixmap pix = QPixmap::fromImage(img, Qt::NoFormatConversion);
-        {
-            QPainter painter(&pix);
-            QRect r(QPoint(0.0, 0.0), size);
-            this->paint(&painter, r, mode, state);
-        }
+        QPixmap pix = QPixmap(size);
+        pix.fill(Qt::transparent);
+
+        QPainter painter(&pix);
+        QRect r(QPoint(0.0, 0.0), size);
+        this->paint(&painter, r, mode, state);
 
         if (mode != QIcon::Disabled)
             return pix;
 
-        QPixmap output(pix.size());
-        output.fill(Qt::transparent);
-        QPainter p(&output);
-        p.setOpacity(0.5);
-        p.drawPixmap(0, 0, pix);
-        p.end();
+        // For disabled icons use grayscale icons with 50% transparency
+        QImage img = pix.toImage();
 
-        return output;
+        for (int x = 0; x < img.width(); x++)
+        {
+            for (int y = 0; y < img.height(); y++)
+            {
+                QColor n = img.pixelColor(x, y);
+                int gray = qGray(n.red(), n.green(), n.blue());
+                img.setPixelColor(x, y, QColor(gray, gray, gray, n.alpha() / 2));
+            }
+        }
+
+        return QPixmap::fromImage(img, Qt::NoFormatConversion);
     }
 }
