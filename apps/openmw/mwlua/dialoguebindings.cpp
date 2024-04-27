@@ -161,13 +161,7 @@ namespace
 
     struct DialogueInfos
     {
-        ESM::RefId mDialogueRecordId;
-
-        const ESM::Dialogue* getDialogueRecord() const
-        {
-            const auto& dialogueStore{ MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>() };
-            return dialogueStore.search(mDialogueRecordId);
-        }
+        const ESM::Dialogue& parentDialogueRecord;
     };
 
     void prepareBindingsForDialogueRecord(sol::state_view& lua)
@@ -194,33 +188,27 @@ namespace
             return sol::nil;
         });
         recordBindingsClass["infos"]
-            = sol::readonly_property([](const ESM::Dialogue& rec) { return DialogueInfos{ rec.mId }; });
+            = sol::readonly_property([](const ESM::Dialogue& rec) { return DialogueInfos{ rec }; });
     }
 
     void prepareBindingsForDialogueRecordInfoList(sol::state_view& lua)
     {
         auto recordInfosBindingsClass = lua.new_usertype<DialogueInfos>("ESM3_Dialogue_Infos");
-        recordInfosBindingsClass[sol::meta_function::to_string] = [lua](const DialogueInfos& store) -> sol::object {
-            if (const ESM::Dialogue* dialogueRecord = store.getDialogueRecord())
-            {
-                return sol::make_object(lua,
-                    "{" + std::to_string(dialogueRecord->mInfo.size()) + " ESM3_Dialogue["
-                        + dialogueRecord->mId.toDebugString() + "] info elements}");
-            }
-            return sol::nil;
+        recordInfosBindingsClass[sol::meta_function::to_string] = [](const DialogueInfos& store) {
+            const ESM::Dialogue& dialogueRecord = store.parentDialogueRecord;
+            return "{" + std::to_string(dialogueRecord.mInfo.size()) + " ESM3_Dialogue["
+                + dialogueRecord.mId.toDebugString() + "] info elements}";
         };
-        recordInfosBindingsClass[sol::meta_function::length] = [](const DialogueInfos& store) {
-            const ESM::Dialogue* dialogueRecord = store.getDialogueRecord();
-            return dialogueRecord ? dialogueRecord->mInfo.size() : 0;
-        };
+        recordInfosBindingsClass[sol::meta_function::length]
+            = [](const DialogueInfos& store) { return store.parentDialogueRecord.mInfo.size(); };
         recordInfosBindingsClass[sol::meta_function::index]
             = [](const DialogueInfos& store, size_t index) -> const ESM::DialInfo* {
-            const ESM::Dialogue* dialogueRecord = store.getDialogueRecord();
-            if (!dialogueRecord || index == 0 || index > dialogueRecord->mInfo.size())
+            const ESM::Dialogue& dialogueRecord = store.parentDialogueRecord;
+            if (index == 0 || index > dialogueRecord.mInfo.size())
             {
                 return nullptr;
             }
-            ESM::Dialogue::InfoContainer::const_iterator iter{ dialogueRecord->mInfo.cbegin() };
+            ESM::Dialogue::InfoContainer::const_iterator iter{ dialogueRecord.mInfo.cbegin() };
             std::advance(iter, index - 1);
             return &(*iter);
         };
