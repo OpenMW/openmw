@@ -150,7 +150,7 @@ CUSTOM, PLAYER: testInterface.lua
 CUSTOM, PLAYER: overrideInterface.lua
 CUSTOM, PLAYER: useInterface.lua
 )X");
-            mCfg.init(std::move(cfg));
+            mCfg.init(std::move(cfg), false);
         }
     };
 
