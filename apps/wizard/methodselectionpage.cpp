@@ -11,6 +11,10 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget* parent)
 
     setupUi(this);
 
+    installerIconLabel->setPixmap(QIcon(":system-installer").pixmap(QSize(48, 48)));
+    folderIconLabel->setPixmap(QIcon(":folder").pixmap(QSize(48, 48)));
+    buyIconLabel->setPixmap(QIcon(":dollar").pixmap(QSize(48, 48)));
+
 #ifndef OPENMW_USE_UNSHIELD
     retailDiscRadioButton->setEnabled(false);
     existingLocationRadioButton->setChecked(true);

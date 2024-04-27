@@ -83,7 +83,7 @@ target_link_libraries(openmw-launcher
     components_qt
 )
 
-target_link_libraries(openmw-launcher Qt::Widgets Qt::Core)
+target_link_libraries(openmw-launcher Qt::Widgets Qt::Core Qt::Svg)
 
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-launcher PRIVATE --coverage)

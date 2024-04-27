@@ -94,7 +94,7 @@ void CSVWidget::SceneToolMode::showPanel(const QPoint& position)
 
 void CSVWidget::SceneToolMode::addButton(const std::string& icon, const std::string& id, const QString& tooltip)
 {
-    ModeButton* button = new ModeButton(QIcon(QPixmap(icon.c_str())), tooltip, mPanel);
+    ModeButton* button = new ModeButton(QIcon(icon.c_str()), tooltip, mPanel);
     addButton(button, id);
 }
 

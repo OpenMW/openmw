@@ -90,10 +90,10 @@ CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QW
         mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel));
     }
 
-    mButtonPoint = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-point")), "", this);
-    mButtonSquare = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-square")), "", this);
-    mButtonCircle = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-circle")), "", this);
-    mButtonCustom = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-custom")), "", this);
+    mButtonPoint = new QPushButton(QIcon(":scenetoolbar/brush-point"), "", this);
+    mButtonSquare = new QPushButton(QIcon(":scenetoolbar/brush-square"), "", this);
+    mButtonCircle = new QPushButton(QIcon(":scenetoolbar/brush-circle"), "", this);
+    mButtonCustom = new QPushButton(QIcon(":scenetoolbar/brush-custom"), "", this);
 
     mSizeSliders = new BrushSizeControls("Brush size", this);
 
@@ -282,25 +282,25 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon(CSVWidget::BrushShape brush
     {
         case BrushShape_Point:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-point")));
+            setIcon(QIcon(":scenetoolbar/brush-point"));
             tooltip += mTextureBrushWindow->toolTipPoint;
             break;
 
         case BrushShape_Square:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-square")));
+            setIcon(QIcon(":scenetoolbar/brush-square"));
             tooltip += mTextureBrushWindow->toolTipSquare;
             break;
 
         case BrushShape_Circle:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-circle")));
+            setIcon(QIcon(":scenetoolbar/brush-circle"));
             tooltip += mTextureBrushWindow->toolTipCircle;
             break;
 
         case BrushShape_Custom:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-custom")));
+            setIcon(QIcon(":scenetoolbar/brush-custom"));
             tooltip += mTextureBrushWindow->toolTipCustom;
             break;
     }

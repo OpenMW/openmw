@@ -77,10 +77,6 @@
    </property>
    <property name="styleSheet">
     <string notr="true">QToolBar {
-	background-attachment: fixed;
-	background-image: url(:/images/openmw-header.png);
-	background-repeat: none;
-	background-position: right;
 	border: 0px;
 }
 

@@ -357,6 +357,16 @@ add_qt_image_dlls() {
 	QT_IMAGEFORMATS[$CONFIG]="${QT_IMAGEFORMATS[$CONFIG]} $@"
 }
 
+declare -A QT_ICONENGINES
+QT_ICONENGINES["Release"]=""
+QT_ICONENGINES["Debug"]=""
+QT_ICONENGINES["RelWithDebInfo"]=""
+add_qt_icon_dlls() {
+	local CONFIG=$1
+	shift
+	QT_ICONENGINES[$CONFIG]="${QT_ICONENGINES[$CONFIG]} $@"
+}
+
 if [ -z $PLATFORM ]; then
 	PLATFORM="$(uname -m)"
 fi
@@ -942,6 +952,7 @@ printf "Qt ${QT_VER}... "
 
 		add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
 		add_qt_image_dlls $CONFIGURATION "$(pwd)/plugins/imageformats/qsvg${DLLSUFFIX}.dll"
+		add_qt_icon_dlls $CONFIGURATION "$(pwd)/plugins/iconengines/qsvgicon${DLLSUFFIX}.dll"
 	done
 	echo Done.
 }
@@ -1141,6 +1152,13 @@ fi
 		for DLL in ${QT_IMAGEFORMATS[$CONFIGURATION]}; do
 			echo "    $(basename $DLL)"
 			cp "$DLL" "${DLL_PREFIX}imageformats"
+		done
+		echo
+		echo "- Qt Icon Engine DLLs..."
+		mkdir -p ${DLL_PREFIX}iconengines
+		for DLL in ${QT_ICONENGINES[$CONFIGURATION]}; do
+			echo "    $(basename $DLL)"
+			cp "$DLL" "${DLL_PREFIX}iconengines"
 		done
 		echo
 	done

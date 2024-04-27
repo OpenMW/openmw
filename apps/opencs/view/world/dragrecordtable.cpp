@@ -29,7 +29,7 @@ void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTab
     mime->setIndexAtDragStart(index);
     QDrag* drag = new QDrag(this);
     drag->setMimeData(mime);
-    drag->setPixmap(QString::fromUtf8(mime->getIcon().c_str()));
+    drag->setPixmap(QIcon(mime->getIcon().c_str()).pixmap(QSize(16, 16)));
     drag->exec(Qt::CopyAction);
 }
 

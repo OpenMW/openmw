@@ -1,6 +1,5 @@
 [Icon Theme]
-Name=Tango
-Comment=Tango Theme
+Name=Fallback
 Inherits=default
 Directories=16x16
 

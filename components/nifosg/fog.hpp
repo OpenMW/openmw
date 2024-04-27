@@ -15,6 +15,15 @@ namespace NifOsg
 
         META_StateAttribute(NifOsg, Fog, FOG)
 
+        int compare(const StateAttribute& sa) const override
+        {
+            if (const int base = osg::Fog::compare(sa); base != 0)
+                return base;
+            const Fog& rhs = static_cast<const Fog&>(sa);
+            COMPARE_StateAttribute_Parameter(mDepth);
+            return 0;
+        }
+
         void setDepth(float depth) { mDepth = depth; }
         float getDepth() const { return mDepth; }
 

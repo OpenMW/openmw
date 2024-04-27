@@ -631,7 +631,7 @@ namespace MWScript
                 ESM::RefId gem = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                if (!ptr.getClass().hasInventoryStore(ptr))
+                if (!ptr.getClass().isActor())
                     return;
 
                 const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -664,10 +664,10 @@ namespace MWScript
                 for (unsigned int i = 0; i < arg0; ++i)
                     runtime.pop();
 
-                if (!ptr.getClass().hasInventoryStore(ptr))
+                if (!ptr.getClass().isActor())
                     return;
 
-                MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
                     if (it->getCellRef().getSoul() == soul)
@@ -780,10 +780,10 @@ namespace MWScript
                 ESM::RefId soul = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                if (!ptr.getClass().hasInventoryStore(ptr))
+                if (!ptr.getClass().isActor())
                     return;
 
-                MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
 
                 for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
                 {

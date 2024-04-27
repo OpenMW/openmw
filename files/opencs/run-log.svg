@@ -67,14 +67,13 @@
        gradientTransform="matrix(0.26458338,0,0,0.26459185,23.018732,7.1420691)" />
   </defs>
   <g
-     id="debug-profile"
+     id="run-log"
      transform="matrix(3.7795278,0,0,3.7794065,-207.99997,-207.99282)"
      style="display:inline">
     <path
-       style="font-variation-settings:normal;display:inline;vector-effect:none;fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;paint-order:fill markers stroke;stop-color:#000000"
+       style="font-variation-settings:normal;display:inline;vector-effect:none;fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.183633px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;paint-order:fill markers stroke;stop-color:#000000"
        id="path6526"
-       d="m 53.055828,51.961969 -2.084719,1.199138 a 0.11547005,0.11547005 30.092328 0 1 -0.173044,-0.100279 l 0.0039,-2.404989 a 0.11547005,0.11547005 150.09233 0 1 0.173366,-0.09972 l 2.080844,1.205851 a 0.11547005,0.11547005 90.092328 0 1 -3.23e-4,0.2 z"
-       transform="matrix(0.97119563,0,0,1.0037896,6.7567971,5.0948873)" />
+       d="m 57.904031,57.222619 -1.429163,0.842578 a 0.07915963,0.08113535 0 0 1 -0.118629,-0.07046 l 0.0027,-1.689872 a 0.07915963,0.08113535 0 0 1 0.11885,-0.07007 l 1.426507,0.847294 a 0.07915963,0.08113535 0 0 1 -2.21e-4,0.140531 z" />
     <path
        id="rect2091"
        style="font-variation-settings:normal;display:inline;vector-effect:none;fill:url(#linearGradient2178);fill-opacity:1;stroke:none;stroke-width:0.264587px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;paint-order:fill markers stroke;stop-color:#000000"

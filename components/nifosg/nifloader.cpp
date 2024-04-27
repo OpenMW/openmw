@@ -2176,8 +2176,8 @@ namespace NifOsg
             Bgsm::MaterialFilePtr material, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
             const unsigned int uvSet = 0;
-            const bool wrapS = (material->mClamp >> 1) & 0x1;
-            const bool wrapT = material->mClamp & 0x1;
+            const bool wrapS = material->wrapS();
+            const bool wrapT = material->wrapT();
             if (material->mShaderType == Bgsm::ShaderType::Lighting)
             {
                 const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material.get());
@@ -2486,11 +2486,9 @@ namespace NifOsg
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     clearBoundTextures(stateset, boundTextures);
-                    const bool wrapS = (texprop->mClamp >> 1) & 0x1;
-                    const bool wrapT = texprop->mClamp & 0x1;
                     if (!texprop->mTextureSet.empty())
-                        handleTextureSet(
-                            texprop->mTextureSet.getPtr(), wrapS, wrapT, node->getName(), stateset, boundTextures);
+                        handleTextureSet(texprop->mTextureSet.getPtr(), texprop->wrapS(), texprop->wrapT(),
+                            node->getName(), stateset, boundTextures);
                     handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->refraction())
                         SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
@@ -2534,11 +2532,9 @@ namespace NifOsg
                         handleShaderMaterialNodeProperties(material, stateset, boundTextures);
                         break;
                     }
-                    const bool wrapS = (texprop->mClamp >> 1) & 0x1;
-                    const bool wrapT = texprop->mClamp & 0x1;
                     if (!texprop->mTextureSet.empty())
-                        handleTextureSet(
-                            texprop->mTextureSet.getPtr(), wrapS, wrapT, node->getName(), stateset, boundTextures);
+                        handleTextureSet(texprop->mTextureSet.getPtr(), texprop->wrapS(), texprop->wrapT(),
+                            node->getName(), stateset, boundTextures);
                     handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->doubleSided())
                         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -2566,11 +2562,9 @@ namespace NifOsg
                     if (!texprop->mSourceTexture.empty())
                     {
                         const unsigned int uvSet = 0;
-                        const bool wrapS = (texprop->mClamp >> 1) & 0x1;
-                        const bool wrapT = texprop->mClamp & 0x1;
                         unsigned int texUnit = boundTextures.size();
-                        attachExternalTexture(
-                            "diffuseMap", texprop->mSourceTexture, wrapS, wrapT, uvSet, stateset, boundTextures);
+                        attachExternalTexture("diffuseMap", texprop->mSourceTexture, texprop->wrapS(), texprop->wrapT(),
+                            uvSet, stateset, boundTextures);
                         {
                             osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
                             // This handles 20.2.0.7 UV settings like 4.0.0.2 UV settings (see NifOsg::UVController)
@@ -2609,6 +2603,7 @@ namespace NifOsg
                         fog->setMode(osg::Fog::LINEAR);
                         fog->setColor(osg::Vec4f(fogprop->mColour, 1.f));
                         fog->setDepth(fogprop->mFogDepth);
+                        fog = shareAttribute(fog);
                         stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
                         // Intentionally ignoring radial fog flag
                         // We don't really want to override the global setting
@@ -2620,6 +2615,7 @@ namespace NifOsg
                         fog->setMode(osg::Fog::LINEAR);
                         fog->setStart(10000000);
                         fog->setEnd(10000000);
+                        fog = shareAttribute(fog);
                         stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
                     }
                     break;
@@ -2821,7 +2817,11 @@ namespace NifOsg
 
             // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
             if (mVersion <= Nif::NIFFile::VER_MW || !specEnabled)
+            {
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+                mat->setShininess(osg::Material::FRONT_AND_BACK, 0.f);
+                specStrength = 1.f;
+            }
 
             if (lightmode == Nif::NiVertexColorProperty::LightMode::LightMode_Emissive)
             {
@@ -2852,32 +2852,31 @@ namespace NifOsg
                 mat->setColorMode(osg::Material::OFF);
             }
 
-            if (!mPushedSorter && !hasSortAlpha && mHasStencilProperty)
-                setBin_Traversal(node->getOrCreateStateSet());
-
-            if (!mPushedSorter && !hasMatCtrl && mat->getColorMode() == osg::Material::OFF
-                && mat->getEmission(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0, 0, 0, 1)
-                && mat->getDiffuse(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1, 1, 1, 1)
-                && mat->getAmbient(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1, 1, 1, 1)
-                && mat->getShininess(osg::Material::FRONT_AND_BACK) == 0
-                && mat->getSpecular(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0.f, 0.f, 0.f, 0.f))
+            if (hasMatCtrl || mat->getColorMode() != osg::Material::OFF
+                || mat->getEmission(osg::Material::FRONT_AND_BACK) != osg::Vec4f(0, 0, 0, 1)
+                || mat->getDiffuse(osg::Material::FRONT_AND_BACK) != osg::Vec4f(1, 1, 1, 1)
+                || mat->getAmbient(osg::Material::FRONT_AND_BACK) != osg::Vec4f(1, 1, 1, 1)
+                || mat->getShininess(osg::Material::FRONT_AND_BACK) != 0
+                || mat->getSpecular(osg::Material::FRONT_AND_BACK) != osg::Vec4f(0.f, 0.f, 0.f, 0.f))
             {
-                // default state, skip
+                mat = shareAttribute(mat);
+                node->getOrCreateStateSet()->setAttributeAndModes(mat, osg::StateAttribute::ON);
+            }
+
+            if (emissiveMult != 1.f)
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
+
+            if (specStrength != 1.f)
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", specStrength));
+
+            if (!mPushedSorter)
+            {
+                if (!hasSortAlpha && mHasStencilProperty)
+                    setBin_Traversal(node->getOrCreateStateSet());
                 return;
             }
 
-            mat = shareAttribute(mat);
-
             osg::StateSet* stateset = node->getOrCreateStateSet();
-            stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
-            if (emissiveMult != 1.f)
-                stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
-            if (specStrength != 1.f)
-                stateset->addUniform(new osg::Uniform("specStrength", specStrength));
-
-            if (!mPushedSorter)
-                return;
-
             auto assignBin = [&](Nif::NiSortAdjustNode::SortingMode mode, int type) {
                 if (mode == Nif::NiSortAdjustNode::SortingMode::Off)
                 {

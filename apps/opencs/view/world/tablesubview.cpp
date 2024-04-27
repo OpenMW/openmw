@@ -78,8 +78,16 @@ CSVWorld::TableSubView::TableSubView(
     widget->setLayout(layout);
 
     setWidget(widget);
+
+    // Widget position can be negative, we should clamp it.
+    QPoint position = pos();
+    if (position.x() <= 0)
+        position.setX(0);
+    if (position.y() <= 0)
+        position.setY(0);
+
     // prefer height of the screen and full width of the table
-    const QRect rect = QApplication::screenAt(pos())->geometry();
+    const QRect rect = QApplication::screenAt(position)->geometry();
     int frameHeight = 40; // set a reasonable default
     QWidget* topLevel = QApplication::topLevelAt(pos());
     if (topLevel)

@@ -129,10 +129,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>À quel emplacement Morrowind doit-il être installé ?</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Morrowind will be installed to the following location. </source>
         <translation>Morrowind sera installé à l&apos;emplacement suivant :</translation>
     </message>
@@ -171,10 +167,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Dans quelle langue est cette installation de Morrowind ?</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/preferences-desktop-locale.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/preferences-desktop-locale.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Select the language of the Morrowind installation.</source>
         <translation>Sélectionnez la langue de cette installation de Morrowind.</translation>
     </message>
@@ -198,10 +190,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Copie CD/DVD physique</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/system-installer.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/system-installer.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Install from a retail disc to a new location.</source>
         <translation>Installer depuis un CD/DVD et choisir la destination sur l&apos;ordinateur.</translation>
     </message>
@@ -210,20 +198,12 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Installation existante</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/folder.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Select an existing installation.</source>
         <translation>Sélectionnez une installation existante.</translation>
     </message>
     <message>
         <source>Don&apos;t have a copy?</source>
         <translation>Vous n&apos;avez pas de copie du jeu ?</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/dollar.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/icons/tango/48x48/dollar.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Buy the game</source>
