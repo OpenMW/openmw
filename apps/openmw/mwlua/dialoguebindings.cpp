@@ -101,13 +101,13 @@ namespace
 
         const ESM::Dialogue* at(size_t index) const
         {
-            if (index >= getSize())
+            auto result = begin();
+            result += index;
+
+            if (result == end())
             {
                 return nullptr;
             }
-
-            auto result = begin();
-            result += index;
 
             return &(*result);
         }
