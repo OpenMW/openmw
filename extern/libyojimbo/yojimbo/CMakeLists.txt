@@ -16,99 +16,65 @@ function(yojimbo_glob
     set("${ret}" "${source_files}" PARENT_SCOPE)
 endfunction()
 
-function(yojimbo_adlib_interface
-    lib_name # The name of the library target to create (set in parent scope)
-    lib_type # must be INTERFACE
-    itf_dirs # The locations of the include directories, as a list
-    itf_exts # The file extensions of the library's header code.
-    )
-
-    add_library("${lib_name}" INTERFACE)
-    target_include_directories("${lib_name}" INTERFACE ${itf_dirs})
-
-    yojimbo_glob(headers "${itf_dirs}" "${itf_exts}")
-    target_sources("${lib_name}" INTERFACE "${headers}")
-
-    set("${lib_name}" "${lib_name}" PARENT_SCOPE)
-endfunction()
-
-function(yojimbo_adlib
-    lib_name # The name of the library target to create (set in parent scope)
-    lib_type # The type of library to create (STATIC, SHARED)
-    src_dirs # The locations of the source directories, as a list
-    src_exts # The file extension of the library's source code.
-    hdr_dirs # The locations of the include directories, as a list
-    hdr_exts # The file extension of the library's header code.
-    )
-
-    add_library("${lib_name}" "${lib_type}")
-
-    target_include_directories("${lib_name}" PUBLIC ${hdr_dirs})
-
-    yojimbo_glob(sources "${src_dirs}" "${src_exts}")
-    yojimbo_glob(headers "${hdr_dirs}" "${hdr_exts}")
-
-    target_sources("${lib_name}" PRIVATE "${sources}" PUBLIC "${headers}")
-
-    set("${lib_name}" "${lib_name}" PARENT_SCOPE)
-endfunction()
-
 # --- END FUNCTIONS ---
 
-set(Yojimbo_SERIALIZE_INCLUDE_DIR "serialize")
-set(Yojimbo_NETCODE_INCLUDE_DIR "netcode")
-set(Yojimbo_RELIABLE_INCLUDE_DIR "reliable")
-set(Yojimbo_SODIUM_INCLUDE_DIR "sodium")
-set(Yojimbo_TLSF_INCLUDE_DIR "tlsf")
-set(Yojimbo_INCLUDE_DIR "include")
-set(Yojimbo_SOURCE_DIR "source")
+add_library(serialize INTERFACE)
+target_include_directories(serialize INTERFACE "serialize")
+target_sources(serialize INTERFACE "serialize/serialize.h")
 
-yojimbo_adlib_interface(serialize INTERFACE
-    "${Yojimbo_SERIALIZE_INCLUDE_DIR}" "h"
+add_library(reliable STATIC)
+target_include_directories(reliable PUBLIC "reliable")
+target_sources(reliable
+    PRIVATE "reliable/reliable.c"
+    PUBLIC  "reliable/reliable.h"
     )
 
-yojimbo_adlib(reliable STATIC
-    "${Yojimbo_RELIABLE_INCLUDE_DIR}" "c"
-    "${Yojimbo_RELIABLE_INCLUDE_DIR}" "h"
+add_library(tlsf STATIC)
+target_include_directories(tlsf PUBLIC "tlsf")
+target_sources(tlsf
+    PRIVATE "tlsf/tlsf.c"
+    PUBLIC  "tlsf/tlsf.h"
     )
 
-yojimbo_adlib(tlsf STATIC
-    "${Yojimbo_TLSF_INCLUDE_DIR}" "c"
-    "${Yojimbo_TLSF_INCLUDE_DIR}" "h"
-    )
-
-find_library(sodium NAMES sodium libsodium)
-
-if(NOT sodium) # untested
-    if(WIN32)
-        yojimbo_adlib(sodium STATIC
-            "${Yojimbo_SODIUM_INCLUDE_DIR}" "c"
-            "${Yojimbo_SODIUM_INCLUDE_DIR}" "h"
-            )
-    else()
-        yojimbo_adlib(sodium STATIC
-            "${Yojimbo_Sodium_INCLUDE_DIR}" "S"
-            "" ""
-            )
-        target_sources(sodium PRIVATE "${Yojimbo_SODIUM_INCLUDE_DIR}/dummy.c")
+find_library(sodium
+    NAMES sodium libsodium
+    if(NOT WIN32)
+        REQUIRED
     endif()
+    )
+
+if(NOT sodium)
+    add_library(sodium STATIC)
+    target_include_directories(sodium PUBLIC "sodium")
+
+    yojimbo_glob(Yojimbo_SODIUM_SOURCES "sodium" "c")
+    yojimbo_glob(Yojimbo_SODIUM_HEADERS "sodium" "h")
+    target_sources(sodium
+        PRIVATE "${Yojimbo_SODIUM_SOURCES}"
+        PUBLIC  "${Yojimbo_SODIUM_HEADERS}"
+        )
 endif()
 
-yojimbo_adlib(netcode STATIC
-    "${Yojimbo_NETCODE_INCLUDE_DIR}" "c"
-    "${Yojimbo_NETCODE_INCLUDE_DIR}" "h"
+add_library(netcode STATIC)
+target_include_directories(netcode PUBLIC "netcode")
+target_sources(netcode
+    PRIVATE "netcode/netcode.c"
+    PUBLIC  "netcode/netcode.h"
     )
 target_link_libraries(netcode PRIVATE sodium)
 
-yojimbo_adlib(yojimbo STATIC
-    "${Yojimbo_SOURCE_DIR}" "cpp"
-    "${Yojimbo_INCLUDE_DIR}" "h"
+add_library(yojimbo STATIC)
+target_include_directories(yojimbo
+    PRIVATE "." # yojimbo_allocator.cpp:32 " #include tlsf/tlsf.h "
+    PUBLIC "include"
     )
 
-set_target_properties(yojimbo PROPERTIES OUTPUT_NAME yojimbo)
-
-# yojimbo_allocator.cpp:32 " #include "tlsf/tlsf.h" "
-target_include_directories(yojimbo PRIVATE "." PUBLIC Yojimbo_INCLUDE_DIR)
+yojimbo_glob(Yojimbo_SOURCES "source" "cpp")
+yojimbo_glob(Yojimbo_HEADERS "include" "h")
+target_sources(yojimbo
+    PRIVATE "${Yojimbo_SOURCES}"
+    PUBLIC  "${Yojimbo_HEADERS}"
+    )
 
 target_link_libraries(yojimbo
     PUBLIC
