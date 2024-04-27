@@ -306,10 +306,10 @@ namespace MWRender
 
         void removeFromSceneImpl();
 
-        template <typename ControllerType, typename NodeType>
-        inline osg::Callback* handleBlendTransform(osg::ref_ptr<osg::Node> node,
+        template <typename ControllerType>
+        inline osg::Callback* handleBlendTransform(const osg::ref_ptr<osg::Node>& node,
             osg::ref_ptr<SceneUtil::KeyframeController> keyframeController,
-            std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimBlendController<NodeType>>>& blendControllers,
+            std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<ControllerType>>& blendControllers,
             const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
             const AnimState& active);
 

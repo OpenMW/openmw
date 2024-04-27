@@ -27,49 +27,28 @@ namespace MWRender
         std::string mStartKey;
     };
 
-    template <typename NodeClass>
-    class AnimBlendController : public SceneUtil::NodeCallback<AnimBlendController<NodeClass>, NodeClass*>,
-                                public SceneUtil::Controller
+    class AnimBlendController : public SceneUtil::Controller
     {
     public:
-        AnimBlendController(osg::ref_ptr<SceneUtil::KeyframeController> keyframeTrack,
-            const AnimBlendStateData& animState, osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules);
+        AnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
+            const AnimBlendStateData& animState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules);
 
         AnimBlendController() {}
 
-        AnimBlendController(const AnimBlendController& other, const osg::CopyOp&)
-            : AnimBlendController(other.mKeyframeTrack, other.mAnimState, other.mAnimBlendRules)
-        {
-        }
-
-        META_Object(MWRender, AnimBlendController<NodeClass>)
-
-        void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
-        void operator()(osgAnimation::Bone* node, osg::NodeVisitor* nv);
-
-        void setKeyframeTrack(osg::ref_ptr<SceneUtil::KeyframeController> kft, const AnimBlendStateData& animState,
-            osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules);
-
-        osg::Callback* getAsCallback() { return this; }
+        void setKeyframeTrack(const osg::ref_ptr<SceneUtil::KeyframeController>& kft,
+            const AnimBlendStateData& animState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules);
 
         bool getBlendTrigger() const { return mBlendTrigger; }
 
-        void gatherRecursiveBoneTransforms(osgAnimation::Bone* parent, bool isRoot = true);
-        void applyBoneBlend(osgAnimation::Bone* parent);
-
-    private:
+    protected:
         Easings::EasingFn mEasingFn;
-        float mBlendDuration;
+        float mBlendDuration = 0.0f;
+        float mBlendStartTime = 0.0f;
+        float mTimeFactor = 0.0f;
+        float mInterpFactor = 0.0f;
 
         bool mBlendTrigger = false;
-        float mBlendStartTime;
-        osg::Quat mBlendStartRot;
-        osg::Vec3f mBlendStartTrans;
-        float mBlendStartScale;
-
-        float mTimeFactor;
-        float mInterpFactor;
-        bool mInterpActive;
+        bool mInterpActive = false;
 
         AnimBlendStateData mAnimState;
         osg::ref_ptr<const SceneUtil::AnimBlendRules> mAnimBlendRules;
@@ -80,8 +59,55 @@ namespace MWRender
         inline void calculateInterpFactor(float time);
     };
 
-    using NifAnimBlendController = AnimBlendController<NifOsg::MatrixTransform>;
-    using BoneAnimBlendController = AnimBlendController<osgAnimation::Bone>;
+    class NifAnimBlendController : public SceneUtil::NodeCallback<NifAnimBlendController, NifOsg::MatrixTransform*>,
+                                   public AnimBlendController
+    {
+    public:
+        NifAnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
+            const AnimBlendStateData& animState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules);
+
+        NifAnimBlendController() {}
+
+        NifAnimBlendController(const NifAnimBlendController& other, const osg::CopyOp&)
+            : NifAnimBlendController(other.mKeyframeTrack, other.mAnimState, other.mAnimBlendRules)
+        {
+        }
+
+        META_Object(MWRender, NifAnimBlendController)
+
+        void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
+
+        osg::Callback* getAsCallback() { return this; }
+
+    private:
+        osg::Quat mBlendStartRot;
+        osg::Vec3f mBlendStartTrans;
+        float mBlendStartScale = 0.0f;
+    };
+
+    class BoneAnimBlendController : public SceneUtil::NodeCallback<BoneAnimBlendController, osgAnimation::Bone*>,
+                                    public AnimBlendController
+    {
+    public:
+        BoneAnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
+            const AnimBlendStateData& animState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules);
+
+        BoneAnimBlendController() {}
+
+        BoneAnimBlendController(const BoneAnimBlendController& other, const osg::CopyOp&)
+            : BoneAnimBlendController(other.mKeyframeTrack, other.mAnimState, other.mAnimBlendRules)
+        {
+        }
+
+        void gatherRecursiveBoneTransforms(osgAnimation::Bone* parent, bool isRoot = true);
+        void applyBoneBlend(osgAnimation::Bone* parent);
+
+        META_Object(MWRender, BoneAnimBlendController)
+
+        void operator()(osgAnimation::Bone* node, osg::NodeVisitor* nv);
+
+        osg::Callback* getAsCallback() { return this; }
+    };
 
     // Assigned to child bones with an instance of AnimBlendController
     class BoneAnimBlendControllerWrapper : public osg::Callback

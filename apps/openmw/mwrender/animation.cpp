@@ -60,7 +60,6 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "actorutil.hpp"
-#include "animblendcontroller.cpp"
 #include "rotatecontroller.hpp"
 #include "util.hpp"
 #include "vismask.hpp"
@@ -402,8 +401,7 @@ namespace
         return lightModel;
     }
 
-    void assignBoneBlendCallbackRecursive(MWRender::BoneAnimBlendController* controller,
-        MWRender::ActiveControllersVector& activeControllers, osg::Node* parent, bool isRoot)
+    void assignBoneBlendCallbackRecursive(MWRender::BoneAnimBlendController* controller, osg::Node* parent, bool isRoot)
     {
         // Attempt to cast node to an osgAnimation::Bone
         if (!isRoot && dynamic_cast<osgAnimation::Bone*>(parent))
@@ -454,7 +452,7 @@ namespace
         osg::Group* group = parent->asGroup();
         if (group)
             for (unsigned int i = 0; i < group->getNumChildren(); ++i)
-                assignBoneBlendCallbackRecursive(controller, activeControllers, group->getChild(i), false);
+                assignBoneBlendCallbackRecursive(controller, group->getChild(i), false);
     }
 }
 
@@ -1085,31 +1083,31 @@ namespace MWRender
         return mNodeMap;
     }
 
-    template <typename ControllerType, typename NodeType>
-    inline osg::Callback* Animation::handleBlendTransform(osg::ref_ptr<osg::Node> node,
+    template <typename ControllerType>
+    inline osg::Callback* Animation::handleBlendTransform(const osg::ref_ptr<osg::Node>& node,
         osg::ref_ptr<SceneUtil::KeyframeController> keyframeController,
-        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimBlendController<NodeType>>>& blendControllers,
+        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<ControllerType>>& blendControllers,
         const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
         const AnimState& active)
     {
         osg::ref_ptr<ControllerType> animController;
-
         if (blendControllers.contains(node))
         {
-            animController = blendControllers[node];
+            animController = blendControllers.at(node);
             animController->setKeyframeTrack(keyframeController, stateData, blendRules);
         }
         else
         {
             animController = new ControllerType(keyframeController, stateData, blendRules);
-            blendControllers[node] = animController;
+            blendControllers.emplace(node, animController);
 
             if constexpr (std::is_same_v<ControllerType, BoneAnimBlendController>)
-                assignBoneBlendCallbackRecursive(animController, mActiveControllers, node, true);
+                assignBoneBlendCallbackRecursive(animController, node, true);
         }
 
         keyframeController->mTime = active.mTime;
 
+        osg::Callback* asCallback = animController->getAsCallback();
         if constexpr (std::is_same_v<ControllerType, BoneAnimBlendController>)
         {
             // IMPORTANT: we must gather all transforms at point of change before next update
@@ -1118,13 +1116,13 @@ namespace MWRender
                 animController->gatherRecursiveBoneTransforms(static_cast<osgAnimation::Bone*>(node.get()));
 
             // Register blend callback after the initial animation callback
-            node->addUpdateCallback(animController->getAsCallback());
-            mActiveControllers.emplace_back(node, animController->getAsCallback());
+            node->addUpdateCallback(asCallback);
+            mActiveControllers.emplace_back(node, asCallback);
 
             return keyframeController->getAsCallback();
         }
 
-        return animController->getAsCallback();
+        return asCallback;
     }
 
     void Animation::resetActiveGroups()
@@ -1181,14 +1179,13 @@ namespace MWRender
                     {
                         if (dynamic_cast<NifOsg::MatrixTransform*>(node.get()))
                         {
-                            callback = handleBlendTransform<NifAnimBlendController, NifOsg::MatrixTransform>(node,
-                                it->second, mAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
+                            callback = handleBlendTransform<NifAnimBlendController>(node, it->second,
+                                mAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
                         }
                         else if (dynamic_cast<osgAnimation::Bone*>(node.get()))
                         {
-                            callback
-                                = handleBlendTransform<BoneAnimBlendController, osgAnimation::Bone>(node, it->second,
-                                    mBoneAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
+                            callback = handleBlendTransform<BoneAnimBlendController>(node, it->second,
+                                mBoneAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
                         }
                     }
 
