@@ -992,7 +992,7 @@
 
 ---
 -- A read-only list of all @{#DialogueRecord}s in the world database, may be indexed by recordId, which doesn't have to be lowercase.
--- Implements [iterables#List](iterables.html#List) of #DialogueRecord.
+-- Implements [iterables#List](iterables.html#list-iterable) of #DialogueRecord.
 -- @field [parent=#DialogueRecords] #list<#DialogueRecord> records
 -- @usage local record = core.dialogue.journal.records['ms_fargothring']
 -- @usage local record = core.dialogue.journal.records['MS_FargothRing']
