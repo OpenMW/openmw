@@ -18,12 +18,26 @@ endfunction()
 
 # --- END FUNCTIONS ---
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+   "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo"
+   )
+    set(Yojimbo_MODE "DEBUG")
+else()
+    set(Yojimbo_MODE "RELEASE")
+endif()
+
 add_library(serialize INTERFACE)
 target_include_directories(serialize INTERFACE "serialize")
+target_compile_definitions(serialize
+    INTERFACE "SERIALIZE_${Yojimbo_MODE}=1"
+    )
 target_sources(serialize INTERFACE "serialize/serialize.h")
 
 add_library(reliable STATIC)
 target_include_directories(reliable PUBLIC "reliable")
+target_compile_definitions(reliable
+    PUBLIC "RELIABLE_${Yojimbo_MODE}=1"
+    )
 target_sources(reliable
     PRIVATE "reliable/reliable.c"
     PUBLIC  "reliable/reliable.h"
@@ -55,6 +69,9 @@ endif()
 
 add_library(netcode STATIC)
 target_include_directories(netcode PUBLIC "netcode")
+target_compile_definitions(netcode
+    PUBLIC "NETCODE_${Yojimbo_MODE}=1"
+    )
 target_sources(netcode
     PRIVATE "netcode/netcode.c"
     PUBLIC  "netcode/netcode.h"
@@ -65,6 +82,9 @@ add_library(yojimbo STATIC)
 target_include_directories(yojimbo
     PRIVATE "." # yojimbo_allocator.cpp:32 " #include tlsf/tlsf.h "
     PUBLIC "include"
+    )
+target_compile_definitions(yojimbo
+    PUBLIC "YOJIMBO_${Yojimbo_MODE}=1"
     )
 
 yojimbo_glob(Yojimbo_SOURCES "source" "cpp")
