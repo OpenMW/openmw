@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include <components/bgsm/reader.hpp>
+#include <components/bgsm/file.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
@@ -88,11 +88,10 @@ void readFile(
         }
         else
         {
-            Bgsm::Reader reader;
             if (vfs != nullptr)
-                reader.parse(vfs->get(pathStr));
+                Bgsm::parse(vfs->get(pathStr));
             else
-                reader.parse(Files::openConstrainedFileStream(fullPath));
+                Bgsm::parse(Files::openConstrainedFileStream(fullPath));
         }
     }
     catch (std::exception& e)

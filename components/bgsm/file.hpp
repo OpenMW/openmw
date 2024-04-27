@@ -10,6 +10,8 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
+#include <components/files/istreamptr.hpp>
+
 namespace Bgsm
 {
     class BGSMStream;
@@ -51,6 +53,9 @@ namespace Bgsm
         MaterialFile() = default;
         virtual void read(BGSMStream& stream);
         virtual ~MaterialFile() = default;
+
+        bool wrapT() const { return mClamp & 1; }
+        bool wrapS() const { return mClamp & 2; }
     };
 
     struct BGSMFile : MaterialFile
@@ -160,5 +165,6 @@ namespace Bgsm
     };
 
     using MaterialFilePtr = std::shared_ptr<const Bgsm::MaterialFile>;
+    MaterialFilePtr parse(Files::IStreamPtr&& stream);
 }
 #endif

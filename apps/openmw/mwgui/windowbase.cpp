@@ -7,7 +7,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include <components/settings/values.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "draganddrop.hpp"
@@ -80,12 +79,12 @@ void WindowBase::center()
 
 void WindowBase::clampWindowCoordinates(MyGUI::Window* window)
 {
-    auto minSize = window->getMinSize();
-    minSize.height = static_cast<int>(minSize.height * Settings::gui().mScalingFactor);
-    minSize.width = static_cast<int>(minSize.width * Settings::gui().mScalingFactor);
+    MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+    if (window->getLayer())
+        viewSize = window->getLayer()->getSize();
 
     // Window's minimum size is larger than the screen size, can not clamp coordinates
-    MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+    auto minSize = window->getMinSize();
     if (minSize.width > viewSize.width || minSize.height > viewSize.height)
         return;
 

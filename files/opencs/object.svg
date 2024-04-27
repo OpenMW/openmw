@@ -108,11 +108,11 @@
      style="display:inline"
      transform="matrix(3.7795278,0,0,3.77117,-148,-187.58427)">
     <ellipse
-       style="fill:none;stroke:#4d4d4d;stroke-width:0.324753;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#4d4d4d;stroke-width:0.264876;stroke-dasharray:none;stroke-opacity:1"
        id="path1"
        cx="41.274998"
-       cy="51.863022"
-       rx="1.6897067"
-       ry="1.6938115" />
+       cy="51.863018"
+       rx="1.7196451"
+       ry="1.7237496" />
   </g>
 </svg>

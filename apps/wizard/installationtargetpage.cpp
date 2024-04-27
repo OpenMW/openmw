@@ -19,6 +19,8 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Fi
 
     setupUi(this);
 
+    folderIconLabel->setPixmap(QIcon(":folder").pixmap(QSize(48, 48)));
+
     registerField(QLatin1String("installation.path*"), targetLineEdit);
 }
 

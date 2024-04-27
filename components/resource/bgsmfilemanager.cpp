@@ -2,7 +2,6 @@
 
 #include <osg/Object>
 
-#include <components/bgsm/reader.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "objectcache.hpp"
@@ -41,9 +40,7 @@ namespace Resource
             return static_cast<BgsmFileHolder*>(obj.get())->mBgsmFile;
         else
         {
-            Bgsm::Reader reader;
-            reader.parse(mVFS->get(name));
-            Bgsm::MaterialFilePtr file = reader.getFile();
+            Bgsm::MaterialFilePtr file = Bgsm::parse(mVFS->get(name));
             obj = new BgsmFileHolder(file);
             mCache->addEntryToObjectCache(name.value(), obj);
             return file;

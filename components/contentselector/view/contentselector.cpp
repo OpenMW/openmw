@@ -31,7 +31,7 @@ ContentSelectorView::ContentSelector::~ContentSelector() = default;
 
 void ContentSelectorView::ContentSelector::buildContentModel(bool showOMWScripts)
 {
-    QIcon warningIcon(ui->addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
+    QIcon warningIcon(ui->addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning));
     mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon, showOMWScripts);
 }
 

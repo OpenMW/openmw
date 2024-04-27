@@ -170,6 +170,7 @@
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
     Bug #7908: Key bindings names in the settings menu are layout-specific
+    Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
@@ -228,6 +229,7 @@
     Feature #7914: Do not allow to move GUI windows out of screen
     Feature #7923: Don't show non-existent higher ranks for factions with fewer than 9 ranks
     Feature #7932: Support two-channel normal maps
+    Feature #7936: Scalable icons in Qt applications
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION

@@ -65,6 +65,14 @@ Launcher::MainDialog::MainDialog(const Files::ConfigurationManager& configuratio
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     createIcons();
+
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolBar->addWidget(spacer);
+
+    QLabel* logo = new QLabel(this);
+    logo->setPixmap(QIcon(":/images/openmw-header.png").pixmap(QSize(294, 64)));
+    toolBar->addWidget(logo);
 }
 
 Launcher::MainDialog::~MainDialog()
@@ -76,7 +84,7 @@ Launcher::MainDialog::~MainDialog()
 void Launcher::MainDialog::createIcons()
 {
     if (!QIcon::hasThemeIcon("document-new"))
-        QIcon::setThemeName("tango");
+        QIcon::setThemeName("fallback");
 
     connect(dataAction, &QAction::triggered, this, &MainDialog::enableDataPage);
     connect(graphicsAction, &QAction::triggered, this, &MainDialog::enableGraphicsPage);

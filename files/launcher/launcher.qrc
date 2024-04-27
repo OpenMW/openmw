@@ -7,12 +7,12 @@
     <file alias="preferences-advanced.png">images/preferences-advanced.png</file>
     <file alias="preferences-video.png">images/preferences-video.png</file>
 </qresource>
-<qresource prefix="icons/tango">
-    <file alias="index.theme">icons/tango/index.theme</file>
-    <file alias="16x16/document-new.png">icons/tango/16x16/document-new.png</file>
-    <file alias="16x16/edit-clear.png">icons/tango/16x16/edit-clear.png</file>
-    <file alias="16x16/edit-copy.png">icons/tango/16x16/edit-copy.png</file>
-    <file alias="16x16/edit-delete.png">icons/tango/16x16/edit-delete.png</file>
-    <file alias="16x16/view-refresh.png">icons/tango/16x16/view-refresh.png</file>
+<qresource prefix="icons/fallback">
+    <file alias="index.theme">icons/fallback/index.theme</file>
+    <file alias="16x16/document-new.svg">icons/fallback/16x16/document-new.svg</file>
+    <file alias="16x16/edit-clear.svg">icons/fallback/16x16/edit-clear.svg</file>
+    <file alias="16x16/edit-copy.svg">icons/fallback/16x16/edit-copy.svg</file>
+    <file alias="16x16/edit-delete.svg">icons/fallback/16x16/edit-delete.svg</file>
+    <file alias="16x16/view-refresh.svg">icons/fallback/16x16/view-refresh.svg</file>
 </qresource>
 </RCC>
