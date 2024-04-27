@@ -703,7 +703,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Smooth animation transitions</source>
+        <source>Smooth Animation Transitions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

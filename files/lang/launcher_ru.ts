@@ -777,7 +777,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, она делает переходы между различными анимациями/позами намного глаже. Кроме того, она позволяет загружать YAML-файлы конфигураций смешивания анимаций, которые могут быть включены с анимациями, чтобы кастомизировать стили смешивания.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Smooth animation transitions</source>
+        <source>Smooth Animation Transitions</source>
         <translation>Плавные переходы между анимациями</translation>
     </message>
     <message>
