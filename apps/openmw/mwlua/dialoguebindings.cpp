@@ -53,20 +53,22 @@ namespace
 
             FilteredDialogueIterator& operator++()
             {
+                if (mIter == mEndIter)
+                {
+                    return *this;
+                }
+
                 do
                 {
                     ++mIter;
-                } while (mIter->mType != filter && mIter != mEndIter);
+                } while (mIter != mEndIter && mIter->mType != filter);
                 return *this;
             }
 
             FilteredDialogueIterator operator++(int)
             {
                 FilteredDialogueIterator iter = *this;
-                do
-                {
-                    ++mIter;
-                } while (mIter->mType != filter && mIter != mEndIter);
+                ++(*this);
                 return iter;
             }
 
@@ -74,11 +76,8 @@ namespace
             {
                 while (advance > 0 && mIter != mEndIter)
                 {
-                    ++mIter;
-                    if (mIter->mType == filter)
-                    {
-                        --advance;
-                    }
+                    ++(*this);
+                    --advance;
                 }
                 return *this;
             }
