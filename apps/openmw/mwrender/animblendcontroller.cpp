@@ -1,5 +1,7 @@
 #include "animblendcontroller.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <osgAnimation/Bone>
 
 #include <string>
@@ -89,9 +91,8 @@ namespace MWRender
     }
 
     template <typename NodeClass>
-    AnimBlendControllerBase<NodeClass>::AnimBlendControllerBase(
-        osg::ref_ptr<SceneUtil::KeyframeController> keyframeTrack, AnimBlendStateData newState,
-        osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
+    AnimBlendController<NodeClass>::AnimBlendController(osg::ref_ptr<SceneUtil::KeyframeController> keyframeTrack,
+        const AnimBlendStateData& newState, osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
         : mTimeFactor(0.0f)
         , mInterpFactor(0.0f)
     {
@@ -99,8 +100,8 @@ namespace MWRender
     }
 
     template <typename NodeClass>
-    void AnimBlendControllerBase<NodeClass>::setKeyframeTrack(osg::ref_ptr<SceneUtil::KeyframeController> kft,
-        AnimBlendStateData newState, osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
+    void AnimBlendController<NodeClass>::setKeyframeTrack(osg::ref_ptr<SceneUtil::KeyframeController> kft,
+        const AnimBlendStateData& newState, osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
     {
         // If animation has changed then start blending
         if (newState.mGroupname != mAnimState.mGroupname || newState.mStartKey != mAnimState.mStartKey
@@ -139,7 +140,7 @@ namespace MWRender
     }
 
     template <typename NodeClass>
-    void AnimBlendControllerBase<NodeClass>::gatherRecursiveBoneTransforms(osgAnimation::Bone* bone, bool isRoot)
+    void AnimBlendController<NodeClass>::gatherRecursiveBoneTransforms(osgAnimation::Bone* bone, bool isRoot)
     {
         // Incase group traversal encountered something that isnt a bone
         if (!bone)
@@ -156,7 +157,7 @@ namespace MWRender
     }
 
     template <typename NodeClass>
-    void AnimBlendControllerBase<NodeClass>::applyBoneBlend(osgAnimation::Bone* bone)
+    void AnimBlendController<NodeClass>::applyBoneBlend(osgAnimation::Bone* bone)
     {
         // If we are done with interpolation then we can safely skip this as the bones are correct
         if (!mInterpActive)
@@ -200,7 +201,7 @@ namespace MWRender
     }
 
     template <typename NodeClass>
-    void AnimBlendControllerBase<NodeClass>::calculateInterpFactor(float time)
+    void AnimBlendController<NodeClass>::calculateInterpFactor(float time)
     {
         if (mBlendDuration != 0)
             mTimeFactor = std::min((time - mBlendStartTime) / mBlendDuration, 1.0f);
@@ -216,7 +217,7 @@ namespace MWRender
     }
 
     template <typename NodeClass>
-    void AnimBlendControllerBase<NodeClass>::operator()(osgAnimation::Bone* node, osg::NodeVisitor* nv)
+    void AnimBlendController<NodeClass>::operator()(osgAnimation::Bone* node, osg::NodeVisitor* nv)
     {
         // HOW THIS WORKS: This callback method is called only for bones with attached keyframe controllers
         // such as bip01, bip01 spine1 etc. The child bones of these controllers have their own callback wrapper
@@ -236,11 +237,11 @@ namespace MWRender
         if (mInterpActive)
             applyBoneBlend(node);
 
-        SceneUtil::NodeCallback<AnimBlendControllerBase<NodeClass>, osgAnimation::Bone*>::traverse(node, nv);
+        SceneUtil::NodeCallback<AnimBlendController<NodeClass>, osgAnimation::Bone*>::traverse(node, nv);
     }
 
     template <typename NodeClass>
-    void AnimBlendControllerBase<NodeClass>::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
+    void AnimBlendController<NodeClass>::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
         // HOW THIS WORKS: The actual retrieval of the bone transformation based on animation is done by the
         // KeyframeController (mKeyframeTrack). The KeyframeController retreives time data (playback position) every
@@ -302,6 +303,6 @@ namespace MWRender
             // instantly hide/show objects in which case the scale interpolation is undesirable.
             node->setScale(*scale);
 
-        SceneUtil::NodeCallback<AnimBlendControllerBase<NodeClass>, NifOsg::MatrixTransform*>::traverse(node, nv);
+        SceneUtil::NodeCallback<AnimBlendController<NodeClass>, NifOsg::MatrixTransform*>::traverse(node, nv);
     }
 }

@@ -26,7 +26,6 @@ namespace Resource
 
     AnimBlendRulesManager::AnimBlendRulesManager(const VFS::Manager* vfs, double expiryDelay)
         : ResourceManager(vfs, expiryDelay)
-        , mVfs(vfs)
     {
     }
 
@@ -58,27 +57,15 @@ namespace Resource
 
     osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(VFS::Path::NormalizedView path)
     {
-        const std::string normalized = VFS::Path::normalizeFilename(path.value());
-        std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(normalized);
+        std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(path);
         if (obj.has_value())
         {
             return osg::ref_ptr<AnimBlendRules>(static_cast<AnimBlendRules*>(obj->get()));
         }
-        else
-        {
-            osg::ref_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVfs, path);
-            if (blendRules)
-            {
-                // Blend rules were found in VFS, cache them.
-                mCache->addEntryToObjectCache(normalized, blendRules);
-                return blendRules;
-            }
-        }
 
-        // No blend rules were found in VFS, cache a nullptr.
-        osg::ref_ptr<AnimBlendRules> nullRules = nullptr;
-        mCache->addEntryToObjectCache(normalized, nullRules);
-        return nullRules;
+        osg::ref_ptr<AnimBlendRules> blendRules = AnimBlendRules::fromFile(mVFS, path);
+        mCache->addEntryToObjectCache(path.value(), blendRules);
+        return blendRules;
     }
 
     void AnimBlendRulesManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const

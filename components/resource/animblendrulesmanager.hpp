@@ -27,8 +27,6 @@ namespace Resource
 
     private:
         osg::ref_ptr<const SceneUtil::AnimBlendRules> loadRules(VFS::Path::NormalizedView path);
-
-        const VFS::Manager* mVfs;
     };
 
 }
