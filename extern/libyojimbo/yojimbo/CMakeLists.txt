@@ -36,23 +36,21 @@ target_sources(tlsf
     PUBLIC  "tlsf/tlsf.h"
     )
 
-find_library(sodium
-    NAMES sodium libsodium
-    if(NOT WIN32)
-        REQUIRED
+if(NOT WIN32)
+    find_library(sodium NAMES sodium libsodium REQUIRED)
+else()
+    find_library(sodium NAMES sodium libsodium)
+    if(NOT sodium)
+        add_library(sodium STATIC)
+        target_include_directories(sodium PUBLIC "sodium")
+
+        yojimbo_glob(Yojimbo_SODIUM_SOURCES "sodium" "c")
+        yojimbo_glob(Yojimbo_SODIUM_HEADERS "sodium" "h")
+        target_sources(sodium
+            PRIVATE "${Yojimbo_SODIUM_SOURCES}"
+            PUBLIC  "${Yojimbo_SODIUM_HEADERS}"
+            )
     endif()
-    )
-
-if(NOT sodium)
-    add_library(sodium STATIC)
-    target_include_directories(sodium PUBLIC "sodium")
-
-    yojimbo_glob(Yojimbo_SODIUM_SOURCES "sodium" "c")
-    yojimbo_glob(Yojimbo_SODIUM_HEADERS "sodium" "h")
-    target_sources(sodium
-        PRIVATE "${Yojimbo_SODIUM_SOURCES}"
-        PUBLIC  "${Yojimbo_SODIUM_HEADERS}"
-        )
 endif()
 
 add_library(netcode STATIC)
