@@ -704,16 +704,17 @@ namespace MWScript
                 if (!ptr.getClass().isActor())
                     return;
 
+                MWWorld::InventoryStore* invStorePtr = nullptr;
                 if (ptr.getClass().hasInventoryStore(ptr))
                 {
+                    invStorePtr = &ptr.getClass().getInventoryStore(ptr);
                     // Prefer dropping unequipped items first; re-stack if possible by unequipping items before dropping
                     // them.
-                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                    int numNotEquipped = store.count(item);
+                    int numNotEquipped = invStorePtr->count(item);
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
-                        MWWorld::ConstContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && it->getCellRef().getRefId() == item)
+                        MWWorld::ConstContainerStoreIterator it = invStorePtr->getSlot(slot);
+                        if (it != invStorePtr->end() && it->getCellRef().getRefId() == item)
                         {
                             numNotEquipped -= it->getCellRef().getCount();
                         }
@@ -721,29 +722,30 @@ namespace MWScript
 
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots && amount > numNotEquipped; ++slot)
                     {
-                        MWWorld::ContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && it->getCellRef().getRefId() == item)
+                        MWWorld::ContainerStoreIterator it = invStorePtr->getSlot(slot);
+                        if (it != invStorePtr->end() && it->getCellRef().getRefId() == item)
                         {
                             int numToRemove = std::min(amount - numNotEquipped, it->getCellRef().getCount());
-                            store.unequipItemQuantity(*it, numToRemove);
+                            invStorePtr->unequipItemQuantity(*it, numToRemove);
                             numNotEquipped += numToRemove;
                         }
                     }
+                }
 
-                    for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                {
+                    if (iter->getCellRef().getRefId() == item && (!invStorePtr || !invStorePtr->isEquipped(*iter)))
                     {
-                        if (iter->getCellRef().getRefId() == item && !store.isEquipped(*iter))
-                        {
-                            int removed = store.remove(*iter, amount);
-                            MWWorld::Ptr dropped
-                                = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
-                            dropped.getCellRef().setOwner(ESM::RefId());
+                        int removed = store.remove(*iter, amount);
+                        MWWorld::Ptr dropped
+                            = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
+                        dropped.getCellRef().setOwner(ESM::RefId());
 
-                            amount -= removed;
+                        amount -= removed;
 
-                            if (amount <= 0)
-                                break;
-                        }
+                        if (amount <= 0)
+                            break;
                     }
                 }
 
