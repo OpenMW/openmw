@@ -14,8 +14,8 @@ namespace Bsa
         Fallout4 = 1,
         StarfieldGeneral = 2,
         StarfieldDDS = 3,
-        Fallout4NG = 7,
-        Fallout4NG2 = 8,
+        Fallout4NextGen_v7 = 7,
+        Fallout4NextGen_v8 = 8,
     };
 }
 

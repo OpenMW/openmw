@@ -119,8 +119,8 @@ namespace Bsa
             switch (static_cast<BA2Version>(mVersion))
             {
                 case BA2Version::Fallout4:
-                case BA2Version::Fallout4NG:
-                case BA2Version::Fallout4NG2:
+                case BA2Version::Fallout4NextGen_v7:
+                case BA2Version::Fallout4NextGen_v8:
                     break;
                 case BA2Version::StarfieldDDS:
                     uint64_t dummy;
