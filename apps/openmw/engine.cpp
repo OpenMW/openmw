@@ -165,6 +165,15 @@ namespace
     private:
         int mMaxTextureImageUnits = 0;
     };
+
+    void reportStats(unsigned frameNumber, osgViewer::Viewer& viewer, std::ostream& stream)
+    {
+        viewer.getViewerStats()->report(stream, frameNumber);
+        osgViewer::Viewer::Cameras cameras;
+        viewer.getCameras(cameras);
+        for (osg::Camera* camera : cameras)
+            camera->getStats()->report(stream, frameNumber);
+    }
 }
 
 void OMW::Engine::executeLocalScripts()
@@ -180,10 +189,9 @@ void OMW::Engine::executeLocalScripts()
     }
 }
 
-bool OMW::Engine::frame(float frametime)
+bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 {
     const osg::Timer_t frameStart = mViewer->getStartTick();
-    const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
     const osg::Timer* const timer = osg::Timer::instance();
     osg::Stats* const stats = mViewer->getViewerStats();
 
@@ -340,11 +348,12 @@ bool OMW::Engine::frame(float frametime)
         mWorld->updateWindowManager();
     }
 
-    mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
+    // if there is a separate Lua thread, it starts the update now
+    mLuaWorker->allowUpdate(frameStart, frameNumber, *stats);
 
     mViewer->renderingTraversals();
 
-    mLuaWorker->finishUpdate();
+    mLuaWorker->finishUpdate(frameStart, frameNumber, *stats);
 
     return true;
 }
@@ -910,7 +919,7 @@ void OMW::Engine::prepareEngine()
     mLuaManager->init();
 
     // starts a separate lua thread if "lua num threads" > 0
-    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager, *mViewer);
+    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager);
 }
 
 // Initialise and enter main loop.
@@ -1020,7 +1029,9 @@ void OMW::Engine::go()
 
         mViewer->advance(timeManager.getRenderingSimulationTime());
 
-        if (!frame(dt))
+        const unsigned frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+
+        if (!frame(frameNumber, dt))
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
@@ -1034,16 +1045,16 @@ void OMW::Engine::go()
 
         if (stats)
         {
+            // The delay is required because rendering happens in parallel to the main thread and stats from there is
+            // available with delay.
             constexpr unsigned statsReportDelay = 3;
-            const auto frameNumber = mViewer->getFrameStamp()->getFrameNumber();
             if (frameNumber >= statsReportDelay)
             {
-                const unsigned reportFrameNumber = frameNumber - statsReportDelay;
-                mViewer->getViewerStats()->report(stats, reportFrameNumber);
-                osgViewer::Viewer::Cameras cameras;
-                mViewer->getCameras(cameras);
-                for (auto camera : cameras)
-                    camera->getStats()->report(stats, reportFrameNumber);
+                // Viewer frame number can be different from frameNumber because of loading screens which render new
+                // frames inside a simulation frame.
+                const unsigned currentFrameNumber = mViewer->getFrameStamp()->getFrameNumber();
+                for (unsigned i = frameNumber; i <= currentFrameNumber; ++i)
+                    reportStats(i - statsReportDelay, *mViewer, stats);
             }
         }
 
