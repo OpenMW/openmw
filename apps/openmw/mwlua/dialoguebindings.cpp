@@ -151,7 +151,7 @@ namespace
                 return store.at(index - 1);
             },
             [](const StoreT& store, std::string_view id) -> const ESM::Dialogue* {
-                return store.search(ESM::RefId::deserializeText(Misc::StringUtils::lowerCase(id)));
+                return store.search(ESM::RefId::deserializeText(id));
             });
         storeBindingsClass[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         storeBindingsClass[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -173,20 +173,21 @@ namespace
             = sol::readonly_property([](const ESM::Dialogue& rec) { return rec.mId.serializeText(); });
         recordBindingsClass["name"]
             = sol::readonly_property([](const ESM::Dialogue& rec) -> std::string_view { return rec.mStringId; });
-        recordBindingsClass["questName"] = sol::readonly_property([lua](const ESM::Dialogue& rec) -> sol::object {
-            if (rec.mType != ESM::Dialogue::Type::Journal)
-            {
-                return sol::nil;
-            }
-            for (const auto& mwDialogueInfo : rec.mInfo)
-            {
-                if (mwDialogueInfo.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Name)
-                {
-                    return sol::make_object(lua, mwDialogueInfo.mResponse);
-                }
-            }
-            return sol::nil;
-        });
+        recordBindingsClass["questName"]
+            = sol::readonly_property([](const ESM::Dialogue& rec) -> sol::optional<std::string> {
+                  if (rec.mType != ESM::Dialogue::Type::Journal)
+                  {
+                      return sol::nullopt;
+                  }
+                  for (const auto& mwDialogueInfo : rec.mInfo)
+                  {
+                      if (mwDialogueInfo.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Name)
+                      {
+                          return mwDialogueInfo.mResponse;
+                      }
+                  }
+                  return sol::nullopt;
+              });
         recordBindingsClass["infos"]
             = sol::readonly_property([](const ESM::Dialogue& rec) { return DialogueInfos{ rec }; });
     }
@@ -226,136 +227,133 @@ namespace
             = sol::readonly_property([](const ESM::DialInfo& rec) { return rec.mId.serializeText(); });
         recordInfoBindingsClass["text"]
             = sol::readonly_property([](const ESM::DialInfo& rec) -> std::string_view { return rec.mResponse; });
-        recordInfoBindingsClass["questStage"] = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-            if (rec.mData.mType != ESM::Dialogue::Type::Journal)
-            {
-                return sol::nil;
-            }
-            return sol::make_object(lua, rec.mData.mJournalIndex);
-        });
-        recordInfoBindingsClass["isQuestFinished"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
+        recordInfoBindingsClass["questStage"]
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
                   if (rec.mData.mType != ESM::Dialogue::Type::Journal)
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  return sol::make_object(lua, rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Finished);
+                  return rec.mData.mJournalIndex;
+              });
+        recordInfoBindingsClass["isQuestFinished"]
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<bool> {
+                  if (rec.mData.mType != ESM::Dialogue::Type::Journal)
+                  {
+                      return sol::nullopt;
+                  }
+                  return (rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Finished);
               });
         recordInfoBindingsClass["isQuestRestart"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<bool> {
                   if (rec.mData.mType != ESM::Dialogue::Type::Journal)
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  return sol::make_object(lua, rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Restart);
+                  return (rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Restart);
               });
-        recordInfoBindingsClass["isQuestName"] = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-            if (rec.mData.mType != ESM::Dialogue::Type::Journal)
-            {
-                return sol::nil;
-            }
-            return sol::make_object(lua, rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Name);
-        });
-        recordInfoBindingsClass["filterActorId"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+        recordInfoBindingsClass["isQuestName"]
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<bool> {
+                  if (rec.mData.mType != ESM::Dialogue::Type::Journal)
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mActor.serializeText();
-                  return result.empty() ? sol::nil : sol::make_object(lua, result);
+                  return (rec.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Name);
+              });
+        recordInfoBindingsClass["filterActorId"]
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mActor.empty())
+                  {
+                      return sol::nullopt;
+                  }
+                  return rec.mActor.serializeText();
               });
         recordInfoBindingsClass["filterActorRace"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mRace.empty())
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mRace.serializeText();
-                  return result.empty() ? sol::nil : sol::make_object(lua, result);
+                  return rec.mRace.serializeText();
               });
         recordInfoBindingsClass["filterActorClass"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mClass.empty())
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mClass.serializeText();
-                  return result.empty() ? sol::nil : sol::make_object(lua, result);
+                  return rec.mClass.serializeText();
               });
         recordInfoBindingsClass["filterActorFaction"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mFaction.empty())
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mFaction.serializeText();
-                  return result.empty() ? sol::nil : sol::make_object(lua, result);
+                  return rec.mFaction.serializeText();
               });
         recordInfoBindingsClass["filterActorFactionRank"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mData.mRank == -1)
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mData.mRank;
-                  return result == -1 ? sol::nil : sol::make_object(lua, result);
+                  return rec.mData.mRank;
               });
         recordInfoBindingsClass["filterActorCell"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mCell.empty())
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mCell.serializeText();
-                  return result.empty() ? sol::nil : sol::make_object(lua, result);
+                  return rec.mCell.serializeText();
               });
         recordInfoBindingsClass["filterActorDisposition"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
                   if (rec.mData.mType == ESM::Dialogue::Type::Journal)
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  return sol::make_object(lua, rec.mData.mDisposition);
+                  return rec.mData.mDisposition;
               });
         recordInfoBindingsClass["filterActorGender"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mData.mGender == -1)
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mData.mGender;
-                  return result == -1 ? sol::nil : sol::make_object(lua, result);
+                  return rec.mData.mGender;
               });
         recordInfoBindingsClass["filterPlayerFaction"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mPcFaction.empty())
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mPcFaction.serializeText();
-                  return result.empty() ? sol::nil : sol::make_object(lua, result);
+                  return rec.mPcFaction.serializeText();
               });
         recordInfoBindingsClass["filterPlayerFactionRank"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mData.mPCrank == -1)
                   {
-                      return sol::nil;
+                      return sol::nullopt;
                   }
-                  const auto result = rec.mData.mPCrank;
-                  return result == -1 ? sol::nil : sol::make_object(lua, result);
+                  return rec.mData.mPCrank;
               });
-        recordInfoBindingsClass["sound"] = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-            if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mSound == "")
-            {
-                return sol::nil;
-            }
-            return sol::make_object(
-                lua, Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(rec.mSound)).value());
-        });
+        recordInfoBindingsClass["sound"]
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mSound == "")
+                  {
+                      return sol::nullopt;
+                  }
+                  return Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(rec.mSound)).value();
+              });
         recordInfoBindingsClass["resultScript"]
-            = sol::readonly_property([lua](const ESM::DialInfo& rec) -> sol::object {
-                  return rec.mResultScript.empty() ? sol::nil : sol::make_object(lua, rec.mResultScript);
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+                  if (rec.mResultScript.empty())
+                  {
+                      return sol::nullopt;
+                  }
+                  return rec.mResultScript;
               });
     }
 
@@ -404,11 +402,11 @@ namespace MWLua
         prepareBindingsForDialogueRecordStores<ESM::Dialogue::Type::Greeting>(greetingTable, context);
         prepareBindingsForDialogueRecordStores<ESM::Dialogue::Type::Persuasion>(persuasionTable, context);
         prepareBindingsForDialogueRecordStores<ESM::Dialogue::Type::Voice>(voiceTable, context);
-        api["journal"] = journalTable;
-        api["topic"] = topicTable;
-        api["greeting"] = greetingTable;
-        api["persuasion"] = persuasionTable;
-        api["voice"] = voiceTable;
+        api["journal"] = LuaUtil::makeStrictReadOnly(journalTable);
+        api["topic"] = LuaUtil::makeStrictReadOnly(topicTable);
+        api["greeting"] = LuaUtil::makeStrictReadOnly(greetingTable);
+        api["persuasion"] = LuaUtil::makeStrictReadOnly(persuasionTable);
+        api["voice"] = LuaUtil::makeStrictReadOnly(voiceTable);
 
         prepareBindingsForDialogueRecords(lua);
 
