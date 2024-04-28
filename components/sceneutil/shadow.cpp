@@ -74,10 +74,7 @@ namespace SceneUtil
         else
             mShadowTechnique->disableFrontFaceCulling();
 
-        if (settings.mAllowShadowMapOverlap)
-            mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
-        else
-            mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT);
+        mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
 
         if (settings.mEnableDebugHud)
             mShadowTechnique->enableDebugHUD();
@@ -161,8 +158,6 @@ namespace SceneUtil
         definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(
             0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
 
-        definesWithShadows["shadowMapsOverlap"] = settings.mAllowShadowMapOverlap ? "1" : "0";
-
         definesWithShadows["useShadowDebugOverlay"] = settings.mEnableDebugOverlay ? "1" : "0";
 
         // switch this to reading settings if it's ever exposed to the user
@@ -185,8 +180,6 @@ namespace SceneUtil
         definesWithoutShadows["shadows_enabled"] = "0";
 
         definesWithoutShadows["shadow_texture_unit_list"] = "";
-
-        definesWithoutShadows["shadowMapsOverlap"] = "0";
 
         definesWithoutShadows["useShadowDebugOverlay"] = "0";
 
