@@ -65,15 +65,17 @@ namespace MWWorld
         void setExpiryDelay(double expiryDelay);
 
         /// The minimum number of preloaded cells before unused cells get thrown out.
-        void setMinCacheSize(unsigned int num);
+        void setMinCacheSize(std::size_t value) { mMinCacheSize = value; }
 
         /// The maximum number of preloaded cells.
-        void setMaxCacheSize(unsigned int num);
+        void setMaxCacheSize(std::size_t value) { mMaxCacheSize = value; }
 
         /// Enables the creation of instances in the preloading thread.
         void setPreloadInstances(bool preload);
 
-        unsigned int getMaxCacheSize() const;
+        std::size_t getMaxCacheSize() const { return mMaxCacheSize; }
+
+        std::size_t getCacheSize() const { return mPreloadCells.size(); }
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
@@ -96,8 +98,8 @@ namespace MWWorld
         MWRender::LandManager* mLandManager;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
         double mExpiryDelay;
-        unsigned int mMinCacheSize;
-        unsigned int mMaxCacheSize;
+        std::size_t mMinCacheSize = 0;
+        std::size_t mMaxCacheSize = 0;
         bool mPreloadInstances;
 
         double mLastResourceCacheUpdate;

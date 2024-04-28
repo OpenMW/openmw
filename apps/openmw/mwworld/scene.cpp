@@ -270,6 +270,29 @@ namespace
         pagedRefs.erase(it);
         return true;
     }
+
+    template <class Function>
+    void iterateOverCellsAround(int cellX, int cellY, int range, Function&& f)
+    {
+        for (int x = cellX - range, lastX = cellX + range; x <= lastX; ++x)
+            for (int y = cellY - range, lastY = cellY + range; y <= lastY; ++y)
+                f(x, y);
+    }
+
+    void sortCellsToLoad(int centerX, int centerY, std::vector<std::pair<int, int>>& cells)
+    {
+        const auto getDistanceToPlayerCell = [&](const std::pair<int, int>& cellPosition) {
+            return std::abs(cellPosition.first - centerX) + std::abs(cellPosition.second - centerY);
+        };
+
+        const auto getCellPositionPriority = [&](const std::pair<int, int>& cellPosition) {
+            return std::make_pair(getDistanceToPlayerCell(cellPosition), getCellPositionDistanceToOrigin(cellPosition));
+        };
+
+        std::sort(cells.begin(), cells.end(), [&](const std::pair<int, int>& lhs, const std::pair<int, int>& rhs) {
+            return getCellPositionPriority(lhs) < getCellPositionPriority(rhs);
+        });
+    }
 }
 
 namespace MWWorld
@@ -585,44 +608,24 @@ namespace MWWorld
         mPagedRefs.clear();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
-        std::size_t refsToLoad = 0;
-        const auto cellsToLoad = [&](CellStoreCollection& collection, int range) -> std::vector<std::pair<int, int>> {
-            std::vector<std::pair<int, int>> cellsPositionsToLoad;
-            for (int x = playerCellX - range; x <= playerCellX + range; ++x)
-            {
-                for (int y = playerCellY - range; y <= playerCellY + range; ++y)
-                {
-                    if (!isCellInCollection(ESM::ExteriorCellLocation(x, y, playerCellIndex.mWorldspace), collection))
-                    {
-                        refsToLoad += mWorld.getWorldModel().getExterior(playerCellIndex).count();
-                        cellsPositionsToLoad.emplace_back(x, y);
-                    }
-                }
-            }
-            return cellsPositionsToLoad;
-        };
-
         addPostponedPhysicsObjects();
 
-        auto cellsPositionsToLoad = cellsToLoad(mActiveCells, mHalfGridSize);
+        std::size_t refsToLoad = 0;
+        std::vector<std::pair<int, int>> cellsPositionsToLoad;
+        iterateOverCellsAround(playerCellX, playerCellY, mHalfGridSize, [&](int x, int y) {
+            const ESM::ExteriorCellLocation location(x, y, playerCellIndex.mWorldspace);
+            if (isCellInCollection(location, mActiveCells))
+                return;
+            refsToLoad += mWorld.getWorldModel().getExterior(location).count();
+            cellsPositionsToLoad.emplace_back(x, y);
+        });
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
         loadingListener->setLabel("#{OMWEngine:LoadingExterior}");
         loadingListener->setProgressRange(refsToLoad);
 
-        const auto getDistanceToPlayerCell = [&](const std::pair<int, int>& cellPosition) {
-            return std::abs(cellPosition.first - playerCellX) + std::abs(cellPosition.second - playerCellY);
-        };
-
-        const auto getCellPositionPriority = [&](const std::pair<int, int>& cellPosition) {
-            return std::make_pair(getDistanceToPlayerCell(cellPosition), getCellPositionDistanceToOrigin(cellPosition));
-        };
-
-        std::sort(cellsPositionsToLoad.begin(), cellsPositionsToLoad.end(),
-            [&](const std::pair<int, int>& lhs, const std::pair<int, int>& rhs) {
-                return getCellPositionPriority(lhs) < getCellPositionPriority(rhs);
-            });
+        sortCellsToLoad(playerCellX, playerCellY, cellsPositionsToLoad);
 
         for (const auto& [x, y] : cellsPositionsToLoad)
         {
@@ -1136,7 +1139,7 @@ namespace MWWorld
             {
                 try
                 {
-                    preloadCell(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()), true);
+                    preloadCellWithSurroundings(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
                 }
                 catch (std::exception&)
                 {
@@ -1183,27 +1186,47 @@ namespace MWWorld
         }
     }
 
-    void Scene::preloadCell(CellStore& cell, bool preloadSurrounding)
+    void Scene::preloadCellWithSurroundings(CellStore& cell)
     {
-        if (preloadSurrounding && cell.isExterior())
+        if (!cell.isExterior())
         {
-            int x = cell.getCell()->getGridX();
-            int y = cell.getCell()->getGridY();
-            unsigned int numpreloaded = 0;
-            for (int dx = -mHalfGridSize; dx <= mHalfGridSize; ++dx)
-            {
-                for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
-                {
-                    mPreloader->preload(mWorld.getWorldModel().getExterior(
-                                            ESM::ExteriorCellLocation(x + dx, y + dy, cell.getCell()->getWorldSpace())),
-                        mRendering.getReferenceTime());
-                    if (++numpreloaded >= mPreloader->getMaxCacheSize())
-                        break;
-                }
-            }
-        }
-        else
             mPreloader->preload(cell, mRendering.getReferenceTime());
+            return;
+        }
+
+        const int cellX = cell.getCell()->getGridX();
+        const int cellY = cell.getCell()->getGridY();
+
+        std::vector<std::pair<int, int>> cells;
+        const std::size_t gridSize = static_cast<std::size_t>(2 * mHalfGridSize + 1);
+        cells.reserve(gridSize * gridSize);
+
+        iterateOverCellsAround(cellX, cellY, mHalfGridSize, [&](int x, int y) { cells.emplace_back(x, y); });
+
+        sortCellsToLoad(cellX, cellY, cells);
+
+        const std::size_t leftCapacity = mPreloader->getMaxCacheSize() - mPreloader->getCacheSize();
+        if (cells.size() > leftCapacity)
+        {
+            static bool logged = [&] {
+                Log(Debug::Warning) << "Not enough cell preloader cache capacity to preload exterior cells, consider "
+                                       "increasing \"preload cell cache max\" up to "
+                                    << (mPreloader->getCacheSize() + cells.size());
+                return true;
+            }();
+            (void)logged;
+            cells.resize(leftCapacity);
+        }
+
+        const ESM::RefId worldspace = cell.getCell()->getWorldSpace();
+        for (const auto& [x, y] : cells)
+            mPreloader->preload(mWorld.getWorldModel().getExterior(ESM::ExteriorCellLocation(x, y, worldspace)),
+                mRendering.getReferenceTime());
+    }
+
+    void Scene::preloadCell(CellStore& cell)
+    {
+        mPreloader->preload(cell, mRendering.getReferenceTime());
     }
 
     void Scene::preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync)
@@ -1281,7 +1304,7 @@ namespace MWWorld
                 osg::Vec3f pos = dest.mPos.asVec3();
                 const ESM::ExteriorCellLocation cellIndex
                     = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), extWorldspace);
-                preloadCell(mWorld.getWorldModel().getExterior(cellIndex), true);
+                preloadCellWithSurroundings(mWorld.getWorldModel().getExterior(cellIndex));
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
         }
