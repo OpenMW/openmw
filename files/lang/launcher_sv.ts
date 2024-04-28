@@ -1496,7 +1496,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Force Per-Pixel Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tvinga per-pixelljussättning</translation>
     </message>
 </context>
 </TS>
