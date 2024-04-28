@@ -126,6 +126,8 @@ namespace MWDialogue
         /// @return faction1's opinion of faction2
         int getFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2) const override;
 
+        const std::map<ESM::RefId, int>* getFactionReactionOverrides(const ESM::RefId& faction) const override;
+
         /// Removes the last added topic response for the given actor from the journal
         void clearInfoActor(const MWWorld::Ptr& actor) const override;
     };
