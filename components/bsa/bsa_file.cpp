@@ -340,17 +340,17 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
         return BsaVersion::Uncompressed;
     }
 
-    if (head[0] == static_cast<uint32_t>(BsaVersion::Compressed) || head[0] == ESM::fourCC("BTDX"))
+    if (head[0] == static_cast<uint32_t>(BsaVersion::Compressed))
     {
-        if (head[1] == static_cast<uint32_t>(0x01))
-        {
-            if (head[2] == ESM::fourCC("GNRL"))
-                return BsaVersion::BA2GNRL;
-            if (head[2] == ESM::fourCC("DX10"))
-                return BsaVersion::BA2DX10;
-            return BsaVersion::Unknown;
-        }
         return BsaVersion::Compressed;
+    }
+
+    if (head[0] == ESM::fourCC("BTDX"))
+    {
+        if (head[2] == ESM::fourCC("GNRL"))
+            return BsaVersion::BA2GNRL;
+        if (head[2] == ESM::fourCC("DX10"))
+            return BsaVersion::BA2DX10;
     }
 
     return BsaVersion::Unknown;

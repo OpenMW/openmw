@@ -325,7 +325,7 @@ namespace Nif
         {
             nif->read(mSubsurfaceRolloff);
             nif->read(mRimlightPower);
-            if (nif->getBethVersion() == 130 && mRimlightPower == std::numeric_limits<float>::max())
+            if (mRimlightPower == std::numeric_limits<float>::max())
                 nif->read(mBacklightPower);
         }
 

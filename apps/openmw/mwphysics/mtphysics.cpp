@@ -275,10 +275,13 @@ namespace
                 if (mAdvanceSimulation)
                 {
                     MWWorld::Ptr standingOn;
-                    auto* ptrHolder
-                        = static_cast<MWPhysics::PtrHolder*>(scheduler->getUserPointer(frameData.mStandingOn));
-                    if (ptrHolder)
-                        standingOn = ptrHolder->getPtr();
+                    if (frameData.mStandingOn != nullptr)
+                    {
+                        auto* const ptrHolder
+                            = static_cast<MWPhysics::PtrHolder*>(scheduler->getUserPointer(frameData.mStandingOn));
+                        if (ptrHolder != nullptr)
+                            standingOn = ptrHolder->getPtr();
+                    }
                     actor->setStandingOnPtr(standingOn);
                     // the "on ground" state of an actor might have been updated by a traceDown, don't overwrite the
                     // change
@@ -650,15 +653,15 @@ namespace MWPhysics
     void PhysicsTaskScheduler::addCollisionObject(
         btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask)
     {
-        mCollisionObjects.insert(collisionObject);
         MaybeExclusiveLock lock(mCollisionWorldMutex, mLockingPolicy);
+        mCollisionObjects.insert(collisionObject);
         mCollisionWorld->addCollisionObject(collisionObject, collisionFilterGroup, collisionFilterMask);
     }
 
     void PhysicsTaskScheduler::removeCollisionObject(btCollisionObject* collisionObject)
     {
-        mCollisionObjects.erase(collisionObject);
         MaybeExclusiveLock lock(mCollisionWorldMutex, mLockingPolicy);
+        mCollisionObjects.erase(collisionObject);
         mCollisionWorld->removeCollisionObject(collisionObject);
     }
 
