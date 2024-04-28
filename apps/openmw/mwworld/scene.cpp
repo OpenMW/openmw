@@ -1136,7 +1136,7 @@ namespace MWWorld
             {
                 try
                 {
-                    preloadCell(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
+                    preloadCell(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()), true);
                 }
                 catch (std::exception&)
                 {
