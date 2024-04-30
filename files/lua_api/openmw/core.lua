@@ -1022,26 +1022,92 @@
 -- @type DialogueRecordInfo
 -- @field #string id Identifier for this info entry. Is unique only within the @{#DialogueRecord} it belongs to.
 -- @field #string text Text associated with this info entry.
--- @field #number questStage Non-nil only for journal records. Quest stage (same as in @{openmw_types#PlayerQuest.stage}) this info entry is associated with.
--- @field #boolean isQuestFinished Non-nil only for journal records. True if this info entry has the "Finished" flag checked.
--- @field #boolean isQuestRestart Non-nil only for journal records. True if this info entry has the "Restart" flag checked.
--- @field #boolean isQuestName Non-nil only for journal records. True if this info entry has the "Quest Name" flag checked. If true, then the @{#DialogueRecord}, to which this info entry belongs, should have this info entry's @{#DialogueRecordInfo.text} value available in its @{#DialogueRecord.questName}.
--- @field #string filterActorId Non-nil only for non-journal records with available value for this parameter. Speaker ID allowing for this info entry to appear.
--- @field #string filterActorRace Non-nil only for non-journal records with available value for this parameter. Speaker race allowing for this info entry to appear.
--- @field #string filterActorClass Non-nil only for non-journal records with available value for this parameter. Speaker class allowing for this info entry to appear.
--- @field #string filterActorFaction Non-nil only for non-journal records with available value for this parameter. Faction of which the speaker must be a member for this info entry to appear.
--- @field #number filterActorFactionRank Non-nil only for non-journal records with available value for this parameter. Minimum rank in the speakerFactionRequired allowing for this info entry to appear.
--- @field #string filterActorCell Non-nil only for non-journal records with available value for this parameter. Cell name of location where speaker must be for this info entry to appear.
--- @field #number filterActorDisposition Non-nil only for non-journal records with available value for this parameter. Minimum speaker disposition allowing for this info entry to appear. 0 if not defined.
--- @field #number filterActorGender Non-nil only for non-journal records with available value for this parameter. Speaker gender allowing for this info entry to appear. 1 if female, 0 if male.
--- @field #string filterPlayerFaction Non-nil only for non-journal records with available value for this parameter. Faction of which the player must be a member for this info entry to appear.
--- @field #number filterPlayerFactionRank Non-nil only for non-journal records with available value for this parameter. Minimum rank in playerFactionRequired allowing for this info entry to appear.
--- @field #string sound Non-nil only for non-journal records with available value for this parameter. Sound file path for this info entry.
--- @field #string resultScript Non-nil only for non-journal records with available value for this parameter. MWScript (full script text) executed when this info is chosen.
 -- @usage --Variable `aa` below is "Congratulations, %PCName. You are now %PCName the %NextPCRank." in vanilla MW:
 -- local aa = core.dialogue.topic.records['advancement'].infos[100].text
 -- @usage --Variable `bb` below is "sound/vo/a/f/fle_af003.mp3" in vanilla MW:
 -- local bb = core.dialogue.voice.records['flee'].infos[149].sound
+
+---
+-- Quest stage (same as in @{openmw_types#PlayerQuest.stage}) this info entry is associated with.
+-- Non-nil only for journal records.
+-- @field [parent=#DialogueRecordInfo] #number questStage
+
+---
+-- True if this info entry has the "Finished" flag checked.
+-- Non-nil only for journal records.
+-- @field [parent=#DialogueRecordInfo] #boolean isQuestFinished
+
+---
+-- True if this info entry has the "Restart" flag checked.
+-- Non-nil only for journal records.
+-- @field [parent=#DialogueRecordInfo] #boolean isQuestRestart
+
+---
+-- True if this info entry has the "Quest Name" flag checked.
+-- If true, then the @{#DialogueRecord}, to which this info entry belongs, should have this info entry's @{#DialogueRecordInfo.text} value available in its @{#DialogueRecord.questName}.
+-- Non-nil only for journal records.
+-- @field [parent=#DialogueRecordInfo] #boolean isQuestName
+
+---
+-- Faction of which the speaker must be a member for this info entry to appear.
+-- Can return an empty string - this means that the actor must not be a member of any faction for this filtering to apply.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #string filterActorFaction
+
+---
+-- Speaker ID allowing for this info entry to appear.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #string filterActorId
+
+---
+-- Speaker race allowing for this info entry to appear.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #string filterActorRace
+
+---
+-- Speaker class allowing for this info entry to appear.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #string filterActorClass
+
+---
+-- Minimum speaker's rank in their faction allowing for this info entry to appear.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #number filterActorFactionRank
+
+---
+-- Cell name of location where speaker must be for this info entry to appear.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #string filterActorCell
+
+---
+-- Minimum speaker disposition allowing for this info entry to appear.
+-- Always nil for journal records. Otherwise is a nonnegative number, with the zero value representing no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #number filterActorDisposition
+
+---
+-- Speaker gender allowing for this info entry to appear: 1 if female, 0 if male.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #number filterActorGender
+
+---
+-- Faction of which the player must be a member for this info entry to appear.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #string filterPlayerFaction
+
+---
+-- Minimum player's rank in their faction allowing for this info entry to appear.
+-- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- @field [parent=#DialogueRecordInfo] #number filterPlayerFactionRank
+
+---
+-- Sound file path for this info entry.
+-- Always nil for journal records or if there is no sound set.
+-- @field [parent=#DialogueRecordInfo] #string sound
+
+---
+-- MWScript (full script text) executed when this info is chosen.
+-- Always nil for journal records or if there is no value set.
+-- @field [parent=#DialogueRecordInfo] #string resultScript
 
 --- @{#Factions}: Factions
 -- @field [parent=#core] #Factions factions

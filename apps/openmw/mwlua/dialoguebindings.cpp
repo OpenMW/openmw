@@ -174,7 +174,7 @@ namespace
         recordBindingsClass["name"]
             = sol::readonly_property([](const ESM::Dialogue& rec) -> std::string_view { return rec.mStringId; });
         recordBindingsClass["questName"]
-            = sol::readonly_property([](const ESM::Dialogue& rec) -> sol::optional<std::string> {
+            = sol::readonly_property([](const ESM::Dialogue& rec) -> sol::optional<std::string_view> {
                   if (rec.mType != ESM::Dialogue::Type::Journal)
                   {
                       return sol::nullopt;
@@ -183,7 +183,7 @@ namespace
                   {
                       if (mwDialogueInfo.mQuestStatus == ESM::DialInfo::QuestStatus::QS_Name)
                       {
-                          return mwDialogueInfo.mResponse;
+                          return sol::optional<std::string_view>(mwDialogueInfo.mResponse);
                       }
                   }
                   return sol::nullopt;
@@ -289,6 +289,10 @@ namespace
                   {
                       return sol::nullopt;
                   }
+                  if (rec.mFactionLess)
+                  {
+                      return "";
+                  }
                   return rec.mFaction.serializeText();
               });
         recordInfoBindingsClass["filterActorFactionRank"]
@@ -341,19 +345,19 @@ namespace
               });
         recordInfoBindingsClass["sound"]
             = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
-                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mSound == "")
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mSound.empty())
                   {
                       return sol::nullopt;
                   }
                   return Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(rec.mSound)).value();
               });
         recordInfoBindingsClass["resultScript"]
-            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string_view> {
                   if (rec.mResultScript.empty())
                   {
                       return sol::nullopt;
                   }
-                  return rec.mResultScript;
+                  return sol::optional<std::string_view>(rec.mResultScript);
               });
     }
 
