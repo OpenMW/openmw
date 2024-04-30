@@ -225,8 +225,6 @@ namespace MWWorld
         , mTerrain(terrain)
         , mLandManager(landManager)
         , mExpiryDelay(0.0)
-        , mMinCacheSize(0)
-        , mMaxCacheSize(0)
         , mPreloadInstances(true)
         , mLastResourceCacheUpdate(0.0)
         , mLoadedTerrainTimestamp(0.0)
@@ -361,24 +359,9 @@ namespace MWWorld
         mExpiryDelay = expiryDelay;
     }
 
-    void CellPreloader::setMinCacheSize(unsigned int num)
-    {
-        mMinCacheSize = num;
-    }
-
-    void CellPreloader::setMaxCacheSize(unsigned int num)
-    {
-        mMaxCacheSize = num;
-    }
-
     void CellPreloader::setPreloadInstances(bool preload)
     {
         mPreloadInstances = preload;
-    }
-
-    unsigned int CellPreloader::getMaxCacheSize() const
-    {
-        return mMaxCacheSize;
     }
 
     void CellPreloader::setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue)
