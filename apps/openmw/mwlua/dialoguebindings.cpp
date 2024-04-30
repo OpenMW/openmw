@@ -291,7 +291,7 @@ namespace
                   }
                   if (rec.mFactionLess)
                   {
-                      return "";
+                      return sol::optional<std::string>("");
                   }
                   return rec.mFaction.serializeText();
               });
