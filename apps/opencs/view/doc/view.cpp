@@ -36,6 +36,7 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/scalableicon.hpp>
 #include <components/misc/timeconvert.hpp>
 #include <components/version/version.hpp>
 
@@ -140,13 +141,13 @@ void CSVDoc::View::setupEditMenu()
     mUndo = mDocument->getUndoStack().createUndoAction(this, tr("Undo"));
     setupShortcut("document-edit-undo", mUndo);
     connect(mUndo, &QAction::changed, this, &View::undoActionChanged);
-    mUndo->setIcon(QIcon(QString::fromStdString(":menu-undo")));
+    mUndo->setIcon(Misc::ScalableIcon::load(":menu-undo"));
     edit->addAction(mUndo);
 
     mRedo = mDocument->getUndoStack().createRedoAction(this, tr("Redo"));
     connect(mRedo, &QAction::changed, this, &View::redoActionChanged);
     setupShortcut("document-edit-redo", mRedo);
-    mRedo->setIcon(QIcon(QString::fromStdString(":menu-redo")));
+    mRedo->setIcon(Misc::ScalableIcon::load(":menu-redo"));
     edit->addAction(mRedo);
 
     QAction* userSettings = createMenuEntry("Preferences", ":menu-preferences", edit, "document-edit-preferences");
@@ -340,7 +341,7 @@ void CSVDoc::View::setupDebugMenu()
     QAction* runDebug = debug->addMenu(mGlobalDebugProfileMenu);
     runDebug->setText(tr("Run OpenMW"));
     setupShortcut("document-debug-run", runDebug);
-    runDebug->setIcon(QIcon(QString::fromStdString(":run-openmw")));
+    runDebug->setIcon(Misc::ScalableIcon::load(":run-openmw"));
 
     QAction* stopDebug = createMenuEntry("Stop OpenMW", ":stop-openmw", debug, "document-debug-shutdown");
     connect(stopDebug, &QAction::triggered, this, &View::stop);
@@ -374,7 +375,7 @@ QAction* CSVDoc::View::createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* 
     setupShortcut(shortcutName, entry);
     const std::string iconName = CSMWorld::UniversalId(type).getIcon();
     if (!iconName.empty() && iconName != ":placeholder")
-        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+        entry->setIcon(Misc::ScalableIcon::load(QString::fromStdString(iconName)));
 
     menu->addAction(entry);
 
@@ -387,7 +388,7 @@ QAction* CSVDoc::View::createMenuEntry(
     QAction* entry = new QAction(QString::fromStdString(title), this);
     setupShortcut(shortcutName, entry);
     if (!iconName.empty() && iconName != ":placeholder")
-        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+        entry->setIcon(Misc::ScalableIcon::load(QString::fromStdString(iconName)));
 
     menu->addAction(entry);
 

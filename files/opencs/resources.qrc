@@ -39,8 +39,8 @@
         <file alias="levelled-creature">levelled-creature.svg</file>
         <file alias="levelled-item">levelled-item.svg</file>
         <file alias="light">light.svg</file>
-        <file alias="list-base">list-base.svg</file>
         <file alias="list-added">list-added.svg</file>
+        <file alias="list-base">list-base.svg</file>
         <file alias="list-modified">list-modified.svg</file>
         <file alias="list-removed">list-removed.svg</file>
         <file alias="lockpick">lockpick.svg</file>

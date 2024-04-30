@@ -26,6 +26,7 @@
 #include <apps/opencs/view/render/terrainselection.hpp>
 #include <apps/opencs/view/widget/scenetool.hpp>
 
+#include <components/misc/scalableicon.hpp>
 #include <components/misc/strings/conversion.hpp>
 
 #include "../widget/scenetoolbar.hpp"
@@ -49,8 +50,8 @@
 
 CSVRender::TerrainTextureMode::TerrainTextureMode(
     WorldspaceWidget* worldspaceWidget, osg::Group* parentNode, QWidget* parent)
-    : EditMode(worldspaceWidget, QIcon{ ":scenetoolbar/editing-terrain-texture" }, Mask_Terrain | Mask_Reference,
-        "Terrain texture editing", parent)
+    : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-terrain-texture"),
+        Mask_Terrain | Mask_Reference, "Terrain texture editing", parent)
     , mBrushTexture("L0#0")
     , mBrushSize(1)
     , mBrushShape(CSVWidget::BrushShape_Point)

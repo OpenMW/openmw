@@ -17,6 +17,8 @@
 #include <apps/opencs/view/world/enumdelegate.hpp>
 #include <apps/opencs/view/world/util.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 class QModelIndex;
 class QObject;
 
@@ -161,7 +163,7 @@ void CSVWorld::DataDisplayDelegateFactory::add(int enumValue, const QString& enu
     Icon icon;
     icon.mValue = enumValue;
     icon.mName = enumName;
-    icon.mIcon = QIcon(iconFilename);
+    icon.mIcon = Misc::ScalableIcon::load(iconFilename);
 
     for (auto it = mIcons.begin(); it != mIcons.end(); ++it)
     {
