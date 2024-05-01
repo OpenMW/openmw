@@ -301,9 +301,9 @@ namespace
                   {
                       return sol::nullopt;
                   }
-                  return rec.mData.mRank;
+                  return rec.mData.mRank + 1;
               });
-        recordInfoBindingsClass["filterActorCell"]
+        recordInfoBindingsClass["filterPlayerCell"]
             = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
                   if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mCell.empty())
                   {
@@ -341,7 +341,7 @@ namespace
                   {
                       return sol::nullopt;
                   }
-                  return rec.mData.mPCrank;
+                  return rec.mData.mPCrank + 1;
               });
         recordInfoBindingsClass["sound"]
             = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {

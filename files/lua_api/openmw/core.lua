@@ -1044,14 +1044,14 @@
 
 ---
 -- True if this info entry has the "Quest Name" flag checked.
--- If true, then the @{#DialogueRecord}, to which this info entry belongs, should have this info entry's @{#DialogueRecordInfo.text} value available in its @{#DialogueRecord.questName}.
 -- Non-nil only for journal records.
+-- If true, then the @{#DialogueRecord}, to which this info entry belongs, should have this info entry's @{#DialogueRecordInfo.text} value available in its @{#DialogueRecord.questName}.
 -- @field [parent=#DialogueRecordInfo] #boolean isQuestName
 
 ---
 -- Faction of which the speaker must be a member for this info entry to appear.
--- Can return an empty string - this means that the actor must not be a member of any faction for this filtering to apply.
 -- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- Can return an empty string - this means that the actor must not be a member of any faction for this filtering to apply.
 -- @field [parent=#DialogueRecordInfo] #string filterActorFaction
 
 ---
@@ -1072,12 +1072,14 @@
 ---
 -- Minimum speaker's rank in their faction allowing for this info entry to appear.
 -- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- Rank index starts from 1, matching the value in @{openmw_types#NPC.getFactionRank}
 -- @field [parent=#DialogueRecordInfo] #number filterActorFactionRank
 
 ---
--- Cell name of location where speaker must be for this info entry to appear.
+-- Cell name prefix of location where the player must be for this info entry to appear.
 -- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
--- @field [parent=#DialogueRecordInfo] #string filterActorCell
+-- "Prefix" means that the cell's name starting with this value shall pass the filtering. For example: `filterPlayerCell` being "Seyda Neen" does apply to the cell "Seyda Neen, Fargoth's House".
+-- @field [parent=#DialogueRecordInfo] #string filterPlayerCell
 
 ---
 -- Minimum speaker disposition allowing for this info entry to appear.
@@ -1097,6 +1099,7 @@
 ---
 -- Minimum player's rank in their faction allowing for this info entry to appear.
 -- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
+-- Rank index starts from 1, matching the value in @{openmw_types#NPC.getFactionRank}
 -- @field [parent=#DialogueRecordInfo] #number filterPlayerFactionRank
 
 ---
