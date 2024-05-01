@@ -1087,9 +1087,9 @@
 -- @field [parent=#DialogueRecordInfo] #number filterActorDisposition
 
 ---
--- Speaker gender allowing for this info entry to appear: 1 if female, 0 if male.
+-- Speaker gender allowing for this info entry to appear: "male" or "female".
 -- Always nil for journal records. Otherwise the nil value represents no conditions, i.e. no filtering applied using these criteria.
--- @field [parent=#DialogueRecordInfo] #number filterActorGender
+-- @field [parent=#DialogueRecordInfo] #string filterActorGender
 
 ---
 -- Faction of which the player must be a member for this info entry to appear.

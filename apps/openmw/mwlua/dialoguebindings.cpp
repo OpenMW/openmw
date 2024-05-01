@@ -320,12 +320,12 @@ namespace
                   return rec.mData.mDisposition;
               });
         recordInfoBindingsClass["filterActorGender"]
-            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string_view> {
                   if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mData.mGender == -1)
                   {
                       return sol::nullopt;
                   }
-                  return rec.mData.mGender;
+                  return sol::optional<std::string_view>(rec.mData.mGender == 0 ? "male" : "female");
               });
         recordInfoBindingsClass["filterPlayerFaction"]
             = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
