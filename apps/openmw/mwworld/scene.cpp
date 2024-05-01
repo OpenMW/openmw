@@ -1109,8 +1109,9 @@ namespace MWWorld
             {
                 mSceneManager->getTemplate(mMesh);
             }
-            catch (std::exception&)
+            catch (const std::exception& e)
             {
+                Log(Debug::Warning) << "Failed to get mesh template \"" << mMesh << "\" to preload: " << e.what();
             }
         }
 
@@ -1198,9 +1199,10 @@ namespace MWWorld
                 {
                     preloadCellWithSurroundings(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
                 }
-                catch (std::exception&)
+                catch (const std::exception& e)
                 {
-                    // ignore error for now, would spam the log too much
+                    Log(Debug::Warning) << "Failed to schedule preload for door " << door.toString() << ": "
+                                        << e.what();
                 }
             }
         }

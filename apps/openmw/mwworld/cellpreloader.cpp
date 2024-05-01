@@ -66,12 +66,12 @@ namespace MWWorld
     {
     public:
         /// Constructor to be called from the main thread.
-        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager,
+        explicit PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager,
             Resource::BulletShapeManager* bulletShapeManager, Resource::KeyframeManager* keyframeManager,
             Terrain::World* terrain, MWRender::LandManager* landManager, bool preloadInstances)
             : mIsExterior(cell->getCell()->isExterior())
-            , mX(cell->getCell()->getGridX())
-            , mY(cell->getCell()->getGridY())
+            , mCellLocation(cell->getCell()->getExteriorCellLocation())
+            , mCellId(cell->getCell()->getId())
             , mSceneManager(sceneManager)
             , mBulletShapeManager(bulletShapeManager)
             , mKeyframeManager(keyframeManager)
@@ -95,12 +95,13 @@ namespace MWWorld
             {
                 try
                 {
-                    mTerrain->cacheCell(mTerrainView.get(), mX, mY);
-                    mPreloadedObjects.insert(
-                        mLandManager->getLand(ESM::ExteriorCellLocation(mX, mY, ESM::Cell::sDefaultWorldspaceId)));
+                    mTerrain->cacheCell(mTerrainView.get(), mCellLocation.mX, mCellLocation.mY);
+                    mPreloadedObjects.insert(mLandManager->getLand(mCellLocation));
                 }
-                catch (std::exception&)
+                catch (const std::exception& e)
                 {
+                    Log(Debug::Warning) << "Failed to cache terrain for exterior cell " << mCellLocation << ": "
+                                        << e.what();
                 }
             }
 
@@ -113,8 +114,12 @@ namespace MWWorld
 
                 try
                 {
+                    const VFS::Manager& vfs = *mSceneManager->getVFS();
                     mesh = Misc::ResourceHelpers::correctMeshPath(path);
-                    mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
+                    mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, &vfs);
+
+                    if (!vfs.exists(mesh))
+                        continue;
 
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size() - 1)
@@ -124,7 +129,7 @@ namespace MWWorld
                         {
                             kfname = mesh;
                             kfname.replace(kfname.size() - 4, 4, ".kf");
-                            if (mSceneManager->getVFS()->exists(kfname))
+                            if (vfs.exists(kfname))
                                 mPreloadedObjects.insert(mKeyframeManager->get(kfname));
                         }
                     }
@@ -134,18 +139,18 @@ namespace MWWorld
                     else
                         mPreloadedObjects.insert(mBulletShapeManager->getShape(mesh));
                 }
-                catch (std::exception&)
+                catch (const std::exception& e)
                 {
-                    // ignore error for now, would spam the log too much
-                    // error will be shown when visiting the cell
+                    Log(Debug::Warning) << "Failed to preload mesh \"" << path << "\" from cell " << mCellId << ": "
+                                        << e.what();
                 }
             }
         }
 
     private:
         bool mIsExterior;
-        int mX;
-        int mY;
+        ESM::ExteriorCellLocation mCellLocation;
+        ESM::RefId mCellId;
         std::vector<std::string_view> mMeshes;
         Resource::SceneManager* mSceneManager;
         Resource::BulletShapeManager* mBulletShapeManager;

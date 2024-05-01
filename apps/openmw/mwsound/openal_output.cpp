@@ -610,9 +610,9 @@ namespace MWSound
                 }
             }
         }
-        catch (std::exception&)
+        catch (const std::exception& e)
         {
-            Log(Debug::Error) << "Error updating stream \"" << mDecoder->getName() << "\"";
+            Log(Debug::Error) << "Error updating stream \"" << mDecoder->getName() << "\": " << e.what();
             mIsFinished = true;
         }
         return !mIsFinished;

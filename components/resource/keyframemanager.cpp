@@ -154,9 +154,9 @@ namespace Resource
                 mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
             }
         }
-        catch (std::exception&)
+        catch (const std::exception& e)
         {
-            Log(Debug::Warning) << "No textkey file found for " << mNormalized;
+            Log(Debug::Warning) << "Failed to use textkey file " << mNormalized << ": " << e.what();
         }
 
         callback->setEmulatedAnimations(emulatedAnimations);
