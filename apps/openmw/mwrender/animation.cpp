@@ -767,7 +767,7 @@ namespace MWRender
             Misc::StringUtils::replaceLast(yamlpath, ".dae", ".yaml");
 
             // globalBlendConfigPath is only used with actors! Objects have no default blending.
-            const VFS::Path::NormalizedView globalBlendConfigPath("animations/animation-config.yaml");
+            constexpr VFS::Path::NormalizedView globalBlendConfigPath("animations/animation-config.yaml");
             const VFS::Path::NormalizedView blendConfigPath(yamlpath);
 
             osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;

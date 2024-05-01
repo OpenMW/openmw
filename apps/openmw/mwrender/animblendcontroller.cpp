@@ -10,84 +10,127 @@
 
 namespace MWRender
 {
-    /// Animation Easing/Blending functions
-    namespace Easings
-    {
-        float linear(float x)
-        {
-            return x;
-        }
-        float sineOut(float x)
-        {
-            return sin((x * 3.14) / 2);
-        }
-        float sineIn(float x)
-        {
-            return 1 - cos((x * 3.14) / 2);
-        }
-        float sineInOut(float x)
-        {
-            return -(cos(3.14 * x) - 1) / 2;
-        }
-        float cubicOut(float t)
-        {
-            return 1 - powf(1 - t, 3);
-        }
-        float cubicIn(float x)
-        {
-            return powf(x, 3);
-        }
-        float cubicInOut(float x)
-        {
-            return x < 0.5 ? 4 * x * x * x : 1 - powf(-2 * x + 2, 3) / 2;
-        }
-        float quartOut(float t)
-        {
-            return 1 - powf(1 - t, 4);
-        }
-        float quartIn(float t)
-        {
-            return powf(t, 4);
-        }
-        float quartInOut(float x)
-        {
-            return x < 0.5 ? 8 * x * x * x * x : 1 - powf(-2 * x + 2, 4) / 2;
-        }
-        float springOutGeneric(float x, float lambda, float w)
-        {
-            // Higher lambda = lower swing amplitude. 1 = 150% swing amplitude.
-            // W corresponds to the amount of overswings, more = more. 4.71 = 1 overswing, 7.82 = 2
-            return 1 - expf(-lambda * x) * cos(w * x);
-        }
-        float springOutWeak(float x)
-        {
-            return springOutGeneric(x, 4, 4.71);
-        }
-        float springOutMed(float x)
-        {
-            return springOutGeneric(x, 3, 4.71);
-        }
-        float springOutStrong(float x)
-        {
-            return springOutGeneric(x, 2, 4.71);
-        }
-        float springOutTooMuch(float x)
-        {
-            return springOutGeneric(x, 1, 4.71);
-        }
-        std::unordered_map<std::string, EasingFn> easingsMap = { { "linear", Easings::linear },
-            { "sineOut", Easings::sineOut }, { "sineIn", Easings::sineIn }, { "sineInOut", Easings::sineInOut },
-            { "cubicOut", Easings::cubicOut }, { "cubicIn", Easings::cubicIn }, { "cubicInOut", Easings::cubicInOut },
-            { "quartOut", Easings::quartOut }, { "quartIn", Easings::quartIn }, { "quartInOut", Easings::quartInOut },
-            { "springOutWeak", Easings::springOutWeak }, { "springOutMed", Easings::springOutMed },
-            { "springOutStrong", Easings::springOutStrong }, { "springOutTooMuch", Easings::springOutTooMuch } };
-    }
-
     namespace
     {
-        osg::Vec3f vec3fLerp(float t, const osg::Vec3f& A, const osg::Vec3f& B)
+        // Animation Easing/Blending functions
+        namespace Easings
         {
-            return A + (B - A) * t;
+            float linear(float x)
+            {
+                return x;
+            }
+
+            float sineOut(float x)
+            {
+                return sin((x * osg::PIf) / 2);
+            }
+
+            float sineIn(float x)
+            {
+                return 1 - cos((x * osg::PIf) / 2);
+            }
+
+            float sineInOut(float x)
+            {
+                return -(cos(osg::PIf * x) - 1) / 2;
+            }
+
+            float cubicOut(float t)
+            {
+                float t1 = 1 - t;
+                return 1 - (t1 * t1 * t1); // (1-t)^3
+            }
+
+            float cubicIn(float x)
+            {
+                return x * x * x; // x^3
+            }
+
+            float cubicInOut(float x)
+            {
+                if (x < 0.5)
+                {
+                    return 4 * x * x * x; // 4x^3
+                }
+                else
+                {
+                    float x2 = -2 * x + 2;
+                    return 1 - (x2 * x2 * x2) / 2; // (1 - (-2x + 2)^3)/2
+                }
+            }
+
+            float quartOut(float t)
+            {
+                float t1 = 1 - t;
+                return 1 - (t1 * t1 * t1 * t1); // (1-t)^4
+            }
+
+            float quartIn(float t)
+            {
+                return t * t * t * t; // t^4
+            }
+
+            float quartInOut(float x)
+            {
+                if (x < 0.5)
+                {
+                    return 8 * x * x * x * x; // 8x^4
+                }
+                else
+                {
+                    float x2 = -2 * x + 2;
+                    return 1 - (x2 * x2 * x2 * x2) / 2; // 1 - ((-2x + 2)^4)/2
+                }
+            }
+
+            float springOutGeneric(float x, float lambda, float w)
+            {
+                // Higher lambda = lower swing amplitude. 1 = 150% swing amplitude.
+                // W corresponds to the amount of overswings, more = more. 4.71 = 1 overswing, 7.82 = 2
+                return 1 - expf(-lambda * x) * cos(w * x);
+            }
+
+            float springOutWeak(float x)
+            {
+                return springOutGeneric(x, 4, 4.71);
+            }
+
+            float springOutMed(float x)
+            {
+                return springOutGeneric(x, 3, 4.71);
+            }
+
+            float springOutStrong(float x)
+            {
+                return springOutGeneric(x, 2, 4.71);
+            }
+
+            float springOutTooMuch(float x)
+            {
+                return springOutGeneric(x, 1, 4.71);
+            }
+
+            const std::unordered_map<std::string, EasingFn> easingsMap = {
+                { "linear", Easings::linear },
+                { "sineOut", Easings::sineOut },
+                { "sineIn", Easings::sineIn },
+                { "sineInOut", Easings::sineInOut },
+                { "cubicOut", Easings::cubicOut },
+                { "cubicIn", Easings::cubicIn },
+                { "cubicInOut", Easings::cubicInOut },
+                { "quartOut", Easings::quartOut },
+                { "quartIn", Easings::quartIn },
+                { "quartInOut", Easings::quartInOut },
+                { "springOutWeak", Easings::springOutWeak },
+                { "springOutMed", Easings::springOutMed },
+                { "springOutStrong", Easings::springOutStrong },
+                { "springOutTooMuch", Easings::springOutTooMuch },
+            };
+        }
+
+        osg::Vec3f vec3fLerp(float t, const osg::Vec3f& start, const osg::Vec3f& end)
+        {
+            return start + (end - start) * t;
         }
     }
 
@@ -129,10 +172,10 @@ namespace MWRender
 
                 if (blendRule)
                 {
-                    if (Easings::easingsMap.contains(blendRule->mEasing))
+                    if (const auto it = Easings::easingsMap.find(blendRule->mEasing); it != Easings::easingsMap.end())
                     {
+                        mEasingFn = it->second;
                         mBlendDuration = blendRule->mDuration;
-                        mEasingFn = Easings::easingsMap[blendRule->mEasing];
                     }
                     else
                     {

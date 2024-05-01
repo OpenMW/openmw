@@ -16,10 +16,7 @@
 
 namespace MWRender
 {
-    namespace Easings
-    {
-        typedef float (*EasingFn)(float);
-    }
+    typedef float (*EasingFn)(float);
 
     struct AnimBlendStateData
     {
@@ -41,7 +38,7 @@ namespace MWRender
         bool getBlendTrigger() const { return mBlendTrigger; }
 
     protected:
-        Easings::EasingFn mEasingFn;
+        EasingFn mEasingFn;
         float mBlendDuration = 0.0f;
         float mBlendStartTime = 0.0f;
         float mTimeFactor = 0.0f;
