@@ -21,9 +21,9 @@ namespace Resource
     class RetrieveAnimationsVisitor : public osg::NodeVisitor
     {
     public:
-        RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target,
-            osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, const std::string& normalized,
-            const VFS::Manager* vfs);
+        explicit RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target,
+            osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, VFS::Path::NormalizedView path,
+            const VFS::Manager& vfs);
 
         bool belongsToLeftUpperExtremity(const std::string& name);
         bool belongsToRightUpperExtremity(const std::string& name);

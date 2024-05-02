@@ -35,22 +35,22 @@ namespace Resource
 
         double parseTimeSignature(std::string_view line)
         {
-            size_t spacePos = line.find_last_of(' ');
+            const std::size_t spacePos = line.find_last_of(' ');
             double time = 0.0;
-            if (spacePos != std::string::npos && spacePos + 1 < line.size())
+            if (spacePos != std::string_view::npos && spacePos + 1 < line.size())
                 time = Misc::StringUtils::toNumeric<double>(line.substr(spacePos + 1), time);
             return time;
         }
     }
 
     RetrieveAnimationsVisitor::RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target,
-        osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, const std::string& normalized,
-        const VFS::Manager* vfs)
+        osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, VFS::Path::NormalizedView path,
+        const VFS::Manager& vfs)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mTarget(target)
         , mAnimationManager(std::move(animationManager))
-        , mPath(normalized)
-        , mVFS(vfs)
+        , mPath(path)
+        , mVFS(&vfs)
     {
         mPath.changeExtension("txt");
     }
@@ -208,7 +208,7 @@ namespace Resource
 
     osg::ref_ptr<const SceneUtil::KeyframeHolder> KeyframeManager::get(const std::string& name)
     {
-        const std::string normalized = VFS::Path::normalizeFilename(name);
+        const VFS::Path::Normalized normalized(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
@@ -220,7 +220,7 @@ namespace Resource
             {
                 auto file = std::make_shared<Nif::NIFFile>(normalized);
                 Nif::Reader reader(*file, mEncoder);
-                reader.parse(mVFS->getNormalized(normalized));
+                reader.parse(mVFS->get(normalized));
                 NifOsg::Loader::loadKf(*file, *loaded.get());
             }
             else
@@ -230,7 +230,7 @@ namespace Resource
                     = dynamic_cast<osgAnimation::BasicAnimationManager*>(scene->getUpdateCallback());
                 if (bam)
                 {
-                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), normalized, mVFS);
+                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), normalized, *mVFS);
                     scene->accept(rav);
                 }
             }
