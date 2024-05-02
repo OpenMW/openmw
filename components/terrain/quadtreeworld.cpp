@@ -7,6 +7,7 @@
 
 #include <limits>
 
+#include <components/esm/util.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>

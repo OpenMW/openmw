@@ -1,18 +1,19 @@
 #ifndef OPENMW_ESM_PROJECTILESTATE_H
 #define OPENMW_ESM_PROJECTILESTATE_H
 
-#include <string>
-
 #include <osg/Quat>
 #include <osg/Vec3f>
 
-#include "effectlist.hpp"
-
+#include "components/esm/quaternion.hpp"
 #include "components/esm/refid.hpp"
-#include "components/esm/util.hpp"
+#include "components/esm/vector3.hpp"
+
+#include "refnum.hpp"
 
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
 
     // format 0, savegames only
 

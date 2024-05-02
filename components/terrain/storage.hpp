@@ -8,8 +8,8 @@
 #include <osg/Vec3f>
 #include <osg/ref_ptr>
 
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm/util.hpp>
 
 #include "defs.hpp"
 

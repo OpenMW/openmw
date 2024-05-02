@@ -542,7 +542,7 @@ namespace MWWorld
             = mCurrentCell ? mCurrentCell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
         if (currentGridCenter)
         {
-            osg::Vec2 center = ESM::indexToPosition(
+            const osg::Vec2f center = ESM::indexToPosition(
                 ESM::ExteriorCellLocation(currentGridCenter->x(), currentGridCenter->y(), worldspace), true);
             float distance = std::max(std::abs(center.x() - pos.x()), std::abs(center.y() - pos.y()));
             float cellSize = ESM::getCellSize(worldspace);
@@ -1171,7 +1171,7 @@ namespace MWWorld
                     && dx != -halfGridSizePlusOne)
                     continue; // only care about the outer (not yet loaded) part of the grid
                 ESM::ExteriorCellLocation cellIndex(cellX + dx, cellY + dy, extWorldspace);
-                osg::Vec2 thisCellCenter = ESM::indexToPosition(cellIndex, true);
+                const osg::Vec2f thisCellCenter = ESM::indexToPosition(cellIndex, true);
 
                 float dist = std::max(
                     std::abs(thisCellCenter.x() - playerPos.x()), std::abs(thisCellCenter.y() - playerPos.y()));

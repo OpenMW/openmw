@@ -1,8 +1,9 @@
 #include "util.hpp"
+
 #include <components/esm3/loadland.hpp>
 #include <components/esm4/loadland.hpp>
 
-osg::Vec2 ESM::indexToPosition(const ESM::ExteriorCellLocation& cellIndex, bool centre)
+osg::Vec2f ESM::indexToPosition(const ESM::ExteriorCellLocation& cellIndex, bool centre)
 {
     const int cellSize = ESM::getCellSize(cellIndex.mWorldspace);
 
@@ -14,7 +15,8 @@ osg::Vec2 ESM::indexToPosition(const ESM::ExteriorCellLocation& cellIndex, bool 
         x += cellSize / 2;
         y += cellSize / 2;
     }
-    return osg::Vec2(x, y);
+
+    return osg::Vec2f(x, y);
 }
 
 int ESM::getLandSize(ESM::RefId worldspaceId)
