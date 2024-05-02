@@ -23,6 +23,25 @@
 
 namespace Resource
 {
+    namespace
+    {
+        std::string parseTextKey(const std::string& line)
+        {
+            const std::size_t spacePos = line.find_last_of(' ');
+            if (spacePos != std::string::npos)
+                return line.substr(0, spacePos);
+            return {};
+        }
+
+        double parseTimeSignature(std::string_view line)
+        {
+            size_t spacePos = line.find_last_of(' ');
+            double time = 0.0;
+            if (spacePos != std::string::npos && spacePos + 1 < line.size())
+                time = Misc::StringUtils::toNumeric<double>(line.substr(spacePos + 1), time);
+            return time;
+        }
+    }
 
     RetrieveAnimationsVisitor::RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target,
         osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, const std::string& normalized,
@@ -177,23 +196,6 @@ namespace Resource
         }
 
         traverse(node);
-    }
-
-    std::string RetrieveAnimationsVisitor::parseTextKey(const std::string& line)
-    {
-        size_t spacePos = line.find_last_of(' ');
-        if (spacePos != std::string::npos)
-            return line.substr(0, spacePos);
-        return "";
-    }
-
-    double RetrieveAnimationsVisitor::parseTimeSignature(const std::string& line)
-    {
-        size_t spacePos = line.find_last_of(' ');
-        double time = 0.0;
-        if (spacePos != std::string::npos && spacePos + 1 < line.size())
-            time = Misc::StringUtils::toNumeric<double>(line.substr(spacePos + 1), time);
-        return time;
     }
 
     KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,

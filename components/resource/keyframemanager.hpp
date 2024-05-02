@@ -33,9 +33,6 @@ namespace Resource
         virtual void apply(osg::Node& node) override;
 
     private:
-        std::string parseTextKey(const std::string& line);
-        double parseTimeSignature(const std::string& line);
-
         SceneUtil::KeyframeHolder& mTarget;
         osg::ref_ptr<osgAnimation::BasicAnimationManager> mAnimationManager;
         VFS::Path::Normalized mPath;
