@@ -30,9 +30,10 @@ namespace Resource
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mTarget(target)
         , mAnimationManager(std::move(animationManager))
-        , mNormalized(normalized)
+        , mPath(normalized)
         , mVFS(vfs)
     {
+        mPath.changeExtension("txt");
     }
 
     bool RetrieveAnimationsVisitor::belongsToLeftUpperExtremity(const std::string& name)
@@ -142,18 +143,22 @@ namespace Resource
         // InventoryWeaponOneHand, PickProbe, Slash, Thrust, Chop... even "Slash Small Follow" osgAnimation formats
         // should have a .txt file with the same name, each line holding a textkey and whitespace separated time
         // value e.g. idle: start 0.0333
-        try
+        if (const Files::IStreamPtr textKeysFile = mVFS->find(mPath))
         {
-            Files::IStreamPtr textKeysFile = mVFS->get(changeFileExtension(mNormalized, "txt"));
-            std::string line;
-            while (getline(*textKeysFile, line))
+            try
             {
-                mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
+                std::string line;
+                while (getline(*textKeysFile, line))
+                    mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Warning) << "Failed to read text key file \"" << mPath << "\": " << e.what();
             }
         }
-        catch (const std::exception& e)
+        else
         {
-            Log(Debug::Warning) << "Failed to use textkey file " << mNormalized << ": " << e.what();
+            Log(Debug::Warning) << "Text key file is not found: " << mPath;
         }
 
         callback->setEmulatedAnimations(emulatedAnimations);
@@ -190,21 +195,6 @@ namespace Resource
             time = Misc::StringUtils::toNumeric<double>(line.substr(spacePos + 1), time);
         return time;
     }
-
-    std::string RetrieveAnimationsVisitor::changeFileExtension(const std::string& file, const std::string& ext)
-    {
-        size_t extPos = file.find_last_of('.');
-        if (extPos != std::string::npos && extPos + 1 < file.size())
-        {
-            return file.substr(0, extPos + 1) + ext;
-        }
-        return file;
-    }
-
-}
-
-namespace Resource
-{
 
     KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
         const ToUTF8::StatelessUtf8Encoder* encoder)

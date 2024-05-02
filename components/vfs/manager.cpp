@@ -1,6 +1,5 @@
 #include "manager.hpp"
 
-#include <algorithm>
 #include <cassert>
 #include <stdexcept>
 
@@ -38,6 +37,11 @@ namespace VFS
             archive->listResources(mIndex);
     }
 
+    Files::IStreamPtr Manager::find(Path::NormalizedView name) const
+    {
+        return findNormalized(name.value());
+    }
+
     Files::IStreamPtr Manager::get(const Path::Normalized& name) const
     {
         return getNormalized(name);
@@ -51,10 +55,10 @@ namespace VFS
     Files::IStreamPtr Manager::getNormalized(std::string_view normalizedName) const
     {
         assert(Path::isNormalized(normalizedName));
-        const auto found = mIndex.find(normalizedName);
-        if (found == mIndex.end())
-            throw std::runtime_error("Resource '" + std::string(normalizedName) + "' is not found");
-        return found->second->open();
+        auto ptr = findNormalized(normalizedName);
+        if (ptr == nullptr)
+            throw std::runtime_error("Resource '" + std::string(normalizedName) + "' not found");
+        return ptr;
     }
 
     bool Manager::exists(const Path::Normalized& name) const
@@ -115,5 +119,14 @@ namespace VFS
     RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator() const
     {
         return { mIndex.begin(), mIndex.end() };
+    }
+
+    Files::IStreamPtr Manager::findNormalized(std::string_view normalizedPath) const
+    {
+        assert(Path::isNormalized(normalizedPath));
+        const auto it = mIndex.find(normalizedPath);
+        if (it == mIndex.end())
+            return nullptr;
+        return it->second->open();
     }
 }

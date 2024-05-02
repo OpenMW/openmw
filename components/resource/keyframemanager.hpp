@@ -1,9 +1,10 @@
 #ifndef OPENMW_COMPONENTS_KEYFRAMEMANAGER_H
 #define OPENMW_COMPONENTS_KEYFRAMEMANAGER_H
 
+#include <string>
+
 #include <osg/ref_ptr>
 #include <osgAnimation/BasicAnimationManager>
-#include <string>
 
 #include <components/sceneutil/keyframe.hpp>
 
@@ -32,13 +33,12 @@ namespace Resource
         virtual void apply(osg::Node& node) override;
 
     private:
-        std::string changeFileExtension(const std::string& file, const std::string& ext);
         std::string parseTextKey(const std::string& line);
         double parseTimeSignature(const std::string& line);
 
         SceneUtil::KeyframeHolder& mTarget;
         osg::ref_ptr<osgAnimation::BasicAnimationManager> mAnimationManager;
-        std::string mNormalized;
+        VFS::Path::Normalized mPath;
         const VFS::Manager* mVFS;
     };
 }
