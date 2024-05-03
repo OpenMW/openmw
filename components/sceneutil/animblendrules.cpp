@@ -127,7 +127,7 @@ namespace SceneUtil
         mRules.insert(mRules.end(), rules.begin(), rules.end());
     }
 
-    inline bool AnimBlendRules::fitsRuleString(const std::string_view& str, const std::string_view& ruleStr) const
+    inline bool AnimBlendRules::fitsRuleString(const std::string_view str, const std::string_view ruleStr) const
     {
         // A wildcard only supported in the beginning or the end of the rule string in hopes that this will be more
         // performant. And most likely this kind of support is enough.

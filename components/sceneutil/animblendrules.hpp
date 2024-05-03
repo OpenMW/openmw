@@ -42,7 +42,7 @@ namespace SceneUtil
     private:
         std::vector<BlendRule> mRules;
 
-        inline bool fitsRuleString(const std::string_view& str, const std::string_view& ruleStr) const;
+        inline bool fitsRuleString(const std::string_view str, const std::string_view ruleStr) const;
     };
 }
 
