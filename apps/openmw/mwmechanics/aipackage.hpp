@@ -110,6 +110,10 @@ namespace MWMechanics
 
         virtual osg::Vec3f getDestination() const { return osg::Vec3f(0, 0, 0); }
 
+        virtual std::optional<int> getDistance() const { return std::nullopt; }
+
+        virtual std::optional<float> getDuration() const { return std::nullopt; }
+
         /// Return true if any loaded actor with this AI package must be active.
         bool alwaysActive() const { return mOptions.mAlwaysActive; }
 
