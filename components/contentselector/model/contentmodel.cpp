@@ -602,7 +602,8 @@ void ContentSelectorModel::ContentModel::sortFiles()
     emit layoutAboutToBeChanged();
 
     int firstModifiable = 0;
-    while (mFiles.at(firstModifiable)->builtIn() || mFiles.at(firstModifiable)->fromAnotherConfigFile())
+    while (firstModifiable < mFiles.size()
+        && (mFiles.at(firstModifiable)->builtIn() || mFiles.at(firstModifiable)->fromAnotherConfigFile()))
         ++firstModifiable;
 
     // Dependency sort
