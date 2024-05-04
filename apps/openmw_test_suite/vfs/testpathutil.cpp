@@ -39,7 +39,7 @@ namespace VFS::Path
 
         TEST(NormalizedTest, shouldSupportConstructorFromNormalizedView)
         {
-            const NormalizedView view = "foo/bar/baz";
+            const NormalizedView view("foo/bar/baz");
             const Normalized value(view);
             EXPECT_EQ(value.view(), "foo/bar/baz");
         }

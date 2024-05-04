@@ -79,7 +79,7 @@ namespace VFS::Path
     public:
         constexpr NormalizedView() noexcept = default;
 
-        constexpr NormalizedView(const char* value)
+        constexpr explicit NormalizedView(const char* value)
             : mValue(value)
         {
             if (!isNormalized(mValue))
@@ -179,6 +179,12 @@ namespace VFS::Path
             return true;
         }
 
+        Normalized& operator=(NormalizedView value)
+        {
+            mValue = value.value();
+            return *this;
+        }
+
         Normalized& operator/=(NormalizedView value)
         {
             mValue.reserve(mValue.size() + value.value().size() + 1);
@@ -258,6 +264,22 @@ namespace VFS::Path
         result /= rhs;
         return result;
     }
+
+    struct Hash
+    {
+        using is_transparent = void;
+
+        [[nodiscard]] std::size_t operator()(std::string_view sv) const { return std::hash<std::string_view>{}(sv); }
+
+        [[nodiscard]] std::size_t operator()(const std::string& s) const { return std::hash<std::string>{}(s); }
+
+        [[nodiscard]] std::size_t operator()(const Normalized& s) const { return std::hash<std::string>{}(s.value()); }
+
+        [[nodiscard]] std::size_t operator()(NormalizedView s) const
+        {
+            return std::hash<std::string_view>{}(s.value());
+        }
+    };
 }
 
 #endif

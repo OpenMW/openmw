@@ -104,7 +104,27 @@ namespace MWLua
         });
         aiPackage["sideWithTarget"] = sol::readonly_property([](const AiPackage& p) { return p.sideWithTarget(); });
         aiPackage["destPosition"] = sol::readonly_property([](const AiPackage& p) { return p.getDestination(); });
+        aiPackage["distance"] = sol::readonly_property([](const AiPackage& p) { return p.getDistance(); });
+        aiPackage["duration"] = sol::readonly_property([](const AiPackage& p) { return p.getDuration(); });
+        aiPackage["idle"] = sol::readonly_property([context](const AiPackage& p) -> sol::optional<sol::table> {
+            if (p.getTypeId() == MWMechanics::AiPackageTypeId::Wander)
+            {
+                sol::table idles(context.mLua->sol(), sol::create);
+                const std::vector<unsigned char>& idle = static_cast<const MWMechanics::AiWander&>(p).getIdle();
+                if (!idle.empty())
+                {
+                    for (size_t i = 0; i < idle.size(); ++i)
+                    {
+                        std::string_view groupName = MWMechanics::AiWander::getIdleGroupName(i);
+                        idles[groupName] = idle[i];
+                    }
+                    return idles;
+                }
+            }
+            return sol::nullopt;
+        });
 
+        aiPackage["isRepeat"] = sol::readonly_property([](const AiPackage& p) { return p.getRepeat(); });
         selfAPI["_getActiveAiPackage"] = [](SelfObject& self) -> sol::optional<std::shared_ptr<AiPackage>> {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
@@ -132,13 +152,25 @@ namespace MWLua
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             ai.stack(MWMechanics::AiPursue(target.ptr()), ptr, cancelOther);
         };
-        selfAPI["_startAiFollow"] = [](SelfObject& self, const LObject& target, bool cancelOther) {
+        selfAPI["_startAiFollow"] = [](SelfObject& self, const LObject& target, sol::optional<LCell> cell,
+                                        float duration, const osg::Vec3f& dest, bool repeat, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stack(MWMechanics::AiFollow(target.ptr()), ptr, cancelOther);
+            if (cell)
+            {
+                ai.stack(MWMechanics::AiFollow(target.ptr().getCellRef().getRefId(),
+                             cell->mStore->getCell()->getNameId(), duration, dest.x(), dest.y(), dest.z(), repeat),
+                    ptr, cancelOther);
+            }
+            else
+            {
+                ai.stack(MWMechanics::AiFollow(
+                             target.ptr().getCellRef().getRefId(), duration, dest.x(), dest.y(), dest.z(), repeat),
+                    ptr, cancelOther);
+            }
         };
         selfAPI["_startAiEscort"] = [](SelfObject& self, const LObject& target, LCell cell, float duration,
-                                        const osg::Vec3f& dest, bool cancelOther) {
+                                        const osg::Vec3f& dest, bool repeat, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             // TODO: change AiEscort implementation to accept ptr instead of a non-unique refId.
@@ -146,23 +178,27 @@ namespace MWLua
             int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
             auto* esmCell = cell.mStore->getCell();
             if (esmCell->isExterior())
-                ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr,
+                ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), repeat), ptr,
                     cancelOther);
             else
                 ai.stack(MWMechanics::AiEscort(
-                             refId, esmCell->getNameId(), gameHoursDuration, dest.x(), dest.y(), dest.z(), false),
+                             refId, esmCell->getNameId(), gameHoursDuration, dest.x(), dest.y(), dest.z(), repeat),
                     ptr, cancelOther);
         };
-        selfAPI["_startAiWander"] = [](SelfObject& self, int distance, float duration, bool cancelOther) {
+        selfAPI["_startAiWander"]
+            = [](SelfObject& self, int distance, int duration, sol::table luaIdle, bool repeat, bool cancelOther) {
+                  const MWWorld::Ptr& ptr = self.ptr();
+                  MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+                  std::vector<unsigned char> idle;
+                  // Lua index starts at 1
+                  for (size_t i = 1; i <= luaIdle.size(); i++)
+                      idle.emplace_back(luaIdle.get<unsigned char>(i));
+                  ai.stack(MWMechanics::AiWander(distance, duration, 0, idle, repeat), ptr, cancelOther);
+              };
+        selfAPI["_startAiTravel"] = [](SelfObject& self, const osg::Vec3f& target, bool repeat, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
-            ai.stack(MWMechanics::AiWander(distance, gameHoursDuration, 0, {}, false), ptr, cancelOther);
-        };
-        selfAPI["_startAiTravel"] = [](SelfObject& self, const osg::Vec3f& target, bool cancelOther) {
-            const MWWorld::Ptr& ptr = self.ptr();
-            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stack(MWMechanics::AiTravel(target.x(), target.y(), target.z(), false), ptr, cancelOther);
+            ai.stack(MWMechanics::AiTravel(target.x(), target.y(), target.z(), repeat), ptr, cancelOther);
         };
         selfAPI["_enableLuaAnimations"] = [](SelfObject& self, bool enable) {
             const MWWorld::Ptr& ptr = self.ptr();

@@ -112,7 +112,8 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
         return false;
     }
-    std::set<std::string> contentDedupe;
+    engine.addContentFile("builtin.omwscripts");
+    std::set<std::string> contentDedupe{ "builtin.omwscripts" };
     for (const auto& contentFile : content)
     {
         if (!contentDedupe.insert(contentFile).second)

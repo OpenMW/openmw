@@ -31,6 +31,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadland.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolshapebrush.hpp"
@@ -62,8 +63,8 @@ namespace osg
 
 CSVRender::TerrainShapeMode::TerrainShapeMode(
     WorldspaceWidget* worldspaceWidget, osg::Group* parentNode, QWidget* parent)
-    : EditMode(
-        worldspaceWidget, QIcon{ ":scenetoolbar/editing-terrain-shape" }, Mask_Terrain, "Terrain land editing", parent)
+    : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-terrain-shape"), Mask_Terrain,
+        "Terrain land editing", parent)
     , mParentNode(parentNode)
 {
 }

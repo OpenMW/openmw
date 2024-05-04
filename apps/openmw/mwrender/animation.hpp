@@ -142,45 +142,28 @@ namespace MWRender
         struct AnimState
         {
             std::shared_ptr<AnimSource> mSource;
-            float mStartTime;
-            float mLoopStartTime;
-            float mLoopStopTime;
-            float mStopTime;
+            float mStartTime = 0;
+            float mLoopStartTime = 0;
+            float mLoopStopTime = 0;
+            float mStopTime = 0;
 
-            typedef std::shared_ptr<float> TimePtr;
-            TimePtr mTime;
-            float mSpeedMult;
+            std::shared_ptr<float> mTime = std::make_shared<float>(0);
+            float mSpeedMult = 1;
 
-            bool mPlaying;
-            bool mLoopingEnabled;
-            uint32_t mLoopCount;
+            bool mPlaying = false;
+            bool mLoopingEnabled = true;
+            uint32_t mLoopCount = 0;
 
-            AnimPriority mPriority;
-            int mBlendMask;
-            bool mAutoDisable;
-
-            AnimState()
-                : mStartTime(0.0f)
-                , mLoopStartTime(0.0f)
-                , mLoopStopTime(0.0f)
-                , mStopTime(0.0f)
-                , mTime(new float)
-                , mSpeedMult(1.0f)
-                , mPlaying(false)
-                , mLoopingEnabled(true)
-                , mLoopCount(0)
-                , mPriority(0)
-                , mBlendMask(0)
-                , mAutoDisable(true)
-            {
-            }
-            ~AnimState() = default;
+            AnimPriority mPriority{ 0 };
+            int mBlendMask = 0;
+            bool mAutoDisable = true;
 
             float getTime() const { return *mTime; }
             void setTime(float time) { *mTime = time; }
 
             bool shouldLoop() const { return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0; }
         };
+
         typedef std::map<std::string, AnimState, std::less<>> AnimStateMap;
         AnimStateMap mStates;
 
@@ -246,6 +229,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
         bool mPlayScriptedOnly;
+        bool mRequiresBoneMap;
 
         const NodeMap& getNodeMap() const;
 

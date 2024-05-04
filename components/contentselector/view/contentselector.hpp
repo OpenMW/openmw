@@ -40,6 +40,7 @@ namespace ContentSelectorView
         void sortFiles();
         bool containsDataFiles(const QString& path);
         void clearFiles();
+        void setNonUserContent(const QStringList& fileList);
         void setProfileContent(const QStringList& fileList);
 
         void clearCheckStates();

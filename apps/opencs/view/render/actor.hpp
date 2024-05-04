@@ -62,7 +62,7 @@ namespace CSVRender
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
         SceneUtil::Skeleton* mSkeleton;
-        SceneUtil::NodeMapVisitor::NodeMap mNodeMap;
+        SceneUtil::NodeMap mNodeMap;
     };
 }
 

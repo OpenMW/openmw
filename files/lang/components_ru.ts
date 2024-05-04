@@ -29,6 +29,14 @@
         <source>&lt;b&gt;Author:&lt;/b&gt; %1&lt;br/&gt;&lt;b&gt;Format version:&lt;/b&gt; %2&lt;br/&gt;&lt;b&gt;Modified:&lt;/b&gt; %3&lt;br/&gt;&lt;b&gt;Path:&lt;/b&gt;&lt;br/&gt;%4&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Description:&lt;/b&gt;&lt;br/&gt;%5&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Dependencies: &lt;/b&gt;%6&lt;br/&gt;</source>
         <translation>&lt;b&gt;Автор:&lt;/b&gt; %1&lt;br/&gt;&lt;b&gt;Версия формата данных:&lt;/b&gt; %2&lt;br/&gt;&lt;b&gt;Дата изменения:&lt;/b&gt; %3&lt;br/&gt;&lt;b&gt;Путь к файлу:&lt;/b&gt;&lt;br/&gt;%4&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Описание:&lt;/b&gt;&lt;br/&gt;%5&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Зависимости: &lt;/b&gt;%6&lt;br/&gt;</translation>
     </message>
+    <message>
+        <source>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is part of OpenMW.&lt;/b&gt;&lt;br/&gt;</source>
+        <translation>&lt;br/&gt;&lt;b&gt;Этот контентный файл не может быть отключен, потому что он является частью OpenMW.&lt;/b&gt;&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is enabled in a config file other than the user one.&lt;/b&gt;&lt;br/&gt;</source>
+        <translation>&lt;br/&gt;&lt;b&gt;Этот контентный файл не может быть отключен, потому что он включен в конфигурационном файле, не являющемся пользовательским.&lt;/b&gt;&lt;br/&gt;</translation>
+    </message>
 </context>
 <context>
     <name>ContentSelectorView::ContentSelector</name>
@@ -65,7 +73,7 @@ Arguments:
 </source>
         <translation>
 Параметры:
-        </translation>
+</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not find %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The application is not found.&lt;/p&gt;&lt;p&gt;Please make sure OpenMW is installed correctly and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>

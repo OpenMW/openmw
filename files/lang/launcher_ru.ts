@@ -84,11 +84,11 @@
         <translation>Отменить</translation>
     </message>
     <message>
-        <source>Remove unused tiles</source>
+        <source>Remove Unused Tiles</source>
         <translation>Удалить неиспользуемые тайлы</translation>
     </message>
     <message>
-        <source>Max size</source>
+        <source>Max Size</source>
         <translation>Максимальный размер</translation>
     </message>
     <message>
@@ -109,7 +109,7 @@
     </message>
     <message>
         <source>&amp;New Content List</source>
-        <translation>Новый список плагинов</translation>
+        <translation>&amp;Новый список плагинов</translation>
     </message>
     <message>
         <source>Clone Content List</source>
@@ -148,16 +148,16 @@
         <translation>Ctrl+R</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: content files that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;подсказка: файлы данных, не включенные в текущий список, &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;выделены&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: content files that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Подсказка: файлы данных, не включенные в текущий список, &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;выделены&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: directories that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;подсказка: директории, не включенные в текущий список, &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;выделены&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: directories that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Подсказка: директории, не включенные в текущий список, &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;выделены&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: archives that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;подсказка: архивы, не включенные в текущий список, &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;выделены&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: archives that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Подсказка: архивы, не включенные в текущий список, &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;выделены&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -227,15 +227,15 @@
         <translation>Экран</translation>
     </message>
     <message>
-        <source>Window mode</source>
+        <source>Window Mode</source>
         <translation>Режим окна</translation>
     </message>
     <message>
-        <source>Framerate limit</source>
+        <source>Framerate Limit</source>
         <translation>Максимум кадров в секунду</translation>
     </message>
     <message>
-        <source>Window border</source>
+        <source>Window Border</source>
         <translation>Рамка окна</translation>
     </message>
     <message>
@@ -243,11 +243,11 @@
         <translation>Разрешение экрана</translation>
     </message>
     <message>
-        <source>Anti-aliasing</source>
+        <source>Anti-Aliasing</source>
         <translation>Сглаживание</translation>
     </message>
     <message>
-        <source>Vertical synchronization</source>
+        <source>Vertical Synchronization</source>
         <translation>Вертикальная синхронизация</translation>
     </message>
 </context>
@@ -270,7 +270,7 @@
         <translation>Импорт настроек из Morrowind</translation>
     </message>
     <message>
-        <source>File to import settings from:</source>
+        <source>File to Import Settings From:</source>
         <translation>Импортировать настройки из файла:</translation>
     </message>
     <message>
@@ -278,8 +278,8 @@
         <translation>Выбрать...</translation>
     </message>
     <message>
-        <source>Import add-on and plugin selection (creates a new Content List)</source>
-        <translation>Импортировать подключенные плагины (создает новый список плагинов)</translation>
+        <source>Import Add-on and Plugin Selection</source>
+        <translation>Импортировать список подключенных аддонов и плагинов</translation>
     </message>
     <message>
         <source>Fonts shipped with the original engine are blurry with UI scaling and support only a small amount of characters,
@@ -290,7 +290,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
 Включите эту опцию, если вы все равно хотите использовать оригинальные шрифты вместо шрифтов OpenMW, или если вы используете сторонние растровые шрифты.</translation>
     </message>
     <message>
-        <source>Import bitmap fonts setup</source>
+        <source>Import Bitmap Fonts</source>
         <translation>Импортировать растровые шрифты</translation>
     </message>
     <message>
@@ -342,7 +342,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Clone Content List</source>
-        <translation>Создать копию списка плагинов</translation>
+        <translation>Создать копию списка</translation>
     </message>
     <message>
         <source>Delete Content List</source>
@@ -371,6 +371,26 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&amp;Uncheck Selected</source>
         <translation>&amp;Отключить выбранные</translation>
+    </message>
+    <message>
+        <source>Resolved as %1</source>
+        <translation>Путь разрешен как %1</translation>
+    </message>
+    <message>
+        <source>This is the data-local directory and cannot be disabled</source>
+        <translation>Это директория data-loсal, и она не может быть отключена</translation>
+    </message>
+    <message>
+        <source>This directory is part of OpenMW and cannot be disabled</source>
+        <translation>Это директория является частью OpenMW и не может быть отключена</translation>
+    </message>
+    <message>
+        <source>This directory is enabled in an openmw.cfg other than the user one</source>
+        <translation>Это директория включена в openmw.cfg, не являющемся пользовательским</translation>
+    </message>
+    <message>
+        <source>This archive is enabled in an openmw.cfg other than the user one</source>
+        <translation>Этот архив включен в openmw.cfg, не являющемся пользовательским</translation>
     </message>
 </context>
 <context>
@@ -527,7 +547,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;br&gt;&lt;b&gt;Could not create directory %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</source>
-        <translation>&lt;br&gt;&lt;b&gt;Не удалось создать директорию %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;</translation>
+        <translation>&lt;br&gt;&lt;b&gt;Не удалось создать директорию %0&lt;/b&gt;&lt;br&gt;&lt;br&gt;%1&lt;br&gt;</translation>
     </message>
 </context>
 <context>
@@ -609,7 +629,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Делает изменение отношения торговцев к персонажу игрока из-за торговли постоянным.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Permanent barter disposition changes</source>
+        <source>Permanent Barter Disposition Changes</source>
         <translation>Постоянная смена отношения торговцев</translation>
     </message>
     <message>
@@ -617,7 +637,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Немедленно вводить спутников персонажа игрока в бой с противниками, начавшими бой с ними или персонажем игрока. Если настройка отключена, они не вступят в бой до первой атаки от противников или игрока.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Followers defend immediately</source>
+        <source>Followers Defend Immediately</source>
         <translation>Спутники защищаются сразу</translation>
     </message>
     <message>
@@ -633,7 +653,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Предотвращает вступление в бой персонажей, подвергнутых эффектам Усмирения, каждый кадр - как в Morrowind без MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Classic Calm spells behavior</source>
+        <source>Classic Calm Spells Behavior</source>
         <translation>Классическое поведение Усмирения</translation>
     </message>
     <message>
@@ -641,7 +661,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Делает стоимость заполненных камней душ зависимой только от силы души.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Soulgem values rebalance</source>
+        <source>Soulgem Values Rebalance</source>
         <translation>Ребаланс стоимости камней душ</translation>
     </message>
     <message>
@@ -649,11 +669,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Делает так, чтобы персонаж плыл немного вверх относительно камеры в режиме от третьего лица. Предназначено для того, чтобы было проще плыть по поверхности воды без погружения в нее.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Swim upward correction</source>
+        <source>Swim Upward Correction</source>
         <translation>Коррекция при плавании вверх</translation>
     </message>
     <message>
-        <source>Enchanted weapons are magical</source>
+        <source>Enchanted Weapons Are Magical</source>
         <translation>Зачарованное оружие - магическое</translation>
     </message>
     <message>
@@ -665,7 +685,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эффекты отраженных заклинаний Поглощения не отзеркаливаются - как в Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Classic reflected Absorb spells behavior</source>
+        <source>Classic Reflected Absorb Spells Behavior</source>
         <translation>Классическое поведение Поглощения</translation>
     </message>
     <message>
@@ -673,7 +693,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда включено, NPC пытаются избегать столкновения с другими персонажами.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>NPCs avoid collisions</source>
+        <source>NPCs Avoid Collisions</source>
         <translation>Персонажи избегают столкновения</translation>
     </message>
     <message>
@@ -681,7 +701,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Не учитывать множитель веса расы при вычислении скорости перемещения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Racial variation in speed fix</source>
+        <source>Racial Variation in Speed Fix</source>
         <translation>Фикс влияния веса рас на Скорость</translation>
     </message>
     <message>
@@ -689,7 +709,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда эта настройка включена, игрок может обыскивать тела персонажей (например, призванных существ) во время анимации их смерти, если они не находятся в бою. Если при этом игрок убрал тело, то нам приходится сразу увеличивать счетчик количества погибших и запускать скрипт удаленного персонажа.&lt;/p&gt;&lt;p&gt;Когда эта настройка отключена, игроку всегда придется ждать завершения анимации смерти. В основном предотвращает эксплойт с призванными существами (сбор дорогого оружия с дремор и золотых святых). Конфликтует с модами на манекены, которые используют команду SkipAnim для предотвращения завершения анимации смерти.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Can loot during death animation</source>
+        <source>Can Loot During Death Animation</source>
         <translation>Обыск тел во время анимации смерти</translation>
     </message>
     <message>
@@ -701,7 +721,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позволяет атакам существ без оружия повреждать броню цели, по аналогии с атаками оружием.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Unarmed creature attacks damage armor</source>
+        <source>Unarmed Creature Attacks Damage Armor</source>
         <translation>Атаки существ повреждают броню</translation>
     </message>
     <message>
@@ -709,11 +729,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Отключено</translation>
     </message>
     <message>
-        <source>Affect werewolves</source>
+        <source>Affect Werewolves</source>
         <translation>Включая оборотней</translation>
     </message>
     <message>
-        <source>Do not affect werewolves</source>
+        <source>Do Not Affect Werewolves</source>
         <translation>Не включая оборотней</translation>
     </message>
     <message>
@@ -725,11 +745,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Форма объектов столкновений, используемых для физики и поиска путей с помощью навигационной сетки. Цилиндры дают лучшую совместимость между поиском путей и возможностью двигаться по ним. Изменение значения этой настройки влияет на создание навигационной сетки, поэтому сетка, сгенерированная с одним значением, не может быть использована для другого.</translation>
     </message>
     <message>
-        <source>Axis-aligned bounding box</source>
+        <source>Axis-Aligned Bounding Box</source>
         <translation>Параллелепипед</translation>
     </message>
     <message>
-        <source>Rotating box</source>
+        <source>Rotating Box</source>
         <translation>Вращающийся параллелепипед</translation>
     </message>
     <message>
@@ -749,7 +769,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Использовать анимации сотворения заклинаний для магических предметов, по аналогии с заклинаниями.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Use magic item animation</source>
+        <source>Use Magic Item Animation</source>
         <translation>Анимации магических предметов</translation>
     </message>
     <message>
@@ -757,7 +777,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Делает перемещение персонажей более плавным. Рекомендуется использовать совместно с настройкой &quot;Поворот в направлении движения&quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Smooth movement</source>
+        <source>Smooth Movement</source>
         <translation>Плавное перемещение</translation>
     </message>
     <message>
@@ -765,7 +785,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загружать KF-файлы и файлы скелетов из директории Animations&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Use additional animation sources</source>
+        <source>Use Additional Animation Sources</source>
         <translation>Использовать источники анимаций</translation>
     </message>
     <message>
@@ -773,7 +793,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Влияет на перемещение по диагонали и в сторону. Включение этой настройки делает перемещение более реалистичным.&lt;/p&gt;&lt;p&gt;При ее выключении тело персонажа всегда целиком направлено в направлении движения. Так как в игре нет анимаций для движения по диагонали, из-за этого получается скольжение.&lt;/p&gt;&lt;p&gt;Когда настройка включена, только ноги персонажа поворачиваются в направлении движения. Верхняя часть тела поворачивается частично. Голова всегда смотрит в одном направлении с камерой. В бою этот режим работает только для движения по диагонали, вне боя он также влияет на движение влево и вправо. Также во время плавания тело персонажа поворачивается в направлении движения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Turn to movement direction</source>
+        <source>Turn to Movement Direction</source>
         <translation>Поворот в направлении движения</translation>
     </message>
     <message>
@@ -781,7 +801,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отображать зачехленное оружие (с колчанами и ножнами). Требует ресурсы из модов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Weapon sheathing</source>
+        <source>Weapon Sheathing</source>
         <translation>Зачехление оружия</translation>
     </message>
     <message>
@@ -789,7 +809,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отображать щиты на спине. Требует ресурсы из модов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Shield sheathing</source>
+        <source>Shield Sheathing</source>
         <translation>Зачехление щитов</translation>
     </message>
     <message>
@@ -805,7 +825,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
                   Когда настройка отключена, карты используются, только если они явно заданы в модели (.nif или .osg). Влияет на объекты.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Auto use object normal maps</source>
+        <source>Auto Use Object Normal Maps</source>
         <translation>Карты нормалей объектов</translation>
     </message>
     <message>
@@ -813,7 +833,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;См. &apos;Карты нормалей объектов&apos;. Влияет на ландшафт.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Auto use terrain normal maps</source>
+        <source>Auto Use Terrain Normal Maps</source>
         <translation>Карты нормалей ландшафта</translation>
     </message>
     <message>
@@ -829,7 +849,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
                   (.osg-моделях, они не поддерживаются в .nif-моделях). Влияет на объекты.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Auto use object specular maps</source>
+        <source>Auto Use Object Specular Maps</source>
         <translation>Спекулярные карты объектов</translation>
     </message>
     <message>
@@ -837,7 +857,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если существует файл с маской, заданной с помощью настройки &apos;terrain specular map pattern&apos; то он будет использоваться в качестве спекулярной карты. Он должен представлять собой текстуру, содержащую цвет слоя в RGB-канале и мощность спекулярного освещения в альфа-канале.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Auto use terrain specular maps</source>
+        <source>Auto Use Terrain Specular Maps</source>
         <translation>Спекулярные карты ландшафта</translation>
     </message>
     <message>
@@ -851,7 +871,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Bump/reflect map local lighting</source>
+        <source>Bump/Reflect Map Local Lighting</source>
         <translation>Локальное освещение карт отражений</translation>
     </message>
     <message>
@@ -859,7 +879,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позволяет MSAA работать с моделями с альфа-тестированием, что позволяет улучшить отображение граней и избежать их пикселизации. Может снизить производительность.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Use anti-aliased alpha testing</source>
+        <source>Use Anti-Aliased Alpha Testing</source>
         <translation>Сглаживание альфа-тестирования</translation>
     </message>
     <message>
@@ -871,7 +891,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эмуляция сохранения покрытия в MIP-картах, чтобы модели с альфа-тестированием не усыхали по мере удаления от камеры. Однако если MIP-карты на уровне самих текстур уже созданы с сохранением покрытия, покрытие будет расти по мере удаления от камеры, так что читайте инструкции к вашим модам.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Adjust coverage for alpha test</source>
+        <source>Adjust Coverage for Alpha Test</source>
         <translation>Покрытие альфа-тестирования</translation>
     </message>
     <message>
@@ -889,7 +909,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
                     С этой настройкой плотность тумана для объекта зависит от расстояния от камеры до объекта (т.н. евклидово расстояние), благодаря чему туман выглядит не так искусственно, особенно при большом поле зрения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Radial fog</source>
+        <source>Radial Fog</source>
         <translation>Радиальный туман</translation>
     </message>
     <message>
@@ -897,7 +917,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Использование экспоненциальной формулы для тумана. По умолчанию используется линейный туман.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Exponential fog</source>
+        <source>Exponential Fog</source>
         <translation>Экспоненциальный туман</translation>
     </message>
     <message>
@@ -905,7 +925,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Снизить видимость плоскости отсечения с помощью смешения объектов с небом.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Sky blending</source>
+        <source>Sky Blending</source>
         <translation>Смешивать с небом</translation>
     </message>
     <message>
@@ -913,7 +933,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Множитель расстояния обзора, определяющий начало смешения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Sky blending start</source>
+        <source>Sky Blending Start</source>
         <translation>Минимальное расстояние смешения</translation>
     </message>
     <message>
@@ -921,7 +941,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Ландшафт</translation>
     </message>
     <message>
-        <source>Viewing distance</source>
+        <source>Viewing Distance</source>
         <translation>Расстояние обзора</translation>
     </message>
     <message>
@@ -929,7 +949,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Определяет, насколько большим должен быть объект, чтобы отображаться на удаленном ландшафте. Для этого размер объекта делится на его расстояние до камеры, и результат сравнивается со значением этой настройки. Чем меньше значение, тем больше объектов будет отображаться в сцене.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Object paging min size</source>
+        <source>Object Paging Min Size</source>
         <translation>Минимальный размер склеиваемых объектов</translation>
     </message>
     <message>
@@ -937,7 +957,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда включено, на удаленном ландшафте будут отображаться объекты, склеенные вместе с помощью специального алгоритма. Когда выключено, будет отображаться только сам ландшафт.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Distant land</source>
+        <source>Distant Land</source>
         <translation>Удаленный ландшафт</translation>
     </message>
     <message>
@@ -945,7 +965,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Склеивать объекты в активных ячейках.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Active grid object paging</source>
+        <source>Active Grid Object Paging</source>
         <translation>Склеивание в активных ячейках</translation>
     </message>
     <message>
@@ -953,7 +973,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, модели с поддержкой переключения в зависимости от времени суток будут ее использовать.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Day night switch nodes</source>
+        <source>Day Night Switch Nodes</source>
         <translation>Переключение узлов дня и ночи</translation>
     </message>
     <message>
@@ -965,7 +985,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, то будет включена постобработка графики.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Enable post processing</source>
+        <source>Enable Post Processing</source>
         <translation>Включить постобработку</translation>
     </message>
     <message>
@@ -973,7 +993,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отрисовывать прозрачные объекты заново - со строгой границей прозрачности.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Transparent postpass</source>
+        <source>Transparent Postpass</source>
         <translation>Дополнительный проход для прозрачных объектов</translation>
     </message>
     <message>
@@ -981,7 +1001,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Определяет, насколько быстро может меняться эффект аккомодации глаза от кадра к кадру. Более низкие значения означают более медленные преобразования.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Auto exposure speed</source>
+        <source>Auto Exposure Speed</source>
         <translation>Скорость автоматической экспозиции</translation>
     </message>
     <message>
@@ -1025,7 +1045,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта настройка отвечает за масштабирование окон внутриигрового интерфейса. Значение 1.0 соответствует нормальному размеру интерфейса.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>GUI scaling factor</source>
+        <source>GUI Scaling Factor</source>
         <translation>Масштаб интерфейса</translation>
     </message>
     <message>
@@ -1033,7 +1053,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда настройка включена, в подсказке, всплывающей при наведении курсора на иконку магического эффекта, будет отображаться оставшаяся длительность магического эффекта или источника света.&lt;/p&gt;&lt;p&gt;По умолчанию настройка отключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Show effect duration</source>
+        <source>Show Effect Duration</source>
         <translation>Показывать длительность эффектов</translation>
     </message>
     <message>
@@ -1041,15 +1061,15 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, у тем диалогов будет другой цвет, если у вашего собеседника есть уникальная реплика по заданной теме, или же если вы уже видели текст темы. Цвета могут быть настроены через settings.cfg.&lt;/p&gt;&lt;p&gt;По умолчанию настройка отключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Change dialogue topic color</source>
+        <source>Change Dialogue Topic Color</source>
         <translation>Смена цвета тем для диалогов</translation>
     </message>
     <message>
         <source>Size of characters in game texts.</source>
-        <translation>Размер символов в текстах</translation>
+        <translation>Размер символов в текстах.</translation>
     </message>
     <message>
-        <source>Font size</source>
+        <source>Font Size</source>
         <translation>Размер шрифтов</translation>
     </message>
     <message>
@@ -1057,7 +1077,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включить возможность масштабирования на локальной и глобальной картах.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Can zoom on maps</source>
+        <source>Can Zoom on Maps</source>
         <translation>Включить масштабирование карты</translation>
     </message>
     <message>
@@ -1069,7 +1089,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, на всплывающих подсказках стрел и болтов будет показан их бонус к урону.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Show projectile damage</source>
+        <source>Show Projectile Damage</source>
         <translation>Показывать урон снарядов</translation>
     </message>
     <message>
@@ -1077,7 +1097,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, на всплывающих подсказках оружия ближнего боя будут показаны его дальность и скорость атаки.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Show melee info</source>
+        <source>Show Melee Info</source>
         <translation>Показывать информацию об оружии</translation>
     </message>
     <message>
@@ -1085,11 +1105,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Растягивать фон меню, экранов загрузки и т.д., чтобы изображение соответствовало соотношению сторон выбранного разрешения экрана.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Stretch menu background</source>
+        <source>Stretch Menu Background</source>
         <translation>Растягивать фон меню</translation>
     </message>
     <message>
-        <source>Show owned objects</source>
+        <source>Show Owned Objects</source>
         <translation>Выделять объекты с владельцами</translation>
     </message>
     <message>
@@ -1097,7 +1117,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Показывать шанс успеха в меню зачарования, или же нет.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Show enchant chance</source>
+        <source>Show Enchant Chance</source>
         <translation>Показывать шанс успеха зачарования</translation>
     </message>
     <message>
@@ -1105,7 +1125,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Предотвращает экипировку торговцами предметов, которые им проданы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Merchant equipping fix</source>
+        <source>Merchant Equipping Fix</source>
         <translation>Фикс экипировки предметов торговцами</translation>
     </message>
     <message>
@@ -1125,7 +1145,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта настройка определяет, будет ли отображаться время с начала новой игры для выбранного сохранения в меню загрузки.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Add &quot;Time Played&quot; to saves</source>
+        <source>Add &quot;Time Played&quot; to Saves</source>
         <translation>Выводить &quot;Время в игре&quot; в сохранениях</translation>
     </message>
     <message>
@@ -1141,7 +1161,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>TGA</translation>
     </message>
     <message>
-        <source>Notify on saved screenshot</source>
+        <source>Notify on Saved Screenshot</source>
         <translation>Уведомление при сохранении снимка</translation>
     </message>
     <message>
@@ -1157,23 +1177,23 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда эта настройка включена, OpenMW будет управлять курсором мыши.&lt;/p&gt;&lt;p&gt;В “режиме обзора”, OpenMW будет захватывать курсор в центре экрана вне зависимости от значения этой настройки (потому что курсор всегда расположен по центру в окне OpenMW). Однако в режиме меню эта настройка определяет поведение выхода курсора за пределы окна OpenMW. Если настройка включена, курсор остановится на краю окна, предотвращая доступ к другим приложениям. Если выключена, курсор может свободно перемещаться по рабочему столу.&lt;/p&gt;&lt;p&gt;Эта настройка не применяется к экрану, на котором нажата клавиша “Escape” (там курсор никогда не захватывается). Вне зависимости от значения этой настройки “Alt-Tab” и некоторые другие зависимые от операционной системы комбинации клавиш могут быть использованы, чтобы вернуть управление курсором операционной системе. Эта настройка также взаимодействует с настройкой &quot;minimize on focus loss&quot;, определяя, что именно считать потерей фокуса. На системах с двумя экранами может быть проще получить доступ ко второму экрану, если настройка выключена.&lt;/p&gt;&lt;p&gt;Замечание для разработчиков: лучше запускать игру с отключенной настройкой при запуске игры через отладчик, чтобы курсор не становился недоступен, когда игра останавливается на точке останова.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Grab cursor</source>
+        <source>Grab Cursor</source>
         <translation>Захватывать курсор</translation>
     </message>
     <message>
-        <source>Skip menu and generate default character</source>
+        <source>Skip Menu and Generate Default Character</source>
         <translation>Пропустить меню и создать персонажа по умолчанию</translation>
     </message>
     <message>
-        <source>Start default character at</source>
+        <source>Start Default Character at</source>
         <translation>Запустить с персонажем по умолчанию в локации</translation>
     </message>
     <message>
-        <source>default cell</source>
+        <source>Default Cell</source>
         <translation>по умолчанию</translation>
     </message>
     <message>
-        <source>Run script after startup:</source>
+        <source>Run Script After Startup:</source>
         <translation>Запустить скрипт после запуска:</translation>
     </message>
     <message>
@@ -1185,7 +1205,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Когда настройка включена, в фоне создаются навигационные меши для геометрии игрового мира. Когда она отключена, то используются только путевые точки из игровых файлов. На однопоточных системах включенный навигатор может значительно снизить скорость смены локаций. На многопоточных системах влияние на производительность незначительное. Также на многопоточных системах задержки могут зависеть от других настроек или производительности системы. Передвижение по открытому миру, а также вход в локации и выход из них могут привести к обновлению кэша. Персонажи могут не иметь возможности найти путь вокруг них, пока обновление не будет завершено. Можете попробовать отключить навигатор, если вы предпочитаете старомодный ИИ, который не знает, как до вас добраться, пока вы стоите за камнем и колдуете огненные стрелы.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Use navigation mesh for pathfinding</source>
+        <source>Use Navigation Mesh for Pathfinding</source>
         <translation>Использовать навигационную сетку</translation>
     </message>
     <message>
@@ -1193,7 +1213,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;В режиме вида от третьего лица камера перемещается согласно анимациям движения персонажа игрока. Включение этой настройки отключает это поведение, убирая зависимость движения персонажа игрока от состояния его анимаций. Такое поведение было в OpenMW версии 0.48 и ранее.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Player movement ignores animation</source>
+        <source>Player Movement Ignores Animation</source>
         <translation>Движение игрока обходит анимации</translation>
     </message>
     <message>
@@ -1201,7 +1221,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Игровой процесс</translation>
     </message>
     <message>
-        <source>Always allow actors to follow over water</source>
+        <source>Always Allow Actors to Follow over Water</source>
         <translation>Позволить всем следовать по воде</translation>
     </message>
     <message>
@@ -1209,11 +1229,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, требуются магические метательные снаряды, чтобы обойти сопротивление обычному оружию или уязвимость к нему. Если отключена, то требуются магические снаряды или магическое оружие дальнего боя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Only magical ammo bypass resistance</source>
+        <source>Only Magical Ammo Bypass Resistance</source>
         <translation>Только снаряды обходят сопротивление</translation>
     </message>
     <message>
-        <source>Graphic herbalism</source>
+        <source>Graphic Herbalism</source>
         <translation>Графический гербализм</translation>
     </message>
     <message>
@@ -1221,31 +1241,31 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Разрешает зачарованному оружию без флага Магическое обходить сопротивление обычному оружию, как в Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Trainers choose offered skills by base value</source>
+        <source>Trainers Choose Offered Skills by Base Value</source>
         <translation>Учителя выбирают базовые навыки</translation>
     </message>
     <message>
-        <source>Steal from knocked out actors in combat</source>
+        <source>Steal from Knocked out Actors in Combat</source>
         <translation>Кража у персонажей без сознания в бою</translation>
     </message>
     <message>
-        <source>Factor strength into hand-to-hand combat</source>
+        <source>Factor Strength into Hand-to-Hand Combat</source>
         <translation>Учет Силы в рукопашном бою</translation>
     </message>
     <message>
-        <source>Background physics threads</source>
+        <source>Background Physics Threads</source>
         <translation>Количество фоновых потоков для физики</translation>
     </message>
     <message>
-        <source>Actor collision shape type</source>
+        <source>Actor Collision Shape Type</source>
         <translation>Форма объекта столкновений для персонажей</translation>
     </message>
     <message>
-        <source>Soft particles</source>
+        <source>Soft Particles</source>
         <translation>Мягкие частицы</translation>
     </message>
     <message>
-        <source>Weather particle occlusion</source>
+        <source>Weather Particle Occlusion</source>
         <translation>Окклюзия погодных частиц</translation>
     </message>
     <message>
@@ -1257,23 +1277,23 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Тени</translation>
     </message>
     <message>
-        <source>bounds</source>
-        <translation>по границам объектов</translation>
+        <source>Bounds</source>
+        <translation>По границам объектов</translation>
     </message>
     <message>
-        <source>primitives</source>
-        <translation>по примитивам</translation>
+        <source>Primitives</source>
+        <translation>По примитивам</translation>
     </message>
     <message>
-        <source>none</source>
-        <translation>отключено</translation>
+        <source>None</source>
+        <translation>Отключено</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of &quot;compute scene bounds&quot; computation method to be used. Bounds (default) for good balance between performance and shadow quality, primitives for better looking shadows or none for no computation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Определяет используемый тип вычисления границ сцены. Вычисление по границам объектов (по умолчанию) дает хороший баланс между производительностью и качеством теней, вычисление по примитивам улучшает качество теней, а еще можно полностью отключить вычисление.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Shadow planes computation method</source>
+        <source>Shadow Planes Computation Method</source>
         <translation>Метод определения границ для теней</translation>
     </message>
     <message>
@@ -1289,7 +1309,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включить тени от NPC и существ, кроме персонажа игрока. Может незначительно снизить производительность.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Enable actor shadows</source>
+        <source>Enable Actor Shadows</source>
         <translation>Включить тени от персонажей</translation>
     </message>
     <message>
@@ -1313,7 +1333,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Множитель от расстояния выше, при котором тени начнут плавно угасать.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Fade start multiplier</source>
+        <source>Fade Start Multiplier</source>
         <translation>Множитель начала угасания теней</translation>
     </message>
     <message>
@@ -1321,7 +1341,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включить тени от персонажа игрока. Может очень незначительно снизить производительность.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Enable player shadows</source>
+        <source>Enable Player Shadows</source>
         <translation>Включить тени от персонажа игрока</translation>
     </message>
     <message>
@@ -1329,7 +1349,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Разрешение отдельных теневых карт. Увеличение значения улучшает качество теней, но может незначительно снизить производительность.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Shadow map resolution</source>
+        <source>Shadow Map Resolution</source>
         <translation>Разрешение теневой карты</translation>
     </message>
     <message>
@@ -1337,7 +1357,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Расстояние от камеры, при достижении которого тени полностью исчезают.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Shadow distance limit:</source>
+        <source>Shadow Distance Limit:</source>
         <translation>Максимальная дистанция теней:</translation>
     </message>
     <message>
@@ -1345,7 +1365,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включить тени от объектов. Может значительно снизить производительность.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Enable object shadows</source>
+        <source>Enable Object Shadows</source>
         <translation>Включить тени от объектов</translation>
     </message>
     <message>
@@ -1353,7 +1373,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Из-за ограничений в файлах Morrowind, только персонажи могут отбрасывать тени в интерьерах, что может раздражать.&lt;/p&gt;&lt;p&gt;Не имеет эффекта, если тени от персонажей отключены.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Enable indoor shadows</source>
+        <source>Enable Indoor Shadows</source>
         <translation>Включить тени в интерьерах</translation>
     </message>
     <message>
@@ -1361,7 +1381,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включить тени от ландшафта (включая удаленный ландшафт). Может значительно снизить производительность и качество теней.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Enable terrain shadows</source>
+        <source>Enable Terrain Shadows</source>
         <translation>Включить тени от ландшафта</translation>
     </message>
     <message>
@@ -1369,15 +1389,15 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Освещение</translation>
     </message>
     <message>
-        <source>Lighting method</source>
+        <source>Lighting Method</source>
         <translation>Способ освещения</translation>
     </message>
     <message>
-        <source>Audio device</source>
+        <source>Audio Device</source>
         <translation>Звуковое устройство</translation>
     </message>
     <message>
-        <source>HRTF profile</source>
+        <source>HRTF Profile</source>
         <translation>Профиль HRTF</translation>
     </message>
     <message>
@@ -1389,11 +1409,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Прицел</translation>
     </message>
     <message>
-        <source>Tooltip and crosshair</source>
+        <source>Tooltip and Crosshair</source>
         <translation>Всплывающая подсказка и прицел</translation>
     </message>
     <message>
-        <source>Maximum quicksaves</source>
+        <source>Maximum Quicksaves</source>
         <translation>Количество быстрых сохранений</translation>
     </message>
     <message>
@@ -1401,7 +1421,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Снимки экрана</translation>
     </message>
     <message>
-        <source>Screenshot format</source>
+        <source>Screenshot Format</source>
         <translation>Формат снимков экрана</translation>
     </message>
     <message>
@@ -1409,7 +1429,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное расстояние, на котором будут отображаться источники света (во внутриигровых единицах измерения).&lt;/p&gt;&lt;p&gt;Если 0, то расстояние не ограничено.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Maximum light distance</source>
+        <source>Maximum Light Distance</source>
         <translation>Дальность отображения источников света</translation>
     </message>
     <message>
@@ -1417,7 +1437,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное количество источников света для каждого объекта.&lt;/p&gt;&lt;p&gt;Низкие числа (близкие к значению по умолчанию) приводят к резким перепадам освещения, как при устаревшем методе освещения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Max lights</source>
+        <source>Max Lights</source>
         <translation>Макс. кол-во источников света</translation>
     </message>
     <message>
@@ -1447,7 +1467,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Множитель размера ограничивающей сферы источников света.&lt;/p&gt;&lt;p&gt;Высокие значения делают затухание света плавнее, но требуют более высокого максимального количества источников света.&lt;/p&gt;&lt;p&gt;Настройка не влияет на уровень освещения или мощность источников света.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Bounding sphere multiplier</source>
+        <source>Bounding Sphere Multiplier</source>
         <translation>Множитель размера ограничивающей сферы</translation>
     </message>
     <message>
@@ -1459,11 +1479,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Использовать в виде от третьего лица положение камеры, а не персонажа игрока для прослушивания звуков.</translation>
     </message>
     <message>
-        <source>Use the camera as the sound listener</source>
+        <source>Use the Camera as the Sound Listener</source>
         <translation>Использовать камеру как слушателя</translation>
     </message>
     <message>
-        <source>Minimum interior brightness</source>
+        <source>Minimum Interior Brightness</source>
         <translation>Минимальный уровень освещения в помещениях</translation>
     </message>
 </context>

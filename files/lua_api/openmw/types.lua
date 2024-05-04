@@ -372,7 +372,7 @@
 -- for i = 1, #mySpells do print(mySpells[i].id) end
 -- @usage -- add ALL spells that exist in the world
 -- local mySpells = types.Actor.spells(self)
--- for _, spell in pairs(core.magic.spells) do
+-- for _, spell in pairs(core.magic.spells.records) do
 --     if spell.type == core.magic.SPELL_TYPE.Spell then
 --         mySpells:add(spell)
 --     end
@@ -446,6 +446,12 @@
 -- @field #number progress [0-1] The NPC's skill progress.
 
 ---
+-- @type AIStat
+-- @field #number base The stat's base value.
+-- @field #number modifier The stat's modifier.
+-- @field #number modified The actor's current ai value (read-only.)
+
+---
 -- @type DynamicStats
 
 ---
@@ -465,6 +471,33 @@
 -- @function [parent=#DynamicStats] fatigue
 -- @param openmw.core#GameObject actor
 -- @return #DynamicStat
+
+---
+-- @type AIStats
+
+---
+-- Alarm (returns @{#AIStat})
+-- @function [parent=#AIStats] alarm
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
+
+---
+-- Fight (returns @{#AIStat})
+-- @function [parent=#AIStats] fight
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
+
+---
+-- Flee (returns @{#AIStat})
+-- @function [parent=#AIStats] flee
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
+
+---
+-- Hello (returns @{#AIStat})
+-- @function [parent=#AIStats] hello
+-- @param openmw.core#GameObject actor
+-- @return #AIStat
 
 ---
 -- @type AttributeStats
@@ -686,6 +719,7 @@
 -- @type ActorStats
 -- @field #DynamicStats dynamic
 -- @field #AttributeStats attributes
+-- @field #AIStats ai
 
 ---
 -- Level (returns @{#LevelStat})
@@ -1088,6 +1122,12 @@
 -- @function [parent=#Player] getCrimeLevel
 -- @param openmw.core#GameObject player
 -- @return #number
+
+---
+-- Sets the bounty or crime level of the player, may only be used in global scripts
+-- @function [parent=#Player] setCrimeLevel
+-- @param openmw.core#GameObject player
+-- @param #number crimeLevel The requested crime level
 
 ---
 -- Whether the character generation for this player is finished.

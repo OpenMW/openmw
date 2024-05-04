@@ -113,19 +113,29 @@ namespace Bsa
             input.read(reinterpret_cast<char*>(header), 16);
             input.read(reinterpret_cast<char*>(&fileTableOffset), 8);
 
-            if (header[0] == 0x00415342) /*"BSA\x00"*/
-                fail("Unrecognized compressed BSA format");
+            if (header[0] != ESM::fourCC("BTDX"))
+                fail("Unrecognized BA2 signature");
             mVersion = header[1];
-            if (mVersion != 0x01 /*FO4*/ && mVersion != 0x02 /*Starfield*/)
-                fail("Unrecognized compressed BSA version");
+            switch (static_cast<BA2Version>(mVersion))
+            {
+                case BA2Version::Fallout4:
+                case BA2Version::Fallout4NextGen_v7:
+                case BA2Version::Fallout4NextGen_v8:
+                    break;
+                case BA2Version::StarfieldDDS:
+                    uint64_t dummy;
+                    input.read(reinterpret_cast<char*>(&dummy), 8);
+                    uint32_t compressionMethod;
+                    input.read(reinterpret_cast<char*>(&compressionMethod), 4);
+                    if (compressionMethod == 3)
+                        fail("Unsupported LZ4-compressed DDS BA2");
+                    break;
+                default:
+                    fail("Unrecognized DDS BA2 version");
+            }
 
             type = header[2];
             fileCount = header[3];
-            if (mVersion == 0x02)
-            {
-                uint64_t dummy;
-                input.read(reinterpret_cast<char*>(&dummy), 8);
-            }
         }
 
         if (type == ESM::fourCC("DX10"))

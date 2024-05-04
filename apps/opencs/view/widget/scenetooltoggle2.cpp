@@ -10,6 +10,8 @@
 
 #include <apps/opencs/view/widget/scenetool.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "pushbutton.hpp"
 #include "scenetoolbar.hpp"
 
@@ -50,7 +52,7 @@ void CSVWidget::SceneToolToggle2::adjustIcon()
 
     std::ostringstream stream;
     stream << mCompositeIcon << buttonIds;
-    setIcon(QIcon(QString::fromUtf8(stream.str().c_str())));
+    setIcon(Misc::ScalableIcon::load(QString::fromUtf8(stream.str().c_str())));
 }
 
 CSVWidget::SceneToolToggle2::SceneToolToggle2(
@@ -87,8 +89,8 @@ void CSVWidget::SceneToolToggle2::addButton(
     std::ostringstream stream;
     stream << mSingleIcon << id;
 
-    PushButton* button = new PushButton(
-        QIcon(QPixmap(stream.str().c_str())), PushButton::Type_Toggle, tooltip.isEmpty() ? name : tooltip, mPanel);
+    PushButton* button = new PushButton(Misc::ScalableIcon::load(stream.str().c_str()), PushButton::Type_Toggle,
+        tooltip.isEmpty() ? name : tooltip, mPanel);
 
     button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize(QSize(mIconSize, mIconSize));

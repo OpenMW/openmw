@@ -117,7 +117,7 @@ namespace MWBase
         virtual void stopMusic() = 0;
         ///< Stops music if it's playing
 
-        virtual void streamMusic(const std::string& filename, MWSound::MusicType type, float fade = 1.f) = 0;
+        virtual void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) = 0;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
         /// \param type music type.
@@ -126,7 +126,7 @@ namespace MWBase
         virtual bool isMusicPlaying() = 0;
         ///< Returns true if music is playing
 
-        virtual void playPlaylist(const std::string& playlist) = 0;
+        virtual void playPlaylist(VFS::Path::NormalizedView playlist) = 0;
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
         /// Title music playlist is predefined

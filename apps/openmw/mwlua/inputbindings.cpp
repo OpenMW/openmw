@@ -10,6 +10,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwinput/actions.hpp"
 
 #include "luamanagerimp.hpp"
@@ -208,6 +209,11 @@ namespace MWLua
         };
         api["isMouseButtonPressed"]
             = [](int button) -> bool { return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(button); };
+        api["_isGamepadCursorActive"] = [input]() -> bool { return input->isGamepadGuiCursorEnabled(); };
+        api["_setGamepadCursorActive"] = [input](bool v) {
+            input->setGamepadGuiCursorEnabled(v);
+            MWBase::Environment::get().getWindowManager()->setCursorActive(v);
+        };
         api["getMouseMoveX"] = [input]() { return input->getMouseMoveX(); };
         api["getMouseMoveY"] = [input]() { return input->getMouseMoveY(); };
         api["getAxisValue"] = [input](int axis) {
@@ -221,7 +227,7 @@ namespace MWLua
         api["getControlSwitch"] = [input](std::string_view key) { return input->getControlSwitch(key); };
         api["setControlSwitch"] = [input](std::string_view key, bool v) { input->toggleControlSwitch(key, v); };
 
-        api["getKeyName"] = [](SDL_Scancode code) { return SDL_GetKeyName(SDL_GetKeyFromScancode(code)); };
+        api["getKeyName"] = [](SDL_Scancode code) { return SDL_GetScancodeName(code); };
 
         api["ACTION"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWInput::Actions>({
             { "GameMenu", MWInput::A_GameMenu },

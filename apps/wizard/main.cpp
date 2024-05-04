@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
     l10n::installQtTranslations(app, "wizard", resourcesPath);
 
-    Wizard::MainWizard wizard;
+    Wizard::MainWizard wizard(std::move(configurationManager));
 
     wizard.show();
     return app.exec();

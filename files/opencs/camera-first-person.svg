@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="48pt"
+   height="48pt"
+   viewBox="0 0 16.933333 16.933333"
+   version="1.1"
+   id="svg1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="Main"
+       gradientTransform="translate(63.499994)">
+      <stop
+         style="stop-color:#4d4d4d;stop-opacity:1;"
+         offset="0"
+         id="stop2082" />
+    </linearGradient>
+    <linearGradient
+       id="Blue"
+       gradientTransform="matrix(0.26458333,0,0,0.26458333,-13.80713,103.48169)">
+      <stop
+         style="stop-color:#55c3ff;stop-opacity:1;"
+         offset="0"
+         id="stop2484" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#Blue"
+       id="linearGradient2809"
+       gradientUnits="userSpaceOnUse"
+       x1="7.4083338"
+       y1="-3.7041662"
+       x2="11.641667"
+       y2="-3.7041662" />
+  </defs>
+  <g
+     id="camera-first-person"
+     style="display:inline"
+     transform="matrix(1.3333345,0,0,1.333334,-190.85285,-85.019482)">
+    <path
+       id="rect2331"
+       style="font-variation-settings:normal;display:inline;opacity:1;vector-effect:none;fill:url(#linearGradient2809);fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+       d="M 558.40946,259.99589 557.5,270 h 3 l 0.91695,11.00345 A 1.0867995,1.0867995 42.618179 0 0 562.5,282 h 5 a 1.0867995,1.0867995 137.38182 0 0 1.08305,-0.99655 L 569.5,270 h 2.75 l -0.90946,-10.00411 A 1.0950328,1.0950328 42.402786 0 0 570.25,259 H 559.5 a 1.0950328,1.0950328 137.59721 0 0 -1.09054,0.99589 z"
+       transform="scale(0.26458333)" />
+    <ellipse
+       style="font-variation-settings:normal;display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.13229157;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+       id="ellipse2327"
+       cx="149.48953"
+       cy="67.071899"
+       rx="1.5874941"
+       ry="1.5875033" />
+    <circle
+       style="font-variation-settings:normal;display:inline;opacity:1;vector-effect:none;fill:#241f31;fill-opacity:1;stroke:none;stroke-width:0.326641px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+       id="circle2329"
+       cx="150.01872"
+       cy="67.204193"
+       r="0.52916664" />
+  </g>
+</svg>

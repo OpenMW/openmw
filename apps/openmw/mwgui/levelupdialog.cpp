@@ -22,6 +22,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "class.hpp"
 
 namespace
@@ -216,8 +218,7 @@ namespace MWGui
         center();
 
         // Play LevelUp Music
-        MWBase::Environment::get().getSoundManager()->streamMusic(
-            "Music/Special/MW_Triumph.mp3", MWSound::MusicType::Special);
+        MWBase::Environment::get().getSoundManager()->streamMusic(MWSound::triumphMusic, MWSound::MusicType::Special);
     }
 
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)

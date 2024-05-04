@@ -2,6 +2,7 @@
 #define GAME_MWBASE_DIALOGUEMANAGER_H
 
 #include <list>
+#include <map>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -108,10 +109,14 @@ namespace MWBase
         /// Changes faction1's opinion of faction2 by \a diff.
         virtual void modFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int diff) = 0;
 
+        /// Set faction1's opinion of faction2.
         virtual void setFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int absolute) = 0;
 
         /// @return faction1's opinion of faction2
         virtual int getFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2) const = 0;
+
+        /// @return all faction's opinion overrides
+        virtual const std::map<ESM::RefId, int>* getFactionReactionOverrides(const ESM::RefId& faction) const = 0;
 
         /// Removes the last added topic response for the given actor from the journal
         virtual void clearInfoActor(const MWWorld::Ptr& actor) const = 0;

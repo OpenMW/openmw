@@ -17,6 +17,8 @@
 
 #include <apps/opencs/view/doc/subview.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
@@ -60,7 +62,7 @@ CSVWorld::TableSubView::TableSubView(
     mOptions->hide();
 
     QPushButton* opt = new QPushButton();
-    opt->setIcon(QIcon(":startup/configure"));
+    opt->setIcon(Misc::ScalableIcon::load(":startup/configure"));
     opt->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     opt->setToolTip("Open additional options for this subview.");
     connect(opt, &QPushButton::clicked, this, &TableSubView::toggleOptions);
@@ -78,8 +80,16 @@ CSVWorld::TableSubView::TableSubView(
     widget->setLayout(layout);
 
     setWidget(widget);
+
+    // Widget position can be negative, we should clamp it.
+    QPoint position = pos();
+    if (position.x() <= 0)
+        position.setX(0);
+    if (position.y() <= 0)
+        position.setY(0);
+
     // prefer height of the screen and full width of the table
-    const QRect rect = QApplication::screenAt(pos())->geometry();
+    const QRect rect = QApplication::screenAt(position)->geometry();
     int frameHeight = 40; // set a reasonable default
     QWidget* topLevel = QApplication::topLevelAt(pos());
     if (topLevel)

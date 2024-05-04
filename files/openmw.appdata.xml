@@ -21,6 +21,15 @@ Copyright 2020 Bret Curtis <psi29a@gmail.com>
   </p>
  </description>
  <launchable type="desktop-id">org.openmw.launcher.desktop</launchable>
+ <developer id="org.openmw">
+   <name>OpenMW Contributors</name>
+ </developer>
+
+ <branding>
+  <color type="primary" scheme_preference="light">#dcccb8</color>
+  <color type="primary" scheme_preference="dark">#574526</color>
+ </branding>
+
  <screenshots>
   <screenshot type="default">
    <image>https://wiki.openmw.org/images/Openmw_0.11.1_launcher_1.png</image>
@@ -28,15 +37,15 @@ Copyright 2020 Bret Curtis <psi29a@gmail.com>
   </screenshot>
   <screenshot>
    <image>https://wiki.openmw.org/images/0.40_Screenshot-Balmora_3.png</image>
-   <caption>The Mournhold's plaza on OpenMW</caption>
+   <caption>Balmora at morning on OpenMW</caption>
   </screenshot>
   <screenshot>
    <image>https://wiki.openmw.org/images/Screenshot_mournhold_plaza_0.35.png</image>
-   <caption>Vivec seen from Ebonheart on OpenMW</caption>
+   <caption>The Mournhold's plaza on OpenMW</caption>
   </screenshot>
   <screenshot>
    <image>https://wiki.openmw.org/images/Screenshot_Vivec_seen_from_Ebonheart_0.35.png</image>
-   <caption>Balmora at morning on OpenMW</caption>
+   <caption>Vivec seen from Ebonheart on OpenMW</caption>
   </screenshot>
  </screenshots>
  <categories>

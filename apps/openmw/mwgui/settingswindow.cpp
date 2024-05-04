@@ -405,7 +405,8 @@ namespace MWGui
 
         std::vector<std::string> availableLanguages;
         const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        for (const auto& path : vfs->getRecursiveDirectoryIterator("l10n/"))
+        constexpr VFS::Path::NormalizedView l10n("l10n/");
+        for (const auto& path : vfs->getRecursiveDirectoryIterator(l10n))
         {
             if (Misc::getFileExtension(path) == "yaml")
             {

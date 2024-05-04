@@ -186,6 +186,15 @@ namespace MWLua
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getNpcStats(o.ptr()).getBounty();
         };
+        player["setCrimeLevel"] = [](const Object& o, int amount) {
+            verifyPlayer(o);
+            if (!dynamic_cast<const GObject*>(&o))
+                throw std::runtime_error("Only global scripts can change crime level");
+            const MWWorld::Class& cls = o.ptr().getClass();
+            cls.getNpcStats(o.ptr()).setBounty(amount);
+            if (amount == 0)
+                MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
+        };
         player["isCharGenFinished"] = [](const Object&) -> bool {
             return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
         };

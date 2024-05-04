@@ -8,15 +8,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: content files that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Data Directories</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: directories that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -68,10 +60,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;note: archives that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Move selected archive one position down</source>
         <translation type="unfinished"></translation>
     </message>
@@ -93,14 +81,6 @@
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Remove unused tiles</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Max size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -157,6 +137,26 @@
     </message>
     <message>
         <source>Ctrl+R</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: content files that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: directories that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: archives that are not part of current Content List are &lt;span style=&quot; font-style:italic;font-weight: bold&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove Unused Tiles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Max Size</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -227,27 +227,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Window mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Framerate limit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Window border</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Anti-aliasing</source>
+        <source>Window Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Vertical synchronization</source>
+        <source>Framerate Limit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Window Border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Anti-Aliasing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Vertical Synchronization</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -270,15 +270,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>File to import settings from:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Import add-on and plugin selection (creates a new Content List)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -288,11 +280,19 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Import bitmap fonts setup</source>
+        <source>Run &amp;Settings Importer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Run &amp;Settings Importer</source>
+        <source>File to Import Settings From:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import Bitmap Fonts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import Add-on and Plugin Selection</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -368,6 +368,26 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&amp;Uncheck Selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Resolved as %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This is the data-local directory and cannot be disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This directory is part of OpenMW and cannot be disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This directory is enabled in an openmw.cfg other than the user one</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This archive is enabled in an openmw.cfg other than the user one</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -607,15 +627,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Permanent barter disposition changes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make player followers and escorters start combat with enemies who have started combat with them or the player. Otherwise they wait for the enemies or the player to do an attack first.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Followers defend immediately</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -631,15 +643,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Classic Calm spells behavior</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make the value of filled soul gems dependent only on soul magnitude.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Soulgem values rebalance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -647,19 +651,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Swim upward correction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enchanted weapons are magical</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make stealing items from NPCs that were knocked down possible during combat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Classic reflected Absorb spells behavior</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -667,15 +659,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use navigation mesh for pathfinding</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled NPCs apply evasion maneuver to avoid collisions with others.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>NPCs avoid collisions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -683,15 +667,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Racial variation in speed fix</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, if they are not in combat. In this case we have to increment death counter and run disposed actor&apos;s script instantly.&lt;/p&gt;&lt;p&gt;If this setting is false, player has to wait until end of death animation in all cases. Makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder. Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Can loot during death animation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -699,31 +675,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unarmed creature attacks damage armor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Affect werewolves</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Do not affect werewolves</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How many threads will be spawned to compute physics update in the background. A value of 0 means that the update will be performed in the main thread.&lt;/p&gt;&lt;p&gt;A value greater than 1 requires the Bullet library be compiled with multithreading support.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Axis-aligned bounding box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Rotating box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -743,15 +699,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use magic item animation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Smooth movement</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -759,15 +707,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use additional animation sources</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Affects side and diagonal movement. Enabling this setting makes movement more realistic.&lt;/p&gt;&lt;p&gt;If disabled then the whole character&apos;s body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.&lt;/p&gt;&lt;p&gt;If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it changes straight right and straight left movement as well. Also turns the whole body up or down when swimming according to the movement direction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Turn to movement direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -775,23 +715,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Weapon sheathing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Shield sheathing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In third person, the camera will sway along with the movement animations of the player. Enabling this option disables this swaying by having the player character move independently of its animation. This was the default behavior of OpenMW 0.48 and earlier.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Player movement ignores animation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -805,15 +733,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Auto use object normal maps</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &apos;auto use object normal maps&apos;. Affects terrain.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Auto use terrain normal maps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -825,15 +745,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Auto use object specular maps</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a file with pattern &apos;terrain specular map pattern&apos; exists, use that file as a &apos;diffuse specular&apos; map. The texture must contain the layer colour in the RGB channel (as usual), and a specular multiplier in the alpha channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Auto use terrain specular maps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -844,15 +756,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Bump/reflect map local lighting</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation. Can negatively impact performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Use anti-aliased alpha testing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -861,10 +765,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate coverage-preserving mipmaps to prevent alpha-tested meshes shrinking as they get further away. Will cause meshes whose textures have coverage-preserving mipmaps to grow, though, so refer to mod installation instructions for how to set this.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Adjust coverage for alpha test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -881,15 +781,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Radial fog</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use exponential fog formula. By default, linear fog is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Exponential fog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -897,15 +789,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Sky blending</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The fraction of the maximum distance at which blending with the sky starts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sky blending start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -913,15 +797,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Viewing distance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls how large an object must be to be visible in the scene. The object’s size is divided by its distance to the camera and the result of the division is compared with this value. The smaller this value is, the more objects you will see in the scene.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Object paging min size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -929,23 +805,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Distant land</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use object paging for active cells grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Active grid object paging</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, supporting models will make use of day night switch nodes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Day night switch nodes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -957,23 +821,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable post processing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Re-render transparent objects with forced alpha clipping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Transparent postpass</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls how much eye adaptation can change from frame to frame. Smaller values makes for slower transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Auto exposure speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1017,15 +869,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>GUI scaling factor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show effect duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1033,23 +877,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Change dialogue topic color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Size of characters in game texts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Font size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable zooming on local and global maps.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Can zoom on maps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1061,15 +893,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show projectile damage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show melee info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1077,27 +901,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Stretch menu background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show owned objects</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show enchant chance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prevents merchants from equipping items that are sold to them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Merchant equipping fix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1117,10 +925,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Add &quot;Time Played&quot; to saves</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>JPG</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1130,10 +934,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>TGA</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Notify on saved screenshot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1149,26 +949,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Grab cursor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Skip menu and generate default character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Start default character at</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>default cell</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Run script after startup:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Browse…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1181,51 +961,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Always allow actors to follow over water</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled, a magical ammunition is required to bypass normal weapon resistance or weakness. If disabled, a magical ranged weapon or a magical ammunition is required.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Only magical ammo bypass resistance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Graphic herbalism</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make enchanted weapons without Magical flag bypass normal weapons resistance, like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Trainers choose offered skills by base value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Steal from knocked out actors in combat</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Factor strength into hand-to-hand combat</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Background physics threads</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Actor collision shape type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Soft particles</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Weather particle occlusion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1237,23 +977,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>bounds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>primitives</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>none</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of &quot;compute scene bounds&quot; computation method to be used. Bounds (default) for good balance between performance and shadow quality, primitives for better looking shadows or none for no computation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Shadow planes computation method</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1266,10 +990,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable actor shadows</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1293,15 +1013,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Fade start multiplier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable player shadows</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1309,15 +1021,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Shadow map resolution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The distance from the camera at which shadows completely disappear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Shadow distance limit:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1325,15 +1029,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable object shadows</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Due to limitations with Morrowind&apos;s data, only actors can cast shadows indoors, which some might feel is distracting.&lt;/p&gt;&lt;p&gt;Has no effect if actor/player shadows are not enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable indoor shadows</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1341,23 +1037,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable terrain shadows</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Lighting</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lighting method</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Audio device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>HRTF profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1369,19 +1049,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Tooltip and crosshair</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Maximum quicksaves</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Screenshots</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Screenshot format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1432,23 +1100,375 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use the camera as the sound listener</source>
+        <source>Permanent Barter Disposition Changes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Maximum light distance</source>
+        <source>Classic Calm Spells Behavior</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Max lights</source>
+        <source>NPCs Avoid Collisions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Bounding sphere multiplier</source>
+        <source>Soulgem Values Rebalance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Minimum interior brightness</source>
+        <source>Day Night Switch Nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Followers Defend Immediately</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only Magical Ammo Bypass Resistance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Graphic Herbalism</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Swim Upward Correction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enchanted Weapons Are Magical</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merchant Equipping Fix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Can Loot During Death Animation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classic Reflected Absorb Spells Behavior</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unarmed Creature Attacks Damage Armor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Affect Werewolves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do Not Affect Werewolves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Background Physics Threads</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Actor Collision Shape Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Axis-Aligned Bounding Box</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rotating Box</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Smooth Movement</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use Additional Animation Sources</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Weapon Sheathing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shield Sheathing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Player Movement Ignores Animation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use Magic Item Animation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto Use Object Normal Maps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Soft Particles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto Use Object Specular Maps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto Use Terrain Normal Maps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto Use Terrain Specular Maps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use Anti-Aliased Alpha Testing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bump/Reflect Map Local Lighting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Weather Particle Occlusion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exponential Fog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Radial Fog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sky Blending Start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sky Blending</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object Paging Min Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Viewing Distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Distant Land</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Active Grid Object Paging</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Transparent Postpass</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto Exposure Speed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Post Processing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shadow Planes Computation Method</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Actor Shadows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fade Start Multiplier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Player Shadows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shadow Map Resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shadow Distance Limit:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Object Shadows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Indoor Shadows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Terrain Shadows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximum Light Distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Max Lights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lighting Method</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bounding Sphere Multiplier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Minimum Interior Brightness</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Audio Device</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HRTF Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tooltip and Crosshair</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GUI Scaling Factor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Effect Duration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Change Dialogue Topic Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Font Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Projectile Damage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Melee Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stretch Menu Background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Owned Objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Enchant Chance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximum Quicksaves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Screenshot Format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Grab Cursor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default Cell</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bounds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Primitives</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Always Allow Actors to Follow over Water</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Racial Variation in Speed Fix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use Navigation Mesh for Pathfinding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Trainers Choose Offered Skills by Base Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Steal from Knocked out Actors in Combat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Factor Strength into Hand-to-Hand Combat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Turn to Movement Direction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Adjust Coverage for Alpha Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use the Camera as the Sound Listener</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Can Zoom on Maps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add &quot;Time Played&quot; to Saves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Notify on Saved Screenshot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Skip Menu and Generate Default Character</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Start Default Character at</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run Script After Startup:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

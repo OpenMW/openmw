@@ -13,7 +13,7 @@ uniform vec2 offset;
 
 void main()
 {
-    vec2 uv = (gl_FragCoord.xy + offset) / @ripple_map_size;
+    vec2 uv = (gl_FragCoord.xy + offset) / @rippleMapSize;
 
     vec4 color = texture2D(imageIn, uv);
     float wavesizeMultiplier = getTemporalWaveSizeMultiplier(osg_SimulationTime);

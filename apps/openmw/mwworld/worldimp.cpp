@@ -90,6 +90,8 @@
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/physicssystem.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "actionteleport.hpp"
 #include "cellstore.hpp"
 #include "containerstore.hpp"
@@ -394,7 +396,7 @@ namespace MWWorld
             {
                 // Make sure that we do not continue to play a Title music after a new game video.
                 MWBase::Environment::get().getSoundManager()->stopMusic();
-                MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
+                MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
             }
         }
@@ -521,7 +523,7 @@ namespace MWWorld
                     if (getPlayerPtr().getCell()->isExterior())
                         mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3(),
                             getPlayerPtr().getCell()->getCell()->getWorldSpace());
-                    mWorldScene->preloadCell(*getPlayerPtr().getCell(), true);
+                    mWorldScene->preloadCellWithSurroundings(*getPlayerPtr().getCell());
                 }
                 break;
             default:
@@ -591,6 +593,12 @@ namespace MWWorld
         // Must be cleared before mRendering is destroyed
         if (mProjectileManager)
             mProjectileManager->clear();
+
+        if (Settings::navigator().mWaitForAllJobsOnExit)
+        {
+            Log(Debug::Verbose) << "Waiting for all navmesh jobs to be done...";
+            mNavigator->wait(DetourNavigator::WaitConditionType::allJobsDone, nullptr);
+        }
     }
 
     void World::setRandomSeed(uint32_t seed)

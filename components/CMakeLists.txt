@@ -107,6 +107,10 @@ add_component_dir (settings
     windowmode
     )
 
+add_component_dir (bgsm
+    stream file
+    )
+
 add_component_dir (bsa
     bsa_file compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
@@ -125,7 +129,7 @@ add_component_dir (vfs
 
 add_component_dir (resource
     scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem
-    resourcemanager stats animation foreachbulletobject errormarker cachestats
+    resourcemanager stats animation foreachbulletobject errormarker cachestats bgsmfilemanager
     )
 
 add_component_dir (shader
@@ -181,7 +185,7 @@ add_component_dir (esm3
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
-    infoorder timestamp formatversion landrecorddata selectiongroup
+    infoorder timestamp formatversion landrecorddata selectiongroup dialoguecondition
     )
 
 add_component_dir (esmterrain
@@ -511,7 +515,7 @@ set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
 if (USE_QT)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
-        model/naturalsort model/contentmodel
+        model/contentmodel
         model/loadordererror
         view/combobox view/contentselector
         )
@@ -530,7 +534,7 @@ if (USE_QT)
         )
 
     add_component_qt_dir (misc
-        helpviewer utf8qtextstream hash
+        helpviewer utf8qtextstream hash scalableicon
         )
 
     add_component_qt_dir (files

@@ -188,7 +188,7 @@ namespace OMW
 
         void executeLocalScripts();
 
-        bool frame(float dt);
+        bool frame(unsigned frameNumber, float dt);
 
         /// Prepare engine for game play
         void prepareEngine();

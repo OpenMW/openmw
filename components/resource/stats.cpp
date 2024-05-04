@@ -49,6 +49,8 @@ namespace Resource
 
         std::vector<std::string> generateAllStatNames()
         {
+            constexpr std::size_t itemsPerPage = 24;
+
             constexpr std::string_view firstPage[] = {
                 "FrameNumber",
                 "",
@@ -76,6 +78,8 @@ namespace Resource
                 "",
             };
 
+            static_assert(std::size(firstPage) == itemsPerPage);
+
             constexpr std::string_view caches[] = {
                 "Node",
                 "Shape",
@@ -83,6 +87,7 @@ namespace Resource
                 "Image",
                 "Nif",
                 "Keyframe",
+                "BSShader Material",
                 "Groundcover Chunk",
                 "Object Chunk",
                 "Terrain Chunk",
@@ -100,7 +105,9 @@ namespace Resource
 
             constexpr std::string_view navMesh[] = {
                 "NavMesh Jobs",
-                "NavMesh Waiting",
+                "NavMesh Removing",
+                "NavMesh Updating",
+                "NavMesh Delayed",
                 "NavMesh Pushed",
                 "NavMesh Processing",
                 "NavMesh DbJobs Write",
@@ -129,7 +136,8 @@ namespace Resource
             for (std::string_view name : cellPreloader)
                 statNames.emplace_back(name);
 
-            statNames.emplace_back();
+            while (statNames.size() % itemsPerPage != 0)
+                statNames.emplace_back();
 
             for (std::string_view name : navMesh)
                 statNames.emplace_back(name);

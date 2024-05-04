@@ -1060,17 +1060,23 @@ namespace MWMechanics
         std::string_view action = evt.substr(groupname.size() + 2);
         if (action == "equip attach")
         {
-            if (groupname == "shield")
-                mAnimation->showCarriedLeft(true);
-            else
-                mAnimation->showWeapons(true);
+            if (mUpperBodyState == UpperBodyState::Equipping)
+            {
+                if (groupname == "shield")
+                    mAnimation->showCarriedLeft(true);
+                else
+                    mAnimation->showWeapons(true);
+            }
         }
         else if (action == "unequip detach")
         {
-            if (groupname == "shield")
-                mAnimation->showCarriedLeft(false);
-            else
-                mAnimation->showWeapons(false);
+            if (mUpperBodyState == UpperBodyState::Unequipping)
+            {
+                if (groupname == "shield")
+                    mAnimation->showCarriedLeft(false);
+                else
+                    mAnimation->showWeapons(false);
+            }
         }
         else if (action == "chop hit" || action == "slash hit" || action == "thrust hit" || action == "hit")
         {
@@ -2473,9 +2479,7 @@ namespace MWMechanics
 
             movement.x() *= scale;
             movement.y() *= scale;
-            // Update movement
-            if (movement != osg::Vec3f())
-                world->queueMovement(mPtr, movement);
+            world->queueMovement(mPtr, movement);
         }
 
         mSkipAnim = false;
@@ -2692,6 +2696,9 @@ namespace MWMechanics
 
     bool CharacterController::isMovementAnimationControlled() const
     {
+        if (mHitState != CharState_None)
+            return true;
+
         if (Settings::game().mPlayerMovementIgnoresAnimation && mPtr == getPlayer())
             return false;
 

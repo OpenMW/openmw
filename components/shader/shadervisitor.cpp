@@ -26,6 +26,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
 #include <components/vfs/manager.hpp>
@@ -186,6 +187,7 @@ namespace Shader
         , mAdditiveBlending(false)
         , mDiffuseHeight(false)
         , mNormalHeight(false)
+        , mReconstructNormalZ(false)
         , mTexStageRequiringTangents(-1)
         , mSoftParticles(false)
         , mNode(nullptr)
@@ -431,6 +433,7 @@ namespace Shader
                     normalMapTex->setFilter(osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
                     normalMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
                     normalMapTex->setName("normalMap");
+                    normalMap = normalMapTex;
 
                     int unit = texAttributes.size();
                     if (!writableStateSet)
@@ -442,6 +445,21 @@ namespace Shader
                     mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
+
+            if (normalMap != nullptr && normalMap->getImage(0))
+            {
+                // Special handling for red-green normal maps (e.g. BC5 or R8G8)
+                switch (SceneUtil::computeUnsizedPixelFormat(normalMap->getImage(0)->getPixelFormat()))
+                {
+                    case GL_RG:
+                    case GL_RG_INTEGER:
+                    {
+                        mRequirements.back().mReconstructNormalZ = true;
+                        mRequirements.back().mNormalHeight = false;
+                    }
+                }
+            }
+
             if (mAutoUseSpecularMaps && diffuseMap != nullptr && specularMap == nullptr && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
@@ -631,6 +649,7 @@ namespace Shader
 
         defineMap["diffuseParallax"] = reqs.mDiffuseHeight ? "1" : "0";
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
+        defineMap["reconstructNormalZ"] = reqs.mReconstructNormalZ ? "1" : "0";
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
         addedState->addUniform("colorMode");

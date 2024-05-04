@@ -738,6 +738,17 @@ namespace MWDialogue
         return 0;
     }
 
+    const std::map<ESM::RefId, int>* DialogueManager::getFactionReactionOverrides(const ESM::RefId& faction) const
+    {
+        // Make sure the faction exists
+        MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction);
+
+        const auto found = mChangedFactionReaction.find(faction);
+        if (found != mChangedFactionReaction.end())
+            return &found->second;
+        return nullptr;
+    }
+
     void DialogueManager::clearInfoActor(const MWWorld::Ptr& actor) const
     {
         if (actor == mActor && !mLastTopic.empty())

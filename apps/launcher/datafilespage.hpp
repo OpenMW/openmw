@@ -25,6 +25,7 @@ namespace ContentSelectorView
 namespace Config
 {
     class GameSettings;
+    struct SettingValue;
     class LauncherSettings;
 }
 
@@ -73,6 +74,7 @@ namespace Launcher
         void updateCloneProfileOkButton(const QString& text);
         void addSubdirectories(bool append);
         void sortDirectories();
+        void sortArchives();
         void removeDirectory();
         void moveArchives(int step);
         void moveDirectory(int step);
@@ -146,8 +148,8 @@ namespace Launcher
          * @return the file paths of all selected content files
          */
         QStringList selectedFilePaths() const;
-        QStringList selectedArchivePaths() const;
-        QStringList selectedDirectoriesPaths() const;
+        QList<Config::SettingValue> selectedArchivePaths() const;
+        QList<Config::SettingValue> selectedDirectoriesPaths() const;
     };
 }
 #endif

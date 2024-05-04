@@ -6,6 +6,7 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -601,6 +602,83 @@ namespace ESM
             EXPECT_EQ(result.mName, record.mName);
             EXPECT_EQ(result.mModel, record.mModel);
             EXPECT_EQ(result.mIcon, record.mIcon);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, infoShouldNotChange)
+        {
+            DialInfo record = {
+                .mData = {
+                    .mType = ESM::Dialogue::Topic,
+                    .mDisposition = 1,
+                    .mRank = 2,
+                    .mGender = ESM::DialInfo::NA,
+                    .mPCrank = 3,
+                },
+                .mSelects = {
+                    ESM::DialogueCondition{
+                        .mVariable = {},
+                        .mValue = 42,
+                        .mIndex = 0,
+                        .mFunction = ESM::DialogueCondition::Function_Level,
+                        .mComparison = ESM::DialogueCondition::Comp_Eq
+                    },
+                    ESM::DialogueCondition{
+                        .mVariable = generateRandomString(32),
+                        .mValue = 0,
+                        .mIndex = 1,
+                        .mFunction = ESM::DialogueCondition::Function_NotLocal,
+                        .mComparison = ESM::DialogueCondition::Comp_Eq
+                    },
+                },
+                .mId = generateRandomRefId(32),
+                .mPrev = generateRandomRefId(32),
+                .mNext = generateRandomRefId(32),
+                .mActor = generateRandomRefId(32),
+                .mRace = generateRandomRefId(32),
+                .mClass = generateRandomRefId(32),
+                .mFaction = generateRandomRefId(32),
+                .mPcFaction = generateRandomRefId(32),
+                .mCell = generateRandomRefId(32),
+                .mSound = generateRandomString(32),
+                .mResponse = generateRandomString(32),
+                .mResultScript = generateRandomString(32),
+                .mFactionLess = false,
+                .mQuestStatus = ESM::DialInfo::QS_None,
+            };
+
+            DialInfo result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mType, record.mData.mType);
+            EXPECT_EQ(result.mData.mDisposition, record.mData.mDisposition);
+            EXPECT_EQ(result.mData.mRank, record.mData.mRank);
+            EXPECT_EQ(result.mData.mGender, record.mData.mGender);
+            EXPECT_EQ(result.mData.mPCrank, record.mData.mPCrank);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mPrev, record.mPrev);
+            EXPECT_EQ(result.mNext, record.mNext);
+            EXPECT_EQ(result.mActor, record.mActor);
+            EXPECT_EQ(result.mRace, record.mRace);
+            EXPECT_EQ(result.mClass, record.mClass);
+            EXPECT_EQ(result.mFaction, record.mFaction);
+            EXPECT_EQ(result.mPcFaction, record.mPcFaction);
+            EXPECT_EQ(result.mCell, record.mCell);
+            EXPECT_EQ(result.mSound, record.mSound);
+            EXPECT_EQ(result.mResponse, record.mResponse);
+            EXPECT_EQ(result.mResultScript, record.mResultScript);
+            EXPECT_EQ(result.mFactionLess, record.mFactionLess);
+            EXPECT_EQ(result.mQuestStatus, record.mQuestStatus);
+            EXPECT_EQ(result.mSelects.size(), record.mSelects.size());
+            for (size_t i = 0; i < result.mSelects.size(); ++i)
+            {
+                const auto& resultS = result.mSelects[i];
+                const auto& recordS = record.mSelects[i];
+                EXPECT_EQ(resultS.mVariable, recordS.mVariable);
+                EXPECT_EQ(resultS.mValue, recordS.mValue);
+                EXPECT_EQ(resultS.mIndex, recordS.mIndex);
+                EXPECT_EQ(resultS.mFunction, recordS.mFunction);
+                EXPECT_EQ(resultS.mComparison, recordS.mComparison);
+            }
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));

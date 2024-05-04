@@ -46,9 +46,11 @@
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6716: mwscript comparison operator handling is too restrictive
+    Bug #6723: "Turn to movement direction" makes the player rotate wildly with COLLADA
     Bug #6754: Beast to Non-beast transformation mod is not working on OpenMW
     Bug #6758: Main menu background video can be stopped by opening the options menu
     Bug #6807: Ultimate Galleon is not working properly
+    Bug #6846: Launcher only works with default config paths
     Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
     Bug #6894: Added item combines with equipped stack instead of creating a new unequipped stack
     Bug #6932: Creatures flee from my followers and we have to chase after them
@@ -143,6 +145,7 @@
     Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
     Bug #7724: Guards don't help vs werewolves
     Bug #7733: Launcher shows incorrect data paths when there's two plugins with the same name
+    Bug #7737: OSG stats are missing some data on loading screens
     Bug #7742: Governing attribute training limit should use the modified attribute
     Bug #7753: Editor: Actors Don't Scale According to Their Race
     Bug #7758: Water walking is not taken into account to compute path cost on the water
@@ -160,11 +163,15 @@
     Bug #7840: First run of the launcher doesn't save viewing distance as the default value
     Bug #7841: Editor: "Dirty" water heights are saved in modified CELLs
     Bug #7859: AutoCalc flag is not used to calculate potion value
+    Bug #7861: OpenMW-CS: Incorrect DIAL's type in INFO records
     Bug #7872: Region sounds use wrong odds
+    Bug #7886: Equip and unequip animations can't share the animation track section
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
+    Bug #7908: Key bindings names in the settings menu are layout-specific
+    Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
@@ -214,9 +221,17 @@
     Feature #7652: Sort inactive post processing shaders list properly
     Feature #7698: Implement sAbsorb, sDamage, sDrain, sFortify and sRestore
     Feature #7709: Improve resolution selection in Launcher
+    Feature #7777: Support external Bethesda material files (BGSM/BGEM)
     Feature #7792: Support Timescale Clouds
     Feature #7795: Support MaxNumberRipples INI setting
     Feature #7805: Lua Menu context
+    Feature #7860: Lua: Expose NPC AI settings (fight, alarm, flee)
+    Feature #7875: Disable MyGUI windows snapping
+    Feature #7914: Do not allow to move GUI windows out of screen
+    Feature #7923: Don't show non-existent higher ranks for factions with fewer than 9 ranks
+    Feature #7932: Support two-channel normal maps
+    Feature #7936: Scalable icons in Qt applications
+    Feature #7953: Allow to change SVG icons colors depending on color scheme
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION

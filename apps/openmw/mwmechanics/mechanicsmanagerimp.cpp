@@ -29,6 +29,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "actor.hpp"
 #include "actors.hpp"
 #include "actorutil.hpp"
@@ -1678,12 +1680,12 @@ namespace MWMechanics
         if (mMusicType != MWSound::MusicType::Explore && !hasHostiles
             && !(player.getClass().getCreatureStats(player).isDead() && musicPlaying))
         {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
+            MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
             mMusicType = MWSound::MusicType::Explore;
         }
         else if (mMusicType != MWSound::MusicType::Battle && hasHostiles)
         {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
+            MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::battlePlaylist);
             mMusicType = MWSound::MusicType::Battle;
         }
     }

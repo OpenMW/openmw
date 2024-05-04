@@ -1,5 +1,7 @@
 #include "startup.hpp"
 
+#include <components/misc/scalableicon.hpp>
+
 #include <QGridLayout>
 #include <QGuiApplication>
 #include <QHBoxLayout>
@@ -10,13 +12,13 @@
 #include <QScreen>
 #include <QVBoxLayout>
 
-QPushButton* CSVDoc::StartupDialogue::addButton(const QString& label, const QIcon& icon)
+QPushButton* CSVDoc::StartupDialogue::addButton(const QString& label, const QString& icon)
 {
     int column = mColumn--;
 
     QPushButton* button = new QPushButton(this);
 
-    button->setIcon(QIcon(icon));
+    button->setIcon(Misc::ScalableIcon::load(icon));
 
     button->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
 
@@ -39,13 +41,13 @@ QWidget* CSVDoc::StartupDialogue::createButtons()
     mLayout = new QGridLayout(widget);
 
     /// \todo add icons
-    QPushButton* loadDocument = addButton("Edit A Content File", QIcon(":startup/edit-content"));
+    QPushButton* loadDocument = addButton("Edit A Content File", ":startup/edit-content");
     connect(loadDocument, &QPushButton::clicked, this, &StartupDialogue::loadDocument);
 
-    QPushButton* createAddon = addButton("Create A New Addon", QIcon(":startup/create-addon"));
+    QPushButton* createAddon = addButton("Create A New Addon", ":startup/create-addon");
     connect(createAddon, &QPushButton::clicked, this, &StartupDialogue::createAddon);
 
-    QPushButton* createGame = addButton("Create A New Game", QIcon(":startup/create-game"));
+    QPushButton* createGame = addButton("Create A New Game", ":startup/create-game");
     connect(createGame, &QPushButton::clicked, this, &StartupDialogue::createGame);
 
     for (int i = 0; i < 3; ++i)
@@ -78,7 +80,7 @@ QWidget* CSVDoc::StartupDialogue::createTools()
     QPushButton* config = new QPushButton(widget);
 
     config->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-    config->setIcon(QIcon(":startup/configure"));
+    config->setIcon(Misc::ScalableIcon::load(":startup/configure"));
     config->setToolTip("Open user settings");
 
     layout->addWidget(config);

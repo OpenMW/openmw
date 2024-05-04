@@ -36,6 +36,7 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/scalableicon.hpp>
 #include <components/misc/timeconvert.hpp>
 #include <components/version/version.hpp>
 
@@ -71,30 +72,30 @@ void CSVDoc::View::setupFileMenu()
 {
     QMenu* file = menuBar()->addMenu(tr("File"));
 
-    QAction* newGame = createMenuEntry("New Game", ":./menu-new-game.png", file, "document-file-newgame");
+    QAction* newGame = createMenuEntry("New Game", ":menu-new-game", file, "document-file-newgame");
     connect(newGame, &QAction::triggered, this, &View::newGameRequest);
 
-    QAction* newAddon = createMenuEntry("New Addon", ":./menu-new-addon.png", file, "document-file-newaddon");
+    QAction* newAddon = createMenuEntry("New Addon", ":menu-new-addon", file, "document-file-newaddon");
     connect(newAddon, &QAction::triggered, this, &View::newAddonRequest);
 
-    QAction* open = createMenuEntry("Open", ":./menu-open.png", file, "document-file-open");
+    QAction* open = createMenuEntry("Open", ":menu-open", file, "document-file-open");
     connect(open, &QAction::triggered, this, &View::loadDocumentRequest);
 
-    QAction* save = createMenuEntry("Save", ":./menu-save.png", file, "document-file-save");
+    QAction* save = createMenuEntry("Save", ":menu-save", file, "document-file-save");
     connect(save, &QAction::triggered, this, &View::save);
     mSave = save;
 
     file->addSeparator();
 
-    QAction* verify = createMenuEntry("Verify", ":./menu-verify.png", file, "document-file-verify");
+    QAction* verify = createMenuEntry("Verify", ":menu-verify", file, "document-file-verify");
     connect(verify, &QAction::triggered, this, &View::verify);
     mVerify = verify;
 
-    QAction* merge = createMenuEntry("Merge", ":./menu-merge.png", file, "document-file-merge");
+    QAction* merge = createMenuEntry("Merge", ":menu-merge", file, "document-file-merge");
     connect(merge, &QAction::triggered, this, &View::merge);
     mMerge = merge;
 
-    QAction* loadErrors = createMenuEntry("Error Log", ":./error-log.png", file, "document-file-errorlog");
+    QAction* loadErrors = createMenuEntry("Error Log", ":error-log", file, "document-file-errorlog");
     connect(loadErrors, &QAction::triggered, this, &View::loadErrorLog);
 
     QAction* meta = createMenuEntry(CSMWorld::UniversalId::Type_MetaDatas, file, "document-file-metadata");
@@ -102,10 +103,10 @@ void CSVDoc::View::setupFileMenu()
 
     file->addSeparator();
 
-    QAction* close = createMenuEntry("Close", ":./menu-close.png", file, "document-file-close");
+    QAction* close = createMenuEntry("Close", ":menu-close", file, "document-file-close");
     connect(close, &QAction::triggered, this, &View::close);
 
-    QAction* exit = createMenuEntry("Exit", ":./menu-exit.png", file, "document-file-exit");
+    QAction* exit = createMenuEntry("Exit", ":menu-exit", file, "document-file-exit");
     connect(exit, &QAction::triggered, this, &View::exit);
 
     connect(this, &View::exitApplicationRequest, &mViewManager, &ViewManager::exitApplication);
@@ -140,17 +141,16 @@ void CSVDoc::View::setupEditMenu()
     mUndo = mDocument->getUndoStack().createUndoAction(this, tr("Undo"));
     setupShortcut("document-edit-undo", mUndo);
     connect(mUndo, &QAction::changed, this, &View::undoActionChanged);
-    mUndo->setIcon(QIcon(QString::fromStdString(":./menu-undo.png")));
+    mUndo->setIcon(Misc::ScalableIcon::load(":menu-undo"));
     edit->addAction(mUndo);
 
     mRedo = mDocument->getUndoStack().createRedoAction(this, tr("Redo"));
     connect(mRedo, &QAction::changed, this, &View::redoActionChanged);
     setupShortcut("document-edit-redo", mRedo);
-    mRedo->setIcon(QIcon(QString::fromStdString(":./menu-redo.png")));
+    mRedo->setIcon(Misc::ScalableIcon::load(":menu-redo"));
     edit->addAction(mRedo);
 
-    QAction* userSettings
-        = createMenuEntry("Preferences", ":./menu-preferences.png", edit, "document-edit-preferences");
+    QAction* userSettings = createMenuEntry("Preferences", ":menu-preferences", edit, "document-edit-preferences");
     connect(userSettings, &QAction::triggered, this, &View::editSettingsRequest);
 
     QAction* search = createMenuEntry(CSMWorld::UniversalId::Type_Search, edit, "document-edit-search");
@@ -161,10 +161,10 @@ void CSVDoc::View::setupViewMenu()
 {
     QMenu* view = menuBar()->addMenu(tr("View"));
 
-    QAction* newWindow = createMenuEntry("New View", ":./menu-new-window.png", view, "document-view-newview");
+    QAction* newWindow = createMenuEntry("New View", ":menu-new-window", view, "document-view-newview");
     connect(newWindow, &QAction::triggered, this, &View::newView);
 
-    mShowStatusBar = createMenuEntry("Toggle Status Bar", ":./menu-status-bar.png", view, "document-view-statusbar");
+    mShowStatusBar = createMenuEntry("Toggle Status Bar", ":menu-status-bar", view, "document-view-statusbar");
     connect(mShowStatusBar, &QAction::toggled, this, &View::toggleShowStatusBar);
     mShowStatusBar->setCheckable(true);
     mShowStatusBar->setChecked(CSMPrefs::get()["Windows"]["show-statusbar"].isTrue());
@@ -289,7 +289,7 @@ void CSVDoc::View::setupAssetsMenu()
 {
     QMenu* assets = menuBar()->addMenu(tr("Assets"));
 
-    QAction* reload = createMenuEntry("Reload", ":./menu-reload.png", assets, "document-assets-reload");
+    QAction* reload = createMenuEntry("Reload", ":menu-reload", assets, "document-assets-reload");
     connect(reload, &QAction::triggered, &mDocument->getData(), &CSMWorld::Data::assetsChanged);
 
     assets->addSeparator();
@@ -341,9 +341,9 @@ void CSVDoc::View::setupDebugMenu()
     QAction* runDebug = debug->addMenu(mGlobalDebugProfileMenu);
     runDebug->setText(tr("Run OpenMW"));
     setupShortcut("document-debug-run", runDebug);
-    runDebug->setIcon(QIcon(QString::fromStdString(":./run-openmw.png")));
+    runDebug->setIcon(Misc::ScalableIcon::load(":run-openmw"));
 
-    QAction* stopDebug = createMenuEntry("Stop OpenMW", ":./stop-openmw.png", debug, "document-debug-shutdown");
+    QAction* stopDebug = createMenuEntry("Stop OpenMW", ":stop-openmw", debug, "document-debug-shutdown");
     connect(stopDebug, &QAction::triggered, this, &View::stop);
     mStopDebug = stopDebug;
 
@@ -355,16 +355,16 @@ void CSVDoc::View::setupHelpMenu()
 {
     QMenu* help = menuBar()->addMenu(tr("Help"));
 
-    QAction* helpInfo = createMenuEntry("Help", ":/info.png", help, "document-help-help");
+    QAction* helpInfo = createMenuEntry("Help", ":info", help, "document-help-help");
     connect(helpInfo, &QAction::triggered, this, &View::openHelp);
 
-    QAction* tutorial = createMenuEntry("Tutorial", ":/info.png", help, "document-help-tutorial");
+    QAction* tutorial = createMenuEntry("Tutorial", ":info", help, "document-help-tutorial");
     connect(tutorial, &QAction::triggered, this, &View::tutorial);
 
-    QAction* about = createMenuEntry("About OpenMW-CS", ":./info.png", help, "document-help-about");
+    QAction* about = createMenuEntry("About OpenMW-CS", ":info", help, "document-help-about");
     connect(about, &QAction::triggered, this, &View::infoAbout);
 
-    QAction* aboutQt = createMenuEntry("About Qt", ":./qt.png", help, "document-help-qt");
+    QAction* aboutQt = createMenuEntry("About Qt", ":qt", help, "document-help-qt");
     connect(aboutQt, &QAction::triggered, this, &View::infoAboutQt);
 }
 
@@ -375,7 +375,7 @@ QAction* CSVDoc::View::createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* 
     setupShortcut(shortcutName, entry);
     const std::string iconName = CSMWorld::UniversalId(type).getIcon();
     if (!iconName.empty() && iconName != ":placeholder")
-        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+        entry->setIcon(Misc::ScalableIcon::load(QString::fromStdString(iconName)));
 
     menu->addAction(entry);
 
@@ -388,7 +388,7 @@ QAction* CSVDoc::View::createMenuEntry(
     QAction* entry = new QAction(QString::fromStdString(title), this);
     setupShortcut(shortcutName, entry);
     if (!iconName.empty() && iconName != ":placeholder")
-        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+        entry->setIcon(Misc::ScalableIcon::load(QString::fromStdString(iconName)));
 
     menu->addAction(entry);
 
@@ -1111,7 +1111,16 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
 {
     QRect rect;
     if (isGrowLimit)
-        rect = QApplication::screenAt(pos())->geometry();
+    {
+        // Widget position can be negative, we should clamp it.
+        QPoint position = pos();
+        if (position.x() <= 0)
+            position.setX(0);
+        if (position.y() <= 0)
+            position.setY(0);
+
+        rect = QApplication::screenAt(position)->geometry();
+    }
     else
         rect = desktopRect();
 

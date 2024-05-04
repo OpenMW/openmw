@@ -558,11 +558,9 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     _texture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::NEAREST);
     _texture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::NEAREST);
 
-    // the shadow comparison should fail if object is outside the texture
-    _texture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_BORDER);
-    _texture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::CLAMP_TO_BORDER);
-    _texture->setBorderColor(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
-    //_texture->setBorderColor(osg::Vec4(0.0f,0.0f,0.0f,0.0f));
+    // the shader clips sampled coordinates, so no need for border
+    _texture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_EDGE);
+    _texture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::CLAMP_TO_EDGE);
 
     // set up the camera
     _camera = new osg::Camera;

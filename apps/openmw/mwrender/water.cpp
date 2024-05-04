@@ -713,11 +713,11 @@ namespace MWRender
     {
         // use a define map to conditionally compile the shader
         std::map<std::string, std::string> defineMap;
-        defineMap["refraction_enabled"] = std::string(mRefraction ? "1" : "0");
+        defineMap["waterRefraction"] = std::string(mRefraction ? "1" : "0");
         const int rippleDetail = Settings::water().mRainRippleDetail;
-        defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
-        defineMap["ripple_map_world_scale"] = std::to_string(RipplesSurface::sWorldScaleFactor);
-        defineMap["ripple_map_size"] = std::to_string(RipplesSurface::sRTTSize) + ".0";
+        defineMap["rainRippleDetail"] = std::to_string(rippleDetail);
+        defineMap["rippleMapWorldScale"] = std::to_string(RipplesSurface::sWorldScaleFactor);
+        defineMap["rippleMapSize"] = std::to_string(RipplesSurface::sRTTSize) + ".0";
         defineMap["sunlightScattering"] = Settings::water().mSunlightScattering ? "1" : "0";
         defineMap["wobblyShores"] = Settings::water().mWobblyShores ? "1" : "0";
         defineMap["shaderRipples"] = supportShaderWaterRipples ? "1" : "0";
@@ -729,8 +729,6 @@ namespace MWRender
 
         osg::ref_ptr<osg::Texture2D> normalMap(
             new osg::Texture2D(mResourceSystem->getImageManager()->getImage("textures/omw/water_nm.png")));
-        if (normalMap->getImage())
-            normalMap->getImage()->flipVertical();
         normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
         normalMap->setMaxAnisotropy(16);
