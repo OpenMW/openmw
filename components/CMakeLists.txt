@@ -534,7 +534,7 @@ if (USE_QT)
         )
 
     add_component_qt_dir (misc
-        helpviewer utf8qtextstream hash
+        helpviewer utf8qtextstream hash scalableicon
         )
 
     add_component_qt_dir (files

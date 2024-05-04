@@ -4,6 +4,9 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/lua/luastate.hpp>
 
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/store.hpp"
 
 #include "idcollectionbindings.hpp"
@@ -70,6 +73,16 @@ namespace MWLua
             sol::table res(lua, sol::create);
             for (const auto& [factionId, reaction] : rec.mReactions)
                 res[factionId.serializeText()] = reaction;
+
+            const auto* overrides
+                = MWBase::Environment::get().getDialogueManager()->getFactionReactionOverrides(rec.mId);
+
+            if (overrides != nullptr)
+            {
+                for (const auto& [factionId, reaction] : *overrides)
+                    res[factionId.serializeText()] = reaction;
+            }
+
             return res;
         });
         factionT["attributes"] = sol::readonly_property([&lua](const ESM::Faction& rec) {

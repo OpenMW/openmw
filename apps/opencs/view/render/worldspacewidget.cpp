@@ -23,6 +23,7 @@
 #include <apps/opencs/view/widget/modebutton.hpp>
 
 #include <components/esm/defs.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include <osg/Camera>
 #include <osg/Group>
@@ -220,7 +221,7 @@ CSVWidget::SceneToolMode* CSVRender::WorldspaceWidget::makeNavigationSelector(CS
         "<li>Hold {free-forward:mod} to speed up movement</li>"
         "</ul>");
     tool->addButton(
-        new CSVRender::OrbitCameraMode(this, QIcon(":scenetoolbar/orbiting-camera"),
+        new CSVRender::OrbitCameraMode(this, Misc::ScalableIcon::load(":scenetoolbar/orbiting-camera"),
             "Orbiting Camera"
             "<ul><li>Always facing the centre point</li>"
             "<li>Rotate around the centre point via {orbit-up}, {orbit-left}, {orbit-down}, {orbit-right} or by moving "

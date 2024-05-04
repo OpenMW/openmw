@@ -145,7 +145,8 @@ namespace MWWorld
 
         ~Scene();
 
-        void preloadCell(MWWorld::CellStore& cell, bool preloadSurrounding = false);
+        void preloadCellWithSurroundings(MWWorld::CellStore& cell);
+        void preloadCell(MWWorld::CellStore& cell);
         void preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync = false);
         void reloadTerrain();
 

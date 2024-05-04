@@ -17,6 +17,8 @@
 
 #include <apps/opencs/view/doc/subview.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
@@ -60,7 +62,7 @@ CSVWorld::TableSubView::TableSubView(
     mOptions->hide();
 
     QPushButton* opt = new QPushButton();
-    opt->setIcon(QIcon(":startup/configure"));
+    opt->setIcon(Misc::ScalableIcon::load(":startup/configure"));
     opt->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     opt->setToolTip("Open additional options for this subview.");
     connect(opt, &QPushButton::clicked, this, &TableSubView::toggleOptions);

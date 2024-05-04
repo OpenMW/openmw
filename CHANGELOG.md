@@ -145,6 +145,7 @@
     Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
     Bug #7724: Guards don't help vs werewolves
     Bug #7733: Launcher shows incorrect data paths when there's two plugins with the same name
+    Bug #7737: OSG stats are missing some data on loading screens
     Bug #7742: Governing attribute training limit should use the modified attribute
     Bug #7753: Editor: Actors Don't Scale According to Their Race
     Bug #7758: Water walking is not taken into account to compute path cost on the water
@@ -230,6 +231,7 @@
     Feature #7923: Don't show non-existent higher ranks for factions with fewer than 9 ranks
     Feature #7932: Support two-channel normal maps
     Feature #7936: Scalable icons in Qt applications
+    Feature #7953: Allow to change SVG icons colors depending on color scheme
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION

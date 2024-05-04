@@ -2,6 +2,7 @@
 
 #include <QIcon>
 
+#include <components/misc/scalableicon.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 
 #include "../../model/prefs/state.hpp"
@@ -36,7 +37,7 @@ class QWidget;
 namespace CSVRender
 {
     PathgridMode::PathgridMode(WorldspaceWidget* worldspaceWidget, QWidget* parent)
-        : EditMode(worldspaceWidget, QIcon(":scenetoolbar/editing-pathgrid"),
+        : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-pathgrid"),
             Mask_Pathgrid | Mask_Terrain | Mask_Reference, getTooltip(), parent)
         , mDragMode(DragMode_None)
         , mFromNode(0)
