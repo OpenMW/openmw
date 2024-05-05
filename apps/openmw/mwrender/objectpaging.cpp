@@ -59,7 +59,7 @@ namespace MWRender
             }
         }
 
-        std::string getModel(int type, const ESM::RefId& id, const MWWorld::ESMStore& store)
+        std::string getModel(int type, ESM::RefId id, const MWWorld::ESMStore& store)
         {
             switch (type)
             {
@@ -77,24 +77,21 @@ namespace MWRender
         }
     }
 
-    osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char lod,
+    osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char /*lod*/,
         unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
-        lod = static_cast<unsigned char>(lodFlags >> (4 * 4));
         if (activeGrid && !mActiveGrid)
             return nullptr;
 
-        ChunkId id = std::make_tuple(center, size, activeGrid);
+        const ChunkId id = std::make_tuple(center, size, activeGrid);
 
-        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
-        if (obj)
+        if (const osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id))
             return static_cast<osg::Node*>(obj.get());
-        else
-        {
-            osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile, lod);
-            mCache->addEntryToObjectCache(id, node.get());
-            return node;
-        }
+
+        const unsigned char lod = static_cast<unsigned char>(lodFlags >> (4 * 4));
+        osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile, lod);
+        mCache->addEntryToObjectCache(id, node.get());
+        return node;
     }
 
     namespace
@@ -489,10 +486,10 @@ namespace MWRender
         }
 
         std::map<ESM::RefNum, PagedCellRef> collectESM3References(
-            float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers)
+            float size, const osg::Vec2i& startCell, const MWWorld::ESMStore& store)
         {
             std::map<ESM::RefNum, PagedCellRef> refs;
-            const auto& store = MWBase::Environment::get().getWorld()->getStore();
+            ESM::ReadersCache readers;
             for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
             {
                 for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
@@ -560,19 +557,15 @@ namespace MWRender
     osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
         const osg::Vec3f& viewPoint, bool compile, unsigned char lod)
     {
-        osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
-
-        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * getCellSize(mWorldspace);
-        osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
+        const osg::Vec2i startCell(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
+        const MWBase::World& world = *MWBase::Environment::get().getWorld();
+        const MWWorld::ESMStore& store = world.getStore();
 
         std::map<ESM::RefNum, PagedCellRef> refs;
-        ESM::ReadersCache readers;
-        const auto& world = MWBase::Environment::get().getWorld();
-        const auto& store = world->getStore();
 
         if (mWorldspace == ESM::Cell::sDefaultWorldspaceId)
         {
-            refs = collectESM3References(size, startCell, readers);
+            refs = collectESM3References(size, startCell, store);
         }
         else
         {
@@ -594,8 +587,8 @@ namespace MWRender
             }
         }
 
-        osg::Vec2f minBound = (center - osg::Vec2f(size / 2.f, size / 2.f));
-        osg::Vec2f maxBound = (center + osg::Vec2f(size / 2.f, size / 2.f));
+        const osg::Vec2f minBound = (center - osg::Vec2f(size / 2.f, size / 2.f));
+        const osg::Vec2f maxBound = (center + osg::Vec2f(size / 2.f, size / 2.f));
         struct InstanceList
         {
             std::vector<const PagedCellRef*> mInstances;
@@ -604,7 +597,7 @@ namespace MWRender
         };
         typedef std::map<osg::ref_ptr<const osg::Node>, InstanceList> NodeMap;
         NodeMap nodes;
-        osg::ref_ptr<RefnumSet> refnumSet = activeGrid ? new RefnumSet : nullptr;
+        const osg::ref_ptr<RefnumSet> refnumSet = activeGrid ? new RefnumSet : nullptr;
 
         // Mask_UpdateVisitor is used in such cases in NIF loader:
         // 1. For collision nodes, which is not supposed to be rendered.
@@ -612,18 +605,13 @@ namespace MWRender
         // Since ObjectPaging does not handle VisController, we can just ignore both types of nodes.
         constexpr auto copyMask = ~Mask_UpdateVisitor;
 
-        auto cellSize = getCellSize(mWorldspace);
-        const auto smallestDistanceToChunk = (size > 1 / 8.f) ? (size * cellSize) : 0.f;
-        const auto higherDistanceToChunk = [&] {
-            if (!activeGrid)
-                return smallestDistanceToChunk + 1;
-            return ((size < 1) ? 5 : 3) * cellSize * size + 1;
-        }();
+        const int cellSize = getCellSize(mWorldspace);
+        const float smallestDistanceToChunk = (size > 1 / 8.f) ? (size * cellSize) : 0.f;
+        const float higherDistanceToChunk
+            = activeGrid ? ((size < 1) ? 5 : 3) * cellSize * size + 1 : smallestDistanceToChunk + 1;
 
         AnalyzeVisitor analyzeVisitor(copyMask);
-        float minSize = mMinSize;
-        if (mMinSizeMergeFactor)
-            minSize *= mMinSizeMergeFactor;
+        const float minSize = mMinSizeMergeFactor ? mMinSize * mMinSizeMergeFactor : mMinSize;
         for (const auto& [refNum, ref] : refs)
         {
             if (size < 1.f)
@@ -674,13 +662,13 @@ namespace MWRender
                 if (found != mLODNameCache.end() && found->first == key)
                     model = found->second;
                 else
-                    model = mLODNameCache
-                                .insert(found,
-                                    { key,
-                                        Misc::ResourceHelpers::getLODMeshName(
-                                            world->getESMVersions()[refNum.mContentFile], model,
-                                            mSceneManager->getVFS(), lod) })
-                                ->second;
+                    model
+                        = mLODNameCache
+                              .insert(found,
+                                  { key,
+                                      Misc::ResourceHelpers::getLODMeshName(world.getESMVersions()[refNum.mContentFile],
+                                          model, mSceneManager->getVFS(), lod) })
+                              ->second;
             }
 
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
@@ -726,6 +714,7 @@ namespace MWRender
             emplaced.first->second.mInstances.push_back(&ref);
         }
 
+        const osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * getCellSize(mWorldspace);
         osg::ref_ptr<osg::Group> group = new osg::Group;
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
         osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
@@ -738,15 +727,14 @@ namespace MWRender
 
             const AnalyzeVisitor::Result& analyzeResult = pair.second.mAnalyzeResult;
 
-            float mergeCost = analyzeResult.mNumVerts * size;
-            float mergeBenefit = analyzeVisitor.getMergeBenefit(analyzeResult) * mMergeFactor;
-            bool merge = mergeBenefit > mergeCost;
+            const float mergeCost = analyzeResult.mNumVerts * size;
+            const float mergeBenefit = analyzeVisitor.getMergeBenefit(analyzeResult) * mMergeFactor;
+            const bool merge = mergeBenefit > mergeCost;
 
-            float minSizeMerged = mMinSize;
-            float factor2 = mergeBenefit > 0 ? std::min(1.f, mergeCost * mMinSizeCostMultiplier / mergeBenefit) : 1;
-            float minSizeMergeFactor2 = (1 - factor2) * mMinSizeMergeFactor + factor2;
-            if (minSizeMergeFactor2 > 0)
-                minSizeMerged *= minSizeMergeFactor2;
+            const float factor2
+                = mergeBenefit > 0 ? std::min(1.f, mergeCost * mMinSizeCostMultiplier / mergeBenefit) : 1;
+            const float minSizeMergeFactor2 = (1 - factor2) * mMinSizeMergeFactor + factor2;
+            const float minSizeMerged = minSizeMergeFactor2 > 0 ? mMinSize * minSizeMergeFactor2 : mMinSize;
 
             unsigned int numinstances = 0;
             for (const PagedCellRef* refPtr : pair.second.mInstances)
@@ -758,11 +746,11 @@ namespace MWRender
                         < (viewPoint - ref.mPosition).length2() * minSizeMerged * minSizeMerged)
                     continue;
 
-                osg::Vec3f nodePos = ref.mPosition - worldCenter;
-                osg::Quat nodeAttitude = osg::Quat(ref.mRotation.z(), osg::Vec3f(0, 0, -1))
+                const osg::Vec3f nodePos = ref.mPosition - worldCenter;
+                const osg::Quat nodeAttitude = osg::Quat(ref.mRotation.z(), osg::Vec3f(0, 0, -1))
                     * osg::Quat(ref.mRotation.y(), osg::Vec3f(0, -1, 0))
                     * osg::Quat(ref.mRotation.x(), osg::Vec3f(-1, 0, 0));
-                osg::Vec3f nodeScale = osg::Vec3f(ref.mScale, ref.mScale, ref.mScale);
+                const osg::Vec3f nodeScale(ref.mScale, ref.mScale, ref.mScale);
 
                 osg::ref_ptr<osg::Group> trans;
                 if (merge)
@@ -815,7 +803,7 @@ namespace MWRender
                     }
                 }
 
-                osg::Group* attachTo = merge ? mergeGroup : group;
+                osg::Group* const attachTo = merge ? mergeGroup : group;
                 attachTo->addChild(trans);
                 ++numinstances;
             }
@@ -836,6 +824,8 @@ namespace MWRender
             }
         }
 
+        const osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
+
         if (mergeGroup->getNumChildren())
         {
             SceneUtil::Optimizer optimizer;
@@ -845,7 +835,7 @@ namespace MWRender
                 optimizer.setMergeAlphaBlending(true);
             }
             optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
-            unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS
+            const unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS
                 | SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES | SceneUtil::Optimizer::MERGE_GEOMETRY;
 
             optimizer.optimize(mergeGroup, options);
@@ -864,7 +854,7 @@ namespace MWRender
             }
         }
 
-        auto ico = mSceneManager->getIncrementalCompileOperation();
+        osgUtil::IncrementalCompileOperation* const ico = mSceneManager->getIncrementalCompileOperation();
         if (!stateToCompile.empty() && ico)
         {
             auto compileSet = new osgUtil::IncrementalCompileOperation::CompileSet(group);
@@ -1020,7 +1010,7 @@ namespace MWRender
                 if (!std::get<2>(chunkId))
                     return;
                 const osg::Vec2f& center = std::get<0>(chunkId);
-                bool activeGrid = (center.x() > mActiveGrid.x() || center.y() > mActiveGrid.y()
+                const bool activeGrid = (center.x() > mActiveGrid.x() || center.y() > mActiveGrid.y()
                     || center.x() < mActiveGrid.z() || center.y() < mActiveGrid.w());
                 if (!activeGrid)
                     return;
