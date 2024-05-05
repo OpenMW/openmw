@@ -15,6 +15,7 @@
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
@@ -465,72 +466,76 @@ namespace MWRender
     {
     }
 
-    std::map<ESM::RefNum, ESM::CellRef> ObjectPaging::collectESM3References(
-        float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers) const
+    namespace
     {
-        std::map<ESM::RefNum, ESM::CellRef> refs;
-        const auto& store = MWBase::Environment::get().getWorld()->getStore();
-        for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
+        std::map<ESM::RefNum, ESM::CellRef> collectESM3References(
+            float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers)
         {
-            for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
+            std::map<ESM::RefNum, ESM::CellRef> refs;
+            const auto& store = MWBase::Environment::get().getWorld()->getStore();
+            for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
             {
-                const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
-                if (!cell)
-                    continue;
-                for (size_t i = 0; i < cell->mContextList.size(); ++i)
+                for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
                 {
-                    try
+                    const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
+                    if (!cell)
+                        continue;
+                    for (size_t i = 0; i < cell->mContextList.size(); ++i)
                     {
-                        const std::size_t index = static_cast<std::size_t>(cell->mContextList[i].index);
-                        const ESM::ReadersCache::BusyItem reader = readers.get(index);
-                        cell->restore(*reader, i);
-                        ESM::CellRef ref;
-                        ESM::MovedCellRef cMRef;
-                        bool deleted = false;
-                        bool moved = false;
-                        while (ESM::Cell::getNextRef(
-                            *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                        try
                         {
-                            if (moved)
-                                continue;
-
-                            if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum)
-                                != cell->mMovedRefs.end())
-                                continue;
-
-                            int type = store.findStatic(ref.mRefID);
-                            if (!typeFilter(type, size >= 2))
-                                continue;
-                            if (deleted)
+                            const std::size_t index = static_cast<std::size_t>(cell->mContextList[i].index);
+                            const ESM::ReadersCache::BusyItem reader = readers.get(index);
+                            cell->restore(*reader, i);
+                            ESM::CellRef ref;
+                            ESM::MovedCellRef cMRef;
+                            bool deleted = false;
+                            bool moved = false;
+                            while (ESM::Cell::getNextRef(
+                                *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                             {
-                                refs.erase(ref.mRefNum);
-                                continue;
+                                if (moved)
+                                    continue;
+
+                                if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum)
+                                    != cell->mMovedRefs.end())
+                                    continue;
+
+                                int type = store.findStatic(ref.mRefID);
+                                if (!typeFilter(type, size >= 2))
+                                    continue;
+                                if (deleted)
+                                {
+                                    refs.erase(ref.mRefNum);
+                                    continue;
+                                }
+                                refs[ref.mRefNum] = std::move(ref);
                             }
-                            refs[ref.mRefNum] = std::move(ref);
+                        }
+                        catch (const std::exception& e)
+                        {
+                            Log(Debug::Warning) << "Failed to collect references from cell \"" << cell->getDescription()
+                                                << "\": " << e.what();
+                            continue;
                         }
                     }
-                    catch (const std::exception& e)
+
+                    for (auto [ref, deleted] : cell->mLeasedRefs)
                     {
-                        Log(Debug::Warning) << "Failed to collect references from cell \"" << cell->getDescription()
-                                            << "\": " << e.what();
-                        continue;
+                        if (deleted)
+                        {
+                            refs.erase(ref.mRefNum);
+                            continue;
+                        }
+                        int type = store.findStatic(ref.mRefID);
+                        if (!typeFilter(type, size >= 2))
+                            continue;
+                        refs[ref.mRefNum] = std::move(ref);
                     }
-                }
-                for (auto [ref, deleted] : cell->mLeasedRefs)
-                {
-                    if (deleted)
-                    {
-                        refs.erase(ref.mRefNum);
-                        continue;
-                    }
-                    int type = store.findStatic(ref.mRefID);
-                    if (!typeFilter(type, size >= 2))
-                        continue;
-                    refs[ref.mRefNum] = std::move(ref);
                 }
             }
+            return refs;
         }
-        return refs;
     }
 
     osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
