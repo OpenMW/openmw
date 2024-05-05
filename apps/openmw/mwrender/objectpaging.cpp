@@ -9,6 +9,8 @@
 #include <osg/Sequence>
 #include <osg/Switch>
 #include <osgAnimation/BasicAnimationManager>
+#include <osgParticle/ParticleProcessor>
+#include <osgParticle/ParticleSystemUpdater>
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <components/esm3/esmreader.hpp>
@@ -16,32 +18,25 @@
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
-
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/optimizer.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/vfs/manager.hpp>
-
-#include <osgParticle/ParticleProcessor>
-#include <osgParticle/ParticleSystemUpdater>
-
 #include <components/misc/rng.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/optimizer.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/settings/values.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
-
-#include <condition_variable>
 
 namespace MWRender
 {
