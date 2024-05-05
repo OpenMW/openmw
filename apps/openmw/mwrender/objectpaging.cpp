@@ -589,6 +589,8 @@ namespace MWRender
 
         const osg::Vec2f minBound = (center - osg::Vec2f(size / 2.f, size / 2.f));
         const osg::Vec2f maxBound = (center + osg::Vec2f(size / 2.f, size / 2.f));
+        const osg::Vec2i floorMinBound(std::floor(minBound.x()), std::floor(minBound.y()));
+        const osg::Vec2i ceilMaxBound(std::ceil(maxBound.x()), std::ceil(maxBound.y()));
         struct InstanceList
         {
             std::vector<const PagedCellRef*> mInstances;
@@ -617,10 +619,10 @@ namespace MWRender
             if (size < 1.f)
             {
                 const osg::Vec3f cellPos = ref.mPosition / cellSize;
-                if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x())
-                    || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
-                    || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x())
-                    || (maxBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
+                if ((minBound.x() > floorMinBound.x() && cellPos.x() < minBound.x())
+                    || (minBound.y() > floorMinBound.y() && cellPos.y() < minBound.y())
+                    || (maxBound.x() < ceilMaxBound.x() && cellPos.x() >= maxBound.x())
+                    || (maxBound.y() < ceilMaxBound.y() && cellPos.y() >= maxBound.y()))
                     continue;
             }
 
