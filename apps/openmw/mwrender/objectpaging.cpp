@@ -40,37 +40,39 @@
 
 namespace MWRender
 {
-
-    bool typeFilter(int type, bool far)
+    namespace
     {
-        switch (type)
+        bool typeFilter(int type, bool far)
         {
-            case ESM::REC_STAT:
-            case ESM::REC_ACTI:
-            case ESM::REC_DOOR:
-                return true;
-            case ESM::REC_CONT:
-                return !far;
+            switch (type)
+            {
+                case ESM::REC_STAT:
+                case ESM::REC_ACTI:
+                case ESM::REC_DOOR:
+                    return true;
+                case ESM::REC_CONT:
+                    return !far;
 
-            default:
-                return false;
+                default:
+                    return false;
+            }
         }
-    }
 
-    std::string getModel(int type, const ESM::RefId& id, const MWWorld::ESMStore& store)
-    {
-        switch (type)
+        std::string getModel(int type, const ESM::RefId& id, const MWWorld::ESMStore& store)
         {
-            case ESM::REC_STAT:
-                return store.get<ESM::Static>().searchStatic(id)->mModel;
-            case ESM::REC_ACTI:
-                return store.get<ESM::Activator>().searchStatic(id)->mModel;
-            case ESM::REC_DOOR:
-                return store.get<ESM::Door>().searchStatic(id)->mModel;
-            case ESM::REC_CONT:
-                return store.get<ESM::Container>().searchStatic(id)->mModel;
-            default:
-                return {};
+            switch (type)
+            {
+                case ESM::REC_STAT:
+                    return store.get<ESM::Static>().searchStatic(id)->mModel;
+                case ESM::REC_ACTI:
+                    return store.get<ESM::Activator>().searchStatic(id)->mModel;
+                case ESM::REC_DOOR:
+                    return store.get<ESM::Door>().searchStatic(id)->mModel;
+                case ESM::REC_CONT:
+                    return store.get<ESM::Container>().searchStatic(id)->mModel;
+                default:
+                    return {};
+            }
         }
     }
 
@@ -94,23 +96,23 @@ namespace MWRender
         }
     }
 
-    class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
-    {
-    public:
-        bool isOperationPermissibleForObjectImplementation(
-            const SceneUtil::Optimizer* optimizer, const osg::Drawable* node, unsigned int option) const override
-        {
-            return true;
-        }
-        bool isOperationPermissibleForObjectImplementation(
-            const SceneUtil::Optimizer* optimizer, const osg::Node* node, unsigned int option) const override
-        {
-            return (node->getDataVariance() != osg::Object::DYNAMIC);
-        }
-    };
-
     namespace
     {
+        class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
+        {
+        public:
+            bool isOperationPermissibleForObjectImplementation(
+                const SceneUtil::Optimizer* optimizer, const osg::Drawable* node, unsigned int option) const override
+            {
+                return true;
+            }
+            bool isOperationPermissibleForObjectImplementation(
+                const SceneUtil::Optimizer* optimizer, const osg::Node* node, unsigned int option) const override
+            {
+                return (node->getDataVariance() != osg::Object::DYNAMIC);
+            }
+        };
+
         using LODRange = osg::LOD::MinMaxPair;
 
         LODRange intersection(const LODRange& left, const LODRange& right)
@@ -127,326 +129,327 @@ namespace MWRender
         {
             return { r.first / div, r.second / div };
         }
-    }
 
-    class CopyOp : public osg::CopyOp
-    {
-    public:
-        bool mOptimizeBillboards = true;
-        LODRange mDistances = { 0.f, 0.f };
-        osg::Vec3f mViewVector;
-        osg::Node::NodeMask mCopyMask = ~0u;
-        mutable std::vector<const osg::Node*> mNodePath;
-
-        void copy(const osg::Node* toCopy, osg::Group* attachTo)
+        class CopyOp : public osg::CopyOp
         {
-            const osg::Group* groupToCopy = toCopy->asGroup();
-            if (toCopy->getStateSet() || toCopy->asTransform() || !groupToCopy)
-                attachTo->addChild(operator()(toCopy));
-            else
+        public:
+            bool mOptimizeBillboards = true;
+            LODRange mDistances = { 0.f, 0.f };
+            osg::Vec3f mViewVector;
+            osg::Node::NodeMask mCopyMask = ~0u;
+            mutable std::vector<const osg::Node*> mNodePath;
+
+            void copy(const osg::Node* toCopy, osg::Group* attachTo)
             {
-                for (unsigned int i = 0; i < groupToCopy->getNumChildren(); ++i)
-                    attachTo->addChild(operator()(groupToCopy->getChild(i)));
-            }
-        }
-
-        osg::Node* operator()(const osg::Node* node) const override
-        {
-            if (!(node->getNodeMask() & mCopyMask))
-                return nullptr;
-
-            if (const osg::Drawable* d = node->asDrawable())
-                return operator()(d);
-
-            if (dynamic_cast<const osgParticle::ParticleProcessor*>(node))
-                return nullptr;
-            if (dynamic_cast<const osgParticle::ParticleSystemUpdater*>(node))
-                return nullptr;
-
-            if (const osg::Switch* sw = node->asSwitch())
-            {
-                osg::Group* n = new osg::Group;
-                for (unsigned int i = 0; i < sw->getNumChildren(); ++i)
-                    if (sw->getValue(i))
-                        n->addChild(operator()(sw->getChild(i)));
-                n->setDataVariance(osg::Object::STATIC);
-                return n;
-            }
-            if (const osg::LOD* lod = dynamic_cast<const osg::LOD*>(node))
-            {
-                std::vector<std::pair<osg::ref_ptr<osg::Node>, LODRange>> children;
-                for (unsigned int i = 0; i < lod->getNumChildren(); ++i)
-                    if (const auto r = intersection(lod->getRangeList()[i], mDistances); !empty(r))
-                        children.emplace_back(operator()(lod->getChild(i)), lod->getRangeList()[i]);
-                if (children.empty())
-                    return nullptr;
-
-                if (children.size() == 1)
-                    return children.front().first.release();
+                const osg::Group* groupToCopy = toCopy->asGroup();
+                if (toCopy->getStateSet() || toCopy->asTransform() || !groupToCopy)
+                    attachTo->addChild(operator()(toCopy));
                 else
                 {
-                    osg::LOD* n = new osg::LOD;
-                    for (const auto& [child, range] : children)
-                        n->addChild(child, range.first, range.second);
+                    for (unsigned int i = 0; i < groupToCopy->getNumChildren(); ++i)
+                        attachTo->addChild(operator()(groupToCopy->getChild(i)));
+                }
+            }
+
+            osg::Node* operator()(const osg::Node* node) const override
+            {
+                if (!(node->getNodeMask() & mCopyMask))
+                    return nullptr;
+
+                if (const osg::Drawable* d = node->asDrawable())
+                    return operator()(d);
+
+                if (dynamic_cast<const osgParticle::ParticleProcessor*>(node))
+                    return nullptr;
+                if (dynamic_cast<const osgParticle::ParticleSystemUpdater*>(node))
+                    return nullptr;
+
+                if (const osg::Switch* sw = node->asSwitch())
+                {
+                    osg::Group* n = new osg::Group;
+                    for (unsigned int i = 0; i < sw->getNumChildren(); ++i)
+                        if (sw->getValue(i))
+                            n->addChild(operator()(sw->getChild(i)));
                     n->setDataVariance(osg::Object::STATIC);
                     return n;
                 }
-            }
-            if (const osg::Sequence* sq = dynamic_cast<const osg::Sequence*>(node))
-            {
-                osg::Group* n = new osg::Group;
-                n->addChild(operator()(sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0)));
-                n->setDataVariance(osg::Object::STATIC);
-                return n;
-            }
-
-            mNodePath.push_back(node);
-
-            osg::Node* cloned = static_cast<osg::Node*>(node->clone(*this));
-            cloned->setDataVariance(osg::Object::STATIC);
-            cloned->setUserDataContainer(nullptr);
-            cloned->setName("");
-
-            mNodePath.pop_back();
-
-            handleCallbacks(node, cloned);
-
-            return cloned;
-        }
-        void handleCallbacks(const osg::Node* node, osg::Node* cloned) const
-        {
-            for (const osg::Callback* callback = node->getCullCallback(); callback != nullptr;
-                 callback = callback->getNestedCallback())
-            {
-                if (callback->className() == std::string("BillboardCallback"))
+                if (const osg::LOD* lod = dynamic_cast<const osg::LOD*>(node))
                 {
-                    if (mOptimizeBillboards)
+                    std::vector<std::pair<osg::ref_ptr<osg::Node>, LODRange>> children;
+                    for (unsigned int i = 0; i < lod->getNumChildren(); ++i)
+                        if (const auto r = intersection(lod->getRangeList()[i], mDistances); !empty(r))
+                            children.emplace_back(operator()(lod->getChild(i)), lod->getRangeList()[i]);
+                    if (children.empty())
+                        return nullptr;
+
+                    if (children.size() == 1)
+                        return children.front().first.release();
+                    else
                     {
-                        handleBillboard(cloned);
-                        continue;
+                        osg::LOD* n = new osg::LOD;
+                        for (const auto& [child, range] : children)
+                            n->addChild(child, range.first, range.second);
+                        n->setDataVariance(osg::Object::STATIC);
+                        return n;
+                    }
+                }
+                if (const osg::Sequence* sq = dynamic_cast<const osg::Sequence*>(node))
+                {
+                    osg::Group* n = new osg::Group;
+                    n->addChild(operator()(sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0)));
+                    n->setDataVariance(osg::Object::STATIC);
+                    return n;
+                }
+
+                mNodePath.push_back(node);
+
+                osg::Node* cloned = static_cast<osg::Node*>(node->clone(*this));
+                cloned->setDataVariance(osg::Object::STATIC);
+                cloned->setUserDataContainer(nullptr);
+                cloned->setName("");
+
+                mNodePath.pop_back();
+
+                handleCallbacks(node, cloned);
+
+                return cloned;
+            }
+            void handleCallbacks(const osg::Node* node, osg::Node* cloned) const
+            {
+                for (const osg::Callback* callback = node->getCullCallback(); callback != nullptr;
+                     callback = callback->getNestedCallback())
+                {
+                    if (callback->className() == std::string("BillboardCallback"))
+                    {
+                        if (mOptimizeBillboards)
+                        {
+                            handleBillboard(cloned);
+                            continue;
+                        }
+                        else
+                            cloned->setDataVariance(osg::Object::DYNAMIC);
+                    }
+
+                    if (node->getCullCallback()->getNestedCallback())
+                    {
+                        osg::Callback* clonedCallback = osg::clone(callback, osg::CopyOp::SHALLOW_COPY);
+                        clonedCallback->setNestedCallback(nullptr);
+                        cloned->addCullCallback(clonedCallback);
                     }
                     else
-                        cloned->setDataVariance(osg::Object::DYNAMIC);
+                        cloned->addCullCallback(const_cast<osg::Callback*>(callback));
                 }
+            }
+            void handleBillboard(osg::Node* node) const
+            {
+                osg::Transform* transform = node->asTransform();
+                if (!transform)
+                    return;
+                osg::MatrixTransform* matrixTransform = transform->asMatrixTransform();
+                if (!matrixTransform)
+                    return;
 
-                if (node->getCullCallback()->getNestedCallback())
+                osg::Matrix worldToLocal = osg::Matrix::identity();
+                for (auto pathNode : mNodePath)
+                    if (const osg::Transform* t = pathNode->asTransform())
+                        t->computeWorldToLocalMatrix(worldToLocal, nullptr);
+                worldToLocal = osg::Matrix::orthoNormal(worldToLocal);
+
+                osg::Matrix billboardMatrix;
+                osg::Vec3f viewVector = -(mViewVector + worldToLocal.getTrans());
+                viewVector.normalize();
+                osg::Vec3f right = viewVector ^ osg::Vec3f(0, 0, 1);
+                right.normalize();
+                osg::Vec3f up = right ^ viewVector;
+                up.normalize();
+                billboardMatrix.makeLookAt(osg::Vec3f(0, 0, 0), viewVector, up);
+                billboardMatrix.invert(billboardMatrix);
+
+                const osg::Matrix& oldMatrix = matrixTransform->getMatrix();
+                float mag[3]; // attempt to preserve scale
+                for (int i = 0; i < 3; ++i)
+                    mag[i] = std::sqrt(oldMatrix(0, i) * oldMatrix(0, i) + oldMatrix(1, i) * oldMatrix(1, i)
+                        + oldMatrix(2, i) * oldMatrix(2, i));
+                osg::Matrix newMatrix;
+                worldToLocal.setTrans(0, 0, 0);
+                newMatrix *= worldToLocal;
+                newMatrix.preMult(billboardMatrix);
+                newMatrix.preMultScale(osg::Vec3f(mag[0], mag[1], mag[2]));
+                newMatrix.setTrans(oldMatrix.getTrans());
+
+                matrixTransform->setMatrix(newMatrix);
+            }
+            osg::Drawable* operator()(const osg::Drawable* drawable) const override
+            {
+                if (!(drawable->getNodeMask() & mCopyMask))
+                    return nullptr;
+
+                if (dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
+                    return nullptr;
+
+                if (dynamic_cast<const SceneUtil::OsgaRigGeometry*>(drawable))
+                    return nullptr;
+                if (const SceneUtil::RigGeometry* rig = dynamic_cast<const SceneUtil::RigGeometry*>(drawable))
+                    return operator()(rig->getSourceGeometry());
+                if (const SceneUtil::MorphGeometry* morph = dynamic_cast<const SceneUtil::MorphGeometry*>(drawable))
+                    return operator()(morph->getSourceGeometry());
+
+                if (getCopyFlags() & DEEP_COPY_DRAWABLES)
                 {
-                    osg::Callback* clonedCallback = osg::clone(callback, osg::CopyOp::SHALLOW_COPY);
-                    clonedCallback->setNestedCallback(nullptr);
-                    cloned->addCullCallback(clonedCallback);
+                    osg::Drawable* d = static_cast<osg::Drawable*>(drawable->clone(*this));
+                    d->setDataVariance(osg::Object::STATIC);
+                    d->setUserDataContainer(nullptr);
+                    d->setName("");
+                    return d;
                 }
                 else
-                    cloned->addCullCallback(const_cast<osg::Callback*>(callback));
+                    return const_cast<osg::Drawable*>(drawable);
             }
-        }
-        void handleBillboard(osg::Node* node) const
-        {
-            osg::Transform* transform = node->asTransform();
-            if (!transform)
-                return;
-            osg::MatrixTransform* matrixTransform = transform->asMatrixTransform();
-            if (!matrixTransform)
-                return;
-
-            osg::Matrix worldToLocal = osg::Matrix::identity();
-            for (auto pathNode : mNodePath)
-                if (const osg::Transform* t = pathNode->asTransform())
-                    t->computeWorldToLocalMatrix(worldToLocal, nullptr);
-            worldToLocal = osg::Matrix::orthoNormal(worldToLocal);
-
-            osg::Matrix billboardMatrix;
-            osg::Vec3f viewVector = -(mViewVector + worldToLocal.getTrans());
-            viewVector.normalize();
-            osg::Vec3f right = viewVector ^ osg::Vec3f(0, 0, 1);
-            right.normalize();
-            osg::Vec3f up = right ^ viewVector;
-            up.normalize();
-            billboardMatrix.makeLookAt(osg::Vec3f(0, 0, 0), viewVector, up);
-            billboardMatrix.invert(billboardMatrix);
-
-            const osg::Matrix& oldMatrix = matrixTransform->getMatrix();
-            float mag[3]; // attempt to preserve scale
-            for (int i = 0; i < 3; ++i)
-                mag[i] = std::sqrt(oldMatrix(0, i) * oldMatrix(0, i) + oldMatrix(1, i) * oldMatrix(1, i)
-                    + oldMatrix(2, i) * oldMatrix(2, i));
-            osg::Matrix newMatrix;
-            worldToLocal.setTrans(0, 0, 0);
-            newMatrix *= worldToLocal;
-            newMatrix.preMult(billboardMatrix);
-            newMatrix.preMultScale(osg::Vec3f(mag[0], mag[1], mag[2]));
-            newMatrix.setTrans(oldMatrix.getTrans());
-
-            matrixTransform->setMatrix(newMatrix);
-        }
-        osg::Drawable* operator()(const osg::Drawable* drawable) const override
-        {
-            if (!(drawable->getNodeMask() & mCopyMask))
-                return nullptr;
-
-            if (dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
-                return nullptr;
-
-            if (dynamic_cast<const SceneUtil::OsgaRigGeometry*>(drawable))
-                return nullptr;
-            if (const SceneUtil::RigGeometry* rig = dynamic_cast<const SceneUtil::RigGeometry*>(drawable))
-                return operator()(rig->getSourceGeometry());
-            if (const SceneUtil::MorphGeometry* morph = dynamic_cast<const SceneUtil::MorphGeometry*>(drawable))
-                return operator()(morph->getSourceGeometry());
-
-            if (getCopyFlags() & DEEP_COPY_DRAWABLES)
-            {
-                osg::Drawable* d = static_cast<osg::Drawable*>(drawable->clone(*this));
-                d->setDataVariance(osg::Object::STATIC);
-                d->setUserDataContainer(nullptr);
-                d->setName("");
-                return d;
-            }
-            else
-                return const_cast<osg::Drawable*>(drawable);
-        }
-        osg::Callback* operator()(const osg::Callback* callback) const override { return nullptr; }
-    };
-
-    class RefnumSet : public osg::Object
-    {
-    public:
-        RefnumSet() {}
-        RefnumSet(const RefnumSet& copy, const osg::CopyOp&)
-            : mRefnums(copy.mRefnums)
-        {
-        }
-        META_Object(MWRender, RefnumSet)
-        std::vector<ESM::RefNum> mRefnums;
-    };
-
-    class AnalyzeVisitor : public osg::NodeVisitor
-    {
-    public:
-        AnalyzeVisitor(osg::Node::NodeMask analyzeMask)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mCurrentStateSet(nullptr)
-        {
-            setTraversalMask(analyzeMask);
-        }
-
-        typedef std::unordered_map<osg::StateSet*, unsigned int> StateSetCounter;
-        struct Result
-        {
-            StateSetCounter mStateSetCounter;
-            unsigned int mNumVerts = 0;
+            osg::Callback* operator()(const osg::Callback* callback) const override { return nullptr; }
         };
 
-        void apply(osg::Node& node) override
+        class RefnumSet : public osg::Object
         {
-            if (node.getStateSet())
-                mCurrentStateSet = node.getStateSet();
+        public:
+            RefnumSet() {}
+            RefnumSet(const RefnumSet& copy, const osg::CopyOp&)
+                : mRefnums(copy.mRefnums)
+            {
+            }
+            META_Object(MWRender, RefnumSet)
+            std::vector<ESM::RefNum> mRefnums;
+        };
 
-            if (osg::Switch* sw = node.asSwitch())
+        class AnalyzeVisitor : public osg::NodeVisitor
+        {
+        public:
+            AnalyzeVisitor(osg::Node::NodeMask analyzeMask)
+                : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+                , mCurrentStateSet(nullptr)
             {
-                for (unsigned int i = 0; i < sw->getNumChildren(); ++i)
-                    if (sw->getValue(i))
-                        traverse(*sw->getChild(i));
-                return;
-            }
-            if (osg::LOD* lod = dynamic_cast<osg::LOD*>(&node))
-            {
-                for (unsigned int i = 0; i < lod->getNumChildren(); ++i)
-                    if (const auto r = intersection(lod->getRangeList()[i], mDistances); !empty(r))
-                        traverse(*lod->getChild(i));
-                return;
-            }
-            if (osg::Sequence* sq = dynamic_cast<osg::Sequence*>(&node))
-            {
-                traverse(*sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0));
-                return;
+                setTraversalMask(analyzeMask);
             }
 
-            traverse(node);
-        }
-        void apply(osg::Geometry& geom) override
-        {
-            if (osg::Array* array = geom.getVertexArray())
-                mResult.mNumVerts += array->getNumElements();
-
-            ++mResult.mStateSetCounter[mCurrentStateSet];
-            ++mGlobalStateSetCounter[mCurrentStateSet];
-        }
-        Result retrieveResult()
-        {
-            Result result = mResult;
-            mResult = Result();
-            mCurrentStateSet = nullptr;
-            return result;
-        }
-        void addInstance(const Result& result)
-        {
-            for (auto pair : result.mStateSetCounter)
-                mGlobalStateSetCounter[pair.first] += pair.second;
-        }
-        float getMergeBenefit(const Result& result)
-        {
-            if (result.mStateSetCounter.empty())
-                return 1;
-            float mergeBenefit = 0;
-            for (auto pair : result.mStateSetCounter)
+            typedef std::unordered_map<osg::StateSet*, unsigned int> StateSetCounter;
+            struct Result
             {
-                mergeBenefit += mGlobalStateSetCounter[pair.first];
+                StateSetCounter mStateSetCounter;
+                unsigned int mNumVerts = 0;
+            };
+
+            void apply(osg::Node& node) override
+            {
+                if (node.getStateSet())
+                    mCurrentStateSet = node.getStateSet();
+
+                if (osg::Switch* sw = node.asSwitch())
+                {
+                    for (unsigned int i = 0; i < sw->getNumChildren(); ++i)
+                        if (sw->getValue(i))
+                            traverse(*sw->getChild(i));
+                    return;
+                }
+                if (osg::LOD* lod = dynamic_cast<osg::LOD*>(&node))
+                {
+                    for (unsigned int i = 0; i < lod->getNumChildren(); ++i)
+                        if (const auto r = intersection(lod->getRangeList()[i], mDistances); !empty(r))
+                            traverse(*lod->getChild(i));
+                    return;
+                }
+                if (osg::Sequence* sq = dynamic_cast<osg::Sequence*>(&node))
+                {
+                    traverse(*sq->getChild(sq->getValue() != -1 ? sq->getValue() : 0));
+                    return;
+                }
+
+                traverse(node);
             }
-            mergeBenefit /= result.mStateSetCounter.size();
-            return mergeBenefit;
-        }
+            void apply(osg::Geometry& geom) override
+            {
+                if (osg::Array* array = geom.getVertexArray())
+                    mResult.mNumVerts += array->getNumElements();
 
-        Result mResult;
-        osg::StateSet* mCurrentStateSet;
-        StateSetCounter mGlobalStateSetCounter;
-        LODRange mDistances = { 0.f, 0.f };
-    };
+                ++mResult.mStateSetCounter[mCurrentStateSet];
+                ++mGlobalStateSetCounter[mCurrentStateSet];
+            }
+            Result retrieveResult()
+            {
+                Result result = mResult;
+                mResult = Result();
+                mCurrentStateSet = nullptr;
+                return result;
+            }
+            void addInstance(const Result& result)
+            {
+                for (auto pair : result.mStateSetCounter)
+                    mGlobalStateSetCounter[pair.first] += pair.second;
+            }
+            float getMergeBenefit(const Result& result)
+            {
+                if (result.mStateSetCounter.empty())
+                    return 1;
+                float mergeBenefit = 0;
+                for (auto pair : result.mStateSetCounter)
+                {
+                    mergeBenefit += mGlobalStateSetCounter[pair.first];
+                }
+                mergeBenefit /= result.mStateSetCounter.size();
+                return mergeBenefit;
+            }
 
-    class DebugVisitor : public osg::NodeVisitor
-    {
-    public:
-        DebugVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        {
-        }
-        void apply(osg::Drawable& node) override
-        {
-            osg::ref_ptr<osg::Material> m(new osg::Material);
-            osg::Vec4f color(
-                Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), 0.f);
-            color.normalize();
-            m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
-            m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
-            m->setColorMode(osg::Material::OFF);
-            m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(color));
-            osg::ref_ptr<osg::StateSet> stateset
-                = node.getStateSet() ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY) : new osg::StateSet;
-            stateset->setAttribute(m);
-            stateset->addUniform(new osg::Uniform("colorMode", 0));
-            stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
-            stateset->addUniform(new osg::Uniform("specStrength", 1.f));
-            node.setStateSet(stateset);
-        }
-    };
+            Result mResult;
+            osg::StateSet* mCurrentStateSet;
+            StateSetCounter mGlobalStateSetCounter;
+            LODRange mDistances = { 0.f, 0.f };
+        };
 
-    class AddRefnumMarkerVisitor : public osg::NodeVisitor
-    {
-    public:
-        AddRefnumMarkerVisitor(ESM::RefNum refnum)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mRefnum(refnum)
+        class DebugVisitor : public osg::NodeVisitor
         {
-        }
-        ESM::RefNum mRefnum;
-        void apply(osg::Geometry& node) override
+        public:
+            DebugVisitor()
+                : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            {
+            }
+            void apply(osg::Drawable& node) override
+            {
+                osg::ref_ptr<osg::Material> m(new osg::Material);
+                osg::Vec4f color(
+                    Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), 0.f);
+                color.normalize();
+                m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
+                m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
+                m->setColorMode(osg::Material::OFF);
+                m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(color));
+                osg::ref_ptr<osg::StateSet> stateset = node.getStateSet()
+                    ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY)
+                    : new osg::StateSet;
+                stateset->setAttribute(m);
+                stateset->addUniform(new osg::Uniform("colorMode", 0));
+                stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
+                stateset->addUniform(new osg::Uniform("specStrength", 1.f));
+                node.setStateSet(stateset);
+            }
+        };
+
+        class AddRefnumMarkerVisitor : public osg::NodeVisitor
         {
-            osg::ref_ptr<RefnumMarker> marker(new RefnumMarker);
-            marker->mRefnum = mRefnum;
-            if (osg::Array* array = node.getVertexArray())
-                marker->mNumVertices = array->getNumElements();
-            node.getOrCreateUserDataContainer()->addUserObject(marker);
-        }
-    };
+        public:
+            AddRefnumMarkerVisitor(ESM::RefNum refnum)
+                : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+                , mRefnum(refnum)
+            {
+            }
+            ESM::RefNum mRefnum;
+            void apply(osg::Geometry& node) override
+            {
+                osg::ref_ptr<RefnumMarker> marker(new RefnumMarker);
+                marker->mRefnum = mRefnum;
+                if (osg::Array* array = node.getVertexArray())
+                    marker->mNumVertices = array->getNumElements();
+                node.getOrCreateUserDataContainer()->addUserObject(marker);
+            }
+        };
+    }
 
     ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace)
         : GenericResourceManager<ChunkId>(nullptr, Settings::cells().mCacheExpiryDelay)
@@ -984,34 +987,37 @@ namespace MWRender
         return true;
     }
 
-    struct GetRefnumsFunctor
+    namespace
     {
-        GetRefnumsFunctor(std::vector<ESM::RefNum>& output)
-            : mOutput(output)
+        struct GetRefnumsFunctor
         {
-        }
-        void operator()(MWRender::ChunkId chunkId, osg::Object* obj)
-        {
-            if (!std::get<2>(chunkId))
-                return;
-            const osg::Vec2f& center = std::get<0>(chunkId);
-            bool activeGrid = (center.x() > mActiveGrid.x() || center.y() > mActiveGrid.y()
-                || center.x() < mActiveGrid.z() || center.y() < mActiveGrid.w());
-            if (!activeGrid)
-                return;
-
-            osg::UserDataContainer* udc = obj->getUserDataContainer();
-            if (udc && udc->getNumUserObjects())
+            GetRefnumsFunctor(std::vector<ESM::RefNum>& output)
+                : mOutput(output)
             {
-                RefnumSet* refnums = dynamic_cast<RefnumSet*>(udc->getUserObject(0));
-                if (!refnums)
-                    return;
-                mOutput.insert(mOutput.end(), refnums->mRefnums.begin(), refnums->mRefnums.end());
             }
-        }
-        osg::Vec4i mActiveGrid;
-        std::vector<ESM::RefNum>& mOutput;
-    };
+            void operator()(MWRender::ChunkId chunkId, osg::Object* obj)
+            {
+                if (!std::get<2>(chunkId))
+                    return;
+                const osg::Vec2f& center = std::get<0>(chunkId);
+                bool activeGrid = (center.x() > mActiveGrid.x() || center.y() > mActiveGrid.y()
+                    || center.x() < mActiveGrid.z() || center.y() < mActiveGrid.w());
+                if (!activeGrid)
+                    return;
+
+                osg::UserDataContainer* udc = obj->getUserDataContainer();
+                if (udc && udc->getNumUserObjects())
+                {
+                    RefnumSet* refnums = dynamic_cast<RefnumSet*>(udc->getUserObject(0));
+                    if (!refnums)
+                        return;
+                    mOutput.insert(mOutput.end(), refnums->mRefnums.begin(), refnums->mRefnums.end());
+                }
+            }
+            osg::Vec4i mActiveGrid;
+            std::vector<ESM::RefNum>& mOutput;
+        };
+    }
 
     void ObjectPaging::getPagedRefnums(const osg::Vec4i& activeGrid, std::vector<ESM::RefNum>& out)
     {
