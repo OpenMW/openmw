@@ -468,10 +468,30 @@ namespace MWRender
 
     namespace
     {
-        std::map<ESM::RefNum, ESM::CellRef> collectESM3References(
+        struct PagedCellRef
+        {
+            ESM::RefId mRefId;
+            ESM::RefNum mRefNum;
+            osg::Vec3f mPosition;
+            osg::Vec3f mRotation;
+            float mScale;
+        };
+
+        PagedCellRef makePagedCellRef(const ESM::CellRef& value)
+        {
+            return PagedCellRef{
+                .mRefId = value.mRefID,
+                .mRefNum = value.mRefNum,
+                .mPosition = value.mPos.asVec3(),
+                .mRotation = value.mPos.asRotationVec3(),
+                .mScale = value.mScale,
+            };
+        }
+
+        std::map<ESM::RefNum, PagedCellRef> collectESM3References(
             float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers)
         {
-            std::map<ESM::RefNum, ESM::CellRef> refs;
+            std::map<ESM::RefNum, PagedCellRef> refs;
             const auto& store = MWBase::Environment::get().getWorld()->getStore();
             for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
             {
@@ -509,7 +529,7 @@ namespace MWRender
                                     refs.erase(ref.mRefNum);
                                     continue;
                                 }
-                                refs[ref.mRefNum] = std::move(ref);
+                                refs.insert_or_assign(ref.mRefNum, makePagedCellRef(ref));
                             }
                         }
                         catch (const std::exception& e)
@@ -519,8 +539,7 @@ namespace MWRender
                             continue;
                         }
                     }
-
-                    for (auto [ref, deleted] : cell->mLeasedRefs)
+                    for (const auto& [ref, deleted] : cell->mLeasedRefs)
                     {
                         if (deleted)
                         {
@@ -530,7 +549,7 @@ namespace MWRender
                         int type = store.findStatic(ref.mRefID);
                         if (!typeFilter(type, size >= 2))
                             continue;
-                        refs[ref.mRefNum] = std::move(ref);
+                        refs.insert_or_assign(ref.mRefNum, makePagedCellRef(ref));
                     }
                 }
             }
@@ -546,7 +565,7 @@ namespace MWRender
         osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * getCellSize(mWorldspace);
         osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
 
-        std::map<ESM::RefNum, ESM::CellRef> refs;
+        std::map<ESM::RefNum, PagedCellRef> refs;
         ESM::ReadersCache readers;
         const auto& world = MWBase::Environment::get().getWorld();
         const auto& store = world->getStore();
@@ -579,7 +598,7 @@ namespace MWRender
         osg::Vec2f maxBound = (center + osg::Vec2f(size / 2.f, size / 2.f));
         struct InstanceList
         {
-            std::vector<const ESM::CellRef*> mInstances;
+            std::vector<const PagedCellRef*> mInstances;
             AnalyzeVisitor::Result mAnalyzeResult;
             bool mNeedCompile = false;
         };
@@ -605,14 +624,11 @@ namespace MWRender
         float minSize = mMinSize;
         if (mMinSizeMergeFactor)
             minSize *= mMinSizeMergeFactor;
-        for (const auto& pair : refs)
+        for (const auto& [refNum, ref] : refs)
         {
-            const ESM::CellRef& ref = pair.second;
-
-            osg::Vec3f pos = ref.mPos.asVec3();
             if (size < 1.f)
             {
-                osg::Vec3f cellPos = pos / cellSize;
+                const osg::Vec3f cellPos = ref.mPosition / cellSize;
                 if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x())
                     || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
                     || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x())
@@ -620,20 +636,20 @@ namespace MWRender
                     continue;
             }
 
-            float dSqr = (viewPoint - pos).length2();
+            const float dSqr = (viewPoint - ref.mPosition).length2();
             if (!activeGrid)
             {
                 std::lock_guard<std::mutex> lock(mSizeCacheMutex);
-                SizeCache::iterator found = mSizeCache.find(pair.first);
+                SizeCache::iterator found = mSizeCache.find(refNum);
                 if (found != mSizeCache.end() && found->second < dSqr * minSize * minSize)
                     continue;
             }
 
-            if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefID))
+            if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefId))
                 continue;
 
-            int type = store.findStatic(ref.mRefID);
-            std::string model = getModel(type, ref.mRefID, store);
+            const int type = store.findStatic(ref.mRefId);
+            std::string model = getModel(type, ref.mRefId, store);
             if (model.empty())
                 continue;
             model = Misc::ResourceHelpers::correctMeshPath(model);
@@ -662,7 +678,7 @@ namespace MWRender
                                 .insert(found,
                                     { key,
                                         Misc::ResourceHelpers::getLODMeshName(
-                                            world->getESMVersions()[ref.mRefNum.mContentFile], model,
+                                            world->getESMVersions()[refNum.mContentFile], model,
                                             mSceneManager->getVFS(), lod) })
                                 ->second;
             }
@@ -678,20 +694,20 @@ namespace MWRender
                         && dynamic_cast<const osgAnimation::BasicAnimationManager*>(cnode->getUpdateCallback())))
                     continue;
                 else
-                    refnumSet->mRefnums.push_back(pair.first);
+                    refnumSet->mRefnums.push_back(refNum);
             }
 
             {
                 std::lock_guard<std::mutex> lock(mRefTrackerMutex);
-                if (getRefTracker().mDisabled.count(pair.first))
+                if (getRefTracker().mDisabled.count(refNum))
                     continue;
             }
 
-            float radius2 = cnode->getBound().radius2() * ref.mScale * ref.mScale;
+            const float radius2 = cnode->getBound().radius2() * ref.mScale * ref.mScale;
             if (radius2 < dSqr * minSize * minSize && !activeGrid)
             {
                 std::lock_guard<std::mutex> lock(mSizeCacheMutex);
-                mSizeCache[pair.first] = radius2;
+                mSizeCache[refNum] = radius2;
                 continue;
             }
 
@@ -733,20 +749,19 @@ namespace MWRender
                 minSizeMerged *= minSizeMergeFactor2;
 
             unsigned int numinstances = 0;
-            for (auto cref : pair.second.mInstances)
+            for (const PagedCellRef* refPtr : pair.second.mInstances)
             {
-                const ESM::CellRef& ref = *cref;
-                osg::Vec3f pos = ref.mPos.asVec3();
+                const PagedCellRef& ref = *refPtr;
 
                 if (!activeGrid && minSizeMerged != minSize
-                    && cnode->getBound().radius2() * cref->mScale * cref->mScale
-                        < (viewPoint - pos).length2() * minSizeMerged * minSizeMerged)
+                    && cnode->getBound().radius2() * ref.mScale * ref.mScale
+                        < (viewPoint - ref.mPosition).length2() * minSizeMerged * minSizeMerged)
                     continue;
 
-                osg::Vec3f nodePos = pos - worldCenter;
-                osg::Quat nodeAttitude = osg::Quat(ref.mPos.rot[2], osg::Vec3f(0, 0, -1))
-                    * osg::Quat(ref.mPos.rot[1], osg::Vec3f(0, -1, 0))
-                    * osg::Quat(ref.mPos.rot[0], osg::Vec3f(-1, 0, 0));
+                osg::Vec3f nodePos = ref.mPosition - worldCenter;
+                osg::Quat nodeAttitude = osg::Quat(ref.mRotation.z(), osg::Vec3f(0, 0, -1))
+                    * osg::Quat(ref.mRotation.y(), osg::Vec3f(0, -1, 0))
+                    * osg::Quat(ref.mRotation.x(), osg::Vec3f(-1, 0, 0));
                 osg::Vec3f nodeScale = osg::Vec3f(ref.mScale, ref.mScale, ref.mScale);
 
                 osg::ref_ptr<osg::Group> trans;
