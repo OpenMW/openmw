@@ -664,13 +664,11 @@ namespace MWRender
                 if (found != mLODNameCache.end() && found->first == key)
                     model = found->second;
                 else
-                    model
-                        = mLODNameCache
-                              .insert(found,
-                                  { key,
-                                      Misc::ResourceHelpers::getLODMeshName(world.getESMVersions()[refNum.mContentFile],
-                                          model, mSceneManager->getVFS(), lod) })
-                              ->second;
+                    model = mLODNameCache
+                                .emplace_hint(found, std::move(key),
+                                    Misc::ResourceHelpers::getLODMeshName(world.getESMVersions()[refNum.mContentFile],
+                                        model, mSceneManager->getVFS(), lod))
+                                ->second;
             }
 
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
