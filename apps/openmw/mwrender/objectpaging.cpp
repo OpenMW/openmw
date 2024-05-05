@@ -711,15 +711,15 @@ namespace MWRender
                 continue;
             }
 
-            auto emplaced = nodes.emplace(cnode, InstanceList());
+            const auto emplaced = nodes.emplace(std::move(cnode), InstanceList());
             if (emplaced.second)
             {
                 analyzeVisitor.mDistances = LODRange{ smallestDistanceToChunk, higherDistanceToChunk } / ref.mScale;
-                const_cast<osg::Node*>(cnode.get())
-                    ->accept(
-                        analyzeVisitor); // const-trickery required because there is no const version of NodeVisitor
+                const osg::Node* const nodePtr = emplaced.first->first.get();
+                // const-trickery required because there is no const version of NodeVisitor
+                const_cast<osg::Node*>(nodePtr)->accept(analyzeVisitor);
                 emplaced.first->second.mAnalyzeResult = analyzeVisitor.retrieveResult();
-                emplaced.first->second.mNeedCompile = compile && cnode->referenceCount() <= 3;
+                emplaced.first->second.mNeedCompile = compile && nodePtr->referenceCount() <= 2;
             }
             else
                 analyzeVisitor.addInstance(emplaced.first->second.mAnalyzeResult);
