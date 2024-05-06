@@ -343,7 +343,12 @@ namespace MWGui
 
         MWBase::Environment::get().getInputManager()->update(0, true, true);
 
-        mResourceSystem->reportStats(mViewer->getFrameStamp()->getFrameNumber(), mViewer->getViewerStats());
+        osg::Stats* const stats = mViewer->getViewerStats();
+        const unsigned frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+
+        stats->setAttribute(frameNumber, "Loading", 1);
+
+        mResourceSystem->reportStats(frameNumber, stats);
         if (osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
         {
             ico->setMinimumTimeAvailableForGLCompileAndDeletePerFrame(1.f / getTargetFrameRate());
