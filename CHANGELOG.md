@@ -37,6 +37,7 @@
     Bug #6156: 1ft Charm or Sound magic effect vfx doesn't work properly
     Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
+    Bug #6240: State sharing sometimes prevents the use of the same texture file for different purposes in shaders
     Bug #6313: Followers with high Fight can turn hostile
     Bug #6402: The sound of a thunderstorm does not stop playing after entering the premises
     Bug #6427: Enemy health bar disappears before damaging effect ends
