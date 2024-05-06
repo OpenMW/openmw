@@ -2030,7 +2030,7 @@ namespace NifOsg
                             textureName = "diffuseMap";
                             break;
                         case Nif::NiTexturingProperty::GlowTexture:
-                            textureName = "glowMap";
+                            textureName = "emissiveMap";
                             break;
                         case Nif::NiTexturingProperty::DarkTexture:
                             textureName = "darkMap";
