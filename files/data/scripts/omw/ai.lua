@@ -22,16 +22,18 @@ local function startPackage(args)
         local key = "idle"
         local idle = {}
         local duration = 0
-        for i = 2, 9 do
-            local val = args.idle[key .. i]
-            if val == nil then
-                idle[i-1] = 0
-            else
-                local v = tonumber(val) or 0
-                if v < 0 or v > 100 then
-                    error("idle values cannot exceed 100")
+        if args.idle then
+            for i = 2, 9 do
+                local val = args.idle[key .. i]
+                if val == nil then
+                    idle[i-1] = 0
+                else
+                    local v = tonumber(val) or 0
+                    if v < 0 or v > 100 then
+                        error("idle values cannot exceed 100")
+                    end
+                    idle[i-1] = v
                 end
-                idle[i-1] = v
             end
         end
         if args.duration then

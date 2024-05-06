@@ -555,11 +555,19 @@ namespace MWRender
             // TODO
         }
 
-        if (activeGrid)
+        if (activeGrid && !refs.empty())
         {
             std::lock_guard<std::mutex> lock(mRefTrackerMutex);
-            for (auto ref : getRefTracker().mBlacklist)
-                refs.erase(ref);
+            const std::set<ESM::RefNum>& blacklist = getRefTracker().mBlacklist;
+            if (blacklist.size() < refs.size())
+            {
+                for (ESM::RefNum ref : blacklist)
+                    refs.erase(ref);
+            }
+            else
+            {
+                std::erase_if(refs, [&](const auto& ref) { return blacklist.contains(ref.first); });
+            }
         }
 
         osg::Vec2f minBound = (center - osg::Vec2f(size / 2.f, size / 2.f));
