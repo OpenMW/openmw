@@ -7,7 +7,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/misc/algorithm.hpp>
 
 #include "cellstore.hpp"

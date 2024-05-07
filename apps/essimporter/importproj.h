@@ -2,7 +2,8 @@
 #define OPENMW_ESSIMPORT_IMPORTPROJ_H
 
 #include <components/esm/esmcommon.hpp>
-#include <components/esm/util.hpp>
+#include <components/esm/vector3.hpp>
+
 #include <cstdint>
 #include <vector>
 

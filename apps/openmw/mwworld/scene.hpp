@@ -10,10 +10,9 @@
 #include <memory>
 #include <optional>
 #include <set>
-#include <unordered_map>
 #include <vector>
 
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/misc/constants.hpp>
 
 namespace osg
