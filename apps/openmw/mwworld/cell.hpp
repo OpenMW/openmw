@@ -4,8 +4,8 @@
 #include <osg/Vec2i>
 
 #include <components/esm/esmbridge.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm/util.hpp>
 
 namespace ESM
 {

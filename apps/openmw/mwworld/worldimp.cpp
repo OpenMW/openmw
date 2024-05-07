@@ -2784,7 +2784,7 @@ namespace MWWorld
 
         int x = ext->getGridX();
         int y = ext->getGridY();
-        osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
+        const osg::Vec2f posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
         pos.pos[0] = posFromIndex.x();
         pos.pos[1] = posFromIndex.y();
 

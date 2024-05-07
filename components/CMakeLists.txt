@@ -169,6 +169,9 @@ add_component_dir(esm attr common defs esmcommon records util luascripts format 
     indexrefid
     serializerefid
     esm3exteriorcellrefid
+    quaternion
+    vector3
+    exteriorcelllocation
     )
 
 add_component_dir(fx pass technique lexer lexer_types parse_constants widgets stateupdater)
@@ -186,6 +189,7 @@ add_component_dir (esm3
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
     infoorder timestamp formatversion landrecorddata selectiongroup dialoguecondition
+    refnum
     )
 
 add_component_dir (esmterrain

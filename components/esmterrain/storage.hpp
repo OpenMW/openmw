@@ -7,7 +7,7 @@
 #include <components/terrain/storage.hpp>
 
 #include <components/esm/esmterrain.hpp>
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/esm3/loadltex.hpp>
 
 namespace ESM4

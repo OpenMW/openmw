@@ -1226,11 +1226,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled, a magical ammunition is required to bypass normal weapon resistance or weakness. If disabled, a magical ranged weapon or a magical ammunition is required.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, требуются магические метательные снаряды, чтобы обойти сопротивление обычному оружию или уязвимость к нему. Если отключена, то требуются магические снаряды или магическое оружие дальнего боя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, для обхода сопротивления или уязвимости к обычному оружию необходимо, чтобы снаряд был магическим. Если выключена, то магическим для этого может быть как снаряд, так и оружие дальнего боя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Only Magical Ammo Bypass Resistance</source>
-        <translation>Только снаряды обходят сопротивление</translation>
+        <translation>Обычные снаряды не обходят сопротивление</translation>
     </message>
     <message>
         <source>Graphic Herbalism</source>

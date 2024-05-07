@@ -15,6 +15,9 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/projectilestate.hpp>
 
+#include <components/esm/quaternion.hpp>
+#include <components/esm/vector3.hpp>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>

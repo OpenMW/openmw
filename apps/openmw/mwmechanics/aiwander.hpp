@@ -113,6 +113,14 @@ namespace MWMechanics
 
         bool isStationary() const { return mDistance == 0; }
 
+        std::optional<int> getDistance() const override { return mDistance; }
+
+        std::optional<float> getDuration() const override { return static_cast<float>(mDuration); }
+
+        const std::vector<unsigned char>& getIdle() const { return mIdle; }
+
+        static std::string_view getIdleGroupName(size_t index) { return sIdleSelectToGroupName[index]; }
+
     private:
         void stopWalking(const MWWorld::Ptr& actor);
 
