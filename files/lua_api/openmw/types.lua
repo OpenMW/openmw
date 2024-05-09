@@ -2246,6 +2246,9 @@
 --- Functions for @{#ESM4Static} objects
 -- @field [parent=#types] #ESM4Static ESM4Static
 
+--- Functions for @{#ESM4StaticCollection} objects
+-- @field [parent=#types] #ESM4StaticCollection ESM4StaticCollection
+
 --- Functions for @{#ESM4Weapon} objects
 -- @field [parent=#types] #ESM4Weapon ESM4Weapon
 
