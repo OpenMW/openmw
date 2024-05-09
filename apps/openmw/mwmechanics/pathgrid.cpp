@@ -1,5 +1,6 @@
 #include "pathgrid.hpp"
 
+#include <algorithm>
 #include <list>
 #include <set>
 
