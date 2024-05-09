@@ -8,6 +8,7 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include "mainwizard.hpp"
 
@@ -19,7 +20,7 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Fi
 
     setupUi(this);
 
-    folderIconLabel->setPixmap(QIcon(":folder").pixmap(QSize(48, 48)));
+    folderIcon->setIcon(Misc::ScalableIcon::load(":folder"));
 
     registerField(QLatin1String("installation.path*"), targetLineEdit);
 }
