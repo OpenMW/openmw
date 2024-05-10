@@ -1,10 +1,11 @@
 #include "dialoguebindings.hpp"
+
+#include "context.hpp"
+
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/store.hpp"
-#include "context.hpp"
-#include "object.hpp"
-#include <algorithm>
+
 #include <components/esm3/loaddial.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -12,122 +13,44 @@
 
 namespace
 {
-    template <ESM::Dialogue::Type filter>
+    std::vector<const ESM::Dialogue*> makeIndex(const MWWorld::Store<ESM::Dialogue>& store, ESM::Dialogue::Type type)
+    {
+        std::vector<const ESM::Dialogue*> result;
+        for (const ESM::Dialogue& v : store)
+            if (v.mType == type)
+                result.push_back(&v);
+        return result;
+    }
+
+    template <ESM::Dialogue::Type type>
     class FilteredDialogueStore
     {
         const MWWorld::Store<ESM::Dialogue>& mDialogueStore;
-
-        const ESM::Dialogue* foundDialogueFilteredOut(const ESM::Dialogue* possibleResult) const
-        {
-            if (possibleResult && possibleResult->mType == filter)
-            {
-                return possibleResult;
-            }
-            return nullptr;
-        }
+        std::vector<const ESM::Dialogue*> mIndex;
 
     public:
-        FilteredDialogueStore()
-            : mDialogueStore{ MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>() }
+        explicit FilteredDialogueStore(const MWWorld::Store<ESM::Dialogue>& store)
+            : mDialogueStore(store)
+            , mIndex{ makeIndex(store, type) }
         {
         }
-
-        class FilteredDialogueIterator
-        {
-            using DecoratedIterator = MWWorld::Store<ESM::Dialogue>::iterator;
-            DecoratedIterator mIter;
-            DecoratedIterator mEndIter;
-
-        public:
-            using iterator_category = DecoratedIterator::iterator_category;
-            using value_type = DecoratedIterator::value_type;
-            using difference_type = DecoratedIterator::difference_type;
-            using pointer = DecoratedIterator::pointer;
-            using reference = DecoratedIterator::reference;
-
-            FilteredDialogueIterator(const DecoratedIterator& pointingIterator, const DecoratedIterator& end)
-                : mIter{ pointingIterator }
-                , mEndIter{ end }
-            {
-            }
-
-            FilteredDialogueIterator& operator++()
-            {
-                if (mIter == mEndIter)
-                {
-                    return *this;
-                }
-
-                do
-                {
-                    ++mIter;
-                } while (mIter != mEndIter && mIter->mType != filter);
-                return *this;
-            }
-
-            FilteredDialogueIterator operator++(int)
-            {
-                FilteredDialogueIterator iter = *this;
-                ++(*this);
-                return iter;
-            }
-
-            FilteredDialogueIterator& operator+=(difference_type advance)
-            {
-                while (advance > 0 && mIter != mEndIter)
-                {
-                    ++(*this);
-                    --advance;
-                }
-                return *this;
-            }
-
-            bool operator==(const FilteredDialogueIterator& x) const { return mIter == x.mIter; }
-
-            bool operator!=(const FilteredDialogueIterator& x) const { return !(*this == x); }
-
-            const value_type& operator*() const { return *mIter; }
-
-            const value_type* operator->() const { return &(*mIter); }
-        };
-
-        using iterator = FilteredDialogueIterator;
 
         const ESM::Dialogue* search(const ESM::RefId& id) const
         {
-            return foundDialogueFilteredOut(mDialogueStore.search(id));
+            const ESM::Dialogue* dialogue = mDialogueStore.search(id);
+            if (dialogue != nullptr && dialogue->mType == type)
+                return dialogue;
+            return nullptr;
         }
 
-        const ESM::Dialogue* at(size_t index) const
+        const ESM::Dialogue* at(std::size_t index) const
         {
-            auto result = begin();
-            result += index;
-
-            if (result == end())
-            {
+            if (index >= mIndex.size())
                 return nullptr;
-            }
-
-            return &(*result);
+            return mIndex[index];
         }
 
-        size_t getSize() const
-        {
-            return std::count_if(
-                mDialogueStore.begin(), mDialogueStore.end(), [](const auto& d) { return d.mType == filter; });
-        }
-
-        iterator begin() const
-        {
-            iterator result{ mDialogueStore.begin(), mDialogueStore.end() };
-            while (result != end() && result->mType != filter)
-            {
-                ++result;
-            }
-            return result;
-        }
-
-        iterator end() const { return iterator{ mDialogueStore.end(), mDialogueStore.end() }; }
+        std::size_t getSize() const { return mIndex.size(); }
     };
 
     template <ESM::Dialogue::Type filter>
@@ -156,7 +79,7 @@ namespace
         storeBindingsClass[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         storeBindingsClass[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
 
-        table["records"] = StoreT{};
+        table["records"] = StoreT{ MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>() };
     }
 
     struct DialogueInfos
