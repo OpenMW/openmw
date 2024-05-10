@@ -343,6 +343,34 @@ namespace
 
 namespace MWWorld
 {
+    namespace
+    {
+        template <class T>
+        bool isEnabled(const T& ref, const ESMStore& store)
+        {
+            if (ref.mEsp.parent.isZeroOrUnset())
+                return true;
+
+            // Disable objects that are linked to an initially disabled parent.
+            // Actually when we will start working on Oblivion/Skyrim scripting we will need to:
+            //  - use the current state of the parent instead of initial state of the parent
+            //  - every time when the parent is enabled/disabled we should also enable/disable
+            //        all objects that are linked to it.
+            // But for now we assume that the parent remains in its initial state.
+            if (const ESM4::Reference* parentRef = store.get<ESM4::Reference>().searchStatic(ref.mEsp.parent))
+            {
+                const bool parentDisabled = parentRef->mFlags & ESM4::Rec_Disabled;
+                const bool inversed = ref.mEsp.flags & ESM4::EnableParent::Flag_Inversed;
+                if (parentDisabled != inversed)
+                    return false;
+
+                return isEnabled(*parentRef, store);
+            }
+
+            return true;
+        }
+    }
+
     struct CellStoreImp
     {
         CellStoreTuple mRefLists;
@@ -416,23 +444,8 @@ namespace MWWorld
             return;
         }
         LiveCellRef<X> liveCellRef(ref, ptr);
-        if (!ref.mEsp.parent.isZeroOrUnset())
-        {
-            // Disable objects that are linked to an initially disabled parent.
-            // Actually when we will start working on Oblivion/Skyrim scripting we will need to:
-            //  - use the current state of the parent instead of initial state of the parent
-            //  - every time when the parent is enabled/disabled we should also enable/disable
-            //        all objects that are linked to it.
-            // But for now we assume that the parent remains in its initial state.
-            const ESM4::Reference* parentRef = esmStore.get<ESM4::Reference>().searchStatic(ref.mEsp.parent);
-            if (parentRef)
-            {
-                bool parentDisabled = parentRef->mFlags & ESM4::Rec_Disabled;
-                bool inversed = ref.mEsp.flags & ESM4::EnableParent::Flag_Inversed;
-                if (parentDisabled != inversed)
-                    liveCellRef.mData.disable();
-            }
-        }
+        if (!isEnabled(ref, esmStore))
+            liveCellRef.mData.disable();
         list.push_back(liveCellRef);
     }
 
