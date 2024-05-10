@@ -1488,11 +1488,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Force the use of per pixel lighting. By default, only bump and normal mapped objects use per-pixel lighting. Only affects objects drawn with shaders. Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended. Note that groundcover shaders and particle effects ignore this setting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>Использовать попиксельное освещене принудительно. По умолчанию его используют только объекты, использующие карты бампа и карты нормалей. Влияет только на объекты, отрисовываемые шейдерами. Включение попиксельного освещения приводит к визуальным отличиям по сравнению с оригинальным движком Morrowind, так как некоторые источники света в Morrowind полагаются на повершинное освещение для того, чтобы выглядеть, как задумывалось. Обратите внимание, что шейдеры растительности и системы частиц игнорируют эту настройку.</translation>
+        <translation>Использовать попиксельное освещение принудительно. По умолчанию его используют только объекты, использующие карты бампа и карты нормалей. Влияет только на объекты, отрисовываемые шейдерами. Включение попиксельного освещения приводит к визуальным отличиям по сравнению с оригинальным движком Morrowind, так как некоторые источники света в Morrowind полагаются на повершинное освещение для того, чтобы выглядеть, как задумывалось. Обратите внимание, что шейдеры растительности и системы частиц игнорируют эту настройку.</translation>
     </message>
     <message>
         <source>Force Per-Pixel Lighting</source>
-        <translation>Использовать попиксельное освещение</translation>
+        <translation>Попиксельное освещение</translation>
     </message>
 </context>
 </TS>
