@@ -221,7 +221,7 @@ split point uniform logarithmic ratio
 :Default:	0.5
 
 Controls the ratio of :math:`C_i^{log}` versus :math:`C_i^{uniform}` used to form the Practical Split Scheme as described in the linked paper.
-When using a larger-than-default viewing distance and distant terrain, and you have `allow shadow map overlap`_ enabled, larger values will prevent nearby shadows losing quality.
+When using a larger-than-default viewing distance and distant terrain, larger values will prevent nearby shadows losing quality.
 It is therefore recommended that this isn't left at the default when the viewing distance is changed.
 
 split point bias
