@@ -83,31 +83,32 @@ namespace MWRender
                 }
             }
 
-            float springOutGeneric(float x, float lambda, float w)
+            float springOutGeneric(float x, float lambda)
             {
                 // Higher lambda = lower swing amplitude. 1 = 150% swing amplitude.
-                // W corresponds to the amount of overswings, more = more. 4.71 = 1 overswing, 7.82 = 2
+                // w corresponds to the frequency of oscillation in the easing function, controlling the amount of overswing
+                constexpr float w = 1.5f * osg::PIf; // 4.71238
                 return 1 - expf(-lambda * x) * cos(w * x);
             }
 
             float springOutWeak(float x)
             {
-                return springOutGeneric(x, 4, 4.71);
+                return springOutGeneric(x, 4);
             }
 
             float springOutMed(float x)
             {
-                return springOutGeneric(x, 3, 4.71);
+                return springOutGeneric(x, 3);
             }
 
             float springOutStrong(float x)
             {
-                return springOutGeneric(x, 2, 4.71);
+                return springOutGeneric(x, 2);
             }
 
             float springOutTooMuch(float x)
             {
-                return springOutGeneric(x, 1, 4.71);
+                return springOutGeneric(x, 1);
             }
 
             const std::unordered_map<std::string, EasingFn> easingsMap = {
