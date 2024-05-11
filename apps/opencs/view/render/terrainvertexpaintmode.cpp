@@ -71,9 +71,9 @@ CSVRender::TerrainVertexPaintMode::TerrainVertexPaintMode(
 
 void CSVRender::TerrainVertexPaintMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
-    if (!mTerrainShapeSelection)
+    if (!mTerrainSelection)
     {
-        mTerrainShapeSelection
+        mTerrainSelection
             = std::make_shared<TerrainSelection>(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Shape);
     }
 
@@ -107,9 +107,9 @@ void CSVRender::TerrainVertexPaintMode::deactivate(CSVWidget::SceneToolbar* tool
         toolbar->removeTool(mVertexPaintBrushScenetool);
     }
 
-    if (mTerrainShapeSelection)
+    if (mTerrainSelection)
     {
-        mTerrainShapeSelection.reset();
+        mTerrainSelection.reset();
     }
 
     if (mBrushDraw)
@@ -128,10 +128,13 @@ void CSVRender::TerrainVertexPaintMode::primaryEditPressed(const WorldspaceHitRe
     {
         if (mDragMode == InteractionType_PrimaryEdit)
         {
+            CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+            // QUndoStack& undoStack = document.getUndoStack();
+            // undoStack.beginMacro("Set land normals");
             editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
         }
     }
-    endShapeEditing();
+    endVertexPaintEditing();
 }
 
 void CSVRender::TerrainVertexPaintMode::primarySelectPressed(const WorldspaceHitResult& hit)
@@ -139,7 +142,7 @@ void CSVRender::TerrainVertexPaintMode::primarySelectPressed(const WorldspaceHit
     if (hit.hit && hit.tag == nullptr)
     {
         selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
-        mTerrainShapeSelection->clearTemporarySelection();
+        mTerrainSelection->clearTemporarySelection();
     }
 }
 
@@ -148,7 +151,7 @@ void CSVRender::TerrainVertexPaintMode::secondarySelectPressed(const WorldspaceH
     if (hit.hit && hit.tag == nullptr)
     {
         selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
-        mTerrainShapeSelection->clearTemporarySelection();
+        mTerrainSelection->clearTemporarySelection();
     }
 }
 
@@ -162,6 +165,9 @@ bool CSVRender::TerrainVertexPaintMode::primaryEditStartDrag(const QPoint& pos)
     {
         mEditingPos = hit.worldPos;
         mIsEditing = true;
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+        QUndoStack& undoStack = document.getUndoStack();
+        undoStack.beginMacro("Set land normals");
     }
 
     return true;
@@ -227,26 +233,38 @@ void CSVRender::TerrainVertexPaintMode::dragCompleted(const QPoint& pos)
 {
     if (mDragMode == InteractionType_PrimaryEdit)
     {
-        endShapeEditing();
+        if (mIsEditing)
+        {
+            CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+            QUndoStack& undoStack = document.getUndoStack();
+            undoStack.endMacro();
+        }
+        endVertexPaintEditing();
     }
     if (mDragMode == InteractionType_PrimarySelect || mDragMode == InteractionType_SecondarySelect)
     {
-        mTerrainShapeSelection->clearTemporarySelection();
+        mTerrainSelection->clearTemporarySelection();
     }
 }
 
 void CSVRender::TerrainVertexPaintMode::dragAborted()
 {
-    endShapeEditing();
+    if (mIsEditing)
+    {
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+        QUndoStack& undoStack = document.getUndoStack();
+        undoStack.endMacro();
+    } 
+    endVertexPaintEditing();
     mDragMode = InteractionType_None;
 }
 
 void CSVRender::TerrainVertexPaintMode::dragWheel(int diff, double speedFactor) {}
 
-void CSVRender::TerrainVertexPaintMode::endShapeEditing()
+void CSVRender::TerrainVertexPaintMode::endVertexPaintEditing()
 {
     mIsEditing = false;
-    mTerrainShapeSelection->update();
+    mTerrainSelection->update();
 }
 
 void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
@@ -458,6 +476,7 @@ void CSVRender::TerrainVertexPaintMode::pushEditToCommand(const CSMWorld::LandCo
 
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.push(new CSMWorld::ModifyCommand(landTable, index, changedLand));
+
 }
 
 bool CSVRender::TerrainVertexPaintMode::isInCellSelection(int globalSelectionX, int globalSelectionY)
@@ -569,13 +588,13 @@ void CSVRender::TerrainVertexPaintMode::selectTerrainShapes(
         selectAction = CSMPrefs::get()["3D Scene Editing"]["secondary-select-action"].toString();
 
     if (selectAction == "Select only")
-        mTerrainShapeSelection->onlySelect(selections);
+        mTerrainSelection->onlySelect(selections);
     else if (selectAction == "Add to selection")
-        mTerrainShapeSelection->addSelect(selections);
+        mTerrainSelection->addSelect(selections);
     else if (selectAction == "Remove from selection")
-        mTerrainShapeSelection->removeSelect(selections);
+        mTerrainSelection->removeSelect(selections);
     else if (selectAction == "Invert selection")
-        mTerrainShapeSelection->toggleSelect(selections);
+        mTerrainSelection->toggleSelect(selections);
 }
 
 bool CSVRender::TerrainVertexPaintMode::noCell(const std::string& cellId)
@@ -823,7 +842,7 @@ void CSVRender::TerrainVertexPaintMode::mouseMoveEvent(QMouseEvent* event)
 
 std::shared_ptr<CSVRender::TerrainSelection> CSVRender::TerrainVertexPaintMode::getTerrainSelection()
 {
-    return mTerrainShapeSelection;
+    return mTerrainSelection;
 }
 
 void CSVRender::TerrainVertexPaintMode::setBrushSize(int brushSize)

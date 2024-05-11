@@ -73,12 +73,12 @@ namespace CSVRender
             VertexPaintEditTool_Replace = 0
         };
 
-        /// Editmode for terrain shape grid
+        /// Editmode for terrain vertex colour grid
         TerrainVertexPaintMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
         void primaryOpenPressed(const WorldspaceHitResult& hit) override;
 
-        /// Create single command for one-click shape editing
+        /// Create single command for one-click vertex paint editing
         void primaryEditPressed(const WorldspaceHitResult& hit) override;
 
         /// Open brush settings window
@@ -89,20 +89,20 @@ namespace CSVRender
         void activate(CSVWidget::SceneToolbar*) override;
         void deactivate(CSVWidget::SceneToolbar*) override;
 
-        /// Start shape editing command macro
+        /// Start vertex paint editing command macro
         bool primaryEditStartDrag(const QPoint& pos) override;
 
         bool secondaryEditStartDrag(const QPoint& pos) override;
         bool primarySelectStartDrag(const QPoint& pos) override;
         bool secondarySelectStartDrag(const QPoint& pos) override;
 
-        /// Handle shape edit behavior during dragging
+        /// Handle vertex paint edit behavior during dragging
         void drag(const QPoint& pos, int diffX, int diffY, double speedFactor) override;
 
-        /// End shape editing command macro
+        /// End vertex paint editing command macro
         void dragCompleted(const QPoint& pos) override;
 
-        /// Cancel shape editing, and reset all pending changes
+        /// Cancel vertex paint editing, and reset all pending changes
         void dragAborted() override;
 
         void dragWheel(int diff, double speedFactor) override;
@@ -113,7 +113,7 @@ namespace CSVRender
 
     private:
         /// Reset everything in the current edit
-        void endShapeEditing();
+        void endVertexPaintEditing();
 
         /// Handle brush mechanics for colour editing
         void editVertexColourGrid(const std::pair<int, int>& vertexCoords, bool dragOperation);
@@ -128,7 +128,7 @@ namespace CSVRender
         /// Select vertex at global selection coordinate
         void handleSelection(int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections);
 
-        /// Handle brush mechanics for terrain shape selection
+        /// Handle brush mechanics for terrain selection
         void selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode);
 
         bool noCell(const std::string& cellId);
@@ -139,7 +139,7 @@ namespace CSVRender
 
         bool isLandLoaded(const std::string& cellId);
 
-        /// Push terrain shape edits to command macro
+        /// Push terrain vertex coloir edits to command macro
         void pushEditToCommand(const CSMWorld::LandColoursColumn::DataType& newLandColours, CSMDoc::Document& document,
             CSMWorld::IdTable& landTable, const std::string& cellId);
 
@@ -159,7 +159,7 @@ namespace CSVRender
         int mDragMode = InteractionType_None;
         osg::Group* mParentNode;
         bool mIsEditing = false;
-        std::shared_ptr<TerrainSelection> mTerrainShapeSelection;
+        std::shared_ptr<TerrainSelection> mTerrainSelection;
         int mTotalDiffY = 0;
         std::vector<CSMWorld::CellCoordinates> mAlteredCells;
         osg::Vec3d mEditingPos;
