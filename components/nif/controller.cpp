@@ -122,11 +122,13 @@ namespace Nif
             mStringPalette.read(nif);
         else if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() >= 24)
         {
-            uint16_t numAnimNotes = 1;
             if (nif->getBethVersion() >= 29)
-                nif->read(numAnimNotes);
+                mAnimNotesList.resize(nif->get<uint16_t>());
+            else
+                mAnimNotesList.resize(1);
 
-            nif->skip(4 * numAnimNotes); // BSAnimNotes links
+            for (auto& notes : mAnimNotesList)
+                notes.read(nif);
         }
     }
 

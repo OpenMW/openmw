@@ -56,6 +56,7 @@ namespace Nif
         bool mPlayBackwards{ false };
         NiControllerManagerPtr mManager;
         NiStringPalettePtr mStringPalette;
+        BSAnimNotesList mAnimNotesList;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

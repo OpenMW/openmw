@@ -449,5 +449,31 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSAnimNote : public Record
+    {
+        enum class Type : uint32_t
+        {
+            Invalid = 0,
+            GrabIK = 1,
+            LookIK = 2,
+        };
+
+        Type mType;
+        float mTime;
+        uint32_t mArm;
+        float mGain;
+        uint32_t mState;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSAnimNotes : public Record
+    {
+        BSAnimNoteList mList;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
 }
 #endif

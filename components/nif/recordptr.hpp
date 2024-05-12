@@ -165,6 +165,8 @@ namespace Nif
     struct BSMultiBound;
     struct BSMultiBoundData;
     struct BSSkinBoneData;
+    struct BSAnimNote;
+    struct BSAnimNotes;
 
     using NiAVObjectPtr = RecordPtrT<NiAVObject>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -231,6 +233,8 @@ namespace Nif
     using NiControllerSequenceList = RecordListT<NiControllerSequence>;
     using NiPSysModifierList = RecordListT<NiPSysModifier>;
     using NiTriBasedGeomList = RecordListT<NiTriBasedGeom>;
+    using BSAnimNoteList = RecordListT<BSAnimNote>;
+    using BSAnimNotesList = RecordListT<BSAnimNotes>;
 
 } // Namespace
 #endif

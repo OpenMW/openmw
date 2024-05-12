@@ -73,6 +73,8 @@ namespace Nif
         RC_bhkSimpleShapePhantom,
         RC_bhkSphereShape,
         RC_bhkStiffSpringConstraint,
+        RC_BSAnimNote,
+        RC_BSAnimNotes,
         RC_BSBehaviorGraphExtraData,
         RC_BSBound,
         RC_BSBoneLODExtraData,

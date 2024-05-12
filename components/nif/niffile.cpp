@@ -212,6 +212,8 @@ namespace Nif
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
 
             // Bethesda
+            { "BSAnimNote", &construct<BSAnimNote, RC_BSAnimNote> },
+            { "BSAnimNotes", &construct<BSAnimNotes, RC_BSAnimNotes> },
             { "BSPackedAdditionalGeometryData",
                 &construct<NiAdditionalGeometryData, RC_BSPackedAdditionalGeometryData> },
             { "BSShaderTextureSet", &construct<BSShaderTextureSet, RC_BSShaderTextureSet> },
