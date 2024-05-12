@@ -138,7 +138,7 @@ CSVWorld::TableBottomBox::TableBottomBox(const CreatorFactoryBase& creatorFactor
 bool CSVWorld::TableBottomBox::event(QEvent* event)
 {
     // Apply style sheet again if style was changed
-    if (event->type() == QEvent::ThemeChange || event->type() == QEvent::PaletteChange)
+    if (event->type() == QEvent::PaletteChange)
     {
         if (mStatusBar != nullptr)
             mStatusBar->setStyleSheet(statusBarStyle);

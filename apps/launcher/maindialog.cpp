@@ -90,7 +90,7 @@ Launcher::MainDialog::~MainDialog()
 bool Launcher::MainDialog::event(QEvent* event)
 {
     // Apply style sheet again if style was changed
-    if (event->type() == QEvent::ThemeChange || event->type() == QEvent::PaletteChange)
+    if (event->type() == QEvent::PaletteChange)
     {
         if (toolBar != nullptr)
             toolBar->setStyleSheet(toolBarStyle);
