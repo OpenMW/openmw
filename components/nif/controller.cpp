@@ -815,12 +815,28 @@ namespace Nif
         nif->read(mHandle);
     }
 
+    void NiBSplineCompFloatInterpolator::read(NIFStream* nif)
+    {
+        NiBSplineFloatInterpolator::read(nif);
+
+        nif->read(mOffset);
+        nif->read(mHalfRange);
+    }
+
     void NiBSplinePoint3Interpolator::read(NIFStream* nif)
     {
         NiBSplineInterpolator::read(nif);
 
         nif->read(mValue);
         nif->read(mHandle);
+    }
+
+    void NiBSplineCompPoint3Interpolator::read(NIFStream* nif)
+    {
+        NiBSplinePoint3Interpolator::read(nif);
+
+        nif->read(mOffset);
+        nif->read(mHalfRange);
     }
 
     void NiBSplineTransformInterpolator::read(NIFStream* nif)
@@ -831,6 +847,18 @@ namespace Nif
         nif->read(mTranslationHandle);
         nif->read(mRotationHandle);
         nif->read(mScaleHandle);
+    }
+
+    void NiBSplineCompTransformInterpolator::read(NIFStream* nif)
+    {
+        NiBSplineTransformInterpolator::read(nif);
+
+        nif->read(mTranslationOffset);
+        nif->read(mTranslationHalfRange);
+        nif->read(mRotationOffset);
+        nif->read(mRotationHalfRange);
+        nif->read(mScaleOffset);
+        nif->read(mScaleHalfRange);
     }
 
 }
