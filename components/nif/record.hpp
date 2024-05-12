@@ -162,6 +162,8 @@ namespace Nif
         RC_NiBSAnimationNode,
         RC_NiBSPArrayController,
         RC_NiBSParticleNode,
+        RC_NiBSplineData,
+        RC_NiBSplineBasisData,
         RC_NiCamera,
         RC_NiClusterAccumulator,
         RC_NiCollisionObject,

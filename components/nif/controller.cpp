@@ -793,4 +793,18 @@ namespace Nif
         mInterpolator.post(nif);
     }
 
+    void NiBSplineInterpolator::read(NIFStream* nif)
+    {
+        nif->read(mStartTime);
+        nif->read(mStopTime);
+        mSplineData.read(nif);
+        mBasisData.read(nif);
+    }
+
+    void NiBSplineInterpolator::post(Reader& nif)
+    {
+        mSplineData.post(nif);
+        mBasisData.post(nif);
+    }
+
 }

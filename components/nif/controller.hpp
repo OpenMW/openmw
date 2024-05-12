@@ -548,5 +548,17 @@ namespace Nif
     using NiBlendPoint3Interpolator = TypedNiBlendInterpolator<osg::Vec3f>;
     using NiBlendTransformInterpolator = TypedNiBlendInterpolator<NiQuatTransform>;
 
+    // Abstract
+    struct NiBSplineInterpolator : public NiInterpolator
+    {
+        float mStartTime;
+        float mStopTime;
+        NiBSplineDataPtr mSplineData;
+        NiBSplineBasisDataPtr mBasisData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
 }
 #endif

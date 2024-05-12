@@ -362,6 +362,21 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiBSplineData : public Record
+    {
+        std::vector<float> mFloatControlPoints;
+        std::vector<int16_t> mCompactControlPoints;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineBasisData : public Record
+    {
+        uint32_t mNumControlPoints;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct NiAdditionalGeometryData : public Record
     {
         struct DataStream

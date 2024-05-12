@@ -537,6 +537,17 @@ namespace Nif
         mKeyList->read(nif);
     }
 
+    void NiBSplineData::read(NIFStream* nif)
+    {
+        nif->readVector(mFloatControlPoints, nif->get<uint32_t>());
+        nif->readVector(mCompactControlPoints, nif->get<uint32_t>());
+    }
+
+    void NiBSplineBasisData::read(NIFStream* nif)
+    {
+        nif->read(mNumControlPoints);
+    }
+
     void NiAdditionalGeometryData::read(NIFStream* nif)
     {
         nif->read(mNumVertices);

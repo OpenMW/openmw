@@ -195,6 +195,8 @@ namespace Nif
             // Gamebryo
             { "NiAdditionalGeometryData", &construct<NiAdditionalGeometryData, RC_NiAdditionalGeometryData> },
             { "NiBoolData", &construct<NiBoolData, RC_NiBoolData> },
+            { "NiBSplineData", &construct<NiBSplineData, RC_NiBSplineData> },
+            { "NiBSplineBasisData", &construct<NiBSplineBasisData, RC_NiBSplineBasisData> },
             { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
 

@@ -137,6 +137,8 @@ namespace Nif
     struct NiPSysModifier;
     struct NiPSysSpawnModifier;
     struct NiBoolData;
+    struct NiBSplineData;
+    struct NiBSplineBasisData;
     struct NiSkinPartition;
     struct BSShaderTextureSet;
     struct NiTriBasedGeom;
@@ -189,6 +191,8 @@ namespace Nif
     using NiPSysModifierPtr = RecordPtrT<NiPSysModifier>;
     using NiPSysSpawnModifierPtr = RecordPtrT<NiPSysSpawnModifier>;
     using NiBoolDataPtr = RecordPtrT<NiBoolData>;
+    using NiBSplineDataPtr = RecordPtrT<NiBSplineData>;
+    using NiBSplineBasisDataPtr = RecordPtrT<NiBSplineBasisData>;
     using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
     using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
     using NiTriBasedGeomPtr = RecordPtrT<NiTriBasedGeom>;
