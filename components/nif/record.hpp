@@ -139,6 +139,7 @@ namespace Nif
         RC_BSSkinInstance,
         RC_BSSkyShaderProperty,
         RC_BSSubIndexTriShape,
+        RC_BSTreadTransfInterpolator,
         RC_BSTriShape,
         RC_BSWArray,
         RC_BSWaterShaderProperty,

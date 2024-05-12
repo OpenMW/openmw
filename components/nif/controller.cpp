@@ -863,4 +863,24 @@ namespace Nif
         nif->read(mScaleHalfRange);
     }
 
+    void BSTreadTransform::read(NIFStream* nif)
+    {
+        nif->read(mName);
+        nif->read(mTransform1);
+        nif->read(mTransform2);
+    }
+
+    void BSTreadTransfInterpolator::read(NIFStream* nif)
+    {
+        mTransforms.resize(nif->get<uint32_t>());
+        for (BSTreadTransform& transform : mTransforms)
+            transform.read(nif);
+        mData.read(nif);
+    }
+
+    void BSTreadTransfInterpolator::post(Reader& nif)
+    {
+        mData.post(nif);
+    }
+
 }

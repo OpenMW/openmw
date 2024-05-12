@@ -617,6 +617,23 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSTreadTransform
+    {
+        std::string mName;
+        NiQuatTransform mTransform1;
+        NiQuatTransform mTransform2;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSTreadTransfInterpolator : public NiInterpolator
+    {
+        std::vector<BSTreadTransform> mTransforms;
+        NiFloatDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
 
 }
 #endif

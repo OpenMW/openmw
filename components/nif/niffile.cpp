@@ -188,6 +188,7 @@ namespace Nif
 
             // Interpolators, Bethesda
             { "BSRotAccumTransfInterpolator", &construct<NiTransformInterpolator, RC_BSRotAccumTransfInterpolator> },
+            { "BSTreadTransfInterpolator", &construct<BSTreadTransfInterpolator, RC_BSTreadTransfInterpolator> },
 
             // DATA
 
