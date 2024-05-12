@@ -223,6 +223,14 @@ namespace Debug
 
     namespace
     {
+        struct Record
+        {
+            std::string mValue;
+            Level mLevel;
+        };
+
+        std::vector<Record> globalBuffer;
+
         Color getColor(Level level)
         {
             switch (level)
@@ -303,6 +311,23 @@ namespace Debug
             bool mUseColor;
         };
 
+        class Buffer
+        {
+        public:
+            explicit Buffer(std::vector<Record>& buffer)
+                : mBuffer(buffer)
+            {
+            }
+
+            void write(const char* str, std::streamsize size, Level debugLevel)
+            {
+                mBuffer.push_back(Record{ std::string(str, size), debugLevel });
+            }
+
+        private:
+            std::vector<Record>& mBuffer;
+        };
+
         template <class First, class Second>
         class Tee : public DebugOutputBase
         {
@@ -337,8 +362,10 @@ static std::ofstream logfile;
 #if defined(_WIN32) && defined(_DEBUG)
 static boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
 #else
-static boost::iostreams::stream_buffer<Debug::Tee<Debug::Identity, Debug::Coloured>> coutsb;
-static boost::iostreams::stream_buffer<Debug::Tee<Debug::Identity, Debug::Coloured>> cerrsb;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Identity, Debug::Coloured>> standardOut;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Identity, Debug::Coloured>> standardErr;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Buffer, Debug::Coloured>> bufferedOut;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Buffer, Debug::Coloured>> bufferedErr;
 #endif
 
 std::ostream& getRawStdout()
@@ -359,20 +386,22 @@ Misc::Locked<std::ostream&> getLockedRawStderr()
 // Redirect cout and cerr to the log file
 void setupLogging(const std::filesystem::path& logDir, std::string_view appName, std::ios_base::openmode mode)
 {
-#if defined(_WIN32) && defined(_DEBUG)
-    // Redirect cout and cerr to VS debug output when running in debug mode
-    sb.open(Debug::DebugOutput());
-    std::cout.rdbuf(&sb);
-    std::cerr.rdbuf(&sb);
-#else
+#if !(defined(_WIN32) && defined(_DEBUG))
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
     logfile.open(logDir / logName, mode);
 
-    coutsb.open(Debug::Tee(Debug::Identity(logfile), Debug::Coloured(*rawStdout)));
-    cerrsb.open(Debug::Tee(Debug::Identity(logfile), Debug::Coloured(*rawStderr)));
+    Debug::Identity log(logfile);
 
-    std::cout.rdbuf(&coutsb);
-    std::cerr.rdbuf(&cerrsb);
+    for (const Debug::Record& v : Debug::globalBuffer)
+        log.write(v.mValue.data(), v.mValue.size(), v.mLevel);
+
+    Debug::globalBuffer.clear();
+
+    standardOut.open(Debug::Tee(log, Debug::Coloured(*rawStdout)));
+    standardErr.open(Debug::Tee(log, Debug::Coloured(*rawStderr)));
+
+    std::cout.rdbuf(&standardOut);
+    std::cerr.rdbuf(&standardErr);
 #endif
 
 #ifdef _WIN32
@@ -391,6 +420,19 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
     rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
     rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
     rawStderrMutex = std::make_unique<std::mutex>();
+
+#if defined(_WIN32) && defined(_DEBUG)
+    // Redirect cout and cerr to VS debug output when running in debug mode
+    sb.open(Debug::DebugOutput());
+    std::cout.rdbuf(&sb);
+    std::cerr.rdbuf(&sb);
+#else
+    bufferedOut.open(Debug::Tee(Debug::Buffer(Debug::globalBuffer), Debug::Coloured(*rawStdout)));
+    bufferedErr.open(Debug::Tee(Debug::Buffer(Debug::globalBuffer), Debug::Coloured(*rawStderr)));
+
+    std::cout.rdbuf(&bufferedOut);
+    std::cerr.rdbuf(&bufferedErr);
+#endif
 
     int ret = 0;
     try
