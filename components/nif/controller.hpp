@@ -560,5 +560,34 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    // Abstract
+    struct NiBSplineFloatInterpolator : public NiBSplineInterpolator
+    {
+        float mValue;
+        uint32_t mHandle;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract
+    struct NiBSplinePoint3Interpolator : public NiBSplineInterpolator
+    {
+        osg::Vec3f mValue;
+        uint32_t mHandle;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineTransformInterpolator : public NiBSplineInterpolator
+    {
+        NiQuatTransform mValue;
+        uint32_t mTranslationHandle;
+        uint32_t mRotationHandle;
+        uint32_t mScaleHandle;
+
+        void read(NIFStream* nif) override;
+    };
+
+
 }
 #endif

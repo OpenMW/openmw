@@ -164,6 +164,7 @@ namespace Nif
             { "NiLightRadiusController", &construct<NiFloatInterpController, RC_NiLightRadiusController> },
 
             // Interpolators, Gamebryo
+            { "NiBSplineTransformInterpolator", &construct<NiBSplineTransformInterpolator, RC_NiBSplineTransformInterpolator> },
             { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },
             { "NiBlendFloatInterpolator", &construct<NiBlendFloatInterpolator, RC_NiBlendFloatInterpolator> },
             { "NiBlendPoint3Interpolator", &construct<NiBlendPoint3Interpolator, RC_NiBlendPoint3Interpolator> },

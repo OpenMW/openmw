@@ -164,6 +164,7 @@ namespace Nif
         RC_NiBSParticleNode,
         RC_NiBSplineData,
         RC_NiBSplineBasisData,
+        RC_NiBSplineTransformInterpolator,
         RC_NiCamera,
         RC_NiClusterAccumulator,
         RC_NiCollisionObject,

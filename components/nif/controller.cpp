@@ -807,4 +807,30 @@ namespace Nif
         mBasisData.post(nif);
     }
 
+    void NiBSplineFloatInterpolator::read(NIFStream* nif)
+    {
+        NiBSplineInterpolator::read(nif);
+
+        nif->read(mValue);
+        nif->read(mHandle);
+    }
+
+    void NiBSplinePoint3Interpolator::read(NIFStream* nif)
+    {
+        NiBSplineInterpolator::read(nif);
+
+        nif->read(mValue);
+        nif->read(mHandle);
+    }
+
+    void NiBSplineTransformInterpolator::read(NIFStream* nif)
+    {
+        NiBSplineInterpolator::read(nif);
+
+        nif->read(mValue);
+        nif->read(mTranslationHandle);
+        nif->read(mRotationHandle);
+        nif->read(mScaleHandle);
+    }
+
 }
