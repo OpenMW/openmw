@@ -315,7 +315,7 @@
 -- @param #any spellOrId A @{openmw.core#Spell} or string record id.
 
 ---
--- Remove an active spell based on active spell ID (see @{openmw.core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw.core#ActiveSpell.temporary}).
+-- Remove an active spell based on active spell ID (see @{openmw_core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw_core#ActiveSpell.temporary}).
 -- @function [parent=#ActorActiveSpells] remove
 -- @param self
 -- @param #any id Active spell ID.
@@ -1318,7 +1318,7 @@
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Armor.createRecordDraft(armorTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record
--- world.createObject(newRecord):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
+-- world.createObject(newRecord.id):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
 
 
 --- @{#Book} functions
@@ -1457,7 +1457,7 @@
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Clothing.createRecordDraft(clothingTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record
--- world.createObject(newRecord):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
+-- world.createObject(newRecord.id):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
 
 ---
 -- @type ClothingRecord

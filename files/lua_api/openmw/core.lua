@@ -1130,6 +1130,7 @@
 -- @field #map<#string, #number> reactions A read-only map containing reactions of other factions to this faction.
 -- @field #list<#string> attributes A read-only list containing IDs of attributes to advance ranks in the faction.
 -- @field #list<#string> skills A read-only list containing IDs of skills to advance ranks in the faction.
+-- @field #boolean hidden If true, the faction won't show in the player's skills menu
 
 ---
 -- Faction rank data record

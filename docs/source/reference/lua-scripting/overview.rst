@@ -216,6 +216,7 @@ To enter the Lua mode run one of the commands:
 - ``lua player`` or ``luap`` - enter player context
 - ``lua global`` or ``luag`` - enter global context
 - ``lua selected`` or ``luas`` - enter local context on the selected object
+- ``lua menu`` or ``luam`` - enter menu context
 
 Script structure
 ================
@@ -482,7 +483,7 @@ There are a few methods for sending events:
 
 - `core.sendGlobalEvent <openmw_core.html##(sendGlobalEvent)>`_ to send events to global scripts
 - `GameObject:sendEvent <openmw_core.html##(GameObject).sendEvent>`_ to send events to local scripts attached to a game object
-- `types.Player.sendMenuEvent <openmw_menu.html##(Player).sendMenuEvent>`_ to send events to menu scripts of the given player
+- `types.Player.sendMenuEvent <openmw_types.html##(Player).sendMenuEvent>`_ to send events to menu scripts of the given player
 
 Events are the main way of interacting between local and global scripts.
 They are not recommended for interactions between two global scripts, because in this case interfaces are more convenient.

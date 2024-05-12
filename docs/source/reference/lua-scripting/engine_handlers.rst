@@ -157,4 +157,4 @@ Engine handler is a function defined by a script, that can be called by the engi
 
   * - onStateChanged()
     - | Called whenever the current game changes
-      | (i. e. the result of `getState <openmw_menu.html##(getState)>`_ changes)
+      | (i. e. the result of `getState <openmw_menu.html##(menu).getState>`_ changes)

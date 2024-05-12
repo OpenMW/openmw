@@ -12,28 +12,28 @@ Lua API reference
     aipackages
     setting_renderers
     events
-    openmw_util
-    openmw_storage
-    openmw_core
-    openmw_types
+    openmw_ambient
     openmw_animation
     openmw_async
-    openmw_vfs
-    openmw_markup
-    openmw_world
-    openmw_self
-    openmw_nearby
-    openmw_input
-    openmw_ambient
-    openmw_ui
     openmw_camera
-    openmw_postprocessing
+    openmw_core
     openmw_debug
+    openmw_input
+    openmw_markup
     openmw_menu
+    openmw_nearby
+    openmw_postprocessing
+    openmw_self
+    openmw_storage
+    openmw_types
+    openmw_ui
+    openmw_util
+    openmw_vfs
+    openmw_world
     openmw_aux_calendar
-    openmw_aux_util
     openmw_aux_time
     openmw_aux_ui
+    openmw_aux_util
     interface_activation
     interface_ai
     interface_animation
