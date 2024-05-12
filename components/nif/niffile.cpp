@@ -186,6 +186,9 @@ namespace Nif
             { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
             { "NiTransformInterpolator", &construct<NiTransformInterpolator, RC_NiTransformInterpolator> },
 
+            // Interpolators, Bethesda
+            { "BSRotAccumTransfInterpolator", &construct<NiTransformInterpolator, RC_BSRotAccumTransfInterpolator> },
+
             // DATA
 
             // 4.0.0.2

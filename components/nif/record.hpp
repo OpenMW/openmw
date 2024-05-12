@@ -127,6 +127,7 @@ namespace Nif
         RC_BSStripPSysData,
         RC_BSRefractionFirePeriodController,
         RC_BSRefractionStrengthController,
+        RC_BSRotAccumTransfInterpolator,
         RC_BSSegmentedTriShape,
         RC_BSShaderNoLightingProperty,
         RC_BSShaderPPLightingProperty,
