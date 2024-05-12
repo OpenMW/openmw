@@ -315,7 +315,7 @@
 -- @param #any spellOrId A @{openmw.core#Spell} or string record id.
 
 ---
--- Remove an active spell based on active spell ID (see @{openmw.core#(ActiveSpell).activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw.core#(ActiveSpell).temporary}).
+-- Remove an active spell based on active spell ID (see @{openmw_core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw_core#ActiveSpell.temporary}).
 -- @function [parent=#ActorActiveSpells] remove
 -- @param self
 -- @param #any id Active spell ID.
