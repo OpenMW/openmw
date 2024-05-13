@@ -540,6 +540,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 case ESM::REC_ENAB:
                 case ESM::REC_LEVC:
                 case ESM::REC_LEVI:
+                case ESM::REC_LIGH:
                 case ESM::REC_CREA:
                 case ESM::REC_CONT:
                 case ESM::REC_RAND:

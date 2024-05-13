@@ -1590,6 +1590,13 @@
 -- @return #boolean
 
 ---
+-- Creates a @{#LightRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Light] createRecordDraft
+-- @param #LightRecord light A Lua table with the fields of a LightRecord, with an optional field `template` that accepts a @{#LightRecord} as a base.
+-- @return #LightRecord A strongly typed Light record.
+
+---
 -- Returns the read-only @{#LightRecord} of a Light
 -- @function [parent=#Light] record
 -- @param #any objectOrRecordId
@@ -1608,7 +1615,15 @@
 -- @field #number duration
 -- @field #number radius
 -- @field #number color
--- @field #boolean isCarriable
+-- @field #boolean isCarriable True if the light can be carried by actors and appears up in their inventory.
+-- @field #boolean isDynamic If true, the light will apply to actors and other moving objects
+-- @field #boolean isFire True if the light acts like a fire.
+-- @field #boolean isFlicker
+-- @field #boolean isFlickerSlow
+-- @field #boolean isNegative If true, the light will reduce light instead of increasing it.
+-- @field #boolean isOffByDefault If true, the light will not emit any light or sound while placed in the world. It will still work in the inventory.
+-- @field #boolean isPulse
+-- @field #boolean isPulseSlow
 
 
 
