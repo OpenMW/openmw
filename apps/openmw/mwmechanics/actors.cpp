@@ -1879,6 +1879,9 @@ namespace MWMechanics
                     > actorsProcessingRange * actorsProcessingRange)
                 continue;
 
+            // Get rid of effects pending removal so they are not applied when resting
+            updateMagicEffects(actor.getPtr());
+
             adjustMagicEffects(actor.getPtr(), duration);
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(actor.getPtr());
