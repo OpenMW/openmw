@@ -126,7 +126,30 @@ local function testRecordStores()
     testRecordStore(types.NPC.races,"races")
     testRecordStore(types.Player.birthSigns,"birthSigns")
 end
-
+local function testRecordCreation()
+    local newLight = {
+        isCarriable = true,
+        isDynamic = true,
+        isFire =false,
+        isFlicker = false,
+        isFlickerSlow = false,
+        isNegative = false,
+        isOffByDefault = false,
+        isPulse = false,
+        weight = 1,
+        value = 10,
+        duration = 12,
+        radius = 30,
+        color = 5,
+        name = "TestLight",
+        model = "meshes\\marker_door.dae"
+    }
+    local draft = types.Light.createRecordDraft(newLight)
+    local record = world.createRecord(draft)
+    for key, value in pairs(newLight) do
+        testing.expectEqual(record[key],value)
+    end
+end
 local function initPlayer()
     player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
     coroutine.yield()
@@ -165,6 +188,7 @@ tests = {
     {'teleport', testTeleport},
     {'getGMST', testGetGMST},
     {'recordStores', testRecordStores},
+    {'recordCreation', testRecordCreation},
     {'mwscript', testMWScript},
 }
 
