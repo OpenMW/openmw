@@ -56,6 +56,7 @@ namespace Nif
         bool mPlayBackwards{ false };
         NiControllerManagerPtr mManager;
         NiStringPalettePtr mStringPalette;
+        BSAnimNotesList mAnimNotesList;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -547,6 +548,92 @@ namespace Nif
     using NiBlendFloatInterpolator = TypedNiBlendInterpolator<float>;
     using NiBlendPoint3Interpolator = TypedNiBlendInterpolator<osg::Vec3f>;
     using NiBlendTransformInterpolator = TypedNiBlendInterpolator<NiQuatTransform>;
+
+    // Abstract
+    struct NiBSplineInterpolator : public NiInterpolator
+    {
+        float mStartTime;
+        float mStopTime;
+        NiBSplineDataPtr mSplineData;
+        NiBSplineBasisDataPtr mBasisData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    // Abstract
+    struct NiBSplineFloatInterpolator : public NiBSplineInterpolator
+    {
+        float mValue;
+        uint32_t mHandle;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineCompFloatInterpolator : public NiBSplineFloatInterpolator
+    {
+        float mOffset;
+        float mHalfRange;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract
+    struct NiBSplinePoint3Interpolator : public NiBSplineInterpolator
+    {
+        osg::Vec3f mValue;
+        uint32_t mHandle;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineCompPoint3Interpolator : public NiBSplinePoint3Interpolator
+    {
+        float mOffset;
+        float mHalfRange;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineTransformInterpolator : public NiBSplineInterpolator
+    {
+        NiQuatTransform mValue;
+        uint32_t mTranslationHandle;
+        uint32_t mRotationHandle;
+        uint32_t mScaleHandle;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineCompTransformInterpolator : public NiBSplineTransformInterpolator
+    {
+        float mTranslationOffset;
+        float mTranslationHalfRange;
+        float mRotationOffset;
+        float mRotationHalfRange;
+        float mScaleOffset;
+        float mScaleHalfRange;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSTreadTransform
+    {
+        std::string mName;
+        NiQuatTransform mTransform1;
+        NiQuatTransform mTransform2;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSTreadTransfInterpolator : public NiInterpolator
+    {
+        std::vector<BSTreadTransform> mTransforms;
+        NiFloatDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
 
 }
 #endif

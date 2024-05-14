@@ -164,6 +164,14 @@ namespace Nif
             { "NiLightRadiusController", &construct<NiFloatInterpController, RC_NiLightRadiusController> },
 
             // Interpolators, Gamebryo
+            { "NiBSplineCompFloatInterpolator",
+                &construct<NiBSplineCompFloatInterpolator, RC_NiBSplineCompFloatInterpolator> },
+            { "NiBSplineCompPoint3Interpolator",
+                &construct<NiBSplineCompPoint3Interpolator, RC_NiBSplineCompPoint3Interpolator> },
+            { "NiBSplineCompTransformInterpolator",
+                &construct<NiBSplineCompTransformInterpolator, RC_NiBSplineCompTransformInterpolator> },
+            { "NiBSplineTransformInterpolator",
+                &construct<NiBSplineTransformInterpolator, RC_NiBSplineTransformInterpolator> },
             { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },
             { "NiBlendFloatInterpolator", &construct<NiBlendFloatInterpolator, RC_NiBlendFloatInterpolator> },
             { "NiBlendPoint3Interpolator", &construct<NiBlendPoint3Interpolator, RC_NiBlendPoint3Interpolator> },
@@ -177,6 +185,10 @@ namespace Nif
             { "NiPathInterpolator", &construct<NiPathInterpolator, RC_NiPathInterpolator> },
             { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
             { "NiTransformInterpolator", &construct<NiTransformInterpolator, RC_NiTransformInterpolator> },
+
+            // Interpolators, Bethesda
+            { "BSRotAccumTransfInterpolator", &construct<NiTransformInterpolator, RC_BSRotAccumTransfInterpolator> },
+            { "BSTreadTransfInterpolator", &construct<BSTreadTransfInterpolator, RC_BSTreadTransfInterpolator> },
 
             // DATA
 
@@ -195,10 +207,14 @@ namespace Nif
             // Gamebryo
             { "NiAdditionalGeometryData", &construct<NiAdditionalGeometryData, RC_NiAdditionalGeometryData> },
             { "NiBoolData", &construct<NiBoolData, RC_NiBoolData> },
+            { "NiBSplineData", &construct<NiBSplineData, RC_NiBSplineData> },
+            { "NiBSplineBasisData", &construct<NiBSplineBasisData, RC_NiBSplineBasisData> },
             { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
 
             // Bethesda
+            { "BSAnimNote", &construct<BSAnimNote, RC_BSAnimNote> },
+            { "BSAnimNotes", &construct<BSAnimNotes, RC_BSAnimNotes> },
             { "BSPackedAdditionalGeometryData",
                 &construct<NiAdditionalGeometryData, RC_BSPackedAdditionalGeometryData> },
             { "BSShaderTextureSet", &construct<BSShaderTextureSet, RC_BSShaderTextureSet> },

@@ -362,6 +362,21 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiBSplineData : public Record
+    {
+        std::vector<float> mFloatControlPoints;
+        std::vector<int16_t> mCompactControlPoints;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineBasisData : public Record
+    {
+        uint32_t mNumControlPoints;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct NiAdditionalGeometryData : public Record
     {
         struct DataStream
@@ -432,6 +447,32 @@ namespace Nif
         osg::BoundingSpheref mSphere;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct BSAnimNote : public Record
+    {
+        enum class Type : uint32_t
+        {
+            Invalid = 0,
+            GrabIK = 1,
+            LookIK = 2,
+        };
+
+        Type mType;
+        float mTime;
+        uint32_t mArm;
+        float mGain;
+        uint32_t mState;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSAnimNotes : public Record
+    {
+        BSAnimNoteList mList;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
 }
