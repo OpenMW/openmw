@@ -2,6 +2,15 @@
 
 #include <algorithm>
 
+namespace {
+    MyGUI::IntSize max(MyGUI::IntSize a, MyGUI::IntSize b) {
+        MyGUI::IntSize result = a;
+        if (result.width < b.width) result.width = b.width;
+        if (result.height < b.height) result.height = b.height;
+        return result;
+    }
+}
+
 namespace LuaUi
 {
     void LuaContainer::updateChildren()
@@ -12,7 +21,7 @@ namespace LuaUi
 
     MyGUI::IntSize LuaContainer::childScalingSize() const
     {
-        return MyGUI::IntSize();
+        return WidgetExtension::calculateSize();
     }
 
     MyGUI::IntSize LuaContainer::templateScalingSize() const

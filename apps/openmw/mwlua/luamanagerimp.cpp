@@ -181,6 +181,7 @@ namespace MWLua
         MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
         if (!timeManager.isPaused())
         {
+            mMenuScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
             mGlobalScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
             for (LocalScripts* scripts : mActiveLocalScripts)
                 scripts->processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
