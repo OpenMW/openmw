@@ -1645,6 +1645,7 @@ namespace MWMechanics
                 {
                     std::string startKey = "start";
                     std::string stopKey = "stop";
+
                     MWBase::LuaManager::ActorControls* actorControls
                         = MWBase::Environment::get().getLuaManager()->getActorControls(mPtr);
                     const bool aiInactive
