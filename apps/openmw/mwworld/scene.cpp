@@ -597,7 +597,7 @@ namespace MWWorld
             if (world->isActorCollisionEnabled(playerPtr) && newPos.pos[2] >= mLowestPoint - lowestPointAdjustment)
             {
                 MWWorld::ActionTeleport(refId, newPos, false).execute(playerPtr);
-                Log(Debug::Warning) << "Player position has been reset due to falling into the void.";
+                Log(Debug::Warning) << "Player position has been reset due to falling into the void";
             }
         }
     }
