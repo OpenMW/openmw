@@ -1647,12 +1647,13 @@ namespace MWMechanics
                     std::string stopKey = "stop";
                     MWBase::LuaManager::ActorControls* actorControls
                         = MWBase::Environment::get().getLuaManager()->getActorControls(mPtr);
-
+                    const bool aiInactive
+                        = actorControls->mDisableAI || !MWBase::Environment::get().getMechanicsManager()->isAIActive();
                     if (mWeaponType != ESM::Weapon::PickProbe && !isRandomAttackAnimation(mCurrentWeapon))
                     {
                         if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
                             mAttackType = "shoot";
-                        else if (mPtr == getPlayer() || actorControls->mDisableAI)
+                        else if (mPtr == getPlayer() || aiInactive)
                         {
                             if (Settings::game().mBestAttack)
                             {
