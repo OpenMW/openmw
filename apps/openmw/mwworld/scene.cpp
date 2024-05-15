@@ -591,7 +591,14 @@ namespace MWWorld
 
             ESM::Position newPos;
             const ESM::RefId refId = MWBase::Environment::get().getWorld()->findInteriorPosition(cellNameId, newPos);
-            MWWorld::ActionTeleport(refId, newPos, false).execute(playerPtr);
+
+            // Only teleport if that teleport point is > the lowest point, rare edge case
+            // also check that collision is enabled, which is opposite to Vanilla
+            if (world->isActorCollisionEnabled(playerPtr) && newPos.pos[2] >= mLowestPoint - lowestPointAdjustment)
+            {
+                MWWorld::ActionTeleport(refId, newPos, false).execute(playerPtr);
+                Log(Debug::Warning) << "Player position has been reset due to falling into the void.";
+            }
         }
     }
 
