@@ -39,6 +39,8 @@
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/physicssystem.hpp"
 
+#include "../mwworld/actionteleport.hpp"
+
 #include "cellpreloader.hpp"
 #include "cellstore.hpp"
 #include "cellvisitors.hpp"
@@ -138,10 +140,22 @@ namespace
     }
 
     void addObject(const MWWorld::Ptr& ptr, const MWWorld::World& world, const MWPhysics::PhysicsSystem& physics,
-        DetourNavigator::Navigator& navigator, const DetourNavigator::UpdateGuard* navigatorUpdateGuard = nullptr)
+        float& lowestPoint, bool isInterior, DetourNavigator::Navigator& navigator,
+        const DetourNavigator::UpdateGuard* navigatorUpdateGuard = nullptr)
     {
         if (const auto object = physics.getObject(ptr))
         {
+            // Find the lowest point of this collision object in world space from its AABB if interior
+            // this point is used to determine the infinite fall cutoff from lowest point in the cell
+            if (isInterior)
+            {
+                btVector3 aabbMin;
+                btVector3 aabbMax;
+                const auto transform = object->getTransform();
+                object->getShapeInstance()->mCollisionShape->getAabb(transform, aabbMin, aabbMax);
+                lowestPoint = std::min(lowestPoint, static_cast<float>(aabbMin.z()));
+            }
+
             const DetourNavigator::ObjectTransform objectTransform{ ptr.getRefData().getPosition(),
                 ptr.getCellRef().getScale() };
 
@@ -526,6 +540,7 @@ namespace MWWorld
         navigatorUpdateGuard.reset();
         assert(mActiveCells.empty());
         mCurrentCell = nullptr;
+        mLowestPoint = std::numeric_limits<float>::max();
 
         mPreloader->clear();
     }
@@ -556,12 +571,28 @@ namespace MWWorld
 
     void Scene::playerMoved(const osg::Vec3f& pos)
     {
-        if (!mCurrentCell || !mCurrentCell->isExterior())
+        if (!mCurrentCell)
             return;
 
-        osg::Vec2i newCell = getNewGridCenter(pos, &mCurrentGridCenter);
-        if (newCell != mCurrentGridCenter)
-            requestChangeCellGrid(pos, newCell);
+        // The player is reset when z is 90 units below the lowest reference bound z.
+        constexpr float lowestPointAdjustment = -90.0f;
+        if (mCurrentCell->isExterior())
+        {
+            osg::Vec2i newCell = getNewGridCenter(pos, &mCurrentGridCenter);
+            if (newCell != mCurrentGridCenter)
+                requestChangeCellGrid(pos, newCell);
+        }
+        else if (pos.z() < mLowestPoint + lowestPointAdjustment)
+        {
+            // Player has fallen into the void, reset to interior marker/coc (#1415)
+            const std::string_view cellNameId = mCurrentCell->getCell()->getNameId();
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            MWWorld::Ptr playerPtr = world->getPlayerPtr();
+
+            ESM::Position newPos;
+            const ESM::RefId refId = MWBase::Environment::get().getWorld()->findInteriorPosition(cellNameId, newPos);
+            MWWorld::ActionTeleport(refId, newPos, false).execute(playerPtr);
+        }
     }
 
     void Scene::requestChangeCellGrid(const osg::Vec3f& position, const osg::Vec2i& cell, bool changeEvent)
@@ -840,6 +871,7 @@ namespace MWWorld
         , mPreloadDoors(Settings::cells().mPreloadDoors)
         , mPreloadFastTravel(Settings::cells().mPreloadFastTravel)
         , mPredictionTime(Settings::cells().mPredictionTime)
+        , mLowestPoint(std::numeric_limits<float>::max())
     {
         mPreloader = std::make_unique<CellPreloader>(rendering.getResourceSystem(), physics->getShapeManager(),
             rendering.getTerrain(), rendering.getLandManager());
@@ -970,20 +1002,23 @@ namespace MWWorld
     void Scene::insertCell(
         CellStore& cell, Loading::Listener* loadingListener, const DetourNavigator::UpdateGuard* navigatorUpdateGuard)
     {
+        const bool isInterior = !cell.isExterior();
         InsertVisitor insertVisitor(cell, loadingListener);
         cell.forEach(insertVisitor);
         insertVisitor.insert(
             [&](const MWWorld::Ptr& ptr) { addObject(ptr, mWorld, mPagedRefs, *mPhysics, mRendering); });
-        insertVisitor.insert(
-            [&](const MWWorld::Ptr& ptr) { addObject(ptr, mWorld, *mPhysics, mNavigator, navigatorUpdateGuard); });
+        insertVisitor.insert([&](const MWWorld::Ptr& ptr) {
+            addObject(ptr, mWorld, *mPhysics, mLowestPoint, isInterior, mNavigator, navigatorUpdateGuard);
+        });
     }
 
     void Scene::addObjectToScene(const Ptr& ptr)
     {
+        const bool isInterior = mCurrentCell && !mCurrentCell->isExterior();
         try
         {
             addObject(ptr, mWorld, mPagedRefs, *mPhysics, mRendering);
-            addObject(ptr, mWorld, *mPhysics, mNavigator);
+            addObject(ptr, mWorld, *mPhysics, mLowestPoint, isInterior, mNavigator);
             mWorld.scaleObject(ptr, ptr.getCellRef().getScale());
         }
         catch (std::exception& e)

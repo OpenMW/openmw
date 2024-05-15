@@ -101,6 +101,7 @@ namespace MWWorld
         bool mPreloadDoors;
         bool mPreloadFastTravel;
         float mPredictionTime;
+        float mLowestPoint;
 
         int mHalfGridSize = Constants::CellGridRadius;
 
