@@ -1654,7 +1654,7 @@ namespace MWMechanics
                     {
                         if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
                             mAttackType = "shoot";
-                        else if (mPtr == getPlayer() || aiInactive)
+                        else if (mPtr == getPlayer())
                         {
                             if (Settings::game().mBestAttack)
                             {
@@ -1673,6 +1673,8 @@ namespace MWMechanics
                                 mAttackType = getMovementBasedAttackType();
                             }
                         }
+                        else if (aiInactive)
+                            mAttackType = getRandomAttackType();
                         // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
                         startKey = mAttackType + ' ' + startKey;
                         stopKey = mAttackType + " max attack";
