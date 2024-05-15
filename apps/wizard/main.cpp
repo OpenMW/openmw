@@ -1,4 +1,3 @@
-#include <QApplication>
 #include <QDir>
 
 #include <boost/program_options/options_description.hpp>
@@ -6,6 +5,7 @@
 
 #include <components/files/qtconversion.hpp>
 #include <components/l10n/qttranslations.hpp>
+#include <components/platform/application.hpp>
 
 #include "mainwizard.hpp"
 
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     configurationManager.addCommonOptions(description);
     configurationManager.readConfiguration(variables, description, true);
 
-    QApplication app(argc, argv);
+    Platform::Application app(argc, argv);
 
     // Now we make sure the current dir is set to application path
     QDir dir(QCoreApplication::applicationDirPath());

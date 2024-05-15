@@ -546,6 +546,10 @@ if (USE_QT)
         qtconfigpath
         )
 
+    add_component_qt_dir (platform
+        application
+        )
+
     QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 

@@ -238,6 +238,7 @@
     Feature #7953: Allow to change SVG icons colors depending on color scheme
     Feature #7964: Add Lua read access to MW Dialogue records
     Feature #7971: Make save's Time Played value display hours instead of days
+    Feature #7985: Support dark mode on Windows
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
