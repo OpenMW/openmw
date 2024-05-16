@@ -261,7 +261,8 @@ namespace MWInput
 
     void MouseManager::warpMouse()
     {
-        float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-        mInputWrapper->warpMouse(static_cast<int>(mGuiCursorX * uiScale), static_cast<int>(mGuiCursorY * uiScale));
+        float guiUiScale = Settings::gui().mScalingFactor;
+        mInputWrapper->warpMouse(
+            static_cast<int>(mGuiCursorX * guiUiScale), static_cast<int>(mGuiCursorY * guiUiScale));
     }
 }
