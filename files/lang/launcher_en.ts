@@ -1427,5 +1427,13 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Browse…</source>
         <translation></translation>
     </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Smooth Animation Transitions</source>
+        <translation></translation>
+    </message>
 </context>
 </TS>

@@ -86,7 +86,7 @@ namespace MWRender
             float springOutGeneric(float x, float lambda)
             {
                 // Higher lambda = lower swing amplitude. 1 = 150% swing amplitude.
-                // w corresponds to the frequency of oscillation in the easing function, controlling the amount of overswing
+                // w is the frequency of oscillation in the easing func, controls the amount of overswing
                 constexpr float w = 1.5f * osg::PIf; // 4.71238
                 return 1 - expf(-lambda * x) * cos(w * x);
             }
