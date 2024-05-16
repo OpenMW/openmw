@@ -58,3 +58,9 @@ weekday4: "Middas"
 weekday5: "Turdas"
 weekday6: "Fredas"
 weekday7: "Loredas"
+
+# In German, there are usually no "a.m."/"p.m." shenanigans going on.
+# In case of ambiguity, "vormittags" ("mornings") and "nachmittags" ("in the afternoon") are used.
+am: "vormittags"
+pm: "nachmittags"
+day: "Tag"

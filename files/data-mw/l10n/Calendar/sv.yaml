@@ -1,7 +1,15 @@
 # source: https://en.uesp.net/wiki/Lore:Calendar
 
-# Sv: Ingen vits att översätta namn på månader och dagar till svenska när inte spelets innehåll finns på svenska. Det lär mest bara förvirra. Därför finns bara dateFormat i denna fil.
+# Sv: Ingen vits att översätta namn på månader och dagar till svenska när inte spelets innehåll finns på svenska. Det lär mest bara förvirra.
+# Därför finns bara dateFormat, am, pm och day i denna fil.
 
-# En: No use translating names on months and weekdays to Swedish when the game's content isn't in Swedish. It will probably just confuse people. Therefore, only dateFormat is present in this file.
+# En: No use translating names on months and weekdays to Swedish when the game's content isn't in Swedish. It will probably just confuse people.
+# Therefore, only dateFormat, am, pm and day are present in this file.
 
 dateFormat: "dag {day} av {monthInGenitive} år {year, number, :: group-off}"
+
+# In Swedish, as with German, we don't use AM/PM but instead a 24h clock.
+# But instead of that, we could use "förmiddag" and "eftermiddag", which is basically "morning" and "afternoon"
+am: "förmiddag"
+pm: "eftermiddag"
+day: "Dag"

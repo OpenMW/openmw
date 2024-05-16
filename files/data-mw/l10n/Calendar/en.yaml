@@ -37,3 +37,7 @@ weekday4: "Middas"
 weekday5: "Turdas"
 weekday6: "Fredas"
 weekday7: "Loredas"
+
+am: "a.m."
+pm: "p.m."
+day: "Day"
