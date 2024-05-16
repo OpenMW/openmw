@@ -22,9 +22,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QRadioButton" name="retailDiscRadioButton">
-     <property name="styleSheet">
-      <string notr="true">font-weight:bold;</string>
-     </property>
      <property name="text">
       <string>Retail CD/DVD</string>
      </property>
@@ -81,9 +78,6 @@
    </item>
    <item>
     <widget class="QRadioButton" name="existingLocationRadioButton">
-     <property name="styleSheet">
-      <string notr="true">font-weight:bold</string>
-     </property>
      <property name="text">
       <string>Existing Installation</string>
      </property>

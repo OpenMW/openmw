@@ -11,7 +11,7 @@ void LineEdit::setupClearButton()
     mClearButton = new QToolButton(this);
     mClearButton->setIcon(QIcon::fromTheme("edit-clear"));
     mClearButton->setCursor(Qt::ArrowCursor);
-    mClearButton->setStyleSheet("QToolButton { border: none; padding: 0px; }");
+    mClearButton->setAutoRaise(true);
     mClearButton->hide();
     connect(mClearButton, &QToolButton::clicked, this, &LineEdit::clear);
     connect(this, &LineEdit::textChanged, this, &LineEdit::updateClearButton);

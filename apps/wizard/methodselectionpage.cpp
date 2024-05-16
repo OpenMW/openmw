@@ -23,6 +23,11 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget* parent)
     buyLinkButton->released();
 #endif
 
+    QFont font = existingLocationRadioButton->font();
+    font.setBold(true);
+    existingLocationRadioButton->setFont(font);
+    retailDiscRadioButton->setFont(font);
+
     registerField(QLatin1String("installation.retailDisc"), retailDiscRadioButton);
 
     connect(buyLinkButton, &QPushButton::released, this, &MethodSelectionPage::handleBuyButton);

@@ -155,6 +155,9 @@ namespace MWRender
         if (!mEnabled)
             return;
 
+        if (dt == 0.f)
+            return;
+
         if (!MWBase::Environment::get().getSoundManager()->sayActive(mReference))
         {
             mBlinkTimer += dt;

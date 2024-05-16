@@ -22,6 +22,11 @@
 #include "importpage.hpp"
 #include "settingspage.hpp"
 
+namespace
+{
+    constexpr const char* toolBarStyle = "QToolBar { border: 0px; } QToolButton { min-width: 70px }";
+}
+
 using namespace Process;
 
 void cfgError(const QString& title, const QString& msg)
@@ -73,12 +78,25 @@ Launcher::MainDialog::MainDialog(const Files::ConfigurationManager& configuratio
     QLabel* logo = new QLabel(this);
     logo->setPixmap(QIcon(":/images/openmw-header.png").pixmap(QSize(294, 64)));
     toolBar->addWidget(logo);
+    toolBar->setStyleSheet(toolBarStyle);
 }
 
 Launcher::MainDialog::~MainDialog()
 {
     delete mGameInvoker;
     delete mWizardInvoker;
+}
+
+bool Launcher::MainDialog::event(QEvent* event)
+{
+    // Apply style sheet again if style was changed
+    if (event->type() == QEvent::PaletteChange)
+    {
+        if (toolBar != nullptr)
+            toolBar->setStyleSheet(toolBarStyle);
+    }
+
+    return QMainWindow::event(event);
 }
 
 void Launcher::MainDialog::createIcons()

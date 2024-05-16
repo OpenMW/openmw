@@ -537,6 +537,17 @@ namespace Nif
         mKeyList->read(nif);
     }
 
+    void NiBSplineData::read(NIFStream* nif)
+    {
+        nif->readVector(mFloatControlPoints, nif->get<uint32_t>());
+        nif->readVector(mCompactControlPoints, nif->get<uint32_t>());
+    }
+
+    void NiBSplineBasisData::read(NIFStream* nif)
+    {
+        nif->read(mNumControlPoints);
+    }
+
     void NiAdditionalGeometryData::read(NIFStream* nif)
     {
         nif->read(mNumVertices);
@@ -601,6 +612,33 @@ namespace Nif
     void BSMultiBoundSphere::read(NIFStream* nif)
     {
         nif->read(mSphere);
+    }
+
+    void BSAnimNote::read(NIFStream* nif)
+    {
+        mType = static_cast<Type>(nif->get<uint32_t>());
+        nif->read(mTime);
+        if (mType == Type::GrabIK)
+        {
+            nif->read(mArm);
+        }
+        else if (mType == Type::LookIK)
+        {
+            nif->read(mGain);
+            nif->read(mState);
+        }
+    }
+
+    void BSAnimNotes::read(NIFStream* nif)
+    {
+        mList.resize(nif->get<uint16_t>());
+        for (auto& note : mList)
+            note.read(nif);
+    }
+
+    void BSAnimNotes::post(Reader& nif)
+    {
+        postRecordList(nif, mList);
     }
 
 } // Namespace
