@@ -346,7 +346,7 @@ namespace ESMTerrain
                     color[i] = colourData->getColors()[srcArrayIndex + i];
 
             // Does nothing by default, override in OpenMW-CS
-            if (alteration && heightData != nullptr)
+            if (alteration)
                 adjustColor(col, row, heightData, color);
 
             // Unlike normals, colors mostly connect seamlessly between cells, but not always...

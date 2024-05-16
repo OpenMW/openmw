@@ -120,7 +120,7 @@ bool CSVRender::Cell::addObjects(int start, int end)
 
 void CSVRender::Cell::updateLand()
 {
-    if (mLandDeleted || !mUpdateLand)
+    if (!mUpdateLand || mLandDeleted)
         return;
 
     mUpdateLand = false;
