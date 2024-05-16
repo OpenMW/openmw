@@ -105,7 +105,7 @@
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 95 16" align="Left Top">
-                        <Property key="Caption" value="#{sQuick_Save}"/>
+                        <Property key="Caption" value="#{OMWEngine:AutoSaveOnResting}"/>
                     </Widget>
                 </Widget>
                 <Widget type="HBox" position="4 280 260 28">
@@ -115,7 +115,7 @@
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 89 16" align="Left Top">
-                        <Property key="Caption" value="#{sBestAttack}"/>
+                        <Property key="Caption" value="#{OMWEngine:BestAttack}"/>
                     </Widget>
                 </Widget>
                 <Widget type="HBox" position="4 310 260 28">
@@ -135,7 +135,7 @@
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 80 16" align="Left Top">
-                        <Property key="Caption" value="#{sCursorOff}"/>
+                        <Property key="Caption" value="#{OMWEngine:Crosshair}"/>
                     </Widget>
                 </Widget>
             </Widget>
