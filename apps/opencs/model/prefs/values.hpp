@@ -205,13 +205,13 @@ namespace CSMPrefs
         Settings::SettingValue<int> mErrorHeight{ mIndex, sName, "error-height", 100 };
         Settings::SettingValue<bool> mHighlightOccurrences{ mIndex, sName, "highlight-occurrences", true };
         Settings::SettingValue<std::string> mColourHighlight{ mIndex, sName, "colour-highlight", "lightcyan" };
-        Settings::SettingValue<std::string> mColourInt{ mIndex, sName, "colour-int", "darkmagenta" };
+        Settings::SettingValue<std::string> mColourInt{ mIndex, sName, "colour-int", "#aa55ff" };
         Settings::SettingValue<std::string> mColourFloat{ mIndex, sName, "colour-float", "magenta" };
         Settings::SettingValue<std::string> mColourName{ mIndex, sName, "colour-name", "grey" };
         Settings::SettingValue<std::string> mColourKeyword{ mIndex, sName, "colour-keyword", "red" };
         Settings::SettingValue<std::string> mColourSpecial{ mIndex, sName, "colour-special", "darkorange" };
         Settings::SettingValue<std::string> mColourComment{ mIndex, sName, "colour-comment", "green" };
-        Settings::SettingValue<std::string> mColourId{ mIndex, sName, "colour-id", "blue" };
+        Settings::SettingValue<std::string> mColourId{ mIndex, sName, "colour-id", "#0055ff" };
     };
 
     struct GeneralInputCategory : Settings::WithIndex
