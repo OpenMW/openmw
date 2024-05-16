@@ -110,7 +110,7 @@ namespace ESM
                         mDataTypes |= DATA_VHGT;
                     break;
                 case fourCC("WNAM"):
-                    esm.getHExact(mWnam.data(), mWnam.size());
+                    esm.getExact(mWnam.data(), mWnam.size());
                     if (mFlags & Flag_HeightsNormals)
                         mDataTypes |= DATA_WNAM;
                     break;
