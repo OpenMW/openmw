@@ -13,18 +13,14 @@
 #include <osgDB/ReadFile>
 
 #include <components/debug/debuglog.hpp>
-
-#include <components/myguiplatform/myguitexture.hpp>
-
-#include <components/misc/strings/lower.hpp>
-
-#include <components/settings/values.hpp>
-
+#include <components/esm3/loadclas.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/memorystream.hpp>
+#include <components/l10n/manager.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/misc/timeconvert.hpp>
-
-#include <components/esm3/loadclas.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -367,18 +363,23 @@ namespace MWGui
 
     std::string formatTimeplayed(const double timeInSeconds)
     {
-        int timePlayed = (int)floor(timeInSeconds);
-        int days = timePlayed / 60 / 60 / 24;
-        int hours = (timePlayed / 60 / 60) % 24;
-        int minutes = (timePlayed / 60) % 60;
-        int seconds = timePlayed % 60;
+        auto l10n = MWBase::Environment::get().getL10nManager()->getContext("Interface");
+        int duration = static_cast<int>(timeInSeconds);
+        if (duration <= 0)
+            return l10n->formatMessage("DurationSecond", { "seconds" }, { 0 });
 
-        std::stringstream stream;
-        stream << std::setfill('0') << std::setw(2) << days << ":";
-        stream << std::setfill('0') << std::setw(2) << hours << ":";
-        stream << std::setfill('0') << std::setw(2) << minutes << ":";
-        stream << std::setfill('0') << std::setw(2) << seconds;
-        return stream.str();
+        std::string result;
+        int hours = duration / 3600;
+        int minutes = (duration / 60) % 60;
+        int seconds = duration % 60;
+        if (hours)
+            result += l10n->formatMessage("DurationHour", { "hours" }, { hours });
+        if (minutes)
+            result += l10n->formatMessage("DurationMinute", { "minutes" }, { minutes });
+        if (seconds)
+            result += l10n->formatMessage("DurationSecond", { "seconds" }, { seconds });
+
+        return result;
     }
 
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox* sender, size_t pos)
