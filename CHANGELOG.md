@@ -172,6 +172,7 @@
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
     Bug #7908: Key bindings names in the settings menu are layout-specific
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
+    Bug #7980: Paralyzed NPCs' lips move
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
