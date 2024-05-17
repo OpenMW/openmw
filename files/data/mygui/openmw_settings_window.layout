@@ -98,7 +98,7 @@
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 250 260 28">
+                <Widget type="HBox" position="4 250 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Saves"/>
                         <UserString key="SettingName" value="autosave"/>
@@ -108,7 +108,7 @@
                         <Property key="Caption" value="#{OMWEngine:AutoSaveOnResting}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 280 260 28">
+                <Widget type="HBox" position="4 280 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="best attack"/>
@@ -118,7 +118,7 @@
                         <Property key="Caption" value="#{OMWEngine:BestAttack}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 310 260 28">
+                <Widget type="HBox" position="4 310 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="subtitles"/>
@@ -128,7 +128,7 @@
                         <Property key="Caption" value="#{OMWEngine:Subtitles}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 340 260 28">
+                <Widget type="HBox" position="4 340 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="HUD"/>
                         <UserString key="SettingName" value="crosshair"/>
