@@ -1,2 +1,2 @@
-GLOBAL: test.lua
+GLOBAL: global.lua
 PLAYER: player.lua

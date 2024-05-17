@@ -4,11 +4,7 @@ local world = require('openmw.world')
 local core = require('openmw.core')
 local types = require('openmw.types')
 
-if not core.contentFiles.has('Morrowind.esm') then
-    error('This test requires Morrowind.esm')
-end
-
-local tests = {
+return {
     {'Player should be able to walk up stairs in Ebonheart docks (#4247)', function()
         world.players[1]:teleport('', util.vector3(19867, -102180, -79), util.transform.rotateZ(math.rad(91)))
         coroutine.yield()
@@ -41,11 +37,4 @@ local tests = {
         end
         testing.expectThat(types.Container.inventory(barrel):find('ring_keley'), isFargothRing)
     end},
-}
-
-return {
-    engineHandlers = {
-        onUpdate = testing.testRunner(tests),
-    },
-    eventHandlers = testing.eventHandlers,
 }
