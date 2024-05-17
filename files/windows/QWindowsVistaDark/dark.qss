@@ -156,6 +156,11 @@ QProgressBar::chunk:disabled
     color: #788D9C;
 }
 
+QSizeGrip
+{
+    image: url(:/dark/size-grip.svg);
+}
+
 QDockWidget
 {
     background-color: #232323;
