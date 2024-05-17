@@ -197,7 +197,7 @@ namespace MWGui
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
-                title << " (#{sLevel} " << signature.mPlayerLevel << " "
+                title << " (#{OMWEngine:Level} " << signature.mPlayerLevel << " "
                       << MyGUI::TextIterator::toTagsString(MyGUI::UString(className)) << ")";
 
                 mCharacterSelection->addItem(MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
@@ -413,10 +413,10 @@ namespace MWGui
         text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
 
         if (mCurrentSlot->mProfile.mMaximumHealth > 0)
-            text << "#{sHealth} " << static_cast<int>(mCurrentSlot->mProfile.mCurrentHealth) << "/"
+            text << "#{OMWEngine:Health} " << static_cast<int>(mCurrentSlot->mProfile.mCurrentHealth) << "/"
                  << static_cast<int>(mCurrentSlot->mProfile.mMaximumHealth) << "\n";
 
-        text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
+        text << "#{OMWEngine:Level} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCellName << "}\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);

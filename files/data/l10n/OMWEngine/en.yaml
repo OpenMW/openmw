@@ -38,6 +38,8 @@ ScreenshotMade: "%s has been saved"
 DeleteGame: "Delete Game"
 DeleteGameConfirmation: "Are you sure you want to delete this saved game?"
 EmptySaveNameError: "Game can not be saved without a name!"
+Health: "Health"
+Level: "Level"
 LoadGameConfirmation: "Do you want to load a saved game and lose the current one?"
 MissingContentFilesConfirmation: |-
     The currently selected content files do not match the ones used by this save game.

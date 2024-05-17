@@ -38,6 +38,8 @@ ScreenshotMade: "Capture d'écran %s sauvegardée"
 DeleteGame: "Supprimer la partie"
 DeleteGameConfirmation: "Voulez-vous réellement supprimer cette partie sauvegardée ?"
 EmptySaveNameError: "Impossible de sauvegarder une partie lui donner un nom !"
+# Health: "Health"
+# Level: "Level"
 LoadGameConfirmation: "Voulez-vous charger cette autre partie ? Toute progression non sauvegardée sera perdue."
 MissingContentFilesConfirmation: |-
     Les données de jeu actuellement sélectionnées ne correspondent pas à celle indiquée dans cette sauvegarde.

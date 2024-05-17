@@ -38,6 +38,8 @@ ScreenshotMade: "Создан снимок экрана %s"
 DeleteGame: "Удалить игру"
 DeleteGameConfirmation: "Вы уверены, что хотите удалить это сохранение?"
 EmptySaveNameError: "Имя сохранения не может быть пустым!"
+Health: "Здоровье"
+Level: "Уровень"
 LoadGameConfirmation: "Вы хотите загрузить сохранение? Текущая игра будет потеряна."
 MissingContentFilesConfirmation: |-
     Выбранные ESM/ESP файлы не соответствуют тем, которые использовались для этого сохранения.

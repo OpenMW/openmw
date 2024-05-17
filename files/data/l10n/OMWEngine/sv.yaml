@@ -39,6 +39,8 @@ TimePlayed: "Speltid"
 DeleteGame: "Radera spel"
 DeleteGameConfirmation: "Är du säker på att du vill radera sparfilen?"
 EmptySaveNameError: "Spelet kan inte sparas utan ett namn!"
+# Health: "Health"
+# Level: "Level"
 LoadGameConfirmation: "Vill du ladda ett sparat spel och förlora det pågående spelet?"
 MissingContentFilesConfirmation: |-
     De valda innehållsfilerna matchar inte filerna som används av denna sparfil.

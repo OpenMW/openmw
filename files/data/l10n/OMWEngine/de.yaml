@@ -38,6 +38,8 @@ ScreenshotMade: "%s wurde gespeichert."
 DeleteGame: "Spielstand löschen"
 DeleteGameConfirmation: "Möchten Sie den Spielstand wirklich löschen?"
 EmptySaveNameError: "Der Spielstand kann ohne Name nicht gespeichert werden!"
+# Health: "Health"
+# Level: "Level"
 LoadGameConfirmation: "Spielstand laden und aktuellen Fortschritt verwerfen?"
 MissingContentFilesConfirmation: |-
    Die aktuell ausgewählten Spieledateien stimmen nicht mit den im Spielstand verwendeten überein,
