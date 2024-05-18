@@ -589,16 +589,19 @@ namespace MWWorld
             MWBase::World* world = MWBase::Environment::get().getWorld();
             MWWorld::Ptr playerPtr = world->getPlayerPtr();
 
-            ESM::Position newPos;
-            const ESM::RefId refId = MWBase::Environment::get().getWorld()->findInteriorPosition(cellNameId, newPos);
-
-            // Only teleport if that teleport point is > the lowest point, rare edge case
-            // also check that collision is enabled, which is opposite to Vanilla
-            if (!refId.empty() && world->isActorCollisionEnabled(playerPtr)
-                && newPos.pos[2] >= mLowestPoint - lowestPointAdjustment)
+            // Check that collision is enabled, which is opposite to Vanilla
+            // this change was decided in MR #4100 as the behaviour is preferable
+            if (world->isActorCollisionEnabled(playerPtr))
             {
-                MWWorld::ActionTeleport(refId, newPos, false).execute(playerPtr);
-                Log(Debug::Warning) << "Player position has been reset due to falling into the void";
+                ESM::Position newPos;
+                const ESM::RefId refId = world->findInteriorPosition(cellNameId, newPos);
+
+                // Only teleport if that teleport point is > the lowest point, rare edge case
+                if (!refId.empty() && newPos.pos[2] >= mLowestPoint - lowestPointAdjustment)
+                {
+                    MWWorld::ActionTeleport(refId, newPos, false).execute(playerPtr);
+                    Log(Debug::Warning) << "Player position has been reset due to falling into the void";
+                }
             }
         }
     }
