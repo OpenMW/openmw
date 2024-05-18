@@ -254,7 +254,7 @@ void CSVRender::TerrainVertexPaintMode::dragAborted()
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
         undoStack.endMacro();
-    } 
+    }
     endVertexPaintEditing();
     mDragMode = InteractionType_None;
 }
@@ -476,7 +476,6 @@ void CSVRender::TerrainVertexPaintMode::pushEditToCommand(const CSMWorld::LandCo
 
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.push(new CSMWorld::ModifyCommand(landTable, index, changedLand));
-
 }
 
 bool CSVRender::TerrainVertexPaintMode::isInCellSelection(int globalSelectionX, int globalSelectionY)
