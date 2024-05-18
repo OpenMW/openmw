@@ -6,6 +6,7 @@
 namespace osg
 {
     class Group;
+    class StateSet;
 }
 
 namespace DetourNavigator
@@ -16,8 +17,8 @@ namespace DetourNavigator
 
 namespace SceneUtil
 {
-    osg::ref_ptr<osg::Group> createRecastMeshGroup(
-        const DetourNavigator::RecastMesh& recastMesh, const DetourNavigator::RecastSettings& settings);
+    osg::ref_ptr<osg::Group> createRecastMeshGroup(const DetourNavigator::RecastMesh& recastMesh,
+        const DetourNavigator::RecastSettings& settings, const osg::ref_ptr<osg::StateSet>& debugDrawStateSet);
 }
 
 #endif

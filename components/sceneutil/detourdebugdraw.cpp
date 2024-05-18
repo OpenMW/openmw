@@ -1,9 +1,15 @@
 #include "detourdebugdraw.hpp"
+
+#include "depth.hpp"
 #include "util.hpp"
 
 #include <osg/BlendFunc>
 #include <osg/Group>
 #include <osg/LineWidth>
+#include <osg/Material>
+#include <osg/PolygonOffset>
+
+#include <algorithm>
 
 namespace
 {
@@ -111,6 +117,22 @@ namespace SceneUtil
         stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
         stateSet->setAttributeAndModes(new osg::LineWidth());
         stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        return stateSet;
+    }
+
+    osg::ref_ptr<osg::StateSet> makeDetourGroupStateSet()
+    {
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+
+        const float polygonOffsetFactor = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        osg::ref_ptr<osg::PolygonOffset> polygonOffset
+            = new osg::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
+
+        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+        stateSet->setAttribute(material);
+        stateSet->setAttributeAndModes(polygonOffset);
         return stateSet;
     }
 }

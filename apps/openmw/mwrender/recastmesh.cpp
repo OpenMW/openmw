@@ -6,6 +6,7 @@
 #include <components/detournavigator/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/detourdebugdraw.hpp>
 #include <components/sceneutil/recastmesh.hpp>
 
 #include <osg/PositionAttitudeTransform>
@@ -19,6 +20,8 @@ namespace MWRender
     RecastMesh::RecastMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
         , mEnabled(enabled)
+        , mGroupStateSet(SceneUtil::makeDetourGroupStateSet())
+        , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
     {
     }
 
@@ -55,11 +58,16 @@ namespace MWRender
 
             if (it->second.mVersion != tile->second->getVersion())
             {
-                const auto group = SceneUtil::createRecastMeshGroup(*tile->second, settings.mRecast);
-                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+                const osg::ref_ptr<osg::Group> group
+                    = SceneUtil::createRecastMeshGroup(*tile->second, settings.mRecast, mDebugDrawStateSet);
                 group->setNodeMask(Mask_Debug);
+                group->setStateSet(mGroupStateSet);
+
+                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+
                 mRootNode->removeChild(it->second.mValue);
                 mRootNode->addChild(group);
+
                 it->second.mValue = group;
                 it->second.mVersion = tile->second->getVersion();
             }
@@ -79,9 +87,13 @@ namespace MWRender
                 mRootNode->removeChild(it->second.mValue);
             }
 
-            const auto group = SceneUtil::createRecastMeshGroup(*mesh, settings.mRecast);
-            MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+            const osg::ref_ptr<osg::Group> group
+                = SceneUtil::createRecastMeshGroup(*mesh, settings.mRecast, mDebugDrawStateSet);
             group->setNodeMask(Mask_Debug);
+            group->setStateSet(mGroupStateSet);
+
+            MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+
             mGroups.insert_or_assign(it, position, Group{ mesh->getVersion(), group });
             mRootNode->addChild(group);
         }

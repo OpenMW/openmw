@@ -53,6 +53,8 @@ namespace SceneUtil
 
         void addColor(osg::Vec4f&& value);
     };
+
+    osg::ref_ptr<osg::StateSet> makeDetourGroupStateSet();
 }
 
 #endif

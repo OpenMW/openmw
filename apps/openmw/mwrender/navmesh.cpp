@@ -1,4 +1,5 @@
 #include "navmesh.hpp"
+
 #include "vismask.hpp"
 
 #include <components/detournavigator/guardednavmeshcacheitem.hpp>
@@ -129,16 +130,17 @@ namespace MWRender
                     if (mAborted.load(std::memory_order_acquire))
                         return;
 
-                    group = SceneUtil::createNavMeshTileGroup(navMesh->getImpl(), *meshTile, mSettings, mGroupStateSet,
-                        mDebugDrawStateSet, flags, minSalt, maxSalt);
+                    group = SceneUtil::createNavMeshTileGroup(
+                        navMesh->getImpl(), *meshTile, mSettings, mDebugDrawStateSet, flags, minSalt, maxSalt);
                 }
                 if (group == nullptr)
                 {
                     removedTiles.push_back(position);
                     continue;
                 }
-                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
                 group->setNodeMask(Mask_Debug);
+                group->setStateSet(mGroupStateSet);
+                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
                 updatedTiles.emplace_back(position, Tile{ version, std::move(group) });
             }
 
@@ -166,7 +168,7 @@ namespace MWRender
         bool enabled, Settings::NavMeshRenderMode mode)
         : mRootNode(root)
         , mWorkQueue(workQueue)
-        , mGroupStateSet(SceneUtil::makeNavMeshTileStateSet())
+        , mGroupStateSet(SceneUtil::makeDetourGroupStateSet())
         , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
         , mEnabled(enabled)
         , mMode(mode)

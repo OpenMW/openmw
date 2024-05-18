@@ -1,12 +1,16 @@
 #include "actorspaths.hpp"
+
 #include "vismask.hpp"
 
 #include <components/detournavigator/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/agentpath.hpp>
+#include <components/sceneutil/detourdebugdraw.hpp>
 
+#include <osg/Material>
 #include <osg/PositionAttitudeTransform>
+#include <osg/StateSet>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -15,9 +19,24 @@
 
 namespace MWRender
 {
+    namespace
+    {
+        osg::ref_ptr<osg::StateSet> makeGroupStateSet()
+        {
+            osg::ref_ptr<osg::Material> material = new osg::Material;
+            material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setAttribute(material);
+            return stateSet;
+        }
+    }
+
     ActorsPaths::ActorsPaths(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
         , mEnabled(enabled)
+        , mGroupStateSet(makeGroupStateSet())
+        , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
     {
     }
 
@@ -48,14 +67,15 @@ namespace MWRender
         if (group != mGroups.end())
             mRootNode->removeChild(group->second.mNode);
 
-        auto newGroup = SceneUtil::createAgentPathGroup(path, agentBounds, start, end, settings.mRecast);
-        if (newGroup)
-        {
-            MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(newGroup, "debug");
-            newGroup->setNodeMask(Mask_Debug);
-            mRootNode->addChild(newGroup);
-            mGroups[actor.mRef] = Group{ actor.mCell, std::move(newGroup) };
-        }
+        osg::ref_ptr<osg::Group> newGroup
+            = SceneUtil::createAgentPathGroup(path, agentBounds, start, end, settings.mRecast, mDebugDrawStateSet);
+        newGroup->setNodeMask(Mask_Debug);
+        newGroup->setStateSet(mGroupStateSet);
+
+        MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(newGroup, "debug");
+
+        mRootNode->addChild(newGroup);
+        mGroups.insert_or_assign(group, actor.mRef, Group{ actor.mCell, std::move(newGroup) });
     }
 
     void ActorsPaths::remove(const MWWorld::ConstPtr& actor)

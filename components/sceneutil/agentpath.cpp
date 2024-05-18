@@ -1,4 +1,5 @@
 #include "agentpath.hpp"
+
 #include "detourdebugdraw.hpp"
 
 #include <osg/Material>
@@ -38,13 +39,13 @@ namespace SceneUtil
 {
     osg::ref_ptr<osg::Group> createAgentPathGroup(const std::deque<osg::Vec3f>& path,
         const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end,
-        const DetourNavigator::RecastSettings& settings)
+        const DetourNavigator::RecastSettings& settings, const osg::ref_ptr<osg::StateSet>& debugDrawStateSet)
     {
         using namespace DetourNavigator;
 
-        const osg::ref_ptr<osg::Group> group(new osg::Group);
+        osg::ref_ptr<osg::Group> group(new osg::Group);
 
-        DebugDraw debugDraw(*group, DebugDraw::makeStateSet(), osg::Vec3f(0, 0, 0), 1);
+        DebugDraw debugDraw(*group, debugDrawStateSet, osg::Vec3f(0, 0, 0), 1);
 
         const auto agentRadius = DetourNavigator::getAgentRadius(agentBounds);
         const auto agentHeight = DetourNavigator::getAgentHeight(agentBounds);
@@ -68,10 +69,6 @@ namespace SceneUtil
         debugDraw.end();
 
         debugDraw.depthMask(true);
-
-        osg::ref_ptr<osg::Material> material = new osg::Material;
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-        group->getOrCreateStateSet()->setAttribute(material);
 
         return group;
     }

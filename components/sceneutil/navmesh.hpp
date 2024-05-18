@@ -27,11 +27,9 @@ namespace SceneUtil
         NavMeshTileDrawFlagsHeat = 1 << 3,
     };
 
-    osg::ref_ptr<osg::StateSet> makeNavMeshTileStateSet();
-
     osg::ref_ptr<osg::Group> createNavMeshTileGroup(const dtNavMesh& navMesh, const dtMeshTile& meshTile,
-        const DetourNavigator::Settings& settings, const osg::ref_ptr<osg::StateSet>& groupStateSet,
-        const osg::ref_ptr<osg::StateSet>& debugDrawStateSet, unsigned char flags, unsigned minSalt, unsigned maxSalt);
+        const DetourNavigator::Settings& settings, const osg::ref_ptr<osg::StateSet>& debugDrawStateSet,
+        unsigned char flags, unsigned minSalt, unsigned maxSalt);
 }
 
 #endif
