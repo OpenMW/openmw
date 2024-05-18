@@ -330,14 +330,7 @@ namespace Shader
                     const osg::Texture* texture = attr->asTexture();
                     if (texture)
                     {
-                        std::string texName;
-                        const osg::StateAttribute* type
-                            = stateset->getTextureAttribute(unit, SceneUtil::TextureType::AttributeType);
-                        if (type)
-                            texName = static_cast<const SceneUtil::TextureType*>(type)->getName();
-                        else
-                            texName = texture->getName();
-
+                        std::string texName = SceneUtil::getTextureType(*stateset, *texture, unit);
                         if ((texName.empty() || !isTextureNameRecognized(texName)) && unit == 0)
                             texName = "diffuseMap";
 

@@ -408,4 +408,12 @@ namespace SceneUtil
         return osg::Image::computePixelFormat(format);
     }
 
+    const std::string& getTextureType(const osg::StateSet& stateset, const osg::Texture& texture, unsigned int texUnit)
+    {
+        const osg::StateAttribute* type = stateset.getTextureAttribute(texUnit, SceneUtil::TextureType::AttributeType);
+        if (type)
+            return static_cast<const SceneUtil::TextureType*>(type)->getName();
+
+        return texture.getName();
+    }
 }

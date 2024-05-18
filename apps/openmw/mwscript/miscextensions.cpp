@@ -47,7 +47,7 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/conversion.hpp>
-#include <components/sceneutil/texturetype.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -107,12 +107,7 @@ namespace
                     std::string fileName;
                     if (image)
                         fileName = image->getFileName();
-                    const osg::StateAttribute* type
-                        = stateset->getTextureAttribute(i, SceneUtil::TextureType::AttributeType);
-                    if (type)
-                        mTextures.emplace_back(static_cast<const SceneUtil::TextureType*>(type)->getName(), fileName);
-                    else
-                        mTextures.emplace_back(texture->getName(), fileName);
+                    mTextures.emplace_back(SceneUtil::getTextureType(*stateset, *texture, i), fileName);
                 }
             }
 
