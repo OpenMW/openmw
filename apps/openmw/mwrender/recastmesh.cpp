@@ -67,14 +67,22 @@ namespace MWRender
             ++it;
         }
 
-        for (const auto& tile : tiles)
+        for (const auto& [position, mesh] : tiles)
         {
-            if (mGroups.count(tile.first))
-                continue;
-            const auto group = SceneUtil::createRecastMeshGroup(*tile.second, settings.mRecast);
+            const auto it = mGroups.find(position);
+
+            if (it != mGroups.end())
+            {
+                if (it->second.mVersion == mesh->getVersion())
+                    continue;
+
+                mRootNode->removeChild(it->second.mValue);
+            }
+
+            const auto group = SceneUtil::createRecastMeshGroup(*mesh, settings.mRecast);
             MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
             group->setNodeMask(Mask_Debug);
-            mGroups.emplace(tile.first, Group{ tile.second->getVersion(), group });
+            mGroups.insert_or_assign(it, position, Group{ mesh->getVersion(), group });
             mRootNode->addChild(group);
         }
     }
