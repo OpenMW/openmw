@@ -217,7 +217,10 @@ namespace DetourNavigator
 
     Stats NavMeshManager::getStats() const
     {
-        return Stats{ .mUpdater = mAsyncNavMeshUpdater.getStats() };
+        return Stats{
+            .mUpdater = mAsyncNavMeshUpdater.getStats(),
+            .mRecast = mRecastMeshManager.getStats(),
+        };
     }
 
     RecastMeshTiles NavMeshManager::getRecastMeshTiles() const

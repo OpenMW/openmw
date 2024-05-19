@@ -119,6 +119,10 @@ namespace Resource
                 "NavMesh CachedTiles",
                 "NavMesh Cache Get",
                 "NavMesh Cache Hit",
+                "NavMesh Recast Tiles",
+                "NavMesh Recast Objects",
+                "NavMesh Recast Heightfields",
+                "NavMesh Recast Water",
             };
 
             std::vector<std::string> statNames;

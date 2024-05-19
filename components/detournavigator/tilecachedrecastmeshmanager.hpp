@@ -28,11 +28,11 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
-#include <vector>
 
 namespace DetourNavigator
 {
     class RecastMesh;
+    struct TileCachedRecastMeshManagerStats;
 
     class TileCachedRecastMeshManager
     {
@@ -80,6 +80,8 @@ namespace DetourNavigator
         void addChangedTile(const TilePosition& tilePosition, ChangeType changeType);
 
         std::map<osg::Vec2i, ChangeType> takeChangedTiles(const UpdateGuard* guard);
+
+        TileCachedRecastMeshManagerStats getStats() const;
 
     private:
         struct Report

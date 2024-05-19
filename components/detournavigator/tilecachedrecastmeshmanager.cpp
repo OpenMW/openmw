@@ -1,8 +1,10 @@
 #include "tilecachedrecastmeshmanager.hpp"
+
 #include "changetype.hpp"
 #include "gettilespositions.hpp"
 #include "recastmeshbuilder.hpp"
 #include "settingsutils.hpp"
+#include "stats.hpp"
 #include "updateguard.hpp"
 
 #include <components/bullethelpers/aabb.hpp>
@@ -11,7 +13,6 @@
 #include <boost/geometry/geometry.hpp>
 
 #include <limits>
-#include <vector>
 
 namespace DetourNavigator
 {
@@ -427,6 +428,17 @@ namespace DetourNavigator
                     ++it->second.mVersion.mRevision;
         }
         return std::move(mChangedTiles);
+    }
+
+    TileCachedRecastMeshManagerStats TileCachedRecastMeshManager::getStats() const
+    {
+        const std::lock_guard lock(mMutex);
+        return TileCachedRecastMeshManagerStats{
+            .mTiles = mCache.size(),
+            .mObjects = mObjects.size(),
+            .mHeightfields = mHeightfields.size(),
+            .mWater = mWater.size(),
+        };
     }
 
     TileCachedRecastMeshManager::IndexPoint TileCachedRecastMeshManager::makeIndexPoint(
