@@ -91,7 +91,7 @@ namespace DetourNavigator
          * @brief setWorldspace should be called before adding object from new worldspace
          * @param worldspace
          */
-        virtual void setWorldspace(std::string_view worldspace, const UpdateGuard* guard) = 0;
+        virtual void setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard) = 0;
 
         /**
          * @brief updateBounds should be called before adding object from loading cell

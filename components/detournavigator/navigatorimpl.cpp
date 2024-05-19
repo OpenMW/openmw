@@ -33,7 +33,7 @@ namespace DetourNavigator
             --it->second;
     }
 
-    void NavigatorImpl::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
+    void NavigatorImpl::setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard)
     {
         mNavMeshManager.setWorldspace(worldspace, guard);
     }

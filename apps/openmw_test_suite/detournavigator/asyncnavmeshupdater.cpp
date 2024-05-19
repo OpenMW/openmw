@@ -52,7 +52,7 @@ namespace
         OffMeshConnectionsManager mOffMeshConnectionsManager{ mSettings.mRecast };
         const AgentBounds mAgentBounds{ CollisionShapeType::Aabb, { 29, 29, 66 } };
         const TilePosition mPlayerTile{ 0, 0 };
-        const std::string mWorldspace = "sys::default";
+        const ESM::RefId mWorldspace = ESM::RefId::stringRefId("sys::default");
         const btBoxShape mBox{ btVector3(100, 100, 20) };
         Loading::Listener mListener;
     };
@@ -310,7 +310,7 @@ namespace
         AsyncNavMeshUpdater updater(mSettings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db));
 
         const TileId nextTileId(dbPtr->getMaxTileId() + 1);
-        ASSERT_EQ(dbPtr->insertTile(nextTileId, "worldspace", TilePosition{}, TileVersion{ 1 }, {}, {}), 1);
+        ASSERT_EQ(dbPtr->insertTile(nextTileId, mWorldspace, TilePosition{}, TileVersion{ 1 }, {}, {}), 1);
 
         const auto navMeshCacheItem = std::make_shared<GuardedNavMeshCacheItem>(1, mSettings);
         const TilePosition tilePosition{ 0, 0 };
@@ -385,7 +385,7 @@ namespace
         const AgentBounds mAgentBounds{ CollisionShapeType::Aabb, osg::Vec3f(1, 1, 1) };
         const std::shared_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItemPtr;
         const std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem = mNavMeshCacheItemPtr;
-        const std::string_view mWorldspace = "worldspace";
+        const ESM::RefId mWorldspace = ESM::RefId::stringRefId("worldspace");
         const TilePosition mChangedTile{ 0, 0 };
         const std::chrono::steady_clock::time_point mProcessTime{};
         const TilePosition mPlayerTile{ 0, 0 };
@@ -397,20 +397,23 @@ namespace
         std::list<Job> jobs;
         SpatialJobQueue queue;
 
-        queue.push(jobs.emplace(jobs.end(), mAgentBounds, mNavMeshCacheItem, "worldspace1", mChangedTile,
-            ChangeType::remove, mProcessTime));
-        queue.push(jobs.emplace(jobs.end(), mAgentBounds, mNavMeshCacheItem, "worldspace2", mChangedTile,
-            ChangeType::update, mProcessTime));
+        const ESM::RefId worldspace1 = ESM::RefId::stringRefId("worldspace1");
+        const ESM::RefId worldspace2 = ESM::RefId::stringRefId("worldspace2");
+
+        queue.push(jobs.emplace(
+            jobs.end(), mAgentBounds, mNavMeshCacheItem, worldspace1, mChangedTile, ChangeType::remove, mProcessTime));
+        queue.push(jobs.emplace(
+            jobs.end(), mAgentBounds, mNavMeshCacheItem, worldspace2, mChangedTile, ChangeType::update, mProcessTime));
 
         ASSERT_EQ(queue.size(), 2);
 
         const auto job1 = queue.pop(mChangedTile);
         ASSERT_TRUE(job1.has_value());
-        EXPECT_EQ((*job1)->mWorldspace, "worldspace1");
+        EXPECT_EQ((*job1)->mWorldspace, worldspace1);
 
         const auto job2 = queue.pop(mChangedTile);
         ASSERT_TRUE(job2.has_value());
-        EXPECT_EQ((*job2)->mWorldspace, "worldspace2");
+        EXPECT_EQ((*job2)->mWorldspace, worldspace2);
 
         EXPECT_EQ(queue.size(), 0);
     }

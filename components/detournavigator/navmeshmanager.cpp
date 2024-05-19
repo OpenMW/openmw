@@ -58,7 +58,7 @@ namespace DetourNavigator
     {
     }
 
-    void NavMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
+    void NavMeshManager::setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard)
     {
         if (worldspace == mWorldspace)
             return;

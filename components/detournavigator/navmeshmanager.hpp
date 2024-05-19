@@ -24,7 +24,7 @@ namespace DetourNavigator
 
         ScopedUpdateGuard makeUpdateGuard() { return mRecastMeshManager.makeUpdateGuard(); }
 
-        void setWorldspace(std::string_view worldspace, const UpdateGuard* guard);
+        void setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard);
 
         void updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard);
 
@@ -67,7 +67,7 @@ namespace DetourNavigator
 
     private:
         const Settings& mSettings;
-        std::string mWorldspace;
+        ESM::RefId mWorldspace;
         TileCachedRecastMeshManager mRecastMeshManager;
         OffMeshConnectionsManager mOffMeshConnectionsManager;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;

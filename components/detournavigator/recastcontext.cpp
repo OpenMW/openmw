@@ -24,7 +24,7 @@ namespace DetourNavigator
         }
 
         std::string formatPrefix(
-            std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds)
+            ESM::RefId worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds)
         {
             std::ostringstream stream;
             stream << "Worldspace: " << worldspace << "; tile position: " << tilePosition.x() << ", "
@@ -34,7 +34,7 @@ namespace DetourNavigator
     }
 
     RecastContext::RecastContext(
-        std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds)
+        ESM::RefId worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds)
         : mPrefix(formatPrefix(worldspace, tilePosition, agentBounds))
     {
     }
