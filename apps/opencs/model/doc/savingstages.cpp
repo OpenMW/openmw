@@ -305,9 +305,8 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
         {
             CSMWorld::CellRef refRecord = ref.get();
 
-            // Check for uninitialized content file
-            if (!refRecord.mRefNum.hasContentFile())
-                refRecord.mRefNum.mContentFile = 0;
+            // -1 is the current file, saved indices are 1-based
+            refRecord.mRefNum.mContentFile++;
 
             // recalculate the ref's cell location
             std::ostringstream stream;

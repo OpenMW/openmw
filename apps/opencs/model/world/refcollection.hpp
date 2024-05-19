@@ -55,7 +55,7 @@ namespace CSMWorld
         {
         }
 
-        void load(ESM::ESMReader& reader, int cellIndex, bool base, std::map<unsigned int, unsigned int>& cache,
+        void load(ESM::ESMReader& reader, int cellIndex, bool base, std::map<ESM::RefNum, unsigned int>& cache,
             CSMDoc::Messages& messages);
         ///< Load a sequence of references.
 

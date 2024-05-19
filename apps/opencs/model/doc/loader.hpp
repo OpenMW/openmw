@@ -23,11 +23,9 @@ namespace CSMDoc
 
         struct Stage
         {
-            int mFile;
-            int mRecordsLoaded;
-            bool mRecordsLeft;
-
-            Stage();
+            int mFile = 0;
+            int mRecordsLoaded = 0;
+            bool mRecordsLeft = false;
         };
 
         QMutex mMutex;

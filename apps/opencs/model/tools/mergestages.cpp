@@ -117,7 +117,7 @@ void CSMTools::MergeReferencesStage::perform(int stage, CSMDoc::Messages& messag
         ref.mOriginalCell = ref.mCell;
 
         ref.mRefNum.mIndex = mIndex[ref.mCell]++;
-        ref.mRefNum.mContentFile = 0;
+        ref.mRefNum.mContentFile = -1;
         ref.mNew = false;
 
         mState.mTarget->getData().getReferences().appendRecord(std::make_unique<CSMWorld::Record<CSMWorld::CellRef>>(

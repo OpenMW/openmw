@@ -167,6 +167,7 @@
     Bug #7872: Region sounds use wrong odds
     Bug #7886: Equip and unequip animations can't share the animation track section
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
+    Bug #7896: Editor: Loading cellrefs incorrectly transforms Refnums, causing load failures
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
