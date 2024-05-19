@@ -8,6 +8,11 @@
 
 #include "operation.hpp"
 
+namespace
+{
+    constexpr int operationLineHeight = 40;
+}
+
 CSVDoc::Operations::Operations()
 {
     /// \todo make widget height fixed (exactly the height required to display all operations)
@@ -20,7 +25,7 @@ CSVDoc::Operations::Operations()
     widgetContainer->setLayout(mLayout);
     setWidget(widgetContainer);
     setVisible(false);
-    setFixedHeight(widgetContainer->height());
+    setFixedHeight(operationLineHeight);
     setTitleBarWidget(new QWidget(this));
 }
 
@@ -33,9 +38,6 @@ void CSVDoc::Operations::setProgress(int current, int max, int type, int threads
             return;
         }
 
-    int oldCount = static_cast<int>(mOperations.size());
-    int newCount = oldCount + 1;
-
     Operation* operation = new Operation(type, this);
     connect(operation, qOverload<int>(&Operation::abortOperation), this, &Operations::abortOperation);
 
@@ -43,8 +45,8 @@ void CSVDoc::Operations::setProgress(int current, int max, int type, int threads
     mOperations.push_back(operation);
     operation->setProgress(current, max, threads);
 
-    if (oldCount > 0)
-        setFixedHeight(height() / oldCount * newCount);
+    int newCount = static_cast<int>(mOperations.size());
+    setFixedHeight(operationLineHeight * newCount);
 
     setVisible(true);
 }
@@ -54,16 +56,14 @@ void CSVDoc::Operations::quitOperation(int type)
     for (std::vector<Operation*>::iterator iter(mOperations.begin()); iter != mOperations.end(); ++iter)
         if ((*iter)->getType() == type)
         {
-            int oldCount = static_cast<int>(mOperations.size());
-            int newCount = oldCount - 1;
-
             mLayout->removeItem((*iter)->getLayout());
 
             (*iter)->deleteLater();
             mOperations.erase(iter);
 
-            if (oldCount > 1)
-                setFixedHeight(height() / oldCount * newCount);
+            int newCount = static_cast<int>(mOperations.size());
+            if (newCount > 0)
+                setFixedHeight(operationLineHeight * newCount);
             else
                 setVisible(false);
 

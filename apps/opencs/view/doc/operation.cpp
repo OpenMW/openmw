@@ -13,21 +13,21 @@ void CSVDoc::Operation::updateLabel(int threads)
 {
     if (threads == -1 || ((threads == 0) != mStalling))
     {
-        std::string name("unknown operation");
+        std::string name("Unknown operation");
 
         switch (mType)
         {
             case CSMDoc::State_Saving:
-                name = "saving";
+                name = "Saving";
                 break;
             case CSMDoc::State_Verifying:
-                name = "verifying";
+                name = "Verifying";
                 break;
             case CSMDoc::State_Searching:
-                name = "searching";
+                name = "Searching";
                 break;
             case CSMDoc::State_Merging:
-                name = "merging";
+                name = "Merging";
                 break;
         }
 
@@ -98,7 +98,7 @@ void CSVDoc::Operation::setBarColor(int type)
           "QProgressBar::chunk {"
           "background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 %1, stop:.50 %2 stop: .51 %3 stop:1 %4);"
           "text-align: center;"
-          "margin: 2px 1px 1p 2px;"
+          "margin: 2px 2px 2px 2px;"
           "}";
 
     QString topColor = "#F2F6F8";
@@ -121,10 +121,10 @@ void CSVDoc::Operation::setBarColor(int type)
 
         case CSMDoc::State_Searching:
 
-            topColor = "#EBF1F6";
-            midTopColor = "#ABD3EE";
-            midBottomColor = "#89C3EB";
-            bottomColor = "#D5EBFB"; // blue gloss #4
+            topColor = "#6DB3F2";
+            midTopColor = "#54A3EE";
+            midBottomColor = "#3690F0";
+            bottomColor = "#1E69DE"; // blue gloss #3
             break;
 
         case CSMDoc::State_Verifying:
@@ -142,13 +142,6 @@ void CSVDoc::Operation::setBarColor(int type)
             midBottomColor = "#B68D4C";
             bottomColor = "#E9D4B3"; // l Brown 3D
             break;
-
-        default:
-
-            topColor = "#F2F6F8";
-            bottomColor = "#E0EFF9";
-            midTopColor = "#D8E1E7";
-            midBottomColor = "#B5C6D0"; // gray gloss for undefined ops
     }
 
     mProgressBar->setStyleSheet(style.arg(topColor).arg(midTopColor).arg(midBottomColor).arg(bottomColor));
