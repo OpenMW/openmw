@@ -603,7 +603,7 @@ namespace MWWorld
         mPreloader->setTerrain(mRendering.getTerrain());
         if (mRendering.pagingUnlockCache())
             mPreloader->abortTerrainPreloadExcept(nullptr);
-        if (!mPreloader->isTerrainLoaded(std::make_pair(pos, newGrid), mRendering.getReferenceTime()))
+        if (!mPreloader->isTerrainLoaded(PositionCellGrid{ pos, newGrid }, mRendering.getReferenceTime()))
             preloadTerrain(pos, playerCellIndex.mWorldspace, true);
         mPagedRefs.clear();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
@@ -1093,26 +1093,25 @@ namespace MWWorld
         osg::Vec3f predictedPos = playerPos + moved / dt * mPredictionTime;
 
         if (mCurrentCell->isExterior())
-            exteriorPositions.emplace_back(
-                predictedPos, gridCenterToBounds(getNewGridCenter(predictedPos, &mCurrentGridCenter)));
+            exteriorPositions.push_back(PositionCellGrid{
+                predictedPos, gridCenterToBounds(getNewGridCenter(predictedPos, &mCurrentGridCenter)) });
 
         mLastPlayerPos = playerPos;
 
         if (mPreloadEnabled)
         {
             if (mPreloadDoors)
-                preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
+                preloadTeleportDoorDestinations(playerPos, predictedPos);
             if (mPreloadExteriorGrid)
                 preloadExteriorGrid(playerPos, predictedPos);
             if (mPreloadFastTravel)
-                preloadFastTravelDestinations(playerPos, predictedPos, exteriorPositions);
+                preloadFastTravelDestinations(playerPos, exteriorPositions);
         }
 
         mPreloader->setTerrainPreloadPositions(exteriorPositions);
     }
 
-    void Scene::preloadTeleportDoorDestinations(
-        const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<PositionCellGrid>& exteriorPositions)
+    void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos)
     {
         std::vector<MWWorld::ConstPtr> teleportDoors;
         for (const MWWorld::CellStore* cellStore : mActiveCells)
@@ -1232,10 +1231,9 @@ namespace MWWorld
     void Scene::preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync)
     {
         ESM::ExteriorCellLocation cellPos = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace);
-        std::vector<PositionCellGrid> vec;
-        vec.emplace_back(pos, gridCenterToBounds({ cellPos.mX, cellPos.mY }));
-        mPreloader->abortTerrainPreloadExcept(vec.data());
-        mPreloader->setTerrainPreloadPositions(vec);
+        const PositionCellGrid position{ pos, gridCenterToBounds({ cellPos.mX, cellPos.mY }) };
+        mPreloader->abortTerrainPreloadExcept(&position);
+        mPreloader->setTerrainPreloadPositions(std::span(&position, 1));
         if (!sync)
             return;
 
@@ -1249,7 +1247,7 @@ namespace MWWorld
 
     void Scene::reloadTerrain()
     {
-        mPreloader->setTerrainPreloadPositions(std::vector<PositionCellGrid>());
+        mPreloader->setTerrainPreloadPositions({});
     }
 
     struct ListFastTravelDestinationsVisitor
@@ -1282,12 +1280,10 @@ namespace MWWorld
         std::vector<ESM::Transport::Dest> mList;
     };
 
-    void Scene::preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& /*predictedPos*/,
-        std::vector<PositionCellGrid>& exteriorPositions) // ignore predictedPos here since opening dialogue with
-                                                          // travel service takes extra time
+    void Scene::preloadFastTravelDestinations(
+        const osg::Vec3f& playerPos, std::vector<PositionCellGrid>& exteriorPositions)
     {
-        const MWWorld::ConstPtr player = mWorld.getPlayerPtr();
-        ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
+        ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, playerPos);
         ESM::RefId extWorldspace = mWorld.getCurrentWorldspace();
         for (MWWorld::CellStore* cellStore : mActiveCells)
         {
@@ -1305,7 +1301,7 @@ namespace MWWorld
                 const ESM::ExteriorCellLocation cellIndex
                     = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), extWorldspace);
                 preloadCellWithSurroundings(mWorld.getWorldModel().getExterior(cellIndex));
-                exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
+                exteriorPositions.push_back(PositionCellGrid{ pos, gridCenterToBounds(getNewGridCenter(pos)) });
             }
         }
     }

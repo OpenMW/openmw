@@ -70,7 +70,6 @@ namespace Terrain
                 mNodes.clear();
             }
         }
-        const osg::Vec4i& getActiveGrid() const { return mActiveGrid; }
 
         unsigned int getWorldUpdateRevision() const { return mWorldUpdateRevision; }
         void setWorldUpdateRevision(int updateRevision) { mWorldUpdateRevision = updateRevision; }
