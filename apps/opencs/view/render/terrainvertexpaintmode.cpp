@@ -128,9 +128,6 @@ void CSVRender::TerrainVertexPaintMode::primaryEditPressed(const WorldspaceHitRe
     {
         if (mDragMode == InteractionType_PrimaryEdit)
         {
-            CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-            // QUndoStack& undoStack = document.getUndoStack();
-            // undoStack.beginMacro("Set land normals");
             editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
         }
     }
@@ -167,7 +164,7 @@ bool CSVRender::TerrainVertexPaintMode::primaryEditStartDrag(const QPoint& pos)
         mIsEditing = true;
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
-        undoStack.beginMacro("Set land normals");
+        undoStack.beginMacro("Set land vertex colours");
     }
 
     return true;
