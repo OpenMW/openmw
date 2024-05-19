@@ -24,9 +24,7 @@ namespace DetourNavigator
 
         ScopedUpdateGuard makeUpdateGuard() { return mRecastMeshManager.makeUpdateGuard(); }
 
-        void setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard);
-
-        void updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard);
+        void updateBounds(ESM::RefId worldspace, const osg::Vec3f& playerPosition, const UpdateGuard* guard);
 
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType, const UpdateGuard* guard);

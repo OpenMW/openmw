@@ -44,31 +44,21 @@ namespace
     struct DetourNavigatorNavigatorTest : Test
     {
         Settings mSettings = makeSettings();
-        std::unique_ptr<Navigator> mNavigator;
-        const osg::Vec3f mPlayerPosition;
-        const std::string mWorldspace;
+        std::unique_ptr<Navigator> mNavigator = std::make_unique<NavigatorImpl>(
+            mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max()));
+        const osg::Vec3f mPlayerPosition{ 256, 256, 0 };
+        const ESM::RefId mWorldspace = ESM::RefId::stringRefId("sys::default");
         const AgentBounds mAgentBounds{ CollisionShapeType::Aabb, { 29, 29, 66 } };
-        osg::Vec3f mStart;
-        osg::Vec3f mEnd;
+        osg::Vec3f mStart{ 52, 460, 1 };
+        osg::Vec3f mEnd{ 460, 52, 1 };
         std::deque<osg::Vec3f> mPath;
-        std::back_insert_iterator<std::deque<osg::Vec3f>> mOut;
+        std::back_insert_iterator<std::deque<osg::Vec3f>> mOut{ mPath };
         AreaCosts mAreaCosts;
         Loading::Listener mListener;
         const osg::Vec2i mCellPosition{ 0, 0 };
         const float mEndTolerance = 0;
         const btTransform mTransform{ btMatrix3x3::getIdentity(), btVector3(256, 256, 0) };
         const ObjectTransform mObjectTransform{ ESM::Position{ { 256, 256, 0 }, { 0, 0, 0 } }, 0.0f };
-
-        DetourNavigatorNavigatorTest()
-            : mPlayerPosition(256, 256, 0)
-            , mWorldspace("sys::default")
-            , mStart(52, 460, 1)
-            , mEnd(460, 52, 1)
-            , mOut(mPath)
-        {
-            mNavigator.reset(new NavigatorImpl(
-                mSettings, std::make_unique<NavMeshDb>(":memory:", std::numeric_limits<std::uint64_t>::max())));
-        }
     };
 
     constexpr std::array<float, 5 * 5> defaultHeightfieldData{ {
@@ -878,7 +868,7 @@ namespace
             .mScale = 1.0f,
         };
 
-        mNavigator->updateBounds(mPlayerPosition, nullptr);
+        mNavigator->updateBounds(mWorldspace, mPlayerPosition, nullptr);
         ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
         mNavigator->addObject(ObjectId(&bigBox.shape()), ObjectShapes(bigBox.instance(), objectTransform),
             btTransform::getIdentity(), nullptr);

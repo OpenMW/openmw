@@ -27,9 +27,7 @@ namespace DetourNavigator
 
         void removeAgent(const AgentBounds& agentBounds) override;
 
-        void setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard) override;
-
-        void updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard) override;
+        void updateBounds(ESM::RefId worldspace, const osg::Vec3f& playerPosition, const UpdateGuard* guard) override;
 
         void addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
             const UpdateGuard* guard) override;

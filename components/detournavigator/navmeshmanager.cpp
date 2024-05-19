@@ -58,18 +58,16 @@ namespace DetourNavigator
     {
     }
 
-    void NavMeshManager::setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard)
+    void NavMeshManager::updateBounds(ESM::RefId worldspace, const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
-        if (worldspace == mWorldspace)
-            return;
-        mRecastMeshManager.setWorldspace(worldspace, guard);
-        for (auto& [agent, cache] : mCache)
-            cache = std::make_shared<GuardedNavMeshCacheItem>(++mGenerationCounter, mSettings);
-        mWorldspace = worldspace;
-    }
+        if (worldspace != mWorldspace)
+        {
+            mRecastMeshManager.setWorldspace(worldspace, guard);
+            for (auto& [agent, cache] : mCache)
+                cache = std::make_shared<GuardedNavMeshCacheItem>(++mGenerationCounter, mSettings);
+            mWorldspace = worldspace;
+        }
 
-    void NavMeshManager::updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
-    {
         const TilePosition playerTile = toNavMeshTilePosition(mSettings.mRecast, playerPosition);
         const TilesPositionsRange range = makeRange(playerTile, mSettings.mMaxTilesNumber);
         mRecastMeshManager.setRange(range, guard);
