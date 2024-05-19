@@ -449,7 +449,7 @@ namespace
                 ASSERT_EQ(manager.getMesh("other", TilePosition(x, y)), nullptr);
     }
 
-    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, set_bounds_should_add_changed_tiles)
+    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, set_range_should_add_changed_tiles)
     {
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
@@ -469,5 +469,37 @@ namespace
         EXPECT_THAT(manager.takeChangedTiles(nullptr),
             ElementsAre(
                 std::pair(TilePosition(-1, -1), ChangeType::add), std::pair(TilePosition(0, 0), ChangeType::remove)));
+    }
+
+    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, set_range_should_remove_cached_recast_meshes_outside_range)
+    {
+        TileCachedRecastMeshManager manager(mSettings);
+
+        const std::string_view worldspace = "worldspace";
+        manager.setWorldspace(worldspace, nullptr);
+
+        const btBoxShape boxShape(btVector3(100, 100, 20));
+        const CollisionShape shape(mInstance, boxShape, mObjectTransform);
+        const TilesPositionsRange range1{
+            .mBegin = TilePosition(0, 0),
+            .mEnd = TilePosition(1, 1),
+        };
+        manager.setRange(range1, nullptr);
+        manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
+
+        const TilePosition tilePosition(0, 0);
+
+        ASSERT_EQ(manager.getCachedMesh(worldspace, tilePosition), nullptr);
+        ASSERT_NE(manager.getMesh(worldspace, tilePosition), nullptr);
+        ASSERT_NE(manager.getCachedMesh(worldspace, tilePosition), nullptr);
+
+        const TilesPositionsRange range2{
+            .mBegin = TilePosition(-1, -1),
+            .mEnd = TilePosition(0, 0),
+        };
+        manager.takeChangedTiles(nullptr);
+        manager.setRange(range2, nullptr);
+
+        ASSERT_EQ(manager.getCachedMesh(worldspace, tilePosition), nullptr);
     }
 }

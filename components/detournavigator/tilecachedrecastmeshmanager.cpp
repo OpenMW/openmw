@@ -100,6 +100,11 @@ namespace DetourNavigator
                     }
                 });
             }
+
+            getTilesPositions(mRange, [&](const TilePosition& v) {
+                if (!isInTilesPositionsRange(range, v))
+                    mCache.erase(v);
+            });
         }
 
         if (changed)
