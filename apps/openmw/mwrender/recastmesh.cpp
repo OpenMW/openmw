@@ -17,11 +17,22 @@
 
 namespace MWRender
 {
+    namespace
+    {
+        osg::ref_ptr<osg::StateSet> makeDebugDrawStateSet()
+        {
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+            return stateSet;
+        }
+    }
+
     RecastMesh::RecastMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
         , mEnabled(enabled)
         , mGroupStateSet(SceneUtil::makeDetourGroupStateSet())
-        , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
+        , mDebugDrawStateSet(makeDebugDrawStateSet())
     {
     }
 

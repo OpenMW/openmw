@@ -8,6 +8,7 @@
 #include <components/sceneutil/agentpath.hpp>
 #include <components/sceneutil/detourdebugdraw.hpp>
 
+#include <osg/LineWidth>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
@@ -30,13 +31,21 @@ namespace MWRender
             stateSet->setAttribute(material);
             return stateSet;
         }
+
+        osg::ref_ptr<osg::StateSet> makeDebugDrawStateSet()
+        {
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setAttributeAndModes(new osg::LineWidth());
+
+            return stateSet;
+        }
     }
 
     ActorsPaths::ActorsPaths(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
         , mEnabled(enabled)
         , mGroupStateSet(makeGroupStateSet())
-        , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
+        , mDebugDrawStateSet(makeDebugDrawStateSet())
     {
     }
 

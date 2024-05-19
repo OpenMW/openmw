@@ -7,10 +7,13 @@
 #include <components/detournavigator/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/detourdebugdraw.hpp>
 #include <components/sceneutil/navmesh.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
+#include <osg/BlendFunc>
+#include <osg/LineWidth>
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
 
@@ -23,6 +26,29 @@
 
 namespace MWRender
 {
+    namespace
+    {
+        osg::ref_ptr<osg::StateSet> makeDebugDrawStateSet()
+        {
+            const osg::ref_ptr<osg::LineWidth> lineWidth = new osg::LineWidth();
+
+            const osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            const osg::ref_ptr<SceneUtil::AutoDepth> depth = new SceneUtil::AutoDepth;
+            depth->setWriteMask(false);
+
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+            stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            stateSet->setAttributeAndModes(lineWidth);
+            stateSet->setAttributeAndModes(blendFunc);
+            stateSet->setAttributeAndModes(depth);
+
+            return stateSet;
+        }
+    }
+
     struct NavMesh::LessByTilePosition
     {
         bool operator()(const DetourNavigator::TilePosition& lhs,
@@ -169,7 +195,7 @@ namespace MWRender
         : mRootNode(root)
         , mWorkQueue(workQueue)
         , mGroupStateSet(SceneUtil::makeDetourGroupStateSet())
-        , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
+        , mDebugDrawStateSet(makeDebugDrawStateSet())
         , mEnabled(enabled)
         , mMode(mode)
         , mId(std::numeric_limits<std::size_t>::max())

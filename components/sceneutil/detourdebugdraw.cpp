@@ -108,18 +108,6 @@ namespace SceneUtil
         mColors->push_back(value);
     }
 
-    osg::ref_ptr<osg::StateSet> DebugDraw::makeStateSet()
-    {
-        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
-        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-        stateSet->setMode(GL_DEPTH, osg::StateAttribute::OFF);
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        stateSet->setAttributeAndModes(new osg::LineWidth());
-        stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        return stateSet;
-    }
-
     osg::ref_ptr<osg::StateSet> makeDetourGroupStateSet()
     {
         osg::ref_ptr<osg::Material> material = new osg::Material;
