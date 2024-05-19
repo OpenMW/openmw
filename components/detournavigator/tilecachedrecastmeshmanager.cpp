@@ -107,11 +107,10 @@ namespace DetourNavigator
             });
         }
 
+        const MaybeLockGuard lock(mMutex, guard);
+
         if (changed)
-        {
-            const MaybeLockGuard lock(mMutex, guard);
             ++mRevision;
-        }
 
         mRange = range;
     }
@@ -357,6 +356,8 @@ namespace DetourNavigator
             const std::lock_guard lock(mMutex);
             if (mWorldspace != worldspace)
                 return nullptr;
+            if (!isInTilesPositionsRange(mRange, tilePosition))
+                return nullptr;
             const auto it = mCache.find(tilePosition);
             if (it != mCache.end() && it->second.mRecastMesh->getVersion() == it->second.mVersion)
                 return it->second.mRecastMesh;
@@ -379,6 +380,8 @@ namespace DetourNavigator
     {
         const std::lock_guard lock(mMutex);
         if (mWorldspace != worldspace)
+            return nullptr;
+        if (!isInTilesPositionsRange(mRange, tilePosition))
             return nullptr;
         const auto it = mCache.find(tilePosition);
         if (it == mCache.end())

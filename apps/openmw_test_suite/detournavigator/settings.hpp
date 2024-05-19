@@ -39,7 +39,7 @@ namespace DetourNavigator
             result.mDetour.mMaxPolygonPathSize = 1024;
             result.mDetour.mMaxSmoothPathSize = 1024;
             result.mDetour.mMaxPolys = 4096;
-            result.mMaxTilesNumber = 512;
+            result.mMaxTilesNumber = 1024;
             result.mMinUpdateInterval = std::chrono::milliseconds(50);
             result.mWriteToNavMeshDb = true;
             return result;

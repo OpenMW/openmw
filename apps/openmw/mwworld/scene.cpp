@@ -572,11 +572,11 @@ namespace MWWorld
 
     void Scene::changeCellGrid(const osg::Vec3f& pos, ESM::ExteriorCellLocation playerCellIndex, bool changeEvent)
     {
-        mHalfGridSize
+        const int halfGridSize
             = isEsm4Ext(playerCellIndex.mWorldspace) ? Constants::ESM4CellGridRadius : Constants::CellGridRadius;
         auto navigatorUpdateGuard = mNavigator.makeUpdateGuard();
-        int playerCellX = playerCellIndex.mX;
-        int playerCellY = playerCellIndex.mY;
+        const int playerCellX = playerCellIndex.mX;
+        const int playerCellY = playerCellIndex.mY;
 
         for (auto iter = mActiveCells.begin(); iter != mActiveCells.end();)
         {
@@ -585,15 +585,21 @@ namespace MWWorld
             {
                 const auto dx = std::abs(playerCellX - cell->getCell()->getGridX());
                 const auto dy = std::abs(playerCellY - cell->getCell()->getGridY());
-                if (dx > mHalfGridSize || dy > mHalfGridSize)
+                if (dx > halfGridSize || dy > halfGridSize)
                     unloadCell(cell, navigatorUpdateGuard.get());
             }
             else
                 unloadCell(cell, navigatorUpdateGuard.get());
         }
 
-        mNavigator.updateBounds(playerCellIndex.mWorldspace, pos, navigatorUpdateGuard.get());
+        const DetourNavigator::CellGridBounds cellGridBounds{
+            .mCenter = osg::Vec2i(playerCellX, playerCellY),
+            .mHalfSize = halfGridSize,
+        };
 
+        mNavigator.updateBounds(playerCellIndex.mWorldspace, cellGridBounds, pos, navigatorUpdateGuard.get());
+
+        mHalfGridSize = halfGridSize;
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
         mRendering.setActiveGrid(newGrid);
@@ -696,7 +702,16 @@ namespace MWWorld
                 ESM::ExteriorCellLocation(it->mData.mX, it->mData.mY, ESM::Cell::sDefaultWorldspaceId));
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
-            mNavigator.updateBounds(ESM::Cell::sDefaultWorldspaceId, position, navigatorUpdateGuard.get());
+            const osg::Vec2i cellPosition(it->mData.mX, it->mData.mY);
+
+            const DetourNavigator::CellGridBounds cellGridBounds{
+                .mCenter = osg::Vec2i(it->mData.mX, it->mData.mY),
+                .mHalfSize = Constants::CellGridRadius,
+            };
+
+            mNavigator.updateBounds(
+                ESM::Cell::sDefaultWorldspaceId, cellGridBounds, position, navigatorUpdateGuard.get());
+
             loadCell(cell, nullptr, false, position, navigatorUpdateGuard.get());
 
             mNavigator.update(position, navigatorUpdateGuard.get());
@@ -752,7 +767,8 @@ namespace MWWorld
             CellStore& cell = mWorld.getWorldModel().getInterior(it->mName);
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
-            mNavigator.updateBounds(cell.getCell()->getWorldSpace(), position.asVec3(), navigatorUpdateGuard.get());
+            mNavigator.updateBounds(
+                cell.getCell()->getWorldSpace(), std::nullopt, position.asVec3(), navigatorUpdateGuard.get());
             loadCell(cell, nullptr, false, position.asVec3(), navigatorUpdateGuard.get());
 
             mNavigator.update(position.asVec3(), navigatorUpdateGuard.get());
@@ -902,7 +918,8 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell.count());
 
-        mNavigator.updateBounds(cell.getCell()->getWorldSpace(), position.asVec3(), navigatorUpdateGuard.get());
+        mNavigator.updateBounds(
+            cell.getCell()->getWorldSpace(), std::nullopt, position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.
         mPagedRefs.clear();

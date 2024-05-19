@@ -3,7 +3,9 @@
 
 #include <cassert>
 #include <filesystem>
+#include <optional>
 
+#include "cellgridbounds.hpp"
 #include "heightfieldshape.hpp"
 #include "objectid.hpp"
 #include "objecttransform.hpp"
@@ -89,7 +91,8 @@ namespace DetourNavigator
         virtual void removeAgent(const AgentBounds& agentBounds) = 0;
 
         // Updates bounds for recast mesh and navmesh tiles, removes tiles outside the range.
-        virtual void updateBounds(ESM::RefId worldspace, const osg::Vec3f& playerPosition, const UpdateGuard* guard)
+        virtual void updateBounds(ESM::RefId worldspace, const std::optional<CellGridBounds>& cellGridBounds,
+            const osg::Vec3f& playerPosition, const UpdateGuard* guard)
             = 0;
 
         /**

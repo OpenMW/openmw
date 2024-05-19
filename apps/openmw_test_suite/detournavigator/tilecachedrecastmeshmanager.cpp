@@ -173,7 +173,7 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const TilesPositionsRange range{
             .mBegin = TilePosition(-1, -1),
-            .mEnd = TilePosition(1, 1),
+            .mEnd = TilePosition(2, 2),
         };
         manager.setRange(range, nullptr);
         manager.setWorldspace(mWorldspace, nullptr);

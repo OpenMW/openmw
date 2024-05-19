@@ -859,6 +859,17 @@ namespace
         EXPECT_EQ(mNavigator->getNavMesh(mAgentBounds)->lockConst()->getVersion(), version);
     }
 
+    std::pair<TilePosition, TilePosition> getMinMax(const RecastMeshTiles& tiles)
+    {
+        const auto lessByX = [](const auto& l, const auto& r) { return l.first.x() < r.first.x(); };
+        const auto lessByY = [](const auto& l, const auto& r) { return l.first.y() < r.first.y(); };
+
+        const auto [minX, maxX] = std::ranges::minmax_element(tiles, lessByX);
+        const auto [minY, maxY] = std::ranges::minmax_element(tiles, lessByY);
+
+        return { TilePosition(minX->first.x(), minY->first.y()), TilePosition(maxX->first.x(), maxY->first.y()) };
+    }
+
     TEST_F(DetourNavigatorNavigatorTest, update_for_very_big_object_should_be_limited)
     {
         const float size = static_cast<float>((1 << 22) - 1);
@@ -867,8 +878,10 @@ namespace
             .mPosition = ESM::Position{ .pos = { 0, 0, 0 }, .rot{ 0, 0, 0 } },
             .mScale = 1.0f,
         };
+        const std::optional<CellGridBounds> cellGridBounds = std::nullopt;
+        const osg::Vec3f playerPosition(32, 1024, 0);
 
-        mNavigator->updateBounds(mWorldspace, mPlayerPosition, nullptr);
+        mNavigator->updateBounds(mWorldspace, cellGridBounds, playerPosition, nullptr);
         ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
         mNavigator->addObject(ObjectId(&bigBox.shape()), ObjectShapes(bigBox.instance(), objectTransform),
             btTransform::getIdentity(), nullptr);
@@ -878,7 +891,8 @@ namespace
         std::mutex mutex;
 
         std::thread thread([&] {
-            mNavigator->update(mPlayerPosition, nullptr);
+            auto guard = mNavigator->makeUpdateGuard();
+            mNavigator->update(playerPosition, guard.get());
             std::lock_guard lock(mutex);
             updated = true;
             updateFinished.notify_all();
@@ -886,7 +900,7 @@ namespace
 
         {
             std::unique_lock lock(mutex);
-            updateFinished.wait_for(lock, std::chrono::seconds(3), [&] { return updated; });
+            updateFinished.wait_for(lock, std::chrono::seconds(10), [&] { return updated; });
             ASSERT_TRUE(updated);
         }
 
@@ -894,14 +908,69 @@ namespace
 
         mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        EXPECT_EQ(mNavigator->getRecastMeshTiles().size(), 509);
+        const auto recastMeshTiles = mNavigator->getRecastMeshTiles();
+        ASSERT_EQ(recastMeshTiles.size(), 1033);
+        EXPECT_EQ(getMinMax(recastMeshTiles), std::pair(TilePosition(-18, -17), TilePosition(18, 19)));
 
         const auto navMesh = mNavigator->getNavMesh(mAgentBounds);
         ASSERT_NE(navMesh, nullptr);
 
         std::size_t usedNavMeshTiles = 0;
         navMesh->lockConst()->forEachUsedTile([&](const auto&...) { ++usedNavMeshTiles; });
-        EXPECT_EQ(usedNavMeshTiles, 509);
+        EXPECT_EQ(usedNavMeshTiles, 1024);
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, update_should_be_limited_by_cell_grid_bounds)
+    {
+        const float size = static_cast<float>((1 << 22) - 1);
+        CollisionShapeInstance bigBox(std::make_unique<btBoxShape>(btVector3(size, size, 1)));
+        const ObjectTransform objectTransform{
+            .mPosition = ESM::Position{ .pos = { 0, 0, 0 }, .rot{ 0, 0, 0 } },
+            .mScale = 1.0f,
+        };
+        const CellGridBounds cellGridBounds{
+            .mCenter = osg::Vec2i(0, 0),
+            .mHalfSize = 1,
+        };
+        const osg::Vec3f playerPosition(32, 1024, 0);
+
+        mNavigator->updateBounds(mWorldspace, cellGridBounds, playerPosition, nullptr);
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        mNavigator->addObject(ObjectId(&bigBox.shape()), ObjectShapes(bigBox.instance(), objectTransform),
+            btTransform::getIdentity(), nullptr);
+
+        bool updated = false;
+        std::condition_variable updateFinished;
+        std::mutex mutex;
+
+        std::thread thread([&] {
+            auto guard = mNavigator->makeUpdateGuard();
+            mNavigator->update(playerPosition, guard.get());
+            std::lock_guard lock(mutex);
+            updated = true;
+            updateFinished.notify_all();
+        });
+
+        {
+            std::unique_lock lock(mutex);
+            updateFinished.wait_for(lock, std::chrono::seconds(10), [&] { return updated; });
+            ASSERT_TRUE(updated);
+        }
+
+        thread.join();
+
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
+
+        const auto recastMeshTiles = mNavigator->getRecastMeshTiles();
+        ASSERT_EQ(recastMeshTiles.size(), 854);
+        EXPECT_EQ(getMinMax(recastMeshTiles), std::pair(TilePosition(-12, -12), TilePosition(18, 19)));
+
+        const auto navMesh = mNavigator->getNavMesh(mAgentBounds);
+        ASSERT_NE(navMesh, nullptr);
+
+        std::size_t usedNavMeshTiles = 0;
+        navMesh->lockConst()->forEachUsedTile([&](const auto&...) { ++usedNavMeshTiles; });
+        EXPECT_EQ(usedNavMeshTiles, 854);
     }
 
     struct DetourNavigatorNavigatorNotSupportedAgentBoundsTest : TestWithParam<AgentBounds>

@@ -3,6 +3,7 @@
 
 #include "agentbounds.hpp"
 #include "asyncnavmeshupdater.hpp"
+#include "cellgridbounds.hpp"
 #include "heightfieldshape.hpp"
 #include "offmeshconnectionsmanager.hpp"
 #include "recastmeshtiles.hpp"
@@ -24,7 +25,8 @@ namespace DetourNavigator
 
         ScopedUpdateGuard makeUpdateGuard() { return mRecastMeshManager.makeUpdateGuard(); }
 
-        void updateBounds(ESM::RefId worldspace, const osg::Vec3f& playerPosition, const UpdateGuard* guard);
+        void updateBounds(ESM::RefId worldspace, const std::optional<CellGridBounds>& cellGridBounds,
+            const osg::Vec3f& playerPosition, const UpdateGuard* guard);
 
         bool addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
             const AreaType areaType, const UpdateGuard* guard);
@@ -65,7 +67,9 @@ namespace DetourNavigator
 
     private:
         const Settings& mSettings;
+        const int mMaxRadius;
         ESM::RefId mWorldspace;
+        std::optional<CellGridBounds> mCellGridBounds;
         TileCachedRecastMeshManager mRecastMeshManager;
         OffMeshConnectionsManager mOffMeshConnectionsManager;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
