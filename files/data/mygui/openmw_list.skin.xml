@@ -124,6 +124,28 @@
         </BasisSkin>
     </Resource>
 
+    <Resource type="ResourceSkin" name="MW_ListLine_Specific" size="5 5">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+        
+        <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
+            <State name="normal" colour="#{fontcolour=link}"/>
+            <State name="highlighted" colour="#{fontcolour=link_over}"/>
+            <State name="pushed" colour="#{fontcolour=link_pressed}"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_ListLine_Exhausted" size="5 5">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+        
+        <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
+            <State name="normal" colour="#525252"/>
+            <State name="highlighted" colour="#666666"/>
+            <State name="pushed" colour="#3D3D3D"/>
+        </BasisSkin>
+    </Resource>
+
     <Resource type="ResourceLayout" name="MW_List" size="516 516" align="Left Top">
         <Widget type="Widget" position="0 0 516 516" name="Root">
             <Property key="NeedKey" value="true"/>
