@@ -55,6 +55,8 @@ namespace ESM
 
         BusyItem get(std::size_t index);
 
+        void clear();
+
     private:
         const std::size_t mCapacity;
         std::map<std::size_t, std::list<Item>::iterator> mIndex;

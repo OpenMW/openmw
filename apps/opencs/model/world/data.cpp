@@ -1065,11 +1065,9 @@ int CSMWorld::Data::startLoading(const std::filesystem::path& path, bool base, b
 {
     Log(Debug::Info) << "Loading content file " << path;
 
-    if (!mReaders)
-        mReaders.emplace();
     mDialogue = nullptr;
 
-    auto reader = mReaders->get(mReaderIndex++);
+    ESM::ReadersCache::BusyItem reader = mReaders.get(mReaderIndex++);
     reader->setEncoder(&mEncoder);
     reader->open(path);
 
@@ -1133,14 +1131,14 @@ void CSMWorld::Data::loadFallbackEntries()
 
 bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
 {
-    if (mReaderIndex == 0 || !mReaders)
+    if (mReaderIndex == 0)
         throw std::logic_error("can't continue loading, because no load has been started");
-    ESM::ReadersCache::BusyItem reader = mReaders->get(mReaderIndex - 1);
+    ESM::ReadersCache::BusyItem reader = mReaders.get(mReaderIndex - 1);
     if (!reader->isOpen())
         throw std::logic_error("can't continue loading, because no load has been started");
     reader->setEncoder(&mEncoder);
     reader->setIndex(static_cast<int>(mReaderIndex - 1));
-    reader->resolveParentFileIndices(*mReaders);
+    reader->resolveParentFileIndices(mReaders);
 
     if (!reader->hasMoreRecs())
     {
@@ -1411,7 +1409,7 @@ void CSMWorld::Data::finishLoading()
     mTopicInfos.sort(mTopicInfoOrder);
     mJournalInfos.sort(mJournalInfoOrder);
     // Release file locks so we can actually write to the file we're editing
-    mReaders.reset();
+    mReaders.clear();
 }
 
 bool CSMWorld::Data::hasId(const std::string& id) const

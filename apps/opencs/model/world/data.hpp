@@ -123,7 +123,7 @@ namespace CSMWorld
         std::unique_ptr<ActorAdapter> mActorAdapter;
         std::vector<QAbstractItemModel*> mModels;
         std::map<UniversalId::Type, QAbstractItemModel*> mModelIndex;
-        std::optional<ESM::ReadersCache> mReaders;
+        ESM::ReadersCache mReaders;
         const ESM::Dialogue* mDialogue; // last loaded dialogue
         bool mBase;
         bool mProject;
