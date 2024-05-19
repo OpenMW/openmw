@@ -174,6 +174,7 @@
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
     Bug #7970: Difference of GetPCSleep (?) behavior between vanilla and OpenMW
     Bug #7980: Paralyzed NPCs' lips move
+    Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
