@@ -26,6 +26,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/texturetype.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
@@ -329,7 +330,7 @@ namespace Shader
                     const osg::Texture* texture = attr->asTexture();
                     if (texture)
                     {
-                        std::string texName = texture->getName();
+                        std::string texName = SceneUtil::getTextureType(*stateset, *texture, unit);
                         if ((texName.empty() || !isTextureNameRecognized(texName)) && unit == 0)
                             texName = "diffuseMap";
 
@@ -430,13 +431,14 @@ namespace Shader
                     normalMapTex->setFilter(osg::Texture::MIN_FILTER, diffuseMap->getFilter(osg::Texture::MIN_FILTER));
                     normalMapTex->setFilter(osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
                     normalMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
-                    normalMapTex->setName("normalMap");
                     normalMap = normalMapTex;
 
                     int unit = texAttributes.size();
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
                     writableStateSet->setTextureAttributeAndModes(unit, normalMapTex, osg::StateAttribute::ON);
+                    writableStateSet->setTextureAttributeAndModes(
+                        unit, new SceneUtil::TextureType("normalMap"), osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "normalMap";
                     mRequirements.back().mTexStageRequiringTangents = unit;
                     mRequirements.back().mShaderRequired = true;
@@ -474,12 +476,13 @@ namespace Shader
                     specularMapTex->setFilter(
                         osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
                     specularMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
-                    specularMapTex->setName("specularMap");
 
                     int unit = texAttributes.size();
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
                     writableStateSet->setTextureAttributeAndModes(unit, specularMapTex, osg::StateAttribute::ON);
+                    writableStateSet->setTextureAttributeAndModes(
+                        unit, new SceneUtil::TextureType("specularMap"), osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "specularMap";
                     mRequirements.back().mShaderRequired = true;
                 }

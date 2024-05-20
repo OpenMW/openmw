@@ -57,6 +57,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/texturetype.hpp>
 
 #include "fog.hpp"
 #include "matrixtransform.hpp"
@@ -1031,8 +1032,11 @@ namespace NifOsg
             texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
             unsigned int texUnit = boundTextures.size();
             if (stateset)
+            {
                 stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-            texture2d->setName(name);
+                stateset->setTextureAttributeAndModes(
+                    texUnit, new SceneUtil::TextureType(name), osg::StateAttribute::ON);
+            }
             boundTextures.emplace_back(uvSet);
             return texture2d;
         }

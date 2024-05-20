@@ -47,6 +47,7 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/conversion.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -106,7 +107,7 @@ namespace
                     std::string fileName;
                     if (image)
                         fileName = image->getFileName();
-                    mTextures.emplace_back(texture->getName(), fileName);
+                    mTextures.emplace_back(SceneUtil::getTextureType(*stateset, *texture, i), fileName);
                 }
             }
 

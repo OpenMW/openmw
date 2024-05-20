@@ -11,6 +11,7 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/texturetype.hpp>
 
 namespace SceneUtil
 {
@@ -137,6 +138,19 @@ namespace SceneUtil
         }
     };
 
+    class TextureTypeSerializer : public osgDB::ObjectWrapper
+    {
+    public:
+        TextureTypeSerializer()
+            : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::TextureType>, "SceneUtil::TextureType",
+                "osg::Object osg::StateAttribute SceneUtil::TextureType")
+        {
+            addSerializer(new osgDB::StringSerializer<SceneUtil::TextureType>(
+                              "Name", {}, &SceneUtil::TextureType::getName, &SceneUtil::TextureType::setName),
+                osgDB::BaseSerializer::RW_STRING);
+        }
+    };
+
     osgDB::ObjectWrapper* makeDummySerializer(const std::string& classname)
     {
         return new osgDB::ObjectWrapper(createInstanceFunc<osg::DummyObject>, classname, "osg::Object");
@@ -168,6 +182,7 @@ namespace SceneUtil
             mgr->addWrapper(new CameraRelativeTransformSerializer);
             mgr->addWrapper(new MatrixTransformSerializer);
             mgr->addWrapper(new FogSerializer);
+            mgr->addWrapper(new TextureTypeSerializer);
 
             // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of
             // vertex data that would make the file large and hard to read.

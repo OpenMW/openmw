@@ -28,6 +28,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/texturetype.hpp>
 
 #include <components/fallback/fallback.hpp>
 
@@ -768,9 +769,10 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> sunTex = new osg::Texture2D(imageManager.getImage("textures/tx_sun_05.dds"));
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        sunTex->setName("diffuseMap");
 
         mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex);
+        mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(
+            0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         mGeom->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sun)));
 
         osg::ref_ptr<osg::Group> queryNode = new osg::Group;
@@ -787,6 +789,7 @@ namespace MWRender
             stateset->setAttributeAndModes(alphaFunc);
         }
         stateset->setTextureAttributeAndModes(0, sunTex);
+        stateset->setTextureAttributeAndModes(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         stateset->setAttributeAndModes(createUnlitMaterial());
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunflash_Query)));
 
@@ -908,7 +911,6 @@ namespace MWRender
             = new osg::Texture2D(imageManager.getImage("textures/tx_sun_flash_grey_05.dds"));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        tex->setName("diffuseMap");
 
         osg::ref_ptr<osg::Group> group(new osg::Group);
 
@@ -921,6 +923,7 @@ namespace MWRender
         osg::StateSet* stateset = geom->getOrCreateStateSet();
 
         stateset->setTextureAttributeAndModes(0, tex);
+        stateset->setTextureAttributeAndModes(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
