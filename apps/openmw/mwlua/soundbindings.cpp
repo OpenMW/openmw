@@ -141,7 +141,7 @@ namespace MWLua
         api["streamMusic"] = [](std::string_view fileName, const sol::optional<sol::table>& options) {
             auto args = getStreamMusicArgs(options);
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-            sndMgr->streamMusic(VFS::Path::Normalized(fileName), MWSound::MusicType::Scripted, args.mFade);
+            sndMgr->streamMusic(VFS::Path::Normalized(fileName), MWSound::MusicType::Normal, args.mFade);
         };
 
         api["say"]

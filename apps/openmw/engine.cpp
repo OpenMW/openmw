@@ -998,7 +998,7 @@ void OMW::Engine::go()
         mWindowManager->pushGuiMode(MWGui::GM_MainMenu);
 
         if (mVFS->exists(MWSound::titleMusic))
-            mSoundManager->streamMusic(MWSound::titleMusic, MWSound::MusicType::Special);
+            mSoundManager->streamMusic(MWSound::titleMusic, MWSound::MusicType::Normal);
         else
             Log(Debug::Warning) << "Title music not found";
 

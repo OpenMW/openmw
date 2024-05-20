@@ -48,6 +48,13 @@ set(BUILTIN_DATA_FILES
     l10n/OMWEngine/sv.yaml
     l10n/OMWEngine/fr.yaml
 
+    # L10n for music system
+    l10n/OMWMusic/de.yaml
+    l10n/OMWMusic/en.yaml
+    l10n/OMWMusic/ru.yaml
+    l10n/OMWMusic/sv.yaml
+    l10n/OMWMusic/fr.yaml
+
     # L10n for post-processing HUD and built-in shaders
     l10n/OMWShaders/de.yaml
     l10n/OMWShaders/en.yaml
@@ -79,6 +86,10 @@ set(BUILTIN_DATA_FILES
     scripts/omw/mechanics/animationcontroller.lua
     scripts/omw/mechanics/playercontroller.lua
     scripts/omw/settings/menu.lua
+    scripts/omw/music/actor.lua
+    scripts/omw/music/helpers.lua
+    scripts/omw/music/music.lua
+    scripts/omw/music/settings.lua
     scripts/omw/settings/player.lua
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua
