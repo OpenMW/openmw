@@ -86,15 +86,16 @@ namespace SceneUtil
 
     void DebugDraw::end()
     {
+        const osg::ref_ptr<osg::DrawArrays> drawArrays
+            = new osg::DrawArrays(mMode, 0, static_cast<int>(mVertices->size()));
+
         osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
         geometry->setStateSet(mStateSet);
-        geometry->setVertexArray(mVertices);
-        geometry->setColorArray(mColors, osg::Array::BIND_PER_VERTEX);
-        geometry->addPrimitiveSet(new osg::DrawArrays(mMode, 0, static_cast<int>(mVertices->size())));
+        geometry->addPrimitiveSet(drawArrays);
+        geometry->setVertexArray(std::exchange(mVertices, nullptr));
+        geometry->setColorArray(std::exchange(mColors, nullptr), osg::Array::BIND_PER_VERTEX);
 
         mGroup.addChild(geometry);
-        mColors.release();
-        mVertices.release();
     }
 
     void DebugDraw::addVertex(osg::Vec3f&& position)
