@@ -56,13 +56,16 @@ source_group(wizard FILES ${WIZARD} ${WIZARD_HEADER})
 
 set(QT_USE_QTGUI 1)
 
+set (WIZARD_RES ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+
 # Set some platform specific settings
 if(WIN32)
+    set(WIZARD_RES ${WIZARD_RES} ${CMAKE_SOURCE_DIR}/files/windows/QWindowsVistaDark/dark.qrc)
     set(GUI_TYPE WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+QT_ADD_RESOURCES(RCC_SRCS ${WIZARD_RES})
 QT_WRAP_UI(UI_HDRS ${WIZARD_UI})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

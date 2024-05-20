@@ -144,6 +144,7 @@ set (OPENCS_UI
 source_group (openmw-cs FILES main.cpp ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
+    set(OPENCS_RES ${OPENCS_RES} ${CMAKE_SOURCE_DIR}/files/windows/QWindowsVistaDark/dark.qrc)
     set(QT_USE_QTMAIN TRUE)
     set(OPENCS_RC_FILE ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc)
 else(WIN32)

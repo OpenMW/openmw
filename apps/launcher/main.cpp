@@ -9,6 +9,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/l10n/qttranslations.hpp>
+#include <components/platform/application.hpp>
 #include <components/platform/platform.hpp>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -33,7 +34,7 @@ int runLauncher(int argc, char* argv[])
 
     try
     {
-        QApplication app(argc, argv);
+        Platform::Application app(argc, argv);
 
         QString resourcesPath(".");
         if (!variables["resources"].empty())

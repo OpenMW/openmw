@@ -47,13 +47,16 @@ source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
 
 set(QT_USE_QTGUI 1)
 
+set (LAUNCHER_RES ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
+
 # Set some platform specific settings
 if(WIN32)
+    set(LAUNCHER_RES ${LAUNCHER_RES} ${CMAKE_SOURCE_DIR}/files/windows/QWindowsVistaDark/dark.qrc)
     set(GUI_TYPE WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
+QT_ADD_RESOURCES(RCC_SRCS ${LAUNCHER_RES})
 QT_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
