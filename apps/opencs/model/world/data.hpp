@@ -33,6 +33,7 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadsscr.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/esm3/selectiongroup.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/misc/algorithm.hpp>
@@ -122,12 +123,12 @@ namespace CSMWorld
         std::unique_ptr<ActorAdapter> mActorAdapter;
         std::vector<QAbstractItemModel*> mModels;
         std::map<UniversalId::Type, QAbstractItemModel*> mModelIndex;
-        ESM::ESMReader* mReader;
+        ESM::ReadersCache mReaders;
         const ESM::Dialogue* mDialogue; // last loaded dialogue
         bool mBase;
         bool mProject;
-        std::map<ESM::RefId, std::map<unsigned int, unsigned int>> mRefLoadCache;
-        int mReaderIndex;
+        std::map<ESM::RefId, std::map<ESM::RefNum, unsigned int>> mRefLoadCache;
+        std::size_t mReaderIndex;
 
         Files::PathContainer mDataPaths;
         std::vector<std::string> mArchives;
@@ -135,14 +136,11 @@ namespace CSMWorld
         ResourcesManager mResourcesManager;
         std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
-        std::vector<std::shared_ptr<ESM::ESMReader>> mReaders;
-
         InfoOrderByTopic mJournalInfoOrder;
         InfoOrderByTopic mTopicInfoOrder;
 
-        // not implemented
-        Data(const Data&);
-        Data& operator=(const Data&);
+        Data(const Data&) = delete;
+        Data& operator=(const Data&) = delete;
 
         void addModel(QAbstractItemModel* model, UniversalId::Type type, bool update = true);
 

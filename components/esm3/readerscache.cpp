@@ -86,4 +86,12 @@ namespace ESM
             it->mState = State::Closed;
         }
     }
+
+    void ReadersCache::clear()
+    {
+        mIndex.clear();
+        mBusyItems.clear();
+        mFreeItems.clear();
+        mClosedItems.clear();
+    }
 }

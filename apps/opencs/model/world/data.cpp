@@ -137,9 +137,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     : mEncoder(encoding)
     , mPathgrids(mCells)
     , mRefs(mCells)
-    , mReader(nullptr)
     , mDialogue(nullptr)
-    , mReaderIndex(1)
+    , mReaderIndex(0)
     , mDataPaths(dataPaths)
     , mArchives(archives)
     , mVFS(std::make_unique<VFS::Manager>())
@@ -688,8 +687,6 @@ CSMWorld::Data::~Data()
 {
     for (std::vector<QAbstractItemModel*>::iterator iter(mModels.begin()); iter != mModels.end(); ++iter)
         delete *iter;
-
-    delete mReader;
 }
 
 std::shared_ptr<Resource::ResourceSystem> CSMWorld::Data::getResourceSystem()
@@ -1068,17 +1065,11 @@ int CSMWorld::Data::startLoading(const std::filesystem::path& path, bool base, b
 {
     Log(Debug::Info) << "Loading content file " << path;
 
-    // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
-    std::shared_ptr<ESM::ESMReader> ptr(mReader);
-    mReaders.push_back(ptr);
-    mReader = nullptr;
-
     mDialogue = nullptr;
 
-    mReader = new ESM::ESMReader;
-    mReader->setEncoder(&mEncoder);
-    mReader->setIndex((project || !base) ? 0 : mReaderIndex++);
-    mReader->open(path);
+    ESM::ReadersCache::BusyItem reader = mReaders.get(mReaderIndex++);
+    reader->setEncoder(&mEncoder);
+    reader->open(path);
 
     mBase = base;
     mProject = project;
@@ -1087,13 +1078,13 @@ int CSMWorld::Data::startLoading(const std::filesystem::path& path, bool base, b
     {
         MetaData metaData;
         metaData.mId = ESM::RefId::stringRefId("sys::meta");
-        metaData.load(*mReader);
+        metaData.load(*reader);
 
         mMetaData.setRecord(0,
             std::make_unique<Record<MetaData>>(Record<MetaData>(RecordBase::State_ModifiedOnly, nullptr, &metaData)));
     }
 
-    return mReader->getRecordCount();
+    return reader->getRecordCount();
 }
 
 void CSMWorld::Data::loadFallbackEntries()
@@ -1140,24 +1131,17 @@ void CSMWorld::Data::loadFallbackEntries()
 
 bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
 {
-    if (!mReader)
+    if (mReaderIndex == 0)
         throw std::logic_error("can't continue loading, because no load has been started");
+    ESM::ReadersCache::BusyItem reader = mReaders.get(mReaderIndex - 1);
+    if (!reader->isOpen())
+        throw std::logic_error("can't continue loading, because no load has been started");
+    reader->setEncoder(&mEncoder);
+    reader->setIndex(static_cast<int>(mReaderIndex - 1));
+    reader->resolveParentFileIndices(mReaders);
 
-    if (!mReader->hasMoreRecs())
+    if (!reader->hasMoreRecs())
     {
-        if (mBase)
-        {
-            // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand
-            // loading. We don't store non-base reader, because everything going into modified will be fully loaded
-            // during the initial loading process.
-            std::shared_ptr<ESM::ESMReader> ptr(mReader);
-            mReaders.push_back(ptr);
-        }
-        else
-            delete mReader;
-
-        mReader = nullptr;
-
         mDialogue = nullptr;
 
         loadFallbackEntries();
@@ -1165,76 +1149,76 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
         return true;
     }
 
-    ESM::NAME n = mReader->getRecName();
-    mReader->getRecHeader();
+    ESM::NAME n = reader->getRecName();
+    reader->getRecHeader();
 
     bool unhandledRecord = false;
 
     switch (n.toInt())
     {
         case ESM::REC_GLOB:
-            mGlobals.load(*mReader, mBase);
+            mGlobals.load(*reader, mBase);
             break;
         case ESM::REC_GMST:
-            mGmsts.load(*mReader, mBase);
+            mGmsts.load(*reader, mBase);
             break;
         case ESM::REC_SKIL:
-            mSkills.load(*mReader, mBase);
+            mSkills.load(*reader, mBase);
             break;
         case ESM::REC_CLAS:
-            mClasses.load(*mReader, mBase);
+            mClasses.load(*reader, mBase);
             break;
         case ESM::REC_FACT:
-            mFactions.load(*mReader, mBase);
+            mFactions.load(*reader, mBase);
             break;
         case ESM::REC_RACE:
-            mRaces.load(*mReader, mBase);
+            mRaces.load(*reader, mBase);
             break;
         case ESM::REC_SOUN:
-            mSounds.load(*mReader, mBase);
+            mSounds.load(*reader, mBase);
             break;
         case ESM::REC_SCPT:
-            mScripts.load(*mReader, mBase);
+            mScripts.load(*reader, mBase);
             break;
         case ESM::REC_REGN:
-            mRegions.load(*mReader, mBase);
+            mRegions.load(*reader, mBase);
             break;
         case ESM::REC_BSGN:
-            mBirthsigns.load(*mReader, mBase);
+            mBirthsigns.load(*reader, mBase);
             break;
         case ESM::REC_SPEL:
-            mSpells.load(*mReader, mBase);
+            mSpells.load(*reader, mBase);
             break;
         case ESM::REC_ENCH:
-            mEnchantments.load(*mReader, mBase);
+            mEnchantments.load(*reader, mBase);
             break;
         case ESM::REC_BODY:
-            mBodyParts.load(*mReader, mBase);
+            mBodyParts.load(*reader, mBase);
             break;
         case ESM::REC_SNDG:
-            mSoundGens.load(*mReader, mBase);
+            mSoundGens.load(*reader, mBase);
             break;
         case ESM::REC_MGEF:
-            mMagicEffects.load(*mReader, mBase);
+            mMagicEffects.load(*reader, mBase);
             break;
         case ESM::REC_PGRD:
-            mPathgrids.load(*mReader, mBase);
+            mPathgrids.load(*reader, mBase);
             break;
         case ESM::REC_SSCR:
-            mStartScripts.load(*mReader, mBase);
+            mStartScripts.load(*reader, mBase);
             break;
 
         case ESM::REC_LTEX:
-            mLandTextures.load(*mReader, mBase);
+            mLandTextures.load(*reader, mBase);
             break;
 
         case ESM::REC_LAND:
-            mLand.load(*mReader, mBase);
+            mLand.load(*reader, mBase);
             break;
 
         case ESM::REC_CELL:
         {
-            int index = mCells.load(*mReader, mBase);
+            int index = mCells.load(*reader, mBase);
             if (index < 0 || index >= mCells.getSize())
             {
                 // log an error and continue loading the refs to the last loaded cell
@@ -1243,69 +1227,69 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 index = mCells.getSize() - 1;
             }
 
-            mRefs.load(*mReader, index, mBase, mRefLoadCache[mCells.getId(index)], messages);
+            mRefs.load(*reader, index, mBase, mRefLoadCache[mCells.getId(index)], messages);
             break;
         }
 
         case ESM::REC_ACTI:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Activator);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Activator);
             break;
         case ESM::REC_ALCH:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Potion);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Potion);
             break;
         case ESM::REC_APPA:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Apparatus);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Apparatus);
             break;
         case ESM::REC_ARMO:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Armor);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Armor);
             break;
         case ESM::REC_BOOK:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Book);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Book);
             break;
         case ESM::REC_CLOT:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Clothing);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Clothing);
             break;
         case ESM::REC_CONT:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Container);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Container);
             break;
         case ESM::REC_CREA:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Creature);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Creature);
             break;
         case ESM::REC_DOOR:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Door);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Door);
             break;
         case ESM::REC_INGR:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Ingredient);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Ingredient);
             break;
         case ESM::REC_LEVC:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_CreatureLevelledList);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_CreatureLevelledList);
             break;
         case ESM::REC_LEVI:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_ItemLevelledList);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_ItemLevelledList);
             break;
         case ESM::REC_LIGH:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Light);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Light);
             break;
         case ESM::REC_LOCK:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Lockpick);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Lockpick);
             break;
         case ESM::REC_MISC:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Miscellaneous);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Miscellaneous);
             break;
         case ESM::REC_NPC_:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Npc);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Npc);
             break;
         case ESM::REC_PROB:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Probe);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Probe);
             break;
         case ESM::REC_REPA:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Repair);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Repair);
             break;
         case ESM::REC_STAT:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Static);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Static);
             break;
         case ESM::REC_WEAP:
-            mReferenceables.load(*mReader, mBase, UniversalId::Type_Weapon);
+            mReferenceables.load(*reader, mBase, UniversalId::Type_Weapon);
             break;
 
         case ESM::REC_DIAL:
@@ -1313,7 +1297,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
             ESM::Dialogue record;
             bool isDeleted = false;
 
-            record.load(*mReader, isDeleted);
+            record.load(*reader, isDeleted);
 
             if (isDeleted)
             {
@@ -1359,14 +1343,14 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 messages.add(UniversalId::Type_None, "Found info record not following a dialogue record", "",
                     CSMDoc::Message::Severity_Error);
 
-                mReader->skipRecord();
+                reader->skipRecord();
                 break;
             }
 
             if (mDialogue->mType == ESM::Dialogue::Journal)
-                mJournalInfos.load(*mReader, mBase, *mDialogue, mJournalInfoOrder);
+                mJournalInfos.load(*reader, mBase, *mDialogue, mJournalInfoOrder);
             else
-                mTopicInfos.load(*mReader, mBase, *mDialogue, mTopicInfoOrder);
+                mTopicInfos.load(*reader, mBase, *mDialogue, mTopicInfoOrder);
 
             break;
         }
@@ -1379,7 +1363,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 break;
             }
 
-            mFilters.load(*mReader, mBase);
+            mFilters.load(*reader, mBase);
             break;
 
         case ESM::REC_DBGP:
@@ -1390,7 +1374,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 break;
             }
 
-            mDebugProfiles.load(*mReader, mBase);
+            mDebugProfiles.load(*reader, mBase);
             break;
 
         case ESM::REC_SELG:
@@ -1401,7 +1385,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 break;
             }
 
-            mSelectionGroups.load(*mReader, mBase);
+            mSelectionGroups.load(*reader, mBase);
             break;
 
         default:
@@ -1414,7 +1398,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
         messages.add(
             UniversalId::Type_None, "Unsupported record type: " + n.toString(), "", CSMDoc::Message::Severity_Error);
 
-        mReader->skipRecord();
+        reader->skipRecord();
     }
 
     return false;
@@ -1424,6 +1408,8 @@ void CSMWorld::Data::finishLoading()
 {
     mTopicInfos.sort(mTopicInfoOrder);
     mJournalInfos.sort(mJournalInfoOrder);
+    // Release file locks so we can actually write to the file we're editing
+    mReaders.clear();
 }
 
 bool CSMWorld::Data::hasId(const std::string& id) const
