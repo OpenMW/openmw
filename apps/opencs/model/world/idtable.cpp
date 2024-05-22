@@ -384,15 +384,20 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
         const ESM::RefId refId = ESM::RefId::stringRefId(id);
         const int oldRow = idCollection()->searchId(refId);
 
-        // If it does not exist or it is in the current plugin, it can be skipped.
-        if (oldRow < 0 || plugin == 0)
+        // If it does not exist, it can be skipped.
+        if (oldRow < 0)
         {
             results.recordMapping.emplace_back(id, id);
             continue;
         }
-
         // Look for a pre-existing record
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow));
+        // If it is in the current plugin, it can be skipped.
+        if (record.mState == Record<LandTexture>::State_ModifiedOnly)
+        {
+            results.recordMapping.emplace_back(id, id);
+            continue;
+        }
         std::string texture = Misc::StringUtils::lowerCase(record.get().mTexture);
         auto searchIt = reverseLookupMap.find(texture);
         if (searchIt != reverseLookupMap.end())
