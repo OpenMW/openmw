@@ -22,7 +22,7 @@ namespace DetourNavigator
     {
         struct Ignore
         {
-            std::string_view mWorldspace;
+            ESM::RefId mWorldspace;
             const TilePosition& mTilePosition;
             std::shared_ptr<NavMeshTileConsumer> mConsumer;
 
@@ -34,10 +34,10 @@ namespace DetourNavigator
         };
     }
 
-    GenerateNavMeshTile::GenerateNavMeshTile(std::string worldspace, const TilePosition& tilePosition,
+    GenerateNavMeshTile::GenerateNavMeshTile(ESM::RefId worldspace, const TilePosition& tilePosition,
         RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds,
         const DetourNavigator::Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer)
-        : mWorldspace(std::move(worldspace))
+        : mWorldspace(worldspace)
         , mTilePosition(tilePosition)
         , mRecastMeshProvider(recastMeshProvider)
         , mAgentBounds(agentBounds)

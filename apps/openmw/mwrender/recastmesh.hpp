@@ -6,8 +6,6 @@
 
 #include <osg/ref_ptr>
 
-#include <vector>
-
 namespace osg
 {
     class Group;

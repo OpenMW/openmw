@@ -106,8 +106,8 @@ namespace NavMeshTool
                 return DetourNavigator::resolveMeshSource(mDb, source, mNextShapeId);
             }
 
-            std::optional<NavMeshTileInfo> find(std::string_view worldspace, const TilePosition& tilePosition,
-                const std::vector<std::byte>& input) override
+            std::optional<NavMeshTileInfo> find(
+                ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input) override
             {
                 std::optional<NavMeshTileInfo> result;
                 std::lock_guard lock(mMutex);
@@ -121,7 +121,7 @@ namespace NavMeshTool
                 return result;
             }
 
-            void ignore(std::string_view worldspace, const TilePosition& tilePosition) override
+            void ignore(ESM::RefId worldspace, const TilePosition& tilePosition) override
             {
                 if (mRemoveUnusedTiles)
                 {
@@ -131,7 +131,7 @@ namespace NavMeshTool
                 report();
             }
 
-            void identity(std::string_view worldspace, const TilePosition& tilePosition, std::int64_t tileId) override
+            void identity(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t tileId) override
             {
                 if (mRemoveUnusedTiles)
                 {
@@ -142,7 +142,7 @@ namespace NavMeshTool
                 report();
             }
 
-            void insert(std::string_view worldspace, const TilePosition& tilePosition, std::int64_t version,
+            void insert(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t version,
                 const std::vector<std::byte>& input, PreparedNavMeshData& data) override
             {
                 {
@@ -158,7 +158,7 @@ namespace NavMeshTool
                 report();
             }
 
-            void update(std::string_view worldspace, const TilePosition& tilePosition, std::int64_t tileId,
+            void update(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t tileId,
                 std::int64_t version, PreparedNavMeshData& data) override
             {
                 data.mUserId = static_cast<unsigned>(tileId);
@@ -217,7 +217,7 @@ namespace NavMeshTool
                 mDb.vacuum();
             }
 
-            void removeTilesOutsideRange(std::string_view worldspace, const TilesPositionsRange& range)
+            void removeTilesOutsideRange(ESM::RefId worldspace, const TilesPositionsRange& range)
             {
                 const std::lock_guard lock(mMutex);
                 mTransaction.commit();

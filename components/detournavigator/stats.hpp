@@ -50,9 +50,18 @@ namespace DetourNavigator
         NavMeshTilesCacheStats mCache;
     };
 
+    struct TileCachedRecastMeshManagerStats
+    {
+        std::size_t mTiles = 0;
+        std::size_t mObjects = 0;
+        std::size_t mHeightfields = 0;
+        std::size_t mWater = 0;
+    };
+
     struct Stats
     {
-        std::optional<AsyncNavMeshUpdaterStats> mUpdater;
+        AsyncNavMeshUpdaterStats mUpdater;
+        TileCachedRecastMeshManagerStats mRecast;
     };
 
     void reportStats(const Stats& stats, unsigned int frameNumber, osg::Stats& out);
