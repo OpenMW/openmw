@@ -91,7 +91,7 @@ namespace CSVWorld
 
     std::string LandTextureCreator::getId() const
     {
-        return CSMWorld::LandTexture::createUniqueRecordId(0, mIndexBox->value());
+        return CSMWorld::LandTexture::createUniqueRecordId(-1, mIndexBox->value());
     }
 
     void LandTextureCreator::nameChanged(const QString& value)

@@ -410,7 +410,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
         int startIndex = index;
         do
         {
-            std::string newId = LandTexture::createUniqueRecordId(0, index);
+            std::string newId = LandTexture::createUniqueRecordId(-1, index);
             const ESM::RefId newRefId = ESM::RefId::stringRefId(newId);
             int newRow = idCollection()->searchId(newRefId);
 

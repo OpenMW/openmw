@@ -680,13 +680,13 @@ void CSVRender::TerrainTextureMode::createTexture(const std::string& textureFile
         const size_t maxCounter = std::numeric_limits<uint16_t>::max() - 1;
         try
         {
-            newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
-            if (ltexTable.getRecord(newId).isDeleted() == 0)
+            newId = CSMWorld::LandTexture::createUniqueRecordId(-1, counter);
+            if (!ltexTable.getRecord(newId).isDeleted())
                 counter = (counter + 1) % maxCounter;
         }
         catch (const std::exception&)
         {
-            newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
+            newId = CSMWorld::LandTexture::createUniqueRecordId(-1, counter);
             freeIndexFound = true;
         }
     } while (freeIndexFound == false);

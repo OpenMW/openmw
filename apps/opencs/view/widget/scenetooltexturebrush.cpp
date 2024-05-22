@@ -167,7 +167,7 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
     int pluginInDragged = 0;
     CSMWorld::LandTexture::parseUniqueRecordId(brushTexture, pluginInDragged, index);
     const ESM::RefId brushTextureRefId = ESM::RefId::stringRefId(brushTexture);
-    std::string newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(0, index);
+    std::string newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(-1, index);
     ESM::RefId newBrushTextureRefId = ESM::RefId::stringRefId(newBrushTextureId);
     int rowInBase = landtexturesCollection.searchId(brushTextureRefId);
     int rowInNew = landtexturesCollection.searchId(newBrushTextureRefId);
@@ -184,7 +184,7 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
             const int maxCounter = std::numeric_limits<uint16_t>::max() - 1;
             do
             {
-                newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
+                newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(-1, counter);
                 newBrushTextureRefId = ESM::RefId::stringRefId(newBrushTextureId);
                 if (landtexturesCollection.searchId(brushTextureRefId) != -1
                     && landtexturesCollection.getRecord(brushTextureRefId).isDeleted() == 0

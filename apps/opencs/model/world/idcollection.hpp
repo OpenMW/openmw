@@ -73,6 +73,13 @@ namespace CSMWorld
         bool isDeleted = false;
 
         loadRecord(record, reader, isDeleted);
+        if constexpr (std::is_same_v<ESXRecordT, LandTexture>)
+        {
+            // This doesn't really matter since the value never gets saved, but it makes the index uniqueness check more
+            // sensible
+            if (!base)
+                record.mPluginIndex = -1;
+        }
 
         ESM::RefId id = getRecordId(record);
         int index = this->searchId(id);
