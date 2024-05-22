@@ -755,6 +755,7 @@ macOS15_Xcode16_arm64:
     - cd MSVC2022_64_Ninja
     - Get-Volume
     - .\ActivateMSVC.ps1
+    - $env:CCACHE_IGNOREHEADERS = "$env:INCLUDE;$(Get-Location)\deps"
     - '$env:NINJA_STATUS = "[%s/%t %p :: %e] "'
     - cmake --build . --config $config --target ($targets.Split(' '))
     - ccache --show-stats -v
