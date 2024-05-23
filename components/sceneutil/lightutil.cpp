@@ -117,19 +117,23 @@ namespace SceneUtil
         configureLight(light, radius, isExterior);
 
         osg::Vec4f diffuse = esmLight.mColor;
+        osg::Vec4f specular = esmLight.mColor; // ESM format doesn't provide specular
         if (esmLight.mNegative)
         {
             diffuse *= -1;
             diffuse.a() = 1;
+            // Using specular lighting for negative lights is unreasonable
+            specular = osg::Vec4f();
         }
         light->setDiffuse(diffuse);
         light->setAmbient(ambient);
-        light->setSpecular(diffuse); // ESM format doesn't provide specular
+        light->setSpecular(specular);
 
         lightSource->setLight(light);
 
         osg::ref_ptr<SceneUtil::LightController> ctrl(new SceneUtil::LightController);
         ctrl->setDiffuse(light->getDiffuse());
+        ctrl->setSpecular(light->getSpecular());
         if (esmLight.mFlicker)
             ctrl->setType(SceneUtil::LightController::LT_Flicker);
         if (esmLight.mFlickerSlow)
