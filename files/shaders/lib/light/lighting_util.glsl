@@ -106,8 +106,6 @@ float lcalcRadius(int lightIndex)
 float lcalcIllumination(int lightIndex, float dist)
 {
     float illumination = 1.0 / (lcalcConstantAttenuation(lightIndex) + lcalcLinearAttenuation(lightIndex) * dist + lcalcQuadraticAttenuation(lightIndex) * dist * dist);
-    // FIXME: FFP doesn't do this
-    illumination = clamp(illumination, 0.0, 1.0);
 #if @lightingMethodPerObjectUniform || @lightingMethodUBO
     // Fade illumination between the radius and the radius doubled to diminish pop-in
     illumination *= 1.0 - quickstep((dist / lcalcRadius(lightIndex)) - 1.0);
