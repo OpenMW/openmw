@@ -228,6 +228,12 @@ namespace fx
 
         int parseSourceFormat();
 
+        template <class SrcT, class T>
+        void parseWidgetType(Types::Uniform<SrcT>& uniform);
+
+        template <class SrcT, class T>
+        SrcT getUniformValue();
+
         osg::BlendEquation::Equation parseBlendEquation();
 
         osg::BlendFunc::BlendFuncMode parseBlendFuncMode();

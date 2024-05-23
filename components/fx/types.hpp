@@ -4,14 +4,8 @@
 #include <optional>
 #include <variant>
 
-#include <osg/BlendEquation>
-#include <osg/BlendFunc>
-#include <osg/Camera>
-#include <osg/FrameBufferObject>
 #include <osg/Texture2D>
 #include <osg/Uniform>
-
-#include <MyGUI_Widget.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/format.hpp>
@@ -57,6 +51,13 @@ namespace fx
         };
 
         template <class T>
+        struct Choice
+        {
+            std::string mLabel;
+            T mValue;
+        };
+
+        template <class T>
         struct Uniform
         {
             std::optional<T> mValue;
@@ -65,6 +66,8 @@ namespace fx
             T mDefault = {};
             T mMin = std::numeric_limits<T>::lowest();
             T mMax = std::numeric_limits<T>::max();
+
+            std::vector<Choice<T>> mChoices;
 
             using value_type = T;
 

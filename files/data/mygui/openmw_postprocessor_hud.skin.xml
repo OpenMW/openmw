@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Resource" version="1.1">
 
+	<Resource type="ResourceLayout" name="MW_ValueEditChoice" version="3.2.0">
+		<Widget type="Widget" skin="" position="0 0 100 50" align="Stretch" name="Root">
+            <Widget type="ComboBox" skin="MW_ComboBox" position_real="0 0 1 1"  align="Stretch" name="Choices">
+                <Property key="Caption" value=""/>
+                <UserString key="HStretch" value="true"/>
+                <UserString key="VStretch" value="true"/>
+            </Widget>
+		</Widget>
+	</Resource>
+
 	<Resource type="ResourceLayout" name="MW_ValueEditNumber" version="3.2.0">
 		<Widget type="Widget" skin="" position="0 0 100 50" align="Stretch" name="Root">
             <Widget type="Widget" skin="BlackBG" position="0 0 100 50" name="Fill" align="Stretch">
