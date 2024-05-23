@@ -241,6 +241,11 @@ namespace MWMechanics
 
     bool CreatureStats::isParalyzed() const
     {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::Ptr player = world->getPlayerPtr();
+        if (world->getGodModeState() && this == &player.getClass().getCreatureStats(player))
+            return false;
+
         return mMagicEffects.getOrDefault(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
     }
 
