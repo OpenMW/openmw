@@ -1,5 +1,6 @@
 local camera = require('openmw.camera')
 local core = require('openmw.core')
+local debug = require('openmw.debug')
 local input = require('openmw.input')
 local util = require('openmw.util')
 local self = require('openmw.self')
@@ -207,7 +208,9 @@ local function onFrame(dt)
         primaryMode = mode
     end
     if mode ~= MODE.Static then
-        if not next(noModeControl) then
+        local paralysis = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.Paralyze)
+        local paralyzed = not debug.isGodMode() and paralysis.magnitude > 0
+        if not next(noModeControl) and not paralyzed then
             updatePOV(dt)
             updateVanity(dt)
         end
