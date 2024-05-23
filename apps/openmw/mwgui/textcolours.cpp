@@ -32,5 +32,13 @@ namespace MWGui
         journalTopic = getTextColour("journal_topic");
         journalTopicOver = getTextColour("journal_topic_over");
         journalTopicPressed = getTextColour("journal_topic_pressed");
+
+        specific = getTextColour("specific");
+        specificOver = getTextColour("specific_over");
+        specificPressed = getTextColour("specific_pressed");
+
+        exhausted = getTextColour("exhausted");
+        exhaustedOver = getTextColour("exhausted_over");
+        exhaustedPressed = getTextColour("exhausted_pressed");
     }
 }

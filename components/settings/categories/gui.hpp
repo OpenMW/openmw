@@ -32,8 +32,12 @@ namespace Settings
         SettingValue<MyGUI::Colour> mColorCrosshairOwned{ mIndex, "GUI", "color crosshair owned" };
         SettingValue<bool> mKeyboardNavigation{ mIndex, "GUI", "keyboard navigation" };
         SettingValue<bool> mColorTopicEnable{ mIndex, "GUI", "color topic enable" };
-        SettingValue<MyGUI::Colour> mColorTopicSpecific{ mIndex, "GUI", "color topic specific" };
-        SettingValue<MyGUI::Colour> mColorTopicExhausted{ mIndex, "GUI", "color topic exhausted" };
+        SettingValue<MyGUI::Colour> mColorTopicSpecific{ mIndex, "GUI", "FontColor_color_specific" };
+        SettingValue<MyGUI::Colour> mColorTopicSpecificOver{ mIndex, "GUI", "FontColor_color_specific_over" };
+        SettingValue<MyGUI::Colour> mColorTopicSpecificPressed{ mIndex, "GUI", "FontColor_color_specific_pressed" };
+        SettingValue<MyGUI::Colour> mColorTopicExhausted{ mIndex, "GUI", "FontColor_color_exhausted" };
+        SettingValue<MyGUI::Colour> mColorTopicExhaustedOver{ mIndex, "GUI", "FontColor_color_exhausted_over" };
+        SettingValue<MyGUI::Colour> mColorTopicExhaustedPressed{ mIndex, "GUI", "FontColor_color_exhausted_pressed" };
     };
 }
 

@@ -27,6 +27,14 @@ namespace MWGui
         MyGUI::Colour journalTopicOver;
         MyGUI::Colour journalTopicPressed;
 
+        MyGUI::Colour specific;
+        MyGUI::Colour specificOver;
+        MyGUI::Colour specificPressed;
+
+        MyGUI::Colour exhausted;
+        MyGUI::Colour exhaustedOver;
+        MyGUI::Colour exhaustedPressed;
+
     public:
         void loadColours();
     };

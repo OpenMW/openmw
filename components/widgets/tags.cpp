@@ -1,5 +1,6 @@
 #include "tags.hpp"
 
+#include <components/settings/values.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include <MyGUI_Colour.h>
@@ -10,7 +11,6 @@ namespace Gui
     bool replaceTag(std::string_view tag, MyGUI::UString& out)
     {
         std::string_view fontcolour = "fontcolour=";
-
         std::string_view fontcolourhtml = "fontcolourhtml=";
 
         if (tag.starts_with(fontcolour))
@@ -19,7 +19,12 @@ namespace Gui
             fallbackName += tag.substr(fontcolour.length());
             std::string_view str = Fallback::Map::getString(fallbackName);
             if (str.empty())
-                throw std::runtime_error("Unknown fallback name: " + fallbackName);
+            {
+                std::string_view category = "GUI";
+                str = Settings::Manager::getString(fallbackName, category);
+                if (str.empty())
+                    throw std::runtime_error("Unable to map setting to value: " + fallbackName);
+            }     
 
             std::string ret[3];
             unsigned int j = 0;
