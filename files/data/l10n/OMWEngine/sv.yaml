@@ -22,7 +22,7 @@ LoadingInProgress: "Laddar sparat spel"
 LoadingRequiresNewVersionError: |-
     Denna sparfil skapades i en nyare version av OpenMW och stöds därför inte.
     Uppgradera till den senaste versionen av OpenMW för att ladda filen.
- LoadingRequiresOldVersionError: |-
+LoadingRequiresOldVersionError: |-
     Denna sparfil skapades i en äldre version av OpenMW i ett format som inte längre stöds.
     Ladda och spara denna sparfil med {version} för att uppgradera den.
 NewGameConfirmation: "Vill du starta ett nytt spel och förlora det pågående spelet?"
@@ -39,6 +39,8 @@ TimePlayed: "Speltid"
 DeleteGame: "Radera spel"
 DeleteGameConfirmation: "Är du säker på att du vill radera sparfilen?"
 EmptySaveNameError: "Spelet kan inte sparas utan ett namn!"
+Health: "Hälsa"
+Level: "Nivå"
 LoadGameConfirmation: "Vill du ladda ett sparat spel och förlora det pågående spelet?"
 MissingContentFilesConfirmation: |-
     De valda innehållsfilerna matchar inte filerna som används av denna sparfil.
@@ -70,6 +72,8 @@ AudioFootsteps: "Fotsteg"
 AudioMaster: "Huvudvolym"
 AudioMusic: "Musik"
 AudioVoice: "Röster"
+AutoSaveOnResting: "Autospara vid vila"
+BestAttack: "Använd alltid bästa attack"
 CameraSensitivity: "Kamerakänslighet"
 CameraZoomIn: "Zooma in kamera"
 CameraZoomOut: "Zooma ut kamera"
@@ -78,6 +82,7 @@ ConfirmResetBindings: "Återställ alla kontroller till standard?"
 ConfirmResolution: "Ny upplösning kommer ställas in omedelbart. Vill du fortsätta?"
 Controller: "Handkontroll"
 Controls: "Kontroller"
+Crosshair: "Hårkors"
 DelayLow: "Snabbt"
 DelayHigh: "Långsamt"
 DetailLevel: "Detaljnivå"

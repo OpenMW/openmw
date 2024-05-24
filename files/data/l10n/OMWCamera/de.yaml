@@ -11,12 +11,12 @@ viewOverShoulderDescription: |
 
 shoulderOffsetX: "Schulteransicht: horizontaler Offset"
 shoulderOffsetXDescription: >
-    Horizontaler Offset der „Über-die-Schulter-Ansicht“.
+    Horizontaler Offset der "Über-die-Schulter-Ansicht".
     Größere Werte verschieben die Ansicht nach rechts; negative Werte verschieben die Ansicht über die linke Schulter.
 
 shoulderOffsetY: "Schulteransicht: vertikaler Offset"
 shoulderOffsetYDescription: >
-    Vertikaler Offset der „Über-die-Schulter-Ansicht“.
+    Vertikaler Offset der "Über-die-Schulter-Ansicht".
 
 autoSwitchShoulder: "Schulter automatisch wechseln"
 autoSwitchShoulderDescription: >
@@ -25,7 +25,7 @@ autoSwitchShoulderDescription: >
 zoomOutWhenMoveCoef: "Kamera-Zoomfaktor bei Bewegung"
 zoomOutWhenMoveCoefDescription: >
     Bewegt die Kamera vom Spielercharakter weg (positiver Wert) oder auf ihn zu (negativer Wert), solange sich dieser bewegt. Der Wert 0 deaktiviert den Zoom (Standard: 20,0).
-    Funktioniert nur, wenn „Über-die-Schulter-Ansicht“ aktiviert ist.
+    Funktioniert nur, wenn "Über-die-Schulter-Ansicht" aktiviert ist.
 
 previewIfStandStill: "Vorschau bei Stillstand"
 previewIfStandStillDescription: >
@@ -36,9 +36,10 @@ deferredPreviewRotationDescription: |
     Falls aktiviert, dreht sich der Spielercharakter nach dem Verlassen des Vorschau- oder Vanity-Modus sanft in die Blickrichtung der Kamera.
     Falls deaktiviert, dreht sich die Kamera ruckartig in Richtung des Spielercharakters.
 
-ignoreNC: "Ignoriere „No Collision“-Flag"
+ignoreNC: |
+    Ignoriere "No Collision"-Flag
 ignoreNCDescription: >
-    Falls aktiviert, bewegt sich die Kamera nicht durch Objekte, deren NC-Flag („No Collision“-Flag) im NIF-Modell aktiviert ist.
+    Falls aktiviert, bewegt sich die Kamera nicht durch Objekte, deren NC-Flag ("No Collision"-Flag) im NIF-Modell aktiviert ist.
 
 move360: "360°-Bewegung"
 move360Description: >
@@ -46,7 +47,8 @@ move360Description: >
     Beispiel: Läuft der Spielercharakter in diesem Modus rückwärts, dreht er sich stattdessen mit dem Gesicht zur Kamera.
 
 move360TurnSpeed: "Multiplikator für 360°-Bewegung-Drehgeschwindigkeit"
-move360TurnSpeedDescription: "Multiplikator für die Drehgeschwindigkeit bei aktivierter „360°-Bewegung“ (Standard: 5,0)."
+move360TurnSpeedDescription: |
+    Multiplikator für die Drehgeschwindigkeit bei aktivierter "360°-Bewegung" (Standard: 5,0).
 
 slowViewChange: "Sanfter Ansichtswechsel"
 slowViewChangeDescription: "Falls aktiviert, wechselt die Kamera nicht mehr ruckartig von der Ego- in die Verfolgerperspektive."
