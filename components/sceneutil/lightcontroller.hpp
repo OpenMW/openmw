@@ -27,12 +27,14 @@ namespace SceneUtil
         void setType(LightType type);
 
         void setDiffuse(const osg::Vec4f& color);
+        void setSpecular(const osg::Vec4f& color);
 
         void operator()(SceneUtil::LightSource* node, osg::NodeVisitor* nv);
 
     private:
         LightType mType;
         osg::Vec4f mDiffuseColor;
+        osg::Vec4f mSpecularColor;
         float mPhase;
         float mBrightness;
         double mStartTime;

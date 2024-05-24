@@ -1160,6 +1160,7 @@ namespace SceneUtil
 
                     auto* light = transform.mLightSource->getLight(frameNum);
                     light->setDiffuse(light->getDiffuse() * fade);
+                    light->setSpecular(light->getSpecular() * fade);
                     transform.mLightSource->setLastAppliedFrame(frameNum);
                 }
 
