@@ -56,6 +56,17 @@ namespace MWWorld
             }
         }
 
+        // For fixing old saves
+        void assign(ESM::CellRef& ref)
+        {
+            if (!ref.mRefNum.isSet())
+            {
+                CellRef temp(ref);
+                temp.getOrAssignRefNum(mLastGenerated);
+                ref.mRefNum = temp.getRefNum();
+            }
+        }
+
     private:
         std::size_t mRevision = 0;
         std::unordered_map<ESM::RefNum, Ptr> mIndex;

@@ -317,7 +317,12 @@ namespace MWWorld
                 convertMagicEffects(
                     player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
             else if (reader.getFormatVersion() <= ESM::MaxOldCreatureStatsFormatVersion)
+            {
                 convertStats(player.mObject.mCreatureStats);
+                convertEnchantmentSlots(player.mObject.mCreatureStats, player.mObject.mInventory);
+            }
+            else if (reader.getFormatVersion() <= ESM::MaxActiveSpellSlotIndexFormatVersion)
+                convertEnchantmentSlots(player.mObject.mCreatureStats, player.mObject.mInventory);
 
             if (!player.mObject.mEnabled)
             {
