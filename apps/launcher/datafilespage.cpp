@@ -359,7 +359,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     QList<Config::SettingValue> selectedArchives = mGameSettings.getArchiveList();
     QStringList contentModelSelectedArchives = mLauncherSettings.getArchiveList(contentModelName);
-    if (contentModelSelectedArchives.isEmpty())
+    if (!contentModelSelectedArchives.isEmpty())
     {
         selectedArchives.erase(std::remove_if(selectedArchives.begin(), selectedArchives.end(),
                                    [&](const Config::SettingValue& dir) { return mGameSettings.isUserSetting(dir); }),
