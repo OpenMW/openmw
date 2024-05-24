@@ -41,7 +41,6 @@ Lua API reference
     interface_controls
     interface_gamepadcontrols
     interface_item_usage
-    interface_music
     interface_mwui
     interface_settings
     interface_skill_progression

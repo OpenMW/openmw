@@ -18,9 +18,6 @@
 -- @field [parent=#interfaces] scripts.omw.mwui.init#scripts.omw.mwui.init MWUI
 
 ---
--- @field [parent=#interfaces] scripts.omw.music.music#scripts.omw.music.music Music
-
----
 -- @field [parent=#interfaces] scripts.omw.settings.player#scripts.omw.settings.player Settings
 
 ---

@@ -150,35 +150,6 @@ registerPlaylist({ id = "battle", priority = battlePriority, randomize = true })
 registerPlaylist({ id = "explore", priority = explorePriority, randomize = true, active = true })
 
 return {
-    ---
-    -- @module Music
-    -- @usage require('openmw.interfaces').Music
-    interfaceName = 'Music',
-    interface = {
-        --- Interface version
-        -- @field [parent=#Music] #number version
-        version = 0,
-        ---
-        -- Set state for playlist with given ID
-        -- @function [parent=#Music] setPlaylistActive
-        -- @param #string id Playlist ID
-        -- @param #boolean state Playlist is active
-        setPlaylistActive = setPlaylistActive,
-        ---
-        -- Register given playlist
-        -- @function [parent=#Music] registerPlaylist
-        -- @param #table playlist Playlist data. Can contain:
-        --
-        -- * `id` - #string, playlist ID
-        -- * `priority` - #number, playlist priority (lower value means higher priority)
-        -- * `fadeOut` - #number, Time in seconds to fade out current track before starting this one. If nil, allow the engine to choose the value.
-        -- * `tracks` - #list<#string>, Paths of track files for playlist (if nil, use all tracks from 'music/{id}/' folder)
-        -- * `active` - #boolean, tells if playlist is active (default is false)
-        -- * `randomize` - #boolean, tells if playlist should shuffle its tracks during playback (default is false). When all tracks are played, they are randomized again.
-        -- * `playOne` - #boolean, tells if playlist should be automatically deactivated after one track is played (default is false)
-        -- * `cycleTracks` - #boolean, if true, tells to start playlist from beginning once all tracks are played, otherwise playlist becomes deactivated (default is true).
-        registerPlaylist = registerPlaylist
-    },
     engineHandlers = {
         onFrame = onFrame
     },

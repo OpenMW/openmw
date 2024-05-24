@@ -39,9 +39,6 @@
   * - :ref:`MWUI <Interface MWUI>`
     - by player scripts
     - Morrowind-style UI templates.
-  * - :ref:`Music <Interface Music>`
-    - by player scripts
-    - Provides access to music playlists.
   * - :ref:`UI <Interface UI>`
     - by player scripts
     - | High-level UI modes interface. Allows to override parts
