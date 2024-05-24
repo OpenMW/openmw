@@ -1482,7 +1482,6 @@ namespace MWMechanics
                 if (!playerHitAttemptActor.isInCell())
                     player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
             }
-            const bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
             const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
 
             // AI and magic effects update
@@ -1634,8 +1633,7 @@ namespace MWMechanics
                 world->setActorActive(actor.getPtr(), true);
 
                 const bool isDead = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead();
-                if (!isDead && (!godmode || !isPlayer)
-                    && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
+                if (!isDead && actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isParalyzed())
                     ctrl.skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
