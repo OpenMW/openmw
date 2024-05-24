@@ -42,7 +42,7 @@ namespace CSVRender
             land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
     }
 
-    const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
+    const ESM::LandTexture* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
         const int row = mData.getLandTextures().searchId(
             ESM::RefId::stringRefId(CSMWorld::LandTexture::createUniqueRecordId(plugin, index)));

@@ -103,8 +103,8 @@ namespace ESMTerrain
 
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
-    Storage::Storage(const VFS::Manager* vfs, const std::string& normalMapPattern,
-        const std::string& normalHeightMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern,
+    Storage::Storage(const VFS::Manager* vfs, std::string_view normalMapPattern,
+        std::string_view normalHeightMapPattern, bool autoUseNormalMaps, std::string_view specularMapPattern,
         bool autoUseSpecularMaps)
         : mVFS(vfs)
         , mNormalMapPattern(normalMapPattern)
@@ -368,23 +368,21 @@ namespace ESMTerrain
 
     std::string Storage::getTextureName(UniqueTextureId id)
     {
-        static constexpr char defaultTexture[] = "textures\\_land_default.dds";
-        if (id.first == 0)
-            return defaultTexture; // Not sure if the default texture really is hardcoded?
-
-        // NB: All vtex ids are +1 compared to the ltex ids
-        const ESM::LandTexture* ltex = getLandTexture(id.first - 1, id.second);
-        if (!ltex)
+        std::string_view texture = "_land_default.dds";
+        if (id.first != 0)
         {
-            Log(Debug::Warning) << "Warning: Unable to find land texture index " << id.first - 1 << " in plugin "
-                                << id.second << ", using default texture instead";
-            return defaultTexture;
+            // NB: All vtex ids are +1 compared to the ltex ids
+            const ESM::LandTexture* ltex = getLandTexture(id.first - 1, id.second);
+            if (ltex)
+                texture = ltex->mTexture;
+            else
+            {
+                Log(Debug::Warning) << "Warning: Unable to find land texture index " << id.first - 1 << " in plugin "
+                                    << id.second << ", using default texture instead";
+            }
         }
-
         // this is needed due to MWs messed up texture handling
-        std::string texture = Misc::ResourceHelpers::correctTexturePath(ltex->mTexture, mVFS);
-
-        return texture;
+        return Misc::ResourceHelpers::correctTexturePath(texture, mVFS);
     }
 
     void Storage::getBlendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
@@ -417,21 +415,21 @@ namespace ESMTerrain
 
         sampleBlendmaps(chunkSize, origin.x(), origin.y(), ESM::Land::LAND_TEXTURE_SIZE, handleSample);
 
-        std::map<UniqueTextureId, unsigned int> textureIndicesMap;
+        std::map<UniqueTextureId, std::size_t> textureIndicesMap;
 
         for (std::size_t y = 0; y < blendmapSize; ++y)
         {
             for (std::size_t x = 0; x < blendmapSize; ++x)
             {
                 const UniqueTextureId id = textureIds[y * blendmapSize + x];
-                std::map<UniqueTextureId, unsigned int>::iterator found = textureIndicesMap.find(id);
+                auto found = textureIndicesMap.find(id);
                 if (found == textureIndicesMap.end())
                 {
-                    unsigned int layerIndex = layerList.size();
+                    std::size_t layerIndex = layerList.size();
                     Terrain::LayerInfo info = getLayerInfo(getTextureName(id));
 
                     // look for existing diffuse map, which may be present when several plugins use the same texture
-                    for (unsigned int i = 0; i < layerList.size(); ++i)
+                    for (std::size_t i = 0; i < layerList.size(); ++i)
                     {
                         if (layerList[i].mDiffuseMap == info.mDiffuseMap)
                         {
@@ -452,7 +450,7 @@ namespace ESMTerrain
                         layerList.push_back(std::move(info));
                     }
                 }
-                const unsigned int layerIndex = found->second;
+                const std::size_t layerIndex = found->second;
                 unsigned char* const data = blendmaps[layerIndex]->data();
                 const std::size_t realY = (blendmapSize - y - 1) * imageScaleFactor;
                 const std::size_t realX = x * imageScaleFactor;
