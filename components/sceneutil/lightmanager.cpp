@@ -1161,8 +1161,10 @@ namespace SceneUtil
             }
 
             const bool fillPPLights = mPPLightBuffer && it->first->getName() == Constants::SceneCamera;
+            const bool sceneLimitReached = getLightingMethod() == LightingMethod::SingleUBO
+                && it->second.size() > static_cast<size_t>(getMaxLightsInScene() - 1);
 
-            if (fillPPLights || getLightingMethod() == LightingMethod::SingleUBO)
+            if (fillPPLights || sceneLimitReached)
             {
                 auto sorter = [](const LightSourceViewBound& left, const LightSourceViewBound& right) {
                     return left.mViewBound.center().length2() - left.mViewBound.radius2()
@@ -1183,7 +1185,7 @@ namespace SceneUtil
                     }
                 }
 
-                if (it->second.size() > static_cast<size_t>(getMaxLightsInScene() - 1))
+                if (sceneLimitReached)
                     it->second.resize(getMaxLightsInScene() - 1);
             }
         }
