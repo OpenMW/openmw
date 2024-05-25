@@ -54,9 +54,9 @@ MissingContentFilesList: |-
   }
 MissingContentFilesListCopy: |-
   {files, plural,
-    one{\n\nPress Kopiera för att placera namnet i urklipp.}
-    few{\n\nPress Kopiera för att placera deras namn i urklipp.}
-    other{\n\nPress Kopiera för att placera deras namn i urklipp.}
+    one{\n\nKlicka på kopiera för att placera namnet i urklipp.}
+    few{\n\nKlicka på kopiera för att placera deras namn i urklipp.}
+    other{\n\nKlicka på kopiera för att placera deras namn i urklipp.}
   } 
 OverwriteGameConfirmation: "Är du säker på att du vill skriva över det här sparade spelet?"
 SelectCharacter: "Välj spelfigur..."
@@ -127,7 +127,7 @@ MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt l�
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
 MenuTransparency: "Menytransparens"
 MouseAndKeyboard: "Mus/Tangentbord"
-PostProcessing: "Postprocessing"
+PostProcessing: "Efterbehandling (post processing)"
 PostProcessingIsNotEnabled: "Postprocessing är inte aktiverat"
 PostProcessingTooltip: "Justeras via Postprocessing-gränssnittet, se input bindings."
 Preferences: "Inställningar" #Den engelska texten är "prefs", alltså "preferences" men förkortat. Men översättningen "preferenser" känns inte helt rätt. Kan vara bra att fundera över den här framöver.
@@ -181,8 +181,8 @@ WaterShader: "Vattenshader"
 WaterShaderTextureQuality: "Texturkvalitet"
 WindowBorder: "Fönster, ram"
 WindowMode: "Fönsterläge"
-WindowModeFullscreen: "Fullskärm"
-WindowModeHint: "Notera: Fullskärm i fönsterläge\nanvänder alltid skärmens nativa upplösning."
+WindowModeFullscreen: "Helskärm"
+WindowModeHint: "Notera: Helskärm i fönsterläge\nanvänder alltid skärmens nativa upplösning."
 WindowModeWindowed: "Fönster"
-WindowModeWindowedFullscreen: "Fullskärm i fönsterläge"
+WindowModeWindowedFullscreen: "Helskärm i fönsterläge"
 WobblyShores: "Vaggande stränder"
