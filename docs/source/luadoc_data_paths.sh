@@ -6,7 +6,6 @@ paths=(
   scripts/omw/mechanics/animationcontroller.lua
   scripts/omw/input/gamepadcontrols.lua
   scripts/omw/camera/camera.lua
-  scripts/omw/music/music.lua
   scripts/omw/mwui/init.lua
   scripts/omw/settings/player.lua
   scripts/omw/ui.lua
