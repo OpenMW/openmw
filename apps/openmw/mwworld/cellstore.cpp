@@ -264,9 +264,7 @@ namespace
         }
         else if (state.mVersion <= ESM::MaxOldCreatureStatsFormatVersion)
         {
-            if constexpr (std::is_same_v<T, ESM::Creature>)
-                MWWorld::convertStats(state.mCreatureStats);
-            else if constexpr (std::is_same_v<T, ESM::NPC>)
+            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
             {
                 MWWorld::convertStats(state.mCreatureStats);
                 MWWorld::convertEnchantmentSlots(state.mCreatureStats, state.mInventory);
@@ -274,7 +272,7 @@ namespace
         }
         else if (state.mVersion <= ESM::MaxActiveSpellSlotIndexFormatVersion)
         {
-            if constexpr (std::is_same_v<T, ESM::NPC>)
+            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertEnchantmentSlots(state.mCreatureStats, state.mInventory);
         }
 

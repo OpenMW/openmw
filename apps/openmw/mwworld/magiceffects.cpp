@@ -243,7 +243,7 @@ namespace MWWorld
                 continue;
             if (activeSpell.mFlags & ESM::ActiveSpells::Flag_Equipment)
             {
-                auto slotIndex = activeSpell.mItem.mIndex;
+                std::int64_t slotIndex = activeSpell.mItem.mIndex;
                 auto slot = std::find_if(inventory.mEquipmentSlots.begin(), inventory.mEquipmentSlots.end(),
                     [=](const auto& entry) { return entry.second == slotIndex; });
                 if (slot != inventory.mEquipmentSlots.end() && slot->first < inventory.mItems.size())
