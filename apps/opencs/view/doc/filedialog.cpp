@@ -177,8 +177,6 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString& name, bool)
         mAdjusterWidget->setName("", true);
 
     ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled(success);
-    if (success)
-        ui.projectButtonBox->button(QDialogButtonBox::Ok)->setFocus();
 }
 
 QString CSVDoc::FileDialog::filename() const
