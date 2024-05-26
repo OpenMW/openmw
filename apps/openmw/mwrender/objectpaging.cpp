@@ -877,15 +877,19 @@ namespace MWRender
 
     namespace
     {
+        osg::Vec2f clampToCell(const osg::Vec3f& cellPos, const osg::Vec2i& cell)
+        {
+            return osg::Vec2f(std::clamp<float>(cellPos.x(), cell.x(), cell.x() + 1),
+                std::clamp<float>(cellPos.y(), cell.y(), cell.y() + 1));
+        }
+
         class CollectIntersecting
         {
         public:
             explicit CollectIntersecting(
                 bool activeGridOnly, const osg::Vec3f& position, const osg::Vec2i& cell, ESM::RefId worldspace)
                 : mActiveGridOnly(activeGridOnly)
-                , mPosition(position)
-                , mCell(cell)
-                , mWorldspace(worldspace)
+                , mPosition(clampToCell(position / getCellSize(worldspace), cell))
             {
             }
 
@@ -893,33 +897,23 @@ namespace MWRender
             {
                 if (mActiveGridOnly && !std::get<2>(id))
                     return;
-                if (intersects(id, mPosition))
+                if (intersects(id))
                     mCollected.insert(id);
             }
 
             const std::set<ChunkId>& getCollected() const { return mCollected; }
 
         private:
-            bool intersects(ChunkId id, osg::Vec3f pos) const
+            bool intersects(ChunkId id) const
             {
-                pos /= getCellSize(mWorldspace);
-                clampToCell(pos);
-                osg::Vec2f center = std::get<0>(id);
-                float halfSize = std::get<1>(id) / 2;
-                return pos.x() >= center.x() - halfSize && pos.y() >= center.y() - halfSize
-                    && pos.x() <= center.x() + halfSize && pos.y() <= center.y() + halfSize;
-            }
-
-            void clampToCell(osg::Vec3f& cellPos) const
-            {
-                cellPos.x() = std::clamp<float>(cellPos.x(), mCell.x(), mCell.x() + 1);
-                cellPos.y() = std::clamp<float>(cellPos.y(), mCell.y(), mCell.y() + 1);
+                const osg::Vec2f center = std::get<0>(id);
+                const float halfSize = std::get<1>(id) / 2;
+                return mPosition.x() >= center.x() - halfSize && mPosition.y() >= center.y() - halfSize
+                    && mPosition.x() <= center.x() + halfSize && mPosition.y() <= center.y() + halfSize;
             }
 
             bool mActiveGridOnly;
-            osg::Vec3f mPosition;
-            osg::Vec2i mCell;
-            ESM::RefId mWorldspace;
+            osg::Vec2f mPosition;
             std::set<ChunkId> mCollected;
         };
     }
