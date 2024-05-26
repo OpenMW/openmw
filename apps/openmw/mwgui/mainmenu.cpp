@@ -100,10 +100,6 @@ namespace MWGui
         {
             winMgr->removeGuiMode(GM_MainMenu);
         }
-        else if (name == "options")
-        {
-            winMgr->toggleSettingsWindow();
-        }
         else if (name == "credits")
             winMgr->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
@@ -132,16 +128,17 @@ namespace MWGui
                 dialog->eventCancelClicked.clear();
             }
         }
-
-        else
+        else if (name == "loadgame" || name == "savegame")
         {
             if (!mSaveGameDialog)
                 mSaveGameDialog = std::make_unique<SaveGameDialog>();
-            if (name == "loadgame")
-                mSaveGameDialog->setLoadOrSave(true);
-            else if (name == "savegame")
-                mSaveGameDialog->setLoadOrSave(false);
+            mSaveGameDialog->setLoadOrSave(name == "loadgame");
             mSaveGameDialog->setVisible(true);
+        }
+
+        if (winMgr->isSettingsWindowVisible() || name == "options")
+        {
+            winMgr->toggleSettingsWindow();
         }
     }
 
