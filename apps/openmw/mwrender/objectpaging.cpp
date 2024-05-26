@@ -898,10 +898,10 @@ namespace MWRender
                 if (mActiveGridOnly && !std::get<2>(id))
                     return;
                 if (intersects(id))
-                    mCollected.insert(id);
+                    mCollected.push_back(id);
             }
 
-            const std::set<ChunkId>& getCollected() const { return mCollected; }
+            const std::vector<ChunkId>& getCollected() const { return mCollected; }
 
         private:
             bool intersects(ChunkId id) const
@@ -914,7 +914,7 @@ namespace MWRender
 
             bool mActiveGridOnly;
             osg::Vec2f mPosition;
-            std::set<ChunkId> mCollected;
+            std::vector<ChunkId> mCollected;
         };
     }
 
