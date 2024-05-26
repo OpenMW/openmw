@@ -95,6 +95,15 @@ EnableController: "Enable Controller"
 FieldOfView: "Field of View"
 FieldOfViewHigh: "High"
 FieldOfViewLow: "Low"
+ForcePerPixelLighting: "Force Per-Pixel Lighting"
+ForcePerPixelLightingTooltip: |-
+    Force the use of per-pixel lighting. By default, only bump- and normal-mapped objects use per-pixel lighting.
+
+    Only affects objects drawn with shaders.
+
+    Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended.
+
+    Note that groundcover shaders and particle effects ignore this setting.
 FrameRateHint: "Hint: press F3 to show\nthe current frame rate."
 GammaCorrection: "Gamma Correction"
 GammaDark: "Dark"

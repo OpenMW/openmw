@@ -1037,7 +1037,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="9" column="1">
+               <item row="8" column="1">
                 <spacer name="verticalSpacer_10">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
@@ -1109,16 +1109,6 @@
                  </property>
                  <property name="text">
                   <string>Bounding Sphere Multiplier</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="8" column="0">
-                <widget class="QCheckBox" name="forcePplCheckBox">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Force the use of per pixel lighting. By default, only bump and normal mapped objects use per-pixel lighting. Only affects objects drawn with shaders. Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended. Note that groundcover shaders and particle effects ignore this setting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Force Per-Pixel Lighting</string>
                  </property>
                 </widget>
                </item>

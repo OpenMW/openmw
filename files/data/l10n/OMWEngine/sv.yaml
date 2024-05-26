@@ -95,6 +95,16 @@ EnableController: "Aktivera handkontroll"
 FieldOfView: "Synfält"
 FieldOfViewLow: "Låg"
 FieldOfViewHigh: "Hög"
+ForcePerPixelLighting: "Tvinga per-pixelljussättning"
+ForcePerPixelLightingTooltip: |-
+    Tvingar användningen av per-pixelljussättning. Som standard är det annars bara objekt med normalkartor som använder per-pixelljussättning.
+
+    Denna inställning påverkar endast objekt som ritas med shaderteknik.
+
+    Aktivering av per-pixelljussättning kommer ge visuella skillnader jämfört med hur Morrowind ser ut i ordinarie spelmotor.
+    Detta då visst ljus i Morrowind är beroende av vertexljussättning för att se ut som det var avsett.
+
+    Notera att shaders för marktäckare och partikeleffekter ignorerar denna inställning.
 FrameRateHint: "Tips: tryck på F3 för att visa\naktuell bilduppdateringsfrekvens."
 GammaCorrection: "Gammakorrigering"
 GammaDark: "Mörkt"
