@@ -10,18 +10,18 @@
 
 namespace
 {
-    constexpr int operationLineHeight = 40;
+    constexpr int operationLineHeight = 36;
 }
 
 CSVDoc::Operations::Operations()
 {
-    /// \todo make widget height fixed (exactly the height required to display all operations)
-
     setFeatures(QDockWidget::NoDockWidgetFeatures);
 
     QWidget* widgetContainer = new QWidget(this);
     mLayout = new QVBoxLayout;
+    mLayout->setContentsMargins(0, 0, 0, 0);
 
+    widgetContainer->setContentsMargins(0, 0, 0, 0);
     widgetContainer->setLayout(mLayout);
     setWidget(widgetContainer);
     setVisible(false);
