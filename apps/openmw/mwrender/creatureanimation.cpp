@@ -5,6 +5,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/values.hpp>
@@ -172,6 +173,9 @@ namespace MWRender
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::move(source));
             attached->accept(assignVisitor);
+
+            if (item.getType() == ESM::Light::sRecordId)
+                addExtraLight(scene->getNode()->asGroup(), SceneUtil::LightCommon(*item.get<ESM::Light>()->mBase));
         }
         catch (std::exception& e)
         {
