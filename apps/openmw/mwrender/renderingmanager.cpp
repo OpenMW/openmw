@@ -290,9 +290,9 @@ namespace MWRender
                 for (std::vector<std::string>::const_iterator it = mKeyframes.begin(); it != mKeyframes.end(); ++it)
                     mResourceSystem->getKeyframeManager()->get(*it);
             }
-            catch (std::exception&)
+            catch (const std::exception& e)
             {
-                // ignore error (will be shown when these are needed proper)
+                Log(Debug::Warning) << "Failed to preload common assets: " << e.what();
             }
         }
 

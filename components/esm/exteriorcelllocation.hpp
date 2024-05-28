@@ -5,6 +5,7 @@
 
 #include <components/esm3/loadcell.hpp>
 
+#include <ostream>
 #include <tuple>
 
 namespace ESM
@@ -29,6 +30,11 @@ namespace ESM
         friend inline bool operator<(const ExteriorCellLocation& lhs, const ExteriorCellLocation& rhs)
         {
             return std::make_tuple(lhs.mX, lhs.mY, lhs.mWorldspace) < std::make_tuple(rhs.mX, rhs.mY, rhs.mWorldspace);
+        }
+
+        friend inline std::ostream& operator<<(std::ostream& stream, const ExteriorCellLocation& value)
+        {
+            return stream << "{" << value.mX << ", " << value.mY << ", " << value.mWorldspace << "}";
         }
     };
 }

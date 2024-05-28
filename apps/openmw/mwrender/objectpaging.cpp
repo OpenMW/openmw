@@ -511,8 +511,10 @@ namespace MWRender
                             refs[ref.mRefNum] = std::move(ref);
                         }
                     }
-                    catch (std::exception&)
+                    catch (const std::exception& e)
                     {
+                        Log(Debug::Warning) << "Failed to collect references from cell \"" << cell->getDescription()
+                                            << "\": " << e.what();
                         continue;
                     }
                 }

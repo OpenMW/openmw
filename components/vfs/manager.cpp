@@ -53,7 +53,7 @@ namespace VFS
         assert(Path::isNormalized(normalizedName));
         const auto found = mIndex.find(normalizedName);
         if (found == mIndex.end())
-            throw std::runtime_error("Resource '" + std::string(normalizedName) + "' not found");
+            throw std::runtime_error("Resource '" + std::string(normalizedName) + "' is not found");
         return found->second->open();
     }
 
@@ -84,7 +84,7 @@ namespace VFS
 
         const auto found = mIndex.find(normalized);
         if (found == mIndex.end())
-            throw std::runtime_error("Resource '" + normalized + "' not found");
+            throw std::runtime_error("Resource '" + normalized + "' is not found");
         return found->second->getPath();
     }
 
