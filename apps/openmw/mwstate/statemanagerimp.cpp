@@ -606,6 +606,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         MWBase::Environment::get().getWorld()->renderPlayer();
         MWBase::Environment::get().getWindowManager()->updatePlayer();
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
+        MWBase::Environment::get().getWorld()->toggleVanityMode(false);
 
         if (firstPersonCam != MWBase::Environment::get().getWorld()->isFirstPerson())
             MWBase::Environment::get().getWorld()->togglePOV();
