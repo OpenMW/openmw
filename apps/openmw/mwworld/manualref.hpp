@@ -18,6 +18,7 @@ namespace MWWorld
 
     public:
         ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& name, const int count = 1);
+        ManualRef(const MWWorld::ESMStore& store, const MWWorld::Ptr& template_, const int count = 1);
 
         const Ptr& getPtr() const { return mPtr; }
     };
