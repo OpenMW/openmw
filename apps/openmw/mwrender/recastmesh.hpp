@@ -10,6 +10,7 @@ namespace osg
 {
     class Group;
     class Geometry;
+    class StateSet;
 }
 
 namespace DetourNavigator
@@ -47,6 +48,8 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRootNode;
         bool mEnabled;
         std::map<DetourNavigator::TilePosition, Group> mGroups;
+        osg::ref_ptr<osg::StateSet> mGroupStateSet;
+        osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
     };
 }
 

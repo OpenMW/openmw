@@ -1,5 +1,5 @@
 #include "navmesh.hpp"
-#include "depth.hpp"
+
 #include "detourdebugdraw.hpp"
 
 #include <components/detournavigator/settings.hpp>
@@ -7,10 +7,6 @@
 #include <DetourDebugDraw.h>
 
 #include <osg/Group>
-#include <osg/Material>
-#include <osg/PolygonOffset>
-
-#include <algorithm>
 
 namespace
 {
@@ -270,31 +266,14 @@ namespace
 
 namespace SceneUtil
 {
-    osg::ref_ptr<osg::StateSet> makeNavMeshTileStateSet()
-    {
-        osg::ref_ptr<osg::Material> material = new osg::Material;
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-
-        const float polygonOffsetFactor = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
-        const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
-        osg::ref_ptr<osg::PolygonOffset> polygonOffset
-            = new osg::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
-
-        osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
-        stateSet->setAttribute(material);
-        stateSet->setAttributeAndModes(polygonOffset);
-        return stateSet;
-    }
-
     osg::ref_ptr<osg::Group> createNavMeshTileGroup(const dtNavMesh& navMesh, const dtMeshTile& meshTile,
-        const DetourNavigator::Settings& settings, const osg::ref_ptr<osg::StateSet>& groupStateSet,
-        const osg::ref_ptr<osg::StateSet>& debugDrawStateSet, unsigned char flags, unsigned minSalt, unsigned maxSalt)
+        const DetourNavigator::Settings& settings, const osg::ref_ptr<osg::StateSet>& debugDrawStateSet,
+        unsigned char flags, unsigned minSalt, unsigned maxSalt)
     {
         if (meshTile.header == nullptr)
             return nullptr;
 
         osg::ref_ptr<osg::Group> group(new osg::Group);
-        group->setStateSet(groupStateSet);
         constexpr float shift = 10.0f;
         DebugDraw debugDraw(
             *group, debugDrawStateSet, osg::Vec3f(0, 0, shift), 1.0f / settings.mRecast.mRecastScaleFactor);
