@@ -81,6 +81,8 @@ namespace MWWorld
 
         void deregisterLiveCellRef(const LiveCellRefBase& ref) noexcept { mPtrRegistry.remove(ref); }
 
+        void assignSaveFileRefNum(ESM::CellRef& ref) { mPtrRegistry.assign(ref); }
+
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)
         {
