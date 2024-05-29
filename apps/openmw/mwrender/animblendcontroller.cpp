@@ -4,10 +4,7 @@
 
 #include <osgAnimation/Bone>
 
-#define _USE_MATH_DEFINES
-
 #include <cassert>
-#include <cmath>
 #include <string>
 #include <vector>
 
@@ -25,17 +22,17 @@ namespace MWRender
 
             float sineOut(float x)
             {
-                return sin((x * M_PI) / 2);
+                return sin((x * osg::PIf) / 2);
             }
 
             float sineIn(float x)
             {
-                return 1 - cos((x * M_PI) / 2);
+                return 1 - cos((x * osg::PIf) / 2);
             }
 
             float sineInOut(float x)
             {
-                return -(cos(M_PI * x) - 1) / 2;
+                return -(cos(osg::PIf * x) - 1) / 2;
             }
 
             float cubicOut(float t)
@@ -90,7 +87,7 @@ namespace MWRender
             {
                 // Higher lambda = lower swing amplitude. 1 = 150% swing amplitude.
                 // w is the frequency of oscillation in the easing func, controls the amount of overswing
-                constexpr float w = 1.5f * M_PI; // 4.71238
+                const float w = 1.5f * osg::PIf; // 4.71238
                 return 1 - expf(-lambda * x) * cos(w * x);
             }
 

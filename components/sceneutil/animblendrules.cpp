@@ -42,7 +42,6 @@ namespace SceneUtil
             }
             return std::make_pair(group, key);
         }
-
     }
 
     using BlendRule = AnimBlendRules::BlendRule;
@@ -168,5 +167,4 @@ namespace SceneUtil
 
         return std::nullopt;
     }
-
 }

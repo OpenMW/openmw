@@ -543,7 +543,7 @@ Enabling this option disables this swaying by having the player character move i
 This setting can be controlled in the Settings tab of the launcher.
 
 smooth animation transitions
----------------------------------
+----------------------------
 
 :Type:		boolean
 :Range:		True/False

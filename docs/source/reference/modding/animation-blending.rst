@@ -20,8 +20,9 @@ In examples below ``.yaml`` config file will be used. You can provide ``.json`` 
 
 Animation blending config file is a list of blending rules that look like this:
 
-```
-blending_rules:
+::
+
+ blending_rules:
   - from: "*"
     to: "*"
     easing: "sineOut"
@@ -30,9 +31,8 @@ blending_rules:
     to: "idlesneak*"
     easing: "springOutWeak"
     duration: 0.4
-```
 
-See ``OpenMW\files\data\animations\animation-config.yaml`` for an example of such a file.
+See `files/data/animations/animation-config.yaml <https://gitlab.com/OpenMW/openmw/-/tree/master/files/data/animations/animation-config.yaml>`__ for an example of such a file.
 
 Every blending rule should include a set of following fields:
 
@@ -85,6 +85,6 @@ List of possible easings
 
 Its hard to give an example of use cases for the latter 2 types of easing functions, they are there for developers to experiment.
 
-The possible easings are largely ported from `here <https://easings.net/>`__ and have similar names. Except for the ``springOut`` family, those are similar to ``elasticOut`` from `easings.net <https://easings.net/>`__, with ``springOutWeak`` being almost identical to ``elasticOut``.
+The possible easings are largely ported from `easings.net <https://easings.net/>`__ and have similar names. Except for the ``springOut`` family, those are similar to ``elasticOut``, with ``springOutWeak`` being almost identical to ``elasticOut``.
 
 Don't be afraid to experiment with different timing and easing functions!

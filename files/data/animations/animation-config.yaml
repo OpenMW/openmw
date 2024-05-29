@@ -1,7 +1,6 @@
 # This is the default OpenMW animation blending config file (global config) , will affect NPCs and creatures but not animated objects.
 # If you want to provide an animation blending config for your modded animations - DO NOT override the global config in your mod.
 # For details on how to edit and create your own blending rules, see https://openmw.readthedocs.io/en/latest/reference/modding/animation-blending.html
-# Author: Maksim Eremenko (Max Yari)
 
 blending_rules:
   # General blending rule, any transition that will not be caught by the rules below - will use this rule
