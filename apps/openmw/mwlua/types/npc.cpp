@@ -107,6 +107,34 @@ namespace MWLua
             return MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(o.ptr());
         };
 
+        npc["getBaseDisposition"] = [](const Object& o, const Object& player) -> int {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player!");
+            const MWWorld::Class& cls = o.ptr().getClass();
+            if (!cls.isNpc())
+                throw std::runtime_error("NPC expected");
+            return cls.getNpcStats(o.ptr()).getBaseDisposition();
+        };
+
+        npc["setBaseDisposition"] = [](const Object& o, const Object& player, int value) {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player!");
+            const MWWorld::Class& cls = o.ptr().getClass();
+            if (!cls.isNpc())
+                throw std::runtime_error("NPC expected");
+            cls.getNpcStats(o.ptr()).setBaseDisposition(value);
+        };
+
+        npc["modBaseDisposition"] = [](const Object& o, const Object& player, int value) {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player!");
+            const MWWorld::Class& cls = o.ptr().getClass();
+            if (!cls.isNpc())
+                throw std::runtime_error("NPC expected");
+            auto& stats = cls.getNpcStats(o.ptr());
+            stats.setBaseDisposition(stats.getBaseDisposition() + value);
+        };
+
         npc["getFactionRank"] = [](const Object& actor, std::string_view faction) {
             const MWWorld::Ptr ptr = actor.ptr();
             ESM::RefId factionId = parseFactionId(faction);
