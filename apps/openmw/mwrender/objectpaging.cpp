@@ -9,6 +9,8 @@
 #include <osg/Sequence>
 #include <osg/Switch>
 #include <osgAnimation/BasicAnimationManager>
+#include <osgParticle/ParticleProcessor>
+#include <osgParticle/ParticleSystemUpdater>
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <components/esm3/esmreader.hpp>
@@ -16,32 +18,25 @@
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
-
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/optimizer.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/vfs/manager.hpp>
-
-#include <osgParticle/ParticleProcessor>
-#include <osgParticle/ParticleSystemUpdater>
-
 #include <components/misc/rng.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/optimizer.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/settings/values.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
-
-#include <condition_variable>
 
 namespace MWRender
 {
@@ -875,35 +870,48 @@ namespace MWRender
         return Mask_Static;
     }
 
-    struct ClearCacheFunctor
+    namespace
     {
-        void operator()(MWRender::ChunkId id, osg::Object* obj)
+        osg::Vec2f clampToCell(const osg::Vec3f& cellPos, const osg::Vec2i& cell)
         {
-            if (intersects(id, mPosition))
-                mToClear.insert(id);
+            return osg::Vec2f(std::clamp<float>(cellPos.x(), cell.x(), cell.x() + 1),
+                std::clamp<float>(cellPos.y(), cell.y(), cell.y() + 1));
         }
-        bool intersects(ChunkId id, osg::Vec3f pos)
+
+        class CollectIntersecting
         {
-            if (mActiveGridOnly && !std::get<2>(id))
-                return false;
-            pos /= getCellSize(mWorldspace);
-            clampToCell(pos);
-            osg::Vec2f center = std::get<0>(id);
-            float halfSize = std::get<1>(id) / 2;
-            return pos.x() >= center.x() - halfSize && pos.y() >= center.y() - halfSize
-                && pos.x() <= center.x() + halfSize && pos.y() <= center.y() + halfSize;
-        }
-        void clampToCell(osg::Vec3f& cellPos)
-        {
-            cellPos.x() = std::clamp<float>(cellPos.x(), mCell.x(), mCell.x() + 1);
-            cellPos.y() = std::clamp<float>(cellPos.y(), mCell.y(), mCell.y() + 1);
-        }
-        osg::Vec3f mPosition;
-        osg::Vec2i mCell;
-        ESM::RefId mWorldspace;
-        std::set<MWRender::ChunkId> mToClear;
-        bool mActiveGridOnly = false;
-    };
+        public:
+            explicit CollectIntersecting(
+                bool activeGridOnly, const osg::Vec3f& position, const osg::Vec2i& cell, ESM::RefId worldspace)
+                : mActiveGridOnly(activeGridOnly)
+                , mPosition(clampToCell(position / getCellSize(worldspace), cell))
+            {
+            }
+
+            void operator()(const ChunkId& id, osg::Object* /*obj*/)
+            {
+                if (mActiveGridOnly && !std::get<2>(id))
+                    return;
+                if (intersects(id))
+                    mCollected.push_back(id);
+            }
+
+            const std::vector<ChunkId>& getCollected() const { return mCollected; }
+
+        private:
+            bool intersects(ChunkId id) const
+            {
+                const osg::Vec2f center = std::get<0>(id);
+                const float halfSize = std::get<1>(id) / 2;
+                return mPosition.x() >= center.x() - halfSize && mPosition.y() >= center.y() - halfSize
+                    && mPosition.x() <= center.x() + halfSize && mPosition.y() <= center.y() + halfSize;
+            }
+
+            bool mActiveGridOnly;
+            osg::Vec2f mPosition;
+            std::vector<ChunkId> mCollected;
+        };
+    }
 
     bool ObjectPaging::enableObject(
         int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled)
@@ -921,14 +929,11 @@ namespace MWRender
                 return false;
         }
 
-        ClearCacheFunctor ccf;
-        ccf.mPosition = pos;
-        ccf.mCell = cell;
-        ccf.mWorldspace = mWorldspace;
+        CollectIntersecting ccf(false, pos, cell, mWorldspace);
         mCache->call(ccf);
-        if (ccf.mToClear.empty())
+        if (ccf.getCollected().empty())
             return false;
-        for (const auto& chunk : ccf.mToClear)
+        for (const ChunkId& chunk : ccf.getCollected())
             mCache->removeFromObjectCache(chunk);
         return true;
     }
@@ -946,15 +951,11 @@ namespace MWRender
                 return false;
         }
 
-        ClearCacheFunctor ccf;
-        ccf.mPosition = pos;
-        ccf.mCell = cell;
-        ccf.mActiveGridOnly = true;
-        ccf.mWorldspace = mWorldspace;
+        CollectIntersecting ccf(true, pos, cell, mWorldspace);
         mCache->call(ccf);
-        if (ccf.mToClear.empty())
+        if (ccf.getCollected().empty())
             return false;
-        for (const auto& chunk : ccf.mToClear)
+        for (const ChunkId& chunk : ccf.getCollected())
             mCache->removeFromObjectCache(chunk);
         return true;
     }
