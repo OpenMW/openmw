@@ -26,14 +26,6 @@ namespace
 {
     constexpr int ffpMaxLights = 8;
 
-    bool sortLights(const SceneUtil::LightManager::LightSourceViewBound* left,
-        const SceneUtil::LightManager::LightSourceViewBound* right)
-    {
-        static auto constexpr illuminationBias = 81.f;
-        return left->mViewBound.center().length2() - left->mViewBound.radius2() * illuminationBias
-            < right->mViewBound.center().length2() - right->mViewBound.radius2() * illuminationBias;
-    }
-
     void configurePosition(osg::Matrixf& mat, const osg::Vec4& pos)
     {
         mat(0, 0) = pos.x();
@@ -1130,10 +1122,8 @@ namespace SceneUtil
     }
 
     const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(
-        osgUtil::CullVisitor* cv, const osg::RefMatrix* viewMatrix, size_t frameNum)
+        osg::Camera* camera, const osg::RefMatrix* viewMatrix, size_t frameNum)
     {
-        osg::Camera* camera = cv->getCurrentCamera();
-
         osg::observer_ptr<osg::Camera> camPtr(camera);
         auto it = mLightsInViewSpace.find(camPtr);
 
@@ -1147,7 +1137,7 @@ namespace SceneUtil
 
                 float radius = transform.mLightSource->getRadius();
 
-                osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0, 0, 0), radius);
+                osg::BoundingSphere viewBound(osg::Vec3f(), radius * mPointLightRadiusMultiplier);
                 transformBoundingSphere(worldViewMat, viewBound);
 
                 if (transform.mLightSource->getLastAppliedFrame() != frameNum && mPointLightFadeEnd != 0.f)
@@ -1164,15 +1154,6 @@ namespace SceneUtil
                     transform.mLightSource->setLastAppliedFrame(frameNum);
                 }
 
-                // remove lights culled by this camera
-                if (!usingFFP())
-                {
-                    viewBound._radius *= 2.f;
-                    if (cv->getModelViewCullingStack().front().isCulled(viewBound))
-                        continue;
-                    viewBound._radius /= 2.f;
-                }
-                viewBound._radius *= mPointLightRadiusMultiplier;
                 LightSourceViewBound l;
                 l.mLightSource = transform.mLightSource;
                 l.mViewBound = viewBound;
@@ -1180,8 +1161,10 @@ namespace SceneUtil
             }
 
             const bool fillPPLights = mPPLightBuffer && it->first->getName() == Constants::SceneCamera;
+            const bool sceneLimitReached = getLightingMethod() == LightingMethod::SingleUBO
+                && it->second.size() > static_cast<size_t>(getMaxLightsInScene() - 1);
 
-            if (fillPPLights || getLightingMethod() == LightingMethod::SingleUBO)
+            if (fillPPLights || sceneLimitReached)
             {
                 auto sorter = [](const LightSourceViewBound& left, const LightSourceViewBound& right) {
                     return left.mViewBound.center().length2() - left.mViewBound.radius2()
@@ -1202,7 +1185,7 @@ namespace SceneUtil
                     }
                 }
 
-                if (it->second.size() > static_cast<size_t>(getMaxLightsInScene() - 1))
+                if (sceneLimitReached)
                     it->second.resize(getMaxLightsInScene() - 1);
             }
         }
@@ -1284,74 +1267,63 @@ namespace SceneUtil
         // Possible optimizations:
         // - organize lights in a quad tree
 
-        mLastFrameNumber = cv->getTraversalNumber();
-
         // Don't use Camera::getViewMatrix, that one might be relative to another camera!
         const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
-        const std::vector<LightManager::LightSourceViewBound>& lights
-            = mLightManager->getLightsInViewSpace(cv, viewMatrix, mLastFrameNumber);
 
-        // get the node bounds in view space
-        // NB do not node->getBound() * modelView, that would apply the node's transformation twice
-        osg::BoundingSphere nodeBound;
-        osg::Transform* transform = node->asTransform();
-        if (transform)
+        // Update light list if necessary
+        // This makes sure we don't update it more than once per frame when rendering with multiple cameras
+        if (mLastFrameNumber != cv->getTraversalNumber())
         {
-            for (size_t i = 0; i < transform->getNumChildren(); ++i)
-                nodeBound.expandBy(transform->getChild(i)->getBound());
-        }
-        else
-            nodeBound = node->getBound();
-        osg::Matrixf mat = *cv->getModelViewMatrix();
-        transformBoundingSphere(mat, nodeBound);
+            mLastFrameNumber = cv->getTraversalNumber();
 
-        mLightList.clear();
-        for (size_t i = 0; i < lights.size(); ++i)
-        {
-            const LightManager::LightSourceViewBound& l = lights[i];
+            // Get the node bounds in view space
+            // NB: do not node->getBound() * modelView, that would apply the node's transformation twice
+            osg::BoundingSphere nodeBound;
+            const osg::Transform* transform = node->asTransform();
+            if (transform)
+            {
+                for (size_t i = 0; i < transform->getNumChildren(); ++i)
+                    nodeBound.expandBy(transform->getChild(i)->getBound());
+            }
+            else
+                nodeBound = node->getBound();
 
-            if (mIgnoredLightSources.count(l.mLightSource))
-                continue;
+            transformBoundingSphere(*cv->getModelViewMatrix(), nodeBound);
 
-            if (l.mViewBound.intersects(nodeBound))
-                mLightList.push_back(&l);
+            const std::vector<LightManager::LightSourceViewBound>& lights
+                = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix, mLastFrameNumber);
+
+            mLightList.clear();
+            for (const LightManager::LightSourceViewBound& light : lights)
+            {
+                if (mIgnoredLightSources.contains(light.mLightSource))
+                    continue;
+
+                if (light.mViewBound.intersects(nodeBound))
+                    mLightList.push_back(&light);
+            }
+
+            const size_t maxLights = mLightManager->getMaxLights() - mLightManager->getStartLight();
+
+            if (mLightList.size() > maxLights)
+            {
+                // Sort by proximity to object: prefer closer lights with larger radius
+                std::sort(mLightList.begin(), mLightList.end(),
+                    [&](const SceneUtil::LightManager::LightSourceViewBound* left,
+                        const SceneUtil::LightManager::LightSourceViewBound* right) {
+                        const float leftDist = (nodeBound.center() - left->mViewBound.center()).length2();
+                        const float rightDist = (nodeBound.center() - right->mViewBound.center()).length2();
+                        // A tricky way to compare normalized distance. This avoids division by near zero
+                        return left->mViewBound.radius() * rightDist > right->mViewBound.radius() * leftDist;
+                    });
+
+                mLightList.resize(maxLights);
+            }
         }
 
         if (!mLightList.empty())
         {
-            size_t maxLights = mLightManager->getMaxLights() - mLightManager->getStartLight();
-
-            osg::ref_ptr<osg::StateSet> stateset = nullptr;
-
-            if (mLightList.size() > maxLights)
-            {
-                LightManager::LightList lightList = mLightList;
-
-                if (mLightManager->usingFFP())
-                {
-                    for (auto it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights;)
-                    {
-                        osg::BoundingSphere bs = (*it)->mViewBound;
-                        bs._radius = bs._radius * 2.0;
-                        if (cv->getModelViewCullingStack().front().isCulled(bs))
-                            it = lightList.erase(it);
-                        else
-                            ++it;
-                    }
-                }
-
-                // sort by proximity to camera, then get rid of furthest away lights
-                std::sort(lightList.begin(), lightList.end(), sortLights);
-                while (lightList.size() > maxLights)
-                    lightList.pop_back();
-                stateset = mLightManager->getLightListStateSet(
-                    lightList, cv->getTraversalNumber(), cv->getCurrentRenderStage()->getInitialViewMatrix());
-            }
-            else
-                stateset = mLightManager->getLightListStateSet(
-                    mLightList, cv->getTraversalNumber(), cv->getCurrentRenderStage()->getInitialViewMatrix());
-
-            cv->pushStateSet(stateset);
+            cv->pushStateSet(mLightManager->getLightListStateSet(mLightList, mLastFrameNumber, viewMatrix));
             return true;
         }
         return false;
