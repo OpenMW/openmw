@@ -145,9 +145,6 @@ namespace SceneUtil
             : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::TextureType>, "SceneUtil::TextureType",
                 "osg::Object osg::StateAttribute SceneUtil::TextureType")
         {
-            addSerializer(new osgDB::StringSerializer<SceneUtil::TextureType>(
-                              "Name", {}, &SceneUtil::TextureType::getName, &SceneUtil::TextureType::setName),
-                osgDB::BaseSerializer::RW_STRING);
         }
     };
 
