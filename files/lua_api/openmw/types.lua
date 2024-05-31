@@ -1015,11 +1015,11 @@
 -- @function [parent=#NPC] setBaseDisposition
 -- @param openmw.core#GameObject object
 -- @param openmw.core#GameObject player The player that you want to set the disposition for.
--- @param #number value BaseDisposition is set to this value
+-- @param #number value Base disposition is set to this value
 
 ---
 -- Modify the base disposition of the provided NPC by a certain amount.
--- @function [parent=#NPC] modBaseDisposition
+-- @function [parent=#NPC] modifyBaseDisposition
 -- @param openmw.core#GameObject object
 -- @param openmw.core#GameObject player The player that you want to modify the disposition for.
 -- @param #number value Base disposition modification value

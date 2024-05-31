@@ -125,7 +125,7 @@ namespace MWLua
             cls.getNpcStats(o.ptr()).setBaseDisposition(value);
         };
 
-        npc["modBaseDisposition"] = [](const Object& o, const Object& player, int value) {
+        npc["modifyBaseDisposition"] = [](const Object& o, const Object& player, int value) {
             if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
                 throw std::runtime_error("The argument must be a player!");
             const MWWorld::Class& cls = o.ptr().getClass();
