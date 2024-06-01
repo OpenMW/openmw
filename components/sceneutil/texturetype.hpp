@@ -11,14 +11,10 @@ namespace SceneUtil
     public:
         TextureType() = default;
 
-        TextureType(const std::string& name)
-            : mName(name)
-        {
-        }
+        TextureType(const std::string& name) { setName(name); }
 
         TextureType(const TextureType& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
             : StateAttribute(copy, copyop)
-            , mName(copy.mName)
         {
         }
 
@@ -30,15 +26,9 @@ namespace SceneUtil
         int compare(const osg::StateAttribute& sa) const override
         {
             COMPARE_StateAttribute_Types(TextureType, sa);
-            COMPARE_StateAttribute_Parameter(mName);
+            COMPARE_StateAttribute_Parameter(_name);
             return 0;
         }
-
-        void setName(const std::string& name) { mName = name; }
-        const std::string& getName() const { return mName; }
-
-    private:
-        std::string mName;
     };
 }
 #endif
