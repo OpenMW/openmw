@@ -120,12 +120,12 @@ LightingMethodShadersCompatibility: "Shaders (compatibility)"
 LightingResetToDefaults: "Resets to default values, would you like to continue? Changes to lighting method will require a restart."
 Lights: "Lights"
 LightsBoundingSphereMultiplier: "Bounding Sphere Multiplier"
-LightsBoundingSphereMultiplierTooltip: "Default: 1.65\nMultipler for bounding sphere of lights.\nHigher numbers allows for smooth falloff but require an increase in number of max lights.\n\nDoes not effect the illumination or strength of lights."
+LightsBoundingSphereMultiplierTooltip: "Default: 1.65\nMultiplier for bounding sphere of lights.\nHigher numbers allows for smooth falloff but require an increase in number of max lights.\n\nDoes not effect the illumination or strength of lights."
 LightsFadeStartMultiplier: "Fade Start Multiplier"
 LightsFadeStartMultiplierTooltip: "Default: 0.85\nFraction of maximum distance at which lights will start to fade.\n\nSet this to a low value for slower transitions or a high value for quicker transitions."
 LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
-    \"Legacy\" always uses 8 lights per object and provides a lighting closest to an original game.\n\n
-    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
+    \"Legacy\" always uses 8 lights per object. It provides results most similar to Morrowind's lighting.\n\n
+    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
     \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
 LightsMaximumDistance: "Maximum Light Distance"
 LightsMaximumDistanceTooltip: "Default: 8192\nMaximum distance at which lights will appear (measured in units).\n\nSet this to 0 to use an unlimited distance."
