@@ -1257,6 +1257,7 @@ namespace MWSound
     void SoundManager::clear()
     {
         stopMusic();
+        mMusicType = MusicType::Normal;
 
         for (SoundMap::value_type& snd : mActiveSounds)
         {

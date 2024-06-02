@@ -115,6 +115,8 @@ namespace MWBase
         virtual void stopMusic() = 0;
         ///< Stops music if it's playing
 
+        virtual MWSound::MusicType getMusicType() const = 0;
+
         virtual void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) = 0;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.

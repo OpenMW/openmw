@@ -169,6 +169,8 @@ namespace MWSound
         void stopMusic() override;
         ///< Stops music if it's playing
 
+        MWSound::MusicType getMusicType() const override { return mMusicType; }
+
         void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) override;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
