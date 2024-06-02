@@ -16,7 +16,6 @@
 #include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -305,8 +304,6 @@ namespace MWSound
 
     void SoundManager::streamMusic(VFS::Path::NormalizedView filename, MusicType type, float fade)
     {
-        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
-
         // Can not interrupt scripted music by built-in playlists
         if (mMusicType == MusicType::MWScript && type != MusicType::MWScript)
             return;
@@ -1073,6 +1070,8 @@ namespace MWSound
                 streamMusicFull(mNextMusic);
                 mNextMusic = VFS::Path::Normalized();
             }
+            else
+                mMusicType = MusicType::Normal;
         }
         else
         {
@@ -1257,7 +1256,7 @@ namespace MWSound
 
     void SoundManager::clear()
     {
-        SoundManager::stopMusic();
+        stopMusic();
 
         for (SoundMap::value_type& snd : mActiveSounds)
         {
