@@ -115,6 +115,7 @@ namespace MWSound
         , mOutput(std::make_unique<OpenAL_Output>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*mOutput)
+        , mMusicType(MWSound::MusicType::Normal)
         , mListenerUnderwater(false)
         , mListenerPos(0, 0, 0)
         , mListenerDir(1, 0, 0)
@@ -307,10 +308,10 @@ namespace MWSound
         const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
 
         // Can not interrupt scripted music by built-in playlists
-        if (mechanicsManager->getMusicType() == MusicType::MWScript && type != MusicType::MWScript)
+        if (mMusicType == MusicType::MWScript && type != MusicType::MWScript)
             return;
 
-        mechanicsManager->setMusicType(type);
+        mMusicType = type;
         advanceMusic(filename, fade);
     }
 

@@ -250,7 +250,6 @@ namespace MWMechanics
         , mClassSelected(false)
         , mRaceSelected(false)
         , mAI(true)
-        , mMusicType(MWSound::MusicType::Normal)
     {
         // buildPlayer no longer here, needs to be done explicitly after all subsystems are up and running
     }

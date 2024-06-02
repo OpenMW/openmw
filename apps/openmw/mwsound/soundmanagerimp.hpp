@@ -86,7 +86,7 @@ namespace MWSound
         TrackList mActiveTracks;
 
         StreamPtr mMusic;
-        VFS::Path::Normalized mCurrentPlaylist;
+        MusicType mMusicType;
 
         bool mListenerUnderwater;
         osg::Vec3f mListenerPos;
