@@ -330,6 +330,11 @@ QComboBox
     padding-top: 1px;
     padding-bottom: 1px;
 }
+QComboBox:hover
+{
+    background-color: #404040;
+	border: 1px solid #4e4e4e;
+}
 QComboBox:disabled
 {
     background-color: #313131;
@@ -540,6 +545,10 @@ QCheckBox::indicator:checked, QObject::indicator:checked
 {
     image: url(:/dark/checkbox-checked.svg);
 }
+QCheckBox::indicator:hover, QObject::indicator:hover
+{
+    background-color: #404040;
+}
 QCheckBox::indicator:checked:disabled, QObject::indicator:checked:disabled
 {
     image: url(:/dark/checkbox-checked-disabled.svg);
@@ -564,6 +573,11 @@ QRadioButton::indicator
     border: 0px;
     width: 13px;
     height: 13px;
+}
+QRadioButton::indicator:hover
+{
+    background-color: qradialgradient(cx:0.5, cy:0.5, radius: 0.5,
+                fx:0.5, fy:0.5, stop:0 #404040, stop:1 transparent);
 }
 QRadioButton::indicator:unchecked
 {
