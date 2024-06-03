@@ -86,7 +86,7 @@ namespace MWSound
         TrackList mActiveTracks;
 
         StreamPtr mMusic;
-        VFS::Path::Normalized mCurrentPlaylist;
+        MusicType mMusicType;
 
         bool mListenerUnderwater;
         osg::Vec3f mListenerPos;
@@ -168,6 +168,8 @@ namespace MWSound
 
         void stopMusic() override;
         ///< Stops music if it's playing
+
+        MWSound::MusicType getMusicType() const override { return mMusicType; }
 
         void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) override;
         ///< Play a soundifle

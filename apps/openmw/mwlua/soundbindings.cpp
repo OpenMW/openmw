@@ -157,7 +157,13 @@ namespace MWLua
 
         api["isMusicPlaying"] = []() { return MWBase::Environment::get().getSoundManager()->isMusicPlaying(); };
 
-        api["stopMusic"] = []() { MWBase::Environment::get().getSoundManager()->stopMusic(); };
+        api["stopMusic"] = []() {
+            MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+            if (sndMgr->getMusicType() == MWSound::MusicType::MWScript)
+                return;
+
+            sndMgr->stopMusic();
+        };
 
         lua["openmw_ambient"] = LuaUtil::makeReadOnly(api);
         return lua["openmw_ambient"];

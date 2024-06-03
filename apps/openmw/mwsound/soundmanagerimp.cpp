@@ -16,7 +16,6 @@
 #include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -115,6 +114,7 @@ namespace MWSound
         , mOutput(std::make_unique<OpenAL_Output>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*mOutput)
+        , mMusicType(MWSound::MusicType::Normal)
         , mListenerUnderwater(false)
         , mListenerPos(0, 0, 0)
         , mListenerDir(1, 0, 0)
@@ -304,13 +304,11 @@ namespace MWSound
 
     void SoundManager::streamMusic(VFS::Path::NormalizedView filename, MusicType type, float fade)
     {
-        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
-
         // Can not interrupt scripted music by built-in playlists
-        if (mechanicsManager->getMusicType() == MusicType::MWScript && type != MusicType::MWScript)
+        if (mMusicType == MusicType::MWScript && type != MusicType::MWScript)
             return;
 
-        mechanicsManager->setMusicType(type);
+        mMusicType = type;
         advanceMusic(filename, fade);
     }
 
@@ -1072,6 +1070,8 @@ namespace MWSound
                 streamMusicFull(mNextMusic);
                 mNextMusic = VFS::Path::Normalized();
             }
+            else
+                mMusicType = MusicType::Normal;
         }
         else
         {
@@ -1256,7 +1256,8 @@ namespace MWSound
 
     void SoundManager::clear()
     {
-        SoundManager::stopMusic();
+        stopMusic();
+        mMusicType = MusicType::Normal;
 
         for (SoundMap::value_type& snd : mActiveSounds)
         {
