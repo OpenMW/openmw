@@ -22,7 +22,7 @@ namespace MWRender
         ~TerrainStorage();
 
         osg::ref_ptr<const ESMTerrain::LandObject> getLand(ESM::ExteriorCellLocation cellLocation) override;
-        const ESM::LandTexture* getLandTexture(std::uint16_t index, int plugin) override;
+        const std::string* getLandTexture(std::uint16_t index, int plugin) override;
 
         bool hasData(ESM::ExteriorCellLocation cellLocation) override;
 

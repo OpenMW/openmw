@@ -391,11 +391,6 @@ namespace MWWorld
         if (listener != nullptr)
             listener->setProgressRange(::EsmLoader::fileProgress);
 
-        // Land texture loading needs to use a separate internal store for each plugin.
-        // We set the number of plugins here so we can properly verify if valid plugin
-        // indices are being passed to the LandTexture Store retrieval methods.
-        getWritable<ESM::LandTexture>().resize(esm.getIndex() + 1);
-
         // Loop through all records
         while (esm.hasMoreRecs())
         {

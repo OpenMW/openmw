@@ -105,9 +105,8 @@ namespace MWRender
         return mLandManager->getLand(cellLocation);
     }
 
-    const ESM::LandTexture* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
+    const std::string* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
-        assert(plugin >= 0); // Saves don't contain textures
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         return esmStore.get<ESM::LandTexture>().search(index, plugin);
     }

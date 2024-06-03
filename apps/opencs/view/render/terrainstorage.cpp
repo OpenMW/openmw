@@ -42,14 +42,14 @@ namespace CSVRender
             land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
     }
 
-    const ESM::LandTexture* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
+    const std::string* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
         const int row = mData.getLandTextures().searchId(
             ESM::RefId::stringRefId(CSMWorld::LandTexture::createUniqueRecordId(plugin, index)));
         if (row == -1)
             return nullptr;
 
-        return &mData.getLandTextures().getRecord(row).get();
+        return &mData.getLandTextures().getRecord(row).get().mTexture;
     }
 
     void TerrainStorage::setAlteredHeight(int inCellX, int inCellY, float height)
