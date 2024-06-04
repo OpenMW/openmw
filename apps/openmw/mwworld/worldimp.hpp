@@ -239,6 +239,8 @@ namespace MWWorld
 
         MWWorld::ESMStore& getStore() override { return mStore; }
 
+        const MWWorld::ESMStore& getStore() const override { return mStore; }
+
         const std::vector<int>& getESMVersions() const override;
 
         LocalScripts& getLocalScripts() override;
