@@ -1122,8 +1122,10 @@ namespace SceneUtil
     }
 
     const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(
-        osg::Camera* camera, const osg::RefMatrix* viewMatrix, size_t frameNum)
+        osgUtil::CullVisitor* cv, const osg::RefMatrix* viewMatrix, size_t frameNum)
     {
+        osg::Camera* camera = cv->getCurrentCamera();
+
         osg::observer_ptr<osg::Camera> camPtr(camera);
         auto it = mLightsInViewSpace.find(camPtr);
 
@@ -1175,13 +1177,22 @@ namespace SceneUtil
 
                 if (fillPPLights)
                 {
+                    osg::CullingSet& cullingSet = cv->getModelViewCullingStack().front();
                     for (const auto& bound : it->second)
                     {
                         if (bound.mLightSource->getEmpty())
                             continue;
                         const auto* light = bound.mLightSource->getLight(frameNum);
-                        if (light->getDiffuse().x() >= 0.f)
-                            mPPLightBuffer->setLight(frameNum, light, bound.mLightSource->getRadius());
+                        // Ignore negative lights
+                        if (light->getDiffuse().x() < 0.f)
+                            continue;
+                        const float radius = bound.mLightSource->getRadius();
+                        osg::BoundingSphere frustumBound = bound.mViewBound;
+                        frustumBound.radius() = radius * 2.f;
+                        // Ignore culled lights
+                        if (cullingSet.isCulled(frustumBound))
+                            continue;
+                        mPPLightBuffer->setLight(frameNum, light, radius);
                     }
                 }
 
@@ -1291,7 +1302,7 @@ namespace SceneUtil
             transformBoundingSphere(*cv->getModelViewMatrix(), nodeBound);
 
             const std::vector<LightManager::LightSourceViewBound>& lights
-                = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix, mLastFrameNumber);
+                = mLightManager->getLightsInViewSpace(cv, viewMatrix, mLastFrameNumber);
 
             mLightList.clear();
             for (const LightManager::LightSourceViewBound& light : lights)
