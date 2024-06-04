@@ -717,9 +717,7 @@ namespace MWRender
             new osg::Texture2D(mResourceSystem->getImageManager()->getImage("textures/omw/water_nm.png")));
         normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-        normalMap->setMaxAnisotropy(16);
-        normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
-        normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mResourceSystem->getSceneManager()->applyFilterSettings(normalMap);
 
         mRainSettingsUpdater = new RainSettingsUpdater();
         node->setUpdateCallback(mRainSettingsUpdater);
