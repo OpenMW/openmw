@@ -1,6 +1,7 @@
 #include "application.hpp"
 
 #include <QFile>
+#include <QOperatingSystemVersion>
 #include <QStyle>
 #include <QStyleHints>
 
@@ -14,6 +15,15 @@ namespace Platform
     {
 #if defined(WIN32) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
         init();
+    }
+
+    static QString getStyleSheetPath()
+    {
+        QString qssPath(":/dark/dark_win10.qss");
+        if (QOperatingSystemVersion::current() >= QOperatingSystemVersion::Windows11)
+            qssPath = ":/dark/dark_win11.qss";
+
+        return qssPath;
     }
 
     void Application::init()
@@ -32,7 +42,7 @@ namespace Platform
                 mCurrentStyle = "windows";
                 setStyle("windows");
 
-                QFile file(":/dark/dark.qss");
+                QFile file(getStyleSheetPath());
                 file.open(QIODevice::ReadOnly);
                 setStyleSheet(file.readAll());
             }
@@ -49,7 +59,7 @@ namespace Platform
             mCurrentStyle = "windows";
             setStyle("windows");
 
-            QFile file(":/dark/dark.qss");
+            QFile file(getStyleSheetPath());
             file.open(QIODevice::ReadOnly);
             setStyleSheet(file.readAll());
         }

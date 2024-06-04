@@ -1,6 +1,7 @@
 <RCC>
 	<qresource prefix="/dark">
-		<file>dark.qss</file>
+		<file>dark_win10.qss</file>
+		<file>dark_win11.qss</file>
 		<file>checkbox-checked.svg</file>
 		<file>checkbox-checked-disabled.svg</file>
 		<file>checkbox-empty.svg</file>
