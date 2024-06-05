@@ -95,11 +95,12 @@ void CSVDoc::Operation::setBarColor(int type)
     QString style
         = "QProgressBar {"
           "text-align: center;"
+          "border: 1px solid #4e4e4e;"
           "}"
           "QProgressBar::chunk {"
           "background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 %1, stop:.50 %2 stop: .51 %3 stop:1 %4);"
           "text-align: center;"
-          "margin: 2px 2px 2px 2px;"
+          "margin: 2px;"
           "}";
 
     QString topColor = "#9e9e9e";
