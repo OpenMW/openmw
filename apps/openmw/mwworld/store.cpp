@@ -386,15 +386,15 @@ namespace MWWorld
         auto mapping = mMappings.find(PluginIndex{ plugin, index });
         if (mapping == mMappings.end())
             return nullptr;
-        auto texture = mTextures.find(mapping->second);
-        if (texture == mTextures.end())
+        auto texture = mStatic.find(mapping->second);
+        if (texture == mStatic.end())
             return nullptr;
         return &texture->second;
     }
 
     size_t Store<ESM::LandTexture>::getSize() const
     {
-        return mTextures.size();
+        return mStatic.size();
     }
 
     RecordId Store<ESM::LandTexture>::load(ESM::ESMReader& esm)
@@ -408,7 +408,7 @@ namespace MWWorld
 
         if (!isDeleted)
         {
-            mTextures[lt.mId] = std::move(lt.mTexture);
+            mStatic[lt.mId] = std::move(lt.mTexture);
             mMappings.emplace(PluginIndex{ plugin, lt.mIndex }, lt.mId);
         }
 
@@ -417,7 +417,7 @@ namespace MWWorld
 
     bool Store<ESM::LandTexture>::eraseStatic(const ESM::RefId& id)
     {
-        mTextures.erase(id);
+        mStatic.erase(id);
         return true;
     }
 

@@ -256,7 +256,7 @@ namespace MWWorld
     class Store<ESM::LandTexture> : public DynamicStore
     {
         using PluginIndex = std::pair<int, std::uint32_t>; // This is essentially a FormId
-        std::unordered_map<ESM::RefId, std::string> mTextures;
+        std::unordered_map<ESM::RefId, std::string> mStatic;
         std::map<PluginIndex, ESM::RefId> mMappings;
 
     public:
