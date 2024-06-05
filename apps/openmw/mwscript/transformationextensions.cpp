@@ -168,7 +168,7 @@ namespace MWScript
                 float az = ptr.getRefData().getPosition().rot[2];
 
                 // XYZ axis use the inverse (XYZ) rotation order like vanilla SetAngle.
-                // UWV axis use the standard (ZYX) rotation order like TESCS/OpenMW-CS and the rest of the game.
+                // UVW axis use the standard (ZYX) rotation order like TESCS/OpenMW-CS and the rest of the game.
                 if (axis == "x")
                     MWBase::Environment::get().getWorld()->rotateObject(
                         ptr, osg::Vec3f(angle, ay, az), MWBase::RotationFlag_inverseOrder);
@@ -181,10 +181,10 @@ namespace MWScript
                 else if (axis == "u")
                     MWBase::Environment::get().getWorld()->rotateObject(
                         ptr, osg::Vec3f(angle, ay, az), MWBase::RotationFlag_none);
-                else if (axis == "w")
+                else if (axis == "v")
                     MWBase::Environment::get().getWorld()->rotateObject(
                         ptr, osg::Vec3f(ax, angle, az), MWBase::RotationFlag_none);
-                else if (axis == "v")
+                else if (axis == "w")
                     MWBase::Environment::get().getWorld()->rotateObject(
                         ptr, osg::Vec3f(ax, ay, angle), MWBase::RotationFlag_none);
             }
