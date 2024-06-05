@@ -129,9 +129,9 @@
         <Property key="TextAlign" value="Left VCenter"/>
 
         <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
-            <State name="normal" colour="#{fontcolour=specific}"/>
-            <State name="highlighted" colour="#{fontcolour=specific_over}"/>
-            <State name="pushed" colour="#{fontcolour=specific_pressed}"/>
+            <State name="normal" colour="#{fontcolouroptional=specific}"/>
+            <State name="highlighted" colour="#{fontcolouroptional=specific_over}"/>
+            <State name="pushed" colour="#{fontcolouroptional=specific_pressed}"/>
         </BasisSkin>
     </Resource>
 
@@ -140,9 +140,9 @@
         <Property key="TextAlign" value="Left VCenter"/>
 
         <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
-            <State name="normal" colour="#{fontcolour=exhausted}"/>
-            <State name="highlighted" colour="#{fontcolour=exhausted_over}"/>
-            <State name="pushed" colour="#{fontcolour=exhausted_pressed}"/>
+            <State name="normal" colour="#{fontcolouroptional=exhausted}"/>
+            <State name="highlighted" colour="#{fontcolouroptional=exhausted_over}"/>
+            <State name="pushed" colour="#{fontcolouroptional=exhausted_pressed}"/>
         </BasisSkin>
     </Resource>
 

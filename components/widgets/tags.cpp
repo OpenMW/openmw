@@ -12,6 +12,7 @@ namespace Gui
     {
         std::string_view fontcolour = "fontcolour=";
         std::string_view fontcolourhtml = "fontcolourhtml=";
+        std::string_view fontcolouroptional = "fontcolouroptional=";
 
         if (tag.starts_with(fontcolour))
         {
@@ -19,12 +20,7 @@ namespace Gui
             fallbackName += tag.substr(fontcolour.length());
             std::string_view str = Fallback::Map::getString(fallbackName);
             if (str.empty())
-            {
-                std::string_view category = "GUI";
-                str = Settings::Manager::getString(fallbackName, category);
-                if (str.empty())
-                    throw std::runtime_error("Unable to map setting to value: " + fallbackName);
-            }     
+                throw std::runtime_error("Unable to map setting to value: " + fallbackName);
 
             std::string ret[3];
             unsigned int j = 0;
@@ -61,6 +57,30 @@ namespace Gui
             html << "#" << std::hex << MyGUI::utility::parseInt(ret[0]) << MyGUI::utility::parseInt(ret[1])
                  << MyGUI::utility::parseInt(ret[2]);
             out = html.str();
+            return true;
+        }
+        else if (tag.starts_with(fontcolouroptional))
+        {
+            std::string settingprefix = "color topic ";
+            std::string_view category = "GUI";
+            settingprefix += tag.substr(fontcolouroptional.length());
+            std::replace(settingprefix.begin(), settingprefix.end(), '_', ' ');
+            std::string str = Settings::Manager::getString(settingprefix, category);
+            if (str.empty())
+                throw std::runtime_error("Unable to map setting to value: " + settingprefix);
+
+            std::string ret[3];
+            unsigned int j = 0;
+            for (unsigned int i = 0; i < str.length(); ++i)
+            {
+                if (str[i] == ',')
+                    j++;
+                else if (str[i] != ' ')
+                    ret[j] += str[i];
+            }
+            MyGUI::Colour col(MyGUI::utility::parseInt(ret[0]) / 255.f, MyGUI::utility::parseInt(ret[1]) / 255.f,
+                MyGUI::utility::parseInt(ret[2]) / 255.f);
+            out = col.print();
             return true;
         }
         return false;
