@@ -50,6 +50,18 @@ namespace
             throw std::runtime_error("Faction '" + std::string(faction) + "' does not exist");
         return id;
     }
+
+    void verifyPlayer(const MWLua::Object& o)
+    {
+        if (o.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            throw std::runtime_error("The argument must be a player!");
+    }
+
+    void verifyNpc(const MWWorld::Class& cls)
+    {
+        if (!cls.isNpc())
+            throw std::runtime_error("The argument must be a NPC!");
+    }
 }
 
 namespace MWLua
@@ -99,38 +111,36 @@ namespace MWLua
         };
 
         npc["getDisposition"] = [](const Object& o, const Object& player) -> int {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player!");
             const MWWorld::Class& cls = o.ptr().getClass();
-            if (!cls.isNpc())
-                throw std::runtime_error("NPC expected");
+            verifyPlayer(player);
+            verifyNpc(cls);
             return MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(o.ptr());
         };
 
         npc["getBaseDisposition"] = [](const Object& o, const Object& player) -> int {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player!");
             const MWWorld::Class& cls = o.ptr().getClass();
-            if (!cls.isNpc())
-                throw std::runtime_error("NPC expected");
+            verifyPlayer(player);
+            verifyNpc(cls);
             return cls.getNpcStats(o.ptr()).getBaseDisposition();
         };
 
-        npc["setBaseDisposition"] = [](const Object& o, const Object& player, int value) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player!");
+        npc["setBaseDisposition"] = [](Object& o, const Object& player, int value) {
+            if (dynamic_cast<LObject*>(&o) && !dynamic_cast<SelfObject*>(&o))
+                throw std::runtime_error("Local scripts can modify only self");
+
             const MWWorld::Class& cls = o.ptr().getClass();
-            if (!cls.isNpc())
-                throw std::runtime_error("NPC expected");
+            verifyPlayer(player);
+            verifyNpc(cls);
             cls.getNpcStats(o.ptr()).setBaseDisposition(value);
         };
 
-        npc["modifyBaseDisposition"] = [](const Object& o, const Object& player, int value) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player!");
+        npc["modifyBaseDisposition"] = [](Object& o, const Object& player, int value) {
+            if (dynamic_cast<LObject*>(&o) && !dynamic_cast<SelfObject*>(&o))
+                throw std::runtime_error("Local scripts can modify only self");
+
             const MWWorld::Class& cls = o.ptr().getClass();
-            if (!cls.isNpc())
-                throw std::runtime_error("NPC expected");
+            verifyPlayer(player);
+            verifyNpc(cls);
             auto& stats = cls.getNpcStats(o.ptr());
             stats.setBaseDisposition(stats.getBaseDisposition() + value);
         };
