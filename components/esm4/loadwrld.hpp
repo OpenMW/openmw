@@ -81,7 +81,7 @@ namespace ESM4
             std::vector<REFRcoord> refrs;
         };
 
-        // Map size	struct	16 or 28 byte structure
+        // Map size struct, either 16 (old format) or 28 (new format) byte structure
         struct Map
         {
             std::uint32_t width; // usable width of the map
