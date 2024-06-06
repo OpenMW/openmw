@@ -1004,6 +1004,27 @@
 -- @return #number
 
 ---
+-- Returns the current base disposition of the provided NPC. This is their base disposition, before modifiers such as personality and faction relations are taken into account.
+-- @function [parent=#NPC] getBaseDisposition
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player The player that you want to check the disposition for.
+-- @return #number
+
+---
+-- Set the base disposition of the provided NPC (only in global scripts or on self).
+-- @function [parent=#NPC] setBaseDisposition
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player The player that you want to set the disposition for.
+-- @param #number value Base disposition is set to this value
+
+---
+-- Modify the base disposition of the provided NPC by a certain amount (only in global scripts or on self).
+-- @function [parent=#NPC] modifyBaseDisposition
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player The player that you want to modify the disposition for.
+-- @param #number value Base disposition modification value
+
+---
 -- Get the total weight that the actor can carry.
 -- @function [parent=#NPC] getCapacity
 -- @param openmw.core#GameObject actor
