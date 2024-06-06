@@ -29,79 +29,56 @@ namespace
     }
 
     template <typename F>
-    void createGeneric(F func, const MWWorld::ESMStore& store, ESM::RefId name)
+    void visitRefStore(const MWWorld::ESMStore& store, ESM::RefId name, F func)
     {
         switch (store.find(name))
         {
             case ESM::REC_ACTI:
-                func(store.get<ESM::Activator>());
-                break;
+                return func(store.get<ESM::Activator>());
             case ESM::REC_ALCH:
-                func(store.get<ESM::Potion>());
-                break;
+                return func(store.get<ESM::Potion>());
             case ESM::REC_APPA:
-                func(store.get<ESM::Apparatus>());
-                break;
+                return func(store.get<ESM::Apparatus>());
             case ESM::REC_ARMO:
-                func(store.get<ESM::Armor>());
-                break;
+                return func(store.get<ESM::Armor>());
             case ESM::REC_BOOK:
-                func(store.get<ESM::Book>());
-                break;
+                return func(store.get<ESM::Book>());
             case ESM::REC_CLOT:
-                func(store.get<ESM::Clothing>());
-                break;
+                return func(store.get<ESM::Clothing>());
             case ESM::REC_CONT:
-                func(store.get<ESM::Container>());
-                break;
+                return func(store.get<ESM::Container>());
             case ESM::REC_CREA:
-                func(store.get<ESM::Creature>());
-                break;
+                return func(store.get<ESM::Creature>());
             case ESM::REC_DOOR:
-                func(store.get<ESM::Door>());
-                break;
+                return func(store.get<ESM::Door>());
             case ESM::REC_INGR:
-                func(store.get<ESM::Ingredient>());
-                break;
+                return func(store.get<ESM::Ingredient>());
             case ESM::REC_LEVC:
-                func(store.get<ESM::CreatureLevList>());
-                break;
+                return func(store.get<ESM::CreatureLevList>());
             case ESM::REC_LEVI:
-                func(store.get<ESM::ItemLevList>());
-                break;
+                return func(store.get<ESM::ItemLevList>());
             case ESM::REC_LIGH:
-                func(store.get<ESM::Light>());
-                break;
+                return func(store.get<ESM::Light>());
             case ESM::REC_LOCK:
-                func(store.get<ESM::Lockpick>());
-                break;
+                return func(store.get<ESM::Lockpick>());
             case ESM::REC_MISC:
-                func(store.get<ESM::Miscellaneous>());
-                break;
+                return func(store.get<ESM::Miscellaneous>());
             case ESM::REC_NPC_:
-                func(store.get<ESM::NPC>());
-                break;
+                return func(store.get<ESM::NPC>());
             case ESM::REC_PROB:
-                func(store.get<ESM::Probe>());
-                break;
+                return func(store.get<ESM::Probe>());
             case ESM::REC_REPA:
-                func(store.get<ESM::Repair>());
-                break;
+                return func(store.get<ESM::Repair>());
             case ESM::REC_STAT:
-                func(store.get<ESM::Static>());
-                break;
+                return func(store.get<ESM::Static>());
             case ESM::REC_WEAP:
-                func(store.get<ESM::Weapon>());
-                break;
+                return func(store.get<ESM::Weapon>());
             case ESM::REC_BODY:
-                func(store.get<ESM::BodyPart>());
-                break;
+                return func(store.get<ESM::BodyPart>());
             case ESM::REC_STAT4:
-                func(store.get<ESM4::Static>());
-                break;
+                return func(store.get<ESM4::Static>());
             case ESM::REC_TERM4:
-                func(store.get<ESM4::Terminal>());
-                break;
+                return func(store.get<ESM4::Terminal>());
             case 0:
                 throw std::logic_error(
                     "failed to create manual cell ref for " + name.toDebugString() + " (unknown ID)");
@@ -116,7 +93,7 @@ namespace
 MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& name, const int count)
 {
     auto cb = [&](const auto& store) { create(store, name, mRef, mPtr); };
-    createGeneric(cb, store, name);
+    visitRefStore(store, name, cb);
 
     mPtr.getCellRef().setCount(count);
 }
@@ -124,7 +101,7 @@ MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& 
 MWWorld::ManualRef::ManualRef(const ESMStore& store, const Ptr& template_, const int count)
 {
     auto cb = [&](const auto& store) { create(store, template_, mRef, mPtr); };
-    createGeneric(cb, store, template_.getCellRef().getRefId());
+    visitRefStore(store, template_.getCellRef().getRefId(), cb);
 
     mPtr.getCellRef().setCount(count);
     mPtr.getCellRef().unsetRefNum();
