@@ -22,9 +22,9 @@ namespace
 
     template <typename T>
     void create(
-        const MWWorld::Store<T>& list, const MWWorld::Ptr& template_, std::any& refValue, MWWorld::Ptr& ptrValue)
+        const MWWorld::Store<T>& list, const MWWorld::Ptr& templatePtr, std::any& refValue, MWWorld::Ptr& ptrValue)
     {
-        refValue = *static_cast<MWWorld::LiveCellRef<T>*>(template_.getBase());
+        refValue = *static_cast<MWWorld::LiveCellRef<T>*>(templatePtr.getBase());
         ptrValue = MWWorld::Ptr(&std::any_cast<MWWorld::LiveCellRef<T>&>(refValue), nullptr);
     }
 
