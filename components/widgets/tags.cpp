@@ -61,25 +61,24 @@ namespace Gui
         }
         else if (tag.starts_with(fontcolouroptional))
         {
-            std::string settingprefix = "color topic ";
             std::string_view category = "GUI";
-            settingprefix += tag.substr(fontcolouroptional.length());
-            std::replace(settingprefix.begin(), settingprefix.end(), '_', ' ');
-            std::string str = Settings::Manager::getString(settingprefix, category);
+            std::string colortag = "";
+            colortag += tag.substr(fontcolouroptional.length());
+            std::string str = Settings::Manager::getString(colortag, category);
             if (str.empty())
-                throw std::runtime_error("Unable to map setting to value: " + settingprefix);
+                throw std::runtime_error("Unable to map setting to value: " + colortag);
 
-            std::string ret[3];
+            std::string ret[4];
             unsigned int j = 0;
             for (unsigned int i = 0; i < str.length(); ++i)
             {
-                if (str[i] == ',')
+                if (str[i] == ' ')
                     j++;
                 else if (str[i] != ' ')
                     ret[j] += str[i];
             }
-            MyGUI::Colour col(MyGUI::utility::parseInt(ret[0]) / 255.f, MyGUI::utility::parseInt(ret[1]) / 255.f,
-                MyGUI::utility::parseInt(ret[2]) / 255.f);
+            MyGUI::Colour col(MyGUI::utility::parseFloat(ret[0]), MyGUI::utility::parseFloat(ret[1]),
+                MyGUI::utility::parseFloat(ret[2]), MyGUI::utility::parseFloat(ret[3]));
             out = col.print();
             return true;
         }
