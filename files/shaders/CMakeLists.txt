@@ -39,8 +39,6 @@ set(SHADER_FILES
     compatibility/objects.frag
     compatibility/terrain.vert
     compatibility/terrain.frag
-    compatibility/s360.frag
-    compatibility/s360.vert
     compatibility/shadows_vertex.glsl
     compatibility/shadows_fragment.glsl
     compatibility/shadowcasting.vert

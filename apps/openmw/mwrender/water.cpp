@@ -568,16 +568,6 @@ namespace MWRender
         updateVisible();
     }
 
-    osg::Node* Water::getReflectionNode()
-    {
-        return mReflection;
-    }
-
-    osg::Node* Water::getRefractionNode()
-    {
-        return mRefraction;
-    }
-
     osg::Vec3d Water::getPosition() const
     {
         return mWaterNode->getPosition();

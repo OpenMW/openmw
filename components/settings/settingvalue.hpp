@@ -44,7 +44,6 @@ namespace Settings
         HrtfMode,
         WindowMode,
         VSyncMode,
-        ScreenshotSettings,
     };
 
     template <class T>
@@ -176,12 +175,6 @@ namespace Settings
         return SettingValueType::VSyncMode;
     }
 
-    template <>
-    inline constexpr SettingValueType getSettingValueType<ScreenshotSettings>()
-    {
-        return SettingValueType::ScreenshotSettings;
-    }
-
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -228,8 +221,6 @@ namespace Settings
                 return "window mode";
             case SettingValueType::VSyncMode:
                 return "vsync mode";
-            case SettingValueType::ScreenshotSettings:
-                return "screenshot settings";
         }
         return "unsupported";
     }
@@ -396,17 +387,6 @@ namespace Settings
                             stream << "," << v;
                     }
                     return stream;
-                }
-                else if constexpr (std::is_same_v<T, ScreenshotSettings>)
-                {
-                    stream << "ScreenshotSettings{ .mType = " << static_cast<int>(value.mValue.mType);
-                    if (value.mValue.mWidth.has_value())
-                        stream << ", .mWidth = " << *value.mValue.mWidth;
-                    if (value.mValue.mHeight.has_value())
-                        stream << ", .mHeight = " << *value.mValue.mHeight;
-                    if (value.mValue.mCubeSize.has_value())
-                        stream << ", .mCubeSize = " << *value.mValue.mCubeSize;
-                    return stream << " }";
                 }
                 else
                     return stream << value.mValue;

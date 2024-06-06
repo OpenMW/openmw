@@ -252,6 +252,7 @@
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
     Task #7394: Drop support for --fs-strict
+    Task #7720: Drop 360-degree screenshot support
 
 0.48.0
 ------
