@@ -103,7 +103,6 @@ add_component_dir (settings
     settingvalue
     shadermanager
     values
-    screenshotsettings
     windowmode
     )
 

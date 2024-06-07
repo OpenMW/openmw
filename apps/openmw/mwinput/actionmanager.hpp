@@ -17,9 +17,8 @@ namespace MWInput
     class ActionManager
     {
     public:
-        ActionManager(BindingsManager* bindingsManager,
-            osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-            osg::ref_ptr<osgViewer::Viewer> viewer, osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
+        ActionManager(BindingsManager* bindingsManager, osg::ref_ptr<osgViewer::Viewer> viewer,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
 
         void update(float dt);
 
@@ -48,7 +47,6 @@ namespace MWInput
         BindingsManager* mBindingsManager;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
-        osgViewer::ScreenCaptureHandler::CaptureOperation* mScreenCaptureOperation;
 
         float mTimeIdle;
     };

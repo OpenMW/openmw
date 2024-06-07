@@ -2385,11 +2385,6 @@ namespace MWWorld
         mRendering->screenshot(image, w, h);
     }
 
-    bool World::screenshot360(osg::Image* image)
-    {
-        return mRendering->screenshot360(image);
-    }
-
     void World::activateDoor(const MWWorld::Ptr& door)
     {
         auto state = door.getClass().getDoorState(door);

@@ -521,8 +521,7 @@ namespace MWRender
 
         mCamera = std::make_unique<Camera>(mViewer->getCamera());
 
-        mScreenshotManager
-            = std::make_unique<ScreenshotManager>(viewer, mRootNode, sceneRoot, mResourceSystem, mWater.get());
+        mScreenshotManager = std::make_unique<ScreenshotManager>(viewer);
 
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -1017,19 +1016,6 @@ namespace MWRender
     void RenderingManager::screenshot(osg::Image* image, int w, int h)
     {
         mScreenshotManager->screenshot(image, w, h);
-    }
-
-    bool RenderingManager::screenshot360(osg::Image* image)
-    {
-        if (mCamera->isVanityOrPreviewModeEnabled())
-        {
-            Log(Debug::Warning) << "Spherical screenshots are not allowed in preview mode.";
-            return false;
-        }
-
-        mScreenshotManager->screenshot360(image);
-
-        return true;
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const osg::BoundingBox& worldbb)

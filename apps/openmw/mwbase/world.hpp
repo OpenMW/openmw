@@ -425,7 +425,6 @@ namespace MWBase
 
         /// \todo this does not belong here
         virtual void screenshot(osg::Image* image, int w, int h) = 0;
-        virtual bool screenshot360(osg::Image* image) = 0;
 
         /// Find default position inside exterior cell specified by name
         /// \return empty RefId if exterior with given name not exists, the cell's RefId otherwise

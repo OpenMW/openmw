@@ -517,7 +517,6 @@ namespace MWWorld
 
         /// \todo this does not belong here
         void screenshot(osg::Image* image, int w, int h) override;
-        bool screenshot360(osg::Image* image) override;
 
         /// Find center of exterior cell above land surface
         /// \return false if exterior with given name not exists, true otherwise
