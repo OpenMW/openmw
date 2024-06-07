@@ -363,6 +363,9 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
             if (effect->mData.mMagnMax < 0)
                 messages.add(
                     id, "Effect #" + number + " maximum magnitude is negative", "", CSMDoc::Message::Severity_Error);
+            else if (effect->mData.mMagnMax == 0)
+                messages.add(
+                    id, "Effect #" + number + " maximum magnitude is zero", "", CSMDoc::Message::Severity_Warning);
             if (effect->mData.mMagnMin > effect->mData.mMagnMax)
                 messages.add(id, "Effect #" + number + " minimum magnitude is higher than maximum magnitude", "",
                     CSMDoc::Message::Severity_Error);
