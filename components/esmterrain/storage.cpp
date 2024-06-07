@@ -372,9 +372,9 @@ namespace ESMTerrain
         if (id.first != 0)
         {
             // NB: All vtex ids are +1 compared to the ltex ids
-            const ESM::LandTexture* ltex = getLandTexture(id.first - 1, id.second);
+            const std::string* ltex = getLandTexture(id.first - 1, id.second);
             if (ltex)
-                texture = ltex->mTexture;
+                texture = *ltex;
             else
             {
                 Log(Debug::Warning) << "Warning: Unable to find land texture index " << id.first - 1 << " in plugin "

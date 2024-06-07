@@ -73,7 +73,7 @@ namespace ESMTerrain
 
         // Not implemented in this class, because we need different Store implementations for game and editor
         virtual osg::ref_ptr<const LandObject> getLand(ESM::ExteriorCellLocation cellLocation) = 0;
-        virtual const ESM::LandTexture* getLandTexture(std::uint16_t index, int plugin) = 0;
+        virtual const std::string* getLandTexture(std::uint16_t index, int plugin) = 0;
         /// Get bounds of the whole terrain in cell units
         void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) override = 0;
 
