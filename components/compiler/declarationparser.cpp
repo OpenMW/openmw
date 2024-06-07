@@ -2,7 +2,9 @@
 
 #include <components/misc/strings/lower.hpp>
 
+#include "context.hpp"
 #include "errorhandler.hpp"
+#include "extensions.hpp"
 #include "locals.hpp"
 #include "scanner.hpp"
 #include "skipparser.hpp"
@@ -70,6 +72,15 @@ bool Compiler::DeclarationParser::parseKeyword(int keyword, const TokenLoc& loc,
     else if (mState == State_Name)
     {
         // allow keywords to be used as local variable names. MW script compiler, you suck!
+        if (const Extensions* extensions = getContext().getExtensions())
+        {
+            std::string argumentType;
+            bool hasExplicit = false;
+            char returnType;
+            if (extensions->isFunction(keyword, returnType, argumentType, hasExplicit))
+                getErrorHandler().warning("Local variable declaration shadows a function", loc);
+        }
+
         return parseName(loc.mLiteral, loc, scanner);
     }
     else if (mState == State_End)
@@ -104,6 +115,7 @@ bool Compiler::DeclarationParser::parseInt(int value, const TokenLoc& loc, Scann
     if (mState == State_Name)
     {
         // Allow integers to be used as variable names
+        getErrorHandler().warning("Integer is used as a local variable name", loc);
         return parseName(loc.mLiteral, loc, scanner);
     }
     return Parser::parseInt(value, loc, scanner);
