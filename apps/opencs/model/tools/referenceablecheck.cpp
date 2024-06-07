@@ -38,6 +38,8 @@
 #include "../world/record.hpp"
 #include "../world/universalid.hpp"
 
+#include "effectlistcheck.hpp"
+
 namespace ESM
 {
     class Script;
@@ -331,47 +333,7 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
 
     inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
 
-    if (potion.mEffects.mList.empty())
-    {
-        messages.add(id, "Potion doesn't have any magic effects", "", CSMDoc::Message::Severity_Warning);
-    }
-    else
-    {
-        std::vector<ESM::IndexedENAMstruct>::const_iterator effect = potion.mEffects.mList.begin();
-
-        for (size_t i = 1; i <= potion.mEffects.mList.size(); i++)
-        {
-            const std::string number = std::to_string(i);
-            // At the time of writing this effects, attributes and skills are mostly hardcoded
-            if (effect->mData.mEffectID < 0 || effect->mData.mEffectID > ESM::MagicEffect::Length)
-                messages.add(id, "Effect #" + number + " is invalid", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mSkill < -1 || effect->mData.mSkill > ESM::Skill::Length)
-                messages.add(
-                    id, "Effect #" + number + " affected skill is invalid", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mAttribute < -1 || effect->mData.mAttribute > ESM::Attribute::Length)
-                messages.add(
-                    id, "Effect #" + number + " affected attribute is invalid", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mRange != ESM::RT_Self)
-                messages.add(id, "Effect #" + number + " range is not Self", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mArea < 0)
-                messages.add(id, "Effect #" + number + " area is negative", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mDuration < 0)
-                messages.add(id, "Effect #" + number + " duration is negative", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mMagnMin < 0)
-                messages.add(
-                    id, "Effect #" + number + " minimum magnitude is negative", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mMagnMax < 0)
-                messages.add(
-                    id, "Effect #" + number + " maximum magnitude is negative", "", CSMDoc::Message::Severity_Error);
-            else if (effect->mData.mMagnMax == 0)
-                messages.add(
-                    id, "Effect #" + number + " maximum magnitude is zero", "", CSMDoc::Message::Severity_Warning);
-            if (effect->mData.mMagnMin > effect->mData.mMagnMax)
-                messages.add(id, "Effect #" + number + " minimum magnitude is higher than maximum magnitude", "",
-                    CSMDoc::Message::Severity_Error);
-            ++effect;
-        }
-    }
+    effectListCheck(potion.mEffects.mList, messages, id);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Potion>(potion, messages, id.toString());
@@ -607,27 +569,7 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(
     // Check that mentioned scripts exist
     scriptCheck<ESM::Ingredient>(ingredient, messages, id.toString());
 
-    bool hasEffects = false;
-    for (size_t i = 0; i < 4; i++)
-    {
-        if (ingredient.mData.mEffectID[i] == -1)
-            continue;
-
-        hasEffects = true;
-
-        const std::string number = std::to_string(i + 1);
-        // At the time of writing this effects, attributes and skills are mostly hardcoded
-        if (ingredient.mData.mEffectID[i] < -1 || ingredient.mData.mEffectID[i] > ESM::MagicEffect::Length)
-            messages.add(id, "Effect #" + number + " is invalid", "", CSMDoc::Message::Severity_Error);
-        if (ingredient.mData.mSkills[i] < -1 || ingredient.mData.mSkills[i] > ESM::Skill::Length)
-            messages.add(id, "Effect #" + number + " affected skill is invalid", "", CSMDoc::Message::Severity_Error);
-        if (ingredient.mData.mAttributes[i] < -1 || ingredient.mData.mAttributes[i] > ESM::Attribute::Length)
-            messages.add(
-                id, "Effect #" + number + " affected attribute is invalid", "", CSMDoc::Message::Severity_Error);
-    }
-
-    if (!hasEffects)
-        messages.add(id, "Ingredient doesn't have any magic effects", "", CSMDoc::Message::Severity_Warning);
+    ingredientEffectListCheck(ingredient, messages, id);
 }
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(

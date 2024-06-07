@@ -42,7 +42,7 @@ opencs_units (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
-    mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck
+    mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck effectlistcheck
     )
 
 opencs_hdrs (model/tools
