@@ -10,6 +10,7 @@
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
+#include <components/esm/attr.hpp>
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadench.hpp>
 
@@ -65,18 +66,13 @@ void CSMTools::EnchantmentCheckStage::perform(int stage, CSMDoc::Messages& messa
         for (size_t i = 1; i <= enchantment.mEffects.mList.size(); i++)
         {
             const std::string number = std::to_string(i);
-            // At the time of writing this effects, attributes and skills are hardcoded
-            if (effect->mData.mEffectID < 0 || effect->mData.mEffectID > 142)
-            {
+            // At the time of writing this effects, attributes and skills are mostly hardcoded
+            if (effect->mData.mEffectID < 0 || effect->mData.mEffectID > ESM::MagicEffect::Length)
                 messages.add(id, "Effect #" + number + " is invalid", "", CSMDoc::Message::Severity_Error);
-                ++effect;
-                continue;
-            }
-
-            if (effect->mData.mSkill < -1 || effect->mData.mSkill > 26)
+            if (effect->mData.mSkill < -1 || effect->mData.mSkill > ESM::Skill::Length)
                 messages.add(
                     id, "Effect #" + number + " affected skill is invalid", "", CSMDoc::Message::Severity_Error);
-            if (effect->mData.mAttribute < -1 || effect->mData.mAttribute > 7)
+            if (effect->mData.mAttribute < -1 || effect->mData.mAttribute > ESM::Attribute::Length)
                 messages.add(
                     id, "Effect #" + number + " affected attribute is invalid", "", CSMDoc::Message::Severity_Error);
             if (effect->mData.mRange < 0 || effect->mData.mRange > 2)
