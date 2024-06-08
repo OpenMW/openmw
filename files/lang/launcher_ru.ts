@@ -450,8 +450,8 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Закрыть</translation>
     </message>
     <message>
-        <source> Launch OpenMW </source>
-        <translation> Запустить OpenMW </translation>
+        <source>Launch OpenMW</source>
+        <translation>Запустить OpenMW</translation>
     </message>
     <message>
         <source>Help</source>
