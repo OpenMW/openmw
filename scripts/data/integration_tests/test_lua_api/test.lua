@@ -1,4 +1,4 @@
-local testing = require('testing_util')
+﻿local testing = require('testing_util')
 local core = require('openmw.core')
 local async = require('openmw.async')
 local util = require('openmw.util')
@@ -150,6 +150,42 @@ local function testRecordCreation()
         testing.expectEqual(record[key],value)
     end
 end
+local function testUTF8()
+    local utf8char = "😀"
+    local utf8str = "Hello, 你好, 🌎!"
+    local chars = {}
+
+    for codepoint = 0, 0x10FFFF do
+        local char = utf8.char(codepoint)
+        local charSize = string.len(char)
+
+        testing.expect(not chars[char], nil, "Duplicate UTF-8 character: " .. char)
+        chars[char] = true
+
+        if codepoint <= 0x7F then
+            testing.expectEqual(charSize, 1)
+        elseif codepoint <= 0x7FF then
+            testing.expectEqual(charSize, 2)
+        elseif codepoint <= 0xFFFF then
+            testing.expectEqual(charSize, 3)
+        elseif codepoint <= 0x10FFFF then
+            testing.expectEqual(charSize, 4)
+        end
+
+        testing.expectEqual(utf8.codepoint(char), codepoint)
+        testing.expectEqual(utf8.len(char), 1)
+    end
+
+    local str = ""
+    for utf_char in utf8str:gmatch(utf8.charpattern) do
+        str = str .. utf_char
+    end
+    testing.expectEqual(str, utf8str)
+
+    testing.expectEqual(utf8.codepoint(utf8char), 128512)
+    testing.expectEqual(utf8.len(utf8str), 13)
+    testing.expectEqual(utf8.offset(utf8str, 9), 11)
+end
 local function initPlayer()
     player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
     coroutine.yield()
@@ -189,6 +225,7 @@ tests = {
     {'getGMST', testGetGMST},
     {'recordStores', testRecordStores},
     {'recordCreation', testRecordCreation},
+    {'utf8', testUTF8},
     {'mwscript', testMWScript},
 }
 

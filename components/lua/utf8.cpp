@@ -6,8 +6,8 @@
 namespace
 {
     constexpr std::string_view UTF8PATT = "[%z\x01-\x7F\xC2-\xF4][\x80-\xBF]*"; // %z is deprecated in Lua5.2
-    constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
-    // constexpr uint32_t MAXUNICODE = 0x10FFFFu;
+    // constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
+    constexpr uint32_t MAXUNICODE = 0x10FFFFu;
 
     inline bool isNilOrNone(const sol::stack_proxy arg)
     {
@@ -100,7 +100,7 @@ namespace LuaUtf8
             for (size_t i = 0; i < args.size(); ++i)
             {
                 int64_t codepoint = getInteger(args[i], (i + 1), "char");
-                if (codepoint < 0 || codepoint > MAXUTF)
+                if (codepoint < 0 || codepoint > MAXUNICODE)
                     throw std::runtime_error(
                         "bad argument #" + std::to_string(i + 1) + " to 'char' (value out of range)");
 
