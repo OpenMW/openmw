@@ -11,7 +11,6 @@ namespace MWGui
         return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
     }
 
-
     void TextColours::loadColours()
     {
         header = getTextColour("header");
@@ -33,6 +32,5 @@ namespace MWGui
         journalTopic = getTextColour("journal_topic");
         journalTopicOver = getTextColour("journal_topic_over");
         journalTopicPressed = getTextColour("journal_topic_pressed");
-
     }
 }

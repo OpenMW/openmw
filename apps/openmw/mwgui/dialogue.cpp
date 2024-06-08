@@ -794,8 +794,8 @@ namespace MWGui
         if (!Settings::gui().mColorTopicEnable)
             return;
 
-        std::string specificSkin = "MW_ListLine_Specific";
-        std::string exhaustedSkin = "MW_ListLine_Exhausted";
+        const std::string_view specificSkin = "MW_ListLine_Specific";
+        const std::string_view exhaustedSkin = "MW_ListLine_Exhausted";
 
         for (const std::string& keyword : mKeywords)
         {
