@@ -7,6 +7,7 @@
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadinfo.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -20,8 +21,8 @@
 #include <array>
 #include <limits>
 #include <memory>
+#include <numeric>
 #include <random>
-#include <type_traits>
 
 namespace ESM
 {
@@ -170,6 +171,17 @@ namespace ESM
         void load(ESMReader& reader, T& record)
         {
             reader.getComposite(record);
+        }
+
+        void load(ESMReader& reader, Land& record)
+        {
+            bool deleted = false;
+            record.load(reader, deleted);
+            if (deleted)
+                return;
+            record.mLandData = std::make_unique<LandRecordData>();
+            reader.restoreContext(record.mContext);
+            loadLandRecordData(record.mDataTypes, reader, *record.mLandData);
         }
 
         template <typename T>
@@ -679,6 +691,43 @@ namespace ESM
                 EXPECT_EQ(resultS.mFunction, recordS.mFunction);
                 EXPECT_EQ(resultS.mComparison, recordS.mComparison);
             }
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, landShouldNotChange)
+        {
+            LandRecordData data;
+            std::iota(data.mHeights.begin(), data.mHeights.end(), 1);
+            std::for_each(data.mHeights.begin(), data.mHeights.end(), [](float& v) { v *= Land::sHeightScale; });
+            data.mMinHeight = *std::min_element(data.mHeights.begin(), data.mHeights.end());
+            data.mMaxHeight = *std::max_element(data.mHeights.begin(), data.mHeights.end());
+            std::iota(data.mNormals.begin(), data.mNormals.end(), 2);
+            std::iota(data.mTextures.begin(), data.mTextures.end(), 3);
+            std::iota(data.mColours.begin(), data.mColours.end(), 4);
+            data.mDataLoaded = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_VCLR | Land::DATA_VTEX;
+
+            Land record;
+            record.mFlags = 42;
+            record.mX = 2;
+            record.mY = 3;
+            record.mDataTypes = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_WNAM | Land::DATA_VCLR | Land::DATA_VTEX;
+            generateWnam(data.mHeights, record.mWnam);
+            record.mLandData = std::make_unique<LandRecordData>(data);
+
+            Land result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mFlags, record.mFlags);
+            EXPECT_EQ(result.mX, record.mX);
+            EXPECT_EQ(result.mY, record.mY);
+            EXPECT_EQ(result.mDataTypes, record.mDataTypes);
+            EXPECT_EQ(result.mWnam, record.mWnam);
+            EXPECT_EQ(result.mLandData->mHeights, record.mLandData->mHeights);
+            EXPECT_EQ(result.mLandData->mMinHeight, record.mLandData->mMinHeight);
+            EXPECT_EQ(result.mLandData->mMaxHeight, record.mLandData->mMaxHeight);
+            EXPECT_EQ(result.mLandData->mNormals, record.mLandData->mNormals);
+            EXPECT_EQ(result.mLandData->mTextures, record.mLandData->mTextures);
+            EXPECT_EQ(result.mLandData->mColours, record.mLandData->mColours);
+            EXPECT_EQ(result.mLandData->mDataLoaded, record.mLandData->mDataLoaded);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));
