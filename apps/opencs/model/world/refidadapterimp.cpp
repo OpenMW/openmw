@@ -194,6 +194,26 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
     {
         case 0:
             ingredient.mData.mEffectID[subRowIndex] = value.toInt();
+            switch (ingredient.mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainSkill:
+                case ESM::MagicEffect::DamageSkill:
+                case ESM::MagicEffect::RestoreSkill:
+                case ESM::MagicEffect::FortifySkill:
+                case ESM::MagicEffect::AbsorbSkill:
+                    ingredient.mData.mAttributes[subRowIndex] = -1;
+                    break;
+                case ESM::MagicEffect::DrainAttribute:
+                case ESM::MagicEffect::DamageAttribute:
+                case ESM::MagicEffect::RestoreAttribute:
+                case ESM::MagicEffect::FortifyAttribute:
+                case ESM::MagicEffect::AbsorbAttribute:
+                    ingredient.mData.mSkills[subRowIndex] = -1;
+                    break;
+                default:
+                    ingredient.mData.mSkills[subRowIndex] = -1;
+                    ingredient.mData.mAttributes[subRowIndex] = -1;
+            }
             break;
         case 1:
             ingredient.mData.mSkills[subRowIndex] = value.toInt();
