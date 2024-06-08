@@ -53,28 +53,48 @@ namespace Resource
     class GenericObjectCache : public osg::Referenced
     {
     public:
-        // Update last usage timestamp using referenceTime for each cache time if they are not nullptr and referenced
-        // from somewhere else. Remove items with last usage > expiryTime. Note: last usage might be updated from other
-        // places so nullptr or not references elsewhere items are not always removed.
+        /*
+         * @brief Updates usage timestamps and removes expired items
+         *
+         * Updates the lastUsage timestamp of cached items that have external references.
+         * Initializes lastUsage timestamp for new items.
+         * Removes items that haven't been referenced for longer than expiryDelay.
+         *
+         * @param referenceTime the timestamp indicating when the item was most recently used
+         * @param expiryDelay the delay after which the cache entry for an item expires
+         */
         void update(double referenceTime, double expiryDelay)
         {
             std::vector<osg::ref_ptr<osg::Object>> objectsToRemove;
+
             {
                 const double expiryTime = referenceTime - expiryDelay;
+
                 std::lock_guard<std::mutex> lock(mMutex);
+
                 std::erase_if(mItems, [&](auto& v) {
                     Item& item = v.second;
+
+                    // update last usage timestamp if item is being referenced externally
+                    // or initialize if not set
                     if ((item.mValue != nullptr && item.mValue->referenceCount() > 1) || item.mLastUsage == 0)
                         item.mLastUsage = referenceTime;
+
+                    // skip items that have been accessed since expiryTime
                     if (item.mLastUsage > expiryTime)
                         return false;
+
                     ++mExpired;
+
+                    // just mark for removal here so objects can be removed in bulk outside the lock
                     if (item.mValue != nullptr)
                         objectsToRemove.push_back(std::move(item.mValue));
+
                     return true;
                 });
             }
-            // note, actual unref happens outside of the lock
+
+            // remove expired items from cache
             objectsToRemove.clear();
         }
 
