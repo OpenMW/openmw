@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <components/lua/luastate.hpp>
+#include <components/testing/expecterror.hpp>
 #include <components/testing/util.hpp>
 
 namespace

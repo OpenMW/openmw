@@ -3,12 +3,11 @@
 
 #include <components/lua/asyncpackage.hpp>
 #include <components/lua/luastate.hpp>
-#include <components/testing/util.hpp>
+#include <components/testing/expecterror.hpp>
 
 namespace
 {
     using namespace testing;
-    using namespace TestingOpenMW;
 
     struct LuaCoroutineCallbackTest : Test
     {

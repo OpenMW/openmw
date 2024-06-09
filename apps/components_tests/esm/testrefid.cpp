@@ -1,7 +1,7 @@
 #include <components/esm/refid.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/testing/util.hpp>
+#include <components/testing/expecterror.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

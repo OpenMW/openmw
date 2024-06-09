@@ -13,7 +13,7 @@
 #include <components/misc/color.hpp>
 #include <components/misc/endianness.hpp>
 
-#include <components/testing/util.hpp>
+#include <components/testing/expecterror.hpp>
 
 namespace
 {

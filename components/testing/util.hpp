@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <initializer_list>
+#include <memory>
 #include <sstream>
 
 #include <components/misc/strings/conversion.hpp>
@@ -79,16 +80,5 @@ namespace TestingOpenMW
         return createTestVFS(VFS::FileMap(files.begin(), files.end()));
     }
 }
-
-#define EXPECT_ERROR(X, ERR_SUBSTR)                                                                                    \
-    try                                                                                                                \
-    {                                                                                                                  \
-        X;                                                                                                             \
-        FAIL() << "Expected error";                                                                                    \
-    }                                                                                                                  \
-    catch (const std::exception& e)                                                                                    \
-    {                                                                                                                  \
-        EXPECT_THAT(e.what(), ::testing::HasSubstr(ERR_SUBSTR));                                                       \
-    }
 
 #endif

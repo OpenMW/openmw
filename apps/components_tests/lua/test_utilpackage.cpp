@@ -3,7 +3,7 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
-#include <components/testing/util.hpp>
+#include <components/testing/expecterror.hpp>
 
 namespace
 {

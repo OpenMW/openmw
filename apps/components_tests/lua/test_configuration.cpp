@@ -9,6 +9,7 @@
 #include <components/esm3/readerscache.hpp>
 #include <components/lua/configuration.hpp>
 #include <components/lua/serialization.hpp>
+#include <components/testing/expecterror.hpp>
 #include <components/testing/util.hpp>
 
 namespace

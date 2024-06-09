@@ -513,6 +513,7 @@ else ()
 endif()
 
 add_component_dir(testing
+    expecterror
     util
 )
 
