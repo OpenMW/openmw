@@ -102,7 +102,7 @@ namespace MWWorld
         {
             if (mRef == nullptr)
                 return "null object";
-            std::string result = mRef->isDeleted() ? "object" : "deleted object";
+            std::string result = mRef->isDeleted() ? "deleted object" : "object";
             result += mRef->mRef.getRefNum().toString();
             result += " (";
             result += mRef->getTypeDescription();
