@@ -1474,13 +1474,5 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Run Script After Startup:</source>
         <translation>Script à lancer après démarrage :</translation>
     </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Force the use of per pixel lighting. By default, only bump and normal mapped objects use per-pixel lighting. Only affects objects drawn with shaders. Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended. Note that groundcover shaders and particle effects ignore this setting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, le moteur de jeu illumine séparément chaque pixel des textures (éclairage par pixel, Per Pixel Lighting) pour chaque passe de rendu.&lt;/p&gt;&lt;p&gt;Lorsque cette option est désactivée, seuls les plaquages de rugosité (bump map) et de normales (normal maps) utilisent l&apos;éclairage par pixel. Les autres passes utilisent un éclairage par vertex (sommet de chaque polygone).&lt;/p&gt;&lt;p&gt;Le rendu de l&apos;éclairage par pixel diffère de celui du moteur de jeu original du fait que certaines sources de lumière de Morrowind furent calibrées pour un éclairage par vertex.&lt;/p&gt;&lt;p&gt;Cette option affecte uniquement les objets dont le rendu est réalisé avec des shaders. Elle n&apos;affecte ni la végétation au sol ni les effets de particules.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Force Per-Pixel Lighting</source>
-        <translation>Forcer l&apos;éclairage par pixel</translation>
-    </message>
 </context>
 </TS>

@@ -259,7 +259,6 @@ bool Launcher::SettingsPage::loadSettings()
         lightFadeMultiplierSpinBox->setValue(Settings::shaders().mLightFadeStart);
         lightsBoundingSphereMultiplierSpinBox->setValue(Settings::shaders().mLightBoundsMultiplier);
         lightsMinimumInteriorBrightnessSpinBox->setValue(Settings::shaders().mMinimumInteriorBrightness);
-        loadSettingBool(Settings::shaders().mForcePerPixelLighting, *forcePplCheckBox);
 
         connect(lightingMethodComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this,
             &SettingsPage::slotLightTypeCurrentIndexChanged);
@@ -479,7 +478,6 @@ void Launcher::SettingsPage::saveSettings()
         Settings::shaders().mLightFadeStart.set(lightFadeMultiplierSpinBox->value());
         Settings::shaders().mLightBoundsMultiplier.set(lightsBoundingSphereMultiplierSpinBox->value());
         Settings::shaders().mMinimumInteriorBrightness.set(lightsMinimumInteriorBrightnessSpinBox->value());
-        saveSettingBool(*forcePplCheckBox, Settings::shaders().mForcePerPixelLighting);
     }
 
     // Audio

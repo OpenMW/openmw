@@ -648,6 +648,7 @@ namespace MWGui
         if (selectedButton == 1 || selectedButton == -1)
             return;
 
+        Settings::shaders().mForcePerPixelLighting.reset();
         Settings::shaders().mLightBoundsMultiplier.reset();
         Settings::shaders().mMaximumLightDistance.reset();
         Settings::shaders().mLightFadeStart.reset();

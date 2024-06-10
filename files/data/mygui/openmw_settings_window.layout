@@ -597,14 +597,30 @@
                             <Property key="AddItem" value="56"/>
                             <Property key="AddItem" value="64"/>
                         </Widget>
-                        <Widget type="ImageBox" skin="MW_HLine" position="0 54 360 18" align="Top HStretch"/>
+                        <!-- Per-Pixel Lighting -->
+                        <Widget type="HBox" position="0 60 340 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top">
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="force per pixel lighting"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="#{OMWEngine:ForcePerPixelLighting}"/>
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="#{OMWEngine:ForcePerPixelLightingTooltip}"/>
+                            </Widget>
+                        </Widget>
+
+                        <Widget type="ImageBox" skin="MW_HLine" position="0 84 360 18" align="Top HStretch"/>
+
                         <!-- Light Fade Start -->
-                        <Widget type="TextBox" skin="NormalText" position="0 78 500 18" align="Left Top" name="MaxLightDistanceText">
+                        <Widget type="TextBox" skin="NormalText" position="0 104 500 18" align="Left Top" name="MaxLightDistanceText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsMaximumDistanceTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 104 352 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 128 352 18" align="HStretch Top">
                             <Property key="Range" value="8193"/>
                             <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -617,12 +633,12 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMaximumDistance} (%s)"/>
                         </Widget>
                         <!-- Light Fade Multiplier -->
-                        <Widget type="TextBox" skin="NormalText" position="0 128 500 18" align="Left Top" name="LightFadeMultiplierText">
+                        <Widget type="TextBox" skin="NormalText" position="0 152 500 18" align="Left Top" name="LightFadeMultiplierText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsFadeStartMultiplierTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 152 352 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 176 352 18" align="HStretch Top">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="100"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -635,12 +651,12 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsFadeStartMultiplier} (%s)"/>
                         </Widget>
                         <!-- Bounding Sphere Multiplier -->
-                        <Widget type="TextBox" skin="NormalText" position="0 176 500 18" align="Left Top" name="BoundingSphereMultText">
+                        <Widget type="TextBox" skin="NormalText" position="0 200 500 18" align="Left Top" name="BoundingSphereMultText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsBoundingSphereMultiplierTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 200 352 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 224 352 18" align="HStretch Top">
                             <Property key="Range" value="500000"/>
                             <Property key="Page" value="1000"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -653,12 +669,12 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsBoundingSphereMultiplier} (%s)"/>
                         </Widget>
                         <!-- Minimum Ambient Brightness -->
-                        <Widget type="TextBox" skin="NormalText" position="0 224 500 18" align="Left Top" name="MinimumBrightnessText">
+                        <Widget type="TextBox" skin="NormalText" position="0 248 500 18" align="Left Top" name="MinimumBrightnessText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsMinimumInteriorBrightnessTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 248 352 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 272 352 18" align="HStretch Top">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="100"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -668,7 +684,7 @@
                             <UserString key="SettingLabelWidget" value="MinimumBrightnessText"/>
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMinimumInteriorBrightness} (%s)"/>
                         </Widget>
-                        <Widget type="AutoSizedButton" skin="MW_Button" position="0 290 0 0" align="Top Left" name="LightsResetButton">
+                        <Widget type="AutoSizedButton" skin="MW_Button" position="0 306 0 0" align="Top Left" name="LightsResetButton">
                             <Property key="Caption" value="#{Interface:Reset}"/>
                         </Widget>
                     </Widget>

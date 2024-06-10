@@ -1541,6 +1541,16 @@ namespace MWRender
                 if (MWMechanics::getPlayer().isInCell())
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
             }
+            else if (it->first == "Shaders" && it->second == "force per pixel lighting")
+            {
+                mViewer->stopThreading();
+
+                auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+                defines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
+                mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+
+                mViewer->startThreading();
+            }
             else if (it->first == "Shaders"
                 && (it->second == "light bounds multiplier" || it->second == "maximum light distance"
                     || it->second == "light fade start" || it->second == "max lights"))

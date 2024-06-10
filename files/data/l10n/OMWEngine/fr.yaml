@@ -95,6 +95,15 @@ EnableController: "Activer la manette"
 FieldOfView: "Champ de vision"
 FieldOfViewHigh: "Étendu"
 FieldOfViewLow: "Restreint"
+ForcePerPixelLighting: "Forcer l'éclairage par pixel"
+ForcePerPixelLightingTooltip: |-
+    Force l'usage de l'éclairage par pixel. Par défaut, seuls les objets avec des "bump" et "normal" maps utilisent l'éclairage par pixel.
+
+    Affecte uniquement les objets rendus via des shaders.
+
+    Activer l'éclairage par pixel donne des résultats visuels différents de ceux du moteur de jeu original, car certaines lumières de Morrowind furent implémentées pour un éclairage par vertex.
+
+    Les shaders de végétation au sol et les particules ignorent cette option.
 FrameRateHint: "Note: Appuyez sur F3 pour afficher la fréquence d'affichage (FPS)."
 GammaCorrection: "Correction Gamma"
 GammaDark: "Sombre"
