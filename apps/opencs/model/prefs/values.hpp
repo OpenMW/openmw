@@ -448,7 +448,7 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mSceneSpeedModifier{ mIndex, sName, "scene-speed-modifier", "Shift" };
         Settings::SettingValue<std::string> mSceneDelete{ mIndex, sName, "scene-delete", "Delete" };
         Settings::SettingValue<std::string> mSceneInstanceDropTerrain{ mIndex, sName, "scene-instance-drop-terrain",
-            "G" };
+            "B" };
         Settings::SettingValue<std::string> mSceneInstanceDropCollision{ mIndex, sName, "scene-instance-drop-collision",
             "H" };
         Settings::SettingValue<std::string> mSceneInstanceDropTerrainSeparately{ mIndex, sName,
