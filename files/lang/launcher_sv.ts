@@ -451,8 +451,8 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>Stäng</translation>
     </message>
     <message>
-        <source> Launch OpenMW </source>
-        <translation> Starta OpenMW </translation>
+        <source>Launch OpenMW</source>
+        <translation>Starta OpenMW</translation>
     </message>
     <message>
         <source>Help</source>
