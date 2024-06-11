@@ -13,6 +13,8 @@
 
 #include "../prefs/state.hpp"
 
+#include "effectlistcheck.hpp"
+
 CSMTools::SpellCheckStage::SpellCheckStage(const CSMWorld::IdCollection<ESM::Spell>& spells)
     : mSpells(spells)
 {
@@ -46,5 +48,5 @@ void CSMTools::SpellCheckStage::perform(int stage, CSMDoc::Messages& messages)
     if (spell.mData.mCost < 0)
         messages.add(id, "Spell cost is negative", "", CSMDoc::Message::Severity_Error);
 
-    /// \todo check data members that can't be edited in the table view
+    effectListCheck(spell.mEffects.mList, messages, id);
 }

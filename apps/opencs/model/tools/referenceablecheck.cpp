@@ -38,6 +38,8 @@
 #include "../world/record.hpp"
 #include "../world/universalid.hpp"
 
+#include "effectlistcheck.hpp"
+
 namespace ESM
 {
     class Script;
@@ -330,7 +332,8 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, potion.mId);
 
     inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
-    /// \todo Check magic effects for validity
+
+    effectListCheck(potion.mEffects.mList, messages, id);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Potion>(potion, messages, id.toString());
@@ -565,6 +568,8 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Ingredient>(ingredient, messages, id.toString());
+
+    ingredientEffectListCheck(ingredient, messages, id);
 }
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
