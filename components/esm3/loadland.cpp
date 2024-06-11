@@ -101,23 +101,28 @@ namespace ESM
             {
                 case fourCC("VNML"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VNML;
+                    if (mFlags & Flag_HeightsNormals)
+                        mDataTypes |= DATA_VNML;
                     break;
                 case fourCC("VHGT"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VHGT;
+                    if (mFlags & Flag_HeightsNormals)
+                        mDataTypes |= DATA_VHGT;
                     break;
                 case fourCC("WNAM"):
                     esm.getHT(mWnam);
-                    mDataTypes |= DATA_WNAM;
+                    if (mFlags & Flag_HeightsNormals)
+                        mDataTypes |= DATA_WNAM;
                     break;
                 case fourCC("VCLR"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VCLR;
+                    if (mFlags & Flag_Colors)
+                        mDataTypes |= DATA_VCLR;
                     break;
                 case fourCC("VTEX"):
                     esm.skipHSub();
-                    mDataTypes |= DATA_VTEX;
+                    if (mFlags & Flag_Textures)
+                        mDataTypes |= DATA_VTEX;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
@@ -204,9 +209,9 @@ namespace ESM
         if (mLandData == nullptr)
             mLandData = std::make_unique<LandData>();
 
-        mLandData->mHeights.fill(0);
-        mLandData->mMinHeight = 0;
-        mLandData->mMaxHeight = 0;
+        mLandData->mHeights.fill(DEFAULT_HEIGHT);
+        mLandData->mMinHeight = DEFAULT_HEIGHT;
+        mLandData->mMaxHeight = DEFAULT_HEIGHT;
         for (size_t i = 0; i < LandRecordData::sLandNumVerts; ++i)
         {
             mLandData->mNormals[i * 3 + 0] = 0;

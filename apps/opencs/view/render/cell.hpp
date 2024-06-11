@@ -9,6 +9,7 @@
 #include <osg/Vec3d>
 #include <osg/ref_ptr>
 
+#include "../../model/doc/document.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 #include "instancedragmodes.hpp"
 #include <components/esm/refid.hpp>
@@ -89,7 +90,8 @@ namespace CSVRender
     public:
         /// \note Deleted covers both cells that are deleted and cells that don't exist in
         /// the first place.
-        Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::string& id, bool deleted = false);
+        Cell(CSMDoc::Document& document, osg::Group* rootNode, const std::string& id, bool deleted = false,
+            bool isExterior = false);
 
         ~Cell();
 

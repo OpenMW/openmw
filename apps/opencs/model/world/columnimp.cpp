@@ -202,6 +202,8 @@ namespace CSMWorld
             copy.getLandData()->mHeights[i] = values[i];
         }
 
+        copy.mFlags |= Land::Flag_HeightsNormals;
+
         record.setModified(copy);
     }
 
@@ -249,6 +251,8 @@ namespace CSMWorld
             copy.getLandData()->mColours[i] = values[i];
         }
 
+        copy.mFlags |= Land::Flag_Colors;
+
         record.setModified(copy);
     }
 
@@ -295,6 +299,8 @@ namespace CSMWorld
         {
             copy.getLandData()->mTextures[i] = values[i];
         }
+
+        copy.mFlags |= Land::Flag_Textures;
 
         record.setModified(copy);
     }

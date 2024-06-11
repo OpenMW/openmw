@@ -154,6 +154,8 @@ namespace CSVRender
 
     void TerrainStorage::adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const
     {
+        if (!heightData)
+            return;
         // Highlight broken height changes
         int heightWarningLimit = 1024;
         if (((col > 0 && row > 0) && leftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData->getHeights()))
