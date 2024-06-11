@@ -512,6 +512,11 @@ else ()
         )
 endif()
 
+add_component_dir(testing
+    expecterror
+    util
+)
+
 set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
     )
 

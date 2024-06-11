@@ -1169,8 +1169,9 @@ if [ "${BUILD_BENCHMARKS}" ]; then
 fi
 
 if [ -n "${TEST_FRAMEWORK}" ]; then
-	add_cmake_opts -DBUILD_UNITTESTS=ON
+	add_cmake_opts -DBUILD_COMPONENTS_TESTS=ON
 	add_cmake_opts -DBUILD_OPENCS_TESTS=ON
+	add_cmake_opts -DBUILD_OPENMW_TESTS=ON
 fi
 
 if [ -n "$ACTIVATE_MSVC" ]; then

@@ -1,11 +1,8 @@
 name: CMake
 
 on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-    branches: [ master ]
+- push
+- pull_request
 
 env:
   BUILD_TYPE: RelWithDebInfo
@@ -30,13 +27,27 @@ jobs:
           max-size: 1000M
 
       - name: Configure
-        run: cmake . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=1 -DUSE_SYSTEM_TINYXML=1 -DBUILD_UNITTESTS=1 -DCMAKE_INSTALL_PREFIX=install
+        run: >
+            cmake .
+            -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+            -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
+            -D USE_SYSTEM_TINYXML=ON
+            -D BUILD_COMPONENTS_TESTS=ON
+            -D BUILD_OPENMW_TESTS=ON
+            -D BUILD_OPENCS_TESTS=ON
+            -D CMAKE_INSTALL_PREFIX=install
 
       - name: Build
-        run: make -j3
+        run: cmake --build . -- -j$(nproc)
 
-      - name: Test
-        run: ./openmw_test_suite
+      - name: Run components tests
+        run: ./components-tests
+
+      - name: Run OpenMW tests
+        run: ./openmw-tests
+
+      - name: Run OpenMW-CS tests
+        run: ./openmw-cs-tests
 
           #    - name: Install
           #      shell: bash
