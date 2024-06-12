@@ -706,7 +706,7 @@ namespace ESM
             data.mDataLoaded = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_VCLR | Land::DATA_VTEX;
 
             Land record;
-            record.mFlags = 42;
+            record.mFlags = Land::Flag_HeightsNormals | Land::Flag_Colors | Land::Flag_Textures;
             record.mX = 2;
             record.mY = 3;
             record.mDataTypes = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_WNAM | Land::DATA_VCLR | Land::DATA_VTEX;
