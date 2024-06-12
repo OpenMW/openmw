@@ -251,7 +251,7 @@ if(APPLE AND BUILD_OPENMW)
                                            "LINKER:SHELL:-framework AudioToolbox"
                                            "LINKER:SHELL:-framework VideoDecodeAcceleration")
     endif()
-endif(APPLE)
+endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-lib PRIVATE --coverage)
@@ -264,4 +264,4 @@ endif()
 
 if (WIN32 AND BUILD_OPENMW)
     INSTALL(TARGETS openmw RUNTIME DESTINATION ".")
-endif (WIN32)
+endif()
