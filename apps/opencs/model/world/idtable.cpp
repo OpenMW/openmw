@@ -12,6 +12,7 @@
 #include <type_traits>
 
 #include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/idtablebase.hpp>
 #include <apps/opencs/model/world/record.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
@@ -21,7 +22,6 @@
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
-#include "landtexture.hpp"
 
 CSMWorld::IdTable::IdTable(CollectionBase* idCollection, unsigned int features)
     : IdTableBase(features)
@@ -361,73 +361,8 @@ CSMWorld::LandTextureIdTable::LandTextureIdTable(CollectionBase* idCollection, u
 {
 }
 
-CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::importTextures(
-    const std::vector<std::string>& ids)
+const CSMWorld::Record<ESM::LandTexture>* CSMWorld::LandTextureIdTable::searchRecord(
+    std::uint16_t index, int plugin) const
 {
-    ImportResults results;
-
-    // Map existing textures to ids
-    std::map<std::string, std::string> reverseLookupMap;
-    for (int i = 0; i < idCollection()->getSize(); ++i)
-    {
-        auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
-        if (record.isModified())
-            reverseLookupMap.emplace(
-                Misc::StringUtils::lowerCase(record.get().mTexture), idCollection()->getId(i).getRefIdString());
-    }
-
-    for (const std::string& id : ids)
-    {
-        int plugin, index;
-        LandTexture::parseUniqueRecordId(id, plugin, index);
-
-        const ESM::RefId refId = ESM::RefId::stringRefId(id);
-        const int oldRow = idCollection()->searchId(refId);
-
-        // If it does not exist, it can be skipped.
-        if (oldRow < 0)
-        {
-            results.recordMapping.emplace_back(id, id);
-            continue;
-        }
-        // Look for a pre-existing record
-        auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow));
-        // If it is in the current plugin, it can be skipped.
-        if (record.mState == Record<LandTexture>::State_ModifiedOnly)
-        {
-            results.recordMapping.emplace_back(id, id);
-            continue;
-        }
-        std::string texture = Misc::StringUtils::lowerCase(record.get().mTexture);
-        auto searchIt = reverseLookupMap.find(texture);
-        if (searchIt != reverseLookupMap.end())
-        {
-            results.recordMapping.emplace_back(id, searchIt->second);
-            continue;
-        }
-
-        // Iterate until an unused index or found, or the index has completely wrapped around.
-        int startIndex = index;
-        do
-        {
-            std::string newId = LandTexture::createUniqueRecordId(-1, index);
-            const ESM::RefId newRefId = ESM::RefId::stringRefId(newId);
-            int newRow = idCollection()->searchId(newRefId);
-
-            if (newRow < 0)
-            {
-                // Id not taken, clone it
-                cloneRecord(refId, newRefId, UniversalId::Type_LandTexture);
-                results.createdRecords.push_back(newId);
-                results.recordMapping.emplace_back(id, newId);
-                reverseLookupMap.emplace(texture, newId);
-                break;
-            }
-
-            const size_t MaxIndex = std::numeric_limits<uint16_t>::max() - 1;
-            index = (index + 1) % MaxIndex;
-        } while (index != startIndex);
-    }
-
-    return results;
+    return static_cast<CSMWorld::IdCollection<ESM::LandTexture>*>(idCollection())->searchRecord(index, plugin);
 }

@@ -16,7 +16,6 @@
 #include <apps/opencs/model/world/info.hpp>
 #include <apps/opencs/model/world/infocollection.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/metadata.hpp>
 #include <apps/opencs/model/world/nestedidcollection.hpp>
 #include <apps/opencs/model/world/nestedinfocollection.hpp>
@@ -36,6 +35,7 @@
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadglob.hpp>
+#include <components/esm3/loadltex.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/files/collections.hpp>
 #include <components/misc/strings/lower.hpp>
@@ -530,13 +530,11 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mLand.addColumn(new LandColoursColumn);
     mLand.addColumn(new LandTexturesColumn);
 
-    mLandTextures.addColumn(new StringIdColumn<LandTexture>(true));
-    mLandTextures.addColumn(new RecordStateColumn<LandTexture>);
-    mLandTextures.addColumn(new FixedRecordTypeColumn<LandTexture>(UniversalId::Type_LandTexture));
-    mLandTextures.addColumn(new LandTextureNicknameColumn);
-    mLandTextures.addColumn(new LandTexturePluginIndexColumn);
+    mLandTextures.addColumn(new StringIdColumn<ESM::LandTexture>);
+    mLandTextures.addColumn(new RecordStateColumn<ESM::LandTexture>);
+    mLandTextures.addColumn(new FixedRecordTypeColumn<ESM::LandTexture>(UniversalId::Type_LandTexture));
     mLandTextures.addColumn(new LandTextureIndexColumn);
-    mLandTextures.addColumn(new TextureColumn<LandTexture>);
+    mLandTextures.addColumn(new TextureColumn<ESM::LandTexture>);
 
     mPathgrids.addColumn(new StringIdColumn<Pathgrid>);
     mPathgrids.addColumn(new RecordStateColumn<Pathgrid>);
@@ -939,12 +937,12 @@ CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand()
     return mLand;
 }
 
-const CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures() const
+const CSMWorld::IdCollection<ESM::LandTexture>& CSMWorld::Data::getLandTextures() const
 {
     return mLandTextures;
 }
 
-CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures()
+CSMWorld::IdCollection<ESM::LandTexture>& CSMWorld::Data::getLandTextures()
 {
     return mLandTextures;
 }

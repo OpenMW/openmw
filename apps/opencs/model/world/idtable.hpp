@@ -16,10 +16,17 @@
 
 class QObject;
 
+namespace ESM
+{
+    struct LandTexture;
+}
+
 namespace CSMWorld
 {
     class CollectionBase;
     struct RecordBase;
+    template <typename ESXRecordT>
+    struct Record;
 
     class IdTable : public IdTableBase
     {
@@ -103,26 +110,12 @@ namespace CSMWorld
         virtual CollectionBase* idCollection() const;
     };
 
-    /// An IdTable customized to handle the more unique needs of LandTextureId's which behave
-    /// differently from other records. The major difference is that base records cannot be
-    /// modified.
     class LandTextureIdTable : public IdTable
     {
     public:
-        struct ImportResults
-        {
-            using StringPair = std::pair<std::string, std::string>;
-
-            /// The newly added records
-            std::vector<std::string> createdRecords;
-            /// The 1st string is the original id, the 2nd is the mapped id
-            std::vector<StringPair> recordMapping;
-        };
-
         LandTextureIdTable(CollectionBase* idCollection, unsigned int features = 0);
 
-        /// Finds and maps/recreates the specified ids.
-        ImportResults importTextures(const std::vector<std::string>& ids);
+        const CSMWorld::Record<ESM::LandTexture>* searchRecord(std::uint16_t index, int plugin) const;
     };
 }
 
