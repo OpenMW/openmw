@@ -573,7 +573,7 @@ ICU_VER="70_1"
 LUAJIT_VER="v2.1.0-beta3-452-g7a0cf5fd"
 LZ4_VER="1.9.2"
 OPENAL_VER="1.23.0"
-QT_VER="6.6.2"
+QT_VER="6.6.3"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
 OSG_ARCHIVE="OSGoS-3.6.5-123-g68c5c573d-msvc${OSG_MSVC_YEAR}-win${BITS}"
@@ -904,7 +904,7 @@ printf "Qt ${QT_VER}... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		pushd "$DEPS" > /dev/null
-		AQT_VERSION="v3.1.12"
+		AQT_VERSION="v3.1.15"
 		if ! [ -f "aqt_x64-${AQT_VERSION}.exe" ]; then
 			download "aqt ${AQT_VERSION}"\
 				"https://github.com/miurahr/aqtinstall/releases/download/${AQT_VERSION}/aqt_x64.exe" \
