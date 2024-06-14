@@ -103,7 +103,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState(
 
     LiveCellRef<T> ref(record);
     ref.load(state);
-    collection.mList.push_back(ref);
+    collection.mList.push_back(std::move(ref));
     auto it = ContainerStoreIterator(this, --collection.mList.end());
     MWBase::Environment::get().getWorldModel()->registerPtr(*it);
 

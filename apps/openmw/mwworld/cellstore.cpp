@@ -319,7 +319,7 @@ namespace
         // new reference
         MWWorld::LiveCellRef<T> ref(record);
         ref.load(state);
-        collection.mList.push_back(ref);
+        collection.mList.push_back(std::move(ref));
 
         MWWorld::LiveCellRefBase* base = &collection.mList.back();
         MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(base, cellstore));
@@ -426,9 +426,9 @@ namespace MWWorld
                 liveCellRef.mData.setDeletedByContentFile(true);
 
             if (iter != mList.end())
-                *iter = liveCellRef;
+                *iter = std::move(liveCellRef);
             else
-                mList.push_back(liveCellRef);
+                mList.push_back(std::move(liveCellRef));
         }
         else
         {
@@ -455,7 +455,7 @@ namespace MWWorld
         LiveCellRef<X> liveCellRef(ref, ptr);
         if (!isEnabled(ref, esmStore))
             liveCellRef.mData.disable();
-        list.push_back(liveCellRef);
+        list.push_back(std::move(liveCellRef));
     }
 
     template <typename X>
