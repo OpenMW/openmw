@@ -125,7 +125,7 @@ LightsFadeStartMultiplier: "Multiplikator für Startwert der Lichtabblendung"
 LightsFadeStartMultiplierTooltip: "Standard: 0,85\nBruchteil der maximalen Lichtreichweite, bei der Lichtquellen langsam zu verblassen beginnen.\n\nKleinere Werte führen zu einem sanfteren Übergang, der allerdings bereits bei geringerer Entfernung startet; größere Werte machen den Übergang abrupter, betreffen aber nur weiter entfernte Lichtquellen."
 LightsLightingMethodTooltip: "Legt die interne Behandlung von Lichtquellen fest.\n\n
    „Veraltet“ verwendet immer bis zu 8 Lichtquellen pro Objekt und führt zu Ergebnissen, die denen der Original-Engine am ähnlichsten sind.\n\n
-   „Shader (Kompatibilitätsmodus)“ entfernt das Maximum von 8 Lichtquellen pro Objekt; Bodenvegetation wird von Lichtquellen beleuchtet und das sanfte Abblenden von Lichtquellen wird aktiviert. Es wird empfohlen, diese Option für ältere Hardware und Maximalwerte für Lichtquellen nahe 8 zu verwenden.\n\n
+   „Shader (Kompatibilitätsmodus)“ entfernt das Maximum von 8 Lichtquellen pro Objekt; Bodenvegetation wird von Lichtquellen beleuchtet. Es wird empfohlen, diese Option für ältere Hardware und Maximalwerte für Lichtquellen nahe 8 zu verwenden.\n\n
    „Shader“ bietet alle Vorteile von „Shader (Kompatibilitätsmodus)“, nutzt aber einen moderneren Ansatz, der größere Maximalwerte für Lichtquellen bei geringen bis keinen Leistungseinbußen ermöglicht. Funktioniert möglicherweise nicht auf älterer Hardware."
 LightsMaximumDistance: "Maximale Lichtreichweite"
 LightsMaximumDistanceTooltip: "Standard: 8192 (1 Zelle)\nMaximale Entfernung, bis zu der Lichtquellen noch dargestellt werden (gemessen in In-Game-Einheiten).\n\nEin Wert von 0 entspricht einer unbegrenzten Reichweite."

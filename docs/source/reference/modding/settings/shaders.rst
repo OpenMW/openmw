@@ -148,13 +148,13 @@ lighting method
 
 Sets the internal handling of light sources.
 
-'legacy' is restricted to 8 lights per object and emulates fixed function
-pipeline compatible lighting.
+'legacy' is restricted to 8 lights per object and it is the method closest to
+fixed function pipeline lighting.
 
 'shaders compatibility' removes the light limit controllable through :ref:`max
 lights` and follows a modified attenuation formula which can drastically reduce
-light popping and seams. This mode also enables lighting on groundcover and a
-configurable light fade. It is recommended to use this with older hardware and a
+light popping and seams. This mode also enables lighting on groundcover.
+It is recommended to use this with older hardware and a
 light limit closer to 8. Because of its wide range of compatibility it is set as
 the default.
 
@@ -189,7 +189,7 @@ increase in :ref:`max lights` and thus carries a performance penalty. This
 especially helps with abrupt light popping with handheld light sources such as
 torches and lanterns.
 
-This setting has no effect if :ref:`lighting method` is 'legacy'.
+In Morrowind, this multiplier is non-existent, i.e. it is always 1.0.
 
 maximum light distance
 ----------------------
@@ -202,7 +202,7 @@ The maximum distance from the camera that lights will be illuminated, applies to
 both interiors and exteriors. A lower distance will improve performance. Set
 this to a non-positive value to disable fading.
 
-This setting has no effect if :ref:`lighting method` is 'legacy'.
+In Morrowind, there is no distance-based light fading.
 
 light fade start
 ----------------
@@ -214,8 +214,7 @@ light fade start
 The fraction of the maximum distance at which lights will begin to fade away.
 Tweaking it will make the transition proportionally more or less smooth.
 
-This setting has no effect if the :ref:`maximum light distance` is non-positive
-or :ref:`lighting method` is 'legacy'.
+This setting has no effect if the :ref:`maximum light distance` is non-positive.
 
 max lights
 ----------

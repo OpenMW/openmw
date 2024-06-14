@@ -254,15 +254,6 @@ bool Launcher::SettingsPage::loadSettings()
 
         connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotShadowDistLimitToggled);
 
-        lightsMaxLightsSpinBox->setValue(Settings::shaders().mMaxLights);
-        lightsMaximumDistanceSpinBox->setValue(Settings::shaders().mMaximumLightDistance);
-        lightFadeMultiplierSpinBox->setValue(Settings::shaders().mLightFadeStart);
-        lightsBoundingSphereMultiplierSpinBox->setValue(Settings::shaders().mLightBoundsMultiplier);
-        lightsMinimumInteriorBrightnessSpinBox->setValue(Settings::shaders().mMinimumInteriorBrightness);
-
-        connect(lightingMethodComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this,
-            &SettingsPage::slotLightTypeCurrentIndexChanged);
-
         int lightingMethod = 1;
         switch (Settings::shaders().mLightingMethod)
         {
@@ -277,7 +268,6 @@ bool Launcher::SettingsPage::loadSettings()
                 break;
         }
         lightingMethodComboBox->setCurrentIndex(lightingMethod);
-        slotLightTypeCurrentIndexChanged(lightingMethod);
     }
 
     // Audio
@@ -472,12 +462,6 @@ void Launcher::SettingsPage::saveSettings()
             Settings::shadows().mComputeSceneBounds.set("primitives");
         else
             Settings::shadows().mComputeSceneBounds.set("none");
-
-        Settings::shaders().mMaxLights.set(lightsMaxLightsSpinBox->value());
-        Settings::shaders().mMaximumLightDistance.set(lightsMaximumDistanceSpinBox->value());
-        Settings::shaders().mLightFadeStart.set(lightFadeMultiplierSpinBox->value());
-        Settings::shaders().mLightBoundsMultiplier.set(lightsBoundingSphereMultiplierSpinBox->value());
-        Settings::shaders().mMinimumInteriorBrightness.set(lightsMinimumInteriorBrightnessSpinBox->value());
     }
 
     // Audio
@@ -594,13 +578,4 @@ void Launcher::SettingsPage::slotDistantLandToggled(bool checked)
 {
     activeGridObjectPagingCheckBox->setEnabled(checked);
     objectPagingMinSizeComboBox->setEnabled(checked);
-}
-
-void Launcher::SettingsPage::slotLightTypeCurrentIndexChanged(int index)
-{
-    lightsMaximumDistanceSpinBox->setEnabled(index != 0);
-    lightFadeMultiplierSpinBox->setEnabled(index != 0);
-    lightsMaxLightsSpinBox->setEnabled(index != 0);
-    lightsBoundingSphereMultiplierSpinBox->setEnabled(index != 0);
-    lightsMinimumInteriorBrightnessSpinBox->setEnabled(index != 0);
 }

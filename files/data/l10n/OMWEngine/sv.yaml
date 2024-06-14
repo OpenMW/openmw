@@ -126,7 +126,7 @@ LightsFadeStartMultiplier: "Blekningsstartmultiplikator"
 LightsFadeStartMultiplierTooltip: "Förvalt: 0.85\nFraktion av det maximala avståndet från vilket ljuskällor börjar blekna.\n\nVälj lågt värde för långsammare övergång eller högre värde för snabbare övergång."
 LightsLightingMethodTooltip: "Välj intern hantering av ljuskällor.\n\n
     \"Gammaldags\" använder alltid max 8 ljuskällor per objekt och ger ljussättning likt ett gammaldags spel.\n\n
-    \"Shader (kompatibilitet)\" tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning och ett konfigurerbart ljusbleknande. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
+    \"Shader (kompatibilitet)\" tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
     \"Shader\" har alla fördelar som \"Shader (kompatibilitet)\" har, med med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara."
 LightsMaximumDistance: "Maximalt ljusavstånd"
 LightsMaximumDistanceTooltip: "Förvalt: 8192\nMaximala avståndet där ljuskällor syns (mätt i enheter).\n\nVärdet 0 ger oändligt avstånd."

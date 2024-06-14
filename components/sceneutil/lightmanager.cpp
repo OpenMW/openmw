@@ -830,32 +830,33 @@ namespace SceneUtil
         if (settings.mLightingMethod == LightingMethod::FFP)
         {
             initFFP(ffpMaxLights);
-            return;
         }
-
-        static bool hasLoggedWarnings = false;
-
-        if (settings.mLightingMethod == LightingMethod::SingleUBO && !hasLoggedWarnings)
-        {
-            if (!supportsUBO)
-                Log(Debug::Warning)
-                    << "GL_ARB_uniform_buffer_object not supported: switching to shader compatibility lighting mode";
-            if (!supportsGPU4)
-                Log(Debug::Warning)
-                    << "GL_EXT_gpu_shader4 not supported: switching to shader compatibility lighting mode";
-            hasLoggedWarnings = true;
-        }
-
-        if (!supportsUBO || !supportsGPU4 || settings.mLightingMethod == LightingMethod::PerObjectUniform)
-            initPerObjectUniform(settings.mMaxLights);
         else
-            initSingleUBO(settings.mMaxLights);
+        {
+            static bool hasLoggedWarnings = false;
+
+            if (settings.mLightingMethod == LightingMethod::SingleUBO && !hasLoggedWarnings)
+            {
+                if (!supportsUBO)
+                    Log(Debug::Warning) << "GL_ARB_uniform_buffer_object not supported: switching to shader "
+                                           "compatibility lighting mode";
+                if (!supportsGPU4)
+                    Log(Debug::Warning)
+                        << "GL_EXT_gpu_shader4 not supported: switching to shader compatibility lighting mode";
+                hasLoggedWarnings = true;
+            }
+
+            if (!supportsUBO || !supportsGPU4 || settings.mLightingMethod == LightingMethod::PerObjectUniform)
+                initPerObjectUniform(settings.mMaxLights);
+            else
+                initSingleUBO(settings.mMaxLights);
+
+            getOrCreateStateSet()->addUniform(new osg::Uniform("PointLightCount", 0));
+
+            addCullCallback(new LightManagerCullCallback(this));
+        }
 
         updateSettings(settings.mLightBoundsMultiplier, settings.mMaximumLightDistance, settings.mLightFadeStart);
-
-        getOrCreateStateSet()->addUniform(new osg::Uniform("PointLightCount", 0));
-
-        addCullCallback(new LightManagerCullCallback(this));
     }
 
     LightManager::LightManager(const LightManager& copy, const osg::CopyOp& copyop)
@@ -942,9 +943,6 @@ namespace SceneUtil
 
     void LightManager::updateSettings(float lightBoundsMultiplier, float maximumLightDistance, float lightFadeStart)
     {
-        if (getLightingMethod() == LightingMethod::FFP)
-            return;
-
         mPointLightRadiusMultiplier = lightBoundsMultiplier;
         mPointLightFadeEnd = maximumLightDistance;
         if (mPointLightFadeEnd > 0)
