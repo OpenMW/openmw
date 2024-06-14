@@ -317,7 +317,7 @@ namespace
         }
 
         // new reference
-        MWWorld::LiveCellRef<T> ref(record);
+        MWWorld::LiveCellRef<T> ref(ESM::makeBlankCellRef(), record);
         ref.load(state);
         collection.mList.push_back(std::move(ref));
 

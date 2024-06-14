@@ -37,7 +37,7 @@ namespace MWWorld
 
         WorldModel* mWorldModel = nullptr;
 
-        LiveCellRefBase(unsigned int type, const ESM::CellRef& cref = ESM::CellRef());
+        LiveCellRefBase(unsigned int type, const ESM::CellRef& cref);
         LiveCellRefBase(unsigned int type, const ESM4::Reference& cref);
         LiveCellRefBase(unsigned int type, const ESM4::ActorCharacter& cref);
 
@@ -140,12 +140,6 @@ namespace MWWorld
 
         LiveCellRef(const ESM4::ActorCharacter& cref, const X* b = nullptr)
             : LiveCellRefBase(X::sRecordId, cref)
-            , mBase(b)
-        {
-        }
-
-        LiveCellRef(const X* b = nullptr)
-            : LiveCellRefBase(X::sRecordId)
             , mBase(b)
         {
         }
