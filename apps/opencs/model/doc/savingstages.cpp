@@ -17,7 +17,6 @@
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/info.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/metadata.hpp>
 #include <apps/opencs/model/world/pathgrid.hpp>
 #include <apps/opencs/model/world/record.hpp>
@@ -498,11 +497,11 @@ int CSMDoc::WriteLandTextureCollectionStage::setup()
 void CSMDoc::WriteLandTextureCollectionStage::perform(int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<CSMWorld::LandTexture>& landTexture = mDocument.getData().getLandTextures().getRecord(stage);
+    const CSMWorld::Record<ESM::LandTexture>& landTexture = mDocument.getData().getLandTextures().getRecord(stage);
 
     if (landTexture.isModified() || landTexture.mState == CSMWorld::RecordBase::State_Deleted)
     {
-        CSMWorld::LandTexture record = landTexture.get();
+        ESM::LandTexture record = landTexture.get();
         writer.startRecord(record.sRecordId);
         record.save(writer, landTexture.mState == CSMWorld::RecordBase::State_Deleted);
         writer.endRecord(record.sRecordId);

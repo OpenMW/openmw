@@ -14,6 +14,7 @@
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadinfo.hpp>
+#include <components/esm3/loadltex.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/selectiongroup.hpp>
@@ -29,7 +30,6 @@
 #include "columns.hpp"
 #include "info.hpp"
 #include "land.hpp"
-#include "landtexture.hpp"
 #include "record.hpp"
 
 namespace CSMWorld
@@ -81,13 +81,6 @@ namespace CSMWorld
     {
         const Land& land = record.get();
         return QString::fromUtf8(Land::createUniqueRecordId(land.mX, land.mY).c_str());
-    }
-
-    template <>
-    inline QVariant StringIdColumn<LandTexture>::get(const Record<LandTexture>& record) const
-    {
-        const LandTexture& ltex = record.get();
-        return QString::fromUtf8(LandTexture::createUniqueRecordId(ltex.mPluginIndex, ltex.mIndex).c_str());
     }
 
     template <typename ESXRecordT>
@@ -2365,20 +2358,11 @@ namespace CSMWorld
         bool isEditable() const override { return true; }
     };
 
-    struct LandTextureNicknameColumn : public Column<LandTexture>
-    {
-        LandTextureNicknameColumn();
-
-        QVariant get(const Record<LandTexture>& record) const override;
-        void set(Record<LandTexture>& record, const QVariant& data) override;
-        bool isEditable() const override;
-    };
-
-    struct LandTextureIndexColumn : public Column<LandTexture>
+    struct LandTextureIndexColumn : public Column<ESM::LandTexture>
     {
         LandTextureIndexColumn();
 
-        QVariant get(const Record<LandTexture>& record) const override;
+        QVariant get(const Record<ESM::LandTexture>& record) const override;
         bool isEditable() const override;
     };
 
@@ -2387,14 +2371,6 @@ namespace CSMWorld
         LandPluginIndexColumn();
 
         QVariant get(const Record<Land>& record) const override;
-        bool isEditable() const override;
-    };
-
-    struct LandTexturePluginIndexColumn : public Column<LandTexture>
-    {
-        LandTexturePluginIndexColumn();
-
-        QVariant get(const Record<LandTexture>& record) const override;
         bool isEditable() const override;
     };
 

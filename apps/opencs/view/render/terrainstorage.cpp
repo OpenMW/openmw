@@ -7,7 +7,6 @@
 #include <apps/opencs/model/world/data.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
 #include <algorithm>
@@ -44,12 +43,7 @@ namespace CSVRender
 
     const std::string* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
-        const int row = mData.getLandTextures().searchId(
-            ESM::RefId::stringRefId(CSMWorld::LandTexture::createUniqueRecordId(plugin, index)));
-        if (row == -1)
-            return nullptr;
-
-        return &mData.getLandTextures().getRecord(row).get().mTexture;
+        return mData.getLandTextures().getLandTexture(index, plugin);
     }
 
     void TerrainStorage::setAlteredHeight(int inCellX, int inCellY, float height)

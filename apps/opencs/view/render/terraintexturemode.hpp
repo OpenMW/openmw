@@ -117,14 +117,11 @@ namespace CSVRender
         void pushEditToCommand(CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
             CSMWorld::IdTable& landTable, std::string cellId);
 
-        /// \brief Create new land texture record from texture asset
-        void createTexture(const std::string& textureFileName);
-
         /// \brief Create new cell and land if needed
         bool allowLandTextureEditing(const std::string& textureFileName);
 
         std::string mCellId;
-        std::string mBrushTexture;
+        ESM::RefId mBrushTexture;
         int mBrushSize;
         CSVWidget::BrushShape mBrushShape;
         std::unique_ptr<BrushDraw> mBrushDraw;
@@ -139,13 +136,13 @@ namespace CSVRender
         const int landTextureSize{ ESM::Land::LAND_TEXTURE_SIZE };
 
     signals:
-        void passBrushTexture(std::string brushTexture);
+        void passBrushTexture(ESM::RefId brushTexture);
 
     public slots:
         void handleDropEvent(QDropEvent* event);
         void setBrushSize(int brushSize);
         void setBrushShape(CSVWidget::BrushShape brushShape);
-        void setBrushTexture(std::string brushShape);
+        void setBrushTexture(ESM::RefId brushShape);
     };
 }
 

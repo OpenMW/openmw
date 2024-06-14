@@ -24,6 +24,7 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadglob.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadltex.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadregn.hpp>
@@ -43,7 +44,6 @@
 #include "idcollection.hpp"
 #include "infocollection.hpp"
 #include "land.hpp"
-#include "landtexture.hpp"
 #include "metadata.hpp"
 #include "nestedidcollection.hpp"
 #include "nestedinfocollection.hpp"
@@ -114,7 +114,7 @@ namespace CSMWorld
         InfoCollection mJournalInfos;
         NestedIdCollection<Cell> mCells;
         SubCellCollection<Pathgrid> mPathgrids;
-        IdCollection<LandTexture> mLandTextures;
+        IdCollection<ESM::LandTexture> mLandTextures;
         IdCollection<Land> mLand;
         RefIdCollection mReferenceables;
         RefCollection mRefs;
@@ -259,9 +259,9 @@ namespace CSMWorld
 
         IdCollection<CSMWorld::Land>& getLand();
 
-        const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
+        const IdCollection<ESM::LandTexture>& getLandTextures() const;
 
-        IdCollection<CSMWorld::LandTexture>& getLandTextures();
+        IdCollection<ESM::LandTexture>& getLandTextures();
 
         const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
 
