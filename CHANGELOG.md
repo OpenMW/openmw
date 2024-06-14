@@ -247,6 +247,7 @@
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
+    Task #6505: UTF-8 support in Lua scripts
     Task #6624: Drop support for saves made prior to 0.45
     Task #7048: Get rid of std::bind
     Task #7113: Move from std::atoi to std::from_char
