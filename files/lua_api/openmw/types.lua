@@ -1539,6 +1539,12 @@
 -- @field [parent=#types] #Lockable Lockable
 
 ---
+-- Whether the object is a Lockable.
+-- @function [parent=#Lockable] objectIsInstance
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
 -- Returns the key record of a lockable object(door, container)
 -- @function [parent=#Lockable] getKeyRecord
 -- @param openmw.core#GameObject object
