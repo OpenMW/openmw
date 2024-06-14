@@ -29,7 +29,7 @@ namespace MWWorld
         /** Information about this instance, such as 3D location and rotation
          * and individual type-dependent data.
          */
-        MWWorld::CellRef mRef;
+        CellRef mRef;
 
         /** runtime-data */
         RefData mData;
