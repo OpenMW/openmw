@@ -77,9 +77,9 @@ namespace MWWorld
 
         std::size_t getPtrRegistryRevision() const { return mPtrRegistry.getRevision(); }
 
-        void registerPtr(const Ptr& ptr) { mPtrRegistry.insert(ptr); }
+        void registerPtr(const Ptr& ptr);
 
-        void deregisterLiveCellRef(const LiveCellRefBase& ref) noexcept { mPtrRegistry.remove(ref); }
+        void deregisterLiveCellRef(LiveCellRefBase& ref) noexcept;
 
         void assignSaveFileRefNum(ESM::CellRef& ref) { mPtrRegistry.assign(ref); }
 

@@ -17,6 +17,7 @@ namespace MWWorld
     class Ptr;
     class ESMStore;
     class Class;
+    class WorldModel;
 
     template <typename X>
     struct LiveCellRef;
@@ -34,11 +35,22 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
+        WorldModel* mWorldModel = nullptr;
+
         LiveCellRefBase(unsigned int type, const ESM::CellRef& cref = ESM::CellRef());
         LiveCellRefBase(unsigned int type, const ESM4::Reference& cref);
         LiveCellRefBase(unsigned int type, const ESM4::ActorCharacter& cref);
+
+        LiveCellRefBase(const LiveCellRefBase& other) = default;
+
+        LiveCellRefBase(LiveCellRefBase&& other) noexcept;
+
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase();
+
+        LiveCellRefBase& operator=(const LiveCellRefBase& other) = default;
+
+        LiveCellRefBase& operator=(LiveCellRefBase&& other) noexcept;
 
         virtual void load(const ESM::ObjectState& state) = 0;
         ///< Load state into a LiveCellRef, that has already been initialised with base and class.

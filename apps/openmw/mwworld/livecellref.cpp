@@ -38,9 +38,27 @@ namespace MWWorld
     {
     }
 
+    LiveCellRefBase::LiveCellRefBase(LiveCellRefBase&& other) noexcept
+        : mClass(other.mClass)
+        , mRef(std::move(other.mRef))
+        , mData(std::move(other.mData))
+        , mWorldModel(std::exchange(other.mWorldModel, nullptr))
+    {
+    }
+
     LiveCellRefBase::~LiveCellRefBase()
     {
-        MWBase::Environment::get().getWorldModel()->deregisterLiveCellRef(*this);
+        if (mWorldModel != nullptr)
+            mWorldModel->deregisterLiveCellRef(*this);
+    }
+
+    LiveCellRefBase& LiveCellRefBase::operator=(LiveCellRefBase&& other) noexcept
+    {
+        mClass = other.mClass;
+        mRef = std::move(other.mRef);
+        mData = std::move(other.mData);
+        mWorldModel = std::exchange(other.mWorldModel, nullptr);
+        return *this;
     }
 
     void LiveCellRefBase::loadImp(const ESM::ObjectState& state)
