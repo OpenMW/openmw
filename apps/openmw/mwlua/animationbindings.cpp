@@ -218,6 +218,8 @@ namespace MWLua
             getMutableAnimationOrThrow(ObjectVariant(object))->adjustSpeedMult(groupname, speed);
         };
         api["getActiveGroup"] = [](const sol::object& object, MWRender::BoneGroup boneGroup) -> std::string_view {
+            if (boneGroup < 0 || boneGroup >= BoneGroup::Num_BoneGroups)
+                throw std::runtime_error("Invalid bonegroup: " + std::to_string(boneGroup));
             return getConstAnimationOrThrow(ObjectVariant(object))->getActiveGroup(boneGroup);
         };
 
