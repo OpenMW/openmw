@@ -55,6 +55,7 @@ namespace MWLua
         addRecordFunctionBinding<ESM::Miscellaneous>(miscellaneous, context);
         miscellaneous["createRecordDraft"] = tableToMisc;
 
+        // Deprecated. Moved to itemData; should be removed later
         miscellaneous["setSoul"] = [](const GObject& object, std::string_view soulId) {
             ESM::RefId creature = ESM::RefId::deserializeText(soulId);
             const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -75,6 +76,7 @@ namespace MWLua
                 return soul.serializeText();
         };
         miscellaneous["soul"] = miscellaneous["getSoul"]; // for compatibility; should be removed later
+
         sol::usertype<ESM::Miscellaneous> record
             = context.mLua->sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
         record[sol::meta_function::to_string]

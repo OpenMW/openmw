@@ -11,6 +11,7 @@ namespace MWLua
 {
     void addItemBindings(sol::table item, const Context& context)
     {
+        // Deprecated. Moved to itemData; should be removed later
         item["getEnchantmentCharge"] = [](const Object& object) -> sol::optional<float> {
             float charge = object.ptr().getCellRef().getEnchantmentCharge();
             if (charge == -1)
