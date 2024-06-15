@@ -242,6 +242,11 @@ namespace MWWorld
 
     void Player::clear()
     {
+        ESM::CellRef cellRef;
+        cellRef.blank();
+        cellRef.mRefID = ESM::RefId::stringRefId("Player");
+        cellRef.mRefNum = mPlayer.mRef.getRefNum();
+        mPlayer = LiveCellRef<ESM::NPC>(cellRef, mPlayer.mBase);
         mCellStore = nullptr;
         mSign = ESM::RefId();
         mMarkedCell = nullptr;
