@@ -52,6 +52,8 @@ namespace
     {
         for (const auto& enam : list.mList)
         {
+            if (enam.mData.mRange != ESM::RT_Self)
+                continue;
             ESM::ActiveEffect effect;
             effect.mEffectId = enam.mData.mEffectID;
             effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;

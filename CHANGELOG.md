@@ -180,6 +180,7 @@
     Bug #7993: Cannot load Bloodmoon without Tribunal
     Bug #7997: Can toggle perspective when paralyzed
     Bug #8002: Portable light sources held by creatures do not emit lighting
+    Bug #8018: Potion effects should never explode and always apply on self
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
