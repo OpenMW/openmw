@@ -34,6 +34,8 @@ namespace Debug
 
     Misc::Locked<std::ostream&> getLockedRawStderr();
 
+    Level getDebugLevel();
+
     // Redirect cout and cerr to the log file
     void setupLogging(const std::filesystem::path& logDir, std::string_view appName);
 

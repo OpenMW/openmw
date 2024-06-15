@@ -108,12 +108,6 @@ namespace Debug
     class DebugOutputBase : public boost::iostreams::sink
     {
     public:
-        DebugOutputBase()
-        {
-            if (CurrentDebugLevel == NoLevel)
-                fillCurrentDebugLevel();
-        }
-
         virtual std::streamsize write(const char* str, std::streamsize size)
         {
             if (size <= 0)
@@ -172,29 +166,6 @@ namespace Debug
             }
 
             return NoLevel;
-        }
-
-        static void fillCurrentDebugLevel()
-        {
-            const char* env = getenv("OPENMW_DEBUG_LEVEL");
-            if (env)
-            {
-                std::string value(env);
-                if (value == "ERROR")
-                    CurrentDebugLevel = Error;
-                else if (value == "WARNING")
-                    CurrentDebugLevel = Warning;
-                else if (value == "INFO")
-                    CurrentDebugLevel = Info;
-                else if (value == "VERBOSE")
-                    CurrentDebugLevel = Verbose;
-                else if (value == "DEBUG")
-                    CurrentDebugLevel = Debug;
-
-                return;
-            }
-
-            CurrentDebugLevel = Verbose;
         }
 
         virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
@@ -380,8 +351,30 @@ namespace Debug
         return Misc::Locked<std::ostream&>(*rawStderrMutex, getRawStderr());
     }
 
+    Level getDebugLevel()
+    {
+        if (const char* env = getenv("OPENMW_DEBUG_LEVEL"))
+        {
+            const std::string_view value(env);
+            if (value == "ERROR")
+                return Error;
+            if (value == "WARNING")
+                return Warning;
+            if (value == "INFO")
+                return Info;
+            if (value == "VERBOSE")
+                return Verbose;
+            if (value == "DEBUG")
+                return Debug;
+        }
+
+        return Verbose;
+    }
+
     void setupLogging(const std::filesystem::path& logDir, std::string_view appName)
     {
+        CurrentDebugLevel = getDebugLevel();
+
 #if !(defined(_WIN32) && defined(_DEBUG))
         const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
         logfile.open(logDir / logName, std::ios::out);
