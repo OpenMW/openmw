@@ -40,7 +40,7 @@ namespace osgMyGUI
 
     MyGUI::LogLevel LogFacility::getCurrentLogLevel() const
     {
-        switch (Debug::CurrentDebugLevel)
+        switch (Log::sMinDebugLevel)
         {
             case Debug::Error:
                 return MyGUI::LogLevel::Error;

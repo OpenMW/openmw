@@ -113,12 +113,15 @@ namespace Debug
         {
             if (size <= 0)
                 return size;
-            std::string_view msg{ str, size_t(size) };
+            std::string_view msg{ str, static_cast<size_t>(size) };
 
             // Skip debug level marker
-            Level level = getLevelMarker(str);
-            if (level != NoLevel)
+            Level level = All;
+            if (Log::sWriteLevel)
+            {
+                level = getLevelMarker(msg[0]);
                 msg = msg.substr(1);
+            }
 
             char prefix[32];
             std::size_t prefixSize;
@@ -159,14 +162,11 @@ namespace Debug
         virtual ~DebugOutputBase() = default;
 
     protected:
-        static Level getLevelMarker(const char* str)
+        static Level getLevelMarker(char marker)
         {
-            if (unsigned(*str) <= unsigned(Marker))
-            {
-                return Level(*str);
-            }
-
-            return NoLevel;
+            if (0 <= marker && static_cast<unsigned>(marker) < static_cast<unsigned>(All))
+                return static_cast<Level>(marker);
+            return All;
         }
 
         virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
@@ -216,7 +216,7 @@ namespace Debug
                     return DarkGray;
                 case Debug:
                     return DarkGray;
-                case NoLevel:
+                case All:
                     return Reset;
             }
             return Reset;
@@ -378,7 +378,8 @@ namespace Debug
 
     void setupLogging(const std::filesystem::path& logDir, std::string_view appName)
     {
-        CurrentDebugLevel = getDebugLevel();
+        Log::sMinDebugLevel = getDebugLevel();
+        Log::sWriteLevel = true;
 
 #if !(defined(_WIN32) && defined(_DEBUG))
         const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
@@ -473,7 +474,9 @@ namespace Debug
         // Restore cout and cerr
         std::cout.rdbuf(rawStdout->rdbuf());
         std::cerr.rdbuf(rawStderr->rdbuf());
-        CurrentDebugLevel = NoLevel;
+
+        Log::sMinDebugLevel = All;
+        Log::sWriteLevel = false;
 
         return ret;
     }
