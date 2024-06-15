@@ -168,13 +168,6 @@ option(OPENMW_USE_SYSTEM_GOOGLETEST "Use system Google Test library." OFF)
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
-# what is necessary to build documentation
-IF( BUILD_DOCS )
-    # Builds the documentation.
-    FIND_PACKAGE( Sphinx REQUIRED )
-    FIND_PACKAGE( Doxygen REQUIRED )
-ENDIF()
-
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
@@ -1107,28 +1100,34 @@ elseif(NOT APPLE)
     endif(WIN32)
 endif(OPENMW_OSX_DEPLOYMENT AND APPLE)
 
-# Doxygen Target -- simply run 'make doc' or 'make doc_pages'
-# output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
-# output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
-#                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
-    # determine output directory for doc_pages
-    if (NOT DEFINED DOXYGEN_PAGES_OUTPUT_DIR)
-        set(DOXYGEN_PAGES_OUTPUT_DIR "${OpenMW_BINARY_DIR}/docs/Pages")
+# what is necessary to build documentation
+if ( BUILD_DOCS )
+    # Builds the documentation.
+    FIND_PACKAGE( Sphinx REQUIRED )
+    FIND_PACKAGE( Doxygen REQUIRED )
+
+    # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
+    # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
+    # output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
+    #                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
+    if ( DOXYGEN_FOUND )
+        # determine output directory for doc_pages
+        if (NOT DEFINED DOXYGEN_PAGES_OUTPUT_DIR)
+            set(DOXYGEN_PAGES_OUTPUT_DIR "${OpenMW_BINARY_DIR}/docs/Pages")
+        endif ()
+        configure_file(${OpenMW_SOURCE_DIR}/docs/Doxyfile.cmake ${OpenMW_BINARY_DIR}/docs/Doxyfile @ONLY)
+        configure_file(${OpenMW_SOURCE_DIR}/docs/DoxyfilePages.cmake ${OpenMW_BINARY_DIR}/docs/DoxyfilePages @ONLY)
+        add_custom_target(doc
+            ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/Doxyfile
+            WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
+            COMMENT "Generating Doxygen documentation at ${OpenMW_BINARY_DIR}/docs/Doxygen"
+            VERBATIM)
+        add_custom_target(doc_pages
+            ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/DoxyfilePages
+            WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
+            COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
     endif ()
-    configure_file(${OpenMW_SOURCE_DIR}/docs/Doxyfile.cmake ${OpenMW_BINARY_DIR}/docs/Doxyfile @ONLY)
-    configure_file(${OpenMW_SOURCE_DIR}/docs/DoxyfilePages.cmake ${OpenMW_BINARY_DIR}/docs/DoxyfilePages @ONLY)
-    add_custom_target(doc
-        ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/Doxyfile
-        WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
-        COMMENT "Generating Doxygen documentation at ${OpenMW_BINARY_DIR}/docs/Doxygen"
-        VERBATIM)
-    add_custom_target(doc_pages
-        ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/DoxyfilePages
-        WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
-        COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
-endif ()
+endif()
 
 # Qt localization
 if (USE_QT)
