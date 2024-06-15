@@ -1,13 +1,16 @@
-#include <gtest/gtest.h>
+#include <components/debug/debugging.hpp>
+#include <components/misc/strings/conversion.hpp>
+#include <components/settings/parser.hpp>
+#include <components/settings/values.hpp>
 
-#include "components/misc/strings/conversion.hpp"
-#include "components/settings/parser.hpp"
-#include "components/settings/values.hpp"
+#include <gtest/gtest.h>
 
 #include <filesystem>
 
 int main(int argc, char** argv)
 {
+    Log::sMinDebugLevel = Debug::getDebugLevel();
+
     const std::filesystem::path settingsDefaultPath = std::filesystem::path{ OPENMW_PROJECT_SOURCE_DIR } / "files"
         / Misc::StringUtils::stringToU8String("settings-default.cfg");
 

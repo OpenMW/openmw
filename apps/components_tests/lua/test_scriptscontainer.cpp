@@ -458,10 +458,14 @@ CUSTOM, PLAYER: useInterface.lua
         callback.call(1.5, 2.5);
         EXPECT_EQ(internal::GetCapturedStdout(), "1.5\t2.5\n");
 
+        const Debug::Level level = std::exchange(Log::sMinDebugLevel, Debug::All);
+
         testing::internal::CaptureStdout();
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = sol::nil;
         callback.call(1.5, 2.5);
         EXPECT_EQ(internal::GetCapturedStdout(), "Ignored callback to the removed script some_script.lua\n");
+
+        Log::sMinDebugLevel = level;
     }
 
 }
