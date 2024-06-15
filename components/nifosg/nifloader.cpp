@@ -741,7 +741,11 @@ namespace NifOsg
             }
 
             if (nifNode->recType == Nif::RC_NiCollisionSwitch && !nifNode->collisionActive())
+            {
                 node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
+                // Don't let the optimizer mess with this node
+                node->setDataVariance(osg::Object::DYNAMIC);
+            }
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
