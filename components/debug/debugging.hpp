@@ -35,8 +35,8 @@ std::ostream& getRawStderr();
 
 Misc::Locked<std::ostream&> getLockedRawStderr();
 
-void setupLogging(
-    const std::filesystem::path& logDir, std::string_view appName, std::ios_base::openmode mode = std::ios::out);
+// Redirect cout and cerr to the log file
+void setupLogging(const std::filesystem::path& logDir, std::string_view appName);
 
 int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], std::string_view appName);
 

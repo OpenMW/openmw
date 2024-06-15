@@ -383,12 +383,11 @@ Misc::Locked<std::ostream&> getLockedRawStderr()
     return Misc::Locked<std::ostream&>(*rawStderrMutex, getRawStderr());
 }
 
-// Redirect cout and cerr to the log file
-void setupLogging(const std::filesystem::path& logDir, std::string_view appName, std::ios_base::openmode mode)
+void setupLogging(const std::filesystem::path& logDir, std::string_view appName)
 {
 #if !(defined(_WIN32) && defined(_DEBUG))
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-    logfile.open(logDir / logName, mode);
+    logfile.open(logDir / logName, std::ios::out);
 
     Debug::Identity log(logfile);
 
