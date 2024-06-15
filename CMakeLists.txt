@@ -1110,24 +1110,23 @@ if ( BUILD_DOCS )
     # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
     # output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
     #                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
-    if ( DOXYGEN_FOUND )
-        # determine output directory for doc_pages
-        if (NOT DEFINED DOXYGEN_PAGES_OUTPUT_DIR)
-            set(DOXYGEN_PAGES_OUTPUT_DIR "${OpenMW_BINARY_DIR}/docs/Pages")
-        endif ()
-        configure_file(${OpenMW_SOURCE_DIR}/docs/Doxyfile.cmake ${OpenMW_BINARY_DIR}/docs/Doxyfile @ONLY)
-        configure_file(${OpenMW_SOURCE_DIR}/docs/DoxyfilePages.cmake ${OpenMW_BINARY_DIR}/docs/DoxyfilePages @ONLY)
-        add_custom_target(doc
-            ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/Doxyfile
-            WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
-            COMMENT "Generating Doxygen documentation at ${OpenMW_BINARY_DIR}/docs/Doxygen"
-            VERBATIM)
-        add_custom_target(doc_pages
-            ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/DoxyfilePages
-            WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
-            COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
+
+    # determine output directory for doc_pages
+    if (NOT DEFINED DOXYGEN_PAGES_OUTPUT_DIR)
+        set(DOXYGEN_PAGES_OUTPUT_DIR "${OpenMW_BINARY_DIR}/docs/Pages")
     endif ()
-endif()
+    configure_file(${OpenMW_SOURCE_DIR}/docs/Doxyfile.cmake ${OpenMW_BINARY_DIR}/docs/Doxyfile @ONLY)
+    configure_file(${OpenMW_SOURCE_DIR}/docs/DoxyfilePages.cmake ${OpenMW_BINARY_DIR}/docs/DoxyfilePages @ONLY)
+    add_custom_target(doc
+        ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/Doxyfile
+        WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
+        COMMENT "Generating Doxygen documentation at ${OpenMW_BINARY_DIR}/docs/Doxygen"
+        VERBATIM)
+    add_custom_target(doc_pages
+        ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/DoxyfilePages
+        WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
+        COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
+endif ()
 
 # Qt localization
 if (USE_QT)
