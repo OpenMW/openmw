@@ -1,6 +1,7 @@
 #include "debugging.hpp"
 
 #include <chrono>
+#include <deque>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -199,7 +200,7 @@ namespace Debug
             Level mLevel;
         };
 
-        std::vector<Record> globalBuffer;
+        std::deque<Record> globalBuffer;
 
         Color getColor(Level level)
         {
@@ -284,18 +285,22 @@ namespace Debug
         class Buffer
         {
         public:
-            explicit Buffer(std::vector<Record>& buffer)
-                : mBuffer(buffer)
+            explicit Buffer(std::size_t capacity, std::deque<Record>& buffer)
+                : mCapacity(capacity)
+                , mBuffer(buffer)
             {
             }
 
             void write(const char* str, std::streamsize size, Level debugLevel)
             {
+                while (mBuffer.size() >= mCapacity)
+                    mBuffer.pop_front();
                 mBuffer.push_back(Record{ std::string(str, size), debugLevel });
             }
 
         private:
-            std::vector<Record>& mBuffer;
+            std::size_t mCapacity;
+            std::deque<Record>& mBuffer;
         };
 
         template <class First, class Second>
@@ -417,8 +422,10 @@ namespace Debug
         std::cout.rdbuf(&sb);
         std::cerr.rdbuf(&sb);
 #else
-        bufferedOut.open(Tee(Buffer(globalBuffer), Coloured(*rawStdout)));
-        bufferedErr.open(Tee(Buffer(globalBuffer), Coloured(*rawStderr)));
+        constexpr std::size_t bufferCapacity = 1024;
+
+        bufferedOut.open(Tee(Buffer(bufferCapacity, globalBuffer), Coloured(*rawStdout)));
+        bufferedErr.open(Tee(Buffer(bufferCapacity, globalBuffer), Coloured(*rawStderr)));
 
         std::cout.rdbuf(&bufferedOut);
         std::cerr.rdbuf(&bufferedErr);
