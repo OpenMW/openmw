@@ -679,6 +679,9 @@ namespace MWGui
         mWeapBox->setUserData(MyGUI::Any::Null);
         mSpellBox->clearUserStrings();
         mSpellBox->setUserData(MyGUI::Any::Null);
+
+        mActiveCell = nullptr;
+        mHasALastActiveCell = false;
     }
 
     void HUD::customMarkerCreated(MyGUI::Widget* marker)

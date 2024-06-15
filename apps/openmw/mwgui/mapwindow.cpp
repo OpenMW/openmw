@@ -82,7 +82,7 @@ namespace
 
     MyGUI::IntRect createRect(const MyGUI::IntPoint& center, int radius)
     {
-        return { center.left - radius, center.top + radius, center.left + radius, center.top - radius };
+        return { center.left - radius, center.top - radius, center.left + radius, center.top + radius };
     }
 
     int getLocalViewingDistance()
@@ -387,16 +387,6 @@ namespace MWGui
 
         if (cell.isExterior())
         {
-            int curX = 0;
-            int curY = 0;
-            if (mActiveCell)
-            {
-                curX = mActiveCell->getGridX();
-                curY = mActiveCell->getGridY();
-            }
-            const MyGUI::IntRect intersection = { std::max(x, curX) - mCellDistance, std::max(y, curY) - mCellDistance,
-                std::min(x, curX) + mCellDistance, std::min(y, curY) + mCellDistance };
-
             const MyGUI::IntRect activeGrid = createRect({ x, y }, Constants::CellGridRadius);
             const MyGUI::IntRect currentView = createRect({ x, y }, mCellDistance);
 
@@ -416,10 +406,13 @@ namespace MWGui
             for (auto& widget : mDoorMarkersToRecycle)
                 widget->setVisible(false);
 
-            for (auto const& entry : mMaps)
+            if (mHasALastActiveCell)
             {
-                if (mHasALastActiveCell && !intersection.inside({ entry.mCellX, entry.mCellY }))
-                    mLocalMapRender->removeExteriorCell(entry.mCellX, entry.mCellY);
+                for (const auto& entry : mMaps)
+                {
+                    if (!currentView.inside({ entry.mCellX, entry.mCellY }))
+                        mLocalMapRender->removeExteriorCell(entry.mCellX, entry.mCellY);
+                }
             }
         }
 
@@ -513,7 +506,7 @@ namespace MWGui
         if (markers.empty())
             return;
 
-        std::string markerTexture;
+        std::string_view markerTexture;
         if (type == MWBase::World::Detect_Creature)
         {
             markerTexture = "textures\\detect_animal_icon.dds";
