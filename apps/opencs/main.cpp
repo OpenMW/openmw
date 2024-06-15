@@ -78,5 +78,5 @@ int runApplication(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
+    return Debug::wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
 }
