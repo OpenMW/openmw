@@ -52,6 +52,7 @@
 -- @field #string recordId Id of the script
 -- @field openmw.core#GameObject object The object the script is attached to.
 -- @field openmw.core#GameObject player The player the script refers to.
+-- @field #boolean isRunning Whether the script is currently running
 -- @field #MWScriptVariables variables Local variables of the script (mutable)
 -- @usage
 -- for _, script in ipairs(world.mwscript.getLocalScripts(object)) do

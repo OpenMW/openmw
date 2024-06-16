@@ -177,3 +177,8 @@ void MWWorld::LocalScripts::remove(const Ptr& ptr)
             break;
         }
 }
+
+bool MWWorld::LocalScripts::isRunning(const ESM::RefId& scriptName, const Ptr& ptr) const
+{
+    return std::ranges::find(mScripts, std::pair(scriptName, ptr)) != mScripts.end();
+}

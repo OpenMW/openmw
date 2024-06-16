@@ -45,6 +45,9 @@ namespace MWWorld
 
         void remove(const Ptr& ptr);
         ///< Remove script for given reference (ignored if reference does not have a script listed).
+
+        bool isRunning(const ESM::RefId&, const Ptr&) const;
+        ///< Is the local script running?.
     };
 }
 
