@@ -1,5 +1,6 @@
 #include "mwscriptbindings.hpp"
 
+#include <components/compiler/locals.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/strings/lower.hpp>
 
@@ -143,18 +144,75 @@ namespace MWLua
         });
         mwscript["player"] = sol::readonly_property(
             [](const MWScriptRef&) { return GObject(MWBase::Environment::get().getWorld()->getPlayerPtr()); });
-        mwscriptVars[sol::meta_function::index]
-            = [](MWScriptVariables& s, std::string_view var) -> sol::optional<double> {
-            if (s.mRef.getLocals().hasVar(s.mRef.mId, var))
-                return s.mRef.getLocals().getVarAsDouble(s.mRef.mId, Misc::StringUtils::lowerCase(var));
-            else
+        mwscriptVars[sol::meta_function::length]
+            = [](MWScriptVariables& s) { return s.mRef.getLocals().getSize(s.mRef.mId); };
+        mwscriptVars[sol::meta_function::index] = sol::overload(
+            [](MWScriptVariables& s, std::string_view var) -> sol::optional<double> {
+                if (s.mRef.getLocals().hasVar(s.mRef.mId, var))
+                    return s.mRef.getLocals().getVarAsDouble(s.mRef.mId, Misc::StringUtils::lowerCase(var));
+                else
+                    return sol::nullopt;
+            },
+            [](MWScriptVariables& s, std::size_t index) -> sol::optional<double> {
+                auto& locals = s.mRef.getLocals();
+                if (index < 1 || locals.getSize(s.mRef.mId) < index)
+                    return sol::nullopt;
+                if (index <= locals.mShorts.size())
+                    return locals.mShorts[index - 1];
+                index -= locals.mShorts.size();
+                if (index <= locals.mLongs.size())
+                    return locals.mLongs[index - 1];
+                index -= locals.mLongs.size();
+                if (index <= locals.mFloats.size())
+                    return locals.mFloats[index - 1];
                 return sol::nullopt;
-        };
-        mwscriptVars[sol::meta_function::new_index] = [](MWScriptVariables& s, std::string_view var, double val) {
-            MWScript::Locals& locals = s.mRef.getLocals();
-            if (!locals.setVar(s.mRef.mId, Misc::StringUtils::lowerCase(var), val))
-                throw std::runtime_error(
-                    "No variable \"" + std::string(var) + "\" in mwscript " + s.mRef.mId.toDebugString());
+            });
+        mwscriptVars[sol::meta_function::new_index] = sol::overload(
+            [](MWScriptVariables& s, std::string_view var, double val) {
+                MWScript::Locals& locals = s.mRef.getLocals();
+                if (!locals.setVar(s.mRef.mId, Misc::StringUtils::lowerCase(var), val))
+                    throw std::runtime_error(
+                        "No variable \"" + std::string(var) + "\" in mwscript " + s.mRef.mId.toDebugString());
+            },
+            [](MWScriptVariables& s, std::size_t index, double val) {
+                auto& locals = s.mRef.getLocals();
+                if (index < 1 || locals.getSize(s.mRef.mId) < index)
+                    throw std::runtime_error("Index out of range in mwscript " + s.mRef.mId.toDebugString());
+                if (index <= locals.mShorts.size())
+                {
+                    locals.mShorts[index - 1] = static_cast<Interpreter::Type_Short>(val);
+                    return;
+                }
+                index -= locals.mShorts.size();
+                if (index <= locals.mLongs.size())
+                {
+                    locals.mLongs[index - 1] = static_cast<Interpreter::Type_Integer>(val);
+                    return;
+                }
+                index -= locals.mLongs.size();
+                if (index <= locals.mFloats.size())
+                    locals.mFloats[index - 1] = static_cast<Interpreter::Type_Float>(val);
+            });
+        mwscriptVars[sol::meta_function::pairs] = [](MWScriptVariables& s) {
+            std::size_t index = 0;
+            const auto& compilerLocals = MWBase::Environment::get().getScriptManager()->getLocals(s.mRef.mId);
+            auto& locals = s.mRef.getLocals();
+            std::size_t size = locals.getSize(s.mRef.mId);
+            return sol::as_function(
+                [&, index, size](sol::this_state ts) mutable -> sol::optional<std::tuple<std::string_view, double>> {
+                    if (index >= size)
+                        return sol::nullopt;
+                    auto i = index++;
+                    if (i <= locals.mShorts.size())
+                        return std::make_tuple<std::string_view, double>(compilerLocals.get('s')[i], locals.mShorts[i]);
+                    i -= locals.mShorts.size();
+                    if (i <= locals.mLongs.size())
+                        return std::make_tuple<std::string_view, double>(compilerLocals.get('l')[i], locals.mLongs[i]);
+                    i -= locals.mLongs.size();
+                    if (i <= locals.mFloats.size())
+                        return std::make_tuple<std::string_view, double>(compilerLocals.get('f')[i], locals.mFloats[i]);
+                    return sol::nullopt;
+                });
         };
 
         using GlobalStore = MWWorld::Store<ESM::Global>;
@@ -222,5 +280,4 @@ namespace MWLua
         };
         return LuaUtil::makeReadOnly(api);
     }
-
 }

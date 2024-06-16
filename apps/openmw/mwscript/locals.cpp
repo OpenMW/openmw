@@ -121,6 +121,12 @@ namespace MWScript
         return true;
     }
 
+    std::size_t Locals::getSize(const ESM::RefId& script)
+    {
+        ensure(script);
+        return mShorts.size() + mLongs.size() + mFloats.size();
+    }
+
     bool Locals::write(ESM::Locals& locals, const ESM::RefId& script) const
     {
         if (!mInitialised)
