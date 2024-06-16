@@ -7,7 +7,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/misc/algorithm.hpp>
 
 #include "cellstore.hpp"
@@ -80,6 +80,8 @@ namespace MWWorld
         void registerPtr(const Ptr& ptr) { mPtrRegistry.insert(ptr); }
 
         void deregisterLiveCellRef(const LiveCellRefBase& ref) noexcept { mPtrRegistry.remove(ref); }
+
+        void assignSaveFileRefNum(ESM::CellRef& ref) { mPtrRegistry.assign(ref); }
 
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)

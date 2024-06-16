@@ -3,7 +3,6 @@
 
 #include <span>
 
-#include <osg/Camera>
 #include <osg/Light>
 #include <osg/ref_ptr>
 
@@ -168,7 +167,6 @@ namespace MWRender
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
         void screenshot(osg::Image* image, int w, int h);
-        bool screenshot360(osg::Image* image);
 
         struct RayResult
         {

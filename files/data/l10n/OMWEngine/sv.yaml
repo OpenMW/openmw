@@ -22,7 +22,7 @@ LoadingInProgress: "Laddar sparat spel"
 LoadingRequiresNewVersionError: |-
     Denna sparfil skapades i en nyare version av OpenMW och stöds därför inte.
     Uppgradera till den senaste versionen av OpenMW för att ladda filen.
- LoadingRequiresOldVersionError: |-
+LoadingRequiresOldVersionError: |-
     Denna sparfil skapades i en äldre version av OpenMW i ett format som inte längre stöds.
     Ladda och spara denna sparfil med {version} för att uppgradera den.
 NewGameConfirmation: "Vill du starta ett nytt spel och förlora det pågående spelet?"
@@ -39,6 +39,8 @@ TimePlayed: "Speltid"
 DeleteGame: "Radera spel"
 DeleteGameConfirmation: "Är du säker på att du vill radera sparfilen?"
 EmptySaveNameError: "Spelet kan inte sparas utan ett namn!"
+Health: "Hälsa"
+Level: "Nivå"
 LoadGameConfirmation: "Vill du ladda ett sparat spel och förlora det pågående spelet?"
 MissingContentFilesConfirmation: |-
     De valda innehållsfilerna matchar inte filerna som används av denna sparfil.
@@ -52,9 +54,9 @@ MissingContentFilesList: |-
   }
 MissingContentFilesListCopy: |-
   {files, plural,
-    one{\n\nPress Kopiera för att placera namnet i urklipp.}
-    few{\n\nPress Kopiera för att placera deras namn i urklipp.}
-    other{\n\nPress Kopiera för att placera deras namn i urklipp.}
+    one{\n\nKlicka på kopiera för att placera namnet i urklipp.}
+    few{\n\nKlicka på kopiera för att placera deras namn i urklipp.}
+    other{\n\nKlicka på kopiera för att placera deras namn i urklipp.}
   } 
 OverwriteGameConfirmation: "Är du säker på att du vill skriva över det här sparade spelet?"
 SelectCharacter: "Välj spelfigur..."
@@ -70,6 +72,8 @@ AudioFootsteps: "Fotsteg"
 AudioMaster: "Huvudvolym"
 AudioMusic: "Musik"
 AudioVoice: "Röster"
+AutoSaveOnResting: "Autospara vid vila"
+BestAttack: "Använd alltid bästa attack"
 CameraSensitivity: "Kamerakänslighet"
 CameraZoomIn: "Zooma in kamera"
 CameraZoomOut: "Zooma ut kamera"
@@ -78,6 +82,7 @@ ConfirmResetBindings: "Återställ alla kontroller till standard?"
 ConfirmResolution: "Ny upplösning kommer ställas in omedelbart. Vill du fortsätta?"
 Controller: "Handkontroll"
 Controls: "Kontroller"
+Crosshair: "Hårkors"
 DelayLow: "Snabbt"
 DelayHigh: "Långsamt"
 DetailLevel: "Detaljnivå"
@@ -90,6 +95,16 @@ EnableController: "Aktivera handkontroll"
 FieldOfView: "Synfält"
 FieldOfViewLow: "Låg"
 FieldOfViewHigh: "Hög"
+ForcePerPixelLighting: "Tvinga per-pixelljussättning"
+ForcePerPixelLightingTooltip: |-
+    Tvingar användningen av per-pixelljussättning. Som standard är det annars bara objekt med normalkartor som använder per-pixelljussättning.
+
+    Denna inställning påverkar endast objekt som ritas med shaderteknik.
+
+    Aktivering av per-pixelljussättning kommer ge visuella skillnader jämfört med hur Morrowind ser ut i ordinarie spelmotor.
+    Detta då visst ljus i Morrowind är beroende av vertexljussättning för att se ut som det var avsett.
+
+    Notera att shaders för marktäckare och partikeleffekter ignorerar denna inställning.
 FrameRateHint: "Tips: tryck på F3 för att visa\naktuell bilduppdateringsfrekvens."
 GammaCorrection: "Gammakorrigering"
 GammaDark: "Mörkt"
@@ -111,7 +126,7 @@ LightsFadeStartMultiplier: "Blekningsstartmultiplikator"
 LightsFadeStartMultiplierTooltip: "Förvalt: 0.85\nFraktion av det maximala avståndet från vilket ljuskällor börjar blekna.\n\nVälj lågt värde för långsammare övergång eller högre värde för snabbare övergång."
 LightsLightingMethodTooltip: "Välj intern hantering av ljuskällor.\n\n
     \"Gammaldags\" använder alltid max 8 ljuskällor per objekt och ger ljussättning likt ett gammaldags spel.\n\n
-    \"Shader (kompatibilitet)\" tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning och ett konfigurerbart ljusbleknande. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
+    \"Shader (kompatibilitet)\" tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
     \"Shader\" har alla fördelar som \"Shader (kompatibilitet)\" har, med med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara."
 LightsMaximumDistance: "Maximalt ljusavstånd"
 LightsMaximumDistanceTooltip: "Förvalt: 8192\nMaximala avståndet där ljuskällor syns (mätt i enheter).\n\nVärdet 0 ger oändligt avstånd."
@@ -122,9 +137,9 @@ MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt l�
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
 MenuTransparency: "Menytransparens"
 MouseAndKeyboard: "Mus/Tangentbord"
-PostProcessing: "Postprocessing"
-PostProcessingIsNotEnabled: "Postprocessing är inte aktiverat"
-PostProcessingTooltip: "Justeras via Postprocessing-gränssnittet, se input bindings."
+PostProcessing: "Efterbehandling (post processing)"
+PostProcessingIsNotEnabled: "Efterbehandling (post processing) är inte aktiverat"
+PostProcessingTooltip: "Justeras via Efterbehandlings-gränssnittet, se input bindings."
 Preferences: "Inställningar" #Den engelska texten är "prefs", alltså "preferences" men förkortat. Men översättningen "preferenser" känns inte helt rätt. Kan vara bra att fundera över den här framöver.
 PrimaryLanguage: "Primärt språk"
 PrimaryLanguageTooltip: "Lokaliseringsfiler för detta språk har högst prioritet."
@@ -159,11 +174,12 @@ TestingExteriorCells: "Testar exteriöra celler"
 TestingInteriorCells: "Testar interiöra celler"
 TextureFiltering: "Texturfiltrering"
 TextureFilteringBilinear: "Bilinjär"
+TextureFilteringNearest: "Närmaste"
 TextureFilteringDisabled: "Ingen"
 TextureFilteringOther: "Annan"
 TextureFilteringTrilinear: "Trilinjär"
 ToggleHUD: "Visa/dölj HUD"
-TogglePostProcessorHUD: "Visa/dölj Postprocess-HUD"
+TogglePostProcessorHUD: "Visa/dölj Efterbehandlingsgränssnitt"
 TransparencyFull: "Full"
 TransparencyNone: "Ingen"
 Video: "Bild"
@@ -175,8 +191,8 @@ WaterShader: "Vattenshader"
 WaterShaderTextureQuality: "Texturkvalitet"
 WindowBorder: "Fönster, ram"
 WindowMode: "Fönsterläge"
-WindowModeFullscreen: "Fullskärm"
-WindowModeHint: "Notera: Fullskärm i fönsterläge\nanvänder alltid skärmens nativa upplösning."
+WindowModeFullscreen: "Helskärm"
+WindowModeHint: "Notera: Helskärm i fönsterläge\nanvänder alltid skärmens nativa upplösning."
 WindowModeWindowed: "Fönster"
-WindowModeWindowedFullscreen: "Fullskärm i fönsterläge"
+WindowModeWindowedFullscreen: "Helskärm i fönsterläge"
 WobblyShores: "Vaggande stränder"

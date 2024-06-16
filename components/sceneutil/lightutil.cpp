@@ -52,11 +52,15 @@ namespace SceneUtil
         static const bool useConstant = Fallback::Map::getBool("LightAttenuation_UseConstant");
         static const bool useLinear = Fallback::Map::getBool("LightAttenuation_UseLinear");
         static const bool useQuadratic = Fallback::Map::getBool("LightAttenuation_UseQuadratic");
-        static const float constantValue = Fallback::Map::getFloat("LightAttenuation_ConstantValue");
-        static const float linearValue = Fallback::Map::getFloat("LightAttenuation_LinearValue");
-        static const float quadraticValue = Fallback::Map::getFloat("LightAttenuation_QuadraticValue");
-        static const float linearRadiusMult = Fallback::Map::getFloat("LightAttenuation_LinearRadiusMult");
-        static const float quadraticRadiusMult = Fallback::Map::getFloat("LightAttenuation_QuadraticRadiusMult");
+        // User file might provide nonsense values
+        // Clamp these settings to prevent badness (e.g. illegal OpenGL calls)
+        static const float constantValue = std::max(Fallback::Map::getFloat("LightAttenuation_ConstantValue"), 0.f);
+        static const float linearValue = std::max(Fallback::Map::getFloat("LightAttenuation_LinearValue"), 0.f);
+        static const float quadraticValue = std::max(Fallback::Map::getFloat("LightAttenuation_QuadraticValue"), 0.f);
+        static const float linearRadiusMult
+            = std::max(Fallback::Map::getFloat("LightAttenuation_LinearRadiusMult"), 0.f);
+        static const float quadraticRadiusMult
+            = std::max(Fallback::Map::getFloat("LightAttenuation_QuadraticRadiusMult"), 0.f);
         static const int linearMethod = Fallback::Map::getInt("LightAttenuation_LinearMethod");
         static const int quadraticMethod = Fallback::Map::getInt("LightAttenuation_QuadraticMethod");
         static const bool outQuadInLin = Fallback::Map::getBool("LightAttenuation_OutQuadInLin");
@@ -68,7 +72,7 @@ namespace SceneUtil
         {
             linearAttenuation = linearMethod == 0 ? linearValue : 0.01f;
             float r = radius * linearRadiusMult;
-            if (r && (linearMethod == 1 || linearMethod == 2))
+            if (r > 0.f && (linearMethod == 1 || linearMethod == 2))
                 linearAttenuation = linearValue / std::pow(r, linearMethod);
         }
 
@@ -76,9 +80,13 @@ namespace SceneUtil
         {
             quadraticAttenuation = quadraticMethod == 0 ? quadraticValue : 0.01f;
             float r = radius * quadraticRadiusMult;
-            if (r && (quadraticMethod == 1 || quadraticMethod == 2))
+            if (r > 0.f && (quadraticMethod == 1 || quadraticMethod == 2))
                 quadraticAttenuation = quadraticValue / std::pow(r, quadraticMethod);
         }
+
+        // If the values are still nonsense, try to at least prevent UB and disable attenuation
+        if (constantAttenuation == 0.f && linearAttenuation == 0.f && quadraticAttenuation == 0.f)
+            constantAttenuation = 1.f;
 
         light->setConstantAttenuation(constantAttenuation);
         light->setLinearAttenuation(linearAttenuation);
@@ -117,19 +125,23 @@ namespace SceneUtil
         configureLight(light, radius, isExterior);
 
         osg::Vec4f diffuse = esmLight.mColor;
+        osg::Vec4f specular = esmLight.mColor; // ESM format doesn't provide specular
         if (esmLight.mNegative)
         {
             diffuse *= -1;
             diffuse.a() = 1;
+            // Using specular lighting for negative lights is unreasonable
+            specular = osg::Vec4f();
         }
         light->setDiffuse(diffuse);
         light->setAmbient(ambient);
-        light->setSpecular(diffuse); // ESM format doesn't provide specular
+        light->setSpecular(specular);
 
         lightSource->setLight(light);
 
         osg::ref_ptr<SceneUtil::LightController> ctrl(new SceneUtil::LightController);
         ctrl->setDiffuse(light->getDiffuse());
+        ctrl->setSpecular(light->getSpecular());
         if (esmLight.mFlicker)
             ctrl->setType(SceneUtil::LightController::LT_Flicker);
         if (esmLight.mFlickerSlow)

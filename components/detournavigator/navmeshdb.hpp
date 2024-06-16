@@ -2,10 +2,10 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVMESHDB_H
 
 #include "tileposition.hpp"
+#include "tilespositionsrange.hpp"
 
-#include <components/detournavigator/tilespositionsrange.hpp>
+#include <components/esm/refid.hpp>
 #include <components/misc/strongtypedef.hpp>
-
 #include <components/sqlite3/db.hpp>
 #include <components/sqlite3/statement.hpp>
 #include <components/sqlite3/transaction.hpp>
@@ -13,13 +13,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
-#include <memory>
 #include <optional>
-#include <stdexcept>
 #include <string_view>
-#include <tuple>
-#include <utility>
 #include <vector>
 
 struct sqlite3;
@@ -148,21 +143,21 @@ namespace DetourNavigator
         TileId getMaxTileId();
 
         std::optional<Tile> findTile(
-            std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
+            ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
         std::optional<TileData> getTileData(
-            std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
+            ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
-        int insertTile(TileId tileId, std::string_view worldspace, const TilePosition& tilePosition,
-            TileVersion version, const std::vector<std::byte>& input, const std::vector<std::byte>& data);
+        int insertTile(TileId tileId, ESM::RefId worldspace, const TilePosition& tilePosition, TileVersion version,
+            const std::vector<std::byte>& input, const std::vector<std::byte>& data);
 
         int updateTile(TileId tileId, TileVersion version, const std::vector<std::byte>& data);
 
-        int deleteTilesAt(std::string_view worldspace, const TilePosition& tilePosition);
+        int deleteTilesAt(ESM::RefId worldspace, const TilePosition& tilePosition);
 
-        int deleteTilesAtExcept(std::string_view worldspace, const TilePosition& tilePosition, TileId excludeTileId);
+        int deleteTilesAtExcept(ESM::RefId worldspace, const TilePosition& tilePosition, TileId excludeTileId);
 
-        int deleteTilesOutsideRange(std::string_view worldspace, const TilesPositionsRange& range);
+        int deleteTilesOutsideRange(ESM::RefId worldspace, const TilesPositionsRange& range);
 
         ShapeId getMaxShapeId();
 

@@ -379,7 +379,10 @@ namespace MWMechanics
         mFlags = static_cast<ESM::ActiveSpells::Flags>(
             ESM::ActiveSpells::Flag_Temporary | ESM::ActiveSpells::Flag_Stackable);
 
-        inflict(mCaster, potion->mEffects, ESM::RT_Self);
+        // Ignore range and don't apply area of effect
+        inflict(mCaster, potion->mEffects, ESM::RT_Self, true);
+        inflict(mCaster, potion->mEffects, ESM::RT_Touch, true);
+        inflict(mCaster, potion->mEffects, ESM::RT_Target, true);
 
         return true;
     }

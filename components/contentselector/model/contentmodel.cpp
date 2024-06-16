@@ -508,13 +508,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
                     file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
                     for (const auto& master : fileReader.getGameFiles())
                         file->addGameFile(QString::fromUtf8(master.name.c_str()));
-
-                    // HACK
-                    // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing
-                    // from the file supplied by Bethesda, so we have to add it ourselves
-                    if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
-                        file->addGameFile(QString::fromUtf8("Tribunal.esm"));
-
                     break;
                 }
                 case ESM::Format::Tes4:
@@ -606,6 +599,11 @@ void ContentSelectorModel::ContentModel::sortFiles()
         && (mFiles.at(firstModifiable)->builtIn() || mFiles.at(firstModifiable)->fromAnotherConfigFile()))
         ++firstModifiable;
 
+    // For the purposes of dependency sort we'll hallucinate that Bloodmoon is dependent on Tribunal
+    const EsmFile* tribunalFile = item("Tribunal.esm");
+    const EsmFile* bloodmoonFile = item("Bloodmoon.esm");
+    const bool sortExpansions = tribunalFile != nullptr && bloodmoonFile != nullptr;
+
     // Dependency sort
     std::unordered_set<const EsmFile*> moved;
     for (int i = mFiles.size() - 1; i > firstModifiable;)
@@ -616,10 +614,12 @@ void ContentSelectorModel::ContentModel::sortFiles()
             int index = -1;
             for (int j = firstModifiable; j < i; ++j)
             {
-                const QStringList& gameFiles = mFiles.at(j)->gameFiles();
+                const EsmFile* addonFile = mFiles.at(j);
+                const QStringList& gameFiles = addonFile->gameFiles();
                 // All addon files are implicitly dependent on the game file
                 // so that they don't accidentally become the game file
-                if (gameFiles.contains(file->fileName(), Qt::CaseInsensitive) || file == mGameFile)
+                if (gameFiles.contains(file->fileName(), Qt::CaseInsensitive) || file == mGameFile
+                    || (sortExpansions && file == tribunalFile && addonFile == bloodmoonFile))
                 {
                     index = j;
                     break;
@@ -758,6 +758,15 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
             }
         }
     }
+
+    if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
+    {
+        // Warn the user if Bloodmoon is loaded before Tribunal (Tribunal is not a hard dependency)
+        const EsmFile* tribunalFile = item("Tribunal.esm");
+        if (tribunalFile != nullptr && mCheckedFiles.contains(tribunalFile) && row < indexFromItem(tribunalFile).row())
+            errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, "Tribunal.esm"));
+    }
+
     return errors;
 }
 
@@ -839,6 +848,17 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
 
                 emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
             }
+        }
+    }
+
+    // Need to manually let Bloodmoon entry know if Tribunal is checked/unchecked
+    if (file->fileName().compare("Tribunal.esm", Qt::CaseInsensitive) == 0)
+    {
+        const EsmFile* bloodmoonFile = item("Bloodmoon.esm");
+        if (bloodmoonFile != nullptr)
+        {
+            QModelIndex bloodmoonIndex = indexFromItem(bloodmoonFile);
+            emit dataChanged(bloodmoonIndex, bloodmoonIndex);
         }
     }
 

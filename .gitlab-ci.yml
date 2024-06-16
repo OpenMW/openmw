@@ -25,8 +25,7 @@ variables:
 
 .Ubuntu_Image:
   tags:
-    - docker
-    - linux
+    - saas-linux-medium-amd64
   image: ubuntu:22.04
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -70,15 +69,16 @@ Ubuntu_GCC_preprocess:
     - df -h
     - du -sh .
     - cmake --install .
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:openmw_tests.xml"; fi
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-cs-tests --gtest_output="xml:openmw_cs_tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./components-tests --gtest_output="xml:components-tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-tests --gtest_output="xml:openmw-tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-cs-tests --gtest_output="xml:openmw-cs-tests.xml"; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_esm_refid_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
     - ccache -s
     - df -h
     - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
-    - ls | grep -v -e '^extern$' -e '^install$' -e '^openmw_tests.xml$' -e '^openmw_cs_tests.xml$' | xargs -I '{}' rm -rf './{}'
+    - ls | grep -v -e '^extern$' -e '^install$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs -I '{}' rm -rf './{}'
     - cd ..
     - df -h
     - du -sh build/
@@ -91,8 +91,7 @@ Ubuntu_GCC_preprocess:
 
 Coverity:
   tags:
-    - docker
-    - linux
+    - saas-linux-medium-amd64
   image: ubuntu:22.04
   stage: build
   rules:
@@ -116,6 +115,7 @@ Coverity:
   script:
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
+    - export COVERITY_NO_LOG_ENVIRONMENT_VARIABLES=1
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
@@ -423,7 +423,7 @@ Ubuntu_Clang_Tidy_other:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw_test_suite openmw-navmeshtool openmw-bulletobjecttool
+    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest components-tests openmw-tests openmw-cs-tests openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
 
 .Ubuntu_Clang_tests:
@@ -646,7 +646,7 @@ macOS14_Xcode15_arm64:
   variables:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
-    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+    # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
 
 .Windows_MSBuild_Base:
   tags:
@@ -748,7 +748,7 @@ Windows_MSBuild_RelWithDebInfo:
   variables:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
-    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+    # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
   # temporarily enabled while we're linking these on the downloads page
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
@@ -756,7 +756,7 @@ Windows_MSBuild_RelWithDebInfo:
 
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
-    - linux
+    - saas-linux-medium-amd64
   image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"

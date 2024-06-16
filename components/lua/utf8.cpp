@@ -6,8 +6,8 @@
 namespace
 {
     constexpr std::string_view UTF8PATT = "[%z\x01-\x7F\xC2-\xF4][\x80-\xBF]*"; // %z is deprecated in Lua5.2
-    constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
-    // constexpr uint32_t MAXUNICODE = 0x10FFFFu;
+    // constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
+    constexpr uint32_t MAXUNICODE = 0x10FFFFu;
 
     inline bool isNilOrNone(const sol::stack_proxy arg)
     {
@@ -96,16 +96,15 @@ namespace LuaUtf8
 
         utf8["char"] = [](const sol::variadic_args args) -> std::string {
             std::string result{};
-            std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+            std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
             for (size_t i = 0; i < args.size(); ++i)
             {
                 int64_t codepoint = getInteger(args[i], (i + 1), "char");
-                if (codepoint < 0 || codepoint > MAXUTF)
+                if (codepoint < 0 || codepoint > MAXUNICODE)
                     throw std::runtime_error(
                         "bad argument #" + std::to_string(i + 1) + " to 'char' (value out of range)");
 
-                // this feels dodgy if wchar_t is 16-bit as MAXUTF won't fit in sixteen bits
-                result += converter.to_bytes(static_cast<wchar_t>(codepoint));
+                result += converter.to_bytes(static_cast<char32_t>(codepoint));
             }
             return result;
         };

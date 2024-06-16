@@ -34,7 +34,6 @@ namespace Launcher
         void slotSkyBlendingToggled(bool checked);
         void slotShadowDistLimitToggled(bool checked);
         void slotDistantLandToggled(bool checked);
-        void slotLightTypeCurrentIndexChanged(int index);
 
     private:
         Config::GameSettings& mGameSettings;

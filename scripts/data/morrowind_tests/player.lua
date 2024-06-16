@@ -78,7 +78,7 @@ testing.registerLocalTest('Guard in Imperial Prison Ship should find path (#7241
 
 return {
     engineHandlers = {
-        onUpdate = testing.updateLocal,
+        onFrame = testing.updateLocal,
     },
     eventHandlers = testing.eventHandlers
 }

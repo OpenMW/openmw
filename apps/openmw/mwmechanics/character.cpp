@@ -1646,6 +1646,10 @@ namespace MWMechanics
                     std::string startKey = "start";
                     std::string stopKey = "stop";
 
+                    MWBase::LuaManager::ActorControls* actorControls
+                        = MWBase::Environment::get().getLuaManager()->getActorControls(mPtr);
+                    const bool aiInactive
+                        = actorControls->mDisableAI || !MWBase::Environment::get().getMechanicsManager()->isAIActive();
                     if (mWeaponType != ESM::Weapon::PickProbe && !isRandomAttackAnimation(mCurrentWeapon))
                     {
                         if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
@@ -1669,6 +1673,8 @@ namespace MWMechanics
                                 mAttackType = getMovementBasedAttackType();
                             }
                         }
+                        else if (aiInactive)
+                            mAttackType = getRandomAttackType();
                         // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
                         startKey = mAttackType + ' ' + startKey;
                         stopKey = mAttackType + " max attack";

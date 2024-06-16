@@ -38,8 +38,6 @@ namespace MWMechanics
         typedef std::map<ESM::RefId, OwnerMap> StolenItemsMap;
         StolenItemsMap mStolenItems;
 
-        MWSound::MusicType mMusicType;
-
     public:
         void buildPlayer();
         ///< build player according to stored class/race/birthsign information. Will
@@ -245,11 +243,7 @@ namespace MWMechanics
         GreetingState getGreetingState(const MWWorld::Ptr& ptr) const override;
         bool isTurningToPlayer(const MWWorld::Ptr& ptr) const override;
 
-        MWSound::MusicType getMusicType() const override { return mMusicType; }
-        void setMusicType(MWSound::MusicType type) override { mMusicType = type; }
-
     private:
-        void updateMusicState();
         bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
         bool canReportCrime(
             const MWWorld::Ptr& actor, const MWWorld::Ptr& victim, std::set<MWWorld::Ptr>& playerFollowers);

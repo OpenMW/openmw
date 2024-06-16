@@ -1,4 +1,5 @@
 #include "navmeshmanager.hpp"
+
 #include "debug.hpp"
 #include "gettilespositions.hpp"
 #include "makenavmesh.hpp"
@@ -8,6 +9,7 @@
 #include "waitconditiontype.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/util.hpp>
 
 #include <osg/io_utils>
 
@@ -35,13 +37,44 @@ namespace DetourNavigator
 {
     namespace
     {
-        TilesPositionsRange makeRange(const TilePosition& center, int maxTiles)
+        int getMaxRadius(int maxTiles)
         {
-            const int radius = static_cast<int>(std::ceil(std::sqrt(static_cast<float>(maxTiles) / osg::PIf) + 1));
+            return static_cast<int>(std::ceil(std::sqrt(static_cast<float>(maxTiles) / osg::PIf) + 1));
+        }
+
+        TilesPositionsRange makeRange(const TilePosition& center, int radius)
+        {
             return TilesPositionsRange{
                 .mBegin = center - TilePosition(radius, radius),
                 .mEnd = center + TilePosition(radius + 1, radius + 1),
             };
+        }
+
+        osg::Vec2f getMinCellGridPosition(const osg::Vec2i& center, int offset, float cellSize)
+        {
+            const osg::Vec2i cell = center + osg::Vec2i(offset, offset);
+            return osg::Vec2f(static_cast<float>(cell.x()) * cellSize, static_cast<float>(cell.y()) * cellSize);
+        }
+
+        TilesPositionsRange makeCellGridRange(
+            const RecastSettings& settings, ESM::RefId worldspace, const CellGridBounds& bounds)
+        {
+            const float floatCellSize = static_cast<float>(ESM::getCellSize(worldspace));
+            const osg::Vec2f min = getMinCellGridPosition(bounds.mCenter, -bounds.mHalfSize, floatCellSize);
+            const osg::Vec2f max = getMinCellGridPosition(bounds.mCenter, bounds.mHalfSize + 1, floatCellSize);
+            return TilesPositionsRange{
+                .mBegin = getTilePosition(settings, toNavMeshCoordinates(settings, min)),
+                .mEnd = getTilePosition(settings, toNavMeshCoordinates(settings, max)),
+            };
+        }
+
+        TilesPositionsRange makeRange(const Settings& settings, ESM::RefId worldspace,
+            const std::optional<CellGridBounds>& bounds, int radius, const TilePosition& center)
+        {
+            TilesPositionsRange result = makeRange(center, radius);
+            if (bounds.has_value())
+                result = getIntersection(result, makeCellGridRange(settings.mRecast, worldspace, *bounds));
+            return result;
         }
 
         TilePosition toNavMeshTilePosition(const RecastSettings& settings, const osg::Vec3f& position)
@@ -52,27 +85,28 @@ namespace DetourNavigator
 
     NavMeshManager::NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db)
         : mSettings(settings)
+        , mMaxRadius(getMaxRadius(settings.mMaxTilesNumber))
         , mRecastMeshManager(settings.mRecast)
         , mOffMeshConnectionsManager(settings.mRecast)
         , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager, std::move(db))
     {
     }
 
-    void NavMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
+    void NavMeshManager::updateBounds(ESM::RefId worldspace, const std::optional<CellGridBounds>& cellGridBounds,
+        const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
-        if (worldspace == mWorldspace)
-            return;
-        mRecastMeshManager.setWorldspace(worldspace, guard);
-        for (auto& [agent, cache] : mCache)
-            cache = std::make_shared<GuardedNavMeshCacheItem>(++mGenerationCounter, mSettings);
-        mWorldspace = worldspace;
-    }
+        if (worldspace != mWorldspace)
+        {
+            mRecastMeshManager.setWorldspace(worldspace, guard);
+            for (auto& [agent, cache] : mCache)
+                cache = std::make_shared<GuardedNavMeshCacheItem>(++mGenerationCounter, mSettings);
+            mWorldspace = worldspace;
+        }
 
-    void NavMeshManager::updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
-    {
         const TilePosition playerTile = toNavMeshTilePosition(mSettings.mRecast, playerPosition);
-        const TilesPositionsRange range = makeRange(playerTile, mSettings.mMaxTilesNumber);
-        mRecastMeshManager.setRange(range, guard);
+
+        mRecastMeshManager.setRange(makeRange(mSettings, worldspace, cellGridBounds, mMaxRadius, playerTile), guard);
+        mCellGridBounds = cellGridBounds;
     }
 
     bool NavMeshManager::addObject(const ObjectId id, const CollisionShape& shape, const btTransform& transform,
@@ -164,7 +198,7 @@ namespace DetourNavigator
             return;
         mLastRecastMeshManagerRevision = mRecastMeshManager.getRevision();
         mPlayerTile = playerTile;
-        mRecastMeshManager.setRange(makeRange(playerTile, mSettings.mMaxTilesNumber), guard);
+        mRecastMeshManager.setRange(makeRange(mSettings, mWorldspace, mCellGridBounds, mMaxRadius, playerTile), guard);
         const auto changedTiles = mRecastMeshManager.takeChangedTiles(guard);
         const TilesPositionsRange range = mRecastMeshManager.getLimitedObjectsRange();
         for (const auto& [agentBounds, cached] : mCache)
@@ -217,7 +251,10 @@ namespace DetourNavigator
 
     Stats NavMeshManager::getStats() const
     {
-        return Stats{ .mUpdater = mAsyncNavMeshUpdater.getStats() };
+        return Stats{
+            .mUpdater = mAsyncNavMeshUpdater.getStats(),
+            .mRecast = mRecastMeshManager.getStats(),
+        };
     }
 
     RecastMeshTiles NavMeshManager::getRecastMeshTiles() const

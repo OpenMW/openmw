@@ -451,8 +451,8 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>Stäng</translation>
     </message>
     <message>
-        <source> Launch OpenMW </source>
-        <translation> Starta OpenMW </translation>
+        <source>Launch OpenMW</source>
+        <translation>Starta OpenMW</translation>
     </message>
     <message>
         <source>Help</source>
@@ -1074,25 +1074,13 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effekter av reflekterade &quot;Absorb&quot;-besvärjelser speglas inte – såsom i Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum distance at which lights will appear (measured in units).&lt;/p&gt;&lt;p&gt;Set this to 0 to use an unlimited distance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximala avståndet där ljuskällor syns (mätt i enheter).&lt;/p&gt;&lt;p&gt;Värdet 0 ger oändligt avstånd.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of lights per object.&lt;/p&gt;&lt;p&gt;A low number near default will cause light popping similar to what you would see with legacy lighting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximalt antal ljuskällor per objekt.&lt;/p&gt;&lt;p&gt;Ett lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp som vid ljussättningsmetoden Gammaldags.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fraction of maximum distance at which lights will start to fade.&lt;/p&gt;&lt;p&gt;Set this to a low value for slower transitions or a high value for quicker transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fraktion av det maximala avståndet från vilket ljuskällor börjar blekna.&lt;/p&gt;&lt;p&gt;Välj ett lågt värde för långsammare övergång eller högre värde för snabbare övergång.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object and provides a lighting closest to an original game.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
+&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object. It provides results most similar to Morrowind&apos;s lighting.&lt;/p&gt;
+&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
 &lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Välj intern hantering av ljuskällor.&lt;/p&gt;
 &lt;p&gt; &quot;Gammaldags&quot; använder alltid max 8 ljuskällor per objekt och ger ljussättning likt ett gammaldags spel.&lt;/p&gt;
-&lt;p&gt;&quot;Shader (kompatibilitet)&quot; tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning och ett konfigurerbart ljusbleknande. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.&lt;/p&gt;
+&lt;p&gt;&quot;Shader (kompatibilitet)&quot; tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.&lt;/p&gt;
 &lt;p&gt; &quot;Shader&quot; har alla fördelar som &quot;Shader (kompatibilitet)&quot; har, men med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
@@ -1102,14 +1090,6 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     <message>
         <source>Shaders (compatibility)</source>
         <translation>Shader (kompatibilitet)</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multipler for bounding sphere of lights.&lt;/p&gt;&lt;p&gt;Higher numbers allows for smooth falloff but require an increase in number of max lights.&lt;/p&gt;&lt;p&gt;Does not effect the illumination or strength of lights.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multiplikator för ljusens gränssfär.&lt;/p&gt;&lt;p&gt;Högre värden ger mjukare minskning av gränssfären, men kräver högre värde i Max antal ljuskällor.&lt;/p&gt;&lt;p&gt;Påverkar inte ljusstyrkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum ambient interior brightness.&lt;/p&gt;&lt;p&gt;Increase this if you feel interiors are too dark.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minsta omgivande ljusstyrka i interiörer.&lt;/p&gt;&lt;p&gt;Öka värdet om du anser att interiörer är för mörka.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
@@ -1335,24 +1315,8 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>Aktivera terrängskuggor</translation>
     </message>
     <message>
-        <source>Maximum Light Distance</source>
-        <translation>Maximalt ljusavstånd</translation>
-    </message>
-    <message>
-        <source>Max Lights</source>
-        <translation>Max antal ljuskällor</translation>
-    </message>
-    <message>
         <source>Lighting Method</source>
         <translation>Ljussättningsmetod</translation>
-    </message>
-    <message>
-        <source>Bounding Sphere Multiplier</source>
-        <translation>Gränssfärsmultiplikator</translation>
-    </message>
-    <message>
-        <source>Minimum Interior Brightness</source>
-        <translation>Minsta ljusstyrka i interiörer</translation>
     </message>
     <message>
         <source>Audio Device</source>

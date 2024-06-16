@@ -1,22 +1,25 @@
-# local files
-set(GAME
-    main.cpp
+set(OPENMW_SOURCES
     engine.cpp
     options.cpp
+)
 
+set(OPENMW_RESOURCES
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest
 )
 
 if (ANDROID)
-    set(GAME ${GAME} android_main.cpp)
+    set(OPENMW_SOURCES ${OPENMW_SOURCES} android_main.cpp)
 endif()
 
-set(GAME_HEADER
+set(OPENMW_HEADERS
+    doc.hpp
     engine.hpp
+    options.hpp
+    profile.hpp
 )
 
-source_group(game FILES ${GAME} ${GAME_HEADER})
+source_group(apps/openmw FILES main.cpp ${OPENMW_SOURCES} ${OPENMW_HEADERS} ${OPENMW_RESOURCES})
 
 add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky skyutil npcanimation esm4npcanimation vismask
@@ -62,7 +65,7 @@ add_openmw_dir (mwscript
 add_openmw_dir (mwlua
     luamanagerimp object objectlists userdataserializer luaevents engineevents objectvariant
     context menuscripts globalscripts localscripts playerscripts luabindings objectbindings cellbindings
-    mwscriptbindings camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings
+    mwscriptbindings camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings dialoguebindings
     postprocessingbindings stats recordstore debugbindings corebindings worldbindings worker magicbindings factionbindings
     classbindings itemdata inputprocessor animationbindings birthsignbindings racebindings markupbindings
     types/types types/door types/item types/actor types/container types/lockable types/weapon types/npc
@@ -84,6 +87,7 @@ add_openmw_dir (mwworld
     store esmstore fallback actionrepair actionsoulgem livecellref actiondoor
     contentloader esmloader actiontrap cellreflist cellref weather projectilemanager
     cellpreloader datetimemanager groundcoverstore magiceffects cell ptrregistry
+    positioncellgrid
     )
 
 add_openmw_dir (mwphysics
@@ -123,18 +127,33 @@ add_openmw_dir (.
 # Main executable
 
 if (NOT ANDROID)
-    openmw_add_executable(openmw
+    add_library(openmw-lib STATIC
         ${OPENMW_FILES}
-        ${GAME} ${GAME_HEADER}
-        ${APPLE_BUNDLE_RESOURCES}
+        ${OPENMW_SOURCES}
     )
-else ()
-    add_library(openmw
-        SHARED
-        ${OPENMW_FILES}
-        ${GAME} ${GAME_HEADER}
-    )
+
+    # Otherwise linker fails with LNK1149 because main.cpp has __declspec(dllexport)
+    if(NOT WIN32)
+        set_target_properties(openmw-lib PROPERTIES OUTPUT_NAME openmw)
+    endif()
 endif ()
+
+if(BUILD_OPENMW)
+    if (ANDROID)
+        add_library(openmw-lib SHARED
+            ${OPENMW_FILES}
+            ${OPENMW_SOURCES}
+        )
+    else()
+        openmw_add_executable(openmw
+            ${APPLE_BUNDLE_RESOURCES}
+            ${OPENMW_RESOURCES}
+            main.cpp
+        )
+
+        target_link_libraries(openmw openmw-lib)
+    endif()
+endif()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
@@ -142,7 +161,7 @@ include_directories(
     ${FFmpeg_INCLUDE_DIRS}
 )
 
-target_link_libraries(openmw
+target_link_libraries(openmw-lib
     # CMake's built-in OSG finder does not use pkgconfig, so we have to
     # manually ensure the order is correct for inter-library dependencies.
     # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
@@ -166,7 +185,7 @@ target_link_libraries(openmw
 )
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(openmw PRIVATE
+    target_precompile_headers(openmw-lib PRIVATE
         <boost/program_options/options_description.hpp>
 
         <sol/sol.hpp>
@@ -194,23 +213,23 @@ endif()
 add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
 
 if (ANDROID)
-    target_link_libraries(openmw EGL android log z)
+    target_link_libraries(openmw-lib EGL android log z)
 endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)
-    target_link_libraries(openmw ${TinyXML_LIBRARIES})
+    target_link_libraries(openmw-lib ${TinyXML_LIBRARIES})
 endif()
 
 if (NOT UNIX)
-    target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
+    target_link_libraries(openmw-lib ${SDL2MAIN_LIBRARY})
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-    target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(openmw-lib ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_OPENMW)
     set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
 
     set(OPENMW_RESOURCES_ROOT ${BUNDLE_RESOURCES_DIR})
@@ -236,13 +255,17 @@ if(APPLE)
                                            "LINKER:SHELL:-framework AudioToolbox"
                                            "LINKER:SHELL:-framework VideoDecodeAcceleration")
     endif()
-endif(APPLE)
-
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(openmw PRIVATE --coverage)
-    target_link_libraries(openmw gcov)
 endif()
 
-if (WIN32)
+if (BUILD_WITH_CODE_COVERAGE)
+    target_compile_options(openmw-lib PRIVATE --coverage)
+    target_link_libraries(openmw-lib gcov)
+    if (NOT ANDROID AND BUILD_OPENMW)
+        target_compile_options(openmw PRIVATE --coverage)
+        target_link_libraries(openmw gcov)
+    endif()
+endif()
+
+if (WIN32 AND BUILD_OPENMW)
     INSTALL(TARGETS openmw RUNTIME DESTINATION ".")
-endif (WIN32)
+endif()

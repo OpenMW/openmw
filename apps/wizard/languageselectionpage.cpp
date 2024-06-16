@@ -1,5 +1,7 @@
 #include "languageselectionpage.hpp"
 
+#include <components/misc/scalableicon.hpp>
+
 #include "mainwizard.hpp"
 
 Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
@@ -9,7 +11,7 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
 
     setupUi(this);
 
-    flagIconLabel->setPixmap(QIcon(":preferences-desktop-locale").pixmap(QSize(48, 48)));
+    flagIcon->setIcon(Misc::ScalableIcon::load(":preferences-desktop-locale"));
 
     registerField(QLatin1String("installation.language"), languageComboBox, "currentData", "currentDataChanged");
 }

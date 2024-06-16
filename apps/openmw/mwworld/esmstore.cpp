@@ -366,6 +366,7 @@ namespace MWWorld
             case ESM::REC_DOOR4:
             case ESM::REC_FLOR4:
             case ESM::REC_FURN4:
+            case ESM::REC_IMOD4:
             case ESM::REC_INGR4:
             case ESM::REC_LIGH4:
             case ESM::REC_LVLI4:
@@ -374,6 +375,7 @@ namespace MWWorld
             case ESM::REC_MISC4:
             case ESM::REC_MSTT4:
             case ESM::REC_NPC_4:
+            case ESM::REC_SCOL4:
             case ESM::REC_STAT4:
             case ESM::REC_TERM4:
             case ESM::REC_TREE4:
@@ -388,11 +390,6 @@ namespace MWWorld
     {
         if (listener != nullptr)
             listener->setProgressRange(::EsmLoader::fileProgress);
-
-        // Land texture loading needs to use a separate internal store for each plugin.
-        // We set the number of plugins here so we can properly verify if valid plugin
-        // indices are being passed to the LandTexture Store retrieval methods.
-        getWritable<ESM::LandTexture>().resize(esm.getIndex() + 1);
 
         // Loop through all records
         while (esm.hasMoreRecs())
@@ -687,7 +684,7 @@ namespace MWWorld
             + get<ESM::Activator>().getDynamicSize() + get<ESM::Miscellaneous>().getDynamicSize()
             + get<ESM::Weapon>().getDynamicSize() + get<ESM::CreatureLevList>().getDynamicSize()
             + get<ESM::ItemLevList>().getDynamicSize() + get<ESM::Creature>().getDynamicSize()
-            + get<ESM::Container>().getDynamicSize();
+            + get<ESM::Container>().getDynamicSize() + get<ESM::Light>().getDynamicSize();
     }
 
     void ESMStore::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -713,6 +710,7 @@ namespace MWWorld
         get<ESM::ItemLevList>().write(writer, progress);
         get<ESM::Creature>().write(writer, progress);
         get<ESM::Container>().write(writer, progress);
+        get<ESM::Light>().write(writer, progress);
     }
 
     bool ESMStore::readRecord(ESM::ESMReader& reader, uint32_t type_id)
@@ -732,6 +730,7 @@ namespace MWWorld
             case ESM::REC_WEAP:
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
+            case ESM::REC_LIGH:
                 mStoreImp->mRecNameToStore[type]->read(reader);
                 return true;
             case ESM::REC_NPC_:

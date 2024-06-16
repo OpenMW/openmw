@@ -7,11 +7,11 @@
 #include <tuple>
 #include <utility>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
-#include <components/misc/utf8stream.hpp>
-
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/utf8stream.hpp>
 
 bool MWState::operator<(const Slot& left, const Slot& right)
 {
@@ -99,9 +99,11 @@ MWState::Character::Character(const std::filesystem::path& saves, const std::str
             {
                 addSlot(iter, game);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
-            } // ignoring bad saved game files for now
+                Log(Debug::Warning) << "Failed to add slot for game \"" << game << "\" save " << iter << ": "
+                                    << e.what();
+            }
         }
 
         std::sort(mSlots.begin(), mSlots.end());

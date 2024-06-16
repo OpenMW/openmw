@@ -39,7 +39,6 @@ namespace MWGui
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
         , mImportantLabel(false)
-        , mVisible(false)
         , mNestedLoadingCount(0)
         , mProgress(0)
         , mShowWallpaper(true)
@@ -142,7 +141,7 @@ namespace MWGui
         osg::BoundingSphere computeBound(const osg::Node&) const override { return osg::BoundingSphere(); }
     };
 
-    void LoadingScreen::loadingOn(bool visible)
+    void LoadingScreen::loadingOn()
     {
         // Early-out if already on
         if (mNestedLoadingCount++ > 0 && mMainWidget->getVisible())
@@ -161,16 +160,7 @@ namespace MWGui
             mOldIcoMax = ico->getMaximumNumOfObjectsToCompilePerFrame();
         }
 
-        mVisible = visible;
-        mLoadingBox->setVisible(mVisible);
         setVisible(true);
-
-        if (!mVisible)
-        {
-            mShowWallpaper = false;
-            draw();
-            return;
-        }
 
         mShowWallpaper = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
 
@@ -186,7 +176,6 @@ namespace MWGui
     {
         if (--mNestedLoadingCount > 0)
             return;
-        mLoadingBox->setVisible(true); // restore
 
         if (mLastRenderTime < mLoadingOnTime)
         {
@@ -327,7 +316,7 @@ namespace MWGui
 
     void LoadingScreen::draw()
     {
-        if (mVisible && !needToDrawLoadingScreen())
+        if (!needToDrawLoadingScreen())
             return;
 
         if (mShowWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000 * 1)

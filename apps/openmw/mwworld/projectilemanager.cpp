@@ -15,6 +15,9 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/projectilestate.hpp>
 
+#include <components/esm/quaternion.hpp>
+#include <components/esm/vector3.hpp>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -702,8 +705,10 @@ namespace MWWorld
                 state.mProjectileId
                     = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, false);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
+                Log(Debug::Warning) << "Failed to add projectile for " << esm.mId
+                                    << " while reading projectile record: " << e.what();
                 return true;
             }
 
@@ -731,10 +736,10 @@ namespace MWWorld
                 state.mEffects = getMagicBoltData(
                     state.mIdMagic, state.mSoundIds, state.mSpeed, texture, state.mSourceName, state.mSpellId);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
-                Log(Debug::Warning) << "Warning: Failed to recreate magic projectile from saved data (id \""
-                                    << state.mSpellId << "\" no longer exists?)";
+                Log(Debug::Warning) << "Failed to recreate magic projectile for " << esm.mId << " and spell "
+                                    << state.mSpellId << " while reading projectile record: " << e.what();
                 return true;
             }
 
@@ -750,8 +755,10 @@ namespace MWWorld
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getCorrectedModel(ptr);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
+                Log(Debug::Warning) << "Failed to get model for " << state.mIdMagic.at(0)
+                                    << " while reading projectile record: " << e.what();
                 return true;
             }
 

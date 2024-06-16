@@ -27,13 +27,11 @@
 namespace MWInput
 {
 
-    ActionManager::ActionManager(BindingsManager* bindingsManager,
-        osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-        osg::ref_ptr<osgViewer::Viewer> viewer, osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler)
+    ActionManager::ActionManager(BindingsManager* bindingsManager, osg::ref_ptr<osgViewer::Viewer> viewer,
+        osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler)
         : mBindingsManager(bindingsManager)
         , mViewer(std::move(viewer))
         , mScreenCaptureHandler(std::move(screenCaptureHandler))
-        , mScreenCaptureOperation(screenCaptureOperation)
         , mTimeIdle(0.f)
     {
     }
@@ -170,23 +168,8 @@ namespace MWInput
 
     void ActionManager::screenshot()
     {
-        const Settings::ScreenshotSettings& settings = Settings::video().mScreenshotType;
-
-        if (settings.mType == Settings::ScreenshotType::Regular)
-        {
-            mScreenCaptureHandler->setFramesToCapture(1);
-            mScreenCaptureHandler->captureNextFrame(*mViewer);
-        }
-        else
-        {
-            osg::ref_ptr<osg::Image> screenshot(new osg::Image);
-
-            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get()))
-            {
-                (*mScreenCaptureOperation)(*(screenshot.get()), 0);
-                // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
-            }
-        }
+        mScreenCaptureHandler->setFramesToCapture(1);
+        mScreenCaptureHandler->captureNextFrame(*mViewer);
     }
 
     void ActionManager::toggleMainMenu()

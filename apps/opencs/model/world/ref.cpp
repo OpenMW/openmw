@@ -8,8 +8,6 @@ CSMWorld::CellRef::CellRef()
     : mNew(true)
     , mIdNum(0)
 {
-    mRefNum.mIndex = 0;
-    mRefNum.mContentFile = 0;
 }
 
 std::pair<int, int> CSMWorld::CellRef::getCellIndex() const

@@ -294,9 +294,9 @@ namespace MWRender
                 for (std::vector<std::string>::const_iterator it = mKeyframes.begin(); it != mKeyframes.end(); ++it)
                     mResourceSystem->getKeyframeManager()->get(*it);
             }
-            catch (std::exception&)
+            catch (const std::exception& e)
             {
-                // ignore error (will be shown when these are needed proper)
+                Log(Debug::Warning) << "Failed to preload common assets: " << e.what();
             }
         }
 
@@ -531,8 +531,7 @@ namespace MWRender
 
         mCamera = std::make_unique<Camera>(mViewer->getCamera());
 
-        mScreenshotManager
-            = std::make_unique<ScreenshotManager>(viewer, mRootNode, sceneRoot, mResourceSystem, mWater.get());
+        mScreenshotManager = std::make_unique<ScreenshotManager>(viewer);
 
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -1044,19 +1043,6 @@ namespace MWRender
     void RenderingManager::screenshot(osg::Image* image, int w, int h)
     {
         mScreenshotManager->screenshot(image, w, h);
-    }
-
-    bool RenderingManager::screenshot360(osg::Image* image)
-    {
-        if (mCamera->isVanityOrPreviewModeEnabled())
-        {
-            Log(Debug::Warning) << "Spherical screenshots are not allowed in preview mode.";
-            return false;
-        }
-
-        mScreenshotManager->screenshot360(image);
-
-        return true;
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const osg::BoundingBox& worldbb)
@@ -1615,6 +1601,16 @@ namespace MWRender
             {
                 if (MWMechanics::getPlayer().isInCell())
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
+            }
+            else if (it->first == "Shaders" && it->second == "force per pixel lighting")
+            {
+                mViewer->stopThreading();
+
+                auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+                defines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
+                mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+
+                mViewer->startThreading();
             }
             else if (it->first == "Shaders"
                 && (it->second == "light bounds multiplier" || it->second == "maximum light distance"

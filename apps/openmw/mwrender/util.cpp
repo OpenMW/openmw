@@ -6,6 +6,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/sceneutil/texturetype.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/values.hpp>
 
@@ -54,7 +55,6 @@ namespace MWRender
             = new osg::Texture2D(resourceSystem->getImageManager()->getImage(correctedTexture));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        tex->setName("diffuseMap");
 
         osg::ref_ptr<osg::StateSet> stateset;
         if (const osg::StateSet* const src = node.getStateSet())
@@ -63,6 +63,7 @@ namespace MWRender
             stateset = new osg::StateSet;
 
         stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
+        stateset->setTextureAttribute(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::OVERRIDE);
 
         node.setStateSet(stateset);
     }

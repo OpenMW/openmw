@@ -183,8 +183,7 @@ namespace MWWorld
 
         MWWorld::Ptr player = getPlayer();
         const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && playerStats.isParalyzed()) || playerStats.getKnockedDown() || playerStats.isDead())
+        if (playerStats.isParalyzed() || playerStats.getKnockedDown() || playerStats.isDead())
             return;
 
         MWWorld::Ptr toActivate = MWBase::Environment::get().getWorld()->getFacedObject();
@@ -243,6 +242,11 @@ namespace MWWorld
 
     void Player::clear()
     {
+        ESM::CellRef cellRef;
+        cellRef.blank();
+        cellRef.mRefID = ESM::RefId::stringRefId("Player");
+        cellRef.mRefNum = mPlayer.mRef.getRefNum();
+        mPlayer = LiveCellRef<ESM::NPC>(cellRef, mPlayer.mBase);
         mCellStore = nullptr;
         mSign = ESM::RefId();
         mMarkedCell = nullptr;
@@ -317,7 +321,12 @@ namespace MWWorld
                 convertMagicEffects(
                     player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
             else if (reader.getFormatVersion() <= ESM::MaxOldCreatureStatsFormatVersion)
+            {
                 convertStats(player.mObject.mCreatureStats);
+                convertEnchantmentSlots(player.mObject.mCreatureStats, player.mObject.mInventory);
+            }
+            else if (reader.getFormatVersion() <= ESM::MaxActiveSpellSlotIndexFormatVersion)
+                convertEnchantmentSlots(player.mObject.mCreatureStats, player.mObject.mInventory);
 
             if (!player.mObject.mEnabled)
             {

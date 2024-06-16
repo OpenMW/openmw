@@ -61,6 +61,9 @@ namespace CSVWorld
 
         void extendedConfigRequest(ExtendedCommandConfigurator::Mode mode, const std::vector<std::string>& selectedIds);
 
+    protected:
+        bool event(QEvent* event) override;
+
     public:
         TableBottomBox(const CreatorFactoryBase& creatorFactory, CSMDoc::Document& document,
             const CSMWorld::UniversalId& id, QWidget* parent = nullptr);

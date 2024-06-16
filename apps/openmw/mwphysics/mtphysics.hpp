@@ -3,7 +3,9 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <memory>
 #include <optional>
+#include <set>
 #include <shared_mutex>
 #include <thread>
 #include <unordered_set>

@@ -812,8 +812,8 @@ void OMW::Engine::prepareEngine()
         Version::getOpenmwVersionDescription(), shadersSupported, mCfgMgr);
     mEnvironment.setWindowManager(*mWindowManager);
 
-    mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler,
-        mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
+    mInputManager = std::make_unique<MWInput::InputManager>(mWindow, mViewer, mScreenCaptureHandler, keybinderUser,
+        keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
     mEnvironment.setInputManager(*mInputManager);
 
     // Create sound system
@@ -998,7 +998,7 @@ void OMW::Engine::go()
         mWindowManager->pushGuiMode(MWGui::GM_MainMenu);
 
         if (mVFS->exists(MWSound::titleMusic))
-            mSoundManager->streamMusic(MWSound::titleMusic, MWSound::MusicType::Special);
+            mSoundManager->streamMusic(MWSound::titleMusic, MWSound::MusicType::Normal);
         else
             Log(Debug::Warning) << "Title music not found";
 

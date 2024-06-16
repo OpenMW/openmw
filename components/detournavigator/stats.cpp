@@ -32,11 +32,19 @@ namespace DetourNavigator
             out.setAttribute(frameNumber, "NavMesh Cache Get", static_cast<double>(stats.mCache.mGetCount));
             out.setAttribute(frameNumber, "NavMesh Cache Hit", static_cast<double>(stats.mCache.mHitCount));
         }
+
+        void reportStats(const TileCachedRecastMeshManagerStats& stats, unsigned int frameNumber, osg::Stats& out)
+        {
+            out.setAttribute(frameNumber, "NavMesh Recast Tiles", static_cast<double>(stats.mTiles));
+            out.setAttribute(frameNumber, "NavMesh Recast Objects", static_cast<double>(stats.mObjects));
+            out.setAttribute(frameNumber, "NavMesh Recast Heightfields", static_cast<double>(stats.mHeightfields));
+            out.setAttribute(frameNumber, "NavMesh Recast Water", static_cast<double>(stats.mWater));
+        }
     }
 
     void reportStats(const Stats& stats, unsigned int frameNumber, osg::Stats& out)
     {
-        if (stats.mUpdater.has_value())
-            reportStats(*stats.mUpdater, frameNumber, out);
+        reportStats(stats.mUpdater, frameNumber, out);
+        reportStats(stats.mRecast, frameNumber, out);
     }
 }

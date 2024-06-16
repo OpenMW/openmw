@@ -24,7 +24,6 @@
 #include "columnimp.hpp"
 #include "info.hpp"
 #include "land.hpp"
-#include "landtexture.hpp"
 #include "record.hpp"
 #include "ref.hpp"
 
@@ -74,16 +73,6 @@ namespace CSMWorld
         return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
-    inline void setRecordId(const ESM::RefId& id, LandTexture& record)
-    {
-        int plugin = 0;
-        int index = 0;
-
-        LandTexture::parseUniqueRecordId(id.getRefIdString(), plugin, index);
-        record.mPluginIndex = plugin;
-        record.mIndex = index;
-    }
-
     inline ESM::RefId getRecordId(const ESM::MagicEffect& record)
     {
         return ESM::RefId::stringRefId(CSMWorld::getStringId(record.mId));
@@ -93,11 +82,6 @@ namespace CSMWorld
     {
         int index = ESM::MagicEffect::indexNameToIndex(id.getRefIdString());
         record.mId = ESM::RefId::index(ESM::REC_MGEF, static_cast<std::uint32_t>(index));
-    }
-
-    inline ESM::RefId getRecordId(const LandTexture& record)
-    {
-        return ESM::RefId::stringRefId(LandTexture::createUniqueRecordId(record.mPluginIndex, record.mIndex));
     }
 
     inline void setRecordId(const ESM::RefId& id, ESM::Skill& record)
@@ -339,7 +323,7 @@ namespace CSMWorld
         const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
         const int index = cloneRecordImp(origin, destination, type);
-        mRecords.at(index)->get().setPlugin(0);
+        mRecords.at(index)->get().setPlugin(-1);
     }
 
     template <typename ESXRecordT>
@@ -354,7 +338,7 @@ namespace CSMWorld
         const int index = touchRecordImp(id);
         if (index >= 0)
         {
-            mRecords.at(index)->get().setPlugin(0);
+            mRecords.at(index)->get().setPlugin(-1);
             return true;
         }
 

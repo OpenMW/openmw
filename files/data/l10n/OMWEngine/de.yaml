@@ -38,6 +38,8 @@ ScreenshotMade: "%s wurde gespeichert."
 DeleteGame: "Spielstand löschen"
 DeleteGameConfirmation: "Möchten Sie den Spielstand wirklich löschen?"
 EmptySaveNameError: "Der Spielstand kann ohne Name nicht gespeichert werden!"
+Health: "Lebensenergie"
+Level: "Stufe"
 LoadGameConfirmation: "Spielstand laden und aktuellen Fortschritt verwerfen?"
 MissingContentFilesConfirmation: |-
    Die aktuell ausgewählten Spieledateien stimmen nicht mit den im Spielstand verwendeten überein,
@@ -70,6 +72,8 @@ AudioVoice: "Stimmen"
 AudioEffects: "Effekte"
 AudioFootsteps: "Schritte"
 AudioMusic: "Musik"
+AutoSaveOnResting: "Beim Rasten speichern"
+BestAttack: "Immer bester Angriff"
 CameraSensitivity: "Kameraempfindlichkeit"
 CameraZoomIn: "Kamera hineinzoomen"
 CameraZoomOut: "Kamera herauszoomen"
@@ -78,6 +82,7 @@ ConfirmResetBindings: "Alle Tastenbelegungen zurücksetzen?"
 ConfirmResolution: "Neue Auflösung wird sofort angewendet. Fortsetzen?"
 Controller: "Controller"
 Controls: "Steuerung"
+Crosshair: "Fadenkreuz"
 DelayLow: "Schnell"
 DelayHigh: "Langsam"
 DetailLevel: "Detailgrad"
@@ -90,6 +95,15 @@ EnableController: "Controller aktivieren"
 FieldOfView: "Sichtfeld"
 FieldOfViewLow: "Niedrig"
 FieldOfViewHigh: "Hoch"
+ForcePerPixelLighting: "Beleuchtung pro Pixel erzwingen"
+ForcePerPixelLightingTooltip: |-
+    Erzwingt die Verwendung der Beleuchtung pro Pixel. Standardmäßig verwenden nur Bump- und Normal-mapped-Objekte eine Beleuchtung pro Pixel.
+
+    Betrifft nur mit Shadern gezeichnete Objekte.
+
+    Die Aktivierung der Per-Pixel-Beleuchtung führt zu visuellen Unterschieden zur ursprünglichen Morrowind-Engine, da bestimmte Lichter in Morrowind auf Vertex-Beleuchtung angewiesen sind, um wie beabsichtigt auszusehen.
+
+    Beachten Sie, dass Bodendecker-Shader und Partikeleffekte diese Einstellung ignorieren.
 FrameRateHint: "Hinweis: Drücken Sie F3,\num die aktuelle Bildrate anzuzeigen."
 GammaCorrection: "Gamma-Korrektur"
 GammaDark: "Dunkel"
@@ -111,7 +125,7 @@ LightsFadeStartMultiplier: "Multiplikator für Startwert der Lichtabblendung"
 LightsFadeStartMultiplierTooltip: "Standard: 0,85\nBruchteil der maximalen Lichtreichweite, bei der Lichtquellen langsam zu verblassen beginnen.\n\nKleinere Werte führen zu einem sanfteren Übergang, der allerdings bereits bei geringerer Entfernung startet; größere Werte machen den Übergang abrupter, betreffen aber nur weiter entfernte Lichtquellen."
 LightsLightingMethodTooltip: "Legt die interne Behandlung von Lichtquellen fest.\n\n
    „Veraltet“ verwendet immer bis zu 8 Lichtquellen pro Objekt und führt zu Ergebnissen, die denen der Original-Engine am ähnlichsten sind.\n\n
-   „Shader (Kompatibilitätsmodus)“ entfernt das Maximum von 8 Lichtquellen pro Objekt; Bodenvegetation wird von Lichtquellen beleuchtet und das sanfte Abblenden von Lichtquellen wird aktiviert. Es wird empfohlen, diese Option für ältere Hardware und Maximalwerte für Lichtquellen nahe 8 zu verwenden.\n\n
+   „Shader (Kompatibilitätsmodus)“ entfernt das Maximum von 8 Lichtquellen pro Objekt; Bodenvegetation wird von Lichtquellen beleuchtet. Es wird empfohlen, diese Option für ältere Hardware und Maximalwerte für Lichtquellen nahe 8 zu verwenden.\n\n
    „Shader“ bietet alle Vorteile von „Shader (Kompatibilitätsmodus)“, nutzt aber einen moderneren Ansatz, der größere Maximalwerte für Lichtquellen bei geringen bis keinen Leistungseinbußen ermöglicht. Funktioniert möglicherweise nicht auf älterer Hardware."
 LightsMaximumDistance: "Maximale Lichtreichweite"
 LightsMaximumDistanceTooltip: "Standard: 8192 (1 Zelle)\nMaximale Entfernung, bis zu der Lichtquellen noch dargestellt werden (gemessen in In-Game-Einheiten).\n\nEin Wert von 0 entspricht einer unbegrenzten Reichweite."
@@ -159,6 +173,7 @@ TestingExteriorCells: "Außenzellen testen"
 TestingInteriorCells: "Innenzellen testen"
 TextureFiltering: "Texturfilter"
 TextureFilteringBilinear: "Bilinear"
+TextureFilteringNearest: "Nächstgelegen"
 TextureFilteringDisabled: "Keiner"
 TextureFilteringOther: "Sonstiges"
 TextureFilteringTrilinear: "Trilinear"

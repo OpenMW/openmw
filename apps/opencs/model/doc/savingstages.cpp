@@ -17,7 +17,6 @@
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/info.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/metadata.hpp>
 #include <apps/opencs/model/world/pathgrid.hpp>
 #include <apps/opencs/model/world/record.hpp>
@@ -305,9 +304,8 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
         {
             CSMWorld::CellRef refRecord = ref.get();
 
-            // Check for uninitialized content file
-            if (!refRecord.mRefNum.hasContentFile())
-                refRecord.mRefNum.mContentFile = 0;
+            // -1 is the current file, saved indices are 1-based
+            refRecord.mRefNum.mContentFile++;
 
             // recalculate the ref's cell location
             std::ostringstream stream;
@@ -499,11 +497,11 @@ int CSMDoc::WriteLandTextureCollectionStage::setup()
 void CSMDoc::WriteLandTextureCollectionStage::perform(int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<CSMWorld::LandTexture>& landTexture = mDocument.getData().getLandTextures().getRecord(stage);
+    const CSMWorld::Record<ESM::LandTexture>& landTexture = mDocument.getData().getLandTextures().getRecord(stage);
 
     if (landTexture.isModified() || landTexture.mState == CSMWorld::RecordBase::State_Deleted)
     {
-        CSMWorld::LandTexture record = landTexture.get();
+        ESM::LandTexture record = landTexture.get();
         writer.startRecord(record.sRecordId);
         record.save(writer, landTexture.mState == CSMWorld::RecordBase::State_Deleted);
         writer.endRecord(record.sRecordId);

@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "mainwizard.hpp"
 
 Wizard::ExistingInstallationPage::ExistingInstallationPage(QWidget* parent)
@@ -17,6 +19,8 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(QWidget* parent)
     // Add a placeholder item to the list of installations
     QListWidgetItem* emptyItem = new QListWidgetItem(tr("No existing installations detected"));
     emptyItem->setFlags(Qt::NoItemFlags);
+
+    browseButton->setIcon(Misc::ScalableIcon::load(":folder"));
 
     installationsList->insertItem(0, emptyItem);
 }

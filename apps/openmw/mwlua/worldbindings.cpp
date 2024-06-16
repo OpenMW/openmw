@@ -5,6 +5,7 @@
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -181,6 +182,10 @@ namespace MWLua
             [lua = context.mLua](const ESM::Weapon& weapon) -> const ESM::Weapon* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(weapon);
+            },
+            [lua = context.mLua](const ESM::Light& light) -> const ESM::Light* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(light);
             });
 
         api["_runStandardActivationAction"] = [context](const GObject& object, const GObject& actor) {

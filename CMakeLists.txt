@@ -39,11 +39,12 @@ option(BUILD_ESMTOOL            "Build ESM inspector" ON)
 option(BUILD_NIFTEST            "Build nif file tester" ON)
 option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_COMPONENTS_TESTS   "Build components library tests" OFF)
 option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 option(BUILD_BULLETOBJECTTOOL   "Build Bullet object tool" ON)
 option(BUILD_OPENCS_TESTS       "Build OpenMW Construction Set tests" OFF)
+option(BUILD_OPENMW_TESTS       "Build OpenMW tests" OFF)
 option(PRECOMPILE_HEADERS_WITH_MSVC "Precompile most common used headers with MSVC (alternative to ccache)" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
@@ -81,7 +82,7 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 61)
+set(OPENMW_LUA_API_REVISION 62)
 set(OPENMW_POSTPROCESSING_API_REVISION 1)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -306,7 +307,7 @@ if (OPENMW_USE_SYSTEM_YAML_CPP)
     find_package(yaml-cpp REQUIRED)
 endif()
 
-if ((BUILD_UNITTESTS OR BUILD_OPENCS_TESTS) AND OPENMW_USE_SYSTEM_GOOGLETEST)
+if ((BUILD_COMPONENTS_TESTS OR BUILD_OPENCS_TESTS OR BUILD_OPENMW_TESTS) AND OPENMW_USE_SYSTEM_GOOGLETEST)
     find_package(GTest 1.10 REQUIRED)
     find_package(GMock 1.10 REQUIRED)
 endif()
@@ -645,7 +646,7 @@ endif()
 add_subdirectory (components)
 
 # Apps and tools
-if (BUILD_OPENMW)
+if (BUILD_OPENMW OR BUILD_OPENMW_TESTS)
     add_subdirectory( apps/openmw )
 endif()
 
@@ -679,11 +680,10 @@ endif()
 
 if (BUILD_NIFTEST)
     add_subdirectory(apps/niftest)
-endif(BUILD_NIFTEST)
+endif()
 
-# UnitTests
-if (BUILD_UNITTESTS)
-    add_subdirectory( apps/openmw_test_suite )
+if (BUILD_COMPONENTS_TESTS)
+    add_subdirectory(apps/components_tests)
 endif()
 
 if (BUILD_BENCHMARKS)
@@ -695,11 +695,15 @@ if (BUILD_NAVMESHTOOL)
 endif()
 
 if (BUILD_BULLETOBJECTTOOL)
-    add_subdirectory( apps/bulletobjecttool )
+    add_subdirectory(apps/bulletobjecttool)
 endif()
 
 if (BUILD_OPENCS_TESTS)
     add_subdirectory(apps/opencs_tests)
+endif()
+
+if (BUILD_OPENMW_TESTS)
+    add_subdirectory(apps/openmw_tests)
 endif()
 
 if (WIN32)
@@ -783,8 +787,8 @@ if (WIN32)
             target_compile_options(openmw-wizard PRIVATE ${WARNINGS})
         endif()
 
-        if (BUILD_UNITTESTS)
-            target_compile_options(openmw_test_suite PRIVATE ${WARNINGS})
+        if (BUILD_COMPONENTS_TESTS)
+            target_compile_options(components-tests PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BENCHMARKS)
@@ -797,6 +801,14 @@ if (WIN32)
 
         if (BUILD_BULLETOBJECTTOOL)
             target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
+        endif()
+
+        if (BUILD_OPENCS_TESTS)
+            target_compile_options(openmw-cs-tests PRIVATE ${WARNINGS})
+        endif()
+
+        if (BUILD_OPENMW_TESTS)
+            target_compile_options(openmw-tests PRIVATE ${WARNINGS})
         endif()
     endif(MSVC)
 
@@ -917,6 +929,11 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
     install_plugins_for_bundle("${APP_BUNDLE_NAME}" PLUGINS)
     install_plugins_for_bundle("${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+
     set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
     set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/PlugIns/${QT_QMACSTYLE_PLUGIN_GROUP}/${QT_QMACSTYLE_PLUGIN_NAME}")
     set(OPENCS_PLUGINS ${OPENCS_PLUGINS} "${INSTALLED_OPENCS_APP}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
@@ -968,6 +985,7 @@ elseif(NOT APPLE)
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "." RENAME "AUTHORS.txt")
         INSTALL(FILES "${INSTALL_SOURCE}/defaults.bin" DESTINATION ".")
         INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION ".")
 

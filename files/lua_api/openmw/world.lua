@@ -172,7 +172,8 @@
 -- * @{openmw.types#MiscellaneousRecord},
 -- * @{openmw.types#ClothingRecord},
 -- * @{openmw.types#WeaponRecord},
--- * @{openmw.types#ActivatorRecord}
+-- * @{openmw.types#ActivatorRecord},
+-- * @{openmw.types#LightRecord}
 -- @function [parent=#world] createRecord
 -- @param #any record A record to be registered in the database. Must be one of the supported types.
 -- @return #any A new record added to the database. The type is the same as the input's.

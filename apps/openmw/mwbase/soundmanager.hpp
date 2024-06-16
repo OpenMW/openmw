@@ -33,10 +33,8 @@ namespace MWSound
 
     enum class MusicType
     {
-        Special,
-        Explore,
-        Battle,
-        Scripted
+        Normal,
+        MWScript
     };
 
     class Sound;
@@ -117,6 +115,8 @@ namespace MWBase
         virtual void stopMusic() = 0;
         ///< Stops music if it's playing
 
+        virtual MWSound::MusicType getMusicType() const = 0;
+
         virtual void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) = 0;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
@@ -125,11 +125,6 @@ namespace MWBase
 
         virtual bool isMusicPlaying() = 0;
         ///< Returns true if music is playing
-
-        virtual void playPlaylist(VFS::Path::NormalizedView playlist) = 0;
-        ///< Start playing music from the selected folder
-        /// \param name of the folder that contains the playlist
-        /// Title music playlist is predefined
 
         virtual void say(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView filename) = 0;
         ///< Make an actor say some text.

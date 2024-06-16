@@ -1027,17 +1027,7 @@
             <layout class="QHBoxLayout" name="horizontalLightingLayout">
              <item>
               <layout class="QGridLayout" name="lightingLayout" columnstretch="0,0">
-               <item row="4" column="0">
-                <widget class="QLabel" name="lightsMaximumDistanceLabel">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum distance at which lights will appear (measured in units).&lt;/p&gt;&lt;p&gt;Set this to 0 to use an unlimited distance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Maximum Light Distance</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="8" column="1">
+               <item row="2" column="1">
                 <spacer name="verticalSpacer_10">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
@@ -1050,32 +1040,12 @@
                  </property>
                 </spacer>
                </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="lightsMaxLightsLabel">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of lights per object.&lt;/p&gt;&lt;p&gt;A low number near default will cause light popping similar to what you would see with legacy lighting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Max Lights</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
-                <widget class="QLabel" name="lightFadeMultiplierLabel">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fraction of maximum distance at which lights will start to fade.&lt;/p&gt;&lt;p&gt;Set this to a low value for slower transitions or a high value for quicker transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Fade Start Multiplier</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
+               <item row="1" column="0">
                 <widget class="QLabel" name="lightingMethodLabel">
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object and provides a lighting closest to an original game.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
+&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object. It provides results most similar to Morrowind's lighting.&lt;/p&gt;
+&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
 &lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
@@ -1083,7 +1053,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
+               <item row="1" column="1">
                 <widget class="QComboBox" name="lightingMethodComboBox">
                  <item>
                   <property name="text">
@@ -1100,94 +1070,6 @@
                    <string>Shaders</string>
                   </property>
                  </item>
-                </widget>
-               </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="lightsBoundingSphereMultiplierLabel">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multipler for bounding sphere of lights.&lt;/p&gt;&lt;p&gt;Higher numbers allows for smooth falloff but require an increase in number of max lights.&lt;/p&gt;&lt;p&gt;Does not effect the illumination or strength of lights.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Bounding Sphere Multiplier</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="7" column="0">
-                <widget class="QLabel" name="lightsMinimumInteriorBrightnessLabel">
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum ambient interior brightness.&lt;/p&gt;&lt;p&gt;Increase this if you feel interiors are too dark.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>Minimum Interior Brightness</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="1">
-                <widget class="QDoubleSpinBox" name="lightsBoundingSphereMultiplierSpinBox">
-                 <property name="maximum">
-                  <double>5.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.050000000000000</double>
-                 </property>
-                 <property name="value">
-                  <double>1.650000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="1">
-                <widget class="QDoubleSpinBox" name="lightFadeMultiplierSpinBox">
-                 <property name="maximum">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.010000000000000</double>
-                 </property>
-                 <property name="value">
-                  <double>0.850000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="7" column="1">
-                <widget class="QDoubleSpinBox" name="lightsMinimumInteriorBrightnessSpinBox">
-                 <property name="maximum">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.010000000000000</double>
-                 </property>
-                 <property name="value">
-                  <double>0.080000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QSpinBox" name="lightsMaximumDistanceSpinBox">
-                 <property name="suffix">
-                  <string> unit(s)</string>
-                 </property>
-                 <property name="maximum">
-                  <number>8192</number>
-                 </property>
-                 <property name="singleStep">
-                  <number>128</number>
-                 </property>
-                 <property name="value">
-                  <number>8192</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QSpinBox" name="lightsMaxLightsSpinBox">
-                 <property name="minimum">
-                  <number>2</number>
-                 </property>
-                 <property name="maximum">
-                  <number>64</number>
-                 </property>
-                 <property name="singleStep">
-                  <number>2</number>
-                 </property>
                 </widget>
                </item>
               </layout>

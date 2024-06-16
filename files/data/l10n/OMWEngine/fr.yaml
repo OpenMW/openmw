@@ -38,6 +38,8 @@ ScreenshotMade: "Capture d'écran %s sauvegardée"
 DeleteGame: "Supprimer la partie"
 DeleteGameConfirmation: "Voulez-vous réellement supprimer cette partie sauvegardée ?"
 EmptySaveNameError: "Impossible de sauvegarder une partie lui donner un nom !"
+Health: "Santé"
+Level: "Niveau"
 LoadGameConfirmation: "Voulez-vous charger cette autre partie ? Toute progression non sauvegardée sera perdue."
 MissingContentFilesConfirmation: |-
     Les données de jeu actuellement sélectionnées ne correspondent pas à celle indiquée dans cette sauvegarde.
@@ -70,6 +72,8 @@ AudioFootsteps: "Bruits de pas"
 AudioMaster: "Général"
 AudioMusic: "Musique"
 AudioVoice: "Voix"
+AutoSaveOnResting: "Sauvegarde auto au repos"
+BestAttack: "Toujours meilleure attaque"
 CameraSensitivity: "Sensibilité de la caméra"
 CameraZoomIn: "Zoom avant de la caméra"
 CameraZoomOut: "Zoom arrière de la caméra"
@@ -78,6 +82,7 @@ ConfirmResetBindings: "Réinitialiser tous les contrôles à leurs valeurs par d
 ConfirmResolution: "La nouvelle résolution d'affichage sera appliquée instantanément. Voulez-vous continuer ?"
 Controller: "Manette"
 Controls: "Contrôles"
+Crosshair: "Viseur"
 DelayHigh: "Lent"
 DelayLow: "Rapide"
 DetailLevel: "Niveau de détails"
@@ -90,6 +95,15 @@ EnableController: "Activer la manette"
 FieldOfView: "Champ de vision"
 FieldOfViewHigh: "Étendu"
 FieldOfViewLow: "Restreint"
+ForcePerPixelLighting: "Forcer l'éclairage par pixel"
+ForcePerPixelLightingTooltip: |-
+    Force l'usage de l'éclairage par pixel. Par défaut, seuls les objets avec des "bump" et "normal" maps utilisent l'éclairage par pixel.
+
+    Affecte uniquement les objets rendus via des shaders.
+
+    Activer l'éclairage par pixel donne des résultats visuels différents de ceux du moteur de jeu original, car certaines lumières de Morrowind furent implémentées pour un éclairage par vertex.
+
+    Les shaders de végétation au sol et les particules ignorent cette option.
 FrameRateHint: "Note: Appuyez sur F3 pour afficher la fréquence d'affichage (FPS)."
 GammaCorrection: "Correction Gamma"
 GammaDark: "Sombre"
@@ -111,7 +125,7 @@ LightsFadeStartMultiplier: "Seuil de perte d'éclat lumineux"
 LightsFadeStartMultiplierTooltip: "valeur par défaut: 0.85\nFraction de la distance maximale d'une source à partir de laquelle l'intensité lumineuse commence à décroître.\n\nSélectionnez une valeur basse pour une transition douce ou une valeur plus élevée pour une transition plus abrupte."
 LightsLightingMethodTooltip: "Définit la gestion des sources lumineuses :\n\n
     \"Traditionnelle\" Chaque objet est éclairé par 8 sources lumineuses. Cet méthode est la plus proche du jeu original.\n\n
-    \"Shaders (mode de compatibilité)\" supprime la limite des 8 sources lumineuses. Cette méthode permet d'éclairer la végétation au sol, mais aussi de configurer à quel distance une source lumineuse s'estompe. Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.\n\n
+    \"Shaders (mode de compatibilité)\" supprime la limite des 8 sources lumineuses. Cette méthode permet d'éclairer la végétation au sol. Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.\n\n
     \"Shaders\" offre tous les bénéfices apportés par \"Shaders (mode de compatibilité)\", mais utilise une approche moderne. Celle-ci permet, sur du matériel moderne, d'augmenter le nombre de sources lumineuses par objet sans perte de performance."
 LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
@@ -159,6 +173,7 @@ TestingExteriorCells: "Vérification des espaces (cells) extérieurs"
 TestingInteriorCells: "Vérification des espaces (cells) intérieurs"
 TextureFiltering: "Filtre appliqué aux textures"
 TextureFilteringBilinear: "Bilinéaire"
+TextureFilteringNearest: "Plus proche voisin"
 TextureFilteringDisabled: "Aucun"
 TextureFilteringOther: "Autre"
 TextureFilteringTrilinear: "Trilinéaire"

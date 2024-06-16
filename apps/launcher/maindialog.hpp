@@ -60,6 +60,9 @@ namespace Launcher
         void play();
         void help();
 
+    protected:
+        bool event(QEvent* event) override;
+
     private slots:
         void wizardStarted();
         void wizardFinished(int exitCode, QProcess::ExitStatus exitStatus);

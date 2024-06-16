@@ -7,7 +7,7 @@
 #include <components/terrain/storage.hpp>
 
 #include <components/esm/esmterrain.hpp>
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/esm3/loadltex.hpp>
 
 namespace ESM4
@@ -67,13 +67,13 @@ namespace ESMTerrain
     class Storage : public Terrain::Storage
     {
     public:
-        Storage(const VFS::Manager* vfs, const std::string& normalMapPattern = "",
-            const std::string& normalHeightMapPattern = "", bool autoUseNormalMaps = false,
-            const std::string& specularMapPattern = "", bool autoUseSpecularMaps = false);
+        Storage(const VFS::Manager* vfs, std::string_view normalMapPattern = {},
+            std::string_view normalHeightMapPattern = {}, bool autoUseNormalMaps = false,
+            std::string_view specularMapPattern = {}, bool autoUseSpecularMaps = false);
 
         // Not implemented in this class, because we need different Store implementations for game and editor
         virtual osg::ref_ptr<const LandObject> getLand(ESM::ExteriorCellLocation cellLocation) = 0;
-        virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
+        virtual const std::string* getLandTexture(std::uint16_t index, int plugin) = 0;
         /// Get bounds of the whole terrain in cell units
         void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) override = 0;
 

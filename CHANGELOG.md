@@ -12,7 +12,7 @@
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
     Bug #4683: Disposition decrease when player commits crime is not implemented properly
     Bug #4742: Actors with wander never stop walking after Loopgroup Walkforward
-    Bug #4743: PlayGroup doesn't play non-looping animations correctly 
+    Bug #4743: PlayGroup doesn't play non-looping animations correctly
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #4822: Non-weapon equipment and body parts can't inherit time from parent animation
@@ -37,6 +37,7 @@
     Bug #6156: 1ft Charm or Sound magic effect vfx doesn't work properly
     Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
+    Bug #6240: State sharing sometimes prevents the use of the same texture file for different purposes in shaders
     Bug #6313: Followers with high Fight can turn hostile
     Bug #6402: The sound of a thunderstorm does not stop playing after entering the premises
     Bug #6427: Enemy health bar disappears before damaging effect ends
@@ -140,6 +141,7 @@
     Bug #7676: Incorrect magic effect order in alchemy
     Bug #7679: Scene luminance value flashes when toggling shaders
     Bug #7685: Corky sometimes doesn't follow Llovyn Andus
+    Bug #7707: (OpenCS): New landscape records do not contain appropriate flags
     Bug #7712: Casting doesn't support spells and enchantments with no effects
     Bug #7721: CS: Special Chars Not Allowed in IDs
     Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
@@ -167,11 +169,20 @@
     Bug #7872: Region sounds use wrong odds
     Bug #7886: Equip and unequip animations can't share the animation track section
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
+    Bug #7896: Editor: Loading cellrefs incorrectly transforms Refnums, causing load failures
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
     Bug #7908: Key bindings names in the settings menu are layout-specific
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
+    Bug #7970: Difference of GetPCSleep (?) behavior between vanilla and OpenMW
+    Bug #7980: Paralyzed NPCs' lips move
+    Bug #7993: Cannot load Bloodmoon without Tribunal
+    Bug #7997: Can toggle perspective when paralyzed
+    Bug #8002: Portable light sources held by creatures do not emit lighting
+    Bug #8018: Potion effects should never explode and always apply on self
+    Bug #8021: Player's scale doesn't reset when starting a new game
+    Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
@@ -232,15 +243,20 @@
     Feature #7932: Support two-channel normal maps
     Feature #7936: Scalable icons in Qt applications
     Feature #7953: Allow to change SVG icons colors depending on color scheme
+    Feature #7964: Add Lua read access to MW Dialogue records
+    Feature #7971: Make save's Time Played value display hours instead of days
+    Feature #7985: Support dark mode on Windows
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
+    Task #6505: UTF-8 support in Lua scripts
     Task #6624: Drop support for saves made prior to 0.45
     Task #7048: Get rid of std::bind
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
     Task #7394: Drop support for --fs-strict
+    Task #7720: Drop 360-degree screenshot support
 
 0.48.0
 ------

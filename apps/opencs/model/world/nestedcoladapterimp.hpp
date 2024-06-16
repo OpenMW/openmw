@@ -319,12 +319,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                {
-                    if (effect.mEffectID >= 0 && effect.mEffectID < ESM::MagicEffect::Length)
-                        return effect.mEffectID;
-                    else
-                        throw std::runtime_error("Magic effects ID unexpected value");
-                }
+                    return effect.mEffectID;
                 case 1:
                 {
                     switch (effect.mEffectID)
@@ -354,12 +349,7 @@ namespace CSMWorld
                     }
                 }
                 case 3:
-                {
-                    if (effect.mRange >= 0 && effect.mRange <= 2)
-                        return effect.mRange;
-                    else
-                        throw std::runtime_error("Magic effects range unexpected value");
-                }
+                    return effect.mRange;
                 case 4:
                     return effect.mArea;
                 case 5:

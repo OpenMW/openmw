@@ -148,7 +148,7 @@ namespace MWBase
         virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
 
         virtual MWWorld::ESMStore& getStore() = 0;
-        const MWWorld::ESMStore& getStore() const { return const_cast<MWBase::World*>(this)->getStore(); }
+        virtual const MWWorld::ESMStore& getStore() const = 0;
 
         virtual const std::vector<int>& getESMVersions() const = 0;
 
@@ -425,7 +425,6 @@ namespace MWBase
 
         /// \todo this does not belong here
         virtual void screenshot(osg::Image* image, int w, int h) = 0;
-        virtual bool screenshot360(osg::Image* image) = 0;
 
         /// Find default position inside exterior cell specified by name
         /// \return empty RefId if exterior with given name not exists, the cell's RefId otherwise

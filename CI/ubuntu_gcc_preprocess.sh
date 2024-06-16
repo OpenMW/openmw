@@ -31,7 +31,8 @@ cmake \
     -D BUILD_OPENCS=ON \
     -D BUILD_OPENCS_TESTS=ON \
     -D BUILD_OPENMW=ON \
-    -D BUILD_UNITTESTS=ON \
+    -D BUILD_OPENMW_TESTS=ON \
+    -D BUILD_COMPONENTS_TESTS=ON \
     -D BUILD_WIZARD=ON \
     "${SRC}"
 cmake --build . --parallel

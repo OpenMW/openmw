@@ -11,6 +11,7 @@
 #include <components/esm3/npcstate.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwmechanics/magiceffects.hpp"
 
@@ -101,13 +102,16 @@ namespace MWWorld
             }
             creatureStats.mActiveSpells.mSpells.emplace_back(params);
         }
-        std::multimap<ESM::RefId, int> equippedItems;
+        std::multimap<ESM::RefId, ESM::RefNum> equippedItems;
         for (std::size_t i = 0; i < inventory.mItems.size(); ++i)
         {
-            const ESM::ObjectState& item = inventory.mItems[i];
+            ESM::ObjectState& item = inventory.mItems[i];
             auto slot = inventory.mEquipmentSlots.find(i);
             if (slot != inventory.mEquipmentSlots.end())
-                equippedItems.emplace(item.mRef.mRefID, slot->second);
+            {
+                MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(item.mRef);
+                equippedItems.emplace(item.mRef.mRefID, item.mRef.mRefNum);
+            }
         }
         for (const auto& [id, oldMagnitudes] : inventory.mPermanentMagicEffectMagnitudes)
         {
@@ -161,7 +165,7 @@ namespace MWWorld
             auto [begin, end] = equippedItems.equal_range(id);
             for (auto it = begin; it != end; ++it)
             {
-                params.mItem = { static_cast<unsigned int>(it->second), 0 };
+                params.mItem = it->second;
                 creatureStats.mActiveSpells.mSpells.emplace_back(params);
             }
         }
@@ -228,5 +232,29 @@ namespace MWWorld
             dynamic.mMod = 0.f;
         for (auto& setting : creatureStats.mAiSettings)
             setting.mMod = 0.f;
+    }
+
+    // Versions 17-27 wrote an equipment slot index to mItem
+    void convertEnchantmentSlots(ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory)
+    {
+        for (auto& activeSpell : creatureStats.mActiveSpells.mSpells)
+        {
+            if (!activeSpell.mItem.isSet())
+                continue;
+            if (activeSpell.mFlags & ESM::ActiveSpells::Flag_Equipment)
+            {
+                std::int64_t slotIndex = activeSpell.mItem.mIndex;
+                auto slot = std::find_if(inventory.mEquipmentSlots.begin(), inventory.mEquipmentSlots.end(),
+                    [=](const auto& entry) { return entry.second == slotIndex; });
+                if (slot != inventory.mEquipmentSlots.end() && slot->first < inventory.mItems.size())
+                {
+                    ESM::CellRef& ref = inventory.mItems[slot->first].mRef;
+                    MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(ref);
+                    activeSpell.mItem = ref.mRefNum;
+                    continue;
+                }
+            }
+            activeSpell.mItem = {};
+        }
     }
 }

@@ -75,8 +75,8 @@ namespace CSMWorld
             /// Marks an additional dependency
             void addOtherDependency(const ESM::RefId& id);
             /// Clears parts and dependencies
-            void reset_data(const ESM::RefId& raceId,
-                const WeightsHeights& raceStats = { osg::Vec2f(1.f, 1.f), osg::Vec2f(1.f, 1.f) }, bool isBeast = false);
+            void reset_data(const ESM::RefId& raceId, const WeightsHeights& raceStats = { { 1.f, 1.f }, { 1.f, 1.f } },
+                bool isBeast = false);
 
         private:
             bool handles(ESM::PartReferenceType type) const;

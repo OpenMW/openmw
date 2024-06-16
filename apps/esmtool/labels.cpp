@@ -7,6 +7,7 @@
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -766,18 +767,16 @@ std::string enchantmentFlags(int flags)
 std::string landFlags(std::uint32_t flags)
 {
     std::string properties;
-    // The ESM component says that this first four bits are used, but
-    // only the first three bits are used as far as I can tell.
-    // There's also no enumeration of the bit in the ESM component.
     if (flags == 0)
         properties += "[None] ";
-    if (flags & 0x00000001)
-        properties += "Unknown1 ";
-    if (flags & 0x00000004)
-        properties += "Unknown3 ";
-    if (flags & 0x00000002)
-        properties += "Unknown2 ";
-    if (flags & 0xFFFFFFF8)
+    if (flags & ESM::Land::Flag_HeightsNormals)
+        properties += "HeightsNormals ";
+    if (flags & ESM::Land::Flag_Colors)
+        properties += "Colors ";
+    if (flags & ESM::Land::Flag_Textures)
+        properties += "Textures ";
+    int unused = 0xFFFFFFFF ^ (ESM::Land::Flag_HeightsNormals | ESM::Land::Flag_Colors | ESM::Land::Flag_Textures);
+    if (flags & unused)
         properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;

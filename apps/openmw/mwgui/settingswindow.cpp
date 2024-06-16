@@ -44,16 +44,22 @@
 
 namespace
 {
-    std::string textureMipmappingToStr(const std::string& val)
+    std::string textureFilteringToStr(const std::string& mipFilter, const std::string& magFilter)
     {
-        if (val == "linear")
-            return "#{OMWEngine:TextureFilteringTrilinear}";
-        if (val == "nearest")
-            return "#{OMWEngine:TextureFilteringBilinear}";
-        if (val == "none")
+        if (mipFilter == "none")
             return "#{OMWEngine:TextureFilteringDisabled}";
 
-        Log(Debug::Warning) << "Warning: Invalid texture mipmap option: " << val;
+        if (magFilter == "linear")
+        {
+            if (mipFilter == "linear")
+                return "#{OMWEngine:TextureFilteringTrilinear}";
+            if (mipFilter == "nearest")
+                return "#{OMWEngine:TextureFilteringBilinear}";
+        }
+        else if (magFilter == "nearest")
+            return "#{OMWEngine:TextureFilteringNearest}";
+
+        Log(Debug::Warning) << "Warning: Invalid texture filtering options: " << mipFilter << ", " << magFilter;
         return "#{OMWEngine:TextureFilteringOther}";
     }
 
@@ -368,8 +374,8 @@ namespace MWGui
         }
         highlightCurrentResolution();
 
-        const std::string& tmip = Settings::general().mTextureMipmap;
-        mTextureFilteringButton->setCaptionWithReplacing(textureMipmappingToStr(tmip));
+        mTextureFilteringButton->setCaptionWithReplacing(
+            textureFilteringToStr(Settings::general().mTextureMipmap, Settings::general().mTextureMinFilter));
 
         int waterTextureSize = Settings::water().mRttSize;
         if (waterTextureSize >= 512)
@@ -649,6 +655,7 @@ namespace MWGui
         if (selectedButton == 1 || selectedButton == -1)
             return;
 
+        Settings::shaders().mForcePerPixelLighting.reset();
         Settings::shaders().mLightBoundsMultiplier.reset();
         Settings::shaders().mMaximumLightDistance.reset();
         Settings::shaders().mLightFadeStart.reset();
@@ -691,12 +698,24 @@ namespace MWGui
 
     void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        if (pos == 0)
-            Settings::general().mTextureMipmap.set("nearest");
-        else if (pos == 1)
-            Settings::general().mTextureMipmap.set("linear");
-        else
-            Log(Debug::Warning) << "Unexpected option pos " << pos;
+        auto& generalSettings = Settings::general();
+        switch (pos)
+        {
+            case 0: // Bilinear with mips
+                generalSettings.mTextureMipmap.set("nearest");
+                generalSettings.mTextureMagFilter.set("linear");
+                generalSettings.mTextureMinFilter.set("linear");
+                break;
+            case 1: // Trilinear with mips
+                generalSettings.mTextureMipmap.set("linear");
+                generalSettings.mTextureMagFilter.set("linear");
+                generalSettings.mTextureMinFilter.set("linear");
+                break;
+            default:
+                Log(Debug::Warning) << "Unexpected texture filtering option pos " << pos;
+                break;
+        }
+
         apply();
     }
 

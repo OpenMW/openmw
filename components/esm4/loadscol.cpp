@@ -49,12 +49,14 @@ void ESM4::StaticCollection::load(ESM4::Reader& reader)
             case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM::fourCC("OBND"):
             case ESM::fourCC("MODL"): // Model data start
+                reader.getZString(mModel);
+                break;
             case ESM::fourCC("MODT"):
             case ESM::fourCC("MODC"):
             case ESM::fourCC("MODS"):
             case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("OBND"):
             case ESM::fourCC("ONAM"):
             case ESM::fourCC("DATA"):
             case ESM::fourCC("FLTR"): // FO4

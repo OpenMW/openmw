@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "components/esm/refid.hpp"
-#include "components/esm/util.hpp"
+#include <components/esm/refid.hpp>
+#include <components/esm/vector3.hpp>
 
 namespace ESM
 {

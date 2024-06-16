@@ -52,12 +52,6 @@ namespace MWSound
 
         std::unique_ptr<Sound_Output> mOutput;
 
-        // Caches available music tracks by <playlist name, (sound files) >
-        std::unordered_map<VFS::Path::Normalized, std::vector<VFS::Path::Normalized>, VFS::Path::Hash, std::equal_to<>>
-            mMusicFiles;
-        std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
-        VFS::Path::Normalized mLastPlayedMusic; // The music file that was last played
-
         WaterSoundUpdater mWaterSoundUpdater;
 
         SoundBufferPool mSoundBuffers;
@@ -92,7 +86,7 @@ namespace MWSound
         TrackList mActiveTracks;
 
         StreamPtr mMusic;
-        VFS::Path::Normalized mCurrentPlaylist;
+        MusicType mMusicType;
 
         bool mListenerUnderwater;
         osg::Vec3f mListenerPos;
@@ -127,7 +121,6 @@ namespace MWSound
 
         void streamMusicFull(VFS::Path::NormalizedView filename);
         void advanceMusic(VFS::Path::NormalizedView filename, float fadeOut = 1.f);
-        void startRandomTitle();
 
         void cull3DSound(SoundBase* sound);
 
@@ -176,6 +169,8 @@ namespace MWSound
         void stopMusic() override;
         ///< Stops music if it's playing
 
+        MWSound::MusicType getMusicType() const override { return mMusicType; }
+
         void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) override;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
@@ -184,11 +179,6 @@ namespace MWSound
 
         bool isMusicPlaying() override;
         ///< Returns true if music is playing
-
-        void playPlaylist(VFS::Path::NormalizedView playlist) override;
-        ///< Start playing music from the selected folder
-        /// \param name of the folder that contains the playlist
-        /// Title music playlist is predefined
 
         void say(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView filename) override;
         ///< Make an actor say some text.

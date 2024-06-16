@@ -5,7 +5,6 @@
 #include "gyroscopeaxis.hpp"
 #include "hrtfmode.hpp"
 #include "navmeshrendermode.hpp"
-#include "screenshotsettings.hpp"
 #include "windowmode.hpp"
 
 #include <components/detournavigator/collisionshapetype.hpp>
@@ -263,14 +262,6 @@ namespace Settings
         if (value < 0 || 2 < value)
             return SDLUtil::VSyncMode::Disabled;
         return static_cast<SDLUtil::VSyncMode>(value);
-    }
-
-    ScreenshotSettings parseScreenshotSettings(std::string_view value);
-
-    template <>
-    inline ScreenshotSettings Manager::getImpl<ScreenshotSettings>(std::string_view setting, std::string_view category)
-    {
-        return parseScreenshotSettings(getString(setting, category));
     }
 }
 

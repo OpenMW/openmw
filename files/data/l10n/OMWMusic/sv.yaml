@@ -1,0 +1,7 @@
+Music: "OpenMW Musik"
+settingsPageDescription: "OpenMW Musikinställningar"
+
+musicSettings: "Musikkonfiguration"
+
+CombatMusicEnabled: "Spela stridsmusik"
+CombatMusicEnabledDescription: "Om aktiv kommer spelet byta till stridsmusik när det finns figurer som är i strid."

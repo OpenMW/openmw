@@ -1,8 +1,9 @@
 #include "cellpreloader.hpp"
 
-#include <array>
+#include <algorithm>
 #include <atomic>
 #include <limits>
+#include <span>
 
 #include <osg/Stats>
 
@@ -26,32 +27,27 @@
 #include "cellstore.hpp"
 #include "class.hpp"
 
-namespace
-{
-    template <class Contained>
-    bool contains(const std::vector<MWWorld::CellPreloader::PositionCellGrid>& container, const Contained& contained,
-        float tolerance)
-    {
-        for (const auto& pos : contained)
-        {
-            bool found = false;
-            for (const auto& pos2 : container)
-            {
-                if ((pos.first - pos2.first).length2() < tolerance * tolerance && pos.second == pos2.second)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                return false;
-        }
-        return true;
-    }
-}
-
 namespace MWWorld
 {
+    namespace
+    {
+        bool contains(std::span<const PositionCellGrid> positions, const PositionCellGrid& contained, float tolerance)
+        {
+            const float squaredTolerance = tolerance * tolerance;
+            const auto predicate = [&](const PositionCellGrid& v) {
+                return (contained.mPosition - v.mPosition).length2() < squaredTolerance
+                    && contained.mCellBounds == v.mCellBounds;
+            };
+            return std::ranges::any_of(positions, predicate);
+        }
+
+        bool contains(
+            std::span<const PositionCellGrid> container, std::span<const PositionCellGrid> contained, float tolerance)
+        {
+            const auto predicate = [&](const PositionCellGrid& v) { return contains(container, v, tolerance); };
+            return std::ranges::all_of(contained, predicate);
+        }
+    }
 
     struct ListModelsVisitor
     {
@@ -70,12 +66,12 @@ namespace MWWorld
     {
     public:
         /// Constructor to be called from the main thread.
-        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager,
+        explicit PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager,
             Resource::BulletShapeManager* bulletShapeManager, Resource::KeyframeManager* keyframeManager,
             Terrain::World* terrain, MWRender::LandManager* landManager, bool preloadInstances)
             : mIsExterior(cell->getCell()->isExterior())
-            , mX(cell->getCell()->getGridX())
-            , mY(cell->getCell()->getGridY())
+            , mCellLocation(cell->getCell()->getExteriorCellLocation())
+            , mCellId(cell->getCell()->getId())
             , mSceneManager(sceneManager)
             , mBulletShapeManager(bulletShapeManager)
             , mKeyframeManager(keyframeManager)
@@ -99,12 +95,13 @@ namespace MWWorld
             {
                 try
                 {
-                    mTerrain->cacheCell(mTerrainView.get(), mX, mY);
-                    mPreloadedObjects.insert(
-                        mLandManager->getLand(ESM::ExteriorCellLocation(mX, mY, ESM::Cell::sDefaultWorldspaceId)));
+                    mTerrain->cacheCell(mTerrainView.get(), mCellLocation.mX, mCellLocation.mY);
+                    mPreloadedObjects.insert(mLandManager->getLand(mCellLocation));
                 }
-                catch (std::exception&)
+                catch (const std::exception& e)
                 {
+                    Log(Debug::Warning) << "Failed to cache terrain for exterior cell " << mCellLocation << ": "
+                                        << e.what();
                 }
             }
 
@@ -117,8 +114,12 @@ namespace MWWorld
 
                 try
                 {
+                    const VFS::Manager& vfs = *mSceneManager->getVFS();
                     mesh = Misc::ResourceHelpers::correctMeshPath(path);
-                    mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
+                    mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, &vfs);
+
+                    if (!vfs.exists(mesh))
+                        continue;
 
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size() - 1)
@@ -128,7 +129,7 @@ namespace MWWorld
                         {
                             kfname = mesh;
                             kfname.replace(kfname.size() - 4, 4, ".kf");
-                            if (mSceneManager->getVFS()->exists(kfname))
+                            if (vfs.exists(kfname))
                                 mPreloadedObjects.insert(mKeyframeManager->get(kfname));
                         }
                     }
@@ -138,18 +139,18 @@ namespace MWWorld
                     else
                         mPreloadedObjects.insert(mBulletShapeManager->getShape(mesh));
                 }
-                catch (std::exception&)
+                catch (const std::exception& e)
                 {
-                    // ignore error for now, would spam the log too much
-                    // error will be shown when visiting the cell
+                    Log(Debug::Warning) << "Failed to preload mesh \"" << path << "\" from cell " << mCellId << ": "
+                                        << e.what();
                 }
             }
         }
 
     private:
         bool mIsExterior;
-        int mX;
-        int mY;
+        ESM::ExteriorCellLocation mCellLocation;
+        ESM::RefId mCellId;
         std::vector<std::string_view> mMeshes;
         Resource::SceneManager* mSceneManager;
         Resource::BulletShapeManager* mBulletShapeManager;
@@ -169,12 +170,12 @@ namespace MWWorld
     class TerrainPreloadItem : public SceneUtil::WorkItem
     {
     public:
-        TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View>>& views, Terrain::World* world,
-            const std::vector<CellPreloader::PositionCellGrid>& preloadPositions)
+        explicit TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View>>& views, Terrain::World* world,
+            std::span<const PositionCellGrid> preloadPositions)
             : mAbort(false)
             , mTerrainViews(views)
             , mWorld(world)
-            , mPreloadPositions(preloadPositions)
+            , mPreloadPositions(preloadPositions.begin(), preloadPositions.end())
         {
         }
 
@@ -183,8 +184,8 @@ namespace MWWorld
             for (unsigned int i = 0; i < mTerrainViews.size() && i < mPreloadPositions.size() && !mAbort; ++i)
             {
                 mTerrainViews[i]->reset();
-                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].first, mPreloadPositions[i].second, mAbort,
-                    mLoadingReporter);
+                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].mPosition, mPreloadPositions[i].mCellBounds,
+                    mAbort, mLoadingReporter);
             }
             mLoadingReporter.complete();
         }
@@ -197,7 +198,7 @@ namespace MWWorld
         std::atomic<bool> mAbort;
         std::vector<osg::ref_ptr<Terrain::View>> mTerrainViews;
         Terrain::World* mWorld;
-        std::vector<CellPreloader::PositionCellGrid> mPreloadPositions;
+        std::vector<PositionCellGrid> mPreloadPositions;
         Loading::Reporter mLoadingReporter;
     };
 
@@ -375,19 +376,19 @@ namespace MWWorld
             mTerrainPreloadItem->wait(listener);
     }
 
-    void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid* exceptPos)
+    void CellPreloader::abortTerrainPreloadExcept(const PositionCellGrid* exceptPos)
     {
-        if (exceptPos && contains(mTerrainPreloadPositions, std::array{ *exceptPos }, Constants::CellSizeInUnits))
+        if (exceptPos != nullptr && contains(mTerrainPreloadPositions, *exceptPos, Constants::CellSizeInUnits))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {
             mTerrainPreloadItem->abort();
             mTerrainPreloadItem->waitTillDone();
         }
-        setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
+        setTerrainPreloadPositions({});
     }
 
-    void CellPreloader::setTerrainPreloadPositions(const std::vector<CellPreloader::PositionCellGrid>& positions)
+    void CellPreloader::setTerrainPreloadPositions(std::span<const PositionCellGrid> positions)
     {
         if (positions.empty())
         {
@@ -408,7 +409,7 @@ namespace MWWorld
                     mTerrainViews.emplace_back(mTerrain->createView());
             }
 
-            mTerrainPreloadPositions = positions;
+            mTerrainPreloadPositions.assign(positions.begin(), positions.end());
             if (!positions.empty())
             {
                 mTerrainPreloadItem = new TerrainPreloadItem(mTerrainViews, mTerrain, positions);
@@ -417,10 +418,10 @@ namespace MWWorld
         }
     }
 
-    bool CellPreloader::isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const
+    bool CellPreloader::isTerrainLoaded(const PositionCellGrid& position, double referenceTime) const
     {
         return mLoadedTerrainTimestamp + mResourceSystem->getSceneManager()->getExpiryDelay() > referenceTime
-            && contains(mLoadedTerrainPositions, std::array{ position }, Constants::CellSizeInUnits);
+            && contains(mLoadedTerrainPositions, position, Constants::CellSizeInUnits);
     }
 
     void CellPreloader::setTerrain(Terrain::World* terrain)

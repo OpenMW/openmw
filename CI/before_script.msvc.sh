@@ -544,7 +544,7 @@ if [ -n "$SINGLE_CONFIG" ]; then
 	add_cmake_opts "-DCMAKE_BUILD_TYPE=${CONFIGURATIONS[0]}"
 fi
 
-if ! [ -z $UNITY_BUILD ]; then
+if [[ -n "$UNITY_BUILD" ]]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
@@ -559,11 +559,11 @@ fi
 # turn on LTO by default
 add_cmake_opts "-DOPENMW_LTO_BUILD=True"
 
-if ! [ -z "$USE_WERROR" ]; then
+if [[ -n "$USE_WERROR" ]]; then
   add_cmake_opts "-DOPENMW_MSVC_WERROR=ON"
 fi
 
-if ! [ -z "$USE_CLANG_TIDY" ]; then
+if [[ -n "$USE_CLANG_TIDY" ]]; then
   add_cmake_opts "-DCMAKE_CXX_CLANG_TIDY=\"clang-tidy --warnings-as-errors=*\""
 fi
 
@@ -578,7 +578,7 @@ QT_VER="6.6.2"
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
 OSG_ARCHIVE="OSGoS-3.6.5-123-g68c5c573d-msvc${OSG_MSVC_YEAR}-win${BITS}"
 OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
-if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
+if [[ -n "$OSG_MULTIVIEW_BUILD" ]]; then
 	OSG_ARCHIVE_NAME="OSG-3.6-multiview"
 	OSG_ARCHIVE="OSG-3.6-multiview-d2ee5aa8-msvc${OSG_MSVC_YEAR}-win${BITS}"
 	OSG_ARCHIVE_REPO_URL="https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview"
@@ -866,7 +866,7 @@ printf "${OSG_ARCHIVE_NAME}... "
 			SUFFIX_UPCASE=""
 		fi
 
-		if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
+		if [[ -n "$OSG_MULTIVIEW_BUILD" ]]; then
 			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,libpng16}${SUFFIX}.dll \
 				"$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
 		else
@@ -875,9 +875,9 @@ printf "${OSG_ARCHIVE_NAME}... "
 				"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
 			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/icudt58.dll"
 			if [ $CONFIGURATION == "Debug" ]; then
-				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_system-vc141-mt-gd-1_63,collada-dom2.4-dp-vc141-mt-d}.dll
+				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-gd-1_63,boost_system-vc141-mt-gd-1_63,collada-dom2.4-dp-vc141-mt-d}.dll
 			else
-				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_system-vc141-mt-1_63,collada-dom2.4-dp-vc141-mt}.dll
+				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-gd-1_63,boost_system-vc141-mt-1_63,collada-dom2.4-dp-vc141-mt}.dll
 			fi
 		fi
 		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dae,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
@@ -1167,8 +1167,9 @@ if [ "${BUILD_BENCHMARKS}" ]; then
 fi
 
 if [ -n "${TEST_FRAMEWORK}" ]; then
-	add_cmake_opts -DBUILD_UNITTESTS=ON
+	add_cmake_opts -DBUILD_COMPONENTS_TESTS=ON
 	add_cmake_opts -DBUILD_OPENCS_TESTS=ON
+	add_cmake_opts -DBUILD_OPENMW_TESTS=ON
 fi
 
 if [ -n "$ACTIVATE_MSVC" ]; then

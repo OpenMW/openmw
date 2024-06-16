@@ -16,7 +16,6 @@
 #include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -115,6 +114,7 @@ namespace MWSound
         , mOutput(std::make_unique<OpenAL_Output>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*mOutput)
+        , mMusicType(MWSound::MusicType::Normal)
         , mListenerUnderwater(false)
         , mListenerPos(0, 0, 0)
         , mListenerDir(1, 0, 0)
@@ -262,7 +262,6 @@ namespace MWSound
             return;
 
         Log(Debug::Info) << "Playing \"" << filename << "\"";
-        mLastPlayedMusic = filename;
 
         DecoderPtr decoder = getDecoder();
         try
@@ -298,41 +297,6 @@ namespace MWSound
         mMusic->setFadeout(fadeOut);
     }
 
-    void SoundManager::startRandomTitle()
-    {
-        const auto playlist = mMusicFiles.find(mCurrentPlaylist);
-
-        if (playlist == mMusicFiles.end() || playlist->second.empty())
-        {
-            advanceMusic(VFS::Path::NormalizedView());
-            return;
-        }
-
-        const std::vector<VFS::Path::Normalized>& filelist = playlist->second;
-
-        auto& tracklist = mMusicToPlay[mCurrentPlaylist];
-
-        // Do a Fisher-Yates shuffle
-
-        // Repopulate if playlist is empty
-        if (tracklist.empty())
-        {
-            tracklist.resize(filelist.size());
-            std::iota(tracklist.begin(), tracklist.end(), 0);
-        }
-
-        int i = Misc::Rng::rollDice(tracklist.size());
-
-        // Reshuffle if last played music is the same after a repopulation
-        if (filelist[tracklist[i]] == mLastPlayedMusic)
-            i = (i + 1) % tracklist.size();
-
-        // Remove music from list after advancing music
-        advanceMusic(filelist[tracklist[i]]);
-        tracklist[i] = tracklist.back();
-        tracklist.pop_back();
-    }
-
     bool SoundManager::isMusicPlaying()
     {
         return mMusic && mOutput->isStreamPlaying(mMusic.get());
@@ -340,48 +304,12 @@ namespace MWSound
 
     void SoundManager::streamMusic(VFS::Path::NormalizedView filename, MusicType type, float fade)
     {
-        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
-
         // Can not interrupt scripted music by built-in playlists
-        if (mechanicsManager->getMusicType() == MusicType::Scripted && type != MusicType::Scripted
-            && type != MusicType::Special)
+        if (mMusicType == MusicType::MWScript && type != MusicType::MWScript)
             return;
 
-        mechanicsManager->setMusicType(type);
+        mMusicType = type;
         advanceMusic(filename, fade);
-        if (type == MWSound::MusicType::Battle)
-            mCurrentPlaylist = battlePlaylist;
-        else if (type == MWSound::MusicType::Explore)
-            mCurrentPlaylist = explorePlaylist;
-    }
-
-    void SoundManager::playPlaylist(VFS::Path::NormalizedView playlist)
-    {
-        if (mCurrentPlaylist == playlist)
-            return;
-
-        auto it = mMusicFiles.find(playlist);
-
-        if (it == mMusicFiles.end())
-        {
-            std::vector<VFS::Path::Normalized> filelist;
-            const VFS::Path::Normalized playlistPath
-                = Misc::ResourceHelpers::correctMusicPath(playlist) / VFS::Path::NormalizedView();
-            for (const auto& name : mVFS->getRecursiveDirectoryIterator(VFS::Path::NormalizedView(playlistPath)))
-                filelist.push_back(name);
-
-            it = mMusicFiles.emplace_hint(it, playlist, std::move(filelist));
-        }
-
-        // No Battle music? Use Explore playlist
-        if (playlist == battlePlaylist && it->second.empty())
-        {
-            playPlaylist(explorePlaylist);
-            return;
-        }
-
-        mCurrentPlaylist = playlist;
-        startRandomTitle();
     }
 
     void SoundManager::say(const MWWorld::ConstPtr& ptr, VFS::Path::NormalizedView filename)
@@ -1022,10 +950,6 @@ namespace MWSound
         duration = mTimePassed;
         mTimePassed = 0.0f;
 
-        // Make sure music is still playing
-        if (!isMusicPlaying() && !mCurrentPlaylist.value().empty())
-            startRandomTitle();
-
         Environment env = Env_Normal;
         if (mListenerUnderwater)
             env = Env_Underwater;
@@ -1146,6 +1070,8 @@ namespace MWSound
                 streamMusicFull(mNextMusic);
                 mNextMusic = VFS::Path::Normalized();
             }
+            else
+                mMusicType = MusicType::Normal;
         }
         else
         {
@@ -1165,7 +1091,7 @@ namespace MWSound
         if (isMainMenu && !isMusicPlaying())
         {
             if (mVFS->exists(MWSound::titleMusic))
-                streamMusic(MWSound::titleMusic, MWSound::MusicType::Special);
+                streamMusic(MWSound::titleMusic, MWSound::MusicType::Normal);
         }
 
         updateSounds(duration);
@@ -1330,7 +1256,8 @@ namespace MWSound
 
     void SoundManager::clear()
     {
-        SoundManager::stopMusic();
+        stopMusic();
+        mMusicType = MusicType::Normal;
 
         for (SoundMap::value_type& snd : mActiveSounds)
         {

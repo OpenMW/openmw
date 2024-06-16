@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWRENDER_OBJECTPAGING_H
 #define OPENMW_MWRENDER_OBJECTPAGING_H
 
-#include <components/esm3/loadcell.hpp>
+#include <components/esm3/refnum.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
 
@@ -11,17 +11,18 @@ namespace Resource
 {
     class SceneManager;
 }
+
 namespace MWWorld
 {
-    class ESMStore;
+//    class ESMStore;
     class GroundcoverStore;
 }
-
+/*
 namespace ESM
 {
     class ReadersCache;
 }
-
+*/
 namespace MWRender
 {
 
@@ -85,9 +86,6 @@ namespace MWRender
 
         const RefTracker& getRefTracker() const { return mRefTracker; }
         RefTracker& getWritableRefTracker() { return mRefTrackerLocked ? mRefTrackerNew : mRefTracker; }
-
-        std::map<ESM::RefNum, ESM::CellRef> collectESM3References(
-            float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers) const;
 
         std::mutex mSizeCacheMutex;
         typedef std::map<ESM::RefNum, float> SizeCache;

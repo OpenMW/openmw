@@ -168,10 +168,11 @@ namespace MWGui
         if (static_cast<size_t>(index) != selected)
         {
             auto technique = *mActiveList->getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
-            if (technique->getDynamic())
+            if (technique->getDynamic() || technique->getInternal())
                 return;
 
-            if (processor->enableTechnique(std::move(technique), index) != MWRender::PostProcessor::Status_Error)
+            if (processor->enableTechnique(std::move(technique), index - mOffset)
+                != MWRender::PostProcessor::Status_Error)
                 processor->saveChain();
         }
     }
@@ -444,10 +445,16 @@ namespace MWGui
             }
         }
 
+        mOffset = 0;
         for (auto technique : processor->getTechniques())
         {
             if (!technique->getHidden())
+            {
                 mActiveList->addItem(technique->getName(), technique);
+
+                if (technique->getInternal())
+                    mOffset++;
+            }
         }
 
         auto tryFocus = [this](ListWrapper* widget, const std::string& hint) {
@@ -484,6 +491,7 @@ namespace MWGui
         factory.registerFactory<fx::Widgets::EditNumberFloat>("Widget");
         factory.registerFactory<fx::Widgets::EditNumberInt>("Widget");
         factory.registerFactory<fx::Widgets::EditBool>("Widget");
+        factory.registerFactory<fx::Widgets::EditChoice>("Widget");
         factory.registerFactory<ListWrapper>("Widget");
     }
 }

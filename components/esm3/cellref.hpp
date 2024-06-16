@@ -8,12 +8,12 @@
 #include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 
+#include "refnum.hpp"
+
 namespace ESM
 {
     class ESMWriter;
     class ESMReader;
-
-    using RefNum = ESM::FormId;
 
     /* Cell reference. This represents ONE object (of many) inside the
     cell. The cell references are not loaded as part of the normal

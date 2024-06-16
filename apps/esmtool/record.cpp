@@ -866,7 +866,9 @@ namespace EsmTool
 
         if (const ESM::Land::LandData* data = mData.getLandData(mData.mDataTypes))
         {
-            std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
+            std::cout << "  MinHeight: " << data->mMinHeight << std::endl;
+            std::cout << "  MaxHeight: " << data->mMaxHeight << std::endl;
+            std::cout << "  DataLoaded: " << data->mDataLoaded << std::endl;
         }
         mData.unloadData();
         std::cout << "  Deleted: " << mIsDeleted << std::endl;

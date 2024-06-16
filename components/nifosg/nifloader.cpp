@@ -57,6 +57,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/texturetype.hpp>
 
 #include "fog.hpp"
 #include "matrixtransform.hpp"
@@ -740,7 +741,11 @@ namespace NifOsg
             }
 
             if (nifNode->recType == Nif::RC_NiCollisionSwitch && !nifNode->collisionActive())
+            {
                 node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
+                // Don't let the optimizer mess with this node
+                node->setDataVariance(osg::Object::DYNAMIC);
+            }
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
@@ -1031,8 +1036,11 @@ namespace NifOsg
             texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
             unsigned int texUnit = boundTextures.size();
             if (stateset)
+            {
                 stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-            texture2d->setName(name);
+                stateset->setTextureAttributeAndModes(
+                    texUnit, new SceneUtil::TextureType(name), osg::StateAttribute::ON);
+            }
             boundTextures.emplace_back(uvSet);
             return texture2d;
         }
@@ -2030,7 +2038,7 @@ namespace NifOsg
                             textureName = "diffuseMap";
                             break;
                         case Nif::NiTexturingProperty::GlowTexture:
-                            textureName = "glowMap";
+                            textureName = "emissiveMap";
                             break;
                         case Nif::NiTexturingProperty::DarkTexture:
                             textureName = "darkMap";

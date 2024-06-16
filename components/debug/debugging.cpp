@@ -221,51 +221,40 @@ namespace Debug
     };
 #else
 
-    class Tee : public DebugOutputBase
+    namespace
     {
-    public:
-        Tee(std::ostream& stream, std::ostream& stream2)
-            : out(stream)
-            , out2(stream2)
+        struct Record
         {
-            // TODO: check which stream is stderr?
-            mUseColor = useColoredOutput();
+            std::string mValue;
+            Level mLevel;
+        };
 
-            mColors[Error] = Red;
-            mColors[Warning] = Yellow;
-            mColors[Info] = Reset;
-            mColors[Verbose] = DarkGray;
-            mColors[Debug] = DarkGray;
-            mColors[NoLevel] = Reset;
+        std::vector<Record> globalBuffer;
+
+        Color getColor(Level level)
+        {
+            switch (level)
+            {
+                case Error:
+                    return Red;
+                case Warning:
+                    return Yellow;
+                case Info:
+                    return Reset;
+                case Verbose:
+                    return DarkGray;
+                case Debug:
+                    return DarkGray;
+                case NoLevel:
+                    return Reset;
+            }
+            return Reset;
         }
 
-        std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) override
-        {
-            out.write(str, size);
-            out.flush();
-
-            if (mUseColor)
-            {
-                out2 << "\033[0;" << mColors[debugLevel] << "m";
-                out2.write(str, size);
-                out2 << "\033[0;" << Reset << "m";
-            }
-            else
-            {
-                out2.write(str, size);
-            }
-            out2.flush();
-
-            return size;
-        }
-
-        virtual ~Tee() = default;
-
-    private:
-        static bool useColoredOutput()
+        bool useColoredOutput()
         {
 #if defined(_WIN32)
-            if (getenv("NO_COLOR"))
+            if (std::getenv("NO_COLOR") != nullptr)
                 return false;
 
             DWORD mode;
@@ -273,22 +262,94 @@ namespace Debug
                 return true;
 
             // some console emulators may not use the Win32 API, so try the Unixy approach
-            char* term = getenv("TERM");
-            return term && GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_CHAR;
+            return std::getenv("TERM") != nullptr && GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_CHAR;
 #else
-            char* term = getenv("TERM");
-            bool useColor = term && !getenv("NO_COLOR") && isatty(fileno(stderr));
-
-            return useColor;
+            return std::getenv("TERM") != nullptr && std::getenv("NO_COLOR") == nullptr && isatty(fileno(stderr));
 #endif
         }
 
-        std::ostream& out;
-        std::ostream& out2;
-        bool mUseColor;
+        class Identity
+        {
+        public:
+            explicit Identity(std::ostream& stream)
+                : mStream(stream)
+            {
+            }
 
-        std::map<Level, int> mColors;
-    };
+            void write(const char* str, std::streamsize size, Level /*level*/)
+            {
+                mStream.write(str, size);
+                mStream.flush();
+            }
+
+        private:
+            std::ostream& mStream;
+        };
+
+        class Coloured
+        {
+        public:
+            explicit Coloured(std::ostream& stream)
+                : mStream(stream)
+                // TODO: check which stream is stderr?
+                , mUseColor(useColoredOutput())
+            {
+            }
+
+            void write(const char* str, std::streamsize size, Level level)
+            {
+                if (mUseColor)
+                    mStream << "\033[0;" << getColor(level) << 'm';
+                mStream.write(str, size);
+                if (mUseColor)
+                    mStream << "\033[0;" << Reset << 'm';
+                mStream.flush();
+            }
+
+        private:
+            std::ostream& mStream;
+            bool mUseColor;
+        };
+
+        class Buffer
+        {
+        public:
+            explicit Buffer(std::vector<Record>& buffer)
+                : mBuffer(buffer)
+            {
+            }
+
+            void write(const char* str, std::streamsize size, Level debugLevel)
+            {
+                mBuffer.push_back(Record{ std::string(str, size), debugLevel });
+            }
+
+        private:
+            std::vector<Record>& mBuffer;
+        };
+
+        template <class First, class Second>
+        class Tee : public DebugOutputBase
+        {
+        public:
+            explicit Tee(First first, Second second)
+                : mFirst(first)
+                , mSecond(second)
+            {
+            }
+
+            std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) override
+            {
+                mFirst.write(str, size, debugLevel);
+                mSecond.write(str, size, debugLevel);
+                return size;
+            }
+
+        private:
+            First mFirst;
+            Second mSecond;
+        };
+    }
 #endif
 
 }
@@ -301,8 +362,10 @@ static std::ofstream logfile;
 #if defined(_WIN32) && defined(_DEBUG)
 static boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
 #else
-static boost::iostreams::stream_buffer<Debug::Tee> coutsb;
-static boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Identity, Debug::Coloured>> standardOut;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Identity, Debug::Coloured>> standardErr;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Buffer, Debug::Coloured>> bufferedOut;
+static boost::iostreams::stream_buffer<Debug::Tee<Debug::Buffer, Debug::Coloured>> bufferedErr;
 #endif
 
 std::ostream& getRawStdout()
@@ -323,20 +386,22 @@ Misc::Locked<std::ostream&> getLockedRawStderr()
 // Redirect cout and cerr to the log file
 void setupLogging(const std::filesystem::path& logDir, std::string_view appName, std::ios_base::openmode mode)
 {
-#if defined(_WIN32) && defined(_DEBUG)
-    // Redirect cout and cerr to VS debug output when running in debug mode
-    sb.open(Debug::DebugOutput());
-    std::cout.rdbuf(&sb);
-    std::cerr.rdbuf(&sb);
-#else
+#if !(defined(_WIN32) && defined(_DEBUG))
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
     logfile.open(logDir / logName, mode);
 
-    coutsb.open(Debug::Tee(logfile, *rawStdout));
-    cerrsb.open(Debug::Tee(logfile, *rawStderr));
+    Debug::Identity log(logfile);
 
-    std::cout.rdbuf(&coutsb);
-    std::cerr.rdbuf(&cerrsb);
+    for (const Debug::Record& v : Debug::globalBuffer)
+        log.write(v.mValue.data(), v.mValue.size(), v.mLevel);
+
+    Debug::globalBuffer.clear();
+
+    standardOut.open(Debug::Tee(log, Debug::Coloured(*rawStdout)));
+    standardErr.open(Debug::Tee(log, Debug::Coloured(*rawStderr)));
+
+    std::cout.rdbuf(&standardOut);
+    std::cerr.rdbuf(&standardErr);
 #endif
 
 #ifdef _WIN32
@@ -355,6 +420,19 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
     rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
     rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
     rawStderrMutex = std::make_unique<std::mutex>();
+
+#if defined(_WIN32) && defined(_DEBUG)
+    // Redirect cout and cerr to VS debug output when running in debug mode
+    sb.open(Debug::DebugOutput());
+    std::cout.rdbuf(&sb);
+    std::cerr.rdbuf(&sb);
+#else
+    bufferedOut.open(Debug::Tee(Debug::Buffer(Debug::globalBuffer), Debug::Coloured(*rawStdout)));
+    bufferedErr.open(Debug::Tee(Debug::Buffer(Debug::globalBuffer), Debug::Coloured(*rawStderr)));
+
+    std::cout.rdbuf(&bufferedOut);
+    std::cerr.rdbuf(&bufferedErr);
+#endif
 
     int ret = 0;
     try

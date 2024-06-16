@@ -1,9 +1,15 @@
 #include "detourdebugdraw.hpp"
+
+#include "depth.hpp"
 #include "util.hpp"
 
 #include <osg/BlendFunc>
 #include <osg/Group>
 #include <osg/LineWidth>
+#include <osg/Material>
+#include <osg/PolygonOffset>
+
+#include <algorithm>
 
 namespace
 {
@@ -80,15 +86,16 @@ namespace SceneUtil
 
     void DebugDraw::end()
     {
+        const osg::ref_ptr<osg::DrawArrays> drawArrays
+            = new osg::DrawArrays(mMode, 0, static_cast<int>(mVertices->size()));
+
         osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
         geometry->setStateSet(mStateSet);
-        geometry->setVertexArray(mVertices);
-        geometry->setColorArray(mColors, osg::Array::BIND_PER_VERTEX);
-        geometry->addPrimitiveSet(new osg::DrawArrays(mMode, 0, static_cast<int>(mVertices->size())));
+        geometry->addPrimitiveSet(drawArrays);
+        geometry->setVertexArray(std::exchange(mVertices, nullptr));
+        geometry->setColorArray(std::exchange(mColors, nullptr), osg::Array::BIND_PER_VERTEX);
 
         mGroup.addChild(geometry);
-        mColors.release();
-        mVertices.release();
     }
 
     void DebugDraw::addVertex(osg::Vec3f&& position)
@@ -102,15 +109,19 @@ namespace SceneUtil
         mColors->push_back(value);
     }
 
-    osg::ref_ptr<osg::StateSet> DebugDraw::makeStateSet()
+    osg::ref_ptr<osg::StateSet> makeDetourGroupStateSet()
     {
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+
+        const float polygonOffsetFactor = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0 : -1.0;
+        osg::ref_ptr<osg::PolygonOffset> polygonOffset
+            = new osg::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
+
         osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
-        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-        stateSet->setMode(GL_DEPTH, osg::StateAttribute::OFF);
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        stateSet->setAttributeAndModes(new osg::LineWidth());
-        stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        stateSet->setAttribute(material);
+        stateSet->setAttributeAndModes(polygonOffset);
         return stateSet;
     }
 }

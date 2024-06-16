@@ -15,6 +15,7 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/texturetype.hpp>
 
 namespace SceneUtil
 {
@@ -222,7 +223,6 @@ namespace SceneUtil
         {
             osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(name);
             osg::ref_ptr<osg::Texture2D> tex(new osg::Texture2D(image));
-            tex->setName("envMap");
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
             tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
             resourceSystem->getSceneManager()->applyFilterSettings(tex);
@@ -247,6 +247,7 @@ namespace SceneUtil
             node->setStateSet(writableStateSet);
         }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
+        writableStateSet->setTextureAttributeAndModes(texUnit, new TextureType("envMap"), osg::StateAttribute::ON);
         writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
         resourceSystem->getSceneManager()->recreateShaders(std::move(node));
 
@@ -407,4 +408,12 @@ namespace SceneUtil
         return osg::Image::computePixelFormat(format);
     }
 
+    const std::string& getTextureType(const osg::StateSet& stateset, const osg::Texture& texture, unsigned int texUnit)
+    {
+        const osg::StateAttribute* type = stateset.getTextureAttribute(texUnit, SceneUtil::TextureType::AttributeType);
+        if (type)
+            return static_cast<const SceneUtil::TextureType*>(type)->getName();
+
+        return texture.getName();
+    }
 }

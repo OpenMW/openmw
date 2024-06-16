@@ -117,9 +117,6 @@ namespace MWRender
 
         void update(float dt, bool paused);
 
-        osg::Node* getReflectionNode();
-        osg::Node* getRefractionNode();
-
         osg::Vec3d getPosition() const;
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);

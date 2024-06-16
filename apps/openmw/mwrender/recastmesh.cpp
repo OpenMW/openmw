@@ -6,6 +6,7 @@
 #include <components/detournavigator/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/detourdebugdraw.hpp>
 #include <components/sceneutil/recastmesh.hpp>
 
 #include <osg/PositionAttitudeTransform>
@@ -16,9 +17,22 @@
 
 namespace MWRender
 {
+    namespace
+    {
+        osg::ref_ptr<osg::StateSet> makeDebugDrawStateSet()
+        {
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+            return stateSet;
+        }
+    }
+
     RecastMesh::RecastMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
         , mEnabled(enabled)
+        , mGroupStateSet(SceneUtil::makeDetourGroupStateSet())
+        , mDebugDrawStateSet(makeDebugDrawStateSet())
     {
     }
 
@@ -55,11 +69,16 @@ namespace MWRender
 
             if (it->second.mVersion != tile->second->getVersion())
             {
-                const auto group = SceneUtil::createRecastMeshGroup(*tile->second, settings.mRecast);
-                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+                const osg::ref_ptr<osg::Group> group
+                    = SceneUtil::createRecastMeshGroup(*tile->second, settings.mRecast, mDebugDrawStateSet);
                 group->setNodeMask(Mask_Debug);
+                group->setStateSet(mGroupStateSet);
+
+                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+
                 mRootNode->removeChild(it->second.mValue);
                 mRootNode->addChild(group);
+
                 it->second.mValue = group;
                 it->second.mVersion = tile->second->getVersion();
             }
@@ -67,14 +86,26 @@ namespace MWRender
             ++it;
         }
 
-        for (const auto& tile : tiles)
+        for (const auto& [position, mesh] : tiles)
         {
-            if (mGroups.count(tile.first))
-                continue;
-            const auto group = SceneUtil::createRecastMeshGroup(*tile.second, settings.mRecast);
-            MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+            const auto it = mGroups.find(position);
+
+            if (it != mGroups.end())
+            {
+                if (it->second.mVersion == mesh->getVersion())
+                    continue;
+
+                mRootNode->removeChild(it->second.mValue);
+            }
+
+            const osg::ref_ptr<osg::Group> group
+                = SceneUtil::createRecastMeshGroup(*mesh, settings.mRecast, mDebugDrawStateSet);
             group->setNodeMask(Mask_Debug);
-            mGroups.emplace(tile.first, Group{ tile.second->getVersion(), group });
+            group->setStateSet(mGroupStateSet);
+
+            MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
+
+            mGroups.insert_or_assign(it, position, Group{ mesh->getVersion(), group });
             mRootNode->addChild(group);
         }
     }

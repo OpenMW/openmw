@@ -231,6 +231,7 @@ namespace Crash
     void CrashMonitor::handleCrash(bool isFreeze)
     {
         DWORD processId = GetProcessId(mAppProcessHandle);
+        const char* env = getenv("OPENMW_FULL_MEMDUMP");
 
         try
         {
@@ -268,6 +269,10 @@ namespace Crash
             infos.ExceptionPointers = &exp;
             infos.ClientPointers = FALSE;
             MINIDUMP_TYPE type = (MINIDUMP_TYPE)(MiniDumpWithDataSegs | MiniDumpWithHandleData);
+
+            if (env)
+                type = static_cast<MINIDUMP_TYPE>(type | MiniDumpWithFullMemory);
+
             miniDumpWriteDump(mAppProcessHandle, processId, hCrashLog, type, &infos, 0, 0);
         }
         catch (const std::exception& e)

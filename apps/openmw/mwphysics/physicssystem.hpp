@@ -1,12 +1,12 @@
 #ifndef OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 #define OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <map>
 #include <memory>
 #include <optional>
-#include <set>
 #include <span>
 #include <unordered_map>
 #include <variant>
@@ -15,8 +15,6 @@
 #include <osg/Quat>
 #include <osg/Timer>
 #include <osg/ref_ptr>
-
-#include <components/esm/util.hpp>
 
 #include "../mwworld/ptr.hpp"
 

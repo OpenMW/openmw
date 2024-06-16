@@ -49,10 +49,8 @@ namespace MWInput
     {
     public:
         InputManager(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer,
-            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
-            osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-            const std::filesystem::path& userFile, bool userFileExists,
-            const std::filesystem::path& userControllerBindingsFile,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler, const std::filesystem::path& userFile,
+            bool userFileExists, const std::filesystem::path& userControllerBindingsFile,
             const std::filesystem::path& controllerBindingsFile, bool grab);
 
         ~InputManager() final;

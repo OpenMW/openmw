@@ -353,8 +353,7 @@ namespace MWGui
         bool isDelayNeeded = MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player)
             || playerStats.getKnockedDown() || playerStats.getHitRecovery();
 
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        bool isReturnNeeded = (!godmode && playerStats.isParalyzed()) || playerStats.isDead();
+        bool isReturnNeeded = playerStats.isParalyzed() || playerStats.isDead();
 
         if (isReturnNeeded)
         {

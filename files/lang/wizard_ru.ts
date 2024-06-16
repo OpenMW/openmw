@@ -321,7 +321,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Morrowind configuration file (*.ini)</source>
-        <translation>Файл настроек Morrowind (*.ini)</translation>
+        <translation>Файл с настройками Morrowind (*.ini)</translation>
     </message>
     <message>
         <source>Select Morrowind.esm (located in Data Files)</source>

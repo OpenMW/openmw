@@ -194,12 +194,3 @@ Gamma is an exponent that makes colors brighter if greater than 1.0 and darker i
 This setting can be changed in the Detail tab of the Video panel of the Options menu.
 It has been reported to not work on some Linux systems, 
 and therefore the in-game setting in the Options menu has been disabled on Linux systems.
-
-screenshot type
----------------
-
-:Type:		screenshot settings
-:Default:	regular
-
-Type of screenshot to take (regular, cylindrical, spherical, planet or cubemap), optionally followed by
-screenshot width, height and cubemap resolution in pixels (e.g. spherical 1600 1000 1200).
