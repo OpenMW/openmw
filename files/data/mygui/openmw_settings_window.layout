@@ -599,7 +599,7 @@
                         </Widget>
                         <!-- Per-Pixel Lighting -->
                         <Widget type="HBox" position="0 60 340 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="PerPixelLighting">
                                 <UserString key="SettingCategory" value="Shaders"/>
                                 <UserString key="SettingName" value="force per pixel lighting"/>
                                 <UserString key="SettingType" value="CheckButton"/>

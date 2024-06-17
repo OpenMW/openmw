@@ -1604,6 +1604,7 @@ namespace MWRender
             }
             else if (it->first == "Shaders" && it->second == "force per pixel lighting")
             {
+/*
                 mViewer->stopThreading();
 
                 auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -1611,6 +1612,7 @@ namespace MWRender
                 mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
                 mViewer->startThreading();
+*/
             }
             else if (it->first == "Shaders"
                 && (it->second == "light bounds multiplier" || it->second == "maximum light distance"

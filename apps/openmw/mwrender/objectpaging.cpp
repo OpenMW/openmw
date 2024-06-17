@@ -41,7 +41,6 @@
 
 #include "vismask.hpp"
 
-//#include <condition_variable>
 #include <components/shader/shadermanager.hpp>
 #include "apps/openmw/mwworld/groundcoverstore.hpp"
 
@@ -140,6 +139,7 @@ namespace MWRender
             bool mOptimizeBillboards = true;
             LODRange mDistances = { 0.f, 0.f };
             osg::Vec3f mViewVector;
+            bool mGroundcover = false;
             osg::Node::NodeMask mCopyMask = ~0u;
             mutable std::vector<const osg::Node*> mNodePath;
 
@@ -160,11 +160,11 @@ namespace MWRender
                 if (!(node->getNodeMask() & mCopyMask))
                     return nullptr;
 
-                //if (const osg::Drawable* d = node->asDrawable())
-                    //return operator()(d);
-
                 if (const osg::Drawable* d = node->asDrawable())
                 {
+                    if (!mGroundcover) 
+                        return operator()(d);
+
                     osg::Node* clone = operator()(d);
                     osg::Geometry* geom = clone ? clone->asGeometry() : nullptr;
                     if (!mGroundcover || !geom) return clone;
@@ -485,9 +485,9 @@ namespace MWRender
         : GenericResourceManager<ChunkId>(nullptr, Settings::cells().mCacheExpiryDelay)
         , Terrain::QuadTreeWorld::ChunkManager(worldspace)
         , mSceneManager(sceneManager)
+        , mActiveGrid(Settings::terrain().mObjectPagingActiveGrid)
         , mGroundcover(groundcover)
         , mGroundcoverStore(store)
-        , mActiveGrid(Settings::terrain().mObjectPagingActiveGrid)
         , mDebugBatches(Settings::terrain().mDebugChunks)
         , mMergeFactor(Settings::terrain().mObjectPagingMergeFactor)
         , mMinSize(Settings::terrain().mObjectPagingMinSize)
@@ -526,19 +526,21 @@ namespace MWRender
         }
 
         std::map<ESM::RefNum, PagedCellRef> collectESM3References(
-            float size, const osg::Vec2i& startCell, const MWWorld::ESMStore& store)
+            float size, const osg::Vec2i& startCell, const MWWorld::ESMStore& store, bool groundcover, const MWWorld::GroundcoverStore& groundcoverStore)
         {
             std::map<ESM::RefNum, PagedCellRef> refs;
             ESM::ReadersCache readers;
 
-            if (mGroundcover)
+            if (groundcover)
             {
+                float groundcoverDensity = Settings::groundcover().mDensity;
+
                 for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
                 {
                     for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
                     {
                         ESM::Cell cell;
-                        mGroundcoverStore.initCell(cell, cellX, cellY);
+                        groundcoverStore.initCell(cell, cellX, cellY);
                         if (cell.mContextList.empty()) 
                             continue;
 
@@ -560,11 +562,12 @@ namespace MWRender
                                         continue;
                                     }
 
-                                    currentGroundcover += mGroundcoverDensity;
+                                    currentGroundcover += groundcoverDensity;
                                     if (currentGroundcover < 1.f) continue;
                                     currentGroundcover -= 1.f;
 
-                                    refs[ref.mRefNum] = std::move(ref);
+                                    //refs[ref.mRefNum] = std::move(ref);
+                                    refs.insert_or_assign(ref.mRefNum, makePagedCellRef(ref));
                                 }
                             }
                             catch (std::exception&)
@@ -652,7 +655,7 @@ namespace MWRender
 
         if (mWorldspace == ESM::Cell::sDefaultWorldspaceId)
         {
-            refs = collectESM3References(size, startCell, store);
+            refs = collectESM3References(size, startCell, store, mGroundcover, mGroundcoverStore);
         }
         else
         {
@@ -725,13 +728,13 @@ namespace MWRender
             if (Misc::ResourceHelpers::isHiddenMarker(ref.mRefId))
                 continue;
 
-            const int type = store.findStatic(ref.mRefID);
+            const int type = store.findStatic(ref.mRefId);
             std::string model;
 
             if(mGroundcover)
-                model = mGroundcoverStore.getGroundcoverModel(ref.mRefID);
+                model = mGroundcoverStore.getGroundcoverModel(ref.mRefId);
             else
-                model = getModel(type, ref.mRefID, store);
+                model = getModel(type, ref.mRefId, store);
 
             if (model.empty())
                 continue;

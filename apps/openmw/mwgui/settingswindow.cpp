@@ -294,6 +294,7 @@ namespace MWGui
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptAdapter, "ScriptAdapter");
         getWidget(mScriptDisabled, "ScriptDisabled");
+        getWidget(mPerPixelLighting, "PerPixelLighting");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -354,16 +355,24 @@ namespace MWGui
         mResetControlsButton->eventMouseButtonClick
             += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
+        mPerPixelLighting->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onPerPixelLighting);
+
+
         // fill resolution list
         const int screen = Settings::video().mScreen;
         int numDisplayModes = SDL_GetNumDisplayModes(screen);
         std::vector<std::pair<int, int>> resolutions;
-        for (int i = 0; i < numDisplayModes; i++)
+/*        for (int i = 0; i < numDisplayModes; i++)
         {
             SDL_DisplayMode mode;
             SDL_GetDisplayMode(screen, i, &mode);
             resolutions.emplace_back(mode.w, mode.h);
         }
+*/
+            resolutions.emplace_back(Settings::video().mResolutionX, Settings::video().mResolutionY);
+
+
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)
         {
@@ -1082,6 +1091,12 @@ namespace MWGui
         else
             MWBase::Environment::get().getInputManager()->resetToDefaultControllerBindings();
         updateControlsBox();
+    }
+
+    void SettingsWindow::onPerPixelLighting(MyGUI::Widget* _sender)
+    {
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
     }
 
     void SettingsWindow::onOpen()

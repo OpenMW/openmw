@@ -14,15 +14,9 @@ namespace Resource
 
 namespace MWWorld
 {
-//    class ESMStore;
     class GroundcoverStore;
 }
-/*
-namespace ESM
-{
-    class ReadersCache;
-}
-*/
+
 namespace MWRender
 {
 
