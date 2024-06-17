@@ -19,7 +19,7 @@ namespace ESSImport
     struct SCHD
     {
         ESM::NAME32 mName;
-        ESM::Script::SCHDstruct mData;
+        ESM::Script::SCHD mData;
     };
 
     // A running global script

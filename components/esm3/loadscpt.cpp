@@ -11,7 +11,7 @@
 
 namespace ESM
 {
-    template <Misc::SameAsWithoutCvref<Script::SCHDstruct> T>
+    template <Misc::SameAsWithoutCvref<Script::SCHD> T>
     void decompose(T&& v, const auto& f)
     {
         f(v.mNumShorts, v.mNumLongs, v.mNumFloats, v.mScriptDataSize, v.mStringTableSize);
