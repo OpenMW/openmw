@@ -279,11 +279,11 @@ namespace ESM
             Script record;
             record.blank();
             record.mId = generateRandomRefId(33);
-            record.mData.mNumShorts = 42;
+            record.mNumShorts = 42;
             Script result;
             saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
             EXPECT_EQ(result.mId, record.mId);
-            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
+            EXPECT_EQ(result.mNumShorts, record.mNumShorts);
         }
 
         TEST_P(Esm3SaveLoadRecordTest, playerShouldNotChange)
@@ -417,26 +417,21 @@ namespace ESM
             Script record;
             record.blank();
             record.mId = generateRandomRefId(32);
-            record.mData.mNumShorts = 3;
-            record.mData.mNumFloats = 4;
-            record.mData.mNumLongs = 5;
-            record.mData.mScriptDataSize = 13;
-            generateStrings(std::back_inserter(record.mVarNames),
-                record.mData.mNumShorts + record.mData.mNumFloats + record.mData.mNumLongs);
-            record.mData.mStringTableSize = std::accumulate(record.mVarNames.begin(), record.mVarNames.end(), 0,
-                [](std::size_t r, const std::string& v) { return r + v.size() + 1; });
-            generateBytes(std::back_inserter(record.mScriptData), record.mData.mScriptDataSize);
+            record.mNumShorts = 3;
+            record.mNumFloats = 4;
+            record.mNumLongs = 5;
+            generateStrings(
+                std::back_inserter(record.mVarNames), record.mNumShorts + record.mNumFloats + record.mNumLongs);
+            generateBytes(std::back_inserter(record.mScriptData), 13);
             record.mScriptText = generateRandomString(17);
 
             Script result;
             saveAndLoadRecord(record, GetParam(), result);
 
             EXPECT_EQ(result.mId, record.mId);
-            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
-            EXPECT_EQ(result.mData.mNumFloats, record.mData.mNumFloats);
-            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
-            EXPECT_EQ(result.mData.mScriptDataSize, record.mData.mScriptDataSize);
-            EXPECT_EQ(result.mData.mStringTableSize, record.mData.mStringTableSize);
+            EXPECT_EQ(result.mNumShorts, record.mNumShorts);
+            EXPECT_EQ(result.mNumFloats, record.mNumFloats);
+            EXPECT_EQ(result.mNumShorts, record.mNumShorts);
             EXPECT_EQ(result.mVarNames, record.mVarNames);
             EXPECT_EQ(result.mScriptData, record.mScriptData);
             EXPECT_EQ(result.mScriptText, record.mScriptText);
