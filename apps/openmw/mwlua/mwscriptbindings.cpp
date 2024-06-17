@@ -203,13 +203,13 @@ namespace MWLua
                     if (index >= size)
                         return sol::nullopt;
                     auto i = index++;
-                    if (i <= locals.mShorts.size())
+                    if (i < locals.mShorts.size())
                         return std::make_tuple<std::string_view, double>(compilerLocals.get('s')[i], locals.mShorts[i]);
                     i -= locals.mShorts.size();
-                    if (i <= locals.mLongs.size())
+                    if (i < locals.mLongs.size())
                         return std::make_tuple<std::string_view, double>(compilerLocals.get('l')[i], locals.mLongs[i]);
                     i -= locals.mLongs.size();
-                    if (i <= locals.mFloats.size())
+                    if (i < locals.mFloats.size())
                         return std::make_tuple<std::string_view, double>(compilerLocals.get('f')[i], locals.mFloats[i]);
                     return sol::nullopt;
                 });
