@@ -575,7 +575,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - cd MSVC2022_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config
+    - cmake --build . --config $config --target $targets
     - ccache --show-stats -v
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
@@ -618,6 +618,8 @@ macOS14_Xcode15_arm64:
     - "*.log"
     - MSVC2022_64_Ninja/*.log
     - MSVC2022_64_Ninja/**/*.log
+  variables:
+    targets: all
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -647,6 +649,15 @@ macOS14_Xcode15_arm64:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+
+.Windows_Ninja_CacheInit:
+  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    config: "RelWithDebInfo"
+    targets: "get-version"
+  when: manual
 
 .Windows_MSBuild_Base:
   tags:
@@ -686,7 +697,7 @@ macOS14_Xcode15_arm64:
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
     - cd MSVC2022_64
     - Get-Volume
-    - cmake --build . --config $config
+    - cmake --build . --config $config --target $targets
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
@@ -727,6 +738,8 @@ macOS14_Xcode15_arm64:
     - "*.log"
     - MSVC2022_64/*.log
     - MSVC2022_64/**/*.log
+  variables:
+    targets: ALL_BUILD
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -753,6 +766,15 @@ Windows_MSBuild_RelWithDebInfo:
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+
+.Windows_MSBuild_CacheInit:
+  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    config: "RelWithDebInfo"
+    targets: "get-version"
+  when: manual
 
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
