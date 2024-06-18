@@ -23,7 +23,7 @@ return {
         testing.expectEqual(count, 0)
         testing.expectEqual(count, #mainVars)
     end},
-    {'Should support iteration and manipulation of script variables of different types', function()
+    {'Should support iteration of script variables', function()
         local jiub = world.getObjectByFormId(core.getFormId('Morrowind.esm', 172867))
         local jiubVars = world.mwscript.getLocalScript(jiub).variables
         local first, last, count = iterateOverVariables(jiubVars)
@@ -32,6 +32,10 @@ return {
         testing.expectEqual(last, 'timer')
         testing.expectEqual(count, 3)
         testing.expectEqual(count, #jiubVars)
+    end},
+    {'Should support numeric and string indices for getting and setting', function()
+        local jiub = world.getObjectByFormId(core.getFormId('Morrowind.esm', 172867))
+        local jiubVars = world.mwscript.getLocalScript(jiub).variables
 
         testing.expectEqual(jiubVars[1], jiubVars.state)
         testing.expectEqual(jiubVars[2], jiubVars.wandering)
