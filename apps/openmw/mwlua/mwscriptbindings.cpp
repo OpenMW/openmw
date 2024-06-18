@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwscript/globalscripts.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/worldimp.hpp"
 
 #include "object.hpp"
 
@@ -26,6 +27,16 @@ namespace MWLua
                 return mObj->ptr().getRefData().getLocals();
             else
                 return MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocals(mId);
+        }
+        bool isRunning() const
+        {
+            if (mObj.has_value()) // local script
+            {
+                MWWorld::LocalScripts& localScripts = MWBase::Environment::get().getWorld()->getLocalScripts();
+                return localScripts.isRunning(mId, mObj->ptr());
+            }
+
+            return MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning(mId);
         }
     };
     struct MWScriptVariables
@@ -114,6 +125,7 @@ namespace MWLua
             = context.mLua->sol().new_usertype<MWScriptVariables>("MWScriptVariables");
         mwscript[sol::meta_function::to_string]
             = [](const MWScriptRef& s) { return std::string("MWScript{") + s.mId.toDebugString() + "}"; };
+        mwscript["isRunning"] = sol::readonly_property([](const MWScriptRef& s) { return s.isRunning(); });
         mwscript["recordId"] = sol::readonly_property([](const MWScriptRef& s) { return s.mId.serializeText(); });
         mwscript["variables"] = sol::readonly_property([](const MWScriptRef& s) { return MWScriptVariables{ s }; });
         mwscript["object"] = sol::readonly_property([](const MWScriptRef& s) -> sol::optional<GObject> {
