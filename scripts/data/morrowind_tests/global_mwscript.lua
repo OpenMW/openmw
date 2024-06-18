@@ -15,24 +15,33 @@ function iterateOverVariables(variables)
 end
 
 return {
-    {'Should support iteration over script variables', function()
+    {'Should support iteration over an empty set of script variables', function()
         local mainVars = world.mwscript.getGlobalScript('main').variables
         local first, last, count = iterateOverVariables(mainVars)
         testing.expectEqual(first, nil)
         testing.expectEqual(last, nil)
         testing.expectEqual(count, 0)
         testing.expectEqual(count, #mainVars)
-
+    end},
+    {'Should support iteration and manipulation of script variables of different types', function()
         local jiub = world.getObjectByFormId(core.getFormId('Morrowind.esm', 172867))
         local jiubVars = world.mwscript.getLocalScript(jiub).variables
-        first, last, count = iterateOverVariables(jiubVars)
-        print(first, last, count)
+        local first, last, count = iterateOverVariables(jiubVars)
+
         testing.expectEqual(first, 'state')
         testing.expectEqual(last, 'timer')
         testing.expectEqual(count, 3)
         testing.expectEqual(count, #jiubVars)
+
         testing.expectEqual(jiubVars[1], jiubVars.state)
         testing.expectEqual(jiubVars[2], jiubVars.wandering)
         testing.expectEqual(jiubVars[3], jiubVars.timer)
+
+        jiubVars[1] = 123;
+        testing.expectEqual(jiubVars.state, 123)
+        jiubVars.wandering = 42;
+        testing.expectEqual(jiubVars[2], 42)
+        jiubVars[3] = 1.25;
+        testing.expectEqual(jiubVars.timer, 1.25)
     end},
 }
