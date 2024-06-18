@@ -1303,7 +1303,7 @@ namespace MWGui
         return mViewer->getCamera()->getCullMask();
     }
 
-    void WindowManager::popGuiMode()
+    void WindowManager::popGuiMode(bool forceExit)
     {
         if (mDragAndDrop && mDragAndDrop->mIsOnDragAndDrop)
         {
@@ -1313,6 +1313,12 @@ namespace MWGui
         if (!mGuiModes.empty())
         {
             const GuiMode mode = mGuiModes.back();
+            if (forceExit)
+            {
+                GuiModeState& state = mGuiModeStates[mode];
+                for (const auto& window : state.mWindows)
+                    window->exit();
+            }
             mKeyboardNavigation->saveFocus(mode);
             mGuiModes.pop_back();
             mGuiModeStates[mode].update(false);

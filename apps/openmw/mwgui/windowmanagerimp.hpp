@@ -150,7 +150,7 @@ namespace MWGui
 
         void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg) override;
         void pushGuiMode(GuiMode mode) override;
-        void popGuiMode() override;
+        void popGuiMode(bool forceExit = false) override;
         void removeGuiMode(GuiMode mode) override; ///< can be anywhere in the stack
 
         void goToJail(int days) override;
