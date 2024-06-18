@@ -8,6 +8,7 @@
 
 #include <components/esm3/loaddial.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/vfs/pathutil.hpp>
 
@@ -71,7 +72,7 @@ namespace
                 {
                     return nullptr;
                 }
-                return store.at(index - 1);
+                return store.at(LuaUtil::fromLuaIndex(index));
             },
             [](const StoreT& store, std::string_view id) -> const ESM::Dialogue* {
                 return store.search(ESM::RefId::deserializeText(id));
@@ -133,7 +134,7 @@ namespace
                 return nullptr;
             }
             ESM::Dialogue::InfoContainer::const_iterator iter{ dialogueRecord.mInfo.cbegin() };
-            std::advance(iter, index - 1);
+            std::advance(iter, LuaUtil::fromLuaIndex(index));
             return &(*iter);
         };
         recordInfosBindingsClass[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -224,7 +225,7 @@ namespace
                   {
                       return sol::nullopt;
                   }
-                  return rec.mData.mRank + 1;
+                  return LuaUtil::toLuaIndex(rec.mData.mRank);
               });
         recordInfoBindingsClass["filterPlayerCell"]
             = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {
@@ -264,7 +265,7 @@ namespace
                   {
                       return sol::nullopt;
                   }
-                  return rec.mData.mPCrank + 1;
+                  return LuaUtil::toLuaIndex(rec.mData.mPCrank);
               });
         recordInfoBindingsClass["sound"]
             = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<std::string> {

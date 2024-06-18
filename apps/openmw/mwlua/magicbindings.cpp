@@ -11,6 +11,7 @@
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/color.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/format.hpp>
@@ -207,7 +208,7 @@ namespace MWLua
     {
         sol::table res(lua, sol::create);
         for (size_t i = 0; i < effects.size(); ++i)
-            res[i + 1] = effects[i]; // ESM::IndexedENAMstruct (effect params)
+            res[LuaUtil::toLuaIndex(i)] = effects[i]; // ESM::IndexedENAMstruct (effect params)
         return res;
     }
 
@@ -783,7 +784,7 @@ namespace MWLua
             [](const ActorSpells& spells, size_t index) -> const ESM::Spell* {
                 if (auto* store = spells.getStore())
                     if (index <= store->count() && index > 0)
-                        return store->at(index - 1);
+                        return store->at(LuaUtil::fromLuaIndex(index));
                 return nullptr;
             },
             [spellStore](const ActorSpells& spells, std::string_view spellId) -> const ESM::Spell* {

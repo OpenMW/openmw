@@ -1,5 +1,7 @@
 #include "postprocessingbindings.hpp"
 
+#include <components/lua/util.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwrender/postprocessor.hpp"
@@ -78,7 +80,7 @@ namespace MWLua
 
             for (size_t i = 0; i < *targetSize; ++i)
             {
-                sol::object obj = table[i + 1];
+                sol::object obj = table[LuaUtil::toLuaIndex(i)];
                 if (!obj.is<T>())
                     throw std::runtime_error("Invalid type for uniform array");
                 values.push_back(obj.as<T>());

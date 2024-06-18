@@ -4,6 +4,7 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
@@ -145,30 +146,24 @@ namespace MWLua
             stats.setBaseDisposition(stats.getBaseDisposition() + value);
         };
 
-        npc["getFactionRank"] = [](const Object& actor, std::string_view faction) {
+        npc["getFactionRank"] = [](const Object& actor, std::string_view faction) -> size_t {
             const MWWorld::Ptr ptr = actor.ptr();
             ESM::RefId factionId = parseFactionId(faction);
 
             const MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
-
-            int factionRank = npcStats.getFactionRank(factionId);
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             {
                 if (npcStats.isInFaction(factionId))
-                    return factionRank + 1;
-                else
-                    return 0;
+                {
+                    int factionRank = npcStats.getFactionRank(factionId);
+                    return LuaUtil::toLuaIndex(factionRank);
+                }
+                return 0;
             }
-            else
-            {
-                ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
-                if (factionId == primaryFactionId && factionRank == -1)
-                    return ptr.getClass().getPrimaryFactionRank(ptr);
-                else if (primaryFactionId == factionId)
-                    return factionRank + 1;
-                else
-                    return 0;
-            }
+            ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
+            if (factionId == primaryFactionId)
+                return LuaUtil::toLuaIndex(ptr.getClass().getPrimaryFactionRank(ptr));
+            return 0;
         };
 
         npc["setFactionRank"] = [](Object& actor, std::string_view faction, int value) {
@@ -185,7 +180,7 @@ namespace MWLua
             if (value <= 0 || value > ranksCount)
                 throw std::runtime_error("Requested rank does not exist");
 
-            auto targetRank = std::clamp(value, 1, ranksCount) - 1;
+            auto targetRank = LuaUtil::fromLuaIndex(std::clamp(value, 1, ranksCount));
 
             if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
             {

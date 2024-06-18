@@ -1,6 +1,7 @@
 #include "mwscriptbindings.hpp"
 
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -174,7 +175,7 @@ namespace MWLua
             [](const GlobalStore& store, size_t index) -> sol::optional<float> {
                 if (index < 1 || store.getSize() < index)
                     return sol::nullopt;
-                auto g = store.at(index - 1);
+                auto g = store.at(LuaUtil::fromLuaIndex(index));
                 if (g == nullptr)
                     return sol::nullopt;
                 std::string globalId = g->mId.serializeText();
@@ -190,7 +191,7 @@ namespace MWLua
             [](const GlobalStore& store, size_t index, float val) {
                 if (index < 1 || store.getSize() < index)
                     return;
-                auto g = store.at(index - 1);
+                auto g = store.at(LuaUtil::fromLuaIndex(index));
                 if (g == nullptr)
                     return;
                 std::string globalId = g->mId.serializeText();
