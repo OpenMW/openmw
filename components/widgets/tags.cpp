@@ -20,7 +20,7 @@ namespace Gui
             fallbackName += tag.substr(fontcolour.length());
             std::string_view str = Fallback::Map::getString(fallbackName);
             if (str.empty())
-                throw std::runtime_error("Unable to map setting to value: " + fallbackName);
+                throw std::runtime_error("Unknown fallback name: " + fallbackName);
 
             std::string ret[3];
             unsigned int j = 0;
