@@ -7,9 +7,14 @@
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/utilpackage.hpp>
+#include <components/misc/convert.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
+#include <components/esm3/loadclas.hpp>
+#include <components/esm3/loadnpc.hpp>
 
 #include "../context.hpp"
 
@@ -45,6 +50,38 @@ namespace MWLua
             }
             providedServices["Travel"] = !rec.getTransport().empty();
             return LuaUtil::makeReadOnly(providedServices);
+        });
+
+        record["travelDestinations"] = sol::readonly_property([context](const T& rec) -> sol::table {
+            sol::state_view& lua = context.mLua->sol();
+            sol::table travelDests(lua, sol::create);
+            if (!rec.getTransport().empty())
+            {
+
+                int index = 1;
+                for (const auto& dest : rec.getTransport())
+                {
+
+                    sol::table travelDest(lua, sol::create);
+
+                    ESM::RefId cellId;
+                    if (dest.mCellName.empty())
+                    {
+                        const ESM::ExteriorCellLocation cellIndex
+                            = ESM::positionToExteriorCellLocation(dest.mPos.pos[0], dest.mPos.pos[1]);
+                        cellId = ESM::RefId::esm3ExteriorCell(cellIndex.mX, cellIndex.mY);
+                    }
+                    else
+                        cellId = ESM::RefId::stringRefId(dest.mCellName);
+                    travelDest["rotation"] = LuaUtil::asTransform(Misc::Convert::makeOsgQuat(dest.mPos.rot));
+                    travelDest["position"] = dest.mPos.asVec3();
+                    travelDest["cellId"] = cellId.serializeText();
+
+                    travelDests[index] = LuaUtil::makeReadOnly(travelDest);
+                    index++;
+                }
+            }
+            return LuaUtil::makeReadOnly(travelDests);
         });
     }
 }
