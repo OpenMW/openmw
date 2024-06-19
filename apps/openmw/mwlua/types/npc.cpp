@@ -158,11 +158,13 @@ namespace MWLua
                     int factionRank = npcStats.getFactionRank(factionId);
                     return LuaUtil::toLuaIndex(factionRank);
                 }
-                return 0;
             }
-            ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
-            if (factionId == primaryFactionId)
-                return LuaUtil::toLuaIndex(ptr.getClass().getPrimaryFactionRank(ptr));
+            else
+            {
+                ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
+                if (factionId == primaryFactionId)
+                    return LuaUtil::toLuaIndex(ptr.getClass().getPrimaryFactionRank(ptr));
+            }
             return 0;
         };
 
