@@ -79,6 +79,10 @@ namespace MWLua
         api["getCellByName"] = [](std::string_view name) {
             return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(name, /*forceLoad=*/false) };
         };
+        api["getCellById"] = [](std::string_view stringId) {
+            return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(
+                ESM::RefId::deserializeText(stringId), /*forceLoad=*/false) };
+        };
         api["getExteriorCell"] = [](int x, int y, sol::object cellOrName) {
             ESM::RefId worldspace;
             if (cellOrName.is<GCell>())

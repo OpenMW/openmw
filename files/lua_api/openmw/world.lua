@@ -69,6 +69,12 @@
 -- @return openmw.core#Cell
 
 ---
+-- Loads a cell by ID provided
+-- @function [parent=#world] getCellById
+-- @param #string cellId
+-- @return openmw.core#Cell
+
+---
 -- Loads an exterior cell by grid indices
 -- @function [parent=#world] getExteriorCell
 -- @param #number gridX
