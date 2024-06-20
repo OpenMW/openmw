@@ -386,7 +386,14 @@ namespace LuaUtil
     {
         auto iter = mCompiledScripts.find(path);
         if (iter != mCompiledScripts.end())
-            return mSol.load(iter->second.as_string_view(), path, sol::load_mode::binary);
+        {
+            sol::load_result res = mSol.load(iter->second.as_string_view(), path, sol::load_mode::binary);
+            // Unless we have memory corruption issues, the bytecode is valid at this point, but loading might still
+            // fail because we've hit our Lua memory cap
+            if (!res.valid())
+                throw std::runtime_error("Lua error: " + res.get<std::string>());
+            return res;
+        }
         sol::function res = loadFromVFS(path);
         mCompiledScripts[path] = res.dump();
         return res;
