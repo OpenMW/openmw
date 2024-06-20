@@ -63,6 +63,8 @@ namespace MWLua
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
+        selfAPI["attackType"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>(
+            { { "NoAttack", 0 }, { "Chop", 1 }, { "Slash", 2 }, { "Thrust", 3 } }));
 
         using AiPackage = MWMechanics::AiPackage;
         sol::usertype<AiPackage> aiPackage = context.mLua->sol().new_usertype<AiPackage>("AiPackage");

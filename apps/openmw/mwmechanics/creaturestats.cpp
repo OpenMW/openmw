@@ -45,7 +45,6 @@ namespace MWMechanics
         , mSideMovementAngle(0)
         , mLevel(0)
         , mAttackingOrSpell(false)
-        , mAttackType("")
     {
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
