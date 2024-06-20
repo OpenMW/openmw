@@ -1674,7 +1674,12 @@ namespace MWMechanics
                             }
                         }
                         else if (aiInactive)
-                            mAttackType = getRandomAttackType();
+                        {
+                            mAttackType = getDesiredAttackType();
+                            if (mAttackType == "")
+                                mAttackType = getRandomAttackType();
+                        }
+
                         // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
                         startKey = mAttackType + ' ' + startKey;
                         stopKey = mAttackType + " max attack";
@@ -3000,6 +3005,11 @@ namespace MWMechanics
     bool CharacterController::getAttackingOrSpell() const
     {
         return mPtr.getClass().getCreatureStats(mPtr).getAttackingOrSpell();
+    }
+
+    std::string_view CharacterController::getDesiredAttackType() const
+    {
+        return mPtr.getClass().getCreatureStats(mPtr).getAttackType();
     }
 
     void CharacterController::setActive(int active) const

@@ -239,6 +239,18 @@ namespace MWMechanics
 
     namespace
     {
+        std::string_view attackTypeName(int attackTypeNum)
+        {
+            if (attackTypeNum == 1)
+                return "chop";
+            else if (attackTypeNum == 2)
+                return "slash";
+            else if (attackTypeNum == 3)
+                return "thrust";
+            else
+                return "";
+        }
+
         float getTimeToDestination(const AiPackage& package, const osg::Vec3f& position, float speed, float duration,
             const osg::Vec3f& halfExtents)
         {
@@ -363,7 +375,11 @@ namespace MWMechanics
                 mov.mSpeedFactor = osg::Vec2(controls.mMovement, controls.mSideMovement).length();
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, controls.mRun);
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, controls.mSneak);
-                stats.setAttackingOrSpell((controls.mUse & 1) == 1);
+
+                int attackTypeNum = controls.mUse & 3;
+                stats.setAttackingOrSpell(attackTypeNum != 0);
+                stats.setAttackType(attackTypeName(attackTypeNum));
+
                 controls.mChanged = false;
             }
             // For the player we don't need to copy these values to Lua because mwinput doesn't change them.
