@@ -37,7 +37,7 @@
 -- @field [parent=#ActorControls] #boolean run true - run, false - walk
 -- @field [parent=#ActorControls] #boolean sneak If true - sneak
 -- @field [parent=#ActorControls] #boolean jump If true - initiate a jump
--- @field [parent=#ActorControls] #number use if 1 - activates the readied weapon/spell. For weapons, keeping at 1 will charge the attack until set to 0.
+-- @field [parent=#ActorControls] #number use Possible values: 0 - 3. If above 0 - activates the readied weapon/spell. For weapons, keeping at a non-zero value will charge the attack until set to 0. For melee weapons on AI-disabled actors - values 1 - 3 determine an attack type: 1 - chop, 2 - slash, 3 - thrust.
 
 ---
 -- Enables or disables standard AI (enabled by default).
