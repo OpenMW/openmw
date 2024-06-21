@@ -47,6 +47,7 @@
 #include "aifollow.hpp"
 #include "aipursue.hpp"
 #include "aiwander.hpp"
+#include "attacktype.hpp"
 #include "character.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -239,13 +240,13 @@ namespace MWMechanics
 
     namespace
     {
-        std::string_view attackTypeName(int attackTypeNum)
+        std::string_view attackTypeName(AttackType attackType)
         {
-            if (attackTypeNum == 1)
+            if (attackType == AttackType::Chop)
                 return "chop";
-            else if (attackTypeNum == 2)
+            else if (attackType == AttackType::Slash)
                 return "slash";
-            else if (attackTypeNum == 3)
+            else if (attackType == AttackType::Thrust)
                 return "thrust";
             else
                 return "";
@@ -376,9 +377,11 @@ namespace MWMechanics
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, controls.mRun);
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, controls.mSneak);
 
-                int attackTypeNum = controls.mUse & 3;
-                stats.setAttackingOrSpell(attackTypeNum != 0);
-                stats.setAttackType(attackTypeName(attackTypeNum));
+                // Same as mUse % max AttackType int value
+                AttackType attackType = static_cast<AttackType>(controls.mUse % static_cast<int>(AttackType::Thrust));
+
+                stats.setAttackingOrSpell(attackType != AttackType::NoAttack);
+                stats.setAttackType(attackTypeName(attackType));
 
                 controls.mChanged = false;
             }

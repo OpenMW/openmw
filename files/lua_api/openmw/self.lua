@@ -37,11 +37,12 @@
 -- @field [parent=#ActorControls] #boolean run true - run, false - walk
 -- @field [parent=#ActorControls] #boolean sneak If true - sneak
 -- @field [parent=#ActorControls] #boolean jump If true - initiate a jump
--- @field [parent=#ActorControls] #number Accepts an @{#AttackTYPE} value. Activates the readied weapon/spell according to a provided value. For weapons, keeping this value modified will charge the attack until set to @{#AttackTYPE.NoAttack}.
+-- @field [parent=#ActorControls] #number use Accepts an @{#AttackTYPE} value. Activates the readied weapon/spell according to a provided value. For weapons, keeping this value modified will charge the attack until set to @{#AttackTYPE.NoAttack}. If an @{#AttackTYPE} not appropriate for a currently equipped weapon provided - an appropriate @{#AttackTYPE} will be used instead.
 
+---
 -- @type AttackTYPE
 -- @field #number NoAttack
--- @field #number Attack
+-- @field #number Any
 -- @field #number Chop
 -- @field #number Swing
 -- @field #number Thrust

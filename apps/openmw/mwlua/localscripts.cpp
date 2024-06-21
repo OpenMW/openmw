@@ -1,6 +1,7 @@
 #include "localscripts.hpp"
 
 #include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadweap.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -13,6 +14,7 @@
 #include "../mwmechanics/aisequence.hpp"
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
+#include "../mwmechanics/attacktype.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
@@ -63,8 +65,11 @@ namespace MWLua
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
-        selfAPI["AttackTYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>(
-            { { "NoAttack", 0 }, { "Attack", 1 }, { "Chop", 1 }, { "Slash", 2 }, { "Thrust", 3 } }));
+        selfAPI["AttackTYPE"]
+            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWMechanics::AttackType>(
+                { { "NoAttack", MWMechanics::AttackType::NoAttack }, { "Any", MWMechanics::AttackType::Any },
+                    { "Chop", MWMechanics::AttackType::Chop }, { "Slash", MWMechanics::AttackType::Slash },
+                    { "Thrust", MWMechanics::AttackType::Thrust } }));
 
         using AiPackage = MWMechanics::AiPackage;
         sol::usertype<AiPackage> aiPackage = context.mLua->sol().new_usertype<AiPackage>("AiPackage");
