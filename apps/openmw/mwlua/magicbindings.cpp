@@ -931,7 +931,7 @@ namespace MWLua
                 if (stackable)
                     params.setFlag(ESM::ActiveSpells::Flag_Stackable);
 
-                for (auto enam : enams)
+                for (const ESM::IndexedENAMstruct& enam : enams)
                 {
                     const ESM::MagicEffect* mgef = esmStore.get<ESM::MagicEffect>().find(enam.mData.mEffectID);
                     MWMechanics::ActiveSpells::ActiveEffect effect;
