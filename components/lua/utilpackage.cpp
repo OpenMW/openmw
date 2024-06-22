@@ -240,7 +240,7 @@ namespace LuaUtil
             return std::make_tuple(angles.x(), angles.z());
         };
         transMType["getAnglesZYX"] = [](const TransformM& m) {
-            osg::Vec3f angles = Misc::toEulerAnglesXZ(m.mM);
+            osg::Vec3f angles = Misc::toEulerAnglesZYX(m.mM);
             return std::make_tuple(angles.z(), angles.y(), angles.x());
         };
 
@@ -276,7 +276,7 @@ namespace LuaUtil
             return std::make_tuple(angles.x(), angles.z());
         };
         transQType["getAnglesZYX"] = [](const TransformQ& q) {
-            osg::Vec3f angles = Misc::toEulerAnglesXZ(q.mQ);
+            osg::Vec3f angles = Misc::toEulerAnglesZYX(q.mQ);
             return std::make_tuple(angles.z(), angles.y(), angles.x());
         };
 
