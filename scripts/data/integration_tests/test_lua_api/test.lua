@@ -29,7 +29,9 @@ local function testTimers()
         ts2 = core.getSimulationTime() - startSimulationTime
     end)
 
-    while not (ts1 and ts2 and th1 and th2) do coroutine.yield() end
+    while not (ts1 and ts2 and th1 and th2) do
+        coroutine.yield()
+    end
 
     testing.expectGreaterOrEqual(th1, 36, 'async:newGameTimer failed')
     testing.expectGreaterOrEqual(ts1, 0.5, 'async:newSimulationTimer failed')
@@ -98,43 +100,45 @@ local function testMWScript()
     testing.expectEqual(variableStoreCount, indexCheck)
 end
 
-local function testRecordStore(store,storeName,skipPairs)
+local function testRecordStore(store, storeName, skipPairs)
     testing.expect(store.records)
     local firstRecord = store.records[1]
-    if not firstRecord then return end
-    testing.expectEqual(firstRecord.id,store.records[firstRecord.id].id)
+    if not firstRecord then
+        return
+    end
+    testing.expectEqual(firstRecord.id, store.records[firstRecord.id].id)
     local status, _ = pcall(function()
-            for index, value in ipairs(store.records) do
-                if value.id == firstRecord.id then
-                    testing.expectEqual(index,1,storeName)
-                    break
-                end
-            end 
+        for index, value in ipairs(store.records) do
+            if value.id == firstRecord.id then
+                testing.expectEqual(index, 1, storeName)
+                break
+            end
+        end
     end)
 
-    testing.expectEqual(status,true,storeName)
+    testing.expectEqual(status, true, storeName)
     
 end
 
 local function testRecordStores()
     for key, type in pairs(types) do
         if type.records then
-            testRecordStore(type,key)
+            testRecordStore(type, key)
         end
     end
-    testRecordStore(core.magic.enchantments,"enchantments")
-    testRecordStore(core.magic.effects,"effects",true)
-    testRecordStore(core.magic.spells,"spells")
+    testRecordStore(core.magic.enchantments, "enchantments")
+    testRecordStore(core.magic.effects, "effects", true)
+    testRecordStore(core.magic.spells, "spells")
 
-    testRecordStore(core.stats.Attribute,"Attribute")
-    testRecordStore(core.stats.Skill,"Skill")
+    testRecordStore(core.stats.Attribute, "Attribute")
+    testRecordStore(core.stats.Skill, "Skill")
 
-    testRecordStore(core.sound,"sound")
-    testRecordStore(core.factions,"factions")
+    testRecordStore(core.sound, "sound")
+    testRecordStore(core.factions, "factions")
 
-    testRecordStore(types.NPC.classes,"classes")
-    testRecordStore(types.NPC.races,"races")
-    testRecordStore(types.Player.birthSigns,"birthSigns")
+    testRecordStore(types.NPC.classes, "classes")
+    testRecordStore(types.NPC.races, "races")
+    testRecordStore(types.Player.birthSigns, "birthSigns")
 end
 
 local function testRecordCreation()
@@ -158,7 +162,7 @@ local function testRecordCreation()
     local draft = types.Light.createRecordDraft(newLight)
     local record = world.createRecord(draft)
     for key, value in pairs(newLight) do
-        testing.expectEqual(record[key],value)
+        testing.expectEqual(record[key], value)
     end
 end
 
