@@ -136,6 +136,7 @@ local function testRecordStores()
     testRecordStore(types.NPC.races,"races")
     testRecordStore(types.Player.birthSigns,"birthSigns")
 end
+
 local function testRecordCreation()
     local newLight = {
         isCarriable = true,
@@ -160,9 +161,10 @@ local function testRecordCreation()
         testing.expectEqual(record[key],value)
     end
 end
-local function testUTF8()
-    local utf8char = "😀"
-    local utf8str = "Hello, 你好, 🌎!"
+
+local function testUTF8Chars()
+    testing.expectEqual(utf8.codepoint("😀"), 0x1F600)
+
     local chars = {}
 
     for codepoint = 0, 0x10FFFF do
@@ -185,6 +187,10 @@ local function testUTF8()
         testing.expectEqual(utf8.codepoint(char), codepoint)
         testing.expectEqual(utf8.len(char), 1)
     end
+end
+
+local function testUTF8Strings()
+    local utf8str = "Hello, 你好, 🌎!"
 
     local str = ""
     for utf_char in utf8str:gmatch(utf8.charpattern) do
@@ -192,10 +198,10 @@ local function testUTF8()
     end
     testing.expectEqual(str, utf8str)
 
-    testing.expectEqual(utf8.codepoint(utf8char), 128512)
     testing.expectEqual(utf8.len(utf8str), 13)
     testing.expectEqual(utf8.offset(utf8str, 9), 11)
 end
+
 local function initPlayer()
     player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
     coroutine.yield()
@@ -243,7 +249,8 @@ tests = {
     {'getGMST', testGetGMST},
     {'recordStores', testRecordStores},
     {'recordCreation', testRecordCreation},
-    {'utf8', testUTF8},
+    {'utf8Chars', testUTF8Chars},
+    {'utf8Strings', testUTF8Strings},
     {'mwscript', testMWScript},
 }
 
