@@ -116,8 +116,9 @@ namespace LuaUtil
         static void disableProfiler() { sProfilerEnabled = false; }
         static bool isProfilerEnabled() { return sProfilerEnabled; }
 
-    private:
         static sol::protected_function_result throwIfError(sol::protected_function_result&&);
+
+    private:
         template <typename... Args>
         friend sol::protected_function_result call(const sol::protected_function& fn, Args&&... args);
         template <typename... Args>
