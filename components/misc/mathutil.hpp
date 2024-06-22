@@ -11,7 +11,6 @@
 
 namespace Misc
 {
-
     /// Normalizes given angle to the range [-PI, PI]. E.g. PI*3/2 -> -PI/2.
     inline double normalizeAngle(double angle)
     {
@@ -33,11 +32,13 @@ namespace Misc
         float z = atan2(forward.x(), forward.y());
         return osg::Vec3f(x, 0, z);
     }
-    inline osg::Vec3f toEulerAnglesXZ(osg::Quat quat)
+
+    inline osg::Vec3f toEulerAnglesXZ(const osg::Quat& quat)
     {
         return toEulerAnglesXZ(quat * osg::Vec3f(0, 1, 0));
     }
-    inline osg::Vec3f toEulerAnglesXZ(osg::Matrixf m)
+
+    inline osg::Vec3f toEulerAnglesXZ(const osg::Matrixf& m)
     {
         osg::Vec3f forward(m(1, 0), m(1, 1), m(1, 2));
         forward.normalize();
@@ -52,11 +53,13 @@ namespace Misc
         float z = atan2(forwardZ.x(), forwardZ.y());
         return osg::Vec3f(x, y, z);
     }
-    inline osg::Vec3f toEulerAnglesZYX(osg::Quat quat)
+
+    inline osg::Vec3f toEulerAnglesZYX(const osg::Quat& quat)
     {
         return toEulerAnglesZYX(quat * osg::Vec3f(0, 1, 0), quat * osg::Vec3f(0, 0, 1));
     }
-    inline osg::Vec3f toEulerAnglesZYX(osg::Matrixf m)
+
+    inline osg::Vec3f toEulerAnglesZYX(const osg::Matrixf& m)
     {
         osg::Vec3f forward(m(1, 0), m(1, 1), m(1, 2));
         osg::Vec3f up(m(2, 0), m(2, 1), m(2, 2));
