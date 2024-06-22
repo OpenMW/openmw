@@ -1097,6 +1097,9 @@ namespace MWGui
         {
             tag = tag.substr(MyGuiPrefix.length());
             size_t comma_pos = tag.find(',');
+            if (comma_pos == std::string_view::npos)
+                throw std::runtime_error("Invalid setting tag (expected comma): " + std::string(tag));
+
             std::string_view settingSection = tag.substr(0, comma_pos);
             std::string_view settingTag = tag.substr(comma_pos + 1, tag.length());
 
