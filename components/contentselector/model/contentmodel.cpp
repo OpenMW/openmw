@@ -674,8 +674,12 @@ void ContentSelectorModel::ContentModel::setNonUserContent(const QStringList& fi
 
     int insertPosition = 0;
 
-    while (insertPosition < mFiles.size() && mFiles.at(insertPosition)->builtIn())
+    for (auto* file : mFiles)
+    {
+        if (!file->builtIn())
+            break;
         ++insertPosition;
+    }
 
     for (const auto& filepath : fileList)
     {
