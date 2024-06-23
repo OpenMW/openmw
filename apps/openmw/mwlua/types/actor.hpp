@@ -13,8 +13,6 @@
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
-#include <components/esm3/loadclas.hpp>
-#include <components/esm3/loadnpc.hpp>
 
 #include "../context.hpp"
 
@@ -57,11 +55,9 @@ namespace MWLua
             sol::table travelDests(lua, sol::create);
             if (!rec.getTransport().empty())
             {
-
                 int index = 1;
                 for (const auto& dest : rec.getTransport())
                 {
-
                     sol::table travelDest(lua, sol::create);
 
                     ESM::RefId cellId;
