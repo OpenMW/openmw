@@ -5,7 +5,9 @@ local core = require('openmw.core')
 local input = require('openmw.input')
 local types = require('openmw.types')
 local nearby = require('openmw.nearby')
+local camera = require('openmw.camera')
 
+types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Controls, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Fighting, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Jumping, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Looking, false)
@@ -228,6 +230,115 @@ testing.registerLocalTest('playerMemoryLimit',
         end)
         testing.expectEqual(ok, false, 'Script reaching memory limit should fail')
         testing.expectEqual(err, 'not enough memory')
+    end)
+
+testing.registerLocalTest('playerWeaponAttack',
+    function()
+        camera.setMode(camera.MODE.ThirdPerson)
+
+        local options = {
+            agentBounds = types.Actor.getPathfindingAgentBounds(self),
+        }
+        local duration = 10
+        local endTime = core.getSimulationTime() + duration
+        local nextTime = 0
+        local use = self.ATTACK_TYPE.NoAttack
+
+        local attributes = {}
+        for k, v in pairs(types.Actor.stats.attributes) do
+            attributes[k] = v(self).base
+        end
+
+        types.Actor.stats.attributes.speed(self).base = 100
+        types.Actor.stats.attributes.strength(self).base = 1000
+        types.Actor.stats.attributes.agility(self).base = 1000
+
+        local weaponId = 'basic_dagger1h'
+        local weapon = types.Actor.inventory(self):find(weaponId)
+
+        local isWeapon = function(actual)
+            if actual == nil then
+                return weaponId .. ' is not found'
+            end
+            if actual.recordId ~= weaponId then
+                return 'found weapon recordId does not match expected: actual=' .. tostring(actual.id)
+                       .. ', expected=' .. weaponId
+            end
+            return ''
+        end
+        testing.expectThat(weapon, isWeapon)
+
+        types.Actor.setEquipment(self, {[types.Actor.EQUIPMENT_SLOT.CarriedRight] = weapon})
+
+        coroutine.yield()
+
+        testing.expectThat(types.Actor.getEquipment(self, types.Actor.EQUIPMENT_SLOT.CarriedRight), isWeapon)
+
+        types.Actor.setStance(self, types.Actor.STANCE.Weapon)
+
+        local previousHealth = nil
+        local targetActor = nil
+
+        while true do
+            local time = core.getSimulationTime()
+            testing.expectLessOrEqual(time, endTime, 'Did not damage any targets in ' .. duration .. ' seconds')
+
+            if targetActor ~= nil and types.Actor.stats.dynamic.health(targetActor).current < previousHealth then
+                print('Dealt ' .. (previousHealth - types.Actor.stats.dynamic.health(targetActor).current) .. ' damage to ' .. tostring(targetActor))
+                break
+            end
+
+            local minDistance = nil
+            for i, actor in ipairs(nearby.actors) do
+                if actor.id ~= self.id then
+                    local distance = (actor.position - self.position):length()
+                    if minDistance == nil or minDistance > distance then
+                        minDistance = distance
+                        targetActor = actor
+                    end
+                end
+            end
+            testing.expectNotEqual(targetActor, nil, 'No attack targets found')
+
+            previousHealth = types.Actor.stats.dynamic.health(targetActor).current
+
+            local destination = nil
+            if minDistance > 100 then
+                local status, path = nearby.findPath(self.position, targetActor.position, options)
+
+                testing.expectEqual(status, nearby.FIND_PATH_STATUS.Success,
+                    'Failed to find path from ' .. tostring(self.position) .. ' to ' .. tostring(targetActor.position))
+
+                destination = path[2]
+                use = self.ATTACK_TYPE.NoAttack
+
+                self.controls.run = true
+                self.controls.movement = 1
+            else
+                destination = targetActor.position
+
+                if nextTime < time then
+                    if use == 0 then
+                        use = self.ATTACK_TYPE.Any
+                        nextTime = time + 0.5
+                    else
+                        use = self.ATTACK_TYPE.NoAttack
+                    end
+                end
+            end
+            self.controls.use = use
+
+            local direction = destination - self.position
+            direction = direction:normalize()
+            self.controls.yawChange = util.normalizeAngle(math.atan2(direction.x, direction.y) - self.rotation:getYaw())
+            self.controls.pitchChange = util.normalizeAngle(math.asin(util.clamp(-direction.z, -1, 1)) - self.rotation:getPitch())
+
+            coroutine.yield()
+        end
+
+        for k, v in pairs(types.Actor.stats.attributes) do
+            v(self).base = attributes[k]
+        end
     end)
 
 return {

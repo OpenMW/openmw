@@ -277,7 +277,12 @@ tests = {
     {'playerMemoryLimit', function()
         initPlayer()
         testing.runLocalTest(player, 'playerMemoryLimit')
-    end}
+    end},
+    {'player with equipped weapon on attack should damage health of other actors', function()
+        initPlayer()
+        world.createObject('basic_dagger1h', 1):moveInto(player)
+        testing.runLocalTest(player, 'playerWeaponAttack')
+    end},
 }
 
 return {

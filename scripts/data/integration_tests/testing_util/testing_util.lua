@@ -81,6 +81,12 @@ function M.expectEqual(v1, v2, msg)
     end
 end
 
+function M.expectNotEqual(v1, v2, msg)
+    if v1 == v2 then
+        error(string.format('%s: %s == %s', msg or '', v1, v2), 2)
+    end
+end
+
 function M.closeToVector(expected, maxDistance)
     return function(actual)
         local distance = (expected - actual):length()
