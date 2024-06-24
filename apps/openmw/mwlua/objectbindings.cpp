@@ -4,6 +4,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/shapes/box.hpp>
+#include <components/lua/util.hpp>
 #include <components/lua/utilpackage.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/mathutil.hpp>
@@ -170,7 +171,7 @@ namespace MWLua
             listT[sol::meta_function::length] = [](const ListT& list) { return list.mIds->size(); };
             listT[sol::meta_function::index] = [](const ListT& list, size_t index) -> sol::optional<ObjectT> {
                 if (index > 0 && index <= list.mIds->size())
-                    return ObjectT((*list.mIds)[index - 1]);
+                    return ObjectT((*list.mIds)[LuaUtil::fromLuaIndex(index)]);
                 else
                     return sol::nullopt;
             };
@@ -257,17 +258,16 @@ namespace MWLua
             };
             ownerT["factionId"] = sol::property(getOwnerFactionId, setOwnerFactionId);
 
-            auto getOwnerFactionRank = [](const OwnerT& o) -> sol::optional<int> {
+            auto getOwnerFactionRank = [](const OwnerT& o) -> sol::optional<size_t> {
                 int rank = o.mObj.ptr().getCellRef().getFactionRank();
                 if (rank < 0)
                     return sol::nullopt;
-                else
-                    return rank;
+                return LuaUtil::toLuaIndex(rank);
             };
-            auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<int> factionRank) {
+            auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<size_t> factionRank) {
                 if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
                     throw std::runtime_error("Local scripts can set an owner faction rank only on self");
-                o.mObj.ptr().getCellRef().setFactionRank(factionRank.value_or(-1));
+                o.mObj.ptr().getCellRef().setFactionRank(LuaUtil::fromLuaIndex(factionRank.value_or(0)));
             };
             ownerT["factionRank"] = sol::property(getOwnerFactionRank, setOwnerFactionRank);
 

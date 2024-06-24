@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadalch.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -47,7 +48,7 @@ namespace
             potion.mEffects.mList.resize(numEffects);
             for (size_t i = 0; i < numEffects; ++i)
             {
-                potion.mEffects.mList[i] = LuaUtil::cast<ESM::IndexedENAMstruct>(effectsTable[i + 1]);
+                potion.mEffects.mList[i] = LuaUtil::cast<ESM::IndexedENAMstruct>(effectsTable[LuaUtil::toLuaIndex(i)]);
             }
             potion.mEffects.updateIndexes();
         }
@@ -86,7 +87,7 @@ namespace MWLua
         record["effects"] = sol::readonly_property([context](const ESM::Potion& rec) -> sol::table {
             sol::table res(context.mLua->sol(), sol::create);
             for (size_t i = 0; i < rec.mEffects.mList.size(); ++i)
-                res[i + 1] = rec.mEffects.mList[i]; // ESM::IndexedENAMstruct (effect params)
+                res[LuaUtil::toLuaIndex(i)] = rec.mEffects.mList[i]; // ESM::IndexedENAMstruct (effect params)
             return res;
         });
     }

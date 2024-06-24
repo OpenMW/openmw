@@ -3,6 +3,7 @@
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadingr.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -57,7 +58,7 @@ namespace MWLua
                 effect.mData.mMagnMin = 0;
                 effect.mData.mMagnMax = 0;
                 effect.mIndex = i;
-                res[i + 1] = effect;
+                res[LuaUtil::toLuaIndex(i)] = effect;
             }
             return res;
         });

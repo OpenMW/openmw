@@ -5,6 +5,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
@@ -48,7 +49,7 @@ namespace MWLua
             [](const StoreT& store, size_t index) -> const T* {
                 if (index == 0 || index > store.getSize())
                     return nullptr;
-                return store.at(index - 1); // Translate from Lua's 1-based indexing.
+                return store.at(LuaUtil::fromLuaIndex(index));
             },
             [](const StoreT& store, std::string_view id) -> const T* {
                 return store.search(ESM::RefId::deserializeText(id));

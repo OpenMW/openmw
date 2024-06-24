@@ -8,6 +8,7 @@
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/serialization.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/version/version.hpp>
@@ -33,13 +34,13 @@ namespace MWLua
         const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
         sol::table list(lua, sol::create);
         for (size_t i = 0; i < contentList.size(); ++i)
-            list[i + 1] = Misc::StringUtils::lowerCase(contentList[i]);
+            list[LuaUtil::toLuaIndex(i)] = Misc::StringUtils::lowerCase(contentList[i]);
         sol::table res(lua, sol::create);
         res["list"] = LuaUtil::makeReadOnly(list);
         res["indexOf"] = [&contentList](std::string_view contentFile) -> sol::optional<int> {
             for (size_t i = 0; i < contentList.size(); ++i)
                 if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
-                    return i + 1;
+                    return LuaUtil::toLuaIndex(i);
             return sol::nullopt;
         };
         res["has"] = [&contentList](std::string_view contentFile) -> bool {
