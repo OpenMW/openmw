@@ -129,6 +129,7 @@ for entry in tests_dir.glob("test_*"):
     if entry.is_dir():
         if not runTest(entry.name):
             status = -1
-shutil.rmtree(config_dir, ignore_errors=True)
-shutil.rmtree(userdata_dir, ignore_errors=True)
+if status == 0:
+    shutil.rmtree(config_dir, ignore_errors=True)
+    shutil.rmtree(userdata_dir, ignore_errors=True)
 exit(status)
