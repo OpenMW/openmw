@@ -14,6 +14,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/worldmodel.hpp"
 
+#include "../mwbase/luamanager.hpp"
+
 #include "interpretercontext.hpp"
 
 namespace
@@ -128,6 +130,7 @@ namespace MWScript
     void GlobalScripts::addScript(const ESM::RefId& name, const MWWorld::Ptr& target)
     {
         const auto iter = mScripts.find(name);
+        bool started = false;
 
         if (iter == mScripts.end())
         {
@@ -136,21 +139,24 @@ namespace MWScript
                 auto desc = std::make_shared<GlobalScriptDesc>();
                 MWWorld::Ptr ptr = target;
                 desc->mTarget = ptr;
-                desc->mRunning = true;
+                started = desc->mRunning = true;
                 desc->mLocals.configure(*script);
                 mScripts.insert(std::make_pair(name, desc));
             }
             else
             {
                 Log(Debug::Error) << "Failed to add global script " << name << ": script record not found";
+                return;
             }
         }
         else if (!iter->second->mRunning)
         {
-            iter->second->mRunning = true;
+            started = iter->second->mRunning = true;
             MWWorld::Ptr ptr = target;
             iter->second->mTarget = ptr;
         }
+
+        MWBase::Environment::get().getLuaManager()->globalMWScriptCalled(name, target, started);
     }
 
     void GlobalScripts::removeScript(const ESM::RefId& name)
