@@ -2,6 +2,7 @@
 #include "labels.hpp"
 
 #include <iostream>
+#include <numeric>
 #include <sstream>
 
 #include <components/esm3/cellstate.hpp>
@@ -1181,11 +1182,11 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mId << std::endl;
 
-        std::cout << "  Num Shorts: " << mData.mData.mNumShorts << std::endl;
-        std::cout << "  Num Longs: " << mData.mData.mNumLongs << std::endl;
-        std::cout << "  Num Floats: " << mData.mData.mNumFloats << std::endl;
-        std::cout << "  Script Data Size: " << mData.mData.mScriptDataSize << std::endl;
-        std::cout << "  Table Size: " << mData.mData.mStringTableSize << std::endl;
+        std::cout << "  Num Shorts: " << mData.mNumShorts << std::endl;
+        std::cout << "  Num Longs: " << mData.mNumLongs << std::endl;
+        std::cout << "  Num Floats: " << mData.mNumFloats << std::endl;
+        std::cout << "  Script Data Size: " << mData.mScriptData.size() << std::endl;
+        std::cout << "  Table Size: " << ESM::computeScriptStringTableSize(mData.mVarNames) << std::endl;
 
         for (const std::string& variable : mData.mVarNames)
             std::cout << "  Variable: " << variable << std::endl;

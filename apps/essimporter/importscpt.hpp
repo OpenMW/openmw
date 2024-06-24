@@ -19,7 +19,11 @@ namespace ESSImport
     struct SCHD
     {
         ESM::NAME32 mName;
-        ESM::Script::SCHDstruct mData;
+        std::uint32_t mNumShorts;
+        std::uint32_t mNumLongs;
+        std::uint32_t mNumFloats;
+        std::uint32_t mScriptDataSize;
+        std::uint32_t mStringTableSize;
     };
 
     // A running global script
