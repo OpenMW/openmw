@@ -17,11 +17,14 @@ parser.add_argument("--verbose", action='store_true', help="print all openmw out
 args = parser.parse_args()
 
 example_suite_dir = Path(args.example_suite).resolve()
-example_suite_content = example_suite_dir / "game_template" / "data" / "template.omwgame"
-if not example_suite_content.is_file():
-    sys.exit(
-        f"{example_suite_content} not found, use 'git clone https://gitlab.com/OpenMW/example-suite/' to get it"
-    )
+
+content_paths = (
+    example_suite_dir / "game_template" / "data" / "template.omwgame",
+    example_suite_dir / "example_animated_creature" / "data" / "landracer.omwaddon",
+)
+for path in content_paths:
+    if not path.is_file():
+        sys.exit(f"{path} is not found, use 'git clone https://gitlab.com/OpenMW/example-suite/' to get it")
 
 openmw_binary = Path(args.omw).resolve()
 if not openmw_binary.is_file():
@@ -43,15 +46,17 @@ def runTest(name):
     shutil.copyfile(example_suite_dir / "settings.cfg", config_dir / "settings.cfg")
     test_dir = tests_dir / name
     with open(config_dir / "openmw.cfg", "w", encoding="utf-8") as omw_cfg:
+        for path in content_paths:
+            omw_cfg.write(f'data="{path.parent}"\n')
         omw_cfg.writelines(
             (
-                f'data="{example_suite_content.parent}"\n',
                 f'data="{testing_util_dir}"\n',
                 f'data-local="{test_dir}"\n',
                 f'user-data="{userdata_dir}"\n',
-                f'content={example_suite_content.name}\n',
             )
         )
+        for path in content_paths:
+            omw_cfg.write(f'content={path.name}\n')
         if (test_dir / "openmw.cfg").exists():
             omw_cfg.write(open(test_dir / "openmw.cfg").read())
         elif (test_dir / "test.omwscripts").exists():
