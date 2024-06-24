@@ -45,6 +45,16 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     const CSMWorld::CellRef& cellRef = record.get();
     const CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Reference, cellRef.mId);
 
+    // Check RefNum is unique per content file, otherwise can cause load issues
+    const auto refNum = cellRef.mRefNum;
+    const auto insertResult = mUsedReferenceIDs.emplace(refNum, cellRef.mId);
+    if (!insertResult.second)
+        messages.add(id,
+            "Duplicate RefNum: " + std::to_string(refNum.mContentFile) + std::string("-")
+                + std::to_string(refNum.mIndex) + " shared with cell reference "
+                + insertResult.first->second.toString(),
+            "", CSMDoc::Message::Severity_Error);
+
     // Check reference id
     if (cellRef.mRefID.empty())
         messages.add(id, "Instance is not based on an object", "", CSMDoc::Message::Severity_Error);
@@ -109,6 +119,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
 int CSMTools::ReferenceCheckStage::setup()
 {
     mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mUsedReferenceIDs.clear();
 
     return mReferences.getSize();
 }
