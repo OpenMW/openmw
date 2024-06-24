@@ -104,6 +104,8 @@ namespace MWWorld
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
 
     private:
+        struct GetCellStoreCallback;
+
         PtrRegistry mPtrRegistry; // defined before mCells because during destruction it should be the last
 
         MWWorld::ESMStore& mStore;

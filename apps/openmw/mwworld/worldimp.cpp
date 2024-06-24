@@ -473,8 +473,8 @@ namespace MWWorld
 
         mStore.write(writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                         // references to custom made records will be recognized
+        mWorldModel.write(writer, progress); // the player's cell needs to be loaded before the player
         mPlayer->write(writer, progress);
-        mWorldModel.write(writer, progress);
         mGlobalVariables.write(writer, progress);
         mWeatherManager->write(writer, progress);
         mProjectileManager->write(writer, progress);
