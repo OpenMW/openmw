@@ -113,6 +113,14 @@ namespace MWLua
                 scripts->onSkillLevelUp(event.mSkill, event.mSource);
         }
 
+        void operator()(const OnGlobalScriptRequested& event) const
+        {
+            sol::optional<GObject> target;
+            if (event.mTarget.isSet())
+                target = GObject(event.mTarget);
+            mGlobalScripts.onGlobalScriptRequested(MWScriptRef{ event.mScript, {} }, event.mStarted, target);
+        }
+
     private:
         MWWorld::Ptr getPtr(ESM::RefNum id) const
         {
