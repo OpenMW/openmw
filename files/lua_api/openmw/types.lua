@@ -2109,7 +2109,8 @@
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this container (can be empty)
 -- @field #number weight capacity of this container
-
+-- @field #boolean organic Whether items can be placed in the container
+-- @field #boolean respawns Whether the container respawns its contents
 
 --------------------------------------------------------------------------------
 -- @{#Door} functions
