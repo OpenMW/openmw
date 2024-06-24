@@ -673,7 +673,7 @@ void ContentSelectorModel::ContentModel::setNonUserContent(const QStringList& fi
     for (auto* file : mFiles)
         file->setFromAnotherConfigFile(mNonUserContent.contains(file->fileName().toLower()));
 
-    int insertPosition
+    auto insertPosition
         = std::ranges::find_if(mFiles, [](const EsmFile* file) { return !file->builtIn(); }) - mFiles.begin();
 
     for (const auto& filepath : fileList)
