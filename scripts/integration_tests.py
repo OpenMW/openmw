@@ -45,11 +45,11 @@ def runTest(name):
     with open(config_dir / "openmw.cfg", "w", encoding="utf-8") as omw_cfg:
         omw_cfg.writelines(
             (
-                f'data="{example_suite_dir}{os.sep}game_template{os.sep}data"\n',
+                f'data="{example_suite_content.parent}"\n',
                 f'data="{testing_util_dir}"\n',
                 f'data-local="{test_dir}"\n',
                 f'user-data="{userdata_dir}"\n',
-                "content=template.omwgame\n",
+                f'content={example_suite_content.name}\n',
             )
         )
         if (test_dir / "openmw.cfg").exists():
