@@ -864,10 +864,7 @@ namespace MWLua
             else if (selectedPtr.isEmpty())
                 out << std::setw(valueW * 2) << "NA (not selected) ";
             else if (!selectedScripts || !selectedScripts->hasScript(i))
-            {
-                out << std::setw(valueW) << "-";
-                outMemSize(selectedStats[i].mMemoryUsage);
-            }
+                out << std::setw(valueW * 2) << "NA";
             else
             {
                 out << std::setw(valueW) << static_cast<int64_t>(selectedStats[i].mAvgInstructionCount);
