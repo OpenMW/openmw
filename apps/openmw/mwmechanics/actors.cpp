@@ -378,7 +378,8 @@ namespace MWMechanics
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, controls.mSneak);
 
                 // Same as mUse % max AttackType int value
-                AttackType attackType = static_cast<AttackType>(controls.mUse % static_cast<int>(AttackType::Thrust));
+                AttackType attackType
+                    = static_cast<AttackType>(controls.mUse % (static_cast<int>(AttackType::Thrust) + 1));
 
                 stats.setAttackingOrSpell(attackType != AttackType::NoAttack);
                 stats.setAttackType(attackTypeName(attackType));
