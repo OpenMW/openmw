@@ -178,7 +178,7 @@ namespace LuaUtil
 
         // Calls given handlers in direct order.
         template <typename... Args>
-        void callEngineHandlers(EngineHandlerList& handlers, Args&&... args)
+        void callEngineHandlers(EngineHandlerList& handlers, const Args&... args)
         {
             for (Handler& handler : handlers.mList)
             {

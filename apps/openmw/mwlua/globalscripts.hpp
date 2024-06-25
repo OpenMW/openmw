@@ -4,7 +4,6 @@
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
 
-#include "mwscriptref.hpp"
 #include "object.hpp"
 
 namespace MWLua
@@ -25,7 +24,6 @@ namespace MWLua
                 &mOnActivateHandlers,
                 &mOnUseItemHandlers,
                 &mOnNewExteriorHandlers,
-                &mOnGlobalScriptRequestedHandlers,
             });
         }
 
@@ -43,10 +41,6 @@ namespace MWLua
             callEngineHandlers(mOnUseItemHandlers, obj, actor, force);
         }
         void onNewExterior(const GCell& cell) { callEngineHandlers(mOnNewExteriorHandlers, cell); }
-        void onGlobalScriptRequested(const MWScriptRef& scriptRef, const bool started, sol::optional<GObject> target)
-        {
-            callEngineHandlers(mOnGlobalScriptRequestedHandlers, scriptRef, started, target);
-        }
 
     private:
         EngineHandlerList mObjectActiveHandlers{ "onObjectActive" };
@@ -57,7 +51,6 @@ namespace MWLua
         EngineHandlerList mOnActivateHandlers{ "onActivate" };
         EngineHandlerList mOnUseItemHandlers{ "_onUseItem" };
         EngineHandlerList mOnNewExteriorHandlers{ "onNewExterior" };
-        EngineHandlerList mOnGlobalScriptRequestedHandlers{ "onGlobalScriptRequested" };
     };
 
 }

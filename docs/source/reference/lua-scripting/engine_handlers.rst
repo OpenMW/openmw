@@ -58,16 +58,6 @@ Engine handler is a function defined by a script, that can be called by the engi
     - Object is activated by an actor.
   * - onNewExterior(cell)
     - A new exterior cell not defined by a content file has been generated.
-  * - onGlobalScriptRequested(script, started, target)
-    - | A `StartScript` was called.
-      | Note that this affects `Start Scripts` defined by content files, as well as calls to the MWScript function `StartScript`.
-      | This does not necessarily indicate the script in question is actually being started, as there may (presently)
-      | only be a single instance of a global script at a time.
-      | This can potentially be used to override vanilla functionality, such as:
-      | ``if script.recordId == 'dbattackscript' then script.variables.sleeponce = 1 end``
-      | The `target` and `script.object` fields may be different.
-      | If `started` is true then refer to `script.object`, otherwise the `target`, if present, represents what the `startscript` call is actually targeted at. For example:
-      | ``if started and script.object then print(script.object.recordId) elseif target then print(target.recordId) end``
 
 **Only for local scripts**
 
