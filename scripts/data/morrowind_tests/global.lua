@@ -24,6 +24,7 @@ end
 local testModules = {
     'global_issues',
     'global_dialogues',
+    'global_mwscript',
 }
 
 return {

@@ -67,6 +67,8 @@ namespace MWScript
             return static_cast<float>(getVarAsDouble(script, var));
         }
 
+        std::size_t getSize(const ESM::RefId& script);
+
         /// \note If locals have not been configured yet, no data is written.
         ///
         /// \return Locals written?
