@@ -8,7 +8,6 @@
 #include <sol/sol.hpp>
 
 #include <components/esm3/cellref.hpp>
-#include <components/esm3/loadglob.hpp>
 
 #include "../mwworld/ptr.hpp"
 

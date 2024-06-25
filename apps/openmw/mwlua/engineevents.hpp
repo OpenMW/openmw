@@ -70,14 +70,8 @@ namespace MWLua
             std::string mSkill;
             std::string mSource;
         };
-        struct OnGlobalScriptRequested
-        {
-            ESM::RefId mScript;
-            ESM::RefNum mTarget;
-            bool mStarted;
-        };
         using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnUseItem, OnNewExterior, OnTeleported,
-            OnAnimationTextKey, OnSkillUse, OnSkillLevelUp, OnGlobalScriptRequested>;
+            OnAnimationTextKey, OnSkillUse, OnSkillLevelUp>;
 
         void clear() { mQueue.clear(); }
         void addToQueue(Event e) { mQueue.push_back(std::move(e)); }

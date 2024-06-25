@@ -1,8 +1,5 @@
 #include "luamanagerimp.hpp"
 
-#include <apps/openmw/mwlua/mwscriptref.hpp>
-#include <apps/openmw/mwlua/object.hpp>
-#include <components/misc/strings/lower.hpp>
 #include <filesystem>
 
 #include <MyGUI_InputManager.h>
@@ -602,14 +599,6 @@ namespace MWLua
         mGlobalScripts.setSavedDataDeserializer(mGlobalLoader.get());
         mGlobalScripts.load(globalScripts);
         mGlobalScriptsStarted = true;
-    }
-
-    void LuaManager::globalMWScriptCalled(const ESM::RefId& scriptName, const MWWorld::Ptr& target, const bool started)
-    {
-        ESM::RefNum targetId;
-        if (!target.isEmpty())
-            targetId = getId(target);
-        mEngineEvents.addToQueue(EngineEvents::OnGlobalScriptRequested{ scriptName, targetId, started });
     }
 
     void LuaManager::saveLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScripts& data)

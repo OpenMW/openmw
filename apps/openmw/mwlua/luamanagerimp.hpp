@@ -156,9 +156,6 @@ namespace MWLua
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
         std::string formatResourceUsageStats() const override;
 
-        void globalMWScriptCalled(
-            const ESM::RefId& scriptName, const MWWorld::Ptr& target, const bool started) override;
-
         LuaUtil::InputAction::Registry& inputActions() { return mInputActions; }
         LuaUtil::InputTrigger::Registry& inputTriggers() { return mInputTriggers; }
 

@@ -150,9 +150,6 @@ namespace MWBase
             = 0;
 
         virtual std::string formatResourceUsageStats() const = 0;
-
-        virtual void globalMWScriptCalled(const ESM::RefId& scriptName, const MWWorld::Ptr& target, const bool started)
-            = 0;
     };
 
 }
