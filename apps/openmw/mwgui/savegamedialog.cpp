@@ -435,7 +435,7 @@ namespace MWGui
                     mCurrentSlot->mProfile.mInGameTime.mMonth)
              << " " << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}");
 
-        if (Settings::saves().mTimeplayed)
+        if (mCurrentSlot->mProfile.mTimePlayed > 0)
         {
             text << "\n"
                  << "#{OMWEngine:TimePlayed}: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
