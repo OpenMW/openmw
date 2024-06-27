@@ -491,7 +491,7 @@ else(USE_LUAJIT)
     find_package(Lua REQUIRED)
     add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
-if (NOT WIN32)
+if (NOT WIN32 AND NOT ANDROID)
     include(cmake/CheckLuaCustomAllocator.cmake)
 endif()
 
