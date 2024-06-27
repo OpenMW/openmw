@@ -748,6 +748,7 @@ macOS15_Xcode16_arm64:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - $env:CCACHE_DEPEND = "true"
+    - $env:CCACHE_INODECACHE = "true"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64_Ninja\.cmake\api\v1\query\codemodel-v2
