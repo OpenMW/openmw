@@ -45,7 +45,8 @@ CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList& values, cons
     , mUiScale(static_cast<QGuiApplication*>(QGuiApplication::instance())->devicePixelRatio())
     , mSettingKey(pageName + '/' + settingName)
 {
-    parent->installEventFilter(this);
+    if (parent)
+        parent->installEventFilter(this);
 
     buildPixmaps();
 
