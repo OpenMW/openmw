@@ -180,6 +180,7 @@
     Bug #7993: Cannot load Bloodmoon without Tribunal
     Bug #7997: Can toggle perspective when paralyzed
     Bug #8002: Portable light sources held by creatures do not emit lighting
+    Bug #8005: F3 stats bars are sorted not according to their place in the timeline
     Bug #8018: Potion effects should never explode and always apply on self
     Bug #8021: Player's scale doesn't reset when starting a new game
     Feature #1415: Infinite fall failsafe
