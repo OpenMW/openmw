@@ -30,9 +30,10 @@ namespace MWScript
         , mStore(store)
         , mCompilerContext(compilerContext)
         , mParser(mErrorHandler, mCompilerContext)
-        , mOpcodesInstalled(false)
         , mGlobalScripts(store)
     {
+        installOpcodes(mInterpreter);
+
         mErrorHandler.setWarningsMode(warningsMode);
 
         mScriptBlacklist.resize(scriptBlacklist.size());
@@ -110,14 +111,9 @@ namespace MWScript
         const auto& target = interpreterContext.getTarget();
         if (!iter->second.mProgram.mInstructions.empty()
             && iter->second.mInactive.find(target) == iter->second.mInactive.end())
+        {
             try
             {
-                if (!mOpcodesInstalled)
-                {
-                    installOpcodes(mInterpreter);
-                    mOpcodesInstalled = true;
-                }
-
                 mInterpreter.run(iter->second.mProgram, interpreterContext);
                 return true;
             }
@@ -131,6 +127,7 @@ namespace MWScript
 
                 iter->second.mInactive.insert(target); // don't execute again.
             }
+        }
         return false;
     }
 

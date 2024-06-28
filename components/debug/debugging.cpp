@@ -468,7 +468,7 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
 #endif
             SDL_ShowSimpleMessageBox(0, (std::string(appName) + ": Fatal error").c_str(), e.what(), nullptr);
 
-        Log(Debug::Error) << "Error: " << e.what();
+        Log(Debug::Error) << "Fatal error: " << e.what();
 
         ret = 1;
     }
