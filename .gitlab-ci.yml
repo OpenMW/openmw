@@ -813,13 +813,12 @@ macOS15_Xcode16_arm64:
     - MSVC2022_64_Ninja/*.log
     - MSVC2022_64_Ninja/**/*.log
     - "*_to-be-merged.txt"
-  variables:
-    targets: "all"
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   # This is capped at 2h by GitLab for Windows Shared Runners
   timeout: 2h
   variables:
     CCACHE_SIZE: 1.5G
+    targets: all
 
 .Windows_Ninja_Release:
   extends:
