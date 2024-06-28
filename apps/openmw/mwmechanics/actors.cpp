@@ -242,14 +242,19 @@ namespace MWMechanics
     {
         std::string_view attackTypeName(AttackType attackType)
         {
-            if (attackType == AttackType::Chop)
-                return "chop";
-            else if (attackType == AttackType::Slash)
-                return "slash";
-            else if (attackType == AttackType::Thrust)
-                return "thrust";
-            else
-                return "";
+            switch (attackType)
+            {
+                case AttackType::NoAttack:
+                case AttackType::Any:
+                    return {};
+                case AttackType::Chop:
+                    return "chop";
+                case AttackType::Slash:
+                    return "slash";
+                case AttackType::Thrust:
+                    return "thrust";
+            }
+            throw std::logic_error("Invalid attack type value: " + std::to_string(static_cast<int>(attackType)));
         }
 
         float getTimeToDestination(const AiPackage& package, const osg::Vec3f& position, float speed, float duration,
@@ -377,10 +382,7 @@ namespace MWMechanics
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, controls.mRun);
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, controls.mSneak);
 
-                // Same as mUse % max AttackType int value
-                AttackType attackType
-                    = static_cast<AttackType>(controls.mUse % (static_cast<int>(AttackType::Thrust) + 1));
-
+                AttackType attackType = static_cast<AttackType>(controls.mUse);
                 stats.setAttackingOrSpell(attackType != AttackType::NoAttack);
                 stats.setAttackType(attackTypeName(attackType));
 
