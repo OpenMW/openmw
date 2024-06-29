@@ -243,7 +243,7 @@ namespace MWRender
             }
             else
             {
-                if (mMaxNumberRipples == 0)
+                if (mMaxNumberRipples <= 0)
                     return;
 
                 osgParticle::ParticleSystem::ScopedWriteLock lock(*mParticleSystem->getReadWriteMutex());

@@ -1,5 +1,6 @@
 #include "menuscripts.hpp"
 
+#include <components/lua/util.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -88,7 +89,7 @@ namespace MWLua
                 slotInfo["timePlayed"] = slot.mProfile.mTimePlayed;
                 sol::table contentFiles(lua, sol::create);
                 for (size_t i = 0; i < slot.mProfile.mContentFiles.size(); ++i)
-                    contentFiles[i + 1] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
+                    contentFiles[LuaUtil::toLuaIndex(i)] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
 
                 {
                     auto system_time = std::chrono::system_clock::now()

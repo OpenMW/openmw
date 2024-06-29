@@ -169,13 +169,6 @@ option(OPENMW_USE_SYSTEM_GOOGLETEST "Use system Google Test library." OFF)
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
-# what is necessary to build documentation
-IF( BUILD_DOCS )
-    # Builds the documentation.
-    FIND_PACKAGE( Sphinx REQUIRED )
-    FIND_PACKAGE( Doxygen REQUIRED )
-ENDIF()
-
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
@@ -1110,12 +1103,17 @@ elseif(NOT APPLE)
     endif(WIN32)
 endif(OPENMW_OSX_DEPLOYMENT AND APPLE)
 
-# Doxygen Target -- simply run 'make doc' or 'make doc_pages'
-# output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
-# output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
-#                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
+# what is necessary to build documentation
+if ( BUILD_DOCS )
+    # Builds the documentation.
+    FIND_PACKAGE( Sphinx REQUIRED )
+    FIND_PACKAGE( Doxygen REQUIRED )
+
+    # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
+    # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
+    # output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
+    #                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
+
     # determine output directory for doc_pages
     if (NOT DEFINED DOXYGEN_PAGES_OUTPUT_DIR)
         set(DOXYGEN_PAGES_OUTPUT_DIR "${OpenMW_BINARY_DIR}/docs/Pages")

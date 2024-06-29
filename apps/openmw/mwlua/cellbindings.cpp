@@ -84,6 +84,8 @@ namespace MWLua
         };
 
         cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getNameId(); });
+        cellT["id"]
+            = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getId().serializeText(); });
         cellT["region"] = sol::readonly_property(
             [](const CellT& c) -> std::string { return c.mStore->getCell()->getRegion().serializeText(); });
         cellT["worldSpaceId"] = sol::readonly_property(

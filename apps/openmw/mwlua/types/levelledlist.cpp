@@ -1,6 +1,7 @@
 #include "types.hpp"
 
 #include <components/esm3/loadlevlist.hpp>
+#include <components/lua/util.hpp>
 
 #include "../../mwbase/environment.hpp"
 #include "../../mwbase/world.hpp"
@@ -45,7 +46,7 @@ namespace MWLua
         record["creatures"] = sol::readonly_property([&](const ESM::CreatureLevList& rec) -> sol::table {
             sol::table res(state, sol::create);
             for (size_t i = 0; i < rec.mList.size(); ++i)
-                res[i + 1] = rec.mList[i];
+                res[LuaUtil::toLuaIndex(i)] = rec.mList[i];
             return res;
         });
         record["calculateFromAllLevels"] = sol::readonly_property(

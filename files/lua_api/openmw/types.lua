@@ -844,6 +844,7 @@
 -- @field #number stealthSkill The base stealth skill of the creature. This is the skill value used for all skills with a 'stealth' specialization
 -- @field #list<#number> attack A table of the 3 randomly selected attacks used by creatures that do not carry weapons. The table consists of 6 numbers split into groups of 2 values corresponding to minimum and maximum damage in that order.
 -- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this creature.
 
 
 --- @{#NPC} functions
@@ -1121,7 +1122,13 @@
 -- @field #number baseDisposition NPC's starting disposition
 -- @field #bool isMale The gender setting of the NPC
 -- @field #map<#string, #boolean> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
 
+---
+-- @type TravelDestination
+-- @field #string cellId ID of the Destination cell for this TravelDestination, Can be used with @{openmw_world#(world).getCellById}.
+-- @field openmw.util#Vector3 position Destination position for this TravelDestination.
+-- @field openmw.util#Transform rotation Destination rotation for this TravelDestination.
 
 --------------------------------------------------------------------------------
 -- @{#Player} functions

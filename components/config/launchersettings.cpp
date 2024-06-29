@@ -263,13 +263,9 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     for (const QString& listName : getContentLists())
     {
         const auto& listDirs = getDataDirectoryList(listName);
-        if (dirs.length() != listDirs.length())
+        if (!std::ranges::equal(
+                dirs, listDirs, [](const SettingValue& dir, const QString& listDir) { return dir.value == listDir; }))
             continue;
-        for (int i = 0; i < dirs.length(); ++i)
-        {
-            if (dirs[i].value != listDirs[i])
-                continue;
-        }
         if (files == getContentListFiles(listName) && archives == getArchiveList(listName))
         {
             setCurrentContentListName(listName);

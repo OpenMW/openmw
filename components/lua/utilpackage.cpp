@@ -10,6 +10,7 @@
 #include <components/misc/mathutil.hpp>
 
 #include "luastate.hpp"
+#include "util.hpp"
 
 #include "shapes/box.hpp"
 
@@ -143,7 +144,7 @@ namespace LuaUtil
             sol::table table(lua, sol::create);
             const auto vertices = b.vertices();
             for (size_t i = 0; i < vertices.size(); ++i)
-                table[i + 1] = vertices[i];
+                table[toLuaIndex(i)] = vertices[i];
             return table;
         });
         boxType[sol::meta_function::equal_to] = [](const Box& a, const Box& b) { return a == b; };

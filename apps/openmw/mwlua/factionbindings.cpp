@@ -3,6 +3,7 @@
 
 #include <components/esm3/loadfact.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -93,8 +94,8 @@ namespace MWLua
         });
         auto rankT = lua.new_usertype<FactionRank>("ESM3_FactionRank");
         rankT[sol::meta_function::to_string] = [](const FactionRank& rec) -> std::string {
-            return "ESM3_FactionRank[" + rec.mFactionId.toDebugString() + ", " + std::to_string(rec.mRankIndex + 1)
-                + "]";
+            return "ESM3_FactionRank[" + rec.mFactionId.toDebugString() + ", "
+                + std::to_string(LuaUtil::toLuaIndex(rec.mRankIndex)) + "]";
         };
         rankT["name"]
             = sol::readonly_property([](const FactionRank& rec) -> std::string_view { return rec.mRankName; });

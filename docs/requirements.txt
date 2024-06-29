@@ -1,5 +1,5 @@
 parse_cmake
 sphinx==1.8.5
 docutils==0.17.1
-jinja2==3.0.0
+jinja2==3.1.4
 sphinx_rtd_theme

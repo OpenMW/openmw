@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <numeric>
@@ -216,6 +217,19 @@ namespace ESM
                 for (auto& v : dst)
                     v = std::uniform_real_distribution<float>{ -1.0f, 1.0f }(mRandom);
             }
+
+            void generateBytes(auto iterator, std::size_t count)
+            {
+                std::uniform_int_distribution<unsigned short> distribution{ 0,
+                    std::numeric_limits<unsigned char>::max() };
+                std::generate_n(iterator, count, [&] { return static_cast<unsigned char>(distribution(mRandom)); });
+            }
+
+            void generateStrings(auto iterator, std::size_t count)
+            {
+                std::uniform_int_distribution<std::size_t> distribution{ 1, 13 };
+                std::generate_n(iterator, count, [&] { return generateRandomString(distribution(mRandom)); });
+            }
         };
 
         TEST_F(Esm3SaveLoadRecordTest, headerShouldNotChange)
@@ -265,11 +279,11 @@ namespace ESM
             Script record;
             record.blank();
             record.mId = generateRandomRefId(33);
-            record.mData.mNumShorts = 42;
+            record.mNumShorts = 42;
             Script result;
             saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
             EXPECT_EQ(result.mId, record.mId);
-            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
+            EXPECT_EQ(result.mNumShorts, record.mNumShorts);
         }
 
         TEST_P(Esm3SaveLoadRecordTest, playerShouldNotChange)
@@ -403,11 +417,24 @@ namespace ESM
             Script record;
             record.blank();
             record.mId = generateRandomRefId(32);
-            record.mData.mNumShorts = 42;
+            record.mNumShorts = 3;
+            record.mNumFloats = 4;
+            record.mNumLongs = 5;
+            generateStrings(
+                std::back_inserter(record.mVarNames), record.mNumShorts + record.mNumFloats + record.mNumLongs);
+            generateBytes(std::back_inserter(record.mScriptData), 13);
+            record.mScriptText = generateRandomString(17);
+
             Script result;
             saveAndLoadRecord(record, GetParam(), result);
+
             EXPECT_EQ(result.mId, record.mId);
-            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
+            EXPECT_EQ(result.mNumShorts, record.mNumShorts);
+            EXPECT_EQ(result.mNumFloats, record.mNumFloats);
+            EXPECT_EQ(result.mNumShorts, record.mNumShorts);
+            EXPECT_EQ(result.mVarNames, record.mVarNames);
+            EXPECT_EQ(result.mScriptData, record.mScriptData);
+            EXPECT_EQ(result.mScriptText, record.mScriptText);
         }
 
         TEST_P(Esm3SaveLoadRecordTest, quickKeysShouldNotChange)
