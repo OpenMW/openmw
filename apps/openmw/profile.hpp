@@ -29,6 +29,7 @@ namespace OMW
     {
         Input,
         Sound,
+        LuaSyncUpdate,
         State,
         Script,
         Mechanics,
@@ -36,9 +37,8 @@ namespace OMW
         PhysicsWorker,
         World,
         Gui,
-        Lua,
-        LuaSyncUpdate,
         WindowManager,
+        Lua,
         Number,
     };
 
@@ -79,7 +79,7 @@ namespace OMW
     inline const UserStats UserStatsValue<UserStatsType::Lua>::sValue{ "Lua", "lua" };
 
     template <>
-    inline const UserStats UserStatsValue<UserStatsType::LuaSyncUpdate>::sValue{ " -Sync", "luasyncupdate" };
+    inline const UserStats UserStatsValue<UserStatsType::LuaSyncUpdate>::sValue{ "LuaSync", "luasyncupdate" };
 
     template <>
     inline const UserStats UserStatsValue<UserStatsType::WindowManager>::sValue{ "WindowManager", "windowmanager" };
