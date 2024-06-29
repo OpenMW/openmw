@@ -54,5 +54,9 @@ namespace MWLua
         record["mwscript"] = sol::readonly_property(
             [](const ESM::Container& rec) -> std::string { return rec.mScript.serializeText(); });
         record["weight"] = sol::readonly_property([](const ESM::Container& rec) -> float { return rec.mWeight; });
+        record["isOrganic"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Organic; });
+        record["isRespawning"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Respawn; });
     }
 }
