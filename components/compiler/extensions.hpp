@@ -80,15 +80,16 @@ namespace Compiler
         /// \param explicitReference In: has explicit reference; Out: set to false, if
         /// explicit reference is not available for this instruction.
 
-        void registerFunction(const std::string& keyword, ScriptReturn returnType, ScriptArgs argumentType, int code,
-            int codeExplicit = -1);
+        void registerFunction(std::string_view keyword, ScriptReturn returnType, std::string_view argumentType,
+            int code, int codeExplicit = -1);
         ///< Register a custom function
         /// - keyword must be all lower case.
         /// - keyword must be unique
         /// - if explicit references are not supported, segment5codeExplicit must be set to -1
         /// \note Currently only segment 3 and segment 5 opcodes are supported.
 
-        void registerInstruction(const std::string& keyword, ScriptArgs argumentType, int code, int codeExplicit = -1);
+        void registerInstruction(
+            std::string_view keyword, std::string_view argumentType, int code, int codeExplicit = -1);
         ///< Register a custom instruction
         /// - keyword must be all lower case.
         /// - keyword must be unique

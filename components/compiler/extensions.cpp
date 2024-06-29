@@ -51,11 +51,11 @@ namespace Compiler
     }
 
     void Extensions::registerFunction(
-        const std::string& keyword, ScriptReturn returnType, ScriptArgs argumentType, int code, int codeExplicit)
+        std::string_view keyword, ScriptReturn returnType, std::string_view argumentType, int code, int codeExplicit)
     {
         Function function;
 
-        if (argumentType.find('/') == std::string::npos)
+        if (argumentType.find('/') == std::string_view::npos)
         {
             function.mSegment = 5;
             assert(code >= 33554432 && code <= 67108863);
@@ -73,7 +73,7 @@ namespace Compiler
         mKeywords.emplace(keyword, keywordIndex);
 
         function.mReturn = returnType;
-        function.mArguments = std::move(argumentType);
+        function.mArguments = argumentType;
         function.mCode = code;
         function.mCodeExplicit = codeExplicit;
 
@@ -81,11 +81,11 @@ namespace Compiler
     }
 
     void Extensions::registerInstruction(
-        const std::string& keyword, ScriptArgs argumentType, int code, int codeExplicit)
+        std::string_view keyword, std::string_view argumentType, int code, int codeExplicit)
     {
         Instruction instruction;
 
-        if (argumentType.find('/') == std::string::npos)
+        if (argumentType.find('/') == std::string_view::npos)
         {
             instruction.mSegment = 5;
             assert(code >= 33554432 && code <= 67108863);
@@ -102,7 +102,7 @@ namespace Compiler
 
         mKeywords.emplace(keyword, keywordIndex);
 
-        instruction.mArguments = std::move(argumentType);
+        instruction.mArguments = argumentType;
         instruction.mCode = code;
         instruction.mCodeExplicit = codeExplicit;
 
