@@ -27,6 +27,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -81,9 +82,7 @@ namespace MWClass
 
         if (ref->mBase->mModel.empty())
             return {};
-
-        const std::string& name = ref->mBase->mName;
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Light>(ptr);
     }
 
     bool Light::isItem(const MWWorld::ConstPtr& ptr) const
