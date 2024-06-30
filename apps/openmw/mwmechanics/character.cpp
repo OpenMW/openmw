@@ -2287,7 +2287,7 @@ namespace MWMechanics
 
                     // It seems only bipedal actors use turning animations.
                     // Also do not use turning animations in the first-person view and when sneaking.
-                    if (!sneak && !isFirstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
+                    if (!sneak && !isFirstPersonPlayer && isBiped)
                     {
                         if (effectiveRotation > rotationThreshold)
                             movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
@@ -2331,7 +2331,7 @@ namespace MWMechanics
             }
             else
             {
-                if (mPtr.getClass().isBipedal(mPtr))
+                if (isBiped)
                 {
                     if (mTurnAnimationThreshold > 0)
                         mTurnAnimationThreshold -= duration;
