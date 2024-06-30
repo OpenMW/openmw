@@ -27,9 +27,6 @@ namespace MWRender
         void operator()(osg::MatrixTransform* node, osg::NodeVisitor* nv);
 
     protected:
-        osg::Quat getWorldOrientation(osg::Node* node);
-        osg::Vec3d getParentScale(osg::Node* node);
-
         bool mEnabled;
         osg::Vec3f mOffset;
         osg::Quat mRotate;
