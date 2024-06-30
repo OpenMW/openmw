@@ -40,7 +40,8 @@ namespace MWRender
 
         osg::Quat orient = worldOrient * mRotate * worldOrientInverse * matrix.getRotate();
         matrix.setRotate(orient);
-        matrix.setTrans(matrix.getTrans() + worldOrientInverse * mOffset);
+
+        matrix *= osg::Matrix::scale(getParentScale(node));
 
         node->setMatrix(matrix);
 
@@ -69,6 +70,16 @@ namespace MWRender
             worldOrient = worldMat.getRotate();
         }
         return worldOrient;
+    }
+
+    osg::Vec3d RotateController::getParentScale(osg::Node* node)
+    {
+        osg::NodePathList nodepaths = node->getParentalNodePaths(mRelativeTo);
+        if (!nodepaths.empty())
+        {
+            return osg::computeLocalToWorld(nodepaths[0]).getScale();
+        }
+        return osg::Vec3d(1.0, 1.0, 1.0);
     }
 
 }
