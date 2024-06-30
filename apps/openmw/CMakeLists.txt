@@ -123,11 +123,6 @@ add_library(openmw-lib STATIC
     ${OPENMW_SOURCES}
 )
 
-# Otherwise linker fails with LNK1149 because main.cpp has __declspec(dllexport)
-if(NOT WIN32)
-    set_target_properties(openmw-lib PROPERTIES OUTPUT_NAME openmw)
-endif()
-
 if(BUILD_OPENMW)
     if (ANDROID)
         add_library(openmw SHARED

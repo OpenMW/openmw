@@ -180,8 +180,6 @@ add_library(openmw-cs-lib STATIC
     ${OPENCS_RES_SRC}
 )
 
-set_target_properties(openmw-cs-lib PROPERTIES OUTPUT_NAME openmw-cs)
-
 if(BUILD_OPENCS)
     openmw_add_executable(openmw-cs
         MACOSX_BUNDLE
