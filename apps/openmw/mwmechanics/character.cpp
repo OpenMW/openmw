@@ -2042,7 +2042,8 @@ namespace MWMechanics
             float effectiveRotation = rot.z();
             bool canMove = cls.getMaxSpeed(mPtr) > 0;
             const bool turnToMovementDirection = Settings::game().mTurnToMovementDirection;
-            if (!turnToMovementDirection || isFirstPersonPlayer)
+            const bool isBiped = mPtr.getClass().isBipedal(mPtr);
+            if (!isBiped || !turnToMovementDirection || isFirstPersonPlayer)
             {
                 movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
                 stats.setSideMovementAngle(0);
@@ -2296,7 +2297,7 @@ namespace MWMechanics
                 }
             }
 
-            if (turnToMovementDirection && !isFirstPersonPlayer
+            if (turnToMovementDirection && !isFirstPersonPlayer && isBiped
                 && (movestate == CharState_SwimRunForward || movestate == CharState_SwimWalkForward
                     || movestate == CharState_SwimRunBack || movestate == CharState_SwimWalkBack))
             {
