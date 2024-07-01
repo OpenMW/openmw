@@ -34,6 +34,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -217,10 +218,7 @@ namespace MWClass
 
     std::string_view Container::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Container>(ptr);
     }
 
     MWWorld::ContainerStore& Container::getContainerStore(const MWWorld::Ptr& ptr) const

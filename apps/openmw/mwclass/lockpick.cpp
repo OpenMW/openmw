@@ -21,6 +21,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -45,10 +46,7 @@ namespace MWClass
 
     std::string_view Lockpick::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Lockpick>* ref = ptr.get<ESM::Lockpick>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Lockpick>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Lockpick::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const

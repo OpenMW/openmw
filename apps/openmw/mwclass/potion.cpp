@@ -22,6 +22,7 @@
 #include "../mwmechanics/spellutil.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -46,10 +47,7 @@ namespace MWClass
 
     std::string_view Potion::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Potion>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Potion::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const

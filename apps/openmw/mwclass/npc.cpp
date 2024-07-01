@@ -61,6 +61,8 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "nameorid.hpp"
+
 namespace
 {
     struct NpcParts
@@ -541,10 +543,7 @@ namespace MWClass
             return store.find("sWerewolfPopup")->mValue.getString();
         }
 
-        const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::NPC>(ptr);
     }
 
     MWMechanics::CreatureStats& Npc::getCreatureStats(const MWWorld::Ptr& ptr) const
