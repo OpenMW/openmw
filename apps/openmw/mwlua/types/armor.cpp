@@ -98,8 +98,11 @@ namespace MWLua
         record["icon"] = sol::readonly_property([vfs](const ESM::Armor& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
-        record["enchant"]
-            = sol::readonly_property([](const ESM::Armor& rec) -> std::string { return rec.mEnchant.serializeText(); });
+        record["enchant"] = sol::readonly_property([](const ESM::Armor& rec) -> sol::optional<std::string> {
+            if (rec.mEnchant.empty())
+                return sol::nullopt;
+            return rec.mEnchant.serializeText();
+        });
         record["mwscript"]
             = sol::readonly_property([](const ESM::Armor& rec) -> std::string { return rec.mScript.serializeText(); });
         record["weight"] = sol::readonly_property([](const ESM::Armor& rec) -> float { return rec.mData.mWeight; });

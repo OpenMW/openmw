@@ -1327,7 +1327,7 @@
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this armor (can be empty)
 -- @field #string icon VFS path to the icon
--- @field #string enchant The enchantment ID of this armor (can be empty)
+-- @field #string enchant The enchantment ID of this armor (can be nil)
 -- @field #number weight
 -- @field #number value
 -- @field #number type See @{#Armor.TYPE}
@@ -1416,7 +1416,7 @@
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this book (can be empty)
 -- @field #string icon VFS path to the icon
--- @field #string enchant The enchantment ID of this book (can be empty)
+-- @field #string enchant The enchantment ID of this book (can be nil)
 -- @field #string text The text content of the book
 -- @field #number weight
 -- @field #number value
@@ -1494,7 +1494,7 @@
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this clothing (can be empty)
 -- @field #string icon VFS path to the icon
--- @field #string enchant The enchantment ID of this clothing (can be empty)
+-- @field #string enchant The enchantment ID of this clothing (can be nil)
 -- @field #number weight
 -- @field #number value
 -- @field #number type See @{#Clothing.TYPE}
@@ -1819,7 +1819,7 @@
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this weapon (can be empty)
 -- @field #string icon VFS path to the icon
--- @field #string enchant
+-- @field #string enchant The enchantment ID of this weapon (can be nil)
 -- @field #boolean isMagical
 -- @field #boolean isSilver
 -- @field #number weight
