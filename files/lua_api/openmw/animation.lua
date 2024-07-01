@@ -187,7 +187,7 @@
 --
 --   * `loops` - a number >= 0, the number of times the animation should loop after the first play (default: 0).
 --   * `priority` - Either a single #Priority value that will be assigned to all bone groups. Or a table mapping bone groups to its priority (default: PRIORITY.Default).
---   * `blendMask` - A mask of which bone groups to include in the animation (Default: BLEND_MASK.All.
+--   * `blendmask` - A mask of which bone groups to include in the animation (Default: BLEND_MASK.All.
 --   * `autodisable` - If true, the animation will be immediately  removed upon finishing, which means information will not be possible to query once completed. (Default: true)
 --   * `speed` - a floating point number >= 0, the speed at which the animation should play (default: 1)
 --   * `startkey` - the animation key at which the animation should start (default: "start")
