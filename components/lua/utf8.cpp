@@ -1,4 +1,3 @@
-#include <codecvt>
 #include <components/misc/strings/format.hpp>
 
 #include "utf8.hpp"
@@ -35,6 +34,34 @@ namespace
     {
         if (pos < 0)
             pos = std::max<int64_t>(0, pos + len + 1);
+    }
+
+    inline void codepointToUTF8(char32_t codepoint, std::string& str)
+    {
+        if (codepoint <= 0x7Fu)
+        {
+            str.push_back(static_cast<char>(codepoint));
+        }
+        else if (codepoint <= 0x7FFu)
+        {
+            str.push_back(static_cast<char>(0xC0 | ((codepoint & 0x7C0) >> 6)));
+            str.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+        }
+        else if (codepoint <= 0xFFFFu)
+        {
+            str.push_back(static_cast<char>(0xE0 | ((codepoint & 0xF000) >> 12)));
+            str.push_back(static_cast<char>(0x80 | ((codepoint & 0xFC0) >> 6)));
+            str.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+        }
+        else if (codepoint <= MAXUNICODE)
+        {
+            str.push_back(static_cast<char>(0xF0 | ((codepoint & 0x1C0000) >> 18)));
+            str.push_back(static_cast<char>(0x80 | ((codepoint & 0x3F000) >> 12)));
+            str.push_back(static_cast<char>(0x80 | ((codepoint & 0xFC0) >> 6)));
+            str.push_back(static_cast<char>(0x80 | (codepoint & 0x3F)));
+        }
+        else
+            throw std::runtime_error("Invalid codepoint");
     }
 
     // returns: first - character pos in bytes, second - character codepoint
@@ -96,7 +123,6 @@ namespace LuaUtf8
 
         utf8["char"] = [](const sol::variadic_args args) -> std::string {
             std::string result{};
-            std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
             for (size_t i = 0; i < args.size(); ++i)
             {
                 int64_t codepoint = getInteger(args[i], (i + 1), "char");
@@ -104,7 +130,7 @@ namespace LuaUtf8
                     throw std::runtime_error(
                         "bad argument #" + std::to_string(i + 1) + " to 'char' (value out of range)");
 
-                result += converter.to_bytes(static_cast<char32_t>(codepoint));
+                codepointToUTF8(static_cast<char32_t>(codepoint), result);
             }
             return result;
         };
