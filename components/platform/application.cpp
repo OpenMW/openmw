@@ -43,7 +43,12 @@ namespace Platform
                 setStyle("windows");
 
                 QFile file(getStyleSheetPath());
-                file.open(QIODevice::ReadOnly);
+                if (!file.open(QIODevice::ReadOnly))
+                {
+                    qDebug() << "Failed to open style sheet file:" << getStyleSheetPath();
+                    return;
+                }
+
                 setStyleSheet(file.readAll());
             }
         }
@@ -60,7 +65,12 @@ namespace Platform
             setStyle("windows");
 
             QFile file(getStyleSheetPath());
-            file.open(QIODevice::ReadOnly);
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                qDebug() << "Failed to open style sheet file:" << getStyleSheetPath();
+                return;
+            }
+
             setStyleSheet(file.readAll());
         }
         else
