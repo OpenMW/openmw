@@ -316,8 +316,8 @@ find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMP
 if(FFmpeg_FOUND)
     SET(FFVER_OK TRUE)
 
-    # Can not detect FFmpeg version on Windows for now
-    if (NOT WIN32)
+    # Can not detect FFmpeg version on Windows or Android for now
+    if (NOT WIN32 AND NOT ANDROID)
         if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
             message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
             set(FFVER_OK FALSE)
