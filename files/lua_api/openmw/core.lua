@@ -277,7 +277,7 @@
 -- money:split(50):moveInto(types.Container.content(cont))
 
 ---
--- The axis aligned bounding box in local coordinates.
+-- The axis aligned bounding box in world coordinates.
 -- @function [parent=#GameObject] getBoundingBox
 -- @param self
 -- @return openmw.util#Box

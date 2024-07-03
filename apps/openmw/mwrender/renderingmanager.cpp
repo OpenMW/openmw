@@ -1659,24 +1659,32 @@ namespace MWRender
 
     osg::BoundingBox RenderingManager::getCullSafeBoundingBox(const MWWorld::Ptr& ptr) const
     {
-        const std::string model = ptr.getClass().getCorrectedModel(ptr);
-        if (model.empty())
-            return {};
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> rootNode = ptr.getRefData().getBaseNode();
 
-        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> rootNode = new SceneUtil::PositionAttitudeTransform;
-        // Hack even used by osg internally, osg's NodeVisitor won't accept const qualified nodes
-        rootNode->addChild(const_cast<osg::Node*>(mResourceSystem->getSceneManager()->getTemplate(model).get()));
-
-        const float refScale = ptr.getCellRef().getScale();
-        rootNode->setScale({ refScale, refScale, refScale });
-        rootNode->setPosition(osg::Vec3(0, 0, 0));
-
-        osg::ref_ptr<Animation> animation = nullptr;
-
-        if (ptr.getClass().isNpc())
+        // Recalculate bounds on the ptr's template when the object is not loaded or is loaded but paged
+        MWWorld::Scene* worldScene = MWBase::Environment::get().getWorldScene();
+        if (!rootNode || worldScene->isPagedRef(ptr))
         {
-            rootNode->setNodeMask(Mask_Actor);
-            animation = new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(rootNode), mResourceSystem);
+            const std::string model = ptr.getClass().getCorrectedModel(ptr);
+
+            if (model.empty())
+                return {};
+
+            rootNode = new SceneUtil::PositionAttitudeTransform;
+            // Hack even used by osg internally, osg's NodeVisitor won't accept const qualified nodes
+            rootNode->addChild(const_cast<osg::Node*>(mResourceSystem->getSceneManager()->getTemplate(model).get()));
+
+            const float refScale = ptr.getCellRef().getScale();
+            rootNode->setScale({ refScale, refScale, refScale });
+            rootNode->setPosition(ptr.getCellRef().getPosition().asVec3());
+
+            osg::ref_ptr<Animation> animation = nullptr;
+
+            if (ptr.getClass().isNpc())
+            {
+                rootNode->setNodeMask(Mask_Actor);
+                animation = new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(rootNode), mResourceSystem);
+            }
         }
 
         SceneUtil::CullSafeBoundsVisitor computeBounds;
