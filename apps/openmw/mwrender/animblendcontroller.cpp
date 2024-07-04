@@ -326,7 +326,16 @@ namespace MWRender
                 {
                     const osg::Quat rotate = rotateController->getRotate();
                     const osg::Vec3f offset = rotateController->getOffset();
-                    const osg::Quat worldOrient = rotateController->getWorldOrientation(node) * rotate.inverse();
+
+                    osg::NodePathList nodepaths = node->getParentalNodePaths(rotateController->getRelativeTo());
+                    osg::Quat worldOrient;
+                    if (!nodepaths.empty())
+                    {
+                        osg::Matrixf worldMat = osg::computeLocalToWorld(nodepaths[0]);
+                        worldOrient = worldMat.getRotate();
+                    }
+
+                    worldOrient = worldOrient * rotate.inverse();
                     const osg::Quat worldOrientInverse = worldOrient.inverse();
 
                     mBlendStartTrans -= worldOrientInverse * offset;
