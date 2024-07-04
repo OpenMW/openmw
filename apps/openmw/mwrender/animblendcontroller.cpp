@@ -1,4 +1,5 @@
 #include "animblendcontroller.hpp"
+#include "rotatecontroller.hpp"
 
 #include <components/debug/debuglog.hpp>
 
@@ -308,10 +309,31 @@ namespace MWRender
         {
             mBlendTrigger = false;
             mBlendStartTime = time;
-            // Nif mRotation is used here because it's unaffected by the side-effects of RotationController
+
+            // Nif mRotationScale is used here because it's unaffected by the side-effects of RotationController
             mBlendStartRot = node->mRotationScale.toOsgMatrix().getRotate();
             mBlendStartTrans = node->getMatrix().getTrans();
             mBlendStartScale = node->mScale;
+
+            // Subtract any rotate controller's offset from start transform (if it appears after this callback)
+            // this is required otherwise the blend start will be with an offset, then offset could be applied again
+            // fixes an issue with camera jumping during first person sneak jumping camera
+            osg::Callback* updateCb = node->getUpdateCallback()->getNestedCallback();
+            while (updateCb)
+            {
+                MWRender::RotateController* rotateController = dynamic_cast<MWRender::RotateController*>(updateCb);
+                if (rotateController)
+                {
+                    const osg::Quat rotate = rotateController->getRotate();
+                    const osg::Vec3f offset = rotateController->getOffset();
+                    const osg::Quat worldOrient = rotateController->getWorldOrientation(node) * rotate.inverse();
+                    const osg::Quat worldOrientInverse = worldOrient.inverse();
+
+                    mBlendStartTrans -= worldOrientInverse * offset;
+                }
+
+                updateCb = updateCb->getNestedCallback();
+            }
         }
 
         calculateInterpFactor(time);
