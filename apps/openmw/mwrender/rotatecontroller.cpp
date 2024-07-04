@@ -52,6 +52,7 @@ namespace MWRender
 
         osg::Quat orient = worldOrient * mRotate * worldOrientInverse * matrix.getRotate();
         matrix.setRotate(orient);
+        matrix.setTrans(matrix.getTrans() + worldOrientInverse * mOffset);
 
         matrix *= osg::Matrix::scale(worldScale);
 
