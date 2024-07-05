@@ -212,7 +212,7 @@ void CSVWorld::ScriptSubView::useHint(const std::string& hint)
     if (hint.empty())
         return;
 
-    unsigned line = 0, column = 0;
+    int line = 0, column = 0;
     char c;
     std::istringstream stream(hint.c_str() + 1);
     switch (hint[0])
@@ -222,8 +222,8 @@ void CSVWorld::ScriptSubView::useHint(const std::string& hint)
         {
             QModelIndex index = mModel->getModelIndex(getUniversalId().getId(), mColumn);
             QString source = mModel->data(index).toString();
-            unsigned stringSize = source.length();
-            unsigned pos, dummy;
+            int stringSize = static_cast<int>(source.length());
+            int pos, dummy;
             if (!(stream >> c >> dummy >> pos))
                 return;
 
@@ -234,7 +234,7 @@ void CSVWorld::ScriptSubView::useHint(const std::string& hint)
                 pos = stringSize;
             }
 
-            for (unsigned i = 0; i <= pos; ++i)
+            for (int i = 0; i <= pos; ++i)
             {
                 if (source[i] == '\n')
                 {

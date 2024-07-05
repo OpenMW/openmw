@@ -36,7 +36,12 @@ namespace Misc
             return QIcon();
 
         QFile iconFile(fileName);
-        iconFile.open(QIODevice::ReadOnly);
+        if (!iconFile.open(QIODevice::ReadOnly))
+        {
+            qDebug() << "Failed to open icon file:" << fileName;
+            return QIcon();
+        }
+
         auto content = iconFile.readAll();
         if (!content.startsWith("<?xml"))
             return QIcon(fileName);

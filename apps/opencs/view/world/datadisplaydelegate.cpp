@@ -71,7 +71,7 @@ bool CSVWorld::DataDisplayDelegate::eventFilter(QObject* target, QEvent* event)
         QColor themeColor = QApplication::palette().text().color();
         if (themeColor != mPixmapsColor)
         {
-            mPixmapsColor = themeColor;
+            mPixmapsColor = std::move(themeColor);
 
             buildPixmaps();
         }
