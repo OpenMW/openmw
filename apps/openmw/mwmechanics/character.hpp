@@ -247,6 +247,8 @@ namespace MWMechanics
         bool getAttackingOrSpell() const;
         void setAttackingOrSpell(bool attackingOrSpell) const;
 
+        std::string_view getDesiredAttackType() const;
+
         void prepareHit();
 
     public:
