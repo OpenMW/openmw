@@ -1364,4 +1364,28 @@ namespace
 
         EXPECT_EQ(*result, expected);
     }
+
+    TEST_F(TestBulletNifLoader, dont_assign_invalid_bounding_box_extents)
+    {
+        copy(mTransform, mNiTriShape.mTransform);
+        mNiTriShape.mTransform.mScale = 10;
+        mNiTriShape.mParents.push_back(&mNiNode);
+
+        mNiTriShape2.mName = "Bounding Box";
+        mNiTriShape2.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNiTriShape2.mBounds.mBox.mExtents = osg::Vec3f(-1, -2, -3);
+        mNiTriShape2.mParents.push_back(&mNiNode);
+
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiTriShape2) };
+
+        Nif::NIFFile file("test.nif");
+        file.mRoots.push_back(&mNiNode);
+
+        const auto result = mLoader.load(file);
+
+        const bool extentsUnassigned
+            = std::ranges::all_of(result->mCollisionBox.mExtents._v, [](float extent) { return extent == 0.f; });
+
+        EXPECT_EQ(extentsUnassigned, true);
+    }
 }
