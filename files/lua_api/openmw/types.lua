@@ -750,7 +750,7 @@
 -- @return #boolean
 
 ---
--- Get this item's current enchantment charge.
+-- (DEPRECATED, use itemData(item).enchantmentCharge) Get this item's current enchantment charge.
 -- @function [parent=#Item] getEnchantmentCharge
 -- @param openmw.core#GameObject item
 -- @return #number The charge remaining. `nil` if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of `nil`.
@@ -763,7 +763,7 @@
 -- @return #boolean
 
 ---
--- Set this item's enchantment charge.
+-- (DEPRECATED, use itemData(item).enchantmentCharge) Set this item's enchantment charge.
 -- @function [parent=#Item] setEnchantmentCharge
 -- @param openmw.core#GameObject item
 -- @param #number charge Can be `nil` to reset the unused state / full
@@ -777,14 +777,16 @@
 -- @return #boolean
 
 ---
--- Set of properties that differentiates one item from another of the same record type.
+-- Set of properties that differentiates one item from another of the same record type; can be used by any script, but only global and self scripts can change values.
 -- @function [parent=#Item] itemData
 -- @param openmw.core#GameObject item
 -- @return #ItemData
 
 ---
 -- @type ItemData
--- @field #number condition The item's current condition. Time remaining for lights. Uses left for lockpicks and probes. Current health for weapons and armor.
+-- @field #number condition The item's current condition. Time remaining for lights. Uses left for repairs, lockpicks and probes. Current health for weapons and armor.
+-- @field #number enchantmentCharge The item's current enchantment charge. Unenchanted items will always return a value of `nil`. Setting this to `nil` will reset the charge of the item.
+-- @field #string soul The recordId of the item's current soul. Items without soul will always return a value of `nil`. Setting this to `nil` will remove the soul from the item.
 
 --------------------------------------------------------------------------------
 -- @{#Creature} functions
@@ -1689,7 +1691,7 @@
 -- @return #MiscellaneousRecord
 
 ---
--- Returns the read-only soul of a miscellaneous item
+-- (DEPRECATED, use itemData(item).soul) Returns the read-only soul of a miscellaneous item
 -- @function [parent=#Miscellaneous] getSoul
 -- @param openmw.core#GameObject object
 -- @return #string
@@ -1702,7 +1704,7 @@
 -- @return #MiscellaneousRecord A strongly typed Miscellaneous record.
 
 ---
--- Sets the soul of a miscellaneous item, intended for soul gem objects; Must be used in a global script.
+-- (DEPRECATED, use itemData(item).soul) Sets the soul of a miscellaneous item, intended for soul gem objects; Must be used in a global script.
 -- @function [parent=#Miscellaneous] setSoul
 -- @param openmw.core#GameObject object
 -- @param #string soulId Record ID for the soul of the creature to use
