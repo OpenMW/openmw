@@ -110,8 +110,11 @@ namespace MWLua
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
         record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
-        record["enchant"]
-            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mEnchant.serializeText(); });
+        record["enchant"] = sol::readonly_property([](const ESM::Book& rec) -> sol::optional<std::string> {
+            if (rec.mEnchant.empty())
+                return sol::nullopt;
+            return rec.mEnchant.serializeText();
+        });
         record["isScroll"] = sol::readonly_property([](const ESM::Book& rec) -> bool { return rec.mData.mIsScroll; });
         record["value"] = sol::readonly_property([](const ESM::Book& rec) -> int { return rec.mData.mValue; });
         record["weight"] = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mWeight; });
