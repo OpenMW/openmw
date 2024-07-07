@@ -2172,8 +2172,8 @@
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this door (can be empty)
--- @field #string openSound VFS path to the sound of opening
--- @field #string closeSound VFS path to the sound of closing
+-- @field #string openSound The sound id for door opening
+-- @field #string closeSound The sound id for door closing
 
 
 
