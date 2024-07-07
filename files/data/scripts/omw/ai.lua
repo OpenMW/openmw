@@ -1,5 +1,6 @@
 local self = require('openmw.self')
 local interfaces = require('openmw.interfaces')
+local types = require('openmw.types')
 local util = require('openmw.util')
 
 local function startPackage(args)
@@ -10,6 +11,7 @@ local function startPackage(args)
         self:_startAiCombat(args.target, cancelOther)
     elseif args.type == 'Pursue' then
         if not args.target then error("target required") end
+        if not types.Player.objectIsInstance(args.target) then error("target must be a player") end
         self:_startAiPursue(args.target, cancelOther)
     elseif args.type == 'Follow' then
         if not args.target then error("target required") end
