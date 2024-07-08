@@ -245,7 +245,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                if (!mWindowManager->containsMode(MWGui::GM_MainMenu))
+                if (!mWindowManager->containsMode(MWGui::GM_MainMenu) || !paused)
                 {
                     if (mWorld->getScriptsEnabled())
                     {
