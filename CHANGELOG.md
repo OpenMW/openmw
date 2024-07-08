@@ -184,6 +184,7 @@
     Bug #8005: F3 stats bars are sorted not according to their place in the timeline
     Bug #8018: Potion effects should never explode and always apply on self
     Bug #8021: Player's scale doesn't reset when starting a new game
+    Bug #8064: Lua move360 script doesn't respect the enableZoom/disableZoom Camera interface setting
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
