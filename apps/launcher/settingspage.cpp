@@ -319,7 +319,6 @@ bool Launcher::SettingsPage::loadSettings()
     // Miscellaneous
     {
         // Saves
-        loadSettingBool(Settings::saves().mTimeplayed, *timePlayedCheckbox);
         loadSettingInt(Settings::saves().mMaxQuicksaves, *maximumQuicksavesComboBox);
 
         // Other Settings
@@ -512,7 +511,6 @@ void Launcher::SettingsPage::saveSettings()
     // Miscellaneous
     {
         // Saves Settings
-        saveSettingBool(*timePlayedCheckbox, Settings::saves().mTimeplayed);
         saveSettingInt(*maximumQuicksavesComboBox, Settings::saves().mMaxQuicksaves);
 
         // Other Settings
