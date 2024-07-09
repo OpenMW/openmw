@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadligh.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -96,8 +97,8 @@ namespace MWLua
         });
         record["sound"]
             = sol::readonly_property([](const ESM::Light& rec) -> std::string { return rec.mSound.serializeText(); });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Light& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Light& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
         record["weight"] = sol::readonly_property([](const ESM::Light& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Light& rec) -> int { return rec.mData.mValue; });
         record["duration"] = sol::readonly_property([](const ESM::Light& rec) -> int { return rec.mData.mTime; });

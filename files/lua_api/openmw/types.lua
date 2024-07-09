@@ -837,7 +837,7 @@
 -- @field #string name
 -- @field #string baseCreature Record id of a base creature, which was modified to create this one
 -- @field #string model VFS path to the creature's model
--- @field #string mwscript
+-- @field #string mwscript MWScript on this creature (can be nil)
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
 -- @field #number baseGold The base barter gold of the creature
@@ -1117,7 +1117,7 @@
 -- @field #string race
 -- @field #string class Name of the NPC's class (e. g. Acrobat)
 -- @field #string model Path to the model associated with this NPC, used for animations.
--- @field #string mwscript MWScript that is attached to this NPC
+-- @field #string mwscript MWScript on this NPC (can be nil)
 -- @field #string hair Path to the hair body part model
 -- @field #string head Path to the head body part model
 -- @field #number baseGold The base barter gold of the NPC
@@ -1327,7 +1327,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this armor (can be empty)
+-- @field #string mwscript MWScript on this armor (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #string enchant The enchantment ID of this armor (can be nil)
 -- @field #number weight
@@ -1416,7 +1416,7 @@
 -- @field #string id The record ID of the book
 -- @field #string name Name of the book
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this book (can be empty)
+-- @field #string mwscript MWScript on this book (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #string enchant The enchantment ID of this book (can be nil)
 -- @field #string text The text content of the book
@@ -1494,7 +1494,7 @@
 -- @field #string id Record id
 -- @field #string name Name of the clothing
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this clothing (can be empty)
+-- @field #string mwscript MWScript on this clothing (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #string enchant The enchantment ID of this clothing (can be nil)
 -- @field #number weight
@@ -1537,7 +1537,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this potion (can be empty)
+-- @field #string mwscript MWScript on this potion (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
@@ -1643,7 +1643,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this light (can be empty)
+-- @field #string mwscript MWScript on this light (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #string sound VFS path to the sound
 -- @field #number weight
@@ -1714,7 +1714,7 @@
 -- @field #string id The record ID of the miscellaneous item
 -- @field #string name The name of the miscellaneous item
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this miscellaneous item (can be empty)
+-- @field #string mwscript MWScript on this miscellaneous item (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
@@ -1759,7 +1759,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this potion (can be empty)
+-- @field #string mwscript MWScript on this potion (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
@@ -1819,7 +1819,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this weapon (can be empty)
+-- @field #string mwscript MWScript on this weapon (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #string enchant The enchantment ID of this weapon (can be nil)
 -- @field #boolean isMagical
@@ -1888,7 +1888,7 @@
 -- @field #string id The record ID of the apparatus
 -- @field #string name The name of the apparatus
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this apparatus (can be empty)
+-- @field #string mwscript MWScript on this apparatus (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number type The type of apparatus. See @{#Apparatus.TYPE}
 -- @field #number weight
@@ -1927,7 +1927,7 @@
 -- @field #string id The record ID of the lockpick
 -- @field #string name The name of the lockpick
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this lockpick (can be empty)
+-- @field #string mwscript MWScript on this lockpick (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number maxCondition The maximum number of uses of this lockpick
 -- @field #number weight
@@ -1966,7 +1966,7 @@
 -- @field #string id The record ID of the probe
 -- @field #string name The name of the probe
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this probe (can be empty)
+-- @field #string mwscript MWScript on this probe (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number maxCondition The maximum number of uses of this probe
 -- @field #number weight
@@ -2005,7 +2005,7 @@
 -- @field #string id The record ID of the repair tool
 -- @field #string name The name of the repair tool
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this repair tool (can be empty)
+-- @field #string mwscript MWScript on this repair tool (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number maxCondition The maximum number of uses of this repair tool
 -- @field #number weight
@@ -2042,7 +2042,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this activator (can be empty)
+-- @field #string mwscript MWScript on this activator (can be nil)
 
 ---
 -- Creates a @{#ActivatorRecord} without adding it to the world database.
@@ -2109,7 +2109,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this container (can be empty)
+-- @field #string mwscript MWScript on this container (can be nil)
 -- @field #number weight capacity of this container
 -- @field #boolean isOrganic Whether items can be placed in the container
 -- @field #boolean isRespawning Whether the container respawns its contents
@@ -2171,10 +2171,9 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this door (can be empty)
+-- @field #string mwscript MWScript on this door (can be nil)
 -- @field #string openSound The sound id for door opening
 -- @field #string closeSound The sound id for door closing
-
 
 
 --- Functions for @{#Static} objects
