@@ -2,6 +2,11 @@
 #define COMPONENTS_LUA_UTIL_H
 
 #include <cstdint>
+#include <string>
+
+#include <sol/sol.hpp>
+
+#include <components/esm/refid.hpp>
 
 namespace LuaUtil
 {
@@ -14,6 +19,13 @@ namespace LuaUtil
     constexpr inline std::int64_t toLuaIndex(std::int64_t i)
     {
         return i + 1;
+    }
+
+    inline sol::optional<std::string> serializeRefId(ESM::RefId id)
+    {
+        if (id.empty())
+            return sol::nullopt;
+        return id.serializeText();
     }
 }
 
