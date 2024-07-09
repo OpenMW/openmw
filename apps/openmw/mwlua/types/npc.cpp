@@ -85,8 +85,8 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.serializeText(); });
         record["class"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass.serializeText(); });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
         record["hair"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.serializeText(); });
         record["baseDisposition"]
