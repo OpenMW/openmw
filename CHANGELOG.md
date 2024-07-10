@@ -249,6 +249,7 @@
     Feature #7971: Make save's Time Played value display hours instead of days
     Feature #7985: Support dark mode on Windows
     Feature #8034: (Lua) Containers should have respawning/organic flags
+    Feature #8067: Support Game Mode on macOS
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
