@@ -349,6 +349,7 @@
 
 ---
 -- @type ActiveSpellEffect
+-- @field #number index Index of this effect within the original list of @{#MagicEffectWithParams} of the spell/enchantment/potion this effect came from.
 -- @field #string affectedSkill Optional skill ID
 -- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Magic effect id
@@ -729,7 +730,6 @@
 -- @field #number magnitude current magnitude of the effect. Will be set to 0 when effect is removed or expires.
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
--- @field #number index Index of this effect within the original list of @{#MagicEffectWithParams} of the spell/enchantment/potion this effect came from.
 
 --- @{#Sound}: Sounds and Speech
 -- @field [parent=#core] #Sound sound
