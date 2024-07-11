@@ -85,7 +85,8 @@ namespace NifBullet
     {
         if (Misc::StringUtils::ciEqual(node.mName, "Bounding Box"))
         {
-            if (node.mBounds.mType == Nif::BoundingVolume::Type::BOX_BV)
+            if (node.mBounds.mType == Nif::BoundingVolume::Type::BOX_BV
+                && std::ranges::all_of(node.mBounds.mBox.mExtents._v, [](float extent) { return extent > 0.f; }))
             {
                 mShape->mCollisionBox.mExtents = node.mBounds.mBox.mExtents;
                 mShape->mCollisionBox.mCenter = node.mBounds.mBox.mCenter;
