@@ -101,6 +101,24 @@ namespace MWWorld
                 return Cell(*cell);
             return std::nullopt;
         }
+
+        CellStore* getOrCreateExterior(const ESM::ExteriorCellLocation& location,
+            std::map<ESM::ExteriorCellLocation, MWWorld::CellStore*>& exteriors, ESMStore& store,
+            ESM::ReadersCache& readers, std::unordered_map<ESM::RefId, CellStore>& cells, bool triggerEvent)
+        {
+            if (const auto it = exteriors.find(location); it != exteriors.end())
+            {
+                assert(it->second != nullptr);
+                return it->second;
+            }
+            auto [cell, created] = createExteriorCell(location, store);
+            const ESM::RefId id = cell.getId();
+            CellStore* const cellStore = &emplaceCellStore(id, std::move(cell), store, readers, cells);
+            exteriors.emplace(location, cellStore);
+            if (created && triggerEvent)
+                MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
+            return cellStore;
+        }
     }
 }
 
@@ -178,23 +196,7 @@ namespace MWWorld
 {
     CellStore& WorldModel::getExterior(ESM::ExteriorCellLocation location, bool forceLoad) const
     {
-        const auto it = mExteriors.find(location);
-        CellStore* cellStore = nullptr;
-
-        if (it == mExteriors.end())
-        {
-            auto [cell, created] = createExteriorCell(location, mStore);
-            const ESM::RefId id = cell.getId();
-            cellStore = &emplaceCellStore(id, std::move(cell), mStore, mReaders, mCells);
-            mExteriors.emplace(location, cellStore);
-            if (created)
-                MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
-        }
-        else
-        {
-            assert(it->second != nullptr);
-            cellStore = it->second;
-        }
+        CellStore* cellStore = getOrCreateExterior(location, mExteriors, mStore, mReaders, mCells, true);
 
         if (forceLoad && cellStore->getState() != CellStore::State_Loaded)
             cellStore->load();
@@ -447,17 +449,26 @@ void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progr
         }
 }
 
-struct GetCellStoreCallback : public MWWorld::CellStore::GetCellStoreCallback
+struct MWWorld::WorldModel::GetCellStoreCallback : public CellStore::GetCellStoreCallback
 {
 public:
-    GetCellStoreCallback(MWWorld::WorldModel& worldModel)
+    GetCellStoreCallback(WorldModel& worldModel)
         : mWorldModel(worldModel)
     {
     }
 
-    MWWorld::WorldModel& mWorldModel;
+    WorldModel& mWorldModel;
 
-    MWWorld::CellStore* getCellStore(const ESM::RefId& cellId) override { return mWorldModel.findCell(cellId); }
+    CellStore* getCellStore(const ESM::RefId& cellId) override
+    {
+        if (const auto* exteriorId = cellId.getIf<ESM::ESM3ExteriorCellRefId>())
+        {
+            ESM::ExteriorCellLocation location(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId);
+            return getOrCreateExterior(
+                location, mWorldModel.mExteriors, mWorldModel.mStore, mWorldModel.mReaders, mWorldModel.mCells, false);
+        }
+        return mWorldModel.findCell(cellId);
+    }
 };
 
 bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type)
@@ -467,7 +478,10 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type)
         ESM::CellState state;
         state.mId = reader.getCellId();
 
-        CellStore* const cellStore = findCell(state.mId);
+        GetCellStoreCallback callback(*this);
+
+        CellStore* const cellStore = callback.getCellStore(state.mId);
+
         if (cellStore == nullptr)
         {
             Log(Debug::Warning) << "Dropping state for cell " << state.mId << " (cell no longer exists)";
@@ -483,8 +497,6 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type)
 
         if (cellStore->getState() != CellStore::State_Loaded)
             cellStore->load();
-
-        GetCellStoreCallback callback(*this);
 
         cellStore->readReferences(reader, &callback);
 
