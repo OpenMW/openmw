@@ -413,18 +413,15 @@ namespace Resource
                 return;
 
             std::vector<std::pair<std::string, std::string>> renameList;
-            for (const auto& influence : *vertexInfluenceMap)
+            for (const auto& [oldBoneName, _] : *vertexInfluenceMap)
             {
-                const std::string& oldBoneName = influence.first;
-                std::string newBoneName = Misc::StringUtils::underscoresToSpaces(oldBoneName);
+                const std::string newBoneName = Misc::StringUtils::underscoresToSpaces(oldBoneName);
                 if (newBoneName != oldBoneName)
                     renameList.emplace_back(oldBoneName, newBoneName);
             }
 
-            for (const auto& rename : renameList)
+            for (const auto& [oldName, newName] : renameList)
             {
-                const std::string& oldName = rename.first;
-                const std::string& newName = rename.second;
                 if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end())
                     (*vertexInfluenceMap)[newName] = std::move((*vertexInfluenceMap)[oldName]);
                 vertexInfluenceMap->erase(oldName);
@@ -433,16 +430,13 @@ namespace Resource
 
         void renameAnimationChannelTargets(osgAnimation::BasicAnimationManager& animManager)
         {
-            for (const auto& animation : animManager.getAnimationList())
+            for (const osgAnimation::Animation* animation : animManager.getAnimationList())
             {
                 if (animation)
                 {
-                    auto& channels = animation->getChannels();
-                    for (auto& channel : channels)
-                    {
-                        std::string newTargetName = Misc::StringUtils::underscoresToSpaces(channel->getTargetName());
-                        channel->setTargetName(newTargetName);
-                    }
+                    const osgAnimation::ChannelList& channels = animation->getChannels();
+                    for (osgAnimation::Channel* channel : channels)
+                        channel->setTargetName(Misc::StringUtils::underscoresToSpaces(channel->getTargetName()));
                 }
             }
         }
@@ -696,7 +690,7 @@ namespace Resource
             node->accept(rigFinder);
 
             // If a collada file with rigs, we should replace underscores with spaces
-            if (isColladaFile && rigFinder.mFoundNodes.size() > 0)
+            if (isColladaFile && !rigFinder.mFoundNodes.empty())
             {
                 ReplaceAnimationUnderscoresVisitor renamingVisitor;
                 node->accept(renamingVisitor);
