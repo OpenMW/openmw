@@ -86,12 +86,6 @@ namespace Resource
         {
             if (animation)
             {
-                //"Default" is osg dae plugin's default naming scheme for unnamed animations
-                if (animation->getName() == "Default")
-                {
-                    animation->setName(std::string("idle"));
-                }
-
                 osg::ref_ptr<Resource::Animation> mergedAnimationTrack = new Resource::Animation;
                 const std::string animationName = animation->getName();
                 mergedAnimationTrack->setName(animationName);
@@ -99,9 +93,6 @@ namespace Resource
                 const osgAnimation::ChannelList& channels = animation->getChannels();
                 for (const auto& channel : channels)
                 {
-                    // Replace channel target name to match the renamed bones/transforms
-                    channel->setTargetName(Misc::StringUtils::underscoresToSpaces(channel->getTargetName()));
-
                     if (name == "Bip01 R Clavicle")
                     {
                         if (!belongsToRightUpperExtremity(channel->getTargetName()))

@@ -9,9 +9,9 @@
 #include <osg/Node>
 #include <osg/UserDataContainer>
 
+#include <osgAnimation/BasicAnimationManager>
 #include <osgAnimation/Bone>
 #include <osgAnimation/RigGeometry>
-#include <osgAnimation/Skeleton>
 #include <osgAnimation/UpdateBone>
 
 #include <osgParticle/ParticleSystem>
@@ -63,7 +63,6 @@
 
 namespace
 {
-
     class InitWorldSpaceParticlesCallback
         : public SceneUtil::NodeCallback<InitWorldSpaceParticlesCallback, osgParticle::ParticleSystem*>
     {
@@ -272,11 +271,6 @@ namespace Resource
 
         void apply(osg::Node& node) override
         {
-            // If an osgAnimation bone/transform, ensure underscores in name are replaced with spaces
-            // this is for compatibility reasons
-            if (dynamic_cast<osgAnimation::Bone*>(&node))
-                node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
-
             if (osg::StateSet* stateset = node.getStateSet())
             {
                 if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
@@ -362,50 +356,99 @@ namespace Resource
         std::vector<osg::ref_ptr<SceneUtil::RigGeometryHolder>> mRigGeometryHolders;
     };
 
-    void updateVertexInfluenceMap(osgAnimation::RigGeometry& rig)
-    {
-        osgAnimation::VertexInfluenceMap* vertexInfluenceMap = rig.getInfluenceMap();
-        if (!vertexInfluenceMap)
-            return;
-
-        std::vector<std::string> renameList;
-        for (const auto& [boneName, unused] : *vertexInfluenceMap)
-        {
-            if (boneName.find('_') != std::string::npos)
-                renameList.push_back(boneName);
-        }
-
-        for (const std::string& oldName : renameList)
-        {
-            const std::string newName = Misc::StringUtils::underscoresToSpaces(oldName);
-            if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end())
-                (*vertexInfluenceMap)[newName] = std::move((*vertexInfluenceMap)[oldName]);
-            vertexInfluenceMap->erase(oldName);
-        }
-    }
-
-    class RenameAnimCallbacksVisitor : public osg::NodeVisitor
+    class ReplaceAnimationUnderscoresVisitor : public osg::NodeVisitor
     {
     public:
-        RenameAnimCallbacksVisitor()
+        ReplaceAnimationUnderscoresVisitor()
             : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
         {
         }
 
-        void apply(osg::MatrixTransform& node) override
+        void apply(osg::Node& node) override
         {
-            // osgAnimation update callback name must match bone name/channel targets
-            osg::Callback* cb = node.getUpdateCallback();
-            while (cb)
-            {
-                auto animCb = dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
-                if (animCb)
-                    animCb->setName(Misc::StringUtils::underscoresToSpaces(animCb->getName()));
+            // NOTE: MUST update the animation manager names first!
+            if (auto* animationManager = dynamic_cast<osgAnimation::BasicAnimationManager*>(node.getUpdateCallback()))
+                renameAnimationChannelTargets(*animationManager);
 
-                cb = cb->getNestedCallback();
+            // Then, any applicable node names
+            if (auto* rigGeometry = dynamic_cast<osgAnimation::RigGeometry*>(&node))
+            {
+                renameNode(*rigGeometry);
+                updateVertexInfluenceMap(*rigGeometry);
+            }
+            else if (auto* matrixTransform = dynamic_cast<osg::MatrixTransform*>(&node))
+            {
+                renameNode(*matrixTransform);
+                renameUpdateCallbacks(*matrixTransform);
             }
 
             traverse(node);
+        }
+
+    private:
+        inline void renameNode(osg::Node& node)
+        {
+            node.setName(Misc::StringUtils::underscoresToSpaces(node.getName()));
+        }
+
+        void renameUpdateCallbacks(osg::MatrixTransform& node)
+        {
+            osg::Callback* cb = node.getUpdateCallback();
+            while (cb)
+            {
+                auto* animCb = dynamic_cast<osgAnimation::AnimationUpdateCallback<osg::NodeCallback>*>(cb);
+                if (animCb)
+                {
+                    std::string newAnimCbName = Misc::StringUtils::underscoresToSpaces(animCb->getName());
+                    animCb->setName(newAnimCbName);
+                }
+                cb = cb->getNestedCallback();
+            }
+        }
+
+        void updateVertexInfluenceMap(osgAnimation::RigGeometry& rig)
+        {
+            osgAnimation::VertexInfluenceMap* vertexInfluenceMap = rig.getInfluenceMap();
+            if (!vertexInfluenceMap)
+                return;
+
+            std::vector<std::pair<std::string, std::string>> renameList;
+            for (const auto& influence : *vertexInfluenceMap)
+            {
+                const std::string& oldBoneName = influence.first;
+                std::string newBoneName = Misc::StringUtils::underscoresToSpaces(oldBoneName);
+                if (newBoneName != oldBoneName)
+                    renameList.emplace_back(oldBoneName, newBoneName);
+            }
+
+            for (const auto& rename : renameList)
+            {
+                const std::string& oldName = rename.first;
+                const std::string& newName = rename.second;
+                if (vertexInfluenceMap->find(newName) == vertexInfluenceMap->end())
+                    (*vertexInfluenceMap)[newName] = std::move((*vertexInfluenceMap)[oldName]);
+                vertexInfluenceMap->erase(oldName);
+            }
+        }
+
+        void renameAnimationChannelTargets(osgAnimation::BasicAnimationManager& animManager)
+        {
+            for (const auto& animation : animManager.getAnimationList())
+            {
+                if (animation)
+                {
+                    // "Default" is osg dae plugin's default naming scheme for unnamed animations
+                    if (animation->getName() == "Default")
+                        animation->setName(std::string("idle"));
+
+                    auto& channels = animation->getChannels();
+                    for (auto& channel : channels)
+                    {
+                        std::string newTargetName = Misc::StringUtils::underscoresToSpaces(channel->getTargetName());
+                        channel->setTargetName(newTargetName);
+                    }
+                }
+            }
         }
     };
 
@@ -655,14 +698,19 @@ namespace Resource
             // Recognize and convert osgAnimation::RigGeometry to OpenMW-optimized type
             SceneUtil::FindByClassVisitor rigFinder("RigGeometry");
             node->accept(rigFinder);
+
+            // If a collada file with rigs, we should replace underscores with spaces
+            if (isColladaFile && rigFinder.mFoundNodes.size() > 0)
+            {
+                ReplaceAnimationUnderscoresVisitor renamingVisitor;
+                node->accept(renamingVisitor);
+            }
+
             for (osg::Node* foundRigNode : rigFinder.mFoundNodes)
             {
                 if (foundRigNode->libraryName() == std::string_view("osgAnimation"))
                 {
                     osgAnimation::RigGeometry* foundRigGeometry = static_cast<osgAnimation::RigGeometry*>(foundRigNode);
-
-                    if (isColladaFile)
-                        Resource::updateVertexInfluenceMap(*foundRigGeometry);
 
                     osg::ref_ptr<SceneUtil::RigGeometryHolder> newRig
                         = new SceneUtil::RigGeometryHolder(*foundRigGeometry, osg::CopyOp::DEEP_COPY_ALL);
@@ -685,11 +733,6 @@ namespace Resource
 
                 if (colladaDescriptionVisitor.mSkeleton)
                 {
-                    // Collada bones may have underscores in place of spaces due to a collada limitation
-                    // we should rename the bones and update callbacks here at load time
-                    Resource::RenameAnimCallbacksVisitor renameBoneVisitor;
-                    node->accept(renameBoneVisitor);
-
                     if (osg::Group* group = dynamic_cast<osg::Group*>(node))
                     {
                         group->removeChildren(0, group->getNumChildren());
