@@ -47,6 +47,7 @@
 #include "aifollow.hpp"
 #include "aipursue.hpp"
 #include "aiwander.hpp"
+#include "attacktype.hpp"
 #include "character.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -239,6 +240,23 @@ namespace MWMechanics
 
     namespace
     {
+        std::string_view attackTypeName(AttackType attackType)
+        {
+            switch (attackType)
+            {
+                case AttackType::NoAttack:
+                case AttackType::Any:
+                    return {};
+                case AttackType::Chop:
+                    return "chop";
+                case AttackType::Slash:
+                    return "slash";
+                case AttackType::Thrust:
+                    return "thrust";
+            }
+            throw std::logic_error("Invalid attack type value: " + std::to_string(static_cast<int>(attackType)));
+        }
+
         float getTimeToDestination(const AiPackage& package, const osg::Vec3f& position, float speed, float duration,
             const osg::Vec3f& halfExtents)
         {
@@ -363,7 +381,11 @@ namespace MWMechanics
                 mov.mSpeedFactor = osg::Vec2(controls.mMovement, controls.mSideMovement).length();
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, controls.mRun);
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, controls.mSneak);
-                stats.setAttackingOrSpell((controls.mUse & 1) == 1);
+
+                AttackType attackType = static_cast<AttackType>(controls.mUse);
+                stats.setAttackingOrSpell(attackType != AttackType::NoAttack);
+                stats.setAttackType(attackTypeName(attackType));
+
                 controls.mChanged = false;
             }
             // For the player we don't need to copy these values to Lua because mwinput doesn't change them.

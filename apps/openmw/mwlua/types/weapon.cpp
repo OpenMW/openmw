@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -132,9 +133,9 @@ namespace MWLua
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
         record["enchant"] = sol::readonly_property(
-            [](const ESM::Weapon& rec) -> std::string { return rec.mEnchant.serializeText(); });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mScript.serializeText(); });
+            [](const ESM::Weapon& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mEnchant); });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Weapon& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
         record["isMagical"] = sol::readonly_property(
             [](const ESM::Weapon& rec) -> bool { return rec.mData.mFlags & ESM::Weapon::Magical; });
         record["isSilver"] = sol::readonly_property(

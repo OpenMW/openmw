@@ -37,7 +37,15 @@
 -- @field [parent=#ActorControls] #boolean run true - run, false - walk
 -- @field [parent=#ActorControls] #boolean sneak If true - sneak
 -- @field [parent=#ActorControls] #boolean jump If true - initiate a jump
--- @field [parent=#ActorControls] #number use if 1 - activates the readied weapon/spell. For weapons, keeping at 1 will charge the attack until set to 0.
+-- @field [parent=#ActorControls] #ATTACK_TYPE use Activates the readied weapon/spell according to a provided value. For weapons, keeping this value modified will charge the attack until set to @{#ATTACK_TYPE.NoAttack}. If an @{#ATTACK_TYPE} not appropriate for a currently equipped weapon provided - an appropriate @{#ATTACK_TYPE} will be used instead.
+
+---
+-- @type ATTACK_TYPE
+-- @field #number NoAttack
+-- @field #number Any
+-- @field #number Chop
+-- @field #number Swing
+-- @field #number Thrust
 
 ---
 -- Enables or disables standard AI (enabled by default).

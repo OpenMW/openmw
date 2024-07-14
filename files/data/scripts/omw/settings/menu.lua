@@ -448,7 +448,6 @@ local function resetPlayerGroups()
             if not menuGroups[groupKey] then
                 if groupElements[pageKey][groupKey] then
                     groupElements[pageKey][groupKey]:destroy()
-                    print(string.format('destroyed group element %s %s', pageKey, groupKey))
                     groupElements[pageKey][groupKey] = nil
                 end
                 page[groupKey] = nil

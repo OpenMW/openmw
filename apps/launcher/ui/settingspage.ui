@@ -1431,16 +1431,6 @@
          </property>
          <layout class="QVBoxLayout" name="savesGroupVerticalLayout">
           <item>
-           <widget class="QCheckBox" name="timePlayedCheckbox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting determines whether the amount of the time the player has spent playing will be displayed for each saved game in the Load menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Add &quot;Time Played&quot; to Saves</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <layout class="QHBoxLayout" name="maximumQuicksavesLayout">
             <item>
              <widget class="QLabel" name="maximumQuicksavesLabel">

@@ -97,6 +97,7 @@ namespace MWMechanics
     protected:
         int mLevel;
         bool mAttackingOrSpell;
+        std::string mAttackType;
 
     public:
         CreatureStats();
@@ -130,6 +131,7 @@ namespace MWMechanics
         const MagicEffects& getMagicEffects() const;
 
         bool getAttackingOrSpell() const { return mAttackingOrSpell; }
+        std::string_view getAttackType() const { return mAttackType; }
 
         int getLevel() const;
 
@@ -155,6 +157,8 @@ namespace MWMechanics
         void modifyMagicEffects(const MagicEffects& effects);
 
         void setAttackingOrSpell(bool attackingOrSpell) { mAttackingOrSpell = attackingOrSpell; }
+
+        void setAttackType(std::string_view attackType) { mAttackType = attackType; }
 
         void setLevel(int level);
 

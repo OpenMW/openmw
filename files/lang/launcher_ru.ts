@@ -1141,14 +1141,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Сохранения</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting determines whether the amount of the time the player has spent playing will be displayed for each saved game in the Load menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта настройка определяет, будет ли отображаться время с начала новой игры для выбранного сохранения в меню загрузки.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Add &quot;Time Played&quot; to Saves</source>
-        <translation>Выводить &quot;Время в игре&quot; в сохранениях</translation>
-    </message>
-    <message>
         <source>JPG</source>
         <translation>JPG</translation>
     </message>

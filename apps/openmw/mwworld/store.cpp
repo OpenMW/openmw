@@ -630,6 +630,12 @@ namespace MWWorld
     }
     void Store<ESM::Cell>::clearDynamic()
     {
+        for (const auto& [_, cell] : mDynamicExt)
+            mCells.erase(cell->mId);
+        mDynamicExt.clear();
+        for (const auto& [_, cell] : mDynamicInt)
+            mCells.erase(cell->mId);
+        mDynamicInt.clear();
         setUp();
     }
 

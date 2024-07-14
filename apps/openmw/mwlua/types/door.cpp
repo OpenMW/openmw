@@ -2,6 +2,7 @@
 
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm4/loaddoor.hpp>
+#include <components/lua/util.hpp>
 #include <components/lua/utilpackage.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -64,8 +65,8 @@ namespace MWLua
         record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property(
             [](const ESM::Door& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Door& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
         record["openSound"] = sol::readonly_property(
             [](const ESM::Door& rec) -> std::string { return rec.mOpenSound.serializeText(); });
         record["closeSound"] = sol::readonly_property(

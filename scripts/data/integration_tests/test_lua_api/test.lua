@@ -44,7 +44,17 @@ local function testTeleport()
     testing.expectEqualWithDelta(player.position.x, 100, 1, 'incorrect position after teleporting')
     testing.expectEqualWithDelta(player.position.y, 50, 1, 'incorrect position after teleporting')
     testing.expectEqualWithDelta(player.position.z, 500, 1, 'incorrect position after teleporting')
-    testing.expectEqualWithDelta(player.rotation:getYaw(), math.rad(90), 0.05, 'incorrect rotation after teleporting')
+    testing.expectEqualWithDelta(player.rotation:getYaw(), math.rad(90), 0.05, 'incorrect yaw rotation after teleporting')
+    testing.expectEqualWithDelta(player.rotation:getPitch(), math.rad(0), 0.05, 'incorrect pitch rotation after teleporting')
+
+    local rotationX1, rotationZ1 = player.rotation:getAnglesXZ()
+    testing.expectEqualWithDelta(rotationX1, math.rad(0), 0.05, 'incorrect x rotation from getAnglesXZ after teleporting')
+    testing.expectEqualWithDelta(rotationZ1, math.rad(90), 0.05, 'incorrect z rotation from getAnglesXZ after teleporting')
+
+    local rotationZ2, rotationY2, rotationX2 = player.rotation:getAnglesZYX()
+    testing.expectEqualWithDelta(rotationZ2, math.rad(90), 0.05, 'incorrect z rotation from getAnglesZYX after teleporting')
+    testing.expectEqualWithDelta(rotationY2, math.rad(0), 0.05, 'incorrect y rotation from getAnglesZYX after teleporting')
+    testing.expectEqualWithDelta(rotationX2, math.rad(0), 0.05, 'incorrect x rotation from getAnglesZYX after teleporting')
 
     player:teleport('', player.position, {rotation=util.transform.rotateZ(math.rad(-90)), onGround=true})
     coroutine.yield()
@@ -193,9 +203,17 @@ end
 
 tests = {
     {'timers', testTimers},
-    {'playerRotation', function()
+    {'rotating player with controls.yawChange should change rotation', function()
         initPlayer()
-        testing.runLocalTest(player, 'playerRotation')
+        testing.runLocalTest(player, 'playerYawRotation')
+    end},
+    {'rotating player with controls.pitchChange should change rotation', function()
+        initPlayer()
+        testing.runLocalTest(player, 'playerPitchRotation')
+    end},
+    {'rotating player with controls.pitchChange and controls.yawChange should change rotation', function()
+        initPlayer()
+        testing.runLocalTest(player, 'playerPitchAndYawRotation')
     end},
     {'playerForwardRunning', function()
         initPlayer()

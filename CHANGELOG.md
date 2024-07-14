@@ -184,6 +184,8 @@
     Bug #8005: F3 stats bars are sorted not according to their place in the timeline
     Bug #8018: Potion effects should never explode and always apply on self
     Bug #8021: Player's scale doesn't reset when starting a new game
+    Bug #8048: Actors can generate negative collision extents and have no collision
+    Bug #8064: Lua move360 script doesn't respect the enableZoom/disableZoom Camera interface setting
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
@@ -249,6 +251,7 @@
     Feature #7971: Make save's Time Played value display hours instead of days
     Feature #7985: Support dark mode on Windows
     Feature #8034: (Lua) Containers should have respawning/organic flags
+    Feature #8067: Support Game Mode on macOS
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION

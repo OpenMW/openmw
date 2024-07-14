@@ -13,18 +13,88 @@ types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Magic, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.VanityMode, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.ViewMode, false)
 
-testing.registerLocalTest('playerRotation',
-    function()
-        local endTime = core.getSimulationTime() + 1
-        while core.getSimulationTime() < endTime do
-            self.controls.jump = false
-            self.controls.run = true
-            self.controls.movement = 0
-            self.controls.sideMovement = 0
-            self.controls.yawChange = util.normalizeAngle(math.rad(90) - self.rotation:getYaw()) * 0.5
-            coroutine.yield()
+local function rotate(object, targetPitch, targetYaw)
+    local endTime = core.getSimulationTime() + 1
+    while core.getSimulationTime() < endTime do
+        object.controls.jump = false
+        object.controls.run = true
+        object.controls.movement = 0
+        object.controls.sideMovement = 0
+        if targetPitch ~= nil then
+            object.controls.pitchChange = util.normalizeAngle(targetPitch - object.rotation:getPitch()) * 0.5
         end
-        testing.expectEqualWithDelta(self.rotation:getYaw(), math.rad(90), 0.05, 'Incorrect rotation')
+        if targetYaw ~= nil then
+            object.controls.yawChange = util.normalizeAngle(targetYaw - object.rotation:getYaw()) * 0.5
+        end
+        coroutine.yield()
+    end
+end
+
+local function rotateByYaw(object, target)
+    rotate(object, nil, target)
+end
+
+local function rotateByPitch(object, target)
+    rotate(object, target, nil)
+end
+
+testing.registerLocalTest('playerYawRotation',
+    function()
+        local initialAlphaXZ, initialGammaXZ = self.rotation:getAnglesXZ()
+        local initialAlphaZYX, initialBetaZYX, initialGammaZYX = self.rotation:getAnglesZYX()
+
+        local targetYaw = math.rad(90)
+        rotateByYaw(self, targetYaw)
+
+        testing.expectEqualWithDelta(self.rotation:getYaw(), targetYaw, 0.05, 'Incorrect yaw rotation')
+
+        local alpha1, gamma1 = self.rotation:getAnglesXZ()
+        testing.expectEqualWithDelta(alpha1, initialAlphaXZ, 0.05, 'Alpha rotation in XZ convention should not change')
+        testing.expectEqualWithDelta(gamma1, targetYaw, 0.05, 'Incorrect gamma rotation in XZ convention')
+
+        local alpha2, beta2, gamma2 = self.rotation:getAnglesZYX()
+        testing.expectEqualWithDelta(alpha2, targetYaw, 0.05, 'Incorrect alpha rotation in ZYX convention')
+        testing.expectEqualWithDelta(beta2, initialBetaZYX, 0.05, 'Beta rotation in ZYX convention should not change')
+        testing.expectEqualWithDelta(gamma2, initialGammaZYX, 0.05, 'Gamma rotation in ZYX convention should not change')
+    end)
+
+testing.registerLocalTest('playerPitchRotation',
+    function()
+        local initialAlphaXZ, initialGammaXZ = self.rotation:getAnglesXZ()
+        local initialAlphaZYX, initialBetaZYX, initialGammaZYX = self.rotation:getAnglesZYX()
+
+        local targetPitch = math.rad(90)
+        rotateByPitch(self, targetPitch)
+
+        testing.expectEqualWithDelta(self.rotation:getPitch(), targetPitch, 0.05, 'Incorrect pitch rotation')
+
+        local alpha1, gamma1 = self.rotation:getAnglesXZ()
+        testing.expectEqualWithDelta(alpha1, targetPitch, 0.05, 'Incorrect alpha rotation in XZ convention')
+        testing.expectEqualWithDelta(gamma1, initialGammaXZ, 0.05, 'Gamma rotation in XZ convention should not change')
+
+        local alpha2, beta2, gamma2 = self.rotation:getAnglesZYX()
+        testing.expectEqualWithDelta(alpha2, initialAlphaZYX, 0.05, 'Alpha rotation in ZYX convention should not change')
+        testing.expectEqualWithDelta(beta2, initialBetaZYX, 0.05, 'Beta rotation in ZYX convention should not change')
+        testing.expectEqualWithDelta(gamma2, targetPitch, 0.05, 'Incorrect gamma rotation in ZYX convention')
+    end)
+
+testing.registerLocalTest('playerPitchAndYawRotation',
+    function()
+        local targetPitch = math.rad(-30)
+        local targetYaw = math.rad(-60)
+        rotate(self, targetPitch, targetYaw)
+
+        testing.expectEqualWithDelta(self.rotation:getPitch(), targetPitch, 0.05, 'Incorrect pitch rotation')
+        testing.expectEqualWithDelta(self.rotation:getYaw(), targetYaw, 0.05, 'Incorrect yaw rotation')
+
+        local alpha1, gamma1 = self.rotation:getAnglesXZ()
+        testing.expectEqualWithDelta(alpha1, targetPitch, 0.05, 'Incorrect alpha rotation in XZ convention')
+        testing.expectEqualWithDelta(gamma1, targetYaw, 0.05, 'Incorrect gamma rotation in XZ convention')
+
+        local alpha2, beta2, gamma2 = self.rotation:getAnglesZYX()
+        testing.expectEqualWithDelta(alpha2, math.rad(-56), 0.05, 'Incorrect alpha rotation in ZYX convention')
+        testing.expectEqualWithDelta(beta2, math.rad(-25), 0.05, 'Incorrect beta rotation in ZYX convention')
+        testing.expectEqualWithDelta(gamma2, math.rad(-16), 0.05, 'Incorrect gamma rotation in ZYX convention')
     end)
 
 testing.registerLocalTest('playerForwardRunning',
