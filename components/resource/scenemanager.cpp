@@ -437,10 +437,6 @@ namespace Resource
             {
                 if (animation)
                 {
-                    // "Default" is osg dae plugin's default naming scheme for unnamed animations
-                    if (animation->getName() == "Default")
-                        animation->setName(std::string("idle"));
-
                     auto& channels = animation->getChannels();
                     for (auto& channel : channels)
                     {
