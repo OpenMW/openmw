@@ -219,7 +219,8 @@ namespace NavMeshTool
         void serializeToStderr(const T& value)
         {
             const std::vector<std::byte> data = serialize(value);
-            getRawStderr().write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
+            Debug::getRawStderr().write(
+                reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
         }
 
         std::string makeAddObjectErrorMessage(
