@@ -1,5 +1,7 @@
 #include "types.hpp"
 
+#include "../localscripts.hpp"
+
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm4/loaddoor.hpp>
 #include <components/lua/util.hpp>
@@ -8,6 +10,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
+#include "apps/openmw/mwworld/class.hpp"
 #include "apps/openmw/mwworld/worldmodel.hpp"
 
 namespace sol
@@ -38,6 +41,45 @@ namespace MWLua
 
     void addDoorBindings(sol::table door, const Context& context)
     {
+        door["STATE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWWorld::DoorState>({
+            { "Idle", MWWorld::DoorState::Idle },
+            { "Opening", MWWorld::DoorState::Opening },
+            { "Closing", MWWorld::DoorState::Closing },
+        }));
+        door["getDoorState"] = [](const Object& o) -> MWWorld::DoorState {
+            auto door = doorPtr(o);
+            return door.getClass().getDoorState(door);
+        };
+        door["isOpen"] = [](const Object& o) {
+            auto door = doorPtr(o);
+            bool doorIsIdle = door.getClass().getDoorState(door) == MWWorld::DoorState::Idle;
+            bool doorIsOpen = door.getRefData().getPosition().rot[2] != door.getCellRef().getPosition().rot[2];
+
+            return doorIsIdle && doorIsOpen;
+        };
+        door["isClosed"] = [](const Object& o) {
+            auto door = doorPtr(o);
+            bool doorIsIdle = door.getClass().getDoorState(door) == MWWorld::DoorState::Idle;
+            bool doorIsOpen = door.getRefData().getPosition().rot[2] != door.getCellRef().getPosition().rot[2];
+
+            return doorIsIdle && !doorIsOpen;
+        };
+        door["activateDoor"] = [](const Object& o, sol::optional<bool> openState) {
+            bool allowChanges
+                = dynamic_cast<const GObject*>(&o) != nullptr || dynamic_cast<const SelfObject*>(&o) != nullptr;
+            if (!allowChanges)
+                throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
+
+            auto door = doorPtr(o);
+            auto world = MWBase::Environment::get().getWorld();
+
+            if (!openState.has_value())
+                world->activateDoor(door);
+            else if (*openState)
+                world->activateDoor(door, MWWorld::DoorState::Opening);
+            else
+                world->activateDoor(door, MWWorld::DoorState::Closing);
+        };
         door["isTeleport"] = [](const Object& o) { return doorPtr(o).getCellRef().getTeleport(); };
         door["destPosition"]
             = [](const Object& o) -> osg::Vec3f { return doorPtr(o).getCellRef().getDoorDest().asVec3(); };

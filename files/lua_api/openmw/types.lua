@@ -321,7 +321,7 @@
 -- @param #any id Active spell ID.
 
 ---
--- Adds a new spell to the list of active spells (only in global scripts or on self). 
+-- Adds a new spell to the list of active spells (only in global scripts or on self).
 -- Note that this does not play any related VFX or sounds.
 -- @function [parent=#ActorActiveSpells] add
 -- @param self
@@ -799,7 +799,7 @@
 
 ---
 -- A read-only list of all @{#CreatureRecord}s in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #CreatureRecord. 
+-- Implements [iterables#List](iterables.html#List) of #CreatureRecord.
 -- @field [parent=#Creature] #list<#CreatureRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -860,7 +860,7 @@
 
 ---
 -- A read-only list of all @{#NpcRecord}s in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #NpcRecord. 
+-- Implements [iterables#List](iterables.html#List) of #NpcRecord.
 -- @field [parent=#NPC] #map<#NpcRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1037,8 +1037,8 @@
 -- @field [parent=#NPC] #Classes classes
 
 ---
--- A read-only list of all @{#ClassRecord}s in the world database, may be indexed by recordId. 
--- Implements [iterables#List](iterables.html#List) of #ClassRecord. 
+-- A read-only list of all @{#ClassRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #ClassRecord.
 -- @field [parent=#Classes] #list<#ClassRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1078,7 +1078,7 @@
 
 ---
 -- A read-only list of all @{#RaceRecord}s in the world database.
--- Implements [iterables#List](iterables.html#List) of #RaceRecord. 
+-- Implements [iterables#List](iterables.html#List) of #RaceRecord.
 -- @field [parent=#Races] #list<#RaceRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1250,7 +1250,7 @@
 
 ---
 -- A read-only list of all @{#BirthSignRecord}s in the world database.
--- Implements [iterables#List](iterables.html#List) of #BirthSignRecord. 
+-- Implements [iterables#List](iterables.html#List) of #BirthSignRecord.
 -- @field [parent=#BirthSigns] #list<#BirthSignRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1360,7 +1360,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#BookRecord}s in the world database. 
+-- A read-only list of all @{#BookRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #BookRecord.
 -- @field [parent=#Book] #list<#BookRecord> records
 -- @usage local record = types.Book.records['example_recordid']
@@ -1442,7 +1442,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#ClothingRecord}s in the world database. 
+-- A read-only list of all @{#ClothingRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ClothingRecord.
 -- @field [parent=#Clothing] #list<#ClothingRecord> records
 -- @usage local record = types.Clothing.records['example_recordid']
@@ -1514,7 +1514,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#IngredientRecord}s in the world database. 
+-- A read-only list of all @{#IngredientRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #IngredientRecord.
 -- @field [parent=#Ingredient] #list<#IngredientRecord> records
 -- @usage local record = types.Ingredient.records['example_recordid']
@@ -1613,7 +1613,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#LightRecord}s in the world database. 
+-- A read-only list of all @{#LightRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #LightRecord.
 -- @field [parent=#Light] #list<#LightRecord> records
 -- @usage local record = types.Light.records['example_recordid']
@@ -1672,7 +1672,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#MiscellaneousRecord}s in the world database. 
+-- A read-only list of all @{#MiscellaneousRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #MiscellaneousRecord.
 -- @field [parent=#Miscellaneous] #list<#MiscellaneousRecord> records
 -- @usage local record = types.Miscellaneous.records['example_recordid']
@@ -1729,7 +1729,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#PotionRecord}s in the world database. 
+-- A read-only list of all @{#PotionRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #PotionRecord.
 -- @field [parent=#Potion] #list<#PotionRecord> records
 -- @usage local record = types.Potion.records['example_recordid']
@@ -1776,7 +1776,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#WeaponRecord}s in the world database. 
+-- A read-only list of all @{#WeaponRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #WeaponRecord.
 -- @field [parent=#Weapon] #list<#WeaponRecord> records
 -- @usage local record = types.Weapon.records['example_recordid']
@@ -1855,7 +1855,7 @@
 
 
 ---
--- A read-only list of all @{#ApparatusRecord}s in the world database. 
+-- A read-only list of all @{#ApparatusRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ApparatusRecord.
 -- @field [parent=#Apparatus] #list<#ApparatusRecord> records
 -- @usage local record = types.Apparatus.records['example_recordid']
@@ -1904,7 +1904,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#LockpickRecord}s in the world database. 
+-- A read-only list of all @{#LockpickRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #LockpickRecord.
 -- @field [parent=#Lockpick] #list<#LockpickRecord> records
 -- @usage local record = types.Lockpick.records['example_recordid']
@@ -1943,7 +1943,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#ProbeRecord}s in the world database. 
+-- A read-only list of all @{#ProbeRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ProbeRecord.
 -- @field [parent=#Probe] #list<#ProbeRecord> records
 -- @usage local record = types.Probe.records['example_recordid']
@@ -1982,7 +1982,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#RepairRecord}s in the world database. 
+-- A read-only list of all @{#RepairRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #RepairRecord.
 -- @field [parent=#Repair] #list<#RepairRecord> records
 -- @usage local record = types.Repair.records['example_recordid']
@@ -2019,7 +2019,7 @@
 -- @type Activator
 
 ---
--- A read-only list of all @{#ActivatorRecord}s in the world database. 
+-- A read-only list of all @{#ActivatorRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ActivatorRecord.
 -- @field [parent=#Activator] #list<#ActivatorRecord> records
 -- @usage local record = types.Activator.records['example_recordid']
@@ -2062,7 +2062,7 @@
 -- @field #Lockable baseType @{#Lockable}
 
 ---
--- A read-only list of all @{#ContainerRecord}s in the world database. 
+-- A read-only list of all @{#ContainerRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ContainerRecord.
 -- @field [parent=#Container] #list<#ContainerRecord> records
 -- @usage local record = types.Container.records['example_recordid']
@@ -2123,8 +2123,18 @@
 -- @extends #Lockable
 -- @field #Lockable baseType @{#Lockable}
 
+--- Door.STATE
+-- @type DoorSTATE
+-- @field #number Idle The door is either closed or open (usually closed).
+-- @field #number Opening The door is in the process of opening.
+-- @field #number Closing The door is in the process of closing.
+
+--- @{#DoorSTATE}
+-- @field [parent=#Door] #DoorSTATE STATE
+-- @usage local state = types.Door.STATE["Idle"]
+
 ---
--- A read-only list of all @{#DoorRecord}s in the world database. 
+-- A read-only list of all @{#DoorRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #DoorRecord.
 -- @field [parent=#Door] #list<#DoorRecord> records
 -- @usage local record = types.Door.records['example_recordid']
@@ -2167,6 +2177,35 @@
 -- @return #DoorRecord
 
 ---
+-- Gets the state of the door.
+-- @function [parent=#Door] getDoorState
+-- @param openmw.core#GameObject object
+-- @return #DoorSTATE
+
+---
+-- Checks if the door is fully open.
+-- Returns false if the door is currently opening or closing.
+-- @function [parent=#Door] isOpen
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Checks if the door is fully closed.
+-- Returns false if the door is currently opening or closing.
+-- @function [parent=#Door] isClosed
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Opens/Closes the door. Can only be used in global scripts or on self.
+-- @function [parent=#Door] activateDoor
+-- @param openmw.core#GameObject object
+-- @param #boolean openState Optional whether the door should be opened or closed. If not provided, the door will switch to the opposite state.
+-- @usage types.Door.activateDoor(doorObject)
+-- @usage types.Door.activateDoor(doorObject, true)
+-- @usage types.Door.activateDoor(doorObject, false)
+
+---
 -- @type DoorRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -2183,7 +2222,7 @@
 -- @type Static
 
 ---
--- A read-only list of all @{#StaticRecord}s in the world database. 
+-- A read-only list of all @{#StaticRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #StaticRecord.
 -- @field [parent=#Static] #list<#StaticRecord> records
 -- @usage local record = types.Static.records['example_recordid']
@@ -2214,7 +2253,7 @@
 -- @type CreatureLevelledList
 
 ---
--- A read-only list of all @{#CreatureLevelledListRecord}s in the world database. 
+-- A read-only list of all @{#CreatureLevelledListRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #CreatureLevelledListRecord.
 -- @field [parent=#CreatureLevelledList] #list<#CreatureLevelledListRecord> records
 -- @usage local record = types.CreatureLevelledList.records['example_recordid']
@@ -2307,7 +2346,7 @@
 -- @type ESM4Terminal
 
 ---
--- A read-only list of all @{#ESM4TerminalRecord}s in the world database. 
+-- A read-only list of all @{#ESM4TerminalRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ESM4TerminalRecord.
 -- @field [parent=#ESM4Terminal] #list<#ESM4TerminalRecord> records
 -- @usage local record = types.ESM4Terminal.records['example_recordid']
@@ -2376,7 +2415,7 @@
 -- @return #ESM4DoorRecord
 
 ---
--- A read-only list of all @{#ESM4DoorRecord}s in the world database. 
+-- A read-only list of all @{#ESM4DoorRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ESM4DoorRecord.
 -- @field [parent=#ESM4Door] #list<#ESM4DoorRecord> records
 -- @usage local record = types.ESM4Door.records['example_recordid']
