@@ -260,7 +260,7 @@ namespace MWLua
                           // TODO: Maybe disallow opening/closing special modes (main menu, settings, loading screen)
                           // from player scripts. Add new Lua context "menu" that can do it.
                           for (unsigned i = stack.size() - common; i > 0; i--)
-                              windowManager->popGuiMode();
+                              windowManager->popGuiMode(true);
                           if (common == newStack.size() && !newStack.empty() && arg.has_value())
                               windowManager->pushGuiMode(newStack.back(), ptr);
                           for (unsigned i = common; i < newStack.size(); ++i)
