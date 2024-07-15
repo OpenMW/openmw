@@ -132,6 +132,15 @@ namespace MWLua
         });
 
         aiPackage["isRepeat"] = sol::readonly_property([](const AiPackage& p) { return p.getRepeat(); });
+
+        selfAPI["_isFleeing"] = [](SelfObject& self) -> bool {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            if (ai.isEmpty())
+                return false;
+            else
+                return ai.isFleeing();
+        };
         selfAPI["_getActiveAiPackage"] = [](SelfObject& self) -> sol::optional<std::shared_ptr<AiPackage>> {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();

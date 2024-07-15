@@ -80,6 +80,11 @@ return {
         -- @return #Package
         getActivePackage = function() return self:_getActiveAiPackage() end,
 
+        --- Return whether the actor is fleeing.
+        -- @function [parent=#AI] isFleeing
+        -- @return #boolean
+        isFleeing = function() return self:_isFleeing() end,
+
         --- Start new AI package.
         -- @function [parent=#AI] startPackage
         -- @param #table options See the "Built-in AI packages" page.
