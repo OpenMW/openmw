@@ -99,9 +99,6 @@ namespace Resource
                 const osgAnimation::ChannelList& channels = animation->getChannels();
                 for (const auto& channel : channels)
                 {
-                    // Replace channel target name to match the renamed bones/transforms
-                    channel->setTargetName(Misc::StringUtils::underscoresToSpaces(channel->getTargetName()));
-
                     if (name == "Bip01 R Clavicle")
                     {
                         if (!belongsToRightUpperExtremity(channel->getTargetName()))
