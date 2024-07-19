@@ -142,7 +142,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV + offset);
 
 #if defined(DISTORTION) && DISTORTION
-    gl_FragData[0].a = getDiffuseColor().a;
+    gl_FragData[0].a *= getDiffuseColor().a;
     gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords / @distorionRTRatio).x);
     return;
 #endif

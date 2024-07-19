@@ -58,7 +58,7 @@ void main()
 
 #if defined(DISTORTION) && DISTORTION
     vec2 screenCoords = gl_FragCoord.xy / (screenRes * @distorionRTRatio);
-    gl_FragData[0].a = getDiffuseColor().a;
+    gl_FragData[0].a *= getDiffuseColor().a;
     gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords).x);
 
     return;
