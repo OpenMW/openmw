@@ -1659,6 +1659,9 @@ namespace MWRender
 
     osg::BoundingBox RenderingManager::getCullSafeBoundingBox(const MWWorld::Ptr& ptr) const
     {
+        if (ptr.isEmpty())
+            return {};
+
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> rootNode = ptr.getRefData().getBaseNode();
 
         // Recalculate bounds on the ptr's template when the object is not loaded or is loaded but paged
