@@ -23,23 +23,23 @@ namespace MWRender
 
             float sineOut(float x)
             {
-                return sin((x * osg::PIf) / 2);
+                return std::sin((x * osg::PIf) / 2.f);
             }
 
             float sineIn(float x)
             {
-                return 1 - cos((x * osg::PIf) / 2);
+                return 1.f - std::cos((x * osg::PIf) / 2.f);
             }
 
             float sineInOut(float x)
             {
-                return -(cos(osg::PIf * x) - 1) / 2;
+                return -(std::cos(osg::PIf * x) - 1.f) / 2.f;
             }
 
             float cubicOut(float t)
             {
-                float t1 = 1 - t;
-                return 1 - (t1 * t1 * t1); // (1-t)^3
+                float t1 = 1.f - t;
+                return 1.f - (t1 * t1 * t1); // (1-t)^3
             }
 
             float cubicIn(float x)
@@ -49,21 +49,21 @@ namespace MWRender
 
             float cubicInOut(float x)
             {
-                if (x < 0.5)
+                if (x < 0.5f)
                 {
-                    return 4 * x * x * x; // 4x^3
+                    return 4.f * x * x * x; // 4x^3
                 }
                 else
                 {
-                    float x2 = -2 * x + 2;
-                    return 1 - (x2 * x2 * x2) / 2; // (1 - (-2x + 2)^3)/2
+                    float x2 = -2.f * x + 2.f;
+                    return 1.f - (x2 * x2 * x2) / 2.f; // (1 - (-2x + 2)^3)/2
                 }
             }
 
             float quartOut(float t)
             {
-                float t1 = 1 - t;
-                return 1 - (t1 * t1 * t1 * t1); // (1-t)^4
+                float t1 = 1.f - t;
+                return 1.f - (t1 * t1 * t1 * t1); // (1-t)^4
             }
 
             float quartIn(float t)
@@ -73,14 +73,14 @@ namespace MWRender
 
             float quartInOut(float x)
             {
-                if (x < 0.5)
+                if (x < 0.5f)
                 {
-                    return 8 * x * x * x * x; // 8x^4
+                    return 8.f * x * x * x * x; // 8x^4
                 }
                 else
                 {
-                    float x2 = -2 * x + 2;
-                    return 1 - (x2 * x2 * x2 * x2) / 2; // 1 - ((-2x + 2)^4)/2
+                    float x2 = -2.f * x + 2.f;
+                    return 1.f - (x2 * x2 * x2 * x2) / 2.f; // 1 - ((-2x + 2)^4)/2
                 }
             }
 
@@ -89,27 +89,27 @@ namespace MWRender
                 // Higher lambda = lower swing amplitude. 1 = 150% swing amplitude.
                 // w is the frequency of oscillation in the easing func, controls the amount of overswing
                 const float w = 1.5f * osg::PIf; // 4.71238
-                return 1 - expf(-lambda * x) * cos(w * x);
+                return 1.f - expf(-lambda * x) * std::cos(w * x);
             }
 
             float springOutWeak(float x)
             {
-                return springOutGeneric(x, 4);
+                return springOutGeneric(x, 4.f);
             }
 
             float springOutMed(float x)
             {
-                return springOutGeneric(x, 3);
+                return springOutGeneric(x, 3.f);
             }
 
             float springOutStrong(float x)
             {
-                return springOutGeneric(x, 2);
+                return springOutGeneric(x, 2.f);
             }
 
             float springOutTooMuch(float x)
             {
-                return springOutGeneric(x, 1);
+                return springOutGeneric(x, 1.f);
             }
 
             const std::unordered_map<std::string, EasingFn> easingsMap = {
@@ -231,7 +231,7 @@ namespace MWRender
         if (!mInterpActive)
             return;
 
-        // Shouldnt happen, but potentially an edge case where a new bone was added
+        // Shouldn't happen, but potentially an edge case where a new bone was added
         // between gatherRecursiveBoneTransforms and this update
         // currently OpenMW will never do this
         assert(mBlendBoneTransforms.find(bone) != mBlendBoneTransforms.end());
