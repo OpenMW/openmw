@@ -24,9 +24,9 @@ namespace MWRender
         void setOffset(const osg::Vec3f& offset);
         void setRotate(const osg::Quat& rotate);
 
-        const osg::Vec3f getOffset() const { return mOffset; }
+        const osg::Vec3f& getOffset() const { return mOffset; }
 
-        const osg::Quat getRotate() const { return mRotate; }
+        const osg::Quat& getRotate() const { return mRotate; }
 
         osg::Node* getRelativeTo() const { return mRelativeTo; }
 
