@@ -62,6 +62,7 @@ def runTest(name):
             "resolution x = 640\n"
             "resolution y = 480\n"
             "framerate limit = 60\n"
+            "smooth animation transitions = true\n"
         )
     stdout_lines = list()
     exit_ok = True

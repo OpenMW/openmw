@@ -762,13 +762,11 @@ namespace MWRender
         {
             // Note, even if the actual config is .json - we should send a .yaml path to AnimBlendRulesManager, the
             // manager will check for .json if it will not find a specified .yaml file.
-            auto yamlpath = kfname;
-            Misc::StringUtils::replaceLast(yamlpath, ".kf", ".yaml");
-            Misc::StringUtils::replaceLast(yamlpath, ".dae", ".yaml");
+            VFS::Path::Normalized blendConfigPath(kfname);
+            blendConfigPath.changeExtension("yaml");
 
             // globalBlendConfigPath is only used with actors! Objects have no default blending.
             constexpr VFS::Path::NormalizedView globalBlendConfigPath("animations/animation-config.yaml");
-            const VFS::Path::NormalizedView blendConfigPath(yamlpath);
 
             osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
             if (mPtr.getClass().isActor())
@@ -776,8 +774,8 @@ namespace MWRender
                 blendRules
                     = mResourceSystem->getAnimBlendRulesManager()->getRules(globalBlendConfigPath, blendConfigPath);
                 if (blendRules == nullptr)
-                    Log(Debug::Warning) << "Unable to find animation blending rules: '" << yamlpath << "' or '"
-                                        << globalBlendConfigPath.value() << "'";
+                    Log(Debug::Warning) << "Unable to find animation blending rules: '" << blendConfigPath << "' or '"
+                                        << globalBlendConfigPath << "'";
             }
             else
             {
