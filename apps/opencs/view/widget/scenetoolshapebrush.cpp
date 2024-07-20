@@ -109,6 +109,7 @@ CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidge
     mToolSelector->addItem(tr("Height, lower (paint)"));
     mToolSelector->addItem(tr("Smooth (paint)"));
     mToolSelector->addItem(tr("Flatten (paint)"));
+    mToolSelector->addItem(tr("Equalize (paint)"));
 
     QLabel* brushStrengthLabel = new QLabel(this);
     brushStrengthLabel->setText("Brush strength:");

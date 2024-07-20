@@ -128,7 +128,7 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
 {
     if (hit.hit && hit.tag == nullptr)
     {
-        if (mShapeEditTool == ShapeEditTool_Flatten)
+        if (mShapeEditTool == ShapeEditTool_Flatten || mShapeEditTool == ShapeEditTool_Equalize)
             setFlattenToolTargetHeight(hit);
         if (mDragMode == InteractionType_PrimaryEdit && mShapeEditTool != ShapeEditTool_Drag)
         {
@@ -167,7 +167,7 @@ bool CSVRender::TerrainShapeMode::primaryEditStartDrag(const QPoint& pos)
     {
         mEditingPos = hit.worldPos;
         mIsEditing = true;
-        if (mShapeEditTool == ShapeEditTool_Flatten)
+        if (mShapeEditTool == ShapeEditTool_Flatten || mShapeEditTool == ShapeEditTool_Equalize)
             setFlattenToolTargetHeight(hit);
     }
 
@@ -463,6 +463,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
             smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
         if (mShapeEditTool == ShapeEditTool_Flatten)
             flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
+        if (mShapeEditTool == ShapeEditTool_Equalize)
+            equalizeHeight(cellCoords, x, y, mTargetHeight);
     }
 
     if (mBrushShape == CSVWidget::BrushShape_Square)
@@ -489,6 +491,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                     smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
                 if (mShapeEditTool == ShapeEditTool_Flatten)
                     flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
+                if (mShapeEditTool == ShapeEditTool_Equalize)
+                    equalizeHeight(cellCoords, x, y, mTargetHeight);
             }
         }
     }
@@ -529,6 +533,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                         smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
                     if (mShapeEditTool == ShapeEditTool_Flatten)
                         flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
+                    if (mShapeEditTool == ShapeEditTool_Equalize)
+                        equalizeHeight(cellCoords, x, y, mTargetHeight);
                 }
             }
         }
@@ -558,6 +564,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                     smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
                 if (mShapeEditTool == ShapeEditTool_Flatten)
                     flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
+                if (mShapeEditTool == ShapeEditTool_Equalize)
+                    equalizeHeight(cellCoords, x, y, mTargetHeight);
             }
         }
     }
@@ -887,6 +895,30 @@ void CSVRender::TerrainShapeMode::flattenHeight(
         alterHeight(cellCoords, inCellX, inCellY, thisAlteredHeight - toolStrength);
     if (thisHeight + thisAlteredHeight < targetHeight)
         alterHeight(cellCoords, inCellX, inCellY, thisAlteredHeight + toolStrength);
+}
+
+void CSVRender::TerrainShapeMode::equalizeHeight(
+    const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, int targetHeight)
+{
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable
+        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
+    int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
+
+    float thisHeight = 0.0f;
+
+    const std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY());
+
+    if (!noCell(cellId) && !noLand(cellId))
+    {
+        const CSMWorld::LandHeightsColumn::DataType landShapePointer
+            = landTable.data(landTable.getModelIndex(cellId, landshapeColumn))
+                  .value<CSMWorld::LandHeightsColumn::DataType>();
+
+        thisHeight = landShapePointer[inCellY * ESM::Land::LAND_SIZE + inCellX];
+    }
+
+    alterHeight(cellCoords, inCellX, inCellY, targetHeight - thisHeight);
 }
 
 void CSVRender::TerrainShapeMode::updateKeyHeightValues(const CSMWorld::CellCoordinates& cellCoords, int inCellX,
