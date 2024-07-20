@@ -55,15 +55,15 @@
 -- @field #list<#string> contentFiles
 
 ---
--- List of all saves for the given directory
+-- All the saves for the given directory
 -- @function [parent=#menu] getSaves
 -- @param #string directory name of the save directory (e. g. character)
--- @return #list<#SaveInfo>
+-- @return #map<#string, #SaveInfo> map with save filenames as keys
 
 ---
 -- List of all available saves, grouped by directory
 -- @function [parent=#menu] getAllSaves
--- @return #map<#string, #list<#SaveInfo>>
+-- @return #map<#string, #map<#string, #SaveInfo>> map with directory names as keys, returning maps with save filenames as keys
 
 ---
 -- Exit the game
