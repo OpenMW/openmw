@@ -324,8 +324,8 @@ namespace MWRender
                 MWRender::RotateController* rotateController = dynamic_cast<MWRender::RotateController*>(updateCb);
                 if (rotateController)
                 {
-                    const osg::Quat rotate = rotateController->getRotate();
-                    const osg::Vec3f offset = rotateController->getOffset();
+                    const osg::Quat& rotate = rotateController->getRotate();
+                    const osg::Vec3f& offset = rotateController->getOffset();
 
                     osg::NodePathList nodepaths = node->getParentalNodePaths(rotateController->getRelativeTo());
                     osg::Quat worldOrient;

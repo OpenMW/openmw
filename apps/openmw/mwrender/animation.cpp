@@ -776,8 +776,8 @@ namespace MWRender
                 blendRules
                     = mResourceSystem->getAnimBlendRulesManager()->getRules(globalBlendConfigPath, blendConfigPath);
                 if (blendRules == nullptr)
-                    Log(Debug::Warning) << "Unable to find animation blending rules: '" << blendConfigPath.value()
-                                        << "' or '" << globalBlendConfigPath.value() << "'";
+                    Log(Debug::Warning) << "Unable to find animation blending rules: '" << yamlpath << "' or '"
+                                        << globalBlendConfigPath.value() << "'";
             }
             else
             {
