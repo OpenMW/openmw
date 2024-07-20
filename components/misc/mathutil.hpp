@@ -35,7 +35,9 @@ namespace Misc
 
     inline osg::Vec3f toEulerAnglesXZ(const osg::Quat& quat)
     {
-        return toEulerAnglesXZ(quat * osg::Vec3f(0, 1, 0));
+        osg::Vec3f forward = quat * osg::Vec3f(0, 1, 0);
+        forward.normalize();
+        return toEulerAnglesXZ(forward);
     }
 
     inline osg::Vec3f toEulerAnglesXZ(const osg::Matrixf& m)
@@ -56,7 +58,11 @@ namespace Misc
 
     inline osg::Vec3f toEulerAnglesZYX(const osg::Quat& quat)
     {
-        return toEulerAnglesZYX(quat * osg::Vec3f(0, 1, 0), quat * osg::Vec3f(0, 0, 1));
+        osg::Vec3f forward = quat * osg::Vec3f(0, 1, 0);
+        forward.normalize();
+        osg::Vec3f up = quat * osg::Vec3f(0, 0, 1);
+        up.normalize();
+        return toEulerAnglesZYX(forward, up);
     }
 
     inline osg::Vec3f toEulerAnglesZYX(const osg::Matrixf& m)
