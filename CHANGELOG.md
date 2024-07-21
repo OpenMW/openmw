@@ -189,7 +189,6 @@
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
-    Feature #4260: OpenMW-CS Terrain Equalize tool
     Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
@@ -253,6 +252,7 @@
     Feature #7985: Support dark mode on Windows
     Feature #8034: (Lua) Containers should have respawning/organic flags
     Feature #8067: Support Game Mode on macOS
+    Feature #8078: OpenMW-CS Terrain Equalize Tool
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
