@@ -189,6 +189,7 @@
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
+    Feature #4260: OpenMW-CS Terrain Equalize tool
     Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
