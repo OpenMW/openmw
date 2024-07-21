@@ -7,6 +7,7 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
+#include <cmath>
 #include <type_traits>
 
 namespace Misc
@@ -28,8 +29,8 @@ namespace Misc
 
     inline osg::Vec3f toEulerAnglesXZ(osg::Vec3f forward)
     {
-        float x = -asin(forward.z());
-        float z = atan2(forward.x(), forward.y());
+        float x = -std::asin(forward.z());
+        float z = std::atan2(forward.x(), forward.y());
         return osg::Vec3f(x, 0, z);
     }
 
@@ -49,10 +50,10 @@ namespace Misc
 
     inline osg::Vec3f toEulerAnglesZYX(osg::Vec3f forward, osg::Vec3f up)
     {
-        float y = -asin(up.x());
-        float x = atan2(up.y(), up.z());
+        float y = -std::asin(up.x());
+        float x = std::atan2(up.y(), up.z());
         osg::Vec3f forwardZ = (osg::Quat(x, osg::Vec3f(1, 0, 0)) * osg::Quat(y, osg::Vec3f(0, 1, 0))) * forward;
-        float z = atan2(forwardZ.x(), forwardZ.y());
+        float z = std::atan2(forwardZ.x(), forwardZ.y());
         return osg::Vec3f(x, y, z);
     }
 
