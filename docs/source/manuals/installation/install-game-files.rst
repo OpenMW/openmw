@@ -150,7 +150,7 @@ If you are running macOS, you can also download Morrowind through Steam:
 		}
 
 #.	Launch the Steam client and let it download. You can then find ``Morrowind.esm`` at
-	``~/Library/Application Support/Steam/steamapps/common/The Elder Scrolls III - Morrowind/Data Files/``
+	``~/Library/Application Support/Steam/steamapps/common/The Elder Scrolls III - Morrowind/Data Files/``. The ~/Library folder is hidden by default. To get to it from the Installation Wizard popup, you will need to go to Users/your YOUR_USERNAME_HERE/ and do ``CMD+SHFT+PERIOD`` to reveal the ~/Library folder. 
 
 Linux
 ^^^^^
