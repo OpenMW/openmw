@@ -234,9 +234,9 @@ namespace MWLua
             [mechanics](const sol::object& object, const std::string& groupname, const sol::table& options) {
                 uint32_t numberOfLoops = options.get_or("loops", std::numeric_limits<uint32_t>::max());
                 float speed = options.get_or("speed", 1.f);
-                std::string startKey = options.get_or<std::string>("startkey", "start");
-                std::string stopKey = options.get_or<std::string>("stopkey", "stop");
-                bool forceLoop = options.get_or("forceloop", false);
+                std::string startKey = options.get_or<std::string>("startKey", "start");
+                std::string stopKey = options.get_or<std::string>("stopKey", "stop");
+                bool forceLoop = options.get_or("forceLoop", false);
 
                 MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
                 mechanics->playAnimationGroupLua(ptr, groupname, numberOfLoops, speed, startKey, stopKey, forceLoop);
@@ -247,20 +247,20 @@ namespace MWLua
                     ptr, groupname, std::numeric_limits<int>::max(), 1, "start", "stop", false);
             });
 
-        api["playBlended"] = [](const sol::object& object, std::string_view groupname, const sol::table& options) {
+        api["playBlended"] = [](const sol::object& object, std::string_view groupName, const sol::table& options) {
             uint32_t loops = options.get_or("loops", 0u);
             MWRender::Animation::AnimPriority priority = getPriorityArgument(options);
-            BlendMask blendMask = options.get_or("blendmask", BlendMask::BlendMask_All);
-            bool autoDisable = options.get_or("autodisable", true);
+            BlendMask blendMask = options.get_or("blendMask", BlendMask::BlendMask_All);
+            bool autoDisable = options.get_or("autoDisable", true);
             float speed = options.get_or("speed", 1.0f);
-            std::string start = options.get_or<std::string>("startkey", "start");
-            std::string stop = options.get_or<std::string>("stopkey", "stop");
-            float startpoint = options.get_or("startpoint", 0.0f);
-            bool forceLoop = options.get_or("forceloop", false);
+            std::string start = options.get_or<std::string>("startKey", "start");
+            std::string stop = options.get_or<std::string>("stopKey", "stop");
+            float startPoint = options.get_or("startPoint", 0.0f);
+            bool forceLoop = options.get_or("forceLoop", false);
 
             auto animation = getMutableAnimationOrThrow(ObjectVariant(object));
-            animation->play(groupname, priority, blendMask, autoDisable, speed, start, stop, startpoint, loops,
-                forceLoop || animation->isLoopingAnimation(groupname));
+            animation->play(groupName, priority, blendMask, autoDisable, speed, start, stop, startPoint, loops,
+                forceLoop || animation->isLoopingAnimation(groupName));
         };
 
         api["hasGroup"] = [](const sol::object& object, std::string_view groupname) -> bool {
@@ -287,11 +287,11 @@ namespace MWLua
                 context.mLuaManager->addAction(
                     [object = ObjectVariant(object), model = getStaticModelOrThrow(staticOrID),
                         effectId = options.get_or<std::string>("vfxId", ""), loop = options.get_or("loop", false),
-                        bonename = options.get_or<std::string>("bonename", ""),
+                        boneName = options.get_or<std::string>("boneName", ""),
                         particleTexture = options.get_or<std::string>("particleTextureOverride", "")] {
                         MWRender::Animation* anim = getMutableAnimationOrThrow(ObjectVariant(object));
 
-                        anim->addEffect(model, effectId, loop, bonename, particleTexture);
+                        anim->addEffect(model, effectId, loop, boneName, particleTexture);
                     },
                     "addVfxAction");
             });
