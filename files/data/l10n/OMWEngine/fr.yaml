@@ -78,6 +78,17 @@ CameraSensitivity: "Sensibilité de la caméra"
 CameraZoomIn: "Zoom avant de la caméra"
 CameraZoomOut: "Zoom arrière de la caméra"
 ChangeRequiresRestart: "Ce changement requiert un redémarrage de l'application pour prendre effet."
+ClassicFalloff: "Atténuation classique"
+ClassicFalloffTooltip: |-
+    valeur par défaut: inactif
+    Utilise la formule traditionnelle d'atténuation de la lumière ponctuelle qui n'a pas de diminution précoce.
+
+    Un défaut de la formule traditionnelle est que l'influence de la lumière n'atteint jamais tout à fait zéro.
+    C'est physiquement précis, mais peut causer des coutures d'éclairage car les lumières n'affectent pas toute la scène.
+    La diminution précoce aide à atténuer ces coutures au prix d'un assombrissement de la scène.
+
+    Morrowind utilise la formule traditionnelle, vous pourriez donc vouloir activer ceci si vous n'aimez pas les différences de luminosité.
+    Alternativement, essayez de modifier la luminosité minimale intérieure.
 ConfirmResetBindings: "Réinitialiser tous les contrôles à leurs valeurs par défaut ?"
 ConfirmResolution: "La nouvelle résolution d'affichage sera appliquée instantanément. Voulez-vous continuer ?"
 Controller: "Manette"
@@ -95,7 +106,7 @@ EnableController: "Activer la manette"
 FieldOfView: "Champ de vision"
 FieldOfViewHigh: "Étendu"
 FieldOfViewLow: "Restreint"
-ForcePerPixelLighting: "Forcer l'éclairage par pixel"
+ForcePerPixelLighting: "Éclairage par pixel"
 ForcePerPixelLightingTooltip: |-
     Force l'usage de l'éclairage par pixel. Par défaut, seuls les objets avec des "bump" et "normal" maps utilisent l'éclairage par pixel.
 
@@ -130,7 +141,7 @@ LightsLightingMethodTooltip: "Définit la gestion des sources lumineuses :\n\n
 LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
 LightsMinimumInteriorBrightness: "Luminosité intérieure minimale"
-LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres."
+LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres.\n\nCela n'a aucun effet si l'atténuation classique est utilisée."
 MaxLights: "Maximum de sources lumineuses"
 MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles obtenues avec la méthode d'éclairage traditionnelle."
 MenuHelpDelay: "Délai d'affichage du menu d'aide"

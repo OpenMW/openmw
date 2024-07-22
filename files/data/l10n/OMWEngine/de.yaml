@@ -78,6 +78,17 @@ CameraSensitivity: "Kameraempfindlichkeit"
 CameraZoomIn: "Kamera hineinzoomen"
 CameraZoomOut: "Kamera herauszoomen"
 ChangeRequiresRestart: "Diese Änderung erfordert einen Neustart, um wirksam zu werden."
+ClassicFalloff: "Klassischer Lichtabfall"
+ClassicFalloffTooltip: |-
+    Standard: aus
+    Verwendet die traditionelle Formel für die Abschwächung von Punktlichtquellen, die kein frühzeitiges Ausblenden aufweist.
+
+    Ein Nachteil der traditionellen Formel ist, dass der Lichteinfluss nie ganz Null erreicht.
+    Dies ist physikalisch korrekt, kann aber zu Beleuchtungsnähten führen, da Lichter nicht die gesamte Szene beeinflussen.
+    Frühzeitiges Ausblenden hilft, diese Nähte zu verringern, allerdings auf Kosten einer dunkleren Szene.
+
+    Morrowind verwendet die traditionelle Formel, daher möchten Sie dies möglicherweise aktivieren, wenn Ihnen die Helligkeitsunterschiede nicht gefallen.
+    Alternativ können Sie versuchen, die minimale Innenraumhelligkeit zu ändern.
 ConfirmResetBindings: "Alle Tastenbelegungen zurücksetzen?"
 ConfirmResolution: "Neue Auflösung wird sofort angewendet. Fortsetzen?"
 Controller: "Controller"
@@ -95,7 +106,7 @@ EnableController: "Controller aktivieren"
 FieldOfView: "Sichtfeld"
 FieldOfViewLow: "Niedrig"
 FieldOfViewHigh: "Hoch"
-ForcePerPixelLighting: "Beleuchtung pro Pixel erzwingen"
+ForcePerPixelLighting: "Beleuchtung pro Pixel"
 ForcePerPixelLightingTooltip: |-
     Erzwingt die Verwendung der Beleuchtung pro Pixel. Standardmäßig verwenden nur Bump- und Normal-mapped-Objekte eine Beleuchtung pro Pixel.
 
@@ -130,7 +141,7 @@ LightsLightingMethodTooltip: "Legt die interne Behandlung von Lichtquellen fest.
 LightsMaximumDistance: "Maximale Lichtreichweite"
 LightsMaximumDistanceTooltip: "Standard: 8192 (1 Zelle)\nMaximale Entfernung, bis zu der Lichtquellen noch dargestellt werden (gemessen in In-Game-Einheiten).\n\nEin Wert von 0 entspricht einer unbegrenzten Reichweite."
 LightsMinimumInteriorBrightness: "Minimale Helligkeit in Innenräumen"
-LightsMinimumInteriorBrightnessTooltip: "Standard: 0,08\nMinimale Umgebungshelligkeit in Innenräumen.\n\nKann erhöht werden, falls Innenräume (v.a. bei Shader-Beleuchtungsmethoden) zu dunkel dargestellt werden."
+LightsMinimumInteriorBrightnessTooltip: "Standard: 0,08\nMinimale Umgebungshelligkeit in Innenräumen.\n\nKann erhöht werden, falls Innenräume zu dunkel dargestellt werden.\n\nDies hat keine Auswirkung, wenn der klassische Lichtabfall verwendet wird."
 MaxLights: "Maximale Anzahl von Lichtquellen pro Objekt"
 MaxLightsTooltip: "Standard: 8\nMaximale Anzahl von Lichtquellen, die ein Objekt beleuchten können.\n\nKleine Werte können gerade an Orten mit vielen Lichtquellen zum Aufploppen und zum schnellen Wechsel von Lichtern führen, wie es aus der Original-Engine und anderen The-Elder-Scrolls-Titeln bekannt ist."
 MenuHelpDelay: "Verzögerung des Hilfe-Menüs"

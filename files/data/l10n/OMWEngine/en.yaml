@@ -78,6 +78,17 @@ CameraSensitivity: "Camera Sensitivity"
 CameraZoomIn: "Zoom Camera In"
 CameraZoomOut: "Zoom Camera Out"
 ChangeRequiresRestart: "This change requires a restart to take effect."
+ClassicFalloff: "Classic Falloff"
+ClassicFalloffTooltip: |-
+    Default: off
+    Use the traditional point light attenuation formula which lacks an early fade out.
+
+    A flaw of the traditional formula is that light influence never quite reaches zero.
+    This is physically accurate, but can cause lighting seams because lights do not affect the entire scene.
+    Early fade out helps diminish these seams at the cost of darkening the scene.
+
+    Morrowind uses the traditional formula, so you may want to enable this if you dislike the brightness differences.
+    Alternatively, try changing the minimum interior brightness.
 ConfirmResetBindings: "Reset all controls to the default?"
 ConfirmResolution: "New resolution will be applied immediately. Do you want to continue?"
 Controller: "Controller"
@@ -95,7 +106,7 @@ EnableController: "Enable Controller"
 FieldOfView: "Field of View"
 FieldOfViewHigh: "High"
 FieldOfViewLow: "Low"
-ForcePerPixelLighting: "Force Per-Pixel Lighting"
+ForcePerPixelLighting: "Per-Pixel Lighting"
 ForcePerPixelLightingTooltip: |-
     Force the use of per-pixel lighting. By default, only bump- and normal-mapped objects use per-pixel lighting.
 
@@ -130,7 +141,7 @@ LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
 LightsMaximumDistance: "Maximum Light Distance"
 LightsMaximumDistanceTooltip: "Default: 8192\nMaximum distance at which lights will appear (measured in units).\n\nSet this to 0 to use an unlimited distance."
 LightsMinimumInteriorBrightness: "Minimum Interior Brightness"
-LightsMinimumInteriorBrightnessTooltip: "Default: 0.08\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark."
+LightsMinimumInteriorBrightnessTooltip: "Default: 0.08\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark.\n\nThis has no effect if classic falloff is used."
 MaxLights: "Max Lights"
 MaxLightsTooltip: "Default: 8\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see with legacy lighting."
 MenuHelpDelay: "Menu Help Delay"
