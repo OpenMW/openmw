@@ -2,6 +2,7 @@
 
 #include <apps/opencs/model/world/columnbase.hpp>
 #include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/land.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
@@ -283,7 +284,8 @@ namespace CSMWorld
         {
             return QString::fromUtf8(record.get().mRace.getRefIdString().c_str());
         }
-        return QVariant(QVariant::UserType);
+
+        return DisableTag::getVariant();
     }
 
     void BodyPartRaceColumn::set(Record<ESM::BodyPart>& record, const QVariant& data)

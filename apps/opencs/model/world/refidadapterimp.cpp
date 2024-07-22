@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/record.hpp>
 #include <apps/opencs/model/world/refiddata.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
@@ -1117,11 +1118,11 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData(
             case 0:
                 return static_cast<int>(record.get().mNpdt.mLevel);
             case 1:
-                return QVariant(QVariant::UserType);
+                return CSMWorld::DisableTag::getVariant();
             case 2:
-                return QVariant(QVariant::UserType);
+                return CSMWorld::DisableTag::getVariant();
             case 3:
-                return QVariant(QVariant::UserType);
+                return CSMWorld::DisableTag::getVariant();
             case 4:
                 return static_cast<int>(record.get().mNpdt.mDisposition);
             case 5:

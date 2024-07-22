@@ -7,6 +7,7 @@
 #include <variant>
 
 #include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/nestedtablewrapper.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
@@ -892,24 +893,24 @@ namespace CSMWorld
             // While the ambient information is not necessarily valid if the subrecord wasn't loaded,
             // the user should still be allowed to edit it
             case 1:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mAmbient : DisableTag::getVariant();
             case 2:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : DisableTag::getVariant();
             case 3:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : DisableTag::getVariant();
             case 4:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : DisableTag::getVariant();
             case 5:
             {
                 if (isInterior && interiorWater)
                     return cell.mWater;
                 else
-                    return QVariant(QVariant::UserType);
+                    return DisableTag::getVariant();
             }
             case 6:
-                return isInterior ? QVariant(QVariant::UserType) : cell.mMapColor; // TODO: how to select?
+                return isInterior ? DisableTag::getVariant() : cell.mMapColor; // TODO: how to select?
             // case 7: return isInterior ?
-            // behaveLikeExterior : QVariant(QVariant::UserType);
+            // behaveLikeExterior : DisableTag::getVariant();
             default:
                 throw std::runtime_error("Cell subcolumn index out of range");
         }

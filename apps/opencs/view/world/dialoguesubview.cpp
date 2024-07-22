@@ -30,6 +30,7 @@
 #include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/model/world/commanddispatcher.hpp>
 #include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/idtablebase.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 #include <apps/opencs/view/doc/subview.hpp>
@@ -655,7 +656,7 @@ void CSVWorld::EditWidget::remake(int row)
                         ++unlocked;
                     }
 
-                    if (mTable->index(row, i).data().type() == QVariant::UserType)
+                    if (CSMWorld::DisableTag::isDisableTag(mTable->index(row, i).data()))
                     {
                         editor->setEnabled(false);
                         label->setEnabled(false);
@@ -705,7 +706,7 @@ void CSVWorld::EditWidget::remake(int row)
                         unlockedLayout->addWidget(editor, unlocked, 1);
                         ++unlocked;
 
-                        if (tree->index(0, col, tree->index(row, i)).data().type() == QVariant::UserType)
+                        if (CSMWorld::DisableTag::isDisableTag(tree->index(0, col, tree->index(row, i)).data()))
                         {
                             editor->setEnabled(false);
                             label->setEnabled(false);
