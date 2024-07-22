@@ -225,6 +225,10 @@ tests = {
         initPlayer()
         testing.runLocalTest(player, 'playerPitchAndYawRotation')
     end},
+    {'rotating player should not lead to nan rotation', function()
+        initPlayer()
+        testing.runLocalTest(player, 'playerRotation')
+    end},
     {'playerForwardRunning', function()
         initPlayer()
         testing.runLocalTest(player, 'playerForwardRunning')

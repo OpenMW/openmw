@@ -97,6 +97,30 @@ testing.registerLocalTest('playerPitchAndYawRotation',
         testing.expectEqualWithDelta(gamma2, math.rad(-16), 0.05, 'Incorrect gamma rotation in ZYX convention')
     end)
 
+testing.registerLocalTest('playerRotation',
+    function()
+        local rotation = math.sqrt(2)
+        local endTime = core.getSimulationTime() + 3
+        while core.getSimulationTime() < endTime do
+            self.controls.jump = false
+            self.controls.run = true
+            self.controls.movement = 0
+            self.controls.sideMovement = 0
+            self.controls.pitchChange = rotation
+            self.controls.yawChange = rotation
+            coroutine.yield()
+
+            local alpha1, gamma1 = self.rotation:getAnglesXZ()
+            testing.expectThat(alpha1, testing.isNotNan(), 'Alpha rotation in XZ convention is nan')
+            testing.expectThat(gamma1, testing.isNotNan(), 'Gamma rotation in XZ convention is nan')
+
+            local alpha2, beta2, gamma2 = self.rotation:getAnglesZYX()
+            testing.expectThat(alpha2, testing.isNotNan(), 'Alpha rotation in ZYX convention is nan')
+            testing.expectThat(beta2, testing.isNotNan(), 'Beta rotation in ZYX convention is nan')
+            testing.expectThat(gamma2, testing.isNotNan(), 'Gamma rotation in ZYX convention is nan')
+        end
+    end)
+
 testing.registerLocalTest('playerForwardRunning',
     function()
         local startPos = self.position
