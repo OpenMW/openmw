@@ -276,6 +276,14 @@ Also it is possible to add a "Bip01 Arrow" bone to actor skeletons. In this case
 Such approach allows to implement better shooting animations (for example, beast races have tail, so quivers should be attached under different angle and
 default arrow fetching animation does not look good).
 
+Animation blending
+------------------
+
+Animation blending introduces smooth animation transitions between essentially every animation in the game without affecting gameplay. Effective if ``smooth animation transitions`` setting is enabled in the launcher or the config files.
+
+Animation developers can bundle ``.yaml``/``.json`` files together with their ``.kf`` files to specify the blending style of their animations. Those settings will only affect the corresponding animation files. 
+For more details see :doc:`animation-blending`.
+
 Groundcover support
 -------------------
 

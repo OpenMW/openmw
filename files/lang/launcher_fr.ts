@@ -699,6 +699,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Anime l&apos;utilisation d&apos;objet magique, de façon similaire à l&apos;utilisation des sorts.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est désactivée, le moteur de jeu n&apos;effectue aucune transition entre les différentes poses/animations.&lt;/p&gt;&lt;p&gt;Lorsque cette option est activée, le moteur de jeu adoucit la transition entre les différentes poses/animations.&lt;/p&gt;&lt;p&gt;Cette option prend en charge les fichiers de configuration YAML pour les transitions entre animations, ceux-ci peuvent être inclus avec les lots d&apos;animations afin de configurer le type de transition entre les diverses animations fournies.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Smooth Animation Transitions</source>
+        <translation>Adoucir la transition entre animations</translation>
+    </message>
+    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cette option rend les mouvements des PNJ et du joueur plus souple. Recommandé si l&apos;option &quot;Se tourner en direction du mouvement&quot; est activée.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>

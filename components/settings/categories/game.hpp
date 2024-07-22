@@ -39,6 +39,7 @@ namespace Settings
         SettingValue<bool> mCanLootDuringDeathAnimation{ mIndex, "Game", "can loot during death animation" };
         SettingValue<bool> mRebalanceSoulGemValues{ mIndex, "Game", "rebalance soul gem values" };
         SettingValue<bool> mUseAdditionalAnimSources{ mIndex, "Game", "use additional anim sources" };
+        SettingValue<bool> mSmoothAnimTransitions{ mIndex, "Game", "smooth animation transitions" };
         SettingValue<bool> mBarterDispositionChangeIsPermanent{ mIndex, "Game",
             "barter disposition change is permanent" };
         SettingValue<int> mStrengthInfluencesHandToHand{ mIndex, "Game", "strength influences hand to hand",

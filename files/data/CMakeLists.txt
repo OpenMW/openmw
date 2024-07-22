@@ -21,6 +21,9 @@ set(BUILTIN_DATA_FILES
     fonts/MysticCards.omwfont
     fonts/MysticCardsFontLicense.txt
 
+    # Default animation blending config
+    animations/animation-config.yaml
+
     # Month names and date formatting
     l10n/Calendar/de.yaml
     l10n/Calendar/en.yaml
