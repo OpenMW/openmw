@@ -847,6 +847,11 @@
 -- @field #list<#number> attack A table of the 3 randomly selected attacks used by creatures that do not carry weapons. The table consists of 6 numbers split into groups of 2 values corresponding to minimum and maximum damage in that order.
 -- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 -- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this creature.
+-- @field #boolean canFly whether the creature can fly
+-- @field #boolean canSwim whether the creature can swim
+-- @field #boolean canWalk whether the creature can walk
+-- @field #boolean canUseWeapons whether the creature can use weapons and shields
+-- @field #boolean isBiped whether the creature is a biped
 
 
 --- @{#NPC} functions

@@ -58,6 +58,16 @@ namespace MWLua
                 res[index++] = attack;
             return LuaUtil::makeReadOnly(res);
         });
+        record["canFly"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Flies; });
+        record["canSwim"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Swims; });
+        record["canUseWeapons"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Weapon; });
+        record["canWalk"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Walks; });
+        record["isBiped"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Bipedal; });
 
         addActorServicesBindings<ESM::Creature>(record, context);
     }
