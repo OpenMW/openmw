@@ -52,7 +52,7 @@
 -- @return #number
 
 ---
--- Frame duration in seconds
+-- Frame duration in seconds. Not available in global scripts.
 -- @function [parent=#core] getRealFrameDuration
 -- @return #number
 
