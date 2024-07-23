@@ -265,6 +265,20 @@ namespace LuaUtil
             return getFieldOrNil(value, str...);
     }
 
+    template <class... Str>
+    void setDeepField(sol::table& table, const sol::object& value, std::string_view first, const Str&... str)
+    {
+        if constexpr (sizeof...(str) == 0)
+            table[first] = value;
+        else
+        {
+            if (table[first] == sol::nil)
+                table[first] = sol::table(table.lua_state(), sol::create);
+            sol::table nextTable = table[first];
+            setDeepField(nextTable, value, str...);
+        }
+    }
+
     // String representation of a Lua object. Should be used for debugging/logging purposes only.
     std::string toString(const sol::object&);
 

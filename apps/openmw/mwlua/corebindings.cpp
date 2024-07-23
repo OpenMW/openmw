@@ -64,16 +64,18 @@ namespace MWLua
         api["getRealTime"] = []() {
             return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
         };
-        // TODO: remove in global context?
-        api["getRealFrameDuration"] = []() { return MWBase::Environment::get().getFrameDuration(); };
+
+        if (context.mType != Context::Global)
+            api["getRealFrameDuration"] = []() { return MWBase::Environment::get().getFrameDuration(); };
     }
 
     sol::table initCorePackage(const Context& context)
     {
         auto* lua = context.mLua;
 
-        if (lua->sol()["openmw_core"] != sol::nil)
-            return lua->sol()["openmw_core"];
+        sol::object cached = context.getTypePackage("openmw_core");
+        if (cached != sol::nil)
+            return cached;
 
         sol::table api(lua->sol(), sol::create);
         api["API_REVISION"] = Version::getLuaApiRevision(); // specified in CMakeLists.txt
@@ -81,13 +83,7 @@ namespace MWLua
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
         };
-        api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
-            context.mLuaEvents->addGlobalEvent(
-                { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
-        };
         api["contentFiles"] = initContentFilesBindings(lua->sol());
-        api["sound"] = initCoreSoundBindings(context);
-        api["vfx"] = initCoreVfxBindings(context);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
@@ -96,12 +92,19 @@ namespace MWLua
             throw std::runtime_error("Content file not found: " + std::string(contentFile));
         };
         addCoreTimeBindings(api, context);
-        api["magic"] = initCoreMagicBindings(context);
-        api["stats"] = initCoreStatsBindings(context);
 
-        api["factions"] = initCoreFactionBindings(context);
-        api["dialogue"] = initCoreDialogueBindings(context);
-        api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
+        api["magic"]
+            = context.cachePackage("openmw_core_magic", [context]() { return initCoreMagicBindings(context); });
+
+        api["stats"]
+            = context.cachePackage("openmw_core_stats", [context]() { return initCoreStatsBindings(context); });
+
+        api["factions"]
+            = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
+        api["dialogue"]
+            = context.cachePackage("openmw_core_dialogue", [context]() { return initCoreDialogueBindings(context); });
+        api["l10n"] = context.cachePackage("openmw_core_l10n",
+            [lua]() { return LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager()); });
         const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         api["getGMST"] = [lua = context.mLua, gmstStore](const std::string& setting) -> sol::object {
@@ -126,25 +129,29 @@ namespace MWLua
             return sol::nil;
         };
 
-        lua->sol()["openmw_core"] = LuaUtil::makeReadOnly(api);
-        return lua->sol()["openmw_core"];
-    }
+        if (context.mType != Context::Menu)
+        {
+            api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
+                context.mLuaEvents->addGlobalEvent(
+                    { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+            };
+            api["sound"]
+                = context.cachePackage("openmw_core_sound", [context]() { return initCoreSoundBindings(context); });
+            api["vfx"] = initCoreVfxBindings(context);
+        }
+        else
+        {
+            api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
+                if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
+                {
+                    throw std::logic_error("Can't send global events when no game is loaded");
+                }
+                context.mLuaEvents->addGlobalEvent(
+                    { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+            };
+        }
 
-    sol::table initCorePackageForMenuScripts(const Context& context)
-    {
-        sol::table api(context.mLua->sol(), sol::create);
-        for (auto& [k, v] : LuaUtil::getMutableFromReadOnly(initCorePackage(context)))
-            api[k] = v;
-        api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
-            if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
-            {
-                throw std::logic_error("Can't send global events when no game is loaded");
-            }
-            context.mLuaEvents->addGlobalEvent(
-                { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
-        };
-        api["sound"] = sol::nil;
-        api["vfx"] = sol::nil;
-        return LuaUtil::makeReadOnly(api);
+        sol::table readOnly = LuaUtil::makeReadOnly(api);
+        return context.setTypePackage(readOnly, "openmw_core");
     }
 }
