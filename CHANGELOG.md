@@ -182,6 +182,7 @@
     Bug #8002: Portable light sources held by creatures do not emit lighting
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
+    Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
