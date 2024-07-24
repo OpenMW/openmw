@@ -245,6 +245,7 @@
     Feature #7860: Lua: Expose NPC AI settings (fight, alarm, flee)
     Feature #7875: Disable MyGUI windows snapping
     Feature #7914: Do not allow to move GUI windows out of screen
+    Feature #7916: Expose all AiWander options to Lua, extend other packages as well
     Feature #7923: Don't show non-existent higher ranks for factions with fewer than 9 ranks
     Feature #7932: Support two-channel normal maps
     Feature #7936: Scalable icons in Qt applications
