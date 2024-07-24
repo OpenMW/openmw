@@ -26,10 +26,6 @@ namespace SceneUtil
 
     void LinkVisitor::link(osgAnimation::UpdateMatrixTransform* umt)
     {
-        // If osgAnimation had underscores, we should update the umt name also
-        // otherwise the animation channel and updates wont be applied
-        umt->setName(Misc::StringUtils::underscoresToSpaces(umt->getName()));
-
         const osgAnimation::ChannelList& channels = mAnimation->getChannels();
         for (const auto& channel : channels)
         {

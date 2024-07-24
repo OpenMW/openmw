@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadcont.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -51,8 +52,13 @@ namespace MWLua
         record["model"] = sol::readonly_property([](const ESM::Container& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel);
         });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Container& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["mwscript"] = sol::readonly_property([](const ESM::Container& rec) -> sol::optional<std::string> {
+            return LuaUtil::serializeRefId(rec.mScript);
+        });
         record["weight"] = sol::readonly_property([](const ESM::Container& rec) -> float { return rec.mWeight; });
+        record["isOrganic"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Organic; });
+        record["isRespawning"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Respawn; });
     }
 }

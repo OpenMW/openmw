@@ -48,6 +48,7 @@
 #include "../mwgui/tooltips.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace
 {
@@ -209,10 +210,7 @@ namespace MWClass
 
     std::string_view Creature::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Creature>(ptr);
     }
 
     MWMechanics::CreatureStats& Creature::getCreatureStats(const MWWorld::Ptr& ptr) const

@@ -23,16 +23,36 @@
 
 namespace Resource
 {
+    namespace
+    {
+        std::string parseTextKey(const std::string& line)
+        {
+            const std::size_t spacePos = line.find_last_of(' ');
+            if (spacePos != std::string::npos)
+                return line.substr(0, spacePos);
+            return {};
+        }
+
+        double parseTimeSignature(std::string_view line)
+        {
+            const std::size_t spacePos = line.find_last_of(' ');
+            double time = 0.0;
+            if (spacePos != std::string_view::npos && spacePos + 1 < line.size())
+                time = Misc::StringUtils::toNumeric<double>(line.substr(spacePos + 1), time);
+            return time;
+        }
+    }
 
     RetrieveAnimationsVisitor::RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target,
-        osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, const std::string& normalized,
-        const VFS::Manager* vfs)
+        osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, VFS::Path::NormalizedView path,
+        const VFS::Manager& vfs)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mTarget(target)
         , mAnimationManager(std::move(animationManager))
-        , mNormalized(normalized)
-        , mVFS(vfs)
+        , mPath(path)
+        , mVFS(&vfs)
     {
+        mPath.changeExtension("txt");
     }
 
     bool RetrieveAnimationsVisitor::belongsToLeftUpperExtremity(const std::string& name)
@@ -99,9 +119,6 @@ namespace Resource
                 const osgAnimation::ChannelList& channels = animation->getChannels();
                 for (const auto& channel : channels)
                 {
-                    // Replace channel target name to match the renamed bones/transforms
-                    channel->setTargetName(Misc::StringUtils::underscoresToSpaces(channel->getTargetName()));
-
                     if (name == "Bip01 R Clavicle")
                     {
                         if (!belongsToRightUpperExtremity(channel->getTargetName()))
@@ -145,18 +162,22 @@ namespace Resource
         // InventoryWeaponOneHand, PickProbe, Slash, Thrust, Chop... even "Slash Small Follow" osgAnimation formats
         // should have a .txt file with the same name, each line holding a textkey and whitespace separated time
         // value e.g. idle: start 0.0333
-        try
+        if (const Files::IStreamPtr textKeysFile = mVFS->find(mPath))
         {
-            Files::IStreamPtr textKeysFile = mVFS->get(changeFileExtension(mNormalized, "txt"));
-            std::string line;
-            while (getline(*textKeysFile, line))
+            try
             {
-                mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
+                std::string line;
+                while (getline(*textKeysFile, line))
+                    mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Warning) << "Failed to read text key file \"" << mPath << "\": " << e.what();
             }
         }
-        catch (const std::exception& e)
+        else
         {
-            Log(Debug::Warning) << "Failed to use textkey file " << mNormalized << ": " << e.what();
+            Log(Debug::Warning) << "Text key file is not found: " << mPath;
         }
 
         callback->setEmulatedAnimations(emulatedAnimations);
@@ -177,38 +198,6 @@ namespace Resource
         traverse(node);
     }
 
-    std::string RetrieveAnimationsVisitor::parseTextKey(const std::string& line)
-    {
-        size_t spacePos = line.find_last_of(' ');
-        if (spacePos != std::string::npos)
-            return line.substr(0, spacePos);
-        return "";
-    }
-
-    double RetrieveAnimationsVisitor::parseTimeSignature(const std::string& line)
-    {
-        size_t spacePos = line.find_last_of(' ');
-        double time = 0.0;
-        if (spacePos != std::string::npos && spacePos + 1 < line.size())
-            time = Misc::StringUtils::toNumeric<double>(line.substr(spacePos + 1), time);
-        return time;
-    }
-
-    std::string RetrieveAnimationsVisitor::changeFileExtension(const std::string& file, const std::string& ext)
-    {
-        size_t extPos = file.find_last_of('.');
-        if (extPos != std::string::npos && extPos + 1 < file.size())
-        {
-            return file.substr(0, extPos + 1) + ext;
-        }
-        return file;
-    }
-
-}
-
-namespace Resource
-{
-
     KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay,
         const ToUTF8::StatelessUtf8Encoder* encoder)
         : ResourceManager(vfs, expiryDelay)
@@ -219,7 +208,7 @@ namespace Resource
 
     osg::ref_ptr<const SceneUtil::KeyframeHolder> KeyframeManager::get(const std::string& name)
     {
-        const std::string normalized = VFS::Path::normalizeFilename(name);
+        const VFS::Path::Normalized normalized(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
@@ -231,7 +220,7 @@ namespace Resource
             {
                 auto file = std::make_shared<Nif::NIFFile>(normalized);
                 Nif::Reader reader(*file, mEncoder);
-                reader.parse(mVFS->getNormalized(normalized));
+                reader.parse(mVFS->get(normalized));
                 NifOsg::Loader::loadKf(*file, *loaded.get());
             }
             else
@@ -241,7 +230,7 @@ namespace Resource
                     = dynamic_cast<osgAnimation::BasicAnimationManager*>(scene->getUpdateCallback());
                 if (bam)
                 {
-                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), normalized, mVFS);
+                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), normalized, *mVFS);
                     scene->accept(rav);
                 }
             }

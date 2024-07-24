@@ -2,6 +2,8 @@
 
 #include <osg/FrameBufferObject>
 
+#include "postprocessor.hpp"
+
 namespace MWRender
 {
     void DistortionCallback::drawImplementation(
@@ -9,6 +11,11 @@ namespace MWRender
     {
         osg::State* state = renderInfo.getState();
         size_t frameId = state->getFrameStamp()->getFrameNumber() % 2;
+
+        PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
+
+        if (!postProcessor || bin->getStage()->getFrameBufferObject() != postProcessor->getPrimaryFbo(frameId))
+            return;
 
         mFBO[frameId]->apply(*state);
 

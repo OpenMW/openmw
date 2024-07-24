@@ -45,7 +45,8 @@ CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList& values, cons
     , mUiScale(static_cast<QGuiApplication*>(QGuiApplication::instance())->devicePixelRatio())
     , mSettingKey(pageName + '/' + settingName)
 {
-    parent->installEventFilter(this);
+    if (parent)
+        parent->installEventFilter(this);
 
     buildPixmaps();
 
@@ -70,7 +71,7 @@ bool CSVWorld::DataDisplayDelegate::eventFilter(QObject* target, QEvent* event)
         QColor themeColor = QApplication::palette().text().color();
         if (themeColor != mPixmapsColor)
         {
-            mPixmapsColor = themeColor;
+            mPixmapsColor = std::move(themeColor);
 
             buildPixmaps();
         }

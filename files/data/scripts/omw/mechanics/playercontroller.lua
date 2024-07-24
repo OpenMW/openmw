@@ -74,10 +74,10 @@ local function skillLevelUpHandler(skillid, source, params)
         message = '#{sBookSkillMessage}\n'..message
     end
 
-    ui.showMessage(message)
+    ui.showMessage(message, { showInDialogue = false })
     
     if levelStat.progress >= core.getGMST('iLevelUpTotal') then
-        ui.showMessage('#{sLevelUpMsg}')
+        ui.showMessage('#{sLevelUpMsg}', { showInDialogue = false })
     end
 
     if not source or source == I.SkillProgression.SKILL_INCREASE_SOURCES.Usage then skillStat.progress = 0 end

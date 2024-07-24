@@ -21,11 +21,12 @@ file(GLOB UNITTEST_SRC_FILES
 
     lua/test_ui_content.cpp
 
-    misc/test_stringops.cpp
+    misc/compression.cpp
+    misc/progressreporter.cpp
     misc/test_endianness.cpp
     misc/test_resourcehelpers.cpp
-    misc/progressreporter.cpp
-    misc/compression.cpp
+    misc/test_stringops.cpp
+    misc/testmathutil.cpp
 
     nifloader/testbulletnifloader.cpp
 

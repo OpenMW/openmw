@@ -877,7 +877,7 @@ printf "${OSG_ARCHIVE_NAME}... "
 			if [ $CONFIGURATION == "Debug" ]; then
 				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-gd-1_63,boost_system-vc141-mt-gd-1_63,collada-dom2.4-dp-vc141-mt-d}.dll
 			else
-				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-gd-1_63,boost_system-vc141-mt-1_63,collada-dom2.4-dp-vc141-mt}.dll
+				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-1_63,boost_system-vc141-mt-1_63,collada-dom2.4-dp-vc141-mt}.dll
 			fi
 		fi
 		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dae,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll

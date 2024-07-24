@@ -773,6 +773,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Анимации магических предметов</translation>
     </message>
     <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, она делает переходы между различными анимациями/позами намного глаже. Кроме того, она позволяет загружать YAML-файлы конфигураций смешивания анимаций, которые могут быть включены с анимациями, чтобы настроить стили смешивания.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Smooth Animation Transitions</source>
+        <translation>Плавные переходы между анимациями</translation>
+    </message>
+    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Делает перемещение персонажей более плавным. Рекомендуется использовать совместно с настройкой &quot;Поворот в направлении движения&quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -1139,14 +1147,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Saves</source>
         <translation>Сохранения</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting determines whether the amount of the time the player has spent playing will be displayed for each saved game in the Load menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта настройка определяет, будет ли отображаться время с начала новой игры для выбранного сохранения в меню загрузки.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Add &quot;Time Played&quot; to Saves</source>
-        <translation>Выводить &quot;Время в игре&quot; в сохранениях</translation>
     </message>
     <message>
         <source>JPG</source>

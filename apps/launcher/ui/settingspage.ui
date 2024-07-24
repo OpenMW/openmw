@@ -426,6 +426,16 @@
                  </property>
                 </widget>
                </item>
+               <item row="3" column="1">
+                 <widget class="QCheckBox" name="smoothAnimTransitionsCheckBox">
+                   <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                     <string>Smooth Animation Transitions</string>
+                   </property>
+                 </widget>
+               </item>
               </layout>
              </item>
             </layout>
@@ -1430,16 +1440,6 @@
           <string>Saves</string>
          </property>
          <layout class="QVBoxLayout" name="savesGroupVerticalLayout">
-          <item>
-           <widget class="QCheckBox" name="timePlayedCheckbox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting determines whether the amount of the time the player has spent playing will be displayed for each saved game in the Load menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Add &quot;Time Played&quot; to Saves</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <layout class="QHBoxLayout" name="maximumQuicksavesLayout">
             <item>

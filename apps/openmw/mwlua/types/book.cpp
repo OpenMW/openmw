@@ -6,6 +6,7 @@
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -104,14 +105,14 @@ namespace MWLua
         record["name"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property(
             [](const ESM::Book& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Book& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
         record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
-        record["enchant"]
-            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mEnchant.serializeText(); });
+        record["enchant"] = sol::readonly_property(
+            [](const ESM::Book& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mEnchant); });
         record["isScroll"] = sol::readonly_property([](const ESM::Book& rec) -> bool { return rec.mData.mIsScroll; });
         record["value"] = sol::readonly_property([](const ESM::Book& rec) -> int { return rec.mData.mValue; });
         record["weight"] = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mWeight; });
@@ -119,9 +120,7 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mEnchant * 0.1f; });
         record["skill"] = sol::readonly_property([](const ESM::Book& rec) -> sol::optional<std::string> {
             ESM::RefId skill = ESM::Skill::indexToRefId(rec.mData.mSkillId);
-            if (!skill.empty())
-                return skill.serializeText();
-            return sol::nullopt;
+            return LuaUtil::serializeRefId(skill);
         });
     }
 }

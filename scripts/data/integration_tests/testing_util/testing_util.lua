@@ -134,6 +134,20 @@ function M.elementsAreArray(expected)
 end
 
 ---
+-- Matcher verifying that given number is not a nan.
+-- @function isNotNan
+-- @usage
+-- expectThat(value, isNotNan())
+function M.isNotNan(expected)
+    return function(actual)
+        if actual ~= actual then
+            return 'actual value is nan, expected to be not nan'
+        end
+        return ''
+    end
+end
+
+---
 -- Verifies that given value matches provided matcher.
 -- @function expectThat
 -- @param value#any any value to match.

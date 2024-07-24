@@ -4,6 +4,7 @@
 
 #include <components/esm3/loadcrea.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -36,8 +37,9 @@ namespace MWLua
         record["name"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Creature& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["mwscript"] = sol::readonly_property([](const ESM::Creature& rec) -> sol::optional<std::string> {
+            return LuaUtil::serializeRefId(rec.mScript);
+        });
         record["baseCreature"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> std::string { return rec.mOriginal.serializeText(); });
         record["soulValue"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mSoul; });

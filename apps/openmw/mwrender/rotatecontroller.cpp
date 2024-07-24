@@ -35,12 +35,26 @@ namespace MWRender
             return;
         }
         osg::Matrix matrix = node->getMatrix();
-        osg::Quat worldOrient = getWorldOrientation(node);
+
+        osg::Quat worldOrient;
+        osg::Vec3d worldScale(1.0, 1.0, 1.0);
+
+        osg::NodePathList nodepaths = node->getParentalNodePaths(mRelativeTo);
+
+        if (!nodepaths.empty())
+        {
+            osg::Matrixf worldMat = osg::computeLocalToWorld(nodepaths[0]);
+            worldOrient = worldMat.getRotate();
+            worldScale = worldMat.getScale();
+        }
+
         osg::Quat worldOrientInverse = worldOrient.inverse();
 
         osg::Quat orient = worldOrient * mRotate * worldOrientInverse * matrix.getRotate();
         matrix.setRotate(orient);
         matrix.setTrans(matrix.getTrans() + worldOrientInverse * mOffset);
+
+        matrix *= osg::Matrix::scale(worldScale);
 
         node->setMatrix(matrix);
 
@@ -57,18 +71,4 @@ namespace MWRender
 
         traverse(node, nv);
     }
-
-    osg::Quat RotateController::getWorldOrientation(osg::Node* node)
-    {
-        // this could be optimized later, we just need the world orientation, not the full matrix
-        osg::NodePathList nodepaths = node->getParentalNodePaths(mRelativeTo);
-        osg::Quat worldOrient;
-        if (!nodepaths.empty())
-        {
-            osg::Matrixf worldMat = osg::computeLocalToWorld(nodepaths[0]);
-            worldOrient = worldMat.getRotate();
-        }
-        return worldOrient;
-    }
-
 }

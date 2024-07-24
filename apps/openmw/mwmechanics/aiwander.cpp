@@ -455,27 +455,37 @@ namespace MWMechanics
     void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration,
         MWWorld::MovementDirectionFlags supportedMovementDirections, AiWanderStorage& storage)
     {
-        switch (storage.mState)
+        // Attempt to fast forward to the next state instead of remaining in an intermediate state for a frame
+        for (int i = 0; i < 2; ++i)
         {
-            case AiWanderStorage::Wander_IdleNow:
-                onIdleStatePerFrameActions(actor, duration, storage);
-                break;
+            switch (storage.mState)
+            {
+                case AiWanderStorage::Wander_IdleNow:
+                {
+                    onIdleStatePerFrameActions(actor, duration, storage);
+                    if (storage.mState != AiWanderStorage::Wander_ChooseAction)
+                        return;
+                    continue;
+                }
+                case AiWanderStorage::Wander_Walking:
+                    onWalkingStatePerFrameActions(actor, duration, supportedMovementDirections, storage);
+                    return;
 
-            case AiWanderStorage::Wander_Walking:
-                onWalkingStatePerFrameActions(actor, duration, supportedMovementDirections, storage);
-                break;
+                case AiWanderStorage::Wander_ChooseAction:
+                {
+                    onChooseActionStatePerFrameActions(actor, storage);
+                    if (storage.mState != AiWanderStorage::Wander_IdleNow)
+                        return;
+                    continue;
+                }
+                case AiWanderStorage::Wander_MoveNow:
+                    return; // nothing to do
 
-            case AiWanderStorage::Wander_ChooseAction:
-                onChooseActionStatePerFrameActions(actor, storage);
-                break;
-
-            case AiWanderStorage::Wander_MoveNow:
-                break; // nothing to do
-
-            default:
-                // should never get here
-                assert(false);
-                break;
+                default:
+                    // should never get here
+                    assert(false);
+                    return;
+            }
         }
     }
 

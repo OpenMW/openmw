@@ -1,22 +1,28 @@
 #include "itemdata.hpp"
 
+#include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loadench.hpp>
+
 #include "context.hpp"
 #include "luamanagerimp.hpp"
 #include "objectvariant.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwmechanics/spellutil.hpp"
+
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace
 {
     using SelfObject = MWLua::SelfObject;
     using Index = const SelfObject::CachedStat::Index&;
 
-    constexpr std::array properties = { "condition", /*"enchantmentCharge", "soul", "owner", etc..*/ };
+    constexpr std::array properties = { "condition", "enchantmentCharge", "soul" };
 
-    void invalidPropErr(std::string_view prop, const MWWorld::Ptr& ptr)
+    void valueErr(std::string_view prop, std::string type)
     {
-        throw std::runtime_error("'" + std::string(prop) + "'" + " property does not exist for item "
-            + std::string(ptr.getClass().getName(ptr)) + "(" + std::string(ptr.getTypeDescription()) + ")");
+        throw std::logic_error("'" + std::string(prop) + "'" + " received invalid value type (" + type + ")");
     }
 }
 
@@ -54,26 +60,56 @@ namespace MWLua
                 if (it != self->mStatsCache.end())
                     return it->second;
             }
-            return sol::make_object(context.mLua->sol(), getValue(context, prop));
+            return sol::make_object(context.mLua->sol(), getValue(context, prop, mObject.ptr()));
         }
 
         void set(const Context& context, std::string_view prop, const sol::object& value) const
         {
-            SelfObject* obj = mObject.asSelfObject();
-            addStatUpdateAction(context.mLuaManager, *obj);
-            obj->mStatsCache[SelfObject::CachedStat{ &ItemData::setValue, std::monostate{}, prop }] = value;
+            if (mObject.isGObject())
+                setValue({}, prop, mObject.ptr(), value);
+            else if (mObject.isSelfObject())
+            {
+                SelfObject* obj = mObject.asSelfObject();
+                addStatUpdateAction(context.mLuaManager, *obj);
+                obj->mStatsCache[SelfObject::CachedStat{ &ItemData::setValue, std::monostate{}, prop }] = value;
+            }
+            else
+                throw std::runtime_error("Only global or self scripts can set the value");
         }
 
-        sol::object getValue(const Context& context, std::string_view prop) const
+        static sol::object getValue(const Context& context, std::string_view prop, const MWWorld::Ptr& ptr)
         {
             if (prop == "condition")
             {
-                MWWorld::Ptr o = mObject.ptr();
-                if (o.mRef->getType() == ESM::REC_LIGH)
-                    return sol::make_object(context.mLua->sol(), o.getClass().getRemainingUsageTime(o));
-                else if (o.getClass().hasItemHealth(o))
-                    return sol::make_object(
-                        context.mLua->sol(), o.getClass().getItemHealth(o) + o.getCellRef().getChargeIntRemainder());
+                if (ptr.mRef->getType() == ESM::REC_LIGH)
+                    return sol::make_object(context.mLua->sol(), ptr.getClass().getRemainingUsageTime(ptr));
+                else if (ptr.getClass().hasItemHealth(ptr))
+                    return sol::make_object(context.mLua->sol(),
+                        ptr.getClass().getItemHealth(ptr) + ptr.getCellRef().getChargeIntRemainder());
+            }
+            else if (prop == "enchantmentCharge")
+            {
+                const ESM::RefId& enchantmentName = ptr.getClass().getEnchantment(ptr);
+
+                if (enchantmentName.empty())
+                    return sol::lua_nil;
+
+                float charge = ptr.getCellRef().getEnchantmentCharge();
+                const auto& store = MWBase::Environment::get().getESMStore();
+                const auto* enchantment = store->get<ESM::Enchantment>().find(enchantmentName);
+
+                if (charge == -1) // return the full charge
+                    return sol::make_object(context.mLua->sol(), MWMechanics::getEnchantmentCharge(*enchantment));
+
+                return sol::make_object(context.mLua->sol(), charge);
+            }
+            else if (prop == "soul")
+            {
+                ESM::RefId soul = ptr.getCellRef().getSoul();
+                if (soul.empty())
+                    return sol::lua_nil;
+
+                return sol::make_object(context.mLua->sol(), soul.serializeText());
             }
 
             return sol::lua_nil;
@@ -83,17 +119,48 @@ namespace MWLua
         {
             if (prop == "condition")
             {
-                float cond = LuaUtil::cast<float>(value);
-                if (ptr.mRef->getType() == ESM::REC_LIGH)
-                    ptr.getClass().setRemainingUsageTime(ptr, cond);
-                else if (ptr.getClass().hasItemHealth(ptr))
+                if (value.get_type() == sol::type::number)
                 {
-                    // if the value set is less than 0, chargeInt and chargeIntRemainder is set to 0
-                    ptr.getCellRef().setChargeIntRemainder(std::max(0.f, std::modf(cond, &cond)));
-                    ptr.getCellRef().setCharge(std::max(0.f, cond));
+                    float cond = LuaUtil::cast<float>(value);
+                    if (ptr.mRef->getType() == ESM::REC_LIGH)
+                        ptr.getClass().setRemainingUsageTime(ptr, cond);
+                    else if (ptr.getClass().hasItemHealth(ptr))
+                    {
+                        // if the value set is less than 0, chargeInt and chargeIntRemainder is set to 0
+                        ptr.getCellRef().setChargeIntRemainder(std::max(0.f, std::modf(cond, &cond)));
+                        ptr.getCellRef().setCharge(std::max(0.f, cond));
+                    }
                 }
                 else
-                    invalidPropErr(prop, ptr);
+                    valueErr(prop, sol::type_name(value.lua_state(), value.get_type()));
+            }
+            else if (prop == "enchantmentCharge")
+            {
+                if (value.get_type() == sol::type::lua_nil)
+                    ptr.getCellRef().setEnchantmentCharge(-1);
+                else if (value.get_type() == sol::type::number)
+                    ptr.getCellRef().setEnchantmentCharge(std::max(0.0f, LuaUtil::cast<float>(value)));
+                else
+                    valueErr(prop, sol::type_name(value.lua_state(), value.get_type()));
+            }
+            else if (prop == "soul")
+            {
+                if (value.get_type() == sol::type::lua_nil)
+                    ptr.getCellRef().setSoul(ESM::RefId{});
+                else if (value.get_type() == sol::type::string)
+                {
+                    std::string_view souldId = LuaUtil::cast<std::string_view>(value);
+                    ESM::RefId creature = ESM::RefId::deserializeText(souldId);
+                    const auto& store = *MWBase::Environment::get().getESMStore();
+
+                    // TODO: Add Support for NPC Souls
+                    if (store.get<ESM::Creature>().search(creature))
+                        ptr.getCellRef().setSoul(creature);
+                    else
+                        throw std::runtime_error("Cannot use non-existent creature as a soul: " + std::string(souldId));
+                }
+                else
+                    valueErr(prop, sol::type_name(value.lua_state(), value.get_type()));
             }
         }
     };

@@ -28,9 +28,6 @@ namespace Compiler
     public:
         FileParser(ErrorHandler& errorHandler, Context& context);
 
-        std::string getName() const;
-        ///< Return script name.
-
         Interpreter::Program getProgram() const;
 
         const Locals& getLocals() const;

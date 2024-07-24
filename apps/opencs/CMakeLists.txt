@@ -30,7 +30,7 @@ opencs_units (model/world
     )
 
 opencs_hdrs (model/world
-    columnimp idcollection collection info subcellcollection
+    columnimp disabletag idcollection collection info subcellcollection
     )
 
 

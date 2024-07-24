@@ -14,7 +14,8 @@ namespace
         sol::protected_function mNew;
         LuaUiContentTest()
         {
-            mLuaState.addInternalLibSearchPath("resources/lua_libs");
+            mLuaState.addInternalLibSearchPath(
+                std::filesystem::path{ OPENMW_PROJECT_SOURCE_DIR } / "components" / "lua_ui");
             mNew = LuaUi::loadContentConstructor(&mLuaState);
         }
 

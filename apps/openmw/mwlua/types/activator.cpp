@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadacti.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -51,7 +52,8 @@ namespace MWLua
         record["model"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel);
         });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Activator& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["mwscript"] = sol::readonly_property([](const ESM::Activator& rec) -> sol::optional<std::string> {
+            return LuaUtil::serializeRefId(rec.mScript);
+        });
     }
 }

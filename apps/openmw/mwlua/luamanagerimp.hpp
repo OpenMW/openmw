@@ -13,6 +13,7 @@
 #include <components/misc/color.hpp>
 
 #include "../mwbase/luamanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "engineevents.hpp"
 #include "globalscripts.hpp"
@@ -106,7 +107,11 @@ namespace MWLua
 
         // Used only in Lua bindings
         void addCustomLocalScript(const MWWorld::Ptr&, int scriptId, std::string_view initData);
-        void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
+        void addUIMessage(
+            std::string_view message, MWGui::ShowInDialogueMode mode = MWGui::ShowInDialogueMode_IfPossible)
+        {
+            mUIMessages.emplace_back(message, mode);
+        }
         void addInGameConsoleMessage(const std::string& msg, const Misc::Color& color)
         {
             mInGameConsoleMessages.push_back({ msg, color });
@@ -218,7 +223,7 @@ namespace MWLua
         };
         std::vector<DelayedAction> mActionQueue;
         std::optional<DelayedAction> mTeleportPlayerAction;
-        std::vector<std::string> mUIMessages;
+        std::vector<std::pair<std::string, MWGui::ShowInDialogueMode>> mUIMessages;
         std::vector<std::pair<std::string, Misc::Color>> mInGameConsoleMessages;
         std::optional<ObjectId> mDelayedUiModeChangedArg;
 

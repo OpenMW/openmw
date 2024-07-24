@@ -541,3 +541,14 @@ In third person, the camera will sway along with the movement animations of the 
 Enabling this option disables this swaying by having the player character move independently of its animation.
 
 This setting can be controlled in the Settings tab of the launcher.
+
+smooth animation transitions
+----------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enabling this option uses smooth transitions between animations making them a lot less jarring. Also allows to load modded animation blending.
+
+This setting can be controlled in the Settings tab of the launcher.

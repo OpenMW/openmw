@@ -42,7 +42,6 @@ namespace MWScript
         Compiler::Context& mCompilerContext;
         Compiler::FileParser mParser;
         Interpreter::Interpreter mInterpreter;
-        bool mOpcodesInstalled;
 
         struct CompiledScript
         {

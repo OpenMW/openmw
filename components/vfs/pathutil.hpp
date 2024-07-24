@@ -88,6 +88,10 @@ namespace VFS::Path
 
         NormalizedView(const Normalized& value) noexcept;
 
+        explicit NormalizedView(const std::string&) = delete;
+
+        explicit NormalizedView(std::string&&) = delete;
+
         constexpr std::string_view value() const noexcept { return mValue; }
 
         friend constexpr bool operator==(const NormalizedView& lhs, const NormalizedView& rhs) = default;

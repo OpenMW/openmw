@@ -39,6 +39,14 @@
 -- Shows given message at the bottom of the screen.
 -- @function [parent=#ui] showMessage
 -- @param #string msg
+-- @param #table options An optional table with additional optional arguments. Can contain:
+--
+--   * `showInDialogue` - If true, this message will only be shown in the dialogue window. If false, it will always be shown in a message box.
+--                        When omitted, the message will be displayed in the dialogue window if it is open and will be shown at the bottom of the screen otherwise.
+-- @usage local params = {
+--    showInDialogue=false
+-- };
+-- ui.showMessage("Hello world", params)
 
 ---
 -- Predefined colors for console output

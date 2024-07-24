@@ -1674,7 +1674,12 @@ namespace MWMechanics
                             }
                         }
                         else if (aiInactive)
-                            mAttackType = getRandomAttackType();
+                        {
+                            mAttackType = getDesiredAttackType();
+                            if (mAttackType == "")
+                                mAttackType = getRandomAttackType();
+                        }
+
                         // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
                         startKey = mAttackType + ' ' + startKey;
                         stopKey = mAttackType + " max attack";
@@ -2042,7 +2047,8 @@ namespace MWMechanics
             float effectiveRotation = rot.z();
             bool canMove = cls.getMaxSpeed(mPtr) > 0;
             const bool turnToMovementDirection = Settings::game().mTurnToMovementDirection;
-            if (!turnToMovementDirection || isFirstPersonPlayer)
+            const bool isBiped = mPtr.getClass().isBipedal(mPtr);
+            if (!isBiped || !turnToMovementDirection || isFirstPersonPlayer)
             {
                 movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
                 stats.setSideMovementAngle(0);
@@ -2286,7 +2292,7 @@ namespace MWMechanics
 
                     // It seems only bipedal actors use turning animations.
                     // Also do not use turning animations in the first-person view and when sneaking.
-                    if (!sneak && !isFirstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
+                    if (!sneak && !isFirstPersonPlayer && isBiped)
                     {
                         if (effectiveRotation > rotationThreshold)
                             movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
@@ -2296,7 +2302,7 @@ namespace MWMechanics
                 }
             }
 
-            if (turnToMovementDirection && !isFirstPersonPlayer
+            if (turnToMovementDirection && !isFirstPersonPlayer && isBiped
                 && (movestate == CharState_SwimRunForward || movestate == CharState_SwimWalkForward
                     || movestate == CharState_SwimRunBack || movestate == CharState_SwimWalkBack))
             {
@@ -2330,7 +2336,7 @@ namespace MWMechanics
             }
             else
             {
-                if (mPtr.getClass().isBipedal(mPtr))
+                if (isBiped)
                 {
                     if (mTurnAnimationThreshold > 0)
                         mTurnAnimationThreshold -= duration;
@@ -3000,6 +3006,11 @@ namespace MWMechanics
     bool CharacterController::getAttackingOrSpell() const
     {
         return mPtr.getClass().getCreatureStats(mPtr).getAttackingOrSpell();
+    }
+
+    std::string_view CharacterController::getDesiredAttackType() const
+    {
+        return mPtr.getClass().getCreatureStats(mPtr).getAttackType();
     }
 
     void CharacterController::setActive(int active) const

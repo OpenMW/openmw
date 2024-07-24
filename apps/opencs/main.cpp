@@ -13,6 +13,7 @@
 #include <components/platform/platform.hpp>
 
 #include "model/doc/messages.hpp"
+#include "model/world/disabletag.hpp"
 #include "model/world/universalid.hpp"
 
 #ifdef Q_OS_MAC
@@ -53,6 +54,7 @@ int runApplication(int argc, char* argv[])
 
     qRegisterMetaType<std::string>("std::string");
     qRegisterMetaType<CSMWorld::UniversalId>("CSMWorld::UniversalId");
+    qRegisterMetaType<CSMWorld::DisableTag>("CSMWorld::DisableTag");
     qRegisterMetaType<CSMDoc::Message>("CSMDoc::Message");
 
     setQSurfaceFormat();
@@ -78,5 +80,5 @@ int runApplication(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
+    return Debug::wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
 }

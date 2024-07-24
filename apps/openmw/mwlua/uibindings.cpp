@@ -90,7 +90,21 @@ namespace MWLua
         };
         api["_isHudVisible"] = []() -> bool { return MWBase::Environment::get().getWindowManager()->isHudVisible(); };
         api["showMessage"]
-            = [luaManager = context.mLuaManager](std::string_view message) { luaManager->addUIMessage(message); };
+            = [luaManager = context.mLuaManager](std::string_view message, const sol::optional<sol::table>& options) {
+                  MWGui::ShowInDialogueMode mode = MWGui::ShowInDialogueMode_IfPossible;
+                  if (options.has_value())
+                  {
+                      auto showInDialogue = options->get<sol::optional<bool>>("showInDialogue");
+                      if (showInDialogue.has_value())
+                      {
+                          if (*showInDialogue)
+                              mode = MWGui::ShowInDialogueMode_Only;
+                          else
+                              mode = MWGui::ShowInDialogueMode_Never;
+                      }
+                  }
+                  luaManager->addUIMessage(message, mode);
+              };
         api["CONSOLE_COLOR"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string, Misc::Color>({
             { "Default", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Default.substr(1)) },
             { "Error", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Error.substr(1)) },
@@ -246,7 +260,7 @@ namespace MWLua
                           // TODO: Maybe disallow opening/closing special modes (main menu, settings, loading screen)
                           // from player scripts. Add new Lua context "menu" that can do it.
                           for (unsigned i = stack.size() - common; i > 0; i--)
-                              windowManager->popGuiMode();
+                              windowManager->popGuiMode(true);
                           if (common == newStack.size() && !newStack.empty() && arg.has_value())
                               windowManager->pushGuiMode(newStack.back(), ptr);
                           for (unsigned i = common; i < newStack.size(); ++i)

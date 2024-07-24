@@ -934,10 +934,6 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>Sparfiler</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting determines whether the amount of the time the player has spent playing will be displayed for each saved game in the Load menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Denna inställning avgör huruvida mängden tid spelaren har spenderat i spelet kommer visas för varje sparat spel i Ladda spel-menyn.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>JPG</source>
         <translation>JPG</translation>
     </message>
@@ -1435,10 +1431,6 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>Kan zooma på kartor</translation>
     </message>
     <message>
-        <source>Add &quot;Time Played&quot; to Saves</source>
-        <translation>Lägg till spelad tid i sparfiler</translation>
-    </message>
-    <message>
         <source>Notify on Saved Screenshot</source>
         <translation>Ge notis vid sparad skärmdump</translation>
     </message>
@@ -1453,6 +1445,14 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     <message>
         <source>Run Script After Startup:</source>
         <translation>Kör skript efter uppstart:</translation>
+    </message>
+    <message>
+        <source>Smooth Animation Transitions</source>
+        <translation>Mjuka animationsövergångar</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Vid aktivering gör denna funktion att övergångarna mellan olika animationer och poser blir mycket mjukare. Funktionen gör det också möjligt att konfigurera animationsövergångarna i YAML-filer. Dessa filer kan buntas ihop tillsammans med nya animationsfiler.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 </TS>

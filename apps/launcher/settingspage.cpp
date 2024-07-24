@@ -189,6 +189,7 @@ bool Launcher::SettingsPage::loadSettings()
             loadSettingBool(Settings::game().mWeaponSheathing, *weaponSheathingCheckBox);
             loadSettingBool(Settings::game().mShieldSheathing, *shieldSheathingCheckBox);
         }
+        loadSettingBool(Settings::game().mSmoothAnimTransitions, *smoothAnimTransitionsCheckBox);
         loadSettingBool(Settings::game().mTurnToMovementDirection, *turnToMovementDirectionCheckBox);
         loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
         loadSettingBool(Settings::game().mPlayerMovementIgnoresAnimation, *playerMovementIgnoresAnimationCheckBox);
@@ -319,7 +320,6 @@ bool Launcher::SettingsPage::loadSettings()
     // Miscellaneous
     {
         // Saves
-        loadSettingBool(Settings::saves().mTimeplayed, *timePlayedCheckbox);
         loadSettingInt(Settings::saves().mMaxQuicksaves, *maximumQuicksavesComboBox);
 
         // Other Settings
@@ -395,6 +395,7 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*weaponSheathingCheckBox, Settings::game().mWeaponSheathing);
         saveSettingBool(*shieldSheathingCheckBox, Settings::game().mShieldSheathing);
         saveSettingBool(*turnToMovementDirectionCheckBox, Settings::game().mTurnToMovementDirection);
+        saveSettingBool(*smoothAnimTransitionsCheckBox, Settings::game().mSmoothAnimTransitions);
         saveSettingBool(*smoothMovementCheckBox, Settings::game().mSmoothMovement);
         saveSettingBool(*playerMovementIgnoresAnimationCheckBox, Settings::game().mPlayerMovementIgnoresAnimation);
 
@@ -512,7 +513,6 @@ void Launcher::SettingsPage::saveSettings()
     // Miscellaneous
     {
         // Saves Settings
-        saveSettingBool(*timePlayedCheckbox, Settings::saves().mTimeplayed);
         saveSettingInt(*maximumQuicksavesComboBox, Settings::saves().mMaxQuicksaves);
 
         // Other Settings

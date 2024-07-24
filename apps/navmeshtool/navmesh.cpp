@@ -62,7 +62,7 @@ namespace NavMeshTool
         void serializeToStderr(const T& value)
         {
             const std::vector<std::byte> data = serialize(value);
-            getLockedRawStderr()->write(
+            Debug::getLockedRawStderr()->write(
                 reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
         }
 

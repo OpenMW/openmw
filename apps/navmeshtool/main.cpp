@@ -140,14 +140,14 @@ namespace NavMeshTool
 
             if (variables.find("help") != variables.end())
             {
-                getRawStdout() << desc << std::endl;
+                Debug::getRawStdout() << desc << std::endl;
                 return 0;
             }
 
             Files::ConfigurationManager config;
             config.readConfiguration(variables, desc);
 
-            setupLogging(config.getLogPath(), applicationName);
+            Debug::setupLogging(config.getLogPath(), applicationName);
 
             const std::string encoding(variables["encoding"].as<std::string>());
             Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
@@ -260,6 +260,6 @@ namespace NavMeshTool
 /*
 int main(int argc, char* argv[])
 {
-    return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
+    return Debug::wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
 }
 */

@@ -30,7 +30,7 @@ int runLauncher(int argc, char* argv[])
     configurationManager.addCommonOptions(description);
     configurationManager.readConfiguration(variables, description, true);
 
-    setupLogging(configurationManager.getLogPath(), "Launcher");
+    Debug::setupLogging(configurationManager.getLogPath(), "Launcher");
 
     try
     {
@@ -66,5 +66,5 @@ int runLauncher(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(runLauncher, argc, argv, "Launcher");
+    return Debug::wrapApplication(runLauncher, argc, argv, "Launcher");
 }

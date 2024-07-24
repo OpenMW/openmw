@@ -321,7 +321,7 @@
 -- @param #any id Active spell ID.
 
 ---
--- Adds a new spell to the list of active spells (only in global scripts or on self). 
+-- Adds a new spell to the list of active spells (only in global scripts or on self).
 -- Note that this does not play any related VFX or sounds.
 -- @function [parent=#ActorActiveSpells] add
 -- @param self
@@ -750,7 +750,7 @@
 -- @return #boolean
 
 ---
--- Get this item's current enchantment charge.
+-- (DEPRECATED, use itemData(item).enchantmentCharge) Get this item's current enchantment charge.
 -- @function [parent=#Item] getEnchantmentCharge
 -- @param openmw.core#GameObject item
 -- @return #number The charge remaining. `nil` if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of `nil`.
@@ -763,7 +763,7 @@
 -- @return #boolean
 
 ---
--- Set this item's enchantment charge.
+-- (DEPRECATED, use itemData(item).enchantmentCharge) Set this item's enchantment charge.
 -- @function [parent=#Item] setEnchantmentCharge
 -- @param openmw.core#GameObject item
 -- @param #number charge Can be `nil` to reset the unused state / full
@@ -777,14 +777,16 @@
 -- @return #boolean
 
 ---
--- Set of properties that differentiates one item from another of the same record type.
+-- Set of properties that differentiates one item from another of the same record type; can be used by any script, but only global and self scripts can change values.
 -- @function [parent=#Item] itemData
 -- @param openmw.core#GameObject item
 -- @return #ItemData
 
 ---
 -- @type ItemData
--- @field #number condition The item's current condition. Time remaining for lights. Uses left for lockpicks and probes. Current health for weapons and armor.
+-- @field #number condition The item's current condition. Time remaining for lights. Uses left for repairs, lockpicks and probes. Current health for weapons and armor.
+-- @field #number enchantmentCharge The item's current enchantment charge. Unenchanted items will always return a value of `nil`. Setting this to `nil` will reset the charge of the item.
+-- @field #string soul The recordId of the item's current soul. Items without soul will always return a value of `nil`. Setting this to `nil` will remove the soul from the item.
 
 --------------------------------------------------------------------------------
 -- @{#Creature} functions
@@ -797,7 +799,7 @@
 
 ---
 -- A read-only list of all @{#CreatureRecord}s in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #CreatureRecord. 
+-- Implements [iterables#List](iterables.html#List) of #CreatureRecord.
 -- @field [parent=#Creature] #list<#CreatureRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -835,7 +837,7 @@
 -- @field #string name
 -- @field #string baseCreature Record id of a base creature, which was modified to create this one
 -- @field #string model VFS path to the creature's model
--- @field #string mwscript
+-- @field #string mwscript MWScript on this creature (can be nil)
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
 -- @field #number baseGold The base barter gold of the creature
@@ -858,7 +860,7 @@
 
 ---
 -- A read-only list of all @{#NpcRecord}s in the world database, may be indexed by recordId.
--- Implements [iterables#List](iterables.html#List) of #NpcRecord. 
+-- Implements [iterables#List](iterables.html#List) of #NpcRecord.
 -- @field [parent=#NPC] #map<#NpcRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1035,8 +1037,8 @@
 -- @field [parent=#NPC] #Classes classes
 
 ---
--- A read-only list of all @{#ClassRecord}s in the world database, may be indexed by recordId. 
--- Implements [iterables#List](iterables.html#List) of #ClassRecord. 
+-- A read-only list of all @{#ClassRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #ClassRecord.
 -- @field [parent=#Classes] #list<#ClassRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1076,7 +1078,7 @@
 
 ---
 -- A read-only list of all @{#RaceRecord}s in the world database.
--- Implements [iterables#List](iterables.html#List) of #RaceRecord. 
+-- Implements [iterables#List](iterables.html#List) of #RaceRecord.
 -- @field [parent=#Races] #list<#RaceRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1115,7 +1117,7 @@
 -- @field #string race
 -- @field #string class Name of the NPC's class (e. g. Acrobat)
 -- @field #string model Path to the model associated with this NPC, used for animations.
--- @field #string mwscript MWScript that is attached to this NPC
+-- @field #string mwscript MWScript on this NPC (can be nil)
 -- @field #string hair Path to the hair body part model
 -- @field #string head Path to the head body part model
 -- @field #number baseGold The base barter gold of the NPC
@@ -1248,7 +1250,7 @@
 
 ---
 -- A read-only list of all @{#BirthSignRecord}s in the world database.
--- Implements [iterables#List](iterables.html#List) of #BirthSignRecord. 
+-- Implements [iterables#List](iterables.html#List) of #BirthSignRecord.
 -- @field [parent=#BirthSigns] #list<#BirthSignRecord> records
 -- @usage local record = types.NPC.classes['example_recordid']
 -- @usage local record = types.NPC.classes[1]
@@ -1325,9 +1327,9 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this armor (can be empty)
+-- @field #string mwscript MWScript on this armor (can be nil)
 -- @field #string icon VFS path to the icon
--- @field #string enchant The enchantment ID of this armor (can be empty)
+-- @field #string enchant The enchantment ID of this armor (can be nil)
 -- @field #number weight
 -- @field #number value
 -- @field #number type See @{#Armor.TYPE}
@@ -1358,7 +1360,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#BookRecord}s in the world database. 
+-- A read-only list of all @{#BookRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #BookRecord.
 -- @field [parent=#Book] #list<#BookRecord> records
 -- @usage local record = types.Book.records['example_recordid']
@@ -1414,9 +1416,9 @@
 -- @field #string id The record ID of the book
 -- @field #string name Name of the book
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this book (can be empty)
+-- @field #string mwscript MWScript on this book (can be nil)
 -- @field #string icon VFS path to the icon
--- @field #string enchant The enchantment ID of this book (can be empty)
+-- @field #string enchant The enchantment ID of this book (can be nil)
 -- @field #string text The text content of the book
 -- @field #number weight
 -- @field #number value
@@ -1440,7 +1442,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#ClothingRecord}s in the world database. 
+-- A read-only list of all @{#ClothingRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ClothingRecord.
 -- @field [parent=#Clothing] #list<#ClothingRecord> records
 -- @usage local record = types.Clothing.records['example_recordid']
@@ -1492,9 +1494,9 @@
 -- @field #string id Record id
 -- @field #string name Name of the clothing
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this clothing (can be empty)
+-- @field #string mwscript MWScript on this clothing (can be nil)
 -- @field #string icon VFS path to the icon
--- @field #string enchant The enchantment ID of this clothing (can be empty)
+-- @field #string enchant The enchantment ID of this clothing (can be nil)
 -- @field #number weight
 -- @field #number value
 -- @field #number type See @{#Clothing.TYPE}
@@ -1512,7 +1514,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#IngredientRecord}s in the world database. 
+-- A read-only list of all @{#IngredientRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #IngredientRecord.
 -- @field [parent=#Ingredient] #list<#IngredientRecord> records
 -- @usage local record = types.Ingredient.records['example_recordid']
@@ -1535,7 +1537,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this potion (can be empty)
+-- @field #string mwscript MWScript on this potion (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
@@ -1611,7 +1613,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#LightRecord}s in the world database. 
+-- A read-only list of all @{#LightRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #LightRecord.
 -- @field [parent=#Light] #list<#LightRecord> records
 -- @usage local record = types.Light.records['example_recordid']
@@ -1641,7 +1643,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this light (can be empty)
+-- @field #string mwscript MWScript on this light (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #string sound VFS path to the sound
 -- @field #number weight
@@ -1670,7 +1672,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#MiscellaneousRecord}s in the world database. 
+-- A read-only list of all @{#MiscellaneousRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #MiscellaneousRecord.
 -- @field [parent=#Miscellaneous] #list<#MiscellaneousRecord> records
 -- @usage local record = types.Miscellaneous.records['example_recordid']
@@ -1689,7 +1691,7 @@
 -- @return #MiscellaneousRecord
 
 ---
--- Returns the read-only soul of a miscellaneous item
+-- (DEPRECATED, use itemData(item).soul) Returns the read-only soul of a miscellaneous item
 -- @function [parent=#Miscellaneous] getSoul
 -- @param openmw.core#GameObject object
 -- @return #string
@@ -1702,7 +1704,7 @@
 -- @return #MiscellaneousRecord A strongly typed Miscellaneous record.
 
 ---
--- Sets the soul of a miscellaneous item, intended for soul gem objects; Must be used in a global script.
+-- (DEPRECATED, use itemData(item).soul) Sets the soul of a miscellaneous item, intended for soul gem objects; Must be used in a global script.
 -- @function [parent=#Miscellaneous] setSoul
 -- @param openmw.core#GameObject object
 -- @param #string soulId Record ID for the soul of the creature to use
@@ -1712,7 +1714,7 @@
 -- @field #string id The record ID of the miscellaneous item
 -- @field #string name The name of the miscellaneous item
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this miscellaneous item (can be empty)
+-- @field #string mwscript MWScript on this miscellaneous item (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
@@ -1727,7 +1729,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#PotionRecord}s in the world database. 
+-- A read-only list of all @{#PotionRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #PotionRecord.
 -- @field [parent=#Potion] #list<#PotionRecord> records
 -- @usage local record = types.Potion.records['example_recordid']
@@ -1757,7 +1759,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this potion (can be empty)
+-- @field #string mwscript MWScript on this potion (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
@@ -1774,7 +1776,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#WeaponRecord}s in the world database. 
+-- A read-only list of all @{#WeaponRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #WeaponRecord.
 -- @field [parent=#Weapon] #list<#WeaponRecord> records
 -- @usage local record = types.Weapon.records['example_recordid']
@@ -1817,9 +1819,9 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this weapon (can be empty)
+-- @field #string mwscript MWScript on this weapon (can be nil)
 -- @field #string icon VFS path to the icon
--- @field #string enchant
+-- @field #string enchant The enchantment ID of this weapon (can be nil)
 -- @field #boolean isMagical
 -- @field #boolean isSilver
 -- @field #number weight
@@ -1853,7 +1855,7 @@
 
 
 ---
--- A read-only list of all @{#ApparatusRecord}s in the world database. 
+-- A read-only list of all @{#ApparatusRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ApparatusRecord.
 -- @field [parent=#Apparatus] #list<#ApparatusRecord> records
 -- @usage local record = types.Apparatus.records['example_recordid']
@@ -1886,7 +1888,7 @@
 -- @field #string id The record ID of the apparatus
 -- @field #string name The name of the apparatus
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this apparatus (can be empty)
+-- @field #string mwscript MWScript on this apparatus (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number type The type of apparatus. See @{#Apparatus.TYPE}
 -- @field #number weight
@@ -1902,7 +1904,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#LockpickRecord}s in the world database. 
+-- A read-only list of all @{#LockpickRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #LockpickRecord.
 -- @field [parent=#Lockpick] #list<#LockpickRecord> records
 -- @usage local record = types.Lockpick.records['example_recordid']
@@ -1925,7 +1927,7 @@
 -- @field #string id The record ID of the lockpick
 -- @field #string name The name of the lockpick
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this lockpick (can be empty)
+-- @field #string mwscript MWScript on this lockpick (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number maxCondition The maximum number of uses of this lockpick
 -- @field #number weight
@@ -1941,7 +1943,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#ProbeRecord}s in the world database. 
+-- A read-only list of all @{#ProbeRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ProbeRecord.
 -- @field [parent=#Probe] #list<#ProbeRecord> records
 -- @usage local record = types.Probe.records['example_recordid']
@@ -1964,7 +1966,7 @@
 -- @field #string id The record ID of the probe
 -- @field #string name The name of the probe
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this probe (can be empty)
+-- @field #string mwscript MWScript on this probe (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number maxCondition The maximum number of uses of this probe
 -- @field #number weight
@@ -1980,7 +1982,7 @@
 -- @field #Item baseType @{#Item}
 
 ---
--- A read-only list of all @{#RepairRecord}s in the world database. 
+-- A read-only list of all @{#RepairRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #RepairRecord.
 -- @field [parent=#Repair] #list<#RepairRecord> records
 -- @usage local record = types.Repair.records['example_recordid']
@@ -2003,7 +2005,7 @@
 -- @field #string id The record ID of the repair tool
 -- @field #string name The name of the repair tool
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this repair tool (can be empty)
+-- @field #string mwscript MWScript on this repair tool (can be nil)
 -- @field #string icon VFS path to the icon
 -- @field #number maxCondition The maximum number of uses of this repair tool
 -- @field #number weight
@@ -2017,7 +2019,7 @@
 -- @type Activator
 
 ---
--- A read-only list of all @{#ActivatorRecord}s in the world database. 
+-- A read-only list of all @{#ActivatorRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ActivatorRecord.
 -- @field [parent=#Activator] #list<#ActivatorRecord> records
 -- @usage local record = types.Activator.records['example_recordid']
@@ -2040,7 +2042,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this activator (can be empty)
+-- @field #string mwscript MWScript on this activator (can be nil)
 
 ---
 -- Creates a @{#ActivatorRecord} without adding it to the world database.
@@ -2060,7 +2062,7 @@
 -- @field #Lockable baseType @{#Lockable}
 
 ---
--- A read-only list of all @{#ContainerRecord}s in the world database. 
+-- A read-only list of all @{#ContainerRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ContainerRecord.
 -- @field [parent=#Container] #list<#ContainerRecord> records
 -- @usage local record = types.Container.records['example_recordid']
@@ -2107,9 +2109,10 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this container (can be empty)
+-- @field #string mwscript MWScript on this container (can be nil)
 -- @field #number weight capacity of this container
-
+-- @field #boolean isOrganic Whether items can be placed in the container
+-- @field #boolean isRespawning Whether the container respawns its contents
 
 --------------------------------------------------------------------------------
 -- @{#Door} functions
@@ -2120,8 +2123,18 @@
 -- @extends #Lockable
 -- @field #Lockable baseType @{#Lockable}
 
+--- Door.STATE
+-- @type DoorSTATE
+-- @field #number Idle The door is either closed or open (usually closed).
+-- @field #number Opening The door is in the process of opening.
+-- @field #number Closing The door is in the process of closing.
+
+--- @{#DoorSTATE}
+-- @field [parent=#Door] #DoorSTATE STATE
+-- @usage local state = types.Door.STATE["Idle"]
+
 ---
--- A read-only list of all @{#DoorRecord}s in the world database. 
+-- A read-only list of all @{#DoorRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #DoorRecord.
 -- @field [parent=#Door] #list<#DoorRecord> records
 -- @usage local record = types.Door.records['example_recordid']
@@ -2164,14 +2177,42 @@
 -- @return #DoorRecord
 
 ---
+-- Gets the state of the door.
+-- @function [parent=#Door] getDoorState
+-- @param openmw.core#GameObject object
+-- @return #DoorSTATE
+
+---
+-- Checks if the door is fully open.
+-- Returns false if the door is currently opening or closing.
+-- @function [parent=#Door] isOpen
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Checks if the door is fully closed.
+-- Returns false if the door is currently opening or closing.
+-- @function [parent=#Door] isClosed
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Opens/Closes the door. Can only be used in global scripts or on self.
+-- @function [parent=#Door] activateDoor
+-- @param openmw.core#GameObject object
+-- @param #boolean openState Optional whether the door should be opened or closed. If not provided, the door will switch to the opposite state.
+-- @usage types.Door.activateDoor(doorObject)
+-- @usage types.Door.activateDoor(doorObject, true)
+-- @usage types.Door.activateDoor(doorObject, false)
+
+---
 -- @type DoorRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this door (can be empty)
--- @field #string openSound VFS path to the sound of opening
--- @field #string closeSound VFS path to the sound of closing
-
+-- @field #string mwscript MWScript on this door (can be nil)
+-- @field #string openSound The sound id for door opening
+-- @field #string closeSound The sound id for door closing
 
 
 --- Functions for @{#Static} objects
@@ -2181,7 +2222,7 @@
 -- @type Static
 
 ---
--- A read-only list of all @{#StaticRecord}s in the world database. 
+-- A read-only list of all @{#StaticRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #StaticRecord.
 -- @field [parent=#Static] #list<#StaticRecord> records
 -- @usage local record = types.Static.records['example_recordid']
@@ -2212,7 +2253,7 @@
 -- @type CreatureLevelledList
 
 ---
--- A read-only list of all @{#CreatureLevelledListRecord}s in the world database. 
+-- A read-only list of all @{#CreatureLevelledListRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #CreatureLevelledListRecord.
 -- @field [parent=#CreatureLevelledList] #list<#CreatureLevelledListRecord> records
 -- @usage local record = types.CreatureLevelledList.records['example_recordid']
@@ -2305,7 +2346,7 @@
 -- @type ESM4Terminal
 
 ---
--- A read-only list of all @{#ESM4TerminalRecord}s in the world database. 
+-- A read-only list of all @{#ESM4TerminalRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ESM4TerminalRecord.
 -- @field [parent=#ESM4Terminal] #list<#ESM4TerminalRecord> records
 -- @usage local record = types.ESM4Terminal.records['example_recordid']
@@ -2374,7 +2415,7 @@
 -- @return #ESM4DoorRecord
 
 ---
--- A read-only list of all @{#ESM4DoorRecord}s in the world database. 
+-- A read-only list of all @{#ESM4DoorRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ESM4DoorRecord.
 -- @field [parent=#ESM4Door] #list<#ESM4DoorRecord> records
 -- @usage local record = types.ESM4Door.records['example_recordid']

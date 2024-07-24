@@ -44,6 +44,7 @@
     Bug #6550: Cloned body parts don't inherit texture effects
     Bug #6574: Crash at far away from world origin coordinates
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
+    Bug #6665: The kobolds in the skyrim: home of the nords mod are oversized
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6716: mwscript comparison operator handling is too restrictive
@@ -180,8 +181,12 @@
     Bug #7993: Cannot load Bloodmoon without Tribunal
     Bug #7997: Can toggle perspective when paralyzed
     Bug #8002: Portable light sources held by creatures do not emit lighting
+    Bug #8005: F3 stats bars are sorted not according to their place in the timeline
     Bug #8018: Potion effects should never explode and always apply on self
     Bug #8021: Player's scale doesn't reset when starting a new game
+    Bug #8048: Actors can generate negative collision extents and have no collision
+    Bug #8063: menu_background.bik video with audio freezes the game forever
+    Bug #8064: Lua move360 script doesn't respect the enableZoom/disableZoom Camera interface setting
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
@@ -189,6 +194,7 @@
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
     Feature #5944: Option to use camera as sound listener
+    Feature #6009: Animation blending - smooth animation transitions with modding support
     Feature #6152: Playing music via lua scripts
     Feature #6188: Specular lighting from point light sources
     Feature #6411: Support translations in openmw-launcher
@@ -246,6 +252,9 @@
     Feature #7964: Add Lua read access to MW Dialogue records
     Feature #7971: Make save's Time Played value display hours instead of days
     Feature #7985: Support dark mode on Windows
+    Feature #8034: (Lua) Containers should have respawning/organic flags
+    Feature #8067: Support Game Mode on macOS
+    Feature #8078: OpenMW-CS Terrain Equalize Tool
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
