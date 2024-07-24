@@ -45,6 +45,9 @@ namespace VFS
 
         bool exists(Path::NormalizedView name) const;
 
+        // Returns open file if exists or nullptr.
+        Files::IStreamPtr find(Path::NormalizedView name) const;
+
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
@@ -78,6 +81,8 @@ namespace VFS
         std::vector<std::unique_ptr<Archive>> mArchives;
 
         FileMap mIndex;
+
+        inline Files::IStreamPtr findNormalized(std::string_view normalizedPath) const;
     };
 
 }
