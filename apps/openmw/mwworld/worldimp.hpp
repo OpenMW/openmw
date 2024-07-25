@@ -134,6 +134,7 @@ namespace MWWorld
         ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
         uint32_t mRandomSeed{};
+        bool mIdsRebuilt{};
 
         // not implemented
         World(const World&) = delete;
