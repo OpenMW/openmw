@@ -508,10 +508,8 @@ namespace MWWorld
             }
             break;
             case ESM::REC_PLAY:
-                if (!mIdsRebuilt)
+                if (reader.getFormatVersion() <= ESM::MaxPlayerBeforeCellDataFormatVersion && !mIdsRebuilt)
                 {
-                    // FIME this can be removed when MinSupportedSaveGameFormatVersion > 32
-                    // Older saves have the player before the WorldModel.
                     mStore.rebuildIdsIndex();
                     mIdsRebuilt = true;
                 }
