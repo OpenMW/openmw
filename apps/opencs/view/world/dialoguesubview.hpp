@@ -81,7 +81,7 @@ namespace CSVWorld
 
         CSMWorld::ColumnBase::Display mDisplay;
 
-        std::optional<QModelIndex> mIndex;
+        std::optional<QPersistentModelIndex> mIndex;
 
     public:
         DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display);
