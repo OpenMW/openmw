@@ -30,7 +30,7 @@ namespace MWRender
         AnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
             const AnimBlendStateData& animState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules);
 
-        AnimBlendController() {}
+        AnimBlendController();
 
         void setKeyframeTrack(const osg::ref_ptr<SceneUtil::KeyframeController>& kft,
             const AnimBlendStateData& animState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules);
@@ -111,7 +111,7 @@ namespace MWRender
     {
     public:
         BoneAnimBlendControllerWrapper(osg::ref_ptr<BoneAnimBlendController> rootCallback, osgAnimation::Bone* node)
-            : mRootCallback(rootCallback)
+            : mRootCallback(std::move(rootCallback))
             , mNode(node)
         {
         }
@@ -135,7 +135,7 @@ namespace MWRender
 
     private:
         osg::ref_ptr<BoneAnimBlendController> mRootCallback;
-        osgAnimation::Bone* mNode;
+        osgAnimation::Bone* mNode{ nullptr };
     };
 }
 
