@@ -74,23 +74,14 @@ namespace CSVWorld
             QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
     };
 
-    // this can't be nested into the DialogueDelegateDispatcher, because it needs to emit signals
     class DialogueDelegateDispatcherProxy : public QObject
     {
         Q_OBJECT
-        class refWrapper
-        {
-        public:
-            refWrapper(const QModelIndex& index);
-
-            const QModelIndex& mIndex;
-        };
-
         QWidget* mEditor;
 
         CSMWorld::ColumnBase::Display mDisplay;
 
-        std::unique_ptr<refWrapper> mIndexWrapper;
+        std::optional<QPersistentModelIndex> mIndex;
 
     public:
         DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display);
