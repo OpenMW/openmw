@@ -409,10 +409,14 @@ namespace MWRender
 
             mViewer->stopThreading();
 
-            auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
-            auto defines = shaderManager.getGlobalDefines();
-            defines["disableNormals"] = mNormals ? "0" : "1";
-            shaderManager.setGlobalDefines(defines);
+            if (mNormalsSupported)
+            {
+                auto& shaderManager
+                    = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
+                auto defines = shaderManager.getGlobalDefines();
+                defines["disableNormals"] = mNormals ? "0" : "1";
+                shaderManager.setGlobalDefines(defines);
+            }
 
             mRendering.getLightRoot()->setCollectPPLights(mPassLights);
             mStateUpdater->bindPointLights(mPassLights ? mRendering.getLightRoot()->getPPLightsBuffer() : nullptr);

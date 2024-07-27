@@ -80,8 +80,8 @@ shared {
         radius = max(radius, 0.1);
         // hack: make the radius wider on the screen edges
         // (makes things in the corner of the screen look less "wrong" with not-extremely-low FOVs)
-        radius *= pow(texcoord.x*2.0-1.0, 2)+1.0;
-        radius *= pow(texcoord.y*2.0-1.0, 2)+1.0;
+        radius *= pow(texcoord.x*2.0-1.0, 2.0)+1.0;
+        radius *= pow(texcoord.y*2.0-1.0, 2.0)+1.0;
         return radius;
     }
     vec3 powv(vec3 a, float x)
@@ -94,7 +94,7 @@ render_target RT_NoMipmap {
     width_ratio = 0.25;
     height_ratio = 0.25;
     internal_format = rgb16f;
-    source_type = float;
+    source_type = half_float;
     source_format = rgb;
     mipmaps = false;
     min_filter = nearest;
@@ -105,7 +105,7 @@ render_target RT_Horizontal {
     width_ratio = 0.25;
     height_ratio = 0.25;
     internal_format = rgb16f;
-    source_type = float;
+    source_type = half_float;
     source_format = rgb;
     mipmaps = false;
     min_filter = nearest;
@@ -116,7 +116,7 @@ render_target RT_Vertical {
     width_ratio = 0.25;
     height_ratio = 0.25;
     internal_format = rgb16f;
-    source_type = float;
+    source_type = half_float;
     source_format = rgb;
     mipmaps = false;
     min_filter = linear;
