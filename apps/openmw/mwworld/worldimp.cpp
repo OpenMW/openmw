@@ -436,6 +436,7 @@ namespace MWWorld
         mLevitationEnabled = true;
         mPlayerTraveling = false;
         mPlayerInJail = false;
+        mIdsRebuilt = false;
 
         fillGlobalVariables();
     }
@@ -507,11 +508,11 @@ namespace MWWorld
             }
             break;
             case ESM::REC_PLAY:
-                // World::write always puts `ESM::REC_PLAY` between ESMStore (that contains dynamic records)
-                // and WorldModel (that can contain instances of dynamic records). Here we need to rebuild
-                // ESMStore index in order to be able to lookup dynamic records while loading the player and
-                // WorldModel.
-                mStore.rebuildIdsIndex();
+                if (reader.getFormatVersion() <= ESM::MaxPlayerBeforeCellDataFormatVersion && !mIdsRebuilt)
+                {
+                    mStore.rebuildIdsIndex();
+                    mIdsRebuilt = true;
+                }
 
                 mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
@@ -523,10 +524,19 @@ namespace MWWorld
                     mWorldScene->preloadCellWithSurroundings(*getPlayerPtr().getCell());
                 }
                 break;
+            case ESM::REC_CSTA:
+                // We need to rebuild the ESMStore index in order to be able to lookup dynamic records while loading the
+                // WorldModel and, afterwards, the player.
+                if (!mIdsRebuilt)
+                {
+                    mStore.rebuildIdsIndex();
+                    mIdsRebuilt = true;
+                }
+                mWorldModel.readRecord(reader, type);
+                break;
             default:
                 if (!mStore.readRecord(reader, type) && !mGlobalVariables.readRecord(reader, type)
-                    && !mWeatherManager->readRecord(reader, type) && !mWorldModel.readRecord(reader, type)
-                    && !mProjectileManager->readRecord(reader, type))
+                    && !mWeatherManager->readRecord(reader, type) && !mProjectileManager->readRecord(reader, type))
                 {
                     throw std::runtime_error("unknown record in saved game");
                 }
