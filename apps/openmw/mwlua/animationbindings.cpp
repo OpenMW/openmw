@@ -258,7 +258,7 @@ namespace MWLua
             float startPoint = options.get_or("startPoint", 0.0f);
             bool forceLoop = options.get_or("forceLoop", false);
 
-            const std::string_view lowerGroup = { Misc::StringUtils::lowerCase(groupName) };
+            const std::string lowerGroup = Misc::StringUtils::lowerCase(groupName);
 
             auto animation = getMutableAnimationOrThrow(ObjectVariant(object));
             animation->play(lowerGroup, priority, blendMask, autoDisable, speed, start, stop, startPoint, loops,
