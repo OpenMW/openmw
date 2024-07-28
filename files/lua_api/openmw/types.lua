@@ -852,6 +852,8 @@
 -- @field #boolean canWalk whether the creature can walk
 -- @field #boolean canUseWeapons whether the creature can use weapons and shields
 -- @field #boolean isBiped whether the creature is a biped
+-- @field #boolean isEssential whether the creature is essential
+-- @field #boolean isRespawning whether the creature respawns after death
 
 
 --- @{#NPC} functions
@@ -1130,6 +1132,8 @@
 -- @field #bool isMale The gender setting of the NPC
 -- @field #map<#string, #boolean> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 -- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
+-- @field #boolean isEssential whether the NPC is essential
+-- @field #boolean isRespawning whether the NPC respawns after death
 
 ---
 -- @type TravelDestination

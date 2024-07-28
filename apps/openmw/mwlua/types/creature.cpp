@@ -68,6 +68,10 @@ namespace MWLua
             [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Walks; });
         record["isBiped"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Bipedal; });
+        record["isEssential"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Essential; });
+        record["isRespawning"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Respawn; });
 
         addActorServicesBindings<ESM::Creature>(record, context);
     }
