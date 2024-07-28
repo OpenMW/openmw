@@ -575,7 +575,7 @@ color buffer will accumulate.
         height = 4;
         source_format = rgb;
         internal_format = rgb16f;
-        source_type = float;
+        source_type = half_float;
         clear_color = vec4(0,0,0,1);
     }
 
@@ -615,13 +615,13 @@ Below is an example which calculates a naive average scene luminance and transit
         mipmaps = true;
         source_format = rgb;
         internal_format = rgb16f;
-        source_type = float;
+        source_type = half_float;
         min_filter = linear_mipmap_linear;
         mag_filter = linear;
     }
 
     render_target RT_LumAvg {
-        source_type = float;
+        source_type = half_float;
         source_format = rgb;
         internal_format = rgb16f;
         min_filter = nearest;
@@ -629,7 +629,7 @@ Below is an example which calculates a naive average scene luminance and transit
     }
 
     render_target RT_LumAvgLastFrame {
-        source_type = float;
+        source_type = half_float;
         source_format = rgb;
         internal_format = rgb16f;
         min_filter = nearest;
@@ -926,6 +926,8 @@ Types
 | unsigned_int_24_8  | GL_UNSIGNED_INT_24_8  |
 +--------------------+-----------------------+
 | float              | GL_FLOAT              |
++--------------------+-----------------------+
+| half_float         | GL_HALF_FLOAT         |
 +--------------------+-----------------------+
 | double             | GL_DOUBLE             |
 +--------------------+-----------------------+
