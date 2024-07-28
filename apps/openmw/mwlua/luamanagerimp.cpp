@@ -425,14 +425,14 @@ namespace MWLua
         std::string_view start, std::string_view stop, float startpoint, uint32_t loops, bool loopfallback)
     {
         sol::table options = mLua.newTable();
-        options["blendmask"] = blendMask;
-        options["autodisable"] = autodisable;
+        options["blendMask"] = blendMask;
+        options["autoDisable"] = autodisable;
         options["speed"] = speedmult;
-        options["startkey"] = start;
-        options["stopkey"] = stop;
-        options["startpoint"] = startpoint;
+        options["startKey"] = start;
+        options["stopKey"] = stop;
+        options["startPoint"] = startpoint;
         options["loops"] = loops;
-        options["forceloop"] = loopfallback;
+        options["forceLoop"] = loopfallback;
 
         bool priorityAsTable = false;
         for (uint32_t i = 1; i < MWRender::sNumBlendMasks; i++)

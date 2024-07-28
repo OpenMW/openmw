@@ -71,20 +71,20 @@
 -- Check if the given animation group is currently playing
 -- @function [parent=#animation] isPlaying
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @return #boolean
 
 ---
 -- Get the current absolute time of the given animation group if it is playing, or -1 if it is not playing.
 -- @function [parent=#animation] getCurrentTime
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @return #number
 
 ---
 -- Check whether the animation is a looping animation or not. This is determined by a combination 
--- of groupname, some of which are hardcoded to be looping, and the presence of loop start/stop keys.
--- The groupnames that are hardcoded as looping are the following, as well as per-weapon-type suffixed variants of each.
+-- of groupName, some of which are hardcoded to be looping, and the presence of loop start/stop keys.
+-- The groupNames that are hardcoded as looping are the following, as well as per-weapon-type suffixed variants of each.
 -- "walkforward", "walkback", "walkleft", "walkright", "swimwalkforward", "swimwalkback", "swimwalkleft", "swimwalkright", 
 -- "runforward", "runback", "runleft", "runright", "swimrunforward", "swimrunback", "swimrunleft", "swimrunright", 
 -- "sneakforward", "sneakback", "sneakleft", "sneakright", "turnleft", "turnright", "swimturnleft", "swimturnright",
@@ -93,7 +93,7 @@
 -- "inventoryweapontwohand", "inventoryweapontwowide"
 -- @function [parent=#animation] isLoopingAnimation
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @return #boolean
 
 
@@ -102,35 +102,35 @@
 -- Can be used only in local scripts on self.
 -- @function [parent=#animation] cancel
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 
 ---
 -- Enables or disables looping for the given animation group. Looping is enabled by default.
 -- Can be used only in local scripts on self.
 -- @function [parent=#animation] setLoopingEnabled
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @param #boolean enabled
 
 ---
 -- Returns the completion of the animation, or nil if the animation group is not active.
 -- @function [parent=#animation] getCompletion
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @return #number, #nil
 
 ---
 -- Returns the remaining number of loops, not counting the current loop, or nil if the animation group is not active.
 -- @function [parent=#animation] getLoopCount
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @return #number, #nil
 
 ---
 -- Get the current playback speed of an animation group, or nil if the animation group is not active.
 -- @function [parent=#animation] getSpeed
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @return #number, #nil
 
 ---
@@ -139,7 +139,7 @@
 -- Can be used only in local scripts on self.
 -- @function [parent=#animation] setSpeed
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @param #number speed The new animation speed, where speed=1 is normal speed.
 
 ---
@@ -156,14 +156,14 @@
 -- Can be used only in local scripts on self.
 -- @function [parent=#animation] playQueued
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @param #table options A table of play options.  Can contain:
 --
 --   * `loops` - a number >= 0, the number of times the animation should loop after the first play (default: infinite).
 --   * `speed` - a floating point number >= 0, the speed at which the animation should play (default: 1);
---   * `startkey` - the animation key at which the animation should start (default: "start")
---   * `stopkey` - the animation key at which the animation should end (default: "stop")
---   * `forceloop` - a boolean, to set if the animation should loop even if it's not a looping animation (default: false)
+--   * `startKey` - the animation key at which the animation should start (default: "start")
+--   * `stopKey` - the animation key at which the animation should end (default: "stop")
+--   * `forceLoop` - a boolean, to set if the animation should loop even if it's not a looping animation (default: false)
 -- 
 -- @usage -- Play death1 without waiting. Equivalent to playgroup, death1, 1
 -- anim.clearAnimationQueue(self, false)
@@ -171,7 +171,7 @@
 -- 
 -- @usage -- Play an animation group with custom start/stop keys
 -- anim.clearAnimationQueue(self, false)
--- anim.playQueued(self, 'spellcast', { startkey = 'self start', stopkey = 'self stop' })
+-- anim.playQueued(self, 'spellcast', { startKey = 'self start', stopKey = 'self stop' })
 --
 
 ---
@@ -182,38 +182,38 @@
 -- Can be used only in local scripts on self.
 -- @function [parent=#animation] playBlended
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @param #table options A table of play options. Can contain:
 --
 --   * `loops` - a number >= 0, the number of times the animation should loop after the first play (default: 0).
 --   * `priority` - Either a single #Priority value that will be assigned to all bone groups. Or a table mapping bone groups to its priority (default: PRIORITY.Default).
---   * `blendmask` - A mask of which bone groups to include in the animation (Default: BLEND_MASK.All.
---   * `autodisable` - If true, the animation will be immediately  removed upon finishing, which means information will not be possible to query once completed. (Default: true)
+--   * `blendMask` - A mask of which bone groups to include in the animation (Default: BLEND_MASK.All.
+--   * `autoDisable` - If true, the animation will be immediately  removed upon finishing, which means information will not be possible to query once completed. (Default: true)
 --   * `speed` - a floating point number >= 0, the speed at which the animation should play (default: 1)
---   * `startkey` - the animation key at which the animation should start (default: "start")
---   * `stopkey` - the animation key at which the animation should end (default: "stop")
---   * `startpoint` - a floating point number 0 <= value <= 1, starting completion of the animation (default: 0)
---   * `forceloop` - a boolean, to set if the animation should loop even if it's not a looping animation (default: false)
+--   * `startKey` - the animation key at which the animation should start (default: "start")
+--   * `stopKey` - the animation key at which the animation should end (default: "stop")
+--   * `startPoint` - a floating point number 0 <= value <= 1, starting completion of the animation (default: 0)
+--   * `forceLoop` - a boolean, to set if the animation should loop even if it's not a looping animation (default: false)
 
 ---
 -- Check if the actor's animation has the given animation group or not.
 -- @function [parent=#animation] hasGroup
 -- @param openmw.core#GameObject actor
--- @param #string groupname
+-- @param #string groupName
 -- @return #boolean 
 
 ---
 -- Check if the actor's skeleton has the given bone or not
 -- @function [parent=#animation] hasBone
 -- @param openmw.core#GameObject actor
--- @param #string bonename
+-- @param #string boneName
 -- @return #boolean 
 
 ---
 -- Get the current active animation for a bone group
 -- @function [parent=#animation] getActiveGroup
 -- @param openmw.core#GameObject actor
--- @param #number bonegroup Bone group enum, see @{openmw.animation#BONE_GROUP}
+-- @param #number boneGroup Bone group enum, see @{openmw.animation#BONE_GROUP}
 -- @return #string 
 
 ---
@@ -225,12 +225,12 @@
 -- @param #table options optional table of parameters. Can contain:
 --
 --   * `loop` - boolean, if true the effect will loop until removed (default: 0).
---   * `bonename` - name of the bone to attach the vfx to. (default: "")
+--   * `boneName` - name of the bone to attach the vfx to. (default: "")
 --   * `particle` - name of the particle texture to use. (default: "")
 --   * `vfxId` - a string ID that can be used to remove the effect later, using #removeVfx, and to avoid duplicate effects. The default value of "" can have duplicates. To avoid interaction with the engine, use unique identifiers unrelated to magic effect IDs. The engine uses this identifier to add and remove magic effects based on what effects are active on the actor. If this is set equal to the @{openmw.core#MagicEffectId} identifier of the magic effect being added, for example core.magic.EFFECT_TYPE.FireDamage, then the engine will remove it once the fire damage effect on the actor reaches 0. (Default: ""). 
 -- 
 -- @usage local mgef = core.magic.effects.records[myEffectName]
--- anim.addVfx(self, 'VFX_Hands', {bonename = 'Bip01 L Hand', particle = mgef.particle, loop = mgef.continuousVfx, vfxId = mgef.id..'_myuniquenamehere'})
+-- anim.addVfx(self, 'VFX_Hands', {boneName = 'Bip01 L Hand', particle = mgef.particle, loop = mgef.continuousVfx, vfxId = mgef.id..'_myuniquenamehere'})
 -- -- later:
 -- anim.removeVfx(self, mgef.id..'_myuniquenamehere')
 -- 
