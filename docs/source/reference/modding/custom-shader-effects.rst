@@ -67,7 +67,7 @@ This setting can either be activated in the OpenMW launcher, in-game, or changed
 ::
 
     [Post Processing]
-    enabled = false
+    enabled = true
 
 Variables.
 
