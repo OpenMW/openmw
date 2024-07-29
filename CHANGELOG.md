@@ -257,6 +257,7 @@
     Feature #8034: (Lua) Containers should have respawning/organic flags
     Feature #8067: Support Game Mode on macOS
     Feature #8078: OpenMW-CS Terrain Equalize Tool
+    Feature #8087: Creature movement flags are not exposed
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
