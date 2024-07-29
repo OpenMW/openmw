@@ -75,6 +75,7 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     , mShowToolTips(false)
     , mToolTipDelay(0)
     , mInConstructor(true)
+    , mSelectedNavigationMode(0)
 {
     setAcceptDrops(true);
 
@@ -145,6 +146,10 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
 
     connect(new CSMPrefs::Shortcut("scene-clear-selection", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
         [this] { this->clearSelection(Mask_Reference); });
+
+    CSMPrefs::Shortcut* switchPerspectiveShortcut = new CSMPrefs::Shortcut("scene-cam-cycle", this);
+    connect(switchPerspectiveShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::cycleNavigationMode);
 
     mInConstructor = false;
 }
@@ -235,9 +240,11 @@ CSVWidget::SceneToolMode* CSVRender::WorldspaceWidget::makeNavigationSelector(CS
             tool),
         "orbit");
 
-    connect(tool, &CSVWidget::SceneToolMode::modeChanged, this, &WorldspaceWidget::selectNavigationMode);
+    mCameraMode = tool;
 
-    return tool;
+    connect(mCameraMode, &CSVWidget::SceneToolMode::modeChanged, this, &WorldspaceWidget::selectNavigationMode);
+
+    return mCameraMode;
 }
 
 CSVWidget::SceneToolToggle2* CSVRender::WorldspaceWidget::makeSceneVisibilitySelector(CSVWidget::SceneToolbar* parent)
@@ -767,6 +774,26 @@ void CSVRender::WorldspaceWidget::toggleHiddenInstances()
     for (const auto& object : selection)
         if (const auto objectTag = static_cast<CSVRender::ObjectTag*>(object.get()))
             objectTag->mObject->getRootNode()->setNodeMask(firstMask);
+}
+
+void CSVRender::WorldspaceWidget::cycleNavigationMode()
+{
+    switch (++mSelectedNavigationMode)
+    {
+        case (CameraMode::FirstPerson):
+            mCameraMode->setButton("1st");
+            break;
+        case (CameraMode::Orbit):
+            mCameraMode->setButton("orbit");
+            break;
+        case (CameraMode::Free):
+            mCameraMode->setButton("free");
+            break;
+        default:
+            mCameraMode->setButton("1st");
+            mSelectedNavigationMode = 0;
+            break;
+    }
 }
 
 void CSVRender::WorldspaceWidget::handleInteraction(InteractionType type, bool activate)

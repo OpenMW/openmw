@@ -376,6 +376,13 @@ void CSMPrefs::State::declare()
     declareShortcut(mValues->mKeyBindings.mSceneSave8, "Save Group 8");
     declareShortcut(mValues->mKeyBindings.mSceneGroup9, "Selection Group 9");
     declareShortcut(mValues->mKeyBindings.mSceneSave9, "Save Group 9");
+    declareShortcut(mValues->mKeyBindings.mSceneAxisX, "X Axis Movement Lock");
+    declareShortcut(mValues->mKeyBindings.mSceneAxisY, "Y Axis Movement Lock");
+    declareShortcut(mValues->mKeyBindings.mSceneAxisZ, "Z Axis Movement Lock");
+    declareShortcut(mValues->mKeyBindings.mSceneMoveSubmode, "Move Object Submode");
+    declareShortcut(mValues->mKeyBindings.mSceneScaleSubmode, "Scale Object Submode");
+    declareShortcut(mValues->mKeyBindings.mSceneRotateSubmode, "Rotate Object Submode");
+    declareShortcut(mValues->mKeyBindings.mSceneCameraCycle, "Cycle Camera Mode");
 
     declareSubcategory("1st/Free Camera");
     declareShortcut(mValues->mKeyBindings.mFreeForward, "Forward");
