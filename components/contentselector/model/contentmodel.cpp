@@ -19,7 +19,8 @@
 #include <components/files/openfile.hpp>
 #include <components/files/qtconversion.hpp>
 
-ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon& warningIcon, QIcon& errorIcon, bool showOMWScripts)
+ContentSelectorModel::ContentModel::ContentModel(
+    QObject* parent, QIcon& warningIcon, QIcon& errorIcon, bool showOMWScripts)
     : QAbstractTableModel(parent)
     , mWarningIcon(warningIcon)
     , mErrorIcon(errorIcon)
