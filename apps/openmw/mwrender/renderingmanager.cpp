@@ -1051,6 +1051,7 @@ namespace MWRender
     RenderingManager::RayResult getIntersectionResult(osgUtil::LineSegmentIntersector* intersector,
         const osg::ref_ptr<osgUtil::IntersectionVisitor>& visitor, std::span<const MWWorld::Ptr> ignoreList = {})
     {
+        constexpr auto nonObjectWorldMask = Mask_Terrain | Mask_Water;
         RenderingManager::RayResult result;
         result.mHit = false;
         result.mRatio = 0;
@@ -1065,10 +1066,9 @@ namespace MWRender
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end();
                  ++it)
             {
-                // Terrain doesnt contain any user data ptrs or flags, so we have to check the name
-                // TODO: better solution for this that could also be used for water and other world pieces with flags
+                const auto& nodeMask = (*it)->getNodeMask();
                 if (!hitNonObjectWorld)
-                    hitNonObjectWorld = (*it)->getName() == std::string_view("Terrain Root");
+                    hitNonObjectWorld = nodeMask & nonObjectWorldMask;
 
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
                 if (!userDataContainer)
