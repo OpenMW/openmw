@@ -1061,9 +1061,15 @@ namespace MWRender
         auto test = [&](const osgUtil::LineSegmentIntersector::Intersection& intersection) {
             PtrHolder* ptrHolder = nullptr;
             std::vector<RefnumMarker*> refnumMarkers;
+            bool hitNonObjectWorld = false;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end();
                  ++it)
             {
+                // Terrain doesnt contain any user data ptrs or flags, so we have to check the name
+                // TODO: better solution for this that could also be used for water and other world pieces with flags
+                if (!hitNonObjectWorld)
+                    hitNonObjectWorld = (*it)->getName() == std::string_view("Terrain Root");
+
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
                 if (!userDataContainer)
                     continue;
@@ -1109,7 +1115,7 @@ namespace MWRender
                 vertexCounter += refnumMarkers[i]->mNumVertices;
             }
 
-            if (!result.mHitObject.isEmpty() || result.mHitRefnum.isSet())
+            if (!result.mHitObject.isEmpty() || result.mHitRefnum.isSet() || hitNonObjectWorld)
             {
                 result.mHit = true;
                 result.mHitPointWorld = intersection.getWorldIntersectPoint();
