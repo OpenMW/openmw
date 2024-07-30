@@ -19,9 +19,10 @@
 #include <components/files/openfile.hpp>
 #include <components/files/qtconversion.hpp>
 
-ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon& warningIcon, bool showOMWScripts)
+ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon& warningIcon, QIcon& errorIcon, bool showOMWScripts)
     : QAbstractTableModel(parent)
     , mWarningIcon(warningIcon)
+    , mErrorIcon(errorIcon)
     , mShowOMWScripts(showOMWScripts)
     , mMimeType("application/omwcontent")
     , mMimeTypes(QStringList() << mMimeType)
@@ -169,7 +170,12 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
     {
         case Qt::DecorationRole:
         {
-            return isLoadOrderError(file) ? mWarningIcon : QVariant();
+            if (file->isMissing())
+                return mErrorIcon;
+            else if (isLoadOrderError(file))
+                return mWarningIcon;
+            else
+                return QVariant();
         }
 
         case Qt::FontRole:
@@ -595,10 +601,32 @@ void ContentSelectorModel::ContentModel::sortFiles()
 {
     emit layoutAboutToBeChanged();
 
-    int firstModifiable = 0;
-    while (firstModifiable < mFiles.size()
-        && (mFiles.at(firstModifiable)->builtIn() || mFiles.at(firstModifiable)->fromAnotherConfigFile()))
-        ++firstModifiable;
+    // make both Qt5 (int) and Qt6 (qsizetype aka size_t) happy
+    using index_t = ContentFileList::size_type;
+
+    // ensure built-in are first
+    index_t firstModifiable = 0;
+    for (index_t i = 0; i < mFiles.length(); ++i)
+    {
+        if (mFiles.at(i)->builtIn())
+            mFiles.move(i, firstModifiable++);
+    }
+
+    // then non-user content
+    for (const auto& filename : mNonUserContent)
+    {
+        const EsmFile* file = item(filename);
+        int filePosition = indexFromItem(file).row();
+        if (filePosition >= 0)
+            mFiles.move(filePosition, firstModifiable++);
+        else
+        {
+            // the file is not in the VFS, and will be displayed with an error
+            auto missingFile = std::make_unique<EsmFile>(filename);
+            missingFile->setFromAnotherConfigFile(true);
+            mFiles.insert(firstModifiable++, missingFile.release());
+        }
+    }
 
     // For the purposes of dependency sort we'll hallucinate that Bloodmoon is dependent on Tribunal
     const EsmFile* tribunalFile = item("Tribunal.esm");
@@ -669,19 +697,9 @@ void ContentSelectorModel::ContentModel::setNonUserContent(const QStringList& fi
 {
     mNonUserContent.clear();
     for (const auto& file : fileList)
-        mNonUserContent.insert(file.toLower());
+        mNonUserContent.append(file.toLower());
     for (auto* file : mFiles)
         file->setFromAnotherConfigFile(mNonUserContent.contains(file->fileName().toLower()));
-
-    auto insertPosition
-        = std::ranges::find_if(mFiles, [](const EsmFile* file) { return !file->builtIn(); }) - mFiles.begin();
-
-    for (const auto& filepath : fileList)
-    {
-        const EsmFile* file = item(filepath);
-        int filePosition = indexFromItem(file).row();
-        mFiles.move(filePosition, insertPosition++);
-    }
 
     sortFiles();
 }

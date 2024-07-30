@@ -32,7 +32,8 @@ ContentSelectorView::ContentSelector::~ContentSelector() = default;
 void ContentSelectorView::ContentSelector::buildContentModel(bool showOMWScripts)
 {
     QIcon warningIcon(ui->addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning));
-    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon, showOMWScripts);
+    QIcon errorIcon(ui->addonView->style()->standardIcon(QStyle::SP_MessageBoxCritical));
+    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon, errorIcon, showOMWScripts);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()

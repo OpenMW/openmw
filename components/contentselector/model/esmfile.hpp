@@ -55,12 +55,15 @@ namespace ContentSelectorModel
         QString filePath() const { return mPath; }
         bool builtIn() const { return mBuiltIn; }
         bool fromAnotherConfigFile() const { return mFromAnotherConfigFile; }
+        bool isMissing() const { return mPath.isEmpty(); }
 
         /// @note Contains file names, not paths.
         const QStringList& gameFiles() const { return mGameFiles; }
         QString description() const { return mDescription; }
         QString toolTip() const
         {
+            if (isMissing())
+                return tr("<b>This file is specified in a non-user config file, but does not exist in the VFS.</b>");
             QString tooltip = mTooltipTemlate.arg(mAuthor)
                                   .arg(mVersion)
                                   .arg(mModified.toString(Qt::ISODate))
