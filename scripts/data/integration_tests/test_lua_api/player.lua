@@ -220,7 +220,7 @@ testing.registerLocalTest('findNearestNavMeshPosition',
 
 return {
     engineHandlers = {
-        onUpdate = testing.updateLocal,
+        onFrame = testing.updateLocal,
     },
     eventHandlers = testing.eventHandlers
 }

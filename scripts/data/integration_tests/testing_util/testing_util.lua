@@ -181,7 +181,9 @@ end
 
 function M.updateLocal()
     if localTestRunner and coroutine.status(localTestRunner) ~= 'dead' then
-        coroutine.resume(localTestRunner)
+        if not core.isWorldPaused() then
+            coroutine.resume(localTestRunner)
+        end
     else
         localTestRunner = nil
     end
