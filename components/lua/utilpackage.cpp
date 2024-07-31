@@ -55,8 +55,6 @@ namespace
 
         switch (key.length())
         {
-            case 1:
-                return sol::make_object<float>(lua, components[0]);
             case 2:
                 return sol::make_object<LuaUtil::Vec2>(lua, { components[0], components[1] });
             case 3:
