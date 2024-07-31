@@ -31,8 +31,12 @@ function M.runLocalTest(obj, name)
     currentLocalTest = name
     currentLocalTestError = nil
     obj:sendEvent('runLocalTest', name)
-    while currentLocalTest do coroutine.yield() end
-    if currentLocalTestError then error(currentLocalTestError, 2) end
+    while currentLocalTest do
+        coroutine.yield()
+    end
+    if currentLocalTestError then
+        error(currentLocalTestError, 2)
+    end
 end
 
 function M.expect(cond, delta, msg)
@@ -198,7 +202,9 @@ M.eventHandlers = {
         end
         localTestRunner = coroutine.create(function()
             local status, err = pcall(fn)
-            if status then err = nil end
+            if status then
+                err = nil
+            end
             core.sendGlobalEvent('localTestFinished', {name=name, errMsg=err})
         end)
     end,
