@@ -130,30 +130,24 @@ QWidget* CSVWorld::NotEditableSubDelegate::createEditor(
 /*
 ==============================DialogueDelegateDispatcherProxy==========================================
 */
-CSVWorld::DialogueDelegateDispatcherProxy::refWrapper::refWrapper(const QModelIndex& index)
-    : mIndex(index)
-{
-}
-
 CSVWorld::DialogueDelegateDispatcherProxy::DialogueDelegateDispatcherProxy(
     QWidget* editor, CSMWorld::ColumnBase::Display display)
     : mEditor(editor)
     , mDisplay(display)
-    , mIndexWrapper(nullptr)
 {
 }
 
 void CSVWorld::DialogueDelegateDispatcherProxy::editorDataCommited()
 {
-    if (mIndexWrapper.get())
+    if (mIndex.has_value())
     {
-        emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+        emit editorDataCommited(mEditor, mIndex.value(), mDisplay);
     }
 }
 
 void CSVWorld::DialogueDelegateDispatcherProxy::setIndex(const QModelIndex& index)
 {
-    mIndexWrapper = std::make_unique<refWrapper>(index);
+    mIndex = index;
 }
 
 QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const

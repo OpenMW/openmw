@@ -252,6 +252,48 @@ void CSVRender::InstanceMode::getSelectionGroup(const int group)
     getWorldspaceWidget().selectGroup(targets);
 }
 
+void CSVRender::InstanceMode::setDragAxis(const char axis)
+{
+    int newDragAxis;
+
+    const std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
+
+    if (selection.empty())
+        return;
+
+    switch (axis)
+    {
+        case 'x':
+            newDragAxis = 0;
+            break;
+        case 'y':
+            newDragAxis = 1;
+            break;
+        case 'z':
+            newDragAxis = 2;
+            break;
+        default:
+            return;
+    }
+
+    if (newDragAxis == mDragAxis)
+        newDragAxis = -1;
+
+    if (mSubModeId == "move")
+    {
+        mObjectsAtDragStart.clear();
+
+        for (const auto& object : selection)
+            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(object.get()))
+            {
+                const osg::Vec3f thisPoint = objectTag->mObject->getPosition().asVec3();
+                mDragStart = thisPoint;
+                mObjectsAtDragStart.emplace_back(thisPoint);
+            }
+    }
+    mDragAxis = newDragAxis;
+}
+
 CSVRender::InstanceMode::InstanceMode(
     WorldspaceWidget* worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget* parent)
     : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-instance"),
@@ -306,6 +348,19 @@ CSVRender::InstanceMode::InstanceMode(
         connect(new CSMPrefs::Shortcut("scene-save-" + std::to_string(i), worldspaceWidget),
             qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, i] { this->saveSelectionGroup(i); });
     }
+
+    connect(new CSMPrefs::Shortcut("scene-submode-move", worldspaceWidget), qOverload<>(&CSMPrefs::Shortcut::activated),
+        this, [this] { mSubMode->setButton("move"); });
+
+    connect(new CSMPrefs::Shortcut("scene-submode-scale", worldspaceWidget),
+        qOverload<>(&CSMPrefs::Shortcut::activated), this, [this] { mSubMode->setButton("scale"); });
+
+    connect(new CSMPrefs::Shortcut("scene-submode-rotate", worldspaceWidget),
+        qOverload<>(&CSMPrefs::Shortcut::activated), this, [this] { mSubMode->setButton("rotate"); });
+
+    for (const char axis : "xyz")
+        connect(new CSMPrefs::Shortcut(std::string("scene-axis-") + axis, worldspaceWidget),
+            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, axis] { this->setDragAxis(axis); });
 }
 
 void CSVRender::InstanceMode::activate(CSVWidget::SceneToolbar* toolbar)

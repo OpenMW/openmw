@@ -30,7 +30,7 @@ namespace SceneUtil
 
             if (delimiterInd == std::string::npos)
             {
-                group = full;
+                group = std::move(full);
                 Misc::StringUtils::trim(group);
             }
             else

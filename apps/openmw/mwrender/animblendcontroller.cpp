@@ -143,6 +143,11 @@ namespace MWRender
         setKeyframeTrack(keyframeTrack, newState, blendRules);
     }
 
+    AnimBlendController::AnimBlendController()
+        : mEasingFn(&Easings::sineOut)
+    {
+    }
+
     NifAnimBlendController::NifAnimBlendController(const osg::ref_ptr<SceneUtil::KeyframeController>& keyframeTrack,
         const AnimBlendStateData& newState, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules)
         : AnimBlendController(keyframeTrack, newState, blendRules)

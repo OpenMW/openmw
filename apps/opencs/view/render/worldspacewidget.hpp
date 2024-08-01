@@ -75,6 +75,7 @@ namespace CSVRender
         CSMDoc::Document& mDocument;
         unsigned int mInteractionMask;
         CSVWidget::SceneToolMode* mEditMode;
+        CSVWidget::SceneToolMode* mCameraMode;
         bool mLocked;
         int mDragMode;
         bool mDragging;
@@ -89,6 +90,7 @@ namespace CSVRender
         bool mShowToolTips;
         int mToolTipDelay;
         bool mInConstructor;
+        int mSelectedNavigationMode;
 
     public:
         enum DropType
@@ -225,6 +227,13 @@ namespace CSVRender
             Button_Terrain = 0x8
         };
 
+        enum CameraMode
+        {
+            FirstPerson,
+            Orbit,
+            Free
+        };
+
         virtual void addVisibilitySelectorButtons(CSVWidget::SceneToolToggle2* tool);
 
         virtual void addEditModeSelectorButtons(CSVWidget::SceneToolMode* tool);
@@ -239,6 +248,8 @@ namespace CSVRender
         void settingChanged(const CSMPrefs::Setting* setting) override;
 
         bool getSpeedMode();
+
+        void cycleNavigationMode();
 
     private:
         void dragEnterEvent(QDragEnterEvent* event) override;

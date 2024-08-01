@@ -436,19 +436,19 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mReporttableRemove{ mIndex, sName, "reporttable-remove", "Delete" };
         Settings::SettingValue<std::string> mReporttableReplace{ mIndex, sName, "reporttable-replace", "" };
         Settings::SettingValue<std::string> mReporttableRefresh{ mIndex, sName, "reporttable-refresh", "" };
-        Settings::SettingValue<std::string> mSceneNaviPrimary{ mIndex, sName, "scene-navi-primary", "LMB" };
-        Settings::SettingValue<std::string> mSceneNaviSecondary{ mIndex, sName, "scene-navi-secondary", "Ctrl+LMB" };
-        Settings::SettingValue<std::string> mSceneOpenPrimary{ mIndex, sName, "scene-open-primary", "Shift+LMB" };
+        Settings::SettingValue<std::string> mSceneNaviPrimary{ mIndex, sName, "scene-navi-primary", "MMB" };
+        Settings::SettingValue<std::string> mSceneNaviSecondary{ mIndex, sName, "scene-navi-secondary", "Ctrl+MMB" };
+        Settings::SettingValue<std::string> mSceneOpenPrimary{ mIndex, sName, "scene-open-primary", "Shift+RMB" };
         Settings::SettingValue<std::string> mSceneEditPrimary{ mIndex, sName, "scene-edit-primary", "RMB" };
         Settings::SettingValue<std::string> mSceneEditSecondary{ mIndex, sName, "scene-edit-secondary", "Ctrl+RMB" };
-        Settings::SettingValue<std::string> mSceneSelectPrimary{ mIndex, sName, "scene-select-primary", "MMB" };
+        Settings::SettingValue<std::string> mSceneSelectPrimary{ mIndex, sName, "scene-select-primary", "LMB" };
         Settings::SettingValue<std::string> mSceneSelectSecondary{ mIndex, sName, "scene-select-secondary",
-            "Ctrl+MMB" };
-        Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+MMB" };
+            "Ctrl+LMB" };
+        Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+LMB" };
         Settings::SettingValue<std::string> mSceneSpeedModifier{ mIndex, sName, "scene-speed-modifier", "Shift" };
         Settings::SettingValue<std::string> mSceneDelete{ mIndex, sName, "scene-delete", "Delete" };
         Settings::SettingValue<std::string> mSceneInstanceDropTerrain{ mIndex, sName, "scene-instance-drop-terrain",
-            "G" };
+            "B" };
         Settings::SettingValue<std::string> mSceneInstanceDropCollision{ mIndex, sName, "scene-instance-drop-collision",
             "H" };
         Settings::SettingValue<std::string> mSceneInstanceDropTerrainSeparately{ mIndex, sName,
@@ -491,6 +491,14 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mSceneSave8{ mIndex, sName, "scene-save-8", "Ctrl+8" };
         Settings::SettingValue<std::string> mSceneGroup9{ mIndex, sName, "scene-group-9", "9" };
         Settings::SettingValue<std::string> mSceneSave9{ mIndex, sName, "scene-save-9", "Ctrl+9" };
+        Settings::SettingValue<std::string> mSceneAxisX{ mIndex, sName, "scene-axis-x", "X" };
+        Settings::SettingValue<std::string> mSceneAxisY{ mIndex, sName, "scene-axis-y", "Y" };
+        Settings::SettingValue<std::string> mSceneAxisZ{ mIndex, sName, "scene-axis-z", "Z" };
+        Settings::SettingValue<std::string> mSceneMoveSubmode{ mIndex, sName, "scene-submode-move", "G" };
+        Settings::SettingValue<std::string> mSceneScaleSubmode{ mIndex, sName, "scene-submode-scale", "V" };
+        Settings::SettingValue<std::string> mSceneRotateSubmode{ mIndex, sName, "scene-submode-rotate", "R" };
+        Settings::SettingValue<std::string> mSceneCameraCycle{ mIndex, sName, "scene-cam-cycle", "Tab" };
+        Settings::SettingValue<std::string> mSceneToggleMarkers{ mIndex, sName, "scene-toggle-markers", "F4" };
         Settings::SettingValue<std::string> mFreeForward{ mIndex, sName, "free-forward", "W" };
         Settings::SettingValue<std::string> mFreeBackward{ mIndex, sName, "free-backward", "S" };
         Settings::SettingValue<std::string> mFreeLeft{ mIndex, sName, "free-left", "A" };

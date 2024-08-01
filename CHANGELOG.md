@@ -189,6 +189,7 @@
     Bug #8064: Lua move360 script doesn't respect the enableZoom/disableZoom Camera interface setting
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
+    Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
     Feature #5492: Let rain and snow collide with statics
@@ -245,6 +246,7 @@
     Feature #7860: Lua: Expose NPC AI settings (fight, alarm, flee)
     Feature #7875: Disable MyGUI windows snapping
     Feature #7914: Do not allow to move GUI windows out of screen
+    Feature #7916: Expose all AiWander options to Lua, extend other packages as well
     Feature #7923: Don't show non-existent higher ranks for factions with fewer than 9 ranks
     Feature #7932: Support two-channel normal maps
     Feature #7936: Scalable icons in Qt applications
@@ -255,6 +257,7 @@
     Feature #8034: (Lua) Containers should have respawning/organic flags
     Feature #8067: Support Game Mode on macOS
     Feature #8078: OpenMW-CS Terrain Equalize Tool
+    Feature #8087: Creature movement flags are not exposed
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION

@@ -202,7 +202,7 @@ namespace
                 "\nFailed to create a crash report: %s.\n"
                 "Please make sure that '%s' is installed and present in PATH then crash again.\n"
                 "Current PATH: %s\n",
-                T::sName, std::generic_category().message(errno).c_str(), getenv("PATH"));
+                std::generic_category().message(errno).c_str(), T::sName, getenv("PATH"));
         else if (ret != 0)
             printf(
                 "\nFailed to create a crash report.\n"

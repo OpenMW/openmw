@@ -172,7 +172,7 @@ return {
     --         local oldSkillGain = params.skillGain
     --         params.skillGain = oldSkillGain * visibility
     --     end
-    -- end
+    -- end)
     -- 
     interface = {
         --- Interface version

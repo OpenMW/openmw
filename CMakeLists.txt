@@ -82,7 +82,7 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 64)
+set(OPENMW_LUA_API_REVISION 65)
 set(OPENMW_POSTPROCESSING_API_REVISION 1)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -492,11 +492,8 @@ else(USE_LUAJIT)
     find_package(Lua REQUIRED)
     add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
-<<<<<<< HEAD
-if (WIN32)
-=======
+
 if (NOT WIN32 AND NOT ANDROID)
->>>>>>> openmw/master
     include(cmake/CheckLuaCustomAllocator.cmake)
 endif()
 

@@ -83,25 +83,24 @@ namespace MWLua
 
     void LuaManager::init()
     {
-        Context context;
-        context.mIsMenu = false;
-        context.mIsGlobal = true;
-        context.mLuaManager = this;
-        context.mLua = &mLua;
-        context.mObjectLists = &mObjectLists;
-        context.mLuaEvents = &mLuaEvents;
-        context.mSerializer = mGlobalSerializer.get();
+        Context globalContext;
+        globalContext.mType = Context::Global;
+        globalContext.mLuaManager = this;
+        globalContext.mLua = &mLua;
+        globalContext.mObjectLists = &mObjectLists;
+        globalContext.mLuaEvents = &mLuaEvents;
+        globalContext.mSerializer = mGlobalSerializer.get();
 
-        Context localContext = context;
-        localContext.mIsGlobal = false;
+        Context localContext = globalContext;
+        localContext.mType = Context::Local;
         localContext.mSerializer = mLocalSerializer.get();
 
-        Context menuContext = context;
-        menuContext.mIsMenu = true;
+        Context menuContext = globalContext;
+        menuContext.mType = Context::Menu;
 
-        for (const auto& [name, package] : initCommonPackages(context))
+        for (const auto& [name, package] : initCommonPackages(globalContext))
             mLua.addCommonPackage(name, package);
-        for (const auto& [name, package] : initGlobalPackages(context))
+        for (const auto& [name, package] : initGlobalPackages(globalContext))
             mGlobalScripts.addPackage(name, package);
         for (const auto& [name, package] : initMenuPackages(menuContext))
             mMenuScripts.addPackage(name, package);
@@ -426,14 +425,14 @@ namespace MWLua
         std::string_view start, std::string_view stop, float startpoint, uint32_t loops, bool loopfallback)
     {
         sol::table options = mLua.newTable();
-        options["blendmask"] = blendMask;
-        options["autodisable"] = autodisable;
+        options["blendMask"] = blendMask;
+        options["autoDisable"] = autodisable;
         options["speed"] = speedmult;
-        options["startkey"] = start;
-        options["stopkey"] = stop;
-        options["startpoint"] = startpoint;
+        options["startKey"] = start;
+        options["stopKey"] = stop;
+        options["startPoint"] = startpoint;
         options["loops"] = loops;
-        options["forceloop"] = loopfallback;
+        options["forceLoop"] = loopfallback;
 
         bool priorityAsTable = false;
         for (uint32_t i = 1; i < MWRender::sNumBlendMasks; i++)
