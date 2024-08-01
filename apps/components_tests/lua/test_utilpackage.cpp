@@ -51,9 +51,6 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "util.vector2(4, 6):ediv(util.vector2(2, 3)) == util.vector2(2, 2)"));
         lua.safe_script("swizzle = util.vector2(1, 2)");
         EXPECT_TRUE(get<bool>(lua, "swizzle.xx == util.vector2(1, 1) and swizzle.yy == util.vector2(2, 2)"));
-        EXPECT_ERROR(lua.safe_script("v = util.vector2(1, 2).xp"), "unrecognized swizzle index");
-        EXPECT_ERROR(lua.safe_script("v = util.vector2(1, 2).xxxxx"), "invalid swizzle length");
-        EXPECT_ERROR(lua.safe_script("v = util.vector2(1, 2).zw"), "swizzle index out of range");
     }
 
     TEST(LuaUtilPackageTest, Vector3)
@@ -90,9 +87,6 @@ namespace
         lua.safe_script("swizzle = util.vector3(1, 2, 3)");
         EXPECT_TRUE(get<bool>(lua, "swizzle.xxx == util.vector3(1, 1, 1)"));
         EXPECT_TRUE(get<bool>(lua, "swizzle.xyz == swizzle.zyx.zyx"));
-        EXPECT_ERROR(lua.safe_script("v = util.vector3(1, 2, 3).xyp"), "unrecognized swizzle index");
-        EXPECT_ERROR(lua.safe_script("v = util.vector3(1, 2, 3).xxxxx"), "invalid swizzle length");
-        EXPECT_ERROR(lua.safe_script("v = util.vector3(1, 2, 3).xxxw"), "swizzle index out of range");
     }
 
     TEST(LuaUtilPackageTest, Vector4)
@@ -131,8 +125,6 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "swizzle.wwww == util.vector4(4, 4, 4, 4)"));
         EXPECT_TRUE(get<bool>(lua, "swizzle.xyzw == util.vector4(1, 2, 3, 4)"));
         EXPECT_TRUE(get<bool>(lua, "swizzle.xyzw == swizzle.wzyx.wzyx"));
-        EXPECT_ERROR(lua.safe_script("v = util.vector4(1, 2, 3, 4).xyp"), "unrecognized swizzle index");
-        EXPECT_ERROR(lua.safe_script("v = util.vector4(1, 2, 3, 4).xxxxx"), "invalid swizzle length");
     }
 
     TEST(LuaUtilPackageTest, Color)
