@@ -552,3 +552,19 @@ smooth animation transitions
 Enabling this option uses smooth transitions between animations making them a lot less jarring. Also allows to load modded animation blending.
 
 This setting can be controlled in the Settings tab of the launcher.
+
+rebalance soul gem values
+-------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enabling this option drastically reduces the value of filled soul gems, making
+the value dependant only on soul magnitude, ignoring the soul gem type.
+
+The new value formula is based on the Morrowind Code Patch project::
+
+	new value = 0.0001 * (soul magnitude)³ + 2 * (soul magnitude)
+
+This setting can be controlled in the Settings tab of the launcher.
