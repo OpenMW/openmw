@@ -29,7 +29,6 @@ qmake --version
 if [[ "${MACOS_AMD64}" ]]; then
     curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20221113.zip -o ~/openmw-deps.zip
 else
-    # need to update this with new zip from deps from new openmw-dep flow
-    curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20231022_arm64.zip -o ~/openmw-deps.zip
+    curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20240802_arm64.zip -o ~/openmw-deps.zip
 fi
 unzip -o ~/openmw-deps.zip -d /tmp > /dev/null
