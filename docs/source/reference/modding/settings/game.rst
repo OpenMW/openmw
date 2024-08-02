@@ -560,8 +560,9 @@ rebalance soul gem values
 :Range:		True/False
 :Default:	False
 
-Enabling this option drastically reduces the value of filled soul gems, making
-the value dependant only on soul magnitude, ignoring the soul gem type.
+Enabling this option drastically reduces the value of filled soul gems.
+The value will depend on soul magnitude but not the size of the used
+soul gem.
 
 The new value formula is based on the Morrowind Code Patch project::
 
