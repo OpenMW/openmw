@@ -40,13 +40,6 @@ else
     )
 fi
 
-if [[ "${FOR_RELEASE}" ]]; then
-    CMAKE_CONF_OPTS+=(
-        -D CMAKE_C_FLAGS_RELEASE="-g -O0"
-        -D CMAKE_CXX_FLAGS_RELEASE="-g -O0"
-    )
-fi
-
 cmake \
 "${CMAKE_CONF_OPTS[@]}" \
 -D BUILD_OPENMW=TRUE \
