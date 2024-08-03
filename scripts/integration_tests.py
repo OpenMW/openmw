@@ -64,6 +64,8 @@ def runTest(name):
             "framerate limit = 60\n"
             "[Game]\n"
             "smooth animation transitions = true\n"
+            "[Lua]\n"
+            f"memory limit = {1024 * 1024 * 128}\n"
         )
     stdout_lines = list()
     exit_ok = True

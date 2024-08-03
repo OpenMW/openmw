@@ -206,6 +206,19 @@ local function testUTF8Strings()
     testing.expectEqual(utf8.offset(utf8str, 9), 11)
 end
 
+local function testMemoryLimit()
+    local ok, err = pcall(function()
+        local t = {}
+        local n = 1
+        while true do
+            t[n] = n
+            n = n + 1
+        end
+    end)
+    testing.expectEqual(ok, false, 'Script reaching memory limit should fail')
+    testing.expectEqual(err, 'not enough memory')
+end
+
 local function initPlayer()
     player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
     coroutine.yield()
@@ -260,6 +273,11 @@ tests = {
     {'utf8Chars', testUTF8Chars},
     {'utf8Strings', testUTF8Strings},
     {'mwscript', testMWScript},
+    {'testMemoryLimit', testMemoryLimit},
+    {'playerMemoryLimit', function()
+        initPlayer()
+        testing.runLocalTest(player, 'playerMemoryLimit')
+    end}
 }
 
 return {
