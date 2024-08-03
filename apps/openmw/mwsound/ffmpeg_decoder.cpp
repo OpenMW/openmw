@@ -8,6 +8,10 @@
 #include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 
+#if FFMPEG_5_OR_GREATER
+#include <libavutil/channel_layout.h>
+#endif
+
 namespace MWSound
 {
     void AVIOContextDeleter::operator()(AVIOContext* ptr) const
@@ -57,7 +61,11 @@ namespace MWSound
         }
     }
 
+#if FFMPEG_CONST_WRITEPACKET
+    int FFmpeg_Decoder::writePacket(void*, const uint8_t*, int)
+#else
     int FFmpeg_Decoder::writePacket(void*, uint8_t*, int)
+#endif
     {
         Log(Debug::Error) << "can't write to read-only stream";
         return -1;
@@ -152,7 +160,11 @@ namespace MWSound
                 if (!mDataBuf || mDataBufLen < mFrame->nb_samples)
                 {
                     av_freep(&mDataBuf);
+#if FFMPEG_5_OR_GREATER
+                    if (av_samples_alloc(&mDataBuf, nullptr, mOutputChannelLayout.nb_channels,
+#else
                     if (av_samples_alloc(&mDataBuf, nullptr, av_get_channel_layout_nb_channels(mOutputChannelLayout),
+#endif
                             mFrame->nb_samples, mOutputSampleFormat, 0)
                         < 0)
                         return false;
@@ -189,7 +201,11 @@ namespace MWSound
                 if (!getAVAudioData())
                     break;
                 mFramePos = 0;
+#if FFMPEG_5_OR_GREATER
+                mFrameSize = mFrame->nb_samples * mOutputChannelLayout.nb_channels
+#else
                 mFrameSize = mFrame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout)
+#endif
                     * av_get_bytes_per_sample(mOutputSampleFormat);
             }
 
@@ -277,11 +293,19 @@ namespace MWSound
         else
             mOutputSampleFormat = AV_SAMPLE_FMT_S16;
 
+#if FFMPEG_5_OR_GREATER
+        mOutputChannelLayout = (*stream)->codecpar->ch_layout; // sefault
+        if (mOutputChannelLayout.u.mask == 0)
+            av_channel_layout_default(&mOutputChannelLayout, codecCtxPtr->ch_layout.nb_channels);
+
+        codecCtxPtr->ch_layout = mOutputChannelLayout;
+#else
         mOutputChannelLayout = (*stream)->codecpar->channel_layout;
         if (mOutputChannelLayout == 0)
             mOutputChannelLayout = av_get_default_channel_layout(codecCtxPtr->channels);
 
         codecCtxPtr->channel_layout = mOutputChannelLayout;
+#endif
 
         mIoCtx = std::move(ioCtx);
         mFrame = std::move(frame);
@@ -332,41 +356,88 @@ namespace MWSound
             *type = SampleType_Int16;
         }
 
-        if (mOutputChannelLayout == AV_CH_LAYOUT_MONO)
-            *chans = ChannelConfig_Mono;
-        else if (mOutputChannelLayout == AV_CH_LAYOUT_STEREO)
-            *chans = ChannelConfig_Stereo;
-        else if (mOutputChannelLayout == AV_CH_LAYOUT_QUAD)
-            *chans = ChannelConfig_Quad;
-        else if (mOutputChannelLayout == AV_CH_LAYOUT_5POINT1)
-            *chans = ChannelConfig_5point1;
-        else if (mOutputChannelLayout == AV_CH_LAYOUT_7POINT1)
-            *chans = ChannelConfig_7point1;
-        else
+#if FFMPEG_5_OR_GREATER
+        switch (mOutputChannelLayout.u.mask)
+#else
+        switch (mOutputChannelLayout)
+#endif
         {
-            char str[1024];
-            av_get_channel_layout_string(str, sizeof(str), mCodecCtx->channels, mCodecCtx->channel_layout);
-            Log(Debug::Error) << "Unsupported channel layout: " << str;
-
-            if (mCodecCtx->channels == 1)
-            {
-                mOutputChannelLayout = AV_CH_LAYOUT_MONO;
+            case AV_CH_LAYOUT_MONO:
                 *chans = ChannelConfig_Mono;
-            }
-            else
-            {
-                mOutputChannelLayout = AV_CH_LAYOUT_STEREO;
+                break;
+            case AV_CH_LAYOUT_STEREO:
                 *chans = ChannelConfig_Stereo;
-            }
+                break;
+            case AV_CH_LAYOUT_QUAD:
+                *chans = ChannelConfig_Quad;
+                break;
+            case AV_CH_LAYOUT_5POINT1:
+                *chans = ChannelConfig_5point1;
+                break;
+            case AV_CH_LAYOUT_7POINT1:
+                *chans = ChannelConfig_7point1;
+                break;
+            default:
+                char str[1024];
+#if FFMPEG_5_OR_GREATER
+                av_channel_layout_describe(&mCodecCtx->ch_layout, str, sizeof(str));
+                Log(Debug::Error) << "Unsupported channel layout: " << str;
+
+                if (mCodecCtx->ch_layout.nb_channels == 1)
+                {
+                    mOutputChannelLayout = AV_CHANNEL_LAYOUT_MONO;
+                    *chans = ChannelConfig_Mono;
+                }
+                else
+                {
+                    mOutputChannelLayout = AV_CHANNEL_LAYOUT_STEREO;
+                    *chans = ChannelConfig_Stereo;
+                }
+#else
+                av_get_channel_layout_string(str, sizeof(str), mCodecCtx->channels, mCodecCtx->channel_layout);
+                Log(Debug::Error) << "Unsupported channel layout: " << str;
+
+                if (mCodecCtx->channels == 1)
+                {
+                    mOutputChannelLayout = AV_CH_LAYOUT_MONO;
+                    *chans = ChannelConfig_Mono;
+                }
+                else
+                {
+                    mOutputChannelLayout = AV_CH_LAYOUT_STEREO;
+                    *chans = ChannelConfig_Stereo;
+                }
+#endif
+                break;
         }
 
         *samplerate = mCodecCtx->sample_rate;
+#if FFMPEG_5_OR_GREATER
+        AVChannelLayout ch_layout = mCodecCtx->ch_layout;
+        if (ch_layout.u.mask == 0)
+            av_channel_layout_default(&ch_layout, mCodecCtx->ch_layout.nb_channels);
+
+        if (mOutputSampleFormat != mCodecCtx->sample_fmt || mOutputChannelLayout.u.mask != ch_layout.u.mask)
+#else
         int64_t ch_layout = mCodecCtx->channel_layout;
         if (ch_layout == 0)
             ch_layout = av_get_default_channel_layout(mCodecCtx->channels);
 
         if (mOutputSampleFormat != mCodecCtx->sample_fmt || mOutputChannelLayout != ch_layout)
+#endif
+
         {
+#if FFMPEG_5_OR_GREATER
+            swr_alloc_set_opts2(&mSwr, // SwrContext
+                &mOutputChannelLayout, // output ch layout
+                mOutputSampleFormat, // output sample format
+                mCodecCtx->sample_rate, // output sample rate
+                &ch_layout, // input ch layout
+                mCodecCtx->sample_fmt, // input sample format
+                mCodecCtx->sample_rate, // input sample rate
+                0, // logging level offset
+                nullptr); // log context
+#else
             mSwr = swr_alloc_set_opts(mSwr, // SwrContext
                 mOutputChannelLayout, // output ch layout
                 mOutputSampleFormat, // output sample format
@@ -376,6 +447,7 @@ namespace MWSound
                 mCodecCtx->sample_rate, // input sample rate
                 0, // logging level offset
                 nullptr); // log context
+#endif
             if (!mSwr)
                 throw std::runtime_error("Couldn't allocate SwrContext");
             int init = swr_init(mSwr);
@@ -404,7 +476,11 @@ namespace MWSound
 
         while (getAVAudioData())
         {
+#if FFMPEG_5_OR_GREATER
+            size_t got = mFrame->nb_samples * mOutputChannelLayout.nb_channels
+#else
             size_t got = mFrame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout)
+#endif
                 * av_get_bytes_per_sample(mOutputSampleFormat);
             const char* inbuf = reinterpret_cast<char*>(mFrameData[0]);
             output.insert(output.end(), inbuf, inbuf + got);
@@ -413,7 +489,11 @@ namespace MWSound
 
     size_t FFmpeg_Decoder::getSampleOffset()
     {
+#if FFMPEG_5_OR_GREATER
+        std::size_t delay = (mFrameSize - mFramePos) / mOutputChannelLayout.nb_channels
+#else
         std::size_t delay = (mFrameSize - mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout)
+#endif
             / av_get_bytes_per_sample(mOutputSampleFormat);
         return static_cast<std::size_t>(mNextPts * mCodecCtx->sample_rate) - delay;
     }
@@ -426,7 +506,11 @@ namespace MWSound
         , mNextPts(0.0)
         , mSwr(nullptr)
         , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
+#if FFMPEG_5_OR_GREATER
+        , mOutputChannelLayout({})
+#else
         , mOutputChannelLayout(0)
+#endif
         , mDataBuf(nullptr)
         , mFrameData(nullptr)
         , mDataBufLen(0)
