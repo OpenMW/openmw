@@ -187,6 +187,7 @@
     Bug #8048: Actors can generate negative collision extents and have no collision
     Bug #8063: menu_background.bik video with audio freezes the game forever
     Bug #8064: Lua move360 script doesn't respect the enableZoom/disableZoom Camera interface setting
+    Bug #8085: Don't search in scripts or shaders directories for "Select directories you wish to add" menu in launcher
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
