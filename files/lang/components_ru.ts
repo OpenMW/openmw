@@ -39,7 +39,7 @@
     </message>
     <message>
         <source>&lt;b&gt;This file is specified in a non-user config file, but does not exist in the VFS.&lt;/b&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;b&gt;Этот файл указан в непользовательском файле настроек, но не существует в виртуальной файловой системе.&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
