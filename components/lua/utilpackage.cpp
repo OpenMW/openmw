@@ -56,38 +56,75 @@ namespace LuaUtil
 {
     namespace
     {
-        template <typename TNew, typename T, typename... Indices>
-        void swizzle(sol::usertype<T>& type, Indices... indices)
+        template <typename T>
+        float zero(const T& v)
         {
-            constexpr std::array<char, 4> components = { 'x', 'y', 'z', 'w' };
+            return 0.f;
+        };
 
-            std::string field = { components[indices]... };
-            type[field] = sol::readonly_property([=](const T& v) -> TNew { return { v[indices]... }; });
+        template <typename T>
+        float one(const T& v)
+        {
+            return 1.f;
+        };
+
+        template <typename T, std::size_t I>
+        float get(const T& v)
+        {
+            return v[I];
         }
 
         // Creates bindings for all possible permutations (repetition allowed) of x,y,z,w fields
         template <typename T>
         void addSwizzleFields(sol::usertype<T>& type)
         {
-            for (size_t a = 0; a < T::num_components; ++a)
-            {
-                // Single component swizzles
-                swizzle<float>(type, a);
+            // Generate mapping of swizzle characters to their getter functions
+            constexpr auto components = []() {
+                std::array<std::pair<char, float (*)(const T&)>, T::num_components + 2> arr;
 
-                for (size_t b = 0; b < T::num_components; ++b)
+                // 0/1 Components
+                arr[T::num_components] = { '0', zero<T> };
+                arr[T::num_components + 1] = { '1', one<T> };
+
+                // x,y,z,w components
+                if constexpr (T::num_components > 1)
+                {
+                    arr[0] = { 'x', get<T, 0> };
+                    arr[1] = { 'y', get<T, 1> };
+                }
+
+                if constexpr (T::num_components > 2)
+                    arr[2] = { 'z', get<T, 2> };
+
+                if constexpr (T::num_components > 3)
+                    arr[3] = { 'w', get<T, 3> };
+
+                return arr;
+            }();
+
+            // Iterate over the permutations
+            for (const auto [comp1, func1] : components)
+            {
+                // Single component swizzle
+                type[std::string{ comp1 }] = sol::readonly_property([=](const T& v) { return func1(v); });
+
+                for (const auto [comp2, func2] : components)
                 {
                     // Two component swizzles
-                    swizzle<Vec2>(type, a, b);
+                    type[std::string{ comp1, comp2 }]
+                        = sol::readonly_property([=](const T& v) { return Vec2(func1(v), func2(v)); });
 
-                    for (size_t c = 0; c < T::num_components; ++c)
+                    for (const auto [comp3, func3] : components)
                     {
                         // Three component swizzles
-                        swizzle<Vec3>(type, a, b, c);
+                        type[std::string{ comp1, comp2, comp3 }]
+                            = sol::readonly_property([=](const T& v) { return Vec3(func1(v), func2(v), func3(v)); });
 
-                        for (size_t d = 0; d < T::num_components; ++d)
+                        for (const auto [comp4, func4] : components)
                         {
                             // Four component swizzles
-                            swizzle<Vec4>(type, a, b, c, d);
+                            type[std::string{ comp1, comp2, comp3, comp4 }] = sol::readonly_property(
+                                [=](const T& v) { return Vec4(func1(v), func2(v), func3(v), func4(v)); });
                         }
                     }
                 }

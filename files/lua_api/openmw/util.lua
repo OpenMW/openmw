@@ -94,7 +94,7 @@
 -- @type Vector2
 -- @field #number x
 -- @field #number y
--- @field #string xy swizzle support, any combination of fields can be used to construct a new vector
+-- @field #string xy01 swizzle support, any combination of fields can be used to construct a new vector including the 0/1 constants
 -- @usage
 -- v = util.vector2(3, 4)
 -- v.x, v.y       -- 3.0, 4.0
@@ -109,7 +109,9 @@
 -- v1 - v2        -- vector subtraction
 -- v1 * x         -- multiplication by a number
 -- v1 / x         -- division by a number
--- v1.xx, v1.xyx  -- new vectors can be created with swizzles
+-- v1.xx, v1.xyx  -- swizzle with standard fields
+-- v1.y1y, v1.x00 -- swizzle with 0/1 constant
+-- v1['0xy']      -- swizzle with 0/1 constant starting with 0 or 1
 
 ---
 -- Creates a new 2D vector. Vectors are immutable and can not be changed after creation.
@@ -197,7 +199,7 @@
 -- @field #number x
 -- @field #number y
 -- @field #number z
--- @field #string xyz swizzle support, any combination of fields can be used to construct a new vector
+-- @field #string xyz01 swizzle support, any combination of fields can be used to construct a new vector including the 0/1 constants
 -- @usage
 -- v = util.vector3(3, 4, 5)
 -- v.x, v.y, v.z  -- 3.0, 4.0, 5.0
@@ -213,7 +215,9 @@
 -- v1 - v2        -- vector subtraction
 -- v1 * x         -- multiplication by a number
 -- v1 / x         -- division by a number
--- v1.zyz, v1.yx  -- new vectors can be created with swizzles
+-- v1.zyz, v1.yx  -- swizzle with standard fields
+-- v1.w1y, v1.z0z -- swizzle with 0/1 constant
+-- v1['0xy']      -- swizzle with 0/1 constant starting with 0 or 1
 
 ---
 -- Creates a new 3D vector. Vectors are immutable and can not be changed after creation.
@@ -308,7 +312,7 @@
 -- @field #number y
 -- @field #number z
 -- @field #number w
--- @field #string xyzw swizzle support, any combination of fields can be used to construct a new vector
+-- @field #string xyzw01 swizzle support, any combination of fields can be used to construct a new vector including the 0/1 constants
 -- @usage
 -- v = util.vector4(3, 4, 5, 6)
 -- v.x, v.y, v.z, v.w  -- 3.0, 4.0, 5.0, 6.0
@@ -322,7 +326,9 @@
 -- v1 - v2          -- vector subtraction
 -- v1 * x           -- multiplication by a number
 -- v1 / x           -- division by a number
--- v1.zzzz, v1.zyz  -- new vectors can be created with swizzles
+-- v1.zyz, v1.wwwx  -- swizzle with standard fields
+-- v1.w1, v1.z000   -- swizzle with 0/1 constant
+-- v1['000w']       -- swizzle with 0/1 constant starting with 0 or 1
 
 ---
 -- Creates a new 4D vector. Vectors are immutable and can not be changed after creation.
