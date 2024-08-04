@@ -24,6 +24,8 @@ namespace MWRender
 
         glViewport(0, 0, tex->getTextureWidth(), tex->getTextureHeight());
         glClearColor(0.0, 0.0, 0.0, 1.0);
+        glColorMask(true, true, true, true);
+        state->haveAppliedAttribute(osg::StateAttribute::Type::COLORMASK);
         glClear(GL_COLOR_BUFFER_BIT);
 
         bin->drawImplementation(renderInfo, previous);
