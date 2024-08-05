@@ -11,6 +11,7 @@
 #include <condition_variable>
 
 #include <osg/ref_ptr>
+
 namespace osg
 {
     class Texture2D;
@@ -39,11 +40,9 @@ extern "C"
 #endif
 
 #include "videodefs.hpp"
+#include "libavformatdefines.hpp"
 
 #define VIDEO_PICTURE_QUEUE_SIZE 50
-
-#define FFMPEG_5_OR_GREATER (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100))
-#define FFMPEG_CONST_WRITEPACKET (LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 12, 100))
 
 extern "C"
 {
@@ -159,7 +158,7 @@ struct VideoState {
 
     static int istream_read(void *user_data, uint8_t *buf, int buf_size);
 
-#if FFMPEG_CONST_WRITEPACKET
+#if OPENMW_FFMPEG_CONST_WRITEPACKET
     static int istream_write(void *, const unsigned char *, int);
 #else
     static int istream_write(void *, uint8_t *, int);

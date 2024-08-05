@@ -8,7 +8,10 @@
 #include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 
-#if FFMPEG_5_OR_GREATER
+#include <extern/osg-ffmpeg-videoplayer/libavformatdefines.hpp>
+#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
+
+#if OPENMW_FFMPEG_5_OR_GREATER
 #include <libavutil/channel_layout.h>
 #endif
 
@@ -61,7 +64,7 @@ namespace MWSound
         }
     }
 
-#if FFMPEG_CONST_WRITEPACKET
+#if OPENMW_FFMPEG_CONST_WRITEPACKET
     int FFmpeg_Decoder::writePacket(void*, const uint8_t*, int)
 #else
     int FFmpeg_Decoder::writePacket(void*, uint8_t*, int)
@@ -160,7 +163,7 @@ namespace MWSound
                 if (!mDataBuf || mDataBufLen < mFrame->nb_samples)
                 {
                     av_freep(&mDataBuf);
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
                     if (av_samples_alloc(&mDataBuf, nullptr, mOutputChannelLayout.nb_channels,
 #else
                     if (av_samples_alloc(&mDataBuf, nullptr, av_get_channel_layout_nb_channels(mOutputChannelLayout),
@@ -201,7 +204,7 @@ namespace MWSound
                 if (!getAVAudioData())
                     break;
                 mFramePos = 0;
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
                 mFrameSize = mFrame->nb_samples * mOutputChannelLayout.nb_channels
 #else
                 mFrameSize = mFrame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout)
@@ -293,7 +296,7 @@ namespace MWSound
         else
             mOutputSampleFormat = AV_SAMPLE_FMT_S16;
 
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
         mOutputChannelLayout = (*stream)->codecpar->ch_layout; // sefault
         if (mOutputChannelLayout.u.mask == 0)
             av_channel_layout_default(&mOutputChannelLayout, codecCtxPtr->ch_layout.nb_channels);
@@ -356,7 +359,7 @@ namespace MWSound
             *type = SampleType_Int16;
         }
 
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
         switch (mOutputChannelLayout.u.mask)
 #else
         switch (mOutputChannelLayout)
@@ -379,7 +382,7 @@ namespace MWSound
                 break;
             default:
                 char str[1024];
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
                 av_channel_layout_describe(&mCodecCtx->ch_layout, str, sizeof(str));
                 Log(Debug::Error) << "Unsupported channel layout: " << str;
 
@@ -412,7 +415,7 @@ namespace MWSound
         }
 
         *samplerate = mCodecCtx->sample_rate;
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
         AVChannelLayout ch_layout = mCodecCtx->ch_layout;
         if (ch_layout.u.mask == 0)
             av_channel_layout_default(&ch_layout, mCodecCtx->ch_layout.nb_channels);
@@ -427,7 +430,7 @@ namespace MWSound
 #endif
 
         {
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
             swr_alloc_set_opts2(&mSwr, // SwrContext
                 &mOutputChannelLayout, // output ch layout
                 mOutputSampleFormat, // output sample format
@@ -476,7 +479,7 @@ namespace MWSound
 
         while (getAVAudioData())
         {
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
             size_t got = mFrame->nb_samples * mOutputChannelLayout.nb_channels
 #else
             size_t got = mFrame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout)
@@ -489,7 +492,7 @@ namespace MWSound
 
     size_t FFmpeg_Decoder::getSampleOffset()
     {
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
         std::size_t delay = (mFrameSize - mFramePos) / mOutputChannelLayout.nb_channels
 #else
         std::size_t delay = (mFrameSize - mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout)
@@ -506,7 +509,7 @@ namespace MWSound
         , mNextPts(0.0)
         , mSwr(nullptr)
         , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
         , mOutputChannelLayout({})
 #else
         , mOutputChannelLayout(0)
