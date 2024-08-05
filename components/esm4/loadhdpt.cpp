@@ -37,6 +37,9 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mExtraFlags2 = 0;
+    mData = 0;
+    mType = 0;
 
     std::optional<std::uint32_t> type;
 
