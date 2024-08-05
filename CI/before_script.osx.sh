@@ -1,8 +1,5 @@
 #!/bin/sh -e
 
-export CXX=clang++
-export CC=clang
-
 # Silence a git warning
 git config --global advice.detachedHead false
 
@@ -21,6 +18,8 @@ declare -a CMAKE_CONF_OPTS=(
 -D CMAKE_C_COMPILER_LAUNCHER="$CCACHE_EXECUTABLE"
 -D CMAKE_CXX_COMPILER_LAUNCHER="$CCACHE_EXECUTABLE"
 -D CMAKE_CXX_FLAGS="-stdlib=libc++"
+-D CMAKE_C_COMPILER="clang"
+-D CMAKE_CXX_COMPILER="clang++"
 -D CMAKE_OSX_DEPLOYMENT_TARGET="13.6"
 -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=TRUE
 -D Boost_INCLUDE_DIR="$DEPENDENCIES_ROOT/include"
