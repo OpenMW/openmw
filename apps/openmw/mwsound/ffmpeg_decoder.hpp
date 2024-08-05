@@ -30,6 +30,9 @@ extern "C"
 
 #include "sound_decoder.hpp"
 
+#define FFMPEG_5_OR_GREATER (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100))
+#define FFMPEG_CONST_WRITEPACKET (LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 12, 100))
+
 namespace MWSound
 {
     struct AVIOContextDeleter
@@ -77,7 +80,11 @@ namespace MWSound
 
         SwrContext* mSwr;
         enum AVSampleFormat mOutputSampleFormat;
+#if FFMPEG_5_OR_GREATER
+        AVChannelLayout mOutputChannelLayout;
+#else
         int64_t mOutputChannelLayout;
+#endif
         uint8_t* mDataBuf;
         uint8_t** mFrameData;
         int mDataBufLen;
@@ -87,7 +94,11 @@ namespace MWSound
         Files::IStreamPtr mDataStream;
 
         static int readPacket(void* user_data, uint8_t* buf, int buf_size);
+#if FFMPEG_CONST_WRITEPACKET
+        static int writePacket(void* user_data, const uint8_t* buf, int buf_size);
+#else
         static int writePacket(void* user_data, uint8_t* buf, int buf_size);
+#endif
         static int64_t seek(void* user_data, int64_t offset, int whence);
 
         bool getAVAudioData();

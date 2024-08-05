@@ -29,6 +29,8 @@ extern "C"
 typedef SSIZE_T ssize_t;
 #endif
 
+#define FFMPEG_5_OR_GREATER (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100))
+
 namespace Video
 {
 
@@ -43,7 +45,11 @@ protected:
     AVCodecContext* mAudioContext;
     AVStream *mAVStream;
     enum AVSampleFormat mOutputSampleFormat;
+    #if FFMPEG_5_OR_GREATER
+    AVChannelLayout mOutputChannelLayout;
+    #else
     uint64_t mOutputChannelLayout;
+    #endif
     int mOutputSampleRate;
     ssize_t mFramePos;
     ssize_t mFrameSize;

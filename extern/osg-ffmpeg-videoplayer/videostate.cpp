@@ -243,7 +243,11 @@ int VideoState::istream_read(void *user_data, uint8_t *buf, int buf_size)
     }
 }
 
+#if FFMPEG_CONST_WRITEPACKET
+int VideoState::istream_write(void *, const unsigned char *, int)
+#else
 int VideoState::istream_write(void *, uint8_t *, int)
+#endif
 {
     throw std::runtime_error("can't write to read-only stream");
 }
