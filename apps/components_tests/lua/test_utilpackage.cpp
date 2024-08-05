@@ -49,6 +49,10 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "ediv0.x == math.huge and ediv0.y ~= ediv0.y"));
         EXPECT_TRUE(get<bool>(lua, "util.vector2(1, 2):emul(util.vector2(3, 4)) == util.vector2(3, 8)"));
         EXPECT_TRUE(get<bool>(lua, "util.vector2(4, 6):ediv(util.vector2(2, 3)) == util.vector2(2, 2)"));
+        lua.safe_script("swizzle = util.vector2(1, 2)");
+        EXPECT_TRUE(get<bool>(lua, "swizzle.xx == util.vector2(1, 1) and swizzle.yy == util.vector2(2, 2)"));
+        EXPECT_TRUE(get<bool>(lua, "swizzle.y0 == util.vector2(2, 0) and swizzle.x1 == util.vector2(1, 1)"));
+        EXPECT_TRUE(get<bool>(lua, "swizzle['01'] == util.vector2(0, 1) and swizzle['0y'] == util.vector2(0, 2)"));
     }
 
     TEST(LuaUtilPackageTest, Vector3)
@@ -82,6 +86,12 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "ediv0.z == math.huge"));
         EXPECT_TRUE(get<bool>(lua, "util.vector3(1, 2, 3):emul(util.vector3(3, 4, 5)) == util.vector3(3, 8, 15)"));
         EXPECT_TRUE(get<bool>(lua, "util.vector3(4, 6, 8):ediv(util.vector3(2, 3, 4)) == util.vector3(2, 2, 2)"));
+        lua.safe_script("swizzle = util.vector3(1, 2, 3)");
+        EXPECT_TRUE(get<bool>(lua, "swizzle.xxx == util.vector3(1, 1, 1)"));
+        EXPECT_TRUE(get<bool>(lua, "swizzle.xyz == swizzle.zyx.zyx"));
+        EXPECT_TRUE(get<bool>(lua, "swizzle.xy0 == util.vector3(1, 2, 0) and swizzle.x11 == util.vector3(1, 1, 1)"));
+        EXPECT_TRUE(
+            get<bool>(lua, "swizzle['001'] == util.vector3(0, 0, 1) and swizzle['0yx'] == util.vector3(0, 2, 1)"));
     }
 
     TEST(LuaUtilPackageTest, Vector4)
@@ -116,6 +126,14 @@ namespace
             get<bool>(lua, "util.vector4(1, 2, 3, 4):emul(util.vector4(3, 4, 5, 6)) == util.vector4(3, 8, 15, 24)"));
         EXPECT_TRUE(
             get<bool>(lua, "util.vector4(4, 6, 8, 9):ediv(util.vector4(2, 3, 4, 3)) == util.vector4(2, 2, 2, 3)"));
+        lua.safe_script("swizzle = util.vector4(1, 2, 3, 4)");
+        EXPECT_TRUE(get<bool>(lua, "swizzle.wwww == util.vector4(4, 4, 4, 4)"));
+        EXPECT_TRUE(get<bool>(lua, "swizzle.xyzw == util.vector4(1, 2, 3, 4)"));
+        EXPECT_TRUE(get<bool>(lua, "swizzle.xyzw == swizzle.wzyx.wzyx"));
+        EXPECT_TRUE(
+            get<bool>(lua, "swizzle.xyz0 == util.vector4(1, 2, 3, 0) and swizzle.w110 == util.vector4(4, 1, 1, 0)"));
+        EXPECT_TRUE(get<bool>(
+            lua, "swizzle['0001'] == util.vector4(0, 0, 0, 1) and swizzle['0yx1'] == util.vector4(0, 2, 1, 1)"));
     }
 
     TEST(LuaUtilPackageTest, Color)

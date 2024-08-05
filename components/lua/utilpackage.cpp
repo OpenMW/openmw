@@ -57,6 +57,81 @@ namespace LuaUtil
     namespace
     {
         template <typename T>
+        float zero(const T& v)
+        {
+            return 0.f;
+        };
+
+        template <typename T>
+        float one(const T& v)
+        {
+            return 1.f;
+        };
+
+        template <typename T, std::size_t I>
+        float get(const T& v)
+        {
+            return v[I];
+        }
+
+        // Creates bindings for all possible permutations (repetition allowed) of x,y,z,w fields
+        template <typename T>
+        void addSwizzleFields(sol::usertype<T>& type)
+        {
+            // Generate mapping of swizzle characters to their getter functions
+            constexpr auto components = []() {
+                std::array<std::pair<char, float (*)(const T&)>, T::num_components + 2> arr;
+
+                // 0/1 Components
+                arr[T::num_components] = { '0', zero<T> };
+                arr[T::num_components + 1] = { '1', one<T> };
+
+                // x,y,z,w components
+                if constexpr (T::num_components > 1)
+                {
+                    arr[0] = { 'x', get<T, 0> };
+                    arr[1] = { 'y', get<T, 1> };
+                }
+
+                if constexpr (T::num_components > 2)
+                    arr[2] = { 'z', get<T, 2> };
+
+                if constexpr (T::num_components > 3)
+                    arr[3] = { 'w', get<T, 3> };
+
+                return arr;
+            }();
+
+            // Iterate over the permutations
+            for (const auto [comp1, func1] : components)
+            {
+                // Single component swizzle
+                type[std::string{ comp1 }] = sol::readonly_property([=](const T& v) { return func1(v); });
+
+                for (const auto [comp2, func2] : components)
+                {
+                    // Two component swizzles
+                    type[std::string{ comp1, comp2 }]
+                        = sol::readonly_property([=](const T& v) { return Vec2(func1(v), func2(v)); });
+
+                    for (const auto [comp3, func3] : components)
+                    {
+                        // Three component swizzles
+                        type[std::string{ comp1, comp2, comp3 }]
+                            = sol::readonly_property([=](const T& v) { return Vec3(func1(v), func2(v), func3(v)); });
+
+                        for (const auto [comp4, func4] : components)
+                        {
+                            // Four component swizzles
+                            type[std::string{ comp1, comp2, comp3, comp4 }] = sol::readonly_property(
+                                [=](const T& v) { return Vec4(func1(v), func2(v), func3(v), func4(v)); });
+                        }
+                    }
+                }
+            }
+        }
+
+        template <typename T>
         void addVectorMethods(sol::usertype<T>& vectorType)
         {
             vectorType[sol::meta_function::unary_minus] = [](const T& a) { return -a; };
@@ -97,6 +172,8 @@ namespace LuaUtil
                 ss << ")";
                 return ss.str();
             };
+
+            addSwizzleFields(vectorType);
         }
     }
 
@@ -108,17 +185,12 @@ namespace LuaUtil
         // Lua bindings for Vec2
         util["vector2"] = [](float x, float y) { return Vec2(x, y); };
         sol::usertype<Vec2> vec2Type = lua.new_usertype<Vec2>("Vec2");
-        vec2Type["x"] = sol::readonly_property([](const Vec2& v) -> float { return v.x(); });
-        vec2Type["y"] = sol::readonly_property([](const Vec2& v) -> float { return v.y(); });
         addVectorMethods<Vec2>(vec2Type);
         vec2Type["rotate"] = &Misc::rotateVec2f;
 
         // Lua bindings for Vec3
         util["vector3"] = [](float x, float y, float z) { return Vec3(x, y, z); };
         sol::usertype<Vec3> vec3Type = lua.new_usertype<Vec3>("Vec3");
-        vec3Type["x"] = sol::readonly_property([](const Vec3& v) -> float { return v.x(); });
-        vec3Type["y"] = sol::readonly_property([](const Vec3& v) -> float { return v.y(); });
-        vec3Type["z"] = sol::readonly_property([](const Vec3& v) -> float { return v.z(); });
         addVectorMethods<Vec3>(vec3Type);
         vec3Type[sol::meta_function::involution] = [](const Vec3& a, const Vec3& b) { return a ^ b; };
         vec3Type["cross"] = [](const Vec3& a, const Vec3& b) { return a ^ b; };
@@ -126,10 +198,6 @@ namespace LuaUtil
         // Lua bindings for Vec4
         util["vector4"] = [](float x, float y, float z, float w) { return Vec4(x, y, z, w); };
         sol::usertype<Vec4> vec4Type = lua.new_usertype<Vec4>("Vec4");
-        vec4Type["x"] = sol::readonly_property([](const Vec4& v) -> float { return v.x(); });
-        vec4Type["y"] = sol::readonly_property([](const Vec4& v) -> float { return v.y(); });
-        vec4Type["z"] = sol::readonly_property([](const Vec4& v) -> float { return v.z(); });
-        vec4Type["w"] = sol::readonly_property([](const Vec4& v) -> float { return v.w(); });
         addVectorMethods<Vec4>(vec4Type);
 
         // Lua bindings for Box
@@ -334,5 +402,4 @@ namespace LuaUtil
 
         return util;
     }
-
 }
