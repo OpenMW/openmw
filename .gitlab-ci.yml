@@ -22,6 +22,7 @@ variables:
   # These can be specified per job or per pipeline
   ARTIFACT_COMPRESSION_LEVEL: "fast"
   CACHE_COMPRESSION_LEVEL: "fast"
+  FF_TIMESTAMPS: "true"
 
 .Ubuntu_Image:
   tags:
