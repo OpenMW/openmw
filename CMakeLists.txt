@@ -124,7 +124,6 @@ include(WholeArchive)
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
-option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(QT_STATIC "Link static build of Qt into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
@@ -369,11 +368,6 @@ endif()
 
 # Platform specific
 if (WIN32)
-    if(NOT MINGW)
-    set(Boost_USE_STATIC_LIBS   ON)
-    add_definitions(-DBOOST_ALL_NO_LIB)
-    endif(NOT MINGW)
-
     # Suppress WinMain(), provided by SDL
     add_definitions(-DSDL_MAIN_HANDLED)
 
@@ -466,14 +460,7 @@ if(WIN32)
     endif(MSVC)
 endif(WIN32)
 
-IF(BOOST_STATIC)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
-
-set(Boost_NO_BOOST_CMAKE ON)
-set(Boost_NO_WARN_NEW_VERSIONS ON)  # ignore warnings about new releases of boost
-
-find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
+find_package(Boost 1.70.0 CONFIG REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 
 if(OPENMW_USE_SYSTEM_MYGUI)
     find_package(MyGUI 3.4.3 REQUIRED)
@@ -502,7 +489,6 @@ set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 include_directories(
     BEFORE SYSTEM
     "."
-    ${Boost_INCLUDE_DIR}
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -513,7 +499,7 @@ include_directories(
     ${ICU_INCLUDE_DIRS}
 )
 
-link_directories(${Boost_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
+link_directories(${COLLADA_DOM_LIBRARY_DIRS})
 
 if(MYGUI_STATIC)
     add_definitions(-DMYGUI_STATIC)
@@ -601,7 +587,6 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
 
     if (APPLE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")

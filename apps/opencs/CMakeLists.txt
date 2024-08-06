@@ -244,7 +244,7 @@ target_link_libraries(openmw-cs-lib
     ${OSGTEXT_LIBRARIES}
     ${OSG_LIBRARIES}
     ${EXTERN_OSGQT_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components_qt
 )
 
@@ -255,7 +255,7 @@ else()
 endif()
 
 if (WIN32)
-    target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
+    target_link_libraries(openmw-cs-lib Boost::locale)
     target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/openmw-cs.exe.manifest)
 endif()
 
