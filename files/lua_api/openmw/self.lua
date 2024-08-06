@@ -44,7 +44,7 @@
 -- @field #number NoAttack
 -- @field #number Any
 -- @field #number Chop
--- @field #number Swing
+-- @field #number Slash
 -- @field #number Thrust
 
 ---
