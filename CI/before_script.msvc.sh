@@ -44,7 +44,6 @@ function unixPathAsWindows {
 	fi
 }
 
-APPVEYOR=${APPVEYOR:-}
 CI=${CI:-}
 STEP=${STEP:-}
 
@@ -206,16 +205,8 @@ if [ -z $VERBOSE ]; then
 	STRIP="> /dev/null 2>&1"
 fi
 
-if [ -z $APPVEYOR ]; then
-	echo "Running prebuild outside of Appveyor."
-
-	DIR=$(windowsPathAsUnix "${BASH_SOURCE[0]}")
-	cd $(dirname "$DIR")/..
-else
-	echo "Running prebuild in Appveyor."
-
-	cd "$APPVEYOR_BUILD_FOLDER"
-fi
+DIR=$(windowsPathAsUnix "${BASH_SOURCE[0]}")
+cd $(dirname "$DIR")/..
 
 run_cmd() {
 	CMD="$1"
@@ -226,13 +217,7 @@ run_cmd() {
 		eval $CMD $@ > output.log 2>&1 || RET=$?
 
 		if [ $RET -ne 0 ]; then
-			if [ -z $APPVEYOR ]; then
-				echo "Command $CMD failed, output can be found in $(real_pwd)/output.log"
-			else
-				echo
-				echo "Command $CMD failed;"
-				cat output.log
-			fi
+			echo "Command $CMD failed, output can be found in $(real_pwd)/output.log"
 		else
 			rm output.log
 		fi
@@ -559,7 +544,6 @@ echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
 echo "==================================="
 echo
 
-# cd OpenMW/AppVeyor-test
 mkdir -p deps
 cd deps
 
