@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+#include <extern/osg-ffmpeg-videoplayer/libavformatdefines.hpp>
+#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
+
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4244)
@@ -29,9 +32,6 @@ extern "C"
 #include <string>
 
 #include "sound_decoder.hpp"
-
-#define FFMPEG_5_OR_GREATER (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100))
-#define FFMPEG_CONST_WRITEPACKET (LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 12, 100))
 
 namespace MWSound
 {
@@ -80,7 +80,7 @@ namespace MWSound
 
         SwrContext* mSwr;
         enum AVSampleFormat mOutputSampleFormat;
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
         AVChannelLayout mOutputChannelLayout;
 #else
         int64_t mOutputChannelLayout;
@@ -94,7 +94,7 @@ namespace MWSound
         Files::IStreamPtr mDataStream;
 
         static int readPacket(void* user_data, uint8_t* buf, int buf_size);
-#if FFMPEG_CONST_WRITEPACKET
+#if OPENMW_FFMPEG_CONST_WRITEPACKET
         static int writePacket(void* user_data, const uint8_t* buf, int buf_size);
 #else
         static int writePacket(void* user_data, uint8_t* buf, int buf_size);

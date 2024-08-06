@@ -1,6 +1,7 @@
 #include "movieaudiofactory.hpp"
 
 #include <extern/osg-ffmpeg-videoplayer/audiodecoder.hpp>
+#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
 #include <extern/osg-ffmpeg-videoplayer/videostate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -46,7 +47,7 @@ namespace MWSound
 
         size_t getSampleOffset()
         {
-#if FFMPEG_5_OR_GREATER
+#if OPENMW_FFMPEG_5_OR_GREATER
             ssize_t clock_delay = (mFrameSize - mFramePos) / mOutputChannelLayout.nb_channels
 #else
             ssize_t clock_delay = (mFrameSize - mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout)

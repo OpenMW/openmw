@@ -6,6 +6,8 @@
 #include <new>
 #include <memory>
 
+#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
+
 #if defined(_MSC_VER)
     #pragma warning (push)
     #pragma warning (disable : 4244)
@@ -29,8 +31,6 @@ extern "C"
 typedef SSIZE_T ssize_t;
 #endif
 
-#define FFMPEG_5_OR_GREATER (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100))
-
 namespace Video
 {
 
@@ -45,7 +45,7 @@ protected:
     AVCodecContext* mAudioContext;
     AVStream *mAVStream;
     enum AVSampleFormat mOutputSampleFormat;
-    #if FFMPEG_5_OR_GREATER
+    #if OPENMW_FFMPEG_5_OR_GREATER
     AVChannelLayout mOutputChannelLayout;
     #else
     uint64_t mOutputChannelLayout;
