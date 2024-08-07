@@ -29,6 +29,38 @@ local function bindTrigger(key, actionid)
     end)
 end
 
+do -- Actions and Triggers currently unused by builtin scripts
+    -- TODO: as more mechanics are dehardcoded, move these declarations to relevant files
+    local triggers = {
+        Activate = input.ACTION.Activate,
+        Console = input.ACTION.Console,
+        CycleSpellLeft = input.ACTION.CycleSpellLeft,
+        CycleSpellRight = input.ACTION.CycleSpellRight,
+        CycleWeaponLeft = input.ACTION.CycleWeaponLeft,
+        CycleWeaponRight = input.ACTION.CycleWeaponRight,
+        GameMenu = input.ACTION.GameMenu,
+        QuickLoad = input.ACTION.QuickLoad,
+        QuickSave = input.ACTION.QuickSave,
+        Screenshot = input.ACTION.Screenshot,
+        ToggleDebug = input.ACTION.ToggleDebug,
+        ToggleHUD = input.ACTION.ToggleHUD,
+        TogglePostProcessorHUD = input.ACTION.ToggleHUD,
+    }
+    for i = 1, 9 do
+        local key = string.format('QuickKey%s', i)
+        triggers[key] = input.ACTION[key]
+    end
+    for  key, action in pairs(triggers) do
+        input.registerTrigger {
+            key = key,
+            l10n = 'OMWControls',
+            name = key .. '_name',
+            description = key .. '_description',
+        }
+        bindTrigger(key, action)
+    end
+end
+
 bindTrigger('AlwaysRun', input.ACTION.AlwaysRun)
 bindTrigger('ToggleSneak', input.ACTION.Sneak)
 bindTrigger('ToggleWeapon', input.ACTION.ToggleWeapon)
