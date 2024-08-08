@@ -52,6 +52,15 @@ such as weight, value, damage, armor rating, magical effects, and detailed descr
 This setting can be adjusted between 0.0 and 1.0 in game
 with the Menu Help Delay slider in the Prefs panel of the Options menu.
 
+keyboard navigation
+-------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Enable or disable keyboard navigation, such as arrow keys and tab moving UI focus, spacebar and Use keys pressing buttons.
+
 stretch menu background
 -----------------------
 
