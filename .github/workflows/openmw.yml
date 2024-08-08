@@ -166,11 +166,9 @@ jobs:
         -D OPENMW_LTO_BUILD=ON
 
     - name: Build OpenMW
-      working-directory: ${{ github.workspace }}
       run: cmake --build ${{ github.workspace }}/build
 
     - name: Install OpenMW
-      working-directory: ${{ github.workspace }}
       run: cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
 
     - name: Copy missing DLLs
@@ -231,3 +229,25 @@ jobs:
       with:
         name: openmw-${{ matrix.image }}-${{ github.sha }}
         path: ${{ github.workspace }}/install/*
+
+    - name: Add install directory to PATH
+      shell: bash
+      run: echo '${{ github.workspace }}/install' >> ${GITHUB_PATH}
+
+    - name: Run components tests
+      run: build/components-tests.exe
+
+    - name: Run OpenMW tests
+      run: build/openmw-tests.exe
+
+    - name: Run OpenMW-CS tests
+      run: build/openmw-cs-tests.exe
+
+    - name: Run detournavigator navmeshtilescache benchmark
+      run: build/openmw_detournavigator_navmeshtilescache_benchmark.exe
+
+    - name: Run settings access benchmark
+      run: build/openmw_settings_access_benchmark.exe
+
+    - name: Run esm refid benchmark
+      run: build/openmw_esm_refid_benchmark.exe
