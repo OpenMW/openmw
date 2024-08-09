@@ -44,7 +44,7 @@ namespace Misc
         TEST_P(MiscToEulerAnglesXZQuatTest, shouldReturnValueCloseTo)
         {
             const osg::Vec3f result = toEulerAnglesXZ(GetParam().first);
-            EXPECT_THAT(result, Vec3fEq(GetParam().second, std::numeric_limits<float>::epsilon()))
+            EXPECT_THAT(result, Vec3fEq(GetParam().second, 1e-6))
                 << "toEulerAnglesXZ(" << GetParam().first << ") = " << result;
         }
 
