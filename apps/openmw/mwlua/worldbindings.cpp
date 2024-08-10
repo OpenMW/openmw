@@ -25,6 +25,7 @@
 
 #include "luamanagerimp.hpp"
 
+#include "animationbindings.hpp"
 #include "corebindings.hpp"
 #include "mwscriptbindings.hpp"
 
@@ -218,6 +219,8 @@ namespace MWLua
                 },
                 "_runStandardUseAction");
         };
+
+        api["vfx"] = initWorldVfxBindings(context);
 
         return LuaUtil::makeReadOnly(api);
     }

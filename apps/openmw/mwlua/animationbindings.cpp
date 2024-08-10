@@ -70,26 +70,6 @@ namespace MWLua
         return anim;
     }
 
-    const ESM::Static* getStatic(const sol::object& staticOrID)
-    {
-        if (staticOrID.is<ESM::Static>())
-            return staticOrID.as<const ESM::Static*>();
-        else
-        {
-            ESM::RefId id = ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(staticOrID));
-            return MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find(id);
-        }
-    }
-
-    std::string getStaticModelOrThrow(const sol::object& staticOrID)
-    {
-        const ESM::Static* static_ = getStatic(staticOrID);
-        if (!static_)
-            throw std::runtime_error("Invalid static");
-
-        return Misc::ResourceHelpers::correctMeshPath(static_->mModel);
-    }
-
     static AnimationPriorities getPriorityArgument(const sol::table& args)
     {
         auto asPriorityEnum = args.get<sol::optional<Priority>>("priority");
@@ -277,19 +257,18 @@ namespace MWLua
         };
 
         api["addVfx"] = sol::overload(
-            [context](const sol::object& object, const sol::object& staticOrID) {
+            [context](const sol::object& object, const std::string& model) {
                 context.mLuaManager->addAction(
-                    [object = ObjectVariant(object), model = getStaticModelOrThrow(staticOrID)] {
+                    [object = ObjectVariant(object), model = model] {
                         MWRender::Animation* anim = getMutableAnimationOrThrow(object);
                         anim->addEffect(model, "");
                     },
                     "addVfxAction");
             },
-            [context](const sol::object& object, const sol::object& staticOrID, const sol::table& options) {
+            [context](const sol::object& object, const std::string& model, const sol::table& options) {
                 context.mLuaManager->addAction(
-                    [object = ObjectVariant(object), model = getStaticModelOrThrow(staticOrID),
-                        effectId = options.get_or<std::string>("vfxId", ""), loop = options.get_or("loop", false),
-                        boneName = options.get_or<std::string>("boneName", ""),
+                    [object = ObjectVariant(object), model = model, effectId = options.get_or<std::string>("vfxId", ""),
+                        loop = options.get_or("loop", false), boneName = options.get_or<std::string>("boneName", ""),
                         particleTexture = options.get_or<std::string>("particleTextureOverride", "")] {
                         MWRender::Animation* anim = getMutableAnimationOrThrow(ObjectVariant(object));
 
@@ -319,28 +298,25 @@ namespace MWLua
         return LuaUtil::makeReadOnly(api);
     }
 
-    sol::table initCoreVfxBindings(const Context& context)
+    sol::table initWorldVfxBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
         sol::table api(lua, sol::create);
         auto world = MWBase::Environment::get().getWorld();
 
         api["spawn"] = sol::overload(
-            [world, context](const sol::object& staticOrID, const osg::Vec3f& worldPos) {
-                auto model = getStaticModelOrThrow(staticOrID);
+            [world, context](const std::string model, const osg::Vec3f& worldPos) {
                 context.mLuaManager->addAction(
-                    [world, model = std::move(model), worldPos]() { world->spawnEffect(model, "", worldPos); },
+                    [world, model = model, worldPos]() { world->spawnEffect(model, "", worldPos); },
                     "openmw.vfx.spawn");
             },
-            [world, context](const sol::object& staticOrID, const osg::Vec3f& worldPos, const sol::table& options) {
-                auto model = getStaticModelOrThrow(staticOrID);
-
+            [world, context](const std::string& model, const osg::Vec3f& worldPos, const sol::table& options) {
                 bool magicVfx = options.get_or("mwMagicVfx", true);
                 std::string texture = options.get_or<std::string>("particleTextureOverride", "");
                 float scale = options.get_or("scale", 1.f);
 
                 context.mLuaManager->addAction(
-                    [world, model = std::move(model), texture = std::move(texture), worldPos, scale, magicVfx]() {
+                    [world, model = model, texture = std::move(texture), worldPos, scale, magicVfx]() {
                         world->spawnEffect(model, texture, worldPos, scale, magicVfx);
                     },
                     "openmw.vfx.spawn");

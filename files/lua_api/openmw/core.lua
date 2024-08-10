@@ -1142,24 +1142,4 @@
 -- @field #number favouredSkillValue Secondary skill value required to get this rank.
 -- @field #number factionReaction Reaction of faction members if player is in this faction.
 
---- @{#VFX}: Visual effects
--- @field [parent=#core] #VFX vfx
-
----
--- Spawn a VFX at the given location in the world
--- @function [parent=#VFX] spawn
--- @param #any static openmw.core#StaticRecord or #string ID
--- @param openmw.util#Vector3 location
--- @param #table options optional table of parameters. Can contain:
---
---   * `mwMagicVfx` - Boolean that if true causes the textureOverride parameter to only affect nodes with the Nif::RC_NiTexturingProperty property set. (default: true).
---   * `particleTextureOverride` - Name of a particle texture that should override this effect's default texture. (default: "")
---   * `scale` - A number that scales the size of the vfx (Default: 1)
---
--- @usage -- Spawn a sanctuary effect near the player
--- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
--- pos = self.position + util.vector3(0, 100, 0)
--- core.vfx.spawn(effect.castingStatic, pos)
---
-
 return nil

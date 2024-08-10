@@ -141,5 +141,11 @@ return {
             end
             handlers[#handlers + 1] = handler
         end,
+    },
+
+    eventHandlers = {
+        AddVfx = function(data)
+            anim.addVfx(self, data.model, data.options)
+        end,
     }
 }
