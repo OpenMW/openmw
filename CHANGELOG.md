@@ -188,6 +188,7 @@
     Bug #8063: menu_background.bik video with audio freezes the game forever
     Bug #8064: Lua move360 script doesn't respect the enableZoom/disableZoom Camera interface setting
     Bug #8085: Don't search in scripts or shaders directories for "Select directories you wish to add" menu in launcher
+    Bug #8097: GetEffect doesn't detect 0 magnitude spells
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
