@@ -440,12 +440,12 @@ namespace MWMechanics
                     // NB: this currently assumes the hardcoded magic effect flags are used
                     const float magnitude = (effect.mMagnMin + effect.mMagnMax) / 2.f;
                     const float toHeal = magnitude * std::max(1, effect.mDuration);
-                    const float damage = current.getModified() - current.getCurrent();
+                    const float damage = std::max(current.getModified() - current.getCurrent(), 0.f);
                     float priority = 0.f;
                     if (effect.mEffectID == ESM::MagicEffect::RestoreHealth)
                         priority = 4.f;
                     else if (effect.mEffectID == ESM::MagicEffect::RestoreMagicka)
-                        priority = std::max(0.1f, getRestoreMagickaPriority(actor));
+                        priority = getRestoreMagickaPriority(actor);
                     else if (effect.mEffectID == ESM::MagicEffect::RestoreFatigue)
                         priority = 2.f;
                     float overheal = 0.f;
@@ -456,9 +456,8 @@ namespace MWMechanics
                         heal = damage;
                     }
 
-                    priority = (std::pow(priority + heal / current.getModified(), damage * 4.f / current.getModified())
-                                   - priority - overheal / current.getModified())
-                        / priority;
+                    priority = (priority - 1.f) / 2.f * std::pow((damage / current.getModified() + 0.6f), priority * 2)
+                        + priority * (heal - 2.f * overheal) / current.getModified() - 0.5f;
                     rating = priority;
                 }
                 break;
