@@ -10,6 +10,8 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 
+#include <components/esmterrain/storage.hpp>
+
 #include "compositemaprenderer.hpp"
 #include "material.hpp"
 #include "storage.hpp"
@@ -39,6 +41,32 @@ namespace Terrain
         mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);
     }
 
+    // FIXME: don't know which is worse, adding duplicated code here or adding a parameter to
+    //        Terrain::QuadTreeWorld::getChunk().
+    osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& center, unsigned char lod,
+        unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile, int quad)
+    {
+        // Override lod with the vertexLodMod adjusted value.
+        // TODO: maybe we can refactor this code by moving all vertexLodMod code into this class.
+        lod = static_cast<unsigned char>(lodFlags >> (4 * 4));
+
+        const ChunkKey key{ .mCenter = center, .mLod = lod, .mLodFlags = lodFlags };
+        if (osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(key))
+            return static_cast<osg::Node*>(obj.get());
+
+        const TerrainDrawable* templateGeometry = nullptr;
+        const TemplateKey templateKey{ .mCenter = center, .mLod = lod };
+        const auto pair = mCache->lowerBound(templateKey);
+        if (pair.has_value() && templateKey == TemplateKey{ .mCenter = pair->first.mCenter, .mLod = pair->first.mLod })
+            templateGeometry = static_cast<const TerrainDrawable*>(pair->second.get());
+
+        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile, templateGeometry, quad);
+        mCache->addEntryToObjectCache(key, node.get());
+        return node;
+    }
+
+    // called from either TerrainGrid::buildTerrain() or QuadTreeWorld::loadRenderingNode()
+    // calls createChunk()
     osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& center, unsigned char lod,
         unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
@@ -137,12 +165,27 @@ namespace Terrain
         }
     }
 
+// >   openmw.exe!Terrain::ChunkManager::createPasses() Line 188
+//     openmw.exe!Terrain::ChunkManager::createCompositeMapGeometry() Line 123
+//     openmw.exe!Terrain::ChunkManager::createChunk() Line 275
+//     openmw.exe!Terrain::ChunkManager::getChunk() Line 59
+//     openmw.exe!Terrain::QuadTreeWorld::loadRenderingNode() Line 397
+//     openmw.exe!Terrain::QuadTreeWorld::preload() Line 558
+//     openmw.exe!MWWorld::TerrainPreloadItem::doWork() Line 184
+//     openmw.exe!SceneUtil::WorkThread::run() Line 135
     std::vector<osg::ref_ptr<osg::StateSet>> ChunkManager::createPasses(
-        float chunkSize, const osg::Vec2f& chunkCenter, bool forCompositeMap)
+        float chunkSize, const osg::Vec2f& chunkCenter, bool forCompositeMap, int quad)
     {
         std::vector<LayerInfo> layerList;
         std::vector<osg::ref_ptr<osg::Image>> blendmaps;
-        mStorage->getBlendmaps(chunkSize, chunkCenter, blendmaps, layerList, mWorldspace);
+
+        if (quad >= 0) // NOTE: quad == -1 has a special meaning of "no quads"
+        {
+            static_cast<ESMTerrain::Storage*>(mStorage)
+                ->getQuadBlendmaps(chunkSize, chunkCenter, blendmaps, layerList, mWorldspace, quad);
+        }
+        else
+            mStorage->getBlendmaps(chunkSize, chunkCenter, blendmaps, layerList, mWorldspace);
 
         bool useShaders = mSceneManager->getForceShaders();
         if (!mSceneManager->getClampLighting())
@@ -183,14 +226,26 @@ namespace Terrain
             blendmapTextures.push_back(texture);
         }
 
+        // NOTE: This needs to get different values for TES4.  That is, blendmapScale should
+        //       be 16 for TES3 and 6 for TES4 after calling getBlendmapScale() if we were
+        //       using TerrainGrid (i.e. chunksize of 1.f).  See the way Terrain::createPasses()
+        //       uses BlendmapTexMat::value(blendmapScale).  This scaling won't work if using
+        //       QuadTree with chunkSize other than 1.f (in which case need to do sampling).
+        //
+        //       We should remember that in TES4/ESM4 the land "chunk" size is not the same
+        //       size as the texture.  So we may have to do some maths here but it is unclear
+        //       whether it will work out properly until some testing is done.
+        //
+        // FIXME: TES5 and FO3/FONV may have different texture scaling - requires testing.
         float blendmapScale = mStorage->getBlendmapScale(chunkSize);
 
+        // TODO: not so sure about (i.e. don't understand) using blendmapScale for layerTileSize
         return ::Terrain::createPasses(
-            useShaders, mSceneManager, layers, blendmapTextures, blendmapScale, blendmapScale);
+            useShaders, mSceneManager, layers, blendmapTextures, blendmapScale, blendmapScale, quad);
     }
 
     osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f& chunkCenter, unsigned char lod,
-        unsigned int lodFlags, bool compile, const TerrainDrawable* templateGeometry)
+        unsigned int lodFlags, bool compile, const TerrainDrawable* templateGeometry, int quad)
     {
         osg::ref_ptr<TerrainDrawable> geometry(new TerrainDrawable);
 
@@ -201,7 +256,18 @@ namespace Terrain
             osg::ref_ptr<osg::Vec4ubArray> colors(new osg::Vec4ubArray);
             colors->setNormalize(true);
 
-            mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, mWorldspace, *positions, *normals, *colors);
+// FIXME: I have a suspicion that existing fillVertexBuffers() probably already works even with
+//        the unwanted Morrowind specific "fixes".
+#if 1
+            // NOTE: decided on a new method rather than pass quad to fillVertexBuffers() just
+            //       in case the Morrowind specific "fixes" causes problems
+            // NOTE: LOD is not supported
+            if (quad >= 0) // NOTE: quad == -1 has a special meaning of "no quads"
+                static_cast<ESMTerrain::Storage*>(mStorage)
+                    ->fillQuadVertexBuffers(chunkSize, chunkCenter, mWorldspace, *positions, *normals, *colors, quad);
+            else
+#endif
+                mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, mWorldspace, *positions, *normals, *colors);
 
             osg::ref_ptr<osg::VertexBufferObject> vbo(new osg::VertexBufferObject);
             positions->setVertexBufferObject(vbo);
@@ -284,7 +350,9 @@ namespace Terrain
             }
             else
             {
-                geometry->setPasses(createPasses(chunkSize, chunkCenter, false));
+                // FIXME: maybe we need to pass quad here or call a new method
+                //        e.g. createQuadPasses()
+                geometry->setPasses(createPasses(chunkSize, chunkCenter, false, quad));
             }
         }
 

@@ -78,7 +78,7 @@ namespace MWRender
     }
 
     osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char /*lod*/,
-        unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+        unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile/*, int quad*/)
     {
         if (activeGrid && !mActiveGrid)
             return nullptr;

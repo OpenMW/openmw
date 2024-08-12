@@ -27,6 +27,8 @@ namespace
             return instance.get(blendmapScale);
         }
 
+        // FIXME: Not sure if this pre-multiplication is needed for TES4
+        //        (needs A-B testing to confirm)
         const osg::ref_ptr<osg::TexMat>& get(const int blendmapScale)
         {
             const std::lock_guard<std::mutex> lock(mMutex);
@@ -223,7 +225,7 @@ namespace Terrain
 {
     std::vector<osg::ref_ptr<osg::StateSet>> createPasses(bool useShaders, Resource::SceneManager* sceneManager,
         const std::vector<TextureLayer>& layers, const std::vector<osg::ref_ptr<osg::Texture2D>>& blendmaps,
-        int blendmapScale, float layerTileSize)
+        int blendmapScale, float layerTileSize, int quad)
     {
         auto& shaderManager = sceneManager->getShaderManager();
         std::vector<osg::ref_ptr<osg::StateSet>> passes;
@@ -243,7 +245,12 @@ namespace Terrain
                 stateset->setRenderBinDetails(firstLayer ? 0 : 1, "RenderBin");
                 if (!firstLayer)
                 {
-                    stateset->setAttributeAndModes(BlendFunc::value(), osg::StateAttribute::ON);
+                    if (quad >= 0)
+                        stateset->setAttributeAndModes(
+                            new osg::BlendFunc(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA),
+                            osg::StateAttribute::ON);
+                    else
+                        stateset->setAttributeAndModes(BlendFunc::value(), osg::StateAttribute::ON);
                     stateset->setAttributeAndModes(EqualDepth::value(), osg::StateAttribute::ON);
                 }
                 else
@@ -303,13 +310,20 @@ namespace Terrain
                 defineMap["parallax"] = parallax ? "1" : "0";
                 defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
+                if (quad >= 0)
+                    defineMap["baseLayer"] = (firstLayer) ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
-                stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));
+                if (quad >= 0)
+                    stateset->setAttributeAndModes(shaderManager.getProgram("esm4terrain", defineMap));
+                else
+                    stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));
                 stateset->addUniform(UniformCollection::value().mColorMode);
             }
             else
             {
+                // FIXME: needs some changes for ESM4
+
                 // Add the actual layer texture
                 osg::ref_ptr<osg::Texture2D> tex = it->mDiffuseMap;
                 stateset->setTextureAttributeAndModes(0, tex.get());

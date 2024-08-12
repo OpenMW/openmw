@@ -46,7 +46,8 @@ namespace Terrain
         bool isGridEmpty() const { return mGrid.empty(); }
 
     private:
-        osg::ref_ptr<osg::Node> buildTerrain(osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);
+        // quad is meant to be used for ESM4 terrain only; if -1 it is ignored, should be [0..3]
+        osg::ref_ptr<osg::Node> buildTerrain(osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter, int quad = -1);
         void updateWaterCulling();
 
         // split each ESM::Cell into mNumSplits*mNumSplits terrain chunks

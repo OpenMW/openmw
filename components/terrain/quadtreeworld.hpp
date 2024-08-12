@@ -67,7 +67,7 @@ namespace Terrain
                 mWorldspace = worldspace;
             }
             virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod,
-                unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+                unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile/*, int quad = -1*/)
                 = 0;
             virtual unsigned int getNodeMask() { return 0; }
 

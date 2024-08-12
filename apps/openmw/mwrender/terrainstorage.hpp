@@ -7,6 +7,13 @@
 
 #include <components/resource/resourcesystem.hpp>
 
+namespace ESM4
+{
+    struct Land;
+    struct LandTexture;
+    struct TextureSet;
+}
+
 namespace MWRender
 {
 
@@ -30,6 +37,15 @@ namespace MWRender
         void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) override;
 
         LandManager* getLandManager() const;
+
+        const ESM4::Land *getEsm4Land(ESM::ExteriorCellLocation cellLocation) const override;
+        const ESM4::LandTexture *getEsm4LandTexture(ESM::RefId ltexId) const override;
+        const ESM4::TextureSet *getEsm4TextureSet(ESM::RefId txstId) const override;
+
+        // Intended to be set by RenderingManager.  Ideally this should be part of the
+        // construction but this class is initialised in the constructor and we man end up with
+        // a different terrain during RenderingManager::enableTerrain().
+        void setIsEsm4Ext(bool state) { mIsEsm4Ext = state; }
 
     private:
         std::unique_ptr<LandManager> mLandManager;

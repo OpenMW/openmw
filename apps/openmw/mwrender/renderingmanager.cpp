@@ -49,6 +49,7 @@
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/terrain/terraingrid.hpp>
 
+#include <components/esm/util.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm4/loadcell.hpp>
 
@@ -490,6 +491,8 @@ namespace MWRender
         const bool useTerrainNormalMaps = Settings::shaders().mAutoUseTerrainNormalMaps;
         const bool useTerrainSpecularMaps = Settings::shaders().mAutoUseTerrainSpecularMaps;
 
+        // NOTE: Maybe we need to swap out this with a different storage type during
+        //       enableTerrain() if we are in a foreign (i.e. non-Morrowind) worldspace.
         mTerrainStorage = std::make_unique<TerrainStorage>(mResourceSystem, normalMapPattern, heightMapPattern,
             useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps);
 
@@ -798,12 +801,20 @@ namespace MWRender
         mWater->removeCell(store);
     }
 
+    // NOTE: For cc9cii's fork, this is where the terrain storage type is decided when we know
+    //       the worldspace.  But in this implementation the decision is made in the
+    //       constructor.
     void RenderingManager::enableTerrain(bool enable, ESM::RefId worldspace)
     {
         if (!enable)
             mWater->setCullCallback(nullptr);
         else
         {
+            // need to set our ESM4 state in mTerrainStorage here to change some behaviours in
+            // ESMTerrain::Storage
+            if (ESM::isEsm4Ext(worldspace))
+                mTerrainStorage->setIsEsm4Ext(true);
+
             WorldspaceChunkMgr& newChunks = getWorldspaceChunkMgr(worldspace);
             if (newChunks.mTerrain.get() != mTerrain)
             {
@@ -1445,6 +1456,16 @@ namespace MWRender
         mStateUpdater->setFogColor(color);
     }
 
+    // NOTE: mTerrainStorage is a unique_ptr to MWRender::TerrainStorage which is a child
+    //       class of ESMTerrain::Storage.  This makes switching out ESMTerrain::Storage with
+    //       another class impossible unless we decide to accept a man-in-the-middle type mess.
+    //
+    //       mTerrainStorage is initialised in the constructor.  It's probably not a good idea
+    //       to chnage that when we switch to another worldspace so we'll need a different
+    //       solution.
+    //
+    //       So maybe we have to accept the "least bad option" and have the complications
+    //       within MWRender::TerrainStorage e.g. set a state variable (see enableTerrain())
     RenderingManager::WorldspaceChunkMgr& RenderingManager::getWorldspaceChunkMgr(ESM::RefId worldspace)
     {
         auto existingChunkMgr = mWorldspaceChunks.find(worldspace);

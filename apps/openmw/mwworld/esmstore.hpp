@@ -94,6 +94,7 @@ namespace ESM4
     struct ItemMod;
     struct Land;
     struct LandTexture;
+    struct TextureSet;
     struct LevelledCreature;
     struct LevelledItem;
     struct LevelledNpc;
@@ -147,7 +148,7 @@ namespace MWWorld
             Store<ESM4::LevelledNpc>, Store<ESM4::Light>, Store<ESM4::MiscItem>, Store<ESM4::MovableStatic>,
             Store<ESM4::Npc>, Store<ESM4::Outfit>, Store<ESM4::Potion>, Store<ESM4::Race>, Store<ESM4::Reference>,
             Store<ESM4::Static>, Store<ESM4::StaticCollection>, Store<ESM4::Terminal>, Store<ESM4::Tree>,
-            Store<ESM4::Weapon>, Store<ESM4::World>>;
+            Store<ESM4::Weapon>, Store<ESM4::World>, Store<ESM4::TextureSet> >;
 
     private:
         template <typename T>

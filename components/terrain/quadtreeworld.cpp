@@ -1,5 +1,7 @@
 #include "quadtreeworld.hpp"
 
+#include <cmath> // std::floor
+
 #include <osg/Material>
 #include <osg/PolygonMode>
 #include <osg/ShapeDrawable>
@@ -260,7 +262,7 @@ namespace Terrain
         {
         }
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& chunkCenter, unsigned char lod,
-            unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+            unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile/*, int quad*/)
         {
             osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
             auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size,
@@ -289,7 +291,7 @@ namespace Terrain
         , mLodFactor(lodFactor)
         , mVertexLodMod(vertexLodMod)
         , mViewDistance(std::numeric_limits<float>::max())
-        , mMinSize(ESM::isEsm4Ext(worldspace) ? 1 / 4.f : 1 / 8.f)
+        , mMinSize(ESM::isEsm4Ext(worldspace) ? 1 / 2.f : 1 / 8.f) // NOTE: increased min for ESM4
         , mDebugTerrainChunks(debugChunks)
     {
         mChunkManager->setCompositeMapSize(compMapResolution);
@@ -394,11 +396,32 @@ namespace Terrain
 
             for (QuadTreeWorld::ChunkManager* m : mChunkManagers)
             {
-                osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(),
-                    DefaultLodCallback::getNativeLodLevel(entry.mNode, mMinSize), entry.mLodFlags, activeGrid,
-                    vd->getViewPoint(), compile);
-                if (n)
-                    pat->addChild(n);
+                osg::ref_ptr<osg::Node> n;
+                if (ESM::isEsm4Ext(mWorldspace) && entry.mNode->getSize() == 0.5f && m == mChunkManager.get())
+                {
+                    osg::Vec2 chunkCenter = entry.mNode->getCenter();
+                    float originX = std::floor(chunkCenter.x());
+                    float originY = std::floor(chunkCenter.y());
+                    int quad = -1;
+                    if (chunkCenter.x() - originX == 0.25f)
+                        quad = (chunkCenter.y() - originY == 0.25f) ? 0 : 2;
+                    else
+                        quad = (chunkCenter.y() - originY == 0.25f) ? 1 : 3;
+
+                    n = static_cast<Terrain::ChunkManager*>(m)->getChunk(0.5f, entry.mNode->getCenter(),
+                        DefaultLodCallback::getNativeLodLevel(entry.mNode, mMinSize), entry.mLodFlags, activeGrid,
+                        vd->getViewPoint(), compile, quad);
+                    if (n)
+                        pat->addChild(n);
+                }
+                else
+                {
+                    n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(),
+                        DefaultLodCallback::getNativeLodLevel(entry.mNode, mMinSize), entry.mLodFlags, activeGrid,
+                        vd->getViewPoint(), compile);
+                    if (n)
+                        pat->addChild(n);
+                }
             }
             entry.mRenderingNode = pat;
         }
@@ -536,6 +559,8 @@ namespace Terrain
         return mViewDataMap->createIndependentView();
     }
 
+    // FIXME: I guess this is where it all starts?  We need to somehow deal with entry of chunk
+    //        size 1 to be split into 4 smaller "quads".
     void QuadTreeWorld::preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i& grid,
         std::atomic<bool>& abort, Loading::Reporter& reporter)
     {

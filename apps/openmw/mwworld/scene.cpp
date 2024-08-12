@@ -438,6 +438,10 @@ namespace MWWorld
 
         if (cellVariant.isExterior())
         {
+            // NOTE: LandObject may be of type ESM4
+            // NOTE: It's probably a very bad idea to keep the pointer returned from
+            //       getLandManager() since it may change if the worldspace type changes from
+            //       TES3 to TES4 and vice-versa (depends on the final implementation).
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellIndex);
             const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
             const int verts = ESM::getLandSize(worldspace);

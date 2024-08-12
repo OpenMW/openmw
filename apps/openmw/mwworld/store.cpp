@@ -1332,7 +1332,7 @@ template class MWWorld::TypedDynamicStore<ESM4::HeadPart>;
 template class MWWorld::TypedDynamicStore<ESM4::Ingredient>;
 template class MWWorld::TypedDynamicStore<ESM4::ItemMod>;
 template class MWWorld::TypedDynamicStore<ESM4::Land>;
-template class MWWorld::TypedDynamicStore<ESM4::LandTexture>;
+template class MWWorld::TypedDynamicStore<ESM4::LandTexture>; // FIXME: maybe we need some special handling?
 template class MWWorld::TypedDynamicStore<ESM4::LevelledCreature>;
 template class MWWorld::TypedDynamicStore<ESM4::LevelledItem>;
 template class MWWorld::TypedDynamicStore<ESM4::LevelledNpc>;
@@ -1346,6 +1346,7 @@ template class MWWorld::TypedDynamicStore<ESM4::Race>;
 template class MWWorld::TypedDynamicStore<ESM4::Static>;
 template class MWWorld::TypedDynamicStore<ESM4::StaticCollection>;
 template class MWWorld::TypedDynamicStore<ESM4::Terminal>;
+template class MWWorld::TypedDynamicStore<ESM4::TextureSet>;
 template class MWWorld::TypedDynamicStore<ESM4::Tree>;
 template class MWWorld::TypedDynamicStore<ESM4::Weapon>;
 template class MWWorld::TypedDynamicStore<ESM4::World>;

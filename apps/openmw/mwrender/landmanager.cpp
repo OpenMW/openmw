@@ -49,6 +49,13 @@ namespace MWRender
         return landObj;
     }
 
+    const ESM4::Land *LandManager::getLandRecord(ESM::ExteriorCellLocation cellIndex) const
+    {
+        const MWBase::World& world = *MWBase::Environment::get().getWorld();
+        const ESM4::Land* land = world.getStore().get<ESM4::Land>().search(cellIndex);
+        return land;
+    }
+
     void LandManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
         Resource::reportStats("Land", frameNumber, mCache->getStats(), *stats);

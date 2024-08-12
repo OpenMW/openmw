@@ -2,6 +2,8 @@
 
 #include <components/esm3/loadland.hpp>
 #include <components/esm4/loadwrld.hpp>
+#include <components/esm4/loadltex.hpp>
+#include <components/esm4/loadtxst.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -105,10 +107,36 @@ namespace MWRender
         return mLandManager->getLand(cellLocation);
     }
 
+    // NOTE: We need to return different land texture if mIsEsm4Ext is set.
+    //       But there isn't just one texture for a given land, so the method name
+    //       is misleading and may cause confusion for future maintainers.
+    //
+    //       It's a pity we have to use pointers to string here.  FormId would have been
+    //       more than adequate.
+    //
+    // Update: Decided to add new methods instead.  See getEsm4Land(), getEsm4LandTexture()
+    //        and getEsm4TextureSet().
     const std::string* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         return esmStore.get<ESM::LandTexture>().search(index, plugin);
+    }
+
+    const ESM4::Land *TerrainStorage::getEsm4Land(ESM::ExteriorCellLocation cellLocation) const
+    {
+        return mLandManager->getLandRecord(cellLocation);
+    }
+
+    const ESM4::LandTexture *TerrainStorage::getEsm4LandTexture(ESM::RefId ltexId) const
+    {
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        return esmStore.get<ESM4::LandTexture>().search(ltexId);
+    }
+
+    const ESM4::TextureSet *TerrainStorage::getEsm4TextureSet(ESM::RefId txstId) const
+    {
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        return esmStore.get<ESM4::TextureSet>().search(txstId);
     }
 
 }

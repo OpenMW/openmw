@@ -13,6 +13,8 @@
 namespace ESM4
 {
     struct Land;
+    struct LandTexture;
+    struct TextureSet;
 }
 
 namespace ESM
@@ -130,6 +132,19 @@ namespace ESMTerrain
             return data->getHeights()[y * landSize + x];
         }
 
+        virtual const ESM4::Land *getEsm4Land(ESM::ExteriorCellLocation cellLocation) const = 0;
+        virtual const ESM4::LandTexture *getEsm4LandTexture(ESM::RefId ltexId) const = 0;
+        virtual const ESM4::TextureSet *getEsm4TextureSet(ESM::RefId txstId) const = 0;
+
+        void fillQuadVertexBuffers(float size, const osg::Vec2f& center, ESM::RefId worldspace,
+            osg::Vec3Array& positions, osg::Vec3Array& normals, osg::Vec4ubArray& colours, int quad);
+
+        void getQuadBlendmaps(float size, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
+            std::vector<Terrain::LayerInfo>& layerList, ESM::RefId worldspace, int quad);
+
+    protected:
+        bool mIsEsm4Ext; // intended to be used by MWRender::TerrainStorage
+
     private:
         const VFS::Manager* mVFS;
 
@@ -148,6 +163,8 @@ namespace ESMTerrain
 
         std::string getTextureName(UniqueTextureId id);
 
+        std::string getEsm4TextureName(ESM::RefId id);
+
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;
         std::mutex mLayerInfoMutex;
 
@@ -159,6 +176,8 @@ namespace ESMTerrain
         bool mAutoUseSpecularMaps;
 
         Terrain::LayerInfo getLayerInfo(const std::string& texture);
+
+        Terrain::LayerInfo getLayerInfo(const ESM4::TextureSet *txst);
     };
 
 }

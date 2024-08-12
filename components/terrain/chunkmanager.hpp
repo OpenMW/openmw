@@ -81,6 +81,10 @@ namespace Terrain
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags,
             bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
 
+        // NOTE: created to avoid adding another parameter to getChunk() in Terrain::QuadTreeWorld::ChunkManager
+        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags,
+            bool activeGrid, const osg::Vec3f& viewPoint, bool compile, int quad);
+
         void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
         void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }
         void setMaxCompositeGeometrySize(float maxCompGeometrySize) { mMaxCompGeometrySize = maxCompGeometrySize; }
@@ -95,8 +99,9 @@ namespace Terrain
         void releaseGLObjects(osg::State* state) override;
 
     private:
+        // NOTE: quad == -1 has a special meaning that we're not dealing with ESM4 quad structure
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, unsigned char lod,
-            unsigned int lodFlags, bool compile, const TerrainDrawable* templateGeometry);
+            unsigned int lodFlags, bool compile, const TerrainDrawable* templateGeometry, int quad = -1);
 
         osg::ref_ptr<osg::Texture2D> createCompositeMapRTT();
 
@@ -104,7 +109,7 @@ namespace Terrain
             float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, CompositeMap& map);
 
         std::vector<osg::ref_ptr<osg::StateSet>> createPasses(
-            float chunkSize, const osg::Vec2f& chunkCenter, bool forCompositeMap);
+            float chunkSize, const osg::Vec2f& chunkCenter, bool forCompositeMap, int quad = -1);
 
         Terrain::Storage* mStorage;
         Resource::SceneManager* mSceneManager;

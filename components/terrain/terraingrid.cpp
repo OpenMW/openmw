@@ -10,6 +10,7 @@
 #include "storage.hpp"
 #include "view.hpp"
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/esm/util.hpp>
 
 namespace Terrain
 {
@@ -51,10 +52,36 @@ namespace Terrain
         static_cast<MyView*>(view)->mLoaded = buildTerrain(nullptr, 1.f, center);
     }
 
+    // I think this should be where we decide to split the land into 4 quads.
+    // Alternatively, we can do it in loadCell() and call a different kind of buildTerrain().
+    //
+    // Need to do some experiments to see if the existing code will produe the correct quads or
+    // special code needs to be added (depens on column/row start and ends).  But I think we
+    // still need to pass more info to getChunk() because we need to know which quadrant for
+    // the textures?
     osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain(
-        osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
+        osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter, int quad)
     {
-        if (chunkSize * mNumSplits > 1.f)
+        if (ESM::isEsm4Ext(mWorldspace) && chunkSize == 1.f && mNumSplits == 4) // WARN: hard coded values for ESM4
+        {
+            osg::ref_ptr<osg::Group> group(new osg::Group);
+            if (parent)
+                parent->addChild(group); // should never happen
+
+            float newChunkSize = chunkSize / 2.f;
+            {
+                buildTerrain(group, // top right
+                        newChunkSize, chunkCenter + osg::Vec2f(newChunkSize / 2.f, newChunkSize / 2.f), 3);
+                buildTerrain(group, // top left
+                        newChunkSize, chunkCenter + osg::Vec2f(newChunkSize / 2.f, -newChunkSize / 2.f), 1);
+                buildTerrain(group, // bottom right
+                        newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize / 2.f, newChunkSize / 2.f), 2);
+                buildTerrain(group, // bottom left
+                        newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize / 2.f, -newChunkSize / 2.f), 0);
+            }
+            return group;
+        }
+        else if (!ESM::isEsm4Ext(mWorldspace) && chunkSize * mNumSplits > 1.f) // FIXME: needs better logic
         {
             // keep splitting
             osg::ref_ptr<osg::Group> group(new osg::Group);
@@ -70,8 +97,10 @@ namespace Terrain
         }
         else
         {
-            osg::ref_ptr<osg::Node> node
-                = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f(), true);
+            // FIXME: not sure which is worse, this mess or adding a parameter to Terrain::QuadTreeWorld::getChunk()
+            osg::ref_ptr<osg::Node> node = ESM::isEsm4Ext(mWorldspace)
+                ? mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f(), true, quad)
+                : mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f(), true);
             if (!node)
                 return nullptr;
 
@@ -85,6 +114,8 @@ namespace Terrain
         }
     }
 
+    // Use ESM::isEsm4Ext(World::getWorldspace())
+    // or just ESM::isEsm4Ext(mWorldspace) since mWorldspace is declared as protected.
     void TerrainGrid::loadCell(int x, int y)
     {
         if (mGrid.find(std::make_pair(x, y)) != mGrid.end())

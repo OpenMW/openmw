@@ -322,7 +322,7 @@ namespace MWRender
     }
 
     osg::ref_ptr<osg::Node> Groundcover::getChunk(float size, const osg::Vec2f& center, unsigned char lod,
-        unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
+        unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile/*, int quad*/)
     {
         if (lod > getMaxLodLevel())
             return nullptr;
