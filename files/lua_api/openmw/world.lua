@@ -186,7 +186,7 @@
 ---
 -- Spawn a VFX at the given location in the world. Best invoked through the SpawnVfx global event
 -- @function [parent=#VFX] spawn
--- @param #string model #string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
+-- @param #string model string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
 -- @param openmw.util#Vector3 position
 -- @param #table options optional table of parameters. Can contain:
 --
