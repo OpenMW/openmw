@@ -77,8 +77,8 @@ void ESM4::Land::load(ESM4::Reader& reader)
     bool isFONV = (esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134);
     bool isTES5 = (esmVer == ESM::VER_094 || esmVer == ESM::VER_170); // WARN: FO3 is also VER_094
     // WARN: below workaround assumes the data directory path has "Fallout" somewhere
-    if (esmVer == ESM4::VER_094 && reader.getContext().filename.find("allout") != std::string::npos)
-        isTES5 = false; // FIXME: terrible hack
+    //if (esmVer == ESM::VER_094 && reader.getContext().filename.find("allout") != std::string::npos)
+    //    isTES5 = false; // FIXME: terrible hack
 
     mDataTypes = 0;
     mCell = reader.currCell();
