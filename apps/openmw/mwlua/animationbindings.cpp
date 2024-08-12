@@ -256,26 +256,31 @@ namespace MWLua
             return anim->getNode(bonename) != nullptr;
         };
 
-        api["addVfx"] = sol::overload(
-            [context](const sol::object& object, const std::string& model) {
+        api["addVfx"] = [context](
+                            const sol::object& object, const std::string& model, sol::optional<sol::table> options) {
+            if (options)
+            {
+                context.mLuaManager->addAction(
+                    [object = ObjectVariant(object), model = model,
+                        effectId = options->get_or<std::string>("vfxId", ""), loop = options->get_or("loop", false),
+                        boneName = options->get_or<std::string>("boneName", ""),
+                        particleTexture = options->get_or<std::string>("particleTextureOverride", "")] {
+                        MWRender::Animation* anim = getMutableAnimationOrThrow(ObjectVariant(object));
+
+                        anim->addEffect(model, effectId, loop, boneName, particleTexture);
+                    },
+                    "addVfxAction");
+            }
+            else
+            {
                 context.mLuaManager->addAction(
                     [object = ObjectVariant(object), model = model] {
                         MWRender::Animation* anim = getMutableAnimationOrThrow(object);
                         anim->addEffect(model, "");
                     },
                     "addVfxAction");
-            },
-            [context](const sol::object& object, const std::string& model, const sol::table& options) {
-                context.mLuaManager->addAction(
-                    [object = ObjectVariant(object), model = model, effectId = options.get_or<std::string>("vfxId", ""),
-                        loop = options.get_or("loop", false), boneName = options.get_or<std::string>("boneName", ""),
-                        particleTexture = options.get_or<std::string>("particleTextureOverride", "")] {
-                        MWRender::Animation* anim = getMutableAnimationOrThrow(ObjectVariant(object));
-
-                        anim->addEffect(model, effectId, loop, boneName, particleTexture);
-                    },
-                    "addVfxAction");
-            });
+            }
+        };
 
         api["removeVfx"] = [context](const sol::object& object, std::string_view effectId) {
             context.mLuaManager->addAction(
@@ -304,23 +309,26 @@ namespace MWLua
         sol::table api(lua, sol::create);
         auto world = MWBase::Environment::get().getWorld();
 
-        api["spawn"] = sol::overload(
-            [world, context](const std::string model, const osg::Vec3f& worldPos) {
-                context.mLuaManager->addAction(
-                    [world, model = model, worldPos]() { world->spawnEffect(model, "", worldPos); },
-                    "openmw.vfx.spawn");
-            },
-            [world, context](const std::string& model, const osg::Vec3f& worldPos, const sol::table& options) {
-                bool magicVfx = options.get_or("mwMagicVfx", true);
-                std::string texture = options.get_or<std::string>("particleTextureOverride", "");
-                float scale = options.get_or("scale", 1.f);
-
-                context.mLuaManager->addAction(
-                    [world, model = model, texture = std::move(texture), worldPos, scale, magicVfx]() {
-                        world->spawnEffect(model, texture, worldPos, scale, magicVfx);
-                    },
-                    "openmw.vfx.spawn");
-            });
+        api["spawn"]
+            = [world, context](const std::string model, const osg::Vec3f& worldPos, sol::optional<sol::table> options) {
+                  if (options)
+                  {
+                      bool magicVfx = options->get_or("mwMagicVfx", true);
+                      std::string texture = options->get_or<std::string>("particleTextureOverride", "");
+                      float scale = options->get_or("scale", 1.f);
+                      context.mLuaManager->addAction(
+                          [world, model = model, texture = std::move(texture), worldPos, scale, magicVfx]() {
+                              world->spawnEffect(model, texture, worldPos, scale, magicVfx);
+                          },
+                          "openmw.vfx.spawn");
+                  }
+                  else
+                  {
+                      context.mLuaManager->addAction(
+                          [world, model = model, worldPos]() { world->spawnEffect(model, "", worldPos); },
+                          "openmw.vfx.spawn");
+                  }
+              };
 
         return api;
     }
