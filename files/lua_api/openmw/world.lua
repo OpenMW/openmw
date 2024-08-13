@@ -180,4 +180,25 @@
 -- @param #any record A record to be registered in the database. Must be one of the supported types.
 -- @return #any A new record added to the database. The type is the same as the input's.
 
+--- @{#VFX}: Visual effects
+-- @field [parent=#world] #VFX vfx
+
+---
+-- Spawn a VFX at the given location in the world. Best invoked through the SpawnVfx global event
+-- @function [parent=#VFX] spawn
+-- @param #string model string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
+-- @param openmw.util#Vector3 position
+-- @param #table options optional table of parameters. Can contain:
+--
+--   * `mwMagicVfx` - Boolean that if true causes the textureOverride parameter to only affect nodes with the Nif::RC_NiTexturingProperty property set. (default: true).
+--   * `particleTextureOverride` - Name of a particle texture that should override this effect's default texture. (default: "")
+--   * `scale` - A number that scales the size of the vfx (Default: 1)
+--
+-- @usage -- Spawn a sanctuary effect near the player
+-- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
+-- local pos = self.position + util.vector3(0, 100, 0)
+-- local model = types.Static.record(effect.castingStatic).model
+-- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos})
+--
+
 return nil
