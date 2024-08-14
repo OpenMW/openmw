@@ -8,10 +8,6 @@ set(OPENMW_RESOURCES
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest
 )
 
-if (ANDROID)
-    set(OPENMW_SOURCES ${OPENMW_SOURCES} android_main.cpp)
-endif()
-
 set(OPENMW_HEADERS
     doc.hpp
     engine.hpp
@@ -19,7 +15,7 @@ set(OPENMW_HEADERS
     profile.hpp
 )
 
-source_group(apps/openmw FILES main.cpp ${OPENMW_SOURCES} ${OPENMW_HEADERS} ${OPENMW_RESOURCES})
+source_group(apps/openmw FILES main.cpp android_main.cpp ${OPENMW_SOURCES} ${OPENMW_HEADERS} ${OPENMW_RESOURCES})
 
 add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky skyutil npcanimation esm4npcanimation vismask
@@ -122,23 +118,17 @@ add_openmw_dir (mwbase
 
 # Main executable
 
-if (NOT ANDROID)
-    add_library(openmw-lib STATIC
-        ${OPENMW_FILES}
-        ${OPENMW_SOURCES}
-    )
-
-    # Otherwise linker fails with LNK1149 because main.cpp has __declspec(dllexport)
-    if(NOT WIN32)
-        set_target_properties(openmw-lib PROPERTIES OUTPUT_NAME openmw)
-    endif()
-endif ()
+add_library(openmw-lib STATIC
+    ${OPENMW_FILES}
+    ${OPENMW_SOURCES}
+)
 
 if(BUILD_OPENMW)
     if (ANDROID)
-        add_library(openmw-lib SHARED
+        add_library(openmw SHARED
             ${OPENMW_FILES}
-            ${OPENMW_SOURCES}
+            main.cpp
+            android_main.cpp
         )
     else()
         openmw_add_executable(openmw
@@ -146,9 +136,9 @@ if(BUILD_OPENMW)
             ${OPENMW_RESOURCES}
             main.cpp
         )
-
-        target_link_libraries(openmw openmw-lib)
     endif()
+
+    target_link_libraries(openmw openmw-lib)
 endif()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
