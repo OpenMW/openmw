@@ -220,7 +220,7 @@ local function testMemoryLimit()
 end
 
 local function initPlayer()
-    player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
+    player:teleport('', util.vector3(4096, 4096, 1745), util.transform.identity)
     coroutine.yield()
 end
 

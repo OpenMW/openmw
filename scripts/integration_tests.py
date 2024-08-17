@@ -21,6 +21,7 @@ example_suite_dir = Path(args.example_suite).resolve()
 content_paths = (
     example_suite_dir / "game_template" / "data" / "template.omwgame",
     example_suite_dir / "example_animated_creature" / "data" / "landracer.omwaddon",
+    example_suite_dir / "the_hub" / "data" / "the_hub.omwaddon",
 )
 for path in content_paths:
     if not path.is_file():

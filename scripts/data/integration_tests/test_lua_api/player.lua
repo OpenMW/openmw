@@ -159,8 +159,8 @@ testing.registerLocalTest('playerDiagonalWalking',
 
 testing.registerLocalTest('findPath',
     function()
-        local src = util.vector3(4096, 4096, 867.237)
-        local dst = util.vector3(4500, 4500, 700.216)
+        local src = util.vector3(4096, 4096, 1745)
+        local dst = util.vector3(4500, 4500, 1745.95263671875)
         local options = {
             agentBounds = types.Actor.getPathfindingAgentBounds(self),
             includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.Swim,
@@ -180,7 +180,7 @@ testing.registerLocalTest('findPath',
 
 testing.registerLocalTest('findRandomPointAroundCircle',
     function()
-        local position = util.vector3(4096, 4096, 867.237)
+        local position = util.vector3(4096, 4096, 1745.95263671875)
         local maxRadius = 100
         local options = {
             agentBounds = types.Actor.getPathfindingAgentBounds(self),
@@ -193,8 +193,8 @@ testing.registerLocalTest('findRandomPointAroundCircle',
 
 testing.registerLocalTest('castNavigationRay',
     function()
-        local src = util.vector3(4096, 4096, 867.237)
-        local dst = util.vector3(4500, 4500, 700.216)
+        local src = util.vector3(4096, 4096, 1745)
+        local dst = util.vector3(4500, 4500, 1745.95263671875)
         local options = {
             agentBounds = types.Actor.getPathfindingAgentBounds(self),
             includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.Swim,
@@ -206,14 +206,14 @@ testing.registerLocalTest('castNavigationRay',
 
 testing.registerLocalTest('findNearestNavMeshPosition',
     function()
-        local position = util.vector3(4096, 4096, 1000)
+        local position = util.vector3(4096, 4096, 2000)
         local options = {
             agentBounds = types.Actor.getPathfindingAgentBounds(self),
             includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.Swim,
             searchAreaHalfExtents = util.vector3(1000, 1000, 1000),
         }
         local result = nearby.findNearestNavMeshPosition(position, options)
-        local expected = util.vector3(4096, 4096, 872.674)
+        local expected = util.vector3(4096, 4096, 1746.27099609375)
         testing.expectLessOrEqual((result - expected):length(), 1,
             'Navigation mesh position ' .. testing.formatActualExpected(result, expected))
     end)
