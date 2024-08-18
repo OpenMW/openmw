@@ -10,6 +10,7 @@
 #include <components/detournavigator/collisionshapetype.hpp>
 #include <components/sceneutil/lightingmethod.hpp>
 #include <components/sdlutil/vsyncmode.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include <filesystem>
 #include <set>
@@ -262,6 +263,13 @@ namespace Settings
         if (value < 0 || 2 < value)
             return SDLUtil::VSyncMode::Disabled;
         return static_cast<SDLUtil::VSyncMode>(value);
+    }
+
+    template <>
+    inline VFS::Path::Normalized Manager::getImpl<VFS::Path::Normalized>(
+        std::string_view setting, std::string_view category)
+    {
+        return VFS::Path::Normalized(getString(setting, category));
     }
 }
 

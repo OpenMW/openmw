@@ -445,12 +445,11 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
-        const std::string& model = Settings::models().mBaseanim;
         const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
         if (race->mData.mFlags & ESM::Race::Beast)
-            return Settings::models().mBaseanimkna;
+            return Settings::models().mBaseanimkna.get().value();
 
-        return model;
+        return Settings::models().mBaseanim.get().value();
     }
 
     void Npc::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const
