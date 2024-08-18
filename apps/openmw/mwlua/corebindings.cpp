@@ -1,15 +1,17 @@
 #include "corebindings.hpp"
 
-#include <apps/openmw/mwlua/object.hpp>
-#include <apps/openmw/mwworld/cellstore.hpp>
-#include <apps/openmw/mwworld/worldmodel.hpp>
-#include <chrono>
-#include <components/esm3/loadltex.hpp>
 #include <sol/object.hpp>
+
+#include <chrono>
 #include <stdexcept>
+#include <tuple>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/landrecorddata.hpp>
 #include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esm3/loadltex.hpp>
+#include <components/esmterrain/storage.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/serialization.hpp>
@@ -30,10 +32,9 @@
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
 #include "stats.hpp"
-#include <components/esm3/landrecorddata.hpp>
-#include <components/esm3/loadland.hpp>
-#include <components/esmterrain/storage.hpp>
-#include <tuple>
+#include <apps/openmw/mwlua/object.hpp>
+#include <apps/openmw/mwworld/cellstore.hpp>
+#include <apps/openmw/mwworld/worldmodel.hpp>
 
 namespace MWLua
 {
