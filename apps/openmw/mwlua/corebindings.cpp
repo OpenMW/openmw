@@ -1,14 +1,15 @@
 #include "corebindings.hpp"
 
-#include <sol/object.hpp>
-
 #include <chrono>
 #include <stdexcept>
 #include <tuple>
 
+#include <sol/object.hpp>
+
 #include <apps/openmw/mwlua/object.hpp>
 #include <apps/openmw/mwworld/cellstore.hpp>
 #include <apps/openmw/mwworld/worldmodel.hpp>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/landrecorddata.hpp>
 #include <components/esm3/loadfact.hpp>
