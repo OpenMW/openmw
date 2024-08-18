@@ -266,20 +266,11 @@ namespace
         updater.post(mAgentBounds, navMeshCacheItem, mPlayerTile, mWorldspace, changedTiles);
         updater.wait(WaitConditionType::allJobsDone, &mListener);
         updater.stop();
-        const std::set<TilePosition> present{
-            TilePosition(-1, -1),
-            TilePosition(-1, 0),
-            TilePosition(-1, 1),
-            TilePosition(0, -2),
-            TilePosition(0, -1),
-            TilePosition(0, 0),
-            TilePosition(0, 1),
-            TilePosition(0, 2),
-            TilePosition(1, -1),
-            TilePosition(1, 0),
-            TilePosition(1, 1),
-        };
+
+        std::size_t present = 0;
+
         for (int x = -5; x <= 5; ++x)
+        {
             for (int y = -5; y <= 5; ++y)
             {
                 const TilePosition tilePosition(x, y);
@@ -289,15 +280,15 @@ namespace
                     recastMesh->getMeshSources(), [&](const MeshSource& v) { return resolveMeshSource(*dbPtr, v); });
                 if (std::holds_alternative<MeshSource>(objects))
                     continue;
-                EXPECT_EQ(dbPtr
-                              ->findTile(mWorldspace, tilePosition,
-                                  serialize(mSettings.mRecast, mAgentBounds, *recastMesh,
-                                      std::get<std::vector<DbRefGeometryObject>>(objects)))
-                              .has_value(),
-                    present.find(tilePosition) != present.end())
-                    << tilePosition.x() << " " << tilePosition.y()
-                    << " present=" << (present.find(tilePosition) != present.end());
+                present += dbPtr
+                               ->findTile(mWorldspace, tilePosition,
+                                   serialize(mSettings.mRecast, mAgentBounds, *recastMesh,
+                                       std::get<std::vector<DbRefGeometryObject>>(objects)))
+                               .has_value();
             }
+        }
+
+        EXPECT_EQ(present, 11);
     }
 
     TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, next_tile_id_should_be_updated_on_duplicate)

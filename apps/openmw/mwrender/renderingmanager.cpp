@@ -1078,6 +1078,7 @@ namespace MWRender
     RenderingManager::RayResult getIntersectionResult(osgUtil::LineSegmentIntersector* intersector,
         const osg::ref_ptr<osgUtil::IntersectionVisitor>& visitor, std::span<const MWWorld::Ptr> ignoreList = {})
     {
+        constexpr auto nonObjectWorldMask = Mask_Terrain | Mask_Water;
         RenderingManager::RayResult result;
         result.mHit = false;
         result.mRatio = 0;
@@ -1088,9 +1089,14 @@ namespace MWRender
         auto test = [&](const osgUtil::LineSegmentIntersector::Intersection& intersection) {
             PtrHolder* ptrHolder = nullptr;
             std::vector<RefnumMarker*> refnumMarkers;
+            bool hitNonObjectWorld = false;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end();
                  ++it)
             {
+                const auto& nodeMask = (*it)->getNodeMask();
+                if (!hitNonObjectWorld)
+                    hitNonObjectWorld = nodeMask & nonObjectWorldMask;
+
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
                 if (!userDataContainer)
                     continue;
@@ -1136,7 +1142,7 @@ namespace MWRender
                 vertexCounter += refnumMarkers[i]->mNumVertices;
             }
 
-            if (!result.mHitObject.isEmpty() || result.mHitRefnum.isSet())
+            if (!result.mHitObject.isEmpty() || result.mHitRefnum.isSet() || hitNonObjectWorld)
             {
                 result.mHit = true;
                 result.mHitPointWorld = intersection.getWorldIntersectPoint();

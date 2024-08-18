@@ -218,22 +218,34 @@
 
 ---
 -- Plays a VFX on the actor.
--- Can be used only in local scripts on self.
+-- Can be used only in local scripts on self. Can also be evoked by sending an AddVfx event to the target actor.
 -- @function [parent=#animation] addVfx
 -- @param openmw.core#GameObject actor
--- @param #any static @{openmw.core#StaticRecord} or #string ID
+-- @param #string model #string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
 -- @param #table options optional table of parameters. Can contain:
 --
 --   * `loop` - boolean, if true the effect will loop until removed (default: 0).
 --   * `boneName` - name of the bone to attach the vfx to. (default: "")
---   * `particle` - name of the particle texture to use. (default: "")
+--   * `particleTextureOverride` - name of the particle texture to use. (default: "")
 --   * `vfxId` - a string ID that can be used to remove the effect later, using #removeVfx, and to avoid duplicate effects. The default value of "" can have duplicates. To avoid interaction with the engine, use unique identifiers unrelated to magic effect IDs. The engine uses this identifier to add and remove magic effects based on what effects are active on the actor. If this is set equal to the @{openmw.core#MagicEffectId} identifier of the magic effect being added, for example core.magic.EFFECT_TYPE.FireDamage, then the engine will remove it once the fire damage effect on the actor reaches 0. (Default: ""). 
 -- 
 -- @usage local mgef = core.magic.effects.records[myEffectName]
--- anim.addVfx(self, 'VFX_Hands', {boneName = 'Bip01 L Hand', particle = mgef.particle, loop = mgef.continuousVfx, vfxId = mgef.id..'_myuniquenamehere'})
+-- anim.addVfx(self, 'VFX_Hands', {boneName = 'Bip01 L Hand', particleTextureOverride = mgef.particle, loop = mgef.continuousVfx, vfxId = mgef.id..'_myuniquenamehere'})
 -- -- later:
 -- anim.removeVfx(self, mgef.id..'_myuniquenamehere')
 -- 
+-- @usage -- Add vfx to another actor using an event
+-- local mgef = core.magic.effects.records[myEffectName]
+-- target:sendEvent('AddVfx', {
+--   model = types.Static.record(mgef.hitStatic).model,
+--   options = {
+--     vfxId = mgef.id,
+--     particuleTextureOverride = mgef.particle,
+--     loop = false,
+--   }
+-- })
+--
+
 
 ---
 -- Removes a specific VFX

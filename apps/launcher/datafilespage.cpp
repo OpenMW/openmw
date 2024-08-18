@@ -75,7 +75,10 @@ namespace
         QDir currentDir(path);
         if (!currentDir.entryInfoList(fileFilter, QDir::Files).empty()
             || !currentDir.entryInfoList(dirFilter, QDir::Dirs | QDir::NoDotAndDotDot).empty())
+        {
             dirs.push_back(currentDir.canonicalPath());
+            return;
+        }
 
         for (const auto& subdir : currentDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
             contentSubdirs(subdir.canonicalFilePath(), dirs);

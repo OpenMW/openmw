@@ -11,6 +11,7 @@
 #include <condition_variable>
 
 #include <osg/ref_ptr>
+
 namespace osg
 {
     class Texture2D;
@@ -39,6 +40,7 @@ extern "C"
 #endif
 
 #include "videodefs.hpp"
+#include "libavformatdefines.hpp"
 
 #define VIDEO_PICTURE_QUEUE_SIZE 50
 
@@ -155,7 +157,13 @@ struct VideoState {
     double get_master_clock();
 
     static int istream_read(void *user_data, uint8_t *buf, int buf_size);
-    static int istream_write(void *user_data, uint8_t *buf, int buf_size);
+
+#if OPENMW_FFMPEG_CONST_WRITEPACKET
+    static int istream_write(void *, const unsigned char *, int);
+#else
+    static int istream_write(void *, uint8_t *, int);
+#endif
+
     static int64_t istream_seek(void *user_data, int64_t offset, int whence);
 
     osg::ref_ptr<osg::Texture2D> mTexture;

@@ -73,7 +73,6 @@ namespace MWRender
         {
             osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
             texture->setSourceFormat(GL_RGBA);
-            texture->setSourceType(GL_HALF_FLOAT);
             texture->setInternalFormat(GL_RGBA16F);
             if (supportsHalfFloatLinear)
             {

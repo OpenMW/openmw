@@ -19,7 +19,6 @@
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "animationbindings.hpp"
 #include "dialoguebindings.hpp"
 #include "factionbindings.hpp"
 #include "luaevents.hpp"
@@ -137,7 +136,6 @@ namespace MWLua
             };
             api["sound"]
                 = context.cachePackage("openmw_core_sound", [context]() { return initCoreSoundBindings(context); });
-            api["vfx"] = initCoreVfxBindings(context);
         }
         else
         {

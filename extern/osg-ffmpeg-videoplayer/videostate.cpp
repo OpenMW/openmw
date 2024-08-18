@@ -43,6 +43,7 @@ static FlushPacket flush_pkt;
 #include "videoplayer.hpp"
 #include "audiodecoder.hpp"
 #include "audiofactory.hpp"
+#include "libavformatdefines.hpp"
 
 namespace
 {
@@ -243,7 +244,11 @@ int VideoState::istream_read(void *user_data, uint8_t *buf, int buf_size)
     }
 }
 
+#if OPENMW_FFMPEG_CONST_WRITEPACKET
+int VideoState::istream_write(void *, const unsigned char *, int)
+#else
 int VideoState::istream_write(void *, uint8_t *, int)
+#endif
 {
     throw std::runtime_error("can't write to read-only stream");
 }

@@ -218,9 +218,21 @@ testing.registerLocalTest('findNearestNavMeshPosition',
             'Navigation mesh position ' .. testing.formatActualExpected(result, expected))
     end)
 
+testing.registerLocalTest('playerMemoryLimit',
+    function()
+        local ok, err = pcall(function()
+            local str = 'a'
+            while true do
+                str = str .. str
+            end
+        end)
+        testing.expectEqual(ok, false, 'Script reaching memory limit should fail')
+        testing.expectEqual(err, 'not enough memory')
+    end)
+
 return {
     engineHandlers = {
-        onUpdate = testing.updateLocal,
+        onFrame = testing.updateLocal,
     },
     eventHandlers = testing.eventHandlers
 }

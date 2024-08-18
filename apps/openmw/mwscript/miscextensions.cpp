@@ -603,15 +603,15 @@ namespace MWScript
                     key = ESM::MagicEffect::effectGmstIdToIndex(effect);
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-
-                const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
-
-                for (const auto& activeEffect : effects)
+                for (const auto& spell : stats.getActiveSpells())
                 {
-                    if (activeEffect.first.mId == key && activeEffect.second.getModifier() > 0)
+                    for (const auto& effect : spell.getEffects())
                     {
-                        runtime.push(1);
-                        return;
+                        if (effect.mFlags & ESM::ActiveEffect::Flag_Applied && effect.mEffectId == key)
+                        {
+                            runtime.push(1);
+                            return;
+                        }
                     }
                 }
                 runtime.push(0);

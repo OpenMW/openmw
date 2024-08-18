@@ -277,11 +277,11 @@ namespace MWInput
                 key = MyGUI::KeyCode::Apostrophe;
                 break;
             case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-                key = MyGUI::KeyCode::Period;
-                break;
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Period, 0, false);
+                return true;
             case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-                key = MyGUI::KeyCode::Slash;
-                break;
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Slash, 0, false);
+                return true;
             case SDL_CONTROLLER_BUTTON_LEFTSTICK:
                 mGamepadGuiCursorEnabled = !mGamepadGuiCursorEnabled;
                 MWBase::Environment::get().getWindowManager()->setCursorActive(mGamepadGuiCursorEnabled);
