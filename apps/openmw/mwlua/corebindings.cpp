@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <tuple>
 
+#include <apps/openmw/mwlua/object.hpp>
+#include <apps/openmw/mwworld/cellstore.hpp>
+#include <apps/openmw/mwworld/worldmodel.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/landrecorddata.hpp>
 #include <components/esm3/loadfact.hpp>
@@ -32,10 +35,6 @@
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
 #include "stats.hpp"
-#include <apps/openmw/mwlua/object.hpp>
-#include <apps/openmw/mwworld/cellstore.hpp>
-#include <apps/openmw/mwworld/worldmodel.hpp>
-
 namespace MWLua
 {
     static sol::table initContentFilesBindings(sol::state_view& lua)
