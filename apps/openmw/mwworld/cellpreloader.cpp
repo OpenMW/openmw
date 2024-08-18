@@ -133,7 +133,7 @@ namespace MWWorld
                                 mPreloadedObjects.insert(mKeyframeManager->get(kfname));
                         }
                     }
-                    mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
+                    mPreloadedObjects.insert(mSceneManager->getTemplate(VFS::Path::toNormalized(mesh)));
                     if (mPreloadInstances)
                         mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
                     else

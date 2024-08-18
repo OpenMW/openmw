@@ -1263,7 +1263,7 @@ namespace MWRender
         mActorsPaths->updatePtr(old, updated);
     }
 
-    void RenderingManager::spawnEffect(const std::string& model, std::string_view texture,
+    void RenderingManager::spawnEffect(VFS::Path::NormalizedView model, std::string_view texture,
         const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
     {
         mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX);
@@ -1649,7 +1649,7 @@ namespace MWRender
     osg::Vec3f RenderingManager::getHalfExtents(const MWWorld::ConstPtr& object) const
     {
         osg::Vec3f halfExtents(0, 0, 0);
-        std::string modelName = object.getClass().getCorrectedModel(object);
+        VFS::Path::Normalized modelName(object.getClass().getCorrectedModel(object));
         if (modelName.empty())
             return halfExtents;
 
@@ -1680,7 +1680,7 @@ namespace MWRender
         MWWorld::Scene* worldScene = MWBase::Environment::get().getWorldScene();
         if (!rootNode || worldScene->isPagedRef(ptr))
         {
-            const std::string model = ptr.getClass().getCorrectedModel(ptr);
+            const VFS::Path::Normalized model(ptr.getClass().getCorrectedModel(ptr));
 
             if (model.empty())
                 return {};

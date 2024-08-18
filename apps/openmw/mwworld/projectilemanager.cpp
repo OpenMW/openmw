@@ -207,7 +207,8 @@ namespace MWWorld
             attachTo = rotateNode;
         }
 
-        osg::ref_ptr<osg::Node> projectile = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
+        osg::ref_ptr<osg::Node> projectile
+            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), attachTo);
 
         if (state.mIdMagic.size() > 1)
         {
@@ -222,7 +223,8 @@ namespace MWWorld
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
                     mResourceSystem->getSceneManager()->getInstance(
-                        Misc::ResourceHelpers::correctMeshPath(weapon->mModel), findVisitor.mFoundNode);
+                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(weapon->mModel)),
+                        findVisitor.mFoundNode);
             }
         }
 

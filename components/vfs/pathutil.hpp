@@ -166,6 +166,8 @@ namespace VFS::Path
 
         std::string_view view() const { return mValue; }
 
+        bool empty() const { return mValue.empty(); }
+
         operator std::string_view() const { return mValue; }
 
         operator const std::string&() const { return mValue; }
@@ -182,6 +184,8 @@ namespace VFS::Path
             normalizeFilenameInPlace(mValue.begin() + pos, mValue.end());
             return true;
         }
+
+        void clear() { mValue.clear(); }
 
         Normalized& operator=(NormalizedView value)
         {
@@ -284,6 +288,13 @@ namespace VFS::Path
             return std::hash<std::string_view>{}(s.value());
         }
     };
+
+    // A special function to be removed once conversion to VFS::Path::Normalized* is complete
+    template <class T>
+    Normalized toNormalized(T&& value)
+    {
+        return Normalized(std::forward<T>(value));
+    }
 }
 
 #endif

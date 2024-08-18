@@ -3638,8 +3638,8 @@ namespace MWWorld
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
-        std::string model = Misc::ResourceHelpers::correctMeshPath(std::string{
-            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))) } /*[0, 2]*/);
+        VFS::Path::Normalized model(Misc::ResourceHelpers::correctMeshPath(std::string{
+            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))) } /*[0, 2]*/));
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
@@ -3647,7 +3647,7 @@ namespace MWWorld
     void World::spawnEffect(const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos,
         float scale, bool isMagicVFX)
     {
-        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
+        mRendering->spawnEffect(VFS::Path::toNormalized(model), textureOverride, worldPos, scale, isMagicVFX);
     }
 
     struct ResetActorsVisitor
