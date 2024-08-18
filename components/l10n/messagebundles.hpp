@@ -40,7 +40,7 @@ namespace l10n
             const std::vector<icu::Formattable>& args) const;
         void setPreferredLocales(const std::vector<icu::Locale>& preferredLocales);
         const std::vector<icu::Locale>& getPreferredLocales() const { return mPreferredLocales; }
-        void load(std::istream& input, const icu::Locale& lang, const std::string& path);
+        void load(std::istream& input, const icu::Locale& lang);
         bool isLoaded(const icu::Locale& loc) const { return mBundles.find(loc.getName()) != mBundles.end(); }
         const icu::Locale& getFallbackLocale() const { return mFallbackLocale; }
         void setGmstLoader(std::function<std::string(std::string_view)> fn) { mGmstLoader = std::move(fn); }
