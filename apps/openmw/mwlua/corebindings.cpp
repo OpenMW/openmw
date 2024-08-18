@@ -153,7 +153,8 @@ namespace MWLua
                     { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
         }
-        api["getHeightAt"] = [](float x, float y, sol::object cellOrName) {
+
+        api["getHeightAt"] = [](const osg::Vec3f& pos, sol::object cellOrName) {
             ESM::RefId worldspace;
             if (cellOrName.is<GCell>())
                 worldspace = cellOrName.as<GCell>().mStore->getCell()->getWorldSpace();
@@ -167,8 +168,8 @@ namespace MWLua
                 worldspace = ESM::Cell::sDefaultWorldspaceId;
 
             const float cellSize = ESM::getCellSize(worldspace);
-            int cellX = static_cast<int>(std::floor(x / cellSize));
-            int cellY = static_cast<int>(std::floor(y / cellSize));
+            int cellX = static_cast<int>(std::floor(pos.x() / cellSize));
+            int cellY = static_cast<int>(std::floor(pos.y() / cellSize));
 
             auto store = MWBase::Environment::get().getESMStore();
             auto landStore = store->get<ESM::Land>();
@@ -188,7 +189,7 @@ namespace MWLua
                 // If we failed to load data, return the default height
                 return static_cast<float>(ESM::Land::DEFAULT_HEIGHT);
             }
-            return ESMTerrain::Storage::getHeightAt(landData->mHeights, landData->sLandSize, { x, y, 0 }, cellSize);
+            return ESMTerrain::Storage::getHeightAt(landData->mHeights, landData->sLandSize, pos, cellSize);
         };
 
         sol::table readOnlyApi = LuaUtil::makeReadOnly(api);
