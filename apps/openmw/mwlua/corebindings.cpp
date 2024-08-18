@@ -1,5 +1,8 @@
 #include "corebindings.hpp"
 
+#include <apps/openmw/mwlua/object.hpp>
+#include <apps/openmw/mwworld/cellstore.hpp>
+#include <apps/openmw/mwworld/worldmodel.hpp>
 #include <chrono>
 #include <stdexcept>
 
@@ -25,6 +28,9 @@
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
 #include "stats.hpp"
+#include <components/esm3/landrecorddata.hpp>
+#include <components/esm3/loadland.hpp>
+#include <components/esmterrain/storage.hpp>
 
 namespace MWLua
 {
@@ -147,6 +153,43 @@ namespace MWLua
                     { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
         }
+        api["getHeightAt"] = [](float x, float y, sol::object cellOrName) {
+            ESM::RefId worldspace;
+            if (cellOrName.is<GCell>())
+                worldspace = cellOrName.as<GCell>().mStore->getCell()->getWorldSpace();
+            else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
+                worldspace = MWBase::Environment::get()
+                                 .getWorldModel()
+                                 ->getCell(cellOrName.as<std::string_view>())
+                                 .getCell()
+                                 ->getWorldSpace();
+            else
+                worldspace = ESM::Cell::sDefaultWorldspaceId;
+
+            const float cellSize = ESM::getCellSize(worldspace);
+            int cellX = static_cast<int>(std::floor(x / cellSize));
+            int cellY = static_cast<int>(std::floor(y / cellSize));
+
+            auto store = MWBase::Environment::get().getESMStore();
+            auto landStore = store->get<ESM::Land>();
+            auto land = landStore.search(cellX, cellY);
+            const ESM::Land::LandData* landData = nullptr;
+            if (land != nullptr)
+            {
+                landData = land->getLandData(ESM::Land::DATA_VHGT);
+                if (landData != nullptr)
+                {
+                    // Ensure data is loaded if necessary
+                    land->loadData(ESM::Land::DATA_VHGT);
+                }
+            }
+            if (landData == nullptr)
+            {
+                // If we failed to load data, return the default height
+                return static_cast<float>(ESM::Land::DEFAULT_HEIGHT);
+            }
+            return ESMTerrain::Storage::getHeightAt(landData->mHeights, landData->sLandSize, { x, y, 0 }, cellSize);
+        };
 
         sol::table readOnlyApi = LuaUtil::makeReadOnly(api);
         return context.setTypePackage(readOnlyApi, "openmw_core");

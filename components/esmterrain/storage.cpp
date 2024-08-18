@@ -465,20 +465,13 @@ namespace ESMTerrain
             blendmaps.clear(); // If a single texture fills the whole terrain, there is no need to blend
     }
 
-    float Storage::getHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace)
+    float Storage::getHeightAt(
+        const std::span<const float> data, const int landSize, const osg::Vec3f& worldPos, const float cellSize)
     {
-        const float cellSize = ESM::getCellSize(worldspace);
+        // if (!data)
+        // return defaultHeight;
         int cellX = static_cast<int>(std::floor(worldPos.x() / cellSize));
         int cellY = static_cast<int>(std::floor(worldPos.y() / cellSize));
-
-        osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
-        if (!land)
-            return ESM::isEsm4Ext(worldspace) ? std::numeric_limits<float>::lowest() : defaultHeight;
-
-        const ESM::LandData* data = land->getData(ESM::Land::DATA_VHGT);
-        if (!data)
-            return defaultHeight;
-        const int landSize = data->getLandSize();
 
         // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
 
@@ -516,10 +509,10 @@ namespace ESMTerrain
         */
 
         // Build all 4 positions in normalized cell space, using point-sampled height
-        osg::Vec3f v0(startXTS, startYTS, getVertexHeight(data, startX, startY) / cellSize);
-        osg::Vec3f v1(endXTS, startYTS, getVertexHeight(data, endX, startY) / cellSize);
-        osg::Vec3f v2(endXTS, endYTS, getVertexHeight(data, endX, endY) / cellSize);
-        osg::Vec3f v3(startXTS, endYTS, getVertexHeight(data, startX, endY) / cellSize);
+        osg::Vec3f v0(startXTS, startYTS, Storage::getVertexHeight(data, landSize, startX, startY) / cellSize);
+        osg::Vec3f v1(endXTS, startYTS, Storage::getVertexHeight(data, landSize, endX, startY) / cellSize);
+        osg::Vec3f v2(endXTS, endYTS, Storage::getVertexHeight(data, landSize, endX, endY) / cellSize);
+        osg::Vec3f v3(startXTS, endYTS, Storage::getVertexHeight(data, landSize, startX, endY) / cellSize);
         // define this plane in terrain space
         osg::Plane plane;
         // FIXME: deal with differing triangle alignment
@@ -546,6 +539,22 @@ namespace ESMTerrain
 
         // Solve plane equation for z
         return (-plane.getNormal().x() * nX - plane.getNormal().y() * nY - plane[3]) / plane.getNormal().z() * cellSize;
+    }
+
+    float Storage::getHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace)
+    {
+        const float cellSize = ESM::getCellSize(worldspace);
+        int cellX = static_cast<int>(std::floor(worldPos.x() / cellSize));
+        int cellY = static_cast<int>(std::floor(worldPos.y() / cellSize));
+
+        osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
+        if (!land)
+            return ESM::isEsm4Ext(worldspace) ? std::numeric_limits<float>::lowest() : defaultHeight;
+
+        const ESM::LandData* data = land->getData(ESM::Land::DATA_VHGT);
+        if (!data)
+            return defaultHeight;
+        return Storage::getHeightAt(data->getHeights(), data->getLandSize(), worldPos, cellSize);
     }
 
     const LandObject* Storage::getLand(ESM::ExteriorCellLocation cellLocation, LandCache& cache)
