@@ -71,9 +71,10 @@ namespace MWLua
             = [](LuaUtil::InputAction::Registry& registry, std::string_view key) { return registry[key]; };
         {
             auto pairs = [](LuaUtil::InputAction::Registry& registry) {
-                auto next = [](LuaUtil::InputAction::Registry& registry, std::string_view key)
-                    -> sol::optional<std::tuple<std::string_view, LuaUtil::InputAction::Info>> {
-                    std::optional<std::string_view> nextKey(registry.nextKey(key));
+                auto next
+                    = [](LuaUtil::InputAction::Registry& registry,
+                          std::string_view key) -> sol::optional<std::tuple<std::string, LuaUtil::InputAction::Info>> {
+                    std::optional<std::string> nextKey(registry.nextKey(key));
                     if (!nextKey.has_value())
                         return sol::nullopt;
                     else
@@ -102,9 +103,10 @@ namespace MWLua
             = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key) { return registry[key]; };
         {
             auto pairs = [](LuaUtil::InputTrigger::Registry& registry) {
-                auto next = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key)
-                    -> sol::optional<std::tuple<std::string_view, LuaUtil::InputTrigger::Info>> {
-                    std::optional<std::string_view> nextKey(registry.nextKey(key));
+                auto next
+                    = [](LuaUtil::InputTrigger::Registry& registry,
+                          std::string_view key) -> sol::optional<std::tuple<std::string, LuaUtil::InputTrigger::Info>> {
+                    std::optional<std::string> nextKey(registry.nextKey(key));
                     if (!nextKey.has_value())
                         return sol::nullopt;
                     else

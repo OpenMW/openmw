@@ -1,7 +1,34 @@
 ---
 -- `openmw.input` can be used only in menu scripts and scripts attached to a player.
+-- Most mods should prefer to use the actions/triggers API over the direct input device methods.
+-- Actions have one value on each frame (resolved just before the `onFrame` engine handler),
+--  while Triggers don't have a value, but can occur multiple times on each frame.
+-- Prefer to use built-in methods of binding actions, such as the [inputBinding setting renderer](setting_renderers.html#inputbinding)
 -- @module input
 -- @usage local input = require('openmw.input')
+-- -- Example of Action usage
+-- input.registerAction {
+--     key = 'MyAction',
+--     type = input.ACTION_TYPE.Boolean,
+--     l10n = 'MyLocalizationContext',
+--     name = 'MyAction_name',
+--     description = 'MyAction_full_description',
+--     defaultValue = false,
+-- }
+-- return {
+--     onFrame = function()
+--         local myAction = input.getBooleanActionValue('MyAction')
+--         if (myAction) then print('My action is active!') end
+--     end,
+-- }
+-- -- Example of Trigger usage
+-- input.registerTrigger {
+--     key = 'MyTrigger',
+--     l10n = 'MyLocalizationContext',
+--     name = 'MyTrigger_name',
+--     description = 'MyTrigger_full_description',
+-- }
+-- input.registerTriggerHandler('MyTrigger', async:callback(function() print('MyTrigger') end))
 
 
 
