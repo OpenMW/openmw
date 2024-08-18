@@ -35,6 +35,7 @@
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
 #include "stats.hpp"
+
 namespace MWLua
 {
     static sol::table initContentFilesBindings(sol::state_view& lua)
