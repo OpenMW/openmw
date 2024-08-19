@@ -39,7 +39,7 @@
     </message>
     <message>
         <source>&lt;b&gt;This file is specified in a non-user config file, but does not exist in the VFS.&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Ce fichier est spécifié dans un ficher de configuration non contrôlé par l'utilisateur, mais ne semble pas exister.&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Ce fichier est spécifié dans un ficher de configuration non contrôlé par l&apos;utilisateur, mais ne semble pas exister.&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
