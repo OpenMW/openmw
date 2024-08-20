@@ -1,5 +1,7 @@
 #include "bindingsmanager.hpp"
 
+#include <filesystem>
+
 #include <MyGUI_EditBox.h>
 
 #include <extern/oics/ICSChannelListener.h>
@@ -209,13 +211,22 @@ namespace MWInput
 
     BindingsManager::~BindingsManager()
     {
+        const std::string newFileName = Files::pathToUnicodeString(mUserFile) + ".new";
         try
         {
-            mInputBinder->save(Files::pathToUnicodeString(mUserFile));
+            if (mInputBinder->save(newFileName))
+            {
+                std::filesystem::rename(Files::pathFromUnicodeString(newFileName), mUserFile);
+                Log(Debug::Info) << "Saved input bindings: " << mUserFile;
+            }
+            else
+            {
+                Log(Debug::Error) << "Failed to save input bindings to " << newFileName;
+            }
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
-            Log(Debug::Error) << "Failed to save input bindings: " << e.what();
+            Log(Debug::Error) << "Failed to save input bindings to " << newFileName << ": " << e.what();
         }
     }
 

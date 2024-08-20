@@ -144,7 +144,7 @@ namespace ICS
 		void cancelDetectingBindingState();
         bool detectingBindingState();
 
-		bool save(std::string fileName = "");
+		bool save(const std::string& fileName);
 
 		void adjustMouseRegion (Uint16 width, Uint16 height);
 
