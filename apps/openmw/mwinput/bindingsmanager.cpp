@@ -79,12 +79,7 @@ namespace MWInput
             // Disallow binding escape key
             if (key == SDL_SCANCODE_ESCAPE)
             {
-                // Unbind if esc pressed
-                if (mDetectingKeyboard)
-                    clearAllKeyBindings(mInputBinder, control);
-                else
-                    clearAllControllerBindings(mInputBinder, control);
-                control->setInitialValue(0.0f);
+                // Stop binding if esc pressed
                 mInputBinder->cancelDetectingBindingState();
                 MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
                 return;
@@ -161,14 +156,7 @@ namespace MWInput
                 return;
             clearAllControllerBindings(mInputBinder, control);
             control->setInitialValue(0.0f);
-            if (button == SDL_CONTROLLER_BUTTON_START)
-            {
-                // Disallow rebinding SDL_CONTROLLER_BUTTON_START - it is used to open main and without it is not
-                // even possible to exit the game (or change the binding back).
-                mInputBinder->cancelDetectingBindingState();
-            }
-            else
-                ICS::DetectingBindingListener::joystickButtonBindingDetected(ICS, deviceID, control, button, direction);
+            ICS::DetectingBindingListener::joystickButtonBindingDetected(ICS, deviceID, control, button, direction);
             MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
         }
 
@@ -192,11 +180,8 @@ namespace MWInput
         mListener = std::make_unique<BindingsListener>(mInputBinder.get(), this);
         mInputBinder->setDetectingBindingListener(mListener.get());
 
-        if (!userFileExists)
-        {
-            loadKeyDefaults();
-            loadControllerDefaults();
-        }
+        loadKeyDefaults();
+        loadControllerDefaults();
 
         for (int i = 0; i < A_Last; ++i)
         {
