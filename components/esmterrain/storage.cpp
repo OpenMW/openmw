@@ -2,11 +2,11 @@
 
 #include <algorithm>
 #include <optional>
-#include <osg/Vec3f>
 #include <stdexcept>
 
 #include <osg/Image>
 #include <osg/Plane>
+#include <osg/Vec3f>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/esmterrain.hpp>
@@ -475,6 +475,7 @@ namespace ESMTerrain
             blendmaps.clear(); // If a single texture fills the whole terrain, there is no need to blend
     }
 
+    // Returns a position that can be used to look up a land texture, while taking their offset into account
     osg::Vec3f Storage::getTextureCorrectedWorldPos(
         const osg::Vec3f& uncorrectedWorldPos, const int textureSize, const float cellSize)
     {
@@ -485,7 +486,7 @@ namespace ESMTerrain
     }
 
     // Takes in a corrected world pos to match the visuals.
-    UniqueTextureId Storage::getLandTextureAt(const std::span<const std::uint16_t> landData, const int plugin,
+    UniqueTextureId Storage::getTextureAt(const std::span<const std::uint16_t> landData, const int plugin,
         const int textureSize, const osg::Vec3f& correctedWorldPos, const float cellSize)
     {
         int cellX = static_cast<int>(std::floor(correctedWorldPos.x() / cellSize));

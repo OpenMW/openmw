@@ -467,10 +467,10 @@
 
 ---
 -- Get the terrain texture at a given location.
--- @function [parent=#Land] getLandTextureAt
+-- @function [parent=#Land] getTextureAt
 -- @param openmw.util#Vector3 position
 -- @param #any cellOrName (optional) cell or cell name in their exterior world space to query
--- @return #nil, #number Land texture index or nil if failed to retrieve the texture
+-- @return #nil, #number Land texture index or nil if failed to retrieve the texture. Landscape textures created through editors such as openmw-cs can be assigned an id to differentiate them, that is also used for terrain rendering. The value returned here corresponds to that value. See also LTEX records (https://en.uesp.net/wiki/Morrowind_Mod:Mod_File_Format/LTEX)
 -- @return #nil, #number Plugin id or nil if failed to retrieve the texture
 -- @return #nil, #string Texture path or nil if one isn't defined
 

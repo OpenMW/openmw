@@ -17,13 +17,6 @@ namespace MWLua
         sol::state_view& lua = context.mLua->sol();
         sol::table landApi(lua, sol::create);
 
-        // Constants
-        landApi["RANGE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, ESM::RangeType>({
-            { "Self", ESM::RT_Self },
-            { "Touch", ESM::RT_Touch },
-            { "Target", ESM::RT_Target },
-        }));
-
         landApi["getHeightAt"] = [](const osg::Vec3f& pos, sol::object cellOrName) {
             ESM::RefId worldspace;
             if (cellOrName.is<GCell>())
@@ -63,7 +56,7 @@ namespace MWLua
             return ESMTerrain::Storage::getHeightAt(landData->mHeights, landData->sLandSize, pos, cellSize);
         };
 
-        landApi["getLandTextureAt"] = [lua = context.mLua](const osg::Vec3f& pos, sol::object cellOrName) {
+        landApi["getTextureAt"] = [lua = context.mLua](const osg::Vec3f& pos, sol::object cellOrName) {
             sol::variadic_results values;
             ESM::RefId worldspace;
             if (cellOrName.is<GCell>())
@@ -85,6 +78,11 @@ namespace MWLua
             auto store = MWBase::Environment::get().getESMStore();
             // We need to read land twice. Once to get the amount of texture samples per cell edge, and the second time
             // to get the actual data
+            // This is because the visual land textures are offset with regards to quads that are rendered for terrain.
+            // To properly calculate that offset, we need to know how many texture samples exist per cell edge,
+            // as it differs between tes3 and tes4. It's equal -
+            // Once we know the value, we will calculate the offset and retrieve a sample again, this time
+            // with the offset taken into account.
             auto landStore = store->get<ESM::Land>();
             auto land = landStore.search(cellX, cellY);
             const ESM::Land::LandData* landData = nullptr;
@@ -105,6 +103,8 @@ namespace MWLua
                 return values;
             }
 
+            // Use landData to get amount of sampler per cell edge (sLandTextureSize)
+            // and then get the corrected position that will map to the rendered texture
             const osg::Vec3f correctedPos
                 = ESMTerrain::Storage::getTextureCorrectedWorldPos(pos, landData->sLandTextureSize, cellSize);
             int correctedCellX = static_cast<int>(std::floor(correctedPos.x() / cellSize));
@@ -128,7 +128,7 @@ namespace MWLua
 
             // We're passing in sLandTextureSize, NOT sLandSize like with getHeightAt
             const ESMTerrain::UniqueTextureId textureId
-                = ESMTerrain::Storage::getLandTextureAt(correctedLandData->mTextures, correctedLand->getPlugin(),
+                = ESMTerrain::Storage::getTextureAt(correctedLandData->mTextures, correctedLand->getPlugin(),
                     correctedLandData->sLandTextureSize, correctedPos, cellSize);
 
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
