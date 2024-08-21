@@ -111,8 +111,7 @@ namespace LuaUtil
             if (!newPtr)
             {
                 Log(Debug::Error) << "Lua realloc " << osize << "->" << nsize << " failed";
-                smallAllocDelta = 0;
-                bigAllocDelta = 0;
+                return nullptr;
             }
         }
         self->mTotalMemoryUsage += smallAllocDelta + bigAllocDelta;
