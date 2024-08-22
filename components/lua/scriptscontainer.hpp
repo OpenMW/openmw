@@ -232,14 +232,15 @@ namespace LuaUtil
         void addMemoryUsage(int scriptId, int64_t memoryDelta);
 
         // Add to container without calling onInit/onLoad.
-        bool addScript(int scriptId, std::optional<sol::function>& onInit, std::optional<sol::function>& onLoad);
+        bool addScript(
+            LuaView& view, int scriptId, std::optional<sol::function>& onInit, std::optional<sol::function>& onLoad);
 
         // Returns script by id (throws an exception if doesn't exist)
         Script& getScript(int scriptId);
 
         void printError(int scriptId, std::string_view msg, const std::exception& e);
         const std::string& scriptPath(int scriptId) const { return mLua.getConfiguration()[scriptId].mScriptPath; }
-        void callOnInit(int scriptId, const sol::function& onInit, std::string_view data);
+        void callOnInit(LuaView& view, int scriptId, const sol::function& onInit, std::string_view data);
         void callTimer(const Timer& t);
         void updateTimerQueue(std::vector<Timer>& timerQueue, double time);
         static void insertTimer(std::vector<Timer>& timerQueue, Timer&& t);

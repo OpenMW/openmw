@@ -69,26 +69,28 @@ namespace MWLua
 {
     void addArmorBindings(sol::table armor, const Context& context)
     {
-        armor["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "Helmet", ESM::Armor::Helmet },
-            { "Cuirass", ESM::Armor::Cuirass },
-            { "LPauldron", ESM::Armor::LPauldron },
-            { "RPauldron", ESM::Armor::RPauldron },
-            { "Greaves", ESM::Armor::Greaves },
-            { "Boots", ESM::Armor::Boots },
-            { "LGauntlet", ESM::Armor::LGauntlet },
-            { "RGauntlet", ESM::Armor::RGauntlet },
-            { "Shield", ESM::Armor::Shield },
-            { "LBracer", ESM::Armor::LBracer },
-            { "RBracer", ESM::Armor::RBracer },
-        }));
+        sol::state_view lua = context.sol();
+        armor["TYPE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
+            {
+                { "Helmet", ESM::Armor::Helmet },
+                { "Cuirass", ESM::Armor::Cuirass },
+                { "LPauldron", ESM::Armor::LPauldron },
+                { "RPauldron", ESM::Armor::RPauldron },
+                { "Greaves", ESM::Armor::Greaves },
+                { "Boots", ESM::Armor::Boots },
+                { "LGauntlet", ESM::Armor::LGauntlet },
+                { "RGauntlet", ESM::Armor::RGauntlet },
+                { "Shield", ESM::Armor::Shield },
+                { "LBracer", ESM::Armor::LBracer },
+                { "RBracer", ESM::Armor::RBracer },
+            }));
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Armor>(armor, context);
 
         armor["createRecordDraft"] = tableToArmor;
-        sol::usertype<ESM::Armor> record = context.mLua->sol().new_usertype<ESM::Armor>("ESM3_Armor");
+        sol::usertype<ESM::Armor> record = lua.new_usertype<ESM::Armor>("ESM3_Armor");
         record[sol::meta_function::to_string]
             = [](const ESM::Armor& rec) -> std::string { return "ESM3_Armor[" + rec.mId.toDebugString() + "]"; };
         record["id"]

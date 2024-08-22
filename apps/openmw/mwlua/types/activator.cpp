@@ -43,7 +43,7 @@ namespace MWLua
         activator["createRecordDraft"] = tableToActivator;
         addRecordFunctionBinding<ESM::Activator>(activator, context);
 
-        sol::usertype<ESM::Activator> record = context.mLua->sol().new_usertype<ESM::Activator>("ESM3_Activator");
+        sol::usertype<ESM::Activator> record = context.sol().new_usertype<ESM::Activator>("ESM3_Activator");
         record[sol::meta_function::to_string]
             = [](const ESM::Activator& rec) { return "ESM3_Activator[" + rec.mId.toDebugString() + "]"; };
         record["id"]

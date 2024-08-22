@@ -165,22 +165,22 @@ namespace MWLua
 
     sol::table initTypesPackage(const Context& context)
     {
-        auto* lua = context.mLua;
+        auto lua = context.sol();
 
-        if (lua->sol()["openmw_types"] != sol::nil)
-            return lua->sol()["openmw_types"];
+        if (lua["openmw_types"] != sol::nil)
+            return lua["openmw_types"];
 
-        sol::table types(lua->sol(), sol::create);
+        sol::table types(lua, sol::create);
         auto addType = [&](std::string_view name, std::vector<ESM::RecNameInts> recTypes,
                            std::optional<std::string_view> base = std::nullopt) -> sol::table {
-            sol::table t(lua->sol(), sol::create);
+            sol::table t(lua, sol::create);
             sol::table ro = LuaUtil::makeReadOnly(t);
             sol::table meta = ro[sol::metatable_key];
             meta[sol::meta_function::to_string] = [name]() { return name; };
             if (base)
             {
                 t["baseType"] = types[*base];
-                sol::table baseMeta(lua->sol(), sol::create);
+                sol::table baseMeta(lua, sol::create);
                 baseMeta[sol::meta_function::index] = LuaUtil::getMutableFromReadOnly(types[*base]);
                 t[sol::metatable_key] = baseMeta;
             }
@@ -251,8 +251,8 @@ namespace MWLua
         addType(ObjectTypeName::ESM4Tree, { ESM::REC_TREE4 });
         addType(ObjectTypeName::ESM4Weapon, { ESM::REC_WEAP4 });
 
-        sol::table typeToPackage = getTypeToPackageTable(context.mLua->sol());
-        sol::table packageToType = getPackageToTypeTable(context.mLua->sol());
+        sol::table typeToPackage = getTypeToPackageTable(lua);
+        sol::table packageToType = getPackageToTypeTable(lua);
         for (const auto& [type, name] : luaObjectTypeInfo)
         {
             sol::object t = types[name];
@@ -262,7 +262,7 @@ namespace MWLua
             packageToType[t] = type;
         }
 
-        lua->sol()["openmw_types"] = LuaUtil::makeReadOnly(types);
-        return lua->sol()["openmw_types"];
+        lua["openmw_types"] = LuaUtil::makeReadOnly(types);
+        return lua["openmw_types"];
     }
 }

@@ -84,7 +84,7 @@ namespace MWLua
         addRecordFunctionBinding<ESM::Light>(light, context);
         light["createRecordDraft"] = tableToLight;
 
-        sol::usertype<ESM::Light> record = context.mLua->sol().new_usertype<ESM::Light>("ESM3_Light");
+        sol::usertype<ESM::Light> record = context.sol().new_usertype<ESM::Light>("ESM3_Light");
         record[sol::meta_function::to_string]
             = [](const ESM::Light& rec) -> std::string { return "ESM3_Light[" + rec.mId.toDebugString() + "]"; };
         record["id"]

@@ -66,24 +66,26 @@ namespace MWLua
     {
         clothing["createRecordDraft"] = tableToClothing;
 
-        clothing["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "Amulet", ESM::Clothing::Amulet },
-            { "Belt", ESM::Clothing::Belt },
-            { "LGlove", ESM::Clothing::LGlove },
-            { "Pants", ESM::Clothing::Pants },
-            { "RGlove", ESM::Clothing::RGlove },
-            { "Ring", ESM::Clothing::Ring },
-            { "Robe", ESM::Clothing::Robe },
-            { "Shirt", ESM::Clothing::Shirt },
-            { "Shoes", ESM::Clothing::Shoes },
-            { "Skirt", ESM::Clothing::Skirt },
-        }));
+        sol::state_view lua = context.sol();
+        clothing["TYPE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
+            {
+                { "Amulet", ESM::Clothing::Amulet },
+                { "Belt", ESM::Clothing::Belt },
+                { "LGlove", ESM::Clothing::LGlove },
+                { "Pants", ESM::Clothing::Pants },
+                { "RGlove", ESM::Clothing::RGlove },
+                { "Ring", ESM::Clothing::Ring },
+                { "Robe", ESM::Clothing::Robe },
+                { "Shirt", ESM::Clothing::Shirt },
+                { "Shoes", ESM::Clothing::Shoes },
+                { "Skirt", ESM::Clothing::Skirt },
+            }));
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Clothing>(clothing, context);
 
-        sol::usertype<ESM::Clothing> record = context.mLua->sol().new_usertype<ESM::Clothing>("ESM3_Clothing");
+        sol::usertype<ESM::Clothing> record = lua.new_usertype<ESM::Clothing>("ESM3_Clothing");
         record[sol::meta_function::to_string]
             = [](const ESM::Clothing& rec) -> std::string { return "ESM3_Clothing[" + rec.mId.toDebugString() + "]"; };
         record["id"]

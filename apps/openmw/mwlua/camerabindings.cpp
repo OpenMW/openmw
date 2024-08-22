@@ -14,7 +14,7 @@ namespace MWLua
 
     using CameraMode = MWRender::Camera::Mode;
 
-    sol::table initCameraPackage(sol::state_view& lua)
+    sol::table initCameraPackage(sol::state_view lua)
     {
         MWRender::Camera* camera = MWBase::Environment::get().getWorld()->getCamera();
         MWRender::RenderingManager* renderingManager = MWBase::Environment::get().getWorld()->getRenderingManager();

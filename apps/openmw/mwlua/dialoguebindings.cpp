@@ -59,7 +59,7 @@ namespace
     {
         using StoreT = FilteredDialogueStore<filter>;
 
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::usertype<StoreT> storeBindingsClass
             = lua.new_usertype<StoreT>("ESM3_Dialogue_Type" + std::to_string(filter) + " Store");
         storeBindingsClass[sol::meta_function::to_string] = [](const StoreT& store) {
@@ -317,7 +317,7 @@ namespace MWLua
 {
     sol::table initCoreDialogueBindings(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::table api(lua, sol::create);
 
         sol::table journalTable(lua, sol::create);

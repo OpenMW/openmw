@@ -21,7 +21,7 @@ namespace MWLua
     {
         addRecordFunctionBinding<ESM4::Terminal>(term, context, "ESM4Terminal");
 
-        sol::usertype<ESM4::Terminal> record = context.mLua->sol().new_usertype<ESM4::Terminal>("ESM4_Terminal");
+        sol::usertype<ESM4::Terminal> record = context.sol().new_usertype<ESM4::Terminal>("ESM4_Terminal");
         record[sol::meta_function::to_string] = [](const ESM4::Terminal& rec) -> std::string {
             return "ESM4_Terminal[" + ESM::RefId(rec.mId).toDebugString() + "]";
         };

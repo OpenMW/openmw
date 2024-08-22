@@ -22,8 +22,8 @@ namespace MWLua
 {
     sol::table initBirthSignRecordBindings(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
-        sol::table birthSigns(context.mLua->sol(), sol::create);
+        sol::state_view lua = context.sol();
+        sol::table birthSigns(lua, sol::create);
         addRecordFunctionBinding<ESM::BirthSign>(birthSigns, context);
 
         auto signT = lua.new_usertype<ESM::BirthSign>("ESM3_BirthSign");

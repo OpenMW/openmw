@@ -46,7 +46,7 @@ namespace MWLua
 {
     sol::table initCoreFactionBindings(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::table factions(lua, sol::create);
         addRecordFunctionBinding<ESM::Faction>(factions, context);
         // Faction record

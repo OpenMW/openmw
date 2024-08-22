@@ -82,9 +82,10 @@ namespace MWLua
 {
     void addBookBindings(sol::table book, const Context& context)
     {
+        sol::state_view lua = context.sol();
         // types.book.SKILL is deprecated (core.SKILL should be used instead)
         // TODO: Remove book.SKILL after branching 0.49
-        sol::table skill(context.mLua->sol(), sol::create);
+        sol::table skill(lua, sol::create);
         book["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
         book["createRecordDraft"] = tableToBook;
         for (int id = 0; id < ESM::Skill::Length; ++id)
@@ -97,7 +98,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Book>(book, context);
 
-        sol::usertype<ESM::Book> record = context.mLua->sol().new_usertype<ESM::Book>("ESM3_Book");
+        sol::usertype<ESM::Book> record = lua.new_usertype<ESM::Book>("ESM3_Book");
         record[sol::meta_function::to_string]
             = [](const ESM::Book& rec) { return "ESM3_Book[" + rec.mId.toDebugString() + "]"; };
         record["id"]
