@@ -40,9 +40,8 @@ namespace Config
 
         inline void setValue(const QString& key, const SettingValue& value)
         {
-            mSettings.remove(key);
+            remove(key);
             mSettings.insert(key, value);
-            mUserSettings.remove(key);
             if (isUserSetting(value))
                 mUserSettings.insert(key, value);
         }
@@ -63,7 +62,14 @@ namespace Config
 
         inline void remove(const QString& key)
         {
-            mSettings.remove(key);
+            // simplify to removeIf when Qt5 goes
+            for (auto itr = mSettings.lowerBound(key); itr != mSettings.upperBound(key);)
+            {
+                if (isUserSetting(*itr))
+                    itr = mSettings.erase(itr);
+                else
+                    ++itr;
+            }
             mUserSettings.remove(key);
         }
 

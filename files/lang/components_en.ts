@@ -37,6 +37,10 @@
         <source>&lt;b&gt;Author:&lt;/b&gt; %1&lt;br/&gt;&lt;b&gt;Format version:&lt;/b&gt; %2&lt;br/&gt;&lt;b&gt;Modified:&lt;/b&gt; %3&lt;br/&gt;&lt;b&gt;Path:&lt;/b&gt;&lt;br/&gt;%4&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Description:&lt;/b&gt;&lt;br/&gt;%5&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Dependencies: &lt;/b&gt;%6&lt;br/&gt;</source>
         <translation></translation>
     </message>
+    <message>
+        <source>&lt;b&gt;This file is specified in a non-user config file, but does not exist in the VFS.&lt;/b&gt;</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>ContentSelectorView::ContentSelector</name>
