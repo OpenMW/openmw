@@ -255,7 +255,6 @@ else()
 endif()
 
 if (WIN32)
-    target_link_libraries(openmw-cs-lib Boost::locale)
     target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/openmw-cs.exe.manifest)
 endif()
 

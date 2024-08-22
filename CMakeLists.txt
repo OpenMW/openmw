@@ -451,14 +451,6 @@ if(HAVE_MULTIVIEW)
 endif(HAVE_MULTIVIEW)
 
 set(BOOST_COMPONENTS iostreams program_options system)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-    if(MSVC)
-        # boost-zlib is not present (nor needed) in vcpkg version of boost.
-        # there, it is part of boost-iostreams instead.
-        set(BOOST_OPTIONAL_COMPONENTS zlib)
-    endif(MSVC)
-endif(WIN32)
 
 find_package(Boost 1.70.0 CONFIG REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 

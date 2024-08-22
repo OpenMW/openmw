@@ -19,8 +19,6 @@ target_link_libraries(openmw-iniimporter
 )
 
 if (WIN32)
-    target_link_libraries(openmw-iniimporter
-        Boost::locale)
     INSTALL(TARGETS openmw-iniimporter RUNTIME DESTINATION ".")
 endif(WIN32)
 

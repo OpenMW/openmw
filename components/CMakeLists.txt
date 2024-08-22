@@ -614,12 +614,6 @@ endif()
 
 target_link_libraries(components ${BULLET_LIBRARIES})
 
-if (WIN32)
-    target_link_libraries(components
-    Boost::locale
-    Boost::zlib)
-endif()
-
 if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
