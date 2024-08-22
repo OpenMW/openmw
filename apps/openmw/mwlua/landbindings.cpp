@@ -41,12 +41,6 @@ namespace MWLua
             if (land != nullptr)
             {
                 landData = land->getLandData(ESM::Land::DATA_VHGT);
-                if (landData != nullptr)
-                {
-                    // Ensure data is loaded if necessary
-                    land->loadData(ESM::Land::DATA_VHGT);
-                    landData = land->getLandData(ESM::Land::DATA_VHGT);
-                }
             }
             if (landData == nullptr)
             {
@@ -89,12 +83,6 @@ namespace MWLua
             if (land != nullptr)
             {
                 landData = land->getLandData(ESM::Land::DATA_VTEX);
-                if (landData != nullptr)
-                {
-                    // Ensure data is loaded if necessary
-                    land->loadData(ESM::Land::DATA_VTEX);
-                    landData = land->getLandData(ESM::Land::DATA_VTEX);
-                }
             }
             if (landData == nullptr)
             {
@@ -114,12 +102,6 @@ namespace MWLua
             if (correctedLand != nullptr)
             {
                 correctedLandData = correctedLand->getLandData(ESM::Land::DATA_VTEX);
-                if (correctedLandData != nullptr)
-                {
-                    // Ensure data is loaded if necessary
-                    land->loadData(ESM::Land::DATA_VTEX);
-                    correctedLandData = correctedLand->getLandData(ESM::Land::DATA_VTEX);
-                }
             }
             if (correctedLandData == nullptr)
             {
