@@ -101,14 +101,21 @@ namespace LuaUtil
                               << " is blocked because Lua memory limit (configurable in settings.cfg) is exceeded";
             return nullptr;
         }
-        self->mTotalMemoryUsage += smallAllocDelta + bigAllocDelta;
-        self->mSmallAllocMemoryUsage += smallAllocDelta;
 
         void* newPtr = nullptr;
         if (nsize == 0)
             free(ptr);
         else
+        {
             newPtr = realloc(ptr, nsize);
+            if (!newPtr)
+            {
+                Log(Debug::Error) << "Lua realloc " << osize << "->" << nsize << " failed";
+                return nullptr;
+            }
+        }
+        self->mTotalMemoryUsage += smallAllocDelta + bigAllocDelta;
+        self->mSmallAllocMemoryUsage += smallAllocDelta;
 
         if (bigAllocDelta != 0)
         {
