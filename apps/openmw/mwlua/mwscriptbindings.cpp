@@ -95,7 +95,7 @@ namespace MWLua
 
     sol::table initMWScriptBindings(const Context& context)
     {
-        sol::state_view lua = lua;
+        sol::state_view lua = context.sol();
         sol::table api(lua, sol::create);
 
         api["getGlobalScript"]

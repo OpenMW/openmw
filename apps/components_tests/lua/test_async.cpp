@@ -13,12 +13,14 @@ namespace
     {
         void SetUp() override
         {
-            mLua.sol()["callback"] = [&](sol::protected_function fn) -> LuaUtil::Callback {
-                sol::table hiddenData(mLua.sol(), sol::create);
-                hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
-                return LuaUtil::Callback{ std::move(fn), hiddenData };
-            };
-            mLua.sol()["pass"] = [this](LuaUtil::Callback callback) { mCb = callback; };
+            mLua.protectedCall([&](LuaUtil::LuaView& view) {
+                view.sol()["callback"] = [&](sol::protected_function fn) -> LuaUtil::Callback {
+                    sol::table hiddenData(view.sol(), sol::create);
+                    hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
+                    return LuaUtil::Callback{ std::move(fn), hiddenData };
+                };
+                view.sol()["pass"] = [&](LuaUtil::Callback callback) { mCb = callback; };
+            });
         }
 
         LuaUtil::LuaState mLua{ nullptr, nullptr };
@@ -28,25 +30,29 @@ namespace
     TEST_F(LuaCoroutineCallbackTest, CoroutineCallbacks)
     {
         internal::CaptureStdout();
-        mLua.sol().safe_script(R"X(
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            view.sol().safe_script(R"X(
             local s = 'test'
             coroutine.wrap(function()
                 pass(callback(function(v) print(s) end))
             end)()
         )X");
-        mLua.sol().collect_garbage();
-        mCb.call();
+            view.sol().collect_garbage();
+            mCb.call();
+        });
         EXPECT_THAT(internal::GetCapturedStdout(), "test\n");
     }
 
     TEST_F(LuaCoroutineCallbackTest, ErrorInCoroutineCallbacks)
     {
-        mLua.sol().safe_script(R"X(
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            view.sol().safe_script(R"X(
             coroutine.wrap(function()
                 pass(callback(function() error('COROUTINE CALLBACK') end))
             end)()
         )X");
-        mLua.sol().collect_garbage();
+            view.sol().collect_garbage();
+        });
         EXPECT_ERROR(mCb.call(), "COROUTINE CALLBACK");
     }
 }
