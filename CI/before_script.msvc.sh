@@ -62,10 +62,8 @@ PDBS=""
 PLATFORM=""
 CONFIGURATIONS=()
 TEST_FRAMEWORK=""
-GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
 BUILD_BENCHMARKS=""
-OSG_MULTIVIEW_BUILD=""
 USE_WERROR=""
 USE_CLANG_TIDY=""
 
@@ -133,9 +131,6 @@ while [ $# -gt 0 ]; do
 
 			b )
 				BUILD_BENCHMARKS=true ;;
-
-			M )
-				OSG_MULTIVIEW_BUILD=true ;;
 
 			E )
 				USE_WERROR=true ;;
@@ -378,38 +373,20 @@ fi
 case $VS_VERSION in
 	17|17.0|2022 )
 		GENERATOR="Visual Studio 17 2022"
-		TOOLSET="vc143"
+		MSVC_TOOLSET="vc143"
 		MSVC_REAL_VER="17"
-		MSVC_VER="14.3"
 		MSVC_DISPLAY_YEAR="2022"
 
-		OSG_MSVC_YEAR="2019"
-		MYGUI_MSVC_YEAR="2019"
-		LUA_MSVC_YEAR="2019"
 		QT_MSVC_YEAR="2019"
-		BULLET_MSVC_YEAR="2019"
-
-		BOOST_VER="1.80.0"
-		BOOST_VER_URL="1_80_0"
-		BOOST_VER_SDK="108000"
 		;;
 
 	16|16.0|2019 )
 		GENERATOR="Visual Studio 16 2019"
-		TOOLSET="vc142"
+		MSVC_TOOLSET="vc142"
 		MSVC_REAL_VER="16"
-		MSVC_VER="14.2"
 		MSVC_DISPLAY_YEAR="2019"
 
-		OSG_MSVC_YEAR="2019"
-		MYGUI_MSVC_YEAR="2019"
-		LUA_MSVC_YEAR="2019"
 		QT_MSVC_YEAR="2019"
-		BULLET_MSVC_YEAR="2019"
-
-		BOOST_VER="1.80.0"
-		BOOST_VER_URL="1_80_0"
-		BOOST_VER_SDK="108000"
 		;;
 
 	15|15.0|2017 )
@@ -567,23 +544,14 @@ if [[ -n "$USE_CLANG_TIDY" ]]; then
   add_cmake_opts "-DCMAKE_CXX_CLANG_TIDY=\"clang-tidy --warnings-as-errors=*\""
 fi
 
-BULLET_VER="2.89"
-FFMPEG_VER="4.2.2"
-ICU_VER="70_1"
-LUAJIT_VER="v2.1.0-beta3-452-g7a0cf5fd"
-LZ4_VER="1.9.2"
-OPENAL_VER="1.23.0"
-QT_VER="6.6.3"
+QT_VER='6.6.3'
+AQT_VERSION='v3.1.15'
 
-OSG_ARCHIVE_NAME="OSGoS 3.6.5"
-OSG_ARCHIVE="OSGoS-3.6.5-123-g68c5c573d-msvc${OSG_MSVC_YEAR}-win${BITS}"
-OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
-if [[ -n "$OSG_MULTIVIEW_BUILD" ]]; then
-	OSG_ARCHIVE_NAME="OSG-3.6-multiview"
-	OSG_ARCHIVE="OSG-3.6-multiview-d2ee5aa8-msvc${OSG_MSVC_YEAR}-win${BITS}"
-	OSG_ARCHIVE_REPO_URL="https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview"
-fi
-
+VCPKG_REVISION='65ef3a6db0e01983efc7d8286f44020beeee2ea3'
+VCPKG_PATH="vcpkg-x64-windows-${VS_VERSION:?}-${VCPKG_REVISION:?}"
+VCPKG_ARCHIVE="${VCPKG_PATH:?}.7z"
+VCPKG_PDB_PATH="vcpkg-x64-windows-${VS_VERSION:?}-pdb-${VCPKG_REVISION:?}"
+VCPKG_PDB_ARCHIVE="${VCPKG_PDB_PATH:?}.7z"
 
 echo
 echo "==================================="
@@ -601,75 +569,15 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	echo "Downloading dependency packages."
 	echo
 
-	# Boost
-	if [ -z $APPVEYOR ]; then
-		download "Boost ${BOOST_VER}" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
-			"boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe"
+	download "${VCPKG_PATH:?}" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/${VCPKG_ARCHIVE:?}" \
+		"${VCPKG_ARCHIVE:?}"
+
+	if [ -n "${PDBS}" ]; then
+		download "${VCPKG_PDB_PATH:?}" \
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/${VCPKG_PDB_ARCHIVE:?}" \
+			"${VCPKG_PDB_ARCHIVE:?}"
 	fi
-
-	# Bullet
-	download "Bullet ${BULLET_VER}" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt.7z" \
-		"Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt.7z"
-
-	# FFmpeg
-	download "FFmpeg ${FFMPEG_VER}" \
-	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-${FFMPEG_VER}-win${BITS}.zip" \
-		"ffmpeg-${FFMPEG_VER}-win${BITS}.zip" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-${FFMPEG_VER}-dev-win${BITS}.zip" \
-		"ffmpeg-${FFMPEG_VER}-dev-win${BITS}.zip"
-
-	# MyGUI
-	download "MyGUI 3.4.3" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.3-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" \
-		"MyGUI-3.4.3-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z"
-
-	if [ -n "$PDBS" ]; then
-		download "MyGUI symbols" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.3-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" \
-			"MyGUI-3.4.3-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z"
-	fi
-
-	# OpenAL
-	download "OpenAL-Soft ${OPENAL_VER}" \
-	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-${OPENAL_VER}.zip" \
-		"OpenAL-Soft-${OPENAL_VER}.zip"
-
-	# OSGoS
-	download "${OSG_ARCHIVE_NAME}" \
-		"${OSG_ARCHIVE_REPO_URL}/windows/${OSG_ARCHIVE}.7z" \
-		"${OSG_ARCHIVE}.7z"
-
-	if [ -n "$PDBS" ]; then
-		download "${OSG_ARCHIVE_NAME} symbols" \
-			"${OSG_ARCHIVE_REPO_URL}/windows/${OSG_ARCHIVE}-sym.7z" \
-			"${OSG_ARCHIVE}-sym.7z"
-	fi
-
-	# SDL2
-	download "SDL 2.24.0" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-devel-2.24.0-VC.zip" \
-		"SDL2-devel-2.24.0-VC.zip"
-
-	# LZ4
-	download "LZ4 ${LZ4_VER}" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v${LZ4_VER//./_}.7z" \
-		"lz4_win${BITS}_v${LZ4_VER//./_}.7z"
-
-	# LuaJIT
-	download "LuaJIT ${LUAJIT_VER}" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z" \
-		"LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z"
-
-	# ICU
-	download "ICU ${ICU_VER/_/.}"\
-		"https://github.com/unicode-org/icu/releases/download/release-${ICU_VER/_/-}/icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip" \
-		"icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip"
-
-	download "zlib 1.2.11"\
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/zlib-1.2.11-msvc2017-win64.7z" \
-		"zlib-1.2.11-msvc2017-win64.7z"
 fi
 
 cd .. #/..
@@ -705,186 +613,42 @@ echo "Extracting dependencies, this might take a while..."
 echo "---------------------------------------------------"
 echo
 
-
-if [ -z $APPVEYOR ]; then
-	printf "Boost ${BOOST_VER}... "
-else
-	printf "Boost ${BOOST_VER} AppVeyor... "
-fi
+cd $DEPS
+echo
+printf "vcpkg packages ${VCPKG_REVISION:?}... "
 {
-	if [ -z $APPVEYOR ]; then
-		cd $DEPS_INSTALL
-
-		BOOST_SDK="$(real_pwd)/Boost"
-
-		# Boost's installer is still based on ms-dos API that doesn't support larger than 260 char path names
-		# We work around this by installing to root of the current working drive and then move it to our deps
-		# get the current working drive's root, we'll install to that temporarily
-		CWD_DRIVE_ROOT="$(powershell -command '(get-location).Drive.Root')Boost_temp"
-		CWD_DRIVE_ROOT_BASH=$(windowsPathAsUnix "$CWD_DRIVE_ROOT")
-		if [ -d CWD_DRIVE_ROOT_BASH ]; then
-			printf "Cannot continue, ${CWD_DRIVE_ROOT_BASH} aka ${CWD_DRIVE_ROOT} already exists. Please remove before re-running. ";
-			wrappedExit 1;
-		fi
-
-		if [ -d ${BOOST_SDK} ] && grep "BOOST_VERSION ${BOOST_VER_SDK}" Boost/boost/version.hpp > /dev/null; then
-			printf "Exists. "
-		elif [ -z $SKIP_EXTRACT ]; then
-			rm -rf Boost
-			CI_EXTRA_INNO_OPTIONS=""
-			[ -n "$CI" ] && CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG='boost_install.log'"
-			"${DEPS}/boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
-			mv "${CWD_DRIVE_ROOT_BASH}" "${BOOST_SDK}"
-		fi
-		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}"
-		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
-		echo Done.
+	if [[ -d "${VCPKG_PATH:?}" ]]; then
+		printf "Exists. "
 	else
-		# Appveyor has all the boost we need already
-		BOOST_SDK="c:/Libraries/boost_${BOOST_VER_URL}"
+		7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_ARCHIVE:?}" ${STRIP}
 
-		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.1"
-		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
+		if [ -n "${PDBS}" ]; then
+			7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_PDB_ARCHIVE:?}" ${STRIP}
+		fi
+	fi
 
-		echo Done.
-	fi
-}
-cd $DEPS
-echo
-printf "Bullet ${BULLET_VER}... "
-{
-	cd $DEPS_INSTALL
-	if [ -d Bullet ]; then
-		printf -- "Exists. (No version checking) "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt.7z" $STRIP
-		mv "Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt" Bullet
-	fi
-	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
-	echo Done.
-}
-cd $DEPS
-echo
-printf "FFmpeg ${FFMPEG_VER}... "
-{
-	cd $DEPS_INSTALL
-	if [ -d FFmpeg ] && grep "${FFMPEG_VER}" FFmpeg/README.txt > /dev/null; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf FFmpeg
-		eval 7z x -y "${DEPS}/ffmpeg-${FFMPEG_VER}-win${BITS}.zip" $STRIP
-		eval 7z x -y "${DEPS}/ffmpeg-${FFMPEG_VER}-dev-win${BITS}.zip" $STRIP
-		mv "ffmpeg-${FFMPEG_VER}-win${BITS}-shared" FFmpeg
-		cp -r "ffmpeg-${FFMPEG_VER}-win${BITS}-dev/"* FFmpeg/
-		rm -rf "ffmpeg-${FFMPEG_VER}-win${BITS}-dev"
-	fi
-	export FFMPEG_HOME="$(real_pwd)/FFmpeg"
-	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/FFmpeg/bin/"{avcodec-58,avformat-58,avutil-56,swresample-3,swscale-5}.dll
-	done
-	if [ $BITS -eq 32 ]; then
-		add_cmake_opts "-DCMAKE_EXE_LINKER_FLAGS=\"/machine:X86 /safeseh:no\""
-	fi
-	echo Done.
-}
-cd $DEPS
-echo
-printf "MyGUI 3.4.3... "
-{
-	cd $DEPS_INSTALL
-	if [ -d MyGUI ] && \
-		grep "MYGUI_VERSION_MAJOR 3" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-		grep "MYGUI_VERSION_MINOR 4" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-		grep "MYGUI_VERSION_PATCH 3" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
-	then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf MyGUI
-		eval 7z x -y "${DEPS}/MyGUI-3.4.3-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.3-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "MyGUI-3.4.3-msvc${MYGUI_MSVC_YEAR}-win${BITS}" MyGUI
-	fi
-	export MYGUI_HOME="$(real_pwd)/MyGUI"
+	add_cmake_opts -DCMAKE_TOOLCHAIN_FILE="$(real_pwd)/${VCPKG_PATH:?}/scripts/buildsystems/vcpkg.cmake"
+	add_cmake_opts -DLuaJit_INCLUDE_DIR="$(real_pwd)/${VCPKG_PATH:?}/installed/x64-windows/include/luajit"
+	add_cmake_opts -DLuaJit_LIBRARY="$(real_pwd)/${VCPKG_PATH:?}/installed/x64-windows/lib/lua51.lib"
+
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
-		if [ $CONFIGURATION == "Debug" ]; then
-			SUFFIX="_d"
-			MYGUI_CONFIGURATION="Debug"
+		if [[ ${CONFIGURATION:?} == "Debug" ]]; then
+			VCPKG_DLL_BIN="$(pwd)/${VCPKG_PATH:?}/installed/x64-windows/debug/bin"
+
+			add_runtime_dlls ${CONFIGURATION:?} "${VCPKG_DLL_BIN:?}/Debug/MyGUIEngine_d.dll"
 		else
-			SUFFIX=""
-			MYGUI_CONFIGURATION="RelWithDebInfo"
-		fi
-		add_runtime_dlls $CONFIGURATION "$(pwd)/MyGUI/bin/${MYGUI_CONFIGURATION}/MyGUIEngine${SUFFIX}.dll"
-	done
-	echo Done.
-}
-cd $DEPS
-echo
-printf "OpenAL-Soft ${OPENAL_VER}... "
-{
-	if [ -d openal-soft-${OPENAL_VER}-bin ]; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf openal-soft-${OPENAL_VER}-bin
-		eval 7z x -y OpenAL-Soft-${OPENAL_VER}.zip $STRIP
-	fi
-	OPENAL_SDK="$(real_pwd)/openal-soft-${OPENAL_VER}-bin"
-	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
-		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
-	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/openal-soft-${OPENAL_VER}-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
-	done
-	echo Done.
-}
-cd $DEPS
-echo
-printf "${OSG_ARCHIVE_NAME}... "
-{
-	cd $DEPS_INSTALL
-	if [ -d OSG ] && \
-		grep "OPENSCENEGRAPH_MAJOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
-		grep "OPENSCENEGRAPH_MINOR_VERSION    6" OSG/include/osg/Version > /dev/null && \
-		grep "OPENSCENEGRAPH_PATCH_VERSION    5" OSG/include/osg/Version > /dev/null
-	then
-	printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf OSG
-		eval 7z x -y "${DEPS}/${OSG_ARCHIVE}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/${OSG_ARCHIVE}-sym.7z" $STRIP
-		mv "${OSG_ARCHIVE}" OSG
-	fi
-	OSG_SDK="$(real_pwd)/OSG"
-	add_cmake_opts -DOSG_DIR="$OSG_SDK"
-	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
-		if [ $CONFIGURATION == "Debug" ]; then
-			SUFFIX="d"
-			SUFFIX_UPCASE="D"
-		else
-			SUFFIX=""
-			SUFFIX_UPCASE=""
+			VCPKG_DLL_BIN="$(pwd)/${VCPKG_PATH:?}/installed/x64-windows/bin"
+
+			add_runtime_dlls ${CONFIGURATION:?} "${VCPKG_DLL_BIN:?}/Release/MyGUIEngine.dll"
 		fi
 
-		if [[ -n "$OSG_MULTIVIEW_BUILD" ]]; then
-			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,libpng16}${SUFFIX}.dll \
-				"$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
-		else
-			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,icuuc58,libpng16}${SUFFIX}.dll \
-				"$(pwd)/OSG/bin/libxml2"${SUFFIX_UPCASE}.dll \
-				"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
-			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/icudt58.dll"
-			if [ $CONFIGURATION == "Debug" ]; then
-				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-gd-1_63,boost_system-vc141-mt-gd-1_63,collada-dom2.4-dp-vc141-mt-d}.dll
-			else
-				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-1_63,boost_system-vc141-mt-1_63,collada-dom2.4-dp-vc141-mt}.dll
-			fi
-		fi
-		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dae,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
-		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
+		add_osg_dlls ${CONFIGURATION:?} "${VCPKG_DLL_BIN:?}/osgPlugins-3.6.5/*.dll"
+		add_runtime_dlls ${CONFIGURATION:?} "${VCPKG_DLL_BIN:?}/*.dll"
 	done
+
 	echo Done.
 }
+
 cd $DEPS
 echo
 printf "Qt ${QT_VER}... "
@@ -904,7 +668,6 @@ printf "Qt ${QT_VER}... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		pushd "$DEPS" > /dev/null
-		AQT_VERSION="v3.1.15"
 		if ! [ -f "aqt_x64-${AQT_VERSION}.exe" ]; then
 			download "aqt ${AQT_VERSION}"\
 				"https://github.com/miurahr/aqtinstall/releases/download/${AQT_VERSION}/aqt_x64.exe" \
@@ -956,112 +719,8 @@ printf "Qt ${QT_VER}... "
 	done
 	echo Done.
 }
-cd $DEPS
-echo
-printf "SDL 2.24.0... "
-{
-	if [ -d SDL2-2.24.0 ]; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf SDL2-2.24.0
-		eval 7z x -y SDL2-devel-2.24.0-VC.zip $STRIP
-	fi
-	SDL2DIR="$(real_pwd)/SDL2-2.24.0"
-	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/SDL2-2.24.0/lib/x${ARCHSUFFIX}/SDL2.dll"
-	done
-	echo Done.
-}
-cd $DEPS
-echo
-printf "LZ4 ${LZ4_VER}... "
-{
-	if [ -d LZ4_${LZ4_VER} ]; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf LZ4_${LZ4_VER}
-		eval 7z x -y lz4_win${BITS}_v${LZ4_VER//./_}.7z -o$(real_pwd)/LZ4_${LZ4_VER} $STRIP
-	fi
-	export LZ4DIR="$(real_pwd)/LZ4_${LZ4_VER}"
-	add_cmake_opts -DLZ4_INCLUDE_DIR="${LZ4DIR}/include" \
-		-DLZ4_LIBRARY="${LZ4DIR}/lib/liblz4.lib"
-	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
-		if [ $CONFIGURATION == "Debug" ]; then
-			LZ4_CONFIGURATION="Debug"
-		else
-			SUFFIX=""
-			LZ4_CONFIGURATION="Release"
-		fi
-		add_runtime_dlls $CONFIGURATION "$(pwd)/LZ4_${LZ4_VER}/bin/${LZ4_CONFIGURATION}/liblz4.dll"
-	done
-	echo Done.
-}
-cd $DEPS
-echo
-printf "LuaJIT ${LUAJIT_VER}... "
-{
-	if [ -d LuaJIT ]; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf LuaJIT
-		eval 7z x -y LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z -o$(real_pwd)/LuaJIT $STRIP
-	fi
-	export LUAJIT_DIR="$(real_pwd)/LuaJIT"
-	add_cmake_opts -DLuaJit_INCLUDE_DIR="${LUAJIT_DIR}/include" \
-		-DLuaJit_LIBRARY="${LUAJIT_DIR}/lib/lua51.lib"
-	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $CONFIGURATION "$(pwd)/LuaJIT/bin/lua51.dll"
-	done
-	echo Done.
-}
 
-cd $DEPS
-echo
-printf "ICU ${ICU_VER/_/.}... "
-{
-	if [ -d ICU-${ICU_VER} ]; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf ICU-${ICU_VER}
-		eval 7z x -y icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip -o$(real_pwd)/ICU-${ICU_VER} $STRIP
-	fi
-	ICU_ROOT="$(real_pwd)/ICU-${ICU_VER}"
-	add_cmake_opts -DICU_ROOT="${ICU_ROOT}" \
-		-DICU_INCLUDE_DIR="${ICU_ROOT}/include" \
-		-DICU_I18N_LIBRARY="${ICU_ROOT}/lib${BITS}/icuin.lib " \
-		-DICU_UC_LIBRARY="${ICU_ROOT}/lib${BITS}/icuuc.lib " \
-		-DICU_DEBUG=ON
-
-	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icudt${ICU_VER/_*/}.dll"
-		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icuin${ICU_VER/_*/}.dll"
-		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icuuc${ICU_VER/_*/}.dll"
-	done
-	echo Done.
-}
-
-cd $DEPS
-echo
-printf "zlib 1.2.11... "
-{
-	if [ -d zlib-1.2.11-msvc2017-win64 ]; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf zlib-1.2.11-msvc2017-win64
-		eval 7z x -y zlib-1.2.11-msvc2017-win64.7z $STRIP
-	fi
-	add_cmake_opts -DZLIB_ROOT="$(real_pwd)/zlib-1.2.11-msvc2017-win64"
-	for config in ${CONFIGURATIONS[@]}; do
-		if [ $config == "Debug" ]; then
-			add_runtime_dlls $config "$(pwd)/zlib-1.2.11-msvc2017-win64/bin/zlibd.dll"
-		else
-			add_runtime_dlls $config "$(pwd)/zlib-1.2.11-msvc2017-win64/bin/zlib.dll"
-		fi
-	done
-	echo Done.
-}
-
-add_cmake_opts -DCMAKE_PREFIX_PATH="\"${QT_SDK};${SDL2DIR}\""
+add_cmake_opts -DCMAKE_PREFIX_PATH="\"${QT_SDK}\""
 
 echo
 cd $DEPS_INSTALL/..
