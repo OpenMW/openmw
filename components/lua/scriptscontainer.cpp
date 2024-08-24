@@ -46,7 +46,7 @@ namespace LuaUtil
         bool ok = false;
         mLua.protectedCall([&](LuaView& view) {
             std::optional<sol::function> onInit, onLoad;
-            bool ok = addScript(view, scriptId, onInit, onLoad);
+            ok = addScript(view, scriptId, onInit, onLoad);
             if (ok && onInit)
                 callOnInit(view, scriptId, *onInit, initData);
         });

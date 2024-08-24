@@ -14,8 +14,8 @@ namespace
         void SetUp() override
         {
             mLua.protectedCall([&](LuaUtil::LuaView& view) {
-                view.sol()["callback"] = [&](sol::protected_function fn) -> LuaUtil::Callback {
-                    sol::table hiddenData(view.sol(), sol::create);
+                view.sol()["callback"] = [](sol::this_state state, sol::protected_function fn) -> LuaUtil::Callback {
+                    sol::table hiddenData(state, sol::create);
                     hiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
                     return LuaUtil::Callback{ std::move(fn), hiddenData };
                 };
@@ -32,11 +32,11 @@ namespace
         internal::CaptureStdout();
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
             view.sol().safe_script(R"X(
-            local s = 'test'
-            coroutine.wrap(function()
-                pass(callback(function(v) print(s) end))
-            end)()
-        )X");
+                local s = 'test'
+                coroutine.wrap(function()
+                    pass(callback(function(v) print(s) end))
+                end)()
+            )X");
             view.sol().collect_garbage();
             mCb.call();
         });
@@ -47,10 +47,10 @@ namespace
     {
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
             view.sol().safe_script(R"X(
-            coroutine.wrap(function()
-                pass(callback(function() error('COROUTINE CALLBACK') end))
-            end)()
-        )X");
+                coroutine.wrap(function()
+                    pass(callback(function() error('COROUTINE CALLBACK') end))
+                end)()
+            )X");
             view.sol().collect_garbage();
         });
         EXPECT_ERROR(mCb.call(), "COROUTINE CALLBACK");
