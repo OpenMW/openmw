@@ -66,7 +66,7 @@ namespace MWBase
 
         virtual void goodbye() = 0;
 
-        virtual void say(const MWWorld::Ptr& actor, const ESM::RefId& topic) = 0;
+        virtual bool say(const MWWorld::Ptr& actor, const ESM::RefId& topic) = 0;
 
         virtual void keywordSelected(std::string_view keyword, ResponseCallback* callback) = 0;
         virtual void goodbyeSelected() = 0;
