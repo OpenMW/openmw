@@ -397,7 +397,7 @@ namespace MWLua
             [](const ESM::MagicEffect& rec) -> std::string { return rec.mHitSound.serializeText(); });
         magicEffectT["areaStatic"] = sol::readonly_property(
             [](const ESM::MagicEffect& rec) -> std::string { return rec.mArea.serializeText(); });
-        magicEffectT["boltStatic"] = sol::readonly_property(
+        magicEffectT["bolt"] = sol::readonly_property(
             [](const ESM::MagicEffect& rec) -> std::string { return rec.mBolt.serializeText(); });
         magicEffectT["castStatic"] = sol::readonly_property(
             [](const ESM::MagicEffect& rec) -> std::string { return rec.mCasting.serializeText(); });
