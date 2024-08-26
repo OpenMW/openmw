@@ -713,7 +713,7 @@ void CSVRender::Object::setScale(float scale)
 {
     mOverrideFlags |= Override_Scale;
 
-    mScaleOverride = scale;
+    mScaleOverride = std::clamp(scale, 0.5f, 2.0f);
 
     adjustTransform();
 }
