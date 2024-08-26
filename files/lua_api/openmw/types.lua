@@ -222,7 +222,7 @@
 --     print('No Telekinesis effect')
 -- end
 -- @usage -- Check for a specific effect targeting a specific attribute.
--- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, core.ATTRIBUTE.Luck)
+-- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, 'luck')
 -- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
@@ -244,9 +244,10 @@
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
 
----
--- Permanently modifies the magnitude of an active effect to be exactly equal to the provided value. This adds the effect to the list of active effects if not already active.
+--- (Note that using this function will override and conflict with all other sources of this effect, you probably want to use @{#ActorActiveEffects.modify} instead, this function is provided for mwscript parity only)
+-- Permanently modifies the magnitude of an active effect to be exactly equal to the provided value.
 -- Note that although the modification is permanent, the magnitude will not stay equal to the value if any active spells with this effects are added/removed.
+-- Also see the notes on @{#ActorActiveEffects.modify}
 -- @function [parent=#ActorActiveEffects] set
 -- @param self
 -- @param #number value
@@ -254,7 +255,7 @@
 -- @param #string extraParam Optional skill or attribute ID
 
 ---
--- Permanently modifies the magnitude of an active effect by increasing it by the provided value. This adds the effect to the list of active effects if not already active.
+-- Permanently modifies the magnitude of an active effect by modifying it by the provided value. Note that some active effect values, such as fortify attribute effects, have no practical effect of their own, and must be paired with explicitly modifying the target stat to have any effect.
 -- @function [parent=#ActorActiveEffects] modify
 -- @param self
 -- @param #number value
