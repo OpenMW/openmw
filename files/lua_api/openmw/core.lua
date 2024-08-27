@@ -700,7 +700,7 @@
 -- @field #string castStatic Identifier of the vfx static used for casting
 -- @field #string hitStatic Identifier of the vfx static used on hit
 -- @field #string areaStatic Identifier of the vfx static used for AOE spells
--- @field #string boltStatic Identifier of the projectile vfx static used for ranged spells
+-- @field #string bolt Identifier of the projectile used for ranged spells
 -- @field #string castSound Identifier of the sound used for casting
 -- @field #string hitSound Identifier of the sound used on hit
 -- @field #string areaSound Identifier of the sound used for AOE spells
