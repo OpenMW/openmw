@@ -534,7 +534,8 @@ namespace MWMechanics
             if (greetingTimer >= GREETING_SHOULD_START)
             {
                 greetingState = Greet_InProgress;
-                MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("hello"));
+                if (!MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("hello")))
+                    greetingState = Greet_Done;
                 greetingTimer = 0;
             }
         }

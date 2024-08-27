@@ -190,6 +190,7 @@
     Bug #8085: Don't search in scripts or shaders directories for "Select directories you wish to add" menu in launcher
     Bug #8097: GetEffect doesn't detect 0 magnitude spells
     Bug #8124: Normal weapon resistance is applied twice for NPCs
+    Bug #8132: Actors without hello responses turn to face the player
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
