@@ -220,7 +220,7 @@ local function testMemoryLimit()
 end
 
 local function initPlayer()
-    player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
+    player:teleport('', util.vector3(4096, 4096, 1745), util.transform.identity)
     coroutine.yield()
 end
 
@@ -277,7 +277,12 @@ tests = {
     {'playerMemoryLimit', function()
         initPlayer()
         testing.runLocalTest(player, 'playerMemoryLimit')
-    end}
+    end},
+    {'player with equipped weapon on attack should damage health of other actors', function()
+        initPlayer()
+        world.createObject('basic_dagger1h', 1):moveInto(player)
+        testing.runLocalTest(player, 'playerWeaponAttack')
+    end},
 }
 
 return {
