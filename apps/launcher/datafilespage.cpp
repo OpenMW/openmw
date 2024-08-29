@@ -714,9 +714,8 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
         // Automatically add the directory selected by user
         if (!ui.directoryListWidget->findItems(rootPath, Qt::MatchFixedString).isEmpty())
             return;
-        ui.directoryListWidget->addItem(rootPath);
-        auto row = ui.directoryListWidget->count() - 1;
-        auto* item = ui.directoryListWidget->item(row);
+        ui.directoryListWidget->insertItem(selectedRow, rootPath);
+        auto* item = ui.directoryListWidget->item(selectedRow);
         item->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue{ rootPath }));
         mNewDataDirs.push_back(rootPath);
         refreshDataFilesView();
