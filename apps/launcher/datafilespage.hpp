@@ -76,8 +76,7 @@ namespace Launcher
         void sortDirectories();
         void sortArchives();
         void removeDirectory();
-        void moveArchives(int step);
-        void moveDirectory(int step);
+        void moveSources(QListWidget* sourceList, int step);
 
         void slotShowArchiveContextMenu(const QPoint& pos);
         void slotCheckMultiSelectedItems();
@@ -128,7 +127,6 @@ namespace Launcher
 
         void addArchive(const QString& name, Qt::CheckState selected, int row = -1);
         void addArchivesFromDir(const QString& dir);
-        bool moveArchive(QListWidgetItem* listItem, int step);
         void buildView();
         void buildArchiveContextMenu();
         void setCheckStateForMultiSelectedItems(bool checked);
