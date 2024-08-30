@@ -83,6 +83,20 @@ namespace
         for (const auto& subdir : currentDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
             contentSubdirs(subdir.canonicalFilePath(), dirs);
     }
+
+    QList<QPair<int, QListWidgetItem*>> sortedSelectedItems(QListWidget* list, bool reverse = false)
+    {
+        QList<QPair<int, QListWidgetItem*>> sortedItems;
+        for (QListWidgetItem* item : list->selectedItems())
+            sortedItems.append(qMakePair(list->row(item), item));
+
+        if (reverse)
+            std::sort(sortedItems.begin(), sortedItems.end(), [](auto a, auto b) { return a.first > b.first; });
+        else
+            std::sort(sortedItems.begin(), sortedItems.end(), [](auto a, auto b) { return a.first < b.first; });
+
+        return sortedItems;
+    }
 }
 
 namespace Launcher
@@ -164,11 +178,15 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     connect(mCloneProfileDialog->lineEdit(), &LineEdit::textChanged, this, &DataFilesPage::updateCloneProfileOkButton);
     connect(ui.directoryAddSubdirsButton, &QPushButton::released, this, [this]() { this->addSubdirectories(true); });
     connect(ui.directoryInsertButton, &QPushButton::released, this, [this]() { this->addSubdirectories(false); });
-    connect(ui.directoryUpButton, &QPushButton::released, this, [this]() { this->moveDirectory(-1); });
-    connect(ui.directoryDownButton, &QPushButton::released, this, [this]() { this->moveDirectory(1); });
+    connect(ui.directoryUpButton, &QPushButton::released, this,
+        [this]() { this->moveSources(ui.directoryListWidget, -1); });
+    connect(ui.directoryDownButton, &QPushButton::released, this,
+        [this]() { this->moveSources(ui.directoryListWidget, 1); });
     connect(ui.directoryRemoveButton, &QPushButton::released, this, &DataFilesPage::removeDirectory);
-    connect(ui.archiveUpButton, &QPushButton::released, this, [this]() { this->moveArchives(-1); });
-    connect(ui.archiveDownButton, &QPushButton::released, this, [this]() { this->moveArchives(1); });
+    connect(
+        ui.archiveUpButton, &QPushButton::released, this, [this]() { this->moveSources(ui.archiveListWidget, -1); });
+    connect(
+        ui.archiveDownButton, &QPushButton::released, this, [this]() { this->moveSources(ui.archiveListWidget, 1); });
     connect(ui.directoryListWidget->model(), &QAbstractItemModel::rowsMoved, this, &DataFilesPage::sortDirectories);
     connect(ui.archiveListWidget->model(), &QAbstractItemModel::rowsMoved, this, &DataFilesPage::sortArchives);
 
@@ -688,7 +706,17 @@ void Launcher::DataFilesPage::updateCloneProfileOkButton(const QString& text)
 
 void Launcher::DataFilesPage::addSubdirectories(bool append)
 {
-    int selectedRow = append ? ui.directoryListWidget->count() : ui.directoryListWidget->currentRow();
+    int selectedRow = -1;
+    if (append)
+    {
+        selectedRow = ui.directoryListWidget->count();
+    }
+    else
+    {
+        const QList<QPair<int, QListWidgetItem*>> sortedItems = sortedSelectedItems(ui.directoryListWidget);
+        if (!sortedItems.isEmpty())
+            selectedRow = sortedItems.first().first;
+    }
 
     if (selectedRow == -1)
         return;
@@ -787,21 +815,6 @@ void Launcher::DataFilesPage::sortArchives()
     }
 }
 
-void Launcher::DataFilesPage::moveDirectory(int step)
-{
-    int selectedRow = ui.directoryListWidget->currentRow();
-    int newRow = selectedRow + step;
-    if (selectedRow == -1 || newRow < 0 || newRow > ui.directoryListWidget->count() - 1)
-        return;
-
-    if (!(ui.directoryListWidget->item(newRow)->flags() & Qt::ItemIsEnabled))
-        return;
-
-    const auto item = ui.directoryListWidget->takeItem(selectedRow);
-    ui.directoryListWidget->insertItem(newRow, item);
-    ui.directoryListWidget->setCurrentRow(newRow);
-}
-
 void Launcher::DataFilesPage::removeDirectory()
 {
     for (const auto& path : ui.directoryListWidget->selectedItems())
@@ -835,44 +848,23 @@ void Launcher::DataFilesPage::slotCheckMultiSelectedItems()
     setCheckStateForMultiSelectedItems(true);
 }
 
-void Launcher::DataFilesPage::moveArchives(int step)
+void Launcher::DataFilesPage::moveSources(QListWidget* sourceList, int step)
 {
-    QList<QListWidgetItem*> selectedItems = ui.archiveListWidget->selectedItems();
-    QList<QPair<int, QListWidgetItem*>> sortedItems;
-
-    for (QListWidgetItem* selectedItem : selectedItems)
+    const QList<QPair<int, QListWidgetItem*>> sortedItems = sortedSelectedItems(sourceList, step > 0);
+    for (const auto& i : sortedItems)
     {
-        int selectedRow = ui.archiveListWidget->row(selectedItem);
-        sortedItems.append(qMakePair(selectedRow, selectedItem));
-    }
-
-    if (step > 0)
-    {
-        std::sort(sortedItems.begin(), sortedItems.end(), [](auto a, auto b) { return a.first > b.first; });
-    }
-    else
-    {
-        std::sort(sortedItems.begin(), sortedItems.end(), [](auto a, auto b) { return a.first < b.first; });
-    }
-
-    for (auto i : sortedItems)
-    {
-        if (!moveArchive(i.second, step))
+        int selectedRow = sourceList->row(i.second);
+        int newRow = selectedRow + step;
+        if (selectedRow == -1 || newRow < 0 || newRow > sourceList->count() - 1)
             break;
+
+        if (!(sourceList->item(newRow)->flags() & Qt::ItemIsEnabled))
+            break;
+
+        const auto item = sourceList->takeItem(selectedRow);
+        sourceList->insertItem(newRow, item);
+        sourceList->setCurrentRow(newRow);
     }
-}
-
-bool Launcher::DataFilesPage::moveArchive(QListWidgetItem* listItem, int step)
-{
-    int selectedRow = ui.archiveListWidget->row(listItem);
-    int newRow = selectedRow + step;
-    if (selectedRow == -1 || newRow < 0 || newRow > ui.archiveListWidget->count() - 1)
-        return false;
-
-    QListWidgetItem* item = ui.archiveListWidget->takeItem(selectedRow);
-    ui.archiveListWidget->insertItem(newRow, item);
-    ui.archiveListWidget->setCurrentRow(newRow);
-    return true;
 }
 
 void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState selected, int row)
