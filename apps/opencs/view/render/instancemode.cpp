@@ -297,7 +297,7 @@ void CSVRender::InstanceMode::setDragAxis(const char axis)
 CSVRender::InstanceMode::InstanceMode(
     WorldspaceWidget* worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget* parent)
     : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-instance"),
-        Mask_Reference | Mask_Terrain, "Instance editing", parent)
+        Mask_Reference | Mask_Terrain, getTooltip(), parent)
     , mSubMode(nullptr)
     , mSubModeId("move")
     , mSelectionMode(nullptr)
@@ -343,6 +343,23 @@ CSVRender::InstanceMode::InstanceMode(
     for (const char axis : "xyz")
         connect(new CSMPrefs::Shortcut(std::string("scene-axis-") + axis, worldspaceWidget),
             qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, axis] { this->setDragAxis(axis); });
+}
+
+QString CSVRender::InstanceMode::getTooltip()
+{
+    return QString(
+        "Instance editing"
+        "<ul><li>Use {scene-select-primary} and {scene-select-secondary} to select and unselect instances</li>"
+        "<li>Use {scene-edit-primary} to manipulate instances</li>"
+        "<li>Use {scene-select-tertiary} to select a reference object and then {scene-edit-secondary} to snap "
+        "selection relative to the reference object</li>"
+        "<li>Use {scene-submode-move}, {scene-submode-rotate}, {scene-submode-scale} to change to move, rotate, and "
+        "scale modes respectively</li>"
+        "<li>Use {scene-axis-x}, {scene-axis-y}, and {scene-axis-z} to lock changes to X, Y, and Z axes "
+        "respectively</li>"
+        "<li>Use {scene-delete} to delete currently selected objects</li>"
+        "<li>Use {scene-duplicate} to duplicate instances</li>"
+        "<li>Use {scene-instance-drop} to drop instances</li></ul>");
 }
 
 void CSVRender::InstanceMode::activate(CSVWidget::SceneToolbar* toolbar)

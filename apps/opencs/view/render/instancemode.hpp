@@ -74,6 +74,8 @@ namespace CSVRender
         InstanceMode(
             WorldspaceWidget* worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget* parent = nullptr);
 
+        QString getTooltip();
+
         void activate(CSVWidget::SceneToolbar* toolbar) override;
 
         void deactivate(CSVWidget::SceneToolbar* toolbar) override;
