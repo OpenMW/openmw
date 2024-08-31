@@ -505,14 +505,14 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mFreeRight{ mIndex, sName, "free-right", "D" };
         Settings::SettingValue<std::string> mFreeRollLeft{ mIndex, sName, "free-roll-left", "Q" };
         Settings::SettingValue<std::string> mFreeRollRight{ mIndex, sName, "free-roll-right", "E" };
-        Settings::SettingValue<std::string> mFreeSpeedMode{ mIndex, sName, "free-speed-mode", "F" };
+        Settings::SettingValue<std::string> mFreeSpeedMode{ mIndex, sName, "free-speed-mode", "" };
         Settings::SettingValue<std::string> mOrbitUp{ mIndex, sName, "orbit-up", "W" };
         Settings::SettingValue<std::string> mOrbitDown{ mIndex, sName, "orbit-down", "S" };
         Settings::SettingValue<std::string> mOrbitLeft{ mIndex, sName, "orbit-left", "A" };
         Settings::SettingValue<std::string> mOrbitRight{ mIndex, sName, "orbit-right", "D" };
         Settings::SettingValue<std::string> mOrbitRollLeft{ mIndex, sName, "orbit-roll-left", "Q" };
         Settings::SettingValue<std::string> mOrbitRollRight{ mIndex, sName, "orbit-roll-right", "E" };
-        Settings::SettingValue<std::string> mOrbitSpeedMode{ mIndex, sName, "orbit-speed-mode", "F" };
+        Settings::SettingValue<std::string> mOrbitSpeedMode{ mIndex, sName, "orbit-speed-mode", "" };
         Settings::SettingValue<std::string> mOrbitCenterSelection{ mIndex, sName, "orbit-center-selection", "C" };
         Settings::SettingValue<std::string> mScriptEditorComment{ mIndex, sName, "script-editor-comment", "" };
         Settings::SettingValue<std::string> mScriptEditorUncomment{ mIndex, sName, "script-editor-uncomment", "" };
