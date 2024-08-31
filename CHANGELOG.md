@@ -290,6 +290,7 @@
     Task #7182: FFMpeg 5.1.1+ support
     Task #7394: Drop support for --fs-strict
     Task #7720: Drop 360-degree screenshot support
+    Task #8141: Merge Instance Drop Modes
     Task #8214: Drop script blacklisting functionality
 
 0.48.0
