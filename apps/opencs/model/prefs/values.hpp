@@ -447,14 +447,7 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+LMB" };
         Settings::SettingValue<std::string> mSceneSpeedModifier{ mIndex, sName, "scene-speed-modifier", "Shift" };
         Settings::SettingValue<std::string> mSceneDelete{ mIndex, sName, "scene-delete", "Delete" };
-        Settings::SettingValue<std::string> mSceneInstanceDropTerrain{ mIndex, sName, "scene-instance-drop-terrain",
-            "B" };
-        Settings::SettingValue<std::string> mSceneInstanceDropCollision{ mIndex, sName, "scene-instance-drop-collision",
-            "H" };
-        Settings::SettingValue<std::string> mSceneInstanceDropTerrainSeparately{ mIndex, sName,
-            "scene-instance-drop-terrain-separately", "" };
-        Settings::SettingValue<std::string> mSceneInstanceDropCollisionSeparately{ mIndex, sName,
-            "scene-instance-drop-collision-separately", "" };
+        Settings::SettingValue<std::string> mSceneInstanceDrop{ mIndex, sName, "scene-instance-drop", "F" };
         Settings::SettingValue<std::string> mSceneDuplicate{ mIndex, sName, "scene-duplicate", "Shift+C" };
         Settings::SettingValue<std::string> mSceneLoadCamCell{ mIndex, sName, "scene-load-cam-cell", "Keypad+5" };
         Settings::SettingValue<std::string> mSceneLoadCamEastcell{ mIndex, sName, "scene-load-cam-eastcell",
