@@ -499,48 +499,7 @@ namespace ESMTerrain
         int startX = static_cast<int>(nX * textureSize);
         int startY = static_cast<int>(nY * textureSize);
 
-        int endX = startX + 1;
-        int endY = startY + 1;
-        endX = std::min(endX, textureSize - 1);
-        endY = std::min(endY, textureSize - 1);
-
-        float fractionX = std::clamp(nX * textureSize - startX, 0.0f, 1.0f);
-        float fractionY = std::clamp(nY * textureSize - startY, 0.0f, 1.0f);
-
-        /* For even / odd tri strip rows, triangles are this shape:
-        even     odd
-        3---2   3---2
-        | / |   | \ |
-        0---1   0---1
-        */
         return getTextureIdAt(landData, plugin, startX, startY);
-
-        if (fractionX <= 0.5f)
-        {
-            if (fractionY <= 0.5)
-            {
-                // 0
-                return getTextureIdAt(landData, plugin, startX, startY);
-            }
-            else
-            {
-                // 3
-                return getTextureIdAt(landData, plugin, startX, endY);
-            }
-        }
-        else
-        {
-            if (fractionY <= 0.5)
-            {
-                // 1
-                return getTextureIdAt(landData, plugin, endX, startY);
-            }
-            else
-            {
-                // 2
-                return getTextureIdAt(landData, plugin, endX, endY);
-            }
-        }
     }
 
     float Storage::getHeightAt(
