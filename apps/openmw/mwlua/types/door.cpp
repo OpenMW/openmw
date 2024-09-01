@@ -47,18 +47,18 @@ namespace MWLua
             { "Closing", MWWorld::DoorState::Closing },
         }));
         door["getDoorState"] = [](const Object& o) -> MWWorld::DoorState {
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             return door.getClass().getDoorState(door);
         };
         door["isOpen"] = [](const Object& o) {
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             bool doorIsIdle = door.getClass().getDoorState(door) == MWWorld::DoorState::Idle;
             bool doorIsOpen = door.getRefData().getPosition().rot[2] != door.getCellRef().getPosition().rot[2];
 
             return doorIsIdle && doorIsOpen;
         };
         door["isClosed"] = [](const Object& o) {
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             bool doorIsIdle = door.getClass().getDoorState(door) == MWWorld::DoorState::Idle;
             bool doorIsOpen = door.getRefData().getPosition().rot[2] != door.getCellRef().getPosition().rot[2];
 
@@ -70,7 +70,7 @@ namespace MWLua
             if (!allowChanges)
                 throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
 
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             auto world = MWBase::Environment::get().getWorld();
 
             if (!openState.has_value())
