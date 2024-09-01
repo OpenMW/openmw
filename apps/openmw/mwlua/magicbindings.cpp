@@ -306,6 +306,8 @@ namespace MWLua
         spellT["cost"] = sol::readonly_property([](const ESM::Spell& rec) -> int { return rec.mData.mCost; });
         spellT["alwaysSucceedFlag"] = sol::readonly_property(
             [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Always); });
+        spellT["starterSpellFlag"] = sol::readonly_property(
+                [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_PCStart); });
         spellT["autocalcFlag"] = sol::readonly_property(
             [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
         spellT["effects"] = sol::readonly_property(
