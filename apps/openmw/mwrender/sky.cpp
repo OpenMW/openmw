@@ -934,7 +934,8 @@ namespace MWRender
         mUnderwaterSwitch->setWaterLevel(height);
     }
 
-    void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures)
+    void SkyManager::listAssetsToPreload(
+        std::vector<VFS::Path::Normalized>& models, std::vector<VFS::Path::Normalized>& textures)
     {
         models.push_back(Settings::models().mSkyatmosphere);
         if (mSceneManager->getVFS()->exists(Settings::models().mSkynight02.get()))

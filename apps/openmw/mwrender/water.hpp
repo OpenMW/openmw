@@ -9,6 +9,7 @@
 #include <osg/ref_ptr>
 
 #include <components/settings/settings.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace osg
 {
@@ -92,7 +93,7 @@ namespace MWRender
 
         void setCullCallback(osg::Callback* callback);
 
-        void listAssetsToPreload(std::vector<std::string>& textures);
+        void listAssetsToPreload(std::vector<VFS::Path::Normalized>& textures);
 
         void setEnabled(bool enabled);
 

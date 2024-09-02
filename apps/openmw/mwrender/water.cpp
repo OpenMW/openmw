@@ -744,7 +744,7 @@ namespace MWRender
         }
     }
 
-    void Water::listAssetsToPreload(std::vector<std::string>& textures)
+    void Water::listAssetsToPreload(std::vector<VFS::Path::Normalized>& textures)
     {
         const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
         std::string_view texture = Fallback::Map::getString("Water_SurfaceTexture");
@@ -752,7 +752,7 @@ namespace MWRender
         {
             std::ostringstream texname;
             texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
-            textures.push_back(texname.str());
+            textures.emplace_back(texname.str());
         }
     }
 

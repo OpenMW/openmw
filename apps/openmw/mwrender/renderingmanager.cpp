@@ -283,12 +283,12 @@ namespace MWRender
         {
             try
             {
-                for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
-                    mResourceSystem->getSceneManager()->getTemplate(*it);
-                for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
-                    mResourceSystem->getImageManager()->getImage(*it);
-                for (std::vector<std::string>::const_iterator it = mKeyframes.begin(); it != mKeyframes.end(); ++it)
-                    mResourceSystem->getKeyframeManager()->get(*it);
+                for (const VFS::Path::Normalized& v : mModels)
+                    mResourceSystem->getSceneManager()->getTemplate(v);
+                for (const VFS::Path::Normalized& v : mTextures)
+                    mResourceSystem->getImageManager()->getImage(v);
+                for (const VFS::Path::Normalized& v : mKeyframes)
+                    mResourceSystem->getKeyframeManager()->get(v);
             }
             catch (const std::exception& e)
             {
@@ -296,9 +296,9 @@ namespace MWRender
             }
         }
 
-        std::vector<std::string> mModels;
-        std::vector<std::string> mTextures;
-        std::vector<std::string> mKeyframes;
+        std::vector<VFS::Path::Normalized> mModels;
+        std::vector<VFS::Path::Normalized> mTextures;
+        std::vector<VFS::Path::Normalized> mKeyframes;
 
     private:
         Resource::ResourceSystem* mResourceSystem;

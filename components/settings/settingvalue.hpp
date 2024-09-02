@@ -6,8 +6,9 @@
 #include "sanitizer.hpp"
 #include "settings.hpp"
 
-#include "components/debug/debuglog.hpp"
-#include "components/detournavigator/collisionshapetype.hpp"
+#include <components/debug/debuglog.hpp>
+#include <components/detournavigator/collisionshapetype.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include <osg/io_utils>
 
@@ -44,6 +45,7 @@ namespace Settings
         HrtfMode,
         WindowMode,
         VSyncMode,
+        NormalizedPath,
     };
 
     template <class T>
@@ -175,6 +177,12 @@ namespace Settings
         return SettingValueType::VSyncMode;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<VFS::Path::Normalized>()
+    {
+        return SettingValueType::NormalizedPath;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -221,6 +229,8 @@ namespace Settings
                 return "window mode";
             case SettingValueType::VSyncMode:
                 return "vsync mode";
+            case SettingValueType::NormalizedPath:
+                return "normalized path";
         }
         return "unsupported";
     }

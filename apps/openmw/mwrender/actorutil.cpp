@@ -10,24 +10,24 @@ namespace MWRender
         if (!firstPerson)
         {
             if (isWerewolf)
-                return Settings::models().mWolfskin;
+                return Settings::models().mWolfskin.get().value();
             else if (isBeast)
-                return Settings::models().mBaseanimkna;
+                return Settings::models().mBaseanimkna.get().value();
             else if (isFemale)
-                return Settings::models().mBaseanimfemale;
+                return Settings::models().mBaseanimfemale.get().value();
             else
-                return Settings::models().mBaseanim;
+                return Settings::models().mBaseanim.get().value();
         }
         else
         {
             if (isWerewolf)
-                return Settings::models().mWolfskin1st;
+                return Settings::models().mWolfskin1st.get().value();
             else if (isBeast)
-                return Settings::models().mBaseanimkna1st;
+                return Settings::models().mBaseanimkna1st.get().value();
             else if (isFemale)
-                return Settings::models().mBaseanimfemale1st;
+                return Settings::models().mBaseanimfemale1st.get().value();
             else
-                return Settings::models().mXbaseanim1st;
+                return Settings::models().mXbaseanim1st.get().value();
         }
     }
 
