@@ -14,13 +14,11 @@ openmw_add_executable(openmw-iniimporter
 )
 
 target_link_libraries(openmw-iniimporter
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
 
 if (WIN32)
-    target_link_libraries(openmw-iniimporter
-    ${Boost_LOCALE_LIBRARY})
     INSTALL(TARGETS openmw-iniimporter RUNTIME DESTINATION ".")
 endif(WIN32)
 

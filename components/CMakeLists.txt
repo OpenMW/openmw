@@ -586,9 +586,9 @@ target_link_libraries(components
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
 
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_IOSTREAMS_LIBRARY}
+    Boost::system
+    Boost::program_options
+    Boost::iostreams
 
     SDL2::SDL2
     ${OPENGL_gl_LIBRARY}
@@ -612,17 +612,7 @@ else()
     target_link_libraries(components yaml-cpp)
 endif()
 
-if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
-    target_link_libraries(components ${Boost_ATOMIC_LIBRARY})
-endif()
-
 target_link_libraries(components ${BULLET_LIBRARIES})
-
-if (WIN32)
-    target_link_libraries(components
-    ${Boost_LOCALE_LIBRARY}
-    ${Boost_ZLIB_LIBRARY})
-endif()
 
 if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
