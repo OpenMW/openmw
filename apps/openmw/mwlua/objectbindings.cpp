@@ -164,7 +164,7 @@ namespace MWLua
         void registerObjectList(const std::string& prefix, const Context& context)
         {
             using ListT = ObjectList<ObjectT>;
-            sol::state_view& lua = context.mLua->sol();
+            sol::state_view lua = context.sol();
             sol::usertype<ListT> listT = lua.new_usertype<ListT>(prefix + "ObjectList");
             listT[sol::meta_function::to_string]
                 = [](const ListT& list) { return "{" + std::to_string(list.mIds->size()) + " objects}"; };
@@ -205,7 +205,7 @@ namespace MWLua
         void addOwnerbindings(sol::usertype<ObjectT>& objectT, const std::string& prefix, const Context& context)
         {
             using OwnerT = Owner<ObjectT>;
-            sol::usertype<OwnerT> ownerT = context.mLua->sol().new_usertype<OwnerT>(prefix + "Owner");
+            sol::usertype<OwnerT> ownerT = context.sol().new_usertype<OwnerT>(prefix + "Owner");
 
             ownerT[sol::meta_function::to_string] = [](const OwnerT& o) { return "Owner[" + o.mObj.toString() + "]"; };
 
@@ -329,9 +329,10 @@ namespace MWLua
                 return LuaUtil::Box{ bb.center(), bb._max - bb.center() };
             };
 
-            objectT["type"] = sol::readonly_property(
-                [types = getTypeToPackageTable(context.mLua->sol())](
-                    const ObjectT& o) mutable { return types[getLiveCellRefType(o.ptr().mRef)]; });
+            objectT["type"]
+                = sol::readonly_property([types = getTypeToPackageTable(context.sol())](const ObjectT& o) mutable {
+                      return types[getLiveCellRefType(o.ptr().mRef)];
+                  });
 
             objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getCellRef().getCount(); });
             objectT[sol::meta_function::equal_to] = [](const ObjectT& a, const ObjectT& b) { return a.id() == b.id(); };
@@ -553,12 +554,12 @@ namespace MWLua
         void addInventoryBindings(sol::usertype<ObjectT>& objectT, const std::string& prefix, const Context& context)
         {
             using InventoryT = Inventory<ObjectT>;
-            sol::usertype<InventoryT> inventoryT = context.mLua->sol().new_usertype<InventoryT>(prefix + "Inventory");
+            sol::usertype<InventoryT> inventoryT = context.sol().new_usertype<InventoryT>(prefix + "Inventory");
 
             inventoryT[sol::meta_function::to_string]
                 = [](const InventoryT& inv) { return "Inventory[" + inv.mObj.toString() + "]"; };
 
-            inventoryT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
+            inventoryT["getAll"] = [ids = getPackageToTypeTable(context.mLua->unsafeState())](
                                        const InventoryT& inventory, sol::optional<sol::table> type) {
                 int mask = -1;
                 sol::optional<uint32_t> typeId = sol::nullopt;
@@ -681,7 +682,7 @@ namespace MWLua
         void initObjectBindings(const std::string& prefix, const Context& context)
         {
             sol::usertype<ObjectT> objectT
-                = context.mLua->sol().new_usertype<ObjectT>(prefix + "Object", sol::base_classes, sol::bases<Object>());
+                = context.sol().new_usertype<ObjectT>(prefix + "Object", sol::base_classes, sol::bases<Object>());
             addBasicBindings<ObjectT>(objectT, context);
             addInventoryBindings<ObjectT>(objectT, prefix, context);
             addOwnerbindings<ObjectT>(objectT, prefix, context);

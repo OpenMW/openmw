@@ -27,7 +27,7 @@ namespace
             return LuaUi::ContentView(result.get<sol::table>());
         }
 
-        sol::table makeTable() { return sol::table(mLuaState.sol(), sol::create); }
+        sol::table makeTable() { return sol::table(mLuaState.unsafeState(), sol::create); }
 
         sol::table makeTable(std::string name)
         {
@@ -39,13 +39,14 @@ namespace
 
     TEST_F(LuaUiContentTest, ProtectedMetatable)
     {
-        mLuaState.sol()["makeContent"] = mNew;
-        mLuaState.sol()["M"] = makeContent(makeTable()).getMetatable();
+        sol::state_view sol = mLuaState.unsafeState();
+        sol["makeContent"] = mNew;
+        sol["M"] = makeContent(makeTable()).getMetatable();
         std::string testScript = R"(
             assert(not pcall(function() setmetatable(makeContent{}, {}) end), 'Metatable is not protected')
             assert(getmetatable(makeContent{}) == false, 'Metatable is not protected')
         )";
-        EXPECT_NO_THROW(mLuaState.sol().safe_script(testScript));
+        EXPECT_NO_THROW(sol.safe_script(testScript));
     }
 
     TEST_F(LuaUiContentTest, Create)

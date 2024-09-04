@@ -75,8 +75,7 @@ namespace MWLua
         };
         miscellaneous["soul"] = miscellaneous["getSoul"]; // for compatibility; should be removed later
 
-        sol::usertype<ESM::Miscellaneous> record
-            = context.mLua->sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
+        sol::usertype<ESM::Miscellaneous> record = context.sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
         record[sol::meta_function::to_string]
             = [](const ESM::Miscellaneous& rec) { return "ESM3_Miscellaneous[" + rec.mId.toDebugString() + "]"; };
         record["id"] = sol::readonly_property(

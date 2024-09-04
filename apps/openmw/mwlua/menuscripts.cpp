@@ -30,15 +30,16 @@ namespace MWLua
 
     sol::table initMenuPackage(const Context& context)
     {
-        sol::state_view lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::table api(lua, sol::create);
 
         api["STATE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWBase::StateManager::State>({
-                { "NoGame", MWBase::StateManager::State_NoGame },
-                { "Running", MWBase::StateManager::State_Running },
-                { "Ended", MWBase::StateManager::State_Ended },
-            }));
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWBase::StateManager::State>(lua,
+                {
+                    { "NoGame", MWBase::StateManager::State_NoGame },
+                    { "Running", MWBase::StateManager::State_Running },
+                    { "Ended", MWBase::StateManager::State_Ended },
+                }));
 
         api["getState"] = []() -> int { return MWBase::Environment::get().getStateManager()->getState(); };
 

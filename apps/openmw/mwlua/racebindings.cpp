@@ -43,8 +43,8 @@ namespace MWLua
 {
     sol::table initRaceRecordBindings(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
-        sol::table races(context.mLua->sol(), sol::create);
+        sol::state_view lua = context.sol();
+        sol::table races(lua, sol::create);
         addRecordFunctionBinding<ESM::Race>(races, context);
 
         auto raceT = lua.new_usertype<ESM::Race>("ESM3_Race");

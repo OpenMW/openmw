@@ -24,7 +24,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Lockpick>(lockpick, context);
 
-        sol::usertype<ESM::Lockpick> record = context.mLua->sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
+        sol::usertype<ESM::Lockpick> record = context.sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
         record[sol::meta_function::to_string]
             = [](const ESM::Lockpick& rec) { return "ESM3_Lockpick[" + rec.mId.toDebugString() + "]"; };
         record["id"]

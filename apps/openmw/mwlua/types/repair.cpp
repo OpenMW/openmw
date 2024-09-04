@@ -24,7 +24,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Repair>(repair, context);
 
-        sol::usertype<ESM::Repair> record = context.mLua->sol().new_usertype<ESM::Repair>("ESM3_Repair");
+        sol::usertype<ESM::Repair> record = context.sol().new_usertype<ESM::Repair>("ESM3_Repair");
         record[sol::meta_function::to_string]
             = [](const ESM::Repair& rec) { return "ESM3_Repair[" + rec.mId.toDebugString() + "]"; };
         record["id"]

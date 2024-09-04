@@ -39,7 +39,7 @@ namespace MWLua
         // Define a custom user type for the store.
         // Provide the interface of a read-only array.
         using StoreT = MWWorld::Store<T>;
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::usertype<StoreT> storeT = lua.new_usertype<StoreT>(recordName + "WorldStore");
         storeT[sol::meta_function::to_string] = [recordName](const StoreT& store) {
             return "{" + std::to_string(store.getSize()) + " " + recordName + " records}";

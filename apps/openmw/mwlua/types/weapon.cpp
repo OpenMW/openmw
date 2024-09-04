@@ -99,29 +99,31 @@ namespace MWLua
 {
     void addWeaponBindings(sol::table weapon, const Context& context)
     {
-        weapon["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "ShortBladeOneHand", ESM::Weapon::ShortBladeOneHand },
-            { "LongBladeOneHand", ESM::Weapon::LongBladeOneHand },
-            { "LongBladeTwoHand", ESM::Weapon::LongBladeTwoHand },
-            { "BluntOneHand", ESM::Weapon::BluntOneHand },
-            { "BluntTwoClose", ESM::Weapon::BluntTwoClose },
-            { "BluntTwoWide", ESM::Weapon::BluntTwoWide },
-            { "SpearTwoWide", ESM::Weapon::SpearTwoWide },
-            { "AxeOneHand", ESM::Weapon::AxeOneHand },
-            { "AxeTwoHand", ESM::Weapon::AxeTwoHand },
-            { "MarksmanBow", ESM::Weapon::MarksmanBow },
-            { "MarksmanCrossbow", ESM::Weapon::MarksmanCrossbow },
-            { "MarksmanThrown", ESM::Weapon::MarksmanThrown },
-            { "Arrow", ESM::Weapon::Arrow },
-            { "Bolt", ESM::Weapon::Bolt },
-        }));
+        sol::state_view lua = context.sol();
+        weapon["TYPE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
+            {
+                { "ShortBladeOneHand", ESM::Weapon::ShortBladeOneHand },
+                { "LongBladeOneHand", ESM::Weapon::LongBladeOneHand },
+                { "LongBladeTwoHand", ESM::Weapon::LongBladeTwoHand },
+                { "BluntOneHand", ESM::Weapon::BluntOneHand },
+                { "BluntTwoClose", ESM::Weapon::BluntTwoClose },
+                { "BluntTwoWide", ESM::Weapon::BluntTwoWide },
+                { "SpearTwoWide", ESM::Weapon::SpearTwoWide },
+                { "AxeOneHand", ESM::Weapon::AxeOneHand },
+                { "AxeTwoHand", ESM::Weapon::AxeTwoHand },
+                { "MarksmanBow", ESM::Weapon::MarksmanBow },
+                { "MarksmanCrossbow", ESM::Weapon::MarksmanCrossbow },
+                { "MarksmanThrown", ESM::Weapon::MarksmanThrown },
+                { "Arrow", ESM::Weapon::Arrow },
+                { "Bolt", ESM::Weapon::Bolt },
+            }));
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Weapon>(weapon, context);
         weapon["createRecordDraft"] = tableToWeapon;
 
-        sol::usertype<ESM::Weapon> record = context.mLua->sol().new_usertype<ESM::Weapon>("ESM3_Weapon");
+        sol::usertype<ESM::Weapon> record = lua.new_usertype<ESM::Weapon>("ESM3_Weapon");
         record[sol::meta_function::to_string]
             = [](const ESM::Weapon& rec) -> std::string { return "ESM3_Weapon[" + rec.mId.toDebugString() + "]"; };
         record["id"]

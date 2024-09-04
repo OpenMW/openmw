@@ -97,26 +97,26 @@ return {
 
     TEST_F(LuaStateTest, ToString)
     {
-        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), 3.14)), "3.14");
-        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), true)), "true");
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.unsafeState(), 3.14)), "3.14");
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.unsafeState(), true)), "true");
         EXPECT_EQ(LuaUtil::toString(sol::nil), "nil");
-        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), "something")), "\"something\"");
+        EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.unsafeState(), "something")), "\"something\"");
     }
 
     TEST_F(LuaStateTest, Cast)
     {
-        EXPECT_EQ(LuaUtil::cast<int>(sol::make_object(mLua.sol(), 3.14)), 3);
-        EXPECT_ERROR(
-            LuaUtil::cast<int>(sol::make_object(mLua.sol(), "3.14")), "Value \"\"3.14\"\" can not be casted to int");
-        EXPECT_ERROR(LuaUtil::cast<std::string_view>(sol::make_object(mLua.sol(), sol::nil)),
+        EXPECT_EQ(LuaUtil::cast<int>(sol::make_object(mLua.unsafeState(), 3.14)), 3);
+        EXPECT_ERROR(LuaUtil::cast<int>(sol::make_object(mLua.unsafeState(), "3.14")),
+            "Value \"\"3.14\"\" can not be casted to int");
+        EXPECT_ERROR(LuaUtil::cast<std::string_view>(sol::make_object(mLua.unsafeState(), sol::nil)),
             "Value \"nil\" can not be casted to string");
-        EXPECT_ERROR(LuaUtil::cast<std::string>(sol::make_object(mLua.sol(), sol::nil)),
+        EXPECT_ERROR(LuaUtil::cast<std::string>(sol::make_object(mLua.unsafeState(), sol::nil)),
             "Value \"nil\" can not be casted to string");
-        EXPECT_ERROR(LuaUtil::cast<sol::table>(sol::make_object(mLua.sol(), sol::nil)),
+        EXPECT_ERROR(LuaUtil::cast<sol::table>(sol::make_object(mLua.unsafeState(), sol::nil)),
             "Value \"nil\" can not be casted to sol::table");
-        EXPECT_ERROR(LuaUtil::cast<sol::function>(sol::make_object(mLua.sol(), "3.14")),
+        EXPECT_ERROR(LuaUtil::cast<sol::function>(sol::make_object(mLua.unsafeState(), "3.14")),
             "Value \"\"3.14\"\" can not be casted to sol::function");
-        EXPECT_ERROR(LuaUtil::cast<sol::protected_function>(sol::make_object(mLua.sol(), "3.14")),
+        EXPECT_ERROR(LuaUtil::cast<sol::protected_function>(sol::make_object(mLua.unsafeState(), "3.14")),
             "Value \"\"3.14\"\" can not be casted to sol::function");
     }
 
@@ -186,21 +186,22 @@ return {
     TEST_F(LuaStateTest, ProvideAPI)
     {
         LuaUtil::LuaState lua(mVFS.get(), &mCfg);
+        lua.protectedCall([&](LuaUtil::LuaView& view) {
+            sol::table api1 = LuaUtil::makeReadOnly(view.sol().create_table_with("name", "api1"));
+            sol::table api2 = LuaUtil::makeReadOnly(view.sol().create_table_with("name", "api2"));
 
-        sol::table api1 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api1"));
-        sol::table api2 = LuaUtil::makeReadOnly(lua.sol().create_table_with("name", "api2"));
+            sol::table script1 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api1 } });
 
-        sol::table script1 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api1 } });
+            lua.addCommonPackage("sqrlib", view.sol().create_table_with("sqr", [](int x) { return x * x; }));
 
-        lua.addCommonPackage("sqrlib", lua.sol().create_table_with("sqr", [](int x) { return x * x; }));
+            sol::table script2 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api2 } });
 
-        sol::table script2 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api2 } });
+            EXPECT_ERROR(LuaUtil::call(script1["sqr"], 3), "module not found: sqrlib");
+            EXPECT_EQ(LuaUtil::call(script2["sqr"], 3).get<int>(), 9);
 
-        EXPECT_ERROR(LuaUtil::call(script1["sqr"], 3), "module not found: sqrlib");
-        EXPECT_EQ(LuaUtil::call(script2["sqr"], 3).get<int>(), 9);
-
-        EXPECT_EQ(LuaUtil::call(script1["apiName"]).get<std::string>(), "api1");
-        EXPECT_EQ(LuaUtil::call(script2["apiName"]).get<std::string>(), "api2");
+            EXPECT_EQ(LuaUtil::call(script1["apiName"]).get<std::string>(), "api1");
+            EXPECT_EQ(LuaUtil::call(script2["apiName"]).get<std::string>(), "api2");
+        });
     }
 
     TEST_F(LuaStateTest, GetLuaVersion)
@@ -212,7 +213,7 @@ return {
     {
         auto getMem = [&] {
             for (int i = 0; i < 5; ++i)
-                lua_gc(mLua.sol(), LUA_GCCOLLECT, 0);
+                lua_gc(mLua.unsafeState(), LUA_GCCOLLECT, 0);
             return mLua.getTotalMemoryUsage();
         };
         int64_t memWithScript;

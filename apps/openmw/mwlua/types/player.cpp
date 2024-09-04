@@ -71,7 +71,8 @@ namespace MWLua
                 || dynamic_cast<const SelfObject*>(&player) != nullptr;
             return Quests{ .mMutable = allowChanges };
         };
-        sol::usertype<Quests> quests = context.mLua->sol().new_usertype<Quests>("Quests");
+        sol::state_view lua = context.sol();
+        sol::usertype<Quests> quests = lua.new_usertype<Quests>("Quests");
         quests[sol::meta_function::to_string] = [](const Quests& quests) { return "Quests"; };
         quests[sol::meta_function::index] = [](const Quests& quests, std::string_view questId) -> sol::optional<Quest> {
             ESM::RefId quest = ESM::RefId::deserializeText(questId);
@@ -94,7 +95,7 @@ namespace MWLua
             };
         };
 
-        sol::usertype<Quest> quest = context.mLua->sol().new_usertype<Quest>("Quest");
+        sol::usertype<Quest> quest = lua.new_usertype<Quest>("Quest");
         quest[sol::meta_function::to_string]
             = [](const Quest& quest) { return "Quest[" + quest.mQuestId.serializeText() + "]"; };
 
@@ -146,15 +147,16 @@ namespace MWLua
         };
 
         player["CONTROL_SWITCH"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, std::string_view>({
-                { "Controls", "playercontrols" },
-                { "Fighting", "playerfighting" },
-                { "Jumping", "playerjumping" },
-                { "Looking", "playerlooking" },
-                { "Magic", "playermagic" },
-                { "ViewMode", "playerviewswitch" },
-                { "VanityMode", "vanitymode" },
-            }));
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, std::string_view>(lua,
+                {
+                    { "Controls", "playercontrols" },
+                    { "Fighting", "playerfighting" },
+                    { "Jumping", "playerjumping" },
+                    { "Looking", "playerlooking" },
+                    { "Magic", "playermagic" },
+                    { "ViewMode", "playerviewswitch" },
+                    { "VanityMode", "vanitymode" },
+                }));
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         player["getControlSwitch"] = [input](const Object& player, std::string_view key) {
