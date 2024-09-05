@@ -539,8 +539,8 @@ macOS14_Xcode15_arm64:
   variables:
     GIT_STRATEGY: none
   script:
-    - apt update
-    - apt install gcab
+    - apt-get update
+    - apt-get install -y gcab
     - unzip -d sym_store *sym_store.zip
     - shopt -s globstar
     - |
