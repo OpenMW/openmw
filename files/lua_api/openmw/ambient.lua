@@ -33,8 +33,8 @@
 -- @param #table options An optional table with additional optional arguments. Can contain:
 --
 --   * `timeOffset` - a floating point number >= 0, to skip some time (in seconds) from the beginning of the sound file (default: 0);
---   * `volume` - a floating point number >= 0, to set a the sound's volume (default: 1);
---   * `pitch` - a floating point number >= 0, to set a the sound's pitch (default: 1);
+--   * `volume` - a floating point number >= 0, to set the sound's volume (default: 1);
+--   * `pitch` - a floating point number >= 0, to set the sound's pitch (default: 1);
 --   * `scale` - a boolean, to set if the sound's pitch should be scaled by simulation time scaling (default: true);
 --   * `loop` - a boolean, to set if the sound should be repeated when it ends (default: false);
 -- @usage local params = {
