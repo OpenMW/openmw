@@ -536,9 +536,6 @@ macOS14_Xcode15_arm64:
 .Compress_And_Upload_Symbols_Base:
   extends: .Ubuntu_Image
   stage: build
-  needs:
-    - job: $DEPENDENCY_JOB_NAME
-      artifacts: true
   variables:
     GIT_STRATEGY: none
   script:
@@ -668,8 +665,9 @@ macOS14_Xcode15_arm64:
 .Windows_Compress_And_Upload_Symbols_Ninja_Release:
   extends:
     - .Compress_And_Upload_Symbols_Base
-  variables:
-    DEPENDENCY_JOB_NAME: "Windows_Ninja_Release"
+  needs:
+    - job: "Windows_Ninja_Release"
+      artifacts: true
 
 .Windows_Ninja_Release_MultiView:
   extends:
@@ -681,8 +679,9 @@ macOS14_Xcode15_arm64:
 .Windows_Compress_And_Upload_Symbols_Ninja_Release_MultiView:
   extends:
     - .Compress_And_Upload_Symbols_Base
-  variables:
-    DEPENDENCY_JOB_NAME: "Windows_Ninja_Release_MultiView"
+  needs:
+    - job: "Windows_Ninja_Release_MultiView"
+      artifacts: true
 
 .Windows_Ninja_Debug:
   extends:
@@ -693,8 +692,9 @@ macOS14_Xcode15_arm64:
 .Windows_Compress_And_Upload_Symbols_Ninja_Debug:
   extends:
     - .Compress_And_Upload_Symbols_Base
-  variables:
-    DEPENDENCY_JOB_NAME: "Windows_Ninja_Debug"
+  needs:
+    - job: "Windows_Ninja_Debug"
+      artifacts: true
 
 .Windows_Ninja_RelWithDebInfo:
   extends:
@@ -707,8 +707,9 @@ macOS14_Xcode15_arm64:
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
   extends:
     - .Compress_And_Upload_Symbols_Base
-  variables:
-    DEPENDENCY_JOB_NAME: "Windows_Ninja_RelWithDebInfo"
+  needs:
+    - job: "Windows_Ninja_RelWithDebInfo"
+      artifacts: true
 
 .Windows_Ninja_CacheInit:
   # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
@@ -809,8 +810,9 @@ macOS14_Xcode15_arm64:
 .Windows_Compress_And_Upload_Symbols_MSBuild_Release:
   extends:
     - .Compress_And_Upload_Symbols_Base
-  variables:
-    DEPENDENCY_JOB_NAME: "Windows_MSBuild_Release"
+  needs:
+    - job: "Windows_MSBuild_Release"
+      artifacts: true
 
 .Windows_MSBuild_Debug:
   extends:
@@ -821,8 +823,9 @@ macOS14_Xcode15_arm64:
 .Windows_Compress_And_Upload_Symbols_MSBuild_Debug:
   extends:
     - .Compress_And_Upload_Symbols_Base
-  variables:
-    DEPENDENCY_JOB_NAME: "Windows_MSBuild_Debug"
+  needs:
+    - job: "Windows_MSBuild_Debug"
+      artifacts: true
 
 Windows_MSBuild_RelWithDebInfo:
   extends:
@@ -839,8 +842,9 @@ Windows_MSBuild_RelWithDebInfo:
 Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
   extends:
     - .Compress_And_Upload_Symbols_Base
-  variables:
-    DEPENDENCY_JOB_NAME: "Windows_MSBuild_RelWithDebInfo"
+  needs:
+    - job: "Windows_MSBuild_RelWithDebInfo"
+      artifacts: true
   # temporarily enabled while we're linking the above on the downloads page
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
