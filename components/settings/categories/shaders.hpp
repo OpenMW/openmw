@@ -32,6 +32,7 @@ namespace Settings
         SettingValue<std::string> mTerrainSpecularMapPattern{ mIndex, "Shaders", "terrain specular map pattern" };
         SettingValue<bool> mApplyLightingToEnvironmentMaps{ mIndex, "Shaders", "apply lighting to environment maps" };
         SettingValue<SceneUtil::LightingMethod> mLightingMethod{ mIndex, "Shaders", "lighting method" };
+        SettingValue<bool> mClassicFalloff{ mIndex, "Shaders", "classic falloff" };
         SettingValue<float> mLightBoundsMultiplier{ mIndex, "Shaders", "light bounds multiplier",
             makeClampSanitizerFloat(0, 5) };
         SettingValue<float> mMaximumLightDistance{ mIndex, "Shaders", "maximum light distance",

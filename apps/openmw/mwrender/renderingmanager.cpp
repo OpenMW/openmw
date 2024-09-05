@@ -437,6 +437,7 @@ namespace MWRender
         globalDefines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
         globalDefines["clamp"] = Settings::shaders().mClampLighting ? "1" : "0";
         globalDefines["preLightEnv"] = Settings::shaders().mApplyLightingToEnvironmentMaps ? "1" : "0";
+        globalDefines["classicFalloff"] = Settings::shaders().mClassicFalloff ? "1" : "0";
         const bool exponentialFog = Settings::fog().mExponentialFog;
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
@@ -710,7 +711,7 @@ namespace MWRender
         bool isInterior = !cell.isExterior() && !cell.isQuasiExterior();
         bool needsAdjusting = false;
         if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            needsAdjusting = isInterior;
+            needsAdjusting = isInterior && !Settings::shaders().mClassicFalloff;
 
         osg::Vec4f ambient = SceneUtil::colourFromRGB(cell.getMood().mAmbiantColor);
 
@@ -1547,13 +1548,18 @@ namespace MWRender
                 if (MWMechanics::getPlayer().isInCell())
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
             }
-            else if (it->first == "Shaders" && it->second == "force per pixel lighting")
+            else if (it->first == "Shaders"
+                && (it->second == "force per pixel lighting" || it->second == "classic falloff"))
             {
                 mViewer->stopThreading();
 
                 auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                 defines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
+                defines["classicFalloff"] = Settings::shaders().mClassicFalloff ? "1" : "0";
                 mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+
+                if (MWMechanics::getPlayer().isInCell() && it->second == "classic falloff")
+                    configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
                 mViewer->startThreading();
             }
