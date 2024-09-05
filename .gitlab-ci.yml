@@ -540,7 +540,13 @@ macOS14_Xcode15_arm64:
     GIT_STRATEGY: none
   script:
     - apt-get update
-    - apt-get install -y gcab unzip
+    - apt-get install -y curl gcab unzip
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscli-exe-linux-x86_64.zip
+    - unzip -d awscli-exe-linux-x86_64 awscli-exe-linux-x86_64.zip
+    - pushd awscli-exe-linux-x86_64
+    - ./aws/install
+    - popd
+    - aws --version
     - unzip -d sym_store *sym_store.zip
     - shopt -s globstar
     - |
