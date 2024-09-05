@@ -533,6 +533,43 @@ macOS14_Xcode15_arm64:
   variables:
     CCACHE_SIZE: 3G
 
+.Compress_And_Upload_Symbols_Base:
+  extends: .Ubuntu_Image
+  stage: build
+  needs:
+    - job: $DEPENDENCY_JOB_NAME
+      artifacts: true
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - apt update
+    - apt install gcab
+    - unzip -d sym_store *sym_store.zip
+    - shopt -s globstar
+    - |
+      for file in sym_store/**/*.exe; do
+        if [[ -f "$file" ]]; then
+          gcab --create --zip --nopath "${file%.exe}.ex_" "$file"
+        fi
+      done
+    - |
+      for file in sym_store/**/*.dll; do
+        if [[ -f "$file" ]]; then
+          gcab --create --zip --nopath "${file%.dll}.dl_" "$file"
+        fi
+      done
+    - |
+      for file in sym_store/**/*.pdb; do
+        if [[ -f "$file" ]]; then
+          gcab --create --zip --nopath "${file%.pdb}.pd_" "$file"
+        fi
+      done
+    - |
+      if [[ -v AWS_ACCESS_KEY_ID ]]; then
+          cd sym_store
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude '*' --include '*.ex_' --include '*.dl_' --include '*.pd_' .\SymStore s3://openmw-sym
+      fi
+
 .Windows_Ninja_Base:
   tags:
     - saas-windows-medium-amd64
@@ -590,10 +627,7 @@ macOS14_Xcode15_arm64:
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
         }
         Push-Location ..
-        ..\CI\Store-Symbols.ps1
-        if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude * --include *.ex_ --include *.dl_ --include *.pd_ .\SymStore s3://openmw-sym
-        }
+        ..\CI\Store-Symbols.ps1 -SkipCompress
         7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
@@ -631,6 +665,12 @@ macOS14_Xcode15_arm64:
   variables:
     config: "Release"
 
+.Windows_Compress_And_Upload_Symbols_Ninja_Release:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  variables:
+    DEPENDENCY_JOB_NAME: "Windows_Ninja_Release"
+
 .Windows_Ninja_Release_MultiView:
   extends:
     - .Windows_Ninja_Base
@@ -638,11 +678,23 @@ macOS14_Xcode15_arm64:
     multiview: "-M"
     config: "Release"
 
+.Windows_Compress_And_Upload_Symbols_Ninja_Release_MultiView:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  variables:
+    DEPENDENCY_JOB_NAME: "Windows_Ninja_Release_MultiView"
+
 .Windows_Ninja_Debug:
   extends:
     - .Windows_Ninja_Base
   variables:
     config: "Debug"
+
+.Windows_Compress_And_Upload_Symbols_Ninja_Debug:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  variables:
+    DEPENDENCY_JOB_NAME: "Windows_Ninja_Debug"
 
 .Windows_Ninja_RelWithDebInfo:
   extends:
@@ -651,6 +703,12 @@ macOS14_Xcode15_arm64:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+
+.Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  variables:
+    DEPENDENCY_JOB_NAME: "Windows_Ninja_RelWithDebInfo"
 
 .Windows_Ninja_CacheInit:
   # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
@@ -711,10 +769,7 @@ macOS14_Xcode15_arm64:
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
         }
         Push-Location ..
-        ..\CI\Store-Symbols.ps1
-        if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude * --include *.ex_ --include *.dl_ --include *.pd_ .\SymStore s3://openmw-sym
-        }
+        ..\CI\Store-Symbols.ps1 -SkipCompress
         7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
@@ -751,11 +806,23 @@ macOS14_Xcode15_arm64:
   variables:
     config: "Release"
 
+.Windows_Compress_And_Upload_Symbols_MSBuild_Release:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  variables:
+    DEPENDENCY_JOB_NAME: "Windows_MSBuild_Release"
+
 .Windows_MSBuild_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
     config: "Debug"
+
+.Windows_Compress_And_Upload_Symbols_MSBuild_Debug:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  variables:
+    DEPENDENCY_JOB_NAME: "Windows_MSBuild_Debug"
 
 Windows_MSBuild_RelWithDebInfo:
   extends:
@@ -765,6 +832,16 @@ Windows_MSBuild_RelWithDebInfo:
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
   # temporarily enabled while we're linking these on the downloads page
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+
+Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  variables:
+    DEPENDENCY_JOB_NAME: "Windows_MSBuild_RelWithDebInfo"
+  # temporarily enabled while we're linking the above on the downloads page
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
