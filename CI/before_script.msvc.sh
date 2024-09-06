@@ -604,10 +604,10 @@ printf "vcpkg packages ${VCPKG_REVISION:?}... "
 	if [[ -d "${VCPKG_PATH:?}" ]]; then
 		printf "Exists. "
 	else
-		7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_ARCHIVE:?}" ${STRIP}
+		eval 7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_ARCHIVE:?}" ${STRIP}
 
 		if [ -n "${PDBS}" ]; then
-			7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_PDB_ARCHIVE:?}" ${STRIP}
+			eval 7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_PDB_ARCHIVE:?}" ${STRIP}
 		fi
 	fi
 
