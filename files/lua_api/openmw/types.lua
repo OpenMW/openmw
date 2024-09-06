@@ -1003,7 +1003,7 @@
 -- @function [parent=#NPC] isExpelled
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
--- @return #bool isExpelled True if NPC is expelled from the faction.
+-- @return #boolean isExpelled True if NPC is expelled from the faction.
 -- @usage local NPC = require('openmw.types').NPC;
 -- local result = NPC.isExpelled(player, "mages guild");
 
@@ -1105,8 +1105,8 @@
 -- @field #string description Race description
 -- @field #map<#string, #number> skills A map of bonus skill points by skill ID
 -- @field #list<#string> spells A read-only list containing the ids of all spells inherent to the race
--- @field #bool isPlayable True if the player can pick this race in character generation
--- @field #bool isBeast True if this race is a beast race
+-- @field #boolean isPlayable True if the player can pick this race in character generation
+-- @field #boolean isBeast True if this race is a beast race
 -- @field #GenderedNumber height Height values
 -- @field #GenderedNumber weight Weight values
 -- @field #map<#string, #GenderedNumber> attributes A read-only table of attribute ID to base value
@@ -1130,7 +1130,7 @@
 -- @field #string head Path to the head body part model
 -- @field #number baseGold The base barter gold of the NPC
 -- @field #number baseDisposition NPC's starting disposition
--- @field #bool isMale The gender setting of the NPC
+-- @field #boolean isMale The gender setting of the NPC
 -- @field #map<#string, #boolean> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 -- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
 -- @field #boolean isEssential whether the NPC is essential
@@ -1201,8 +1201,8 @@
 -- @type PlayerQuest
 -- @field #string id The quest id.
 -- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.
--- @field #bool started Whether the quest is started.
--- @field #bool finished Whether the quest is finished (global and player scripts can change it).
+-- @field #boolean started Whether the quest is started.
+-- @field #boolean finished Whether the quest is finished (global and player scripts can change it).
 
 ---
 -- Sets the quest stage for the given quest, on the given player, and adds the entry to the journal, if there is an entry at the specified stage. Can only be used in global or player scripts.

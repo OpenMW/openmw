@@ -84,7 +84,7 @@
 ---
 -- Enable/disable automatic reload of modified shaders
 -- @function [parent=#Debug] setShaderHotReloadEnabled
--- @param #bool value
+-- @param #boolean value
 
 ---
 -- To reload modified shaders
