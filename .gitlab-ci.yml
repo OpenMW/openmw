@@ -569,8 +569,7 @@ macOS14_Xcode15_arm64:
       done
     - |
       if [[ -v AWS_ACCESS_KEY_ID ]]; then
-          cd sym_store
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude '*' --include '*.ex_' --include '*.dl_' --include '*.pd_' .\SymStore s3://openmw-sym
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude '*' --include '*.ex_' --include '*.dl_' --include '*.pd_' sym_store s3://openmw-sym
       fi
 
 .Windows_Ninja_Base:
