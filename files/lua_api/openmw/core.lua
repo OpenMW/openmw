@@ -679,6 +679,7 @@
 -- @field #number cost
 -- @field #list<#MagicEffectWithParams> effects The effects (@{#MagicEffectWithParams}) of the spell
 -- @field #boolean alwaysSucceedFlag If set, the spell should ignore skill checks and always succeed.
+-- @field #boolean starterSpellFlag If set, the spell can be selected as a player's starting spell.
 -- @field #boolean autocalcFlag If set, the casting cost should be computed based on the effect list rather than read from the cost field
 
 ---
