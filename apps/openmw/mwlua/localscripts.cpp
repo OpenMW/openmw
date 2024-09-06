@@ -115,7 +115,7 @@ namespace MWLua
         aiPackage["distance"] = sol::readonly_property([](const AiPackage& p) { return p.getDistance(); });
         aiPackage["duration"] = sol::readonly_property([](const AiPackage& p) { return p.getDuration(); });
         aiPackage["idle"]
-            = sol::readonly_property([](sol::this_state lua, const AiPackage& p) -> sol::optional<sol::table> {
+            = sol::readonly_property([lua = lua.lua_state()](const AiPackage& p) -> sol::optional<sol::table> {
                   if (p.getTypeId() == MWMechanics::AiPackageTypeId::Wander)
                   {
                       sol::table idles(lua, sol::create);

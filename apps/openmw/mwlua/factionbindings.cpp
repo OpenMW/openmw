@@ -58,7 +58,7 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Faction& rec) -> std::string_view { return rec.mName; });
         factionT["hidden"]
             = sol::readonly_property([](const ESM::Faction& rec) -> bool { return rec.mData.mIsHidden; });
-        factionT["ranks"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
+        factionT["ranks"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Faction& rec) {
             sol::table res(lua, sol::create);
             for (size_t i = 0; i < rec.mRanks.size() && i < rec.mData.mRankData.size(); i++)
             {
@@ -70,7 +70,7 @@ namespace MWLua
 
             return res;
         });
-        factionT["reactions"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
+        factionT["reactions"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Faction& rec) {
             sol::table res(lua, sol::create);
             for (const auto& [factionId, reaction] : rec.mReactions)
                 res[factionId.serializeText()] = reaction;
@@ -86,10 +86,10 @@ namespace MWLua
 
             return res;
         });
-        factionT["attributes"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
+        factionT["attributes"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Faction& rec) {
             return createReadOnlyRefIdTable(lua, rec.mData.mAttribute, ESM::Attribute::indexToRefId);
         });
-        factionT["skills"] = sol::readonly_property([&lua](const ESM::Faction& rec) {
+        factionT["skills"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Faction& rec) {
             return createReadOnlyRefIdTable(lua, rec.mData.mSkills, ESM::Skill::indexToRefId);
         });
         auto rankT = lua.new_usertype<FactionRank>("ESM3_FactionRank");
@@ -102,7 +102,7 @@ namespace MWLua
         rankT["primarySkillValue"] = sol::readonly_property([](const FactionRank& rec) { return rec.mPrimarySkill; });
         rankT["favouredSkillValue"] = sol::readonly_property([](const FactionRank& rec) { return rec.mFavouredSkill; });
         rankT["factionReaction"] = sol::readonly_property([](const FactionRank& rec) { return rec.mFactReaction; });
-        rankT["attributeValues"] = sol::readonly_property([&lua](const FactionRank& rec) {
+        rankT["attributeValues"] = sol::readonly_property([lua = lua.lua_state()](const FactionRank& rec) {
             sol::table res(lua, sol::create);
             res.add(rec.mAttribute1);
             res.add(rec.mAttribute2);
