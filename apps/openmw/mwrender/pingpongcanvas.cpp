@@ -278,25 +278,6 @@ namespace MWRender
 
                 if (pass.mRenderTarget)
                 {
-                    if (mDirtyAttachments.size() > 0)
-                    {
-                        const auto [w, h]
-                            = pass.mSize.get(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
-
-                        // Custom render targets must be shared between frame ids, so it's impossible to double buffer
-                        // without expensive copies. That means the only thread-safe place to resize is in the draw
-                        // thread.
-                        osg::Texture2D* texture = const_cast<osg::Texture2D*>(dynamic_cast<const osg::Texture2D*>(
-                            pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
-                                .getTexture()));
-
-                        assert(texture != nullptr);
-
-                        texture->setTextureSize(w, h);
-                        texture->setNumMipmapLevels(pass.mRenderTexture->getNumMipmapLevels());
-                        texture->dirtyTextureObject();
-                    }
-
                     pass.mRenderTarget->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
 
                     if (pass.mRenderTexture->getNumMipmapLevels() > 0)
