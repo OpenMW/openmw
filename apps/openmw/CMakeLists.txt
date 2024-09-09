@@ -130,7 +130,6 @@ add_library(openmw-lib STATIC
 if(BUILD_OPENMW)
     if (ANDROID)
         add_library(openmw SHARED
-            ${OPENMW_FILES}
             main.cpp
             android_main.cpp
         )

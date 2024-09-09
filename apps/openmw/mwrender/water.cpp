@@ -557,8 +557,9 @@ namespace MWRender
 
             osg::GLExtensions& exts = SceneUtil::getGLExtensions();
             bool supportHalfFloatTexture = osg::isGLExtensionSupported(exts.contextID, "GL_OES_texture_half_float");
+            bool supportHalfFloatAttachment = osg::isGLExtensionSupported(exts.contextID, "GL_EXT_color_buffer_half_float");
 
-            if (supportHalfFloatTexture)
+            if (supportHalfFloatTexture && supportHalfFloatAttachment)
             {
                 mRipples = new Ripples(mResourceSystem);
                 mSimulation->setRipples(mRipples);
@@ -567,13 +568,9 @@ namespace MWRender
             else
                 Log(Debug::Info) << "Initialized simple water ripples, missing required features";
 
-            mRipples = new Ripples(mResourceSystem);
-            mSimulation->setRipples(mRipples);
-            mParent->addChild(mRipples);
-
             showWorld(mShowWorld);
 
-            createShaderWaterStateSet(mWaterNode, supportHalfFloatTexture);
+            createShaderWaterStateSet(mWaterNode, (supportHalfFloatTexture && supportHalfFloatAttachment) ? true : false);
         }
         else
             createSimpleWaterStateSet(mWaterGeom, Fallback::Map::getFloat("Water_World_Alpha"));
