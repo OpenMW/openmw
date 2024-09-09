@@ -235,7 +235,16 @@ if(MSVC)
 endif()
 
 # Dependencies
-find_package(OpenGL REQUIRED)
+if (APPLE)
+    # Force CMake to use the installed version of OpenGL on macOS
+    set(_SAVE_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+    set(CMAKE_FIND_FRAMEWORK ONLY)
+    find_package(OpenGL REQUIRED)
+    set(CMAKE_FIND_FRAMEWORK ${_SAVE_CMAKE_FIND_FRAMEWORK})
+    unset(_SAVE_CMAKE_FIND_FRAMEWORK)
+else()
+    find_package(OpenGL REQUIRED)
+endif()
 
 find_package(LZ4 REQUIRED)
 
