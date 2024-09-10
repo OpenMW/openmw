@@ -89,6 +89,8 @@ namespace fx
 
         void setDeltaSimulationTime(float time) { mData.get<DeltaSimulationTime>() = time; }
 
+        void setFrameNumber(int frame) { mData.get<FrameNumber>() = frame; }
+
         void setWindSpeed(float speed) { mData.get<WindSpeed>() = speed; }
 
         void setWeatherTransition(float transition)
@@ -233,6 +235,11 @@ namespace fx
             static constexpr std::string_view sName = "deltaSimulationTime";
         };
 
+        struct FrameNumber : std140::Int
+        {
+            static constexpr std::string_view sName = "frameNumber";
+        };
+
         struct WindSpeed : std140::Float
         {
             static constexpr std::string_view sName = "windSpeed";
@@ -267,7 +274,7 @@ namespace fx
             = std140::UBO<ProjectionMatrix, InvProjectionMatrix, ViewMatrix, PrevViewMatrix, InvViewMatrix, EyePos,
                 EyeVec, FogColor, AmbientColor, SkyColor, SunColor, SunPos, Resolution, RcpResolution, FogNear, FogFar,
                 Near, Far, Fov, GameHour, SunVis, WaterHeight, IsWaterEnabled, SimulationTime, DeltaSimulationTime,
-                WindSpeed, WeatherTransition, WeatherID, NextWeatherID, IsUnderwater, IsInterior>;
+                FrameNumber, WindSpeed, WeatherTransition, WeatherID, NextWeatherID, IsUnderwater, IsInterior>;
 
         UniformData mData;
         bool mUseUBO;

@@ -323,6 +323,8 @@ namespace MWRender
 
             mStateUpdater->setSimulationTime(static_cast<float>(stamp->getSimulationTime()));
             mStateUpdater->setDeltaSimulationTime(static_cast<float>(stamp->getSimulationTime() - mLastSimulationTime));
+            // Use a signed int because 'uint' type is not supported in GLSL 120 without extensions
+            mStateUpdater->setFrameNumber(static_cast<int>(stamp->getFrameNumber()));
             mLastSimulationTime = stamp->getSimulationTime();
 
             for (const auto& dispatchNode : mCanvases[frameId]->getPasses())
