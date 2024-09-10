@@ -333,7 +333,7 @@ namespace MWLua
             ESM::RefId factionId = parseFactionId(faction);
             return ptr.getClass().getNpcStats(ptr).getExpelled(factionId);
         };
-        npc["getFactions"] = [&lua](const Object& actor) {
+        npc["getFactions"] = [](sol::this_state lua, const Object& actor) {
             const MWWorld::Ptr ptr = actor.ptr();
             MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
             sol::table res(lua, sol::create);

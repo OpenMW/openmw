@@ -204,7 +204,7 @@ namespace MWLua
         }
     }
 
-    static sol::table effectParamsListToTable(sol::state_view& lua, const std::vector<ESM::IndexedENAMstruct>& effects)
+    static sol::table effectParamsListToTable(lua_State* lua, const std::vector<ESM::IndexedENAMstruct>& effects)
     {
         sol::table res(lua, sol::create);
         for (size_t i = 0; i < effects.size(); ++i)
@@ -313,8 +313,9 @@ namespace MWLua
             [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_PCStart); });
         spellT["autocalcFlag"] = sol::readonly_property(
             [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
-        spellT["effects"] = sol::readonly_property(
-            [&lua](const ESM::Spell& rec) -> sol::table { return effectParamsListToTable(lua, rec.mEffects.mList); });
+        spellT["effects"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Spell& rec) -> sol::table {
+            return effectParamsListToTable(lua, rec.mEffects.mList);
+        });
 
         // Enchantment record
         auto enchantT = lua.new_usertype<ESM::Enchantment>("ESM3_Enchantment");
@@ -328,9 +329,10 @@ namespace MWLua
         enchantT["cost"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCost; });
         enchantT["charge"]
             = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCharge; });
-        enchantT["effects"] = sol::readonly_property([&lua](const ESM::Enchantment& rec) -> sol::table {
-            return effectParamsListToTable(lua, rec.mEffects.mList);
-        });
+        enchantT["effects"]
+            = sol::readonly_property([lua = lua.lua_state()](const ESM::Enchantment& rec) -> sol::table {
+                  return effectParamsListToTable(lua, rec.mEffects.mList);
+              });
 
         // Effect params
         auto effectParamsT = lua.new_usertype<ESM::IndexedENAMstruct>("ESM3_EffectParams");
@@ -522,42 +524,45 @@ namespace MWLua
         activeSpellT["id"] = sol::readonly_property([](const ActiveSpell& activeSpell) -> std::string {
             return activeSpell.mParams.getSourceSpellId().serializeText();
         });
-        activeSpellT["item"] = sol::readonly_property([&lua](const ActiveSpell& activeSpell) -> sol::object {
-            auto item = activeSpell.mParams.getItem();
-            if (!item.isSet())
-                return sol::nil;
-            auto itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(item);
-            if (itemPtr.isEmpty())
-                return sol::nil;
-            if (activeSpell.mActor.isGObject())
-                return sol::make_object(lua, GObject(itemPtr));
-            else
-                return sol::make_object(lua, LObject(itemPtr));
-        });
-        activeSpellT["caster"] = sol::readonly_property([&lua](const ActiveSpell& activeSpell) -> sol::object {
-            auto caster
-                = MWBase::Environment::get().getWorld()->searchPtrViaActorId(activeSpell.mParams.getCasterActorId());
-            if (caster.isEmpty())
-                return sol::nil;
-            else
-            {
-                if (activeSpell.mActor.isGObject())
-                    return sol::make_object(lua, GObject(getId(caster)));
-                else
-                    return sol::make_object(lua, LObject(getId(caster)));
-            }
-        });
-        activeSpellT["effects"] = sol::readonly_property([&lua](const ActiveSpell& activeSpell) -> sol::table {
-            sol::table res(lua, sol::create);
-            size_t tableIndex = 0;
-            for (const ESM::ActiveEffect& effect : activeSpell.mParams.getEffects())
-            {
-                if (!(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
-                    continue;
-                res[++tableIndex] = effect; // ESM::ActiveEffect (effect params)
-            }
-            return res;
-        });
+        activeSpellT["item"]
+            = sol::readonly_property([lua = lua.lua_state()](const ActiveSpell& activeSpell) -> sol::object {
+                  auto item = activeSpell.mParams.getItem();
+                  if (!item.isSet())
+                      return sol::nil;
+                  auto itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(item);
+                  if (itemPtr.isEmpty())
+                      return sol::nil;
+                  if (activeSpell.mActor.isGObject())
+                      return sol::make_object(lua, GObject(itemPtr));
+                  else
+                      return sol::make_object(lua, LObject(itemPtr));
+              });
+        activeSpellT["caster"]
+            = sol::readonly_property([lua = lua.lua_state()](const ActiveSpell& activeSpell) -> sol::object {
+                  auto caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(
+                      activeSpell.mParams.getCasterActorId());
+                  if (caster.isEmpty())
+                      return sol::nil;
+                  else
+                  {
+                      if (activeSpell.mActor.isGObject())
+                          return sol::make_object(lua, GObject(getId(caster)));
+                      else
+                          return sol::make_object(lua, LObject(getId(caster)));
+                  }
+              });
+        activeSpellT["effects"]
+            = sol::readonly_property([lua = lua.lua_state()](const ActiveSpell& activeSpell) -> sol::table {
+                  sol::table res(lua, sol::create);
+                  size_t tableIndex = 0;
+                  for (const ESM::ActiveEffect& effect : activeSpell.mParams.getEffects())
+                  {
+                      if (!(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
+                          continue;
+                      res[++tableIndex] = effect; // ESM::ActiveEffect (effect params)
+                  }
+                  return res;
+              });
         activeSpellT["fromEquipment"] = sol::readonly_property([](const ActiveSpell& activeSpell) -> bool {
             return activeSpell.mParams.hasFlag(ESM::ActiveSpells::Flag_Equipment);
         });

@@ -52,7 +52,7 @@ namespace MWLua
         record["magicSkill"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mMagic; });
         record["stealthSkill"]
             = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mStealth; });
-        record["attack"] = sol::readonly_property([](sol::this_state lua, const ESM::Creature& rec) -> sol::table {
+        record["attack"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Creature& rec) -> sol::table {
             sol::table res(lua, sol::create);
             int index = 1;
             for (auto attack : rec.mData.mAttack)
