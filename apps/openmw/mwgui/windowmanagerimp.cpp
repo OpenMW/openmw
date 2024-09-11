@@ -1323,9 +1323,12 @@ namespace MWGui
                     window->exit();
             }
             mKeyboardNavigation->saveFocus(mode);
-            mGuiModes.pop_back();
-            mGuiModeStates[mode].update(false);
-            MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
+            if (containsMode(mode))
+            {
+                mGuiModes.pop_back();
+                mGuiModeStates[mode].update(false);
+                MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
+            }
         }
 
         if (!mGuiModes.empty())
