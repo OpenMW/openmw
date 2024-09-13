@@ -6,7 +6,7 @@ source_group(apps\\bulletobjecttool FILES ${BULLETMESHTOOL})
 openmw_add_executable(openmw-bulletobjecttool ${BULLETMESHTOOL})
 
 target_link_libraries(openmw-bulletobjecttool
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
 

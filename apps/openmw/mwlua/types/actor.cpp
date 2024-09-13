@@ -172,13 +172,15 @@ namespace MWLua
 
     void addActorBindings(sol::table actor, const Context& context)
     {
+        sol::state_view lua = context.sol();
         actor["STANCE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWMechanics::DrawState>({
-                { "Nothing", MWMechanics::DrawState::Nothing },
-                { "Weapon", MWMechanics::DrawState::Weapon },
-                { "Spell", MWMechanics::DrawState::Spell },
-            }));
-        actor["EQUIPMENT_SLOT"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>(
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWMechanics::DrawState>(lua,
+                {
+                    { "Nothing", MWMechanics::DrawState::Nothing },
+                    { "Weapon", MWMechanics::DrawState::Weapon },
+                    { "Spell", MWMechanics::DrawState::Spell },
+                }));
+        actor["EQUIPMENT_SLOT"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
             { { "Helmet", MWWorld::InventoryStore::Slot_Helmet }, { "Cuirass", MWWorld::InventoryStore::Slot_Cuirass },
                 { "Greaves", MWWorld::InventoryStore::Slot_Greaves },
                 { "LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron },

@@ -287,12 +287,12 @@ namespace MWRender
         {
             try
             {
-                for (std::vector<std::string>::const_iterator it = mModels.begin(); it != mModels.end(); ++it)
-                    mResourceSystem->getSceneManager()->getTemplate(*it);
-                for (std::vector<std::string>::const_iterator it = mTextures.begin(); it != mTextures.end(); ++it)
-                    mResourceSystem->getImageManager()->getImage(*it);
-                for (std::vector<std::string>::const_iterator it = mKeyframes.begin(); it != mKeyframes.end(); ++it)
-                    mResourceSystem->getKeyframeManager()->get(*it);
+                for (const VFS::Path::Normalized& v : mModels)
+                    mResourceSystem->getSceneManager()->getTemplate(v);
+                for (const VFS::Path::Normalized& v : mTextures)
+                    mResourceSystem->getImageManager()->getImage(v);
+                for (const VFS::Path::Normalized& v : mKeyframes)
+                    mResourceSystem->getKeyframeManager()->get(v);
             }
             catch (const std::exception& e)
             {
@@ -300,9 +300,9 @@ namespace MWRender
             }
         }
 
-        std::vector<std::string> mModels;
-        std::vector<std::string> mTextures;
-        std::vector<std::string> mKeyframes;
+        std::vector<VFS::Path::Normalized> mModels;
+        std::vector<VFS::Path::Normalized> mTextures;
+        std::vector<VFS::Path::Normalized> mKeyframes;
 
     private:
         Resource::ResourceSystem* mResourceSystem;
@@ -441,6 +441,7 @@ namespace MWRender
         globalDefines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
         globalDefines["clamp"] = Settings::shaders().mClampLighting ? "1" : "0";
         globalDefines["preLightEnv"] = Settings::shaders().mApplyLightingToEnvironmentMaps ? "1" : "0";
+        globalDefines["classicFalloff"] = Settings::shaders().mClassicFalloff ? "1" : "0";
         const bool exponentialFog = Settings::fog().mExponentialFog;
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
@@ -720,7 +721,7 @@ namespace MWRender
         bool isInterior = !cell.isExterior() && !cell.isQuasiExterior();
         bool needsAdjusting = false;
         if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            needsAdjusting = isInterior;
+            needsAdjusting = isInterior && !Settings::shaders().mClassicFalloff;
 
         osg::Vec4f ambient = SceneUtil::colourFromRGB(cell.getMood().mAmbiantColor);
 
@@ -1608,14 +1609,19 @@ namespace MWRender
                 if (MWMechanics::getPlayer().isInCell())
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
             }
-            else if (it->first == "Shaders" && it->second == "force per pixel lighting")
+            else if (it->first == "Shaders"
+                && (it->second == "force per pixel lighting" || it->second == "classic falloff"))
             {
 /*
                 mViewer->stopThreading();
 
                 auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                 defines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
+                defines["classicFalloff"] = Settings::shaders().mClassicFalloff ? "1" : "0";
                 mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+
+                if (MWMechanics::getPlayer().isInCell() && it->second == "classic falloff")
+                    configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
                 mViewer->startThreading();
 */

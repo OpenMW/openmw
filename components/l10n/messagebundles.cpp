@@ -66,32 +66,25 @@ namespace l10n
         return status.isSuccess();
     }
 
-    void MessageBundles::load(std::istream& input, const icu::Locale& lang, const std::string& path)
+    void MessageBundles::load(std::istream& input, const icu::Locale& lang)
     {
-        try
+        YAML::Node data = YAML::Load(input);
+        std::string localeName = lang.getName();
+        const icu::Locale& langOrEn = localeName == "gmst" ? icu::Locale::getEnglish() : lang;
+        for (const auto& it : data)
         {
-            YAML::Node data = YAML::Load(input);
-            std::string localeName = lang.getName();
-            const icu::Locale& langOrEn = localeName == "gmst" ? icu::Locale::getEnglish() : lang;
-            for (const auto& it : data)
+            const auto key = it.first.as<std::string>();
+            const auto value = it.second.as<std::string>();
+            icu::UnicodeString pattern
+                = icu::UnicodeString::fromUTF8(icu::StringPiece(value.data(), static_cast<std::int32_t>(value.size())));
+            icu::ErrorCode status;
+            UParseError parseError;
+            icu::MessageFormat message(pattern, langOrEn, parseError, status);
+            if (checkSuccess(status, std::string("Failed to create message ") + key + " for locale " + lang.getName(),
+                    parseError))
             {
-                const auto key = it.first.as<std::string>();
-                const auto value = it.second.as<std::string>();
-                icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(
-                    icu::StringPiece(value.data(), static_cast<std::int32_t>(value.size())));
-                icu::ErrorCode status;
-                UParseError parseError;
-                icu::MessageFormat message(pattern, langOrEn, parseError, status);
-                if (checkSuccess(status,
-                        std::string("Failed to create message ") + key + " for locale " + lang.getName(), parseError))
-                {
-                    mBundles[localeName].insert(std::make_pair(key, message));
-                }
+                mBundles[localeName].insert(std::make_pair(key, message));
             }
-        }
-        catch (std::exception& e)
-        {
-            Log(Debug::Error) << "Can not load " << path << ": " << e.what();
         }
     }
 

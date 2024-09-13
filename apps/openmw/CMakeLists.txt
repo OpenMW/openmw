@@ -162,7 +162,7 @@ target_link_libraries(openmw-lib
     ${OSGDB_LIBRARIES}
     ${OSGUTIL_LIBRARIES}
     ${OSG_LIBRARIES}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     ${OPENAL_LIBRARY}
     ${FFmpeg_LIBRARIES}
     ${MyGUI_LIBRARIES}

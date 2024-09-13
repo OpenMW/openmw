@@ -68,7 +68,7 @@ namespace MWLua
             Log(Debug::Verbose) << "Read a large data chunk (" << size << " bytes) from '" << file.mFileName << "'.";
         }
 
-        sol::object readFile(LuaUtil::LuaState* lua, FileHandle& file)
+        sol::object readFile(sol::this_state lua, FileHandle& file)
         {
             std::ostringstream os;
             if (file.mFilePtr && file.mFilePtr->peek() != EOF)
@@ -76,34 +76,34 @@ namespace MWLua
 
             auto result = os.str();
             printLargeDataMessage(file, result.size());
-            return sol::make_object<std::string>(lua->sol(), std::move(result));
+            return sol::make_object<std::string>(lua, std::move(result));
         }
 
-        sol::object readLineFromFile(LuaUtil::LuaState* lua, FileHandle& file)
+        sol::object readLineFromFile(sol::this_state lua, FileHandle& file)
         {
             std::string result;
             if (file.mFilePtr && std::getline(*file.mFilePtr, result))
             {
                 printLargeDataMessage(file, result.size());
-                return sol::make_object<std::string>(lua->sol(), result);
+                return sol::make_object<std::string>(lua, result);
             }
 
             return sol::nil;
         }
 
-        sol::object readNumberFromFile(LuaUtil::LuaState* lua, Files::IStreamPtr& file)
+        sol::object readNumberFromFile(sol::this_state lua, Files::IStreamPtr& file)
         {
             double number = 0;
             if (file && *file >> number)
-                return sol::make_object<double>(lua->sol(), number);
+                return sol::make_object<double>(lua, number);
 
             return sol::nil;
         }
 
-        sol::object readCharactersFromFile(LuaUtil::LuaState* lua, FileHandle& file, size_t count)
+        sol::object readCharactersFromFile(sol::this_state lua, FileHandle& file, size_t count)
         {
             if (count <= 0 && file.mFilePtr->peek() != EOF)
-                return sol::make_object<std::string>(lua->sol(), std::string());
+                return sol::make_object<std::string>(lua, std::string());
 
             auto bytesLeft = getBytesLeftInStream(file.mFilePtr);
             if (bytesLeft <= 0)
@@ -116,7 +116,7 @@ namespace MWLua
             if (file.mFilePtr->read(&result[0], count))
             {
                 printLargeDataMessage(file, result.size());
-                return sol::make_object<std::string>(lua->sol(), result);
+                return sol::make_object<std::string>(lua, result);
             }
 
             return sol::nil;
@@ -131,7 +131,7 @@ namespace MWLua
         }
 
         sol::variadic_results seek(
-            LuaUtil::LuaState* lua, FileHandle& self, std::ios_base::seekdir dir, std::streamoff off)
+            sol::this_state lua, FileHandle& self, std::ios_base::seekdir dir, std::streamoff off)
         {
             sol::variadic_results values;
             try
@@ -141,16 +141,16 @@ namespace MWLua
                 {
                     auto msg = "Failed to seek in file '" + self.mFileName + "'";
                     values.push_back(sol::nil);
-                    values.push_back(sol::make_object<std::string>(lua->sol(), msg));
+                    values.push_back(sol::make_object<std::string>(lua, msg));
                 }
                 else
-                    values.push_back(sol::make_object<std::streampos>(lua->sol(), self.mFilePtr->tellg()));
+                    values.push_back(sol::make_object<std::streampos>(lua, self.mFilePtr->tellg()));
             }
             catch (std::exception& e)
             {
                 auto msg = "Failed to seek in file '" + self.mFileName + "': " + std::string(e.what());
                 values.push_back(sol::nil);
-                values.push_back(sol::make_object<std::string>(lua->sol(), msg));
+                values.push_back(sol::make_object<std::string>(lua, msg));
             }
 
             return values;
@@ -159,18 +159,18 @@ namespace MWLua
 
     sol::table initVFSPackage(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::table api(context.mLua->unsafeState(), sol::create);
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        sol::usertype<FileHandle> handle = context.mLua->sol().new_usertype<FileHandle>("FileHandle");
+        sol::usertype<FileHandle> handle = context.sol().new_usertype<FileHandle>("FileHandle");
         handle["fileName"]
             = sol::readonly_property([](const FileHandle& self) -> std::string_view { return self.mFileName; });
         handle[sol::meta_function::to_string] = [](const FileHandle& self) {
             return "FileHandle{'" + self.mFileName + "'" + (!self.mFilePtr ? ", closed" : "") + "}";
         };
         handle["seek"] = sol::overload(
-            [lua = context.mLua](FileHandle& self, std::string_view whence, sol::optional<long> offset) {
+            [](sol::this_state lua, FileHandle& self, std::string_view whence, sol::optional<long> offset) {
                 validateFile(self);
 
                 auto off = static_cast<std::streamoff>(offset.value_or(0));
@@ -178,21 +178,21 @@ namespace MWLua
 
                 return seek(lua, self, dir, off);
             },
-            [lua = context.mLua](FileHandle& self, sol::optional<long> offset) {
+            [](sol::this_state lua, FileHandle& self, sol::optional<long> offset) {
                 validateFile(self);
 
                 auto off = static_cast<std::streamoff>(offset.value_or(0));
 
                 return seek(lua, self, std::ios_base::cur, off);
             });
-        handle["lines"] = [lua = context.mLua](FileHandle& self) {
+        handle["lines"] = [](sol::this_state lua, FileHandle& self) {
             return sol::as_function([&lua, &self]() mutable {
                 validateFile(self);
                 return readLineFromFile(lua, self);
             });
         };
 
-        api["lines"] = [lua = context.mLua, vfs](std::string_view fileName) {
+        api["lines"] = [vfs](sol::this_state lua, std::string_view fileName) {
             auto normalizedName = VFS::Path::normalizeFilename(fileName);
             return sol::as_function(
                 [lua, file = FileHandle(vfs->getNormalized(normalizedName), normalizedName)]() mutable {
@@ -205,7 +205,7 @@ namespace MWLua
                 });
         };
 
-        handle["close"] = [lua = context.mLua](FileHandle& self) {
+        handle["close"] = [](lua_State* L, FileHandle& self) {
             sol::variadic_results values;
             try
             {
@@ -214,22 +214,22 @@ namespace MWLua
                 {
                     auto msg = "Can not close file '" + self.mFileName + "': file handle is still opened.";
                     values.push_back(sol::nil);
-                    values.push_back(sol::make_object<std::string>(lua->sol(), msg));
+                    values.push_back(sol::make_object<std::string>(L, msg));
                 }
                 else
-                    values.push_back(sol::make_object<bool>(lua->sol(), true));
+                    values.push_back(sol::make_object<bool>(L, true));
             }
             catch (std::exception& e)
             {
                 auto msg = "Can not close file '" + self.mFileName + "': " + std::string(e.what());
                 values.push_back(sol::nil);
-                values.push_back(sol::make_object<std::string>(lua->sol(), msg));
+                values.push_back(sol::make_object<std::string>(L, msg));
             }
 
             return values;
         };
 
-        handle["read"] = [lua = context.mLua](FileHandle& self, const sol::variadic_args args) {
+        handle["read"] = [](sol::this_state lua, FileHandle& self, const sol::variadic_args args) {
             validateFile(self);
 
             if (args.size() > sMaximumReadArguments)
@@ -297,25 +297,25 @@ namespace MWLua
             {
                 auto msg = "Error when handling '" + self.mFileName + "': can not read data for argument #"
                     + std::to_string(i);
-                values.push_back(sol::make_object<std::string>(lua->sol(), msg));
+                values.push_back(sol::make_object<std::string>(lua, msg));
             }
 
             return values;
         };
 
-        api["open"] = [lua = context.mLua, vfs](std::string_view fileName) {
+        api["open"] = [vfs](sol::this_state lua, std::string_view fileName) {
             sol::variadic_results values;
             try
             {
                 auto normalizedName = VFS::Path::normalizeFilename(fileName);
                 auto handle = FileHandle(vfs->getNormalized(normalizedName), normalizedName);
-                values.push_back(sol::make_object<FileHandle>(lua->sol(), std::move(handle)));
+                values.push_back(sol::make_object<FileHandle>(lua, std::move(handle)));
             }
             catch (std::exception& e)
             {
                 auto msg = "Can not open file: " + std::string(e.what());
                 values.push_back(sol::nil);
-                values.push_back(sol::make_object<std::string>(lua->sol(), msg));
+                values.push_back(sol::make_object<std::string>(lua, msg));
             }
 
             return values;

@@ -29,7 +29,7 @@ namespace MWLua
 {
     std::map<std::string, sol::object> initCommonPackages(const Context& context)
     {
-        sol::state_view lua = context.mLua->sol();
+        sol::state_view lua = context.mLua->unsafeState();
         MWWorld::DateTimeManager* tm = MWBase::Environment::get().getWorld()->getTimeManager();
         return {
             { "openmw.animation", initAnimationPackage(context) },
@@ -69,7 +69,7 @@ namespace MWLua
     {
         return {
             { "openmw.ambient", initAmbientPackage(context) },
-            { "openmw.camera", initCameraPackage(context.mLua->sol()) },
+            { "openmw.camera", initCameraPackage(context.sol()) },
             { "openmw.debug", initDebugPackage(context) },
             { "openmw.input", initInputPackage(context) },
             { "openmw.postprocessing", initPostprocessingPackage(context) },

@@ -69,7 +69,8 @@ namespace MWLua
     template <class CellT, class ObjectT>
     static void initCellBindings(const std::string& prefix, const Context& context)
     {
-        sol::usertype<CellT> cellT = context.mLua->sol().new_usertype<CellT>(prefix + "Cell");
+        auto view = context.sol();
+        sol::usertype<CellT> cellT = view.new_usertype<CellT>(prefix + "Cell");
 
         cellT[sol::meta_function::equal_to] = [](const CellT& a, const CellT& b) { return a.mStore == b.mStore; };
         cellT[sol::meta_function::to_string] = [](const CellT& c) {
@@ -127,8 +128,7 @@ namespace MWLua
 
         if constexpr (std::is_same_v<CellT, GCell>)
         { // only for global scripts
-            cellT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
-                                  const CellT& cell, sol::optional<sol::table> type) {
+            cellT["getAll"] = [ids = getPackageToTypeTable(view)](const CellT& cell, sol::optional<sol::table> type) {
                 if (cell.mStore->getState() != MWWorld::CellStore::State_Loaded)
                     cell.mStore->load();
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();

@@ -49,8 +49,14 @@
       <layout class="QGridLayout" name="dirTabLayout">
        <item row="0" column="0">
         <widget class="QListWidget" name="directoryListWidget">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
          <property name="dragDropMode">
           <enum>QAbstractItemView::InternalMove</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
         </widget>
        </item>
@@ -173,6 +179,9 @@
       <layout class="QGridLayout" name="archiveTabLayout">
        <item row="0" column="0">
         <widget class="QListWidget" name="archiveListWidget">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
          </property>

@@ -41,24 +41,26 @@ namespace MWLua
 
     void addDoorBindings(sol::table door, const Context& context)
     {
-        door["STATE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWWorld::DoorState>({
-            { "Idle", MWWorld::DoorState::Idle },
-            { "Opening", MWWorld::DoorState::Opening },
-            { "Closing", MWWorld::DoorState::Closing },
-        }));
+        sol::state_view lua = context.sol();
+        door["STATE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWWorld::DoorState>(lua,
+            {
+                { "Idle", MWWorld::DoorState::Idle },
+                { "Opening", MWWorld::DoorState::Opening },
+                { "Closing", MWWorld::DoorState::Closing },
+            }));
         door["getDoorState"] = [](const Object& o) -> MWWorld::DoorState {
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             return door.getClass().getDoorState(door);
         };
         door["isOpen"] = [](const Object& o) {
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             bool doorIsIdle = door.getClass().getDoorState(door) == MWWorld::DoorState::Idle;
             bool doorIsOpen = door.getRefData().getPosition().rot[2] != door.getCellRef().getPosition().rot[2];
 
             return doorIsIdle && doorIsOpen;
         };
         door["isClosed"] = [](const Object& o) {
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             bool doorIsIdle = door.getClass().getDoorState(door) == MWWorld::DoorState::Idle;
             bool doorIsOpen = door.getRefData().getPosition().rot[2] != door.getCellRef().getPosition().rot[2];
 
@@ -70,7 +72,7 @@ namespace MWLua
             if (!allowChanges)
                 throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
 
-            auto door = doorPtr(o);
+            const MWWorld::Ptr& door = doorPtr(o);
             auto world = MWBase::Environment::get().getWorld();
 
             if (!openState.has_value())
@@ -99,7 +101,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Door>(door, context);
 
-        sol::usertype<ESM::Door> record = context.mLua->sol().new_usertype<ESM::Door>("ESM3_Door");
+        sol::usertype<ESM::Door> record = lua.new_usertype<ESM::Door>("ESM3_Door");
         record[sol::meta_function::to_string]
             = [](const ESM::Door& rec) -> std::string { return "ESM3_Door[" + rec.mId.toDebugString() + "]"; };
         record["id"]
@@ -136,7 +138,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM4::Door>(door, context, "ESM4Door");
 
-        sol::usertype<ESM4::Door> record = context.mLua->sol().new_usertype<ESM4::Door>("ESM4_Door");
+        sol::usertype<ESM4::Door> record = context.sol().new_usertype<ESM4::Door>("ESM4_Door");
         record[sol::meta_function::to_string] = [](const ESM4::Door& rec) -> std::string {
             return "ESM4_Door[" + ESM::RefId(rec.mId).toDebugString() + "]";
         };

@@ -23,7 +23,7 @@ namespace MWLua
 {
     void addLevelledCreatureBindings(sol::table list, const Context& context)
     {
-        auto& state = context.mLua->sol();
+        auto state = context.sol();
         auto item = state.new_usertype<ESM::LevelledListBase::LevelItem>("ESM3_LevelledListItem");
         item["id"] = sol::readonly_property(
             [](const ESM::LevelledListBase::LevelItem& rec) -> std::string { return rec.mId.serializeText(); });

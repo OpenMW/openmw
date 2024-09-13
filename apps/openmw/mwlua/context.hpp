@@ -48,7 +48,7 @@ namespace MWLua
         template <class... Str>
         sol::object getCachedPackage(std::string_view first, const Str&... str) const
         {
-            sol::object package = mLua->sol()[first];
+            sol::object package = sol()[first];
             if constexpr (sizeof...(str) == 0)
                 return package;
             else
@@ -58,7 +58,7 @@ namespace MWLua
         template <class... Str>
         const sol::object& setCachedPackage(const sol::object& value, std::string_view first, const Str&... str) const
         {
-            sol::state_view& lua = mLua->sol();
+            sol::state_view lua = sol();
             if constexpr (sizeof...(str) == 0)
                 lua[first] = value;
             else
@@ -90,9 +90,16 @@ namespace MWLua
 
         bool initializeOnce(std::string_view key) const
         {
-            sol::object flag = mLua->sol()[key];
-            mLua->sol()[key] = sol::make_object(mLua->sol(), true);
+            auto view = sol();
+            sol::object flag = view[key];
+            view[key] = sol::make_object(view, true);
             return flag == sol::nil;
+        }
+
+        sol::state_view sol() const
+        {
+            // Bindings are initialized in a safe context
+            return mLua->unsafeState();
         }
     };
 

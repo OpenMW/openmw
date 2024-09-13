@@ -23,7 +23,7 @@ namespace MWLua
     void addActorServicesBindings(sol::usertype<T>& record, const Context& context)
     {
         record["servicesOffered"] = sol::readonly_property([context](const T& rec) -> sol::table {
-            sol::state_view& lua = context.mLua->sol();
+            sol::state_view lua = context.sol();
             sol::table providedServices(lua, sol::create);
             constexpr std::array<std::pair<int, std::string_view>, 19> serviceNames = { { { ESM::NPC::Spells,
                                                                                               "Spells" },
@@ -51,7 +51,7 @@ namespace MWLua
         });
 
         record["travelDestinations"] = sol::readonly_property([context](const T& rec) -> sol::table {
-            sol::state_view& lua = context.mLua->sol();
+            sol::state_view lua = context.sol();
             sol::table travelDests(lua, sol::create);
             if (!rec.getTransport().empty())
             {

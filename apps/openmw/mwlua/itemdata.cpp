@@ -60,7 +60,7 @@ namespace MWLua
                 if (it != self->mStatsCache.end())
                     return it->second;
             }
-            return sol::make_object(context.mLua->sol(), getValue(context, prop, mObject.ptr()));
+            return sol::make_object(context.mLua->unsafeState(), getValue(context, prop, mObject.ptr()));
         }
 
         void set(const Context& context, std::string_view prop, const sol::object& value) const
@@ -82,9 +82,9 @@ namespace MWLua
             if (prop == "condition")
             {
                 if (ptr.mRef->getType() == ESM::REC_LIGH)
-                    return sol::make_object(context.mLua->sol(), ptr.getClass().getRemainingUsageTime(ptr));
+                    return sol::make_object(context.mLua->unsafeState(), ptr.getClass().getRemainingUsageTime(ptr));
                 else if (ptr.getClass().hasItemHealth(ptr))
-                    return sol::make_object(context.mLua->sol(),
+                    return sol::make_object(context.mLua->unsafeState(),
                         ptr.getClass().getItemHealth(ptr) + ptr.getCellRef().getChargeIntRemainder());
             }
             else if (prop == "enchantmentCharge")
@@ -99,9 +99,10 @@ namespace MWLua
                 const auto* enchantment = store->get<ESM::Enchantment>().find(enchantmentName);
 
                 if (charge == -1) // return the full charge
-                    return sol::make_object(context.mLua->sol(), MWMechanics::getEnchantmentCharge(*enchantment));
+                    return sol::make_object(
+                        context.mLua->unsafeState(), MWMechanics::getEnchantmentCharge(*enchantment));
 
-                return sol::make_object(context.mLua->sol(), charge);
+                return sol::make_object(context.mLua->unsafeState(), charge);
             }
             else if (prop == "soul")
             {
@@ -109,7 +110,7 @@ namespace MWLua
                 if (soul.empty())
                     return sol::lua_nil;
 
-                return sol::make_object(context.mLua->sol(), soul.serializeText());
+                return sol::make_object(context.mLua->unsafeState(), soul.serializeText());
             }
 
             return sol::lua_nil;
@@ -185,7 +186,7 @@ namespace MWLua
             return {};
         };
 
-        sol::usertype<ItemData> itemData = context.mLua->sol().new_usertype<ItemData>("ItemData");
+        sol::usertype<ItemData> itemData = context.sol().new_usertype<ItemData>("ItemData");
         itemData[sol::meta_function::new_index] = [](const ItemData& stat, const sol::variadic_args args) {
             throw std::runtime_error("Unknown ItemData property '" + args.get<std::string>() + "'");
         };

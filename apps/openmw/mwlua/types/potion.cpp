@@ -69,7 +69,8 @@ namespace MWLua
         potion["createRecordDraft"] = tableToPotion;
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        sol::usertype<ESM::Potion> record = context.mLua->sol().new_usertype<ESM::Potion>("ESM3_Potion");
+        sol::state_view lua = context.sol();
+        sol::usertype<ESM::Potion> record = lua.new_usertype<ESM::Potion>("ESM3_Potion");
         record[sol::meta_function::to_string]
             = [](const ESM::Potion& rec) { return "ESM3_Potion[" + rec.mId.toDebugString() + "]"; };
         record["id"]
@@ -84,8 +85,8 @@ namespace MWLua
             [](const ESM::Potion& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
         record["weight"] = sol::readonly_property([](const ESM::Potion& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Potion& rec) -> int { return rec.mData.mValue; });
-        record["effects"] = sol::readonly_property([context](const ESM::Potion& rec) -> sol::table {
-            sol::table res(context.mLua->sol(), sol::create);
+        record["effects"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Potion& rec) -> sol::table {
+            sol::table res(lua, sol::create);
             for (size_t i = 0; i < rec.mEffects.mList.size(); ++i)
                 res[LuaUtil::toLuaIndex(i)] = rec.mEffects.mList[i]; // ESM::IndexedENAMstruct (effect params)
             return res;

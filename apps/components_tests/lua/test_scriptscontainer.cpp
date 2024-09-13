@@ -198,8 +198,9 @@ CUSTOM, PLAYER: useInterface.lua
         EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("stopEvent.lua")));
         EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test2.lua")));
 
-        std::string X0 = LuaUtil::serialize(mLua.sol().create_table_with("x", 0.5));
-        std::string X1 = LuaUtil::serialize(mLua.sol().create_table_with("x", 1.5));
+        sol::state_view sol = mLua.unsafeState();
+        std::string X0 = LuaUtil::serialize(sol.create_table_with("x", 0.5));
+        std::string X1 = LuaUtil::serialize(sol.create_table_with("x", 1.5));
 
         {
             testing::internal::CaptureStdout();
@@ -243,7 +244,8 @@ CUSTOM, PLAYER: useInterface.lua
         EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test1.lua")));
         EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("stopEvent.lua")));
         EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test2.lua")));
-        std::string X = LuaUtil::serialize(mLua.sol().create_table_with("x", 0.5));
+        sol::state_view sol = mLua.unsafeState();
+        std::string X = LuaUtil::serialize(sol.create_table_with("x", 0.5));
 
         {
             testing::internal::CaptureStdout();
@@ -334,8 +336,9 @@ CUSTOM, PLAYER: useInterface.lua
         scripts1.addAutoStartedScripts();
         EXPECT_TRUE(scripts1.addCustomScript(*mCfg.findId("test1.lua")));
 
-        scripts1.receiveEvent("Set", LuaUtil::serialize(mLua.sol().create_table_with("n", 1, "x", 0.5, "y", 3.5)));
-        scripts1.receiveEvent("Set", LuaUtil::serialize(mLua.sol().create_table_with("n", 2, "x", 2.5, "y", 1.5)));
+        sol::state_view sol = mLua.unsafeState();
+        scripts1.receiveEvent("Set", LuaUtil::serialize(sol.create_table_with("n", 1, "x", 0.5, "y", 3.5)));
+        scripts1.receiveEvent("Set", LuaUtil::serialize(sol.create_table_with("n", 2, "x", 2.5, "y", 1.5)));
 
         ESM::LuaScripts data;
         scripts1.save(data);
@@ -379,10 +382,10 @@ CUSTOM, PLAYER: useInterface.lua
         EXPECT_EQ(internal::GetCapturedStdout(), "");
 
         int counter1 = 0, counter2 = 0, counter3 = 0, counter4 = 0;
-        sol::function fn1 = sol::make_object(mLua.sol(), [&]() { counter1++; });
-        sol::function fn2 = sol::make_object(mLua.sol(), [&]() { counter2++; });
-        sol::function fn3 = sol::make_object(mLua.sol(), [&](int d) { counter3 += d; });
-        sol::function fn4 = sol::make_object(mLua.sol(), [&](int d) { counter4 += d; });
+        sol::function fn1 = sol::make_object(mLua.unsafeState(), [&]() { counter1++; });
+        sol::function fn2 = sol::make_object(mLua.unsafeState(), [&]() { counter2++; });
+        sol::function fn3 = sol::make_object(mLua.unsafeState(), [&](int d) { counter3 += d; });
+        sol::function fn4 = sol::make_object(mLua.unsafeState(), [&](int d) { counter4 += d; });
 
         scripts.registerTimerCallback(test1Id, "A", fn3);
         scripts.registerTimerCallback(test1Id, "B", fn4);
@@ -391,12 +394,16 @@ CUSTOM, PLAYER: useInterface.lua
 
         scripts.processTimers(1, 2);
 
-        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 10, test1Id, "B", sol::make_object(mLua.sol(), 3));
-        scripts.setupSerializableTimer(TimerType::GAME_TIME, 10, test2Id, "B", sol::make_object(mLua.sol(), 4));
-        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 5, test1Id, "A", sol::make_object(mLua.sol(), 1));
-        scripts.setupSerializableTimer(TimerType::GAME_TIME, 5, test2Id, "A", sol::make_object(mLua.sol(), 2));
-        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 15, test1Id, "A", sol::make_object(mLua.sol(), 10));
-        scripts.setupSerializableTimer(TimerType::SIMULATION_TIME, 15, test1Id, "B", sol::make_object(mLua.sol(), 20));
+        scripts.setupSerializableTimer(
+            TimerType::SIMULATION_TIME, 10, test1Id, "B", sol::make_object(mLua.unsafeState(), 3));
+        scripts.setupSerializableTimer(TimerType::GAME_TIME, 10, test2Id, "B", sol::make_object(mLua.unsafeState(), 4));
+        scripts.setupSerializableTimer(
+            TimerType::SIMULATION_TIME, 5, test1Id, "A", sol::make_object(mLua.unsafeState(), 1));
+        scripts.setupSerializableTimer(TimerType::GAME_TIME, 5, test2Id, "A", sol::make_object(mLua.unsafeState(), 2));
+        scripts.setupSerializableTimer(
+            TimerType::SIMULATION_TIME, 15, test1Id, "A", sol::make_object(mLua.unsafeState(), 10));
+        scripts.setupSerializableTimer(
+            TimerType::SIMULATION_TIME, 15, test1Id, "B", sol::make_object(mLua.unsafeState(), 20));
 
         scripts.setupUnsavableTimer(TimerType::SIMULATION_TIME, 10, test2Id, fn2);
         scripts.setupUnsavableTimer(TimerType::GAME_TIME, 10, test1Id, fn2);
@@ -446,7 +453,8 @@ CUSTOM, PLAYER: useInterface.lua
 
     TEST_F(LuaScriptsContainerTest, CallbackWrapper)
     {
-        LuaUtil::Callback callback{ mLua.sol()["print"], mLua.newTable() };
+        sol::state_view view = mLua.unsafeState();
+        LuaUtil::Callback callback{ view["print"], sol::table(view, sol::create) };
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptDebugNameKey] = "some_script.lua";
         callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{ nullptr, 0 };
 

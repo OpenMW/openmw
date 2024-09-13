@@ -43,10 +43,19 @@ namespace l10n
         path /= name;
         path /= langName;
 
-        if (!mVFS->exists(path))
+        const Files::IStreamPtr stream = mVFS->find(path);
+
+        if (stream == nullptr)
             return;
 
-        ctx.load(*mVFS->get(path), lang, path);
+        try
+        {
+            ctx.load(*stream, lang);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Cannot load message bundles from " << path << ": " << e.what();
+        }
     }
 
     void Manager::updateContext(const std::string& name, MessageBundles& ctx)

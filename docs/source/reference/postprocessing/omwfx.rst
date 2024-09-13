@@ -107,6 +107,8 @@ Builtin Uniforms
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.deltaSimulationTime``  | The change in `omw.simulationTime`               |
 +-------------+------------------------------+--------------------------------------------------+
+| int         | ``omw.frameNumber``          | The current frame number                         |
++-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.windSpeed``            | The current wind speed                           |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.weatherTransition``    | The transition factor between weathers [0, 1]    |

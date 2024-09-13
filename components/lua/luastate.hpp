@@ -34,6 +34,36 @@ namespace LuaUtil
         bool mLogMemoryUsage = false;
     };
 
+    class LuaState;
+    class LuaView
+    {
+        sol::state_view mSol;
+
+        LuaView(const LuaView&) = delete;
+
+        LuaView(lua_State* L)
+            : mSol(L)
+        {
+        }
+
+    public:
+        friend class LuaState;
+        // Returns underlying sol::state.
+        sol::state_view& sol() { return mSol; }
+
+        // A shortcut to create a new Lua table.
+        sol::table newTable() { return sol::table(mSol, sol::create); }
+    };
+
+    template <typename Key, typename Value>
+    sol::table tableFromPairs(lua_State* L, std::initializer_list<std::pair<Key, Value>> list)
+    {
+        sol::table res(L, sol::create);
+        for (const auto& [k, v] : list)
+            res[k] = v;
+        return res;
+    }
+
     // Holds Lua state.
     // Provides additional features:
     //   - Load scripts from the virtual filesystem;
@@ -54,25 +84,52 @@ namespace LuaUtil
         LuaState(const LuaState&) = delete;
         LuaState(LuaState&&) = delete;
 
-        // Returns underlying sol::state.
-        sol::state_view& sol() { return mSol; }
+        // Pushing to the stack from outside a Lua context crashes the engine if no memory can be allocated to grow the
+        // stack
+        template <class Lambda>
+        [[nodiscard]] int invokeProtectedCall(Lambda&& f) const
+        {
+            if (!lua_checkstack(mSol.lua_state(), 2))
+                return LUA_ERRMEM;
+            lua_pushcfunction(mSol.lua_state(), [](lua_State* L) {
+                void* f = lua_touserdata(L, 1);
+                LuaView view(L);
+                (*static_cast<Lambda*>(f))(view);
+                return 0;
+            });
+            lua_pushlightuserdata(mSol.lua_state(), &f);
+            return lua_pcall(mSol.lua_state(), 1, 0, 0);
+        }
+
+        template <class Lambda>
+        void protectedCall(Lambda&& f) const
+        {
+            int result = invokeProtectedCall(std::forward<Lambda>(f));
+            switch (result)
+            {
+                case LUA_OK:
+                    break;
+                case LUA_ERRMEM:
+                    throw std::runtime_error("Lua error: out of memory");
+                case LUA_ERRRUN:
+                {
+                    sol::optional<std::string> error = sol::stack::check_get<std::string>(mSol.lua_state());
+                    if (error)
+                        throw std::runtime_error(*error);
+                }
+                    [[fallthrough]];
+                default:
+                    throw std::runtime_error("Lua error: " + std::to_string(result));
+            }
+        }
+
+        // Note that constructing a sol::state_view is only safe from a Lua context. Use protectedCall to get one
+        lua_State* unsafeState() const { return mSol.lua_state(); }
 
         // Can be used by a C++ function that is called from Lua to get the Lua traceback.
         // Makes no sense if called not from Lua code.
         // Note: It is a slow function, should be used for debug purposes only.
         std::string debugTraceback() { return mSol["debug"]["traceback"]().get<std::string>(); }
-
-        // A shortcut to create a new Lua table.
-        sol::table newTable() { return sol::table(mSol, sol::create); }
-
-        template <typename Key, typename Value>
-        sol::table tableFromPairs(std::initializer_list<std::pair<Key, Value>> list)
-        {
-            sol::table res(mSol, sol::create);
-            for (const auto& [k, v] : list)
-                res[k] = v;
-            return res;
-        }
 
         // Registers a package that will be available from every sandbox via `require(name)`.
         // The package can be either a sol::table with an API or a sol::function. If it is a function,

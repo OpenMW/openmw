@@ -6,7 +6,7 @@ on:
 
 env:
   BUILD_TYPE: RelWithDebInfo
-  VCPKG_DEPS_REVISION: 14f130a69c29d10ecd31305db45979cf12f0c162
+  VCPKG_DEPS_REVISION: 65ef3a6db0e01983efc7d8286f44020beeee2ea3
 
 jobs:
   Ubuntu:

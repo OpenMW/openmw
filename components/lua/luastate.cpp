@@ -101,14 +101,21 @@ namespace LuaUtil
                               << " is blocked because Lua memory limit (configurable in settings.cfg) is exceeded";
             return nullptr;
         }
-        self->mTotalMemoryUsage += smallAllocDelta + bigAllocDelta;
-        self->mSmallAllocMemoryUsage += smallAllocDelta;
 
         void* newPtr = nullptr;
         if (nsize == 0)
             free(ptr);
         else
+        {
             newPtr = realloc(ptr, nsize);
+            if (!newPtr)
+            {
+                Log(Debug::Error) << "Lua realloc " << osize << "->" << nsize << " failed";
+                return nullptr;
+            }
+        }
+        self->mTotalMemoryUsage += smallAllocDelta + bigAllocDelta;
+        self->mSmallAllocMemoryUsage += smallAllocDelta;
 
         if (bigAllocDelta != 0)
         {
@@ -176,121 +183,125 @@ namespace LuaUtil
         if (sProfilerEnabled)
             lua_sethook(mLuaHolder.get(), &countHook, LUA_MASKCOUNT, countHookStep);
 
-        mSol.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32, sol::lib::string,
-            sol::lib::table, sol::lib::os, sol::lib::debug);
+        protectedCall([&](LuaView& view) {
+            auto& sol = view.sol();
+            sol.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::math, sol::lib::bit32, sol::lib::string,
+                sol::lib::table, sol::lib::os, sol::lib::debug);
 
 #ifndef NO_LUAJIT
-        mSol.open_libraries(sol::lib::jit);
+            sol.open_libraries(sol::lib::jit);
 #endif // NO_LUAJIT
 
-        mSol["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
-        mSol["math"]["randomseed"] = [] {};
+            sol["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
+            sol["math"]["randomseed"] = [] {};
 
-        mSol["utf8"] = LuaUtf8::initUtf8Package(mSol);
+            sol["utf8"] = LuaUtf8::initUtf8Package(sol);
 
-        mSol["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
+            sol["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
 
-        mSol["setEnvironment"]
-            = [](const sol::environment& env, const sol::function& fn) { sol::set_environment(env, fn); };
-        mSol["loadFromVFS"] = [this](std::string_view packageName) {
-            return loadScriptAndCache(packageNameToVfsPath(packageName, mVFS));
-        };
-        mSol["loadInternalLib"] = [this](std::string_view packageName) { return loadInternalLib(packageName); };
+            sol["setEnvironment"]
+                = [](const sol::environment& env, const sol::function& fn) { sol::set_environment(env, fn); };
+            sol["loadFromVFS"] = [this](std::string_view packageName) {
+                return loadScriptAndCache(packageNameToVfsPath(packageName, mVFS));
+            };
+            sol["loadInternalLib"] = [this](std::string_view packageName) { return loadInternalLib(packageName); };
 
-        // Some fixes for compatibility between different Lua versions
-        if (mSol["unpack"] == sol::nil)
-            mSol["unpack"] = mSol["table"]["unpack"];
-        else if (mSol["table"]["unpack"] == sol::nil)
-            mSol["table"]["unpack"] = mSol["unpack"];
-        if (LUA_VERSION_NUM <= 501)
-        {
-            mSol.script(R"(
-                local _pairs = pairs
-                local _ipairs = ipairs
-                pairs = function(v) return (rawget(getmetatable(v) or {}, '__pairs') or _pairs)(v) end
-                ipairs = function(v) return (rawget(getmetatable(v) or {}, '__ipairs') or _ipairs)(v) end
+            // Some fixes for compatibility between different Lua versions
+            if (sol["unpack"] == sol::nil)
+                sol["unpack"] = sol["table"]["unpack"];
+            else if (sol["table"]["unpack"] == sol::nil)
+                sol["table"]["unpack"] = sol["unpack"];
+            if (LUA_VERSION_NUM <= 501)
+            {
+                sol.script(R"(
+                    local _pairs = pairs
+                    local _ipairs = ipairs
+                    pairs = function(v) return (rawget(getmetatable(v) or {}, '__pairs') or _pairs)(v) end
+                    ipairs = function(v) return (rawget(getmetatable(v) or {}, '__ipairs') or _ipairs)(v) end
+                )");
+            }
+
+            sol.script(R"(
+                local printToLog = function(...)
+                    local strs = {}
+                    for i = 1, select('#', ...) do
+                        strs[i] = tostring(select(i, ...))
+                    end
+                    return writeToLog(table.concat(strs, '\t'))
+                end
+                printGen = function(name) return function(...) return printToLog(name, ...) end end
+
+                function requireGen(env, loaded, loadFn)
+                    return function(packageName)
+                        local p = loaded[packageName]
+                        if p == nil then
+                            local loader = loadFn(packageName)
+                            setEnvironment(env, loader)
+                            p = loader(packageName)
+                            loaded[packageName] = p
+                        end
+                        return p
+                    end
+                end
+
+                function createStrictIndexFn(tbl)
+                    return function(_, key)
+                        local res = tbl[key]
+                        if res ~= nil then
+                            return res
+                        else
+                            error('Key not found: '..tostring(key), 2)
+                        end
+                    end
+                end
+                function pairsForReadOnly(v)
+                    local nextFn, t, firstKey = pairs(getmetatable(v).t)
+                    return function(_, k) return nextFn(t, k) end, v, firstKey
+                end
+                function ipairsForReadOnly(v)
+                    local nextFn, t, firstKey = ipairs(getmetatable(v).t)
+                    return function(_, k) return nextFn(t, k) end, v, firstKey
+                end
+                function lenForReadOnly(v)
+                    return #getmetatable(v).t
+                end
+                local function nextForArray(array, index)
+                    index = (index or 0) + 1
+                    if index <= #array then
+                        return index, array[index]
+                    end
+                end
+                function ipairsForArray(array)
+                    return nextForArray, array, 0
+                end
+
+                getmetatable('').__metatable = false
+                getSafeMetatable = function(v)
+                    if type(v) ~= 'table' then error('getmetatable is allowed only for tables', 2) end
+                    return getmetatable(v)
+                end
             )");
-        }
 
-        mSol.script(R"(
-            local printToLog = function(...)
-                local strs = {}
-                for i = 1, select('#', ...) do
-                    strs[i] = tostring(select(i, ...))
-                end
-                return writeToLog(table.concat(strs, '\t'))
-            end
-            printGen = function(name) return function(...) return printToLog(name, ...) end end
-
-            function requireGen(env, loaded, loadFn)
-                return function(packageName)
-                    local p = loaded[packageName]
-                    if p == nil then
-                        local loader = loadFn(packageName)
-                        setEnvironment(env, loader)
-                        p = loader(packageName)
-                        loaded[packageName] = p
-                    end
-                    return p
-                end
-            end
-
-            function createStrictIndexFn(tbl)
-                return function(_, key)
-                    local res = tbl[key]
-                    if res ~= nil then
-                        return res
-                    else
-                        error('Key not found: '..tostring(key), 2)
-                    end
-                end
-            end
-            function pairsForReadOnly(v)
-                local nextFn, t, firstKey = pairs(getmetatable(v).t)
-                return function(_, k) return nextFn(t, k) end, v, firstKey
-            end
-            function ipairsForReadOnly(v)
-                local nextFn, t, firstKey = ipairs(getmetatable(v).t)
-                return function(_, k) return nextFn(t, k) end, v, firstKey
-            end
-            function lenForReadOnly(v)
-                return #getmetatable(v).t
-            end
-            local function nextForArray(array, index)
-                index = (index or 0) + 1
-                if index <= #array then
-                    return index, array[index]
-                end
-            end
-            function ipairsForArray(array)
-                return nextForArray, array, 0
-            end
-
-            getmetatable('').__metatable = false
-            getSafeMetatable = function(v)
-                if type(v) ~= 'table' then error('getmetatable is allowed only for tables', 2) end
-                return getmetatable(v)
-            end
-        )");
-
-        mSandboxEnv = sol::table(mSol, sol::create);
-        mSandboxEnv["_VERSION"] = mSol["_VERSION"];
-        for (const std::string& s : safeFunctions)
-        {
-            if (mSol[s] == sol::nil)
-                throw std::logic_error("Lua function not found: " + s);
-            mSandboxEnv[s] = mSol[s];
-        }
-        for (const std::string& s : safePackages)
-        {
-            if (mSol[s] == sol::nil)
-                throw std::logic_error("Lua package not found: " + s);
-            mCommonPackages[s] = mSandboxEnv[s] = makeReadOnly(mSol[s]);
-        }
-        mSandboxEnv["getmetatable"] = mSol["getSafeMetatable"];
-        mCommonPackages["os"] = mSandboxEnv["os"]
-            = makeReadOnly(tableFromPairs<std::string_view, sol::function>({ { "date", mSol["os"]["date"] },
-                { "difftime", mSol["os"]["difftime"] }, { "time", mSol["os"]["time"] } }));
+            mSandboxEnv = sol::table(sol, sol::create);
+            mSandboxEnv["_VERSION"] = sol["_VERSION"];
+            for (const std::string& s : safeFunctions)
+            {
+                if (sol[s] == sol::nil)
+                    throw std::logic_error("Lua function not found: " + s);
+                mSandboxEnv[s] = sol[s];
+            }
+            for (const std::string& s : safePackages)
+            {
+                if (sol[s] == sol::nil)
+                    throw std::logic_error("Lua package not found: " + s);
+                mCommonPackages[s] = mSandboxEnv[s] = makeReadOnly(sol[s]);
+            }
+            mSandboxEnv["getmetatable"] = sol["getSafeMetatable"];
+            mCommonPackages["os"] = mSandboxEnv["os"]
+                = makeReadOnly(tableFromPairs<std::string_view, sol::function>(sol,
+                    { { "date", sol["os"]["date"] }, { "difftime", sol["os"]["difftime"] },
+                        { "time", sol["os"]["time"] } }));
+        });
     }
 
     sol::table makeReadOnly(const sol::table& table, bool strictIndex)
@@ -333,6 +344,7 @@ namespace LuaUtil
     sol::protected_function_result LuaState::runInNewSandbox(const std::string& path, const std::string& namePrefix,
         const std::map<std::string, sol::object>& packages, const sol::object& hiddenData)
     {
+        // TODO
         sol::protected_function script = loadScriptAndCache(path);
 
         sol::environment env(mSol, sol::create, mSandboxEnv);
@@ -366,6 +378,7 @@ namespace LuaUtil
 
     sol::environment LuaState::newInternalLibEnvironment()
     {
+        // TODO
         sol::environment env(mSol, sol::create, mSandboxEnv);
         sol::table loaded(mSol, sol::create);
         for (const std::string& s : safePackages)

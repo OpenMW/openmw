@@ -24,8 +24,8 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Ingredient>(ingredient, context);
-
-        sol::usertype<ESM::Ingredient> record = context.mLua->sol().new_usertype<ESM::Ingredient>(("ESM3_Ingredient"));
+        sol::state_view lua = context.sol();
+        sol::usertype<ESM::Ingredient> record = lua.new_usertype<ESM::Ingredient>(("ESM3_Ingredient"));
         record[sol::meta_function::to_string]
             = [](const ESM::Ingredient& rec) { return "ESM3_Ingredient[" + rec.mId.toDebugString() + "]"; };
         record["id"]
@@ -43,8 +43,8 @@ namespace MWLua
         record["weight"]
             = sol::readonly_property([](const ESM::Ingredient& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Ingredient& rec) -> int { return rec.mData.mValue; });
-        record["effects"] = sol::readonly_property([context](const ESM::Ingredient& rec) -> sol::table {
-            sol::table res(context.mLua->sol(), sol::create);
+        record["effects"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Ingredient& rec) -> sol::table {
+            sol::table res(lua, sol::create);
             for (size_t i = 0; i < 4; ++i)
             {
                 if (rec.mData.mEffectID[i] < 0)

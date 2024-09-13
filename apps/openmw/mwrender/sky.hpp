@@ -8,6 +8,8 @@
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "precipitationocclusion.hpp"
 #include "skyutil.hpp"
 
@@ -100,7 +102,8 @@ namespace MWRender
         /// Set height of water plane (used to remove underwater weather particles)
         void setWaterHeight(float height);
 
-        void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
+        void listAssetsToPreload(
+            std::vector<VFS::Path::Normalized>& models, std::vector<VFS::Path::Normalized>& textures);
 
         float getBaseWindSpeed() const;
 

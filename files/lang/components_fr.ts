@@ -37,6 +37,10 @@
         <source>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is enabled in a config file other than the user one.&lt;/b&gt;&lt;br/&gt;</source>
         <translation>&lt;br/&gt;&lt;b&gt;Ce fichier de contenu ne peut être désactivé, car il est activé par un fichier de configuration non contrôlé par l&apos;utilisateur.&lt;/b&gt;&lt;br/&gt;</translation>
     </message>
+    <message>
+        <source>&lt;b&gt;This file is specified in a non-user config file, but does not exist in the VFS.&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Ce fichier est spécifié dans un ficher de configuration non contrôlé par l&apos;utilisateur, mais ne semble pas exister.&lt;/b&gt;</translation>
+    </message>
 </context>
 <context>
     <name>ContentSelectorView::ContentSelector</name>

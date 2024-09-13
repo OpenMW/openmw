@@ -82,8 +82,8 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 66)
-set(OPENMW_POSTPROCESSING_API_REVISION 1)
+set(OPENMW_LUA_API_REVISION 68)
+set(OPENMW_POSTPROCESSING_API_REVISION 2)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
@@ -124,8 +124,8 @@ include(WholeArchive)
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
-option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
+
 option(QT_STATIC "Link static build of Qt into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
@@ -237,7 +237,16 @@ if(MSVC)
 endif()
 
 # Dependencies
-find_package(OpenGL REQUIRED)
+if (APPLE)
+    # Force CMake to use the installed version of OpenGL on macOS
+    set(_SAVE_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+    set(CMAKE_FIND_FRAMEWORK ONLY)
+    find_package(OpenGL REQUIRED)
+    set(CMAKE_FIND_FRAMEWORK ${_SAVE_CMAKE_FIND_FRAMEWORK})
+    unset(_SAVE_CMAKE_FIND_FRAMEWORK)
+else()
+    find_package(OpenGL REQUIRED)
+endif()
 
 find_package(LZ4 REQUIRED)
 
@@ -370,11 +379,6 @@ endif()
 
 # Platform specific
 if (WIN32)
-    if(NOT MINGW)
-    set(Boost_USE_STATIC_LIBS   ON)
-    add_definitions(-DBOOST_ALL_NO_LIB)
-    endif(NOT MINGW)
-
     # Suppress WinMain(), provided by SDL
     add_definitions(-DSDL_MAIN_HANDLED)
 
@@ -458,23 +462,8 @@ if(HAVE_MULTIVIEW)
 endif(HAVE_MULTIVIEW)
 
 set(BOOST_COMPONENTS iostreams program_options system)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-    if(MSVC)
-        # boost-zlib is not present (nor needed) in vcpkg version of boost.
-        # there, it is part of boost-iostreams instead.
-        set(BOOST_OPTIONAL_COMPONENTS zlib)
-    endif(MSVC)
-endif(WIN32)
 
-IF(BOOST_STATIC)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
-
-set(Boost_NO_BOOST_CMAKE ON)
-set(Boost_NO_WARN_NEW_VERSIONS ON)  # ignore warnings about new releases of boost
-
-find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
+find_package(Boost 1.70.0 CONFIG REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 
 if(OPENMW_USE_SYSTEM_MYGUI)
     find_package(MyGUI 3.4.3 REQUIRED)
@@ -504,8 +493,11 @@ set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 include_directories(
     BEFORE SYSTEM
     "."
+<<<<<<< HEAD
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
+=======
+>>>>>>> openmw/master
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -516,7 +508,11 @@ include_directories(
     ${ICU_INCLUDE_DIRS}
 )
 
+<<<<<<< HEAD
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
+=======
+link_directories(${COLLADA_DOM_LIBRARY_DIRS})
+>>>>>>> openmw/master
 
 if(MYGUI_STATIC)
     add_definitions(-DMYGUI_STATIC)
@@ -603,9 +599,13 @@ endif()
 
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+<<<<<<< HEAD
     #set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
 set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wno-undef -Wno-unused-parameter -Wno-long-long -Wnon-virtual-dtor -Wunused -Wno-overloaded-virtual -Wno-inconsistent-missing-override -Wno-deprecated-copy-with-user-provided-copy ${OPENMW_CXX_FLAGS}")
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
+=======
+    set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
+>>>>>>> openmw/master
 
     if (APPLE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")

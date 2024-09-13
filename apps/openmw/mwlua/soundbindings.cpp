@@ -100,7 +100,7 @@ namespace MWLua
 {
     sol::table initAmbientPackage(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         if (lua["openmw_ambient"] != sol::nil)
             return lua["openmw_ambient"];
 
@@ -171,7 +171,7 @@ namespace MWLua
 
     sol::table initCoreSoundBindings(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::table api(lua, sol::create);
 
         api["isEnabled"] = []() { return MWBase::Environment::get().getSoundManager()->isEnabled(); };

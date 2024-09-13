@@ -620,25 +620,25 @@ namespace MWDialogue
         return false;
     }
 
-    void DialogueManager::say(const MWWorld::Ptr& actor, const ESM::RefId& topic)
+    bool DialogueManager::say(const MWWorld::Ptr& actor, const ESM::RefId& topic)
     {
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         if (sndMgr->sayActive(actor))
         {
             // Actor is already saying something.
-            return;
+            return false;
         }
 
         if (actor.getClass().isNpc() && MWBase::Environment::get().getWorld()->isSwimming(actor))
         {
             // NPCs don't talk while submerged
-            return;
+            return false;
         }
 
         if (actor.getClass().getCreatureStats(actor).getKnockedDown())
         {
             // Unconscious actors can not speak
-            return;
+            return false;
         }
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -657,6 +657,7 @@ namespace MWDialogue
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
         }
+        return info != nullptr;
     }
 
     int DialogueManager::countSavedGameRecords() const

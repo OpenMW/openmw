@@ -150,8 +150,9 @@ namespace MWLua
         template <class Arg>
         std::function<void(Arg)> wrapLuaCallback(const LuaUtil::Callback& c)
         {
-            return
-                [this, c](Arg arg) { this->queueCallback(c, sol::main_object(this->mLua.sol(), sol::in_place, arg)); };
+            return [this, c](Arg arg) {
+                this->queueCallback(c, sol::main_object(this->mLua.unsafeState(), sol::in_place, arg));
+            };
         }
 
         LuaUi::ResourceManager* uiResourceManager() { return &mUiResourceManager; }
@@ -227,8 +228,8 @@ namespace MWLua
         std::vector<std::pair<std::string, Misc::Color>> mInGameConsoleMessages;
         std::optional<ObjectId> mDelayedUiModeChangedArg;
 
-        LuaUtil::LuaStorage mGlobalStorage{ mLua.sol() };
-        LuaUtil::LuaStorage mPlayerStorage{ mLua.sol() };
+        LuaUtil::LuaStorage mGlobalStorage;
+        LuaUtil::LuaStorage mPlayerStorage;
 
         LuaUtil::InputAction::Registry mInputActions;
         LuaUtil::InputTrigger::Registry mInputTriggers;

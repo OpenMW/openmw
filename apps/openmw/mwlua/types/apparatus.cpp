@@ -20,18 +20,20 @@ namespace MWLua
 {
     void addApparatusBindings(sol::table apparatus, const Context& context)
     {
-        apparatus["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "MortarPestle", ESM::Apparatus::MortarPestle },
-            { "Alembic", ESM::Apparatus::Alembic },
-            { "Calcinator", ESM::Apparatus::Calcinator },
-            { "Retort", ESM::Apparatus::Retort },
-        }));
+        sol::state_view lua = context.sol();
+        apparatus["TYPE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
+            {
+                { "MortarPestle", ESM::Apparatus::MortarPestle },
+                { "Alembic", ESM::Apparatus::Alembic },
+                { "Calcinator", ESM::Apparatus::Calcinator },
+                { "Retort", ESM::Apparatus::Retort },
+            }));
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Apparatus>(apparatus, context);
 
-        sol::usertype<ESM::Apparatus> record = context.mLua->sol().new_usertype<ESM::Apparatus>("ESM3_Apparatus");
+        sol::usertype<ESM::Apparatus> record = lua.new_usertype<ESM::Apparatus>("ESM3_Apparatus");
         record[sol::meta_function::to_string]
             = [](const ESM::Apparatus& rec) { return "ESM3_Apparatus[" + rec.mId.toDebugString() + "]"; };
         record["id"]

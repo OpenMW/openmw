@@ -597,18 +597,32 @@
                             <Property key="AddItem" value="56"/>
                             <Property key="AddItem" value="64"/>
                         </Widget>
-                        <!-- Per-Pixel Lighting -->
-                        <Widget type="HBox" position="0 60 340 24">
+
+                        <Widget type="HBox" position="0 60 600 24">
+                            <!-- Per-Pixel Lighting -->
                             <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="PerPixelLighting">
                                 <UserString key="SettingCategory" value="Shaders"/>
                                 <UserString key="SettingName" value="force per pixel lighting"/>
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                <Property key="Caption" value="#{OMWEngine:ForcePerPixelLighting}"/>
+                                <!-- Deliberate padding -->
+                                <Property key="Caption" value="#{OMWEngine:ForcePerPixelLighting}  "/>
                                 <UserString key="ToolTipType" value="Layout"/>
                                 <UserString key="ToolTipLayout" value="TextToolTip"/>
                                 <UserString key="Caption_Text" value="#{OMWEngine:ForcePerPixelLightingTooltip}"/>
+                            </Widget>
+                            <!-- Classic Falloff -->
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top">
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="classic falloff"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="#{OMWEngine:ClassicFalloff}"/>
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="#{OMWEngine:ClassicFalloffTooltip}"/>
                             </Widget>
                         </Widget>
 

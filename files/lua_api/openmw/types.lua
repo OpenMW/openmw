@@ -222,7 +222,7 @@
 --     print('No Telekinesis effect')
 -- end
 -- @usage -- Check for a specific effect targeting a specific attribute.
--- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, core.ATTRIBUTE.Luck)
+-- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, 'luck')
 -- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
@@ -244,9 +244,10 @@
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
 
----
--- Permanently modifies the magnitude of an active effect to be exactly equal to the provided value. This adds the effect to the list of active effects if not already active.
+--- (Note that using this function will override and conflict with all other sources of this effect, you probably want to use @{#ActorActiveEffects.modify} instead, this function is provided for mwscript parity only)
+-- Permanently modifies the magnitude of an active effect to be exactly equal to the provided value.
 -- Note that although the modification is permanent, the magnitude will not stay equal to the value if any active spells with this effects are added/removed.
+-- Also see the notes on @{#ActorActiveEffects.modify}
 -- @function [parent=#ActorActiveEffects] set
 -- @param self
 -- @param #number value
@@ -254,7 +255,7 @@
 -- @param #string extraParam Optional skill or attribute ID
 
 ---
--- Permanently modifies the magnitude of an active effect by increasing it by the provided value. This adds the effect to the list of active effects if not already active.
+-- Permanently modifies the magnitude of an active effect by modifying it by the provided value. Note that some active effect values, such as fortify attribute effects, have no practical effect of their own, and must be paired with explicitly modifying the target stat to have any effect.
 -- @function [parent=#ActorActiveEffects] modify
 -- @param self
 -- @param #number value
@@ -1002,7 +1003,7 @@
 -- @function [parent=#NPC] isExpelled
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
--- @return #bool isExpelled True if NPC is expelled from the faction.
+-- @return #boolean isExpelled True if NPC is expelled from the faction.
 -- @usage local NPC = require('openmw.types').NPC;
 -- local result = NPC.isExpelled(player, "mages guild");
 
@@ -1104,8 +1105,8 @@
 -- @field #string description Race description
 -- @field #map<#string, #number> skills A map of bonus skill points by skill ID
 -- @field #list<#string> spells A read-only list containing the ids of all spells inherent to the race
--- @field #bool isPlayable True if the player can pick this race in character generation
--- @field #bool isBeast True if this race is a beast race
+-- @field #boolean isPlayable True if the player can pick this race in character generation
+-- @field #boolean isBeast True if this race is a beast race
 -- @field #GenderedNumber height Height values
 -- @field #GenderedNumber weight Weight values
 -- @field #map<#string, #GenderedNumber> attributes A read-only table of attribute ID to base value
@@ -1129,7 +1130,7 @@
 -- @field #string head Path to the head body part model
 -- @field #number baseGold The base barter gold of the NPC
 -- @field #number baseDisposition NPC's starting disposition
--- @field #bool isMale The gender setting of the NPC
+-- @field #boolean isMale The gender setting of the NPC
 -- @field #map<#string, #boolean> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 -- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
 -- @field #boolean isEssential whether the NPC is essential
@@ -1200,8 +1201,8 @@
 -- @type PlayerQuest
 -- @field #string id The quest id.
 -- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.
--- @field #bool started Whether the quest is started.
--- @field #bool finished Whether the quest is finished (global and player scripts can change it).
+-- @field #boolean started Whether the quest is started.
+-- @field #boolean finished Whether the quest is finished (global and player scripts can change it).
 
 ---
 -- Sets the quest stage for the given quest, on the given player, and adds the entry to the journal, if there is an entry at the specified stage. Can only be used in global or player scripts.

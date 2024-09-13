@@ -323,6 +323,8 @@ namespace MWRender
 
             mStateUpdater->setSimulationTime(static_cast<float>(stamp->getSimulationTime()));
             mStateUpdater->setDeltaSimulationTime(static_cast<float>(stamp->getSimulationTime() - mLastSimulationTime));
+            // Use a signed int because 'uint' type is not supported in GLSL 120 without extensions
+            mStateUpdater->setFrameNumber(static_cast<int>(stamp->getFrameNumber()));
             mLastSimulationTime = stamp->getSimulationTime();
 
             for (const auto& dispatchNode : mCanvases[frameId]->getPasses())
@@ -650,12 +652,15 @@ namespace MWRender
                     subPass.mRenderTexture = renderTarget.mTarget;
                     subPass.mMipMap = renderTarget.mMipMap;
 
+                    const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
+                    subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
+
+                    subPass.mRenderTexture->setTextureSize(w, h);
+                    subPass.mRenderTexture->dirtyTextureObject();
+
                     subPass.mRenderTarget = new osg::FrameBufferObject;
                     subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
                         osg::FrameBufferAttachment(subPass.mRenderTexture));
-
-                    const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
-                    subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
 
                     if (std::find_if(attachmentsToDirty.cbegin(), attachmentsToDirty.cend(),
                             [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })

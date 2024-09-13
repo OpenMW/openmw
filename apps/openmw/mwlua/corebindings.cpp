@@ -70,19 +70,18 @@ namespace MWLua
 
     sol::table initCorePackage(const Context& context)
     {
-        auto* lua = context.mLua;
-
+        auto lua = context.sol();
         sol::object cached = context.getTypePackage("openmw_core");
         if (cached != sol::nil)
             return cached;
 
-        sol::table api(lua->sol(), sol::create);
+        sol::table api(lua, sol::create);
         api["API_REVISION"] = Version::getLuaApiRevision(); // specified in CMakeLists.txt
-        api["quit"] = [lua]() {
+        api["quit"] = [lua = context.mLua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
         };
-        api["contentFiles"] = initContentFilesBindings(lua->sol());
+        api["contentFiles"] = initContentFilesBindings(lua);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
@@ -103,10 +102,10 @@ namespace MWLua
         api["dialogue"]
             = context.cachePackage("openmw_core_dialogue", [context]() { return initCoreDialogueBindings(context); });
         api["l10n"] = context.cachePackage("openmw_core_l10n",
-            [lua]() { return LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager()); });
+            [lua]() { return LuaUtil::initL10nLoader(lua, MWBase::Environment::get().getL10nManager()); });
         const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-        api["getGMST"] = [lua = context.mLua, gmstStore](const std::string& setting) -> sol::object {
+        api["getGMST"] = [lua, gmstStore](const std::string& setting) -> sol::object {
             const ESM::GameSetting* gmst = gmstStore->search(setting);
             if (gmst == nullptr)
                 return sol::nil;
@@ -114,13 +113,13 @@ namespace MWLua
             switch (value.getType())
             {
                 case ESM::VT_Float:
-                    return sol::make_object<float>(lua->sol(), value.getFloat());
+                    return sol::make_object<float>(lua, value.getFloat());
                 case ESM::VT_Short:
                 case ESM::VT_Long:
                 case ESM::VT_Int:
-                    return sol::make_object<int>(lua->sol(), value.getInteger());
+                    return sol::make_object<int>(lua, value.getInteger());
                 case ESM::VT_String:
-                    return sol::make_object<std::string>(lua->sol(), value.getString());
+                    return sol::make_object<std::string>(lua, value.getString());
                 case ESM::VT_Unknown:
                 case ESM::VT_None:
                     break;

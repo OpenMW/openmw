@@ -156,6 +156,7 @@ Programmers
     Mateusz Malisz (malice)
     Max Henzerling (SaintMercury)
     megaton
+    Mehdi Yousfi-Monod (mym)
     Michael Hogan (Xethik)
     Michael Mc Donnell
     Michael Papageorgiou (werdanith)

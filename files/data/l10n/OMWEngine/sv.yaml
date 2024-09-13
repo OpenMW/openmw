@@ -78,6 +78,17 @@ CameraSensitivity: "Kamerakänslighet"
 CameraZoomIn: "Zooma in kamera"
 CameraZoomOut: "Zooma ut kamera"
 ChangeRequiresRestart: "Den här ändringen kräver omstart för att ge effekt."
+ClassicFalloff: "Klassiskt ljusavtagande"
+ClassicFalloffTooltip: |-
+    Förvalt: av
+    Använd den traditionella formeln för dämpning av punktljus som saknar en tidig uttoning.
+
+    En nackdel med den traditionella formeln är att ljusets påverkan aldrig riktigt når noll.
+    Detta är fysiskt korrekt, men kan orsaka "sömmar" eftersom ljuset inte påverkar hela scenen.
+    Tidig uttoning minskar synligheten av dessa sömmar på bekostnad av att scenen blir mörkare.
+
+    Morrowind använder den traditionella formeln, så du kanske vill aktivera detta om du ogillar skillnaderna i ljusstyrka.
+    Alternativt kan du prova att justera minsta ljusstyrkan i interiörer.
 ConfirmResetBindings: "Återställ alla kontroller till standard?"
 ConfirmResolution: "Ny upplösning kommer ställas in omedelbart. Vill du fortsätta?"
 Controller: "Handkontroll"
@@ -95,7 +106,7 @@ EnableController: "Aktivera handkontroll"
 FieldOfView: "Synfält"
 FieldOfViewLow: "Låg"
 FieldOfViewHigh: "Hög"
-ForcePerPixelLighting: "Tvinga per-pixelljussättning"
+ForcePerPixelLighting: "Per-pixelljussättning"
 ForcePerPixelLightingTooltip: |-
     Tvingar användningen av per-pixelljussättning. Som standard är det annars bara objekt med normalkartor som använder per-pixelljussättning.
 
@@ -131,7 +142,7 @@ LightsLightingMethodTooltip: "Välj intern hantering av ljuskällor.\n\n
 LightsMaximumDistance: "Maximalt ljusavstånd"
 LightsMaximumDistanceTooltip: "Förvalt: 8192\nMaximala avståndet där ljuskällor syns (mätt i enheter).\n\nVärdet 0 ger oändligt avstånd."
 LightsMinimumInteriorBrightness: "Minsta ljusstyrka i interiörer"
-LightsMinimumInteriorBrightnessTooltip: "Förvalt: 0.08\nMinsta omgivande ljusstyrka i interiörer.\n\nÖka värdet om du anser att interiörer är för mörka."
+LightsMinimumInteriorBrightnessTooltip: "Förvalt: 0.08\nMinsta omgivande ljusstyrka i interiörer.\n\nÖka värdet om du anser att interiörer är för mörka.\n\nDetta har ingen effekt om klassiskt ljusavtagande används."
 MaxLights: "Max antal ljuskällor"
 MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp som vid ljussättningsmetoden Gammaldags."
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes

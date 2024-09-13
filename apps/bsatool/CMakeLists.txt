@@ -9,7 +9,7 @@ openmw_add_executable(bsatool
 )
 
 target_link_libraries(bsatool
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
 

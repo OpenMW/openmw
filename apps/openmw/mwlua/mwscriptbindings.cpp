@@ -95,7 +95,8 @@ namespace MWLua
 
     sol::table initMWScriptBindings(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::state_view lua = context.sol();
+        sol::table api(lua, sol::create);
 
         api["getGlobalScript"]
             = [](std::string_view recordId, sol::optional<GObject> player) -> sol::optional<MWScriptRef> {
@@ -121,10 +122,8 @@ namespace MWLua
         // api["getGlobalScripts"] = [](std::string_view recordId) -> list of scripts
         // api["getLocalScripts"] = [](const GObject& obj) -> list of scripts
 
-        sol::state_view& lua = context.mLua->sol();
-        sol::usertype<MWScriptRef> mwscript = context.mLua->sol().new_usertype<MWScriptRef>("MWScript");
-        sol::usertype<MWScriptVariables> mwscriptVars
-            = context.mLua->sol().new_usertype<MWScriptVariables>("MWScriptVariables");
+        sol::usertype<MWScriptRef> mwscript = lua.new_usertype<MWScriptRef>("MWScript");
+        sol::usertype<MWScriptVariables> mwscriptVars = lua.new_usertype<MWScriptVariables>("MWScriptVariables");
         mwscript[sol::meta_function::to_string]
             = [](const MWScriptRef& s) { return std::string("MWScript{") + s.mId.toDebugString() + "}"; };
         mwscript["isRunning"] = sol::readonly_property([](const MWScriptRef& s) { return s.isRunning(); });

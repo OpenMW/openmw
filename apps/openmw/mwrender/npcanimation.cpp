@@ -502,7 +502,7 @@ namespace MWRender
 
         if (!is1stPerson)
         {
-            const std::string& base = Settings::models().mXbaseanim;
+            const std::string& base = Settings::models().mXbaseanim.get().value();
             if (!isWerewolf)
                 addAnimSource(base, smodel);
 
@@ -521,9 +521,8 @@ namespace MWRender
         }
         else
         {
-            const std::string& base = Settings::models().mXbaseanim1st;
             if (!isWerewolf)
-                addAnimSource(base, smodel);
+                addAnimSource(Settings::models().mXbaseanim1st.get().value(), smodel);
 
             if (!isBase)
                 addAnimSource(smodel, smodel);

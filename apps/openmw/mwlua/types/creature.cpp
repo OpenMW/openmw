@@ -20,16 +20,18 @@ namespace MWLua
 {
     void addCreatureBindings(sol::table creature, const Context& context)
     {
-        creature["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "Creatures", ESM::Creature::Creatures },
-            { "Daedra", ESM::Creature::Daedra },
-            { "Undead", ESM::Creature::Undead },
-            { "Humanoid", ESM::Creature::Humanoid },
-        }));
+        sol::state_view lua = context.sol();
+        creature["TYPE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
+            {
+                { "Creatures", ESM::Creature::Creatures },
+                { "Daedra", ESM::Creature::Daedra },
+                { "Undead", ESM::Creature::Undead },
+                { "Humanoid", ESM::Creature::Humanoid },
+            }));
 
         addRecordFunctionBinding<ESM::Creature>(creature, context);
 
-        sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
+        sol::usertype<ESM::Creature> record = lua.new_usertype<ESM::Creature>("ESM3_Creature");
         record[sol::meta_function::to_string]
             = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId.toDebugString() + "]"; };
         record["id"]
@@ -50,8 +52,7 @@ namespace MWLua
         record["magicSkill"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mMagic; });
         record["stealthSkill"]
             = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mStealth; });
-        record["attack"] = sol::readonly_property([context](const ESM::Creature& rec) -> sol::table {
-            sol::state_view& lua = context.mLua->sol();
+        record["attack"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Creature& rec) -> sol::table {
             sol::table res(lua, sol::create);
             int index = 1;
             for (auto attack : rec.mData.mAttack)

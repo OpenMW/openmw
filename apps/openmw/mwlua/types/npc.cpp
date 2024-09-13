@@ -73,7 +73,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::NPC>(npc, context);
 
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
 
         sol::usertype<ESM::NPC> record = lua.new_usertype<ESM::NPC>("ESM3_NPC");
         record[sol::meta_function::to_string]
@@ -333,7 +333,7 @@ namespace MWLua
             ESM::RefId factionId = parseFactionId(faction);
             return ptr.getClass().getNpcStats(ptr).getExpelled(factionId);
         };
-        npc["getFactions"] = [&lua](const Object& actor) {
+        npc["getFactions"] = [](sol::this_state lua, const Object& actor) {
             const MWWorld::Ptr ptr = actor.ptr();
             MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
             sol::table res(lua, sol::create);

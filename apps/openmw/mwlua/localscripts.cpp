@@ -38,8 +38,9 @@ namespace MWLua
 
     void LocalScripts::initializeSelfPackage(const Context& context)
     {
+        auto lua = context.sol();
         using ActorControls = MWBase::LuaManager::ActorControls;
-        sol::usertype<ActorControls> controls = context.mLua->sol().new_usertype<ActorControls>("ActorControls");
+        sol::usertype<ActorControls> controls = lua.new_usertype<ActorControls>("ActorControls");
 
 #define CONTROL(TYPE, FIELD)                                                                                           \
     sol::property([](const ActorControls& c) { return c.FIELD; },                                                      \
@@ -57,8 +58,8 @@ namespace MWLua
         controls["use"] = CONTROL(int, mUse);
 #undef CONTROL
 
-        sol::usertype<SelfObject> selfAPI = context.mLua->sol().new_usertype<SelfObject>(
-            "SelfObject", sol::base_classes, sol::bases<LObject, Object>());
+        sol::usertype<SelfObject> selfAPI
+            = lua.new_usertype<SelfObject>("SelfObject", sol::base_classes, sol::bases<LObject, Object>());
         selfAPI[sol::meta_function::to_string]
             = [](SelfObject& self) { return "openmw.self[" + self.toString() + "]"; };
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
@@ -66,13 +67,13 @@ namespace MWLua
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
         selfAPI["ATTACK_TYPE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWMechanics::AttackType>(
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWMechanics::AttackType>(lua,
                 { { "NoAttack", MWMechanics::AttackType::NoAttack }, { "Any", MWMechanics::AttackType::Any },
                     { "Chop", MWMechanics::AttackType::Chop }, { "Slash", MWMechanics::AttackType::Slash },
                     { "Thrust", MWMechanics::AttackType::Thrust } }));
 
         using AiPackage = MWMechanics::AiPackage;
-        sol::usertype<AiPackage> aiPackage = context.mLua->sol().new_usertype<AiPackage>("AiPackage");
+        sol::usertype<AiPackage> aiPackage = lua.new_usertype<AiPackage>("AiPackage");
         aiPackage["type"] = sol::readonly_property([](const AiPackage& p) -> std::string_view {
             switch (p.getTypeId())
             {
@@ -113,23 +114,24 @@ namespace MWLua
         aiPackage["destPosition"] = sol::readonly_property([](const AiPackage& p) { return p.getDestination(); });
         aiPackage["distance"] = sol::readonly_property([](const AiPackage& p) { return p.getDistance(); });
         aiPackage["duration"] = sol::readonly_property([](const AiPackage& p) { return p.getDuration(); });
-        aiPackage["idle"] = sol::readonly_property([context](const AiPackage& p) -> sol::optional<sol::table> {
-            if (p.getTypeId() == MWMechanics::AiPackageTypeId::Wander)
-            {
-                sol::table idles(context.mLua->sol(), sol::create);
-                const std::vector<unsigned char>& idle = static_cast<const MWMechanics::AiWander&>(p).getIdle();
-                if (!idle.empty())
-                {
-                    for (size_t i = 0; i < idle.size(); ++i)
-                    {
-                        std::string_view groupName = MWMechanics::AiWander::getIdleGroupName(i);
-                        idles[groupName] = idle[i];
-                    }
-                    return idles;
-                }
-            }
-            return sol::nullopt;
-        });
+        aiPackage["idle"]
+            = sol::readonly_property([lua = lua.lua_state()](const AiPackage& p) -> sol::optional<sol::table> {
+                  if (p.getTypeId() == MWMechanics::AiPackageTypeId::Wander)
+                  {
+                      sol::table idles(lua, sol::create);
+                      const std::vector<unsigned char>& idle = static_cast<const MWMechanics::AiWander&>(p).getIdle();
+                      if (!idle.empty())
+                      {
+                          for (size_t i = 0; i < idle.size(); ++i)
+                          {
+                              std::string_view groupName = MWMechanics::AiWander::getIdleGroupName(i);
+                              idles[groupName] = idle[i];
+                          }
+                          return idles;
+                      }
+                  }
+                  return sol::nullopt;
+              });
 
         aiPackage["isRepeat"] = sol::readonly_property([](const AiPackage& p) { return p.getRepeat(); });
 
@@ -226,7 +228,8 @@ namespace MWLua
         : LuaUtil::ScriptsContainer(lua, "L" + obj.id().toString())
         , mData(obj)
     {
-        this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
+        lua->protectedCall(
+            [&](LuaUtil::LuaView& view) { addPackage("openmw.self", sol::make_object(view.sol(), &mData)); });
         registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
             &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnSkillUse,
             &mOnSkillLevelUp });

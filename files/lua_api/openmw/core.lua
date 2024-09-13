@@ -679,6 +679,7 @@
 -- @field #number cost
 -- @field #list<#MagicEffectWithParams> effects The effects (@{#MagicEffectWithParams}) of the spell
 -- @field #boolean alwaysSucceedFlag If set, the spell should ignore skill checks and always succeed.
+-- @field #boolean starterSpellFlag If set, the spell can be selected as a player's starting spell.
 -- @field #boolean autocalcFlag If set, the casting cost should be computed based on the effect list rather than read from the cost field
 
 ---
@@ -700,7 +701,7 @@
 -- @field #string castStatic Identifier of the vfx static used for casting
 -- @field #string hitStatic Identifier of the vfx static used on hit
 -- @field #string areaStatic Identifier of the vfx static used for AOE spells
--- @field #string boltStatic Identifier of the projectile vfx static used for ranged spells
+-- @field #string bolt Identifier of the projectile used for ranged spells
 -- @field #string castSound Identifier of the sound used for casting
 -- @field #string hitSound Identifier of the sound used on hit
 -- @field #string areaSound Identifier of the sound used for AOE spells

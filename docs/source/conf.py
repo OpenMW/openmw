@@ -71,17 +71,17 @@ ppApiRevision = "UNDEFINED"
 
 try:
     cmake_raw = open(project_root+'/CMakeLists.txt', 'r').read()
-    majorVersionMatch = re.search('set\(OPENMW_VERSION_MAJOR (\d+)\)', cmake_raw)
-    minorVersionMatch = re.search('set\(OPENMW_VERSION_MINOR (\d+)\)', cmake_raw)
-    releaseVersionMatch = re.search('set\(OPENMW_VERSION_RELEASE (\d+)\)', cmake_raw)
+    majorVersionMatch = re.search(r'set\(OPENMW_VERSION_MAJOR (\d+)\)', cmake_raw)
+    minorVersionMatch = re.search(r'set\(OPENMW_VERSION_MINOR (\d+)\)', cmake_raw)
+    releaseVersionMatch = re.search(r'set\(OPENMW_VERSION_RELEASE (\d+)\)', cmake_raw)
     if majorVersionMatch and minorVersionMatch and releaseVersionMatch:
         release = version = '.'.join((majorVersionMatch.group(1),
                                      minorVersionMatch.group(1),
                                      releaseVersionMatch.group(1)))
-    luaApiRevisionMatch = re.search('set\(OPENMW_LUA_API_REVISION (\d+)\)', cmake_raw)
+    luaApiRevisionMatch = re.search(r'set\(OPENMW_LUA_API_REVISION (\d+)\)', cmake_raw)
     if luaApiRevisionMatch:
         luaApiRevision = luaApiRevisionMatch.group(1)
-    ppApiRevisionMatch = re.search('set\(OPENMW_POSTPROCESSING_API_REVISION (\d+)\)', cmake_raw)
+    ppApiRevisionMatch = re.search(r'set\(OPENMW_POSTPROCESSING_API_REVISION (\d+)\)', cmake_raw)
     if ppApiRevisionMatch:
         ppApiRevision = ppApiRevisionMatch.group(1)
 
