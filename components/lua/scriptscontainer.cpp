@@ -97,7 +97,7 @@ namespace LuaUtil
 
         try
         {
-            sol::object scriptOutput = mLua.runInNewSandbox(path, mNamePrefix, mAPI, script.mHiddenData);
+            sol::object scriptOutput = mLua.runInNewSandbox(path, debugName, mAPI, script.mHiddenData);
             if (scriptOutput == sol::nil)
                 return true;
             sol::object engineHandlers = sol::nil, eventHandlers = sol::nil;

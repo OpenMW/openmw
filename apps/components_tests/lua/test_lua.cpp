@@ -81,13 +81,14 @@ return {
 
     TEST_F(LuaStateTest, Sandbox)
     {
-        sol::table script1 = mLua.runInNewSandbox("aaa/counter.lua");
+        const VFS::Path::Normalized path("aaa/counter.lua");
+        sol::table script1 = mLua.runInNewSandbox(path);
 
         EXPECT_EQ(LuaUtil::call(script1["get"]).get<int>(), 42);
         LuaUtil::call(script1["inc"], 3);
         EXPECT_EQ(LuaUtil::call(script1["get"]).get<int>(), 45);
 
-        sol::table script2 = mLua.runInNewSandbox("aaa/counter.lua");
+        sol::table script2 = mLua.runInNewSandbox(path);
         EXPECT_EQ(LuaUtil::call(script2["get"]).get<int>(), 42);
         LuaUtil::call(script2["inc"], 1);
         EXPECT_EQ(LuaUtil::call(script2["get"]).get<int>(), 43);
@@ -122,12 +123,14 @@ return {
 
     TEST_F(LuaStateTest, ErrorHandling)
     {
-        EXPECT_ERROR(mLua.runInNewSandbox("invalid.lua"), "[string \"invalid.lua\"]:1:");
+        const VFS::Path::Normalized path("invalid.lua");
+        EXPECT_ERROR(mLua.runInNewSandbox(path), "[string \"invalid.lua\"]:1:");
     }
 
     TEST_F(LuaStateTest, CustomRequire)
     {
-        sol::table script = mLua.runInNewSandbox("bbb/tests.lua");
+        const VFS::Path::Normalized path("bbb/tests.lua");
+        sol::table script = mLua.runInNewSandbox(path);
 
         EXPECT_FLOAT_EQ(
             LuaUtil::call(script["sin"], 1).get<float>(), -LuaUtil::call(script["requireMathSin"], -1).get<float>());
@@ -135,7 +138,7 @@ return {
         EXPECT_EQ(LuaUtil::call(script["useCounter"]).get<int>(), 43);
         EXPECT_EQ(LuaUtil::call(script["useCounter"]).get<int>(), 44);
         {
-            sol::table script2 = mLua.runInNewSandbox("bbb/tests.lua");
+            sol::table script2 = mLua.runInNewSandbox(path);
             EXPECT_EQ(LuaUtil::call(script2["useCounter"]).get<int>(), 43);
         }
         EXPECT_EQ(LuaUtil::call(script["useCounter"]).get<int>(), 45);
@@ -145,7 +148,8 @@ return {
 
     TEST_F(LuaStateTest, ReadOnly)
     {
-        sol::table script = mLua.runInNewSandbox("bbb/tests.lua");
+        const VFS::Path::Normalized path("bbb/tests.lua");
+        sol::table script = mLua.runInNewSandbox(path);
 
         // rawset itself is allowed
         EXPECT_EQ(LuaUtil::call(script["callRawset"]).get<int>(), 3);
@@ -161,25 +165,27 @@ return {
 
     TEST_F(LuaStateTest, Print)
     {
+        const VFS::Path::Normalized path("bbb/tests.lua");
         {
-            sol::table script = mLua.runInNewSandbox("bbb/tests.lua");
+            sol::table script = mLua.runInNewSandbox(path);
             testing::internal::CaptureStdout();
             LuaUtil::call(script["print"], 1, 2, 3);
             std::string output = testing::internal::GetCapturedStdout();
-            EXPECT_EQ(output, "[bbb/tests.lua]:\t1\t2\t3\n");
+            EXPECT_EQ(output, "unnamed:\t1\t2\t3\n");
         }
         {
-            sol::table script = mLua.runInNewSandbox("bbb/tests.lua", "prefix");
+            sol::table script = mLua.runInNewSandbox(path, "prefix");
             testing::internal::CaptureStdout();
             LuaUtil::call(script["print"]); // print with no arguments
             std::string output = testing::internal::GetCapturedStdout();
-            EXPECT_EQ(output, "prefix[bbb/tests.lua]:\n");
+            EXPECT_EQ(output, "prefix:\n");
         }
     }
 
     TEST_F(LuaStateTest, UnsafeFunction)
     {
-        sol::table script = mLua.runInNewSandbox("bbb/tests.lua");
+        const VFS::Path::Normalized path("bbb/tests.lua");
+        sol::table script = mLua.runInNewSandbox(path);
         EXPECT_ERROR(LuaUtil::call(script["callLoadstring"]), "a nil value");
     }
 
@@ -190,11 +196,13 @@ return {
             sol::table api1 = LuaUtil::makeReadOnly(view.sol().create_table_with("name", "api1"));
             sol::table api2 = LuaUtil::makeReadOnly(view.sol().create_table_with("name", "api2"));
 
-            sol::table script1 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api1 } });
+            const VFS::Path::Normalized path("bbb/tests.lua");
+
+            sol::table script1 = lua.runInNewSandbox(path, "", { { "test.api", api1 } });
 
             lua.addCommonPackage("sqrlib", view.sol().create_table_with("sqr", [](int x) { return x * x; }));
 
-            sol::table script2 = lua.runInNewSandbox("bbb/tests.lua", "", { { "test.api", api2 } });
+            sol::table script2 = lua.runInNewSandbox(path, "", { { "test.api", api2 } });
 
             EXPECT_ERROR(LuaUtil::call(script1["sqr"], 3), "module not found: sqrlib");
             EXPECT_EQ(LuaUtil::call(script2["sqr"], 3).get<int>(), 9);
@@ -217,12 +225,13 @@ return {
             return mLua.getTotalMemoryUsage();
         };
         int64_t memWithScript;
+        const VFS::Path::Normalized path("requireBig.lua");
         {
-            sol::object s = mLua.runInNewSandbox("requireBig.lua");
+            sol::object s = mLua.runInNewSandbox(path);
             memWithScript = getMem();
         }
         for (int i = 0; i < 100; ++i) // run many times to make small memory leaks visible
-            mLua.runInNewSandbox("requireBig.lua");
+            mLua.runInNewSandbox(path);
         int64_t memWithoutScript = getMem();
         // At this moment all instances of the script should be garbage-collected.
         EXPECT_LT(memWithoutScript, memWithScript);
@@ -230,7 +239,8 @@ return {
 
     TEST_F(LuaStateTest, SafeIndexMetamethod)
     {
-        sol::table t = mLua.runInNewSandbox("metaIndexError.lua");
+        const VFS::Path::Normalized path("metaIndexError.lua");
+        sol::table t = mLua.runInNewSandbox(path);
         // without safe get we crash here
         EXPECT_ERROR(LuaUtil::safeGet(t, "any key"), "meta index error");
     }

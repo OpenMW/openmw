@@ -16,16 +16,16 @@
 
 namespace LuaUtil
 {
-
-    static std::string packageNameToVfsPath(std::string_view packageName, const VFS::Manager* vfs)
+    static VFS::Path::Normalized packageNameToVfsPath(std::string_view packageName, const VFS::Manager& vfs)
     {
-        std::string path(packageName);
-        std::replace(path.begin(), path.end(), '.', '/');
-        std::string pathWithInit = path + "/init.lua";
-        path.append(".lua");
-        if (vfs->exists(path))
+        std::string pathValue(packageName);
+        std::replace(pathValue.begin(), pathValue.end(), '.', '/');
+        VFS::Path::Normalized pathWithInit(pathValue + "/init.lua");
+        pathValue.append(".lua");
+        VFS::Path::Normalized path(pathValue);
+        if (vfs.exists(path))
             return path;
-        else if (vfs->exists(pathWithInit))
+        else if (vfs.exists(pathWithInit))
             return pathWithInit;
         else
             throw std::runtime_error("module not found: " + std::string(packageName));
@@ -202,7 +202,7 @@ namespace LuaUtil
             sol["setEnvironment"]
                 = [](const sol::environment& env, const sol::function& fn) { sol::set_environment(env, fn); };
             sol["loadFromVFS"] = [this](std::string_view packageName) {
-                return loadScriptAndCache(packageNameToVfsPath(packageName, mVFS));
+                return loadScriptAndCache(packageNameToVfsPath(packageName, *mVFS));
             };
             sol["loadInternalLib"] = [this](std::string_view packageName) { return loadInternalLib(packageName); };
 
@@ -341,15 +341,14 @@ namespace LuaUtil
         mCommonPackages.insert_or_assign(std::move(packageName), std::move(package));
     }
 
-    sol::protected_function_result LuaState::runInNewSandbox(const std::string& path, const std::string& namePrefix,
-        const std::map<std::string, sol::object>& packages, const sol::object& hiddenData)
+    sol::protected_function_result LuaState::runInNewSandbox(const VFS::Path::Normalized& path,
+        const std::string& envName, const std::map<std::string, sol::object>& packages, const sol::object& hiddenData)
     {
         // TODO
         sol::protected_function script = loadScriptAndCache(path);
 
         sol::environment env(mSol, sol::create, mSandboxEnv);
-        std::string envName = namePrefix + "[" + path + "]:";
-        env["print"] = mSol["printGen"](envName);
+        env["print"] = mSol["printGen"](envName + ":");
         env["_G"] = env;
         env[sol::metatable_key]["__metatable"] = false;
 
@@ -395,12 +394,12 @@ namespace LuaUtil
             return std::move(res);
     }
 
-    sol::function LuaState::loadScriptAndCache(const std::string& path)
+    sol::function LuaState::loadScriptAndCache(const VFS::Path::Normalized& path)
     {
         auto iter = mCompiledScripts.find(path);
         if (iter != mCompiledScripts.end())
         {
-            sol::load_result res = mSol.load(iter->second.as_string_view(), path, sol::load_mode::binary);
+            sol::load_result res = mSol.load(iter->second.as_string_view(), path.value(), sol::load_mode::binary);
             // Unless we have memory corruption issues, the bytecode is valid at this point, but loading might still
             // fail because we've hit our Lua memory cap
             if (!res.valid())
@@ -412,10 +411,10 @@ namespace LuaUtil
         return res;
     }
 
-    sol::function LuaState::loadFromVFS(const std::string& path)
+    sol::function LuaState::loadFromVFS(const VFS::Path::Normalized& path)
     {
         std::string fileContent(std::istreambuf_iterator<char>(*mVFS->get(path)), {});
-        sol::load_result res = mSol.load(fileContent, path, sol::load_mode::text);
+        sol::load_result res = mSol.load(fileContent, path.value(), sol::load_mode::text);
         if (!res.valid())
             throw std::runtime_error(std::string("Lua error: ") += res.get<sol::error>().what());
         return res;
