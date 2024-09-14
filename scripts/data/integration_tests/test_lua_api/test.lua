@@ -3,6 +3,7 @@ local core = require('openmw.core')
 local async = require('openmw.async')
 local util = require('openmw.util')
 local types = require('openmw.types')
+local vfs = require('openmw.vfs')
 local world = require('openmw.world')
 
 local function testTimers()
@@ -224,6 +225,42 @@ local function initPlayer()
     coroutine.yield()
 end
 
+local function testVFS()
+    local file = 'test_vfs_dir/lines.txt'
+    testing.expectEqual(vfs.fileExists(file), true, 'lines.txt should exist')
+    testing.expectEqual(vfs.fileExists('test_vfs_dir/nosuchfile'), false, 'nosuchfile should not exist')
+
+    local getLine = vfs.lines(file)
+    for _,v in pairs({ '1', '2', '', '4' }) do
+        testing.expectEqual(getLine(), v)
+    end
+    testing.expectEqual(getLine(), nil, 'All lines should have been read')
+    local ok = pcall(function()
+        vfs.lines('test_vfs_dir/nosuchfile')
+    end)
+    testing.expectEqual(ok, false, 'Should not be able to read lines from nonexistent file')
+
+    local getPath = vfs.pathsWithPrefix('test_vfs_dir/')
+    testing.expectEqual(getPath(), file)
+    testing.expectEqual(getPath(), nil, 'All paths should have been read')
+
+    local handle = vfs.open(file)
+    testing.expectEqual(vfs.type(handle), 'file', 'File should be open')
+    testing.expectEqual(handle.fileName, file)
+
+    local n1, n2, _, l3, l4 = handle:read("*n", "*number", "*l", "*line", "*l")
+    testing.expectEqual(n1, 1)
+    testing.expectEqual(n2, 2)
+    testing.expectEqual(l3, '')
+    testing.expectEqual(l4, '4')
+
+    testing.expectEqual(handle:seek('set', 0), 0, 'Reading should happen from the start of the file')
+    testing.expectEqual(handle:read("*a"), '1\n2\n\n4')
+
+    testing.expectEqual(handle:close(), true, 'File should be closeable')
+    testing.expectEqual(vfs.type(handle), 'closed file', 'File should be closed')
+end
+
 tests = {
     {'timers', testTimers},
     {'rotating player with controls.yawChange should change rotation', function()
@@ -283,6 +320,7 @@ tests = {
         world.createObject('basic_dagger1h', 1):moveInto(player)
         testing.runLocalTest(player, 'playerWeaponAttack')
     end},
+    {'vfs', testVFS},
 }
 
 return {
