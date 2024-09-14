@@ -151,7 +151,9 @@ void CSVRender::Object::update()
         }
         else if (!model.empty())
         {
-            std::string path = "meshes\\" + model;
+            constexpr VFS::Path::NormalizedView meshes("meshes");
+            VFS::Path::Normalized path(meshes);
+            path /= model;
             mResourceSystem->getSceneManager()->getInstance(path, mBaseNode);
         }
         else

@@ -188,7 +188,7 @@ namespace MWRender
         osg::Vec4f mSkyColour;
         osg::Vec4f mFogColour;
 
-        std::string mCurrentParticleEffect;
+        VFS::Path::Normalized mCurrentParticleEffect;
 
         float mRemainingTransitionTime;
 

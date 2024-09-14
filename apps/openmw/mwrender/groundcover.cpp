@@ -428,7 +428,7 @@ namespace MWRender
         osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * ESM::Land::REAL_SIZE;
         for (auto& pair : instances)
         {
-            const osg::Node* temp = mSceneManager->getTemplate(pair.first);
+            const osg::Node* temp = mSceneManager->getTemplate(VFS::Path::toNormalized(pair.first));
             osg::ref_ptr<osg::Node> node = static_cast<osg::Node*>(temp->clone(osg::CopyOp::DEEP_COPY_NODES
                 | osg::CopyOp::DEEP_COPY_DRAWABLES | osg::CopyOp::DEEP_COPY_USERDATA | osg::CopyOp::DEEP_COPY_ARRAYS
                 | osg::CopyOp::DEEP_COPY_PRIMITIVES));

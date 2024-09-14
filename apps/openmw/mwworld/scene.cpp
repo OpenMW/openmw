@@ -22,6 +22,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/settings/values.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -1094,7 +1095,7 @@ namespace MWWorld
     class PreloadMeshItem : public SceneUtil::WorkItem
     {
     public:
-        PreloadMeshItem(const std::string& mesh, Resource::SceneManager* sceneManager)
+        explicit PreloadMeshItem(VFS::Path::NormalizedView mesh, Resource::SceneManager* sceneManager)
             : mMesh(mesh)
             , mSceneManager(sceneManager)
         {
@@ -1118,21 +1119,21 @@ namespace MWWorld
         void abort() override { mAborted = true; }
 
     private:
-        std::string mMesh;
+        VFS::Path::Normalized mMesh;
         Resource::SceneManager* mSceneManager;
         std::atomic_bool mAborted{ false };
     };
 
     void Scene::preload(const std::string& mesh, bool useAnim)
     {
-        std::string mesh_ = mesh;
+        std::string meshPath = mesh;
         if (useAnim)
-            mesh_ = Misc::ResourceHelpers::correctActorModelPath(mesh_, mRendering.getResourceSystem()->getVFS());
+            meshPath = Misc::ResourceHelpers::correctActorModelPath(meshPath, mRendering.getResourceSystem()->getVFS());
 
-        if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(mesh_, mRendering.getReferenceTime()))
+        if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(meshPath, mRendering.getReferenceTime()))
         {
-            osg::ref_ptr<PreloadMeshItem> item(
-                new PreloadMeshItem(mesh_, mRendering.getResourceSystem()->getSceneManager()));
+            osg::ref_ptr<PreloadMeshItem> item(new PreloadMeshItem(
+                VFS::Path::toNormalized(meshPath), mRendering.getResourceSystem()->getSceneManager()));
             mRendering.getWorkQueue()->addWorkItem(item);
             const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
             mWorkItems.erase(std::remove_if(mWorkItems.begin(), mWorkItems.end(), isDone), mWorkItems.end());

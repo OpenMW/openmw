@@ -671,7 +671,7 @@ namespace MWRender
                                 ->second;
             }
 
-            osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
+            osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(VFS::Path::toNormalized(model), false);
 
             if (activeGrid)
             {

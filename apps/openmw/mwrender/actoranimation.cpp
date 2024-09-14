@@ -73,7 +73,8 @@ namespace MWRender
         if (!parent)
             return nullptr;
 
-        osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model, parent);
+        osg::ref_ptr<osg::Node> instance
+            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), parent);
 
         const NodeMap& nodeMap = getNodeMap();
         NodeMap::const_iterator found = nodeMap.find(bonename);
@@ -89,7 +90,8 @@ namespace MWRender
     osg::ref_ptr<osg::Node> ActorAnimation::attach(
         const std::string& model, std::string_view bonename, std::string_view bonefilter, bool isLight)
     {
-        osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
+        osg::ref_ptr<const osg::Node> templateNode
+            = mResourceSystem->getSceneManager()->getTemplate(VFS::Path::toNormalized(model));
 
         const NodeMap& nodeMap = getNodeMap();
         auto found = nodeMap.find(bonename);
@@ -145,7 +147,7 @@ namespace MWRender
         if (mesh.empty())
             return mesh;
 
-        const std::string holsteredName = addSuffixBeforeExtension(mesh, "_sh");
+        const VFS::Path::Normalized holsteredName(addSuffixBeforeExtension(mesh, "_sh"));
         if (mResourceSystem->getVFS()->exists(holsteredName))
         {
             osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);
@@ -243,7 +245,8 @@ namespace MWRender
         // file.
         if (shieldNode && !shieldNode->getNumChildren())
         {
-            osg::ref_ptr<osg::Node> fallbackNode = mResourceSystem->getSceneManager()->getInstance(mesh, shieldNode);
+            osg::ref_ptr<osg::Node> fallbackNode
+                = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(mesh), shieldNode);
             if (isEnchanted)
                 SceneUtil::addEnchantedGlow(shieldNode, mResourceSystem, glowColor);
         }
@@ -381,7 +384,7 @@ namespace MWRender
             if (!weaponNode->getNumChildren())
             {
                 osg::ref_ptr<osg::Node> fallbackNode
-                    = mResourceSystem->getSceneManager()->getInstance(mesh, weaponNode);
+                    = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(mesh), weaponNode);
                 resetControllers(fallbackNode);
             }
 
@@ -463,7 +466,7 @@ namespace MWRender
 
         // Add new ones
         osg::Vec4f glowColor = ammo->getClass().getEnchantmentColor(*ammo);
-        std::string model = ammo->getClass().getCorrectedModel(*ammo);
+        const VFS::Path::Normalized model(ammo->getClass().getCorrectedModel(*ammo));
         for (unsigned int i = 0; i < ammoCount; ++i)
         {
             osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();

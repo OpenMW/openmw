@@ -1473,7 +1473,7 @@ namespace MWRender
     }
 
     void loadBonesFromFile(
-        osg::ref_ptr<osg::Node>& baseNode, const std::string& model, Resource::ResourceSystem* resourceSystem)
+        osg::ref_ptr<osg::Node>& baseNode, VFS::Path::NormalizedView model, Resource::ResourceSystem* resourceSystem)
     {
         const osg::Node* node = resourceSystem->getSceneManager()->getTemplate(model).get();
         osg::ref_ptr<osg::Node> sheathSkeleton(
@@ -1511,7 +1511,7 @@ namespace MWRender
         for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
             if (Misc::getFileExtension(name) == "nif")
-                loadBonesFromFile(node, name, resourceSystem);
+                loadBonesFromFile(node, VFS::Path::toNormalized(name), resourceSystem);
         }
     }
 
@@ -1526,7 +1526,7 @@ namespace MWRender
             Cache::iterator found = cache.find(model);
             if (found == cache.end())
             {
-                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(VFS::Path::toNormalized(model));
 
                 if (inject)
                 {
@@ -1547,7 +1547,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(VFS::Path::toNormalized(model));
 
             if (inject)
             {
@@ -1762,7 +1762,8 @@ namespace MWRender
         }
         parentNode->addChild(trans);
 
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, trans);
+        osg::ref_ptr<osg::Node> node
+            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), trans);
 
         // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
         node->getOrCreateStateSet()->setAttributeAndModes(
