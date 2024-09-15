@@ -8,16 +8,17 @@ namespace
     using namespace Misc::ResourceHelpers;
     TEST(CorrectSoundPath, wav_files_not_overridden_with_mp3_in_vfs_are_not_corrected)
     {
-        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { "sound/bar.wav", nullptr } });
         constexpr VFS::Path::NormalizedView path("sound/bar.wav");
+        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { path, nullptr } });
         EXPECT_EQ(correctSoundPath(path, *mVFS), "sound/bar.wav");
     }
 
     TEST(CorrectSoundPath, wav_files_overridden_with_mp3_in_vfs_are_corrected)
     {
-        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { "sound/foo.mp3", nullptr } });
-        constexpr VFS::Path::NormalizedView path("sound/foo.wav");
-        EXPECT_EQ(correctSoundPath(path, *mVFS), "sound/foo.mp3");
+        constexpr VFS::Path::NormalizedView mp3("sound/foo.mp3");
+        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { mp3, nullptr } });
+        constexpr VFS::Path::NormalizedView wav("sound/foo.wav");
+        EXPECT_EQ(correctSoundPath(wav, *mVFS), "sound/foo.mp3");
     }
 
     TEST(CorrectSoundPath, corrected_path_does_not_check_existence_in_vfs)

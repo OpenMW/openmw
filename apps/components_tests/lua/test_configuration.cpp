@@ -44,7 +44,7 @@ namespace
         EXPECT_EQ(LuaUtil::scriptCfgToString(cfg.mScripts[1]), "PLAYER : my_mod/player.lua");
         EXPECT_EQ(LuaUtil::scriptCfgToString(cfg.mScripts[2]), "CUSTOM : my_mod/some_other_script.lua");
         EXPECT_EQ(LuaUtil::scriptCfgToString(cfg.mScripts[3]), "PLAYER NPC CREATURE : my_mod/some_other_script.lua");
-        EXPECT_EQ(LuaUtil::scriptCfgToString(cfg.mScripts[4]), ": my_mod/player.LUA");
+        EXPECT_EQ(LuaUtil::scriptCfgToString(cfg.mScripts[4]), ": my_mod/player.lua");
         EXPECT_EQ(LuaUtil::scriptCfgToString(cfg.mScripts[5]), "CUSTOM CREATURE : my_mod/creature.lua");
 
         LuaUtil::ScriptsConfiguration conf;
@@ -54,7 +54,7 @@ namespace
         // cfg.mScripts[1] is overridden by cfg.mScripts[4]
         // cfg.mScripts[2] is overridden by cfg.mScripts[3]
         EXPECT_EQ(LuaUtil::scriptCfgToString(conf[1]), "PLAYER NPC CREATURE : my_mod/some_other_script.lua");
-        EXPECT_EQ(LuaUtil::scriptCfgToString(conf[2]), ": my_mod/player.LUA");
+        EXPECT_EQ(LuaUtil::scriptCfgToString(conf[2]), ": my_mod/player.lua");
         EXPECT_EQ(LuaUtil::scriptCfgToString(conf[3]), "CUSTOM CREATURE : my_mod/creature.lua");
 
         EXPECT_THAT(asVector(conf.getGlobalConf()), ElementsAre(Pair(0, "")));
@@ -89,7 +89,7 @@ namespace
     {
         ESM::LuaScriptsCfg cfg;
         ESM::LuaScriptCfg& script1 = cfg.mScripts.emplace_back();
-        script1.mScriptPath = "Script1.lua";
+        script1.mScriptPath = VFS::Path::Normalized("Script1.lua");
         script1.mInitializationData = "data1";
         script1.mFlags = ESM::LuaScriptCfg::sPlayer;
         script1.mTypes.push_back(ESM::REC_CREA);
@@ -98,12 +98,12 @@ namespace
         script1.mRefs.push_back({ true, 2, 4, "" });
 
         ESM::LuaScriptCfg& script2 = cfg.mScripts.emplace_back();
-        script2.mScriptPath = "Script2.lua";
+        script2.mScriptPath = VFS::Path::Normalized("Script2.lua");
         script2.mFlags = ESM::LuaScriptCfg::sCustom;
         script2.mTypes.push_back(ESM::REC_CONT);
 
         ESM::LuaScriptCfg& script1Extra = cfg.mScripts.emplace_back();
-        script1Extra.mScriptPath = "script1.LUA";
+        script1Extra.mScriptPath = VFS::Path::Normalized("script1.LUA");
         script1Extra.mFlags = ESM::LuaScriptCfg::sCustom | ESM::LuaScriptCfg::sMerge;
         script1Extra.mTypes.push_back(ESM::REC_NPC_);
         script1Extra.mRecords.push_back({ false, ESM::RefId::stringRefId("rat"), "" });
@@ -115,8 +115,8 @@ namespace
         conf.init(cfg);
         ASSERT_EQ(conf.size(), 2);
         EXPECT_EQ(LuaUtil::scriptCfgToString(conf[0]),
-            "CUSTOM PLAYER CREATURE NPC : Script1.lua ; data 5 bytes ; 3 records ; 4 objects");
-        EXPECT_EQ(LuaUtil::scriptCfgToString(conf[1]), "CUSTOM CONTAINER : Script2.lua");
+            "CUSTOM PLAYER CREATURE NPC : script1.lua ; data 5 bytes ; 3 records ; 4 objects");
+        EXPECT_EQ(LuaUtil::scriptCfgToString(conf[1]), "CUSTOM CONTAINER : script2.lua");
 
         EXPECT_THAT(asVector(conf.getPlayerConf()), ElementsAre(Pair(0, "data1")));
         EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, ESM::RefId::stringRefId("something"), ESM::RefNum())),
@@ -139,7 +139,7 @@ namespace
             ElementsAre(Pair(0, "data1"), Pair(1, "")));
 
         ESM::LuaScriptCfg& script3 = cfg.mScripts.emplace_back();
-        script3.mScriptPath = "script1.lua";
+        script3.mScriptPath = VFS::Path::Normalized("script1.lua");
         script3.mFlags = ESM::LuaScriptCfg::sGlobal;
         EXPECT_ERROR(conf.init(cfg), "Flags mismatch for script1.lua");
     }
@@ -168,13 +168,13 @@ namespace
         }
         {
             ESM::LuaScriptCfg& script = cfg.mScripts.emplace_back();
-            script.mScriptPath = "test_global.lua";
+            script.mScriptPath = VFS::Path::Normalized("test_global.lua");
             script.mFlags = ESM::LuaScriptCfg::sGlobal;
             script.mInitializationData = luaData;
         }
         {
             ESM::LuaScriptCfg& script = cfg.mScripts.emplace_back();
-            script.mScriptPath = "test_local.lua";
+            script.mScriptPath = VFS::Path::Normalized("test_local.lua");
             script.mFlags = ESM::LuaScriptCfg::sMerge;
             script.mTypes.push_back(ESM::REC_DOOR);
             script.mTypes.push_back(ESM::REC_MISC);

@@ -9,6 +9,8 @@ namespace
 {
     using namespace testing;
 
+    constexpr VFS::Path::NormalizedView counterPath("aaa/counter.lua");
+
     TestingOpenMW::VFSTestFile counterFile(R"X(
 x = 42
 return {
@@ -17,7 +19,11 @@ return {
 }
 )X");
 
+    constexpr VFS::Path::NormalizedView invalidPath("invalid.lua");
+
     TestingOpenMW::VFSTestFile invalidScriptFile("Invalid script");
+
+    constexpr VFS::Path::NormalizedView testsPath("bbb/tests.lua");
 
     TestingOpenMW::VFSTestFile testsFile(R"X(
 return {
@@ -51,6 +57,8 @@ return {
 }
 )X");
 
+    constexpr VFS::Path::NormalizedView metaIndexErrorPath("metaindexerror.lua");
+
     TestingOpenMW::VFSTestFile metaIndexErrorFile(
         "return setmetatable({}, { __index = function(t, key) error('meta index error') end })");
 
@@ -66,14 +74,24 @@ return {
         return buf.str();
     }
 
+    constexpr VFS::Path::NormalizedView bigPath("big.lua");
+
     TestingOpenMW::VFSTestFile bigScriptFile(genBigScript());
+
+    constexpr VFS::Path::NormalizedView requireBigPath("requirebig.lua");
+
     TestingOpenMW::VFSTestFile requireBigScriptFile("local x = require('big') ; return {x}");
 
     struct LuaStateTest : Test
     {
-        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({ { "aaa/counter.lua", &counterFile },
-            { "bbb/tests.lua", &testsFile }, { "invalid.lua", &invalidScriptFile }, { "big.lua", &bigScriptFile },
-            { "requireBig.lua", &requireBigScriptFile }, { "metaIndexError.lua", &metaIndexErrorFile } });
+        std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({
+            { counterPath, &counterFile },
+            { testsPath, &testsFile },
+            { invalidPath, &invalidScriptFile },
+            { bigPath, &bigScriptFile },
+            { requireBigPath, &requireBigScriptFile },
+            { metaIndexErrorPath, &metaIndexErrorFile },
+        });
 
         LuaUtil::ScriptsConfiguration mCfg;
         LuaUtil::LuaState mLua{ mVFS.get(), &mCfg };
@@ -81,7 +99,7 @@ return {
 
     TEST_F(LuaStateTest, Sandbox)
     {
-        const VFS::Path::Normalized path("aaa/counter.lua");
+        const VFS::Path::Normalized path(counterPath);
         sol::table script1 = mLua.runInNewSandbox(path);
 
         EXPECT_EQ(LuaUtil::call(script1["get"]).get<int>(), 42);

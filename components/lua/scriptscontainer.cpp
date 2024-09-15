@@ -73,7 +73,7 @@ namespace LuaUtil
         if (mScripts.count(scriptId) != 0)
             return false; // already present
 
-        const std::string& path = scriptPath(scriptId);
+        const VFS::Path::Normalized& path = scriptPath(scriptId);
         std::string debugName = mNamePrefix;
         debugName.push_back('[');
         debugName.append(path);

@@ -390,7 +390,7 @@ namespace MWLua
                 };
                 objectT["addScript"] = [context](const GObject& object, std::string_view path, sol::object initData) {
                     const LuaUtil::ScriptsConfiguration& cfg = context.mLua->getConfiguration();
-                    std::optional<int> scriptId = cfg.findId(path);
+                    std::optional<int> scriptId = cfg.findId(VFS::Path::Normalized(path));
                     if (!scriptId)
                         throw std::runtime_error("Unknown script: " + std::string(path));
                     if (!(cfg[*scriptId].mFlags & ESM::LuaScriptCfg::sCustom))
@@ -407,7 +407,7 @@ namespace MWLua
                 };
                 objectT["hasScript"] = [lua = context.mLua](const GObject& object, std::string_view path) {
                     const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
-                    std::optional<int> scriptId = cfg.findId(path);
+                    std::optional<int> scriptId = cfg.findId(VFS::Path::Normalized(path));
                     if (!scriptId)
                         return false;
                     MWWorld::Ptr ptr = object.ptr();
@@ -419,7 +419,7 @@ namespace MWLua
                 };
                 objectT["removeScript"] = [lua = context.mLua](const GObject& object, std::string_view path) {
                     const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
-                    std::optional<int> scriptId = cfg.findId(path);
+                    std::optional<int> scriptId = cfg.findId(VFS::Path::Normalized(path));
                     if (!scriptId)
                         throw std::runtime_error("Unknown script: " + std::string(path));
                     MWWorld::Ptr ptr = object.ptr();

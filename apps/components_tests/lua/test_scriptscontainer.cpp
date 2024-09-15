@@ -14,10 +14,21 @@ namespace
     using namespace testing;
     using namespace TestingOpenMW;
 
+    constexpr VFS::Path::NormalizedView invalidPath("invalid.lua");
+
     VFSTestFile invalidScript("not a script");
+
+    constexpr VFS::Path::NormalizedView incorrectPath("incorrect.lua");
+
     VFSTestFile incorrectScript(
         "return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
+
+    constexpr VFS::Path::NormalizedView emptyPath("empty.lua");
+
     VFSTestFile emptyScript("");
+
+    constexpr VFS::Path::NormalizedView test1Path("test1.lua");
+    constexpr VFS::Path::NormalizedView test2Path("test2.lua");
 
     VFSTestFile testScript(R"X(
 return {
@@ -33,6 +44,8 @@ return {
 }
 )X");
 
+    constexpr VFS::Path::NormalizedView stopEventPath("stopevent.lua");
+
     VFSTestFile stopEventScript(R"X(
 return {
     eventHandlers = {
@@ -43,6 +56,9 @@ return {
     }
 }
 )X");
+
+    constexpr VFS::Path::NormalizedView loadSave1Path("loadsave1.lua");
+    constexpr VFS::Path::NormalizedView loadSave2Path("loadsave2.lua");
 
     VFSTestFile loadSaveScript(R"X(
 x = 0
@@ -70,6 +86,8 @@ return {
 }
 )X");
 
+    constexpr VFS::Path::NormalizedView testInterfacePath("testinterface.lua");
+
     VFSTestFile interfaceScript(R"X(
 return {
     interfaceName = "TestInterface",
@@ -79,6 +97,8 @@ return {
     },
 }
 )X");
+
+    constexpr VFS::Path::NormalizedView overrideInterfacePath("overrideinterface.lua");
 
     VFSTestFile overrideInterfaceScript(R"X(
 local old = nil
@@ -104,6 +124,8 @@ return {
 }
 )X");
 
+    constexpr VFS::Path::NormalizedView useInterfacePath("useinterface.lua");
+
     VFSTestFile useInterfaceScript(R"X(
 local interfaces = require('openmw.interfaces')
 return {
@@ -118,17 +140,17 @@ return {
     struct LuaScriptsContainerTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
-            { "invalid.lua", &invalidScript },
-            { "incorrect.lua", &incorrectScript },
-            { "empty.lua", &emptyScript },
-            { "test1.lua", &testScript },
-            { "test2.lua", &testScript },
-            { "stopEvent.lua", &stopEventScript },
-            { "loadSave1.lua", &loadSaveScript },
-            { "loadSave2.lua", &loadSaveScript },
-            { "testInterface.lua", &interfaceScript },
-            { "overrideInterface.lua", &overrideInterfaceScript },
-            { "useInterface.lua", &useInterfaceScript },
+            { invalidPath, &invalidScript },
+            { incorrectPath, &incorrectScript },
+            { emptyPath, &emptyScript },
+            { test1Path, &testScript },
+            { test2Path, &testScript },
+            { stopEventPath, &stopEventScript },
+            { loadSave1Path, &loadSaveScript },
+            { loadSave2Path, &loadSaveScript },
+            { testInterfacePath, &interfaceScript },
+            { overrideInterfacePath, &overrideInterfaceScript },
+            { useInterfacePath, &useInterfaceScript },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;
@@ -152,39 +174,49 @@ CUSTOM, PLAYER: useInterface.lua
 )X");
             mCfg.init(std::move(cfg));
         }
+
+        int getId(VFS::Path::NormalizedView path) const
+        {
+            const std::optional<int> id = mCfg.findId(path);
+            if (!id.has_value())
+                throw std::invalid_argument("Script id is not found: " + std::string(path.value()));
+            return *id;
+        }
     };
 
-    TEST_F(LuaScriptsContainerTest, VerifyStructure)
+    TEST_F(LuaScriptsContainerTest, addCustomScriptShouldNotStartInvalidScript)
     {
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
-        {
-            testing::internal::CaptureStdout();
-            EXPECT_FALSE(scripts.addCustomScript(*mCfg.findId("invalid.lua")));
-            std::string output = testing::internal::GetCapturedStdout();
-            EXPECT_THAT(output, HasSubstr("Can't start Test[invalid.lua]"));
-        }
-        {
-            testing::internal::CaptureStdout();
-            EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("incorrect.lua")));
-            std::string output = testing::internal::GetCapturedStdout();
-            EXPECT_THAT(output, HasSubstr("Not supported handler 'incorrectHandler' in Test[incorrect.lua]"));
-            EXPECT_THAT(output, HasSubstr("Not supported section 'incorrectSection' in Test[incorrect.lua]"));
-        }
-        {
-            testing::internal::CaptureStdout();
-            EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("empty.lua")));
-            EXPECT_FALSE(scripts.addCustomScript(*mCfg.findId("empty.lua"))); // already present
-            EXPECT_EQ(internal::GetCapturedStdout(), "");
-        }
+        testing::internal::CaptureStdout();
+        EXPECT_FALSE(scripts.addCustomScript(getId(invalidPath)));
+        std::string output = testing::internal::GetCapturedStdout();
+        EXPECT_THAT(output, HasSubstr("Can't start Test[invalid.lua]"));
+    }
+
+    TEST_F(LuaScriptsContainerTest, addCustomScriptShouldNotSuportScriptsWithInvalidHandlerAndSection)
+    {
+        LuaUtil::ScriptsContainer scripts(&mLua, "Test");
+        testing::internal::CaptureStdout();
+        EXPECT_TRUE(scripts.addCustomScript(getId(incorrectPath)));
+        std::string output = testing::internal::GetCapturedStdout();
+        EXPECT_THAT(output, HasSubstr("Not supported handler 'incorrectHandler' in Test[incorrect.lua]"));
+        EXPECT_THAT(output, HasSubstr("Not supported section 'incorrectSection' in Test[incorrect.lua]"));
+    }
+
+    TEST_F(LuaScriptsContainerTest, addCustomScriptShouldReturnFalseForDuplicates)
+    {
+        LuaUtil::ScriptsContainer scripts(&mLua, "Test");
+        EXPECT_TRUE(scripts.addCustomScript(getId(emptyPath)));
+        EXPECT_FALSE(scripts.addCustomScript(getId(emptyPath)));
     }
 
     TEST_F(LuaScriptsContainerTest, CallHandler)
     {
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
         testing::internal::CaptureStdout();
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test1.lua")));
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("stopEvent.lua")));
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test2.lua")));
+        EXPECT_TRUE(scripts.addCustomScript(getId(test1Path)));
+        EXPECT_TRUE(scripts.addCustomScript(getId(stopEventPath)));
+        EXPECT_TRUE(scripts.addCustomScript(getId(test2Path)));
         scripts.update(1.5f);
         EXPECT_EQ(internal::GetCapturedStdout(),
             "Test[test1.lua]:\t update 1.5\n"
@@ -194,9 +226,10 @@ CUSTOM, PLAYER: useInterface.lua
     TEST_F(LuaScriptsContainerTest, CallEvent)
     {
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test1.lua")));
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("stopEvent.lua")));
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test2.lua")));
+
+        EXPECT_TRUE(scripts.addCustomScript(getId(test1Path)));
+        EXPECT_TRUE(scripts.addCustomScript(getId(stopEventPath)));
+        EXPECT_TRUE(scripts.addCustomScript(getId(test2Path)));
 
         sol::state_view sol = mLua.unsafeState();
         std::string X0 = LuaUtil::serialize(sol.create_table_with("x", 0.5));
@@ -212,7 +245,7 @@ CUSTOM, PLAYER: useInterface.lua
             scripts.receiveEvent("Event1", X1);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test2.lua]:\t event1 1.5\n"
-                "Test[stopEvent.lua]:\t event1 1.5\n"
+                "Test[stopevent.lua]:\t event1 1.5\n"
                 "Test[test1.lua]:\t event1 1.5\n");
         }
         {
@@ -227,7 +260,7 @@ CUSTOM, PLAYER: useInterface.lua
             scripts.receiveEvent("Event1", X0);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test2.lua]:\t event1 0.5\n"
-                "Test[stopEvent.lua]:\t event1 0.5\n");
+                "Test[stopevent.lua]:\t event1 0.5\n");
         }
         {
             testing::internal::CaptureStdout();
@@ -241,9 +274,11 @@ CUSTOM, PLAYER: useInterface.lua
     TEST_F(LuaScriptsContainerTest, RemoveScript)
     {
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test1.lua")));
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("stopEvent.lua")));
-        EXPECT_TRUE(scripts.addCustomScript(*mCfg.findId("test2.lua")));
+
+        EXPECT_TRUE(scripts.addCustomScript(getId(test1Path)));
+        EXPECT_TRUE(scripts.addCustomScript(getId(stopEventPath)));
+        EXPECT_TRUE(scripts.addCustomScript(getId(test2Path)));
+
         sol::state_view sol = mLua.unsafeState();
         std::string X = LuaUtil::serialize(sol.create_table_with("x", 0.5));
 
@@ -255,11 +290,11 @@ CUSTOM, PLAYER: useInterface.lua
                 "Test[test1.lua]:\t update 1.5\n"
                 "Test[test2.lua]:\t update 1.5\n"
                 "Test[test2.lua]:\t event1 0.5\n"
-                "Test[stopEvent.lua]:\t event1 0.5\n");
+                "Test[stopevent.lua]:\t event1 0.5\n");
         }
         {
             testing::internal::CaptureStdout();
-            int stopEventScriptId = *mCfg.findId("stopEvent.lua");
+            const int stopEventScriptId = getId(stopEventPath);
             EXPECT_TRUE(scripts.hasScript(stopEventScriptId));
             scripts.removeScript(stopEventScriptId);
             EXPECT_FALSE(scripts.hasScript(stopEventScriptId));
@@ -273,7 +308,7 @@ CUSTOM, PLAYER: useInterface.lua
         }
         {
             testing::internal::CaptureStdout();
-            scripts.removeScript(*mCfg.findId("test1.lua"));
+            scripts.removeScript(getId(test1Path));
             scripts.update(1.5f);
             scripts.receiveEvent("Event1", X);
             EXPECT_EQ(internal::GetCapturedStdout(),
@@ -290,19 +325,19 @@ CUSTOM, PLAYER: useInterface.lua
         scripts.addAutoStartedScripts();
         scripts.update(1.5f);
         EXPECT_EQ(internal::GetCapturedStdout(),
-            "Test[overrideInterface.lua]:\toverride\n"
-            "Test[overrideInterface.lua]:\tinit\n"
-            "Test[overrideInterface.lua]:\tNEW FN\t4.5\n"
-            "Test[testInterface.lua]:\tFN\t4.5\n");
+            "Test[overrideinterface.lua]:\toverride\n"
+            "Test[overrideinterface.lua]:\tinit\n"
+            "Test[overrideinterface.lua]:\tNEW FN\t4.5\n"
+            "Test[testinterface.lua]:\tFN\t4.5\n");
     }
 
     TEST_F(LuaScriptsContainerTest, Interface)
     {
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
         scripts.setAutoStartConf(mCfg.getLocalConf(ESM::REC_CREA, ESM::RefId(), ESM::RefNum()));
-        int addIfaceId = *mCfg.findId("testInterface.lua");
-        int overrideIfaceId = *mCfg.findId("overrideInterface.lua");
-        int useIfaceId = *mCfg.findId("useInterface.lua");
+        const int addIfaceId = getId(testInterfacePath);
+        const int overrideIfaceId = getId(overrideInterfacePath);
+        const int useIfaceId = getId(useInterfacePath);
 
         testing::internal::CaptureStdout();
         scripts.addAutoStartedScripts();
@@ -317,11 +352,11 @@ CUSTOM, PLAYER: useInterface.lua
         scripts.removeScript(overrideIfaceId);
         scripts.update(1.5f);
         EXPECT_EQ(internal::GetCapturedStdout(),
-            "Test[overrideInterface.lua]:\toverride\n"
-            "Test[overrideInterface.lua]:\tinit\n"
-            "Test[overrideInterface.lua]:\tNEW FN\t4.5\n"
-            "Test[testInterface.lua]:\tFN\t4.5\n"
-            "Test[testInterface.lua]:\tFN\t3.5\n");
+            "Test[overrideinterface.lua]:\toverride\n"
+            "Test[overrideinterface.lua]:\tinit\n"
+            "Test[overrideinterface.lua]:\tNEW FN\t4.5\n"
+            "Test[testinterface.lua]:\tFN\t4.5\n"
+            "Test[testinterface.lua]:\tFN\t3.5\n");
     }
 
     TEST_F(LuaScriptsContainerTest, LoadSave)
@@ -334,7 +369,7 @@ CUSTOM, PLAYER: useInterface.lua
         scripts3.setAutoStartConf(mCfg.getPlayerConf());
 
         scripts1.addAutoStartedScripts();
-        EXPECT_TRUE(scripts1.addCustomScript(*mCfg.findId("test1.lua")));
+        EXPECT_TRUE(scripts1.addCustomScript(getId(test1Path)));
 
         sol::state_view sol = mLua.unsafeState();
         scripts1.receiveEvent("Set", LuaUtil::serialize(sol.create_table_with("n", 1, "x", 0.5, "y", 3.5)));
@@ -349,23 +384,23 @@ CUSTOM, PLAYER: useInterface.lua
             scripts2.receiveEvent("Print", "");
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test1.lua]:\tload\n"
-                "Test[loadSave2.lua]:\t0.5\t3.5\n"
-                "Test[loadSave1.lua]:\t2.5\t1.5\n"
+                "Test[loadsave2.lua]:\t0.5\t3.5\n"
+                "Test[loadsave1.lua]:\t2.5\t1.5\n"
                 "Test[test1.lua]:\tprint\n");
-            EXPECT_FALSE(scripts2.hasScript(*mCfg.findId("testInterface.lua")));
+            EXPECT_FALSE(scripts2.hasScript(getId(testInterfacePath)));
         }
         {
             testing::internal::CaptureStdout();
             scripts3.load(data);
             scripts3.receiveEvent("Print", "");
             EXPECT_EQ(internal::GetCapturedStdout(),
-                "Ignoring Test[loadSave1.lua]; this script is not allowed here\n"
+                "Ignoring Test[loadsave1.lua]; this script is not allowed here\n"
                 "Test[test1.lua]:\tload\n"
-                "Test[overrideInterface.lua]:\toverride\n"
-                "Test[overrideInterface.lua]:\tinit\n"
-                "Test[loadSave2.lua]:\t0.5\t3.5\n"
+                "Test[overrideinterface.lua]:\toverride\n"
+                "Test[overrideinterface.lua]:\tinit\n"
+                "Test[loadsave2.lua]:\t0.5\t3.5\n"
                 "Test[test1.lua]:\tprint\n");
-            EXPECT_TRUE(scripts3.hasScript(*mCfg.findId("testInterface.lua")));
+            EXPECT_TRUE(scripts3.hasScript(getId(testInterfacePath)));
         }
     }
 
@@ -373,8 +408,8 @@ CUSTOM, PLAYER: useInterface.lua
     {
         using TimerType = LuaUtil::ScriptsContainer::TimerType;
         LuaUtil::ScriptsContainer scripts(&mLua, "Test");
-        int test1Id = *mCfg.findId("test1.lua");
-        int test2Id = *mCfg.findId("test2.lua");
+        const int test1Id = getId(test1Path);
+        const int test2Id = getId(test2Path);
 
         testing::internal::CaptureStdout();
         EXPECT_TRUE(scripts.addCustomScript(test1Id));
