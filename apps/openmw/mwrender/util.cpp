@@ -49,7 +49,8 @@ namespace MWRender
     {
         if (texture.empty())
             return;
-        std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture, resourceSystem->getVFS());
+        const VFS::Path::Normalized correctedTexture
+            = Misc::ResourceHelpers::correctTexturePath(texture, resourceSystem->getVFS());
         // Not sure if wrap settings should be pulled from the overridden texture?
         osg::ref_ptr<osg::Texture2D> tex
             = new osg::Texture2D(resourceSystem->getImageManager()->getImage(correctedTexture));

@@ -406,7 +406,7 @@ namespace MWRender
             }
         }
 
-        void setTextures(const std::string& phaseTex, const std::string& circleTex)
+        void setTextures(VFS::Path::NormalizedView phaseTex, VFS::Path::NormalizedView circleTex)
         {
             mPhaseTex = new osg::Texture2D(mImageManager.getImage(phaseTex));
             mPhaseTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -766,7 +766,9 @@ namespace MWRender
 
         Resource::ImageManager& imageManager = *sceneManager.getImageManager();
 
-        osg::ref_ptr<osg::Texture2D> sunTex = new osg::Texture2D(imageManager.getImage("textures/tx_sun_05.dds"));
+        constexpr VFS::Path::NormalizedView image("textures/tx_sun_05.dds");
+
+        osg::ref_ptr<osg::Texture2D> sunTex = new osg::Texture2D(imageManager.getImage(image));
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -907,8 +909,8 @@ namespace MWRender
 
     void Sun::createSunFlash(Resource::ImageManager& imageManager)
     {
-        osg::ref_ptr<osg::Texture2D> tex
-            = new osg::Texture2D(imageManager.getImage("textures/tx_sun_flash_grey_05.dds"));
+        constexpr VFS::Path::NormalizedView image("textures/tx_sun_flash_grey_05.dds");
+        osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D(imageManager.getImage(image));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -1115,10 +1117,18 @@ namespace MWRender
 
         textureName += ".dds";
 
+        const VFS::Path::Normalized texturePath(std::move(textureName));
+
         if (mType == Moon::Type_Secunda)
-            mUpdater->setTextures(textureName, "textures/tx_mooncircle_full_s.dds");
+        {
+            constexpr VFS::Path::NormalizedView secunda("textures/tx_mooncircle_full_s.dds");
+            mUpdater->setTextures(texturePath, secunda);
+        }
         else
-            mUpdater->setTextures(textureName, "textures/tx_mooncircle_full_m.dds");
+        {
+            constexpr VFS::Path::NormalizedView masser("textures/tx_mooncircle_full_m.dds");
+            mUpdater->setTextures(texturePath, masser);
+        }
     }
 
     int RainCounter::numParticlesToCreate(double dt) const

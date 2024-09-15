@@ -2229,9 +2229,10 @@ namespace MWGui
             ResourceImageSetPointerFix* imgSetPointer = resource->castType<ResourceImageSetPointerFix>(false);
             if (!imgSetPointer)
                 continue;
-            auto tex_name = imgSetPointer->getImageSet()->getIndexInfo(0, 0).texture;
 
-            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(tex_name);
+            const VFS::Path::Normalized path(imgSetPointer->getImageSet()->getIndexInfo(0, 0).texture);
+
+            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(path);
 
             if (image.valid())
             {

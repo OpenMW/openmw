@@ -41,8 +41,8 @@ namespace
         {
             std::ostringstream texname;
             texname << "textures/water/" << tex << std::setw(2) << std::setfill('0') << i << ".dds";
-            osg::ref_ptr<osg::Texture2D> tex2(
-                new osg::Texture2D(resourceSystem->getImageManager()->getImage(texname.str())));
+            const VFS::Path::Normalized path(texname.str());
+            osg::ref_ptr<osg::Texture2D> tex2(new osg::Texture2D(resourceSystem->getImageManager()->getImage(path)));
             tex2->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
             tex2->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
             resourceSystem->getSceneManager()->applyFilterSettings(tex2);

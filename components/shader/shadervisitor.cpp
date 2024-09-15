@@ -404,17 +404,19 @@ namespace Shader
                 bool normalHeight = false;
                 std::string normalHeightMap = normalMapFileName;
                 Misc::StringUtils::replaceLast(normalHeightMap, ".", mNormalHeightMapPattern + ".");
-                if (mImageManager.getVFS()->exists(normalHeightMap))
+                const VFS::Path::Normalized normalHeightMapPath(normalHeightMap);
+                if (mImageManager.getVFS()->exists(normalHeightMapPath))
                 {
-                    image = mImageManager.getImage(normalHeightMap);
+                    image = mImageManager.getImage(normalHeightMapPath);
                     normalHeight = true;
                 }
                 else
                 {
                     Misc::StringUtils::replaceLast(normalMapFileName, ".", mNormalMapPattern + ".");
-                    if (mImageManager.getVFS()->exists(normalMapFileName))
+                    const VFS::Path::Normalized normalMapPath(normalMapFileName);
+                    if (mImageManager.getVFS()->exists(normalMapPath))
                     {
-                        image = mImageManager.getImage(normalMapFileName);
+                        image = mImageManager.getImage(normalMapPath);
                     }
                 }
                 // Avoid using the auto-detected normal map if it's already being used as a bump map.
@@ -464,9 +466,10 @@ namespace Shader
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
                 Misc::StringUtils::replaceLast(specularMapFileName, ".", mSpecularMapPattern + ".");
-                if (mImageManager.getVFS()->exists(specularMapFileName))
+                const VFS::Path::Normalized specularMapPath(specularMapFileName);
+                if (mImageManager.getVFS()->exists(specularMapPath))
                 {
-                    osg::ref_ptr<osg::Image> image(mImageManager.getImage(specularMapFileName));
+                    osg::ref_ptr<osg::Image> image(mImageManager.getImage(specularMapPath));
                     osg::ref_ptr<osg::Texture2D> specularMapTex(new osg::Texture2D(image));
                     specularMapTex->setTextureSize(image->s(), image->t());
                     specularMapTex->setWrap(osg::Texture::WRAP_S, diffuseMap->getWrap(osg::Texture::WRAP_S));
