@@ -211,7 +211,7 @@ namespace LuaUtil
             sol::table mHiddenData;
             std::map<std::string, sol::main_protected_function> mRegisteredCallbacks;
             std::map<int64_t, sol::main_protected_function> mTemporaryCallbacks;
-            std::string mPath;
+            VFS::Path::Normalized mPath;
             ScriptStats mStats;
         };
         struct Timer
@@ -239,7 +239,12 @@ namespace LuaUtil
         Script& getScript(int scriptId);
 
         void printError(int scriptId, std::string_view msg, const std::exception& e);
-        const std::string& scriptPath(int scriptId) const { return mLua.getConfiguration()[scriptId].mScriptPath; }
+
+        const VFS::Path::Normalized& scriptPath(int scriptId) const
+        {
+            return mLua.getConfiguration()[scriptId].mScriptPath;
+        }
+
         void callOnInit(LuaView& view, int scriptId, const sol::function& onInit, std::string_view data);
         void callTimer(const Timer& t);
         void updateTimerQueue(std::vector<Timer>& timerQueue, double time);

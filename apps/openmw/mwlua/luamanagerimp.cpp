@@ -850,8 +850,8 @@ namespace MWLua
             bool isMenu = mConfiguration[i].mFlags & ESM::LuaScriptCfg::sMenu;
 
             out << std::left;
-            out << " " << std::setw(nameW) << mConfiguration[i].mScriptPath;
-            if (mConfiguration[i].mScriptPath.size() > nameW)
+            out << " " << std::setw(nameW) << mConfiguration[i].mScriptPath.value();
+            if (mConfiguration[i].mScriptPath.value().size() > nameW)
                 out << "\n " << std::setw(nameW) << ""; // if path is too long, break line
             out << std::right;
             out << std::setw(valueW) << static_cast<int64_t>(activeStats[i].mAvgInstructionCount);

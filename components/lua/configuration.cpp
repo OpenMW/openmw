@@ -60,16 +60,17 @@ namespace LuaUtil
             const ESM::LuaScriptCfg& script = cfg.mScripts[i];
             bool global = script.mFlags & ESM::LuaScriptCfg::sGlobal;
             if (global && (script.mFlags & ~ESM::LuaScriptCfg::sMerge) != ESM::LuaScriptCfg::sGlobal)
-                throw std::runtime_error(std::string("Global script can not have local flags: ") + script.mScriptPath);
+                throw std::runtime_error(
+                    std::string("Global script can not have local flags: ") + script.mScriptPath.value());
             if (global && (!script.mTypes.empty() || !script.mRecords.empty() || !script.mRefs.empty()))
                 throw std::runtime_error(std::string("Global script can not have per-type and per-object configuration")
-                    + script.mScriptPath);
-            auto [it, inserted] = mPathToIndex.emplace(Misc::StringUtils::lowerCase(script.mScriptPath), i);
+                    + script.mScriptPath.value());
+            auto [it, inserted] = mPathToIndex.emplace(script.mScriptPath, i);
             if (inserted)
                 continue;
             ESM::LuaScriptCfg& oldScript = cfg.mScripts[it->second];
             if (global != bool(oldScript.mFlags & ESM::LuaScriptCfg::sGlobal))
-                throw std::runtime_error(std::string("Flags mismatch for ") + script.mScriptPath);
+                throw std::runtime_error(std::string("Flags mismatch for ") + script.mScriptPath.value());
             if (script.mFlags & ESM::LuaScriptCfg::sMerge)
             {
                 oldScript.mFlags |= (script.mFlags & ~ESM::LuaScriptCfg::sMerge);
@@ -113,7 +114,7 @@ namespace LuaUtil
         }
     }
 
-    std::optional<int> ScriptsConfiguration::findId(std::string_view path) const
+    std::optional<int> ScriptsConfiguration::findId(VFS::Path::NormalizedView path) const
     {
         auto it = mPathToIndex.find(path);
         if (it != mPathToIndex.end())
@@ -199,7 +200,7 @@ namespace LuaUtil
                 scriptPath = scriptPath.substr(1);
 
             ESM::LuaScriptCfg& script = cfg.mScripts.emplace_back();
-            script.mScriptPath = std::string(scriptPath);
+            script.mScriptPath = VFS::Path::Normalized(scriptPath);
             script.mFlags = 0;
 
             // Parse tags

@@ -4,8 +4,9 @@
 #include <map>
 #include <optional>
 
-#include "components/esm/luascripts.hpp"
-#include "components/esm3/cellref.hpp"
+#include <components/esm/luascripts.hpp>
+#include <components/esm3/refnum.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace LuaUtil
 {
@@ -19,7 +20,8 @@ namespace LuaUtil
         size_t size() const { return mScripts.size(); }
         const ESM::LuaScriptCfg& operator[](int id) const { return mScripts[id]; }
 
-        std::optional<int> findId(std::string_view path) const;
+        std::optional<int> findId(VFS::Path::NormalizedView path) const;
+
         bool isCustomScript(int id) const { return mScripts[id].mFlags & ESM::LuaScriptCfg::sCustom; }
 
         ScriptIdsWithInitializationData getMenuConf() const { return getConfByFlag(ESM::LuaScriptCfg::sMenu); }
@@ -32,7 +34,7 @@ namespace LuaUtil
         ScriptIdsWithInitializationData getConfByFlag(ESM::LuaScriptCfg::Flags flag) const;
 
         std::vector<ESM::LuaScriptCfg> mScripts;
-        std::map<std::string, int, std::less<>> mPathToIndex;
+        std::map<VFS::Path::Normalized, int, std::less<>> mPathToIndex;
 
         struct DetailedConf
         {
