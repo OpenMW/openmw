@@ -68,6 +68,8 @@ namespace Nif
         RC_bhkPrismaticConstraint,
         RC_bhkRagdollConstraint,
         RC_bhkRagdollSystem,
+        RC_bhkRagdollTemplate,
+        RC_bhkRagdollTemplateData,
         RC_bhkRigidBody,
         RC_bhkRigidBodyT,
         RC_bhkSimpleShapePhantom,

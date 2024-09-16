@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_NIF_PHYSICS_HPP
 #define OPENMW_COMPONENTS_NIF_PHYSICS_HPP
 
+#include "extra.hpp"
 #include "niftypes.hpp"
 #include "record.hpp"
 #include "recordptr.hpp"
@@ -904,6 +905,27 @@ namespace Nif
         osg::Vec4f mForwardLS;
         float mStrength;
         float mDamping;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkRagdollTemplate : Extra
+    {
+        NiAVObjectList mBones;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkRagdollTemplateData : Record
+    {
+        std::string mName;
+        float mMass;
+        float mRestitution;
+        float mFriction;
+        float mRadius;
+        HavokMaterial mHavokMaterial;
+        std::vector<bhkWrappedConstraintData> mConstraints;
 
         void read(NIFStream* nif) override;
     };

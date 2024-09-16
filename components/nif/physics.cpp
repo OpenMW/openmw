@@ -986,4 +986,31 @@ namespace Nif
         nif->skip(8); // Unused
     }
 
+    void bhkRagdollTemplate::read(NIFStream* nif)
+    {
+        Extra::read(nif);
+
+        readRecordList(nif, mBones);
+    }
+
+    void bhkRagdollTemplate::post(Reader& nif)
+    {
+        Extra::post(nif);
+
+        postRecordList(nif, mBones);
+    }
+
+    void bhkRagdollTemplateData::read(NIFStream* nif)
+    {
+        nif->read(mName);
+        nif->read(mMass);
+        nif->read(mRestitution);
+        nif->read(mFriction);
+        nif->read(mRadius);
+        mHavokMaterial.read(nif);
+        mConstraints.resize(nif->get<uint32_t>());
+        for (bhkWrappedConstraintData& constraint : mConstraints)
+            constraint.read(nif);
+    }
+
 } // Namespace

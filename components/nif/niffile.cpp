@@ -477,6 +477,10 @@ namespace Nif
             { "bhkLiquidAction", &construct<bhkLiquidAction, RC_bhkLiquidAction> },
             { "bhkOrientHingedBodyAction", &construct<bhkOrientHingedBodyAction, RC_bhkOrientHingedBodyAction> },
 
+            // Ragdoll template records
+            { "bhkRagdollTemplate", &construct<bhkRagdollTemplate, RC_bhkRagdollTemplate> },
+            { "bhkRagdollTemplateData", &construct<bhkRagdollTemplateData, RC_bhkRagdollTemplateData> },
+
             // PROPERTIES
 
             // 4.0.0.2
