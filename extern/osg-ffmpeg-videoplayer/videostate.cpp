@@ -236,11 +236,17 @@ int VideoState::istream_read(void *user_data, uint8_t *buf, int buf_size)
         std::istream& stream = *static_cast<VideoState*>(user_data)->stream;
         stream.clear();
         stream.read((char*)buf, buf_size);
-        return stream.gcount();
+        if (stream.bad())
+            return AVERROR_UNKNOWN;
+        auto count = stream.gcount();
+        // avio_alloc_context says we mustn't return 0 for stream protocols
+        if (!count)
+            return AVERROR_EOF;
+        return count;
     }
     catch (std::exception& )
     {
-        return 0;
+        return AVERROR_UNKNOWN;
     }
 }
 
