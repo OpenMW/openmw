@@ -744,8 +744,19 @@ namespace MWLua
                 const MWWorld::Ptr& ptr = obj.ptr();
                 auto& stats = ptr.getClass().getCreatureStats(ptr);
 
+                // We need to deselect any enchant items before we can select a spell otherwise the item will be
+                // reselected
+                const auto resetEnchantItem = [&]() {
+                    if (ptr.getClass().hasInventoryStore(ptr))
+                    {
+                        MWWorld::InventoryStore& inventory = ptr.getClass().getInventoryStore(ptr);
+                        inventory.setSelectedEnchantItem(inventory.end());
+                    }
+                };
+
                 if (spellId.empty())
                 {
+                    resetEnchantItem();
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
                     else
@@ -755,6 +766,7 @@ namespace MWLua
                 if (!stats.getSpells().hasSpell(spellId))
                     throw std::runtime_error("Actor doesn't know spell " + spellId.toDebugString());
 
+                resetEnchantItem();
                 if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 {
                     int chance = MWMechanics::getSpellSuccessChance(spellId, ptr);
