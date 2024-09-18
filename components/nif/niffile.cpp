@@ -71,6 +71,8 @@ namespace Nif
             { "BSBlastNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSDamageStage", &construct<BSRangeNode, RC_NiNode> },
             { "BSDebrisNode", &construct<BSRangeNode, RC_NiNode> },
+            { "BSDistantObjectInstancedNode",
+                &construct<BSDistantObjectInstancedNode, RC_BSDistantObjectInstancedNode> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
             { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
             { "BSMasterParticleSystem", &construct<BSMasterParticleSystem, RC_NiNode> },

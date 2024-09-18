@@ -89,6 +89,7 @@ namespace Nif
         RC_BSDynamicTriShape,
         RC_BSDismemberSkinInstance,
         RC_BSDistantObjectExtraData,
+        RC_BSDistantObjectInstancedNode,
         RC_BSDistantObjectLargeRefExtraData,
         RC_BSEffectShaderProperty,
         RC_BSEffectShaderPropertyColorController,
