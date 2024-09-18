@@ -25,29 +25,89 @@
 // Create local aliases for brevity
 namespace bpo = boost::program_options;
 
-/// See if the file has the named extension
-bool hasExtension(const std::filesystem::path& filename, std::string_view extensionToFind)
+enum class FileType
 {
-    const auto extension = Files::pathToUnicodeString(filename.extension());
-    return Misc::StringUtils::ciEqual(extension, extensionToFind);
+    BSA,
+    BA2,
+    BGEM,
+    BGSM,
+    NIF,
+    KF,
+    BTO,
+    BTR,
+    RDT,
+    PSA,
+    Unknown,
+};
+
+enum class FileClass
+{
+    Archive,
+    Material,
+    NIF,
+    Unknown,
+};
+
+std::pair<FileType, FileClass> classifyFile(const std::filesystem::path& filename)
+{
+    const std::string extension = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(filename.extension()));
+    if (extension == ".bsa")
+        return { FileType::BSA, FileClass::Archive };
+    if (extension == ".ba2")
+        return { FileType::BA2, FileClass::Archive };
+    if (extension == ".bgem")
+        return { FileType::BGEM, FileClass::Material };
+    if (extension == ".bgsm")
+        return { FileType::BGSM, FileClass::Material };
+    if (extension == ".nif")
+        return { FileType::NIF, FileClass::NIF };
+    if (extension == ".kf")
+        return { FileType::KF, FileClass::NIF };
+    if (extension == ".bto")
+        return { FileType::BTO, FileClass::NIF };
+    if (extension == ".btr")
+        return { FileType::BTR, FileClass::NIF };
+    if (extension == ".rdt")
+        return { FileType::RDT, FileClass::NIF };
+    if (extension == ".psa")
+        return { FileType::PSA, FileClass::NIF };
+
+    return { FileType::Unknown, FileClass::Unknown };
 }
 
-/// See if the file has the "nif" extension.
-bool isNIF(const std::filesystem::path& filename)
+std::string getFileTypeName(FileType fileType)
 {
-    return hasExtension(filename, ".nif") || hasExtension(filename, ".kf");
+    switch (fileType)
+    {
+        case FileType::BSA:
+            return "BSA";
+        case FileType::BA2:
+            return "BA2";
+        case FileType::BGEM:
+            return "BGEM";
+        case FileType::BGSM:
+            return "BGSM";
+        case FileType::NIF:
+            return "NIF";
+        case FileType::KF:
+            return "KF";
+        case FileType::BTO:
+            return "BTO";
+        case FileType::BTR:
+            return "BTR";
+        case FileType::RDT:
+            return "RDT";
+        case FileType::PSA:
+            return "PSA";
+        case FileType::Unknown:
+        default:
+            return {};
+    }
 }
 
-/// Check if the file is a material file.
-bool isMaterial(const std::filesystem::path& filename)
+bool isBSA(const std::filesystem::path& path)
 {
-    return hasExtension(filename, ".bgem") || hasExtension(filename, ".bgsm");
-}
-
-/// See if the file has the "bsa" extension.
-bool isBSA(const std::filesystem::path& filename)
-{
-    return hasExtension(filename, ".bsa") || hasExtension(filename, ".ba2");
+    return classifyFile(path).second == FileClass::Archive;
 }
 
 std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
@@ -59,17 +119,17 @@ std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
     return nullptr;
 }
 
-void readFile(
+bool readFile(
     const std::filesystem::path& source, const std::filesystem::path& path, const VFS::Manager* vfs, bool quiet)
 {
+    const auto [fileType, fileClass] = classifyFile(path);
+    if (fileClass != FileClass::NIF && fileClass != FileClass::Material)
+        return false;
+
     const std::string pathStr = Files::pathToUnicodeString(path);
-    const bool isNif = isNIF(path);
     if (!quiet)
     {
-        if (isNif)
-            std::cout << "Reading " << (hasExtension(path, ".nif") ? "NIF" : "KF") << " file '" << pathStr << "'";
-        else
-            std::cout << "Reading " << (hasExtension(path, ".bgsm") ? "BGSM" : "BGEM") << " file '" << pathStr << "'";
+        std::cout << "Reading " << getFileTypeName(fileType) << " file '" << pathStr << "'";
         if (!source.empty())
             std::cout << " from '" << Files::pathToUnicodeString(isBSA(source) ? source.filename() : source) << "'";
         std::cout << std::endl;
@@ -77,27 +137,35 @@ void readFile(
     const std::filesystem::path fullPath = !source.empty() ? source / path : path;
     try
     {
-        if (isNif)
+        switch (fileClass)
         {
-            Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
-            Nif::Reader reader(file, nullptr);
-            if (vfs != nullptr)
-                reader.parse(vfs->get(pathStr));
-            else
-                reader.parse(Files::openConstrainedFileStream(fullPath));
-        }
-        else
-        {
-            if (vfs != nullptr)
-                Bgsm::parse(vfs->get(pathStr));
-            else
-                Bgsm::parse(Files::openConstrainedFileStream(fullPath));
+            case FileClass::NIF:
+            {
+                Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
+                Nif::Reader reader(file, nullptr);
+                if (vfs != nullptr)
+                    reader.parse(vfs->get(pathStr));
+                else
+                    reader.parse(Files::openConstrainedFileStream(fullPath));
+                break;
+            }
+            case FileClass::Material:
+            {
+                if (vfs != nullptr)
+                    Bgsm::parse(vfs->get(pathStr));
+                else
+                    Bgsm::parse(Files::openConstrainedFileStream(fullPath));
+                break;
+            }
+            default:
+                break;
         }
     }
     catch (std::exception& e)
     {
         std::cerr << "Failed to read '" << pathStr << "':" << std::endl << e.what() << std::endl;
     }
+    return true;
 }
 
 /// Check all the nif files in a given VFS::Archive
@@ -116,10 +184,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 
     for (const auto& name : vfs.getRecursiveDirectoryIterator())
     {
-        if (isNIF(name.value()) || isMaterial(name.value()))
-        {
-            readFile(archivePath, name.value(), &vfs, quiet);
-        }
+        readFile(archivePath, name.value(), &vfs, quiet);
     }
 
     if (!archivePath.empty() && !isBSA(archivePath))
@@ -148,10 +213,11 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
 bool parseOptions(int argc, char** argv, Files::PathContainer& files, Files::PathContainer& archives,
     bool& writeDebugLog, bool& quiet)
 {
-    bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF, KF, BGEM/BGSM and BSA/BA2 files
+    bpo::options_description desc(
+        R"(Ensure that OpenMW can use the provided NIF, KF, BTO/BTR, RDT, PSA, BGEM/BGSM and BSA/BA2 files
 
 Usages:
-  niftest <nif files, kf files, bgem/bgsm files, BSA/BA2 files, or directories>
+  niftest <nif files, kf files, bto/btr files, rdt files, psa files, bgem/bgsm files, BSA/BA2 files, or directories>
       Scan the file or directories for NIF errors.
 
 Allowed options)");
@@ -240,18 +306,18 @@ int main(int argc, char** argv)
         const std::string pathStr = Files::pathToUnicodeString(path);
         try
         {
-            if (isNIF(path) || isMaterial(path))
+            const bool isFile = readFile({}, path, vfs.get(), quiet);
+            if (!isFile)
             {
-                readFile({}, path, vfs.get(), quiet);
-            }
-            else if (auto archive = makeArchive(path))
-            {
-                readVFS(std::move(archive), path, quiet);
-            }
-            else
-            {
-                std::cerr << "Error: '" << pathStr << "' is not a NIF/KF/BGEM/BGSM file, BSA/BA2 archive, or directory"
-                          << std::endl;
+                if (auto archive = makeArchive(path))
+                {
+                    readVFS(std::move(archive), path, quiet);
+                }
+                else
+                {
+                    std::cerr << "Error: '" << pathStr << "' is not a NIF file, material file, archive, or directory"
+                              << std::endl;
+                }
             }
         }
         catch (std::exception& e)
