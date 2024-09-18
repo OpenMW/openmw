@@ -53,13 +53,16 @@ namespace MWRender
         std::string getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const;
         virtual std::string getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const;
         virtual std::string_view getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon);
-        virtual PartHolderPtr attachMesh(
-            const std::string& model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor);
-        virtual PartHolderPtr attachMesh(const std::string& model, std::string_view bonename)
+
+        PartHolderPtr attachMesh(
+            VFS::Path::NormalizedView model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor);
+
+        PartHolderPtr attachMesh(VFS::Path::NormalizedView model, std::string_view bonename)
         {
             osg::Vec4f stubColor = osg::Vec4f(0, 0, 0, 0);
             return attachMesh(model, bonename, false, &stubColor);
         }
+
         osg::ref_ptr<osg::Node> attach(
             VFS::Path::NormalizedView model, std::string_view bonename, std::string_view bonefilter, bool isLight);
 

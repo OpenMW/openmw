@@ -67,14 +67,13 @@ namespace MWRender
     }
 
     PartHolderPtr ActorAnimation::attachMesh(
-        const std::string& model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor)
+        VFS::Path::NormalizedView model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor)
     {
         osg::Group* parent = getBoneByName(bonename);
         if (!parent)
             return nullptr;
 
-        osg::ref_ptr<osg::Node> instance
-            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), parent);
+        osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->getInstance(model, parent);
 
         const NodeMap& nodeMap = getNodeMap();
         NodeMap::const_iterator found = nodeMap.find(bonename);
@@ -217,13 +216,13 @@ namespace MWRender
                 return;
         }
 
-        std::string mesh = getSheathedShieldMesh(*shield);
+        const VFS::Path::Normalized mesh = getSheathedShieldMesh(*shield);
         if (mesh.empty())
             return;
 
-        std::string_view boneName = "Bip01 AttachShield";
+        constexpr std::string_view boneName = "Bip01 AttachShield";
         osg::Vec4f glowColor = shield->getClass().getEnchantmentColor(*shield);
-        const std::string holsteredName = addSuffixBeforeExtension(mesh, "_sh");
+        const VFS::Path::Normalized holsteredName = addSuffixBeforeExtension(mesh, "_sh");
         bool isEnchanted = !shield->getClass().getEnchantment(*shield).empty();
 
         // If we have no dedicated sheath model, use basic shield model as fallback.
@@ -244,8 +243,7 @@ namespace MWRender
         // file.
         if (shieldNode && !shieldNode->getNumChildren())
         {
-            osg::ref_ptr<osg::Node> fallbackNode
-                = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(mesh), shieldNode);
+            osg::ref_ptr<osg::Node> fallbackNode = mResourceSystem->getSceneManager()->getInstance(mesh, shieldNode);
             if (isEnchanted)
                 SceneUtil::addEnchantedGlow(shieldNode, mResourceSystem, glowColor);
         }
@@ -340,13 +338,16 @@ namespace MWRender
         if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
             showHolsteredWeapons = false;
 
-        std::string mesh = weapon->getClass().getCorrectedModel(*weapon);
-        std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
-        if (mesh.empty() || boneName.empty())
+        const VFS::Path::Normalized mesh = weapon->getClass().getCorrectedModel(*weapon);
+        if (mesh.empty())
+            return;
+
+        const std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
+        if (boneName.empty())
             return;
 
         // If the scabbard is not found, use the weapon mesh as fallback.
-        const std::string scabbardName = addSuffixBeforeExtension(mesh, "_sh");
+        const VFS::Path::Normalized scabbardName = addSuffixBeforeExtension(mesh, "_sh");
         bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
         if (!mResourceSystem->getVFS()->exists(scabbardName))
         {
