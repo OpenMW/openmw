@@ -1022,8 +1022,8 @@ namespace NifOsg
             if (!mImageManager)
                 return nullptr;
 
-            std::string filename = Misc::ResourceHelpers::correctTexturePath(path, mImageManager->getVFS());
-            return mImageManager->getImage(filename);
+            return mImageManager->getImage(
+                VFS::Path::toNormalized(Misc::ResourceHelpers::correctTexturePath(path, mImageManager->getVFS())));
         }
 
         osg::ref_ptr<osg::Texture2D> attachTexture(const std::string& name, osg::ref_ptr<osg::Image> image, bool wrapS,

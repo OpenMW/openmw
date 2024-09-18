@@ -221,7 +221,7 @@ namespace SceneUtil
         std::vector<osg::ref_ptr<osg::Texture2D>> textures;
         for (const std::string& name : glowTextureNames)
         {
-            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(name);
+            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(VFS::Path::toNormalized(name));
             osg::ref_ptr<osg::Texture2D> tex(new osg::Texture2D(image));
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
             tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);

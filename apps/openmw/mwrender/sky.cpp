@@ -403,8 +403,9 @@ namespace MWRender
 
         osg::ref_ptr<osg::StateSet> stateset = mRainParticleSystem->getOrCreateStateSet();
 
+        constexpr VFS::Path::NormalizedView raindropImage("textures/tx_raindrop_01.dds");
         osg::ref_ptr<osg::Texture2D> raindropTex
-            = new osg::Texture2D(mSceneManager->getImageManager()->getImage("textures/tx_raindrop_01.dds"));
+            = new osg::Texture2D(mSceneManager->getImageManager()->getImage(raindropImage));
         raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -768,7 +769,8 @@ namespace MWRender
         {
             mClouds = weather.mCloudTexture;
 
-            std::string texture = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
+            const VFS::Path::Normalized texture
+                = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
 
             osg::ref_ptr<osg::Texture2D> cloudTex
                 = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
@@ -790,7 +792,8 @@ namespace MWRender
 
             if (!mNextClouds.empty())
             {
-                std::string texture = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
+                const VFS::Path::Normalized texture
+                    = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
 
                 osg::ref_ptr<osg::Texture2D> cloudTex
                     = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
