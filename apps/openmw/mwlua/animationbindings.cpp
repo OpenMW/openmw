@@ -319,14 +319,14 @@ namespace MWLua
                       std::string texture = options->get_or<std::string>("particleTextureOverride", "");
                       float scale = options->get_or("scale", 1.f);
                       context.mLuaManager->addAction(
-                          [world, model = std::string(model), texture = std::move(texture), worldPos, scale,
+                          [world, model = VFS::Path::Normalized(model), texture = std::move(texture), worldPos, scale,
                               magicVfx]() { world->spawnEffect(model, texture, worldPos, scale, magicVfx); },
                           "openmw.vfx.spawn");
                   }
                   else
                   {
-                      context.mLuaManager->addAction(
-                          [world, model = std::string(model), worldPos]() { world->spawnEffect(model, "", worldPos); },
+                      context.mLuaManager->addAction([world, model = VFS::Path::Normalized(model),
+                                                         worldPos]() { world->spawnEffect(model, "", worldPos); },
                           "openmw.vfx.spawn");
                   }
               };

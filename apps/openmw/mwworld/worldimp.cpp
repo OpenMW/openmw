@@ -3644,10 +3644,10 @@ namespace MWWorld
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
 
-    void World::spawnEffect(const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos,
-        float scale, bool isMagicVFX)
+    void World::spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
+        const osg::Vec3f& worldPos, float scale, bool isMagicVFX)
     {
-        mRendering->spawnEffect(VFS::Path::toNormalized(model), textureOverride, worldPos, scale, isMagicVFX);
+        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
     }
 
     struct ResetActorsVisitor
