@@ -1508,10 +1508,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size() - 4, 4, "/");
 
-        for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
+        for (const VFS::Path::Normalized& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
             if (Misc::getFileExtension(name) == "nif")
-                loadBonesFromFile(node, VFS::Path::toNormalized(name), resourceSystem);
+                loadBonesFromFile(node, name, resourceSystem);
         }
     }
 
