@@ -392,6 +392,7 @@ namespace Nif
             { "NiPSysInitialRotAngleCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleCtlr> },
             { "NiPSysInitialRotAngleVarCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleVarCtlr> },
             { "NiPSysModifierActiveCtlr", &construct<NiPSysModifierBoolCtlr, RC_NiPSysModifierActiveCtlr> },
+            { "NiPSysRotDampeningCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysRotDampeningCtlr> },
 
             // Modifier controllers, Bethesda
             { "BSPSysMultiTargetEmitterCtlr",

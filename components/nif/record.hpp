@@ -270,6 +270,7 @@ namespace Nif
         RC_NiPSysPlanarCollider,
         RC_NiPSysPositionModifier,
         RC_NiPSysRotationModifier,
+        RC_NiPSysRotDampeningCtlr,
         RC_NiPSysResetOnLoopCtlr,
         RC_NiPSysSpawnModifier,
         RC_NiPSysSphericalCollider,
