@@ -55,13 +55,7 @@ namespace MWRender
         virtual std::string_view getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon);
 
         PartHolderPtr attachMesh(
-            VFS::Path::NormalizedView model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor);
-
-        PartHolderPtr attachMesh(VFS::Path::NormalizedView model, std::string_view bonename)
-        {
-            osg::Vec4f stubColor = osg::Vec4f(0, 0, 0, 0);
-            return attachMesh(model, bonename, false, &stubColor);
-        }
+            VFS::Path::NormalizedView model, std::string_view bonename, const osg::Vec4f* glowColor = nullptr);
 
         osg::ref_ptr<osg::Node> attach(
             VFS::Path::NormalizedView model, std::string_view bonename, std::string_view bonefilter, bool isLight);

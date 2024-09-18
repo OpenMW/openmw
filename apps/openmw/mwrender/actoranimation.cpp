@@ -67,7 +67,7 @@ namespace MWRender
     }
 
     PartHolderPtr ActorAnimation::attachMesh(
-        VFS::Path::NormalizedView model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor)
+        VFS::Path::NormalizedView model, std::string_view bonename, const osg::Vec4f* glowColor)
     {
         osg::Group* parent = getBoneByName(bonename);
         if (!parent)
@@ -80,7 +80,7 @@ namespace MWRender
         if (found == nodeMap.end())
             return {};
 
-        if (enchantedGlow)
+        if (glowColor != nullptr)
             mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
         return std::make_unique<PartHolder>(instance);
@@ -221,15 +221,15 @@ namespace MWRender
             return;
 
         constexpr std::string_view boneName = "Bip01 AttachShield";
-        osg::Vec4f glowColor = shield->getClass().getEnchantmentColor(*shield);
+        const bool isEnchanted = !shield->getClass().getEnchantment(*shield).empty();
+        const osg::Vec4f glowColor = isEnchanted ? shield->getClass().getEnchantmentColor(*shield) : osg::Vec4f();
         const VFS::Path::Normalized holsteredName = addSuffixBeforeExtension(mesh, "_sh");
-        bool isEnchanted = !shield->getClass().getEnchantment(*shield).empty();
 
         // If we have no dedicated sheath model, use basic shield model as fallback.
         if (!mResourceSystem->getVFS()->exists(holsteredName))
-            mHolsteredShield = attachMesh(mesh, boneName, isEnchanted, &glowColor);
+            mHolsteredShield = attachMesh(mesh, boneName, isEnchanted ? &glowColor : nullptr);
         else
-            mHolsteredShield = attachMesh(holsteredName, boneName, isEnchanted, &glowColor);
+            mHolsteredShield = attachMesh(holsteredName, boneName, isEnchanted ? &glowColor : nullptr);
 
         if (!mHolsteredShield)
             return;
@@ -348,13 +348,14 @@ namespace MWRender
 
         // If the scabbard is not found, use the weapon mesh as fallback.
         const VFS::Path::Normalized scabbardName = addSuffixBeforeExtension(mesh, "_sh");
-        bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
+        const bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
         if (!mResourceSystem->getVFS()->exists(scabbardName))
         {
             if (showHolsteredWeapons)
             {
-                osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
-                mScabbard = attachMesh(mesh, boneName, isEnchanted, &glowColor);
+                const osg::Vec4f glowColor
+                    = isEnchanted ? weapon->getClass().getEnchantmentColor(*weapon) : osg::Vec4f();
+                mScabbard = attachMesh(mesh, boneName, isEnchanted ? &glowColor : nullptr);
                 if (mScabbard)
                     resetControllers(mScabbard->getNode());
             }
