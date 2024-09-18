@@ -5,6 +5,8 @@
 
 #include <osg/ref_ptr>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "../mwworld/containerstore.hpp"
 
 #include "animation.hpp"
@@ -59,7 +61,7 @@ namespace MWRender
             return attachMesh(model, bonename, false, &stubColor);
         }
         osg::ref_ptr<osg::Node> attach(
-            const std::string& model, std::string_view bonename, std::string_view bonefilter, bool isLight);
+            VFS::Path::NormalizedView model, std::string_view bonename, std::string_view bonefilter, bool isLight);
 
         PartHolderPtr mScabbard;
         PartHolderPtr mHolsteredShield;

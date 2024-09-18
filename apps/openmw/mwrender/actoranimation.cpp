@@ -88,10 +88,9 @@ namespace MWRender
     }
 
     osg::ref_ptr<osg::Node> ActorAnimation::attach(
-        const std::string& model, std::string_view bonename, std::string_view bonefilter, bool isLight)
+        VFS::Path::NormalizedView model, std::string_view bonename, std::string_view bonefilter, bool isLight)
     {
-        osg::ref_ptr<const osg::Node> templateNode
-            = mResourceSystem->getSceneManager()->getTemplate(VFS::Path::toNormalized(model));
+        osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
 
         const NodeMap& nodeMap = getNodeMap();
         auto found = nodeMap.find(bonename);
