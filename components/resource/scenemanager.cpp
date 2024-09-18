@@ -597,9 +597,9 @@ namespace Resource
         mShaderManager->setShaderPath(path);
     }
 
-    bool SceneManager::checkLoaded(const std::string& name, double timeStamp)
+    bool SceneManager::checkLoaded(VFS::Path::NormalizedView name, double timeStamp)
     {
-        return mCache->checkInObjectCache(VFS::Path::normalizeFilename(name), timeStamp);
+        return mCache->checkInObjectCache(name, timeStamp);
     }
 
     void SceneManager::setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled)
