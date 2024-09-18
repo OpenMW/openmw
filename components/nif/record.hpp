@@ -65,6 +65,7 @@ namespace Nif
         RC_bhkPackedNiTriStripsShape,
         RC_bhkPlaneShape,
         RC_bhkPhysicsSystem,
+        RC_bhkPoseArray,
         RC_bhkPrismaticConstraint,
         RC_bhkRagdollConstraint,
         RC_bhkRagdollSystem,

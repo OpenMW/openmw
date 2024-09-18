@@ -1013,4 +1013,23 @@ namespace Nif
             constraint.read(nif);
     }
 
+    void bhkPoseArray::BoneTransform::read(NIFStream* nif)
+    {
+        nif->read(mTranslation);
+        nif->read(mRotation);
+        nif->read(mScale);
+    }
+
+    void bhkPoseArray::read(NIFStream* nif)
+    {
+        nif->readVector(mBones, nif->get<uint32_t>());
+        mPoses.resize(nif->get<uint32_t>());
+        for (std::vector<BoneTransform>& pose : mPoses)
+        {
+            pose.resize(nif->get<uint32_t>());
+            for (BoneTransform& transform : pose)
+                transform.read(nif);
+        }
+    }
+
 } // Namespace

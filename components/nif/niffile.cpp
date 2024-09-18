@@ -484,6 +484,9 @@ namespace Nif
             { "bhkRagdollTemplate", &construct<bhkRagdollTemplate, RC_bhkRagdollTemplate> },
             { "bhkRagdollTemplateData", &construct<bhkRagdollTemplateData, RC_bhkRagdollTemplateData> },
 
+            // Other records
+            { "bhkPoseArray", &construct<bhkPoseArray, RC_bhkPoseArray> },
+
             // PROPERTIES
 
             // 4.0.0.2

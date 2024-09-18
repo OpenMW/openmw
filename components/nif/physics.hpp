@@ -930,5 +930,23 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct bhkPoseArray : Record
+    {
+        struct BoneTransform
+        {
+            osg::Vec3f mTranslation;
+            // FIXME: this and some other quaternions are meant to be read in direct order
+            osg::Quat mRotation;
+            osg::Vec3f mScale;
+
+            void read(NIFStream* nif);
+        };
+
+        std::vector<std::string> mBones;
+        std::vector<std::vector<BoneTransform>> mPoses;
+
+        void read(NIFStream* nif) override;
+    };
+
 } // Namespace
 #endif
