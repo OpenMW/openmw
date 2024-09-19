@@ -794,28 +794,31 @@ namespace MWGui
         if (!Settings::gui().mColorTopicEnable)
             return;
 
-        const std::string_view specificSkin = "MW_ListLine_Specific";
-        const std::string_view exhaustedSkin = "MW_ListLine_Exhausted";
-
         for (const std::string& keyword : mKeywords)
         {
             int flag = MWBase::Environment::get().getDialogueManager()->getTopicFlag(ESM::RefId::stringRefId(keyword));
             MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
-            const auto holdCaption = button->getCaption();
+            const auto oldCaption = button->getCaption();
+            const MyGUI::IntSize oldSize = button->getSize();
 
+            bool changed = false;
             if (flag & MWBase::DialogueManager::TopicType::Specific)
             {
-                button->changeWidgetSkin(specificSkin);
-                button->setCaption(holdCaption);
-                int height = button->getTextSize().height;
-                button->setSize(MyGUI::IntSize(button->getSize().width, height));
+                button->changeWidgetSkin("MW_ListLine_Specific");
+                changed = true;
             }
             else if (flag & MWBase::DialogueManager::TopicType::Exhausted)
             {
-                button->changeWidgetSkin(exhaustedSkin);
-                button->setCaption(holdCaption);
-                int height = button->getTextSize().height;
-                button->setSize(MyGUI::IntSize(button->getSize().width, height));
+                button->changeWidgetSkin("MW_ListLine_Exhausted");
+                changed = true;
+            }
+
+            if (changed)
+            {
+                button->setCaption(oldCaption);
+                button->getSubWidgetText()->setWordWrap(true);
+                button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
+                button->setSize(oldSize);
             }
         }
     }
