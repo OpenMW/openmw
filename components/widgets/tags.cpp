@@ -1,6 +1,5 @@
 #include "tags.hpp"
 
-#include <components/settings/values.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include <MyGUI_Colour.h>
@@ -11,8 +10,8 @@ namespace Gui
     bool replaceTag(std::string_view tag, MyGUI::UString& out)
     {
         std::string_view fontcolour = "fontcolour=";
+
         std::string_view fontcolourhtml = "fontcolourhtml=";
-        std::string_view fontcolouroptional = "fontcoloursetting=";
 
         if (tag.starts_with(fontcolour))
         {
@@ -57,13 +56,6 @@ namespace Gui
             html << "#" << std::hex << MyGUI::utility::parseInt(ret[0]) << MyGUI::utility::parseInt(ret[1])
                  << MyGUI::utility::parseInt(ret[2]);
             out = html.str();
-            return true;
-        }
-        else if (tag.starts_with(fontcolouroptional))
-        {
-            std::string_view colortag = tag.substr(fontcolouroptional.length());
-            const MyGUI::Colour& customColour = Settings::get<MyGUI::Colour>("GUI", colortag).get();
-            out = customColour.print();
             return true;
         }
         return false;

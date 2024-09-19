@@ -158,7 +158,7 @@ The alpha value is currently ignored.
 A topic response is considered unique if its Actor filter field contains the speaking actor's object ID and hasn't yet been read.
 
 color topic specific over
---------------------
+-------------------------
 
 :Type:		RGBA floating point
 :Range:		0.0 to 1.0
@@ -171,7 +171,7 @@ The alpha value is currently ignored.
 A dialogue topic is considered "over" if it is the active GUI element through keyboard or mouse events.
 
 color topic specific pressed
---------------------
+----------------------------
 
 :Type:		RGBA floating point
 :Range:		0.0 to 1.0
@@ -197,7 +197,7 @@ The alpha value is currently ignored.
 A topic is considered "exhausted" if the response the player is about to see has already been seen.
 
 color topic exhausted over
---------------------
+--------------------------
 
 :Type:		RGBA floating point
 :Range:		0.0 to 1.0
@@ -210,7 +210,7 @@ The alpha value is currently ignored.
 A dialogue topic is considered "over" if it is the active GUI element through keyboard or mouse events.
 
 color topic exhausted pressed
---------------------
+-----------------------------
 
 :Type:		RGBA floating point
 :Range:		0.0 to 1.0
