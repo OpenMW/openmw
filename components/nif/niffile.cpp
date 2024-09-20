@@ -71,6 +71,8 @@ namespace Nif
             { "BSBlastNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSDamageStage", &construct<BSRangeNode, RC_NiNode> },
             { "BSDebrisNode", &construct<BSRangeNode, RC_NiNode> },
+            { "BSDistantObjectInstancedNode",
+                &construct<BSDistantObjectInstancedNode, RC_BSDistantObjectInstancedNode> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
             { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
             { "BSMasterParticleSystem", &construct<BSMasterParticleSystem, RC_NiNode> },
@@ -392,6 +394,7 @@ namespace Nif
             { "NiPSysInitialRotAngleCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleCtlr> },
             { "NiPSysInitialRotAngleVarCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleVarCtlr> },
             { "NiPSysModifierActiveCtlr", &construct<NiPSysModifierBoolCtlr, RC_NiPSysModifierActiveCtlr> },
+            { "NiPSysRotDampeningCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysRotDampeningCtlr> },
 
             // Modifier controllers, Bethesda
             { "BSPSysMultiTargetEmitterCtlr",
@@ -480,6 +483,9 @@ namespace Nif
             // Ragdoll template records
             { "bhkRagdollTemplate", &construct<bhkRagdollTemplate, RC_bhkRagdollTemplate> },
             { "bhkRagdollTemplateData", &construct<bhkRagdollTemplateData, RC_bhkRagdollTemplateData> },
+
+            // Other records
+            { "bhkPoseArray", &construct<bhkPoseArray, RC_bhkPoseArray> },
 
             // PROPERTIES
 

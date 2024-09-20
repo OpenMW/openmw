@@ -494,5 +494,37 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSResourceID
+    {
+        uint32_t mFileHash;
+        std::array<char, 4> mExtension;
+        uint32_t mDirectoryHash;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSDistantObjectInstance
+    {
+        BSResourceID mResourceID;
+        std::vector<osg::Matrixf> mTransforms;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSShaderTextureArray
+    {
+        std::vector<std::vector<std::string>> mTextureArrays;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSDistantObjectInstancedNode : BSMultiBoundNode
+    {
+        std::vector<BSDistantObjectInstance> mInstances;
+        std::array<BSShaderTextureArray, 3> mShaderTextureArrays;
+
+        void read(NIFStream* nif) override;
+    };
+
 }
 #endif
