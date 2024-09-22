@@ -148,8 +148,8 @@ color topic specific
 --------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.45 0.5 0.8 1 (blue)
 
 This setting overrides the colour of dialogue topics that have a response unique to the actors speaking.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
@@ -161,8 +161,8 @@ color topic specific over
 -------------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.6 0.6 0.85 1 (blue)
 
 This setting provides an "over" colour to dialogue topics that meet the color topic specific criteria.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
@@ -174,8 +174,8 @@ color topic specific pressed
 ----------------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.3 0.35 0.75 1 (blue)
 
 This setting provides an "pressed" colour to dialogue topics that meet the color topic specific criteria.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
@@ -187,8 +187,8 @@ color topic exhausted
 ---------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.3 0.3 0.3 1 (grey)
 
 This setting overrides the colour of dialogue topics which have been "exhausted" by the player.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
@@ -200,8 +200,8 @@ color topic exhausted over
 --------------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.55 0.55 0.55 1 (grey)
 
 This setting provides an "over" colour to dialogue topics that meet the color topic exhausted criteria.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
@@ -213,10 +213,10 @@ color topic exhausted pressed
 -----------------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.45 0.45 0.45 1 (grey)
 
-This setting provides an "pressed" colour to dialogue topics that meet the color topic exhausted criteria.
+This setting provides a "pressed" colour to dialogue topics that meet the color topic exhausted criteria.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
 The alpha value is currently ignored.
 
