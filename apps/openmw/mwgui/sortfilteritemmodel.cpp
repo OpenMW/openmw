@@ -288,7 +288,7 @@ namespace MWGui
 
         if ((mFilter & Filter_OnlyRepairable)
             && (!base.getClass().hasItemHealth(base)
-                || (base.getClass().getItemHealth(base) == base.getClass().getItemMaxHealth(base))
+                || (base.getClass().getItemHealth(base) >= base.getClass().getItemMaxHealth(base))
                 || (base.getType() != ESM::Weapon::sRecordId && base.getType() != ESM::Armor::sRecordId)))
             return false;
 
