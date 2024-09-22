@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_TERRAIN_DEFS_HPP
 #define COMPONENTS_TERRAIN_DEFS_HPP
 
-#include <string>
+#include <components/vfs/pathutil.hpp>
 
 namespace Terrain
 {
@@ -16,8 +16,8 @@ namespace Terrain
 
     struct LayerInfo
     {
-        std::string mDiffuseMap;
-        std::string mNormalMap;
+        VFS::Path::Normalized mDiffuseMap;
+        VFS::Path::Normalized mNormalMap;
         bool mParallax; // Height info in normal map alpha channel?
         bool mSpecular; // Specular info in diffuse map alpha channel?
 

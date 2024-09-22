@@ -681,11 +681,11 @@ namespace MWRender
     PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, std::string_view bonename,
         std::string_view bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
     {
-        osg::ref_ptr<osg::Node> attached = attach(model, bonename, bonefilter, isLight);
+        osg::ref_ptr<osg::Node> attached = attach(VFS::Path::toNormalized(model), bonename, bonefilter, isLight);
         if (enchantedGlow)
             mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
-        return std::make_unique<PartHolder>(attached);
+        return std::make_unique<PartHolder>(std::move(attached));
     }
 
     osg::Vec3f NpcAnimation::runAnimation(float timepassed)
