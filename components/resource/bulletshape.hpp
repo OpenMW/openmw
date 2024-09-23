@@ -1,7 +1,6 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 #define OPENMW_COMPONENTS_RESOURCE_BULLETSHAPE_H
 
-#include <array>
 #include <map>
 #include <memory>
 
@@ -11,6 +10,8 @@
 
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
+
+#include <components/vfs/pathutil.hpp>
 
 class btCollisionShape;
 
@@ -56,7 +57,7 @@ namespace Resource
         // we store the node's record index mapped to the child index of the shape in the btCompoundShape.
         std::map<int, int> mAnimatedShapes;
 
-        std::string mFileName;
+        VFS::Path::Normalized mFileName;
         std::string mFileHash;
 
         VisualCollisionType mVisualCollisionType = VisualCollisionType::None;

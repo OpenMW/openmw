@@ -412,9 +412,9 @@ namespace MWPhysics
         if (ptr.mRef->mData.mPhysicsPostponed)
             return;
 
-        std::string animationMesh = mesh;
-        if (ptr.getClass().useAnim())
-            animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        const VFS::Path::Normalized animationMesh = ptr.getClass().useAnim()
+            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS())
+            : mesh;
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(animationMesh);
         if (!shapeInstance || !shapeInstance->mCollisionShape)
             return;
@@ -562,7 +562,8 @@ namespace MWPhysics
 
     void PhysicsSystem::addActor(const MWWorld::Ptr& ptr, const std::string& mesh)
     {
-        std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        const VFS::Path::Normalized animationMesh
+            = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(animationMesh);
 
         // Try to get shape from basic model as fallback for creatures
@@ -570,7 +571,7 @@ namespace MWPhysics
         {
             if (animationMesh != mesh)
             {
-                shape = mShapeManager->getShape(mesh);
+                shape = mShapeManager->getShape(VFS::Path::toNormalized(mesh));
             }
         }
 
@@ -590,7 +591,8 @@ namespace MWPhysics
     int PhysicsSystem::addProjectile(
         const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius)
     {
-        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
+        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance
+            = mShapeManager->getInstance(VFS::Path::toNormalized(mesh));
         assert(shapeInstance);
         float radius = computeRadius ? shapeInstance->mCollisionBox.mExtents.length() / 2.f : 1.f;
 
