@@ -206,7 +206,7 @@ namespace MWRender
         };
 
         // PASS: Blot in all ripple spawners
-        mProgramBlobber->apply(state);
+        state.applyAttribute(mProgramBlobber);
         state.apply(frameState.mStateset);
 
         if (mUseCompute)
@@ -225,7 +225,7 @@ namespace MWRender
         }
 
         // PASS: Wave simulation
-        mProgramSimulation->apply(state);
+        state.applyAttribute(mProgramSimulation);
         state.apply(frameState.mStateset);
 
         if (mUseCompute)
