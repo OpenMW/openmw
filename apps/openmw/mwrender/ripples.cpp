@@ -206,8 +206,14 @@ namespace MWRender
         };
 
         // PASS: Blot in all ripple spawners
+        state.pushStateSet(frameState.mStateset);
+        state.apply();
         state.applyAttribute(mProgramBlobber);
-        state.apply(frameState.mStateset);
+        for (const auto& [name, stack] : state.getUniformMap())
+        {
+            if (!stack.uniformVec.empty())
+                state.getLastAppliedProgramObject()->apply(*(stack.uniformVec.back().first));
+        }
 
         if (mUseCompute)
         {
@@ -226,7 +232,11 @@ namespace MWRender
 
         // PASS: Wave simulation
         state.applyAttribute(mProgramSimulation);
-        state.apply(frameState.mStateset);
+        for (const auto& [name, stack] : state.getUniformMap())
+        {
+            if (!stack.uniformVec.empty())
+                state.getLastAppliedProgramObject()->apply(*(stack.uniformVec.back().first));
+        }
 
         if (mUseCompute)
         {
@@ -242,6 +252,8 @@ namespace MWRender
             state.applyTextureAttribute(0, mTextures[1]);
             osg::Geometry::drawImplementation(renderInfo);
         }
+
+        state.popStateSet();
     }
 
     osg::Texture* RipplesSurface::getColorTexture() const
