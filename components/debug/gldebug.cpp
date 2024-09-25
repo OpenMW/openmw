@@ -239,7 +239,7 @@ namespace Debug
             group->push(state);
             lastAppliedStack.push_back(group);
         }
-        if (!(lastAppliedStack.back() == this))
+        if (lastAppliedStack.empty() || !(lastAppliedStack.back() == this))
         {
             push(state);
             lastAppliedStack.push_back(this);
