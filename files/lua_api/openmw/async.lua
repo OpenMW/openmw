@@ -1,5 +1,5 @@
 ---
--- `openmw.async` contains timers and coroutine utils. All functions require
+-- `openmw.async` contains timers and coroutine utilities. All functions require
 -- the package itself as a first argument.
 -- @module async
 -- @usage local async = require('openmw.async')
@@ -16,7 +16,7 @@
 
 ---
 -- Calls callback(arg) in `delay` simulation seconds.
--- Callback must be registered in advance.
+-- The callback must be registered in advance.
 -- @function [parent=#async] newSimulationTimer
 -- @param self
 -- @param #number delay
@@ -25,7 +25,7 @@
 
 ---
 -- Calls callback(arg) in `delay` game seconds.
--- Callback must be registered in advance.
+-- The callback must be registered in advance.
 -- @function [parent=#async] newGameTimer
 -- @param self
 -- @param #number delay
@@ -49,7 +49,7 @@
 -- @param #function func
 
 ---
--- Wraps Lua function with `Callback` object that can be used in async API calls.
+-- Wraps a Lua function with a `Callback` object that can be used in async API calls.
 -- @function [parent=#async] callback
 -- @param self
 -- @param #function func
