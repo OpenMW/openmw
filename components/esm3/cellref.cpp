@@ -287,4 +287,10 @@ namespace ESM
         loadDataImpl<false>(esm, isDeleted, cellRef);
     }
 
+    CellRef makeBlankCellRef()
+    {
+        CellRef result;
+        result.blank();
+        return result;
+    }
 }

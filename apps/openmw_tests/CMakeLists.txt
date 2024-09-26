@@ -9,6 +9,7 @@ file(GLOB UNITTEST_SRC_FILES
     mwworld/test_store.cpp
     mwworld/testduration.cpp
     mwworld/testtimestamp.cpp
+    mwworld/testptr.cpp
 
     mwdialogue/test_keywordsearch.cpp
 

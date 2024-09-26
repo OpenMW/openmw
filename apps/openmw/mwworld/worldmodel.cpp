@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <optional>
+#include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
@@ -338,6 +339,20 @@ namespace MWWorld
         if (result == nullptr)
             throw std::runtime_error(std::string("Can't find cell with name ") + std::string(name));
         return *result;
+    }
+
+    void WorldModel::registerPtr(const Ptr& ptr)
+    {
+        if (ptr.mRef == nullptr)
+            throw std::logic_error("Ptr with nullptr mRef is not allowed to be registered");
+        mPtrRegistry.insert(ptr);
+        ptr.mRef->mWorldModel = this;
+    }
+
+    void WorldModel::deregisterLiveCellRef(LiveCellRefBase& ref) noexcept
+    {
+        mPtrRegistry.remove(ref);
+        ref.mWorldModel = nullptr;
     }
 }
 

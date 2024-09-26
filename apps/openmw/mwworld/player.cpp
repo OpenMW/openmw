@@ -36,8 +36,20 @@
 
 namespace MWWorld
 {
+    namespace
+    {
+        ESM::CellRef makePlayerCellRef()
+        {
+            ESM::CellRef result;
+            result.blank();
+            result.mRefID = ESM::RefId::stringRefId("Player");
+            return result;
+        }
+    }
+
     Player::Player(const ESM::NPC* player)
-        : mCellStore(nullptr)
+        : mPlayer(makePlayerCellRef(), player)
+        , mCellStore(nullptr)
         , mLastKnownExteriorPosition(0, 0, 0)
         , mMarkedPosition(ESM::Position())
         , mMarkedCell(nullptr)
@@ -46,11 +58,6 @@ namespace MWWorld
         , mPaidCrimeId(-1)
         , mJumping(false)
     {
-        ESM::CellRef cellRef;
-        cellRef.blank();
-        cellRef.mRefID = ESM::RefId::stringRefId("Player");
-        mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
-
         ESM::Position playerPos = mPlayer.mData.getPosition();
         playerPos.pos[0] = playerPos.pos[1] = playerPos.pos[2] = 0;
         mPlayer.mData.setPosition(playerPos);
