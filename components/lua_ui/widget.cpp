@@ -126,6 +126,7 @@ namespace LuaUi
     {
         mParent = nullptr;
         widget()->detachFromWidget();
+        widget()->detachFromLayer();
     }
 
     WidgetExtension* WidgetExtension::findDeep(std::string_view flagName)

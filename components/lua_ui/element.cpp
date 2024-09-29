@@ -113,6 +113,7 @@ namespace LuaUi
             ContentView content(LuaUtil::cast<sol::table>(contentObj));
             result.resize(content.size());
             size_t minSize = std::min(children.size(), content.size());
+            std::vector<WidgetExtension*> toDestroy;
             for (size_t i = 0; i < minSize; i++)
             {
                 WidgetExtension* ext = children[i];
@@ -121,7 +122,7 @@ namespace LuaUi
                 {
                     WidgetExtension* root = pluckElementRoot(child, depth);
                     if (ext != root)
-                        destroyChild(ext);
+                        toDestroy.emplace_back(ext);
                     result[i] = root;
                 }
                 else
@@ -133,14 +134,12 @@ namespace LuaUi
                     }
                     else
                     {
-                        destroyChild(ext);
+                        toDestroy.emplace_back(ext);
                         ext = createWidget(newLayout, false, depth);
                     }
                     result[i] = ext;
                 }
             }
-            for (size_t i = minSize; i < children.size(); i++)
-                destroyChild(children[i]);
             for (size_t i = minSize; i < content.size(); i++)
             {
                 sol::object child = content.at(i);
@@ -149,6 +148,11 @@ namespace LuaUi
                 else
                     result[i] = createWidget(child.as<sol::table>(), false, depth);
             }
+            // Don't destroy anything until element creation has had a chance to throw
+            for (size_t i = minSize; i < children.size(); i++)
+                destroyChild(children[i]);
+            for (WidgetExtension* ext : toDestroy)
+                destroyChild(ext);
             return result;
         }
 
@@ -217,7 +221,9 @@ namespace LuaUi
         std::string setLayer(WidgetExtension* ext, const sol::table& layout)
         {
             MyGUI::ILayer* layerNode = ext->widget()->getLayer();
-            std::string currentLayer = layerNode ? layerNode->getName() : std::string();
+            std::string_view currentLayer;
+            if (layerNode)
+                currentLayer = layerNode->getName();
             std::string newLayer = layout.get_or(LayoutKeys::layer, std::string());
             if (!newLayer.empty() && !MyGUI::LayerManager::getInstance().isExist(newLayer))
                 throw std::logic_error(std::string("Layer ") + newLayer + " doesn't exist");
@@ -278,9 +284,20 @@ namespace LuaUi
                 WidgetExtension* parent = mRoot->getParent();
                 auto children = parent->children();
                 auto it = std::find(children.begin(), children.end(), mRoot);
-                mRoot = createWidget(layout(), true, 0);
                 assert(it != children.end());
-                *it = mRoot;
+                try
+                {
+                    mRoot = createWidget(layout(), true, 0);
+                    *it = mRoot;
+                }
+                catch (...)
+                {
+                    // Remove mRoot from its parent's children even if we couldn't replace it
+                    children.erase(it);
+                    parent->setChildren(children);
+                    mRoot = nullptr;
+                    throw;
+                }
                 parent->setChildren(children);
                 mRoot->updateCoord();
             }
@@ -300,6 +317,10 @@ namespace LuaUi
         {
             if (mRoot != nullptr)
             {
+                // If someone decided to destroy an element used as another element's content, we need to detach it
+                // first so the parent doesn't end up holding a stale pointer
+                if (WidgetExtension* parent = mRoot->getParent())
+                    parent->detachChildrenIf([&](WidgetExtension* child) { return child == mRoot; });
                 destroyRoot(mRoot);
                 mRoot = nullptr;
             }

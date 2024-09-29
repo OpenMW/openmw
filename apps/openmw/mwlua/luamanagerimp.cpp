@@ -239,6 +239,11 @@ namespace MWLua
 
     void LuaManager::synchronizedUpdate()
     {
+        mLua.protectedCall([&](LuaUtil::LuaView&) { synchronizedUpdateUnsafe(); });
+    }
+
+    void LuaManager::synchronizedUpdateUnsafe()
+    {
         if (mNewGameStarted)
         {
             mNewGameStarted = false;
