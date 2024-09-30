@@ -33,7 +33,8 @@ namespace
     {
         const ObjectId id(&shape);
         osg::ref_ptr<Resource::BulletShape> bulletShape(new Resource::BulletShape);
-        bulletShape->mFileName = "test.nif";
+        constexpr VFS::Path::NormalizedView test("test.nif");
+        bulletShape->mFileName = test;
         bulletShape->mFileHash = "test_hash";
         ObjectTransform objectTransform;
         std::fill(std::begin(objectTransform.mPosition.pos), std::end(objectTransform.mPosition.pos), 0.1f);

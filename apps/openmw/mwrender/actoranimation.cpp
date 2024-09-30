@@ -385,7 +385,7 @@ namespace MWRender
             if (!weaponNode->getNumChildren())
             {
                 osg::ref_ptr<osg::Node> fallbackNode
-                    = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(mesh), weaponNode);
+                    = mResourceSystem->getSceneManager()->getInstance(mesh, weaponNode);
                 resetControllers(fallbackNode);
             }
 
