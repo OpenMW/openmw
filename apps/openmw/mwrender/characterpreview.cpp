@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <osg/BlendFunc>
+#include <osg/Texture2DArray>
 #include <osg/Camera>
 #include <osg/Fog>
 #include <osg/LightModel>
@@ -258,12 +259,28 @@ namespace MWRender
 
         // TODO: Clean up this mess of loose uniforms that shaders depend on.
         // turn off sky blending
+        int skyTextureSlot = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::SkyTexture);
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
-        stateset->addUniform(new osg::Uniform("sky", 0));
+        stateset->addUniform(new osg::Uniform("sky", skyTextureSlot));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
+        if (Stereo::getMultiview())
+        {
+            // The above set the sky texture unit to 0. Normally this is fine since texture unit 0 is the sampler2d diffuseMap, which will be set.
+            // However, in multiview the sky texture is a sampler2darray, and so needs to be set separately with a dummy texture
+            osg::Texture2DArray* textureArray = new osg::Texture2DArray;
+            textureArray->setTextureSize(1, 1, 2);
+            textureArray->setName("fakeSkyTexture");
+            textureArray->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+            textureArray->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+            textureArray->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            textureArray->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            textureArray->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
+            stateset->setTextureAttributeAndModes(skyTextureSlot, textureArray, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+        }
 
         stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
+        
 
         // Opaque stuff must have 1 as its fragment alpha as the FBO is translucent, so having blending off isn't enough
         osg::ref_ptr<osg::TexEnvCombine> noBlendAlphaEnv = new osg::TexEnvCombine();
