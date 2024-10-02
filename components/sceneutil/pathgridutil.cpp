@@ -7,67 +7,66 @@
 
 namespace SceneUtil
 {
-    const unsigned short DiamondVertexCount = 6;
-    const unsigned short DiamondIndexCount = 24;
-    const unsigned short DiamondWireframeIndexCount = 24;
+    namespace
+    {
+        constexpr unsigned short DiamondVertexCount = 6;
+        constexpr unsigned short DiamondIndexCount = 24;
+        constexpr unsigned short DiamondWireframeIndexCount = 24;
 
-    const unsigned short DiamondConnectorVertexCount = 4;
+        constexpr unsigned short DiamondConnectorVertexCount = 4;
 
-    const unsigned short DiamondTotalVertexCount = DiamondVertexCount + DiamondConnectorVertexCount;
+        constexpr unsigned short DiamondTotalVertexCount = DiamondVertexCount + DiamondConnectorVertexCount;
 
-    const float DiamondWireframeScalar = 1.1f;
+        constexpr float DiamondWireframeScalar = 1.1f;
 
-    const osg::Vec3f DiamondPoints[DiamondVertexCount] = { osg::Vec3f(0.f, 0.f, DiamondHalfHeight * 2.f),
-        osg::Vec3f(-DiamondHalfWidth, -DiamondHalfWidth, DiamondHalfHeight),
-        osg::Vec3f(-DiamondHalfWidth, DiamondHalfWidth, DiamondHalfHeight),
-        osg::Vec3f(DiamondHalfWidth, -DiamondHalfWidth, DiamondHalfHeight),
-        osg::Vec3f(DiamondHalfWidth, DiamondHalfWidth, DiamondHalfHeight), osg::Vec3f(0.f, 0.f, 0.f) };
+        const osg::Vec3f DiamondPoints[DiamondVertexCount] = { osg::Vec3f(0.f, 0.f, DiamondHalfHeight * 2.f),
+            osg::Vec3f(-DiamondHalfWidth, -DiamondHalfWidth, DiamondHalfHeight),
+            osg::Vec3f(-DiamondHalfWidth, DiamondHalfWidth, DiamondHalfHeight),
+            osg::Vec3f(DiamondHalfWidth, -DiamondHalfWidth, DiamondHalfHeight),
+            osg::Vec3f(DiamondHalfWidth, DiamondHalfWidth, DiamondHalfHeight), osg::Vec3f(0.f, 0.f, 0.f) };
 
-    const unsigned short DiamondIndices[DiamondIndexCount]
-        = { 0, 2, 1, 0, 1, 3, 0, 3, 4, 0, 4, 2, 5, 1, 2, 5, 3, 1, 5, 4, 3, 5, 2, 4 };
+        constexpr unsigned short DiamondIndices[DiamondIndexCount]
+            = { 0, 2, 1, 0, 1, 3, 0, 3, 4, 0, 4, 2, 5, 1, 2, 5, 3, 1, 5, 4, 3, 5, 2, 4 };
 
-    const unsigned short DiamondWireframeIndices[DiamondWireframeIndexCount]
-        = { 0, 1, 0, 2, 0, 3, 0, 4, 1, 2, 2, 4, 4, 3, 3, 1, 5, 1, 5, 2, 5, 3, 5, 4 };
+        constexpr unsigned short DiamondWireframeIndices[DiamondWireframeIndexCount]
+            = { 0, 1, 0, 2, 0, 3, 0, 4, 1, 2, 2, 4, 4, 3, 3, 1, 5, 1, 5, 2, 5, 3, 5, 4 };
 
-    const unsigned short DiamondConnectorVertices[DiamondConnectorVertexCount] = { 1, 2, 3, 4 };
+        constexpr unsigned short DiamondConnectorVertices[DiamondConnectorVertexCount] = { 1, 2, 3, 4 };
 
-    const osg::Vec4f DiamondColors[DiamondVertexCount]
-        = { osg::Vec4f(0.f, 0.f, 1.f, 1.f), osg::Vec4f(0.f, .05f, .95f, 1.f), osg::Vec4f(0.f, .1f, .95f, 1.f),
-              osg::Vec4f(0.f, .15f, .95f, 1.f), osg::Vec4f(0.f, .2f, .95f, 1.f), osg::Vec4f(0.f, .25f, 9.f, 1.f) };
+        const osg::Vec4f DiamondColors[DiamondVertexCount]
+            = { osg::Vec4f(0.f, 0.f, 1.f, 1.f), osg::Vec4f(0.f, .05f, .95f, 1.f), osg::Vec4f(0.f, .1f, .95f, 1.f),
+                  osg::Vec4f(0.f, .15f, .95f, 1.f), osg::Vec4f(0.f, .2f, .95f, 1.f), osg::Vec4f(0.f, .25f, 9.f, 1.f) };
 
-    const osg::Vec4f DiamondEdgeColor = osg::Vec4f(0.5f, 1.f, 1.f, 1.f);
-    const osg::Vec4f DiamondWireColor = osg::Vec4f(0.72f, 0.f, 0.96f, 1.f);
-    const osg::Vec4f DiamondFocusWireColor = osg::Vec4f(0.91f, 0.66f, 1.f, 1.f);
+        const osg::Vec4f DiamondEdgeColor = osg::Vec4f(0.5f, 1.f, 1.f, 1.f);
+        const osg::Vec4f DiamondWireColor = osg::Vec4f(0.72f, 0.f, 0.96f, 1.f);
+        const osg::Vec4f DiamondFocusWireColor = osg::Vec4f(0.91f, 0.66f, 1.f, 1.f);
+    }
 
     osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid)
     {
-        const unsigned short PointCount = static_cast<unsigned short>(pathgrid.mPoints.size());
-        const size_t EdgeCount = pathgrid.mEdges.size();
-
-        const unsigned short VertexCount = PointCount * DiamondTotalVertexCount;
-        const unsigned short ColorCount = VertexCount;
-        const size_t PointIndexCount = PointCount * DiamondIndexCount;
-        const size_t EdgeIndexCount = EdgeCount * 2;
+        const size_t vertexCount = pathgrid.mPoints.size() * DiamondTotalVertexCount;
+        const size_t pointIndexCount = pathgrid.mPoints.size() * DiamondIndexCount;
+        const size_t edgeIndexCount = pathgrid.mEdges.size() * 2;
 
         osg::ref_ptr<osg::Geometry> gridGeometry = new osg::Geometry();
 
-        if (PointIndexCount || EdgeIndexCount)
+        if (pointIndexCount || edgeIndexCount)
         {
-            osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(VertexCount);
-            osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(ColorCount);
+            osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(vertexCount);
+            osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(vertexCount);
             osg::ref_ptr<osg::DrawElementsUShort> pointIndices
-                = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, PointIndexCount);
+                = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, pointIndexCount);
             osg::ref_ptr<osg::DrawElementsUShort> lineIndices
-                = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, EdgeIndexCount);
+                = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, edgeIndexCount);
 
             // Add each point/node
-            for (unsigned short pointIndex = 0; pointIndex < PointCount; ++pointIndex)
+            for (size_t pointIndex = 0; pointIndex < pathgrid.mPoints.size(); ++pointIndex)
             {
                 const ESM::Pathgrid::Point& point = pathgrid.mPoints[pointIndex];
                 osg::Vec3f position = osg::Vec3f(point.mX, point.mY, point.mZ);
 
-                unsigned short vertexOffset = pointIndex * DiamondTotalVertexCount;
-                unsigned short indexOffset = pointIndex * DiamondIndexCount;
+                size_t vertexOffset = pointIndex * DiamondTotalVertexCount;
+                size_t indexOffset = pointIndex * DiamondIndexCount;
 
                 // Point
                 for (unsigned short i = 0; i < DiamondVertexCount; ++i)
@@ -91,16 +90,15 @@ namespace SceneUtil
             }
 
             // Add edges
-            unsigned short lineIndex = 0;
+            unsigned int lineIndex = 0;
 
-            for (ESM::Pathgrid::EdgeList::const_iterator edge = pathgrid.mEdges.begin(); edge != pathgrid.mEdges.end();
-                 ++edge)
+            for (const ESM::Pathgrid::Edge& edge : pathgrid.mEdges)
             {
-                if (edge->mV0 == edge->mV1 || edge->mV0 >= PointCount || edge->mV1 >= PointCount)
+                if (edge.mV0 == edge.mV1 || edge.mV0 >= pathgrid.mPoints.size() || edge.mV1 >= pathgrid.mPoints.size())
                     continue;
 
-                const ESM::Pathgrid::Point& from = pathgrid.mPoints[edge->mV0];
-                const ESM::Pathgrid::Point& to = pathgrid.mPoints[edge->mV1];
+                const ESM::Pathgrid::Point& from = pathgrid.mPoints[edge.mV0];
+                const ESM::Pathgrid::Point& to = pathgrid.mPoints[edge.mV1];
 
                 osg::Vec3f fromPos = osg::Vec3f(from.mX, from.mY, from.mZ);
                 osg::Vec3f toPos = osg::Vec3f(to.mX, to.mY, to.mZ);
@@ -122,8 +120,8 @@ namespace SceneUtil
                 else if (dir.x() >= 0 && dir.y() < 0)
                     diamondIndex = 2;
 
-                unsigned short fromIndex = static_cast<unsigned short>(edge->mV0);
-                unsigned short toIndex = static_cast<unsigned short>(edge->mV1);
+                unsigned fromIndex = static_cast<unsigned>(edge.mV0);
+                unsigned toIndex = static_cast<unsigned>(edge.mV1);
 
                 lineIndices->setElement(
                     lineIndex++, fromIndex * DiamondTotalVertexCount + DiamondVertexCount + diamondIndex);
@@ -135,9 +133,9 @@ namespace SceneUtil
 
             gridGeometry->setVertexArray(vertices);
             gridGeometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
-            if (PointIndexCount)
+            if (pointIndexCount)
                 gridGeometry->addPrimitiveSet(pointIndices);
-            if (EdgeIndexCount)
+            if (edgeIndexCount)
                 gridGeometry->addPrimitiveSet(lineIndices);
             gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         }
@@ -152,38 +150,35 @@ namespace SceneUtil
     osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(
         const ESM::Pathgrid& pathgrid, const std::vector<unsigned short>& selected)
     {
-        const unsigned short PointCount = selected.size();
-
-        const unsigned short VertexCount = PointCount * DiamondVertexCount;
-        const unsigned short ColorCount = VertexCount;
-        const size_t IndexCount = PointCount * DiamondWireframeIndexCount;
+        const size_t vertexCount = selected.size() * DiamondVertexCount;
+        const size_t indexCount = selected.size() * DiamondWireframeIndexCount;
 
         osg::ref_ptr<osg::Geometry> wireframeGeometry = new osg::Geometry();
 
-        if (IndexCount)
+        if (indexCount)
         {
-            osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(VertexCount);
-            osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(ColorCount);
+            osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(vertexCount);
+            osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(vertexCount);
             osg::ref_ptr<osg::DrawElementsUShort> indices
-                = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, IndexCount);
+                = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, indexCount);
 
             osg::Vec3f wireOffset = osg::Vec3f(0, 0, (1 - DiamondWireframeScalar) * DiamondHalfHeight);
 
             // Add each point/node
-            for (unsigned short it = 0; it < PointCount; ++it)
+            for (size_t it = 0; it < selected.size(); ++it)
             {
                 const ESM::Pathgrid::Point& point = pathgrid.mPoints[selected[it]];
                 osg::Vec3f position = osg::Vec3f(point.mX, point.mY, point.mZ) + wireOffset;
 
-                unsigned short vertexOffset = it * DiamondVertexCount;
-                unsigned short indexOffset = it * DiamondWireframeIndexCount;
+                size_t vertexOffset = it * DiamondVertexCount;
+                size_t indexOffset = it * DiamondWireframeIndexCount;
 
                 // Point
                 for (unsigned short i = 0; i < DiamondVertexCount; ++i)
                 {
                     (*vertices)[vertexOffset + i] = position + DiamondPoints[i] * DiamondWireframeScalar;
 
-                    if (it == PointCount - 1)
+                    if (it == selected.size() - 1)
                         (*colors)[vertexOffset + i] = DiamondFocusWireColor;
                     else
                         (*colors)[vertexOffset + i] = DiamondWireColor;
@@ -203,8 +198,8 @@ namespace SceneUtil
         return wireframeGeometry;
     }
 
-    unsigned short getPathgridNode(unsigned short vertexIndex)
+    unsigned short getPathgridNode(unsigned vertexIndex)
     {
-        return vertexIndex / (DiamondVertexCount + DiamondConnectorVertexCount);
+        return static_cast<unsigned short>(vertexIndex / (DiamondVertexCount + DiamondConnectorVertexCount));
     }
 }
