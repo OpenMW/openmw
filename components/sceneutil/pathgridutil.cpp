@@ -5,6 +5,8 @@
 
 #include <components/esm3/loadpgrd.hpp>
 
+#include <limits>
+
 namespace SceneUtil
 {
     namespace
@@ -40,24 +42,15 @@ namespace SceneUtil
         const osg::Vec4f DiamondEdgeColor = osg::Vec4f(0.5f, 1.f, 1.f, 1.f);
         const osg::Vec4f DiamondWireColor = osg::Vec4f(0.72f, 0.f, 0.96f, 1.f);
         const osg::Vec4f DiamondFocusWireColor = osg::Vec4f(0.91f, 0.66f, 1.f, 1.f);
-    }
 
-    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid)
-    {
-        const size_t vertexCount = pathgrid.mPoints.size() * DiamondTotalVertexCount;
-        const size_t pointIndexCount = pathgrid.mPoints.size() * DiamondIndexCount;
-        const size_t edgeIndexCount = pathgrid.mEdges.size() * 2;
-
-        osg::ref_ptr<osg::Geometry> gridGeometry = new osg::Geometry();
-
-        if (pointIndexCount || edgeIndexCount)
+        template <class PType, class LType>
+        void addPathgridToGeometry(const size_t vertexCount, const size_t pointIndexCount, const size_t edgeIndexCount,
+            osg::ref_ptr<osg::Geometry>& gridGeometry, const ESM::Pathgrid& pathgrid)
         {
             osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(vertexCount);
             osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(vertexCount);
-            osg::ref_ptr<osg::DrawElementsUInt> pointIndices
-                = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, pointIndexCount);
-            osg::ref_ptr<osg::DrawElementsUInt> lineIndices
-                = new osg::DrawElementsUInt(osg::PrimitiveSet::LINES, edgeIndexCount);
+            osg::ref_ptr<PType> pointIndices = new PType(osg::PrimitiveSet::TRIANGLES, pointIndexCount);
+            osg::ref_ptr<LType> lineIndices = new LType(osg::PrimitiveSet::LINES, edgeIndexCount);
 
             // Add each point/node
             for (size_t pointIndex = 0; pointIndex < pathgrid.mPoints.size(); ++pointIndex)
@@ -140,27 +133,14 @@ namespace SceneUtil
             gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         }
 
-        osg::ref_ptr<osg::Material> material = new osg::Material;
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-        gridGeometry->getOrCreateStateSet()->setAttribute(material);
-
-        return gridGeometry;
-    }
-
-    osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(
-        const ESM::Pathgrid& pathgrid, const std::vector<unsigned short>& selected)
-    {
-        const size_t vertexCount = selected.size() * DiamondVertexCount;
-        const size_t indexCount = selected.size() * DiamondWireframeIndexCount;
-
-        osg::ref_ptr<osg::Geometry> wireframeGeometry = new osg::Geometry();
-
-        if (indexCount)
+        template <class T>
+        void addWireFrameGeometry(const size_t vertexCount, const size_t indexCount,
+            osg::ref_ptr<osg::Geometry>& wireframeGeometry, const ESM::Pathgrid& pathgrid,
+            const std::vector<unsigned short>& selected)
         {
             osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(vertexCount);
             osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(vertexCount);
-            osg::ref_ptr<osg::DrawElementsUInt> indices
-                = new osg::DrawElementsUInt(osg::PrimitiveSet::LINES, indexCount);
+            osg::ref_ptr<T> indices = new T(osg::PrimitiveSet::LINES, indexCount);
 
             osg::Vec3f wireOffset = osg::Vec3f(0, 0, (1 - DiamondWireframeScalar) * DiamondHalfHeight);
 
@@ -194,6 +174,58 @@ namespace SceneUtil
             wireframeGeometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
             wireframeGeometry->addPrimitiveSet(indices);
             wireframeGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+        }
+    }
+
+    osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid)
+    {
+        const size_t vertexCount = pathgrid.mPoints.size() * DiamondTotalVertexCount;
+        const size_t pointIndexCount = pathgrid.mPoints.size() * DiamondIndexCount;
+        const size_t edgeIndexCount = pathgrid.mEdges.size() * 2;
+
+        osg::ref_ptr<osg::Geometry> gridGeometry = new osg::Geometry();
+
+        if (pointIndexCount || edgeIndexCount)
+        {
+            const bool useIntPoints = pointIndexCount > std::numeric_limits<unsigned short>::max();
+            const bool useIntVertices = vertexCount > std::numeric_limits<unsigned short>::max();
+            if (useIntPoints && useIntVertices)
+                addPathgridToGeometry<osg::DrawElementsUInt, osg::DrawElementsUInt>(
+                    vertexCount, pointIndexCount, edgeIndexCount, gridGeometry, pathgrid);
+            else if (useIntPoints)
+                addPathgridToGeometry<osg::DrawElementsUInt, osg::DrawElementsUShort>(
+                    vertexCount, pointIndexCount, edgeIndexCount, gridGeometry, pathgrid);
+            else if (useIntVertices)
+                addPathgridToGeometry<osg::DrawElementsUShort, osg::DrawElementsUInt>(
+                    vertexCount, pointIndexCount, edgeIndexCount, gridGeometry, pathgrid);
+            else
+                addPathgridToGeometry<osg::DrawElementsUShort, osg::DrawElementsUShort>(
+                    vertexCount, pointIndexCount, edgeIndexCount, gridGeometry, pathgrid);
+        }
+
+        osg::ref_ptr<osg::Material> material = new osg::Material;
+        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        gridGeometry->getOrCreateStateSet()->setAttribute(material);
+
+        return gridGeometry;
+    }
+
+    osg::ref_ptr<osg::Geometry> createPathgridSelectedWireframe(
+        const ESM::Pathgrid& pathgrid, const std::vector<unsigned short>& selected)
+    {
+        const size_t vertexCount = selected.size() * DiamondVertexCount;
+        const size_t indexCount = selected.size() * DiamondWireframeIndexCount;
+
+        osg::ref_ptr<osg::Geometry> wireframeGeometry = new osg::Geometry();
+
+        if (indexCount)
+        {
+            if (vertexCount > std::numeric_limits<unsigned short>::max())
+                addWireFrameGeometry<osg::DrawElementsUInt>(
+                    vertexCount, indexCount, wireframeGeometry, pathgrid, selected);
+            else
+                addWireFrameGeometry<osg::DrawElementsUShort>(
+                    vertexCount, indexCount, wireframeGeometry, pathgrid, selected);
         }
         return wireframeGeometry;
     }
