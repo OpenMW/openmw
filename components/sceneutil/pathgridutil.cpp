@@ -54,10 +54,10 @@ namespace SceneUtil
         {
             osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(vertexCount);
             osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(vertexCount);
-            osg::ref_ptr<osg::DrawElementsUShort> pointIndices
-                = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, pointIndexCount);
-            osg::ref_ptr<osg::DrawElementsUShort> lineIndices
-                = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, edgeIndexCount);
+            osg::ref_ptr<osg::DrawElementsUInt> pointIndices
+                = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, pointIndexCount);
+            osg::ref_ptr<osg::DrawElementsUInt> lineIndices
+                = new osg::DrawElementsUInt(osg::PrimitiveSet::LINES, edgeIndexCount);
 
             // Add each point/node
             for (size_t pointIndex = 0; pointIndex < pathgrid.mPoints.size(); ++pointIndex)
@@ -159,8 +159,8 @@ namespace SceneUtil
         {
             osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(vertexCount);
             osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(vertexCount);
-            osg::ref_ptr<osg::DrawElementsUShort> indices
-                = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, indexCount);
+            osg::ref_ptr<osg::DrawElementsUInt> indices
+                = new osg::DrawElementsUInt(osg::PrimitiveSet::LINES, indexCount);
 
             osg::Vec3f wireOffset = osg::Vec3f(0, 0, (1 - DiamondWireframeScalar) * DiamondHalfHeight);
 
