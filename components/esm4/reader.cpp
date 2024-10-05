@@ -320,16 +320,18 @@ namespace ESM4
         std::filesystem::path path = strings / (prefix + language + suffix);
         if (mVFS != nullptr)
         {
-            std::string vfsPath = Files::pathToUnicodeString(path);
-            if (!mVFS->exists(vfsPath))
+            VFS::Path::Normalized vfsPath(Files::pathToUnicodeString(path));
+            Files::IStreamPtr stream = mVFS->find(vfsPath);
+
+            if (stream == nullptr)
             {
                 path = strings / (prefix + altLanguage + suffix);
-                vfsPath = Files::pathToUnicodeString(path);
+                vfsPath = VFS::Path::Normalized(Files::pathToUnicodeString(path));
+                stream = mVFS->find(vfsPath);
             }
 
-            if (mVFS->exists(vfsPath))
+            if (stream != nullptr)
             {
-                const Files::IStreamPtr stream = mVFS->get(vfsPath);
                 buildLStringIndex(stringType, *stream);
                 return;
             }

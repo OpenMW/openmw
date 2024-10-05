@@ -3,6 +3,7 @@
 # Silence a git warning
 git config --global advice.detachedHead false
 
+rm -fr build
 mkdir build
 cd build
 

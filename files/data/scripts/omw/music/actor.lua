@@ -24,7 +24,7 @@ local function onUpdate()
     -- Early-out for actors without targets and without combat state
     -- TODO: use events or engine handlers to detect when targets change
     local isStanceNothing = types.Actor.getStance(self) == types.Actor.STANCE.Nothing
-    if isStanceNothing and next(targets) == nil then
+    if isStanceNothing and next(targets) == nil and not AI.isFleeing() then
         return
     end
 

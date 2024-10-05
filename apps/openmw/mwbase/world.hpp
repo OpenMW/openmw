@@ -4,13 +4,13 @@
 #include "rotationflags.hpp"
 
 #include <deque>
-#include <map>
 #include <set>
 #include <span>
 #include <string_view>
 #include <vector>
 
 #include <components/misc/rng.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwworld/doorstate.hpp"
 #include "../mwworld/globalvariablename.hpp"
@@ -515,7 +515,7 @@ namespace MWBase
         /// Spawn a blood effect for \a ptr at \a worldPosition
         virtual void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
 
-        virtual void spawnEffect(const std::string& model, const std::string& textureOverride,
+        virtual void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
             const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true)
             = 0;
 

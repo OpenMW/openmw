@@ -1,7 +1,7 @@
-#Music: "OpenMW Music"
-#settingsPageDescription: "OpenMW Music settings"
+Music: "OpenMW : Musique"
+settingsPageDescription: "Paramètre de la musique d'OpenMW"
 
-#musicSettings: "Music configuration"
+musicSettings: "Configuration de la musique"
 
-#CombatMusicEnabled: "Play combat music"
-#CombatMusicEnabledDescription: "Whether to switch to combat music when there are actors in combat."
+CombatMusicEnabled: "Jouer la musique de combat"
+CombatMusicEnabledDescription: "Si activé, le jeu bascule vers la musique de combat dès qu'un personnage est en combat."

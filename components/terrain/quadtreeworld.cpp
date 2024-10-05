@@ -404,63 +404,68 @@ namespace Terrain
         }
     }
 
-    void updateWaterCullingView(
-        HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
+    namespace
     {
-        if (!(cv->getTraversalMask() & callback->getCullMask()))
-            return;
-        float lowZ = std::numeric_limits<float>::max();
-        float highZ = callback->getHighZ();
-        if (cv->getEyePoint().z() <= highZ || outofworld)
+        osg::ref_ptr<osg::StateSet> makeStateSet()
         {
-            callback->setLowZ(-std::numeric_limits<float>::max());
-            return;
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+            stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+            stateSet->setAttributeAndModes(
+                new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE),
+                osg::StateAttribute::ON);
+            osg::ref_ptr<osg::Material> material = new osg::Material;
+            material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 1, 1));
+            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
+            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
+            stateSet->setAttributeAndModes(material, osg::StateAttribute::ON);
+            stateSet->setRenderBinDetails(100, "RenderBin");
+            return stateSet;
         }
-        cv->pushCurrentMask();
-        static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
-        for (unsigned int i = 0; i < vd->getNumEntries(); ++i)
-        {
-            ViewDataEntry& entry = vd->getEntry(i);
-            osg::BoundingBox bb
-                = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
-            if (!bb.valid())
-                continue;
-            osg::Vec3f ofs(
-                entry.mNode->getCenter().x() * cellworldsize, entry.mNode->getCenter().y() * cellworldsize, 0.f);
-            bb._min += ofs;
-            bb._max += ofs;
-            bb._min.z() = highZ;
-            bb._max.z() = highZ;
-            if (cv->isCulled(bb))
-                continue;
-            lowZ = bb._min.z();
 
-            if (!debug)
-                break;
-            osg::Box* b = new osg::Box;
-            b->set(bb.center(), bb._max - bb.center());
-            osg::ShapeDrawable* drw = new osg::ShapeDrawable(b);
-            static osg::ref_ptr<osg::StateSet> stateset = nullptr;
-            if (!stateset)
+        void updateWaterCullingView(
+            HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
+        {
+            if (!(cv->getTraversalMask() & callback->getCullMask()))
+                return;
+            float lowZ = std::numeric_limits<float>::max();
+            float highZ = callback->getHighZ();
+            if (cv->getEyePoint().z() <= highZ || outofworld)
             {
-                stateset = new osg::StateSet;
-                stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-                stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-                stateset->setAttributeAndModes(
-                    new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE),
-                    osg::StateAttribute::ON);
-                osg::Material* m = new osg::Material;
-                m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 1, 1));
-                m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
-                m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
-                stateset->setAttributeAndModes(m, osg::StateAttribute::ON);
-                stateset->setRenderBinDetails(100, "RenderBin");
+                callback->setLowZ(-std::numeric_limits<float>::max());
+                return;
             }
-            drw->setStateSet(stateset);
-            drw->accept(*cv);
+            cv->pushCurrentMask();
+            static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
+            for (unsigned int i = 0; i < vd->getNumEntries(); ++i)
+            {
+                ViewDataEntry& entry = vd->getEntry(i);
+                osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))
+                                          ->getWaterBoundingBox();
+                if (!bb.valid())
+                    continue;
+                osg::Vec3f ofs(
+                    entry.mNode->getCenter().x() * cellworldsize, entry.mNode->getCenter().y() * cellworldsize, 0.f);
+                bb._min += ofs;
+                bb._max += ofs;
+                bb._min.z() = highZ;
+                bb._max.z() = highZ;
+                if (cv->isCulled(bb))
+                    continue;
+                lowZ = bb._min.z();
+
+                if (!debug)
+                    break;
+                osg::Box* b = new osg::Box;
+                b->set(bb.center(), bb._max - bb.center());
+                osg::ShapeDrawable* drw = new osg::ShapeDrawable(b);
+                static const osg::ref_ptr<osg::StateSet> stateset = makeStateSet();
+                drw->setStateSet(stateset);
+                drw->accept(*cv);
+            }
+            callback->setLowZ(lowZ);
+            cv->popCurrentMask();
         }
-        callback->setLowZ(lowZ);
-        cv->popCurrentMask();
     }
 
     void QuadTreeWorld::accept(osg::NodeVisitor& nv)

@@ -484,15 +484,24 @@ namespace MWRender
         bool is1stPerson = mViewMode == VM_FirstPerson;
         bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
 
+        std::string_view base;
+        if (!isWerewolf)
+        {
+            if (!is1stPerson)
+                base = Settings::models().mXbaseanim.get().value();
+            else
+                base = Settings::models().mXbaseanim1st.get().value();
+        }
+
         const std::string defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
             getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf), mResourceSystem->getVFS());
 
         std::string smodel = defaultSkeleton;
-        bool isBase = !isWerewolf;
+        bool isCustomModel = false;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         {
             std::string model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
-            isBase = isDefaultActorSkeleton(model);
+            isCustomModel = !isDefaultActorSkeleton(model);
             smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
         }
 
@@ -500,33 +509,21 @@ namespace MWRender
 
         updateParts();
 
-        if (!is1stPerson)
+        if (!base.empty())
+            addAnimSource(base, smodel);
+
+        if (defaultSkeleton != base)
+            addAnimSource(defaultSkeleton, smodel);
+
+        if (isCustomModel)
+            addAnimSource(smodel, smodel);
+
+        const bool customArgonianSwim = !is1stPerson && !isWerewolf && isBeast && mNpc->mRace.contains("argonian");
+        if (customArgonianSwim)
+            addAnimSource(Settings::models().mXargonianswimkna.get().value(), smodel);
+
+        if (is1stPerson)
         {
-            const std::string& base = Settings::models().mXbaseanim.get().value();
-            if (!isWerewolf)
-                addAnimSource(base, smodel);
-
-            if (!isBase)
-            {
-                addAnimSource(defaultSkeleton, smodel);
-                addAnimSource(smodel, smodel);
-            }
-            else if (base != defaultSkeleton)
-            {
-                addAnimSource(defaultSkeleton, smodel);
-            }
-
-            if (!isWerewolf && isBeast && mNpc->mRace.contains("argonian"))
-                addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
-        }
-        else
-        {
-            if (!isWerewolf)
-                addAnimSource(Settings::models().mXbaseanim1st.get().value(), smodel);
-
-            if (!isBase)
-                addAnimSource(smodel, smodel);
-
             mObjectRoot->setNodeMask(Mask_FirstPerson);
             mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
         }
@@ -681,11 +678,11 @@ namespace MWRender
     PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, std::string_view bonename,
         std::string_view bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
     {
-        osg::ref_ptr<osg::Node> attached = attach(model, bonename, bonefilter, isLight);
+        osg::ref_ptr<osg::Node> attached = attach(VFS::Path::toNormalized(model), bonename, bonefilter, isLight);
         if (enchantedGlow)
             mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
-        return std::make_unique<PartHolder>(attached);
+        return std::make_unique<PartHolder>(std::move(attached));
     }
 
     osg::Vec3f NpcAnimation::runAnimation(float timepassed)

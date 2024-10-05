@@ -408,12 +408,12 @@ void CSMPrefs::State::declare()
     declareShortcut(mValues->mKeyBindings.mScriptEditorUncomment, "Uncomment Selection");
 
     declareCategory("Models");
-    declareString(mValues->mModels.mBaseanim, "base animations").setTooltip("3rd person base model with textkeys-data");
-    declareString(mValues->mModels.mBaseanimkna, "base animations, kna")
-        .setTooltip("3rd person beast race base model with textkeys-data");
-    declareString(mValues->mModels.mBaseanimfemale, "base animations, female")
-        .setTooltip("3rd person female base model with textkeys-data");
-    declareString(mValues->mModels.mWolfskin, "base animations, wolf").setTooltip("3rd person werewolf skin");
+    declareString(mValues->mModels.mBaseanim, "Base Animations").setTooltip("Third person base model and animations");
+    declareString(mValues->mModels.mBaseanimkna, "Base Animations, Beast")
+        .setTooltip("Third person beast race base model and animations");
+    declareString(mValues->mModels.mBaseanimfemale, "Base Animations, Female")
+        .setTooltip("Third person female base model and animations");
+    declareString(mValues->mModels.mWolfskin, "Base Animations, Werewolf").setTooltip("Third person werewolf skin");
 }
 
 void CSMPrefs::State::declareCategory(const std::string& key)

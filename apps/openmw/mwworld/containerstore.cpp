@@ -101,9 +101,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState(
     if (!record)
         return ContainerStoreIterator(this);
 
-    LiveCellRef<T> ref(record);
+    LiveCellRef<T> ref(ESM::makeBlankCellRef(), record);
     ref.load(state);
-    collection.mList.push_back(ref);
+    collection.mList.push_back(std::move(ref));
     auto it = ContainerStoreIterator(this, --collection.mList.end());
     MWBase::Environment::get().getWorldModel()->registerPtr(*it);
 

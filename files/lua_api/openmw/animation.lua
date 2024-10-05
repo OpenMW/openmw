@@ -1,5 +1,5 @@
 ---
--- `openmw.animation` defines functions that allow control of character animations
+-- `openmw.animation` defines functions that allow control of character animations.
 -- Note that for some methods, such as @{openmw.animation#playBlended} you should use the associated methods on the 
 -- [AnimationController](interface_animation.html) interface rather than invoking this API directly.
 -- @module animation
@@ -55,7 +55,7 @@
 -- @return #boolean
 
 ---
--- Skips animations for one frame, equivalent to mwscript's SkipAnim
+-- Skips animations for one frame, equivalent to mwscript's SkipAnim.
 -- Can be used only in local scripts on self.
 -- @function [parent=#animation] skipAnimationThisFrame
 -- @param openmw.core#GameObject actor
@@ -98,7 +98,7 @@
 
 
 ---
--- Cancels and removes the animation group from the list of active animations
+-- Cancels and removes the animation group from the list of active animations.
 -- Can be used only in local scripts on self.
 -- @function [parent=#animation] cancel
 -- @param openmw.core#GameObject actor

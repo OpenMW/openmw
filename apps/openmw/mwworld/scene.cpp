@@ -451,8 +451,7 @@ namespace MWWorld
             }
             else if (!ESM::isEsm4Ext(worldspace))
             {
-                static std::vector<float> defaultHeight;
-                defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
+                static const std::vector<float> defaultHeight(verts * verts, ESM::Land::DEFAULT_HEIGHT);
                 mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
                     ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
             }
@@ -1126,19 +1125,19 @@ namespace MWWorld
 
     void Scene::preload(const std::string& mesh, bool useAnim)
     {
-        std::string meshPath = mesh;
-        if (useAnim)
-            meshPath = Misc::ResourceHelpers::correctActorModelPath(meshPath, mRendering.getResourceSystem()->getVFS());
+        const VFS::Path::Normalized meshPath = useAnim
+            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mRendering.getResourceSystem()->getVFS())
+            : mesh;
 
-        if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(meshPath, mRendering.getReferenceTime()))
-        {
-            osg::ref_ptr<PreloadMeshItem> item(new PreloadMeshItem(
-                VFS::Path::toNormalized(meshPath), mRendering.getResourceSystem()->getSceneManager()));
-            mRendering.getWorkQueue()->addWorkItem(item);
-            const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
-            mWorkItems.erase(std::remove_if(mWorkItems.begin(), mWorkItems.end(), isDone), mWorkItems.end());
-            mWorkItems.emplace_back(std::move(item));
-        }
+        if (mRendering.getResourceSystem()->getSceneManager()->checkLoaded(meshPath, mRendering.getReferenceTime()))
+            return;
+
+        osg::ref_ptr<PreloadMeshItem> item(
+            new PreloadMeshItem(meshPath, mRendering.getResourceSystem()->getSceneManager()));
+        mRendering.getWorkQueue()->addWorkItem(item);
+        const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
+        mWorkItems.erase(std::remove_if(mWorkItems.begin(), mWorkItems.end(), isDone), mWorkItems.end());
+        mWorkItems.emplace_back(std::move(item));
     }
 
     void Scene::preloadCells(float dt)

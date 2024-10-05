@@ -20,6 +20,7 @@
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -639,7 +640,7 @@ namespace MWRender
                 continue;
 
             const int type = store.findStatic(ref.mRefId);
-            std::string model = getModel(type, ref.mRefId, store);
+            VFS::Path::Normalized model = getModel(type, ref.mRefId, store);
             if (model.empty())
                 continue;
             model = Misc::ResourceHelpers::correctMeshPath(model);
@@ -647,10 +648,10 @@ namespace MWRender
             if (activeGrid && type != ESM::REC_STAT)
             {
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
-                std::string kfname = Misc::StringUtils::lowerCase(model);
-                if (kfname.size() > 4 && kfname.ends_with(".nif"))
+                if (Misc::getFileExtension(model) == "nif")
                 {
-                    kfname.replace(kfname.size() - 4, 4, ".kf");
+                    VFS::Path::Normalized kfname = model;
+                    kfname.changeExtension("kf");
                     if (mSceneManager->getVFS()->exists(kfname))
                         continue;
                 }
@@ -671,7 +672,7 @@ namespace MWRender
                                 ->second;
             }
 
-            osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(VFS::Path::toNormalized(model), false);
+            osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
 
             if (activeGrid)
             {

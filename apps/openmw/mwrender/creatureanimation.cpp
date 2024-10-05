@@ -111,7 +111,7 @@ namespace MWRender
         MWWorld::ConstPtr item = *it;
 
         std::string_view bonename;
-        std::string itemModel = item.getClass().getCorrectedModel(item);
+        VFS::Path::Normalized itemModel = item.getClass().getCorrectedModel(item);
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
         {
             if (item.getType() == ESM::Weapon::sRecordId)

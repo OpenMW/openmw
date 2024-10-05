@@ -228,7 +228,7 @@ bool Misc::ResourceHelpers::isHiddenMarker(const ESM::RefId& id)
 
 namespace
 {
-    std::string getLODMeshNameImpl(std::string resPath, const VFS::Manager* vfs, std::string_view pattern)
+    std::string getLODMeshNameImpl(std::string resPath, std::string_view pattern)
     {
         if (auto w = Misc::findExtension(resPath); w != std::string::npos)
             resPath.insert(w, pattern);
@@ -237,7 +237,7 @@ namespace
 
     std::string getBestLODMeshName(std::string const& resPath, const VFS::Manager* vfs, std::string_view pattern)
     {
-        if (const auto& result = getLODMeshNameImpl(resPath, vfs, pattern); vfs->exists(result))
+        if (std::string result = getLODMeshNameImpl(resPath, pattern); vfs->exists(result))
             return result;
         return resPath;
     }

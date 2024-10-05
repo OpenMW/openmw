@@ -131,7 +131,8 @@ namespace NavMeshTool
                 osg::ref_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
-                        return bulletShapeManager.getShape(Misc::ResourceHelpers::correctMeshPath(model));
+                        return bulletShapeManager.getShape(
+                            VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(model)));
                     }
                     catch (const std::exception& e)
                     {

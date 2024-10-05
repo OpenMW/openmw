@@ -388,17 +388,20 @@ namespace
         std::string_view mEffectId;
     };
 
-    osg::ref_ptr<osg::LightModel> getVFXLightModelInstance()
+    namespace
     {
-        static osg::ref_ptr<osg::LightModel> lightModel = nullptr;
-
-        if (!lightModel)
+        osg::ref_ptr<osg::LightModel> makeVFXLightModelInstance()
         {
-            lightModel = new osg::LightModel;
+            osg::ref_ptr<osg::LightModel> lightModel = new osg::LightModel;
             lightModel->setAmbientIntensity({ 1, 1, 1, 1 });
+            return lightModel;
         }
 
-        return lightModel;
+        const osg::ref_ptr<osg::LightModel>& getVFXLightModelInstance()
+        {
+            static const osg::ref_ptr<osg::LightModel> lightModel = makeVFXLightModelInstance();
+            return lightModel;
+        }
     }
 
     void assignBoneBlendCallbackRecursive(MWRender::BoneAnimBlendController* controller, osg::Node* parent, bool isRoot)
@@ -1508,10 +1511,10 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size() - 4, 4, "/");
 
-        for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
+        for (const VFS::Path::Normalized& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
             if (Misc::getFileExtension(name) == "nif")
-                loadBonesFromFile(node, VFS::Path::toNormalized(name), resourceSystem);
+                loadBonesFromFile(node, name, resourceSystem);
         }
     }
 

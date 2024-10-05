@@ -179,7 +179,7 @@ namespace LuaUi
 
         void updateVisible();
 
-        void detachChildrenIf(auto&& predicate, std::vector<WidgetExtension*> children)
+        void detachChildrenIf(auto&& predicate, std::vector<WidgetExtension*>& children)
         {
             for (auto it = children.begin(); it != children.end();)
             {

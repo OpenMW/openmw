@@ -533,7 +533,7 @@ namespace MWRender
         : CharacterPreview(
             parent, resourceSystem, MWMechanics::getPlayer(), 512, 512, osg::Vec3f(0, 125, 8), osg::Vec3f(0, 0, 8))
         , mBase(*mCharacter.get<ESM::NPC>()->mBase)
-        , mRef(&mBase)
+        , mRef(ESM::makeBlankCellRef(), &mBase)
         , mPitchRadians(osg::DegreesToRadians(6.f))
     {
         mCharacter = MWWorld::Ptr(&mRef, nullptr);

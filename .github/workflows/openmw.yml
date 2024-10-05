@@ -83,9 +83,7 @@ jobs:
         max-size: 1000M
 
     - name: Configure
-      run: |
-        rm -fr build  # remove the build directory
-        CI/before_script.osx.sh
+      run: CI/before_script.osx.sh
     - name: Build
       run: |
         cd build

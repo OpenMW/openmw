@@ -846,14 +846,12 @@ namespace MWMechanics
         mAI = true;
     }
 
-    bool MechanicsManager::isBoundItem(const MWWorld::Ptr& item)
+    namespace
     {
-        static std::set<ESM::RefId> boundItemIDCache;
-
-        // If this is empty then we haven't executed the GMST cache logic yet; or there isn't any sMagicBound* GMST's
-        // for some reason
-        if (boundItemIDCache.empty())
+        std::set<ESM::RefId> makeBoundItemIdCache()
         {
+            std::set<ESM::RefId> boundItemIDCache;
+
             // Build a list of known bound item ID's
             const MWWorld::Store<ESM::GameSetting>& gameSettings
                 = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
@@ -870,15 +868,16 @@ namespace MWMechanics
 
                 boundItemIDCache.insert(ESM::RefId::stringRefId(currentGMSTValue));
             }
+
+            return boundItemIDCache;
         }
+    }
 
-        // Perform bound item check and assign the Flag_Bound bit if it passes
-        const ESM::RefId& tempItemID = item.getCellRef().getRefId();
+    bool MechanicsManager::isBoundItem(const MWWorld::Ptr& item)
+    {
+        static const std::set<ESM::RefId> boundItemIdCache = makeBoundItemIdCache();
 
-        if (boundItemIDCache.count(tempItemID) != 0)
-            return true;
-
-        return false;
+        return boundItemIdCache.find(item.getCellRef().getRefId()) != boundItemIdCache.end();
     }
 
     bool MechanicsManager::isAllowedToUse(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim)
