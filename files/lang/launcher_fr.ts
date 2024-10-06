@@ -1407,6 +1407,10 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Multiplicateur de force pour le combat à mains nues</translation>
     </message>
     <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage: damage is multiplied by Strength value divided by 40.&lt;/p&gt;&lt;p&gt;Can apply to all actors or only to non-werewolf actors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ce paramètre contrôle le comportement de l&apos;attribut Force pour les dommages en combat à main nue: les dommages sont multipliés par la Force puis divisés par 40.&lt;/p&gt;&lt;p&gt;Il peut s&apos;appliquer à tous les acteurs, ou uniquement aux acteurs non-loups-garous.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <source>Turn to Movement Direction</source>
         <translation>Se tourner en direction du mouvement</translation>
     </message>

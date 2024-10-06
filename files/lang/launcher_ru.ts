@@ -1253,6 +1253,10 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Учет Силы в рукопашном бою</translation>
     </message>
     <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage: damage is multiplied by Strength value divided by 40.&lt;/p&gt;&lt;p&gt;Can apply to all actors or only to non-werewolf actors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Настройка определяет поведение учета атрибута Сила в рукопашном уроне: урон умножается на его значение, разделенное на 40.&lt;/p&gt;&lt;p&gt;Может быть применено ко всем персонажам или же только персонажам, не являющимся оборотнями.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <source>Background Physics Threads</source>
         <translation>Количество фоновых потоков для физики</translation>
     </message>
