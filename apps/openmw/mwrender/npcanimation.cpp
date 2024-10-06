@@ -456,8 +456,8 @@ namespace MWRender
         mHeadModel.clear();
         mHairModel.clear();
 
-        const ESM::RefId& headName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHead") : mNpc->mHead;
-        const ESM::RefId& hairName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHair") : mNpc->mHair;
+        const ESM::RefId headName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHead") : mNpc->mHead;
+        const ESM::RefId hairName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHair") : mNpc->mHair;
 
         if (!headName.empty())
         {
