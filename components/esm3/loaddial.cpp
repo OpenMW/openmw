@@ -85,7 +85,7 @@ namespace ESM
             esm.writeHNCString("NAME", mStringId);
         }
         else if (esm.getFormatVersion() <= MaxNameIsRefIdOnlyFormatVersion)
-            esm.writeHNRefId("NAME", mId);
+            esm.writeHNCRefId("NAME", mId);
         else
             esm.writeHNRefId("ID__", mId);
 
