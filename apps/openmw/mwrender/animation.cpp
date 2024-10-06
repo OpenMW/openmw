@@ -658,16 +658,24 @@ namespace MWRender
         return mKeyframes->mTextKeys;
     }
 
-    void Animation::loadAllAnimationsInFolder(const std::string& model, const std::string& baseModel)
+    void Animation::loadAdditionalAnimations(VFS::Path::NormalizedView model, const std::string& baseModel)
     {
-        std::string animationPath = model;
-        if (animationPath.find("meshes") == 0)
-        {
-            animationPath.replace(0, 6, "animations");
-        }
-        animationPath.replace(animationPath.size() - 3, 3, "/");
+        constexpr VFS::Path::NormalizedView meshes("meshes/");
+        if (!model.value().starts_with(meshes.value()))
+            return;
 
-        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
+        std::string path(model.value());
+
+        constexpr VFS::Path::NormalizedView animations("animations/");
+        path.replace(0, meshes.value().size(), animations.value());
+
+        const std::string::size_type extensionStart = path.find_last_of(VFS::Path::extensionSeparator);
+        if (extensionStart == std::string::npos)
+            return;
+
+        path.replace(extensionStart, path.size() - extensionStart, "/");
+
+        for (const VFS::Path::Normalized& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(path))
         {
             if (Misc::getFileExtension(name) == "kf")
             {
@@ -686,7 +694,7 @@ namespace MWRender
         addSingleAnimSource(kfname, baseModel);
 
         if (Settings::game().mUseAdditionalAnimSources)
-            loadAllAnimationsInFolder(kfname, baseModel);
+            loadAdditionalAnimations(kfname, baseModel);
     }
 
     std::shared_ptr<Animation::AnimSource> Animation::addSingleAnimSource(
