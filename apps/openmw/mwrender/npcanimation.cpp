@@ -647,7 +647,8 @@ namespace MWRender
             {
                 const ESM::Light* light = part.get<ESM::Light>()->mBase;
                 addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                    Misc::ResourceHelpers::correctMeshPath(light->mModel), false, nullptr, true);
+                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(light->mModel)), false, nullptr,
+                    true);
                 if (mObjectParts[ESM::PRT_Shield])
                     addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), SceneUtil::LightCommon(*light));
             }
@@ -667,7 +668,7 @@ namespace MWRender
             {
                 if (const ESM::BodyPart* bodypart = parts[part])
                     addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part), -1, 1,
-                        Misc::ResourceHelpers::correctMeshPath(bodypart->mModel));
+                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(bodypart->mModel)));
             }
         }
 
@@ -675,10 +676,10 @@ namespace MWRender
             attachArrow();
     }
 
-    PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, std::string_view bonename,
+    PartHolderPtr NpcAnimation::insertBoundedPart(VFS::Path::NormalizedView model, std::string_view bonename,
         std::string_view bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
     {
-        osg::ref_ptr<osg::Node> attached = attach(VFS::Path::toNormalized(model), bonename, bonefilter, isLight);
+        osg::ref_ptr<osg::Node> attached = attach(model, bonename, bonefilter, isLight);
         if (enchantedGlow)
             mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
@@ -748,7 +749,7 @@ namespace MWRender
     }
 
     bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority,
-        const std::string& mesh, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
+        VFS::Path::NormalizedView mesh, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
     {
         if (priority <= mPartPriorities[type])
             return false;
@@ -897,7 +898,8 @@ namespace MWRender
 
             if (bodypart)
                 addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part.mPart), group, priority,
-                    Misc::ResourceHelpers::correctMeshPath(bodypart->mModel), enchantedGlow, glowColor);
+                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(bodypart->mModel)), enchantedGlow,
+                    glowColor);
             else
                 reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);
         }
@@ -943,7 +945,7 @@ namespace MWRender
             if (weapon != inv.end())
             {
                 osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
-                std::string mesh = weapon->getClass().getCorrectedModel(*weapon);
+                const VFS::Path::Normalized mesh = weapon->getClass().getCorrectedModel(*weapon);
                 addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1, mesh,
                     !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
@@ -1003,7 +1005,7 @@ namespace MWRender
         if (show && iter != inv.end())
         {
             osg::Vec4f glowColor = iter->getClass().getEnchantmentColor(*iter);
-            std::string mesh = iter->getClass().getCorrectedModel(*iter);
+            VFS::Path::Normalized mesh = iter->getClass().getCorrectedModel(*iter);
             // For shields we must try to use the body part model
             if (iter->getType() == ESM::Armor::sRecordId)
             {
