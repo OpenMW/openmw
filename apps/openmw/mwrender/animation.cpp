@@ -28,16 +28,17 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm4/loadligh.hpp>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/sceneutil/lightcommon.hpp>
-
-#include <components/sceneutil/keyframe.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 #include <components/vfs/recursivedirectoryiterator.hpp>
 
+#include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -677,10 +678,10 @@ namespace MWRender
 
     void Animation::addAnimSource(std::string_view model, const std::string& baseModel)
     {
-        std::string kfname = Misc::StringUtils::lowerCase(model);
+        VFS::Path::Normalized kfname(model);
 
-        if (kfname.ends_with(".nif"))
-            kfname.replace(kfname.size() - 4, 4, ".kf");
+        if (Misc::getFileExtension(kfname) == "nif")
+            kfname.changeExtension("kf");
 
         addSingleAnimSource(kfname, baseModel);
 
