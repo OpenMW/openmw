@@ -32,34 +32,33 @@ CSMPrefs::State* CSMPrefs::State::sThis = nullptr;
 void CSMPrefs::State::declare()
 {
     declareCategory("Windows");
-    declareInt(mValues->mWindows.mDefaultWidth, "Default window width")
+    declareInt(mValues->mWindows.mDefaultWidth, "Default Window Width")
         .setTooltip("Newly opened top-level windows will open with this width.")
         .setMin(80);
-    declareInt(mValues->mWindows.mDefaultHeight, "Default window height")
+    declareInt(mValues->mWindows.mDefaultHeight, "Default Window Height")
         .setTooltip("Newly opened top-level windows will open with this height.")
         .setMin(80);
     declareBool(mValues->mWindows.mShowStatusbar, "Show Status Bar")
         .setTooltip(
-            "If a newly open top level window is showing status bars or not. "
+            "Whether a newly open top level window will show status bars. "
             " Note that this does not affect existing windows.");
     declareBool(mValues->mWindows.mReuse, "Reuse Subviews")
         .setTooltip(
-            "When a new subview is requested and a matching subview already "
-            " exist, do not open a new subview and use the existing one instead.");
-    declareInt(mValues->mWindows.mMaxSubviews, "Maximum number of subviews per top-level window")
+            "When a new subview is requested and a matching subview already exists, reuse the existing subview.");
+    declareInt(mValues->mWindows.mMaxSubviews, "Maximum Number of Subviews per Top-Level Window")
         .setTooltip(
             "If the maximum number is reached and a new subview is opened "
             "it will be placed into a new top-level window.")
         .setRange(1, 256);
-    declareBool(mValues->mWindows.mHideSubview, "Hide single subview")
+    declareBool(mValues->mWindows.mHideSubview, "Hide Single Subview")
         .setTooltip(
             "When a view contains only a single subview, hide the subview title "
             "bar and if this subview is closed also close the view (unless it is the last "
             "view for this document)");
-    declareInt(mValues->mWindows.mMinimumWidth, "Minimum subview width")
+    declareInt(mValues->mWindows.mMinimumWidth, "Minimum Subview Width")
         .setTooltip("Minimum width of subviews.")
         .setRange(50, 10000);
-    declareEnum(mValues->mWindows.mMainwindowScrollbar, "Horizontal scrollbar mode for main window.");
+    declareEnum(mValues->mWindows.mMainwindowScrollbar, "Main Window Horizontal Scrollbar Mode");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     declareBool(mValues->mWindows.mGrowLimit, "Grow Limit Screen")
         .setTooltip(
@@ -69,45 +68,45 @@ void CSMPrefs::State::declare()
 #endif
 
     declareCategory("Records");
-    declareEnum(mValues->mRecords.mStatusFormat, "Modification status display format");
-    declareEnum(mValues->mRecords.mTypeFormat, "ID type display format");
+    declareEnum(mValues->mRecords.mStatusFormat, "Modification Status Display Format");
+    declareEnum(mValues->mRecords.mTypeFormat, "ID Type Display Format");
 
     declareCategory("ID Tables");
     declareEnum(mValues->mIdTables.mDouble, "Double Click");
     declareEnum(mValues->mIdTables.mDoubleS, "Shift Double Click");
     declareEnum(mValues->mIdTables.mDoubleC, "Control Double Click");
     declareEnum(mValues->mIdTables.mDoubleSc, "Shift Control Double Click");
-    declareEnum(mValues->mIdTables.mJumpToAdded, "Action on adding or cloning a record");
+    declareEnum(mValues->mIdTables.mJumpToAdded, "Action on Adding or Cloning a Record");
     declareBool(
-        mValues->mIdTables.mExtendedConfig, "Manually specify affected record types for an extended delete/revert")
+        mValues->mIdTables.mExtendedConfig, "Manually Specify Affected Record Types for an Extended Delete/Revert")
         .setTooltip(
             "Delete and revert commands have an extended form that also affects "
             "associated records.\n\n"
             "If this option is enabled, types of affected records are selected "
             "manually before a command execution.\nOtherwise, all associated "
             "records are deleted/reverted immediately.");
-    declareBool(mValues->mIdTables.mSubviewNewWindow, "Open Record in new window")
+    declareBool(mValues->mIdTables.mSubviewNewWindow, "Open Record in a New Window")
         .setTooltip(
             "When editing a record, open the view in a new window,"
             " rather than docked in the main view.");
-    declareInt(mValues->mIdTables.mFilterDelay, "Delay before applying a filter (in miliseconds)");
+    declareInt(mValues->mIdTables.mFilterDelay, "Filter Apply Delay (ms)");
 
     declareCategory("ID Dialogues");
-    declareBool(mValues->mIdDialogues.mToolbar, "Show toolbar");
+    declareBool(mValues->mIdDialogues.mToolbar, "Show Toolbar");
 
     declareCategory("Reports");
     declareEnum(mValues->mReports.mDouble, "Double Click");
     declareEnum(mValues->mReports.mDoubleS, "Shift Double Click");
     declareEnum(mValues->mReports.mDoubleC, "Control Double Click");
     declareEnum(mValues->mReports.mDoubleSc, "Shift Control Double Click");
-    declareBool(mValues->mReports.mIgnoreBaseRecords, "Ignore base records in verifier");
+    declareBool(mValues->mReports.mIgnoreBaseRecords, "Ignore Base Records in Verifier");
 
     declareCategory("Search & Replace");
-    declareInt(mValues->mSearchAndReplace.mCharBefore, "Characters before search string")
-        .setTooltip("Maximum number of character to display in search result before the searched text");
-    declareInt(mValues->mSearchAndReplace.mCharAfter, "Characters after search string")
-        .setTooltip("Maximum number of character to display in search result after the searched text");
-    declareBool(mValues->mSearchAndReplace.mAutoDelete, "Delete row from result table after a successful replace");
+    declareInt(mValues->mSearchAndReplace.mCharBefore, "Max Characters Before the Search String")
+        .setTooltip("Maximum number of characters to display in the search result before the searched text");
+    declareInt(mValues->mSearchAndReplace.mCharAfter, "Max Characters After the Search String")
+        .setTooltip("Maximum number of characters to display in the search result after the searched text");
+    declareBool(mValues->mSearchAndReplace.mAutoDelete, "Delete Row from the Result Table After Replace");
 
     declareCategory("Scripts");
     declareBool(mValues->mScripts.mShowLinenum, "Show Line Numbers")
@@ -115,19 +114,17 @@ void CSMPrefs::State::declare()
             "Show line numbers to the left of the script editor window."
             "The current row and column numbers of the text cursor are shown at the bottom.");
     declareBool(mValues->mScripts.mWrapLines, "Wrap Lines")
-        .setTooltip("Wrap lines longer than width of script editor.");
-    declareBool(mValues->mScripts.mMonoFont, "Use monospace font");
+        .setTooltip("Wrap lines that are longer than the width of the script editor.");
+    declareBool(mValues->mScripts.mMonoFont, "Use Monospace Font");
     declareInt(mValues->mScripts.mTabWidth, "Tab Width")
         .setTooltip("Number of characters for tab width")
         .setRange(1, 10);
     declareEnum(mValues->mScripts.mWarnings, "Warning Mode");
-    declareBool(mValues->mScripts.mToolbar, "Show toolbar");
-    declareInt(mValues->mScripts.mCompileDelay, "Delay between updating of source errors")
-        .setTooltip("Delay in milliseconds")
-        .setRange(0, 10000);
-    declareInt(mValues->mScripts.mErrorHeight, "Initial height of the error panel").setRange(100, 10000);
-    declareBool(mValues->mScripts.mHighlightOccurrences, "Highlight other occurrences of selected names");
-    declareColour(mValues->mScripts.mColourHighlight, "Colour of highlighted occurrences");
+    declareBool(mValues->mScripts.mToolbar, "Show Toolbar");
+    declareInt(mValues->mScripts.mCompileDelay, "Source Error Update Delay (ms)").setRange(0, 10000);
+    declareInt(mValues->mScripts.mErrorHeight, "Initial Error Panel Height").setRange(100, 10000);
+    declareBool(mValues->mScripts.mHighlightOccurrences, "Highlight Selected Name Occurrences");
+    declareColour(mValues->mScripts.mColourHighlight, "Highlight Colour: Selected Name Occurrences");
     declareColour(mValues->mScripts.mColourInt, "Highlight Colour: Integer Literals");
     declareColour(mValues->mScripts.mColourFloat, "Highlight Colour: Float Literals");
     declareColour(mValues->mScripts.mColourName, "Highlight Colour: Names");
@@ -137,7 +134,7 @@ void CSMPrefs::State::declare()
     declareColour(mValues->mScripts.mColourId, "Highlight Colour: IDs");
 
     declareCategory("General Input");
-    declareBool(mValues->mGeneralInput.mCycle, "Cyclic next/previous")
+    declareBool(mValues->mGeneralInput.mCycle, "Cyclic Next/Previous")
         .setTooltip(
             "When using next/previous functions at the last/first item of a "
             "list go to the first/last item");
@@ -164,24 +161,23 @@ void CSMPrefs::State::declare()
     declareDouble(mValues->mSceneInput.mNaviOrbitRotSpeed, "Orbital Camera Rotational Speed").setRange(0.001, 6.28);
     declareDouble(mValues->mSceneInput.mNaviOrbitSpeedMult, "Orbital Camera Speed Multiplier (from Modifier)")
         .setRange(0.001, 1000.0);
-    declareBool(mValues->mSceneInput.mNaviOrbitConstRoll, "Keep camera roll constant for orbital camera");
+    declareBool(mValues->mSceneInput.mNaviOrbitConstRoll, "Keep Camera Roll Constant for Orbital Camera");
 
     declareBool(mValues->mSceneInput.mContextSelect, "Context Sensitive Selection");
-    declareDouble(mValues->mSceneInput.mDragFactor, "Mouse sensitivity during drag operations").setRange(0.001, 100.0);
-    declareDouble(mValues->mSceneInput.mDragWheelFactor, "Mouse wheel sensitivity during drag operations")
-        .setRange(0.001, 100.0);
-    declareDouble(mValues->mSceneInput.mDragShiftFactor, "Shift-acceleration factor during drag operations")
+    declareDouble(mValues->mSceneInput.mDragFactor, "Dragging Mouse Sensitivity").setRange(0.001, 100.0);
+    declareDouble(mValues->mSceneInput.mDragWheelFactor, "Dragging Mouse Wheel Sensitivity").setRange(0.001, 100.0);
+    declareDouble(mValues->mSceneInput.mDragShiftFactor, "Dragging Shift-Acceleration Factor")
         .setTooltip("Acceleration factor during drag operations while holding down shift")
         .setRange(0.001, 100.0);
     declareDouble(mValues->mSceneInput.mRotateFactor, "Free rotation factor").setPrecision(4).setRange(0.0001, 0.1);
 
     declareCategory("Rendering");
-    declareInt(mValues->mRendering.mFramerateLimit, "FPS limit")
+    declareInt(mValues->mRendering.mFramerateLimit, "FPS Limit")
         .setTooltip("Framerate limit in 3D preview windows. Zero value means \"unlimited\".")
         .setRange(0, 10000);
     declareInt(mValues->mRendering.mCameraFov, "Camera FOV").setRange(10, 170);
-    declareBool(mValues->mRendering.mCameraOrtho, "Orthographic projection for camera");
-    declareInt(mValues->mRendering.mCameraOrthoSize, "Orthographic projection size parameter")
+    declareBool(mValues->mRendering.mCameraOrtho, "Orthographic Projection for Camera");
+    declareInt(mValues->mRendering.mCameraOrthoSize, "Orthographic Projection Size Parameter")
         .setTooltip("Size of the orthographic frustum, greater value will allow the camera to see more of the world.")
         .setRange(10, 10000);
     declareDouble(mValues->mRendering.mObjectMarkerAlpha, "Object Marker Transparency").setPrecision(2).setRange(0, 1);
@@ -204,46 +200,46 @@ void CSMPrefs::State::declare()
     declareBool(mValues->mRendering.mSceneDayNightSwitchNodes, "Use Day/Night Switch Nodes");
 
     declareCategory("Tooltips");
-    declareBool(mValues->mTooltips.mScene, "Show Tooltips in 3D scenes");
-    declareBool(mValues->mTooltips.mSceneHideBasic, "Hide basic  3D scenes tooltips");
-    declareInt(mValues->mTooltips.mSceneDelay, "Tooltip delay in milliseconds").setMin(1);
+    declareBool(mValues->mTooltips.mScene, "Show Tooltips in 3D Scenes");
+    declareBool(mValues->mTooltips.mSceneHideBasic, "Hide Basic 3D Scene Tooltips");
+    declareInt(mValues->mTooltips.mSceneDelay, "Tooltip Delay (ms)").setMin(1);
 
     declareCategory("3D Scene Editing");
-    declareDouble(mValues->mSceneEditing.mGridsnapMovement, "Grid snap size");
-    declareDouble(mValues->mSceneEditing.mGridsnapRotation, "Angle snap size");
-    declareDouble(mValues->mSceneEditing.mGridsnapScale, "Scale snap size");
+    declareDouble(mValues->mSceneEditing.mGridsnapMovement, "Grid Snap Size");
+    declareDouble(mValues->mSceneEditing.mGridsnapRotation, "Angle Snap Size");
+    declareDouble(mValues->mSceneEditing.mGridsnapScale, "Scale Snap Size");
     declareInt(mValues->mSceneEditing.mDistance, "Drop Distance")
         .setTooltip(
-            "If an instance drop can not be placed against another object at the "
-            "insert point, it will be placed by this distance from the insert point instead");
-    declareEnum(mValues->mSceneEditing.mOutsideDrop, "Handling drops outside of cells");
-    declareEnum(mValues->mSceneEditing.mOutsideVisibleDrop, "Handling drops outside of visible cells");
-    declareEnum(mValues->mSceneEditing.mOutsideLandedit, "Handling terrain edit outside of cells")
-        .setTooltip("Behavior of terrain editing, if land editing brush reaches an area without cell record.");
-    declareEnum(mValues->mSceneEditing.mOutsideVisibleLandedit, "Handling terrain edit outside of visible cells")
+            "If the dropped instance cannot be placed against another object at the "
+            "insertion point, it will be placed at this distance from the insertion point.");
+    declareEnum(mValues->mSceneEditing.mOutsideDrop, "Instance Dropping Outside of Cells");
+    declareEnum(mValues->mSceneEditing.mOutsideVisibleDrop, "Instance Dropping Outside of Visible Cells");
+    declareEnum(mValues->mSceneEditing.mOutsideLandedit, "Terrain Editing Outside of Cells")
+        .setTooltip("Behaviour of terrain editing if land editing brush reaches an area without a cell record.");
+    declareEnum(mValues->mSceneEditing.mOutsideVisibleLandedit, "Terrain Editing Outside of Visible Cells")
         .setTooltip(
-            "Behavior of terrain editing, if land editing brush reaches an area that is not currently visible.");
-    declareInt(mValues->mSceneEditing.mTexturebrushMaximumsize, "Maximum texture brush size").setMin(1);
-    declareInt(mValues->mSceneEditing.mShapebrushMaximumsize, "Maximum height edit brush size")
+            "Behaviour of terrain editing if land editing brush reaches an area that is not currently visible.");
+    declareInt(mValues->mSceneEditing.mTexturebrushMaximumsize, "Maximum Texture Brush Size").setMin(1);
+    declareInt(mValues->mSceneEditing.mShapebrushMaximumsize, "Maximum Height Edit Brush Size")
         .setTooltip("Setting for the slider range of brush size in terrain height editing.")
         .setMin(1);
-    declareBool(mValues->mSceneEditing.mLandeditPostSmoothpainting, "Smooth land after painting height")
-        .setTooltip("Raise and lower tools will leave bumpy finish without this option");
-    declareDouble(mValues->mSceneEditing.mLandeditPostSmoothstrength, "Smoothing strength (post-edit)")
+    declareBool(mValues->mSceneEditing.mLandeditPostSmoothpainting, "Smooth Land after Height Painting")
+        .setTooltip("Smooth the normally bumpy results of raise and lower tools.");
+    declareDouble(mValues->mSceneEditing.mLandeditPostSmoothstrength, "Post-Edit Smoothing Strength")
         .setTooltip(
-            "If smoothing land after painting height is used, this is the percentage of smooth applied afterwards. "
-            "Negative values may be used to roughen instead of smooth.")
+            "Smoothing strength for Smooth Land after Height Painting setting. "
+            "Negative values may be used to invert the effect and make the terrain rougher.")
         .setMin(-1)
         .setMax(1);
-    declareBool(mValues->mSceneEditing.mOpenListView, "Open displays list view")
+    declareBool(mValues->mSceneEditing.mOpenListView, "Open Action Shows Instances Table")
         .setTooltip(
-            "When opening a reference from the scene view, it will open the"
-            " instance list view instead of the individual instance record view.");
-    declareEnum(mValues->mSceneEditing.mPrimarySelectAction, "Action for primary select")
+            "Opening an instance from the scene view will open the instances table instead of the record view for that "
+            "instance.");
+    declareEnum(mValues->mSceneEditing.mPrimarySelectAction, "Primary Select Action")
         .setTooltip(
             "Selection can be chosen between select only, add to selection, remove from selection and invert "
             "selection.");
-    declareEnum(mValues->mSceneEditing.mSecondarySelectAction, "Action for secondary select")
+    declareEnum(mValues->mSceneEditing.mSecondarySelectAction, "Secondary Select Action")
         .setTooltip(
             "Selection can be chosen between select only, add to selection, remove from selection and invert "
             "selection.");
@@ -340,10 +336,10 @@ void CSMPrefs::State::declare()
     declareShortcut(mValues->mKeyBindings.mSceneSelectTertiary, "Tertiary Select");
     declareModifier(mValues->mKeyBindings.mSceneSpeedModifier, "Speed Modifier");
     declareShortcut(mValues->mKeyBindings.mSceneDelete, "Delete Instance");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrain, "Drop to terrain level");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollision, "Drop to collision");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrainSeparately, "Drop to terrain level separately");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollisionSeparately, "Drop to collision separately");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrain, "Drop to Terrain Level");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollision, "Drop to Collision");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrainSeparately, "Drop to Terrain Level Separately");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollisionSeparately, "Drop to Collision Separately");
     declareShortcut(mValues->mKeyBindings.mSceneLoadCamCell, "Load Camera Cell");
     declareShortcut(mValues->mKeyBindings.mSceneLoadCamEastcell, "Load East Cell");
     declareShortcut(mValues->mKeyBindings.mSceneLoadCamNorthcell, "Load North Cell");
