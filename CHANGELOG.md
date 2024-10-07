@@ -192,6 +192,7 @@
     Bug #8124: Normal weapon resistance is applied twice for NPCs
     Bug #8132: Actors without hello responses turn to face the player
     Bug #8171: Items with more than 100% health can be repaired
+    Bug #8172: Openmw-cs crashes when viewing `Dantooine, Sea`
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
