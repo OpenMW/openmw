@@ -29,7 +29,7 @@ namespace MWClass
     void ESM4Impl::insertObjectPhysics(
         const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics)
     {
-        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
+        physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
     MWGui::ToolTipInfo ESM4Impl::getToolTipInfo(std::string_view name, int count)

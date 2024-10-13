@@ -407,14 +407,15 @@ namespace MWPhysics
     }
 
     void PhysicsSystem::addObject(
-        const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType)
+        const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh, osg::Quat rotation, int collisionType)
     {
         if (ptr.mRef->mData.mPhysicsPostponed)
             return;
 
         const VFS::Path::Normalized animationMesh = ptr.getClass().useAnim()
-            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS())
-            : mesh;
+            ? VFS::Path::toNormalized(
+                Misc::ResourceHelpers::correctActorModelPath(mesh.value(), mResourceSystem->getVFS()))
+            : VFS::Path::Normalized(mesh);
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(animationMesh);
         if (!shapeInstance || !shapeInstance->mCollisionShape)
             return;
@@ -560,10 +561,10 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::addActor(const MWWorld::Ptr& ptr, const std::string& mesh)
+    void PhysicsSystem::addActor(const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh)
     {
         const VFS::Path::Normalized animationMesh
-            = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+            = Misc::ResourceHelpers::correctActorModelPath(mesh.value(), mResourceSystem->getVFS());
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(animationMesh);
 
         // Try to get shape from basic model as fallback for creatures
@@ -589,7 +590,7 @@ namespace MWPhysics
     }
 
     int PhysicsSystem::addProjectile(
-        const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius)
+        const MWWorld::Ptr& caster, const osg::Vec3f& position, VFS::Path::NormalizedView mesh, bool computeRadius)
     {
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance
             = mShapeManager->getInstance(VFS::Path::toNormalized(mesh));
