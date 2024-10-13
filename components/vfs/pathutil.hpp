@@ -94,6 +94,8 @@ namespace VFS::Path
 
         constexpr std::string_view value() const noexcept { return mValue; }
 
+        constexpr bool empty() const noexcept { return mValue.empty(); }
+
         friend constexpr bool operator==(const NormalizedView& lhs, const NormalizedView& rhs) = default;
 
         friend constexpr bool operator==(const NormalizedView& lhs, const auto& rhs) { return lhs.mValue == rhs; }
