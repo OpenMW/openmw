@@ -12,4 +12,3 @@ luarocks make cyan-dev-1.rockspec
 popd
 
 scripts/generate_teal_declarations.sh ./teal_declarations
-zip teal_declarations.zip -r teal_declarations
