@@ -1,11 +1,12 @@
 #include "infocreator.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <memory>
 
 #include <QLabel>
+#include <QRandomGenerator>
 #include <QString>
-#include <QUuid>
 
 #include <apps/opencs/model/world/columnbase.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
@@ -27,15 +28,27 @@ class QUndoStack;
 
 std::string CSVWorld::InfoCreator::getId() const
 {
-    const std::string topic = mTopic->text().toStdString();
-
-    std::string unique = QUuid::createUuid().toByteArray().data();
-
-    unique.erase(std::remove(unique.begin(), unique.end(), '-'), unique.end());
-
-    unique = unique.substr(1, unique.size() - 2);
-
-    return topic + '#' + unique;
+    std::string id = mTopic->text().toStdString();
+    size_t length = id.size();
+    // We want generated ids to be at most 31 + \0 characters
+    id.resize(length + 32);
+    id[length] = '#';
+    // Combine a random 32bit number with a random 64bit number for a max 30 character string
+    quint32 gen32 = QRandomGenerator::global()->generate();
+    char* start = id.data() + length + 1;
+    char* end = start + 10; // 2^32 is a 10 digit number
+    auto result = std::to_chars(start, end, gen32);
+    quint64 gen64 = QRandomGenerator::global()->generate64();
+    if (gen64)
+    {
+        // 0-pad the first number so 10 + 11 isn't the same as 101 + 1
+        std::fill(result.ptr, end, '0');
+        start = end;
+        end = start + 20; // 2^64 is a 20 digit number
+        result = std::to_chars(start, end, gen64);
+    }
+    id.resize(result.ptr - id.data());
+    return id;
 }
 
 void CSVWorld::InfoCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
