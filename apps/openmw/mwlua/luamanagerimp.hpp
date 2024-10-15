@@ -8,6 +8,7 @@
 
 #include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/scripttracker.hpp>
 #include <components/lua/storage.hpp>
 #include <components/lua_ui/resources.hpp>
 #include <components/misc/color.hpp>
@@ -234,6 +235,8 @@ namespace MWLua
 
         LuaUtil::InputAction::Registry mInputActions;
         LuaUtil::InputTrigger::Registry mInputTriggers;
+
+        LuaUtil::ScriptTracker mScriptTracker;
     };
 
 }

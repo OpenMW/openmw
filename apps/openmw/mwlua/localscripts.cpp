@@ -224,8 +224,8 @@ namespace MWLua
         };
     }
 
-    LocalScripts::LocalScripts(LuaUtil::LuaState* lua, const LObject& obj)
-        : LuaUtil::ScriptsContainer(lua, "L" + obj.id().toString())
+    LocalScripts::LocalScripts(LuaUtil::LuaState* lua, const LObject& obj, LuaUtil::ScriptTracker* tracker)
+        : LuaUtil::ScriptsContainer(lua, "L" + obj.id().toString(), tracker, false)
         , mData(obj)
     {
         lua->protectedCall(

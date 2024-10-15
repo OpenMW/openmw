@@ -6,6 +6,7 @@
 #include <components/lua/asyncpackage.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
+#include <components/lua/scripttracker.hpp>
 
 #include <components/testing/util.hpp>
 
@@ -137,6 +138,31 @@ return {
 }
 )X");
 
+    constexpr VFS::Path::NormalizedView unloadPath("unload.lua");
+
+    VFSTestFile unloadScript(R"X(
+x = 0
+y = 0
+z = 0
+return {
+    engineHandlers = {
+        onSave = function(state)
+            print('saving', x, y, z)
+            return {x = x, y = y}
+        end,
+        onLoad = function(state)
+            x, y = state.x, state.y
+            print('loaded', x, y, z)
+        end
+    },
+    eventHandlers = {
+        Set = function(eventData)
+            x, y, z = eventData.x, eventData.y, eventData.z
+        end
+    }
+}
+)X");
+
     struct LuaScriptsContainerTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
@@ -151,6 +177,7 @@ return {
             { testInterfacePath, &interfaceScript },
             { overrideInterfacePath, &overrideInterfaceScript },
             { useInterfacePath, &useInterfaceScript },
+            { unloadPath, &unloadScript },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;
@@ -171,6 +198,7 @@ CUSTOM, NPC: loadSave2.lua
 CUSTOM, PLAYER: testInterface.lua
 CUSTOM, PLAYER: overrideInterface.lua
 CUSTOM, PLAYER: useInterface.lua
+CUSTOM: unload.lua
 )X");
             mCfg.init(std::move(cfg));
         }
@@ -511,4 +539,35 @@ CUSTOM, PLAYER: useInterface.lua
         Log::sMinDebugLevel = level;
     }
 
+    TEST_F(LuaScriptsContainerTest, Unload)
+    {
+        LuaUtil::ScriptTracker tracker;
+        LuaUtil::ScriptsContainer scripts1(&mLua, "Test", &tracker, false);
+
+        EXPECT_TRUE(scripts1.addCustomScript(*mCfg.findId(unloadPath)));
+        EXPECT_EQ(tracker.size(), 1);
+
+        mLua.protectedCall([&](LuaUtil::LuaView& lua) {
+            scripts1.receiveEvent("Set", LuaUtil::serialize(lua.sol().create_table_with("x", 3, "y", 2, "z", 1)));
+            testing::internal::CaptureStdout();
+            for (int i = 0; i < 600; ++i)
+                tracker.unloadInactiveScripts(lua);
+            EXPECT_EQ(tracker.size(), 0);
+            scripts1.receiveEvent("Set", LuaUtil::serialize(lua.sol().create_table_with("x", 10, "y", 20, "z", 30)));
+            EXPECT_EQ(internal::GetCapturedStdout(),
+                "Test[unload.lua]:\tsaving\t3\t2\t1\n"
+                "Test[unload.lua]:\tloaded\t3\t2\t0\n");
+        });
+        EXPECT_EQ(tracker.size(), 1);
+        ESM::LuaScripts data;
+        scripts1.save(data);
+        EXPECT_EQ(tracker.size(), 1);
+        mLua.protectedCall([&](LuaUtil::LuaView& lua) {
+            for (int i = 0; i < 600; ++i)
+                tracker.unloadInactiveScripts(lua);
+        });
+        EXPECT_EQ(tracker.size(), 0);
+        scripts1.load(data);
+        EXPECT_EQ(tracker.size(), 0);
+    }
 }
