@@ -1,6 +1,17 @@
 #include "scriptscontainer.hpp"
 
+#include "scripttracker.hpp"
+
 #include <components/esm/luascripts.hpp>
+
+namespace
+{
+    struct ScriptInfo
+    {
+        std::string_view mInitData;
+        const ESM::LuaScript* mSavedData;
+    };
+}
 
 namespace LuaUtil
 {
@@ -17,17 +28,23 @@ namespace LuaUtil
 
     int64_t ScriptsContainer::sInstanceCount = 0;
 
-    ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix)
+    ScriptsContainer::ScriptsContainer(
+        LuaUtil::LuaState* lua, std::string_view namePrefix, ScriptTracker* tracker, bool load)
         : mNamePrefix(namePrefix)
         , mLua(*lua)
         , mThis(std::make_shared<ScriptsContainer*>(this))
+        , mTracker(tracker)
     {
         sInstanceCount++;
         registerEngineHandlers({ &mUpdateHandlers });
-        lua->protectedCall([&](LuaView& view) {
-            mPublicInterfaces = sol::table(view.sol(), sol::create);
-            addPackage("openmw.interfaces", mPublicInterfaces);
-        });
+        if (load)
+        {
+            LoadedData& data = mData.emplace<LoadedData>();
+            mLua.protectedCall([&](LuaView& view) {
+                data.mPublicInterfaces = sol::table(view.sol(), sol::create);
+                addPackage("openmw.interfaces", makeReadOnly(data.mPublicInterfaces));
+            });
+        }
     }
 
     void ScriptsContainer::printError(int scriptId, std::string_view msg, const std::exception& e)
@@ -37,7 +54,9 @@ namespace LuaUtil
 
     void ScriptsContainer::addPackage(std::string packageName, sol::object package)
     {
-        mAPI.insert_or_assign(std::move(packageName), makeReadOnly(std::move(package)));
+        if (!package.is<sol::userdata>())
+            throw std::logic_error("Expected package to be read-only: " + packageName);
+        mAPI.insert_or_assign(std::move(packageName), std::move(package));
     }
 
     bool ScriptsContainer::addCustomScript(int scriptId, std::string_view initData)
@@ -70,7 +89,7 @@ namespace LuaUtil
         LuaView& view, int scriptId, std::optional<sol::function>& onInit, std::optional<sol::function>& onLoad)
     {
         assert(scriptId >= 0 && scriptId < static_cast<int>(mLua.getConfiguration().size()));
-        if (mScripts.count(scriptId) != 0)
+        if (hasScript(scriptId))
             return false; // already present
 
         const VFS::Path::Normalized& path = scriptPath(scriptId);
@@ -79,7 +98,8 @@ namespace LuaUtil
         debugName.append(path);
         debugName.push_back(']');
 
-        Script& script = mScripts[scriptId];
+        LoadedData& data = ensureLoaded();
+        Script& script = data.mScripts[scriptId];
         script.mHiddenData = view.newTable();
         script.mHiddenData[sScriptIdKey] = ScriptId{ this, scriptId };
         script.mHiddenData[sScriptDebugNameKey] = debugName;
@@ -144,9 +164,9 @@ namespace LuaUtil
                 for (const auto& [key, fn] : cast<sol::table>(eventHandlers))
                 {
                     std::string_view eventName = cast<std::string_view>(key);
-                    auto it = mEventHandlers.find(eventName);
-                    if (it == mEventHandlers.end())
-                        it = mEventHandlers.emplace(std::string(eventName), EventHandlerList()).first;
+                    auto it = data.mEventHandlers.find(eventName);
+                    if (it == data.mEventHandlers.end())
+                        it = data.mEventHandlers.emplace(std::string(eventName), EventHandlerList()).first;
                     insertHandler(it->second, scriptId, cast<sol::function>(fn));
                 }
             }
@@ -167,29 +187,55 @@ namespace LuaUtil
         }
         catch (std::exception& e)
         {
-            auto iter = mScripts.find(scriptId);
-            iter->second.mHiddenData[sScriptIdKey] = sol::nil;
+            auto iter = data.mScripts.find(scriptId);
             mRemovedScriptsMemoryUsage[scriptId] = iter->second.mStats.mMemoryUsage;
-            mScripts.erase(iter);
+            data.mScripts.erase(iter);
             Log(Debug::Error) << "Can't start " << debugName << "; " << e.what();
             return false;
         }
     }
 
+    bool ScriptsContainer::hasScript(int scriptId) const
+    {
+        return std::visit(
+            [&](auto&& variant) {
+                using T = std::decay_t<decltype(variant)>;
+                if constexpr (std::is_same_v<T, UnloadedData>)
+                {
+                    const auto& conf = mLua.getConfiguration();
+                    if (scriptId >= 0 && static_cast<size_t>(scriptId) < conf.size())
+                    {
+                        const auto& path = conf[scriptId].mScriptPath;
+                        for (const ESM::LuaScript& script : variant.mScripts)
+                        {
+                            if (script.mScriptPath == path)
+                                return true;
+                        }
+                    }
+                }
+                else if constexpr (std::is_same_v<T, LoadedData>)
+                {
+                    return variant.mScripts.count(scriptId) != 0;
+                }
+                return false;
+            },
+            mData);
+    }
+
     void ScriptsContainer::removeScript(int scriptId)
     {
-        auto scriptIter = mScripts.find(scriptId);
-        if (scriptIter == mScripts.end())
+        LoadedData& data = ensureLoaded();
+        auto scriptIter = data.mScripts.find(scriptId);
+        if (scriptIter == data.mScripts.end())
             return; // no such script
         Script& script = scriptIter->second;
         if (script.mInterface)
             removeInterface(scriptId, script);
-        script.mHiddenData[sScriptIdKey] = sol::nil;
         mRemovedScriptsMemoryUsage[scriptId] = script.mStats.mMemoryUsage;
-        mScripts.erase(scriptIter);
+        data.mScripts.erase(scriptIter);
         for (auto& [_, handlers] : mEngineHandlers)
             removeHandler(handlers->mList, scriptId);
-        for (auto& [_, handlers] : mEventHandlers)
+        for (auto& [_, handlers] : data.mEventHandlers)
             removeHandler(handlers, scriptId);
     }
 
@@ -199,7 +245,8 @@ namespace LuaUtil
         const Script* prev = nullptr;
         const Script* next = nullptr;
         int nextId = 0;
-        for (const auto& [otherId, otherScript] : mScripts)
+        LoadedData& data = ensureLoaded();
+        for (const auto& [otherId, otherScript] : data.mScripts)
         {
             if (scriptId == otherId || script.mInterfaceName != otherScript.mInterfaceName)
                 continue;
@@ -235,7 +282,7 @@ namespace LuaUtil
             }
         }
         if (next == nullptr)
-            mPublicInterfaces[script.mInterfaceName] = *script.mInterface;
+            data.mPublicInterfaces[script.mInterfaceName] = *script.mInterface;
     }
 
     void ScriptsContainer::removeInterface(int scriptId, const Script& script)
@@ -244,7 +291,8 @@ namespace LuaUtil
         const Script* prev = nullptr;
         const Script* next = nullptr;
         int nextId = 0;
-        for (const auto& [otherId, otherScript] : mScripts)
+        LoadedData& data = ensureLoaded();
+        for (const auto& [otherId, otherScript] : data.mScripts)
         {
             if (scriptId == otherId || script.mInterfaceName != otherScript.mInterfaceName)
                 continue;
@@ -275,9 +323,9 @@ namespace LuaUtil
             }
         }
         else if (prev)
-            mPublicInterfaces[script.mInterfaceName] = *prev->mInterface;
+            data.mPublicInterfaces[script.mInterfaceName] = *prev->mInterface;
         else
-            mPublicInterfaces[script.mInterfaceName] = sol::nil;
+            data.mPublicInterfaces[script.mInterfaceName] = sol::nil;
     }
 
     void ScriptsContainer::insertHandler(std::vector<Handler>& list, int scriptId, sol::function fn)
@@ -302,8 +350,9 @@ namespace LuaUtil
 
     void ScriptsContainer::receiveEvent(std::string_view eventName, std::string_view eventData)
     {
-        auto it = mEventHandlers.find(eventName);
-        if (it == mEventHandlers.end())
+        LoadedData& data = ensureLoaded();
+        auto it = data.mEventHandlers.find(eventName);
+        if (it == data.mEventHandlers.end())
             return;
         mLua.protectedCall([&](LuaView& view) {
             sol::object data;
@@ -355,6 +404,12 @@ namespace LuaUtil
 
     void ScriptsContainer::save(ESM::LuaScripts& data)
     {
+        if (UnloadedData* unloadedData = std::get_if<UnloadedData>(&mData))
+        {
+            data.mScripts = unloadedData->mScripts;
+            return;
+        }
+        const auto& loadedData = std::get<LoadedData>(mData);
         std::map<int, std::vector<ESM::LuaTimer>> timers;
         auto saveTimerFn = [&](const Timer& timer, TimerType timerType) {
             if (!timer.mSerializable)
@@ -366,12 +421,12 @@ namespace LuaUtil
             savedTimer.mCallbackArgument = timer.mSerializedArg;
             timers[timer.mScriptId].push_back(std::move(savedTimer));
         };
-        for (const Timer& timer : mSimulationTimersQueue)
+        for (const Timer& timer : loadedData.mSimulationTimersQueue)
             saveTimerFn(timer, TimerType::SIMULATION_TIME);
-        for (const Timer& timer : mGameTimersQueue)
+        for (const Timer& timer : loadedData.mGameTimersQueue)
             saveTimerFn(timer, TimerType::GAME_TIME);
         data.mScripts.clear();
-        for (auto& [scriptId, script] : mScripts)
+        for (auto& [scriptId, script] : loadedData.mScripts)
         {
             ESM::LuaScript savedScript;
             // Note: We can not use `scriptPath(scriptId)` here because `save` can be called during
@@ -401,11 +456,6 @@ namespace LuaUtil
         removeAllScripts();
         const ScriptsConfiguration& cfg = mLua.getConfiguration();
 
-        struct ScriptInfo
-        {
-            std::string_view mInitData;
-            const ESM::LuaScript* mSavedData;
-        };
         std::map<int, ScriptInfo> scripts;
         for (const auto& [scriptId, initData] : mAutoStartScripts)
             scripts[scriptId] = { initData, nullptr };
@@ -428,6 +478,60 @@ namespace LuaUtil
         }
 
         mLua.protectedCall([&](LuaView& view) {
+            UnloadedData& container = ensureUnloaded(view);
+
+            for (const auto& [scriptId, scriptInfo] : scripts)
+            {
+                if (scriptInfo.mSavedData == nullptr)
+                    continue;
+                ESM::LuaScript& script = container.mScripts.emplace_back(*scriptInfo.mSavedData);
+                for (ESM::LuaTimer& savedTimer : script.mTimers)
+                {
+                    try
+                    {
+                        sol::object arg = deserialize(view.sol(), savedTimer.mCallbackArgument, mSavedDataDeserializer);
+                        // It is important if the order of content files was changed. The deserialize-serialize
+                        // procedure updates refnums, so timer.mSerializedArg may be not equal to
+                        // savedTimer.mCallbackArgument.
+                        savedTimer.mCallbackArgument = serialize(arg, mSerializer);
+                    }
+                    catch (std::exception& e)
+                    {
+                        printError(scriptId, "can not load timer", e);
+                    }
+                }
+            }
+        });
+    }
+
+    ScriptsContainer::LoadedData& ScriptsContainer::ensureLoaded()
+    {
+        mRequiredLoading = true;
+        if (LoadedData* data = std::get_if<LoadedData>(&mData))
+            return *data;
+        UnloadedData& unloadedData = std::get<UnloadedData>(mData);
+        std::vector<ESM::LuaScript> savedScripts = std::move(unloadedData.mScripts);
+        LoadedData& data = mData.emplace<LoadedData>();
+
+        const ScriptsConfiguration& cfg = mLua.getConfiguration();
+
+        std::map<int, ScriptInfo> scripts;
+        for (const auto& [scriptId, initData] : mAutoStartScripts)
+            scripts[scriptId] = { initData, nullptr };
+        for (const ESM::LuaScript& s : savedScripts)
+        {
+            std::optional<int> scriptId = cfg.findId(s.mScriptPath);
+            auto it = scripts.find(*scriptId);
+            if (it != scripts.end())
+                it->second.mSavedData = &s;
+            else if (cfg.isCustomScript(*scriptId))
+                scripts[*scriptId] = { cfg[*scriptId].mInitializationData, &s };
+        }
+
+        mLua.protectedCall([&](LuaView& view) {
+            data.mPublicInterfaces = sol::table(view.sol(), sol::create);
+            addPackage("openmw.interfaces", makeReadOnly(data.mPublicInterfaces));
+
             for (const auto& [scriptId, scriptInfo] : scripts)
             {
                 std::optional<sol::function> onInit, onLoad;
@@ -471,9 +575,9 @@ namespace LuaUtil
                         timer.mSerializedArg = serialize(timer.mArg, mSerializer);
 
                         if (savedTimer.mType == TimerType::GAME_TIME)
-                            mGameTimersQueue.push_back(std::move(timer));
+                            data.mGameTimersQueue.push_back(std::move(timer));
                         else
-                            mSimulationTimersQueue.push_back(std::move(timer));
+                            data.mSimulationTimersQueue.push_back(std::move(timer));
                     }
                     catch (std::exception& e)
                     {
@@ -483,15 +587,32 @@ namespace LuaUtil
             }
         });
 
-        std::make_heap(mSimulationTimersQueue.begin(), mSimulationTimersQueue.end());
-        std::make_heap(mGameTimersQueue.begin(), mGameTimersQueue.end());
+        std::make_heap(data.mSimulationTimersQueue.begin(), data.mSimulationTimersQueue.end());
+        std::make_heap(data.mGameTimersQueue.begin(), data.mGameTimersQueue.end());
+
+        if (mTracker)
+            mTracker->onLoad(*this);
+
+        return data;
+    }
+
+    ScriptsContainer::UnloadedData& ScriptsContainer::ensureUnloaded(LuaView&)
+    {
+        if (UnloadedData* data = std::get_if<UnloadedData>(&mData))
+            return *data;
+        UnloadedData data;
+        save(data);
+        mAPI.erase("openmw.interfaces");
+        UnloadedData& out = mData.emplace<UnloadedData>(std::move(data));
+        for (auto& [_, handlers] : mEngineHandlers)
+            handlers->mList.clear();
+        mRequiredLoading = false;
+        return out;
     }
 
     ScriptsContainer::~ScriptsContainer()
     {
         sInstanceCount--;
-        for (auto& [_, script] : mScripts)
-            script.mHiddenData[sScriptIdKey] = sol::nil;
         *mThis = nullptr;
     }
 
@@ -499,24 +620,36 @@ namespace LuaUtil
     // external objects that are already removed during child class destruction.
     void ScriptsContainer::removeAllScripts()
     {
-        for (auto& [id, script] : mScripts)
-        {
-            script.mHiddenData[sScriptIdKey] = sol::nil;
-            mRemovedScriptsMemoryUsage[id] = script.mStats.mMemoryUsage;
-        }
-        mScripts.clear();
-        for (auto& [_, handlers] : mEngineHandlers)
-            handlers->mList.clear();
-        mEventHandlers.clear();
-        mSimulationTimersQueue.clear();
-        mGameTimersQueue.clear();
-        mPublicInterfaces.clear();
+        std::visit(
+            [&](auto&& variant) {
+                using T = std::decay_t<decltype(variant)>;
+                if constexpr (std::is_same_v<T, UnloadedData>)
+                {
+                    variant.mScripts.clear();
+                }
+                else if constexpr (std::is_same_v<T, LoadedData>)
+                {
+                    for (auto& [id, script] : variant.mScripts)
+                    {
+                        mRemovedScriptsMemoryUsage[id] = script.mStats.mMemoryUsage;
+                    }
+                    variant.mScripts.clear();
+                    for (auto& [_, handlers] : mEngineHandlers)
+                        handlers->mList.clear();
+                    variant.mEventHandlers.clear();
+                    variant.mSimulationTimersQueue.clear();
+                    variant.mGameTimersQueue.clear();
+                    variant.mPublicInterfaces.clear();
+                }
+            },
+            mData);
     }
 
     ScriptsContainer::Script& ScriptsContainer::getScript(int scriptId)
     {
-        auto it = mScripts.find(scriptId);
-        if (it == mScripts.end())
+        LoadedData& data = ensureLoaded();
+        auto it = data.mScripts.find(scriptId);
+        if (it == data.mScripts.end())
             throw std::logic_error("Script doesn't exist");
         return it->second;
     }
@@ -543,7 +676,8 @@ namespace LuaUtil
         t.mTime = time;
         t.mArg = std::move(callbackArg);
         t.mSerializedArg = serialize(t.mArg, mSerializer);
-        insertTimer(type == TimerType::GAME_TIME ? mGameTimersQueue : mSimulationTimersQueue, std::move(t));
+        LoadedData& data = ensureLoaded();
+        insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::setupUnsavableTimer(
@@ -557,8 +691,8 @@ namespace LuaUtil
         t.mCallback = mTemporaryCallbackCounter;
         getScript(t.mScriptId).mTemporaryCallbacks.emplace(mTemporaryCallbackCounter, std::move(callback));
         mTemporaryCallbackCounter++;
-
-        insertTimer(type == TimerType::GAME_TIME ? mGameTimersQueue : mSimulationTimersQueue, std::move(t));
+        LoadedData& data = ensureLoaded();
+        insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::callTimer(const Timer& t)
@@ -599,41 +733,52 @@ namespace LuaUtil
 
     void ScriptsContainer::processTimers(double simulationTime, double gameTime)
     {
-        updateTimerQueue(mSimulationTimersQueue, simulationTime);
-        updateTimerQueue(mGameTimersQueue, gameTime);
+        LoadedData& data = ensureLoaded();
+        updateTimerQueue(data.mSimulationTimersQueue, simulationTime);
+        updateTimerQueue(data.mGameTimersQueue, gameTime);
     }
 
     static constexpr float instructionCountAvgCoef = 1.0f / 30; // averaging over approximately 30 frames
 
     void ScriptsContainer::statsNextFrame()
     {
-        for (auto& [scriptId, script] : mScripts)
+        if (LoadedData* data = std::get_if<LoadedData>(&mData))
         {
-            // The averaging formula is: averageValue = averageValue * (1-c) + newValue * c
-            script.mStats.mAvgInstructionCount *= 1 - instructionCountAvgCoef;
-            if (script.mStats.mAvgInstructionCount < 5)
-                script.mStats.mAvgInstructionCount = 0; // speeding up converge to zero if newValue is zero
+            for (auto& [scriptId, script] : data->mScripts)
+            {
+                // The averaging formula is: averageValue = averageValue * (1-c) + newValue * c
+                script.mStats.mAvgInstructionCount *= 1 - instructionCountAvgCoef;
+                if (script.mStats.mAvgInstructionCount < 5)
+                    script.mStats.mAvgInstructionCount = 0; // speeding up converge to zero if newValue is zero
+            }
         }
     }
 
     void ScriptsContainer::addInstructionCount(int scriptId, int64_t instructionCount)
     {
-        auto it = mScripts.find(scriptId);
-        if (it != mScripts.end())
-            it->second.mStats.mAvgInstructionCount += instructionCount * instructionCountAvgCoef;
+        if (LoadedData* data = std::get_if<LoadedData>(&mData))
+        {
+            auto it = data->mScripts.find(scriptId);
+            if (it != data->mScripts.end())
+                it->second.mStats.mAvgInstructionCount += instructionCount * instructionCountAvgCoef;
+        }
     }
 
     void ScriptsContainer::addMemoryUsage(int scriptId, int64_t memoryDelta)
     {
-        int64_t* usage;
-        auto it = mScripts.find(scriptId);
-        if (it != mScripts.end())
-            usage = &it->second.mStats.mMemoryUsage;
-        else
-        {
-            auto [rIt, _] = mRemovedScriptsMemoryUsage.emplace(scriptId, 0);
-            usage = &rIt->second;
-        }
+        int64_t* usage = std::visit(
+            [&](auto&& variant) {
+                using T = std::decay_t<decltype(variant)>;
+                if constexpr (std::is_same_v<T, LoadedData>)
+                {
+                    auto it = variant.mScripts.find(scriptId);
+                    if (it != variant.mScripts.end())
+                        return &it->second.mStats.mMemoryUsage;
+                }
+                auto [rIt, _] = mRemovedScriptsMemoryUsage.emplace(scriptId, 0);
+                return &rIt->second;
+            },
+            mData);
         *usage += memoryDelta;
 
         if (mLua.getSettings().mLogMemoryUsage)
@@ -651,12 +796,21 @@ namespace LuaUtil
     void ScriptsContainer::collectStats(std::vector<ScriptStats>& stats) const
     {
         stats.resize(mLua.getConfiguration().size());
-        for (auto& [id, script] : mScripts)
+        if (const LoadedData* data = std::get_if<LoadedData>(&mData))
         {
-            stats[id].mAvgInstructionCount += script.mStats.mAvgInstructionCount;
-            stats[id].mMemoryUsage += script.mStats.mMemoryUsage;
+            for (auto& [id, script] : data->mScripts)
+            {
+                stats[id].mAvgInstructionCount += script.mStats.mAvgInstructionCount;
+                stats[id].mMemoryUsage += script.mStats.mMemoryUsage;
+            }
         }
         for (auto& [id, mem] : mRemovedScriptsMemoryUsage)
             stats[id].mMemoryUsage += mem;
+    }
+
+    ScriptsContainer::Script::~Script()
+    {
+        if (mHiddenData != sol::nil)
+            mHiddenData[sScriptIdKey] = sol::nil;
     }
 }

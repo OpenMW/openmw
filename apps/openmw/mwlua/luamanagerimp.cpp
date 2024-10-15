@@ -210,6 +210,8 @@ namespace MWLua
                 scripts->update(frameDuration);
             mGlobalScripts.update(frameDuration);
         }
+
+        mLua.protectedCall([&](LuaUtil::LuaView& lua) { mScriptTracker.unloadInactiveScripts(lua); });
     }
 
     void LuaManager::objectTeleported(const MWWorld::Ptr& ptr)
@@ -560,7 +562,7 @@ namespace MWLua
         }
         else
         {
-            scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr)));
+            scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr)), &mScriptTracker);
             if (!autoStartConf.has_value())
                 autoStartConf = mConfiguration.getLocalConf(type, ptr.getCellRef().getRefId(), getId(ptr));
             scripts->setAutoStartConf(std::move(*autoStartConf));
