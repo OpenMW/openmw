@@ -3257,22 +3257,71 @@ namespace MWWorld
 
     MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, const ESM::RefId& id)
     {
-        MWWorld::ConstPtr closestMarker;
-        float closestDistance = std::numeric_limits<float>::max();
+        const ESM::ExteriorCellLocation posIndex = ESM::positionToExteriorCellLocation(worldPos.x(), worldPos.y());
 
-        std::vector<MWWorld::Ptr> markers;
+        // Potential optimization: don't scan the entire world for markers and actually do the Todd spiral
+        std::vector<Ptr> markers;
         mWorldModel.getExteriorPtrs(id, markers);
+
+        struct MarkerInfo
+        {
+            Ptr mPtr;
+            int mColumn, mRow; // Local coordinates in the valid marker grid
+        };
+        std::vector<MarkerInfo> validMarkers;
+        validMarkers.reserve(markers.size());
+
+        // The idea is to collect all markers that belong to the smallest possible square grid around worldPos
+        // They are grouped with their position on that grid's edge where the origin is the SW corner
+        int minGridSize = std::numeric_limits<int>::max();
         for (const Ptr& marker : markers)
         {
-            osg::Vec3f markerPos = marker.getRefData().getPosition().asVec3();
-            float distance = (worldPos - markerPos).length2();
-            if (distance < closestDistance)
+            const osg::Vec3f markerPos = marker.getRefData().getPosition().asVec3();
+            const ESM::ExteriorCellLocation index = ESM::positionToExteriorCellLocation(markerPos.x(), markerPos.y());
+
+            const int deltaX = index.mX - posIndex.mX;
+            const int deltaY = index.mY - posIndex.mY;
+            const int gridSize = std::max(std::abs(deltaX), std::abs(deltaY)) * 2;
+            if (gridSize == 0)
+                return marker;
+
+            if (gridSize <= minGridSize)
             {
-                closestDistance = distance;
-                closestMarker = marker;
+                if (gridSize < minGridSize)
+                {
+                    validMarkers.clear();
+                    minGridSize = gridSize;
+                }
+                validMarkers.push_back({ marker, gridSize / 2 + deltaX, gridSize / 2 + deltaY });
             }
         }
 
+        ConstPtr closestMarker;
+        if (validMarkers.empty())
+            return closestMarker;
+        if (validMarkers.size() == 1)
+            return validMarkers[0].mPtr;
+
+        // All the markers are on the edge of the grid
+        // Break ties by picking the earliest marker on SW -> SE -> NE -> NW -> SW path
+        int earliestDistance = std::numeric_limits<int>::max();
+        for (const MarkerInfo& marker : validMarkers)
+        {
+            int distance = 0;
+            if (marker.mRow == 0) // South edge (plus SW and SE corners)
+                distance = marker.mColumn;
+            else if (marker.mColumn == minGridSize) // East edge and NE corner
+                distance = minGridSize + marker.mRow;
+            else if (marker.mRow == minGridSize) // North edge and NW corner
+                distance = minGridSize * 3 - marker.mColumn;
+            else // West edge
+                distance = minGridSize * 4 - marker.mRow;
+            if (distance < earliestDistance)
+            {
+                closestMarker = marker.mPtr;
+                earliestDistance = distance;
+            }
+        }
         return closestMarker;
     }
 
