@@ -114,6 +114,7 @@
     Bug #7553: Faction reaction loading is incorrect
     Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
     Bug #7573: Drain Fatigue can't bring fatigue below zero by default
+    Bug #7582: Skill specializations are hardcoded in character creation
     Bug #7585: Difference in interior lighting between OpenMW with legacy lighting method enabled and vanilla Morrowind
     Bug #7587: Quick load related crash
     Bug #7603: Scripts menu size is not updated properly
@@ -175,6 +176,7 @@
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
     Bug #7908: Key bindings names in the settings menu are layout-specific
+    Bug #7912: Lua: castRenderingRay fails to hit height map
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
     Bug #7970: Difference of GetPCSleep (?) behavior between vanilla and OpenMW
     Bug #7980: Paralyzed NPCs' lips move
@@ -275,6 +277,7 @@
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
+    Task #7181: FFMpeg 5.1.1+ support
     Task #7394: Drop support for --fs-strict
     Task #7720: Drop 360-degree screenshot support
 
