@@ -278,7 +278,7 @@
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
-    Task #7181: FFMpeg 5.1.1+ support
+    Task #7182: FFMpeg 5.1.1+ support
     Task #7394: Drop support for --fs-strict
     Task #7720: Drop 360-degree screenshot support
 
