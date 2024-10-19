@@ -178,7 +178,6 @@ void MWState::StateManager::newGame(bool bypass)
         MWBase::Environment::get().getWorld()->startNewGame(bypass);
 
         mState = State_Running;
-        MWBase::Environment::get().getLuaManager()->newGameStarted();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
