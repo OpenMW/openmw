@@ -142,22 +142,23 @@ std::string Misc::ResourceHelpers::correctBookartPath(
     return image;
 }
 
-std::string Misc::ResourceHelpers::correctActorModelPath(std::string_view resPath, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctActorModelPath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager* vfs)
 {
-    std::string mdlname(resPath);
-    std::string::size_type p = mdlname.find_last_of("/\\");
+    std::string mdlname(resPath.value());
+    std::string::size_type p = mdlname.find_last_of('/');
     if (p != std::string::npos)
-        mdlname.insert(mdlname.begin() + p + 1, 'x');
+        mdlname.insert(mdlname.begin() + static_cast<std::string::difference_type>(p) + 1, 'x');
     else
         mdlname.insert(mdlname.begin(), 'x');
-    std::string kfname = mdlname;
-    if (Misc::StringUtils::ciEndsWith(kfname, ".nif"))
-        kfname.replace(kfname.size() - 4, 4, ".kf");
+
+    VFS::Path::Normalized kfname(mdlname);
+    if (Misc::getFileExtension(mdlname) == "nif")
+        kfname.changeExtension("kf");
 
     if (!vfs->exists(kfname))
-    {
-        return std::string(resPath);
-    }
+        return VFS::Path::Normalized(resPath);
+
     return mdlname;
 }
 

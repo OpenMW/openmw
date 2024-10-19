@@ -494,13 +494,14 @@ namespace MWRender
         }
 
         const std::string defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
-            getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf), mResourceSystem->getVFS());
+            VFS::Path::toNormalized(getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf)),
+            mResourceSystem->getVFS());
 
         std::string smodel = defaultSkeleton;
         bool isCustomModel = false;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         {
-            std::string model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
+            VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
             isCustomModel = !isDefaultActorSkeleton(model);
             smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
         }
