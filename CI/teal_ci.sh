@@ -7,8 +7,9 @@ pushd .
 echo "Install Teal Cyan"
 git clone https://github.com/teal-language/cyan.git
 cd cyan
-git checkout 71eaea271bff489d82a9fb575b823b161b996162
-luarocks make cyan-dev-1.rockspec
+git checkout v0.4.0
+luarocks make cyan-0.4.0-1.rockspec
 popd
 
+cyan version
 scripts/generate_teal_declarations.sh ./teal_declarations
