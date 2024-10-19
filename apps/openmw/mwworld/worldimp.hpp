@@ -172,8 +172,6 @@ namespace MWWorld
 
         void fillGlobalVariables();
 
-        void updateSkyDate();
-
         void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
             ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
 
