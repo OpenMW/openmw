@@ -335,7 +335,8 @@ namespace MWRender
 
         // Since throwing weapons stack themselves, do not show such weapon itself
         int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-        if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
+        auto weaponClass = MWMechanics::getWeaponType(type)->mWeaponClass;
+        if (weaponClass == ESM::WeaponType::Thrown)
             showHolsteredWeapons = false;
 
         const VFS::Path::Normalized mesh = weapon->getClass().getCorrectedModel(*weapon);
@@ -356,7 +357,7 @@ namespace MWRender
                 const osg::Vec4f glowColor
                     = isEnchanted ? weapon->getClass().getEnchantmentColor(*weapon) : osg::Vec4f();
                 mScabbard = attachMesh(mesh, boneName, isEnchanted ? &glowColor : nullptr);
-                if (mScabbard)
+                if (mScabbard && weaponClass == ESM::WeaponType::Ranged)
                     resetControllers(mScabbard->getNode());
             }
 
@@ -364,7 +365,7 @@ namespace MWRender
         }
 
         mScabbard = attachMesh(scabbardName, boneName);
-        if (mScabbard)
+        if (mScabbard && weaponClass == ESM::WeaponType::Ranged)
             resetControllers(mScabbard->getNode());
 
         osg::Group* weaponNode = getBoneByName("Bip01 Weapon");
@@ -386,7 +387,9 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::Node> fallbackNode
                     = mResourceSystem->getSceneManager()->getInstance(mesh, weaponNode);
-                resetControllers(fallbackNode);
+
+                if (weaponClass == ESM::WeaponType::Ranged)
+                    resetControllers(fallbackNode);
             }
 
             if (isEnchanted)
