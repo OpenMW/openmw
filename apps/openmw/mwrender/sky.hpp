@@ -54,12 +54,6 @@ namespace MWRender
 
         void setEnabled(bool enabled);
 
-        void setHour(double hour);
-        ///< will be called even when sky is disabled.
-
-        void setDate(int day, int month);
-        ///< will be called even when sky is disabled.
-
         int getMasserPhase() const;
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
@@ -84,8 +78,6 @@ namespace MWRender
         bool getRainRipplesEnabled() const;
 
         float getPrecipitationAlpha() const;
-
-        void setRainSpeed(float speed);
 
         void setStormParticleDirection(const osg::Vec3f& direction);
 
@@ -165,13 +157,8 @@ namespace MWRender
 
         bool mIsStorm;
 
-        int mDay;
-        int mMonth;
-
         bool mTimescaleClouds;
         float mCloudAnimationTimer;
-
-        float mRainTimer;
 
         // particle system rotation is independent of cloud rotation internally
         osg::Vec3f mStormParticleDirection;
@@ -190,9 +177,6 @@ namespace MWRender
 
         VFS::Path::Normalized mCurrentParticleEffect;
 
-        float mRemainingTransitionTime;
-
-        bool mRainEnabled;
         std::string mRainEffect;
         float mRainSpeed;
         float mRainDiameter;
@@ -206,7 +190,6 @@ namespace MWRender
         float mBaseWindSpeed;
 
         bool mEnabled;
-        bool mSunEnabled;
         bool mSunglareEnabled;
 
         float mPrecipitationAlpha;

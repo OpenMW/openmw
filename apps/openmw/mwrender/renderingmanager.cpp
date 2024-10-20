@@ -686,11 +686,6 @@ namespace MWRender
         updateAmbient();
     }
 
-    void RenderingManager::skySetDate(int day, int month)
-    {
-        mSky->setDate(day, month);
-    }
-
     int RenderingManager::skyGetMasserPhase() const
     {
         return mSky->getMasserPhase();
