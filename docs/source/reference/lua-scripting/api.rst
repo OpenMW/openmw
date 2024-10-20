@@ -45,6 +45,7 @@ Lua API reference
     interface_settings
     interface_skill_progression
     interface_ui
+    interface_crimes
     iterables
 
 

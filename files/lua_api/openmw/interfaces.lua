@@ -30,6 +30,9 @@
 -- @field [parent=#interfaces] scripts.omw.skillhandlers#scripts.omw.skillhandlers SkillProgression
 
 ---
+-- @field [parent=#interfaces] scripts.omw.crimes#scripts.omw.crimes Crimes
+
+---
 -- @function [parent=#interfaces] __index
 -- @param #interfaces self
 -- @param #string key

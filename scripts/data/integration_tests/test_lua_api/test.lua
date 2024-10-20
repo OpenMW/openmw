@@ -5,6 +5,7 @@ local util = require('openmw.util')
 local types = require('openmw.types')
 local vfs = require('openmw.vfs')
 local world = require('openmw.world')
+local I = require('openmw.interfaces')
 
 local function testTimers()
     testing.expectAlmostEqual(core.getGameTimeScale(), 30, 'incorrect getGameTimeScale() result')
@@ -261,6 +262,29 @@ local function testVFS()
     testing.expectEqual(vfs.type(handle), 'closed file', 'File should be closed')
 end
 
+local function testCommitCrime()
+    initPlayer()
+    local player = world.players[1]
+    testing.expectEqual(player == nil, false, 'A viable player reference should exist to run `testCommitCrime`')
+    testing.expectEqual(I.Crimes == nil, false, 'Crimes interface should be available in global contexts')
+
+    -- Reset crime level to have a clean slate
+    types.Player.setCrimeLevel(player, 0) 
+    testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Theft, victim = player, arg = 100}).wasCrimeSeen, false, "Running the crime with the player as the victim should not result in a seen crime")
+    testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Theft, arg = 50 }).wasCrimeSeen, false, "Running the crime with no victim and a type shouldn't raise errors")
+    testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Murder }).wasCrimeSeen, false, "Running a murder crime should work even without a victim")
+
+    -- Create a mockup target for crimes
+    local victim = world.createObject(types.NPC.record(player).id)
+    victim:teleport(player.cell, player.position + util.vector3(0, 300, 0))
+    coroutine.yield()
+
+    -- Reset crime level for testing with a valid victim
+    types.Player.setCrimeLevel(player, 0) 
+    testing.expectEqual(I.Crimes.commitCrime(player, { victim = victim, type = types.Player.OFFENSE_TYPE.Theft, arg = 50 }).wasCrimeSeen, true, "Running a crime with a valid victim should notify them when the player is not sneaking, even if it's not explicitly passed in")
+    testing.expectEqual(types.Player.getCrimeLevel(player), 0, "Crime level should not change if the victim's alarm value is low and there's no other witnesses")
+end
+
 tests = {
     {'timers', testTimers},
     {'rotating player with controls.yawChange should change rotation', function()
@@ -321,6 +345,7 @@ tests = {
         testing.runLocalTest(player, 'playerWeaponAttack')
     end},
     {'vfs', testVFS},
+    {'testCommitCrime', testCommitCrime}
 }
 
 return {

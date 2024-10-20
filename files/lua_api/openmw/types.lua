@@ -1170,6 +1170,19 @@
 -- @param #number crimeLevel The requested crime level
 
 ---
+-- @type OFFENSE_TYPE
+-- @field #number Theft
+-- @field #number Assault
+-- @field #number Murder
+-- @field #number Trespassing
+-- @field #number SleepingInOwnedBed
+-- @field #number Pickpocket
+
+---
+-- Available @{#OFFENSE_TYPE} values. Used in `I.Crimes.commitCrime`.
+-- @field [parent=#Player] #OFFENSE_TYPE OFFENSE_TYPE
+
+---
 -- Whether the character generation for this player is finished.
 -- @function [parent=#Player] isCharGenFinished
 -- @param openmw.core#GameObject player
