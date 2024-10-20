@@ -11,5 +11,6 @@ paths=(
   scripts/omw/ui.lua
   scripts/omw/usehandlers.lua
   scripts/omw/skillhandlers.lua
+  scripts/omw/crimes.lua
 )
 printf '%s\n' "${paths[@]}"

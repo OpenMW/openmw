@@ -43,3 +43,6 @@
     - by player scripts
     - | High-level UI modes interface. Allows to override parts
       | of the interface.
+  * - :ref:`Crimes <Interface Crimes>`
+    - by global scripts
+    - Commit crimes.
