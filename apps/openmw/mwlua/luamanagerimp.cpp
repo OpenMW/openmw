@@ -570,6 +570,7 @@ namespace MWLua
                 scripts->addPackage(name, package);
         }
         scripts->setSerializer(mLocalSerializer.get());
+        scripts->setSavedDataDeserializer(mLocalLoader.get());
 
         MWWorld::RefData& refData = ptr.getRefData();
         refData.setLuaScripts(std::move(scripts));
