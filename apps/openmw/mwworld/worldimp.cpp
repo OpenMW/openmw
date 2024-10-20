@@ -2331,7 +2331,8 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
         mPhysics->remove(getPlayerPtr());
-        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getCorrectedModel(getPlayerPtr()));
+        mPhysics->addActor(
+            getPlayerPtr(), VFS::Path::toNormalized(getPlayerPtr().getClass().getCorrectedModel(getPlayerPtr())));
 
         applyLoopingParticles(player);
 

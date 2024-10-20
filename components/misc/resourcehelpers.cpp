@@ -154,9 +154,9 @@ std::string Misc::ResourceHelpers::correctBookartPath(
     return image;
 }
 
-std::string Misc::ResourceHelpers::correctActorModelPath(const std::string& resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctActorModelPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    std::string mdlname = resPath;
+    std::string mdlname(resPath);
     std::string::size_type p = mdlname.find_last_of("/\\");
     if (p != std::string::npos)
         mdlname.insert(mdlname.begin() + p + 1, 'x');
@@ -168,7 +168,7 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string& resP
 
     if (!vfs->exists(kfname))
     {
-        return resPath;
+        return std::string(resPath);
     }
     return mdlname;
 }
