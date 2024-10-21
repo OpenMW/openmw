@@ -554,6 +554,10 @@ if (USE_QT)
         application
         )
 
+    add_component_qt_dir (vfs
+        qtconversion
+        )
+
     QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
