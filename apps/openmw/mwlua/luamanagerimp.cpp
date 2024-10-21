@@ -373,7 +373,6 @@ namespace MWLua
         mGlobalScripts.addAutoStartedScripts();
         mGlobalScriptsStarted = true;
         mNewGameStarted = true;
-        mMenuScripts.stateChanged();
     }
 
     void LuaManager::gameLoaded()

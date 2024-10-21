@@ -352,6 +352,8 @@ namespace MWWorld
         else
             mGlobalVariables[Globals::sCharGenState].setInteger(-1);
 
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
+
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
