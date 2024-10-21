@@ -266,11 +266,14 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
         if (!std::ranges::equal(
                 dirs, listDirs, [](const SettingValue& dir, const QString& listDir) { return dir.value == listDir; }))
             continue;
-        if (files == getContentListFiles(listName) && archives == getArchiveList(listName))
-        {
-            setCurrentContentListName(listName);
-            return;
-        }
+        constexpr auto compareFiles
+            = [](const QString& a, const QString& b) { return a.compare(b, Qt::CaseInsensitive) == 0; };
+        if (!std::ranges::equal(files, getContentListFiles(listName), compareFiles))
+            continue;
+        if (!std::ranges::equal(archives, getArchiveList(listName), compareFiles))
+            continue;
+        setCurrentContentListName(listName);
+        return;
     }
 
     // otherwise, add content list
