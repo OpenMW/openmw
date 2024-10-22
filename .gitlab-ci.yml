@@ -196,8 +196,9 @@ Teal:
   script:
     - CI/teal_ci.sh
   artifacts:
+    when: always
     paths:
-      - teal_declarations.zip
+      - teal_declarations
 
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
