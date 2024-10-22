@@ -398,6 +398,9 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             continue;
         const auto name = match[0]->text();
         const auto oldrow = ui.archiveListWidget->row(match[0]);
+        // entries may be duplicated, e.g. if a content list predated a BSA being added to a non-user config file
+        if (oldrow < row)
+            continue;
         ui.archiveListWidget->takeItem(oldrow);
         ui.archiveListWidget->insertItem(row, name);
         ui.archiveListWidget->item(row)->setCheckState(Qt::Checked);
