@@ -97,9 +97,6 @@ CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectP
     appendStage(
         new WriteCollectionStage<CSMWorld::IdCollection<ESM::BodyPart>>(mDocument.getData().getBodyParts(), mState));
 
-    appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator>>(
-        mDocument.getData().getSoundGens(), mState));
-
     appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::MagicEffect>>(
         mDocument.getData().getMagicEffects(), mState));
 
@@ -107,6 +104,10 @@ CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectP
         mDocument.getData().getStartScripts(), mState));
 
     appendStage(new WriteRefIdCollectionStage(mDocument, mState));
+
+    // Can reference creatures so needs to load after them for TESCS compatibility
+    appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator>>(
+        mDocument.getData().getSoundGens(), mState));
 
     appendStage(new CollectionReferencesStage(mDocument, mState));
 
