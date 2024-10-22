@@ -112,11 +112,12 @@ CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectP
 
     appendStage(new WriteCellCollectionStage(mDocument, mState));
 
-    // Dialogue can reference objects and cells so must be written after these records for vanilla-compatible files
-
-    appendStage(new WriteDialogueCollectionStage(mDocument, mState, false));
+    // Dialogue can reference objects, cells, and journals so must be written after these records for vanilla-compatible
+    // files
 
     appendStage(new WriteDialogueCollectionStage(mDocument, mState, true));
+
+    appendStage(new WriteDialogueCollectionStage(mDocument, mState, false));
 
     appendStage(new WritePathgridCollectionStage(mDocument, mState));
 
