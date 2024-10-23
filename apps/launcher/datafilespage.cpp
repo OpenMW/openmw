@@ -30,6 +30,7 @@
 #include <components/navmeshtool/protocol.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/bsaarchive.hpp>
+#include <components/vfs/qtconversion.hpp>
 
 #include "utils/profilescombobox.hpp"
 #include "utils/textinputdialog.hpp"
@@ -393,7 +394,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     int row = 0;
     for (const auto& archive : selectedArchives)
     {
-        const auto match = ui.archiveListWidget->findItems(archive.value, Qt::MatchExactly);
+        const auto match = ui.archiveListWidget->findItems(archive.value, Qt::MatchFixedString);
         if (match.isEmpty())
             continue;
         const auto name = match[0]->text();
@@ -889,9 +890,9 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
     QStringList archiveFilter{ "*.bsa", "*.ba2" };
     QDir dir(path);
 
-    std::unordered_set<QString> archives;
+    std::unordered_set<VFS::Path::Normalized, VFS::Path::Hash> archives;
     for (int i = 0; i < ui.archiveListWidget->count(); ++i)
-        archives.insert(ui.archiveListWidget->item(i)->text());
+        archives.insert(VFS::Path::normalizedFromQString(ui.archiveListWidget->item(i)->text()));
 
     for (const auto& fileinfo : dir.entryInfoList(archiveFilter))
     {
@@ -901,7 +902,7 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
 
         const auto fileName = fileinfo.fileName();
 
-        if (archives.insert(fileName).second)
+        if (archives.insert(VFS::Path::normalizedFromQString(fileName)).second)
             addArchive(fileName, Qt::Unchecked);
     }
 }
