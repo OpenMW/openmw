@@ -816,8 +816,10 @@ namespace MWGui
             if (changed)
             {
                 button->setCaption(oldCaption);
-                button->getSubWidgetText()->setWordWrap(true);
-                button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
+                button->setTextAlign(MyGUI::Align::Left);
+                MyGUI::ISubWidgetText* text = button->getSubWidgetText();
+                if (text != nullptr)
+                    text->setWordWrap(true);
                 button->setSize(oldSize);
             }
         }
