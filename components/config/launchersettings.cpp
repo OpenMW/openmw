@@ -271,8 +271,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
 #endif
         constexpr auto compareDataDirectories = [caseSensitivity](const SettingValue& dir, const QString& listDir) {
             return dir.originalRepresentation == listDir
-                || QDir::cleanPath(dir.originalRepresentation)
-                       .compare(QDir::cleanPath(listDir), caseSensitivity) == 0;
+                || QDir::cleanPath(dir.originalRepresentation).compare(QDir::cleanPath(listDir), caseSensitivity) == 0;
         };
         if (!std::ranges::equal(dirs, listDirs, compareDataDirectories))
             continue;
