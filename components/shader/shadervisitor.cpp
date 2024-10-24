@@ -889,12 +889,29 @@ namespace Shader
         if (mAllowedToModifyStateSets && (useShader || generateTangents))
         {
             // make sure that all UV sets are there
-            for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end();
-                 ++it)
+            // it's not safe to assume there's one for slot zero, so try and use one from another slot if possible
+            // if there are none at all, bail.
+            // the TangentSpaceGenerator would bail, but getTangentArray would give an empty array, which is enough to
+            // bypass null checks, but feeds the driver a bad pointer
+            if (sourceGeometry.getTexCoordArray(0) == nullptr)
             {
-                if (sourceGeometry.getTexCoordArray(it->first) == nullptr)
+                for (const auto& array : sourceGeometry.getTexCoordArrayList())
                 {
-                    sourceGeometry.setTexCoordArray(it->first, sourceGeometry.getTexCoordArray(0));
+                    if (array)
+                    {
+                        sourceGeometry.setTexCoordArray(0, array);
+                        break;
+                    }
+                }
+                if (sourceGeometry.getTexCoordArray(0) == nullptr)
+                    return changed;
+            }
+
+            for (const auto& [unit, name] : reqs.mTextures)
+            {
+                if (sourceGeometry.getTexCoordArray(unit) == nullptr)
+                {
+                    sourceGeometry.setTexCoordArray(unit, sourceGeometry.getTexCoordArray(0));
                     changed = true;
                 }
             }
