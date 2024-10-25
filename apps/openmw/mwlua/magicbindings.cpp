@@ -830,10 +830,10 @@ namespace MWLua
         spellsT["add"] = [context](const ActorSpells& spells, const sol::object& spellOrId) {
             if (spells.mActor.isLObject())
                 throw std::runtime_error("Local scripts can modify only spells of the actor they are attached to.");
-            context.mLuaManager->addAction([obj = spells.mActor.object(), id = toSpellId(spellOrId)]() {
+            context.mLuaManager->addAction([obj = spells.mActor.object(), spell = toSpell(spellOrId)]() {
                 const MWWorld::Ptr& ptr = obj.ptr();
                 if (ptr.getClass().isActor())
-                    ptr.getClass().getCreatureStats(ptr).getSpells().add(id);
+                    ptr.getClass().getCreatureStats(ptr).getSpells().add(spell, false);
             });
         };
 
@@ -841,10 +841,10 @@ namespace MWLua
         spellsT["remove"] = [context](const ActorSpells& spells, const sol::object& spellOrId) {
             if (spells.mActor.isLObject())
                 throw std::runtime_error("Local scripts can modify only spells of the actor they are attached to.");
-            context.mLuaManager->addAction([obj = spells.mActor.object(), id = toSpellId(spellOrId)]() {
+            context.mLuaManager->addAction([obj = spells.mActor.object(), spell = toSpell(spellOrId)]() {
                 const MWWorld::Ptr& ptr = obj.ptr();
                 if (ptr.getClass().isActor())
-                    ptr.getClass().getCreatureStats(ptr).getSpells().remove(id);
+                    ptr.getClass().getCreatureStats(ptr).getSpells().remove(spell, false);
             });
         };
 
