@@ -301,7 +301,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
                               [&](const Config::SettingValue& dir) { return mGameSettings.isUserSetting(dir); }),
             directories.end());
         for (const auto& dir : contentModelDirectories)
-            directories.push_back(mGameSettings.procesPathSettingValue({ dir }));
+            directories.push_back(mGameSettings.processPathSettingValue({ dir }));
     }
 
     mDataLocal = mGameSettings.getDataLocal();

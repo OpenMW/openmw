@@ -178,7 +178,7 @@ bool Config::GameSettings::readFile(
                     value.originalRepresentation = value.value;
                 }
 
-                value = procesPathSettingValue(value);
+                value = processPathSettingValue(value);
             }
             if (ignoreContent && (key == QLatin1String("content") || key == QLatin1String("data")))
                 continue;
@@ -586,7 +586,7 @@ bool Config::GameSettings::isUserSetting(const SettingValue& settingValue) const
     return settingValue.context.isEmpty() || settingValue.context == getUserContext();
 }
 
-Config::SettingValue Config::GameSettings::procesPathSettingValue(const SettingValue& value)
+Config::SettingValue Config::GameSettings::processPathSettingValue(const SettingValue& value)
 {
     std::filesystem::path path = Files::pathFromQString(value.value);
     std::filesystem::path basePath = Files::pathFromQString(value.context.isEmpty() ? getUserContext() : value.context);
