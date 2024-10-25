@@ -269,7 +269,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
 #else
         constexpr auto caseSensitivity = Qt::CaseSensitive;
 #endif
-        constexpr auto compareDataDirectories = [caseSensitivity](const SettingValue& dir, const QString& listDir) {
+        constexpr auto compareDataDirectories = [](const SettingValue& dir, const QString& listDir) {
             return dir.originalRepresentation == listDir
                 || QDir::cleanPath(dir.originalRepresentation).compare(QDir::cleanPath(listDir), caseSensitivity) == 0;
         };
