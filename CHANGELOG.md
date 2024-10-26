@@ -198,6 +198,7 @@
     Bug #8172: Openmw-cs crashes when viewing `Dantooine, Sea`
     Bug #8187: Intervention effects should use Chebyshev distance to determine the closest marker
     Bug #8191: NiRollController does not work for sheath meshes
+    Bug #8206: Moving away from storm wind origin should make you faster
     Bug #8207: Using hand-to-hand while sneaking plays the critical hit sound when the target is not getting hurt
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
