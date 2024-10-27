@@ -542,19 +542,19 @@ pack_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
 configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
     "${OpenMW_BINARY_DIR}" "openmw.appdata.xml")
 
-if (NOT WIN32 AND NOT APPLE)
-    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-        "${OpenMW_BINARY_DIR}" "openmw.cfg")
-    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
+if (APPLE)
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}/openmw.cfg")
 elseif (WIN32)
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
         "${OpenMW_BINARY_DIR}" "openmw.cfg")
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
         "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
 else ()
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}/openmw.cfg")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
 endif ()
 
 pack_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
