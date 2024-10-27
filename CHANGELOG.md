@@ -197,6 +197,7 @@
     Bug #8171: Items with more than 100% health can be repaired
     Bug #8172: Openmw-cs crashes when viewing `Dantooine, Sea`
     Bug #8187: Intervention effects should use Chebyshev distance to determine the closest marker
+    Bug #8189: The import tab in the launcher doesn't remember the checkbox selection
     Bug #8191: NiRollController does not work for sheath meshes
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references

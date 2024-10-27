@@ -49,6 +49,12 @@ namespace Config
             std::map<QString, Profile> mValues;
         };
 
+        struct Importer
+        {
+            bool mImportContentSetup = true;
+            bool mImportFontSetup = true;
+        };
+
         void readFile(QTextStream& stream);
 
         void clear();
@@ -87,10 +93,19 @@ namespace Config
 
         void setMainWindow(const MainWindow& value) { mGeneral.mMainWindow = value; }
 
+        bool getImportContentSetup() const { return mImporter.mImportContentSetup; }
+
+        void setImportContentSetup(bool value) { mImporter.mImportContentSetup = value; }
+
+        bool getImportFontSetup() const { return mImporter.mImportFontSetup; }
+
+        void setImportFontSetup(bool value) { mImporter.mImportFontSetup = value; }
+
     private:
         Settings mSettings;
         Profiles mProfiles;
         General mGeneral;
+        Importer mImporter;
 
         bool setValue(const QString& sectionPrefix, const QString& key, const QString& value);
 

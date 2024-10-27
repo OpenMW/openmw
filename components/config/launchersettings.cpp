@@ -20,12 +20,15 @@ namespace Config
         constexpr char sSettingsSection[] = "Settings";
         constexpr char sGeneralSection[] = "General";
         constexpr char sProfilesSection[] = "Profiles";
+        constexpr char sImporterSection[] = "Importer";
         constexpr char sLanguageKey[] = "language";
         constexpr char sCurrentProfileKey[] = "currentprofile";
         constexpr char sDataKey[] = "data";
         constexpr char sArchiveKey[] = "fallback-archive";
         constexpr char sContentKey[] = "content";
         constexpr char sFirstRunKey[] = "firstrun";
+        constexpr char sImportContentSetupKey[] = "importcontentsetup";
+        constexpr char sImportFontSetupKey[] = "importfontsetup";
         constexpr char sMainWindowWidthKey[] = "MainWindow/width";
         constexpr char sMainWindowHeightKey[] = "MainWindow/height";
         constexpr char sMainWindowPosXKey[] = "MainWindow/posx";
@@ -143,6 +146,16 @@ namespace Config
             return false;
         }
 
+        bool parseImporterSection(const QString& key, const QString& value, LauncherSettings::Importer& importer)
+        {
+            if (key == sImportContentSetupKey)
+                return parseBool(value, importer.mImportContentSetup);
+            if (key == sImportFontSetupKey)
+                return parseBool(value, importer.mImportFontSetup);
+
+            return false;
+        }
+
         template <std::size_t size>
         void writeSectionHeader(const char (&name)[size], QTextStream& stream)
         {
@@ -202,6 +215,13 @@ namespace Config
             writeKeyValue(sMainWindowPosXKey, value.mMainWindow.mPosX, stream);
             writeKeyValue(sMainWindowHeightKey, value.mMainWindow.mHeight, stream);
         }
+
+        void writeImporter(const LauncherSettings::Importer& value, QTextStream& stream)
+        {
+            writeSectionHeader(sImporterSection, stream);
+            writeKeyValue(sImportContentSetupKey, value.mImportContentSetup, stream);
+            writeKeyValue(sImportFontSetupKey, value.mImportFontSetup, stream);
+        }
     }
 }
 
@@ -210,6 +230,7 @@ void Config::LauncherSettings::writeFile(QTextStream& stream) const
     writeSettings(mSettings, stream);
     writeProfiles(mProfiles, stream);
     writeGeneral(mGeneral, stream);
+    writeImporter(mImporter, stream);
 }
 
 QStringList Config::LauncherSettings::getContentLists()
@@ -335,6 +356,8 @@ bool Config::LauncherSettings::setValue(const QString& sectionPrefix, const QStr
         return parseProfilesSection(key, value, mProfiles);
     if (sectionPrefix == sGeneralSection)
         return parseGeneralSection(key, value, mGeneral);
+    if (sectionPrefix == sImporterSection)
+        return parseImporterSection(key, value, mImporter);
 
     return false;
 }
@@ -390,4 +413,5 @@ void Config::LauncherSettings::clear()
     mSettings = Settings{};
     mGeneral = General{};
     mProfiles = Profiles{};
+    mImporter = Importer{};
 }
