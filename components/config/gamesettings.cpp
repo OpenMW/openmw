@@ -178,9 +178,7 @@ bool Config::GameSettings::readFile(
                     value.originalRepresentation = value.value;
                 }
 
-                std::filesystem::path path = Files::pathFromQString(value.value);
-                mCfgMgr.processPath(path, Files::pathFromQString(context));
-                value.value = Files::pathToQString(path);
+                value = processPathSettingValue(value);
             }
             if (ignoreContent && (key == QLatin1String("content") || key == QLatin1String("data")))
                 continue;
@@ -586,6 +584,14 @@ QList<Config::SettingValue> Config::GameSettings::getContentList() const
 bool Config::GameSettings::isUserSetting(const SettingValue& settingValue) const
 {
     return settingValue.context.isEmpty() || settingValue.context == getUserContext();
+}
+
+Config::SettingValue Config::GameSettings::processPathSettingValue(const SettingValue& value)
+{
+    std::filesystem::path path = Files::pathFromQString(value.value);
+    std::filesystem::path basePath = Files::pathFromQString(value.context.isEmpty() ? getUserContext() : value.context);
+    mCfgMgr.processPath(path, basePath);
+    return SettingValue{ Files::pathToQString(path), value.originalRepresentation, value.context };
 }
 
 void Config::GameSettings::clear()

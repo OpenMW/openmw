@@ -1,6 +1,7 @@
 #include "launchersettings.hpp"
 
 #include <QDebug>
+#include <QDir>
 #include <QMultiMap>
 #include <QRegularExpression>
 #include <QString>
@@ -263,8 +264,16 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     for (const QString& listName : getContentLists())
     {
         const auto& listDirs = getDataDirectoryList(listName);
-        if (!std::ranges::equal(
-                dirs, listDirs, [](const SettingValue& dir, const QString& listDir) { return dir.value == listDir; }))
+#ifdef Q_OS_WINDOWS
+        constexpr auto caseSensitivity = Qt::CaseInsensitive;
+#else
+        constexpr auto caseSensitivity = Qt::CaseSensitive;
+#endif
+        constexpr auto compareDataDirectories = [](const SettingValue& dir, const QString& listDir) {
+            return dir.originalRepresentation == listDir
+                || QDir::cleanPath(dir.originalRepresentation).compare(QDir::cleanPath(listDir), caseSensitivity) == 0;
+        };
+        if (!std::ranges::equal(dirs, listDirs, compareDataDirectories))
             continue;
         constexpr auto compareFiles
             = [](const QString& a, const QString& b) { return a.compare(b, Qt::CaseInsensitive) == 0; };
@@ -281,7 +290,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     setCurrentContentListName(newContentListName);
     QStringList newListDirs;
     for (const auto& dir : dirs)
-        newListDirs.push_back(dir.value);
+        newListDirs.push_back(dir.originalRepresentation);
     setContentList(newContentListName, newListDirs, archives, files);
 }
 

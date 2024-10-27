@@ -118,6 +118,8 @@ namespace Config
         const QString& getUserContext() const { return mContexts.back(); }
         bool isUserSetting(const SettingValue& settingValue) const;
 
+        SettingValue processPathSettingValue(const SettingValue& value);
+
         void clear();
 
     private:
