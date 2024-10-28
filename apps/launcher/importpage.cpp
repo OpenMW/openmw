@@ -220,9 +220,15 @@ void Launcher::ImportPage::resetProgressBar()
     progressBar->reset();
 }
 
-void Launcher::ImportPage::saveSettings() {}
+void Launcher::ImportPage::saveSettings()
+{
+    mLauncherSettings.setImportContentSetup(addonsCheckBox->isChecked());
+    mLauncherSettings.setImportFontSetup(fontsCheckBox->isChecked());
+}
 
 bool Launcher::ImportPage::loadSettings()
 {
+    addonsCheckBox->setChecked(mLauncherSettings.getImportContentSetup());
+    fontsCheckBox->setChecked(mLauncherSettings.getImportFontSetup());
     return true;
 }
