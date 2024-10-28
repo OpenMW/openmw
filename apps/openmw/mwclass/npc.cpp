@@ -671,8 +671,11 @@ namespace MWClass
             {
                 damage *= store.find("fCombatCriticalStrikeMult")->mValue.getFloat();
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                MWBase::Environment::get().getSoundManager()->playSound3D(
-                    victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
+                if (healthdmg)
+                {
+                    MWBase::Environment::get().getSoundManager()->playSound3D(
+                        victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
+                }
             }
         }
 
