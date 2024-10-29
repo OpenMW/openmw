@@ -37,6 +37,7 @@
 #include <components/files/conversion.hpp>
 #include <components/misc/helpviewer.hpp>
 #include <components/misc/scalableicon.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/misc/timeconvert.hpp>
 #include <components/version/version.hpp>
 
@@ -1112,14 +1113,8 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
     QRect rect;
     if (isGrowLimit)
     {
-        // Widget position can be negative, we should clamp it.
-        QPoint position = pos();
-        if (position.x() <= 0)
-            position.setX(0);
-        if (position.y() <= 0)
-            position.setY(0);
-
-        rect = QApplication::screenAt(position)->geometry();
+        QScreen* screen = getWidgetScreen(pos());
+        rect = screen->geometry();
     }
     else
         rect = desktopRect();
@@ -1164,4 +1159,28 @@ void CSVDoc::View::onRequestFocus(const std::string& id)
     {
         addSubView(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Reference, id));
     }
+}
+
+QScreen* CSVDoc::View::getWidgetScreen(const QPoint& position)
+{
+    QScreen* screen = QApplication::screenAt(position);
+    if (screen == nullptr)
+    {
+        QPoint clampedPosition = position;
+
+        // If we failed to find the screen,
+        // clamp negative positions and try again
+        if (clampedPosition.x() <= 0)
+            clampedPosition.setX(0);
+        if (clampedPosition.y() <= 0)
+            clampedPosition.setY(0);
+
+        screen = QApplication::screenAt(clampedPosition);
+    }
+
+    if (screen == nullptr)
+        throw std::runtime_error(
+            Misc::StringUtils::format("Can not detect the screen for position [%d, %d]", position.x(), position.y()));
+
+    return screen;
 }
