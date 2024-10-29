@@ -90,6 +90,9 @@ namespace MWMechanics
         // This may be necessary when the creature is in an inactive cell.
         std::vector<int> mSummonGraveyard;
 
+        float mAwarenessTimer = 0.f;
+        int mAwarenessRoll = -1;
+
     protected:
         std::string mAttackType;
         int mLevel = 0;
@@ -300,6 +303,9 @@ namespace MWMechanics
         void setTeleported(bool v) { mTeleported = v; }
 
         const std::map<ESM::RefId, AttributeValue>& getAttributes() const { return mAttributes; }
+
+        void updateAwareness(float duration);
+        int getAwarenessRoll();
     };
 }
 

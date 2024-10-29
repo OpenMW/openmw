@@ -409,6 +409,7 @@ namespace MWMechanics
 
     void Actors::updateActor(const MWWorld::Ptr& ptr, float duration) const
     {
+        ptr.getClass().getCreatureStats(ptr).updateAwareness(duration);
         // magic effects
         adjustMagicEffects(ptr, duration);
 

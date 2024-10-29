@@ -686,4 +686,24 @@ namespace MWMechanics
     {
         return mSummonGraveyard;
     }
+
+    void CreatureStats::updateAwareness(float duration)
+    {
+        mAwarenessTimer += duration;
+        // Only reroll for awareness every 5 seconds
+        if (mAwarenessTimer >= 5.f)
+        {
+            mAwarenessTimer = 0.f;
+            mAwarenessRoll = -1;
+        }
+    }
+
+    int CreatureStats::getAwarenessRoll()
+    {
+        if (mAwarenessRoll >= 0)
+            return mAwarenessRoll;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        mAwarenessRoll = Misc::Rng::roll0to99(prng);
+        return mAwarenessRoll;
+    }
 }

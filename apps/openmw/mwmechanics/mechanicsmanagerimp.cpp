@@ -1675,8 +1675,7 @@ namespace MWMechanics
         }
 
         float target = x - y;
-        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        return (Misc::Rng::roll0to99(prng) >= target);
+        return observerStats.getAwarenessRoll() >= target;
     }
 
     void MechanicsManager::startCombat(
