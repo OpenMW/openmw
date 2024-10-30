@@ -274,6 +274,7 @@
     Feature #8078: OpenMW-CS Terrain Equalize Tool
     Feature #8087: Creature movement flags are not exposed
     Feature #8145: Starter spell flag is not exposed
+    Task #5859: User openmw-cs.cfg has comment talking about settings.cfg
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
