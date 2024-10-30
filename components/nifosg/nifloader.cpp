@@ -1027,7 +1027,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Texture2D> attachTexture(const std::string& name, osg::ref_ptr<osg::Image> image, bool wrapS,
-            bool wrapT, unsigned int uvSet, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures) const
+            bool wrapT, unsigned int uvSet, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
             osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
             if (image)
@@ -1038,22 +1038,23 @@ namespace NifOsg
             if (stateset)
             {
                 stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
-                stateset->setTextureAttributeAndModes(
-                    texUnit, new SceneUtil::TextureType(name), osg::StateAttribute::ON);
+                osg::ref_ptr<SceneUtil::TextureType> textureType = new SceneUtil::TextureType(name);
+                textureType = shareAttribute(textureType);
+                stateset->setTextureAttributeAndModes(texUnit, textureType, osg::StateAttribute::ON);
             }
             boundTextures.emplace_back(uvSet);
             return texture2d;
         }
 
         osg::ref_ptr<osg::Texture2D> attachExternalTexture(const std::string& name, const std::string& path, bool wrapS,
-            bool wrapT, unsigned int uvSet, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures) const
+            bool wrapT, unsigned int uvSet, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
             return attachTexture(name, getTextureImage(path), wrapS, wrapT, uvSet, stateset, boundTextures);
         }
 
         osg::ref_ptr<osg::Texture2D> attachNiSourceTexture(const std::string& name, const Nif::NiSourceTexture* st,
             bool wrapS, bool wrapT, unsigned int uvSet, osg::StateSet* stateset,
-            std::vector<unsigned int>& boundTextures) const
+            std::vector<unsigned int>& boundTextures)
         {
             return attachTexture(name, handleSourceTexture(st), wrapS, wrapT, uvSet, stateset, boundTextures);
         }
