@@ -1495,6 +1495,7 @@ namespace MWRender
         newChunkMgr.mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
         float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);
         newChunkMgr.mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
+        newChunkMgr.mTerrain->enableHeightCullCallback(Settings::terrain().mWaterCulling);
 
         return mWorldspaceChunks.emplace(worldspace, std::move(newChunkMgr)).first->second;
     }

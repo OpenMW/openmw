@@ -238,6 +238,7 @@
     Feature #7194: Ori to show texture paths
     Feature #7214: Searching in the in-game console
     Feature #7248: Searching in the console with regex and toggleable case-sensitivity
+    Feature #7318: Ability to disable water culling
     Feature #7468: Factions API for Lua
     Feature #7477: NegativeLight Magic Effect flag
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field

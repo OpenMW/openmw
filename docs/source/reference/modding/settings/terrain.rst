@@ -205,3 +205,16 @@ object paging min size cost multiplier
 This setting adjusts the calculated cost of merging an object used in the mentioned functionality.
 The larger this value is, the less expensive objects can be before they are discarded.
 See the formula above to figure out the math.
+
+water culling
+-------------
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Controls whether water culling is used.
+
+Water culling is an optimisation that prevents the expensive rendering of water when it is
+evaluated to be below any visible terrain chunk, potentially improving performance in many scenes.
+
+You may want to opt out of it if it causes framerate instability or inappropriately invisible water on your setup.
