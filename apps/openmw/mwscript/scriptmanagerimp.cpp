@@ -24,8 +24,7 @@
 
 namespace MWScript
 {
-    ScriptManager::ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode,
-        const std::vector<ESM::RefId>& scriptBlacklist)
+    ScriptManager::ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode)
         : mErrorHandler()
         , mStore(store)
         , mCompilerContext(compilerContext)
@@ -35,10 +34,6 @@ namespace MWScript
         installOpcodes(mInterpreter);
 
         mErrorHandler.setWarningsMode(warningsMode);
-
-        mScriptBlacklist.resize(scriptBlacklist.size());
-
-        std::sort(mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 
     bool ScriptManager::compile(const ESM::RefId& name)
@@ -148,13 +143,10 @@ namespace MWScript
 
         for (auto& script : mStore.get<ESM::Script>())
         {
-            if (!std::binary_search(mScriptBlacklist.begin(), mScriptBlacklist.end(), script.mId))
-            {
-                ++count;
+            ++count;
 
-                if (compile(script.mId))
-                    ++success;
-            }
+            if (compile(script.mId))
+                ++success;
         }
 
         return std::make_pair(count, success);

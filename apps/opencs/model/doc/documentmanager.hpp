@@ -31,7 +31,6 @@ namespace CSMDoc
         QThread mLoaderThread;
         Loader mLoader;
         ToUTF8::FromType mEncoding;
-        std::vector<std::string> mBlacklistedScripts;
 
         std::filesystem::path mResDir;
 
@@ -63,8 +62,6 @@ namespace CSMDoc
         void setResourceDir(const std::filesystem::path& parResDir);
 
         void setEncoding(ToUTF8::FromType encoding);
-
-        void setBlacklistedScripts(const std::vector<std::string>& scriptIds);
 
         /// Sets the file data that gets passed to newly created documents.
         void setFileData(const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);

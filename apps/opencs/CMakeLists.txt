@@ -8,7 +8,7 @@ opencs_units (model/doc
     )
 
 opencs_units (model/doc
-    savingstate savingstages blacklist messages
+    savingstate savingstages messages
     )
 
 opencs_hdrs (model/doc

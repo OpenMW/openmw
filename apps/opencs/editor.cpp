@@ -126,13 +126,6 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
     addOption("fallback",
         boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")->multitoken()->composing(),
         "fallback values");
-    addOption("script-blacklist",
-        boost::program_options::value<std::vector<std::string>>()
-            ->default_value(std::vector<std::string>(), "")
-            ->multitoken(),
-        "exclude specified script from the verifier (if the use of the blacklist is enabled)");
-    addOption("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)->default_value(true),
-        "enable script blacklisting");
     Files::ConfigurationManager::addCommonOptions(desc);
 
     boost::program_options::notify(variables);
@@ -158,9 +151,6 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
                                                      .as<Files::MaybeQuotedPath>()
                                                      .u8string()); // This call to u8string is redundant, but required
                                                                    // to build on MSVC 14.26 due to implementation bugs.
-
-    if (variables["script-blacklist-use"].as<bool>())
-        mDocumentManager.setBlacklistedScripts(variables["script-blacklist"].as<std::vector<std::string>>());
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty())

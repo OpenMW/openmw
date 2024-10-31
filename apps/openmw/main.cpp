@@ -149,14 +149,6 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     engine.setScriptConsoleMode(variables["script-console"].as<bool>());
     engine.setStartupScript(variables["script-run"].as<std::string>());
     engine.setWarningsMode(variables["script-warn"].as<int>());
-    std::vector<ESM::RefId> scriptBlacklist;
-    auto& scriptBlacklistString = variables["script-blacklist"].as<StringsVector>();
-    for (const auto& blacklistString : scriptBlacklistString)
-    {
-        scriptBlacklist.push_back(ESM::RefId::stringRefId(blacklistString));
-    }
-    engine.setScriptBlacklist(scriptBlacklist);
-    engine.setScriptBlacklistUse(variables["script-blacklist-use"].as<bool>());
     engine.setSaveGameFile(variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
 
     // other settings

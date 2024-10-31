@@ -74,10 +74,6 @@ Command line options
                                             1 - show warning but consider script as
                                             correctly compiled anyway
                                             2 - treat warnings as errors
-      --script-blacklist arg                ignore the specified script (if the use
-                                            of the blacklist is enabled)
-      --script-blacklist-use [=arg(=1)] (=1)
-                                            enable script blacklisting
       --load-savegame arg                   load a save game file on game startup
                                             (specify an absolute filename or a
                                             filename relative to the current
