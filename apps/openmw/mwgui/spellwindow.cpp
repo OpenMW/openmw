@@ -14,6 +14,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
@@ -91,8 +92,8 @@ namespace MWGui
             mSpellView->incrementalUpdate();
         }
 
-        // Update effects in-game too if the window is pinned
-        if (mPinned && !MWBase::Environment::get().getWindowManager()->isGuiMode())
+        // Update effects if the time is unpaused for any reason (e.g. the window is pinned)
+        if (!MWBase::Environment::get().getWorld()->getTimeManager()->isPaused())
             mSpellIcons->updateWidgets(mEffectBox, false);
     }
 
