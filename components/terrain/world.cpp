@@ -23,7 +23,6 @@ namespace Terrain
         , mParent(parent)
         , mResourceSystem(resourceSystem)
         , mBorderVisible(false)
-        , mHeightCullCallback(new HeightCullCallback)
         , mWorldspace(worldspace)
     {
         mTerrainRoot = new osg::Group;
@@ -67,7 +66,6 @@ namespace Terrain
         , mChunkManager(nullptr)
         , mCellBorder(nullptr)
         , mBorderVisible(false)
-        , mHeightCullCallback(nullptr)
         , mWorldspace(worldspace)
     {
         mTerrainRoot = new osg::Group;
@@ -141,6 +139,14 @@ namespace Terrain
     {
         if (mChunkManager)
             mChunkManager->clearCache();
+    }
+
+    void World::enableHeightCullCallback(bool enable)
+    {
+        if (enable)
+            mHeightCullCallback = new HeightCullCallback;
+        else
+            mHeightCullCallback = nullptr;
     }
 
     osg::Callback* World::getHeightCullCallback(float highz, unsigned int mask)
