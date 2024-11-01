@@ -374,7 +374,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mActivationDistanceOverride(-1)
     , mGrab(true)
     , mRandomSeed(0)
-    , mScriptBlacklistUse(true)
     , mNewGame(false)
     , mCfgMgr(configurationManager)
     , mGlMaxTextureImageUnits(0)
@@ -884,8 +883,7 @@ void OMW::Engine::prepareEngine()
     mScriptContext = std::make_unique<MWScript::CompilerContext>(MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions(&mExtensions);
 
-    mScriptManager = std::make_unique<MWScript::ScriptManager>(mWorld->getStore(), *mScriptContext, mWarningsMode,
-        mScriptBlacklistUse ? mScriptBlacklist : std::vector<ESM::RefId>());
+    mScriptManager = std::make_unique<MWScript::ScriptManager>(mWorld->getStore(), *mScriptContext, mWarningsMode);
     mEnvironment.setScriptManager(*mScriptManager);
 
     // Create game mechanics system
@@ -1109,16 +1107,6 @@ void OMW::Engine::setActivationDistanceOverride(int distance)
 void OMW::Engine::setWarningsMode(int mode)
 {
     mWarningsMode = mode;
-}
-
-void OMW::Engine::setScriptBlacklist(const std::vector<ESM::RefId>& list)
-{
-    mScriptBlacklist = list;
-}
-
-void OMW::Engine::setScriptBlacklistUse(bool use)
-{
-    mScriptBlacklistUse = use;
 }
 
 void OMW::Engine::setSaveGameFile(const std::filesystem::path& savegame)
