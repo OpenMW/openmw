@@ -59,7 +59,7 @@ list(APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}
 
 add_component_dir (lua
     luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
-    shapes/box inputactions yamlloader
+    shapes/box inputactions yamlloader scripttracker
     )
 
 add_component_dir (l10n
@@ -552,6 +552,10 @@ if (USE_QT)
 
     add_component_qt_dir (platform
         application
+        )
+
+    add_component_qt_dir (vfs
+        qtconversion
         )
 
     QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})

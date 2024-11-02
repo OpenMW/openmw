@@ -7,6 +7,8 @@
 
 #include <sol/sol.hpp>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "configuration.hpp"
 
 namespace VFS
@@ -141,13 +143,13 @@ namespace LuaUtil
         // (the result is expected to be an interface of the script).
         // Args:
         //     path: path to the script in the virtual filesystem;
-        //     namePrefix: sandbox name will be "<namePrefix>[<filePath>]". Sandbox name
-        //         will be added to every `print` output.
+        //     envName: sandbox name.
         //     packages: additional packages that should be available from the sandbox via `require`. Each package
         //         should be either a sol::table or a sol::function. If it is a function, it will be evaluated
         //         (once per sandbox) with the argument 'hiddenData' the first time when requested.
-        sol::protected_function_result runInNewSandbox(const std::string& path, const std::string& namePrefix = "",
-            const std::map<std::string, sol::object>& packages = {}, const sol::object& hiddenData = sol::nil);
+        sol::protected_function_result runInNewSandbox(const VFS::Path::Normalized& path,
+            const std::string& envName = "unnamed", const std::map<std::string, sol::object>& packages = {},
+            const sol::object& hiddenData = sol::nil);
 
         void dropScriptCache() { mCompiledScripts.clear(); }
 
@@ -157,7 +159,7 @@ namespace LuaUtil
         // directly.
         void addInternalLibSearchPath(const std::filesystem::path& path) { mLibSearchPaths.push_back(path); }
         sol::function loadInternalLib(std::string_view libName);
-        sol::function loadFromVFS(const std::string& path);
+        sol::function loadFromVFS(const VFS::Path::Normalized& path);
         sol::environment newInternalLibEnvironment();
 
         uint64_t getTotalMemoryUsage() const { return mSol.memory_used(); }
@@ -182,7 +184,7 @@ namespace LuaUtil
         friend sol::protected_function_result call(
             ScriptId scriptId, const sol::protected_function& fn, Args&&... args);
 
-        sol::function loadScriptAndCache(const std::string& path);
+        sol::function loadScriptAndCache(const VFS::Path::Normalized& path);
         static void countHook(lua_State* L, lua_Debug* ar);
         static void* trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 
@@ -227,7 +229,7 @@ namespace LuaUtil
         sol::state_view mSol;
         const ScriptsConfiguration* mConf;
         sol::table mSandboxEnv;
-        std::map<std::string, sol::bytecode> mCompiledScripts;
+        std::map<VFS::Path::Normalized, sol::bytecode> mCompiledScripts;
         std::map<std::string, sol::object> mCommonPackages;
         const VFS::Manager* mVFS;
         std::vector<std::filesystem::path> mLibSearchPaths;

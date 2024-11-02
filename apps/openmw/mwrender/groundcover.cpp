@@ -1,5 +1,7 @@
 #include "groundcover.hpp"
 
+#include <span>
+
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/ComputeBoundsVisitor>
@@ -46,13 +48,13 @@ namespace MWRender
         class InstancedComputeNearFarCullCallback : public osg::DrawableCullCallback
         {
         public:
-            InstancedComputeNearFarCullCallback(const std::vector<Groundcover::GroundcoverEntry>& instances,
+            explicit InstancedComputeNearFarCullCallback(std::span<const Groundcover::GroundcoverEntry> instances,
                 const osg::Vec3& chunkPosition, const osg::BoundingBox& instanceBounds)
                 : mInstanceMatrices()
                 , mInstanceBounds(instanceBounds)
             {
                 mInstanceMatrices.reserve(instances.size());
-                for (const auto& instance : instances)
+                for (const Groundcover::GroundcoverEntry& instance : instances)
                     mInstanceMatrices.emplace_back(computeInstanceMatrix(instance, chunkPosition));
             }
 
@@ -191,7 +193,8 @@ namespace MWRender
         class InstancingVisitor : public osg::NodeVisitor
         {
         public:
-            InstancingVisitor(std::vector<Groundcover::GroundcoverEntry>& instances, osg::Vec3f& chunkPosition)
+            explicit InstancingVisitor(
+                std::span<const Groundcover::GroundcoverEntry> instances, osg::Vec3f& chunkPosition)
                 : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
                 , mInstances(instances)
                 , mChunkPosition(chunkPosition)
@@ -252,7 +255,7 @@ namespace MWRender
             }
 
         private:
-            std::vector<Groundcover::GroundcoverEntry> mInstances;
+            std::span<const Groundcover::GroundcoverEntry> mInstances;
             osg::Vec3f mChunkPosition;
         };
 
@@ -411,12 +414,15 @@ namespace MWRender
                     }
                 }
 
-                for (auto& pair : refs)
+                for (auto& [refNum, cellRef] : refs)
                 {
-                    ESM::CellRef& ref = pair.second;
-                    const std::string& model = mGroundcoverStore.getGroundcoverModel(ref.mRefID);
-                    if (!model.empty())
-                        instances[model].emplace_back(std::move(ref));
+                    const VFS::Path::NormalizedView model = mGroundcoverStore.getGroundcoverModel(cellRef.mRefID);
+                    if (model.empty())
+                        continue;
+                    auto it = instances.find(model);
+                    if (it == instances.end())
+                        it = instances.emplace_hint(it, VFS::Path::Normalized(model), std::vector<GroundcoverEntry>());
+                    it->second.emplace_back(std::move(cellRef));
                 }
             }
         }
@@ -426,9 +432,9 @@ namespace MWRender
     {
         osg::ref_ptr<osg::Group> group = new osg::Group;
         osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * ESM::Land::REAL_SIZE;
-        for (auto& pair : instances)
+        for (const auto& [model, entries] : instances)
         {
-            const osg::Node* temp = mSceneManager->getTemplate(pair.first);
+            const osg::Node* temp = mSceneManager->getTemplate(model);
             osg::ref_ptr<osg::Node> node = static_cast<osg::Node*>(temp->clone(osg::CopyOp::DEEP_COPY_NODES
                 | osg::CopyOp::DEEP_COPY_DRAWABLES | osg::CopyOp::DEEP_COPY_USERDATA | osg::CopyOp::DEEP_COPY_ARRAYS
                 | osg::CopyOp::DEEP_COPY_PRIMITIVES));
@@ -436,7 +442,7 @@ namespace MWRender
             // Keep link to original mesh to keep it in cache
             group->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(temp));
 
-            InstancingVisitor visitor(pair.second, worldCenter);
+            InstancingVisitor visitor(entries, worldCenter);
             node->accept(visitor);
             group->addChild(node);
         }

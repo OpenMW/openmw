@@ -62,12 +62,13 @@ namespace MWLua
     {
     public:
         static void initializeSelfPackage(const Context&);
-        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
+        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj, LuaUtil::ScriptTracker* tracker = nullptr);
 
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
         const MWWorld::Ptr& getPtrOrEmpty() const { return mData.ptrOrEmpty(); }
 
         void setActive(bool active);
+        bool isActive() const override { return mData.mIsActive; }
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
         void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }
         void onTeleported() { callEngineHandlers(mOnTeleportedHandlers); }

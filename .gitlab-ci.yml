@@ -196,8 +196,9 @@ Teal:
   script:
     - CI/teal_ci.sh
   artifacts:
+    when: always
     paths:
-      - teal_declarations.zip
+      - teal_declarations
 
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
@@ -501,7 +502,6 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
     - ccache/
   script:
-    - rm -fr build  # remove the build directory
     - CI/before_install.osx.sh
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
@@ -521,7 +521,6 @@ Ubuntu_GCC_integration_tests_asan:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
-      - "build/**/*.log"
 
 macOS14_Xcode15_arm64:
   extends: .MacOS

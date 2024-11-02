@@ -96,6 +96,7 @@
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Bug #7309: Sunlight scattering is visible in inappropriate situations
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
+    Bug #7353: Normal Map Crashes with Starwind Assets in TES3MP and OpenMW
     Bug #7354: Disabling post processing in-game causes a crash
     Bug #7364: Post processing is not reflected in savegame previews
     Bug #7380: NiZBufferProperty issue
@@ -114,6 +115,7 @@
     Bug #7553: Faction reaction loading is incorrect
     Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
     Bug #7573: Drain Fatigue can't bring fatigue below zero by default
+    Bug #7582: Skill specializations are hardcoded in character creation
     Bug #7585: Difference in interior lighting between OpenMW with legacy lighting method enabled and vanilla Morrowind
     Bug #7587: Quick load related crash
     Bug #7603: Scripts menu size is not updated properly
@@ -175,6 +177,7 @@
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
     Bug #7908: Key bindings names in the settings menu are layout-specific
+    Bug #7912: Lua: castRenderingRay fails to hit height map
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
     Bug #7970: Difference of GetPCSleep (?) behavior between vanilla and OpenMW
     Bug #7980: Paralyzed NPCs' lips move
@@ -191,6 +194,14 @@
     Bug #8097: GetEffect doesn't detect 0 magnitude spells
     Bug #8124: Normal weapon resistance is applied twice for NPCs
     Bug #8132: Actors without hello responses turn to face the player
+    Bug #8171: Items with more than 100% health can be repaired
+    Bug #8172: Openmw-cs crashes when viewing `Dantooine, Sea`
+    Bug #8187: Intervention effects should use Chebyshev distance to determine the closest marker
+    Bug #8189: The import tab in the launcher doesn't remember the checkbox selection
+    Bug #8191: NiRollController does not work for sheath meshes
+    Bug #8206: Moving away from storm wind origin should make you faster
+    Bug #8207: Using hand-to-hand while sneaking plays the critical hit sound when the target is not getting hurt
+    Bug #8208: The launcher's view distance option's minimum value isn't capped to Vanilla's minimum
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
@@ -227,6 +238,7 @@
     Feature #7194: Ori to show texture paths
     Feature #7214: Searching in the in-game console
     Feature #7248: Searching in the console with regex and toggleable case-sensitivity
+    Feature #7318: Ability to disable water culling
     Feature #7468: Factions API for Lua
     Feature #7477: NegativeLight Magic Effect flag
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field
@@ -263,6 +275,7 @@
     Feature #8078: OpenMW-CS Terrain Equalize Tool
     Feature #8087: Creature movement flags are not exposed
     Feature #8145: Starter spell flag is not exposed
+    Task #5859: User openmw-cs.cfg has comment talking about settings.cfg
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
@@ -272,8 +285,10 @@
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
+    Task #7182: FFMpeg 5.1.1+ support
     Task #7394: Drop support for --fs-strict
     Task #7720: Drop 360-degree screenshot support
+    Task #8214: Drop script blacklisting functionality
 
 0.48.0
 ------

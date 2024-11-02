@@ -90,7 +90,7 @@ namespace CSVRender
     {
         auto sceneMgr = mData.getResourceSystem()->getSceneManager();
 
-        osg::ref_ptr<osg::Node> temp = sceneMgr->getInstance(model);
+        osg::ref_ptr<osg::Node> temp = sceneMgr->getInstance(VFS::Path::toNormalized(model));
         mSkeleton = dynamic_cast<SceneUtil::Skeleton*>(temp.get());
         if (!mSkeleton)
         {
@@ -123,7 +123,7 @@ namespace CSVRender
         auto node = mNodeMap.find(boneName);
         if (!mesh.empty() && node != mNodeMap.end())
         {
-            auto instance = sceneMgr->getInstance(mesh);
+            auto instance = sceneMgr->getInstance(VFS::Path::toNormalized(mesh));
             SceneUtil::attach(instance, mSkeleton, boneName, node->second, sceneMgr);
         }
     }

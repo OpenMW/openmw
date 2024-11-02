@@ -827,7 +827,7 @@ namespace MWSound
         const MWWorld::ConstPtr player = world->getPlayerPtr();
         auto cell = player.getCell()->getCell();
 
-        if (!cell->isExterior())
+        if (!cell->isExterior() && !cell->isQuasiExterior())
             return;
         if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
             return;

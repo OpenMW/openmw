@@ -189,7 +189,7 @@ namespace MWWorld
         float mRotateSpeed;
     };
 
-    void ProjectileManager::createModel(State& state, const std::string& model, const osg::Vec3f& pos,
+    void ProjectileManager::createModel(State& state, VFS::Path::NormalizedView model, const osg::Vec3f& pos,
         const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, const std::string& texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
@@ -222,7 +222,8 @@ namespace MWWorld
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
                     mResourceSystem->getSceneManager()->getInstance(
-                        Misc::ResourceHelpers::correctMeshPath(weapon->mModel), findVisitor.mFoundNode);
+                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(weapon->mModel)),
+                        findVisitor.mFoundNode);
             }
         }
 
@@ -313,7 +314,7 @@ namespace MWWorld
 
         osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
 
-        auto model = ptr.getClass().getCorrectedModel(ptr);
+        VFS::Path::Normalized model = ptr.getClass().getCorrectedModel(ptr);
         createModel(state, model, pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -353,7 +354,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        const auto model = ptr.getClass().getCorrectedModel(ptr);
+        const VFS::Path::Normalized model = ptr.getClass().getCorrectedModel(ptr);
         createModel(state, model, pos, orient, false, false, osg::Vec4(0, 0, 0, 0));
         if (!ptr.getClass().getEnchantment(ptr).empty())
             SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
@@ -693,7 +694,7 @@ namespace MWWorld
             state.mAttackStrength = esm.mAttackStrength;
             state.mToDelete = false;
 
-            std::string model;
+            VFS::Path::Normalized model;
             try
             {
                 MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), esm.mId);
@@ -748,7 +749,7 @@ namespace MWWorld
                                        // file's effect list, which is already trimmed of non-projectile
                                        // effects. We need to use the stored value.
 
-            std::string model;
+            VFS::Path::Normalized model;
             try
             {
                 MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), state.mIdMagic.at(0));

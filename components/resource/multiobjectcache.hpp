@@ -3,10 +3,11 @@
 
 #include <map>
 #include <mutex>
-#include <string>
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
+
+#include <components/vfs/pathutil.hpp>
 
 #include "cachestats.hpp"
 
@@ -23,18 +24,15 @@ namespace Resource
     class MultiObjectCache : public osg::Referenced
     {
     public:
-        MultiObjectCache();
-        ~MultiObjectCache();
-
         void removeUnreferencedObjectsInCache();
 
         /** Remove all objects from the cache. */
         void clear();
 
-        void addEntryToObjectCache(const std::string& filename, osg::Object* object);
+        void addEntryToObjectCache(VFS::Path::NormalizedView filename, osg::Object* object);
 
         /** Take an Object from cache. Return nullptr if no object found. */
-        osg::ref_ptr<osg::Object> takeFromObjectCache(const std::string& fileName);
+        osg::ref_ptr<osg::Object> takeFromObjectCache(VFS::Path::NormalizedView fileName);
 
         /** call releaseGLObjects on all objects attached to the object cache.*/
         void releaseGLObjects(osg::State* state);
@@ -42,7 +40,7 @@ namespace Resource
         CacheStats getStats() const;
 
     protected:
-        typedef std::multimap<std::string, osg::ref_ptr<osg::Object>> ObjectCacheMap;
+        typedef std::multimap<VFS::Path::Normalized, osg::ref_ptr<osg::Object>, std::less<>> ObjectCacheMap;
 
         ObjectCacheMap _objectCache;
         mutable std::mutex _objectCacheMutex;

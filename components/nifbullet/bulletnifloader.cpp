@@ -53,7 +53,7 @@ namespace NifBullet
         mShape->mFileName = nif.getFilename();
         if (roots.empty())
         {
-            warn("Found no root nodes in NIF file " + mShape->mFileName);
+            warn("Found no root nodes in NIF file " + mShape->mFileName.value());
             return mShape;
         }
 
@@ -93,7 +93,7 @@ namespace NifBullet
             }
             else
             {
-                warn("Invalid Bounding Box node bounds in file " + mShape->mFileName);
+                warn("Invalid Bounding Box node bounds in file " + mShape->mFileName.value());
             }
             return true;
         }

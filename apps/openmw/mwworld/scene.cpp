@@ -22,6 +22,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/settings/values.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -450,8 +451,7 @@ namespace MWWorld
             }
             else if (!ESM::isEsm4Ext(worldspace))
             {
-                static std::vector<float> defaultHeight;
-                defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
+                static const std::vector<float> defaultHeight(verts * verts, ESM::Land::DEFAULT_HEIGHT);
                 mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
                     ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
             }
@@ -1094,7 +1094,7 @@ namespace MWWorld
     class PreloadMeshItem : public SceneUtil::WorkItem
     {
     public:
-        PreloadMeshItem(const std::string& mesh, Resource::SceneManager* sceneManager)
+        explicit PreloadMeshItem(VFS::Path::NormalizedView mesh, Resource::SceneManager* sceneManager)
             : mMesh(mesh)
             , mSceneManager(sceneManager)
         {
@@ -1118,26 +1118,26 @@ namespace MWWorld
         void abort() override { mAborted = true; }
 
     private:
-        std::string mMesh;
+        VFS::Path::Normalized mMesh;
         Resource::SceneManager* mSceneManager;
         std::atomic_bool mAborted{ false };
     };
 
     void Scene::preload(const std::string& mesh, bool useAnim)
     {
-        std::string mesh_ = mesh;
-        if (useAnim)
-            mesh_ = Misc::ResourceHelpers::correctActorModelPath(mesh_, mRendering.getResourceSystem()->getVFS());
+        const VFS::Path::Normalized meshPath = useAnim
+            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mRendering.getResourceSystem()->getVFS())
+            : mesh;
 
-        if (!mRendering.getResourceSystem()->getSceneManager()->checkLoaded(mesh_, mRendering.getReferenceTime()))
-        {
-            osg::ref_ptr<PreloadMeshItem> item(
-                new PreloadMeshItem(mesh_, mRendering.getResourceSystem()->getSceneManager()));
-            mRendering.getWorkQueue()->addWorkItem(item);
-            const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
-            mWorkItems.erase(std::remove_if(mWorkItems.begin(), mWorkItems.end(), isDone), mWorkItems.end());
-            mWorkItems.emplace_back(std::move(item));
-        }
+        if (mRendering.getResourceSystem()->getSceneManager()->checkLoaded(meshPath, mRendering.getReferenceTime()))
+            return;
+
+        osg::ref_ptr<PreloadMeshItem> item(
+            new PreloadMeshItem(meshPath, mRendering.getResourceSystem()->getSceneManager()));
+        mRendering.getWorkQueue()->addWorkItem(item);
+        const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
+        mWorkItems.erase(std::remove_if(mWorkItems.begin(), mWorkItems.end(), isDone), mWorkItems.end());
+        mWorkItems.emplace_back(std::move(item));
     }
 
     void Scene::preloadCells(float dt)

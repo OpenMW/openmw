@@ -105,6 +105,8 @@ namespace ESM
     };
 
     void skipLoadCellRef(ESMReader& esm, bool wideRefNum = false);
+
+    CellRef makeBlankCellRef();
 }
 
 #endif

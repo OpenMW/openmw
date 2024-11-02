@@ -60,14 +60,17 @@ namespace MWMechanics
         return std::find(mSpells.begin(), mSpells.end(), spell) != mSpells.end();
     }
 
-    void Spells::add(const ESM::Spell* spell)
+    void Spells::add(const ESM::Spell* spell, bool modifyBase)
     {
-        mSpellList->add(spell);
+        if (modifyBase)
+            mSpellList->add(spell);
+        else
+            addSpell(spell);
     }
 
-    void Spells::add(const ESM::RefId& spellId)
+    void Spells::add(const ESM::RefId& spellId, bool modifyBase)
     {
-        add(SpellList::getSpell(spellId));
+        add(SpellList::getSpell(spellId), modifyBase);
     }
 
     void Spells::addSpell(const ESM::Spell* spell)
@@ -76,13 +79,17 @@ namespace MWMechanics
             mSpells.emplace_back(spell);
     }
 
-    void Spells::remove(const ESM::RefId& spellId)
+    void Spells::remove(const ESM::RefId& spellId, bool modifyBase)
     {
-        const auto spell = SpellList::getSpell(spellId);
-        removeSpell(spell);
-        mSpellList->remove(spell);
+        remove(SpellList::getSpell(spellId), modifyBase);
+    }
 
-        if (spellId == mSelectedSpell)
+    void Spells::remove(const ESM::Spell* spell, bool modifyBase)
+    {
+        removeSpell(spell);
+        if (modifyBase)
+            mSpellList->remove(spell);
+        if (spell->mId == mSelectedSpell)
             mSelectedSpell = ESM::RefId();
     }
 

@@ -144,7 +144,11 @@ namespace MWLua
                     values.push_back(sol::make_object<std::string>(lua, msg));
                 }
                 else
-                    values.push_back(sol::make_object<std::streampos>(lua, self.mFilePtr->tellg()));
+                {
+                    // tellg returns std::streampos which is not required to be a numeric type. It is required to be
+                    // convertible to std::streamoff which is a number
+                    values.push_back(sol::make_object<std::streamoff>(lua, self.mFilePtr->tellg()));
+                }
             }
             catch (std::exception& e)
             {
@@ -205,7 +209,7 @@ namespace MWLua
                 });
         };
 
-        handle["close"] = [](lua_State* L, FileHandle& self) {
+        handle["close"] = [](sol::this_state lua, FileHandle& self) {
             sol::variadic_results values;
             try
             {
@@ -214,16 +218,16 @@ namespace MWLua
                 {
                     auto msg = "Can not close file '" + self.mFileName + "': file handle is still opened.";
                     values.push_back(sol::nil);
-                    values.push_back(sol::make_object<std::string>(L, msg));
+                    values.push_back(sol::make_object<std::string>(lua, msg));
                 }
                 else
-                    values.push_back(sol::make_object<bool>(L, true));
+                    values.push_back(sol::make_object<bool>(lua, true));
             }
             catch (std::exception& e)
             {
                 auto msg = "Can not close file '" + self.mFileName + "': " + std::string(e.what());
                 values.push_back(sol::nil);
-                values.push_back(sol::make_object<std::string>(L, msg));
+                values.push_back(sol::make_object<std::string>(lua, msg));
             }
 
             return values;

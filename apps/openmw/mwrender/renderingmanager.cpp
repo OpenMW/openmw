@@ -696,11 +696,6 @@ namespace MWRender
         updateAmbient();
     }
 
-    void RenderingManager::skySetDate(int day, int month)
-    {
-        mSky->setDate(day, month);
-    }
-
     int RenderingManager::skyGetMasserPhase() const
     {
         return mSky->getMasserPhase();
@@ -1290,7 +1285,7 @@ namespace MWRender
         mActorsPaths->updatePtr(old, updated);
     }
 
-    void RenderingManager::spawnEffect(const std::string& model, std::string_view texture,
+    void RenderingManager::spawnEffect(VFS::Path::NormalizedView model, std::string_view texture,
         const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
     {
         mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX);
@@ -1493,7 +1488,7 @@ namespace MWRender
         RenderingManager::WorldspaceChunkMgr newChunkMgr;
 
         const float lodFactor = Settings::terrain().mLodFactor;
-        const bool groundcover = Settings::groundcover().mEnabled;
+        const bool groundcover = Settings::groundcover().mEnabled && worldspace == ESM::Cell::sDefaultWorldspaceId;
         const bool groundcoverPaging = Settings::groundcover().mPaging;
         const bool distantTerrain = Settings::terrain().mDistantTerrain;
         const double expiryDelay = Settings::cells().mCacheExpiryDelay;
@@ -1561,6 +1556,7 @@ namespace MWRender
         newChunkMgr.mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
         float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);
         newChunkMgr.mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
+        newChunkMgr.mTerrain->enableHeightCullCallback(Settings::terrain().mWaterCulling);
 
         return mWorldspaceChunks.emplace(worldspace, std::move(newChunkMgr)).first->second;
     }
@@ -1715,7 +1711,7 @@ namespace MWRender
     osg::Vec3f RenderingManager::getHalfExtents(const MWWorld::ConstPtr& object) const
     {
         osg::Vec3f halfExtents(0, 0, 0);
-        std::string modelName = object.getClass().getCorrectedModel(object);
+        VFS::Path::Normalized modelName(object.getClass().getCorrectedModel(object));
         if (modelName.empty())
             return halfExtents;
 
@@ -1746,7 +1742,7 @@ namespace MWRender
         MWWorld::Scene* worldScene = MWBase::Environment::get().getWorldScene();
         if (!rootNode || worldScene->isPagedRef(ptr))
         {
-            const std::string model = ptr.getClass().getCorrectedModel(ptr);
+            const VFS::Path::Normalized model(ptr.getClass().getCorrectedModel(ptr));
 
             if (model.empty())
                 return {};

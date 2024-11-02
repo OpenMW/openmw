@@ -121,8 +121,7 @@ bool Config::GameSettings::readFile(
             // Replace composing entries with a replace= line
             if (key == QLatin1String("config") || key == QLatin1String("replace") || key == QLatin1String("data")
                 || key == QLatin1String("fallback-archive") || key == QLatin1String("content")
-                || key == QLatin1String("groundcover") || key == QLatin1String("script-blacklist")
-                || key == QLatin1String("fallback"))
+                || key == QLatin1String("groundcover") || key == QLatin1String("fallback"))
                 settings.remove(key);
         }
     }
@@ -145,8 +144,7 @@ bool Config::GameSettings::readFile(
             // Don't remove composing entries
             if (key != QLatin1String("config") && key != QLatin1String("replace") && key != QLatin1String("data")
                 && key != QLatin1String("fallback-archive") && key != QLatin1String("content")
-                && key != QLatin1String("groundcover") && key != QLatin1String("script-blacklist")
-                && key != QLatin1String("fallback"))
+                && key != QLatin1String("groundcover") && key != QLatin1String("fallback"))
                 settings.remove(key);
 
             if (key == QLatin1String("config") || key == QLatin1String("user-data") || key == QLatin1String("resources")
@@ -178,9 +176,7 @@ bool Config::GameSettings::readFile(
                     value.originalRepresentation = value.value;
                 }
 
-                std::filesystem::path path = Files::pathFromQString(value.value);
-                mCfgMgr.processPath(path, Files::pathFromQString(context));
-                value.value = Files::pathToQString(path);
+                value = processPathSettingValue(value);
             }
             if (ignoreContent && (key == QLatin1String("content") || key == QLatin1String("data")))
                 continue;
@@ -586,6 +582,14 @@ QList<Config::SettingValue> Config::GameSettings::getContentList() const
 bool Config::GameSettings::isUserSetting(const SettingValue& settingValue) const
 {
     return settingValue.context.isEmpty() || settingValue.context == getUserContext();
+}
+
+Config::SettingValue Config::GameSettings::processPathSettingValue(const SettingValue& value)
+{
+    std::filesystem::path path = Files::pathFromQString(value.value);
+    std::filesystem::path basePath = Files::pathFromQString(value.context.isEmpty() ? getUserContext() : value.context);
+    mCfgMgr.processPath(path, basePath);
+    return SettingValue{ Files::pathToQString(path), value.originalRepresentation, value.context };
 }
 
 void Config::GameSettings::clear()

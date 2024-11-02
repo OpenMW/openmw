@@ -85,11 +85,9 @@ namespace Resource
         return true;
     }
 
-    osg::ref_ptr<osg::Image> ImageManager::getImage(std::string_view filename, bool disableFlip)
+    osg::ref_ptr<osg::Image> ImageManager::getImage(VFS::Path::NormalizedView path, bool disableFlip)
     {
-        const std::string normalized = VFS::Path::normalizeFilename(filename);
-
-        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
+        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(path);
         if (obj)
             return osg::ref_ptr<osg::Image>(static_cast<osg::Image*>(obj.get()));
         else
@@ -97,21 +95,21 @@ namespace Resource
             Files::IStreamPtr stream;
             try
             {
-                stream = mVFS->get(normalized);
+                stream = mVFS->get(path);
             }
             catch (std::exception& e)
             {
                 Log(Debug::Error) << "Failed to open image: " << e.what();
-                mCache->addEntryToObjectCache(normalized, mWarningImage);
+                mCache->addEntryToObjectCache(path.value(), mWarningImage);
                 return mWarningImage;
             }
 
-            const std::string ext(Misc::getFileExtension(normalized));
+            const std::string ext(Misc::getFileExtension(path.value()));
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
             if (!reader)
             {
-                Log(Debug::Error) << "Error loading " << filename << ": no readerwriter for '" << ext << "' found";
-                mCache->addEntryToObjectCache(normalized, mWarningImage);
+                Log(Debug::Error) << "Error loading " << path << ": no readerwriter for '" << ext << "' found";
+                mCache->addEntryToObjectCache(path.value(), mWarningImage);
                 return mWarningImage;
             }
 
@@ -123,8 +121,8 @@ namespace Resource
                 stream->read((char*)header, 18);
                 if (stream->gcount() != 18)
                 {
-                    Log(Debug::Error) << "Error loading " << filename << ": couldn't read TGA header";
-                    mCache->addEntryToObjectCache(normalized, mWarningImage);
+                    Log(Debug::Error) << "Error loading " << path << ": couldn't read TGA header";
+                    mCache->addEntryToObjectCache(path.value(), mWarningImage);
                     return mWarningImage;
                 }
                 int type = header[2];
@@ -142,23 +140,22 @@ namespace Resource
                 = reader->readImage(*stream, disableFlip ? mOptionsNoFlip : mOptions);
             if (!result.success())
             {
-                Log(Debug::Error) << "Error loading " << filename << ": " << result.message() << " code "
+                Log(Debug::Error) << "Error loading " << path << ": " << result.message() << " code "
                                   << result.status();
-                mCache->addEntryToObjectCache(normalized, mWarningImage);
+                mCache->addEntryToObjectCache(path.value(), mWarningImage);
                 return mWarningImage;
             }
 
             osg::ref_ptr<osg::Image> image = result.getImage();
 
-            image->setFileName(normalized);
+            image->setFileName(std::string(path.value()));
             if (!checkSupported(image))
             {
                 static bool uncompress = (getenv("OPENMW_DECOMPRESS_TEXTURES") != nullptr);
                 if (!uncompress)
                 {
-                    Log(Debug::Error) << "Error loading " << filename
-                                      << ": no S3TC texture compression support installed";
-                    mCache->addEntryToObjectCache(normalized, mWarningImage);
+                    Log(Debug::Error) << "Error loading " << path << ": no S3TC texture compression support installed";
+                    mCache->addEntryToObjectCache(path.value(), mWarningImage);
                     return mWarningImage;
                 }
                 else
@@ -189,7 +186,7 @@ namespace Resource
                 image = newImage;
             }
 
-            mCache->addEntryToObjectCache(normalized, image);
+            mCache->addEntryToObjectCache(path.value(), image);
             return image;
         }
     }

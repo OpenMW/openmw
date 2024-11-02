@@ -229,6 +229,9 @@
         <layout class="QGridLayout" name="gridLayoutGameMechanics2">
          <item row="0" column="0">
           <widget class="QLabel" name="unarmedFactorsStrengthLabel">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage: damage is multiplied by Strength value divided by 40.&lt;/p&gt;&lt;p&gt;Can apply to all actors or only to non-werewolf actors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Factor Strength into Hand-to-Hand Combat</string>
            </property>
@@ -703,7 +706,7 @@
                   <number>3</number>
                  </property>
                  <property name="minimum">
-                  <double>0.000000000000000</double>
+                  <double>0.250000000000000</double>
                  </property>
                  <property name="singleStep">
                   <double>0.125000000000000</double>

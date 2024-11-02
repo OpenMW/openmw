@@ -18,6 +18,13 @@ namespace
         return lua.safe_script("return " + luaCode).get<T>();
     }
 
+    constexpr VFS::Path::NormalizedView test1EnPath("l10n/test1/en.yaml");
+    constexpr VFS::Path::NormalizedView test1EnUsPath("l10n/test1/en_us.yaml");
+    constexpr VFS::Path::NormalizedView test1DePath("l10n/test1/de.yaml");
+    constexpr VFS::Path::NormalizedView test2EnPath("l10n/test2/en.yaml");
+    constexpr VFS::Path::NormalizedView test3EnPath("l10n/test3/en.yaml");
+    constexpr VFS::Path::NormalizedView test3DePath("l10n/test3/de.yaml");
+
     VFSTestFile invalidScript("not a script");
     VFSTestFile incorrectScript(
         "return { incorrectSection = {}, engineHandlers = { incorrectHandler = function() end } }");
@@ -67,12 +74,12 @@ you_have_arrows: "Arrows count: {count}"
     struct LuaL10nTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
-            { "l10n/Test1/en.yaml", &test1En },
-            { "l10n/Test1/en_US.yaml", &test1EnUS },
-            { "l10n/Test1/de.yaml", &test1De },
-            { "l10n/Test2/en.yaml", &test2En },
-            { "l10n/Test3/en.yaml", &test1En },
-            { "l10n/Test3/de.yaml", &test1De },
+            { test1EnPath, &test1En },
+            { test1EnUsPath, &test1EnUS },
+            { test1DePath, &test1De },
+            { test2EnPath, &test2En },
+            { test3EnPath, &test1En },
+            { test3DePath, &test1De },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;

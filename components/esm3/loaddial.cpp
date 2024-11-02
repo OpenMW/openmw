@@ -82,10 +82,10 @@ namespace ESM
             if (mId != mStringId)
                 throw std::runtime_error("Trying to save Dialogue record with name \"" + mStringId
                     + "\" not maching id " + mId.toDebugString());
-            esm.writeHNString("NAME", mStringId);
+            esm.writeHNCString("NAME", mStringId);
         }
         else if (esm.getFormatVersion() <= MaxNameIsRefIdOnlyFormatVersion)
-            esm.writeHNRefId("NAME", mId);
+            esm.writeHNCRefId("NAME", mId);
         else
             esm.writeHNRefId("ID__", mId);
 

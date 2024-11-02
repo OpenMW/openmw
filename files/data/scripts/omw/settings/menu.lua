@@ -157,7 +157,7 @@ local function renderGroup(group, global)
         sortedSettings[setting.order] = setting
     end
     for _, setting in ipairs(sortedSettings) do
-        table.insert(settingLayouts, renderSetting(group, setting, valueSection:get(setting.key), global))
+        table.insert(settingLayouts, renderSetting(group, setting, valueSection:getCopy(setting.key), global))
     end
     local settingsContent = ui.content(interlaceSeparator(settingLayouts, spacedLines(1)))
 
@@ -288,7 +288,7 @@ local function renderPage(page, options)
     table.sort(sortedGroups, pageGroupComparator)
     local groupLayouts = {}
     for _, pageGroup in ipairs(sortedGroups) do
-        local group = common.getSection(pageGroup.global, common.groupSectionKey):get(pageGroup.key)
+        local group = common.getSection(pageGroup.global, common.groupSectionKey):getCopy(pageGroup.key)
         if not group then
             error(string.format('%s group "%s" was not found', pageGroup.global and 'Global' or 'Player', pageGroup.key))
         end
@@ -360,7 +360,7 @@ end
 
 local function onSettingChanged(global)
     return async:callback(function(groupKey, settingKey)
-        local group = common.getSection(global, common.groupSectionKey):get(groupKey)
+        local group = common.getSection(global, common.groupSectionKey):getCopy(groupKey)
         if not group or not pageOptions[group.page] then return end
 
         local groupElement = groupElements[group.page][group.key]
@@ -375,7 +375,7 @@ local function onSettingChanged(global)
             return
         end
 
-        local value = common.getSection(global, group.key):get(settingKey)
+        local value = common.getSection(global, group.key):getCopy(settingKey)
         local settingsContent = groupElement.layout.content.settings.content
         auxUi.deepDestroy(settingsContent[settingKey]) -- support setting renderers which return UI elements
         settingsContent[settingKey] = renderSetting(group, group.settings[settingKey], value, global)
@@ -404,7 +404,7 @@ local function onGroupRegistered(global, key)
             local group = common.getSection(global, common.groupSectionKey):get(group.key)
             if not group or not pageOptions[group.page] then return end
 
-            local value = common.getSection(global, group.key):get(settingKey)
+            local value = common.getSection(global, group.key):getCopy(settingKey)
 
             local element = groupElements[group.page][group.key]
             local settingsContent = element.layout.content.settings.content

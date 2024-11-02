@@ -22,6 +22,7 @@
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -729,8 +730,8 @@ namespace MWRender
                 continue;
 
             const int type = store.findStatic(ref.mRefId);
-            std::string model;
 
+            VFS::Path::Normalized model;
             if(mGroundcover)
                 model = mGroundcoverStore.getGroundcoverModel(ref.mRefId);
             else
@@ -745,10 +746,10 @@ namespace MWRender
             if (activeGrid && type != ESM::REC_STAT)
             {
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
-                std::string kfname = Misc::StringUtils::lowerCase(model);
-                if (kfname.size() > 4 && kfname.ends_with(".nif"))
+                if (Misc::getFileExtension(model) == "nif")
                 {
-                    kfname.replace(kfname.size() - 4, 4, ".kf");
+                    VFS::Path::Normalized kfname = model;
+                    kfname.changeExtension("kf");
                     if (mSceneManager->getVFS()->exists(kfname))
                         continue;
                 }

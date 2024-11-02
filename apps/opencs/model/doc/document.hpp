@@ -19,7 +19,6 @@
 
 #include "../tools/tools.hpp"
 
-#include "blacklist.hpp"
 #include "operationholder.hpp"
 #include "runner.hpp"
 #include "saving.hpp"
@@ -61,7 +60,6 @@ namespace CSMDoc
         Saving mSavingOperation;
         OperationHolder mSaving;
         std::filesystem::path mResDir;
-        Blacklist mBlacklist;
         Runner mRunner;
         bool mDirty;
 
@@ -95,8 +93,7 @@ namespace CSMDoc
     public:
         Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files, bool new_,
             const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
-            const std::vector<std::string>& blacklistedScripts, const Files::PathContainer& dataPaths,
-            const std::vector<std::string>& archives);
+            const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
 
         ~Document() override = default;
 
@@ -135,8 +132,6 @@ namespace CSMDoc
 
         CSMTools::ReportModel* getReport(const CSMWorld::UniversalId& id);
         ///< The ownership of the returned report is not transferred.
-
-        bool isBlacklisted(const CSMWorld::UniversalId& id) const;
 
         void startRunning(const std::string& profile, const std::string& startupInstruction = "");
 

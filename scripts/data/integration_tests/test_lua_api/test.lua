@@ -3,7 +3,9 @@ local core = require('openmw.core')
 local async = require('openmw.async')
 local util = require('openmw.util')
 local types = require('openmw.types')
+local vfs = require('openmw.vfs')
 local world = require('openmw.world')
+local I = require('openmw.interfaces')
 
 local function testTimers()
     testing.expectAlmostEqual(core.getGameTimeScale(), 30, 'incorrect getGameTimeScale() result')
@@ -224,6 +226,65 @@ local function initPlayer()
     coroutine.yield()
 end
 
+local function testVFS()
+    local file = 'test_vfs_dir/lines.txt'
+    testing.expectEqual(vfs.fileExists(file), true, 'lines.txt should exist')
+    testing.expectEqual(vfs.fileExists('test_vfs_dir/nosuchfile'), false, 'nosuchfile should not exist')
+
+    local getLine = vfs.lines(file)
+    for _,v in pairs({ '1', '2', '', '4' }) do
+        testing.expectEqual(getLine(), v)
+    end
+    testing.expectEqual(getLine(), nil, 'All lines should have been read')
+    local ok = pcall(function()
+        vfs.lines('test_vfs_dir/nosuchfile')
+    end)
+    testing.expectEqual(ok, false, 'Should not be able to read lines from nonexistent file')
+
+    local getPath = vfs.pathsWithPrefix('test_vfs_dir/')
+    testing.expectEqual(getPath(), file)
+    testing.expectEqual(getPath(), nil, 'All paths should have been read')
+
+    local handle = vfs.open(file)
+    testing.expectEqual(vfs.type(handle), 'file', 'File should be open')
+    testing.expectEqual(handle.fileName, file)
+
+    local n1, n2, _, l3, l4 = handle:read("*n", "*number", "*l", "*line", "*l")
+    testing.expectEqual(n1, 1)
+    testing.expectEqual(n2, 2)
+    testing.expectEqual(l3, '')
+    testing.expectEqual(l4, '4')
+
+    testing.expectEqual(handle:seek('set', 0), 0, 'Reading should happen from the start of the file')
+    testing.expectEqual(handle:read("*a"), '1\n2\n\n4')
+
+    testing.expectEqual(handle:close(), true, 'File should be closeable')
+    testing.expectEqual(vfs.type(handle), 'closed file', 'File should be closed')
+end
+
+local function testCommitCrime()
+    initPlayer()
+    local player = world.players[1]
+    testing.expectEqual(player == nil, false, 'A viable player reference should exist to run `testCommitCrime`')
+    testing.expectEqual(I.Crimes == nil, false, 'Crimes interface should be available in global contexts')
+
+    -- Reset crime level to have a clean slate
+    types.Player.setCrimeLevel(player, 0) 
+    testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Theft, victim = player, arg = 100}).wasCrimeSeen, false, "Running the crime with the player as the victim should not result in a seen crime")
+    testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Theft, arg = 50 }).wasCrimeSeen, false, "Running the crime with no victim and a type shouldn't raise errors")
+    testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Murder }).wasCrimeSeen, false, "Running a murder crime should work even without a victim")
+
+    -- Create a mockup target for crimes
+    local victim = world.createObject(types.NPC.record(player).id)
+    victim:teleport(player.cell, player.position + util.vector3(0, 300, 0))
+    coroutine.yield()
+
+    -- Reset crime level for testing with a valid victim
+    types.Player.setCrimeLevel(player, 0) 
+    testing.expectEqual(I.Crimes.commitCrime(player, { victim = victim, type = types.Player.OFFENSE_TYPE.Theft, arg = 50 }).wasCrimeSeen, true, "Running a crime with a valid victim should notify them when the player is not sneaking, even if it's not explicitly passed in")
+    testing.expectEqual(types.Player.getCrimeLevel(player), 0, "Crime level should not change if the victim's alarm value is low and there's no other witnesses")
+end
+
 tests = {
     {'timers', testTimers},
     {'rotating player with controls.yawChange should change rotation', function()
@@ -283,6 +344,8 @@ tests = {
         world.createObject('basic_dagger1h', 1):moveInto(player)
         testing.runLocalTest(player, 'playerWeaponAttack')
     end},
+    {'vfs', testVFS},
+    {'testCommitCrime', testCommitCrime}
 }
 
 return {

@@ -16,6 +16,8 @@
 #include <osg/Timer>
 #include <osg/ref_ptr>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "../mwworld/ptr.hpp"
 
 #include "collisiontype.hpp"
@@ -159,12 +161,12 @@ namespace MWPhysics
         void setWaterHeight(float height);
         void disableWater();
 
-        void addObject(const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation,
+        void addObject(const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh, osg::Quat rotation,
             int collisionType = CollisionType_World);
-        void addActor(const MWWorld::Ptr& ptr, const std::string& mesh);
+        void addActor(const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh);
 
         int addProjectile(
-            const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius);
+            const MWWorld::Ptr& caster, const osg::Vec3f& position, VFS::Path::NormalizedView mesh, bool computeRadius);
         void setCaster(int projectileId, const MWWorld::Ptr& caster);
         void removeProjectile(const int projectileId);
 

@@ -27,7 +27,7 @@ namespace MWClass
     void Actor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
         MWPhysics::PhysicsSystem& physics) const
     {
-        physics.addActor(ptr, model);
+        physics.addActor(ptr, VFS::Path::toNormalized(model));
         if (getCreatureStats(ptr).isDead() && getCreatureStats(ptr).isDeathAnimationFinished())
             MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
     }

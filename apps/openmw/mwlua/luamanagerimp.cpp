@@ -210,6 +210,8 @@ namespace MWLua
                 scripts->update(frameDuration);
             mGlobalScripts.update(frameDuration);
         }
+
+        mLua.protectedCall([&](LuaUtil::LuaView& lua) { mScriptTracker.unloadInactiveScripts(lua); });
     }
 
     void LuaManager::objectTeleported(const MWWorld::Ptr& ptr)
@@ -238,6 +240,11 @@ namespace MWLua
     }
 
     void LuaManager::synchronizedUpdate()
+    {
+        mLua.protectedCall([&](LuaUtil::LuaView&) { synchronizedUpdateUnsafe(); });
+    }
+
+    void LuaManager::synchronizedUpdateUnsafe()
     {
         if (mNewGameStarted)
         {
@@ -366,7 +373,6 @@ namespace MWLua
         mGlobalScripts.addAutoStartedScripts();
         mGlobalScriptsStarted = true;
         mNewGameStarted = true;
-        mMenuScripts.stateChanged();
     }
 
     void LuaManager::gameLoaded()
@@ -555,7 +561,7 @@ namespace MWLua
         }
         else
         {
-            scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr)));
+            scripts = std::make_shared<LocalScripts>(&mLua, LObject(getId(ptr)), &mScriptTracker);
             if (!autoStartConf.has_value())
                 autoStartConf = mConfiguration.getLocalConf(type, ptr.getCellRef().getRefId(), getId(ptr));
             scripts->setAutoStartConf(std::move(*autoStartConf));
@@ -563,6 +569,7 @@ namespace MWLua
                 scripts->addPackage(name, package);
         }
         scripts->setSerializer(mLocalSerializer.get());
+        scripts->setSavedDataDeserializer(mLocalLoader.get());
 
         MWWorld::RefData& refData = ptr.getRefData();
         refData.setLuaScripts(std::move(scripts));
@@ -850,8 +857,8 @@ namespace MWLua
             bool isMenu = mConfiguration[i].mFlags & ESM::LuaScriptCfg::sMenu;
 
             out << std::left;
-            out << " " << std::setw(nameW) << mConfiguration[i].mScriptPath;
-            if (mConfiguration[i].mScriptPath.size() > nameW)
+            out << " " << std::setw(nameW) << mConfiguration[i].mScriptPath.value();
+            if (mConfiguration[i].mScriptPath.value().size() > nameW)
                 out << "\n " << std::setw(nameW) << ""; // if path is too long, break line
             out << std::right;
             out << std::setw(valueW) << static_cast<int64_t>(activeStats[i].mAvgInstructionCount);

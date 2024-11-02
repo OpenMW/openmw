@@ -2475,7 +2475,7 @@ namespace MWMechanics
                 movement = osg::Vec3f();
             }
 
-            if (mFloatToSurface)
+            if (mFloatToSurface && world->isSwimming(mPtr))
             {
                 if (cls.getCreatureStats(mPtr).isDead()
                     || (!godmode

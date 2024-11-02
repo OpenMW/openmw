@@ -1437,9 +1437,9 @@ namespace MWScript
                     osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    std::string model
-                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs);
-                    msg << "Model: " << model << std::endl;
+                    const VFS::Path::Normalized model(
+                        ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs));
+                    msg << "Model: " << model.value() << std::endl;
                     if (!model.empty())
                     {
                         const std::string archive = vfs->getArchive(model);
@@ -1714,7 +1714,7 @@ namespace MWScript
                 for (const T& record : store.get<T>())
                 {
                     MWWorld::ManualRef ref(store, record.mId);
-                    std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
+                    VFS::Path::Normalized model(ref.getPtr().getClass().getCorrectedModel(ref.getPtr()));
                     if (!model.empty())
                     {
                         sceneManager->getTemplate(model);

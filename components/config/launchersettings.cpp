@@ -1,6 +1,7 @@
 #include "launchersettings.hpp"
 
 #include <QDebug>
+#include <QDir>
 #include <QMultiMap>
 #include <QRegularExpression>
 #include <QString>
@@ -19,12 +20,15 @@ namespace Config
         constexpr char sSettingsSection[] = "Settings";
         constexpr char sGeneralSection[] = "General";
         constexpr char sProfilesSection[] = "Profiles";
+        constexpr char sImporterSection[] = "Importer";
         constexpr char sLanguageKey[] = "language";
         constexpr char sCurrentProfileKey[] = "currentprofile";
         constexpr char sDataKey[] = "data";
         constexpr char sArchiveKey[] = "fallback-archive";
         constexpr char sContentKey[] = "content";
         constexpr char sFirstRunKey[] = "firstrun";
+        constexpr char sImportContentSetupKey[] = "importcontentsetup";
+        constexpr char sImportFontSetupKey[] = "importfontsetup";
         constexpr char sMainWindowWidthKey[] = "MainWindow/width";
         constexpr char sMainWindowHeightKey[] = "MainWindow/height";
         constexpr char sMainWindowPosXKey[] = "MainWindow/posx";
@@ -142,6 +146,16 @@ namespace Config
             return false;
         }
 
+        bool parseImporterSection(const QString& key, const QString& value, LauncherSettings::Importer& importer)
+        {
+            if (key == sImportContentSetupKey)
+                return parseBool(value, importer.mImportContentSetup);
+            if (key == sImportFontSetupKey)
+                return parseBool(value, importer.mImportFontSetup);
+
+            return false;
+        }
+
         template <std::size_t size>
         void writeSectionHeader(const char (&name)[size], QTextStream& stream)
         {
@@ -201,6 +215,13 @@ namespace Config
             writeKeyValue(sMainWindowPosXKey, value.mMainWindow.mPosX, stream);
             writeKeyValue(sMainWindowHeightKey, value.mMainWindow.mHeight, stream);
         }
+
+        void writeImporter(const LauncherSettings::Importer& value, QTextStream& stream)
+        {
+            writeSectionHeader(sImporterSection, stream);
+            writeKeyValue(sImportContentSetupKey, value.mImportContentSetup, stream);
+            writeKeyValue(sImportFontSetupKey, value.mImportFontSetup, stream);
+        }
     }
 }
 
@@ -209,6 +230,7 @@ void Config::LauncherSettings::writeFile(QTextStream& stream) const
     writeSettings(mSettings, stream);
     writeProfiles(mProfiles, stream);
     writeGeneral(mGeneral, stream);
+    writeImporter(mImporter, stream);
 }
 
 QStringList Config::LauncherSettings::getContentLists()
@@ -263,14 +285,25 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     for (const QString& listName : getContentLists())
     {
         const auto& listDirs = getDataDirectoryList(listName);
-        if (!std::ranges::equal(
-                dirs, listDirs, [](const SettingValue& dir, const QString& listDir) { return dir.value == listDir; }))
+#ifdef Q_OS_WINDOWS
+        constexpr auto caseSensitivity = Qt::CaseInsensitive;
+#else
+        constexpr auto caseSensitivity = Qt::CaseSensitive;
+#endif
+        constexpr auto compareDataDirectories = [](const SettingValue& dir, const QString& listDir) {
+            return dir.originalRepresentation == listDir
+                || QDir::cleanPath(dir.originalRepresentation).compare(QDir::cleanPath(listDir), caseSensitivity) == 0;
+        };
+        if (!std::ranges::equal(dirs, listDirs, compareDataDirectories))
             continue;
-        if (files == getContentListFiles(listName) && archives == getArchiveList(listName))
-        {
-            setCurrentContentListName(listName);
-            return;
-        }
+        constexpr auto compareFiles
+            = [](const QString& a, const QString& b) { return a.compare(b, Qt::CaseInsensitive) == 0; };
+        if (!std::ranges::equal(files, getContentListFiles(listName), compareFiles))
+            continue;
+        if (!std::ranges::equal(archives, getArchiveList(listName), compareFiles))
+            continue;
+        setCurrentContentListName(listName);
+        return;
     }
 
     // otherwise, add content list
@@ -278,7 +311,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     setCurrentContentListName(newContentListName);
     QStringList newListDirs;
     for (const auto& dir : dirs)
-        newListDirs.push_back(dir.value);
+        newListDirs.push_back(dir.originalRepresentation);
     setContentList(newContentListName, newListDirs, archives, files);
 }
 
@@ -323,6 +356,8 @@ bool Config::LauncherSettings::setValue(const QString& sectionPrefix, const QStr
         return parseProfilesSection(key, value, mProfiles);
     if (sectionPrefix == sGeneralSection)
         return parseGeneralSection(key, value, mGeneral);
+    if (sectionPrefix == sImporterSection)
+        return parseImporterSection(key, value, mImporter);
 
     return false;
 }
@@ -378,4 +413,5 @@ void Config::LauncherSettings::clear()
     mSettings = Settings{};
     mGeneral = General{};
     mProfiles = Profiles{};
+    mImporter = Importer{};
 }

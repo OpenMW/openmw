@@ -55,7 +55,7 @@ namespace MWGui
             {
                 int maxDurability = iter->getClass().getItemMaxHealth(*iter);
                 int durability = iter->getClass().getItemHealth(*iter);
-                if (maxDurability == durability || maxDurability == 0)
+                if (maxDurability <= durability || maxDurability == 0)
                     continue;
 
                 int basePrice = iter->getClass().getValue(*iter);

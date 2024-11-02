@@ -1,21 +1,21 @@
 #ifndef OPENMW_MWRENDER_RENDERINGMANAGER_H
 #define OPENMW_MWRENDER_RENDERINGMANAGER_H
 
-#include <span>
-
-#include <osg/Light>
-#include <osg/ref_ptr>
-
-#include <components/settings/settings.hpp>
-
-#include <osgUtil/IncrementalCompileOperation>
-
 #include "objects.hpp"
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
 
+#include <components/settings/settings.hpp>
+#include <components/vfs/pathutil.hpp>
+
+#include <osg/Light>
+#include <osg/ref_ptr>
+
+#include <osgUtil/IncrementalCompileOperation>
+
 #include <deque>
 #include <memory>
+#include <span>
 #include <unordered_map>
 
 namespace osg
@@ -135,7 +135,6 @@ namespace MWRender
 
         void setAmbientColour(const osg::Vec4f& colour);
 
-        void skySetDate(int day, int month);
         int skyGetMasserPhase() const;
         int skyGetSecundaPhase() const;
         void skySetMoonColour(bool red);
@@ -196,7 +195,7 @@ namespace MWRender
 
         SkyManager* getSkyManager();
 
-        void spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition,
+        void spawnEffect(VFS::Path::NormalizedView model, std::string_view texture, const osg::Vec3f& worldPosition,
             float scale = 1.f, bool isMagicVFX = true);
 
         /// Clear all savegame-specific data

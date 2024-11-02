@@ -8,6 +8,7 @@
 
 #include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/scripttracker.hpp>
 #include <components/lua/storage.hpp>
 #include <components/lua_ui/resources.hpp>
 #include <components/misc/color.hpp>
@@ -170,6 +171,7 @@ namespace MWLua
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
             std::optional<LuaUtil::ScriptIdsWithInitializationData> autoStartConf = std::nullopt);
         void reloadAllScriptsImpl();
+        void synchronizedUpdateUnsafe();
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
@@ -233,6 +235,8 @@ namespace MWLua
 
         LuaUtil::InputAction::Registry mInputActions;
         LuaUtil::InputTrigger::Registry mInputTriggers;
+
+        LuaUtil::ScriptTracker mScriptTracker;
     };
 
 }

@@ -287,13 +287,24 @@ void Settings::SettingsFileParser::saveSettingsFile(
     // exist), start the newly created file with a helpful comment.
     if (!existing)
     {
-        ostream << "# This is the OpenMW user 'settings.cfg' file.  This file only contains" << std::endl;
+        const std::string filename = Files::pathToUnicodeString(file.filename());
+        ostream << "# This is the OpenMW user '" << filename << "' file.  This file only contains" << std::endl;
         ostream << "# explicitly changed settings.  If you would like to revert a setting" << std::endl;
-        ostream << "# to its default, simply remove it from this file.  For available" << std::endl;
-        ostream << "# settings, see the file 'files/settings-default.cfg' in our source repo or the documentation at:"
-                << std::endl;
-        ostream << "#" << std::endl;
-        ostream << "#   https://openmw.readthedocs.io/en/master/reference/modding/settings/index.html" << std::endl;
+        ostream << "# to its default, simply remove it from this file." << std::endl;
+
+        if (filename == "settings.cfg")
+        {
+            ostream << "# For available settings, see the file 'files/settings-default.cfg' in our source repo or the "
+                       "documentation at:"
+                    << std::endl;
+            ostream << "#" << std::endl;
+            ostream << "#   https://openmw.readthedocs.io/en/master/reference/modding/settings/index.html" << std::endl;
+        }
+        else if (filename == "openmw-cs.cfg")
+        {
+            ostream << "# For available settings, see the file 'apps/opencs/model/prefs/values.hpp' in our source repo."
+                    << std::endl;
+        }
     }
 
     // We still have one more thing to do before we're completely done writing the file.

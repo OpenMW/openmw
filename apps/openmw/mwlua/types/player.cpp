@@ -1,18 +1,20 @@
 #include "types.hpp"
 
+#include <components/esm3/loadbsgn.hpp>
+#include <components/esm3/loadfact.hpp>
+
 #include "../birthsignbindings.hpp"
 #include "../luamanagerimp.hpp"
 
 #include "apps/openmw/mwbase/inputmanager.hpp"
 #include "apps/openmw/mwbase/journal.hpp"
+#include "apps/openmw/mwbase/mechanicsmanager.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwmechanics/npcstats.hpp"
 #include "apps/openmw/mwworld/class.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/globals.hpp"
 #include "apps/openmw/mwworld/player.hpp"
-
-#include <components/esm3/loadbsgn.hpp>
 
 namespace MWLua
 {
@@ -51,6 +53,14 @@ namespace
             throw std::runtime_error("Failed to find birth sign: " + std::string(textId));
         return id;
     }
+
+    ESM::RefId parseFactionId(std::string_view faction)
+    {
+        ESM::RefId id = ESM::RefId::deserializeText(faction);
+        if (!MWBase::Environment::get().getESMStore()->get<ESM::Faction>().search(id))
+            return ESM::RefId();
+        return id;
+    }
 }
 
 namespace MWLua
@@ -59,6 +69,12 @@ namespace MWLua
     {
         if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
             throw std::runtime_error("The argument must be a player!");
+    }
+
+    static void verifyNpc(const MWWorld::Class& cls)
+    {
+        if (!cls.isNpc())
+            throw std::runtime_error("The argument must be a NPC!");
     }
 
     void addPlayerBindings(sol::table player, const Context& context)
@@ -199,6 +215,36 @@ namespace MWLua
         };
         player["isCharGenFinished"] = [](const Object&) -> bool {
             return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
+        };
+
+        player["OFFENSE_TYPE"]
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(context.sol(),
+                { { "Theft", MWBase::MechanicsManager::OffenseType::OT_Theft },
+                    { "Assault", MWBase::MechanicsManager::OffenseType::OT_Assault },
+                    { "Murder", MWBase::MechanicsManager::OffenseType::OT_Murder },
+                    { "Trespassing", MWBase::MechanicsManager::OffenseType::OT_Trespassing },
+                    { "SleepingInOwnedBed", MWBase::MechanicsManager::OffenseType::OT_SleepingInOwnedBed },
+                    { "Pickpocket", MWBase::MechanicsManager::OffenseType::OT_Pickpocket } }));
+        player["_runStandardCommitCrime"] = [](const Object& o, const sol::optional<Object> victim, int type,
+                                                std::string_view faction, int arg = 0, bool victimAware = false) {
+            verifyPlayer(o);
+            if (victim.has_value() && !victim->ptrOrEmpty().isEmpty())
+                verifyNpc(victim->ptrOrEmpty().getClass());
+            if (!dynamic_cast<const GObject*>(&o))
+                throw std::runtime_error("Only global scripts can commit crime");
+            if (type < 0 || type > MWBase::MechanicsManager::OffenseType::OT_Pickpocket)
+                throw std::runtime_error("Invalid offense type");
+
+            ESM::RefId factionId = parseFactionId(faction);
+            // If the faction is provided but not found, error out
+            if (faction != "" && factionId == ESM::RefId())
+                throw std::runtime_error("Faction does not exist");
+
+            MWWorld::Ptr victimObj = nullptr;
+            if (victim.has_value())
+                victimObj = victim->ptrOrEmpty();
+            return MWBase::Environment::get().getMechanicsManager()->commitCrime(o.ptr(), victimObj,
+                static_cast<MWBase::MechanicsManager::OffenseType>(type), factionId, arg, victimAware);
         };
 
         player["birthSigns"] = initBirthSignRecordBindings(context);

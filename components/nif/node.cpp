@@ -742,4 +742,43 @@ namespace Nif
         nif->read(mCurrent);
     }
 
+    void BSResourceID::read(NIFStream* nif)
+    {
+        nif->read(mFileHash);
+        nif->readArray(mExtension);
+        nif->read(mDirectoryHash);
+    }
+
+    void BSDistantObjectInstance::read(NIFStream* nif)
+    {
+        mResourceID.read(nif);
+        nif->skip(12 * nif->get<uint32_t>()); // Unknown data
+        mTransforms.resize(nif->get<uint32_t>());
+        for (osg::Matrixf& transform : mTransforms)
+        {
+            std::array<float, 16> mat;
+            nif->readArray(mat);
+            transform.set(mat.data());
+        }
+    }
+
+    void BSShaderTextureArray::read(NIFStream* nif)
+    {
+        nif->skip(1); // Unknown
+        mTextureArrays.resize(nif->get<uint32_t>());
+        for (std::vector<std::string>& textureArray : mTextureArrays)
+            nif->getSizedStrings(textureArray, nif->get<uint32_t>());
+    }
+
+    void BSDistantObjectInstancedNode::read(NIFStream* nif)
+    {
+        BSMultiBoundNode::read(nif);
+
+        mInstances.resize(nif->get<uint32_t>());
+        for (BSDistantObjectInstance& instance : mInstances)
+            instance.read(nif);
+        for (BSShaderTextureArray& textureArray : mShaderTextureArrays)
+            textureArray.read(nif);
+    }
+
 }

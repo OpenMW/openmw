@@ -794,18 +794,34 @@ namespace MWGui
         if (!Settings::gui().mColorTopicEnable)
             return;
 
-        const MyGUI::Colour& specialColour = Settings::gui().mColorTopicSpecific;
-        const MyGUI::Colour& oldColour = Settings::gui().mColorTopicExhausted;
-
         for (const std::string& keyword : mKeywords)
         {
             int flag = MWBase::Environment::get().getDialogueManager()->getTopicFlag(ESM::RefId::stringRefId(keyword));
             MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
+            const auto oldCaption = button->getCaption();
+            const MyGUI::IntSize oldSize = button->getSize();
 
+            bool changed = false;
             if (flag & MWBase::DialogueManager::TopicType::Specific)
-                button->getSubWidgetText()->setTextColour(specialColour);
+            {
+                button->changeWidgetSkin("MW_ListLine_Specific");
+                changed = true;
+            }
             else if (flag & MWBase::DialogueManager::TopicType::Exhausted)
-                button->getSubWidgetText()->setTextColour(oldColour);
+            {
+                button->changeWidgetSkin("MW_ListLine_Exhausted");
+                changed = true;
+            }
+
+            if (changed)
+            {
+                button->setCaption(oldCaption);
+                button->setTextAlign(MyGUI::Align::Left);
+                MyGUI::ISubWidgetText* text = button->getSubWidgetText();
+                if (text != nullptr)
+                    text->setWordWrap(true);
+                button->setSize(oldSize);
+            }
         }
     }
 

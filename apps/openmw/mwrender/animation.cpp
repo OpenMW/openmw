@@ -28,16 +28,17 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm4/loadligh.hpp>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/sceneutil/lightcommon.hpp>
-
-#include <components/sceneutil/keyframe.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 #include <components/vfs/recursivedirectoryiterator.hpp>
 
+#include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -388,17 +389,20 @@ namespace
         std::string_view mEffectId;
     };
 
-    osg::ref_ptr<osg::LightModel> getVFXLightModelInstance()
+    namespace
     {
-        static osg::ref_ptr<osg::LightModel> lightModel = nullptr;
-
-        if (!lightModel)
+        osg::ref_ptr<osg::LightModel> makeVFXLightModelInstance()
         {
-            lightModel = new osg::LightModel;
+            osg::ref_ptr<osg::LightModel> lightModel = new osg::LightModel;
             lightModel->setAmbientIntensity({ 1, 1, 1, 1 });
+            return lightModel;
         }
 
-        return lightModel;
+        const osg::ref_ptr<osg::LightModel>& getVFXLightModelInstance()
+        {
+            static const osg::ref_ptr<osg::LightModel> lightModel = makeVFXLightModelInstance();
+            return lightModel;
+        }
     }
 
     void assignBoneBlendCallbackRecursive(MWRender::BoneAnimBlendController* controller, osg::Node* parent, bool isRoot)
@@ -654,16 +658,24 @@ namespace MWRender
         return mKeyframes->mTextKeys;
     }
 
-    void Animation::loadAllAnimationsInFolder(const std::string& model, const std::string& baseModel)
+    void Animation::loadAdditionalAnimations(VFS::Path::NormalizedView model, const std::string& baseModel)
     {
-        std::string animationPath = model;
-        if (animationPath.find("meshes") == 0)
-        {
-            animationPath.replace(0, 6, "animations");
-        }
-        animationPath.replace(animationPath.size() - 3, 3, "/");
+        constexpr VFS::Path::NormalizedView meshes("meshes/");
+        if (!model.value().starts_with(meshes.value()))
+            return;
 
-        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
+        std::string path(model.value());
+
+        constexpr VFS::Path::NormalizedView animations("animations/");
+        path.replace(0, meshes.value().size(), animations.value());
+
+        const std::string::size_type extensionStart = path.find_last_of(VFS::Path::extensionSeparator);
+        if (extensionStart == std::string::npos)
+            return;
+
+        path.replace(extensionStart, path.size() - extensionStart, "/");
+
+        for (const VFS::Path::Normalized& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(path))
         {
             if (Misc::getFileExtension(name) == "kf")
             {
@@ -674,15 +686,15 @@ namespace MWRender
 
     void Animation::addAnimSource(std::string_view model, const std::string& baseModel)
     {
-        std::string kfname = Misc::StringUtils::lowerCase(model);
+        VFS::Path::Normalized kfname(model);
 
-        if (kfname.ends_with(".nif"))
-            kfname.replace(kfname.size() - 4, 4, ".kf");
+        if (Misc::getFileExtension(kfname) == "nif")
+            kfname.changeExtension("kf");
 
         addSingleAnimSource(kfname, baseModel);
 
         if (Settings::game().mUseAdditionalAnimSources)
-            loadAllAnimationsInFolder(kfname, baseModel);
+            loadAdditionalAnimations(kfname, baseModel);
     }
 
     std::shared_ptr<Animation::AnimSource> Animation::addSingleAnimSource(
@@ -1473,7 +1485,7 @@ namespace MWRender
     }
 
     void loadBonesFromFile(
-        osg::ref_ptr<osg::Node>& baseNode, const std::string& model, Resource::ResourceSystem* resourceSystem)
+        osg::ref_ptr<osg::Node>& baseNode, VFS::Path::NormalizedView model, Resource::ResourceSystem* resourceSystem)
     {
         const osg::Node* node = resourceSystem->getSceneManager()->getTemplate(model).get();
         osg::ref_ptr<osg::Node> sheathSkeleton(
@@ -1508,7 +1520,7 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size() - 4, 4, "/");
 
-        for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
+        for (const VFS::Path::Normalized& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
             if (Misc::getFileExtension(name) == "nif")
                 loadBonesFromFile(node, name, resourceSystem);
@@ -1526,7 +1538,7 @@ namespace MWRender
             Cache::iterator found = cache.find(model);
             if (found == cache.end())
             {
-                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(VFS::Path::toNormalized(model));
 
                 if (inject)
                 {
@@ -1547,7 +1559,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(VFS::Path::toNormalized(model));
 
             if (inject)
             {
@@ -1762,7 +1774,8 @@ namespace MWRender
         }
         parentNode->addChild(trans);
 
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, trans);
+        osg::ref_ptr<osg::Node> node
+            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), trans);
 
         // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
         node->getOrCreateStateSet()->setAttributeAndModes(

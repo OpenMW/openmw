@@ -2,7 +2,6 @@
 
 #include "state.hpp"
 
-#include <apps/opencs/model/doc/blacklist.hpp>
 #include <apps/opencs/model/doc/messages.hpp>
 #include <apps/opencs/model/doc/operationholder.hpp>
 #include <apps/opencs/model/doc/runner.hpp>
@@ -295,8 +294,7 @@ void CSMDoc::Document::createBase()
 
 CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files,
     bool new_, const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
-    const std::vector<std::string>& blacklistedScripts, const Files::PathContainer& dataPaths,
-    const std::vector<std::string>& archives)
+    const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
     : mSavePath(savePath)
     , mContentFiles(std::move(files))
     , mNew(new_)
@@ -338,8 +336,6 @@ CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std
         if (mContentFiles.size() == 1)
             createBase();
     }
-
-    mBlacklist.add(CSMWorld::UniversalId::Type_Script, blacklistedScripts);
 
     addOptionalGmsts();
     addOptionalGlobals();
@@ -483,11 +479,6 @@ CSMWorld::Data& CSMDoc::Document::getData()
 CSMTools::ReportModel* CSMDoc::Document::getReport(const CSMWorld::UniversalId& id)
 {
     return mTools.getReport(id);
-}
-
-bool CSMDoc::Document::isBlacklisted(const CSMWorld::UniversalId& id) const
-{
-    return mBlacklist.isBlacklisted(id);
 }
 
 void CSMDoc::Document::startRunning(const std::string& profile, const std::string& startupInstruction)

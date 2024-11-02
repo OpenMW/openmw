@@ -11,6 +11,7 @@
 #include <components/esm3/loadcell.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
@@ -105,8 +106,8 @@ namespace MWWorld
                 }
             }
 
-            std::string mesh;
-            std::string kfname;
+            VFS::Path::Normalized mesh;
+            VFS::Path::Normalized kfname;
             for (std::string_view path : mMeshes)
             {
                 if (mAbort)
@@ -121,18 +122,14 @@ namespace MWWorld
                     if (!vfs.exists(mesh))
                         continue;
 
-                    size_t slashpos = mesh.find_last_of("/\\");
-                    if (slashpos != std::string::npos && slashpos != mesh.size() - 1)
+                    if (Misc::getFileName(mesh).starts_with('x') && Misc::getFileExtension(mesh) == "nif")
                     {
-                        if (Misc::StringUtils::toLower(mesh[slashpos + 1]) == 'x'
-                            && Misc::StringUtils::ciEndsWith(mesh, ".nif"))
-                        {
-                            kfname = mesh;
-                            kfname.replace(kfname.size() - 4, 4, ".kf");
-                            if (vfs.exists(kfname))
-                                mPreloadedObjects.insert(mKeyframeManager->get(kfname));
-                        }
+                        kfname = mesh;
+                        kfname.changeExtension("kf");
+                        if (vfs.exists(kfname))
+                            mPreloadedObjects.insert(mKeyframeManager->get(kfname));
                     }
+
                     mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
                     if (mPreloadInstances)
                         mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));

@@ -16,28 +16,30 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/texturetype.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace SceneUtil
 {
     namespace
     {
-        std::array<std::string, 32> generateGlowTextureNames()
+        std::array<VFS::Path::Normalized, 32> generateGlowTextureNames()
         {
-            std::array<std::string, 32> result;
+            constexpr VFS::Path::NormalizedView prefix("textures/magicitem");
+            std::array<VFS::Path::Normalized, 32> result;
             for (std::size_t i = 0; i < result.size(); ++i)
             {
                 std::stringstream stream;
-                stream << "textures/magicitem/caust";
+                stream << "caust";
                 stream << std::setw(2);
                 stream << std::setfill('0');
                 stream << i;
                 stream << ".dds";
-                result[i] = std::move(stream).str();
+                result[i] = prefix / VFS::Path::Normalized(std::move(stream).str());
             }
             return result;
         }
 
-        const std::array<std::string, 32> glowTextureNames = generateGlowTextureNames();
+        const std::array<VFS::Path::Normalized, 32> glowTextureNames = generateGlowTextureNames();
 
         struct FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
         {
@@ -219,7 +221,7 @@ namespace SceneUtil
         const osg::Vec4f& glowColor, float glowDuration)
     {
         std::vector<osg::ref_ptr<osg::Texture2D>> textures;
-        for (const std::string& name : glowTextureNames)
+        for (const VFS::Path::Normalized& name : glowTextureNames)
         {
             osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(name);
             osg::ref_ptr<osg::Texture2D> tex(new osg::Texture2D(image));

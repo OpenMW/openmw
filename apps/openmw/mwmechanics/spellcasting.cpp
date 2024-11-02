@@ -72,12 +72,13 @@ namespace MWMechanics
             {
                 if (effectInfo.mData.mRange == ESM::RT_Target)
                     world->spawnEffect(
-                        Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel), texture, mHitPosition, 1.0f);
+                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel)), texture,
+                        mHitPosition, 1.0f);
                 continue;
             }
             else
-                world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel), texture, mHitPosition,
-                    static_cast<float>(effectInfo.mData.mArea * 2));
+                world->spawnEffect(VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel)),
+                    texture, mHitPosition, static_cast<float>(effectInfo.mData.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             {
@@ -539,7 +540,8 @@ namespace MWMechanics
                 }
                 scale = std::max(scale, 1.f);
                 MWBase::Environment::get().getWorld()->spawnEffect(
-                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel), effect->mParticle, pos, scale);
+                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel)),
+                    effect->mParticle, pos, scale);
             }
 
             if (animation && !mCaster.getClass().isActor())

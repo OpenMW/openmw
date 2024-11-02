@@ -238,11 +238,8 @@ namespace MWRender
         , mAtmosphereNightRoll(0.f)
         , mCreated(false)
         , mIsStorm(false)
-        , mDay(0)
-        , mMonth(0)
         , mTimescaleClouds(Fallback::Map::getBool("Weather_Timescale_Clouds"))
         , mCloudAnimationTimer(0.f)
-        , mRainTimer(0.f)
         , mStormParticleDirection(MWWorld::Weather::defaultDirection())
         , mStormDirection(MWWorld::Weather::defaultDirection())
         , mClouds()
@@ -250,8 +247,6 @@ namespace MWRender
         , mCloudBlendFactor(0.f)
         , mCloudSpeed(0.f)
         , mStarsOpacity(0.f)
-        , mRemainingTransitionTime(0.f)
-        , mRainEnabled(false)
         , mRainSpeed(0.f)
         , mRainDiameter(0.f)
         , mRainMinHeight(0.f)
@@ -263,7 +258,6 @@ namespace MWRender
         , mWindSpeed(0.f)
         , mBaseWindSpeed(0.f)
         , mEnabled(true)
-        , mSunEnabled(true)
         , mSunglareEnabled(true)
         , mPrecipitationAlpha(0.f)
         , mDirtyParticlesEffect(false)
@@ -403,8 +397,9 @@ namespace MWRender
 
         osg::ref_ptr<osg::StateSet> stateset = mRainParticleSystem->getOrCreateStateSet();
 
+        constexpr VFS::Path::NormalizedView raindropImage("textures/tx_raindrop_01.dds");
         osg::ref_ptr<osg::Texture2D> raindropTex
-            = new osg::Texture2D(mSceneManager->getImageManager()->getImage("textures/tx_raindrop_01.dds"));
+            = new osg::Texture2D(mSceneManager->getImageManager()->getImage(raindropImage));
         raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -768,7 +763,8 @@ namespace MWRender
         {
             mClouds = weather.mCloudTexture;
 
-            std::string texture = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
+            const VFS::Path::Normalized texture
+                = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
 
             osg::ref_ptr<osg::Texture2D> cloudTex
                 = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
@@ -790,7 +786,8 @@ namespace MWRender
 
             if (!mNextClouds.empty())
             {
-                std::string texture = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
+                const VFS::Path::Normalized texture
+                    = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
 
                 osg::ref_ptr<osg::Texture2D> cloudTex
                     = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
@@ -916,12 +913,6 @@ namespace MWRender
             return;
 
         mSecunda->setState(state);
-    }
-
-    void SkyManager::setDate(int day, int month)
-    {
-        mDay = day;
-        mMonth = month;
     }
 
     void SkyManager::setGlareTimeOfDayFade(float val)

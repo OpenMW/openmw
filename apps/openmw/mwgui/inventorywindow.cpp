@@ -442,6 +442,9 @@ namespace MWGui
 
     void InventoryWindow::updateArmorRating()
     {
+        if (mPtr.isEmpty())
+            return;
+
         mArmorRating->setCaptionWithReplacing(
             "#{sArmor}: " + MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
         if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)

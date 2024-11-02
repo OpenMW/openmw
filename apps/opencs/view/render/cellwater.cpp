@@ -176,14 +176,14 @@ namespace CSVRender
         mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin));
 
         // Add water texture
-        std::string textureName = "textures/water/";
-        textureName += Fallback::Map::getString("Water_SurfaceTexture");
-        textureName += "00.dds";
+        constexpr VFS::Path::NormalizedView prefix("textures/water");
+        VFS::Path::Normalized texturePath(prefix);
+        texturePath /= std::string(Fallback::Map::getString("Water_SurfaceTexture")) + "00.dds";
 
         Resource::ImageManager* imageManager = mData.getResourceSystem()->getImageManager();
 
         osg::ref_ptr<osg::Texture2D> waterTexture = new osg::Texture2D();
-        waterTexture->setImage(imageManager->getImage(textureName));
+        waterTexture->setImage(imageManager->getImage(texturePath));
         waterTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         waterTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 

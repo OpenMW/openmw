@@ -597,9 +597,9 @@ namespace Resource
         mShaderManager->setShaderPath(path);
     }
 
-    bool SceneManager::checkLoaded(const std::string& name, double timeStamp)
+    bool SceneManager::checkLoaded(VFS::Path::NormalizedView name, double timeStamp)
     {
-        return mCache->checkInObjectCache(VFS::Path::normalizeFilename(name), timeStamp);
+        return mCache->checkInObjectCache(name, timeStamp);
     }
 
     void SceneManager::setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled)
@@ -627,7 +627,8 @@ namespace Resource
                 filePath = std::filesystem::relative(filename, osgDB::getCurrentWorkingDirectory());
             try
             {
-                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(Files::pathToUnicodeString(filePath)),
+                return osgDB::ReaderWriter::ReadResult(
+                    mImageManager->getImage(VFS::Path::toNormalized(Files::pathToUnicodeString(filePath))),
                     osgDB::ReaderWriter::ReadResult::FILE_LOADED);
             }
             catch (std::exception& e)
@@ -978,11 +979,9 @@ namespace Resource
         return static_cast<osg::Node*>(mErrorMarker->clone(osg::CopyOp::DEEP_COPY_ALL));
     }
 
-    osg::ref_ptr<const osg::Node> SceneManager::getTemplate(std::string_view name, bool compile)
+    osg::ref_ptr<const osg::Node> SceneManager::getTemplate(VFS::Path::NormalizedView path, bool compile)
     {
-        const VFS::Path::Normalized normalized(name);
-
-        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
+        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(path);
         if (obj)
             return osg::ref_ptr<const osg::Node>(static_cast<osg::Node*>(obj.get()));
         else
@@ -990,14 +989,14 @@ namespace Resource
             osg::ref_ptr<osg::Node> loaded;
             try
             {
-                loaded = load(normalized, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
+                loaded = load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
 
                 SceneUtil::ProcessExtraDataVisitor extraDataVisitor(this);
                 loaded->accept(extraDataVisitor);
             }
             catch (const std::exception& e)
             {
-                Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error instead";
+                Log(Debug::Error) << "Failed to load '" << path << "': " << e.what() << ", using marker_error instead";
                 loaded = cloneErrorMarker();
             }
 
@@ -1014,7 +1013,7 @@ namespace Resource
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor());
             loaded->accept(*shaderVisitor);
 
-            if (canOptimize(normalized))
+            if (canOptimize(path.value()))
             {
                 SceneUtil::Optimizer optimizer;
                 optimizer.setSharedStateManager(mSharedStateManager, &mSharedStateMutex);
@@ -1033,15 +1032,14 @@ namespace Resource
             else
                 loaded->getBound();
 
-            mCache->addEntryToObjectCache(normalized, loaded);
+            mCache->addEntryToObjectCache(path.value(), loaded);
             return loaded;
         }
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::getInstance(std::string_view name)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(VFS::Path::NormalizedView path)
     {
-        osg::ref_ptr<const osg::Node> scene = getTemplate(name);
-        return getInstance(scene);
+        return getInstance(getTemplate(path));
     }
 
     osg::ref_ptr<osg::Node> SceneManager::cloneNode(const osg::Node* base)
@@ -1079,9 +1077,9 @@ namespace Resource
         return cloned;
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::getInstance(std::string_view name, osg::Group* parentNode)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(VFS::Path::NormalizedView path, osg::Group* parentNode)
     {
-        osg::ref_ptr<osg::Node> cloned = getInstance(name);
+        osg::ref_ptr<osg::Node> cloned = getInstance(path);
         attachTo(cloned, parentNode);
         return cloned;
     }

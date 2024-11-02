@@ -152,13 +152,13 @@ namespace Resource
         void setShaderPath(const std::filesystem::path& path);
 
         /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
-        bool checkLoaded(const std::string& name, double referenceTime);
+        bool checkLoaded(VFS::Path::NormalizedView name, double referenceTime);
 
         /// Get a read-only copy of this scene "template"
         /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
         ///  If even the error marker mesh can not be found, an exception is thrown.
         /// @note Thread safe.
-        osg::ref_ptr<const osg::Node> getTemplate(std::string_view name, bool compile = true);
+        osg::ref_ptr<const osg::Node> getTemplate(VFS::Path::NormalizedView path, bool compile = true);
 
         /// Clone osg::Node safely.
         /// @note Thread safe.
@@ -173,12 +173,12 @@ namespace Resource
         /// Instance the given scene template.
         /// @see getTemplate
         /// @note Thread safe.
-        osg::ref_ptr<osg::Node> getInstance(std::string_view name);
+        osg::ref_ptr<osg::Node> getInstance(VFS::Path::NormalizedView path);
 
         /// Instance the given scene template and immediately attach it to a parent node
         /// @see getTemplate
         /// @note Not thread safe, unless parentNode is not part of the main scene graph yet.
-        osg::ref_ptr<osg::Node> getInstance(std::string_view name, osg::Group* parentNode);
+        osg::ref_ptr<osg::Node> getInstance(VFS::Path::NormalizedView path, osg::Group* parentNode);
 
         /// Attach the given scene instance to the given parent node
         /// @note You should have the parentNode in its intended position before calling this method,

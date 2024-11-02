@@ -57,7 +57,7 @@ namespace ESM
 
         // If this test failed probably there is a change in RefId format and CurrentSaveGameFormatVersion should be
         // incremented, current version should be handled.
-        TEST_P(Esm3EsmWriterRefIdSizeTest, writeHRefIdShouldProduceCertainNubmerOfBytes)
+        TEST_P(Esm3EsmWriterRefIdSizeTest, writeHRefIdShouldProduceCertainNumberOfBytes)
         {
             const auto [refId, size] = GetParam();
 

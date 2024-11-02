@@ -456,8 +456,8 @@ namespace MWRender
         mHeadModel.clear();
         mHairModel.clear();
 
-        const ESM::RefId& headName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHead") : mNpc->mHead;
-        const ESM::RefId& hairName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHair") : mNpc->mHair;
+        const ESM::RefId headName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHead") : mNpc->mHead;
+        const ESM::RefId hairName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHair") : mNpc->mHair;
 
         if (!headName.empty())
         {
@@ -484,15 +484,24 @@ namespace MWRender
         bool is1stPerson = mViewMode == VM_FirstPerson;
         bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
 
+        std::string_view base;
+        if (!isWerewolf)
+        {
+            if (!is1stPerson)
+                base = Settings::models().mXbaseanim.get().value();
+            else
+                base = Settings::models().mXbaseanim1st.get().value();
+        }
+
         const std::string defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
             getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf), mResourceSystem->getVFS());
 
         std::string smodel = defaultSkeleton;
-        bool isBase = !isWerewolf;
+        bool isCustomModel = false;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         {
             std::string model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
-            isBase = isDefaultActorSkeleton(model);
+            isCustomModel = !isDefaultActorSkeleton(model);
             smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
         }
 
@@ -500,33 +509,21 @@ namespace MWRender
 
         updateParts();
 
-        if (!is1stPerson)
+        if (!base.empty())
+            addAnimSource(base, smodel);
+
+        if (defaultSkeleton != base)
+            addAnimSource(defaultSkeleton, smodel);
+
+        if (isCustomModel)
+            addAnimSource(smodel, smodel);
+
+        const bool customArgonianSwim = !is1stPerson && !isWerewolf && isBeast && mNpc->mRace.contains("argonian");
+        if (customArgonianSwim)
+            addAnimSource(Settings::models().mXargonianswimkna.get().value(), smodel);
+
+        if (is1stPerson)
         {
-            const std::string& base = Settings::models().mXbaseanim.get().value();
-            if (!isWerewolf)
-                addAnimSource(base, smodel);
-
-            if (!isBase)
-            {
-                addAnimSource(defaultSkeleton, smodel);
-                addAnimSource(smodel, smodel);
-            }
-            else if (base != defaultSkeleton)
-            {
-                addAnimSource(defaultSkeleton, smodel);
-            }
-
-            if (!isWerewolf && isBeast && mNpc->mRace.contains("argonian"))
-                addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
-        }
-        else
-        {
-            if (!isWerewolf)
-                addAnimSource(Settings::models().mXbaseanim1st.get().value(), smodel);
-
-            if (!isBase)
-                addAnimSource(smodel, smodel);
-
             mObjectRoot->setNodeMask(Mask_FirstPerson);
             mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
         }
@@ -541,7 +538,7 @@ namespace MWRender
         if (mesh.empty())
             return std::string();
 
-        const std::string holsteredName = addSuffixBeforeExtension(mesh, "_sh");
+        const VFS::Path::Normalized holsteredName(addSuffixBeforeExtension(mesh, "_sh"));
         if (mResourceSystem->getVFS()->exists(holsteredName))
         {
             osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);
@@ -650,7 +647,8 @@ namespace MWRender
             {
                 const ESM::Light* light = part.get<ESM::Light>()->mBase;
                 addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                    Misc::ResourceHelpers::correctMeshPath(light->mModel), false, nullptr, true);
+                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(light->mModel)), false, nullptr,
+                    true);
                 if (mObjectParts[ESM::PRT_Shield])
                     addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), SceneUtil::LightCommon(*light));
             }
@@ -670,7 +668,7 @@ namespace MWRender
             {
                 if (const ESM::BodyPart* bodypart = parts[part])
                     addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part), -1, 1,
-                        Misc::ResourceHelpers::correctMeshPath(bodypart->mModel));
+                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(bodypart->mModel)));
             }
         }
 
@@ -678,14 +676,14 @@ namespace MWRender
             attachArrow();
     }
 
-    PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, std::string_view bonename,
+    PartHolderPtr NpcAnimation::insertBoundedPart(VFS::Path::NormalizedView model, std::string_view bonename,
         std::string_view bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
     {
         osg::ref_ptr<osg::Node> attached = attach(model, bonename, bonefilter, isLight);
         if (enchantedGlow)
             mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
-        return std::make_unique<PartHolder>(attached);
+        return std::make_unique<PartHolder>(std::move(attached));
     }
 
     osg::Vec3f NpcAnimation::runAnimation(float timepassed)
@@ -751,7 +749,7 @@ namespace MWRender
     }
 
     bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority,
-        const std::string& mesh, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
+        VFS::Path::NormalizedView mesh, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight)
     {
         if (priority <= mPartPriorities[type])
             return false;
@@ -900,7 +898,8 @@ namespace MWRender
 
             if (bodypart)
                 addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part.mPart), group, priority,
-                    Misc::ResourceHelpers::correctMeshPath(bodypart->mModel), enchantedGlow, glowColor);
+                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(bodypart->mModel)), enchantedGlow,
+                    glowColor);
             else
                 reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);
         }
@@ -946,7 +945,7 @@ namespace MWRender
             if (weapon != inv.end())
             {
                 osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
-                std::string mesh = weapon->getClass().getCorrectedModel(*weapon);
+                const VFS::Path::Normalized mesh = weapon->getClass().getCorrectedModel(*weapon);
                 addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1, mesh,
                     !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
 
@@ -1006,7 +1005,7 @@ namespace MWRender
         if (show && iter != inv.end())
         {
             osg::Vec4f glowColor = iter->getClass().getEnchantmentColor(*iter);
-            std::string mesh = iter->getClass().getCorrectedModel(*iter);
+            VFS::Path::Normalized mesh = iter->getClass().getCorrectedModel(*iter);
             // For shields we must try to use the body part model
             if (iter->getType() == ESM::Armor::sRecordId)
             {

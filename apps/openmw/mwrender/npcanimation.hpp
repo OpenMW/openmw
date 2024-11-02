@@ -1,12 +1,13 @@
 #ifndef GAME_RENDER_NPCANIMATION_H
 #define GAME_RENDER_NPCANIMATION_H
 
+#include "actoranimation.hpp"
 #include "animation.hpp"
+#include "weaponanimation.hpp"
+
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwworld/inventorystore.hpp"
-
-#include "actoranimation.hpp"
-#include "weaponanimation.hpp"
 
 #include <array>
 
@@ -50,8 +51,8 @@ namespace MWRender
         std::array<MWSound::Sound*, ESM::PRT_Count> mSounds;
 
         const ESM::NPC* mNpc;
-        std::string mHeadModel;
-        std::string mHairModel;
+        VFS::Path::Normalized mHeadModel;
+        VFS::Path::Normalized mHairModel;
         ViewMode mViewMode;
         bool mShowWeapons;
         bool mShowCarriedLeft;
@@ -83,14 +84,15 @@ namespace MWRender
 
         NpcType getNpcType() const;
 
-        PartHolderPtr insertBoundedPart(const std::string& model, std::string_view bonename,
+        PartHolderPtr insertBoundedPart(VFS::Path::NormalizedView model, std::string_view bonename,
             std::string_view bonefilter, bool enchantedGlow, osg::Vec4f* glowColor, bool isLight);
 
         void removeIndividualPart(ESM::PartReferenceType type);
         void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
-        bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string& mesh,
-            bool enchantedGlow = false, osg::Vec4f* glowColor = nullptr, bool isLight = false);
+        bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority,
+            VFS::Path::NormalizedView mesh, bool enchantedGlow = false, osg::Vec4f* glowColor = nullptr,
+            bool isLight = false);
         void removePartGroup(int group);
         void addPartGroup(int group, int priority, const std::vector<ESM::PartReference>& parts,
             bool enchantedGlow = false, osg::Vec4f* glowColor = nullptr);

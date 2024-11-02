@@ -23,6 +23,7 @@
 #include "../../model/world/tablemimedata.hpp"
 
 #include "../doc/sizehint.hpp"
+#include "../doc/view.hpp"
 #include "../filter/filterbox.hpp"
 #include "../filter/filterdata.hpp"
 #include "table.hpp"
@@ -81,15 +82,10 @@ CSVWorld::TableSubView::TableSubView(
 
     setWidget(widget);
 
-    // Widget position can be negative, we should clamp it.
-    QPoint position = pos();
-    if (position.x() <= 0)
-        position.setX(0);
-    if (position.y() <= 0)
-        position.setY(0);
+    QScreen* screen = CSVDoc::View::getWidgetScreen(pos());
 
     // prefer height of the screen and full width of the table
-    const QRect rect = QApplication::screenAt(position)->geometry();
+    const QRect rect = screen->geometry();
     int frameHeight = 40; // set a reasonable default
     QWidget* topLevel = QApplication::topLevelAt(pos());
     if (topLevel)

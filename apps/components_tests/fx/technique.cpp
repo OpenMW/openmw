@@ -9,8 +9,9 @@
 
 namespace
 {
+    constexpr VFS::Path::NormalizedView techniquePropertiesPath("shaders/technique_properties.omwfx");
 
-    TestingOpenMW::VFSTestFile technique_properties(R"(
+    TestingOpenMW::VFSTestFile techniqueProperties(R"(
     fragment main {}
     vertex main {}
     technique {
@@ -26,7 +27,9 @@ namespace
     }
 )");
 
-    TestingOpenMW::VFSTestFile rendertarget_properties{ R"(
+    constexpr VFS::Path::NormalizedView rendertargetPropertiesPath("shaders/rendertarget_properties.omwfx");
+
+    TestingOpenMW::VFSTestFile rendertargetProperties{ R"(
     render_target rendertarget {
         width_ratio = 0.5;
         height_ratio = 0.5;
@@ -52,7 +55,9 @@ namespace
     technique { passes = downsample2x, main; }
 )" };
 
-    TestingOpenMW::VFSTestFile uniform_properties{ R"(
+    constexpr VFS::Path::NormalizedView uniformPropertiesPath("shaders/uniform_properties.omwfx");
+
+    TestingOpenMW::VFSTestFile uniformProperties{ R"(
     uniform_vec4 uVec4 {
         default = vec4(0,0,0,0);
         min = vec4(0,1,0,0);
@@ -66,13 +71,17 @@ namespace
     technique { passes = main; }
 )" };
 
-    TestingOpenMW::VFSTestFile missing_sampler_source{ R"(
+    constexpr VFS::Path::NormalizedView missingSamplerSourcePath("shaders/missing_sampler_source.omwfx");
+
+    TestingOpenMW::VFSTestFile missingSamplerSource{ R"(
     sampler_1d mysampler1d { }
     fragment main { }
     technique { passes = main; }
 )" };
 
-    TestingOpenMW::VFSTestFile repeated_shared_block{ R"(
+    constexpr VFS::Path::NormalizedView repeatedSharedBlockPath("shaders/repeated_shared_block.omwfx");
+
+    TestingOpenMW::VFSTestFile repeatedSharedBlock{ R"(
     shared {
         float myfloat = 1.0;
     }
@@ -92,11 +101,11 @@ namespace
 
         TechniqueTest()
             : mVFS(TestingOpenMW::createTestVFS({
-                { "shaders/technique_properties.omwfx", &technique_properties },
-                { "shaders/rendertarget_properties.omwfx", &rendertarget_properties },
-                { "shaders/uniform_properties.omwfx", &uniform_properties },
-                { "shaders/missing_sampler_source.omwfx", &missing_sampler_source },
-                { "shaders/repeated_shared_block.omwfx", &repeated_shared_block },
+                { techniquePropertiesPath, &techniqueProperties },
+                { rendertargetPropertiesPath, &rendertargetProperties },
+                { uniformPropertiesPath, &uniformProperties },
+                { missingSamplerSourcePath, &missingSamplerSource },
+                { repeatedSharedBlockPath, &repeatedSharedBlock },
             }))
             , mImageManager(mVFS.get(), 0)
         {

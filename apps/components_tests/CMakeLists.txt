@@ -78,6 +78,7 @@ file(GLOB UNITTEST_SRC_FILES
     esm3/testsaveload.cpp
     esm3/testesmwriter.cpp
     esm3/testinfoorder.cpp
+    esm3/testcstringids.cpp
 
     nifosg/testnifloader.cpp
 

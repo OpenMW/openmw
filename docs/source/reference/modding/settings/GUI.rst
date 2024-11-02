@@ -157,8 +157,8 @@ color topic specific
 --------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.45 0.5 0.8 1 (blue)
 
 This setting overrides the colour of dialogue topics that have a response unique to the actors speaking.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
@@ -166,15 +166,67 @@ The alpha value is currently ignored.
 
 A topic response is considered unique if its Actor filter field contains the speaking actor's object ID and hasn't yet been read.
 
+color topic specific over
+-------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.6 0.6 0.85 1 (blue)
+
+This setting provides an "over" colour to dialogue topics that meet the color topic specific criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "over" if it is the active GUI element through keyboard or mouse events.
+
+color topic specific pressed
+----------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.3 0.35 0.75 1 (blue)
+
+This setting provides an "pressed" colour to dialogue topics that meet the color topic specific criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "pressed" if it is the active GUI element and it receives a sustained keyboard or mouse event.
+
 color topic exhausted
 ---------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.3 0.3 0.3 1 (grey)
 
 This setting overrides the colour of dialogue topics which have been "exhausted" by the player.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
 The alpha value is currently ignored.
 
 A topic is considered "exhausted" if the response the player is about to see has already been seen.
+
+color topic exhausted over
+--------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.55 0.55 0.55 1 (grey)
+
+This setting provides an "over" colour to dialogue topics that meet the color topic exhausted criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "over" if it is the active GUI element through keyboard or mouse events.
+
+color topic exhausted pressed
+-----------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.45 0.45 0.45 1 (grey)
+
+This setting provides a "pressed" colour to dialogue topics that meet the color topic exhausted criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "pressed" if it is the active GUI element and it receives a sustained keyboard or mouse event.

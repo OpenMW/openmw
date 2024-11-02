@@ -75,7 +75,7 @@ namespace TestingOpenMW
     }
 
     inline std::unique_ptr<VFS::Manager> createTestVFS(
-        std::initializer_list<std::pair<std::string_view, VFS::File*>> files)
+        std::initializer_list<std::pair<VFS::Path::NormalizedView, VFS::File*>> files)
     {
         return createTestVFS(VFS::FileMap(files.begin(), files.end()));
     }
