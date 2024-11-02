@@ -493,11 +493,7 @@ set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 include_directories(
     BEFORE SYSTEM
     "."
-<<<<<<< HEAD
     ${SDL2_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIR}
-=======
->>>>>>> openmw/master
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -508,11 +504,7 @@ include_directories(
     ${ICU_INCLUDE_DIRS}
 )
 
-<<<<<<< HEAD
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
-=======
-link_directories(${COLLADA_DOM_LIBRARY_DIRS})
->>>>>>> openmw/master
+link_directories(${SDL2_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
 
 if(MYGUI_STATIC)
     add_definitions(-DMYGUI_STATIC)
@@ -599,13 +591,8 @@ endif()
 
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-<<<<<<< HEAD
     #set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
 set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wno-undef -Wno-unused-parameter -Wno-long-long -Wnon-virtual-dtor -Wunused -Wno-overloaded-virtual -Wno-inconsistent-missing-override -Wno-deprecated-copy-with-user-provided-copy ${OPENMW_CXX_FLAGS}")
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
-=======
-    set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
->>>>>>> openmw/master
 
     if (APPLE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
