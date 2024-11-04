@@ -47,7 +47,7 @@ namespace CSVRender
         mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
 
         // Load skeleton
-        std::string skeletonModel = mActorData->getSkeleton();
+        VFS::Path::Normalized skeletonModel = mActorData->getSkeleton();
         skeletonModel
             = Misc::ResourceHelpers::correctActorModelPath(skeletonModel, mData.getResourceSystem()->getVFS());
         loadSkeleton(skeletonModel);

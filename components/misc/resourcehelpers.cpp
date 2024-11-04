@@ -16,29 +16,16 @@
 
 namespace
 {
-
-    struct MatchPathSeparator
+    bool changeExtension(std::string& path, std::string_view ext)
     {
-        bool operator()(char ch) const { return ch == '\\' || ch == '/'; }
-    };
-
-    std::string getBasename(std::string const& pathname)
-    {
-        return std::string(
-            std::find_if(pathname.rbegin(), pathname.rend(), MatchPathSeparator()).base(), pathname.end());
+        std::string::size_type pos = path.rfind('.');
+        if (pos != std::string::npos && path.compare(pos, path.length() - pos, ext) != 0)
+        {
+            path.replace(pos, path.length(), ext);
+            return true;
+        }
+        return false;
     }
-
-}
-
-bool changeExtension(std::string& path, std::string_view ext)
-{
-    std::string::size_type pos = path.rfind('.');
-    if (pos != std::string::npos && path.compare(pos, path.length() - pos, ext) != 0)
-    {
-        path.replace(pos, path.length(), ext);
-        return true;
-    }
-    return false;
 }
 
 bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
@@ -106,7 +93,8 @@ std::string Misc::ResourceHelpers::correctResourcePath(
     // fall back to a resource in the top level directory if it exists
     std::string fallback{ topLevelDirectories.front() };
     fallback += '\\';
-    fallback += getBasename(correctedPath);
+    fallback += Misc::getFileName(correctedPath);
+
     if (vfs->exists(fallback))
         return fallback;
 
@@ -114,7 +102,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(
     {
         fallback = topLevelDirectories.front();
         fallback += '\\';
-        fallback += getBasename(origExt);
+        fallback += Misc::getFileName(origExt);
         if (vfs->exists(fallback))
             return fallback;
     }
@@ -154,22 +142,23 @@ std::string Misc::ResourceHelpers::correctBookartPath(
     return image;
 }
 
-std::string Misc::ResourceHelpers::correctActorModelPath(std::string_view resPath, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctActorModelPath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager* vfs)
 {
-    std::string mdlname(resPath);
-    std::string::size_type p = mdlname.find_last_of("/\\");
+    std::string mdlname(resPath.value());
+    std::string::size_type p = mdlname.find_last_of('/');
     if (p != std::string::npos)
-        mdlname.insert(mdlname.begin() + p + 1, 'x');
+        mdlname.insert(mdlname.begin() + static_cast<std::string::difference_type>(p) + 1, 'x');
     else
         mdlname.insert(mdlname.begin(), 'x');
-    std::string kfname = mdlname;
-    if (Misc::StringUtils::ciEndsWith(kfname, ".nif"))
-        kfname.replace(kfname.size() - 4, 4, ".kf");
+
+    VFS::Path::Normalized kfname(mdlname);
+    if (Misc::getFileExtension(mdlname) == "nif")
+        kfname.changeExtension("kf");
 
     if (!vfs->exists(kfname))
-    {
-        return std::string(resPath);
-    }
+        return VFS::Path::Normalized(resPath);
+
     return mdlname;
 }
 

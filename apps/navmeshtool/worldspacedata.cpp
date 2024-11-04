@@ -121,7 +121,7 @@ namespace NavMeshTool
 
             for (CellRef& cellRef : cellRefs)
             {
-                std::string model(getModel(esmData, cellRef.mRefId, cellRef.mType));
+                VFS::Path::Normalized model(getModel(esmData, cellRef.mRefId, cellRef.mType));
                 if (model.empty())
                     continue;
 

@@ -1625,7 +1625,8 @@ namespace MWRender
                     const bool werewolf = false;
 
                     defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
-                        getActorSkeleton(firstPerson, isFemale, isBeast, werewolf), mResourceSystem->getVFS());
+                        VFS::Path::toNormalized(getActorSkeleton(firstPerson, isFemale, isBeast, werewolf)),
+                        mResourceSystem->getVFS());
                 }
             }
         }

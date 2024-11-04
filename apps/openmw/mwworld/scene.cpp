@@ -1126,8 +1126,9 @@ namespace MWWorld
     void Scene::preload(const std::string& mesh, bool useAnim)
     {
         const VFS::Path::Normalized meshPath = useAnim
-            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mRendering.getResourceSystem()->getVFS())
-            : mesh;
+            ? Misc::ResourceHelpers::correctActorModelPath(
+                VFS::Path::toNormalized(mesh), mRendering.getResourceSystem()->getVFS())
+            : VFS::Path::toNormalized(mesh);
 
         if (mRendering.getResourceSystem()->getSceneManager()->checkLoaded(meshPath, mRendering.getReferenceTime()))
             return;

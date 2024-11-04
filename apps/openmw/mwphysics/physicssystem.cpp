@@ -413,8 +413,7 @@ namespace MWPhysics
             return;
 
         const VFS::Path::Normalized animationMesh = ptr.getClass().useAnim()
-            ? VFS::Path::toNormalized(
-                Misc::ResourceHelpers::correctActorModelPath(mesh.value(), mResourceSystem->getVFS()))
+            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS())
             : VFS::Path::Normalized(mesh);
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(animationMesh);
         if (!shapeInstance || !shapeInstance->mCollisionShape)
@@ -564,7 +563,7 @@ namespace MWPhysics
     void PhysicsSystem::addActor(const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh)
     {
         const VFS::Path::Normalized animationMesh
-            = Misc::ResourceHelpers::correctActorModelPath(mesh.value(), mResourceSystem->getVFS());
+            = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(animationMesh);
 
         // Try to get shape from basic model as fallback for creatures
