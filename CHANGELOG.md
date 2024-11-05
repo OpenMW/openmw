@@ -111,6 +111,7 @@
     Bug #7475: Equipping a constant effect item doesn't update the magic menu
     Bug #7502: Data directories dialog (0.48.0) forces adding subdirectory instead of intended directory
     Bug #7505: Distant terrain does not support sample size greater than cell size
+    Bug #7531: Some bitmap font glyph substitutes are erroneous or missing
     Bug #7535: Bookart paths for textures in OpenMW vs vanilla Morrowind
     Bug #7553: Faction reaction loading is incorrect
     Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
