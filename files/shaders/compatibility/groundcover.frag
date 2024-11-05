@@ -1,4 +1,5 @@
 #version 120
+#pragma import_defines(CLASSIC_FALLOFF, MAX_LIGHTS)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require

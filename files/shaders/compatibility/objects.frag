@@ -1,5 +1,5 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE, DISTORTION)
+#pragma import_defines(FORCE_OPAQUE, DISTORTION, FORCE_PPL, CLASSIC_FALLOFF, MAX_LIGHTS)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -68,7 +68,11 @@ uniform float far;
 uniform float alphaRef;
 uniform float distortionStrength;
 
+#if defined(FORCE_PPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || FORCE_PPL)
+#else
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
+#endif
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;

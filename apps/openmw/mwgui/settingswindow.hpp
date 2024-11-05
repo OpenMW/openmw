@@ -112,8 +112,6 @@ namespace MWGui
         void onScriptFilterChange(MyGUI::EditBox*);
         void onScriptListSelection(MyGUI::ListBox*, size_t index);
 
-        void onPerPixelLighting(MyGUI::Widget* _sender);
-
         void apply();
 
         void configureWidgets(MyGUI::Widget* widget, bool init);

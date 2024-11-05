@@ -356,10 +356,6 @@ namespace MWGui
         mResetControlsButton->eventMouseButtonClick
             += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
-        mPerPixelLighting->eventMouseButtonClick
-            += MyGUI::newDelegate(this, &SettingsWindow::onPerPixelLighting);
-
-
         // fill resolution list
         const int screen = Settings::video().mScreen;
         int numDisplayModes = SDL_GetNumDisplayModes(screen);
@@ -647,8 +643,6 @@ namespace MWGui
 
     void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
         Settings::shaders().mMaxLights.set(8 * (pos + 1));
         apply();
         configureWidgets(mMainWidget, false);
@@ -1091,12 +1085,6 @@ namespace MWGui
         else
             MWBase::Environment::get().getInputManager()->resetToDefaultControllerBindings();
         updateControlsBox();
-    }
-
-    void SettingsWindow::onPerPixelLighting(MyGUI::Widget* _sender)
-    {
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
     }
 
     void SettingsWindow::onOpen()

@@ -66,7 +66,7 @@ void doLighting(vec3 viewPos, vec3 viewNormal, float shininess, out vec3 diffuse
         float lightDistance = length(lightPos);
 
         // cull non-FFP point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
-#if !@classicFalloff && !@lightingMethodFFP
+#if defined(CLASSIC_FALLOFF) && !CLASSIC_FALLOFF && !@lightingMethodFFP
         if (lightDistance > lcalcRadius(lightIndex) * 2.0)
             continue;
 #endif
