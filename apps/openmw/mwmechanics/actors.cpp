@@ -122,6 +122,8 @@ namespace
     {
         for (const MWMechanics::Actor& actor : actors)
         {
+            if (actor.isInvalid())
+                continue;
             const MWWorld::Ptr& iteratedActor = actor.getPtr();
             if (iteratedActor == player || iteratedActor == actorPtr)
                 continue;
@@ -345,7 +347,7 @@ namespace MWMechanics
                     // Find something nearby.
                     for (const Actor& otherActor : actors)
                     {
-                        if (otherActor.getPtr() == ptr)
+                        if (otherActor.isInvalid() || otherActor.getPtr() == ptr)
                             continue;
 
                         updateHeadTracking(

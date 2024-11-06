@@ -2,6 +2,7 @@
 #define OPENMW_MECHANICS_ACTOR_H
 
 #include <memory>
+#include <optional>
 
 #include "character.hpp"
 #include "creaturestats.hpp"
@@ -29,18 +30,18 @@ namespace MWMechanics
     {
     public:
         Actor(const MWWorld::Ptr& ptr, MWRender::Animation* animation)
-            : mCharacterController(ptr, animation)
-            , mPositionAdjusted(ptr.getClass().getCreatureStats(ptr).getFallHeight() > 0)
+            : mPositionAdjusted(ptr.getClass().getCreatureStats(ptr).getFallHeight() > 0)
         {
+            mCharacterController.emplace(ptr, animation);
         }
 
-        const MWWorld::Ptr& getPtr() const { return mCharacterController.getPtr(); }
+        const MWWorld::Ptr& getPtr() const { return mCharacterController->getPtr(); }
 
         /// Notify this actor of its new base object Ptr, use when the object changed cells
-        void updatePtr(const MWWorld::Ptr& newPtr) { mCharacterController.updatePtr(newPtr); }
+        void updatePtr(const MWWorld::Ptr& newPtr) { mCharacterController->updatePtr(newPtr); }
 
-        CharacterController& getCharacterController() { return mCharacterController; }
-        const CharacterController& getCharacterController() const { return mCharacterController; }
+        CharacterController& getCharacterController() { return *mCharacterController; }
+        const CharacterController& getCharacterController() const { return *mCharacterController; }
 
         int getGreetingTimer() const { return mGreetingTimer; }
         void setGreetingTimer(int timer) { mGreetingTimer = timer; }
@@ -62,11 +63,15 @@ namespace MWMechanics
         void setPositionAdjusted(bool adjusted) { mPositionAdjusted = adjusted; }
         bool getPositionAdjusted() const { return mPositionAdjusted; }
 
-        void invalidate() { mInvalid = true; }
+        void invalidate()
+        {
+            mInvalid = true;
+            mCharacterController.reset();
+        }
         bool isInvalid() const { return mInvalid; }
 
     private:
-        CharacterController mCharacterController;
+        std::optional<CharacterController> mCharacterController;
         int mGreetingTimer{ 0 };
         float mTargetAngleRadians{ 0.f };
         GreetingState mGreetingState{ Greet_None };
