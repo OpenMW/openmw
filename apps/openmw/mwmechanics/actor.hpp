@@ -62,14 +62,18 @@ namespace MWMechanics
         void setPositionAdjusted(bool adjusted) { mPositionAdjusted = adjusted; }
         bool getPositionAdjusted() const { return mPositionAdjusted; }
 
+        void invalidate() { mInvalid = true; }
+        bool isInvalid() const { return mInvalid; }
+
     private:
         CharacterController mCharacterController;
         int mGreetingTimer{ 0 };
         float mTargetAngleRadians{ 0.f };
         GreetingState mGreetingState{ Greet_None };
-        bool mIsTurningToPlayer{ false };
         Misc::DeviatingPeriodicTimer mEngageCombat{ 1.0f, 0.25f,
             Misc::Rng::deviate(0, 0.25f, MWBase::Environment::get().getWorld()->getPrng()) };
+        bool mIsTurningToPlayer{ false };
+        bool mInvalid{ false };
         bool mPositionAdjusted;
     };
 

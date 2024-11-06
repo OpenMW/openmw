@@ -1725,6 +1725,8 @@ namespace MWMechanics
                         .getActorId()); // Stops guard from ending combat if player is unreachable
                 for (const Actor& actor : mActors)
                 {
+                    if (actor.isInvalid())
+                        continue;
                     if (actor.getPtr().getClass().isClass(actor.getPtr(), "Guard"))
                     {
                         MWMechanics::AiSequence& aiSeq
