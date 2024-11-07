@@ -252,12 +252,20 @@ namespace MWMechanics
 
         void prepareHit();
 
+        void unpersistAnimationState();
+
+        void playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority, int blendMask,
+            bool autodisable, float speedmult, std::string_view start, std::string_view stop, float startpoint,
+            uint32_t loops, bool loopfallback = false) const;
+
     public:
-        CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation* anim);
+        CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation& anim);
         virtual ~CharacterController();
 
         CharacterController(const CharacterController&) = delete;
         CharacterController(CharacterController&&) = delete;
+
+        void detachAnimation();
 
         const MWWorld::Ptr& getPtr() const { return mPtr; }
 
@@ -275,11 +283,6 @@ namespace MWMechanics
         void onClose() const;
 
         void persistAnimationState() const;
-        void unpersistAnimationState();
-
-        void playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority, int blendMask,
-            bool autodisable, float speedmult, std::string_view start, std::string_view stop, float startpoint,
-            uint32_t loops, bool loopfallback = false) const;
         bool playGroup(std::string_view groupname, int mode, uint32_t count, bool scripted = false);
         bool playGroupLua(std::string_view groupname, float speed, std::string_view startKey, std::string_view stopKey,
             uint32_t loops, bool forceLoop);

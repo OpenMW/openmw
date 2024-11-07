@@ -1197,7 +1197,7 @@ namespace MWMechanics
         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (!anim)
             return;
-        const auto it = mActors.emplace(mActors.end(), ptr, anim);
+        const auto it = mActors.emplace(mActors.end(), ptr, *anim);
         mIndex.emplace(ptr.mRef, it);
 
         if (updateImmediately)
