@@ -14,8 +14,6 @@ Q_DECLARE_METATYPE(std::filesystem::path)
 
 #endif
 
-#include "ui_filedialog.h"
-
 #include <filesystem>
 #include <vector>
 
@@ -24,6 +22,11 @@ class QModelIndex;
 namespace ContentSelectorView
 {
     class ContentSelector;
+}
+
+namespace Ui
+{
+    class FileDialog;
 }
 
 namespace CSVDoc
@@ -36,7 +39,7 @@ namespace CSVDoc
 
     private:
         ContentSelectorView::ContentSelector* mSelector;
-        Ui::FileDialog ui;
+        std::unique_ptr<Ui::FileDialog> ui;
         ContentAction mAction;
         FileWidget* mFileWidget;
         AdjusterWidget* mAdjusterWidget;
@@ -44,6 +47,9 @@ namespace CSVDoc
 
     public:
         explicit FileDialog(QWidget* parent = nullptr);
+
+        ~FileDialog();
+
         void showDialog(ContentAction action);
 
         void addFiles(const std::vector<std::filesystem::path>& dataDirs);

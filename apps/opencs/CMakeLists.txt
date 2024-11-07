@@ -137,10 +137,6 @@ set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
                 ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc
     )
 
-set (OPENCS_UI
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/filedialog.ui
-    )
-
 source_group (openmw-cs FILES main.cpp ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
@@ -151,15 +147,7 @@ else(WIN32)
     set(OPENCS_RC_FILE "")
 endif(WIN32)
 
-if (QT_VERSION_MAJOR VERSION_EQUAL 5)
-    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-else ()
-    qt6_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-endif()
 qt_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
-
-# for compiled .ui files
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
     set (OPENCS_MAC_ICON "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns")
@@ -192,6 +180,10 @@ if(BUILD_OPENCS)
     )
 
     target_link_libraries(openmw-cs openmw-cs-lib)
+
+    set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-cs PROPERTY AUTOUIC_SEARCH_PATHS ui)
+    set_property(TARGET openmw-cs PROPERTY AUTOUIC ON)
 
     if (BUILD_WITH_CODE_COVERAGE)
         target_compile_options(openmw-cs PRIVATE --coverage)
@@ -284,6 +276,8 @@ endif()
 
 if(USE_QT)
     set_property(TARGET openmw-cs-lib PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-cs-lib PROPERTY AUTOUIC_SEARCH_PATHS ui)
+    set_property(TARGET openmw-cs-lib PROPERTY AUTOUIC ON)
 endif(USE_QT)
 
 if (BUILD_WITH_CODE_COVERAGE)
