@@ -517,9 +517,6 @@ add_component_dir(testing
     util
 )
 
-set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
-    )
-
 if (USE_QT)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
@@ -558,7 +555,6 @@ if (USE_QT)
         qtconversion
         )
 
-    QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
@@ -619,7 +615,7 @@ endif()
 target_link_libraries(components ${BULLET_LIBRARIES})
 
 if (USE_QT)
-    add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
+    add_library(components_qt STATIC ${COMPONENT_QT_FILES})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
 
     if (BUILD_LAUNCHER OR BUILD_WIZARD)
@@ -692,6 +688,8 @@ endif(OSG_STATIC)
 
 if(USE_QT)
     set_property(TARGET components_qt PROPERTY AUTOMOC ON)
+    set_property(TARGET components_qt PROPERTY AUTOUIC ON)
+    set_property(TARGET components_qt PROPERTY AUTOUIC_SEARCH_PATHS contentselector)
 endif(USE_QT)
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
