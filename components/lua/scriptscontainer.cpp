@@ -485,19 +485,34 @@ namespace LuaUtil
                 if (scriptInfo.mSavedData == nullptr)
                     continue;
                 ESM::LuaScript& script = container.mScripts.emplace_back(*scriptInfo.mSavedData);
-                for (ESM::LuaTimer& savedTimer : script.mTimers)
+                if (!script.mData.empty())
                 {
                     try
                     {
-                        sol::object arg = deserialize(view.sol(), savedTimer.mCallbackArgument, mSavedDataDeserializer);
+                        sol::object state = deserialize(view.sol(), script.mData, mSavedDataDeserializer);
+                        script.mData = serialize(state, mSerializer);
+                    }
+                    catch (std::exception& e)
+                    {
+                        printError(scriptId, "onLoad failed", e);
+                        script.mData.clear();
+                    }
+                }
+                for (auto it = script.mTimers.begin(); it != script.mTimers.end();)
+                {
+                    try
+                    {
+                        sol::object arg = deserialize(view.sol(), it->mCallbackArgument, mSavedDataDeserializer);
                         // It is important if the order of content files was changed. The deserialize-serialize
                         // procedure updates refnums, so timer.mSerializedArg may be not equal to
                         // savedTimer.mCallbackArgument.
-                        savedTimer.mCallbackArgument = serialize(arg, mSerializer);
+                        it->mCallbackArgument = serialize(arg, mSerializer);
+                        ++it;
                     }
                     catch (std::exception& e)
                     {
                         printError(scriptId, "can not load timer", e);
+                        it = script.mTimers.erase(it);
                     }
                 }
             }
@@ -547,8 +562,7 @@ namespace LuaUtil
                 {
                     try
                     {
-                        sol::object state
-                            = deserialize(view.sol(), scriptInfo.mSavedData->mData, mSavedDataDeserializer);
+                        sol::object state = deserialize(view.sol(), scriptInfo.mSavedData->mData, mSerializer);
                         sol::object initializationData = deserialize(view.sol(), scriptInfo.mInitData, mSerializer);
                         LuaUtil::call({ this, scriptId }, *onLoad, state, initializationData);
                     }
@@ -567,8 +581,8 @@ namespace LuaUtil
 
                     try
                     {
-                        timer.mArg = sol::main_object(
-                            deserialize(view.sol(), savedTimer.mCallbackArgument, mSavedDataDeserializer));
+                        timer.mArg
+                            = sol::main_object(deserialize(view.sol(), savedTimer.mCallbackArgument, mSerializer));
                         // It is important if the order of content files was changed. The deserialize-serialize
                         // procedure updates refnums, so timer.mSerializedArg may be not equal to
                         // savedTimer.mCallbackArgument.
