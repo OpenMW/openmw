@@ -33,21 +33,9 @@ set(WIZARD_HEADER
     utils/componentlistwidget.hpp
 )
 
-set(WIZARD_UI
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/componentselectionpage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/conclusionpage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/existinginstallationpage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/importpage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/installationtargetpage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/intropage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/languageselectionpage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/methodselectionpage.ui
-)
-
 if (OPENMW_USE_UNSHIELD)
     set (WIZARD ${WIZARD} installationpage.cpp unshield/unshieldworker.cpp)
     set (WIZARD_HEADER ${WIZARD_HEADER} installationpage.hpp unshield/unshieldworker.hpp)
-    set (WIZARD_UI ${WIZARD_UI} ${CMAKE_CURRENT_SOURCE_DIR}/ui/installationpage.ui)
     add_definitions(-DOPENMW_USE_UNSHIELD)
 endif (OPENMW_USE_UNSHIELD)
 
@@ -66,9 +54,6 @@ if(WIN32)
 endif(WIN32)
 
 QT_ADD_RESOURCES(RCC_SRCS ${WIZARD_RES})
-QT_WRAP_UI(UI_HDRS ${WIZARD_UI})
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (OPENMW_USE_UNSHIELD)
     include_directories(${LIBUNSHIELD_INCLUDE_DIRS})
@@ -79,7 +64,6 @@ openmw_add_executable(openmw-wizard
     ${WIZARD}
     ${WIZARD_HEADER}
     ${RCC_SRCS}
-    ${UI_HDRS}
 )
 
 add_dependencies(openmw-wizard qm-files)
@@ -109,4 +93,6 @@ endif(WIN32)
 
 if(USE_QT)
     set_property(TARGET openmw-wizard PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-wizard PROPERTY AUTOUIC ON)
+    set_property(TARGET openmw-wizard PROPERTY AUTOUIC_SEARCH_PATHS ui)
 endif(USE_QT)

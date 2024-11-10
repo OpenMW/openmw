@@ -33,16 +33,6 @@ set(LAUNCHER_HEADER
     utils/openalutil.hpp
 )
 
-# Headers that must be pre-processed
-set(LAUNCHER_UI
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/datafilespage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/graphicspage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/mainwindow.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/importpage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/settingspage.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/directorypicker.ui
-)
-
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
 
 set(QT_USE_QTGUI 1)
@@ -57,9 +47,7 @@ if(WIN32)
 endif(WIN32)
 
 QT_ADD_RESOURCES(RCC_SRCS ${LAUNCHER_RES})
-QT_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(NOT WIN32)
     include_directories(${LIBUNSHIELD_INCLUDE_DIR})
 endif(NOT WIN32)
@@ -70,8 +58,6 @@ openmw_add_executable(openmw-launcher
     ${LAUNCHER}
     ${LAUNCHER_HEADER}
     ${RCC_SRCS}
-    ${MOC_SRCS}
-    ${UI_HDRS}
 )
 
 add_dependencies(openmw-launcher qm-files)
@@ -95,6 +81,8 @@ endif()
 
 if(USE_QT)
     set_property(TARGET openmw-launcher PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-launcher PROPERTY AUTOUIC ON)
+    set_property(TARGET openmw-launcher PROPERTY AUTOUIC_SEARCH_PATHS ui)
 endif(USE_QT)
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
