@@ -115,12 +115,19 @@ jobs:
     - name: Download prebuilt vcpkg packages
       working-directory: ${{ github.workspace }}/deps
       run: |
-        MANIFEST="vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}.txt"
+        $MANIFEST = "vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}.txt"
         curl --fail --retry 3 -L -o "$MANIFEST" "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/$MANIFEST"
-        { read -r URL && read -r HASH FILE; } < "$MANIFEST"
+        $lines = Get-Content "$MANIFEST"
+        $URL = $lines[0]
+        $split = -split $lines[1]
+        $HASH = $split[0]
+        $FILE = $split[1]
         curl --fail --retry 3 -L -o "$FILE" "$URL"
-        echo "$HASH  $FILE" | shasum -a 512 --check
-        echo "archive=$FILE" >> "$GITHUB_ENV"
+        $filehash = Get-FileHash "$FILE" -Algorithm SHA512
+        if ( $filehash.hash -ne "$HASH" ) {
+          exit 1
+        }
+        echo "archive=$FILE" >> $env:GITHUB_ENV
 
     - name: Extract archived prebuilt vcpkg packages
       working-directory: ${{ github.workspace }}/deps
