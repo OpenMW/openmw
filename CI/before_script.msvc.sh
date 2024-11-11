@@ -274,6 +274,20 @@ download() {
 	fi
 }
 
+MANIFEST_FILE=""
+download_from_manifest() {
+	if [ $# -ne 1 ]; then
+		echo "Invalid parameters to download_from_manifest."
+		return 1
+	fi
+	{ read -r URL && read -r HASH FILE; } < $1
+	if [ -z $SKIP_DOWNLOAD ]; then
+		download "${FILE:?}" "${URL:?}" "${FILE:?}"
+	fi
+	echo "${HASH:?}  ${FILE:?}" | sha512sum --check
+	MANIFEST_FILE="${FILE:?}"
+}
+
 real_pwd() {
 	if type cygpath >/dev/null 2>&1; then
 		cygpath -am "$PWD"
@@ -532,11 +546,11 @@ fi
 QT_VER='6.6.3'
 AQT_VERSION='v3.1.15'
 
-VCPKG_REVISION='65ef3a6db0e01983efc7d8286f44020beeee2ea3'
-VCPKG_PATH="vcpkg-x64-windows-${VS_VERSION:?}-${VCPKG_REVISION:?}"
-VCPKG_ARCHIVE="${VCPKG_PATH:?}.7z"
-VCPKG_PDB_PATH="vcpkg-x64-windows-${VS_VERSION:?}-pdb-${VCPKG_REVISION:?}"
-VCPKG_PDB_ARCHIVE="${VCPKG_PDB_PATH:?}.7z"
+VCPKG_TAG="2024-11-10"
+VCPKG_PATH="vcpkg-x64-${VS_VERSION:?}-${VCPKG_TAG:?}"
+VCPKG_PDB_PATH="vcpkg-x64-${VS_VERSION:?}-pdb-${VCPKG_TAG:?}"
+VCPKG_MANIFEST="${VCPKG_PATH:?}.txt"
+VCPKG_PDB_MANIFEST="${VCPKG_PDB_PATH:?}.txt"
 
 echo
 echo "==================================="
@@ -553,14 +567,16 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	echo "Downloading dependency packages."
 	echo
 
-	download "${VCPKG_PATH:?}" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/${VCPKG_ARCHIVE:?}" \
-		"${VCPKG_ARCHIVE:?}"
+	DEPS_BASE_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows"
 
-	if [ -n "${PDBS}" ]; then
+	download "${VCPKG_MANIFEST:?}" \
+		"${DEPS_BASE_URL}/${VCPKG_MANIFEST:?}" \
+		"${VCPKG_MANIFEST:?}"
+
+	if [ -n "${VCPKG_PDB_MANIFEST:?}" ]; then
 		download "${VCPKG_PDB_PATH:?}" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/${VCPKG_PDB_ARCHIVE:?}" \
-			"${VCPKG_PDB_ARCHIVE:?}"
+			"${DEPS_BASE_URL}/${VCPKG_PDB_MANIFEST:?}" \
+			"${VCPKG_PDB_MANIFEST:?}"
 	fi
 fi
 
@@ -599,15 +615,20 @@ echo
 
 cd $DEPS
 echo
-printf "vcpkg packages ${VCPKG_REVISION:?}... "
+printf "vcpkg packages ${VCPKG_TAG:?}... "
 {
 	if [[ -d "${VCPKG_PATH:?}" ]]; then
 		printf "Exists. "
 	else
-		eval 7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_ARCHIVE:?}" ${STRIP}
-
-		if [ -n "${PDBS}" ]; then
-			eval 7z x -y -o"${VCPKG_PATH:?}" "${VCPKG_PDB_ARCHIVE:?}" ${STRIP}
+		download_from_manifest "${VCPKG_MANIFEST:?}"
+		eval 7z x -y -o"${VCPKG_PATH:?}" "${MANIFEST_FILE:?}" ${STRIP}
+	fi
+	if [ -n "${PDBS}" ]; then
+		if [[ -d "${VCPKG_PDB_PATH:?}" ]]; then
+			printf "PDB exists. "
+		else
+			download_from_manifest "${VCPKG_PDB_MANIFEST:?}"
+			eval 7z x -y -o"${VCPKG_PDB_PATH:?}" "${MANIFEST_FILE:?}" ${STRIP}
 		fi
 	fi
 
