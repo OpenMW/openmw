@@ -285,12 +285,12 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     for (const QString& listName : getContentLists())
     {
         const auto& listDirs = getDataDirectoryList(listName);
-#ifdef Q_OS_WINDOWS
-        constexpr auto caseSensitivity = Qt::CaseInsensitive;
-#else
-        constexpr auto caseSensitivity = Qt::CaseSensitive;
-#endif
         constexpr auto compareDataDirectories = [](const SettingValue& dir, const QString& listDir) {
+#ifdef Q_OS_WINDOWS
+            constexpr auto caseSensitivity = Qt::CaseInsensitive;
+#else
+            constexpr auto caseSensitivity = Qt::CaseSensitive;
+#endif
             return dir.originalRepresentation == listDir
                 || QDir::cleanPath(dir.originalRepresentation).compare(QDir::cleanPath(listDir), caseSensitivity) == 0;
         };
