@@ -6,7 +6,7 @@ on:
 
 env:
   BUILD_TYPE: RelWithDebInfo
-  VCPKG_DEPS_REVISION: 65ef3a6db0e01983efc7d8286f44020beeee2ea3
+  VCPKG_DEPS_TAG: 2024-11-10
 
 jobs:
   Ubuntu:
@@ -94,12 +94,15 @@ jobs:
       fail-fast: true
       matrix:
         image:
-        - windows-2019
-        - windows-2022
+        - "2019"
+        - "2022"
 
-    name: ${{ matrix.image }}
+    name: windows-${{ matrix.image }}
 
-    runs-on: ${{ matrix.image }}
+    runs-on: windows-${{ matrix.image }}
+
+    env:
+      archive: FAILEDTODOWNLOAD
 
     steps:
     - uses: actions/checkout@v2
@@ -111,14 +114,24 @@ jobs:
 
     - name: Download prebuilt vcpkg packages
       working-directory: ${{ github.workspace }}/deps
-      run: >
-        curl --fail --retry 3 -L
-        -o vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}.7z
-        https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}.7z
+      run: |
+        $MANIFEST = "vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}.txt"
+        curl --fail --retry 3 -L -o "$MANIFEST" "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/$MANIFEST"
+        $lines = Get-Content "$MANIFEST"
+        $URL = $lines[0]
+        $split = -split $lines[1]
+        $HASH = $split[0]
+        $FILE = $split[1]
+        curl --fail --retry 3 -L -o "$FILE" "$URL"
+        $filehash = Get-FileHash "$FILE" -Algorithm SHA512
+        if ( $filehash.hash -ne "$HASH" ) {
+          exit 1
+        }
+        echo "archive=$FILE" >> $env:GITHUB_ENV
 
     - name: Extract archived prebuilt vcpkg packages
       working-directory: ${{ github.workspace }}/deps
-      run: 7z x -y -ovcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }} vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}.7z
+      run: 7z x -y -ovcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }} ${{ env.archive }}
 
     - name: Cache Qt
       id: qt-cache
@@ -151,10 +164,10 @@ jobs:
         -B ${{ github.workspace }}/build
         -G Ninja
         -D CMAKE_BUILD_TYPE=RelWithDebInfo
-        -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}/scripts/buildsystems/vcpkg.cmake'
+        -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}/scripts/buildsystems/vcpkg.cmake'
         -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64'
-        -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}/installed/x64-windows/include/luajit'
-        -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}/installed/x64-windows/lib/lua51.lib'
+        -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}/installed/x64-windows/include/luajit'
+        -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}/installed/x64-windows/lib/lua51.lib'
         -D BUILD_BENCHMARKS=ON
         -D BUILD_COMPONENTS_TESTS=ON
         -D BUILD_OPENMW_TESTS=ON
@@ -171,9 +184,9 @@ jobs:
 
     - name: Copy missing DLLs
       run: |
-        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/install
-        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/install
-        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_REVISION }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/install
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/install
+        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/install
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ matrix.image }}-${{ env.VCPKG_DEPS_TAG }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/install
 
     - name: Copy Qt DLLs
       working-directory: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
@@ -212,20 +225,20 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        job_url=$(gh run --repo ${{ github.repository }} view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name == "${{ matrix.image }}") | .url')
+        job_url=$(gh run --repo ${{ github.repository }} view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name == "windows-${{ matrix.image }}") | .url')
         printf "Ref ${{ github.ref }}\nJob ${job_url}\nCommit ${{ github.sha }}\n" > install/CI-ID.txt
         cp install/CI-ID.txt pdb/CI-ID.txt
 
     - name: Store OpenMW archived pdb files
       uses: actions/upload-artifact@v4
       with:
-        name: openmw-${{ matrix.image }}-pdb-${{ github.sha }}
+        name: openmw-windows-${{ matrix.image }}-pdb-${{ github.sha }}
         path: ${{ github.workspace }}/pdb/*
 
     - name: Store OpenMW build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: openmw-${{ matrix.image }}-${{ github.sha }}
+        name: openmw-windows-${{ matrix.image }}-${{ github.sha }}
         path: ${{ github.workspace }}/install/*
 
     - name: Add install directory to PATH
