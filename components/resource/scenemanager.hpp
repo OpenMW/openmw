@@ -275,8 +275,6 @@ namespace Resource
         SceneManager(const SceneManager&);
         void operator=(const SceneManager&);
     };
-
-    std::string getFileExtension(const std::string& file);
 }
 
 #endif
