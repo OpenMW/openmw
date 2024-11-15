@@ -133,7 +133,7 @@ namespace MWClass
 
         std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
 
-        std::string getCorrectedModel(const MWWorld::ConstPtr& ptr) const override;
+        VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const override;
 
         float getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const override;
 

@@ -1437,8 +1437,8 @@ namespace MWScript
                     osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    const VFS::Path::Normalized model = ::Misc::ResourceHelpers::correctActorModelPath(
-                        VFS::Path::toNormalized(ptr.getClass().getCorrectedModel(ptr)), vfs);
+                    const VFS::Path::Normalized model
+                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs);
                     msg << "Model: " << model.value() << std::endl;
                     if (!model.empty())
                     {
