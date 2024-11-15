@@ -206,37 +206,34 @@ namespace Resource
     {
     }
 
-    osg::ref_ptr<const SceneUtil::KeyframeHolder> KeyframeManager::get(const std::string& name)
+    osg::ref_ptr<const SceneUtil::KeyframeHolder> KeyframeManager::get(VFS::Path::NormalizedView name)
     {
-        const VFS::Path::Normalized normalized(name);
+        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(name);
 
-        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
-        if (obj)
+        if (obj != nullptr)
             return osg::ref_ptr<const SceneUtil::KeyframeHolder>(static_cast<SceneUtil::KeyframeHolder*>(obj.get()));
+
+        osg::ref_ptr<SceneUtil::KeyframeHolder> loaded(new SceneUtil::KeyframeHolder);
+        if (Misc::getFileExtension(name.value()) == "kf")
+        {
+            auto file = std::make_shared<Nif::NIFFile>(name);
+            Nif::Reader reader(*file, mEncoder);
+            reader.parse(mVFS->get(name));
+            NifOsg::Loader::loadKf(*file, *loaded.get());
+        }
         else
         {
-            osg::ref_ptr<SceneUtil::KeyframeHolder> loaded(new SceneUtil::KeyframeHolder);
-            if (Misc::getFileExtension(normalized) == "kf")
+            osg::ref_ptr<osg::Node> scene = const_cast<osg::Node*>(mSceneManager->getTemplate(name).get());
+            osg::ref_ptr<osgAnimation::BasicAnimationManager> bam
+                = dynamic_cast<osgAnimation::BasicAnimationManager*>(scene->getUpdateCallback());
+            if (bam)
             {
-                auto file = std::make_shared<Nif::NIFFile>(normalized);
-                Nif::Reader reader(*file, mEncoder);
-                reader.parse(mVFS->get(normalized));
-                NifOsg::Loader::loadKf(*file, *loaded.get());
+                Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), name, *mVFS);
+                scene->accept(rav);
             }
-            else
-            {
-                osg::ref_ptr<osg::Node> scene = const_cast<osg::Node*>(mSceneManager->getTemplate(normalized).get());
-                osg::ref_ptr<osgAnimation::BasicAnimationManager> bam
-                    = dynamic_cast<osgAnimation::BasicAnimationManager*>(scene->getUpdateCallback());
-                if (bam)
-                {
-                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), std::move(bam), normalized, *mVFS);
-                    scene->accept(rav);
-                }
-            }
-            mCache->addEntryToObjectCache(normalized, loaded);
-            return loaded;
         }
+        mCache->addEntryToObjectCache(name.value(), loaded);
+        return loaded;
     }
 
     void KeyframeManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const

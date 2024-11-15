@@ -43,17 +43,15 @@ namespace Resource
     Nif::NIFFilePtr NifFileManager::get(VFS::Path::NormalizedView name)
     {
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(name);
-        if (obj)
+        if (obj != nullptr)
             return static_cast<NifFileHolder*>(obj.get())->mNifFile;
-        else
-        {
-            auto file = std::make_shared<Nif::NIFFile>(name.value());
-            Nif::Reader reader(*file, mEncoder);
-            reader.parse(mVFS->get(name));
-            obj = new NifFileHolder(file);
-            mCache->addEntryToObjectCache(name.value(), obj);
-            return file;
-        }
+
+        auto file = std::make_shared<Nif::NIFFile>(name);
+        Nif::Reader reader(*file, mEncoder);
+        reader.parse(mVFS->get(name));
+        obj = new NifFileHolder(file);
+        mCache->addEntryToObjectCache(name.value(), obj);
+        return file;
     }
 
     void NifFileManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
