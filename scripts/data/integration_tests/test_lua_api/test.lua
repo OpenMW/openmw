@@ -158,7 +158,7 @@ local function testRecordCreation()
         radius = 30,
         color = 5,
         name = "TestLight",
-        model = "meshes\\marker_door.dae"
+        model = "meshes/marker_door.dae"
     }
     local draft = types.Light.createRecordDraft(newLight)
     local record = world.createRecord(draft)
@@ -287,7 +287,7 @@ end
 local function testRecordModelProperty()
     initPlayer()
     local player = world.players[1]
-    testing.expectEqual(types.NPC.record(player).model, 'meshes\\basicplayer.dae')
+    testing.expectEqual(types.NPC.record(player).model, 'meshes/basicplayer.dae')
 end
 
 tests = {

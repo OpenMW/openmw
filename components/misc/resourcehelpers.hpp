@@ -36,8 +36,8 @@ namespace Misc
         VFS::Path::Normalized correctActorModelPath(VFS::Path::NormalizedView resPath, const VFS::Manager* vfs);
         std::string correctMaterialPath(std::string_view resPath, const VFS::Manager* vfs);
 
-        // Adds "meshes\\".
-        std::string correctMeshPath(std::string_view resPath);
+        // Prepends "meshes/".
+        VFS::Path::Normalized correctMeshPath(VFS::Path::NormalizedView resPath);
 
         // Prepends "sound/".
         VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath);

@@ -367,8 +367,12 @@ namespace MWMechanics
                     ESM::RefId::stringRefId("VFX_Reflect"));
                 MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
                 if (animation && !reflectStatic->mModel.empty())
-                    animation->addEffect(Misc::ResourceHelpers::correctMeshPath(reflectStatic->mModel),
-                        ESM::MagicEffect::indexToName(ESM::MagicEffect::Reflect), false);
+                {
+                    const VFS::Path::Normalized reflectStaticModel
+                        = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(reflectStatic->mModel));
+                    animation->addEffect(
+                        reflectStaticModel, ESM::MagicEffect::indexToName(ESM::MagicEffect::Reflect), false);
+                }
                 caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
             }
             if (removedSpell)

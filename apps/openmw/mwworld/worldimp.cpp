@@ -3682,8 +3682,10 @@ namespace MWWorld
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
-        VFS::Path::Normalized model(Misc::ResourceHelpers::correctMeshPath(std::string{
-            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))) } /*[0, 2]*/));
+        // [0, 2]
+        const int number = Misc::Rng::rollDice(3);
+        const VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(
+            VFS::Path::Normalized(Fallback::Map::getString("Blood_Model_" + std::to_string(number))));
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }

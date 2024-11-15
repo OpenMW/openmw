@@ -116,7 +116,7 @@ namespace MWWorld
                 try
                 {
                     const VFS::Manager& vfs = *mSceneManager->getVFS();
-                    mesh = Misc::ResourceHelpers::correctMeshPath(path);
+                    mesh = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(path));
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, &vfs);
 
                     if (!vfs.exists(mesh))

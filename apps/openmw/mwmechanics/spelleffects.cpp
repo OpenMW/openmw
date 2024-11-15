@@ -286,8 +286,13 @@ namespace
         const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Absorb"));
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
         if (animation && !absorbStatic->mModel.empty())
-            animation->addEffect(Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel),
-                ESM::MagicEffect::indexToName(ESM::MagicEffect::SpellAbsorption), false);
+        {
+            const VFS::Path::Normalized absorbStaticModel
+                = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(absorbStatic->mModel));
+            animation->addEffect(
+                absorbStaticModel.value(), ESM::MagicEffect::indexToName(ESM::MagicEffect::SpellAbsorption), false);
+        }
+
         int spellCost = 0;
         if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellParams.getSourceSpellId()))
         {
@@ -455,8 +460,12 @@ namespace MWMechanics
                         anim->removeEffect(ESM::MagicEffect::indexToName(effect.mEffectId));
                         const ESM::Static* fx
                             = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_end"));
-                        if (fx)
-                            anim->addEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel), "");
+                        if (fx != nullptr)
+                        {
+                            const VFS::Path::Normalized fxModel
+                                = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(fx->mModel));
+                            anim->addEffect(fxModel.value(), "");
+                        }
                     }
                 }
                 else if (caster == getPlayer())

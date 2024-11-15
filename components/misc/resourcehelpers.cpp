@@ -167,11 +167,10 @@ std::string Misc::ResourceHelpers::correctMaterialPath(std::string_view resPath,
     return correctResourcePath({ { "materials" } }, resPath, vfs);
 }
 
-std::string Misc::ResourceHelpers::correctMeshPath(std::string_view resPath)
+VFS::Path::Normalized Misc::ResourceHelpers::correctMeshPath(VFS::Path::NormalizedView resPath)
 {
-    std::string res = "meshes\\";
-    res.append(resPath);
-    return res;
+    static constexpr VFS::Path::NormalizedView prefix("meshes");
+    return prefix / resPath;
 }
 
 VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(VFS::Path::NormalizedView resPath)

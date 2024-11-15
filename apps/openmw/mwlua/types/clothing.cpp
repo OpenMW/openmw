@@ -1,5 +1,7 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm3/loadclot.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
@@ -91,8 +93,7 @@ namespace MWLua
         record["id"]
             = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property(
-            [](const ESM::Clothing& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
+        addModelProperty(record);
         record["icon"] = sol::readonly_property([vfs](const ESM::Clothing& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
