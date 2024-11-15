@@ -217,45 +217,56 @@ bool Misc::ResourceHelpers::isHiddenMarker(const ESM::RefId& id)
 
 namespace
 {
-    std::string getLODMeshNameImpl(std::string resPath, std::string_view pattern)
+    VFS::Path::Normalized getLODMeshNameImpl(VFS::Path::NormalizedView resPath, std::string_view pattern)
     {
-        if (auto w = Misc::findExtension(resPath); w != std::string::npos)
-            resPath.insert(w, pattern);
-        return VFS::Path::normalizeFilename(resPath);
+        const std::string_view::size_type position = Misc::findExtension(resPath.value());
+        if (position == std::string::npos)
+            return VFS::Path::Normalized(resPath);
+        std::string withPattern(resPath.value());
+        withPattern.insert(position, pattern);
+        return VFS::Path::Normalized(std::move(withPattern));
     }
 
-    std::string getBestLODMeshName(std::string const& resPath, const VFS::Manager* vfs, std::string_view pattern)
+    VFS::Path::Normalized getBestLODMeshName(
+        VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, std::string_view pattern)
     {
-        if (std::string result = getLODMeshNameImpl(resPath, pattern); vfs->exists(result))
+        if (VFS::Path::Normalized result = getLODMeshNameImpl(resPath, pattern); vfs.exists(result))
             return result;
-        return resPath;
+        return VFS::Path::Normalized(resPath);
     }
-}
 
-std::string Misc::ResourceHelpers::getLODMeshName(
-    int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod)
-{
-    const std::string distantMeshPattern = [&esmVersion] {
+    std::string_view getDistantMeshPattern(int esmVersion)
+    {
+        static constexpr std::string_view dist = "_dist";
+        static constexpr std::string_view far = "_far";
+        static constexpr std::string_view lod = "_lod";
+
         switch (esmVersion)
         {
             case ESM::VER_120:
             case ESM::VER_130:
-                return "_dist";
+                return dist;
             case ESM::VER_080:
             case ESM::VER_100:
-                return "_far";
+                return far;
             case ESM::VER_094:
             case ESM::VER_170:
-                return "_lod";
+                return lod;
             default:
-                return "";
+                return std::string_view();
         }
-    }();
+    }
+}
+
+VFS::Path::Normalized Misc::ResourceHelpers::getLODMeshName(
+    int esmVersion, VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, unsigned char lod)
+{
+    const std::string_view distantMeshPattern = getDistantMeshPattern(esmVersion);
     for (int l = lod; l >= 0; --l)
     {
         std::stringstream patern;
         patern << distantMeshPattern << "_" << l;
-        std::string const meshName = getBestLODMeshName(resPath, vfs, patern.str());
+        const VFS::Path::Normalized meshName = getBestLODMeshName(resPath, vfs, patern.view());
         if (meshName != resPath)
             return meshName;
     }
