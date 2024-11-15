@@ -297,6 +297,10 @@ namespace VFS::Path
     {
         return Normalized(std::forward<T>(value));
     }
+
+    Normalized toNormalized(NormalizedView value) = delete;
+
+    Normalized toNormalized(Normalized value) = delete;
 }
 
 #endif
