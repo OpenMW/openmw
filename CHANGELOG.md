@@ -202,6 +202,7 @@
     Bug #8206: Moving away from storm wind origin should make you faster
     Bug #8207: Using hand-to-hand while sneaking plays the critical hit sound when the target is not getting hurt
     Bug #8208: The launcher's view distance option's minimum value isn't capped to Vanilla's minimum
+    Bug #8231: AGOP doesn't like NiCollisionSwitch
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
