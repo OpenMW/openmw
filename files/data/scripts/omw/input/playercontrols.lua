@@ -145,7 +145,7 @@ end
 
 input.registerTriggerHandler('ToggleSpell', async:callback(function()
     if not combatAllowed() then return end
-    if Actor.stance(self) == Actor.STANCE.Spell then
+    if Actor.getStance(self) == Actor.STANCE.Spell then
         Actor.setStance(self, Actor.STANCE.Nothing)
     elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Magic) then
         if checkNotWerewolf() then
@@ -156,7 +156,7 @@ end))
 
 input.registerTriggerHandler('ToggleWeapon', async:callback(function()
     if not combatAllowed() then return end
-    if Actor.stance(self) == Actor.STANCE.Weapon then
+    if Actor.getStance(self) == Actor.STANCE.Weapon then
         Actor.setStance(self, Actor.STANCE.Nothing)
     elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Fighting) then
         Actor.setStance(self, Actor.STANCE.Weapon)
@@ -170,10 +170,12 @@ end))
 local function processAttacking()
     -- for spell-casting, set controls.use to true for exactly one frame
     -- otherwise spell casting is attempted every frame while Use is true
-    if Actor.stance(self) == Actor.STANCE.Spell then
+    if Actor.getStance(self) == Actor.STANCE.Spell then
         self.controls.use = startUse and 1 or 0
+    elseif Actor.getStance(self) == Actor.STANCE.Weapon and input.getBooleanActionValue('Use') then
+        self.controls.use = 1
     else
-        self.controls.use = input.getBooleanActionValue('Use') and 1 or 0
+        self.controls.use = 0
     end
     startUse = false
 end
