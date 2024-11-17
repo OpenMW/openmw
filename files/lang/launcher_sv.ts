@@ -393,6 +393,14 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <source>This archive is enabled in an openmw.cfg other than the user one</source>
         <translation>Detta arkiv är aktiverat i en annan openmw.cfg än användarens</translation>
     </message>
+    <message>
+        <source>&amp;Copy Path(s) to Clipboard</source>
+        <translation>&amp;Kopiera sökväg(ar) till klippbordet</translation>
+    </message>
+    <message>
+        <source>&amp;Open Path in File Explorer</source>
+        <translation>Öppna katalogen i filutforskaren</translation>
+    </message>
 </context>
 <context>
     <name>Launcher::GraphicsPage</name>

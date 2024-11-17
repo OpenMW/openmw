@@ -1,7 +1,9 @@
 #include "datafilespage.hpp"
 #include "maindialog.hpp"
 
+#include <QClipboard>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QFileDialog>
 #include <QList>
 #include <QMessageBox>
@@ -244,6 +246,31 @@ void Launcher::DataFilesPage::buildView()
         &DataFilesPage::navMeshToolFinished);
 
     buildArchiveContextMenu();
+    buildDataFilesContextMenu();
+}
+
+void Launcher::DataFilesPage::slotCopySelectedItemsPaths()
+{
+    QClipboard* clipboard = QApplication::clipboard();
+    QString filepaths;
+
+    for (QListWidgetItem* item : ui.directoryListWidget->selectedItems())
+    {
+        QString path = qvariant_cast<Config::SettingValue>(item->data(Qt::UserRole)).originalRepresentation;
+        filepaths += path + "\n";
+    }
+
+    if (!filepaths.isEmpty())
+    {
+        clipboard->setText(filepaths);
+    }
+}
+
+void Launcher::DataFilesPage::slotOpenSelectedItemsPaths()
+{
+    QListWidgetItem* item = ui.directoryListWidget->currentItem();
+    QUrl confFolderUrl = QUrl::fromLocalFile(qvariant_cast<Config::SettingValue>(item->data(Qt::UserRole)).value);
+    QDesktopServices::openUrl(confFolderUrl);
 }
 
 void Launcher::DataFilesPage::buildArchiveContextMenu()
@@ -254,6 +281,18 @@ void Launcher::DataFilesPage::buildArchiveContextMenu()
     mArchiveContextMenu = new QMenu(ui.archiveListWidget);
     mArchiveContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
     mArchiveContextMenu->addAction(tr("&Uncheck Selected"), this, SLOT(slotUncheckMultiSelectedItems()));
+}
+
+void Launcher::DataFilesPage::buildDataFilesContextMenu()
+{
+    connect(ui.directoryListWidget, &QListWidget::customContextMenuRequested, this,
+        &DataFilesPage::slotShowDataFilesContextMenu);
+
+    mDataFilesContextMenu = new QMenu(ui.directoryListWidget);
+    mDataFilesContextMenu->addAction(
+        tr("&Copy Path(s) to Clipboard"), this, &Launcher::DataFilesPage::slotCopySelectedItemsPaths);
+    mDataFilesContextMenu->addAction(
+        tr("&Open Path in File Explorer"), this, &Launcher::DataFilesPage::slotOpenSelectedItemsPaths);
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -830,6 +869,12 @@ void Launcher::DataFilesPage::slotShowArchiveContextMenu(const QPoint& pos)
 {
     QPoint globalPos = ui.archiveListWidget->viewport()->mapToGlobal(pos);
     mArchiveContextMenu->exec(globalPos);
+}
+
+void Launcher::DataFilesPage::slotShowDataFilesContextMenu(const QPoint& pos)
+{
+    QPoint globalPos = ui.directoryListWidget->viewport()->mapToGlobal(pos);
+    mDataFilesContextMenu->exec(globalPos);
 }
 
 void Launcher::DataFilesPage::setCheckStateForMultiSelectedItems(bool checked)
