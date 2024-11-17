@@ -188,41 +188,41 @@ namespace MWGui
         mCustomMarkers.eventMarkersChanged -= MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
 
+    MWGui::LocalMapBase::MapEntry& LocalMapBase::addMapEntry()
+    {
+        const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
+        MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>(
+            "ImageBox", MyGUI::IntCoord(0, 0, mapWidgetSize, mapWidgetSize), MyGUI::Align::Top | MyGUI::Align::Left);
+        map->setDepth(Local_MapLayer);
+
+        MyGUI::ImageBox* fog = mLocalMap->createWidget<MyGUI::ImageBox>(
+            "ImageBox", MyGUI::IntCoord(0, 0, mapWidgetSize, mapWidgetSize), MyGUI::Align::Top | MyGUI::Align::Left);
+        fog->setDepth(Local_FogLayer);
+        fog->setColour(MyGUI::Colour(0, 0, 0));
+
+        map->setNeedMouseFocus(false);
+        fog->setNeedMouseFocus(false);
+
+        return mMaps.emplace_back(map, fog);
+    }
+
     void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance)
     {
         mLocalMap = widget;
         mCompass = compass;
-        mCellDistance = cellDistance;
-        mNumCells = mCellDistance * 2 + 1;
+        mGrid = createRect({ 0, 0 }, cellDistance);
+        mExtCellDistance = cellDistance;
 
         const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
 
-        mLocalMap->setCanvasSize(mapWidgetSize * mNumCells, mapWidgetSize * mNumCells);
+        mLocalMap->setCanvasSize(mapWidgetSize * (mGrid.width() + 1), mapWidgetSize * (mGrid.height() + 1));
 
         mCompass->setDepth(Local_CompassLayer);
         mCompass->setNeedMouseFocus(false);
 
-        for (int mx = 0; mx < mNumCells; ++mx)
-        {
-            for (int my = 0; my < mNumCells; ++my)
-            {
-                MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                    MyGUI::IntCoord(mx * mapWidgetSize, my * mapWidgetSize, mapWidgetSize, mapWidgetSize),
-                    MyGUI::Align::Top | MyGUI::Align::Left);
-                map->setDepth(Local_MapLayer);
-
-                MyGUI::ImageBox* fog = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                    MyGUI::IntCoord(mx * mapWidgetSize, my * mapWidgetSize, mapWidgetSize, mapWidgetSize),
-                    MyGUI::Align::Top | MyGUI::Align::Left);
-                fog->setDepth(Local_FogLayer);
-                fog->setColour(MyGUI::Colour(0, 0, 0));
-
-                map->setNeedMouseFocus(false);
-                fog->setNeedMouseFocus(false);
-
-                mMaps.emplace_back(map, fog);
-            }
-        }
+        int numCells = (mGrid.width() + 1) * (mGrid.height() + 1);
+        for (int i = 0; i < numCells; ++i)
+            addMapEntry();
     }
 
     bool LocalMapBase::toggleFogOfWar()
@@ -250,8 +250,8 @@ namespace MWGui
     {
         // normalized cell coordinates
         auto mapWidgetSize = getWidgetSize();
-        return MyGUI::IntPoint(std::round((nX + mCellDistance + cellX - mActiveCell->getGridX()) * mapWidgetSize),
-            std::round((nY + mCellDistance - cellY + mActiveCell->getGridY()) * mapWidgetSize));
+        return MyGUI::IntPoint(std::round((nX + cellX - mGrid.left) * mapWidgetSize),
+            std::round((nY - cellY + mGrid.bottom) * mapWidgetSize));
     }
 
     MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const
@@ -334,35 +334,38 @@ namespace MWGui
         mCustomMarkerWidgets.clear();
         if (!mActiveCell)
             return;
-        for (int dX = -mCellDistance; dX <= mCellDistance; ++dX)
-        {
-            for (int dY = -mCellDistance; dY <= mCellDistance; ++dY)
+        auto updateMarkers = [this](CustomMarkerCollection::RangeType markers) {
+            for (auto it = markers.first; it != markers.second; ++it)
             {
-                ESM::RefId cellRefId
-                    = getCellIdInWorldSpace(*mActiveCell, mActiveCell->getGridX() + dX, mActiveCell->getGridY() + dY);
-
-                CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellRefId);
-                for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second;
-                     ++it)
+                const ESM::CustomMarker& marker = it->second;
+                MarkerUserData markerPos(mLocalMapRender);
+                MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
+                    getMarkerCoordinates(marker.mWorldX, marker.mWorldY, markerPos, 16), MyGUI::Align::Default);
+                markerWidget->setDepth(Local_MarkerAboveFogLayer);
+                markerWidget->setUserString("ToolTipType", "Layout");
+                markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+                markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
+                markerWidget->setNormalColour(MyGUI::Colour(0.6f, 0.6f, 0.6f));
+                markerWidget->setHoverColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
+                markerWidget->setUserData(marker);
+                markerWidget->setNeedMouseFocus(true);
+                customMarkerCreated(markerWidget);
+                mCustomMarkerWidgets.push_back(markerWidget);
+            }
+        };
+        if (mActiveCell->isExterior())
+        {
+            for (int x = mGrid.left; x <= mGrid.right; ++x)
+            {
+                for (int y = mGrid.top; y <= mGrid.bottom; ++y)
                 {
-                    const ESM::CustomMarker& marker = it->second;
-
-                    MarkerUserData markerPos(mLocalMapRender);
-                    MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
-                        getMarkerCoordinates(marker.mWorldX, marker.mWorldY, markerPos, 16), MyGUI::Align::Default);
-                    markerWidget->setDepth(Local_MarkerAboveFogLayer);
-                    markerWidget->setUserString("ToolTipType", "Layout");
-                    markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-                    markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
-                    markerWidget->setNormalColour(MyGUI::Colour(0.6f, 0.6f, 0.6f));
-                    markerWidget->setHoverColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
-                    markerWidget->setUserData(marker);
-                    markerWidget->setNeedMouseFocus(true);
-                    customMarkerCreated(markerWidget);
-                    mCustomMarkerWidgets.push_back(markerWidget);
+                    ESM::RefId cellRefId = getCellIdInWorldSpace(*mActiveCell, x, y);
+                    updateMarkers(mCustomMarkers.getMarkers(cellRefId));
                 }
             }
         }
+        else
+            updateMarkers(mCustomMarkers.getMarkers(mActiveCell->getId()));
 
         redraw();
     }
@@ -377,13 +380,13 @@ namespace MWGui
 
         if (cell.isExterior())
         {
+            mGrid = createRect({ x, y }, mExtCellDistance);
             const MyGUI::IntRect activeGrid = createRect({ x, y }, Constants::CellGridRadius);
-            const MyGUI::IntRect currentView = createRect({ x, y }, mCellDistance);
 
             mExteriorDoorMarkerWidgets.clear();
             for (auto& [coord, doors] : mExteriorDoorsByCell)
             {
-                if (!mHasALastActiveCell || !currentView.inside({ coord.first, coord.second })
+                if (!mHasALastActiveCell || !mGrid.inside({ coord.first, coord.second })
                     || activeGrid.inside({ coord.first, coord.second }))
                 {
                     mDoorMarkersToRecycle.insert(mDoorMarkersToRecycle.end(), doors.begin(), doors.end());
@@ -400,27 +403,46 @@ namespace MWGui
             {
                 for (const auto& entry : mMaps)
                 {
-                    if (!currentView.inside({ entry.mCellX, entry.mCellY }))
+                    if (!mGrid.inside({ entry.mCellX, entry.mCellY }))
                         mLocalMapRender->removeExteriorCell(entry.mCellX, entry.mCellY);
                 }
             }
         }
+        else
+            mGrid = mLocalMapRender->getInteriorGrid();
 
         mActiveCell = &cell;
 
-        for (int mx = 0; mx < mNumCells; ++mx)
-        {
-            for (int my = 0; my < mNumCells; ++my)
+        constexpr auto resetEntry = [](MapEntry& entry, bool visible, const MyGUI::IntPoint* position) {
+            entry.mMapWidget->setVisible(visible);
+            entry.mFogWidget->setVisible(visible);
+            if (position)
             {
-                MapEntry& entry = mMaps[my + mNumCells * mx];
-                entry.mMapWidget->setRenderItemTexture(nullptr);
-                entry.mFogWidget->setRenderItemTexture(nullptr);
-                entry.mMapTexture.reset();
-                entry.mFogTexture.reset();
-
-                entry.mCellX = x + (mx - mCellDistance);
-                entry.mCellY = y - (my - mCellDistance);
+                entry.mMapWidget->setPosition(*position);
+                entry.mFogWidget->setPosition(*position);
             }
+            entry.mMapWidget->setRenderItemTexture(nullptr);
+            entry.mFogWidget->setRenderItemTexture(nullptr);
+            entry.mMapTexture.reset();
+            entry.mFogTexture.reset();
+        };
+
+        std::size_t usedEntries = 0;
+        for (int cx = mGrid.left; cx <= mGrid.right; ++cx)
+        {
+            for (int cy = mGrid.top; cy <= mGrid.bottom; ++cy)
+            {
+                MapEntry& entry = usedEntries < mMaps.size() ? mMaps[usedEntries] : addMapEntry();
+                entry.mCellX = cx;
+                entry.mCellY = cy;
+                MyGUI::IntPoint position = getPosition(cx, cy, 0, 0);
+                resetEntry(entry, true, &position);
+                ++usedEntries;
+            }
+        }
+        for (std::size_t i = usedEntries; i < mMaps.size(); ++i)
+        {
+            resetEntry(mMaps[i], false, nullptr);
         }
 
         // Delay the door markers update until scripts have been given a chance to run.
@@ -709,7 +731,7 @@ namespace MWGui
     void LocalMapBase::updateLocalMap()
     {
         auto mapWidgetSize = getWidgetSize();
-        mLocalMap->setCanvasSize(mapWidgetSize * mNumCells, mapWidgetSize * mNumCells);
+        mLocalMap->setCanvasSize(mapWidgetSize * (mGrid.width() + 1), mapWidgetSize * (mGrid.height() + 1));
 
         const auto size = MyGUI::IntSize(std::ceil(mapWidgetSize), std::ceil(mapWidgetSize));
         for (auto& entry : mMaps)
@@ -854,12 +876,10 @@ namespace MWGui
 
         MyGUI::IntPoint widgetPos = clickedPos - mEventBoxLocal->getAbsolutePosition();
         auto mapWidgetSize = getWidgetSize();
-        int x = int(widgetPos.left / float(mapWidgetSize)) - mCellDistance;
-        int y = (int(widgetPos.top / float(mapWidgetSize)) - mCellDistance) * -1;
+        int x = int(widgetPos.left / float(mapWidgetSize)) + mGrid.left;
+        int y = mGrid.bottom - int(widgetPos.top / float(mapWidgetSize));
         float nX = widgetPos.left / float(mapWidgetSize) - int(widgetPos.left / float(mapWidgetSize));
         float nY = widgetPos.top / float(mapWidgetSize) - int(widgetPos.top / float(mapWidgetSize));
-        x += mActiveCell->getGridX();
-        y += mActiveCell->getGridY();
 
         osg::Vec2f worldPos;
         if (!mActiveCell->isExterior())
@@ -889,11 +909,11 @@ namespace MWGui
         const bool zoomOut = rel < 0;
         const bool zoomIn = !zoomOut;
         const double speedDiff = zoomOut ? 1.0 / speed : speed;
-        const float localMapSizeInUnits = localWidgetSize * mNumCells;
 
-        const float currentMinLocalMapZoom = std::max({ (float(Settings::map().mGlobalMapCellSize) * 4.f)
-                / float(localWidgetSize),
-            float(mLocalMap->getWidth()) / localMapSizeInUnits, float(mLocalMap->getHeight()) / localMapSizeInUnits });
+        const float currentMinLocalMapZoom
+            = std::max({ (float(Settings::map().mGlobalMapCellSize) * 4.f) / float(localWidgetSize),
+                float(mLocalMap->getWidth()) / (localWidgetSize * (mGrid.width() + 1)),
+                float(mLocalMap->getHeight()) / (localWidgetSize * (mGrid.height() + 1)) });
 
         if (Settings::map().mGlobal)
         {

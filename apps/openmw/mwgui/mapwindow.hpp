@@ -124,9 +124,6 @@ namespace MWGui
         bool mFogOfWarEnabled;
         bool mNeedDoorMarkersUpdate = false;
 
-        int mNumCells = 1; // for convenience, mCellDistance * 2 + 1
-        int mCellDistance = 0;
-
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
 
@@ -185,6 +182,10 @@ namespace MWGui
         void redraw();
         float getWidgetSize() const;
 
+        MWGui::LocalMapBase::MapEntry& addMapEntry();
+
+        MyGUI::IntRect mGrid{ -1, -1, 1, 1 };
+        int mExtCellDistance = 0;
         float mMarkerUpdateTimer = 0.f;
 
         float mLastDirectionX = 0.f;

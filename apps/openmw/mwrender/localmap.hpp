@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 
+#include <MyGUI_Types.h>
 #include <osg/BoundingBox>
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -97,6 +98,8 @@ namespace MWRender
         bool isPositionExplored(float nX, float nY, int x, int y);
 
         osg::Group* getRoot();
+
+        MyGUI::IntRect getInteriorGrid() const;
 
     private:
         osg::ref_ptr<osg::Group> mRoot;
