@@ -298,8 +298,6 @@ namespace MWSound
 
         std::atomic<bool> mIsFinished;
 
-        void updateAll(bool local);
-
         OpenAL_SoundStream(const OpenAL_SoundStream& rhs);
         OpenAL_SoundStream& operator=(const OpenAL_SoundStream& rhs);
 

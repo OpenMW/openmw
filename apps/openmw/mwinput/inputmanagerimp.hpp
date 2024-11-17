@@ -104,16 +104,6 @@ namespace MWInput
         bool controlsDisabled() override { return mControlsDisabled; }
 
     private:
-        void convertMousePosForMyGUI(int& x, int& y);
-
-        void handleGuiArrowKey(int action);
-
-        void quickKey(int index);
-        void showQuickKeysMenu();
-
-        void loadKeyDefaults(bool force = false);
-        void loadControllerDefaults(bool force = false);
-
         bool mControlsDisabled;
 
         std::unique_ptr<SDLUtil::InputWrapper> mInputWrapper;

@@ -317,8 +317,6 @@ namespace MWGui
 
         const Translation::Storage& getTranslationDataStorage() const override;
 
-        void onSoulgemDialogButtonPressed(int button);
-
         bool getCursorVisible() override;
 
         /// Call when mouse cursor or buttons are used.

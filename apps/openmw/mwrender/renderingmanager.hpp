@@ -280,7 +280,6 @@ namespace MWRender
         void updateTextureFiltering();
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
-        void updateThirdPersonViewMode();
 
         struct WorldspaceChunkMgr
         {
