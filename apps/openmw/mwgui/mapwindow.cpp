@@ -177,18 +177,8 @@ namespace MWGui
     LocalMapBase::LocalMapBase(
         CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled)
         : mLocalMapRender(localMapRender)
-        , mActiveCell(nullptr)
-        , mLocalMap(nullptr)
-        , mCompass(nullptr)
-        , mFogOfWarToggled(true)
         , mFogOfWarEnabled(fogOfWarEnabled)
-        , mNumCells(1)
-        , mCellDistance(0)
         , mCustomMarkers(markers)
-        , mMarkerUpdateTimer(0.0f)
-        , mLastDirectionX(0.0f)
-        , mLastDirectionY(0.0f)
-        , mNeedDoorMarkersUpdate(false)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
