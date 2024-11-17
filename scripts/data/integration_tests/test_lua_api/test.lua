@@ -84,7 +84,7 @@ local function testMWScript()
     local variableStoreCount = 18
     local variableStore = world.mwscript.getGlobalVariables(player)
     testing.expectEqual(variableStoreCount, #variableStore)
-    
+
     variableStore.year = 5
     testing.expectEqual(5, variableStore.year)
     variableStore.year = 1
@@ -119,7 +119,6 @@ local function testRecordStore(store, storeName, skipPairs)
     end)
 
     testing.expectEqual(status, true, storeName)
-    
 end
 
 local function testRecordStores()
@@ -159,7 +158,7 @@ local function testRecordCreation()
         radius = 30,
         color = 5,
         name = "TestLight",
-        model = "meshes\\marker_door.dae"
+        model = "meshes/marker_door.dae"
     }
     local draft = types.Light.createRecordDraft(newLight)
     local record = world.createRecord(draft)
@@ -269,7 +268,7 @@ local function testCommitCrime()
     testing.expectEqual(I.Crimes == nil, false, 'Crimes interface should be available in global contexts')
 
     -- Reset crime level to have a clean slate
-    types.Player.setCrimeLevel(player, 0) 
+    types.Player.setCrimeLevel(player, 0)
     testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Theft, victim = player, arg = 100}).wasCrimeSeen, false, "Running the crime with the player as the victim should not result in a seen crime")
     testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Theft, arg = 50 }).wasCrimeSeen, false, "Running the crime with no victim and a type shouldn't raise errors")
     testing.expectEqual(I.Crimes.commitCrime(player, { type = types.Player.OFFENSE_TYPE.Murder }).wasCrimeSeen, false, "Running a murder crime should work even without a victim")
@@ -280,9 +279,15 @@ local function testCommitCrime()
     coroutine.yield()
 
     -- Reset crime level for testing with a valid victim
-    types.Player.setCrimeLevel(player, 0) 
+    types.Player.setCrimeLevel(player, 0)
     testing.expectEqual(I.Crimes.commitCrime(player, { victim = victim, type = types.Player.OFFENSE_TYPE.Theft, arg = 50 }).wasCrimeSeen, true, "Running a crime with a valid victim should notify them when the player is not sneaking, even if it's not explicitly passed in")
     testing.expectEqual(types.Player.getCrimeLevel(player), 0, "Crime level should not change if the victim's alarm value is low and there's no other witnesses")
+end
+
+local function testRecordModelProperty()
+    initPlayer()
+    local player = world.players[1]
+    testing.expectEqual(types.NPC.record(player).model, 'meshes/basicplayer.dae')
 end
 
 tests = {
@@ -345,7 +350,8 @@ tests = {
         testing.runLocalTest(player, 'playerWeaponAttack')
     end},
     {'vfs', testVFS},
-    {'testCommitCrime', testCommitCrime}
+    {'testCommitCrime', testCommitCrime},
+    {'recordModelProperty', testRecordModelProperty},
 }
 
 return {

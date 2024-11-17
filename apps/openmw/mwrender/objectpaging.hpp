@@ -79,7 +79,7 @@ namespace MWRender
 
         std::mutex mLODNameCacheMutex;
         typedef std::pair<std::string, unsigned char> LODNameCacheKey; // Key: mesh name, lod level
-        typedef std::map<LODNameCacheKey, std::string> LODNameCache; // Cache: key, mesh name to use
+        using LODNameCache = std::map<LODNameCacheKey, VFS::Path::Normalized>; // Cache: key, mesh name to use
         LODNameCache mLODNameCache;
     };
 

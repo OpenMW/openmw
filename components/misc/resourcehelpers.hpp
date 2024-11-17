@@ -36,8 +36,8 @@ namespace Misc
         VFS::Path::Normalized correctActorModelPath(VFS::Path::NormalizedView resPath, const VFS::Manager* vfs);
         std::string correctMaterialPath(std::string_view resPath, const VFS::Manager* vfs);
 
-        // Adds "meshes\\".
-        std::string correctMeshPath(std::string_view resPath);
+        // Prepends "meshes/".
+        VFS::Path::Normalized correctMeshPath(VFS::Path::NormalizedView resPath);
 
         // Prepends "sound/".
         VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath);
@@ -52,7 +52,9 @@ namespace Misc
 
         /// marker objects that have a hardcoded function in the game logic, should be hidden from the player
         bool isHiddenMarker(const ESM::RefId& id);
-        std::string getLODMeshName(int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod = 0);
+
+        VFS::Path::Normalized getLODMeshName(
+            int esmVersion, VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, unsigned char lod = 0);
     }
 }
 

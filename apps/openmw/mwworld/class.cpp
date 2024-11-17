@@ -315,7 +315,7 @@ namespace MWWorld
     {
         std::string_view model = getModel(ptr);
         if (!model.empty())
-            return Misc::ResourceHelpers::correctMeshPath(model);
+            return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(model));
         return {};
     }
 

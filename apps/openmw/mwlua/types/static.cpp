@@ -1,5 +1,7 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -24,7 +26,6 @@ namespace MWLua
             = [](const ESM::Static& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Static& rec) -> std::string { return rec.mId.serializeText(); });
-        record["model"] = sol::readonly_property(
-            [](const ESM::Static& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
+        addModelProperty(record);
     }
 }

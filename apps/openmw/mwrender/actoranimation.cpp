@@ -131,7 +131,7 @@ namespace MWRender
                     if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                         return std::string();
                     if (!bodypart->mModel.empty())
-                        return Misc::ResourceHelpers::correctMeshPath(bodypart->mModel);
+                        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)).value();
                 }
             }
         }

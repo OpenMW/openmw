@@ -1,5 +1,7 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm4/loadterm.hpp>
 #include <components/lua/utilpackage.hpp>
 #include <components/misc/convert.hpp>
@@ -33,8 +35,6 @@ namespace MWLua
         record["resultText"]
             = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string { return rec.mResultText; });
         record["name"] = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string { return rec.mFullName; });
-        record["model"] = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel);
-        });
+        addModelProperty(record);
     }
 }

@@ -668,7 +668,7 @@ namespace MWRender
                     model = mLODNameCache
                                 .emplace_hint(found, std::move(key),
                                     Misc::ResourceHelpers::getLODMeshName(world.getESMVersions()[refNum.mContentFile],
-                                        model, mSceneManager->getVFS(), lod))
+                                        model, *mSceneManager->getVFS(), lod))
                                 ->second;
             }
 

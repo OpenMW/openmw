@@ -222,7 +222,7 @@ namespace MWWorld
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
                     mResourceSystem->getSceneManager()->getInstance(
-                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(weapon->mModel)),
+                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(weapon->mModel)),
                         findVisitor.mFoundNode);
             }
         }
@@ -330,8 +330,8 @@ namespace MWWorld
         // shape
         if (state.mIdMagic.size() > 1)
         {
-            model = Misc::ResourceHelpers::correctMeshPath(
-                MWBase::Environment::get().getESMStore()->get<ESM::Weapon>().find(state.mIdMagic[1])->mModel);
+            model = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(
+                MWBase::Environment::get().getESMStore()->get<ESM::Weapon>().find(state.mIdMagic[1])->mModel));
         }
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
