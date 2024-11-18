@@ -1073,7 +1073,7 @@ namespace MWMechanics
         std::string_view action = evt.substr(groupname.size() + 2);
         if (action == "equip attach")
         {
-            if (mUpperBodyState == UpperBodyState::Equipping && mAnimation)
+            if (mUpperBodyState == UpperBodyState::Equipping)
             {
                 if (groupname == "shield")
                     mAnimation->showCarriedLeft(true);
@@ -1083,7 +1083,7 @@ namespace MWMechanics
         }
         else if (action == "unequip detach")
         {
-            if (mUpperBodyState == UpperBodyState::Unequipping && mAnimation)
+            if (mUpperBodyState == UpperBodyState::Unequipping)
             {
                 if (groupname == "shield")
                     mAnimation->showCarriedLeft(false);
