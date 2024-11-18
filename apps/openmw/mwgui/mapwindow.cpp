@@ -102,6 +102,11 @@ namespace
             return ESM::Cell::generateIdForCell(true, {}, x, y);
         return cell.getId();
     }
+
+    void setCanvasSize(MyGUI::ScrollView* scrollView, const MyGUI::IntRect& grid, int widgetSize)
+    {
+        scrollView->setCanvasSize(widgetSize * (grid.width() + 1), widgetSize * (grid.height() + 1));
+    }
 }
 
 namespace MWGui
@@ -214,8 +219,7 @@ namespace MWGui
         mExtCellDistance = cellDistance;
 
         const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
-
-        mLocalMap->setCanvasSize(mapWidgetSize * (mGrid.width() + 1), mapWidgetSize * (mGrid.height() + 1));
+        setCanvasSize(mLocalMap, mGrid, mapWidgetSize);
 
         mCompass->setDepth(Local_CompassLayer);
         mCompass->setNeedMouseFocus(false);
@@ -378,6 +382,8 @@ namespace MWGui
         const int x = cell.getGridX();
         const int y = cell.getGridY();
 
+        MyGUI::IntSize oldSize{ mGrid.width(), mGrid.height() };
+
         if (cell.isExterior())
         {
             mGrid = createRect({ x, y }, mExtCellDistance);
@@ -444,6 +450,9 @@ namespace MWGui
         {
             resetEntry(mMaps[i], false, nullptr);
         }
+
+        if (oldSize != MyGUI::IntSize{ mGrid.width(), mGrid.height() })
+            setCanvasSize(mLocalMap, mGrid, getWidgetSize());
 
         // Delay the door markers update until scripts have been given a chance to run.
         // If we don't do this, door markers that should be disabled will still appear on the map.
@@ -570,15 +579,7 @@ namespace MWGui
     {
         MyGUI::IntRect coord = widget->getAbsoluteRect();
         MyGUI::IntRect croppedCoord = cropTo->getAbsoluteRect();
-        if (coord.left < croppedCoord.left && coord.right < croppedCoord.left)
-            return true;
-        if (coord.left > croppedCoord.right && coord.right > croppedCoord.right)
-            return true;
-        if (coord.top < croppedCoord.top && coord.bottom < croppedCoord.top)
-            return true;
-        if (coord.top > croppedCoord.bottom && coord.bottom > croppedCoord.bottom)
-            return true;
-        return false;
+        return !coord.intersect(croppedCoord);
     }
 
     void LocalMapBase::updateRequiredMaps()
@@ -731,7 +732,7 @@ namespace MWGui
     void LocalMapBase::updateLocalMap()
     {
         auto mapWidgetSize = getWidgetSize();
-        mLocalMap->setCanvasSize(mapWidgetSize * (mGrid.width() + 1), mapWidgetSize * (mGrid.height() + 1));
+        setCanvasSize(mLocalMap, mGrid, getWidgetSize());
 
         const auto size = MyGUI::IntSize(std::ceil(mapWidgetSize), std::ceil(mapWidgetSize));
         for (auto& entry : mMaps)
