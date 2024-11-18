@@ -1387,6 +1387,7 @@ namespace MWMechanics
                     else if (mWeaponType == ESM::Weapon::HandToHand)
                         mAnimation->showCarriedLeft(false);
 
+                    mAnimation->disable(weapgroup);
                     playBlendedAnimation(
                         weapgroup, priorityWeapon, unequipMask, false, 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                     mUpperBodyState = UpperBodyState::Unequipping;
