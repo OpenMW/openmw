@@ -1008,6 +1008,8 @@ namespace MWMechanics
     void CharacterController::handleTextKey(
         std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map)
     {
+        if (!mAnimation)
+            return;
         std::string_view evt = key->second;
 
         MWBase::Environment::get().getLuaManager()->animationTextKey(mPtr, key->second);
@@ -1153,18 +1155,18 @@ namespace MWMechanics
                         mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
             }
         }
-        else if (action == "shoot attach" && mAnimation)
+        else if (action == "shoot attach")
             mAnimation->attachArrow();
         else if (action == "shoot release")
         {
             // See notes for melee release above
-            if (mReadyToHit && mAnimation)
+            if (mAttackStrength != -1.f  && mAnimation)
             {
                 mAnimation->releaseArrow(mAttackStrength);
                 mReadyToHit = false;
             }
         }
-        else if (action == "shoot follow attach" && mAnimation)
+        else if (action == "shoot follow attach")
             mAnimation->attachArrow();
         // Make sure this key is actually for the RangeType we are casting. The flame atronach has
         // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range
@@ -1237,8 +1239,8 @@ namespace MWMechanics
 
     float CharacterController::calculateWindUp() const
     {
-        if (mCurrentWeapon.empty() || mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon)
-            || !mAnimation)
+        if (!mAnimation || mCurrentWeapon.empty() || mWeaponType == ESM::Weapon::PickProbe
+            || isRandomAttackAnimation(mCurrentWeapon))
             return -1.f;
 
         float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min attack");
