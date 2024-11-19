@@ -1341,10 +1341,14 @@ namespace MWMechanics
             }
         }
 
-        // For biped actors, blend weapon animations with lower body animations with higher priority
-        MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
+        MWRender::Animation::AnimPriority priorityWeapon(Priority_Default);
         if (cls.isBipedal(mPtr))
+        {
+            // For bipeds, blend weapon animations with lower body animations with higher priority
+            // For non-bipeds, movement takes priority
+            priorityWeapon = Priority_Weapon;
             priorityWeapon[MWRender::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+        }
 
         bool forcestateupdate = false;
 
@@ -1366,7 +1370,7 @@ namespace MWMechanics
         if (!isKnockedOut() && !isKnockedDown() && !isRecovery())
         {
             std::string weapgroup;
-            if ((!isWerewolf || mWeaponType != ESM::Weapon::Spell) && weaptype != mWeaponType
+            if (((!isWerewolf && cls.isBipedal(mPtr)) || mWeaponType != ESM::Weapon::Spell) && weaptype != mWeaponType
                 && mUpperBodyState <= UpperBodyState::AttackWindUp && mUpperBodyState != UpperBodyState::Unequipping
                 && !isStillWeapon)
             {
@@ -1441,8 +1445,11 @@ namespace MWMechanics
                                     "equip start", "equip stop", 0.0f, 0);
                             }
 
-                            playBlendedAnimation(
-                                weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start", "equip stop", 0.0f, 0);
+                            if (weaptype != ESM::Weapon::Spell || cls.isBipedal(mPtr))
+                            {
+                                playBlendedAnimation(weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start",
+                                    "equip stop", 0.0f, 0);
+                            }
                             mUpperBodyState = UpperBodyState::Equipping;
 
                             // If we do not have the "equip attach" key, show weapon manually.
@@ -1797,11 +1804,7 @@ namespace MWMechanics
 
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
-                MWRender::Animation::AnimPriority priorityFollow(priorityWeapon);
-                // Follow animations have lower priority than movement for non-biped creatures, logic be damned
-                if (!cls.isBipedal(mPtr))
-                    priorityFollow = Priority_Default;
-                playBlendedAnimation(mCurrentWeapon, priorityFollow, MWRender::BlendMask_All, false, weapSpeed,
+                playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, weapSpeed,
                     mAttackType + ' ' + start, mAttackType + ' ' + stop, 0.0f, 0);
                 mUpperBodyState = UpperBodyState::AttackEnd;
 
