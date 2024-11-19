@@ -17,6 +17,7 @@
 
 #include <components/esm/refid.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace ESM
 {
@@ -277,7 +278,7 @@ namespace MWWorld
 
         virtual std::string_view getModel(const MWWorld::ConstPtr& ptr) const;
 
-        virtual std::string getCorrectedModel(const MWWorld::ConstPtr& ptr) const;
+        virtual VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const;
 
         virtual bool useAnim() const;
         ///< Whether or not to use animated variant of model (default false)
