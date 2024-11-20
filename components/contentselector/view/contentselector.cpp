@@ -320,17 +320,17 @@ void ContentSelectorView::ContentSelector::slotCheckMultiSelectedItems()
 void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()
 {
     QClipboard* clipboard = QApplication::clipboard();
-    QString filepaths;
+    QStringList filepaths;
     for (const QModelIndex& index : ui->addonView->selectionModel()->selectedIndexes())
     {
         int row = mAddonProxyModel->mapToSource(index).row();
         const ContentSelectorModel::EsmFile* file = mContentModel->item(row);
-        filepaths += file->filePath() + "\n";
+        filepaths.push_back(file->filePath());
     }
 
     if (!filepaths.isEmpty())
     {
-        clipboard->setText(filepaths);
+        clipboard->setText(filepaths.join("\n"));
     }
 }
 

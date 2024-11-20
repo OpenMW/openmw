@@ -252,17 +252,17 @@ void Launcher::DataFilesPage::buildView()
 void Launcher::DataFilesPage::slotCopySelectedItemsPaths()
 {
     QClipboard* clipboard = QApplication::clipboard();
-    QString filepaths;
+    QStringList filepaths;
 
     for (QListWidgetItem* item : ui.directoryListWidget->selectedItems())
     {
         QString path = qvariant_cast<Config::SettingValue>(item->data(Qt::UserRole)).originalRepresentation;
-        filepaths += path + "\n";
+        filepaths.push_back(path);
     }
 
     if (!filepaths.isEmpty())
     {
-        clipboard->setText(filepaths);
+        clipboard->setText(filepaths.join("\n"));
     }
 }
 
