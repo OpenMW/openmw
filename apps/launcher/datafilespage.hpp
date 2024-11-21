@@ -42,6 +42,7 @@ namespace Launcher
         ContentSelectorView::ContentSelector* mSelector;
         Ui::DataFilesPage ui;
         QMenu* mArchiveContextMenu;
+        QMenu* mDataFilesContextMenu;
 
     public:
         explicit DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
@@ -79,6 +80,7 @@ namespace Launcher
         void moveSources(QListWidget* sourceList, int step);
 
         void slotShowArchiveContextMenu(const QPoint& pos);
+        void slotShowDataFilesContextMenu(const QPoint& pos);
         void slotCheckMultiSelectedItems();
         void slotUncheckMultiSelectedItems();
 
@@ -129,6 +131,7 @@ namespace Launcher
         void addArchivesFromDir(const QString& dir);
         void buildView();
         void buildArchiveContextMenu();
+        void buildDataFilesContextMenu();
         void setCheckStateForMultiSelectedItems(bool checked);
         void setProfile(int index, bool savePrevious);
         void setProfile(const QString& previous, const QString& current, bool savePrevious);
@@ -140,6 +143,8 @@ namespace Launcher
         void reloadCells(QStringList selectedFiles);
         void refreshDataFilesView();
         void updateNavMeshProgress(int minDataSize);
+        void slotCopySelectedItemsPaths();
+        void slotOpenSelectedItemsPaths();
 
         /**
          * Returns the file paths of all selected content files

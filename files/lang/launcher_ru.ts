@@ -392,6 +392,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>This archive is enabled in an openmw.cfg other than the user one</source>
         <translation>Этот архив включен в openmw.cfg, не являющемся пользовательским</translation>
     </message>
+    <message>
+        <source>&amp;Copy Path(s) to Clipboard</source>
+        <translation>&amp;Скопировать пути в буфер обмена</translation>
+    </message>
+    <message>
+        <source>&amp;Open Path in File Explorer</source>
+        <translation>&amp;Открыть путь в диспетчере файлов</translation>
+    </message>
 </context>
 <context>
     <name>Launcher::GraphicsPage</name>
