@@ -41,17 +41,6 @@ namespace CSVRender
     {
         Q_OBJECT
 
-        enum DropMode
-        {
-            Separate = 0b1,
-
-            Collision = 0b10,
-            Terrain = 0b100,
-
-            CollisionSep = Collision | Separate,
-            TerrainSep = Terrain | Separate,
-        };
-
         CSVWidget::SceneToolMode* mSubMode;
         std::string mSubModeId;
         InstanceSelectionMode* mSelectionMode;
@@ -77,7 +66,7 @@ namespace CSVRender
         osg::Vec3 getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
         void handleSelectDrag(const QPoint& pos);
         void dropInstance(CSVRender::Object* object, float dropHeight);
-        float calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
+        float calculateDropHeight(CSVRender::Object* object, float objectHeight);
         osg::Vec3 calculateSnapPositionRelativeToTarget(osg::Vec3 initalPosition, osg::Vec3 targetPosition,
             osg::Vec3 targetRotation, osg::Vec3 translation, double snap) const;
 
@@ -139,11 +128,7 @@ namespace CSVRender
         void cloneSelectedInstances();
         void getSelectionGroup(const int group);
         void saveSelectionGroup(const int group);
-        void dropSelectedInstancesToCollision();
-        void dropSelectedInstancesToTerrain();
-        void dropSelectedInstancesToCollisionSeparately();
-        void dropSelectedInstancesToTerrainSeparately();
-        void handleDropMethod(DropMode dropMode, QString commandMsg);
+        void dropToCollision();
     };
 
     /// \brief Helper class to handle object mask data in safe way

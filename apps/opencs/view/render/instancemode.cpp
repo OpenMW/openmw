@@ -60,6 +60,24 @@
 #include "pagedworldspacewidget.hpp"
 #include "worldspacewidget.hpp"
 
+namespace
+{
+    constexpr std::string_view sInstanceModeTooltip = R"(
+        Instance editing
+        <ul><li>Use {scene-select-primary} and {scene-select-secondary} to select and unselect instances</li>
+        <li>Use {scene-edit-primary} to manipulate instances</li>
+        <li>Use {scene-select-tertiary} to select a reference object and then {scene-edit-secondary} to snap 
+        selection relative to the reference object</li>
+        <li>Use {scene-submode-move}, {scene-submode-rotate}, {scene-submode-scale} to change to move, rotate, and 
+        scale modes respectively</li>
+        <li>Use {scene-axis-x}, {scene-axis-y}, and {scene-axis-z} to lock changes to X, Y, and Z axes 
+        respectively</li>
+        <li>Use {scene-delete} to delete currently selected objects</li>
+        <li>Use {scene-duplicate} to duplicate instances</li>
+        <li>Use {scene-instance-drop} to drop instances</li></ul>
+)";
+}
+
 int CSVRender::InstanceMode::getSubModeFromId(const std::string& id) const
 {
     return id == "move" ? 0 : (id == "rotate" ? 1 : 2);
@@ -297,7 +315,7 @@ void CSVRender::InstanceMode::setDragAxis(const char axis)
 CSVRender::InstanceMode::InstanceMode(
     WorldspaceWidget* worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget* parent)
     : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-instance"),
-        Mask_Reference | Mask_Terrain, "Instance editing", parent)
+        Mask_Reference | Mask_Terrain, sInstanceModeTooltip.data(), parent)
     , mSubMode(nullptr)
     , mSubModeId("move")
     , mSelectionMode(nullptr)
@@ -320,26 +338,8 @@ CSVRender::InstanceMode::InstanceMode(
     connect(
         duplicateShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::cloneSelectedInstances);
 
-    // Following classes could be simplified by using QSignalMapper, which is obsolete in Qt5.10, but not in Qt4.8 and
-    // Qt5.14
-    CSMPrefs::Shortcut* dropToCollisionShortcut
-        = new CSMPrefs::Shortcut("scene-instance-drop-collision", worldspaceWidget);
-
-    connect(dropToCollisionShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToCollision);
-
-    CSMPrefs::Shortcut* dropToTerrainLevelShortcut
-        = new CSMPrefs::Shortcut("scene-instance-drop-terrain", worldspaceWidget);
-    connect(dropToTerrainLevelShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToTerrain);
-    CSMPrefs::Shortcut* dropToCollisionShortcut2
-        = new CSMPrefs::Shortcut("scene-instance-drop-collision-separately", worldspaceWidget);
-    connect(dropToCollisionShortcut2, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToCollisionSeparately);
-    CSMPrefs::Shortcut* dropToTerrainLevelShortcut2
-        = new CSMPrefs::Shortcut("scene-instance-drop-terrain-separately", worldspaceWidget);
-    connect(dropToTerrainLevelShortcut2, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToTerrainSeparately);
+    connect(new CSMPrefs::Shortcut("scene-instance-drop", worldspaceWidget),
+        qOverload<>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::dropToCollision);
 
     for (short i = 0; i <= 9; i++)
     {
@@ -1254,7 +1254,7 @@ void CSVRender::InstanceMode::dropInstance(CSVRender::Object* object, float drop
     object->setPosition(position.pos);
 }
 
-float CSVRender::InstanceMode::calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight)
+float CSVRender::InstanceMode::calculateDropHeight(CSVRender::Object* object, float objectHeight)
 {
     osg::Vec3d point = object->getPosition().asVec3();
 
@@ -1268,10 +1268,7 @@ float CSVRender::InstanceMode::calculateDropHeight(DropMode dropMode, CSVRender:
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    if (dropMode & Terrain)
-        visitor.setTraversalMask(Mask_Terrain);
-    if (dropMode & Collision)
-        visitor.setTraversalMask(Mask_Terrain | Mask_Reference);
+    visitor.setTraversalMask(Mask_Terrain | Mask_Reference);
 
     mParentNode->accept(visitor);
 
@@ -1286,27 +1283,7 @@ float CSVRender::InstanceMode::calculateDropHeight(DropMode dropMode, CSVRender:
     return 0.0f;
 }
 
-void CSVRender::InstanceMode::dropSelectedInstancesToCollision()
-{
-    handleDropMethod(Collision, "Drop instances to next collision");
-}
-
-void CSVRender::InstanceMode::dropSelectedInstancesToTerrain()
-{
-    handleDropMethod(Terrain, "Drop instances to terrain level");
-}
-
-void CSVRender::InstanceMode::dropSelectedInstancesToCollisionSeparately()
-{
-    handleDropMethod(CollisionSep, "Drop instances to next collision level separately");
-}
-
-void CSVRender::InstanceMode::dropSelectedInstancesToTerrainSeparately()
-{
-    handleDropMethod(TerrainSep, "Drop instances to terrain level separately");
-}
-
-void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString commandMsg)
+void CSVRender::InstanceMode::dropToCollision()
 {
     std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
     if (selection.empty())
@@ -1315,43 +1292,19 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     QUndoStack& undoStack = document.getUndoStack();
 
-    CSMWorld::CommandMacro macro(undoStack, commandMsg);
+    CSMWorld::CommandMacro macro(undoStack, "Drop objects to collision");
 
     DropObjectHeightHandler dropObjectDataHandler(&getWorldspaceWidget());
 
-    if (dropMode & Separate)
-    {
-        int counter = 0;
-        for (osg::ref_ptr<TagBase> tag : selection)
-            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
-            {
-                float objectHeight = dropObjectDataHandler.mObjectHeights[counter];
-                float dropHeight = calculateDropHeight(dropMode, objectTag->mObject, objectHeight);
-                dropInstance(objectTag->mObject, dropHeight);
-                objectTag->mObject->apply(macro);
-                counter++;
-            }
-    }
-    else
-    {
-        float smallestDropHeight = std::numeric_limits<float>::max();
-        int counter = 0;
-        for (osg::ref_ptr<TagBase> tag : selection)
-            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
-            {
-                float objectHeight = dropObjectDataHandler.mObjectHeights[counter];
-                float thisDrop = calculateDropHeight(dropMode, objectTag->mObject, objectHeight);
-                if (thisDrop < smallestDropHeight)
-                    smallestDropHeight = thisDrop;
-                counter++;
-            }
-        for (osg::ref_ptr<TagBase> tag : selection)
-            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
-            {
-                dropInstance(objectTag->mObject, smallestDropHeight);
-                objectTag->mObject->apply(macro);
-            }
-    }
+    int counter = 0;
+    for (osg::ref_ptr<TagBase> tag : selection)
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
+        {
+            float objectHeight = dropObjectDataHandler.mObjectHeights[counter++];
+            float dropHeight = calculateDropHeight(objectTag->mObject, objectHeight);
+            dropInstance(objectTag->mObject, dropHeight);
+            objectTag->mObject->apply(macro);
+        }
 }
 
 CSVRender::DropObjectHeightHandler::DropObjectHeightHandler(WorldspaceWidget* worldspacewidget)

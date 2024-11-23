@@ -336,10 +336,7 @@ void CSMPrefs::State::declare()
     declareShortcut(mValues->mKeyBindings.mSceneSelectTertiary, "Tertiary Select");
     declareModifier(mValues->mKeyBindings.mSceneSpeedModifier, "Speed Modifier");
     declareShortcut(mValues->mKeyBindings.mSceneDelete, "Delete Instance");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrain, "Drop to Terrain Level");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollision, "Drop to Collision");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropTerrainSeparately, "Drop to Terrain Level Separately");
-    declareShortcut(mValues->mKeyBindings.mSceneInstanceDropCollisionSeparately, "Drop to Collision Separately");
+    declareShortcut(mValues->mKeyBindings.mSceneInstanceDrop, "Drop to Collision");
     declareShortcut(mValues->mKeyBindings.mSceneLoadCamCell, "Load Camera Cell");
     declareShortcut(mValues->mKeyBindings.mSceneLoadCamEastcell, "Load East Cell");
     declareShortcut(mValues->mKeyBindings.mSceneLoadCamNorthcell, "Load North Cell");

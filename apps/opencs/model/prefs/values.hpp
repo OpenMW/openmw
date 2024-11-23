@@ -447,14 +447,7 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+LMB" };
         Settings::SettingValue<std::string> mSceneSpeedModifier{ mIndex, sName, "scene-speed-modifier", "Shift" };
         Settings::SettingValue<std::string> mSceneDelete{ mIndex, sName, "scene-delete", "Delete" };
-        Settings::SettingValue<std::string> mSceneInstanceDropTerrain{ mIndex, sName, "scene-instance-drop-terrain",
-            "B" };
-        Settings::SettingValue<std::string> mSceneInstanceDropCollision{ mIndex, sName, "scene-instance-drop-collision",
-            "H" };
-        Settings::SettingValue<std::string> mSceneInstanceDropTerrainSeparately{ mIndex, sName,
-            "scene-instance-drop-terrain-separately", "" };
-        Settings::SettingValue<std::string> mSceneInstanceDropCollisionSeparately{ mIndex, sName,
-            "scene-instance-drop-collision-separately", "" };
+        Settings::SettingValue<std::string> mSceneInstanceDrop{ mIndex, sName, "scene-instance-drop", "F" };
         Settings::SettingValue<std::string> mSceneDuplicate{ mIndex, sName, "scene-duplicate", "Shift+C" };
         Settings::SettingValue<std::string> mSceneLoadCamCell{ mIndex, sName, "scene-load-cam-cell", "Keypad+5" };
         Settings::SettingValue<std::string> mSceneLoadCamEastcell{ mIndex, sName, "scene-load-cam-eastcell",
@@ -505,14 +498,14 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mFreeRight{ mIndex, sName, "free-right", "D" };
         Settings::SettingValue<std::string> mFreeRollLeft{ mIndex, sName, "free-roll-left", "Q" };
         Settings::SettingValue<std::string> mFreeRollRight{ mIndex, sName, "free-roll-right", "E" };
-        Settings::SettingValue<std::string> mFreeSpeedMode{ mIndex, sName, "free-speed-mode", "F" };
+        Settings::SettingValue<std::string> mFreeSpeedMode{ mIndex, sName, "free-speed-mode", "" };
         Settings::SettingValue<std::string> mOrbitUp{ mIndex, sName, "orbit-up", "W" };
         Settings::SettingValue<std::string> mOrbitDown{ mIndex, sName, "orbit-down", "S" };
         Settings::SettingValue<std::string> mOrbitLeft{ mIndex, sName, "orbit-left", "A" };
         Settings::SettingValue<std::string> mOrbitRight{ mIndex, sName, "orbit-right", "D" };
         Settings::SettingValue<std::string> mOrbitRollLeft{ mIndex, sName, "orbit-roll-left", "Q" };
         Settings::SettingValue<std::string> mOrbitRollRight{ mIndex, sName, "orbit-roll-right", "E" };
-        Settings::SettingValue<std::string> mOrbitSpeedMode{ mIndex, sName, "orbit-speed-mode", "F" };
+        Settings::SettingValue<std::string> mOrbitSpeedMode{ mIndex, sName, "orbit-speed-mode", "" };
         Settings::SettingValue<std::string> mOrbitCenterSelection{ mIndex, sName, "orbit-center-selection", "C" };
         Settings::SettingValue<std::string> mScriptEditorComment{ mIndex, sName, "script-editor-comment", "" };
         Settings::SettingValue<std::string> mScriptEditorUncomment{ mIndex, sName, "script-editor-uncomment", "" };
