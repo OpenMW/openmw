@@ -112,20 +112,17 @@ namespace MWGui
     protected:
         void updateLocalMap();
 
-        float mLocalMapZoom = 1.f;
         MWRender::LocalMap* mLocalMapRender;
-
-        const MWWorld::Cell* mActiveCell;
-        bool mHasALastActiveCell = false;
+        const MWWorld::Cell* mActiveCell = nullptr;
         osg::Vec2f mCurPos; // the position of the player in the world (in cell coords)
 
-        MyGUI::ScrollView* mLocalMap;
-        MyGUI::ImageBox* mCompass;
-        bool mFogOfWarToggled;
+        MyGUI::ScrollView* mLocalMap = nullptr;
+        MyGUI::ImageBox* mCompass = nullptr;
+        float mLocalMapZoom = 1.f;
+        bool mHasALastActiveCell = false;
+        bool mFogOfWarToggled = true;
         bool mFogOfWarEnabled;
-
-        int mNumCells; // for convenience, mCellDistance * 2 + 1
-        int mCellDistance;
+        bool mNeedDoorMarkersUpdate = false;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
@@ -185,12 +182,14 @@ namespace MWGui
         void redraw();
         float getWidgetSize() const;
 
-        float mMarkerUpdateTimer;
+        MWGui::LocalMapBase::MapEntry& addMapEntry();
 
-        float mLastDirectionX;
-        float mLastDirectionY;
+        MyGUI::IntRect mGrid{ -1, -1, 1, 1 };
+        int mExtCellDistance = 0;
+        float mMarkerUpdateTimer = 0.f;
 
-        bool mNeedDoorMarkersUpdate;
+        float mLastDirectionX = 0.f;
+        float mLastDirectionY = 0.f;
 
     private:
         void updateDoorMarkers();
