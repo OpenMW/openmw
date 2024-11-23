@@ -18,7 +18,8 @@ namespace SceneUtil
 {
     void setupSoftEffect(osg::Node& node, float size, bool falloff, float falloffDepth)
     {
-        static const osg::ref_ptr<SceneUtil::AutoDepth> depth = new SceneUtil::AutoDepth(osg::Depth::LESS, 0, 1, false);
+        static const osg::ref_ptr<SceneUtil::AutoDepth> depth
+            = new SceneUtil::AutoDepth(osg::Depth::LEQUAL, 0, 1, false);
 
         osg::StateSet* stateset = node.getOrCreateStateSet();
 

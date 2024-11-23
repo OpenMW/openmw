@@ -275,14 +275,14 @@ namespace Resource
             {
                 if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
                 {
-                    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+                    osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
                     depth->setWriteMask(false);
 
                     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 }
                 else if (stateset->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
                 {
-                    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+                    osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
                     depth->setWriteMask(true);
 
                     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);

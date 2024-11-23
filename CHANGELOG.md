@@ -69,6 +69,7 @@
     Bug #6993: Shooting your last round of ammunition causes the attack animation to cancel
     Bug #7009: Falling actors teleport to the ground without receiving any damage on cell loading
     Bug #7034: Misc items defined in one content file are not treated as keys if another content file uses them as such
+    Bug #7040: Incorrect rendering order for Rebirth's Stormfang
     Bug #7042: Weapon follow animations that immediately follow the hit animations cause multiple hits
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
     Bug #7053: Running into objects doesn't trigger GetCollidingPC

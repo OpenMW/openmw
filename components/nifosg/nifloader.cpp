@@ -33,7 +33,6 @@
 
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
-#include <osg/Depth>
 #include <osg/FrontFace>
 #include <osg/Material>
 #include <osg/PolygonMode>
@@ -2011,7 +2010,7 @@ namespace NifOsg
                 stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
                 return;
             }
-            osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
             depth->setWriteMask(depthWrite);
             if (!depthTest)
                 depth->setFunction(osg::Depth::ALWAYS);

@@ -885,12 +885,11 @@ namespace MWRender
         osg::StateSet* queryStateSet = new osg::StateSet;
         if (queryVisible)
         {
-            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth(osg::Depth::LEQUAL);
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
             // This is a trick to make fragments written by the query always use the maximum depth value,
             // without having to retrieve the current far clipping distance.
             // We want the sun glare to be "infinitely" far away.
             double far = SceneUtil::AutoDepth::isReversed() ? 0.0 : 1.0;
-            depth->setFunction(osg::Depth::LEQUAL);
             depth->setZNear(far);
             depth->setZFar(far);
             depth->setWriteMask(false);
