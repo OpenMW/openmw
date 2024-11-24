@@ -61,6 +61,11 @@ namespace ESM
         if (esm.isNextSub("BOUN"))
             esm.getHT(mBounds.mMinX, mBounds.mMinY, mBounds.mMaxX, mBounds.mMaxY);
         esm.getHNOT(mNorthMarkerAngle, "ANGL");
+        if (!esm.getHNOT("CNTR", mCenterX, mCenterY))
+        {
+            mCenterX = (mBounds.mMinX + mBounds.mMaxX) / 2;
+            mCenterY = (mBounds.mMinY + mBounds.mMaxY) / 2;
+        }
         const FormatVersion dataFormat = esm.getFormatVersion();
         while (esm.isNextSub("FTEX"))
         {
@@ -87,13 +92,17 @@ namespace ESM
         {
             esm.writeHNT("BOUN", mBounds);
             esm.writeHNT("ANGL", mNorthMarkerAngle);
+            esm.startSubRecord("CNTR");
+            esm.writeT(mCenterX);
+            esm.writeT(mCenterY);
+            esm.endRecord("CNTR");
         }
-        for (std::vector<FogTexture>::const_iterator it = mFogTextures.begin(); it != mFogTextures.end(); ++it)
+        for (const FogTexture& texture : mFogTextures)
         {
             esm.startSubRecord("FTEX");
-            esm.writeT(it->mX);
-            esm.writeT(it->mY);
-            esm.write(it->mImageData.data(), it->mImageData.size());
+            esm.writeT(texture.mX);
+            esm.writeT(texture.mY);
+            esm.write(texture.mImageData.data(), texture.mImageData.size());
             esm.endRecord("FTEX");
         }
     }

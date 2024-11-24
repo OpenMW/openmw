@@ -28,6 +28,8 @@ namespace ESM
             float mMaxX;
             float mMaxY;
         } mBounds;
+        float mCenterX;
+        float mCenterY;
 
         std::vector<FogTexture> mFogTextures;
 

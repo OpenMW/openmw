@@ -108,9 +108,6 @@ namespace MWRender
         typedef std::vector<osg::ref_ptr<LocalMapRenderToTexture>> RTTVector;
         RTTVector mLocalMapRTTs;
 
-        typedef std::set<std::pair<int, int>> Grid;
-        Grid mCurrentGrid;
-
         enum NeighbourCellFlag : std::uint8_t
         {
             NeighbourCellTopLeft = 1,
@@ -160,8 +157,9 @@ namespace MWRender
         void setupRenderToTexture(
             int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
 
-        bool mInterior;
         osg::BoundingBox mBounds;
+        osg::Vec2f mCenter;
+        bool mInterior;
 
         std::uint8_t getExteriorNeighbourFlags(int cellX, int cellY) const;
     };
