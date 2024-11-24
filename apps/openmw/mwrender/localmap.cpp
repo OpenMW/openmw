@@ -140,6 +140,8 @@ namespace MWRender
             fog->mCenterX = mCenter.x();
             fog->mCenterY = mCenter.y();
 
+            fog->mFogTextures.reserve(segments.first * segments.second);
+
             for (int x = 0; x < segments.first; ++x)
             {
                 for (int y = 0; y < segments.second; ++y)
