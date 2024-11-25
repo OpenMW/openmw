@@ -221,6 +221,7 @@ osg::Group {
           AttributeList 1 {
             osg::Depth {
               UniqueID 10
+              Function LEQUAL
             }
             Value OFF
           }
