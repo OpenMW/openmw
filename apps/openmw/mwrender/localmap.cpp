@@ -579,7 +579,7 @@ namespace MWRender
     MyGUI::IntRect LocalMap::getInteriorGrid() const
     {
         auto segments = divideIntoSegments(mBounds, mMapWorldSize);
-        return { 0, 0, segments.first - 1, segments.second - 1 };
+        return { -1, -1, segments.first, segments.second };
     }
 
     void LocalMap::MapSegment::createFogOfWarTexture()
