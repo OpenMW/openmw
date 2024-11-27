@@ -137,6 +137,8 @@ namespace MWRender
             fog->mBounds.mMinY = mBounds.yMin();
             fog->mBounds.mMaxY = mBounds.yMax();
             fog->mNorthMarkerAngle = mAngle;
+            fog->mCenterX = mCenter.x();
+            fog->mCenterY = mCenter.y();
 
             fog->mFogTextures.reserve(segments.first * segments.second);
 
@@ -145,15 +147,12 @@ namespace MWRender
                 for (int y = 0; y < segments.second; ++y)
                 {
                     const MapSegment& segment = mInteriorSegments[std::make_pair(x, y)];
-
-                    fog->mFogTextures.emplace_back();
-
-                    // saving even if !segment.mHasFogState so we don't mess up the segmenting
-                    // plus, older openmw versions can't deal with empty images
-                    segment.saveFogOfWar(fog->mFogTextures.back());
-
-                    fog->mFogTextures.back().mX = x;
-                    fog->mFogTextures.back().mY = y;
+                    if (!segment.mHasFogState)
+                        continue;
+                    ESM::FogTexture& texture = fog->mFogTextures.emplace_back();
+                    segment.saveFogOfWar(texture);
+                    texture.mX = x;
+                    texture.mY = y;
                 }
             }
 
@@ -332,22 +331,20 @@ namespace MWRender
 
         float zMin = mBounds.zMin();
         float zMax = mBounds.zMax();
+        mCenter = osg::Vec2f(mBounds.center().x(), mBounds.center().y());
 
         // If there is fog state in the CellStore (e.g. when it came from a savegame) we need to do some checks
         // to see if this state is still valid.
         // Both the cell bounds and the NorthMarker rotation could be changed by the content files or exchanged models.
         // If they changed by too much then parts of the interior might not be covered by the map anymore.
         // The following code detects this, and discards the CellStore's fog state if it needs to.
-        std::vector<std::pair<int, int>> segmentMappings;
-        if (cell->getFog())
+        int xOffset = 0;
+        int yOffset = 0;
+        if (const ESM::FogState* fog = cell->getFog())
         {
-            ESM::FogState* fog = cell->getFog();
-
             if (std::abs(mAngle - fog->mNorthMarkerAngle) < osg::DegreesToRadians(5.f))
             {
                 // Expand mBounds so the saved textures fit the same grid
-                int xOffset = 0;
-                int yOffset = 0;
                 if (fog->mBounds.mMinX < mBounds.xMin())
                 {
                     mBounds.xMin() = fog->mBounds.mMinX;
@@ -355,8 +352,7 @@ namespace MWRender
                 else if (fog->mBounds.mMinX > mBounds.xMin())
                 {
                     float diff = fog->mBounds.mMinX - mBounds.xMin();
-                    xOffset += diff / mMapWorldSize;
-                    xOffset++;
+                    xOffset = std::ceil(diff / mMapWorldSize);
                     mBounds.xMin() = fog->mBounds.mMinX - xOffset * mMapWorldSize;
                 }
                 if (fog->mBounds.mMinY < mBounds.yMin())
@@ -366,8 +362,7 @@ namespace MWRender
                 else if (fog->mBounds.mMinY > mBounds.yMin())
                 {
                     float diff = fog->mBounds.mMinY - mBounds.yMin();
-                    yOffset += diff / mMapWorldSize;
-                    yOffset++;
+                    yOffset = std::ceil(diff / mMapWorldSize);
                     mBounds.yMin() = fog->mBounds.mMinY - yOffset * mMapWorldSize;
                 }
                 if (fog->mBounds.mMaxX > mBounds.xMax())
@@ -378,22 +373,14 @@ namespace MWRender
                 if (xOffset != 0 || yOffset != 0)
                     Log(Debug::Warning) << "Warning: expanding fog by " << xOffset << ", " << yOffset;
 
-                const auto& textures = fog->mFogTextures;
-                segmentMappings.reserve(textures.size());
-                osg::BoundingBox savedBounds{ fog->mBounds.mMinX, fog->mBounds.mMinY, 0, fog->mBounds.mMaxX,
-                    fog->mBounds.mMaxY, 0 };
-                auto segments = divideIntoSegments(savedBounds, mMapWorldSize);
-                for (int x = 0; x < segments.first; ++x)
-                    for (int y = 0; y < segments.second; ++y)
-                        segmentMappings.emplace_back(std::make_pair(x + xOffset, y + yOffset));
-
                 mAngle = fog->mNorthMarkerAngle;
+                mCenter.x() = fog->mCenterX;
+                mCenter.y() = fog->mCenterY;
             }
         }
 
         osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
 
-        osg::Vec2f center(mBounds.center().x(), mBounds.center().y());
         osg::Quat cameraOrient(mAngle, osg::Vec3d(0, 0, -1));
 
         auto segments = divideIntoSegments(mBounds, mMapWorldSize);
@@ -404,10 +391,10 @@ namespace MWRender
                 osg::Vec2f start = min + osg::Vec2f(mMapWorldSize * x, mMapWorldSize * y);
                 osg::Vec2f newcenter = start + osg::Vec2f(mMapWorldSize / 2.f, mMapWorldSize / 2.f);
 
-                osg::Vec2f a = newcenter - center;
+                osg::Vec2f a = newcenter - mCenter;
                 osg::Vec3f rotatedCenter = cameraOrient * (osg::Vec3f(a.x(), a.y(), 0));
 
-                osg::Vec2f pos = osg::Vec2f(rotatedCenter.x(), rotatedCenter.y()) + center;
+                osg::Vec2f pos = osg::Vec2f(rotatedCenter.x(), rotatedCenter.y()) + mCenter;
 
                 setupRenderToTexture(x, y, pos.x(), pos.y(), osg::Vec3f(north.x(), north.y(), 0.f), zMin, zMax);
 
@@ -416,14 +403,16 @@ namespace MWRender
                 if (!segment.mFogOfWarImage)
                 {
                     bool loaded = false;
-                    for (size_t index{}; index < segmentMappings.size(); index++)
+                    if (const ESM::FogState* fog = cell->getFog())
                     {
-                        if (segmentMappings[index] == coords)
+                        auto match = std::find_if(
+                            fog->mFogTextures.begin(), fog->mFogTextures.end(), [&](const ESM::FogTexture& texture) {
+                                return texture.mX == x - xOffset && texture.mY == y - yOffset;
+                            });
+                        if (match != fog->mFogTextures.end())
                         {
-                            ESM::FogState* fog = cell->getFog();
-                            segment.loadFogOfWar(fog->mFogTextures[index]);
+                            segment.loadFogOfWar(*match);
                             loaded = true;
-                            break;
                         }
                     }
                     if (!loaded)
@@ -435,7 +424,7 @@ namespace MWRender
 
     void LocalMap::worldToInteriorMapPosition(osg::Vec2f pos, float& nX, float& nY, int& x, int& y)
     {
-        pos = rotatePoint(pos, osg::Vec2f(mBounds.center().x(), mBounds.center().y()), mAngle);
+        pos = rotatePoint(pos, mCenter, mAngle);
 
         osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
 
@@ -451,7 +440,7 @@ namespace MWRender
         osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
         osg::Vec2f pos(mMapWorldSize * (nX + x) + min.x(), mMapWorldSize * (1.0f - nY + y) + min.y());
 
-        pos = rotatePoint(pos, osg::Vec2f(mBounds.center().x(), mBounds.center().y()), -mAngle);
+        pos = rotatePoint(pos, mCenter, -mAngle);
         return pos;
     }
 
@@ -590,7 +579,7 @@ namespace MWRender
     MyGUI::IntRect LocalMap::getInteriorGrid() const
     {
         auto segments = divideIntoSegments(mBounds, mMapWorldSize);
-        return { 0, 0, segments.first - 1, segments.second - 1 };
+        return { -1, -1, segments.first, segments.second };
     }
 
     void LocalMap::MapSegment::createFogOfWarTexture()
