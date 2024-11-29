@@ -36,9 +36,9 @@ CSVDoc::FileDialog::~FileDialog() = default;
 
 void CSVDoc::FileDialog::addFiles(const std::vector<std::filesystem::path>& dataDirs)
 {
-    for (auto iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
+    for (const auto& dir : dataDirs)
     {
-        QString path = Files::pathToQString(*iter);
+        QString path = Files::pathToQString(dir);
         mSelector->addFiles(path);
     }
     mSelector->sortFiles();
