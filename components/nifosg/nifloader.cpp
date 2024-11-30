@@ -1568,6 +1568,9 @@ namespace NifOsg
                 }
                 rig->setBoneInfo(std::move(boneInfo));
                 rig->setInfluences(influences);
+                rig->setTransform(data->mTransform.toMatrix());
+                if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
+                    rig->setRootBone(rootBone->mName);
 
                 drawable = rig;
             }

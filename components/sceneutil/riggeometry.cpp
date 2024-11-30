@@ -7,6 +7,7 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/resource/scenemanager.hpp>
 
 #include "skeleton.hpp"
@@ -181,6 +182,12 @@ namespace SceneUtil
             ++boneInfo;
         }
 
+        osg::Matrixf transform;
+        if (mSkinToSkelMatrix)
+            transform = (*mSkinToSkelMatrix) * mData->mTransform;
+        else
+            transform = mData->mTransform;
+
         for (const auto& [influences, vertices] : mData->mInfluences)
         {
             osg::Matrixf resultMat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
@@ -196,8 +203,7 @@ namespace SceneUtil
                         *resultMatPtr += *boneMatPtr * weight;
             }
 
-            if (mGeomToSkelMatrix)
-                resultMat *= (*mGeomToSkelMatrix);
+            resultMat *= transform;
 
             for (unsigned short vertex : vertices)
             {
@@ -242,9 +248,14 @@ namespace SceneUtil
 
         mSkeleton->updateBoneMatrices(nv->getTraversalNumber());
 
-        updateGeomToSkelMatrix(nv->getNodePath());
+        updateSkinToSkelMatrix(nv->getNodePath());
 
         osg::BoundingBox box;
+        osg::Matrixf transform;
+        if (mSkinToSkelMatrix)
+            transform = (*mSkinToSkelMatrix) * mData->mTransform;
+        else
+            transform = mData->mTransform;
 
         size_t index = 0;
         for (const BoneInfo& info : mData->mBones)
@@ -254,10 +265,7 @@ namespace SceneUtil
                 continue;
 
             osg::BoundingSpheref bs = info.mBoundSphere;
-            if (mGeomToSkelMatrix)
-                transformBoundingSphere(bone->mMatrixInSkeletonSpace * (*mGeomToSkelMatrix), bs);
-            else
-                transformBoundingSphere(bone->mMatrixInSkeletonSpace, bs);
+            transformBoundingSphere(bone->mMatrixInSkeletonSpace * transform, bs);
             box.expandBy(bs);
         }
 
@@ -280,31 +288,39 @@ namespace SceneUtil
         }
     }
 
-    void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
+    void RigGeometry::updateSkinToSkelMatrix(const osg::NodePath& nodePath)
     {
-        bool foundSkel = false;
-        osg::RefMatrix* geomToSkelMatrix = mGeomToSkelMatrix;
-        if (geomToSkelMatrix)
-            geomToSkelMatrix->makeIdentity();
-        for (osg::NodePath::const_iterator it = nodePath.begin(); it != nodePath.end() - 1; ++it)
+        if (mSkinToSkelMatrix)
+            mSkinToSkelMatrix->makeIdentity();
+        auto skeletonRoot = std::find(nodePath.begin(), nodePath.end(), mSkeleton);
+        if (skeletonRoot == nodePath.end())
+            return;
+        skeletonRoot++;
+        auto skinRoot = nodePath.end();
+        if (!mData->mRootBone.empty())
+            skinRoot = std::find_if(skeletonRoot, nodePath.end(),
+                [&](const osg::Node* node) { return Misc::StringUtils::ciEqual(node->getName(), mData->mRootBone); });
+        if (skinRoot == nodePath.end())
         {
-            osg::Node* node = *it;
-            if (!foundSkel)
+            // Failed to find skin root, cancel out everything up till the trishape.
+            // Our parent node is the trishape's transform
+            skinRoot = nodePath.end() - 2;
+            if ((*skinRoot)->getName() != getName()) // but maybe it can get optimized out
+                skinRoot++;
+        }
+        else
+            skinRoot++;
+        for (auto it = skeletonRoot; it != skinRoot; ++it)
+        {
+            const osg::Node* node = *it;
+            if (const osg::Transform* trans = node->asTransform())
             {
-                if (node == mSkeleton)
-                    foundSkel = true;
-            }
-            else
-            {
-                if (osg::Transform* trans = node->asTransform())
-                {
-                    osg::MatrixTransform* matrixTrans = trans->asMatrixTransform();
-                    if (matrixTrans && matrixTrans->getMatrix().isIdentity())
-                        continue;
-                    if (!geomToSkelMatrix)
-                        geomToSkelMatrix = mGeomToSkelMatrix = new osg::RefMatrix;
-                    trans->computeWorldToLocalMatrix(*geomToSkelMatrix, nullptr);
-                }
+                const osg::MatrixTransform* matrixTrans = trans->asMatrixTransform();
+                if (matrixTrans && matrixTrans->getMatrix().isIdentity())
+                    continue;
+                if (!mSkinToSkelMatrix)
+                    mSkinToSkelMatrix = new osg::RefMatrix;
+                trans->computeWorldToLocalMatrix(*mSkinToSkelMatrix, nullptr);
             }
         }
     }
@@ -350,6 +366,20 @@ namespace SceneUtil
 
         mData->mInfluences.reserve(influencesToVertices.size());
         mData->mInfluences.assign(influencesToVertices.begin(), influencesToVertices.end());
+    }
+
+    void RigGeometry::setTransform(osg::Matrixf&& transform)
+    {
+        if (!mData)
+            mData = new InfluenceData;
+        mData->mTransform = transform;
+    }
+
+    void RigGeometry::setRootBone(std::string_view name)
+    {
+        if (!mData)
+            mData = new InfluenceData;
+        mData->mRootBone = name;
     }
 
     void RigGeometry::accept(osg::NodeVisitor& nv)
