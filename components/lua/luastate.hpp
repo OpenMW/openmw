@@ -372,6 +372,12 @@ namespace LuaUtil
     }
     sol::table getMutableFromReadOnly(const sol::userdata&);
 
+    template <class T>
+    void copyVectorToTable(const std::vector<T>& v, sol::table& out)
+    {
+        for (const T& t : v)
+            out.add(t);
+    }
 }
 
 #endif // COMPONENTS_LUA_LUASTATE_H

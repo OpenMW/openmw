@@ -176,8 +176,8 @@ testing.registerLocalTest('findPath',
         }
         local status, path = nearby.findPath(src, dst, options)
         testing.expectEqual(status, nearby.FIND_PATH_STATUS.Success, 'Status')
-        testing.expectLessOrEqual((path[path:size()] - dst):length(), 1,
-            'Last path point '  .. testing.formatActualExpected(path[path:size()], dst))
+        testing.expectLessOrEqual((path[#path] - dst):length(), 1,
+            'Last path point '  .. testing.formatActualExpected(path[#path], dst))
     end)
 
 testing.registerLocalTest('findRandomPointAroundCircle',
