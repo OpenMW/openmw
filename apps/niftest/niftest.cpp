@@ -141,7 +141,7 @@ bool readFile(
         {
             case FileClass::NIF:
             {
-                Nif::NIFFile file(Files::pathToUnicodeString(fullPath));
+                Nif::NIFFile file(VFS::Path::Normalized(Files::pathToUnicodeString(fullPath)));
                 Nif::Reader reader(file, nullptr);
                 if (vfs != nullptr)
                     reader.parse(vfs->get(pathStr));

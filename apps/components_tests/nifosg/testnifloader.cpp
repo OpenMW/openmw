@@ -26,6 +26,8 @@ namespace
     using namespace NifOsg;
     using namespace Nif::Testing;
 
+    constexpr VFS::Path::NormalizedView testNif("test.nif");
+
     struct BaseNifOsgLoaderTest
     {
         VFS::Manager mVfs;
@@ -70,7 +72,7 @@ namespace
     {
         Nif::NiAVObject node;
         init(node);
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&node);
         auto result = Loader::load(file, &mImageManager, &mMaterialManager);
         EXPECT_EQ(serialize(*result), R"(
@@ -260,7 +262,7 @@ osg::Group {
         property.mController = nullptr;
         property.mType = GetParam().mShaderType;
         node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&node);
         auto result = Loader::load(file, &mImageManager, &mMaterialManager);
         EXPECT_EQ(serialize(*result), formatOsgNodeForBSShaderProperty(GetParam().mExpectedShaderPrefix));
@@ -290,7 +292,7 @@ osg::Group {
         property.mShaderFlags1 |= Nif::BSShaderFlags1::BSSFlag1_DepthTest;
         property.mShaderFlags2 |= Nif::BSShaderFlags2::BSSFlag2_DepthWrite;
         node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&node);
         auto result = Loader::load(file, &mImageManager, &mMaterialManager);
         EXPECT_EQ(serialize(*result), formatOsgNodeForBSLightingShaderProperty(GetParam().mExpectedShaderPrefix));
