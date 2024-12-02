@@ -112,8 +112,7 @@ namespace Nif
             { "NiGeomMorpherController", &construct<NiGeomMorpherController, RC_NiGeomMorpherController> },
             { "NiKeyframeController", &construct<NiKeyframeController, RC_NiKeyframeController> },
             { "NiLookAtController", &construct<NiLookAtController, RC_NiLookAtController> },
-            // FIXME: NiLightColorController should have its own struct
-            { "NiLightColorController", &construct<NiMaterialColorController, RC_NiLightColorController> },
+            { "NiLightColorController", &construct<NiLightColorController, RC_NiLightColorController> },
             { "NiMaterialColorController", &construct<NiMaterialColorController, RC_NiMaterialColorController> },
             { "NiPathController", &construct<NiPathController, RC_NiPathController> },
             { "NiRollController", &construct<NiRollController, RC_NiRollController> },

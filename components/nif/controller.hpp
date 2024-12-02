@@ -161,6 +161,21 @@ namespace Nif
     };
     using NiBSPArrayController = NiParticleSystemController;
 
+    struct NiLightColorController : public NiPoint3InterpController
+    {
+        enum class Mode
+        {
+            DiffuseSpecular = 0,
+            Ambient = 1,
+        };
+
+        NiPosDataPtr mData;
+        Mode mMode = Mode::DiffuseSpecular;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiMaterialColorController : public NiPoint3InterpController
     {
         enum class TargetColor

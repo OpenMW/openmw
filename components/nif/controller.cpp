@@ -231,12 +231,32 @@ namespace Nif
         mCollider.post(nif);
     }
 
+    void NiLightColorController::read(NIFStream* nif)
+    {
+        NiPoint3InterpController::read(nif);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+            mMode = static_cast<Mode>(nif->get<uint16_t>());
+        else
+            mMode = static_cast<Mode>((mFlags >> 4) & 1);
+
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+            mData.read(nif);
+    }
+
+    void NiLightColorController::post(Reader& nif)
+    {
+        NiPoint3InterpController::post(nif);
+
+        mData.post(nif);
+    }
+
     void NiMaterialColorController::read(NIFStream* nif)
     {
         NiPoint3InterpController::read(nif);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            mTargetColor = static_cast<TargetColor>(nif->get<uint16_t>() & 3);
+            mTargetColor = static_cast<TargetColor>(nif->get<uint16_t>());
         else
             mTargetColor = static_cast<TargetColor>((mFlags >> 4) & 3);
 
