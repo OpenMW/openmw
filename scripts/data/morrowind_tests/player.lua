@@ -42,7 +42,7 @@ testing.registerLocalTest('Guard in Imperial Prison Ship should find path (#7241
         }
         local status, path = nearby.findPath(src, dst, options)
         testing.expectEqual(status, nearby.FIND_PATH_STATUS.Success, 'Status')
-        testing.expectLessOrEqual((util.vector2(path[#path].x, path[#path]) - util.vector2(dst.x, dst.y)):length(), 1, 'Last path point x, y')
+        testing.expectLessOrEqual((util.vector2(path[#path].x, path[#path].y) - util.vector2(dst.x, dst.y)):length(), 1, 'Last path point x, y')
         testing.expectLessOrEqual(path[#path].z - dst.z, 20, 'Last path point z')
         if agentBounds.shapeType == nearby.COLLISION_SHAPE_TYPE.Aabb then
             testing.expectThat(path, testing.elementsAreArray({
