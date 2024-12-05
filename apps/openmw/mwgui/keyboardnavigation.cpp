@@ -183,10 +183,6 @@ namespace MWGui
                 return switchFocus(D_Down, false);
             case MyGUI::KeyCode::Tab:
                 return switchFocus(MyGUI::InputManager::getInstance().isShiftPressed() ? D_Prev : D_Next, true);
-            case MyGUI::KeyCode::Period:
-                return switchFocus(D_Prev, true);
-            case MyGUI::KeyCode::Slash:
-                return switchFocus(D_Next, true);
             case MyGUI::KeyCode::Return:
             case MyGUI::KeyCode::NumpadEnter:
             case MyGUI::KeyCode::Space:
