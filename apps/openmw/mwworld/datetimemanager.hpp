@@ -29,7 +29,11 @@ namespace MWWorld
         float getGameTimeScale() const { return mGameTimeScale; }
         void setGameTimeScale(float scale); // game time to simulation time ratio
 
-        // Simulation time (the number of seconds passed from the beginning of the game).
+        // Rendering simulation time (summary simulation time of rendering frames since application start).
+        double getRenderingSimulationTime() const { return mRenderingSimulationTime; }
+        void setRenderingSimulationTime(double t) { mRenderingSimulationTime = t; }
+
+        // World simulation time (the number of seconds passed from the beginning of the game).
         double getSimulationTime() const { return mSimulationTime; }
         void setSimulationTime(double t) { mSimulationTime = t; }
         float getSimulationTimeScale() const { return mSimulationTimeScale; }
@@ -49,8 +53,8 @@ namespace MWWorld
     private:
         friend class World;
         void setup(Globals& globalVariables);
-        bool updateGlobalInt(GlobalVariableName name, int value);
-        bool updateGlobalFloat(GlobalVariableName name, float value);
+        void updateGlobalInt(GlobalVariableName name, int value);
+        void updateGlobalFloat(GlobalVariableName name, float value);
         void advanceTime(double hours, Globals& globalVariables);
 
         void setHour(double hour);
@@ -64,6 +68,7 @@ namespace MWWorld
         float mGameHour = 0.f;
         float mGameTimeScale = 0.f;
         float mSimulationTimeScale = 1.0;
+        double mRenderingSimulationTime = 0.0;
         double mSimulationTime = 0.0;
         bool mPaused = false;
         std::set<std::string, std::less<>> mPausedTags;

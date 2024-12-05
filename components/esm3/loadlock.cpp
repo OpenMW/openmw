@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Lockpick::Data> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mWeight, v.mValue, v.mQuality, v.mUses);
+    }
+
     void Lockpick::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -28,7 +36,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("LKDT"):
-                    esm.getHTSized<16>(mData);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -66,7 +74,7 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
 
-        esm.writeHNT("LKDT", mData, 16);
+        esm.writeNamedComposite("LKDT", mData);
         esm.writeHNORefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
     }

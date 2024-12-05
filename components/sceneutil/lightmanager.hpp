@@ -12,7 +12,8 @@
 #include <osg/observer_ptr>
 
 #include <components/sceneutil/nodecallback.hpp>
-#include <components/settings/settings.hpp>
+
+#include "lightingmethod.hpp"
 
 namespace SceneUtil
 {
@@ -80,13 +81,6 @@ namespace SceneUtil
         std::array<size_t, 2> mIndex;
         std::array<osg::ref_ptr<osg::Uniform>, 2> mUniformBuffers;
         std::array<osg::ref_ptr<osg::Uniform>, 2> mUniformCount;
-    };
-
-    enum class LightingMethod
-    {
-        FFP,
-        PerObjectUniform,
-        SingleUBO,
     };
 
     /// LightSource managed by a LightManager.
@@ -186,6 +180,15 @@ namespace SceneUtil
         osg::ref_ptr<LightBuffer> mTemplate;
     };
 
+    struct LightSettings
+    {
+        LightingMethod mLightingMethod = LightingMethod::FFP;
+        int mMaxLights = 0;
+        float mMaximumLightDistance = 0;
+        float mLightFadeStart = 0;
+        float mLightBoundsMultiplier = 0;
+    };
+
     /// @brief Decorator node implementing the rendering of any number of LightSources that can be anywhere in the
     /// subgraph.
     class LightManager : public osg::Group
@@ -212,7 +215,7 @@ namespace SceneUtil
 
         META_Node(SceneUtil, LightManager)
 
-        LightManager(bool ffp = true);
+        explicit LightManager(const LightSettings& settings = LightSettings{});
 
         LightManager(const LightManager& copy, const osg::CopyOp& copyop);
 
@@ -264,10 +267,10 @@ namespace SceneUtil
 
         std::map<std::string, std::string> getLightDefines() const;
 
-        void processChangedSettings(const Settings::CategorySettingVector& changed);
+        void processChangedSettings(float lightBoundsMultiplier, float maximumLightDistance, float lightFadeStart);
 
         /// Not thread safe, it is the responsibility of the caller to stop/start threading on the viewer
-        void updateMaxLights();
+        void updateMaxLights(int maxLights);
 
         osg::ref_ptr<osg::Uniform> generateLightBufferUniform(const osg::Matrixf& sun);
 
@@ -281,7 +284,7 @@ namespace SceneUtil
         void initPerObjectUniform(int targetLights);
         void initSingleUBO(int targetLights);
 
-        void updateSettings();
+        void updateSettings(float lightBoundsMultiplier, float maximumLightDistance, float lightFadeStart);
 
         void setLightingMethod(LightingMethod method);
         void setMaxLights(int value);

@@ -5,6 +5,8 @@
 
 #include <osgParticle/ParticleSystem>
 
+#include <osgAnimation/Bone>
+
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
@@ -13,7 +15,6 @@
 
 namespace SceneUtil
 {
-
     bool FindByNameVisitor::checkGroup(osg::Group& group)
     {
         if (Misc::StringUtils::ciEqual(group.getName(), mNameToFind))
@@ -21,6 +22,7 @@ namespace SceneUtil
             mFoundNode = &group;
             return true;
         }
+
         return false;
     }
 
@@ -46,21 +48,19 @@ namespace SceneUtil
 
     void FindByNameVisitor::apply(osg::Geometry&) {}
 
+    void NodeMapVisitorBoneOnly::apply(osg::MatrixTransform& trans)
+    {
+        // Choose first found bone in file
+        if (dynamic_cast<osgAnimation::Bone*>(&trans) != nullptr)
+            mMap.emplace(trans.getName(), &trans);
+
+        traverse(trans);
+    }
+
     void NodeMapVisitor::apply(osg::MatrixTransform& trans)
     {
         // Choose first found node in file
-
-        if (trans.libraryName() == std::string_view("osgAnimation"))
-        {
-            std::string nodeName = trans.getName();
-            // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses
-            // whitespace-separated names)
-            std::replace(nodeName.begin(), nodeName.end(), '_', ' ');
-            mMap.emplace(nodeName, &trans);
-        }
-        else
-            mMap.emplace(trans.getName(), &trans);
-
+        mMap.emplace(trans.getName(), &trans);
         traverse(trans);
     }
 

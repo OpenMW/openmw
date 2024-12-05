@@ -107,6 +107,8 @@ Builtin Uniforms
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.deltaSimulationTime``  | The change in `omw.simulationTime`               |
 +-------------+------------------------------+--------------------------------------------------+
+| int         | ``omw.frameNumber``          | The current frame number                         |
++-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.windSpeed``            | The current wind speed                           |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.weatherTransition``    | The transition factor between weathers [0, 1]    |
@@ -126,45 +128,49 @@ Builtin Uniforms
 Builtin Macros
 ##############
 
-+-----------------------+----------------+----------------------------------------------------------------------+
-| Macro                 | Definition     | Description                                                          |
-+=======================+================+======================================================================+
-|``OMW_REVERSE_Z``      | ``0`` or ``1`` | Whether a reversed depth buffer is in use.                           |
-|                       |                |                                                                      |
-|                       |                | ``0``  Depth sampler will be in range [1, 0]                         |
-|                       |                |                                                                      |
-|                       |                | ``1``  Depth sampler will be in range [0, 1]                         |
-+-----------------------+----------------+----------------------------------------------------------------------+
-|``OMW_RADIAL_FOG``     | ``0`` or ``1`` | Whether radial fog is in use.                                        |
-|                       |                |                                                                      |
-|                       |                | ``0``  Fog is linear                                                 |
-|                       |                |                                                                      |
-|                       |                | ``1``  Fog is radial                                                 |
-+-----------------------+----------------+----------------------------------------------------------------------+
-|``OMW_EXPONENTIAL_FOG``| ``0`` or ``1`` | Whether exponential fog is in use.                                   |
-|                       |                |                                                                      |
-|                       |                | ``0``  Fog is linear                                                 |
-|                       |                |                                                                      |
-|                       |                | ``1``  Fog is exponential                                            |
-+-----------------------+----------------+----------------------------------------------------------------------+
-| ``OMW_HDR``           | ``0`` or ``1`` | Whether average scene luminance is computed every frame.             |
-|                       |                |                                                                      |
-|                       |                | ``0``  Average scene luminance is not computed                       |
-|                       |                |                                                                      |
-|                       |                | ``1``  Average scene luminance is computed                           |
-+-----------------------+----------------+----------------------------------------------------------------------+
-|  ``OMW_NORMALS``      | ``0`` or ``1`` | Whether normals are available as a sampler in the technique.         |
-|                       |                |                                                                      |
-|                       |                | ``0``  Normals are not available                                     |
-|                       |                |                                                                      |
-|                       |                | ``1``  Normals are available.                                        |
-+-----------------------+----------------+----------------------------------------------------------------------+
-| ``OMW_MULTIVIEW``     | ``0`` or ``1`` | Whether multiview rendering is in use.                               |
-|                       |                |                                                                      |
-|                       |                | ``0``  Multiview not in use                                          |
-|                       |                |                                                                      |
-|                       |                | ``1``  Multiview in use.                                             |
-+-----------------------+----------------+----------------------------------------------------------------------+
++-----------------------+-----------------+----------------------------------------------------------------------+
+| Macro                 | Definition      | Description                                                          |
++=======================+=================+======================================================================+
+|``OMW_REVERSE_Z``      | ``0`` or ``1``  | Whether a reversed depth buffer is in use.                           |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Depth sampler will be in range [1, 0]                         |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Depth sampler will be in range [0, 1]                         |
++-----------------------+-----------------+----------------------------------------------------------------------+
+|``OMW_RADIAL_FOG``     | ``0`` or ``1``  | Whether radial fog is in use.                                        |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Fog is linear                                                 |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Fog is radial                                                 |
++-----------------------+-----------------+----------------------------------------------------------------------+
+|``OMW_EXPONENTIAL_FOG``| ``0`` or ``1``  | Whether exponential fog is in use.                                   |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Fog is linear                                                 |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Fog is exponential                                            |
++-----------------------+-----------------+----------------------------------------------------------------------+
+| ``OMW_HDR``           | ``0`` or ``1``  | Whether average scene luminance is computed every frame.             |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Average scene luminance is not computed                       |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Average scene luminance is computed                           |
++-----------------------+-----------------+----------------------------------------------------------------------+
+|  ``OMW_NORMALS``      | ``0`` or ``1``  | Whether normals are available as a sampler in the technique.         |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Normals are not available                                     |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Normals are available.                                        |
++-----------------------+-----------------+----------------------------------------------------------------------+
+| ``OMW_MULTIVIEW``     | ``0`` or ``1``  | Whether multiview rendering is in use.                               |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Multiview not in use                                          |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Multiview in use.                                             |
++-----------------------+-----------------+----------------------------------------------------------------------+
+| ``OMW_API_VERSION``   | |ppApiRevision| | The revision of OpenMW postprocessing API.                           |
+|                       |                 | It is an integer that is incremented every time the API is changed.  |
+|                       |                 | This was added in 0.49, so it will be undefined in 0.48.             |
++-----------------------+-----------------+----------------------------------------------------------------------+
 
 
 Builtin Functions
@@ -189,19 +195,30 @@ The following functions can be accessed in any fragment or vertex shader.
 +--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``vec4 omw_GetLastPass(vec2 uv)``                | Returns RGBA color output of the last pass                                    |
 +--------------------------------------------------+-------------------------------------------------------------------------------+
-| ``vec3 omw_GetNormals(vec2 uv)``                 | Returns normalized worldspace normals [-1, 1]                                 |
-|                                                  |                                                                               |
-|                                                  | The values in sampler are in [0, 1] but are transformed to [-1, 1]            |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
+| ``vec3 omw_GetNormals(vec2 uv)``                 | Returns normalized view-space normals [-1, 1]                                 |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec3 omw_GetNormalsWorldSpace(vec2 uv)``       | Returns normalized world-space normals [-1, 1]                                |
++--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``vec3 omw_GetWorldPosFromUV(vec2 uv)``          | Returns world position for given uv coordinate.                               |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
++--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``float omw_GetLinearDepth(vec2 uv)``            | Returns the depth in game units for given uv coordinate.                      |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
++--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``float omw_EstimateFogCoverageFromUV(vec2 uv)`` | Returns a fog coverage in the range from 0.0 (no fog) and 1.0 (full fog)      |
 |                                                  |                                                                               |
 |                                                  | Calculates an estimated fog coverage for given uv coordinate.                 |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
-
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``int omw_GetPointLightCount()``                 | Returns the number of point lights available to sample from in the scene.     |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec3 omw_GetPointLightWorldPos(int index)``    | Returns the world space position of a point light.                            |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec3 omw_GetPointLightDiffuse(int index)``     | Returns the diffuse color of the point light.                                 |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``int omw_GetPointLightAttenuation(int index)``  | Returns the attenuation values of the point light.                            |
+|                                                  |                                                                               |
+|                                                  | The XYZ channels hold the constant, linear, and quadratic components.         |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``float omw_GetPointLightRadius(int index)``     | Returns the radius of the point light, in game units.                         |
++--------------------------------------------------+-------------------------------------------------------------------------------+
 
 Special Attributes
 ##################
@@ -318,7 +335,7 @@ Exactly one ``technique`` block is required for every shader file. In this we de
 +------------------+--------------------+---------------------------------------------------+
 | author           | string             | Shader authors that shows in HUD                  |
 +------------------+--------------------+---------------------------------------------------+
-| glsl_Version     | integer            | GLSL version                                      |
+| glsl_version     | integer            | GLSL version                                      |
 +------------------+--------------------+---------------------------------------------------+
 | glsl_profile     | string             | GLSL profile, like ``compatibility``              |
 +------------------+--------------------+---------------------------------------------------+
@@ -436,21 +453,21 @@ To use the sampler, define the appropriately named `sampler2D` in any of your pa
 It is possible to define settings for your shaders that can be adjusted by either users or a Lua script.
 
 
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-| Block           | default  | min      | max      | static  | step     | description  |  display_name     | header  |
-+=================+==========+==========+==========+=========+==========+==============+===================+=========+
-|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_float``| float    | float    | float    | boolean | float    | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+| Block           | default  | min      | max      | static  | step     | description  |  display_name     | header  |  widget_type |
++=================+==========+==========+==========+=========+==========+==============+===================+=========+==============+
+|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_float``| float    | float    | float    | boolean | float    | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
 
 The ``description`` field is used to display a toolip when viewed in the in-game HUD. The ``header`` field
 field can be used to organize uniforms into groups in the HUD. The ``display_name`` field can be used to create a
@@ -494,6 +511,21 @@ These uniform blocks must be defined with the new ``size`` parameter.
         size = 10;
     }
 
+You may also define a dropdown list for users to select specific values from instead of the default sliders using the ``widget_type`` field.
+Each item in the dropdown has an associated display name, which can be a localized string.
+
+.. code-block:: none
+
+    uniform_int uStrength {
+        default = 2;
+        display_name = "Strength";
+        widget_type = choice(
+            "Low" = 1,
+            "Medium" = 2,
+            "High" = 3
+        );
+    }
+
 ``render_target``
 *****************
 
@@ -528,49 +560,138 @@ is not wanted and you want a custom render target.
 +------------------+---------------------+-----------------------------------------------------------------------------+
 | mipmaps          | boolean             | Whether mipmaps should be generated every frame                             |
 +------------------+---------------------+-----------------------------------------------------------------------------+
+| clear_color      | vec4                | The color the texture will be cleared to when it's first created            |
++------------------+---------------------+-----------------------------------------------------------------------------+
 
-To use the render target a pass must be assigned to it, along with any optional clear or blend modes.
+To use the render target a pass must be assigned to it, along with any optional blend modes.
+As a restriction, only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, respectively.
 
-In the code snippet below a rendertarget is used to draw the red channel of a scene at half resolution, then a quarter. As a restriction,
-only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, respectively.
+Blending modes can be useful at times. Below is a simple shader which, when activated, will slowly turn the screen pure red.
+Notice how we only ever write the value `.01` to the `RT_Red` buffer. Since we're using appropriate blending modes the
+color buffer will accumulate.
 
 .. code-block:: none
 
-    render_target RT_Downsample {
-        width_ratio = 0.5;
-        height_ratio = 0.5;
-        internal_format = r16f;
-        source_type = float;
-        source_format = red;
+    render_target RT_Red {
+        width = 4;
+        height = 4;
+        source_format = rgb;
+        internal_format = rgb16f;
+        source_type = half_float;
+        clear_color = vec4(0,0,0,1);
     }
 
-    render_target RT_Downsample4 {
-        width_ratio = 0.25;
-        height_ratio = 0.25;
-    }
-
-    fragment downsample2x(target=RT_Downsample) {
-
+    fragment red(target=RT_Red,blend=(add, src_color, one), rt1=RT_Red) {
         omw_In vec2 omw_TexCoord;
 
         void main()
         {
-            omw_FragColor.r = omw_GetLastShader(omw_TexCoord).r;
+            omw_FragColor.rgb = vec3(0.01,0,0);
         }
     }
 
-    fragment downsample4x(target=RT_Downsample4, rt1=RT_Downsample) {
-
+    fragment view(rt1=RT_Red) {
         omw_In vec2 omw_TexCoord;
 
         void main()
         {
-            omw_FragColor = omw_Texture2D(RT_Downsample, omw_TexCoord);
+            omw_FragColor = omw_Texture2D(RT_Red, omw_TexCoord);
         }
     }
 
-Now, when the `downsample2x` pass runs it will write to the target buffer instead of the default
-one assigned by the engine.
+    technique {
+        author = "OpenMW";
+        passes = red, view;
+    }
+
+
+These custom render targets are persistent and ownership is given to the shader which defines them.
+This gives potential to implement temporal effects by storing previous frame data in these buffers.
+Below is an example which calculates a naive average scene luminance and transitions between values smoothly.
+
+.. code-block:: none
+
+    render_target RT_Lum {
+        width = 256;
+        height = 256;
+        mipmaps = true;
+        source_format = rgb;
+        internal_format = rgb16f;
+        source_type = half_float;
+        min_filter = linear_mipmap_linear;
+        mag_filter = linear;
+    }
+
+    render_target RT_LumAvg {
+        source_type = half_float;
+        source_format = rgb;
+        internal_format = rgb16f;
+        min_filter = nearest;
+        mag_filter = nearest;
+    }
+
+    render_target RT_LumAvgLastFrame {
+        source_type = half_float;
+        source_format = rgb;
+        internal_format = rgb16f;
+        min_filter = nearest;
+        mag_filter = nearest;
+    }
+
+    fragment calculateLum(target=RT_Lum) {
+        omw_In vec2 omw_TexCoord;
+
+        void main()
+        {
+            vec3 orgi = pow(omw_GetLastShader(omw_TexCoord), vec4(2.2)).rgb;
+            omw_FragColor.rgb = orgi;
+        }
+    }
+
+    fragment fetchLumAvg(target=RT_LumAvg, rt1=RT_Lum, rt2=RT_LumAvgLastFrame) {
+        omw_In vec2 omw_TexCoord;
+
+        void main()
+        {
+            vec3 avgLumaCurrFrame = textureLod(RT_Lum, vec2(0.5, 0.5), 6).rgb;
+            vec3 avgLumaLastFrame = omw_Texture2D(RT_LumAvgLastFrame, vec2(0.5, 0.5)).rgb;
+
+            const float speed = 0.9;
+
+            vec3 avgLuma = avgLumaLastFrame + (avgLumaCurrFrame - avgLumaLastFrame) * (1.0 - exp(-omw.deltaSimulationTime * speed));
+
+            omw_FragColor.rgb = avgLuma;
+        }
+    }
+
+    fragment adaptation(rt1=RT_LumAvg) {
+        omw_In vec2 omw_TexCoord;
+
+        void main()
+        {
+            vec3 avgLuma = omw_Texture2D(RT_LumAvg, vec2(0.5, 0.5)).rgb;
+
+            if (omw_TexCoord.y < 0.2)
+                omw_FragColor = vec4(avgLuma, 1.0);
+            else
+                omw_FragColor = omw_GetLastShader(omw_TexCoord);
+        }
+    }
+
+    fragment store(target=RT_LumAvgLastFrame, rt1=RT_LumAvg) {
+        void main()
+        {
+            vec3 avgLuma = omw_Texture2D(RT_LumAvg, vec2(0.5, 0.5)).rgb;
+            omw_FragColor.rgb = avgLuma;
+        }
+    }
+
+    technique {
+        author = "OpenMW";
+        passes = calculateLum, fetchLumAvg, store, adaptation;
+        glsl_version = 330;
+    }
+
 
 Simple Example
 ##############
@@ -625,7 +746,6 @@ together passes, setting up metadata, and setting up various flags.
         passes = desaturate;
         version = "1.0";
         author = "Fargoth";
-        passes = desaturate;
     }
 
 
@@ -808,6 +928,8 @@ Types
 | unsigned_int_24_8  | GL_UNSIGNED_INT_24_8  |
 +--------------------+-----------------------+
 | float              | GL_FLOAT              |
++--------------------+-----------------------+
+| half_float         | GL_HALF_FLOAT         |
 +--------------------+-----------------------+
 | double             | GL_DOUBLE             |
 +--------------------+-----------------------+

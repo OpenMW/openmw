@@ -365,13 +365,6 @@ namespace ESM4
         std::uint32_t unknown4;
         // SCVR
         std::string variableName;
-
-        void clear()
-        {
-            index = 0;
-            type = 0;
-            variableName.clear();
-        }
     };
 
     struct ScriptDefinition

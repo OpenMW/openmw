@@ -1,6 +1,7 @@
 #include "misc.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadmisc.hpp>
@@ -19,12 +20,12 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -49,17 +50,14 @@ namespace MWClass
         }
     }
 
-    std::string Miscellaneous::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Miscellaneous::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Miscellaneous>(ptr);
     }
 
     std::string_view Miscellaneous::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Miscellaneous>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Miscellaneous::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -79,8 +77,8 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
         int value = ref->mBase->mData.mValue;
-        if (ptr.getCellRef().getGoldValue() > 1 && ptr.getRefData().getCount() == 1)
-            value = ptr.getCellRef().getGoldValue();
+        if (isGold(ptr) && ptr.getCellRef().getCount() != 1)
+            value = 1;
 
         if (!ptr.getCellRef().getSoul().empty())
         {
@@ -151,8 +149,8 @@ namespace MWClass
             countString = " (" + std::to_string(count) + ")";
 
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name))
-            + MWGui::ToolTips::getCountString(count) + MWGui::ToolTips::getSoulString(ptr.getCellRef());
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count)
+            + MWGui::ToolTips::getSoulString(ptr.getCellRef());
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -163,11 +161,11 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -189,8 +187,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
 
         MWWorld::Ptr ptr(cell.insert(ref), &cell);
-        ptr.getCellRef().setGoldValue(goldAmount);
-        ptr.getRefData().setCount(1);
+        ptr.getCellRef().setCount(goldAmount);
         return ptr;
     }
 
@@ -203,7 +200,7 @@ namespace MWClass
         {
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
-            newPtr.getRefData().setCount(count);
+            newPtr.getCellRef().setCount(count);
         }
         newPtr.getCellRef().unsetRefNum();
         newPtr.getRefData().setLuaScripts(nullptr);
@@ -216,10 +213,9 @@ namespace MWClass
         MWWorld::Ptr newPtr;
         if (isGold(ptr))
         {
-            newPtr = createGold(cell, getValue(ptr) * ptr.getRefData().getCount());
+            newPtr = createGold(cell, getValue(ptr) * ptr.getCellRef().getCount());
             newPtr.getRefData() = ptr.getRefData();
             newPtr.getCellRef().setRefNum(ptr.getCellRef().getRefNum());
-            newPtr.getRefData().setCount(1);
         }
         else
         {

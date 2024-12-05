@@ -13,6 +13,7 @@
 
 #include "animation.hpp"
 #include "creatureanimation.hpp"
+#include "esm4npcanimation.hpp"
 #include "npcanimation.hpp"
 #include "vismask.hpp"
 
@@ -67,7 +68,7 @@ namespace MWRender
         ptr.getClass().adjustScale(ptr, scaleVec, true);
         insert->setScale(scaleVec);
 
-        ptr.getRefData().setBaseNode(insert);
+        ptr.getRefData().setBaseNode(std::move(insert));
     }
 
     void Objects::insertModel(const MWWorld::Ptr& ptr, const std::string& mesh, bool allowLight)
@@ -78,7 +79,8 @@ namespace MWRender
         std::string animationMesh = mesh;
         if (animated && !mesh.empty())
         {
-            animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+            animationMesh = Misc::ResourceHelpers::correctActorModelPath(
+                VFS::Path::toNormalized(mesh), mResourceSystem->getVFS());
             if (animationMesh == mesh && Misc::StringUtils::ciEndsWith(animationMesh, ".nif"))
                 animated = false;
         }
@@ -95,7 +97,8 @@ namespace MWRender
         ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
         bool animated = true;
-        std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        std::string animationMesh
+            = Misc::ResourceHelpers::correctActorModelPath(VFS::Path::toNormalized(mesh), mResourceSystem->getVFS());
         if (animationMesh == mesh && Misc::StringUtils::ciEndsWith(animationMesh, ".nif"))
             animated = false;
 
@@ -116,13 +119,22 @@ namespace MWRender
         insertBegin(ptr);
         ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
-        osg::ref_ptr<NpcAnimation> anim(
-            new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
-
-        if (mObjects.emplace(ptr.mRef, anim).second)
+        if (ptr.getType() == ESM::REC_NPC_4)
         {
-            ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get());
-            ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
+            osg::ref_ptr<ESM4NpcAnimation> anim(
+                new ESM4NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+            mObjects.emplace(ptr.mRef, anim);
+        }
+        else
+        {
+            osg::ref_ptr<NpcAnimation> anim(
+                new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+
+            if (mObjects.emplace(ptr.mRef, anim).second)
+            {
+                ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get());
+                ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
+            }
         }
     }
 

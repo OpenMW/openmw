@@ -19,6 +19,14 @@ if(OPENMW_GL4ES_MANUAL_INIT)
     add_definitions(-DOPENMW_GL4ES_MANUAL_INIT)
 endif()
 
+if (APPLE OR WIN32)
+    set(DEPLOY_QT_TRANSLATIONS_DEFAULT ON)
+else ()
+    set(DEPLOY_QT_TRANSLATIONS_DEFAULT OFF)
+endif ()
+
+option(DEPLOY_QT_TRANSLATIONS "Deploy standard Qt translations to resources folder. Needed when OpenMW applications are deployed with Qt libraries" ${DEPLOY_QT_TRANSLATIONS_DEFAULT})
+
 # Apps and tools
 option(BUILD_OPENMW             "Build OpenMW" ON)
 option(BUILD_LAUNCHER           "Build Launcher" ON)
@@ -31,11 +39,13 @@ option(BUILD_ESMTOOL            "Build ESM inspector" ON)
 option(BUILD_NIFTEST            "Build nif file tester" ON)
 option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_COMPONENTS_TESTS   "Build components library tests" OFF)
 option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 option(BUILD_BULLETOBJECTTOOL   "Build Bullet object tool" ON)
 option(BUILD_OPENCS_TESTS       "Build OpenMW Construction Set tests" OFF)
+option(BUILD_OPENMW_TESTS       "Build OpenMW tests" OFF)
+option(PRECOMPILE_HEADERS_WITH_MSVC "Precompile most common used headers with MSVC (alternative to ccache)" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
@@ -54,6 +64,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 if (APPLE)
+    set(CMAKE_FIND_FRAMEWORK LAST) # prefer dylibs over frameworks
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
@@ -71,6 +82,8 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
+set(OPENMW_LUA_API_REVISION 68)
+set(OPENMW_POSTPROCESSING_API_REVISION 2)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
@@ -78,7 +91,7 @@ set(OPENMW_VERSION_COMMITDATE "")
 
 set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
-set(OPENMW_DOC_BASEURL "https://openmw.readthedocs.io/en/stable/")
+set(OPENMW_DOC_BASEURL "https://openmw.readthedocs.io/en/")
 
 set(GIT_CHECKOUT FALSE)
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
@@ -111,8 +124,6 @@ include(WholeArchive)
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
-option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
-option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 option(QT_STATIC "Link static build of Qt into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
@@ -142,7 +153,7 @@ option(MYGUI_STATIC "Link static build of Mygui into the binaries" ${_mygui_stat
 option(OPENMW_USE_SYSTEM_RECASTNAVIGATION "Use system provided recastnavigation library" OFF)
 if(OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     set(_recastnavigation_static_default OFF)
-    find_package(RecastNavigation REQUIRED)
+    find_package(RecastNavigation REQUIRED CONFIG)
 else()
     set(_recastnavigation_static_default ON)
 endif()
@@ -155,13 +166,6 @@ option(OPENMW_USE_SYSTEM_GOOGLETEST "Use system Google Test library." OFF)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
-
-# what is necessary to build documentation
-IF( BUILD_DOCS )
-    # Builds the documentation.
-    FIND_PACKAGE( Sphinx REQUIRED )
-    FIND_PACKAGE( Doxygen REQUIRED )
-ENDIF()
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
@@ -178,6 +182,24 @@ if (MSVC)
     # there should be no relevant downsides to having it on:
     # https://docs.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file
     add_compile_options(/bigobj)
+
+    add_compile_options(/Zc:__cplusplus)
+
+    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER)
+        if (CMAKE_GENERATOR MATCHES "Visual Studio")
+            message(STATUS "A compiler launcher was specified, but will be unused by the current generator (${CMAKE_GENERATOR})")
+        else()
+            foreach (config_lower ${CMAKE_CONFIGURATION_TYPES})
+                string(TOUPPER "${config_lower}" config)
+                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
+                endif()
+                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache")
+                    string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_${config} "${CMAKE_CXX_FLAGS_${config}}")
+                endif()
+            endforeach()
+        endif()
+    endif()
 endif()
 
 # Set up common paths
@@ -205,7 +227,7 @@ else()
 endif(APPLE)
 
 if (WIN32)
-    option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
+    option(USE_DEBUG_CONSOLE "Whether a console should be displayed if OpenMW isn't launched from the command line. Does not affect the Release configuration." ON)
 endif()
 
 if(MSVC)
@@ -213,16 +235,25 @@ if(MSVC)
 endif()
 
 # Dependencies
-find_package(OpenGL REQUIRED)
+if (APPLE)
+    # Force CMake to use the installed version of OpenGL on macOS
+    set(_SAVE_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+    set(CMAKE_FIND_FRAMEWORK ONLY)
+    find_package(OpenGL REQUIRED)
+    set(CMAKE_FIND_FRAMEWORK ${_SAVE_CMAKE_FIND_FRAMEWORK})
+    unset(_SAVE_CMAKE_FIND_FRAMEWORK)
+else()
+    find_package(OpenGL REQUIRED)
+endif()
 
 find_package(LZ4 REQUIRED)
 
 if (USE_QT)
     find_package(QT REQUIRED COMPONENTS Core NAMES Qt6 Qt5)
     if (QT_VERSION_MAJOR VERSION_EQUAL 5)
-        find_package(Qt5 5.15 COMPONENTS Core Widgets Network OpenGL REQUIRED)
+        find_package(Qt5 5.15 COMPONENTS Core Widgets Network OpenGL LinguistTools Svg REQUIRED)
     else()
-        find_package(Qt6 COMPONENTS Core Widgets Network OpenGL OpenGLWidgets REQUIRED)
+        find_package(Qt6 COMPONENTS Core Widgets Network OpenGL OpenGLWidgets LinguistTools Svg REQUIRED)
     endif()
     message(STATUS "Using Qt${QT_VERSION}")
 endif()
@@ -276,7 +307,7 @@ if (OPENMW_USE_SYSTEM_YAML_CPP)
     find_package(yaml-cpp REQUIRED)
 endif()
 
-if ((BUILD_UNITTESTS OR BUILD_OPENCS_TESTS) AND OPENMW_USE_SYSTEM_GOOGLETEST)
+if ((BUILD_COMPONENTS_TESTS OR BUILD_OPENCS_TESTS OR BUILD_OPENMW_TESTS) AND OPENMW_USE_SYSTEM_GOOGLETEST)
     find_package(GTest 1.10 REQUIRED)
     find_package(GMock 1.10 REQUIRED)
 endif()
@@ -293,8 +324,8 @@ find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMP
 if(FFmpeg_FOUND)
     SET(FFVER_OK TRUE)
 
-    # Can not detect FFmpeg version on Windows for now
-    if (NOT WIN32)
+    # Can not detect FFmpeg version on Windows or Android for now
+    if (NOT WIN32 AND NOT ANDROID)
         if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
             message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
             set(FFVER_OK FALSE)
@@ -346,11 +377,6 @@ endif()
 
 # Platform specific
 if (WIN32)
-    if(NOT MINGW)
-    set(Boost_USE_STATIC_LIBS   ON)
-    add_definitions(-DBOOST_ALL_NO_LIB)
-    endif(NOT MINGW)
-
     # Suppress WinMain(), provided by SDL
     add_definitions(-DSDL_MAIN_HANDLED)
 
@@ -433,32 +459,14 @@ if(HAVE_MULTIVIEW)
     add_definitions(-DOSG_HAS_MULTIVIEW)
 endif(HAVE_MULTIVIEW)
 
-set(BOOST_COMPONENTS system program_options iostreams)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-    if(MSVC)
-        # boost-zlib is not present (nor needed) in vcpkg version of boost.
-        # there, it is part of boost-iostreams instead.
-        set(BOOST_OPTIONAL_COMPONENTS zlib)
-    endif(MSVC)
-endif(WIN32)
+set(BOOST_COMPONENTS iostreams program_options system)
 
-IF(BOOST_STATIC)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
-
-set(Boost_NO_BOOST_CMAKE ON)
-
-find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
-
-if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
-    find_package(Boost 1.77.0 REQUIRED COMPONENTS atomic)
-endif()
+find_package(Boost 1.70.0 CONFIG REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 
 if(OPENMW_USE_SYSTEM_MYGUI)
-    find_package(MyGUI 3.4.2 REQUIRED)
+    find_package(MyGUI 3.4.3 REQUIRED)
 endif()
-find_package(SDL2 2.0.9 REQUIRED)
+find_package(SDL2 2.0.10 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(ZLIB REQUIRED)
 
@@ -471,7 +479,7 @@ else(USE_LUAJIT)
     find_package(Lua REQUIRED)
     add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
-if (NOT WIN32)
+if (NOT WIN32 AND NOT ANDROID)
     include(cmake/CheckLuaCustomAllocator.cmake)
 endif()
 
@@ -482,8 +490,6 @@ set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 include_directories(
     BEFORE SYSTEM
     "."
-    ${SDL2_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIR}
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -494,7 +500,7 @@ include_directories(
     ${ICU_INCLUDE_DIRS}
 )
 
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
+link_directories(${COLLADA_DOM_LIBRARY_DIRS})
 
 if(MYGUI_STATIC)
     add_definitions(-DMYGUI_STATIC)
@@ -536,14 +542,19 @@ pack_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
 configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
     "${OpenMW_BINARY_DIR}" "openmw.appdata.xml")
 
-if (NOT APPLE)
+if (APPLE)
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}/openmw.cfg")
+elseif (WIN32)
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
+else ()
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
         "${OpenMW_BINARY_DIR}" "openmw.cfg")
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
         "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
-else ()
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}/openmw.cfg")
 endif ()
 
 pack_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
@@ -582,7 +593,6 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
 
     if (APPLE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
@@ -617,7 +627,7 @@ endif()
 add_subdirectory (components)
 
 # Apps and tools
-if (BUILD_OPENMW)
+if (BUILD_OPENMW OR BUILD_OPENMW_TESTS)
     add_subdirectory( apps/openmw )
 endif()
 
@@ -651,11 +661,10 @@ endif()
 
 if (BUILD_NIFTEST)
     add_subdirectory(apps/niftest)
-endif(BUILD_NIFTEST)
+endif()
 
-# UnitTests
-if (BUILD_UNITTESTS)
-    add_subdirectory( apps/openmw_test_suite )
+if (BUILD_COMPONENTS_TESTS)
+    add_subdirectory(apps/components_tests)
 endif()
 
 if (BUILD_BENCHMARKS)
@@ -667,11 +676,15 @@ if (BUILD_NAVMESHTOOL)
 endif()
 
 if (BUILD_BULLETOBJECTTOOL)
-    add_subdirectory( apps/bulletobjecttool )
+    add_subdirectory(apps/bulletobjecttool)
 endif()
 
 if (BUILD_OPENCS_TESTS)
     add_subdirectory(apps/opencs_tests)
+endif()
+
+if (BUILD_OPENMW_TESTS)
+    add_subdirectory(apps/openmw_tests)
 endif()
 
 if (WIN32)
@@ -685,9 +698,8 @@ if (WIN32)
         if (USE_DEBUG_CONSOLE AND BUILD_OPENMW)
             set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
             set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-            set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Debug>:_CONSOLE>)
         elseif (BUILD_OPENMW)
-            # Turn off debug console, debug output will be written to visual studio output instead
+            # Turn off implicit console, you won't see stdout unless launching OpenMW from a command line shell or look at openmw.log
             set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
             set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
         endif()
@@ -710,67 +722,74 @@ if (WIN32)
             )
 
         foreach(d ${WARNINGS_DISABLE})
-            set(WARNINGS "${WARNINGS} /wd${d}")
+            list(APPEND WARNINGS "/wd${d}")
         endforeach(d)
 
         if(OPENMW_MSVC_WERROR)
-            set(WARNINGS "${WARNINGS} /WX")
+            list(APPEND WARNINGS "/WX")
         endif()
 
-        set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
-        set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+        target_compile_options(components PRIVATE ${WARNINGS})
+        target_compile_options(osg-ffmpeg-videoplayer PRIVATE ${WARNINGS})
 
         if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
             target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
         endif()
 
         if (BUILD_BSATOOL)
-            set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(bsatool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESMTOOL)
-            set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(esmtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_ESSIMPORTER)
-            set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-essimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_LAUNCHER)
-            set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-launcher PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_MWINIIMPORTER)
-            set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-iniimporter PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENCS)
-            set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-cs PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENMW)
-            set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_WIZARD)
-            set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-wizard PRIVATE ${WARNINGS})
         endif()
 
-        if (BUILD_UNITTESTS)
-            set_target_properties(openmw_test_suite PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+        if (BUILD_COMPONENTS_TESTS)
+            target_compile_options(components-tests PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BENCHMARKS)
-            set_target_properties(openmw_detournavigator_navmeshtilescache_benchmark PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_NAVMESHTOOL)
-            set_target_properties(openmw-navmeshtool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-navmeshtool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_BULLETOBJECTTOOL)
-            set(WARNINGS "${WARNINGS} ${MT_BUILD}")
-            set_target_properties(openmw-bulletobjecttool PROPERTIES COMPILE_FLAGS "${WARNINGS}")
+            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
+        endif()
+
+        if (BUILD_OPENCS_TESTS)
+            target_compile_options(openmw-cs-tests PRIVATE ${WARNINGS})
+        endif()
+
+        if (BUILD_OPENMW_TESTS)
+            target_compile_options(openmw-tests PRIVATE ${WARNINGS})
         endif()
     endif(MSVC)
 
@@ -802,6 +821,18 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
     get_filename_component(QT_QMACSTYLE_PLUGIN_NAME "${QT_QMACSTYLE_PLUGIN_PATH}" NAME)
     configure_file("${QT_QMACSTYLE_PLUGIN_PATH}" "${APP_BUNDLE_DIR}/Contents/PlugIns/${QT_QMACSTYLE_PLUGIN_GROUP}/${QT_QMACSTYLE_PLUGIN_NAME}" COPYONLY)
 
+    get_property(QT_QSVG_PLUGIN_PATH TARGET Qt${QT_VERSION_MAJOR}::QSvgPlugin PROPERTY LOCATION_RELEASE)
+    get_filename_component(QT_QSVG_PLUGIN_DIR "${QT_QSVG_PLUGIN_PATH}" DIRECTORY)
+    get_filename_component(QT_QSVG_PLUGIN_GROUP "${QT_QSVG_PLUGIN_DIR}" NAME)
+    get_filename_component(QT_QSVG_PLUGIN_NAME "${QT_QSVG_PLUGIN_PATH}" NAME)
+    configure_file("${QT_QSVG_PLUGIN_PATH}" "${APP_BUNDLE_DIR}/Contents/PlugIns/${QT_QSVG_PLUGIN_GROUP}/${QT_QSVG_PLUGIN_NAME}" COPYONLY)
+
+    get_property(QT_QSVG_ICON_PLUGIN_PATH TARGET Qt${QT_VERSION_MAJOR}::QSvgIconPlugin PROPERTY LOCATION_RELEASE)
+    get_filename_component(QT_QSVG_ICON_PLUGIN_DIR "${QT_QSVG_ICON_PLUGIN_PATH}" DIRECTORY)
+    get_filename_component(QT_QSVG_ICON_PLUGIN_GROUP "${QT_QSVG_ICON_PLUGIN_DIR}" NAME)
+    get_filename_component(QT_QSVG_ICON_PLUGIN_NAME "${QT_QSVG_ICON_PLUGIN_PATH}" NAME)
+    configure_file("${QT_QSVG_ICON_PLUGIN_PATH}" "${APP_BUNDLE_DIR}/Contents/PlugIns/${QT_QSVG_ICON_PLUGIN_GROUP}/${QT_QSVG_ICON_PLUGIN_NAME}" COPYONLY)
+
     configure_file("${OpenMW_SOURCE_DIR}/files/mac/qt.conf" "${APP_BUNDLE_DIR}/Contents/Resources/qt.conf" COPYONLY)
 
     if (BUILD_OPENCS)
@@ -809,6 +840,8 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
         set(OPENCS_BUNDLE_NAME "${OPENCS_BUNDLE_NAME_TMP}.app")
         configure_file("${QT_COCOA_PLUGIN_PATH}" "${OPENCS_BUNDLE_NAME}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}" COPYONLY)
         configure_file("${QT_QMACSTYLE_PLUGIN_PATH}" "${OPENCS_BUNDLE_NAME}/Contents/PlugIns/${QT_QMACSTYLE_PLUGIN_GROUP}/${QT_QMACSTYLE_PLUGIN_NAME}" COPYONLY)
+        configure_file("${QT_QSVG_PLUGIN_PATH}" "${OPENCS_BUNDLE_NAME}/Contents/PlugIns/${QT_QSVG_PLUGIN_GROUP}/${QT_QSVG_PLUGIN_NAME}" COPYONLY)
+        configure_file("${QT_QSVG_ICON_PLUGIN_PATH}" "${OPENCS_BUNDLE_NAME}/Contents/PlugIns/${QT_QSVG_ICON_PLUGIN_GROUP}/${QT_QSVG_ICON_PLUGIN_NAME}" COPYONLY)
         configure_file("${OpenMW_SOURCE_DIR}/files/mac/qt.conf" "${OPENCS_BUNDLE_NAME}/Contents/Resources/qt.conf" COPYONLY)
     endif ()
 
@@ -877,6 +910,11 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
     install_plugins_for_bundle("${APP_BUNDLE_NAME}" PLUGINS)
     install_plugins_for_bundle("${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+
     set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
     set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/PlugIns/${QT_QMACSTYLE_PLUGIN_GROUP}/${QT_QMACSTYLE_PLUGIN_NAME}")
     set(OPENCS_PLUGINS ${OPENCS_PLUGINS} "${INSTALLED_OPENCS_APP}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
@@ -928,6 +966,7 @@ elseif(NOT APPLE)
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "." RENAME "AUTHORS.txt")
         INSTALL(FILES "${INSTALL_SOURCE}/defaults.bin" DESTINATION ".")
         INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION ".")
 
@@ -1041,7 +1080,6 @@ elseif(NOT APPLE)
         # Install global configuration files
         INSTALL(FILES "${INSTALL_SOURCE}/defaults.bin" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
         INSTALL(FILES "${INSTALL_SOURCE}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
-        INSTALL(FILES "${INSTALL_SOURCE}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
         INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
         IF(BUILD_OPENCS)
@@ -1053,12 +1091,17 @@ elseif(NOT APPLE)
     endif(WIN32)
 endif(OPENMW_OSX_DEPLOYMENT AND APPLE)
 
-# Doxygen Target -- simply run 'make doc' or 'make doc_pages'
-# output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
-# output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
-#                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
+# what is necessary to build documentation
+if ( BUILD_DOCS )
+    # Builds the documentation.
+    FIND_PACKAGE( Sphinx REQUIRED )
+    FIND_PACKAGE( Doxygen REQUIRED )
+
+    # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
+    # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
+    # output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
+    #                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
+
     # determine output directory for doc_pages
     if (NOT DEFINED DOXYGEN_PAGES_OUTPUT_DIR)
         set(DOXYGEN_PAGES_OUTPUT_DIR "${OpenMW_BINARY_DIR}/docs/Pages")
@@ -1075,3 +1118,78 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
         COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
 endif ()
+
+# Qt localization
+if (USE_QT)
+    file(GLOB LAUNCHER_TS_FILES ${CMAKE_SOURCE_DIR}/files/lang/launcher_*.ts)
+    file(GLOB WIZARD_TS_FILES ${CMAKE_SOURCE_DIR}/files/lang/wizard_*.ts)
+    file(GLOB COMPONENTS_TS_FILES ${CMAKE_SOURCE_DIR}/files/lang/components_*.ts)
+    get_target_property(QT_LUPDATE_EXECUTABLE Qt::lupdate IMPORTED_LOCATION)
+    add_custom_target(translations
+    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
+    VERBATIM
+    COMMAND_EXPAND_LISTS
+
+    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
+    VERBATIM
+    COMMAND_EXPAND_LISTS
+
+    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
+    VERBATIM
+    COMMAND_EXPAND_LISTS)
+
+    if (BUILD_LAUNCHER OR BUILD_WIZARD)
+        if (APPLE)
+            set(QT_OPENMW_TRANSLATIONS_PATH "${APP_BUNDLE_DIR}/Contents/Resources/resources/translations")
+        else ()
+            get_generator_is_multi_config(multi_config)
+            if (multi_config)
+                set(QT_OPENMW_TRANSLATIONS_PATH "${OpenMW_BINARY_DIR}/$<CONFIG>/resources/translations")
+            else ()
+                set(QT_OPENMW_TRANSLATIONS_PATH "${OpenMW_BINARY_DIR}/resources/translations")
+            endif ()
+        endif ()
+
+        file(GLOB TS_FILES ${COMPONENTS_TS_FILES})
+
+        if (BUILD_LAUNCHER)
+            set(TS_FILES ${TS_FILES} ${LAUNCHER_TS_FILES})
+        endif ()
+
+        if (BUILD_WIZARD)
+            set(TS_FILES ${TS_FILES} ${WIZARD_TS_FILES})
+        endif ()
+
+        qt_add_translation(QM_FILES ${TS_FILES} OPTIONS -silent)
+
+        if (DEPLOY_QT_TRANSLATIONS)
+            # Once we set a Qt 6.2.0 as a minimum required version, we may use "qtpaths --qt-query" instead.
+            get_target_property(QT_QMAKE_EXECUTABLE Qt::qmake IMPORTED_LOCATION)
+            execute_process(COMMAND "${QT_QMAKE_EXECUTABLE}" -query QT_INSTALL_TRANSLATIONS
+                OUTPUT_VARIABLE QT_TRANSLATIONS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+            foreach(QM_FILE ${QM_FILES})
+                get_filename_component(QM_BASENAME ${QM_FILE} NAME)
+                string(REGEX REPLACE "[^_]+_(.*)\\.qm" "\\1" LANG_NAME ${QM_BASENAME})
+                if (EXISTS "${QT_TRANSLATIONS_DIR}/qtbase_${LANG_NAME}.qm")
+                    set(QM_FILES ${QM_FILES} "${QT_TRANSLATIONS_DIR}/qtbase_${LANG_NAME}.qm")
+                elseif (EXISTS "${QT_TRANSLATIONS_DIR}/qt_${LANG_NAME}.qm")
+                    set(QM_FILES ${QM_FILES} "${QT_TRANSLATIONS_DIR}/qt_${LANG_NAME}.qm")
+                else ()
+                    message(FATAL_ERROR "Qt translations for '${LANG_NAME}' locale are not found in the '${QT_TRANSLATIONS_DIR}' folder.")
+                endif ()
+            endforeach(QM_FILE)
+
+            list(REMOVE_DUPLICATES QM_FILES)
+        endif ()
+
+        add_custom_target(qm-files
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${QT_OPENMW_TRANSLATIONS_PATH}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${QM_FILES} ${QT_OPENMW_TRANSLATIONS_PATH}
+            DEPENDS ${QM_FILES}
+            COMMENT "Copy *.qm files to resources folder")
+    endif ()
+endif()

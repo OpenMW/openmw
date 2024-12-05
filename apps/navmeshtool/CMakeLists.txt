@@ -5,10 +5,22 @@ set(NAVMESHTOOL
 )
 source_group(apps\\navmeshtool FILES ${NAVMESHTOOL})
 
-openmw_add_executable(openmw-navmeshtool ${NAVMESHTOOL})
+add_library(openmw-navmeshtool-lib STATIC
+    ${NAVMESHTOOL}
+)
 
-target_link_libraries(openmw-navmeshtool
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+if (ANDROID)
+    add_library(openmw-navmeshtool SHARED
+        main.cpp
+    )
+else()
+    openmw_add_executable(openmw-navmeshtool ${NAVMESHTOOL})
+endif()
+
+target_link_libraries(openmw-navmeshtool openmw-navmeshtool-lib)
+
+target_link_libraries(openmw-navmeshtool-lib
+    Boost::program_options
     components
 )
 
@@ -21,7 +33,7 @@ if (WIN32)
     install(TARGETS openmw-navmeshtool RUNTIME DESTINATION ".")
 endif()
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-navmeshtool PRIVATE
         <algorithm>
         <memory>

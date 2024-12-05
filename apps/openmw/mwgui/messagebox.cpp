@@ -4,6 +4,7 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_UString.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -27,7 +28,7 @@ namespace MWGui
         MessageBoxManager::clear();
     }
 
-    int MessageBoxManager::getMessagesCount()
+    std::size_t MessageBoxManager::getMessagesCount()
     {
         return mMessageBoxes.size();
     }
@@ -44,6 +45,20 @@ namespace MWGui
         mStaticMessageBox = nullptr;
 
         mLastButtonPressed = -1;
+    }
+
+    void MessageBoxManager::resetInteractiveMessageBox()
+    {
+        if (mInterMessageBoxe)
+        {
+            mInterMessageBoxe->setVisible(false);
+            mInterMessageBoxe.reset();
+        }
+    }
+
+    void MessageBoxManager::setLastButtonPressed(int index)
+    {
+        mLastButtonPressed = index;
     }
 
     void MessageBoxManager::onFrame(float frameDuration)
@@ -112,7 +127,7 @@ namespace MWGui
     }
 
     bool MessageBoxManager::createInteractiveMessageBox(
-        std::string_view message, const std::vector<std::string>& buttons)
+        std::string_view message, const std::vector<std::string>& buttons, bool immediate, int defaultFocus)
     {
         if (mInterMessageBoxe != nullptr)
         {
@@ -120,7 +135,8 @@ namespace MWGui
             mInterMessageBoxe->setVisible(false);
         }
 
-        mInterMessageBoxe = std::make_unique<InteractiveMessageBox>(*this, std::string{ message }, buttons);
+        mInterMessageBoxe
+            = std::make_unique<InteractiveMessageBox>(*this, std::string{ message }, buttons, immediate, defaultFocus);
         mLastButtonPressed = -1;
 
         return true;
@@ -200,13 +216,15 @@ namespace MWGui
         mMainWidget->setVisible(value);
     }
 
-    InteractiveMessageBox::InteractiveMessageBox(
-        MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
+    InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
+        const std::vector<std::string>& buttons, bool immediate, int defaultFocus)
         : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode()
                 ? "openmw_interactive_messagebox_notransp.layout"
                 : "openmw_interactive_messagebox.layout")
         , mMessageBoxManager(parMessageBoxManager)
         , mButtonPressed(-1)
+        , mDefaultFocus(defaultFocus)
+        , mImmediate(immediate)
     {
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
@@ -362,14 +380,17 @@ namespace MWGui
 
     MyGUI::Widget* InteractiveMessageBox::getDefaultKeyFocus()
     {
-        std::vector<std::string> keywords{ "sOk", "sYes" };
+        if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
+            return mButtons[mDefaultFocus];
+        auto& languageManager = MyGUI::LanguageManager::getInstance();
+        std::vector<MyGUI::UString> keywords{ languageManager.replaceTags("#{sOk}"),
+            languageManager.replaceTags("#{sYes}") };
+
         for (MyGUI::Button* button : mButtons)
         {
-            for (const std::string& keyword : keywords)
+            for (const MyGUI::UString& keyword : keywords)
             {
-                if (Misc::StringUtils::ciEqual(
-                        MyGUI::LanguageManager::getInstance().replaceTags("#{" + keyword + "}").asUTF8(),
-                        button->getCaption().asUTF8()))
+                if (Misc::StringUtils::ciEqual(keyword, button->getCaption()))
                 {
                     return button;
                 }
@@ -393,6 +414,12 @@ namespace MWGui
             {
                 mButtonPressed = index;
                 mMessageBoxManager.onButtonPressed(mButtonPressed);
+                if (!mImmediate)
+                    return;
+
+                mMessageBoxManager.setLastButtonPressed(mButtonPressed);
+                MWBase::Environment::get().getInputManager()->changeInputMode(
+                    MWBase::Environment::get().getWindowManager()->isGuiMode());
                 return;
             }
             index++;

@@ -13,12 +13,6 @@
 
 namespace ESM
 {
-    enum Version
-    {
-        VER_12 = 0x3f99999a,
-        VER_13 = 0x3fa66666
-    };
-
     enum RecordFlag
     {
         // This flag exists, but is not used to determine if a record has been deleted while loading

@@ -10,6 +10,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/color.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -43,9 +44,9 @@ namespace MWRender
         mUseCompute = false;
 #else
         constexpr float minimumGLVersionRequiredForCompute = 4.4;
-        osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
-        mUseCompute = exts->glVersion >= minimumGLVersionRequiredForCompute
-            && exts->glslLanguageVersion >= minimumGLVersionRequiredForCompute;
+        osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+        mUseCompute = exts.glVersion >= minimumGLVersionRequiredForCompute
+            && exts.glslLanguageVersion >= minimumGLVersionRequiredForCompute;
 #endif
 
         if (mUseCompute)
@@ -63,7 +64,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("offset", osg::Vec2f()));
             stateset->addUniform(new osg::Uniform("positionCount", 0));
             stateset->addUniform(new osg::Uniform(osg::Uniform::Type::FLOAT_VEC3, "positions", 100));
-            stateset->setAttributeAndModes(new osg::Viewport(0, 0, RipplesSurface::mRTTSize, RipplesSurface::mRTTSize));
+            stateset->setAttributeAndModes(new osg::Viewport(0, 0, RipplesSurface::sRTTSize, RipplesSurface::sRTTSize));
             mState[i].mStateset = stateset;
         }
 
@@ -71,14 +72,13 @@ namespace MWRender
         {
             osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
             texture->setSourceFormat(GL_RGBA);
-            texture->setSourceType(GL_HALF_FLOAT);
             texture->setInternalFormat(GL_RGBA16F);
             texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::LINEAR);
             texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::LINEAR);
             texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_BORDER);
             texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_BORDER);
             texture->setBorderColor(osg::Vec4(0, 0, 0, 0));
-            texture->setTextureSize(mRTTSize, mRTTSize);
+            texture->setTextureSize(sRTTSize, sRTTSize);
 
             mTextures[i] = texture;
 
@@ -99,14 +99,14 @@ namespace MWRender
     {
         auto& shaderManager = mResourceSystem->getSceneManager()->getShaderManager();
 
-        Shader::ShaderManager::DefineMap defineMap = { { "ripple_map_size", std::to_string(mRTTSize) + ".0" } };
+        Shader::ShaderManager::DefineMap defineMap = { { "rippleMapSize", std::to_string(sRTTSize) + ".0" } };
 
         osg::ref_ptr<osg::Shader> vertex = shaderManager.getShader("fullscreen_tri.vert", {}, osg::Shader::VERTEX);
 
         mProgramBlobber = shaderManager.getProgram(
             vertex, shaderManager.getShader("ripples_blobber.frag", defineMap, osg::Shader::FRAGMENT));
         mProgramSimulation = shaderManager.getProgram(
-            vertex, shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT));
+            std::move(vertex), shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT));
     }
 
     void RipplesSurface::setupComputePipeline()
@@ -119,58 +119,83 @@ namespace MWRender
             nullptr, shaderManager.getShader("core/ripples_simulate.comp", {}, osg::Shader::COMPUTE));
     }
 
+    void RipplesSurface::updateState(const osg::FrameStamp& frameStamp, State& state)
+    {
+        state.mPaused = mPaused;
+
+        if (mPaused)
+            return;
+
+        constexpr double updateFrequency = 60.0;
+        constexpr double updatePeriod = 1.0 / updateFrequency;
+
+        const double simulationTime = frameStamp.getSimulationTime();
+        const double frameDuration = simulationTime - mLastSimulationTime;
+        mLastSimulationTime = simulationTime;
+
+        mRemainingWaveTime += frameDuration;
+        const double ticks = std::floor(mRemainingWaveTime * updateFrequency);
+        mRemainingWaveTime -= ticks * updatePeriod;
+
+        if (ticks == 0)
+        {
+            state.mPaused = true;
+            return;
+        }
+
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
+        const ESM::Position& playerPos = player.getRefData().getPosition();
+
+        mCurrentPlayerPos = osg::Vec2f(
+            std::floor(playerPos.pos[0] / sWorldScaleFactor), std::floor(playerPos.pos[1] / sWorldScaleFactor));
+        const osg::Vec2f offset = mCurrentPlayerPos - mLastPlayerPos;
+        mLastPlayerPos = mCurrentPlayerPos;
+
+        state.mStateset->getUniform("positionCount")->set(static_cast<int>(mPositionCount));
+        state.mStateset->getUniform("offset")->set(offset);
+
+        osg::Uniform* const positions = state.mStateset->getUniform("positions");
+
+        for (std::size_t i = 0; i < mPositionCount; ++i)
+        {
+            osg::Vec3f pos = mPositions[i]
+                - osg::Vec3f(mCurrentPlayerPos.x() * sWorldScaleFactor, mCurrentPlayerPos.y() * sWorldScaleFactor, 0.0)
+                + osg::Vec3f(sRTTSize * sWorldScaleFactor / 2, sRTTSize * sWorldScaleFactor / 2, 0.0);
+            pos /= sWorldScaleFactor;
+            positions->setElement(i, pos);
+        }
+        positions->dirty();
+
+        mPositionCount = 0;
+    }
+
     void RipplesSurface::traverse(osg::NodeVisitor& nv)
     {
-        if (!nv.getFrameStamp())
+        const osg::FrameStamp* const frameStamp = nv.getFrameStamp();
+
+        if (frameStamp == nullptr)
             return;
 
         if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
-        {
-            size_t frameId = nv.getFrameStamp()->getFrameNumber() % 2;
+            updateState(*frameStamp, mState[frameStamp->getFrameNumber() % 2]);
 
-            const ESM::Position& player = MWMechanics::getPlayer().getRefData().getPosition();
-
-            mCurrentPlayerPos = osg::Vec2f(
-                std::floor(player.pos[0] / mWorldScaleFactor), std::floor(player.pos[1] / mWorldScaleFactor));
-            osg::Vec2f offset = mCurrentPlayerPos - mLastPlayerPos;
-            mLastPlayerPos = mCurrentPlayerPos;
-            mState[frameId].mPaused = mPaused;
-            mState[frameId].mOffset = offset;
-            mState[frameId].mStateset->getUniform("positionCount")->set(static_cast<int>(mPositionCount));
-            mState[frameId].mStateset->getUniform("offset")->set(offset);
-
-            auto* positions = mState[frameId].mStateset->getUniform("positions");
-
-            for (size_t i = 0; i < mPositionCount; ++i)
-            {
-                osg::Vec3f pos = mPositions[i]
-                    - osg::Vec3f(
-                        mCurrentPlayerPos.x() * mWorldScaleFactor, mCurrentPlayerPos.y() * mWorldScaleFactor, 0.0)
-                    + osg::Vec3f(mRTTSize * mWorldScaleFactor / 2, mRTTSize * mWorldScaleFactor / 2, 0.0);
-                pos /= mWorldScaleFactor;
-                positions->setElement(i, pos);
-            }
-            positions->dirty();
-
-            mPositionCount = 0;
-        }
         osg::Geometry::traverse(nv);
     }
 
     void RipplesSurface::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         osg::State& state = *renderInfo.getState();
-        osg::GLExtensions& ext = *state.get<osg::GLExtensions>();
-        size_t contextID = state.getContextID();
-
-        size_t currentFrame = state.getFrameStamp()->getFrameNumber() % 2;
+        const std::size_t currentFrame = state.getFrameStamp()->getFrameNumber() % 2;
         const State& frameState = mState[currentFrame];
         if (frameState.mPaused)
         {
             return;
         }
 
-        auto bindImage = [contextID, &state, &ext](osg::Texture2D* texture, GLuint index, GLenum access) {
+        osg::GLExtensions& ext = *state.get<osg::GLExtensions>();
+        const std::size_t contextID = state.getContextID();
+
+        const auto bindImage = [&](osg::Texture2D* texture, GLuint index, GLenum access) {
             osg::Texture::TextureObject* to = texture->getTextureObject(contextID);
             if (!to || texture->isDirty(contextID))
             {
@@ -180,53 +205,55 @@ namespace MWRender
             ext.glBindImageTexture(index, to->id(), 0, GL_FALSE, 0, access, GL_RGBA16F);
         };
 
-        // Run simulation at a fixed rate independent on current FPS
-        // FIXME: when we skip frames we need to preserve positions. this doesn't work now
-        size_t ticks = 1;
-
         // PASS: Blot in all ripple spawners
-        mProgramBlobber->apply(state);
-        state.apply(frameState.mStateset);
-
-        for (size_t i = 0; i < ticks; i++)
+        state.pushStateSet(frameState.mStateset);
+        state.apply();
+        state.applyAttribute(mProgramBlobber);
+        for (const auto& [name, stack] : state.getUniformMap())
         {
-            if (mUseCompute)
-            {
-                bindImage(mTextures[1], 0, GL_WRITE_ONLY_ARB);
-                bindImage(mTextures[0], 1, GL_READ_ONLY_ARB);
+            if (!stack.uniformVec.empty())
+                state.getLastAppliedProgramObject()->apply(*(stack.uniformVec.back().first));
+        }
 
-                ext.glDispatchCompute(mRTTSize / 16, mRTTSize / 16, 1);
-                ext.glMemoryBarrier(GL_ALL_BARRIER_BITS);
-            }
-            else
-            {
-                mFBOs[1]->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
-                state.applyTextureAttribute(0, mTextures[0]);
-                osg::Geometry::drawImplementation(renderInfo);
-            }
+        if (mUseCompute)
+        {
+            bindImage(mTextures[1], 0, GL_WRITE_ONLY_ARB);
+            bindImage(mTextures[0], 1, GL_READ_ONLY_ARB);
+
+            ext.glDispatchCompute(sRTTSize / 16, sRTTSize / 16, 1);
+            ext.glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        }
+        else
+        {
+            mFBOs[1]->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+            state.applyTextureAttribute(0, mTextures[0]);
+            osg::Geometry::drawImplementation(renderInfo);
         }
 
         // PASS: Wave simulation
-        mProgramSimulation->apply(state);
-        state.apply(frameState.mStateset);
-
-        for (size_t i = 0; i < ticks; i++)
+        state.applyAttribute(mProgramSimulation);
+        for (const auto& [name, stack] : state.getUniformMap())
         {
-            if (mUseCompute)
-            {
-                bindImage(mTextures[0], 0, GL_WRITE_ONLY_ARB);
-                bindImage(mTextures[1], 1, GL_READ_ONLY_ARB);
-
-                ext.glDispatchCompute(mRTTSize / 16, mRTTSize / 16, 1);
-                ext.glMemoryBarrier(GL_ALL_BARRIER_BITS);
-            }
-            else
-            {
-                mFBOs[0]->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
-                state.applyTextureAttribute(0, mTextures[1]);
-                osg::Geometry::drawImplementation(renderInfo);
-            }
+            if (!stack.uniformVec.empty())
+                state.getLastAppliedProgramObject()->apply(*(stack.uniformVec.back().first));
         }
+
+        if (mUseCompute)
+        {
+            bindImage(mTextures[0], 0, GL_WRITE_ONLY_ARB);
+            bindImage(mTextures[1], 1, GL_READ_ONLY_ARB);
+
+            ext.glDispatchCompute(sRTTSize / 16, sRTTSize / 16, 1);
+            ext.glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        }
+        else
+        {
+            mFBOs[0]->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+            state.applyTextureAttribute(0, mTextures[1]);
+            osg::Geometry::drawImplementation(renderInfo);
+        }
+
+        state.popStateSet();
     }
 
     osg::Texture* RipplesSurface::getColorTexture() const
@@ -270,7 +297,7 @@ namespace MWRender
         setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         setNodeMask(Mask_RenderToTexture);
         setClearMask(GL_NONE);
-        setViewport(0, 0, RipplesSurface::mRTTSize, RipplesSurface::mRTTSize);
+        setViewport(0, 0, RipplesSurface::sRTTSize, RipplesSurface::sRTTSize);
         addChild(mRipples);
         setCullingActive(false);
         setImplicitBufferAttachmentMask(0, 0);

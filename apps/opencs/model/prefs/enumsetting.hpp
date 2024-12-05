@@ -1,10 +1,13 @@
 #ifndef CSM_PREFS_ENUMSETTING_H
 #define CSM_PREFS_ENUMSETTING_H
 
+#include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
+#include "enumvalueview.hpp"
 #include "setting.hpp"
 
 class QComboBox;
@@ -13,50 +16,22 @@ namespace CSMPrefs
 {
     class Category;
 
-    struct EnumValue
-    {
-        std::string mValue;
-        std::string mTooltip;
-
-        EnumValue(const std::string& value, const std::string& tooltip = "");
-
-        EnumValue(const char* value);
-    };
-
-    struct EnumValues
-    {
-        std::vector<EnumValue> mValues;
-
-        EnumValues& add(const EnumValues& values);
-
-        EnumValues& add(const EnumValue& value);
-
-        EnumValues& add(const std::string& value, const std::string& tooltip);
-    };
-
-    class EnumSetting : public Setting
+    class EnumSetting final : public TypedSetting<std::string>
     {
         Q_OBJECT
 
         std::string mTooltip;
-        EnumValue mDefault;
-        EnumValues mValues;
+        std::span<const EnumValueView> mValues;
         QComboBox* mWidget;
 
     public:
-        EnumSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label,
-            const EnumValue& default_);
+        explicit EnumSetting(Category* parent, QMutex* mutex, std::string_view key, const QString& label,
+            std::span<const EnumValueView> values, Settings::Index& index);
 
         EnumSetting& setTooltip(const std::string& tooltip);
 
-        EnumSetting& addValues(const EnumValues& values);
-
-        EnumSetting& addValue(const EnumValue& value);
-
-        EnumSetting& addValue(const std::string& value, const std::string& tooltip);
-
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

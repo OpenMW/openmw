@@ -36,7 +36,7 @@ namespace ESM
 
         esm.getSubNameIs("MEDT");
         esm.getSubHeader();
-        int school;
+        int32_t school;
         esm.getT(school);
         mData.mSchool = MagicSchool::indexToSkillRefId(school);
         esm.getT(mData.mBaseCost);
@@ -132,53 +132,61 @@ namespace ESM
         esm.writeHNOString("DESC", mDescription);
     }
 
+    namespace
+    {
+        std::map<short, short> makeEffectsMap()
+        {
+            std::map<short, short> effects;
+
+            effects[MagicEffect::Effects::DisintegrateArmor] = MagicEffect::Effects::Sanctuary;
+            effects[MagicEffect::Effects::DisintegrateWeapon] = MagicEffect::Effects::Sanctuary;
+
+            for (int i = MagicEffect::Effects::DrainAttribute; i <= MagicEffect::Effects::DamageSkill; ++i)
+                effects[i] = MagicEffect::Effects::ResistMagicka;
+            for (int i = MagicEffect::Effects::AbsorbAttribute; i <= MagicEffect::Effects::AbsorbSkill; ++i)
+                effects[i] = MagicEffect::Effects::ResistMagicka;
+            for (int i = MagicEffect::Effects::WeaknessToFire; i <= MagicEffect::Effects::WeaknessToNormalWeapons; ++i)
+                effects[i] = MagicEffect::Effects::ResistMagicka;
+
+            effects[MagicEffect::Effects::Burden] = MagicEffect::Effects::ResistMagicka;
+            effects[MagicEffect::Effects::Charm] = MagicEffect::Effects::ResistMagicka;
+            effects[MagicEffect::Effects::Silence] = MagicEffect::Effects::ResistMagicka;
+            effects[MagicEffect::Effects::Blind] = MagicEffect::Effects::ResistMagicka;
+            effects[MagicEffect::Effects::Sound] = MagicEffect::Effects::ResistMagicka;
+
+            for (int i = 0; i < 2; ++i)
+            {
+                effects[MagicEffect::Effects::CalmHumanoid + i] = MagicEffect::Effects::ResistMagicka;
+                effects[MagicEffect::Effects::FrenzyHumanoid + i] = MagicEffect::Effects::ResistMagicka;
+                effects[MagicEffect::Effects::DemoralizeHumanoid + i] = MagicEffect::Effects::ResistMagicka;
+                effects[MagicEffect::Effects::RallyHumanoid + i] = MagicEffect::Effects::ResistMagicka;
+            }
+
+            effects[MagicEffect::Effects::TurnUndead] = MagicEffect::Effects::ResistMagicka;
+
+            effects[MagicEffect::Effects::FireDamage] = MagicEffect::Effects::ResistFire;
+            effects[MagicEffect::Effects::FrostDamage] = MagicEffect::Effects::ResistFrost;
+            effects[MagicEffect::Effects::ShockDamage] = MagicEffect::Effects::ResistShock;
+            effects[MagicEffect::Effects::Vampirism] = MagicEffect::Effects::ResistCommonDisease;
+            effects[MagicEffect::Effects::Corprus] = MagicEffect::Effects::ResistCorprusDisease;
+            effects[MagicEffect::Effects::Poison] = MagicEffect::Effects::ResistPoison;
+            effects[MagicEffect::Effects::Paralyze] = MagicEffect::Effects::ResistParalysis;
+
+            return effects;
+        }
+    }
+
     short MagicEffect::getResistanceEffect(short effect)
     {
         // Source https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attribute
 
         // <Effect, Effect providing resistance against first effect>
-        static std::map<short, short> effects;
-        if (effects.empty())
-        {
-            effects[DisintegrateArmor] = Sanctuary;
-            effects[DisintegrateWeapon] = Sanctuary;
+        static const std::map<short, short> effects = makeEffectsMap();
 
-            for (int i = DrainAttribute; i <= DamageSkill; ++i)
-                effects[i] = ResistMagicka;
-            for (int i = AbsorbAttribute; i <= AbsorbSkill; ++i)
-                effects[i] = ResistMagicka;
-            for (int i = WeaknessToFire; i <= WeaknessToNormalWeapons; ++i)
-                effects[i] = ResistMagicka;
+        if (const auto it = effects.find(effect); it != effects.end())
+            return it->second;
 
-            effects[Burden] = ResistMagicka;
-            effects[Charm] = ResistMagicka;
-            effects[Silence] = ResistMagicka;
-            effects[Blind] = ResistMagicka;
-            effects[Sound] = ResistMagicka;
-
-            for (int i = 0; i < 2; ++i)
-            {
-                effects[CalmHumanoid + i] = ResistMagicka;
-                effects[FrenzyHumanoid + i] = ResistMagicka;
-                effects[DemoralizeHumanoid + i] = ResistMagicka;
-                effects[RallyHumanoid + i] = ResistMagicka;
-            }
-
-            effects[TurnUndead] = ResistMagicka;
-
-            effects[FireDamage] = ResistFire;
-            effects[FrostDamage] = ResistFrost;
-            effects[ShockDamage] = ResistShock;
-            effects[Vampirism] = ResistCommonDisease;
-            effects[Corprus] = ResistCorprusDisease;
-            effects[Poison] = ResistPoison;
-            effects[Paralyze] = ResistParalysis;
-        }
-
-        if (effects.find(effect) != effects.end())
-            return effects[effect];
-        else
-            return -1;
+        return -1;
     }
 
     short MagicEffect::getWeaknessEffect(short effect)
@@ -588,7 +596,7 @@ namespace ESM
         mData.mRed = 0;
         mData.mGreen = 0;
         mData.mBlue = 0;
-        mData.mSpeed = 0;
+        mData.mSpeed = 1;
 
         mIcon.clear();
         mParticle.clear();
@@ -631,7 +639,7 @@ namespace ESM
     {
         auto name = sIndexNameToIndexMap.find(effect);
         if (name == sIndexNameToIndexMap.end())
-            throw std::runtime_error("Unimplemented effect " + std::string(effect));
+            return -1;
 
         return name->second;
     }

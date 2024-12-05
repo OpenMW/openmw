@@ -8,6 +8,7 @@ namespace LuaUi
     {
         mEditBox = createWidget<MyGUI::EditBox>("LuaTextEdit", MyGUI::IntCoord(0, 0, 0, 0), MyGUI::Align::Default);
         mEditBox->eventEditTextChange += MyGUI::newDelegate(this, &LuaTextEdit::textChange);
+        mEditBox->setMaxTextLength(std::numeric_limits<std::size_t>::max());
         registerEvents(mEditBox);
         WidgetExtension::initialize();
     }
@@ -62,7 +63,7 @@ namespace LuaUi
         mEditBox->attachToWidget(this);
     }
 
-    MyGUI::IntSize LuaTextEdit::calculateSize()
+    MyGUI::IntSize LuaTextEdit::calculateSize() const
     {
         MyGUI::IntSize normalSize = WidgetExtension::calculateSize();
         if (mAutoSize)

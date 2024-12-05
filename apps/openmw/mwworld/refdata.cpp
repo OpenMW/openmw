@@ -37,7 +37,6 @@ namespace MWWorld
         mBaseNode = refData.mBaseNode;
         mLocals = refData.mLocals;
         mEnabled = refData.mEnabled;
-        mCount = refData.mCount;
         mPosition = refData.mPosition;
         mChanged = refData.mChanged;
         mDeletedByContentFile = refData.mDeletedByContentFile;
@@ -59,13 +58,12 @@ namespace MWWorld
 
     RefData::RefData()
         : mBaseNode(nullptr)
+        , mCustomData(nullptr)
+        , mFlags(0)
         , mDeletedByContentFile(false)
         , mEnabled(true)
         , mPhysicsPostponed(false)
-        , mCount(1)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0)
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -76,54 +74,50 @@ namespace MWWorld
 
     RefData::RefData(const ESM::CellRef& cellRef)
         : mBaseNode(nullptr)
+        , mPosition(cellRef.mPos)
+        , mCustomData(nullptr)
+        , mFlags(0) // Loading from ESM/ESP files -> assume unchanged
         , mDeletedByContentFile(false)
         , mEnabled(true)
         , mPhysicsPostponed(false)
-        , mCount(1)
-        , mPosition(cellRef.mPos)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0) // Loading from ESM/ESP files -> assume unchanged
     {
     }
 
     RefData::RefData(const ESM4::Reference& ref)
         : mBaseNode(nullptr)
+        , mPosition(ref.mPos)
+        , mCustomData(nullptr)
+        , mFlags(0)
         , mDeletedByContentFile(ref.mFlags & ESM4::Rec_Deleted)
         , mEnabled(!(ref.mFlags & ESM4::Rec_Disabled))
         , mPhysicsPostponed(false)
-        , mCount(ref.mCount)
-        , mPosition(ref.mPos)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0)
     {
     }
 
     RefData::RefData(const ESM4::ActorCharacter& ref)
         : mBaseNode(nullptr)
+        , mPosition(ref.mPos)
+        , mCustomData(nullptr)
+        , mFlags(0)
         , mDeletedByContentFile(ref.mFlags & ESM4::Rec_Deleted)
         , mEnabled(!(ref.mFlags & ESM4::Rec_Disabled))
         , mPhysicsPostponed(false)
-        , mCount(mDeletedByContentFile ? 0 : 1)
-        , mPosition(ref.mPos)
-        , mCustomData(nullptr)
         , mChanged(false)
-        , mFlags(0)
     {
     }
 
     RefData::RefData(const ESM::ObjectState& objectState, bool deletedByContentFile)
         : mBaseNode(nullptr)
-        , mDeletedByContentFile(deletedByContentFile)
-        , mEnabled(objectState.mEnabled != 0)
-        , mPhysicsPostponed(false)
-        , mCount(objectState.mCount)
         , mPosition(objectState.mPosition)
         , mAnimationState(objectState.mAnimationState)
         , mCustomData(nullptr)
-        , mChanged(true)
         , mFlags(objectState.mFlags) // Loading from a savegame -> assume changed
+        , mDeletedByContentFile(deletedByContentFile)
+        , mEnabled(objectState.mEnabled != 0)
+        , mPhysicsPostponed(false)
+        , mChanged(true)
     {
         // "Note that the ActivationFlag_UseEnabled is saved to the reference,
         // which will result in permanently suppressed activation if the reference script is removed.
@@ -153,7 +147,6 @@ namespace MWWorld
         objectState.mHasLocals = mLocals.write(objectState.mLocals, scriptId);
 
         objectState.mEnabled = mEnabled;
-        objectState.mCount = mCount;
         objectState.mPosition = mPosition;
         objectState.mFlags = mFlags;
 
@@ -205,37 +198,15 @@ namespace MWWorld
         return mBaseNode;
     }
 
-    int RefData::getCount(bool absolute) const
-    {
-        if (absolute)
-            return std::abs(mCount);
-        return mCount;
-    }
-
     void RefData::setLocals(const ESM::Script& script)
     {
         if (mLocals.configure(script) && !mLocals.isEmpty())
             mChanged = true;
     }
 
-    void RefData::setCount(int count)
-    {
-        if (count == 0)
-            MWBase::Environment::get().getWorld()->removeRefScript(this);
-
-        mChanged = true;
-
-        mCount = count;
-    }
-
     void RefData::setDeletedByContentFile(bool deleted)
     {
         mDeletedByContentFile = deleted;
-    }
-
-    bool RefData::isDeleted() const
-    {
-        return mDeletedByContentFile || mCount == 0;
     }
 
     bool RefData::isDeletedByContentFile() const

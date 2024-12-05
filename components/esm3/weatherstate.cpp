@@ -41,7 +41,7 @@ namespace ESM
             esm.getHNT(region.mWeather, regionWeatherRecord);
             while (esm.isNextSub(regionChanceRecord))
             {
-                char chance;
+                uint8_t chance;
                 esm.getHT(chance);
                 region.mChances.push_back(chance);
             }
@@ -66,9 +66,9 @@ namespace ESM
         {
             esm.writeHNCRefId(regionNameRecord, it->first);
             esm.writeHNT(regionWeatherRecord, it->second.mWeather);
-            for (size_t i = 0; i < it->second.mChances.size(); ++i)
+            for (const uint8_t& chance : it->second.mChances)
             {
-                esm.writeHNT(regionChanceRecord, it->second.mChances[i]);
+                esm.writeHNT(regionChanceRecord, chance);
             }
         }
     }

@@ -11,8 +11,12 @@ namespace Compiler
 
     class SkipParser : public Parser
     {
+        bool mReportStrayArguments;
+
+        void reportStrayArgument(const TokenLoc& loc);
+
     public:
-        SkipParser(ErrorHandler& errorHandler, const Context& context);
+        SkipParser(ErrorHandler& errorHandler, const Context& context, bool reportStrayArguments = false);
 
         bool parseInt(int value, const TokenLoc& loc, Scanner& scanner) override;
         ///< Handle an int token.

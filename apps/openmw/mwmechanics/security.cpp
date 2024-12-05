@@ -64,7 +64,7 @@ namespace MWMechanics
                 lock.getCellRef().unlock();
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
-                mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);
+                mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, ESM::Skill::Security_PickLock);
             }
             else
                 resultMessage = "#{sLockFail}";
@@ -115,7 +115,7 @@ namespace MWMechanics
 
                 resultSound = "Disarm Trap";
                 resultMessage = "#{sTrapSuccess}";
-                mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 0);
+                mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, ESM::Skill::Security_DisarmTrap);
             }
             else
                 resultMessage = "#{sTrapFail}";

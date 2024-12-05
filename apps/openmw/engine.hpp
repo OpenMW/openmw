@@ -178,8 +178,6 @@ namespace OMW
 
         Files::Collections mFileCollections;
         Translation::Storage mTranslationDataStorage;
-        std::vector<ESM::RefId> mScriptBlacklist;
-        bool mScriptBlacklistUse;
         bool mNewGame;
 
         // not implemented
@@ -188,7 +186,7 @@ namespace OMW
 
         void executeLocalScripts();
 
-        bool frame(float dt);
+        bool frame(unsigned frameNumber, float dt);
 
         /// Prepare engine for game play
         void prepareEngine();
@@ -252,10 +250,6 @@ namespace OMW
         void setActivationDistanceOverride(int distance);
 
         void setWarningsMode(int mode);
-
-        void setScriptBlacklist(const std::vector<ESM::RefId>& list);
-
-        void setScriptBlacklistUse(bool use);
 
         /// Set the save game file to load after initialising the engine.
         void setSaveGameFile(const std::filesystem::path& savegame);

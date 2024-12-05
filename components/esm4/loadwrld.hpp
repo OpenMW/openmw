@@ -55,6 +55,18 @@ namespace ESM4
             WLD_NoGrass = 0x80 //                      No Grass
         };
 
+        enum UseFlags
+        {
+            UseFlag_Land = 0x01,
+            UseFlag_LOD = 0x02,
+            UseFlag_Map = 0x04,
+            UseFlag_Water = 0x08,
+            UseFlag_Climate = 0x10,
+            UseFlag_Imagespace = 0x20, // Unused in TES5
+            UseFlag_SkyCell = 0x40,
+            // cc9cii: 0x80 == needs water adjustment? Set for WastelandNV
+        };
+
         struct REFRcoord
         {
             ESM::FormId formId;
@@ -69,7 +81,7 @@ namespace ESM4
             std::vector<REFRcoord> refrs;
         };
 
-        // Map size	struct	16 or 28 byte structure
+        // Map size struct, either 16 (old format) or 28 (new format) byte structure
         struct Map
         {
             std::uint32_t width; // usable width of the map
@@ -115,15 +127,7 @@ namespace ESM4
         // ----------------------
         ESM::FormId mMusic;
 
-        // 0x01 use Land data
-        // 0x02 use LOD data
-        // 0x04 use Map data
-        // 0x08 use Water data
-        // 0x10 use Climate data
-        // 0x20 use Image Space data (Climate for TES5)
-        // 0x40 use SkyCell (TES5)
-        // 0x80 needs water adjustment (this isn't for parent I think? FONV only set for wastelandnv)
-        std::uint16_t mParentUseFlags; // FO3/FONV
+        std::uint16_t mParentUseFlags{ 0 };
 
         // cache formId's of children (e.g. CELL, ROAD)
         std::vector<ESM::FormId> mCells;

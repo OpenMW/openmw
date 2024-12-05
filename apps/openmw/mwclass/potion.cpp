@@ -1,6 +1,7 @@
 #include "potion.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -13,14 +14,15 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwmechanics/alchemy.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -38,17 +40,14 @@ namespace MWClass
         }
     }
 
-    std::string Potion::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Potion::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Potion>(ptr);
     }
 
     std::string_view Potion::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Potion>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Potion::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -65,9 +64,7 @@ namespace MWClass
 
     int Potion::getValue(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
-
-        return ref->mBase->mData.mValue;
+        return MWMechanics::getPotionValue(*ptr.get<ESM::Potion>()->mBase);
     }
 
     const ESM::RefId& Potion::getUpSoundId(const MWWorld::ConstPtr& ptr) const
@@ -95,14 +92,13 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
 
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->mBase->mEffects);
 
@@ -115,11 +111,11 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

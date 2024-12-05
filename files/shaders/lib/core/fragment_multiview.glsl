@@ -12,7 +12,7 @@ vec4 sampleReflectionMap(vec2 uv)
     return texture(reflectionMap, vec3((uv), gl_ViewID_OVR));
 }
 
-#if @refraction_enabled
+#if @waterRefraction
 
 uniform sampler2DArray refractionMap;
 uniform sampler2DArray refractionDepthMap;

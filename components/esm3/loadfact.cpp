@@ -7,14 +7,55 @@
 
 namespace ESM
 {
-    int& Faction::FADTstruct::getSkill(int index, bool)
+    int32_t& Faction::FADTstruct::getSkill(size_t index, bool)
     {
         return mSkills.at(index);
     }
 
-    int Faction::FADTstruct::getSkill(int index, bool) const
+    int32_t Faction::FADTstruct::getSkill(size_t index, bool) const
     {
         return mSkills.at(index);
+    }
+
+    void RankData::load(ESMReader& esm)
+    {
+        esm.getT(mAttribute1);
+        esm.getT(mAttribute2);
+        esm.getT(mPrimarySkill);
+        esm.getT(mFavouredSkill);
+        esm.getT(mFactReaction);
+    }
+
+    void RankData::save(ESMWriter& esm) const
+    {
+        esm.writeT(mAttribute1);
+        esm.writeT(mAttribute2);
+        esm.writeT(mPrimarySkill);
+        esm.writeT(mFavouredSkill);
+        esm.writeT(mFactReaction);
+    }
+
+    void Faction::FADTstruct::load(ESMReader& esm)
+    {
+        esm.getSubHeader();
+        esm.getT(mAttribute);
+        for (auto& rank : mRankData)
+            rank.load(esm);
+        esm.getT(mSkills);
+        esm.getT(mIsHidden);
+        if (mIsHidden > 1)
+            esm.fail("Unknown flag!");
+    }
+
+    void Faction::FADTstruct::save(ESMWriter& esm) const
+    {
+        esm.startSubRecord("FADT");
+        esm.writeT(mAttribute);
+        for (const auto& rank : mRankData)
+            rank.save(esm);
+        esm.writeT(mSkills);
+        esm.writeT(mIsHidden);
+        esm.endRecord("FADT");
     }
 
     void Faction::load(ESMReader& esm, bool& isDeleted)
@@ -23,10 +64,10 @@ namespace ESM
         mRecordFlags = esm.getRecordFlags();
 
         mReactions.clear();
-        for (int i = 0; i < 10; ++i)
-            mRanks[i].clear();
+        for (auto& rank : mRanks)
+            rank.clear();
 
-        int rankCounter = 0;
+        size_t rankCounter = 0;
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
@@ -42,20 +83,18 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("RNAM"):
-                    if (rankCounter >= 10)
+                    if (rankCounter >= mRanks.size())
                         esm.fail("Rank out of range");
                     mRanks[rankCounter++] = esm.getHString();
                     break;
                 case fourCC("FADT"):
-                    esm.getHTSized<240>(mData);
-                    if (mData.mIsHidden > 1)
-                        esm.fail("Unknown flag!");
+                    mData.load(esm);
                     hasData = true;
                     break;
                 case fourCC("ANAM"):
                 {
                     ESM::RefId faction = esm.getRefId();
-                    int reaction;
+                    int32_t reaction;
                     esm.getHNT(reaction, "INTV");
                     // Prefer the lowest reaction in case a faction is listed multiple times
                     auto it = mReactions.find(faction);
@@ -93,15 +132,15 @@ namespace ESM
 
         esm.writeHNOCString("FNAM", mName);
 
-        for (int i = 0; i < 10; i++)
+        for (const auto& rank : mRanks)
         {
-            if (mRanks[i].empty())
+            if (rank.empty())
                 break;
 
-            esm.writeHNString("RNAM", mRanks[i], 32);
+            esm.writeHNString("RNAM", rank, 32);
         }
 
-        esm.writeHNT("FADT", mData, 240);
+        mData.save(esm);
 
         for (auto it = mReactions.begin(); it != mReactions.end(); ++it)
         {

@@ -50,6 +50,7 @@ namespace MyGUI
 
 namespace MWWorld
 {
+    class Cell;
     class ESMStore;
 }
 
@@ -149,7 +150,7 @@ namespace MWGui
 
         void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg) override;
         void pushGuiMode(GuiMode mode) override;
-        void popGuiMode() override;
+        void popGuiMode(bool forceExit = false) override;
         void removeGuiMode(GuiMode mode) override; ///< can be anywhere in the stack
 
         void goToJail(int days) override;
@@ -160,8 +161,9 @@ namespace MWGui
         bool isGuiMode() const override;
 
         bool isConsoleMode() const override;
-
         bool isPostProcessorHudVisible() const override;
+        bool isSettingsWindowVisible() const override;
+        bool isInteractiveMessageBoxActive() const override;
 
         void toggleVisible(GuiWindow wnd) override;
 
@@ -191,7 +193,8 @@ namespace MWGui
         void setConsoleSelectedObject(const MWWorld::Ptr& object) override;
         MWWorld::Ptr getConsoleSelectedObject() const override;
         void printToConsole(const std::string& msg, std::string_view color) override;
-        void setConsoleMode(const std::string& mode) override;
+        void setConsoleMode(std::string_view mode) override;
+        const std::string& getConsoleMode() override;
 
         /// Set time left for the player to start drowning (update the drowning bar)
         /// @param time time left to start drowning
@@ -213,9 +216,6 @@ namespace MWGui
         bool toggleFogOfWar() override;
         bool toggleFullHelp() override; ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const override;
-
-        void setActiveMap(int x, int y, bool interior) override;
-        ///< set the indices of the map texture that should be used
 
         /// sets the visibility of the drowning bar
         void setDrowningBarVisibility(bool visible) override;
@@ -247,7 +247,8 @@ namespace MWGui
         void showCrosshair(bool show) override;
 
         /// Turn visibility of HUD on or off
-        bool toggleHud() override;
+        bool setHudVisibility(bool show) override;
+        bool isHudVisible() const override { return mHudEnabled; }
 
         void disallowMouse() override;
         void allowMouse() override;
@@ -267,8 +268,8 @@ namespace MWGui
             enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) override;
         void staticMessageBox(std::string_view message) override;
         void removeStaticMessageBox() override;
-        void interactiveMessageBox(
-            std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false) override;
+        void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {},
+            bool block = false, int defaultFocus = -1) override;
 
         int readPressedButton() override; ///< returns the index of the pressed button or -1 if no button was pressed
                                           ///< (->MessageBoxmanager->InteractiveMessageBox)
@@ -312,11 +313,9 @@ namespace MWGui
 
         void setEnemy(const MWWorld::Ptr& enemy) override;
 
-        int getMessagesCount() const override;
+        std::size_t getMessagesCount() const override;
 
         const Translation::Storage& getTranslationDataStorage() const override;
-
-        void onSoulgemDialogButtonPressed(int button);
 
         bool getCursorVisible() override;
 
@@ -363,6 +362,7 @@ namespace MWGui
         void toggleConsole() override;
         void toggleDebugWindow() override;
         void togglePostProcessorHud() override;
+        void toggleSettingsWindow() override;
 
         /// Cycle to next or previous spell
         void cycleSpell(bool next) override;
@@ -560,7 +560,7 @@ namespace MWGui
          */
         void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 
-        void onCursorChange(const std::string& name);
+        void onCursorChange(std::string_view name);
         void onKeyFocusChanged(MyGUI::Widget* widget);
 
         // Key pressed while playing a video
@@ -568,8 +568,8 @@ namespace MWGui
 
         void sizeVideo(int screenWidth, int screenHeight);
 
-        void onClipboardChanged(const std::string& _type, const std::string& _data);
-        void onClipboardRequested(const std::string& _type, std::string& _data);
+        void onClipboardChanged(std::string_view _type, std::string_view _data);
+        void onClipboardRequested(std::string_view _type, std::string& _data);
 
         void createTextures();
         void createCursors();
@@ -585,6 +585,9 @@ namespace MWGui
 
         void setCullMask(uint32_t mask) override;
         uint32_t getCullMask() override;
+
+        void setActiveMap(const MWWorld::Cell& cell);
+        ///< set the indices of the map texture that should be used
 
         Files::ConfigurationManager& mCfgMgr;
     };

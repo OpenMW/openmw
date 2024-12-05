@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+#include <extern/osg-ffmpeg-videoplayer/libavformatdefines.hpp>
+#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
+
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4244)
@@ -32,23 +35,56 @@ extern "C"
 
 namespace MWSound
 {
+    struct AVIOContextDeleter
+    {
+        void operator()(AVIOContext* ptr) const;
+    };
+
+    using AVIOContextPtr = std::unique_ptr<AVIOContext, AVIOContextDeleter>;
+
+    struct AVFormatContextDeleter
+    {
+        void operator()(AVFormatContext* ptr) const;
+    };
+
+    using AVFormatContextPtr = std::unique_ptr<AVFormatContext, AVFormatContextDeleter>;
+
+    struct AVCodecContextDeleter
+    {
+        void operator()(AVCodecContext* ptr) const;
+    };
+
+    using AVCodecContextPtr = std::unique_ptr<AVCodecContext, AVCodecContextDeleter>;
+
+    struct AVFrameDeleter
+    {
+        void operator()(AVFrame* ptr) const;
+    };
+
+    using AVFramePtr = std::unique_ptr<AVFrame, AVFrameDeleter>;
+
     class FFmpeg_Decoder final : public Sound_Decoder
     {
-        AVFormatContext* mFormatCtx;
-        AVCodecContext* mCodecCtx;
+        AVIOContextPtr mIoCtx;
+        AVFormatContextPtr mFormatCtx;
+        AVCodecContextPtr mCodecCtx;
         AVStream** mStream;
 
         AVPacket mPacket;
-        AVFrame* mFrame;
+        AVFramePtr mFrame;
 
-        int mFrameSize;
-        int mFramePos;
+        std::size_t mFrameSize;
+        std::size_t mFramePos;
 
         double mNextPts;
 
         SwrContext* mSwr;
         enum AVSampleFormat mOutputSampleFormat;
+#if OPENMW_FFMPEG_5_OR_GREATER
+        AVChannelLayout mOutputChannelLayout;
+#else
         int64_t mOutputChannelLayout;
+#endif
         uint8_t* mDataBuf;
         uint8_t** mFrameData;
         int mDataBufLen;
@@ -58,13 +94,17 @@ namespace MWSound
         Files::IStreamPtr mDataStream;
 
         static int readPacket(void* user_data, uint8_t* buf, int buf_size);
+#if OPENMW_FFMPEG_CONST_WRITEPACKET
+        static int writePacket(void* user_data, const uint8_t* buf, int buf_size);
+#else
         static int writePacket(void* user_data, uint8_t* buf, int buf_size);
+#endif
         static int64_t seek(void* user_data, int64_t offset, int whence);
 
         bool getAVAudioData();
         size_t readAVAudioData(void* data, size_t length);
 
-        void open(const std::string& fname) override;
+        void open(VFS::Path::NormalizedView fname) override;
         void close() override;
 
         std::string getName() override;

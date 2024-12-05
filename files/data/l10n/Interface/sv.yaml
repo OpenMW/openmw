@@ -1,16 +1,25 @@
-Cancel: "Avbryt"
-Close: "Stäng"
 DurationDay: "{days} d "
 DurationHour: "{hours} tim "
 DurationMinute: "{minutes} min "
-DurationMonth: "{months} må "
+DurationMonth: |-
+  {months, plural,
+    one{{months} må }
+    other{{months} må }
+  }
 DurationSecond: "{seconds} sek "
-DurationYear: "{years} år "
+DurationYear: |-
+  {years, plural,
+    one{{years} år }
+    other{{years} år }
+  }
 No: "Nej"
-None: "Inget"
 NotAvailableShort: "N/A"
-OK: "Ok"
-Off: "Av"
-On: "På"
-Reset: "Återställ"
+Reset: "Reset"
 Yes: "Ja"
+On: "På"
+Off: "Av"
+None: "Inget"
+OK: "Ok"
+Cancel: "Avbryt"
+Close: "Stäng"
+Copy: "Kopiera"

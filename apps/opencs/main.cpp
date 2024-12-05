@@ -3,17 +3,17 @@
 #include <exception>
 #include <string>
 
-#include <QApplication>
 #include <QIcon>
 #include <QSurfaceFormat>
 
 #include <osg/DisplaySettings>
 
 #include <components/debug/debugging.hpp>
-#include <components/debug/debuglog.hpp>
+#include <components/platform/application.hpp>
 #include <components/platform/platform.hpp>
 
 #include "model/doc/messages.hpp"
+#include "model/world/disabletag.hpp"
 #include "model/world/universalid.hpp"
 
 #ifdef Q_OS_MAC
@@ -24,30 +24,6 @@ Q_DECLARE_METATYPE(std::string)
 
 class QEvent;
 class QObject;
-
-class Application : public QApplication
-{
-private:
-    bool notify(QObject* receiver, QEvent* event) override
-    {
-        try
-        {
-            return QApplication::notify(receiver, event);
-        }
-        catch (const std::exception& exception)
-        {
-            Log(Debug::Error) << "An exception has been caught: " << exception.what();
-        }
-
-        return false;
-    }
-
-public:
-    Application(int& argc, char* argv[])
-        : QApplication(argc, argv)
-    {
-    }
-};
 
 void setQSurfaceFormat()
 {
@@ -72,21 +48,21 @@ int runApplication(int argc, char* argv[])
 
     Q_INIT_RESOURCE(resources);
 
+#ifdef WIN32
+    Q_INIT_RESOURCE(dark);
+#endif
+
     qRegisterMetaType<std::string>("std::string");
     qRegisterMetaType<CSMWorld::UniversalId>("CSMWorld::UniversalId");
+    qRegisterMetaType<CSMWorld::DisableTag>("CSMWorld::DisableTag");
     qRegisterMetaType<CSMDoc::Message>("CSMDoc::Message");
 
     setQSurfaceFormat();
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
-    Application application(argc, argv);
+    Platform::Application application(argc, argv);
 
-#ifdef Q_OS_MAC
-    QDir dir(QCoreApplication::applicationDirPath());
-    QDir::setCurrent(dir.absolutePath());
-#endif
-
-    application.setWindowIcon(QIcon(":./openmw-cs.png"));
+    application.setWindowIcon(QIcon(":openmw-cs"));
 
     CS::Editor editor(argc, argv);
 #ifdef __linux__
@@ -104,5 +80,5 @@ int runApplication(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
+    return Debug::wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
 }

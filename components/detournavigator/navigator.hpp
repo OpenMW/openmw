@@ -1,8 +1,11 @@
 ﻿#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 
+#include <cassert>
 #include <filesystem>
+#include <optional>
 
+#include "cellgridbounds.hpp"
 #include "heightfieldshape.hpp"
 #include "objectid.hpp"
 #include "objecttransform.hpp"
@@ -11,6 +14,7 @@
 #include "updateguard.hpp"
 #include "waitconditiontype.hpp"
 
+#include <components/esm/refid.hpp>
 #include <components/resource/bulletshape.hpp>
 
 namespace ESM
@@ -86,17 +90,10 @@ namespace DetourNavigator
          */
         virtual void removeAgent(const AgentBounds& agentBounds) = 0;
 
-        /**
-         * @brief setWorldspace should be called before adding object from new worldspace
-         * @param worldspace
-         */
-        virtual void setWorldspace(std::string_view worldspace, const UpdateGuard* guard) = 0;
-
-        /**
-         * @brief updateBounds should be called before adding object from loading cell
-         * @param playerPosition corresponds to the bounds center
-         */
-        virtual void updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard) = 0;
+        // Updates bounds for recast mesh and navmesh tiles, removes tiles outside the range.
+        virtual void updateBounds(ESM::RefId worldspace, const std::optional<CellGridBounds>& cellGridBounds,
+            const osg::Vec3f& playerPosition, const UpdateGuard* guard)
+            = 0;
 
         /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes

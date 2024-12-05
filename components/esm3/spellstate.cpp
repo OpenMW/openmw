@@ -33,7 +33,7 @@ namespace ESM
                     state.mPurgedEffects.insert(index);
                 }
 
-                mSpellParams[id] = state;
+                mSpellParams[id] = std::move(state);
                 mSpells.emplace_back(id);
             }
         }
@@ -69,7 +69,7 @@ namespace ESM
                 esm.getHNT(info.mMagnitude, "MAGN");
                 permEffectList.push_back(info);
             }
-            mPermanentSpellEffects[spellId] = permEffectList;
+            mPermanentSpellEffects[spellId] = std::move(permEffectList);
         }
 
         // Obsolete

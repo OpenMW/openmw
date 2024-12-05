@@ -1,7 +1,34 @@
 ---
--- `openmw.input` can be used only in scripts attached to a player.
+-- `openmw.input` can be used only in menu scripts and scripts attached to a player.
+-- Most mods should prefer to use the actions/triggers API over the direct input device methods.
+-- Actions have one value on each frame (resolved just before the `onFrame` engine handler),
+--  while Triggers don't have a value, but can occur multiple times on each frame.
+-- Prefer to use built-in methods of binding actions, such as the [inputBinding setting renderer](setting_renderers.html#inputbinding)
 -- @module input
 -- @usage local input = require('openmw.input')
+-- -- Example of Action usage
+-- input.registerAction {
+--     key = 'MyAction',
+--     type = input.ACTION_TYPE.Boolean,
+--     l10n = 'MyLocalizationContext',
+--     name = 'MyAction_name',
+--     description = 'MyAction_full_description',
+--     defaultValue = false,
+-- }
+-- return {
+--     onFrame = function()
+--         local myAction = input.getBooleanActionValue('MyAction')
+--         if (myAction) then print('My action is active!') end
+--     end,
+-- }
+-- -- Example of Trigger usage
+-- input.registerTrigger {
+--     key = 'MyTrigger',
+--     l10n = 'MyLocalizationContext',
+--     name = 'MyTrigger_name',
+--     description = 'MyTrigger_full_description',
+-- }
+-- input.registerTriggerHandler('MyTrigger', async:callback(function() print('MyTrigger') end))
 
 
 
@@ -11,8 +38,7 @@
 -- @return #boolean
 
 ---
--- Is a specific control currently pressed.
--- Input bindings can be changed ingame using Options/Controls menu.
+-- (DEPRECATED, use getBooleanActionValue) Input bindings can be changed ingame using Options/Controls menu.
 -- @function [parent=#input] isActionPressed
 -- @param #number actionId One of @{openmw.input#ACTION}
 -- @return #boolean
@@ -72,22 +98,22 @@
 -- @return #number Value in range [-1, 1].
 
 ---
--- Get state of a control switch. I.e. is player able to move/fight/jump/etc.
+-- Returns a human readable name for the given key code
+-- @function [parent=#input] getKeyName
+-- @param #KeyCode code A key code (see @{openmw.input#KEY})
+-- @return #string
+
+---
+-- [Deprecated, moved to types.Player] Get state of a control switch. I.e. is player able to move/fight/jump/etc.
 -- @function [parent=#input] getControlSwitch
 -- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @return #boolean
 
 ---
--- Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
+-- [Deprecated, moved to types.Player] Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
 -- @function [parent=#input] setControlSwitch
 -- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @param #boolean value
-
----
--- Returns a human readable name for the given key code
--- @function [parent=#input] getKeyName
--- @param #KeyCode code A key code (see @{openmw.input#KEY})
--- @return #string
 
 ---
 -- String id of a @{#CONTROL_SWITCH}
@@ -104,10 +130,11 @@
 -- @field [parent=#CONTROL_SWITCH] #ControlSwitch VanityMode Vanity view if player doesn't touch controls for a long time
 
 ---
--- Values that can be used with getControlSwitch/setControlSwitch.
+-- [Deprecated, moved to types.Player] Values that can be used with getControlSwitch/setControlSwitch.
 -- @field [parent=#input] #CONTROL_SWITCH CONTROL_SWITCH
 
 ---
+-- (DEPRECATED, use actions with matching keys)
 -- @type ACTION
 -- @field [parent=#ACTION] #number GameMenu
 -- @field [parent=#ACTION] #number Screenshot
@@ -153,7 +180,7 @@
 -- @field [parent=#ACTION] #number TogglePostProcessorHUD
 
 ---
--- Values that can be used with isActionPressed.
+-- (DEPRECATED, use getBooleanActionValue) Values that can be used with isActionPressed.
 -- @field [parent=#input] #ACTION ACTION
 
 ---
@@ -187,10 +214,10 @@
 -- @field [parent=#CONTROLLER_AXIS] #number RightY Right stick vertical axis (from -1 to 1)
 -- @field [parent=#CONTROLLER_AXIS] #number TriggerLeft Left trigger (from 0 to 1)
 -- @field [parent=#CONTROLLER_AXIS] #number TriggerRight Right trigger (from 0 to 1)
--- @field [parent=#CONTROLLER_AXIS] #number LookUpDown View direction vertical axis (RightY by default, can be mapped to another axis in Options/Controls menu)
--- @field [parent=#CONTROLLER_AXIS] #number LookLeftRight View direction horizontal axis (RightX by default, can be mapped to another axis in Options/Controls menu)
--- @field [parent=#CONTROLLER_AXIS] #number MoveForwardBackward Movement forward/backward (LeftY by default, can be mapped to another axis in Options/Controls menu)
--- @field [parent=#CONTROLLER_AXIS] #number MoveLeftRight Side movement (LeftX by default, can be mapped to another axis in Options/Controls menu)
+-- @field [parent=#CONTROLLER_AXIS] #number LookUpDown (DEPRECATED, use the LookUpDown action) View direction vertical axis (RightY by default, can be mapped to another axis in Options/Controls menu)
+-- @field [parent=#CONTROLLER_AXIS] #number LookLeftRight (DEPRECATED, use the LookLeftRight action) View direction horizontal axis (RightX by default, can be mapped to another axis in Options/Controls menu)
+-- @field [parent=#CONTROLLER_AXIS] #number MoveForwardBackward (DEPRECATED, use the MoveForwardBackward action) Movement forward/backward (LeftY by default, can be mapped to another axis in Options/Controls menu)
+-- @field [parent=#CONTROLLER_AXIS] #number MoveLeftRight (DEPRECATED, use the MoveLeftRight action) Side movement (LeftX by default, can be mapped to another axis in Options/Controls menu)
 
 ---
 -- Values that can be used with getAxisValue.
@@ -326,5 +353,106 @@
 -- @field [parent=#TouchEvent] #number finger Finger id (the device might support multitouch).
 -- @field [parent=#TouchEvent] openmw.util#Vector2 position Relative position on the touch device (0 to 1 from top left corner),
 -- @field [parent=#TouchEvent] #number pressure Pressure of the finger.
+
+---
+-- @type ActionType
+
+---
+-- @type ACTION_TYPE
+-- @field #ActionType Boolean Input action with value of true or false
+-- @field #ActionType Number Input action with a numeric value
+-- @field #ActionType Range Input action with a numeric value between 0 and 1 (inclusive)
+
+---
+-- Values that can be used in registerAction
+-- @field [parent=#input] #ACTION_TYPE ACTION_TYPE
+
+---
+-- @type ActionInfo
+-- @field [parent=#Actioninfo] #string key
+-- @field [parent=#Actioninfo] #ActionType type
+-- @field [parent=#Actioninfo] #string l10n Localization context containing the name and description keys
+-- @field [parent=#Actioninfo] #string name Localization key of the action's name
+-- @field [parent=#Actioninfo] #string description Localization key of the action's description
+-- @field [parent=#Actioninfo] defaultValue initial value of the action
+
+---
+-- Map of all currently registered actions
+-- @field [parent=#input] #map<#string,#ActionInfo> actions
+
+---
+-- Registers a new input action. The key must be unique
+-- @function [parent=#input] registerAction
+-- @param #ActionInfo info
+
+---
+-- Provides a function computing the value of given input action.
+--   The callback is called once a frame, after the values of dependency actions are resolved.
+--   Throws an error if a cyclic action dependency is detected.
+-- @function [parent=#input] bindAction
+-- @param #string key
+-- @param openmw.async#Callback callback returning the new value of the action, and taking as arguments:
+--   frame time in seconds,
+--   value of the function,
+--   value of the first dependency action,
+--   ...
+-- @param #list<#string> dependencies
+-- @usage
+--   input.bindAction('Activate', async:callback(function(dt, use, sneak, run)
+--       -- while sneaking, only activate things while holding the run binding
+--       return use and (run or not sneak)
+--   end), { 'Sneak', 'Run' })
+
+---
+-- Registers a function to be called whenever the action's value changes
+-- @function [parent=#input] registerActionHandler
+-- @param #string key
+-- @param openmw.async#Callback callback takes the new action value as the only argument
+
+---
+-- Returns the value of a Boolean action
+-- @function [parent=#input] getBooleanActionValue
+-- @param #string key
+-- @return #boolean
+
+---
+-- Returns the value of a Number action
+-- @function [parent=#input] getNumberActionValue
+-- @param #string key
+-- @return #number
+
+---
+-- Returns the value of a Range action
+-- @function [parent=#input] getRangeActionValue
+-- @param #string key
+-- @return #number
+
+---
+-- @type TriggerInfo
+-- @field [parent=#TriggerInfo] #string key
+-- @field [parent=#TriggerInfo] #string l10n Localization context containing the name and description keys
+-- @field [parent=#TriggerInfo] #string name Localization key of the trigger's name
+-- @field [parent=#TriggerInfo] #string description Localization key of the trigger's description
+
+---
+-- Map of all currently registered triggers
+-- @field [parent=#input] #map<#string,#TriggerInfo> triggers
+
+---
+-- Registers a new input trigger. The key must be unique
+-- @function [parent=#input] registerTrigger
+-- @param #TriggerInfo info
+
+---
+-- Registers a function to be called whenever the trigger activates
+-- @function [parent=#input] registerTriggerHandler
+-- @param #string key
+-- @param openmw.async#Callback callback takes the new action value as the only argument
+
+---
+-- Activates the trigger with the given key
+-- @function [parent=#input] activateTrigger
+-- @param #string key
+
 
 return nil

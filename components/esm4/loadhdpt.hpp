@@ -43,17 +43,40 @@ namespace ESM4
     {
         ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
+        std::uint64_t mExtraFlags2;
 
         std::string mEditorId;
         std::string mFullName;
         std::string mModel;
 
         std::uint8_t mData;
+        std::uint32_t mType;
 
-        ESM::FormId mAdditionalPart;
+        enum Type : std::uint32_t
+        {
+            Type_Misc = 0,
+            Type_Face = 1,
+            Type_Eyes = 2,
+            Type_Hair = 3,
+            Type_FacialHair = 4,
+            Type_Scar = 5,
+            Type_Eyebrows = 6,
+            // FO4+
+            Type_Meatcaps = 7,
+            Type_Teeth = 8,
+            Type_HeadRear = 9,
+            // Starfield
+            // 10 and 11 are unknown
+            Type_LeftEye = 12,
+            Type_Eyelashes = 13,
+        };
+
+        std::vector<ESM::FormId> mExtraParts;
 
         std::array<std::string, 3> mTriFile;
         ESM::FormId mBaseTexture;
+        ESM::FormId mColor;
+        std::vector<ESM::FormId> mValidRaces;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

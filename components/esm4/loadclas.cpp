@@ -41,21 +41,21 @@ void ESM4::Class::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DESC:
+            case ESM::fourCC("DESC"):
                 reader.getLocalizedString(mDesc);
                 break;
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIcon);
                 break;
-            case ESM4::SUB_DATA:
-            case ESM4::SUB_ATTR:
-            case ESM4::SUB_PRPS:
+            case ESM::fourCC("DATA"):
+            case ESM::fourCC("ATTR"):
+            case ESM::fourCC("PRPS"):
                 reader.skipSubRecordData();
                 break;
             default:

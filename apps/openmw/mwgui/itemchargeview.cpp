@@ -6,6 +6,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadench.hpp>
 
@@ -18,7 +19,6 @@
 
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
-#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -128,6 +128,11 @@ namespace MWGui
 
         mLines.swap(lines);
 
+        std::stable_sort(mLines.begin(), mLines.end(),
+            [](const MWGui::ItemChargeView::Line& a, const MWGui::ItemChargeView::Line& b) {
+                return Misc::StringUtils::ciLess(a.mText->getCaption(), b.mText->getCaption());
+            });
+
         layoutWidgets();
     }
 
@@ -177,7 +182,7 @@ namespace MWGui
     void ItemChargeView::updateLine(const ItemChargeView::Line& line)
     {
         std::string_view name = line.mItemPtr.getClass().getName(line.mItemPtr);
-        line.mText->setCaption(toUString(name));
+        line.mText->setCaption(MyGUI::UString(name));
 
         line.mCharge->setVisible(false);
         switch (mDisplayMode)

@@ -5,9 +5,10 @@
 #include <string>
 
 #include <osg/Vec3f>
+#include <osg/Vec4f>
 #include <osg/ref_ptr>
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 
 #include "tagbase.hpp"
@@ -138,7 +139,7 @@ namespace CSVRender
         ~Object();
 
         /// Mark the object as selected, selected objects show an outline effect
-        void setSelected(bool selected);
+        void setSelected(bool selected, const osg::Vec4f& color = osg::Vec4f(1, 1, 1, 1));
 
         bool getSelected() const;
 

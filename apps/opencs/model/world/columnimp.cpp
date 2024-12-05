@@ -2,11 +2,12 @@
 
 #include <apps/opencs/model/world/columnbase.hpp>
 #include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/loadltex.hpp>
 #include <components/esm3/loadmgef.hpp>
 
 #include <algorithm>
@@ -45,36 +46,13 @@ namespace CSMWorld
         };
     }
 
-    /* LandTextureNicknameColumn */
-    LandTextureNicknameColumn::LandTextureNicknameColumn()
-        : Column<LandTexture>(Columns::ColumnId_TextureNickname, ColumnBase::Display_String)
-    {
-    }
-
-    QVariant LandTextureNicknameColumn::get(const Record<LandTexture>& record) const
-    {
-        return QString::fromStdString(record.get().mId.toString());
-    }
-
-    void LandTextureNicknameColumn::set(Record<LandTexture>& record, const QVariant& data)
-    {
-        LandTexture copy = record.get();
-        copy.mId = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
-        record.setModified(copy);
-    }
-
-    bool LandTextureNicknameColumn::isEditable() const
-    {
-        return true;
-    }
-
     /* LandTextureIndexColumn */
     LandTextureIndexColumn::LandTextureIndexColumn()
-        : Column<LandTexture>(Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
+        : Column<ESM::LandTexture>(Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
     {
     }
 
-    QVariant LandTextureIndexColumn::get(const Record<LandTexture>& record) const
+    QVariant LandTextureIndexColumn::get(const Record<ESM::LandTexture>& record) const
     {
         return record.get().mIndex;
     }
@@ -96,22 +74,6 @@ namespace CSMWorld
     }
 
     bool LandPluginIndexColumn::isEditable() const
-    {
-        return false;
-    }
-
-    /* LandTexturePluginIndexColumn */
-    LandTexturePluginIndexColumn::LandTexturePluginIndexColumn()
-        : Column<LandTexture>(Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer, 0)
-    {
-    }
-
-    QVariant LandTexturePluginIndexColumn::get(const Record<LandTexture>& record) const
-    {
-        return record.get().mPluginIndex;
-    }
-
-    bool LandTexturePluginIndexColumn::isEditable() const
     {
         return false;
     }
@@ -202,6 +164,8 @@ namespace CSMWorld
             copy.getLandData()->mHeights[i] = values[i];
         }
 
+        copy.mFlags |= Land::Flag_HeightsNormals;
+
         record.setModified(copy);
     }
 
@@ -248,6 +212,8 @@ namespace CSMWorld
         {
             copy.getLandData()->mColours[i] = values[i];
         }
+
+        copy.mFlags |= Land::Flag_Colors;
 
         record.setModified(copy);
     }
@@ -296,6 +262,8 @@ namespace CSMWorld
             copy.getLandData()->mTextures[i] = values[i];
         }
 
+        copy.mFlags |= Land::Flag_Textures;
+
         record.setModified(copy);
     }
 
@@ -316,7 +284,8 @@ namespace CSMWorld
         {
             return QString::fromUtf8(record.get().mRace.getRefIdString().c_str());
         }
-        return QVariant(QVariant::UserType);
+
+        return DisableTag::getVariant();
     }
 
     void BodyPartRaceColumn::set(Record<ESM::BodyPart>& record, const QVariant& data)
@@ -331,6 +300,37 @@ namespace CSMWorld
     bool BodyPartRaceColumn::isEditable() const
     {
         return true;
+    }
+
+    SelectionGroupColumn::SelectionGroupColumn()
+        : Column<ESM::SelectionGroup>(Columns::ColumnId_SelectionGroupObjects, ColumnBase::Display_None)
+    {
+    }
+
+    QVariant SelectionGroupColumn::get(const Record<ESM::SelectionGroup>& record) const
+    {
+        QVariant data;
+        QStringList selectionInfo;
+        const std::vector<std::string>& instances = record.get().selectedInstances;
+
+        for (const std::string& instance : instances)
+            selectionInfo << QString::fromStdString(instance);
+        data.setValue(selectionInfo);
+
+        return data;
+    }
+
+    void SelectionGroupColumn::set(Record<ESM::SelectionGroup>& record, const QVariant& data)
+    {
+        ESM::SelectionGroup record2 = record.get();
+        for (const auto& item : data.toStringList())
+            record2.selectedInstances.push_back(item.toStdString());
+        record.setModified(record2);
+    }
+
+    bool SelectionGroupColumn::isEditable() const
+    {
+        return false;
     }
 
     std::optional<std::uint32_t> getSkillIndex(std::string_view value)

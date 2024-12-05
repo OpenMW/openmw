@@ -1,5 +1,7 @@
 #include "pingpongcanvas.hpp"
 
+#include <cassert>
+
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
@@ -10,9 +12,11 @@
 
 namespace MWRender
 {
-    PingPongCanvas::PingPongCanvas(Shader::ShaderManager& shaderManager)
+    PingPongCanvas::PingPongCanvas(
+        Shader::ShaderManager& shaderManager, const std::shared_ptr<LuminanceCalculator>& luminanceCalculator)
         : mFallbackStateSet(new osg::StateSet)
         , mMultiviewResolveStateSet(new osg::StateSet)
+        , mLuminanceCalculator(luminanceCalculator)
     {
         setUseDisplayList(false);
         setUseVertexBufferObjects(true);
@@ -26,8 +30,7 @@ namespace MWRender
 
         addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, 3));
 
-        mLuminanceCalculator = LuminanceCalculator(shaderManager);
-        mLuminanceCalculator.disable();
+        mLuminanceCalculator->disable();
 
         Shader::ShaderManager::DefineMap defines;
         Stereo::shaderStereoDefines(defines);
@@ -43,19 +46,16 @@ namespace MWRender
         mMultiviewResolveStateSet->addUniform(new osg::Uniform("lastShader", 0));
     }
 
-    void PingPongCanvas::setCurrentFrameData(size_t frameId, fx::DispatchArray&& data)
+    void PingPongCanvas::setPasses(fx::DispatchArray&& passes)
     {
-        mBufferData[frameId].data = std::move(data);
+        mPasses = std::move(passes);
     }
 
-    void PingPongCanvas::setMask(size_t frameId, bool underwater, bool exterior)
+    void PingPongCanvas::setMask(bool underwater, bool exterior)
     {
-        mBufferData[frameId].mask = 0;
-
-        mBufferData[frameId].mask
-            |= underwater ? fx::Technique::Flag_Disable_Underwater : fx::Technique::Flag_Disable_Abovewater;
-        mBufferData[frameId].mask
-            |= exterior ? fx::Technique::Flag_Disable_Exteriors : fx::Technique::Flag_Disable_Interiors;
+        mMask = 0;
+        mMask |= underwater ? fx::Technique::Flag_Disable_Underwater : fx::Technique::Flag_Disable_Abovewater;
+        mMask |= exterior ? fx::Technique::Flag_Disable_Exteriors : fx::Technique::Flag_Disable_Interiors;
     }
 
     void PingPongCanvas::drawGeometry(osg::RenderInfo& renderInfo) const
@@ -77,19 +77,15 @@ namespace MWRender
 
         size_t frameId = state.getFrameStamp()->getFrameNumber() % 2;
 
-        auto& bufferData = mBufferData[frameId];
-
-        const auto& data = bufferData.data;
-
         std::vector<size_t> filtered;
 
-        filtered.reserve(data.size());
+        filtered.reserve(mPasses.size());
 
-        for (size_t i = 0; i < data.size(); ++i)
+        for (size_t i = 0; i < mPasses.size(); ++i)
         {
-            const auto& node = data[i];
+            const auto& node = mPasses[i];
 
-            if (bufferData.mask & node.mFlags)
+            if (mMask & node.mFlags)
                 continue;
 
             filtered.push_back(i);
@@ -97,7 +93,7 @@ namespace MWRender
 
         auto* resolveViewport = state.getCurrentViewport();
 
-        if (filtered.empty() || !bufferData.postprocessing)
+        if (filtered.empty() || !mPostprocessing)
         {
             state.pushStateSet(mFallbackStateSet);
             state.apply();
@@ -108,7 +104,7 @@ namespace MWRender
                 state.apply();
             }
 
-            state.applyTextureAttribute(0, bufferData.sceneTex);
+            state.applyTextureAttribute(0, mTextureScene);
             resolveViewport->apply(state);
 
             drawGeometry(renderInfo);
@@ -124,13 +120,12 @@ namespace MWRender
 
         const unsigned int handle = mFbos[0] ? mFbos[0]->getHandle(state.getContextID()) : 0;
 
-        if (handle == 0 || bufferData.dirty)
+        if (handle == 0 || mDirty)
         {
             for (auto& fbo : mFbos)
             {
                 fbo = new osg::FrameBufferObject;
-                attachCloneOfTemplate(
-                    fbo, osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, bufferData.sceneTexLDR);
+                attachCloneOfTemplate(fbo, osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, mTextureScene);
                 fbo->apply(state);
                 glClearColor(0.5, 0.5, 0.5, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
@@ -140,7 +135,7 @@ namespace MWRender
             {
                 mMultiviewResolveFramebuffer = new osg::FrameBufferObject();
                 attachCloneOfTemplate(mMultiviewResolveFramebuffer,
-                    osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, bufferData.sceneTexLDR);
+                    osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, mTextureScene);
                 mMultiviewResolveFramebuffer->apply(state);
                 glClearColor(0.5, 0.5, 0.5, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
@@ -150,15 +145,15 @@ namespace MWRender
                         .getTexture());
             }
 
-            mLuminanceCalculator.dirty(bufferData.sceneTex->getTextureWidth(), bufferData.sceneTex->getTextureHeight());
+            mLuminanceCalculator->dirty(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
 
             if (Stereo::getStereo())
-                mRenderViewport = new osg::Viewport(
-                    0, 0, bufferData.sceneTex->getTextureWidth(), bufferData.sceneTex->getTextureHeight());
+                mRenderViewport
+                    = new osg::Viewport(0, 0, mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
             else
                 mRenderViewport = nullptr;
 
-            bufferData.dirty = false;
+            mDirty = false;
         }
 
         constexpr std::array<std::array<int, 2>, 3> buffers
@@ -166,11 +161,11 @@ namespace MWRender
                 { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT2_EXT },
                 { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT } } };
 
-        (bufferData.hdr) ? mLuminanceCalculator.enable() : mLuminanceCalculator.disable();
+        (mAvgLum) ? mLuminanceCalculator->enable() : mLuminanceCalculator->disable();
 
         // A histogram based approach is superior way to calculate scene luminance. Using mipmaps is more broadly
         // supported, so that's what we use for now.
-        mLuminanceCalculator.draw(*this, renderInfo, state, ext, frameId);
+        mLuminanceCalculator->draw(*this, renderInfo, state, ext, frameId);
 
         auto buffer = buffers[0];
 
@@ -181,8 +176,7 @@ namespace MWRender
 
         const unsigned int cid = state.getContextID();
 
-        const osg::ref_ptr<osg::FrameBufferObject>& destinationFbo
-            = bufferData.destination ? bufferData.destination : nullptr;
+        const osg::ref_ptr<osg::FrameBufferObject>& destinationFbo = mDestinationFBO ? mDestinationFBO : nullptr;
         unsigned int destinationHandle = destinationFbo ? destinationFbo->getHandle(cid) : 0;
 
         auto bindDestinationFbo = [&]() {
@@ -204,19 +198,55 @@ namespace MWRender
             }
         };
 
+        // When textures are created (or resized) we need to either dirty them and/or clear them.
+        // Otherwise, there will be undefined behavior when reading from a texture that has yet to be written to in a
+        // later pass.
+        for (const auto& attachment : mDirtyAttachments)
+        {
+            const auto [w, h]
+                = attachment.mSize.get(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
+
+            attachment.mTarget->setTextureSize(w, h);
+            if (attachment.mMipMap)
+                attachment.mTarget->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+            attachment.mTarget->dirtyTextureObject();
+
+            osg::ref_ptr<osg::FrameBufferObject> fbo = new osg::FrameBufferObject;
+
+            fbo->setAttachment(
+                osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(attachment.mTarget));
+            fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+
+            glViewport(0, 0, attachment.mTarget->getTextureWidth(), attachment.mTarget->getTextureHeight());
+            state.haveAppliedAttribute(osg::StateAttribute::VIEWPORT);
+            glClearColor(attachment.mClearColor.r(), attachment.mClearColor.g(), attachment.mClearColor.b(),
+                attachment.mClearColor.a());
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            if (attachment.mTarget->getNumMipmapLevels() > 0)
+            {
+                state.setActiveTextureUnit(0);
+                state.applyTextureAttribute(0, attachment.mTarget);
+                ext->glGenerateMipmap(GL_TEXTURE_2D);
+            }
+        }
+
         for (const size_t& index : filtered)
         {
-            const auto& node = data[index];
+            const auto& node = mPasses[index];
 
-            node.mRootStateSet->setTextureAttribute(PostProcessor::Unit_Depth, bufferData.depthTex);
+            node.mRootStateSet->setTextureAttribute(PostProcessor::Unit_Depth, mTextureDepth);
 
-            if (bufferData.hdr)
+            if (mAvgLum)
+                node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_EyeAdaptation,
+                    mLuminanceCalculator->getLuminanceTexture(frameId));
+
+            if (mTextureNormals)
+                node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_Normals, mTextureNormals);
+
+            if (mTextureDistortion)
                 node.mRootStateSet->setTextureAttribute(
-                    PostProcessor::TextureUnits::Unit_EyeAdaptation, mLuminanceCalculator.getLuminanceTexture(frameId));
-
-            if (bufferData.normalsTex)
-                node.mRootStateSet->setTextureAttribute(
-                    PostProcessor::TextureUnits::Unit_Normals, bufferData.normalsTex);
+                    PostProcessor::TextureUnits::Unit_Distortion, mTextureDistortion);
 
             state.pushStateSet(node.mRootStateSet);
             state.apply();
@@ -231,7 +261,7 @@ namespace MWRender
 
                 // VR-TODO: This won't actually work for tex2darrays
                 if (lastShader == 0)
-                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastShader, bufferData.sceneTex);
+                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastShader, mTextureScene);
                 else
                     pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastShader,
                         (osg::Texture*)mFbos[lastShader - GL_COLOR_ATTACHMENT0_EXT]
@@ -239,7 +269,7 @@ namespace MWRender
                             .getTexture());
 
                 if (lastDraw == 0)
-                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastPass, bufferData.sceneTex);
+                    pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastPass, mTextureScene);
                 else
                     pass.mStateSet->setTextureAttribute(PostProcessor::Unit_LastPass,
                         (osg::Texture*)mFbos[lastDraw - GL_COLOR_ATTACHMENT0_EXT]
@@ -260,7 +290,6 @@ namespace MWRender
                     }
 
                     lastApplied = pass.mRenderTarget->getHandle(state.getContextID());
-                    ;
                 }
                 else if (pass.mResolve && index == filtered.back())
                 {
@@ -322,5 +351,7 @@ namespace MWRender
         {
             bindDestinationFbo();
         }
+
+        mDirtyAttachments.clear();
     }
 }

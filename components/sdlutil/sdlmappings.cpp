@@ -83,7 +83,7 @@ namespace SDLUtil
 
     Uint8 myGuiMouseButtonToSdl(MyGUI::MouseButton button)
     {
-        Uint8 value = button.getValue() + 1;
+        Uint8 value = static_cast<Uint8>(button.getValue() + 1);
         if (value == SDL_BUTTON_RIGHT)
             value = SDL_BUTTON_MIDDLE;
         else if (value == SDL_BUTTON_MIDDLE)

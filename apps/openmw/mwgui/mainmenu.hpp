@@ -2,6 +2,8 @@
 #define OPENMW_GAME_MWGUI_MAINMENU_H
 
 #include <memory>
+#include <optional>
+#include <thread>
 
 #include "savegamedialog.hpp"
 #include "windowbase.hpp"
@@ -21,6 +23,20 @@ namespace MWGui
 
     class BackgroundImage;
     class VideoWidget;
+    class MenuVideo
+    {
+        MyGUI::ImageBox* mVideoBackground;
+        VideoWidget* mVideo;
+        std::thread mThread;
+        bool mRunning;
+
+        void run();
+
+    public:
+        MenuVideo(const VFS::Manager* vfs);
+        void resize(int w, int h);
+        ~MenuVideo();
+    };
 
     class MainMenu : public WindowBase
     {
@@ -36,8 +52,6 @@ namespace MWGui
 
         void setVisible(bool visible) override;
 
-        void onFrame(float dt) override;
-
         bool exit() override;
 
     private:
@@ -48,8 +62,7 @@ namespace MWGui
 
         BackgroundImage* mBackground;
 
-        MyGUI::ImageBox* mVideoBackground;
-        VideoWidget* mVideo; // For animated main menus
+        std::optional<MenuVideo> mVideo; // For animated main menus
 
         std::map<std::string, Gui::ImageButton*, std::less<>> mButtons;
 

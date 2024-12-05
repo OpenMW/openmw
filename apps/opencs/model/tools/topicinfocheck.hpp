@@ -84,7 +84,7 @@ namespace CSMTools
             const ESM::RefId& name, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifyItem(const ESM::RefId& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifySelectStruct(
-            const ESM::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+            const ESM::DialogueCondition& select, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifySound(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
 
         template <typename T>

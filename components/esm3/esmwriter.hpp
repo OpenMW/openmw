@@ -5,6 +5,7 @@
 #include <list>
 #include <type_traits>
 
+#include "components/esm/decompose.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
 
@@ -37,8 +38,8 @@ namespace ESM
         void setVersion(unsigned int ver = 0x3fa66666);
         void setType(int type);
         void setEncoder(ToUTF8::Utf8Encoder* encoding);
-        void setAuthor(const std::string& author);
-        void setDescription(const std::string& desc);
+        void setAuthor(std::string_view author);
+        void setDescription(std::string_view desc);
         void setHeader(const Header& value) { mHeader = value; }
 
         // Set the record count for writing it in the file header
@@ -53,7 +54,7 @@ namespace ESM
 
         void clearMaster();
 
-        void addMaster(const std::string& name, uint64_t size);
+        void addMaster(std::string_view name, uint64_t size);
 
         void save(std::ostream& file);
         ///< Start saving a file by writing the TES3 header.
@@ -61,20 +62,20 @@ namespace ESM
         void close();
         ///< \note Does not close the stream.
 
-        void writeHNString(NAME name, const std::string& data);
-        void writeHNString(NAME name, const std::string& data, size_t size);
-        void writeHNCString(NAME name, const std::string& data)
+        void writeHNString(NAME name, std::string_view data);
+        void writeHNString(NAME name, std::string_view data, size_t size);
+        void writeHNCString(NAME name, std::string_view data)
         {
             startSubRecord(name);
             writeHCString(data);
             endRecord(name);
         }
-        void writeHNOString(NAME name, const std::string& data)
+        void writeHNOString(NAME name, std::string_view data)
         {
             if (!data.empty())
                 writeHNString(name, data);
         }
-        void writeHNOCString(NAME name, const std::string& data)
+        void writeHNOCString(NAME name, std::string_view data)
         {
             if (!data.empty())
                 writeHNCString(name, data);
@@ -121,10 +122,25 @@ namespace ESM
             endRecord(name);
         }
 
+        void writeNamedComposite(NAME name, const auto& value)
+        {
+            decompose(value, [&](const auto&... args) {
+                startSubRecord(name);
+                (writeT(args), ...);
+                endRecord(name);
+            });
+        }
+
+        void writeComposite(const auto& value)
+        {
+            decompose(value, [&](const auto&... args) { (writeT(args), ...); });
+        }
+
         // Prevent using writeHNT with strings. This already happened by accident and results in
         // state being discarded without any error on writing or reading it. :(
         // writeHNString and friends must be used instead.
         void writeHNT(NAME name, const std::string& data) = delete;
+        void writeHNT(NAME name, std::string_view data) = delete;
 
         void writeT(NAME data) = delete;
 
@@ -132,7 +148,7 @@ namespace ESM
         void writeHNT(NAME name, const T (&data)[size], int) = delete;
 
         template <typename T>
-        void writeHNT(NAME name, const T& data, int size)
+        void writeHNT(NAME name, const T& data, std::size_t size)
         {
             startSubRecord(name);
             writeT(data, size);
@@ -166,8 +182,8 @@ namespace ESM
         void endRecord(NAME name);
         void endRecord(uint32_t name);
         void writeMaybeFixedSizeString(const std::string& data, std::size_t size);
-        void writeHString(const std::string& data);
-        void writeHCString(const std::string& data);
+        void writeHString(std::string_view data);
+        void writeHCString(std::string_view data);
 
         void writeMaybeFixedSizeRefId(RefId value, std::size_t size);
 

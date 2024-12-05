@@ -2,6 +2,7 @@
 #define OPENMW_ESSIMPORT_NPCC_H
 
 #include <components/esm3/aipackage.hpp>
+#include <cstdint>
 
 #include "importinventory.hpp"
 
@@ -21,7 +22,7 @@ namespace ESSImport
             unsigned char unknown;
             unsigned char mReputation;
             unsigned char unknown2;
-            int mIndex;
+            int32_t mIndex;
         } mNPDT;
 
         Inventory mInventory;

@@ -24,11 +24,14 @@
 #include "installationpage.hpp"
 #endif
 
+#include <algorithm>
+
 using namespace Process;
 
-Wizard::MainWizard::MainWizard(QWidget* parent)
+Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* parent)
     : QWizard(parent)
     , mInstallations()
+    , mCfgMgr(cfgMgr)
     , mError(false)
     , mGameSettings(mCfgMgr)
 {
@@ -55,9 +58,9 @@ Wizard::MainWizard::MainWizard(QWidget* parent)
         &MainWizard::importerFinished);
 
     mLogError = tr(
-        "<html><head/><body><p><b>Could not open %1 for writing</b></p> \
-                   <p>Please make sure you have the right permissions \
-                   and try again.</p></body></html>");
+        "<html><head/><body><p><b>Could not open %1 for writing</b></p>"
+        "<p>Please make sure you have the right permissions "
+        "and try again.</p></body></html>");
 
     std::filesystem::create_directories(mCfgMgr.getUserConfigPath());
     std::filesystem::create_directories(mCfgMgr.getUserDataPath());
@@ -139,9 +142,9 @@ void Wizard::MainWizard::addLogText(const QString& text)
 void Wizard::MainWizard::setupGameSettings()
 {
     QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
-                    <p>Please make sure you have the right permissions \
-                    and try again.</p></body></html>"));
+        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
+           "<p>Please make sure you have the right permissions "
+           "and try again.</p></body></html>"));
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
@@ -166,16 +169,13 @@ void Wizard::MainWizard::setupGameSettings()
         QTextStream stream(&file);
         Misc::ensureUtf8Encoding(stream);
 
-        mGameSettings.readUserFile(stream);
+        mGameSettings.readUserFile(stream, QFileInfo(path).dir().path());
     }
 
     file.close();
 
     // Now the rest
-    QStringList paths;
-    paths.append(Files::getUserConfigPathQString(mCfgMgr));
-    paths.append(QLatin1String("openmw.cfg"));
-    paths.append(Files::getGlobalConfigPathQString(mCfgMgr));
+    QStringList paths = Files::getActiveConfigPathsQString(mCfgMgr);
 
     for (const QString& path2 : paths)
     {
@@ -198,7 +198,7 @@ void Wizard::MainWizard::setupGameSettings()
             QTextStream stream(&file);
             Misc::ensureUtf8Encoding(stream);
 
-            mGameSettings.readFile(stream);
+            mGameSettings.readFile(stream, QFileInfo(path2).dir().path());
         }
         file.close();
     }
@@ -210,9 +210,9 @@ void Wizard::MainWizard::setupLauncherSettings()
     path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
-                    <p>Please make sure you have the right permissions \
-                    and try again.</p></body></html>"));
+        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
+           "<p>Please make sure you have the right permissions "
+           "and try again.</p></body></html>"));
 
     QFile file(path);
 
@@ -243,11 +243,11 @@ void Wizard::MainWizard::setupLauncherSettings()
 void Wizard::MainWizard::setupInstallations()
 {
     // Check if the paths actually contain a Morrowind installation
-    for (const QString& path : mGameSettings.getDataDirs())
+    for (const auto& path : mGameSettings.getDataDirs())
     {
 
-        if (findFiles(QLatin1String("Morrowind"), path))
-            addInstallation(path);
+        if (findFiles(QLatin1String("Morrowind"), path.value))
+            addInstallation(path.value);
     }
 }
 
@@ -271,7 +271,6 @@ void Wizard::MainWizard::runSettingsImporter()
 
     // Set encoding
     QString language(field(QLatin1String("installation.language")).toString());
-
     if (language == QLatin1String("Polish"))
     {
         arguments.append(QLatin1String("win1250"));
@@ -335,10 +334,12 @@ void Wizard::MainWizard::addInstallation(const QString& path)
     mInstallations.insert(QDir::toNativeSeparators(path), install);
 
     // Add it to the openmw.cfg too
-    if (!mGameSettings.getDataDirs().contains(path))
+    const auto& dataDirs = mGameSettings.getDataDirs();
+    if (std::none_of(
+            dataDirs.begin(), dataDirs.end(), [&](const Config::SettingValue& dir) { return dir.value == path; }))
     {
-        mGameSettings.setMultiValue(QLatin1String("data"), path);
-        mGameSettings.addDataDir(path);
+        mGameSettings.setMultiValue(QLatin1String("data"), { path });
+        mGameSettings.addDataDir({ path });
     }
 }
 
@@ -397,15 +398,15 @@ void Wizard::MainWizard::writeSettings()
 
     if (language == QLatin1String("Polish"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1250"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1250" });
     }
     else if (language == QLatin1String("Russian"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1251" });
     }
     else
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "win1252" });
     }
 
     // Write the installation path so that openmw can find them
@@ -413,7 +414,7 @@ void Wizard::MainWizard::writeSettings()
 
     // Make sure the installation path is the last data= entry
     mGameSettings.removeDataDir(path);
-    mGameSettings.addDataDir(path);
+    mGameSettings.addDataDir({ path });
 
     QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     QDir dir(userPath);
@@ -427,9 +428,9 @@ void Wizard::MainWizard::writeSettings()
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<html><head/><body><p><b>Could not create %1</b></p> \
-                              <p>Please make sure you have the right permissions \
-                              and try again.</p></body></html>")
+                tr("<html><head/><body><p><b>Could not create %1</b></p>"
+                   "<p>Please make sure you have the right permissions "
+                   "and try again.</p></body></html>")
                     .arg(userPath));
             connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
             msgBox.exec();
@@ -448,9 +449,9 @@ void Wizard::MainWizard::writeSettings()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
-                          <p>Please make sure you have the right permissions \
-                          and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
+               "<p>Please make sure you have the right permissions "
+               "and try again.</p></body></html>")
                 .arg(file.fileName()));
         connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
@@ -475,9 +476,9 @@ void Wizard::MainWizard::writeSettings()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p> \
-                          <p>Please make sure you have the right permissions \
-                          and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
+               "<p>Please make sure you have the right permissions "
+               "and try again.</p></body></html>")
                 .arg(file.fileName()));
         connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();

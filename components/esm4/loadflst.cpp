@@ -41,13 +41,13 @@ void ESM4::FormIdList::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_LNAM:
+            case ESM::fourCC("LNAM"):
                 reader.getFormId(mObjects.emplace_back());
                 break;
             default:

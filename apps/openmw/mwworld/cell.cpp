@@ -100,18 +100,7 @@ namespace MWWorld
             mWaterHeight = -1.f;
             mHasWater = true;
         }
-    }
-
-    ESM::RefId Cell::getWorldSpace() const
-    {
-        if (isExterior())
-            return mParent;
         else
-            return mId;
-    }
-
-    ESM::ExteriorCellLocation Cell::getExteriorCellLocation() const
-    {
-        return { mGridPos.x(), mGridPos.y(), getWorldSpace() };
+            mGridPos = {};
     }
 }

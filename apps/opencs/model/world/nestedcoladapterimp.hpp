@@ -255,20 +255,22 @@ namespace CSMWorld
         {
             ESXRecordT magic = record.get();
 
-            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+            std::vector<ESM::IndexedENAMstruct>& effectsList = magic.mEffects.mList;
 
             // blank row
-            ESM::ENAMstruct effect;
-            effect.mEffectID = 0;
-            effect.mSkill = -1;
-            effect.mAttribute = -1;
-            effect.mRange = 0;
-            effect.mArea = 0;
-            effect.mDuration = 0;
-            effect.mMagnMin = 0;
-            effect.mMagnMax = 0;
+            ESM::IndexedENAMstruct effect;
+            effect.mIndex = position;
+            effect.mData.mEffectID = 0;
+            effect.mData.mSkill = -1;
+            effect.mData.mAttribute = -1;
+            effect.mData.mRange = 0;
+            effect.mData.mArea = 0;
+            effect.mData.mDuration = 0;
+            effect.mData.mMagnMin = 0;
+            effect.mData.mMagnMax = 0;
 
             effectsList.insert(effectsList.begin() + position, effect);
+            magic.mEffects.updateIndexes();
 
             record.setModified(magic);
         }
@@ -277,12 +279,13 @@ namespace CSMWorld
         {
             ESXRecordT magic = record.get();
 
-            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+            std::vector<ESM::IndexedENAMstruct>& effectsList = magic.mEffects.mList;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int>(effectsList.size()))
                 throw std::runtime_error("index out of range");
 
             effectsList.erase(effectsList.begin() + rowToRemove);
+            magic.mEffects.updateIndexes();
 
             record.setModified(magic);
         }
@@ -292,7 +295,7 @@ namespace CSMWorld
             ESXRecordT magic = record.get();
 
             magic.mEffects.mList
-                = static_cast<const NestedTableWrapper<std::vector<ESM::ENAMstruct>>&>(nestedTable).mNestedTable;
+                = static_cast<const NestedTableWrapper<std::vector<ESM::IndexedENAMstruct>>&>(nestedTable).mNestedTable;
 
             record.setModified(magic);
         }
@@ -300,28 +303,23 @@ namespace CSMWorld
         NestedTableWrapperBase* table(const Record<ESXRecordT>& record) const override
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<ESM::ENAMstruct>>(record.get().mEffects.mList);
+            return new NestedTableWrapper<std::vector<ESM::IndexedENAMstruct>>(record.get().mEffects.mList);
         }
 
         QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const override
         {
             ESXRecordT magic = record.get();
 
-            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+            std::vector<ESM::IndexedENAMstruct>& effectsList = magic.mEffects.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int>(effectsList.size()))
                 throw std::runtime_error("index out of range");
 
-            ESM::ENAMstruct effect = effectsList[subRowIndex];
+            ESM::ENAMstruct effect = effectsList[subRowIndex].mData;
             switch (subColIndex)
             {
                 case 0:
-                {
-                    if (effect.mEffectID >= 0 && effect.mEffectID < ESM::MagicEffect::Length)
-                        return effect.mEffectID;
-                    else
-                        throw std::runtime_error("Magic effects ID unexpected value");
-                }
+                    return effect.mEffectID;
                 case 1:
                 {
                     switch (effect.mEffectID)
@@ -351,12 +349,7 @@ namespace CSMWorld
                     }
                 }
                 case 3:
-                {
-                    if (effect.mRange >= 0 && effect.mRange <= 2)
-                        return effect.mRange;
-                    else
-                        throw std::runtime_error("Magic effects range unexpected value");
-                }
+                    return effect.mRange;
                 case 4:
                     return effect.mArea;
                 case 5:
@@ -374,17 +367,37 @@ namespace CSMWorld
         {
             ESXRecordT magic = record.get();
 
-            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+            std::vector<ESM::IndexedENAMstruct>& effectsList = magic.mEffects.mList;
 
             if (subRowIndex < 0 || subRowIndex >= static_cast<int>(effectsList.size()))
                 throw std::runtime_error("index out of range");
 
-            ESM::ENAMstruct effect = effectsList[subRowIndex];
+            ESM::ENAMstruct effect = effectsList[subRowIndex].mData;
             switch (subColIndex)
             {
                 case 0:
                 {
                     effect.mEffectID = static_cast<short>(value.toInt());
+                    switch (effect.mEffectID)
+                    {
+                        case ESM::MagicEffect::DrainSkill:
+                        case ESM::MagicEffect::DamageSkill:
+                        case ESM::MagicEffect::RestoreSkill:
+                        case ESM::MagicEffect::FortifySkill:
+                        case ESM::MagicEffect::AbsorbSkill:
+                            effect.mAttribute = -1;
+                            break;
+                        case ESM::MagicEffect::DrainAttribute:
+                        case ESM::MagicEffect::DamageAttribute:
+                        case ESM::MagicEffect::RestoreAttribute:
+                        case ESM::MagicEffect::FortifyAttribute:
+                        case ESM::MagicEffect::AbsorbAttribute:
+                            effect.mSkill = -1;
+                            break;
+                        default:
+                            effect.mSkill = -1;
+                            effect.mAttribute = -1;
+                    }
                     break;
                 }
                 case 1:
@@ -418,7 +431,7 @@ namespace CSMWorld
                     throw std::runtime_error("Magic Effects subcolumn index out of range");
             }
 
-            magic.mEffects.mList[subRowIndex] = effect;
+            magic.mEffects.mList[subRowIndex].mData = effect;
 
             record.setModified(magic);
         }

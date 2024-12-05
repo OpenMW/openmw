@@ -4,6 +4,8 @@
 
 #include "niffile.hpp"
 
+#include "../to_utf8/to_utf8.hpp"
+
 namespace
 {
 
@@ -58,6 +60,8 @@ namespace Nif
         size_t end = str.find('\0');
         if (end != std::string::npos)
             str.erase(end);
+        if (mEncoder)
+            str = mEncoder->getUtf8(str, ToUTF8::BufferAllocationPolicy::UseGrowFactor, mBuffer);
         return str;
     }
 
@@ -123,11 +127,34 @@ namespace Nif
     }
 
     template <>
-    void NIFStream::read<Transformation>(Transformation& t)
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref& sphere)
     {
-        read(t.pos);
-        read(t.rotation);
-        read(t.scale);
+        read(sphere.center());
+        read(sphere.radius());
+    }
+
+    template <>
+    void NIFStream::read<NiTransform>(NiTransform& transform)
+    {
+        read(transform.mRotation);
+        read(transform.mTranslation);
+        read(transform.mScale);
+    }
+
+    template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform& transform)
+    {
+        read(transform.mTranslation);
+        read(transform.mRotation);
+        read(transform.mScale);
+        if (getVersion() >= generateVersion(10, 1, 0, 110))
+            return;
+        if (!get<bool>())
+            transform.mTranslation = osg::Vec3f();
+        if (!get<bool>())
+            transform.mRotation = osg::Quat();
+        if (!get<bool>())
+            transform.mScale = 1.f;
     }
 
     template <>
@@ -179,7 +206,19 @@ namespace Nif
     }
 
     template <>
-    void NIFStream::read<Transformation>(Transformation* dest, size_t size)
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref* dest, size_t size)
+    {
+        readRange(*this, dest, size);
+    }
+
+    template <>
+    void NIFStream::read<NiTransform>(NiTransform* dest, size_t size)
+    {
+        readRange(*this, dest, size);
+    }
+
+    template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform* dest, size_t size)
     {
         readRange(*this, dest, size);
     }

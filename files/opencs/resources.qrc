@@ -1,187 +1,163 @@
 <RCC>
     <qresource prefix="/">
-        <file>openmw-cs.png</file>
-        <file>activator.png</file>
-        <file alias="list-added">list-added.png</file>
-        <file>apparatus.png</file>
-        <file>armor.png</file>
-        <file>attribute.png</file>
-        <file>list-base.png</file>
-        <file>birthsign.png</file>
-        <file>body-part.png</file>
-        <file>book.png</file>
-        <file>cell.png</file>
-        <file>class.png</file>
-        <file>clothing.png</file>
-        <file>container.png</file>
-        <file>creature.png</file>
-        <file>debug-profile.png</file>
-        <file>dialogue-info.png</file>
-        <file>dialogue-journal.png</file>
-        <file>dialogue-regular.png</file>
-        <file>dialogue-greeting.png</file>
-        <file>dialogue-persuasion.png</file>
-        <file>dialogue-voice.png</file>
-        <file>dialogue-topics.png</file>
-        <file>dialogue-topic-infos.png</file>
-        <file>journal-topic-infos.png</file>
-        <file>journal-topics.png</file>
-        <file>door.png</file>
-        <file>enchantment.png</file>
-        <file>error-log.png</file>
-        <file>faction.png</file>
-        <file>filter.png</file>
-        <file>global-variable.png</file>
-        <file>gmst.png</file>
-        <file>info.png</file>
-        <file>ingredient.png</file>
-        <file>instance.png</file>
-        <file>land-heightmap.png</file>
-        <file>land-texture.png</file>
-        <file>levelled-creature.png</file>
-        <file>levelled-item.png</file>
-        <file>light.png</file>
-        <file>lockpick.png</file>
-        <file>magic-effect.png</file>
-        <file>probe.png</file>
-        <file>menu-close.png</file>
-        <file>menu-exit.png</file>
-        <file>menu-new-addon.png</file>
-        <file>menu-new-game.png</file>
-        <file>menu-new-window.png</file>
-        <file>menu-merge.png</file>
-        <file>menu-open.png</file>
-        <file>menu-preferences.png</file>
-        <file>menu-reload.png</file>
-        <file>menu-redo.png</file>
-        <file>menu-save.png</file>
-        <file>menu-search.png</file>
-        <file>menu-status-bar.png</file>
-        <file>menu-undo.png</file>
-        <file>menu-verify.png</file>
-        <file>metadata.png</file>
-        <file>miscellaneous.png</file>
-        <file alias="list-modified">list-modified.png</file>
-        <file>npc.png</file>
-        <file>object.png</file>
-        <file>pathgrid.png</file>
-        <file>potion.png</file>
-        <file>qt.png</file>
-        <file>race.png</file>
-        <file>random.png</file>
-        <file alias="list-removed">list-removed.png</file>
-        <file>region.png</file>
-        <file>region-map.png</file>
-        <file>repair.png</file>
-        <file>run-log.png</file>
-        <file>run-openmw.png</file>
-        <file>scene.png</file>
-        <file>script.png</file>
-        <file>skill.png</file>
-        <file>start-script.png</file>
-        <file>stop-openmw.png</file>
-        <file>sound-generator.png</file>
-        <file>sound.png</file>
-        <file>spell.png</file>
-        <file>static.png</file>
-        <file>weapon.png</file>
-        <file>multitype.png</file>
-        <file alias="record-next">record-next.png</file>
-        <file alias="record-previous">record-previous.png</file>
-        <file alias="record-down">record-down.png</file>
-        <file alias="record-up">record-up.png</file>
-        <file alias="edit-delete">record-delete.png</file>
-        <file alias="edit-preview">record-preview.png</file>
-        <file alias="edit-clone">record-clone.png</file>
-        <file alias="edit-add">record-add.png</file>
-        <file alias="edit-edit">record-edit.png</file>
-        <file alias="edit-touch">record-touch.png</file>
-        <file alias="edit-undo">record-revert.png</file>
-        <file alias="resources-icon">resources-icon.png</file>
-        <file alias="resources-mesh">resources-mesh.png</file>
-        <file alias="resources-music">resources-music.png</file>
-        <file alias="resources-sound">resources-sound.png</file>
-        <file alias="resources-texture">resources-texture.png</file>
-        <file alias="resources-video">resources-video.png</file>
+        <file alias="activator">activator.svg</file>
+        <file alias="apparatus">apparatus.svg</file>
+        <file alias="armor">armor.svg</file>
+        <file alias="attribute">attribute.svg</file>
+        <file alias="birthsign">birthsign.svg</file>
+        <file alias="body-part">body-part.svg</file>
+        <file alias="book">book.svg</file>
+        <file alias="cell">cell.svg</file>
+        <file alias="class">class.svg</file>
+        <file alias="clothing">clothing.svg</file>
+        <file alias="container">container.svg</file>
+        <file alias="creature">creature.svg</file>
+        <file alias="debug-profile">debug-profile.svg</file>
+        <file alias="dialogue-info">dialogue-info.svg</file>
+        <file alias="dialogue-topics">dialogue-topics.svg</file>
+        <file alias="door">door.svg</file>
+        <file alias="edit-add">record-add.svg</file>
+        <file alias="edit-clone">record-clone.svg</file>
+        <file alias="edit-delete">record-delete.svg</file>
+        <file alias="edit-edit">record-edit.svg</file>
+        <file alias="edit-preview">record-preview.svg</file>
+        <file alias="edit-touch">record-touch.svg</file>
+        <file alias="edit-undo">record-revert.svg</file>
+        <file alias="enchantment">enchantment.svg</file>
+        <file alias="error-log">error-log.svg</file>
+        <file alias="faction">faction.svg</file>
+        <file alias="filter">filter.svg</file>
+        <file alias="global-variable">global-variable.svg</file>
+        <file alias="gmst">gmst.svg</file>
+        <file alias="info">info.svg</file>
+        <file alias="ingredient">ingredient.svg</file>
+        <file alias="instance">instance.svg</file>
+        <file alias="journal-topic-infos">journal-topic-infos.svg</file>
+        <file alias="journal-topics">journal-topics.svg</file>
+        <file alias="land-heightmap">land-heightmap.svg</file>
+        <file alias="land-texture">land-texture.svg</file>
+        <file alias="levelled-creature">levelled-creature.svg</file>
+        <file alias="levelled-item">levelled-item.svg</file>
+        <file alias="light">light.svg</file>
+        <file alias="list-added">list-added.svg</file>
+        <file alias="list-base">list-base.svg</file>
+        <file alias="list-modified">list-modified.svg</file>
+        <file alias="list-removed">list-removed.svg</file>
+        <file alias="lockpick">lockpick.svg</file>
+        <file alias="magic-effect">magic-effect.svg</file>
+        <file alias="menu-close">menu-close.svg</file>
+        <file alias="menu-exit">menu-exit.svg</file>
+        <file alias="menu-merge">menu-merge.svg</file>
+        <file alias="menu-new-addon">menu-new-addon.svg</file>
+        <file alias="menu-new-game">menu-new-game.svg</file>
+        <file alias="menu-new-window">menu-new-window.svg</file>
+        <file alias="menu-open">menu-open.svg</file>
+        <file alias="menu-preferences">menu-preferences.svg</file>
+        <file alias="menu-redo">menu-redo.svg</file>
+        <file alias="menu-reload">menu-reload.svg</file>
+        <file alias="menu-save">menu-save.svg</file>
+        <file alias="menu-search">menu-search.svg</file>
+        <file alias="menu-status-bar">menu-status-bar.svg</file>
+        <file alias="menu-undo">menu-undo.svg</file>
+        <file alias="menu-verify">menu-verify.svg</file>
+        <file alias="metadata">metadata.svg</file>
+        <file alias="miscellaneous">miscellaneous.svg</file>
+        <file alias="multitype">multitype.svg</file>
+        <file alias="npc">npc.svg</file>
+        <file alias="object">object.svg</file>
+        <file alias="openmw-cs">openmw-cs.png</file>
+        <file alias="pathgrid">pathgrid.svg</file>
         <file alias="placeholder">placeholder.png</file>
+        <file alias="potion">potion.svg</file>
+        <file alias="probe">probe.svg</file>
+        <file alias="qt">qt.svg</file>
+        <file alias="race">race.svg</file>
+        <file alias="record-down">record-down.svg</file>
+        <file alias="record-next">record-next.svg</file>
+        <file alias="record-previous">record-previous.svg</file>
+        <file alias="record-up">record-up.svg</file>
+        <file alias="region">region.svg</file>
+        <file alias="region-map">region-map.svg</file>
+        <file alias="repair">repair.svg</file>
+        <file alias="resources-icon">resources-icon.svg</file>
+        <file alias="resources-mesh">resources-mesh.svg</file>
+        <file alias="resources-music">resources-music.svg</file>
+        <file alias="resources-sound">resources-sound.svg</file>
+        <file alias="resources-texture">resources-texture.svg</file>
+        <file alias="resources-video">resources-video.svg</file>
+        <file alias="run-log">run-log.svg</file>
+        <file alias="run-openmw">run-openmw.svg</file>
+        <file alias="scene">scene.svg</file>
+        <file alias="script">script.svg</file>
+        <file alias="skill">skill.svg</file>
+        <file alias="sound-generator">sound-generator.svg</file>
+        <file alias="sound">sound.svg</file>
+        <file alias="spell">spell.svg</file>
+        <file alias="start-script">start-script.svg</file>
+        <file alias="static">static.svg</file>
+        <file alias="stop-openmw">stop-openmw.svg</file>
+        <file alias="weapon">weapon.svg</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="create-addon">raster/startup/big/create-addon.png</file>
         <file alias="create-game">raster/startup/big/new-game.png</file>
         <file alias="edit-content">raster/startup/big/edit-content.png</file>
-        <file alias="configure">raster/startup/small/configure.png</file>
+        <file alias="configure">configure.svg</file>
     </qresource>
     <qresource prefix="/scenetoolbar">
-        <file alias="night">lighting-moon.png</file>
-        <file alias="day">lighting-sun.png</file>
-        <file alias="bright">lighting-lamp.png</file>
-        <file alias="1st-person">camera-first-person.png</file>
-        <file alias="free-camera">camera-free.png</file>
-        <file alias="orbiting-camera">camera-orbit.png</file>
-        <file alias="play">run-game.png</file>
-        <file alias="scene-view-1">scene-view-instance.png</file>
-        <file alias="scene-view-16">scene-view-terrain.png</file>
-        <file alias="scene-view-4">scene-view-water.png</file>
-        <file alias="scene-view-2">scene-view-pathgrid.png</file>
-        <file alias="scene-view-8">scene-view-fog.png</file>
-        <file alias="scene-view-c0">scene-view-status-0.png</file>
-        <file alias="scene-view-c1">scene-view-status-1.png</file>
-        <file alias="scene-view-c2">scene-view-status-2.png</file>
-        <file alias="scene-view-c3">scene-view-status-3.png</file>
-        <file alias="scene-view-c4">scene-view-status-4.png</file>
-        <file alias="scene-view-c5">scene-view-status-5.png</file>
-        <file alias="scene-view-c6">scene-view-status-6.png</file>
-        <file alias="scene-view-c7">scene-view-status-7.png</file>
-        <file alias="scene-view-c8">scene-view-status-8.png</file>
-        <file alias="scene-view-c9">scene-view-status-9.png</file>
-        <file alias="scene-view-c10">scene-view-status-10.png</file>
-        <file alias="scene-view-c11">scene-view-status-11.png</file>
-        <file alias="scene-view-c12">scene-view-status-12.png</file>
-        <file alias="scene-view-c13">scene-view-status-13.png</file>
-        <file alias="scene-view-c14">scene-view-status-14.png</file>
-        <file alias="scene-view-c15">scene-view-status-15.png</file>
-        <file alias="scene-view-c16">scene-view-status-16.png</file>
-        <file alias="scene-view-c17">scene-view-status-17.png</file>
-        <file alias="scene-view-c18">scene-view-status-18.png</file>
-        <file alias="scene-view-c19">scene-view-status-19.png</file>
-        <file alias="scene-view-c20">scene-view-status-20.png</file>
-        <file alias="scene-view-c21">scene-view-status-21.png</file>
-        <file alias="scene-view-c22">scene-view-status-22.png</file>
-        <file alias="scene-view-c23">scene-view-status-23.png</file>
-        <file alias="scene-view-c24">scene-view-status-24.png</file>
-        <file alias="scene-view-c25">scene-view-status-25.png</file>
-        <file alias="scene-view-c26">scene-view-status-26.png</file>
-        <file alias="scene-view-c27">scene-view-status-27.png</file>
-        <file alias="scene-view-c28">scene-view-status-28.png</file>
-        <file alias="scene-view-c29">scene-view-status-29.png</file>
-        <file alias="scene-view-c30">scene-view-status-30.png</file>
-        <file alias="scene-view-c31">scene-view-status-31.png</file>
-        <file alias="scene-view-marker-2">scene-exterior-arrows.png</file>
-        <file alias="scene-view-marker-4">scene-exterior-borders.png</file>
-        <file alias="scene-view-marker-1">scene-exterior-markers.png</file>
-        <file alias="scene-view-marker-c0">scene-exterior-status-0.png</file>
-        <file alias="scene-view-marker-c1">scene-exterior-status-1.png</file>
-        <file alias="scene-view-marker-c2">scene-exterior-status-2.png</file>
-        <file alias="scene-view-marker-c3">scene-exterior-status-3.png</file>
-        <file alias="scene-view-marker-c4">scene-exterior-status-4.png</file>
-        <file alias="scene-view-marker-c5">scene-exterior-status-5.png</file>
-        <file alias="scene-view-marker-c6">scene-exterior-status-6.png</file>
-        <file alias="scene-view-marker-c7">scene-exterior-status-7.png</file>
-        <file alias="editing-instance">editing-instance.png</file>
-        <file alias="editing-pathgrid">editing-pathgrid.png</file>
-        <file alias="editing-terrain-movement">editing-terrain-movement.png</file>
-        <file alias="editing-terrain-shape">editing-terrain-shape.png</file>
-        <file alias="editing-terrain-texture">editing-terrain-texture.png</file>
-        <file alias="editing-terrain-vertex-paint">editing-terrain-vertex-paint.png</file>
-        <file alias="transform-move">transform-move.png</file>
-        <file alias="transform-rotate">transform-rotate.png</file>
-        <file alias="transform-scale">transform-scale.png</file>
-        <file alias="selection-mode-cube">selection-mode-cube.png</file>
-        <file alias="selection-mode-cube-corner">selection-mode-cube-corner.png</file>
-        <file alias="selection-mode-cube-sphere">selection-mode-cube-sphere.png</file>
-        <file alias="brush-point">brush-point.png</file>
-        <file alias="brush-square">brush-square.png</file>
-        <file alias="brush-circle">brush-circle.png</file>
-        <file alias="brush-custom">brush-custom.png</file>
+        <file alias="night">lighting-moon.svg</file>
+        <file alias="day">lighting-sun.svg</file>
+        <file alias="bright">lighting-lamp.svg</file>
+        <file alias="1st-person">camera-first-person.svg</file>
+        <file alias="free-camera">camera-free.svg</file>
+        <file alias="orbiting-camera">camera-orbit.svg</file>
+        <file alias="play">run-game.svg</file>
+        <file alias="scene-view-1">scene-view-instance.svg</file>
+        <file alias="scene-view-8">scene-view-terrain.svg</file>
+        <file alias="scene-view-4">scene-view-water.svg</file>
+        <file alias="scene-view-2">scene-view-pathgrid.svg</file>
+        <file alias="scene-view-c0">scene-view-status-0.svg</file>
+        <file alias="scene-view-c1">scene-view-status-1.svg</file>
+        <file alias="scene-view-c2">scene-view-status-2.svg</file>
+        <file alias="scene-view-c3">scene-view-status-3.svg</file>
+        <file alias="scene-view-c4">scene-view-status-4.svg</file>
+        <file alias="scene-view-c5">scene-view-status-5.svg</file>
+        <file alias="scene-view-c6">scene-view-status-6.svg</file>
+        <file alias="scene-view-c7">scene-view-status-7.svg</file>
+        <file alias="scene-view-c8">scene-view-status-8.svg</file>
+        <file alias="scene-view-c9">scene-view-status-9.svg</file>
+        <file alias="scene-view-c10">scene-view-status-10.svg</file>
+        <file alias="scene-view-c11">scene-view-status-11.svg</file>
+        <file alias="scene-view-c12">scene-view-status-12.svg</file>
+        <file alias="scene-view-c13">scene-view-status-13.svg</file>
+        <file alias="scene-view-c14">scene-view-status-14.svg</file>
+        <file alias="scene-view-c15">scene-view-status-15.svg</file>
+        <file alias="scene-view-marker-2">scene-exterior-arrows.svg</file>
+        <file alias="scene-view-marker-4">scene-exterior-borders.svg</file>
+        <file alias="scene-view-marker-1">scene-exterior-markers.svg</file>
+        <file alias="scene-view-marker-c0">scene-exterior-status-0.svg</file>
+        <file alias="scene-view-marker-c1">scene-exterior-status-1.svg</file>
+        <file alias="scene-view-marker-c2">scene-exterior-status-2.svg</file>
+        <file alias="scene-view-marker-c3">scene-exterior-status-3.svg</file>
+        <file alias="scene-view-marker-c4">scene-exterior-status-4.svg</file>
+        <file alias="scene-view-marker-c5">scene-exterior-status-5.svg</file>
+        <file alias="scene-view-marker-c6">scene-exterior-status-6.svg</file>
+        <file alias="scene-view-marker-c7">scene-exterior-status-7.svg</file>
+        <file alias="editing-instance">editing-instance.svg</file>
+        <file alias="editing-pathgrid">editing-pathgrid.svg</file>
+        <file alias="editing-terrain-movement">editing-terrain-movement.svg</file>
+        <file alias="editing-terrain-shape">editing-terrain-shape.svg</file>
+        <file alias="editing-terrain-texture">editing-terrain-texture.svg</file>
+        <file alias="editing-terrain-vertex-paint">editing-terrain-vertex-paint.svg</file>
+        <file alias="transform-move">transform-move.svg</file>
+        <file alias="transform-rotate">transform-rotate.svg</file>
+        <file alias="transform-scale">transform-scale.svg</file>
+        <file alias="selection-mode-cube">selection-mode-cube.svg</file>
+        <file alias="selection-mode-cube-corner">selection-mode-cube-corner.svg</file>
+        <file alias="selection-mode-cube-sphere">selection-mode-sphere.svg</file>
+        <file alias="brush-point">brush-point.svg</file>
+        <file alias="brush-square">brush-square.svg</file>
+        <file alias="brush-circle">brush-circle.svg</file>
+        <file alias="brush-custom">brush-custom.svg</file>
     </qresource>
 </RCC>

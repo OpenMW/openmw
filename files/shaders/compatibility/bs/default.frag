@@ -1,5 +1,5 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE)
+#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -24,8 +24,9 @@ varying vec2 emissiveMapUV;
 #if @normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
+
+uniform sampler2D opaqueDepthTex;
 
 varying float euclideanDepth;
 varying float linearDepth;
@@ -39,20 +40,30 @@ uniform float alphaRef;
 uniform float emissiveMult;
 uniform float specStrength;
 uniform bool useTreeAnim;
+uniform float distortionStrength;
 
 #include "lib/light/lighting.glsl"
 #include "lib/material/alpha.glsl"
+#include "lib/util/distortion.glsl"
 
 #include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_fragment.glsl"
 #include "compatibility/fog.glsl"
+#include "compatibility/normals.glsl"
 
 void main()
 {
-    vec3 normal = normalize(passNormal);
-
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
+
+#if defined(DISTORTION) && DISTORTION
+    vec2 screenCoords = gl_FragCoord.xy / (screenRes * @distorionRTRatio);
+    gl_FragData[0].a *= getDiffuseColor().a;
+    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords).x);
+
+    return;
+#endif
+
     gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV);
 #else
     gl_FragData[0] = vec4(1.0);
@@ -63,39 +74,34 @@ void main()
         gl_FragData[0].a *= diffuseColor.a;
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
+    vec3 specularColor = getSpecularColor().xyz;
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
-
-    vec3 normalizedNormal = normal;
-    vec3 normalizedTangent = normalize(passTangent.xyz);
-    vec3 binormal = cross(normalizedTangent, normalizedNormal) * passTangent.w;
-    mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
-
-    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
+    vec3 normal = normalTex.xyz * 2.0 - 1.0;
+#if @reconstructNormalZ
+    normal.z = sqrt(1.0 - dot(normal.xy, normal.xy));
 #endif
-    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
+    vec3 viewNormal = normalToView(normal);
+    specularColor *= normalTex.a;
+#else
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
+#endif
 
     float shadowing = unshadowedLightRatio(linearDepth);
-    vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    vec3 diffuse = diffuseColor.xyz * diffuseLight;
+    vec3 ambient = getAmbientColor().xyz * ambientLight;
     vec3 emission = getEmissionColor().xyz * emissiveMult;
 #if @emissiveMap
     emission *= texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
-    vec3 lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
+    vec3 lighting = diffuse + ambient + emission;
+    vec3 specular = specularColor * specularLight * specStrength;
 
     clampLightingResult(lighting);
 
-    gl_FragData[0].xyz *= lighting;
-
-    float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = getSpecularColor().xyz * specStrength;
-#if @normalMap
-    matSpec *= normalTex.a;
-#endif
-
-    if (matSpec != vec3(0.0))
-        gl_FragData[0].xyz += getSpecular(viewNormal, normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
+    gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
 

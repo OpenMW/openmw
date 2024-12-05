@@ -1,6 +1,8 @@
 #include "methodselectionpage.hpp"
 #include "mainwizard.hpp"
 
+#include <components/misc/scalableicon.hpp>
+
 #include <QDesktopServices>
 #include <QUrl>
 
@@ -11,15 +13,24 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget* parent)
 
     setupUi(this);
 
+    installerIcon->setIcon(Misc::ScalableIcon::load(":system-installer"));
+    folderIcon->setIcon(Misc::ScalableIcon::load(":folder"));
+    buyLinkButton->setIcon(Misc::ScalableIcon::load(":dollar"));
+
 #ifndef OPENMW_USE_UNSHIELD
     retailDiscRadioButton->setEnabled(false);
     existingLocationRadioButton->setChecked(true);
     buyLinkButton->released();
 #endif
 
+    QFont font = existingLocationRadioButton->font();
+    font.setBold(true);
+    existingLocationRadioButton->setFont(font);
+    retailDiscRadioButton->setFont(font);
+
     registerField(QLatin1String("installation.retailDisc"), retailDiscRadioButton);
 
-    connect(buyLinkButton, &QCommandLinkButton::released, this, &MethodSelectionPage::handleBuyButton);
+    connect(buyLinkButton, &QPushButton::released, this, &MethodSelectionPage::handleBuyButton);
 }
 
 int Wizard::MethodSelectionPage::nextId() const

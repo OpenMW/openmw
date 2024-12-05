@@ -85,7 +85,7 @@ namespace MWGui
             {
                 MWWorld::Ptr item = *mKey[index].button->getUserData<MWWorld::Ptr>();
                 // Make sure the item is available and is not broken
-                if (item.isEmpty() || item.getRefData().getCount() < 1
+                if (item.isEmpty() || item.getCellRef().getCount() < 1
                     || (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
                 {
                     // Try searching for a compatible replacement
@@ -299,7 +299,8 @@ namespace MWGui
         mSelected->button->setUserString("Spell", spellId.serialize());
 
         // use the icon of the first effect
-        const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
+        const ESM::MagicEffect* effect
+            = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mData.mEffectID);
 
         std::string path = effect->mIcon;
         std::replace(path.begin(), path.end(), '/', '\\');
@@ -352,8 +353,7 @@ namespace MWGui
         bool isDelayNeeded = MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player)
             || playerStats.getKnockedDown() || playerStats.getHitRecovery();
 
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        bool isReturnNeeded = (!godmode && playerStats.isParalyzed()) || playerStats.isDead();
+        bool isReturnNeeded = playerStats.isParalyzed() || playerStats.isDead();
 
         if (isReturnNeeded)
         {
@@ -383,12 +383,12 @@ namespace MWGui
                 item = nullptr;
 
             // check the item is available and not broken
-            if (item.isEmpty() || item.getRefData().getCount() < 1
+            if (item.isEmpty() || item.getCellRef().getCount() < 1
                 || (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
             {
                 item = store.findReplacement(key->id);
 
-                if (item.isEmpty() || item.getRefData().getCount() < 1)
+                if (item.isEmpty() || item.getCellRef().getCount() < 1)
                 {
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
 

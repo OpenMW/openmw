@@ -51,11 +51,11 @@ namespace Compiler
     }
 
     void Extensions::registerFunction(
-        const std::string& keyword, ScriptReturn returnType, const ScriptArgs& argumentType, int code, int codeExplicit)
+        std::string_view keyword, ScriptReturn returnType, std::string_view argumentType, int code, int codeExplicit)
     {
         Function function;
 
-        if (argumentType.find('/') == std::string::npos)
+        if (argumentType.find('/') == std::string_view::npos)
         {
             function.mSegment = 5;
             assert(code >= 33554432 && code <= 67108863);
@@ -70,22 +70,22 @@ namespace Compiler
 
         int keywordIndex = mNextKeywordIndex--;
 
-        mKeywords.insert(std::make_pair(keyword, keywordIndex));
+        mKeywords.emplace(keyword, keywordIndex);
 
         function.mReturn = returnType;
         function.mArguments = argumentType;
         function.mCode = code;
         function.mCodeExplicit = codeExplicit;
 
-        mFunctions.insert(std::make_pair(keywordIndex, function));
+        mFunctions.emplace(keywordIndex, std::move(function));
     }
 
     void Extensions::registerInstruction(
-        const std::string& keyword, const ScriptArgs& argumentType, int code, int codeExplicit)
+        std::string_view keyword, std::string_view argumentType, int code, int codeExplicit)
     {
         Instruction instruction;
 
-        if (argumentType.find('/') == std::string::npos)
+        if (argumentType.find('/') == std::string_view::npos)
         {
             instruction.mSegment = 5;
             assert(code >= 33554432 && code <= 67108863);
@@ -100,13 +100,13 @@ namespace Compiler
 
         int keywordIndex = mNextKeywordIndex--;
 
-        mKeywords.insert(std::make_pair(keyword, keywordIndex));
+        mKeywords.emplace(keyword, keywordIndex);
 
         instruction.mArguments = argumentType;
         instruction.mCode = code;
         instruction.mCodeExplicit = codeExplicit;
 
-        mInstructions.insert(std::make_pair(keywordIndex, instruction));
+        mInstructions.emplace(keywordIndex, std::move(instruction));
     }
 
     void Extensions::generateFunctionCode(int keyword, std::vector<Interpreter::Type_Code>& code, Literals& literals,

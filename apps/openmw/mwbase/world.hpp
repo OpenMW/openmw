@@ -4,13 +4,13 @@
 #include "rotationflags.hpp"
 
 #include <deque>
-#include <map>
 #include <set>
 #include <span>
 #include <string_view>
 #include <vector>
 
 #include <components/misc/rng.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwworld/doorstate.hpp"
 #include "../mwworld/globalvariablename.hpp"
@@ -148,7 +148,7 @@ namespace MWBase
         virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
 
         virtual MWWorld::ESMStore& getStore() = 0;
-        const MWWorld::ESMStore& getStore() const { return const_cast<MWBase::World*>(this)->getStore(); }
+        virtual const MWWorld::ESMStore& getStore() const = 0;
 
         virtual const std::vector<int>& getESMVersions() const = 0;
 
@@ -183,9 +183,7 @@ namespace MWBase
         /// generate a name.
         virtual std::string_view getCellName(const MWWorld::Cell& cell) const = 0;
 
-        virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
-
-        virtual void removeRefScript(MWWorld::RefData* ref) = 0;
+        virtual void removeRefScript(const MWWorld::CellRef* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts
 
         virtual MWWorld::Ptr getPtr(const ESM::RefId& name, bool activeOnly) = 0;
@@ -232,7 +230,7 @@ namespace MWBase
 
         virtual void setMoonColour(bool red) = 0;
 
-        virtual void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) = 0;
+        virtual void modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances) = 0;
 
         virtual void changeToInteriorCell(
             std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
@@ -251,13 +249,6 @@ namespace MWBase
         virtual float getDistanceToFacedObject() = 0;
 
         virtual float getMaxActivationDistance() const = 0;
-
-        /// Returns a pointer to the object the provided object would hit (if within the
-        /// specified distance), and the point where the hit occurs. This will attempt to
-        /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
-        virtual std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(
-            const MWWorld::ConstPtr& ptr, float distance, std::vector<MWWorld::Ptr>& targets)
-            = 0;
 
         virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) = 0;
         ///< Adjust position after load to be on ground. Must be called after model load.
@@ -311,7 +302,7 @@ namespace MWBase
         virtual const MWPhysics::RayCastingInterface* getRayCasting() const = 0;
 
         virtual bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-            bool ignorePlayer, bool ignoreActors)
+            bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList = {})
             = 0;
 
         virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external) = 0;
@@ -434,7 +425,6 @@ namespace MWBase
 
         /// \todo this does not belong here
         virtual void screenshot(osg::Image* image, int w, int h) = 0;
-        virtual bool screenshot360(osg::Image* image) = 0;
 
         /// Find default position inside exterior cell specified by name
         /// \return empty RefId if exterior with given name not exists, the cell's RefId otherwise
@@ -470,7 +460,7 @@ namespace MWBase
          */
         virtual MWWorld::SpellCastState startSpellCast(const MWWorld::Ptr& actor) = 0;
 
-        virtual void castSpell(const MWWorld::Ptr& actor, bool manualSpell = false) = 0;
+        virtual void castSpell(const MWWorld::Ptr& actor, bool scriptedSpell = false) = 0;
 
         virtual void launchMagicBolt(const ESM::RefId& spellId, const MWWorld::Ptr& caster,
             const osg::Vec3f& fallbackDirection, ESM::RefNum item)
@@ -525,7 +515,7 @@ namespace MWBase
         /// Spawn a blood effect for \a ptr at \a worldPosition
         virtual void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
 
-        virtual void spawnEffect(const std::string& model, const std::string& textureOverride,
+        virtual void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
             const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true)
             = 0;
 
@@ -545,9 +535,6 @@ namespace MWBase
         virtual osg::Vec3f aimToTarget(
             const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target, bool isRangedCombat)
             = 0;
-
-        /// Return the distance between actor's weapon and target's collision box.
-        virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
         virtual void addContainerScripts(const MWWorld::Ptr& reference, MWWorld::CellStore* cell) = 0;
         virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;

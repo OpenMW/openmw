@@ -6,36 +6,60 @@ if(APPLE)
 endif(APPLE)
 
 # Version file
-set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
-set (VERSION_FILE_PATH_BASE "${OpenMW_BINARY_DIR}")
-set (VERSION_FILE_PATH_RELATIVE resources/version)
+set (VERSION_RESOURCE_FILE_IN "${OpenMW_SOURCE_DIR}/files/version.in")
+set (VERSION_RESOURCE_FILE_RELATIVE "resources/version")
+set (VERSION_CPP_FILE "components/version/version.cpp")
+
 if (GIT_CHECKOUT)
     get_generator_is_multi_config(multi_config)
-    add_custom_target (git-version
+    add_custom_target (get-version
+       BYPRODUCTS "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
+       DEPENDS "${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in"
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
-            -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
-            -DVERSION_IN_FILE=${VERSION_IN_FILE}
-            -DVERSION_FILE_PATH_BASE=${VERSION_FILE_PATH_BASE}
-            -DVERSION_FILE_PATH_RELATIVE=${VERSION_FILE_PATH_RELATIVE}
+            -DOpenMW_SOURCE_DIR=${OpenMW_SOURCE_DIR}
+            -DOpenMW_BINARY_DIR=${OpenMW_BINARY_DIR}
+            -DVERSION_RESOURCE_FILE_IN=${VERSION_RESOURCE_FILE_IN}
+            -DVERSION_RESOURCE_FILE_RELATIVE=${VERSION_RESOURCE_FILE_RELATIVE}
+            -DVERSION_CPP_FILE_IN=${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in
+            -DVERSION_CPP_FILE_OUT=${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}.out
             -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
+            -DOPENMW_LUA_API_REVISION=${OPENMW_LUA_API_REVISION}
+            -DOPENMW_POSTPROCESSING_API_REVISION=${OPENMW_POSTPROCESSING_API_REVISION}
             -DOPENMW_VERSION=${OPENMW_VERSION}
+            -DOPENMW_DOC_BASEURL=${OPENMW_DOC_BASEURL}
             -DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
             "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
             -Dgenerator_is_multi_config_var=${multi_config}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
-            VERBATIM)
+        COMMAND ${CMAKE_COMMAND}
+            -E copy_if_different ${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}.out ${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}
+        VERBATIM)
 else (GIT_CHECKOUT)
-    configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
+    configure_resource_file(${VERSION_RESOURCE_FILE_IN} ${OpenMW_BINARY_DIR} ${VERSION_RESOURCE_FILE_RELATIVE})
+    configure_file("${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 endif (GIT_CHECKOUT)
+
+list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
+
+# OSG plugin checker
+# Helpfully, OSG doesn't export this to its CMake config as it doesn't have one
+list(TRANSFORM USED_OSG_PLUGINS REPLACE "^osgdb_" "" OUTPUT_VARIABLE USED_OSG_PLUGIN_NAMES)
+list(TRANSFORM USED_OSG_PLUGIN_NAMES PREPEND "\"" OUTPUT_VARIABLE USED_OSG_PLUGIN_NAMES_FORMATTED)
+list(TRANSFORM USED_OSG_PLUGIN_NAMES_FORMATTED APPEND "\"")
+list(JOIN USED_OSG_PLUGIN_NAMES_FORMATTED ", " USED_OSG_PLUGIN_NAMES_FORMATTED)
+
+set(OSG_PLUGIN_CHECKER_CPP_FILE "components/misc/osgpluginchecker.cpp")
+configure_file("${OpenMW_SOURCE_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+list(APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
 
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage
-    shapes/box
+    luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
+    shapes/box inputactions yamlloader scripttracker
     )
 
 add_component_dir (l10n
@@ -69,6 +93,9 @@ add_component_dir (settings
     categories/video
     categories/water
     categories/windows
+    gyroscopeaxis
+    hrtfmode
+    navmeshrendermode
     parser
     sanitizer
     sanitizerimpl
@@ -76,19 +103,32 @@ add_component_dir (settings
     settingvalue
     shadermanager
     values
+    windowmode
+    )
+
+add_component_dir (bgsm
+    stream file
     )
 
 add_component_dir (bsa
     bsa_file compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
 
+add_component_dir (bullethelpers
+    collisionobject
+    heightfield
+    operators
+    processtrianglecallback
+    transformboundingbox
+    )
+
 add_component_dir (vfs
-    manager archive bsaarchive filesystemarchive registerarchives
+    manager archive bsaarchive filesystemarchive pathutil registerarchives
     )
 
 add_component_dir (resource
-    scenemanager keyframemanager imagemanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem
-    resourcemanager stats animation foreachbulletobject errormarker
+    scenemanager keyframemanager imagemanager animblendrulesmanager bulletshapemanager bulletshape niffilemanager objectcache multiobjectcache resourcesystem
+    resourcemanager stats animation foreachbulletobject errormarker cachestats bgsmfilemanager
     )
 
 add_component_dir (shader
@@ -98,16 +138,17 @@ add_component_dir (shader
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
-    actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
-    screencapture depth color riggeometryosgaextension extradata unrefqueue lightcommon
+    detourdebugdraw navmesh agentpath animblendrules shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
+    screencapture depth color riggeometryosgaextension extradata unrefqueue lightcommon lightingmethod clearcolor
+    cullsafeboundsvisitor keyframe nodecallback textkeymap glextensions
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream physics
+    base controller data effect extra niffile nifkey nifstream niftypes node parent particle physics property record recordptr texture
     )
 
 add_component_dir (nifosg
-    nifloader controller particle matrixtransform
+    nifloader controller particle matrixtransform fog
     )
 
 add_component_dir (nifbullet
@@ -115,19 +156,24 @@ add_component_dir (nifbullet
     )
 
 add_component_dir (to_utf8
+    tables_gen
     to_utf8
     )
 
 add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge esmterrain
     formid
+    fourcc
     stringrefid
     generatedrefid
     indexrefid
     serializerefid
     esm3exteriorcellrefid
+    quaternion
+    vector3
+    exteriorcelllocation
     )
 
-add_component_dir(fx pass technique lexer widgets stateupdater)
+add_component_dir(fx pass technique lexer lexer_types parse_constants widgets stateupdater)
 
 add_component_dir(std140 ubo)
 
@@ -141,10 +187,12 @@ add_component_dir (esm3
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
-    infoorder timestamp
+    infoorder timestamp formatversion landrecorddata selectiongroup dialoguecondition
+    refnum
     )
 
 add_component_dir (esmterrain
+    gridsampling
     storage
     )
 
@@ -247,8 +295,13 @@ add_component_dir (esm4
 )
 
 add_component_dir (misc
-    constants utf8stream resourcehelpers rng messageformatparser weakcache thread
-    compression osguservalues color tuplemeta tuplehelpers
+    barrier budgetmeasurement color compression constants convert coordinateconverter display endianness float16 frameratelimiter
+    guarded math mathutil messageformatparser notnullptr objectpool osgpluginchecker osguservalues progressreporter resourcehelpers
+    rng strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
+    )
+
+add_component_dir (misc/strings
+    algorithm conversion format lower
     )
 
 add_component_dir (stereo
@@ -256,9 +309,10 @@ add_component_dir (stereo
     )
 
 add_component_dir (debug
-    debugging debuglog gldebug debugdraw
+    debugging debuglog gldebug debugdraw writeflags
     )
 
+add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
 IF(NOT WIN32 AND NOT APPLE)
     add_definitions(-DGLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
     add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
@@ -266,6 +320,7 @@ ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf conversion
+    istreamptr streamwithbuffer
     )
 
 add_component_dir (compiler
@@ -277,7 +332,7 @@ add_component_dir (compiler
 
 add_component_dir (interpreter
     context controlopcodes genericopcodes installopcodes interpreter localopcodes mathopcodes
-    miscopcodes opcodes runtime types defines
+    miscopcodes opcodes program runtime types defines
     )
 
 add_component_dir (translation
@@ -306,7 +361,15 @@ add_component_dir (fontloader
     )
 
 add_component_dir (sdlutil
-    gl4es_init sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper events sdlcursormanager sdlmappings
+    events
+    gl4es_init
+    imagetosurface
+    sdlcursormanager
+    sdlgraphicswindow
+    sdlinputwrapper
+    sdlmappings
+    sdlvideowrapper
+    vsyncmode
     )
 
 add_component_dir (version
@@ -406,13 +469,22 @@ add_component_dir(loadinglistener
     reporter
     )
 
+add_component_dir(serialization
+    binaryreader
+    binarywriter
+    osgyaml
+    sizeaccumulator
+    )
+
 add_component_dir(sqlite3
     db
+    request
     statement
     transaction
 )
 
 add_component_dir(esmloader
+    lessbyid
     load
     esmdata
 )
@@ -440,19 +512,26 @@ else ()
         )
 endif()
 
-set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
-    )
+add_component_dir(testing
+    expecterror
+    util
+)
 
 if (USE_QT)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
-        model/naturalsort model/contentmodel
+        model/contentmodel
         model/loadordererror
         view/combobox view/contentselector
         )
+
     add_component_qt_dir (config
         gamesettings
         launchersettings
+        )
+
+    add_component_qt_dir (l10n
+        qttranslations
         )
 
     add_component_qt_dir (process
@@ -460,7 +539,7 @@ if (USE_QT)
         )
 
     add_component_qt_dir (misc
-        helpviewer utf8qtextstream hash
+        helpviewer utf8qtextstream hash scalableicon
         )
 
     add_component_qt_dir (files
@@ -468,20 +547,25 @@ if (USE_QT)
         qtconfigpath
         )
 
-    QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
-endif()
+    add_component_qt_dir (platform
+        application
+        )
 
-if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
-        add_definitions(-fPIC)
-    endif()
-endif ()
+    add_component_qt_dir (vfs
+        qtconversion
+        )
+
+endif()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(SQLite3 REQUIRED)
 
 add_library(components STATIC ${COMPONENT_FILES})
+
+if (ANDROID)
+    set_property(TARGET components PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif()
 
 target_link_libraries(components
     ${COLLADA_DOM_LIBRARIES}
@@ -502,11 +586,11 @@ target_link_libraries(components
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
 
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_IOSTREAMS_LIBRARY}
+    Boost::system
+    Boost::program_options
+    Boost::iostreams
 
-    ${SDL2_LIBRARIES}
+    SDL2::SDL2
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
     ${LUA_LIBRARIES}
@@ -528,32 +612,21 @@ else()
     target_link_libraries(components yaml-cpp)
 endif()
 
-if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
-    target_link_libraries(components ${Boost_ATOMIC_LIBRARY})
-endif()
-
 target_link_libraries(components ${BULLET_LIBRARIES})
 
-if (WIN32)
-    target_link_libraries(components
-    ${Boost_LOCALE_LIBRARY}
-    ${Boost_ZLIB_LIBRARY})
-endif()
-
 if (USE_QT)
-    add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
+    add_library(components_qt STATIC ${COMPONENT_QT_FILES})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
-    target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
+
+    if (BUILD_LAUNCHER OR BUILD_WIZARD)
+        add_dependencies(components_qt qm-files)
+    endif()
 
     if (BUILD_WITH_CODE_COVERAGE)
         target_compile_options(components_qt PRIVATE --coverage)
         target_link_libraries(components_qt gcov)
     endif()
 endif()
-
-if (GIT_CHECKOUT)
-    add_dependencies (components git-version)
-endif (GIT_CHECKOUT)
 
 if (OSG_STATIC AND CMAKE_SYSTEM_NAME MATCHES "Linux")
     find_package(X11 REQUIRED COMPONENTS Xinerama Xrandr)
@@ -583,6 +656,7 @@ endif()
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
 
 target_compile_definitions(components PUBLIC BT_USE_DOUBLE_PRECISION)
+target_compile_definitions(components PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 
 if(OSG_STATIC)
     unset(_osg_plugins_static_files)
@@ -614,9 +688,11 @@ endif(OSG_STATIC)
 
 if(USE_QT)
     set_property(TARGET components_qt PROPERTY AUTOMOC ON)
+    set_property(TARGET components_qt PROPERTY AUTOUIC ON)
+    set_property(TARGET components_qt PROPERTY AUTOUIC_SEARCH_PATHS contentselector)
 endif(USE_QT)
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(components PUBLIC
         <sol/sol.hpp>
 

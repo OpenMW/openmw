@@ -2,6 +2,8 @@
 #define OPENMW_ESM_LUASCRIPTS_H
 
 #include <components/esm/refid.hpp>
+#include <components/vfs/pathutil.hpp>
+
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -20,10 +22,12 @@ namespace ESM
         static constexpr Flags sCustom = 1ull << 1; // local; can be attached/detached by a global script
         static constexpr Flags sPlayer = 1ull << 2; // auto attach to players
 
-        static constexpr Flags sMerge = 1ull
-            << 3; // merge with configuration for this script from previous content files.
+        // merge with configuration for this script from previous content files.
+        static constexpr Flags sMerge = 1ull << 3;
 
-        std::string mScriptPath; // VFS path to the script.
+        static constexpr Flags sMenu = 1ull << 4; // start as a menu script
+
+        VFS::Path::Normalized mScriptPath;
         std::string mInitializationData; // Serialized Lua table. It is a binary data. Can contain '\0'.
         Flags mFlags; // bitwise OR of Flags.
 
@@ -83,7 +87,7 @@ namespace ESM
 
     struct LuaScript
     {
-        std::string mScriptPath;
+        VFS::Path::Normalized mScriptPath;
         std::string mData; // Serialized Lua table. It is a binary data. Can contain '\0'.
         std::vector<LuaTimer> mTimers;
     };

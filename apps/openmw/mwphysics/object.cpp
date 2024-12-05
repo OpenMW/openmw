@@ -23,6 +23,7 @@ namespace MWPhysics
         , mPosition(ptr.getRefData().getPosition().asVec3())
         , mRotation(rotation)
         , mTaskScheduler(scheduler)
+        , mCollidedWith(ScriptedCollisionType_None)
     {
         mCollisionObject = BulletHelpers::makeCollisionObject(mShapeInstance->mCollisionShape.get(),
             Misc::Convert::toBullet(mPosition), Misc::Convert::toBullet(rotation));
@@ -110,6 +111,9 @@ namespace MWPhysics
         if (mShapeInstance->mAnimatedShapes.empty())
             return false;
 
+        if (!mPtr.getRefData().getBaseNode())
+            return false;
+
         assert(mShapeInstance->mCollisionShape->isCompound());
 
         btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->mCollisionShape.get());
@@ -137,6 +141,7 @@ namespace MWPhysics
 
             osg::NodePath& nodePath = nodePathFound->second;
             osg::Matrixf matrix = osg::computeLocalToWorld(nodePath);
+            btVector3 scale = Misc::Convert::toBullet(matrix.getScale());
             matrix.orthoNormalize(matrix);
 
             btTransform transform;
@@ -145,8 +150,15 @@ namespace MWPhysics
                 for (int j = 0; j < 3; ++j)
                     transform.getBasis()[i][j] = matrix(j, i); // NB column/row major difference
 
-            // Note: we can not apply scaling here for now since we treat scaled shapes
-            // as new shapes (btScaledBvhTriangleMeshShape) with 1.0 scale for now
+            btCollisionShape* childShape = compound->getChildShape(shapeIndex);
+            btVector3 newScale = compound->getLocalScaling() * scale;
+
+            if (childShape->getLocalScaling() != newScale)
+            {
+                childShape->setLocalScaling(newScale);
+                result = true;
+            }
+
             if (!(transform == compound->getChildTransform(shapeIndex)))
             {
                 compound->updateChildTransform(shapeIndex, transform);
@@ -154,5 +166,21 @@ namespace MWPhysics
             }
         }
         return result;
+    }
+
+    bool Object::collidedWith(ScriptedCollisionType type) const
+    {
+        return mCollidedWith & type;
+    }
+
+    void Object::addCollision(ScriptedCollisionType type)
+    {
+        std::unique_lock<std::mutex> lock(mPositionMutex);
+        mCollidedWith |= type;
+    }
+
+    void Object::resetCollisions()
+    {
+        mCollidedWith = ScriptedCollisionType_None;
     }
 }

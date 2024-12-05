@@ -22,11 +22,11 @@ variables:
   # These can be specified per job or per pipeline
   ARTIFACT_COMPRESSION_LEVEL: "fast"
   CACHE_COMPRESSION_LEVEL: "fast"
+  FF_TIMESTAMPS: "true"
 
 .Ubuntu_Image:
   tags:
-    - docker
-    - linux
+    - saas-linux-medium-amd64
   image: ubuntu:22.04
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -70,15 +70,16 @@ Ubuntu_GCC_preprocess:
     - df -h
     - du -sh .
     - cmake --install .
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:openmw_tests.xml"; fi
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-cs-tests --gtest_output="xml:openmw_cs_tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./components-tests --gtest_output="xml:components-tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-tests --gtest_output="xml:openmw-tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-cs-tests --gtest_output="xml:openmw-cs-tests.xml"; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_esm_refid_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
     - ccache -s
     - df -h
     - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
-    - ls | grep -v -e '^extern$' -e '^install$' -e '^openmw_tests.xml$' -e '^openmw_cs_tests.xml$' | xargs -I '{}' rm -rf './{}'
+    - ls | grep -v -e '^extern$' -e '^install$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs -I '{}' rm -rf './{}'
     - cd ..
     - df -h
     - du -sh build/
@@ -91,8 +92,7 @@ Ubuntu_GCC_preprocess:
 
 Coverity:
   tags:
-    - docker
-    - linux
+    - saas-linux-medium-amd64
   image: ubuntu:22.04
   stage: build
   rules:
@@ -116,6 +116,7 @@ Coverity:
   script:
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
+    - export COVERITY_NO_LOG_ENVIRONMENT_VARIABLES=1
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
@@ -142,7 +143,7 @@ Ubuntu_GCC:
   variables:
     CC: gcc
     CXX: g++
-    CCACHE_SIZE: 4G
+    CCACHE_SIZE: 3G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -172,6 +173,20 @@ Clang_Format:
     - CI/check_file_names.sh
     - CI/check_clang_format.sh
 
+Lupdate:
+  extends: .Ubuntu_Image
+  stage: checks
+  cache:
+    key: Ubuntu_lupdate.ubuntu_22.04.v1
+    paths:
+      - apt-cache/
+  variables:
+    LUPDATE: lupdate
+  before_script:
+    - CI/install_debian_deps.sh openmw-qt-translations
+  script:
+    - CI/check_qt_translations.sh
+
 Teal:
   stage: checks
   extends: .Ubuntu_Image
@@ -181,8 +196,9 @@ Teal:
   script:
     - CI/teal_ci.sh
   artifacts:
+    when: always
     paths:
-      - teal_declarations.zip
+      - teal_declarations
 
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
@@ -193,9 +209,10 @@ Ubuntu_GCC_Debug:
   variables:
     CC: gcc
     CXX: g++
-    CCACHE_SIZE: 4G
+    CCACHE_SIZE: 3G
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
+    BUILD_SHARED_LIBS: 1
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -408,7 +425,7 @@ Ubuntu_Clang_Tidy_other:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw_test_suite openmw-navmeshtool openmw-bulletobjecttool
+    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest components-tests openmw-tests openmw-cs-tests openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
 
 .Ubuntu_Clang_tests:
@@ -445,6 +462,7 @@ Ubuntu_Clang_tests_Debug:
   stage: test
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    EXAMPLE_SUITE_REVISION: f51b832e033429a7cdc520e0e48d7dfdb9141caa
   cache:
     paths:
       - .cache/pip
@@ -484,7 +502,6 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
     - ccache/
   script:
-    - rm -fr build  # remove the build directory
     - CI/before_install.osx.sh
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
@@ -492,7 +509,7 @@ Ubuntu_GCC_integration_tests_asan:
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.osx.sh
     - cd build; make -j $(sysctl -n hw.logicalcpu) package
-    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}_${CI_JOB_ID}.dmg"; done
+    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
         artifactDirectory="${CI_PROJECT_NAMESPACE//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_REF_NAME//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_SHORT_SHA//[\"<>|$'\t'\/\\?*]/_}-${CI_JOB_ID//[\"<>|$'\t'\/\\?*]/_}/"
@@ -504,21 +521,59 @@ Ubuntu_GCC_integration_tests_asan:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
-      - "build/**/*.log"
 
-macOS13_Xcode14_arm64:
+macOS14_Xcode15_arm64:
   extends: .MacOS
-  image: macos-12-xcode-14
+  image: macos-14-xcode-15
   tags:
     - saas-macos-medium-m1
   cache:
-    key: macOS12_Xcode14_arm64.v4
+    key: macOS14_Xcode15_arm64.v1
   variables:
     CCACHE_SIZE: 3G
 
+.Compress_And_Upload_Symbols_Base:
+  extends: .Ubuntu_Image
+  stage: build
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - apt-get update
+    - apt-get install -y curl gcab unzip
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscli-exe-linux-x86_64.zip
+    - unzip -d awscli-exe-linux-x86_64 awscli-exe-linux-x86_64.zip
+    - pushd awscli-exe-linux-x86_64
+    - ./aws/install
+    - popd
+    - aws --version
+    - unzip -d sym_store *sym_store.zip
+    - shopt -s globstar
+    - |
+      for file in sym_store/**/*.exe; do
+        if [[ -f "$file" ]]; then
+          gcab --create --zip --nopath "${file%.exe}.ex_" "$file"
+        fi
+      done
+    - |
+      for file in sym_store/**/*.dll; do
+        if [[ -f "$file" ]]; then
+          gcab --create --zip --nopath "${file%.dll}.dl_" "$file"
+        fi
+      done
+    - |
+      for file in sym_store/**/*.pdb; do
+        if [[ -f "$file" ]]; then
+          gcab --create --zip --nopath "${file%.pdb}.pd_" "$file"
+        fi
+      done
+    - |
+      if [[ -v AWS_ACCESS_KEY_ID ]]; then
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude '*' --include '*.ex_' --include '*.dl_' --include '*.pd_' sym_store s3://openmw-sym
+      fi
+
 .Windows_Ninja_Base:
   tags:
-    - windows
+    - saas-windows-medium-amd64
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
@@ -555,60 +610,53 @@ macOS13_Xcode14_arm64:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - New-Item -Type File -Force -Path MSVC2019_64_Ninja\.cmake\api\v1\query\codemodel-v2
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
+    - New-Item -Type File -Force -Path MSVC2022_64_Ninja\.cmake\api\v1\query\codemodel-v2
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -N -b -t -C $multiview -E
     - Get-Volume
-    - cd MSVC2019_64_Ninja
+    - cd MSVC2022_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config
-    - ccache --show-stats
+    - cmake --build . --config $config --target $targets
+    - ccache --show-stats -v
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
         }
         Push-Location ..
-        ..\CI\Store-Symbols.ps1
-        if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude * --include *.ex_ --include *.dl_ --include *.pd_ .\SymStore s3://openmw-sym
-        }
-        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        ..\CI\Store-Symbols.ps1 -SkipCompress
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - |
       if (Test-Path env:AWS_ACCESS_KEY_ID) {
-        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
+        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
       }
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-v7
+    key: ninja-2022-v11
     paths:
     - ccache
     - deps
-    - MSVC2019_64_Ninja/deps/Qt
+    - MSVC2022_64_Ninja/deps/Qt
   artifacts:
     when: always
     paths:
     - "*.zip"
     - "*.log"
-    - MSVC2019_64_Ninja/*.log
-    - MSVC2019_64_Ninja/*/*.log
-    - MSVC2019_64_Ninja/*/*/*.log
-    - MSVC2019_64_Ninja/*/*/*/*.log
-    - MSVC2019_64_Ninja/*/*/*/*/*.log
-    - MSVC2019_64_Ninja/*/*/*/*/*/*.log
-    - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
-    - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
+    - MSVC2022_64_Ninja/*.log
+    - MSVC2022_64_Ninja/**/*.log
+  variables:
+    targets: all
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -618,6 +666,13 @@ macOS13_Xcode14_arm64:
   variables:
     config: "Release"
 
+.Windows_Compress_And_Upload_Symbols_Ninja_Release:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  needs:
+    - job: "Windows_Ninja_Release"
+      artifacts: true
+
 .Windows_Ninja_Release_MultiView:
   extends:
     - .Windows_Ninja_Base
@@ -625,11 +680,25 @@ macOS13_Xcode14_arm64:
     multiview: "-M"
     config: "Release"
 
+.Windows_Compress_And_Upload_Symbols_Ninja_Release_MultiView:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  needs:
+    - job: "Windows_Ninja_Release_MultiView"
+      artifacts: true
+
 .Windows_Ninja_Debug:
   extends:
     - .Windows_Ninja_Base
   variables:
     config: "Debug"
+
+.Windows_Compress_And_Upload_Symbols_Ninja_Debug:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  needs:
+    - job: "Windows_Ninja_Debug"
+      artifacts: true
 
 .Windows_Ninja_RelWithDebInfo:
   extends:
@@ -637,11 +706,27 @@ macOS13_Xcode14_arm64:
   variables:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
-    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+    # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+
+.Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  needs:
+    - job: "Windows_Ninja_RelWithDebInfo"
+      artifacts: true
+
+.Windows_Ninja_CacheInit:
+  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    config: "RelWithDebInfo"
+    targets: "get-version"
+  when: manual
 
 .Windows_MSBuild_Base:
   tags:
-    - windows
+    - saas-windows-medium-amd64
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
@@ -651,7 +736,6 @@ macOS13_Xcode14_arm64:
   - choco source disable -n=chocolatey
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
-  - choco install ccache -y
   - choco install vswhere -y
   - choco install python -y
   - choco install awscli -y
@@ -674,62 +758,50 @@ macOS13_Xcode14_arm64:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - $env:CCACHE_BASEDIR = Get-Location
-    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
-    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-    - New-Item -Type File -Force -Path MSVC2019_64\.cmake\api\v1\query\codemodel-v2
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview -E
-    - cd MSVC2019_64
+    - New-Item -Type File -Force -Path MSVC2022_64\.cmake\api\v1\query\codemodel-v2
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
+    - cd MSVC2022_64
     - Get-Volume
-    - cmake --build . --config $config
-    - ccache --show-stats
+    - cmake --build . --config $config --target $targets
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
         }
         Push-Location ..
-        ..\CI\Store-Symbols.ps1
-        if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude * --include *.ex_ --include *.dl_ --include *.pd_ .\SymStore s3://openmw-sym
-        }
-        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        ..\CI\Store-Symbols.ps1 -SkipCompress
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - |
       if (Test-Path env:AWS_ACCESS_KEY_ID) {
-        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
+        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
       }
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-v7
+    key: msbuild-2022-v11
     paths:
-    - ccache
     - deps
-    - MSVC2019_64/deps/Qt
+    - MSVC2022_64/deps/Qt
   artifacts:
     when: always
     paths:
     - "*.zip"
     - "*.log"
-    - MSVC2019_64/*.log
-    - MSVC2019_64/*/*.log
-    - MSVC2019_64/*/*/*.log
-    - MSVC2019_64/*/*/*/*.log
-    - MSVC2019_64/*/*/*/*/*.log
-    - MSVC2019_64/*/*/*/*/*/*.log
-    - MSVC2019_64/*/*/*/*/*/*/*.log
-    - MSVC2019_64/*/*/*/*/*/*/*/*.log
+    - MSVC2022_64/*.log
+    - MSVC2022_64/**/*.log
+  variables:
+    targets: ALL_BUILD
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -739,11 +811,25 @@ macOS13_Xcode14_arm64:
   variables:
     config: "Release"
 
+.Windows_Compress_And_Upload_Symbols_MSBuild_Release:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  needs:
+    - job: "Windows_MSBuild_Release"
+      artifacts: true
+
 .Windows_MSBuild_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
     config: "Debug"
+
+.Windows_Compress_And_Upload_Symbols_MSBuild_Debug:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  needs:
+    - job: "Windows_MSBuild_Debug"
+      artifacts: true
 
 Windows_MSBuild_RelWithDebInfo:
   extends:
@@ -751,15 +837,35 @@ Windows_MSBuild_RelWithDebInfo:
   variables:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
-    # executables: "openmw_test_suite.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+    # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
   # temporarily enabled while we're linking these on the downloads page
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
+Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
+  extends:
+    - .Compress_And_Upload_Symbols_Base
+  needs:
+    - job: "Windows_MSBuild_RelWithDebInfo"
+      artifacts: true
+  # temporarily enabled while we're linking the above on the downloads page
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+
+Windows_MSBuild_CacheInit:
+  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    config: "RelWithDebInfo"
+    targets: "get-version"
+  when: manual
+
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
-    - linux
+    - saas-linux-medium-amd64
   image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"

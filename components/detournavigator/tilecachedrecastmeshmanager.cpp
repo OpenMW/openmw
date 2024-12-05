@@ -1,8 +1,10 @@
 #include "tilecachedrecastmeshmanager.hpp"
+
 #include "changetype.hpp"
 #include "gettilespositions.hpp"
 #include "recastmeshbuilder.hpp"
 #include "settingsutils.hpp"
+#include "stats.hpp"
 #include "updateguard.hpp"
 
 #include <components/bullethelpers/aabb.hpp>
@@ -10,9 +12,7 @@
 
 #include <boost/geometry/geometry.hpp>
 
-#include <algorithm>
 #include <limits>
-#include <vector>
 
 namespace DetourNavigator
 {
@@ -54,6 +54,15 @@ namespace DetourNavigator
         private:
             const std::optional<std::unique_lock<Mutex>> mImpl;
         };
+
+        TilesPositionsRange getIndexRange(const auto& index)
+        {
+            const auto bounds = index.bounds();
+            return TilesPositionsRange{
+                .mBegin = makeTilePosition(bounds.min_corner()),
+                .mEnd = makeTilePosition(bounds.max_corner()) + TilePosition(1, 1),
+            };
+        }
     }
 
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const RecastSettings& settings)
@@ -91,30 +100,48 @@ namespace DetourNavigator
                     }
                 });
             }
+
+            getTilesPositions(mRange, [&](const TilePosition& v) {
+                if (!isInTilesPositionsRange(range, v))
+                    mCache.erase(v);
+            });
         }
 
+        const MaybeLockGuard lock(mMutex, guard);
+
         if (changed)
-        {
-            const MaybeLockGuard lock(mMutex, guard);
             ++mRevision;
-        }
 
         mRange = range;
     }
 
     TilesPositionsRange TileCachedRecastMeshManager::getLimitedObjectsRange() const
     {
-        if (mObjects.empty())
-            return {};
-        const auto bounds = mObjectIndex.bounds();
-        const TilesPositionsRange objectsRange{
-            .mBegin = makeTilePosition(bounds.min_corner()),
-            .mEnd = makeTilePosition(bounds.max_corner()) + TilePosition(1, 1),
-        };
-        return getIntersection(mRange, objectsRange);
+        std::optional<TilesPositionsRange> result;
+        if (!mWater.empty())
+            result = getIndexRange(mWaterIndex);
+        if (!mHeightfields.empty())
+        {
+            const TilesPositionsRange range = getIndexRange(mHeightfieldIndex);
+            if (result.has_value())
+                result = getUnion(*result, range);
+            else
+                result = range;
+        }
+        if (!mObjects.empty())
+        {
+            const TilesPositionsRange range = getIndexRange(mObjectIndex);
+            if (result.has_value())
+                result = getUnion(*result, range);
+            else
+                result = range;
+        }
+        if (result.has_value())
+            return getIntersection(mRange, *result);
+        return {};
     }
 
-    void TileCachedRecastMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
+    void TileCachedRecastMeshManager::setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard)
     {
         const MaybeLockGuard lock(mMutex, guard);
         if (mWorldspace == worldspace)
@@ -323,11 +350,13 @@ namespace DetourNavigator
     }
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(
-        std::string_view worldspace, const TilePosition& tilePosition)
+        ESM::RefId worldspace, const TilePosition& tilePosition)
     {
         {
             const std::lock_guard lock(mMutex);
             if (mWorldspace != worldspace)
+                return nullptr;
+            if (!isInTilesPositionsRange(mRange, tilePosition))
                 return nullptr;
             const auto it = mCache.find(tilePosition);
             if (it != mCache.end() && it->second.mRecastMesh->getVersion() == it->second.mVersion)
@@ -347,10 +376,12 @@ namespace DetourNavigator
     }
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getCachedMesh(
-        std::string_view worldspace, const TilePosition& tilePosition) const
+        ESM::RefId worldspace, const TilePosition& tilePosition) const
     {
         const std::lock_guard lock(mMutex);
         if (mWorldspace != worldspace)
+            return nullptr;
+        if (!isInTilesPositionsRange(mRange, tilePosition))
             return nullptr;
         const auto it = mCache.find(tilePosition);
         if (it == mCache.end())
@@ -359,7 +390,7 @@ namespace DetourNavigator
     }
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getNewMesh(
-        std::string_view worldspace, const TilePosition& tilePosition) const
+        ESM::RefId worldspace, const TilePosition& tilePosition) const
     {
         {
             const std::lock_guard lock(mMutex);
@@ -393,7 +424,7 @@ namespace DetourNavigator
         if (tile == mChangedTiles.end())
             mChangedTiles.emplace(tilePosition, changeType);
         else
-            tile->second = addChangeType(tile->second, changeType);
+            tile->second = changeType == ChangeType::remove ? changeType : tile->second;
     }
 
     std::map<osg::Vec2i, ChangeType> TileCachedRecastMeshManager::takeChangedTiles(const UpdateGuard* guard)
@@ -405,6 +436,17 @@ namespace DetourNavigator
                     ++it->second.mVersion.mRevision;
         }
         return std::move(mChangedTiles);
+    }
+
+    TileCachedRecastMeshManagerStats TileCachedRecastMeshManager::getStats() const
+    {
+        const std::lock_guard lock(mMutex);
+        return TileCachedRecastMeshManagerStats{
+            .mTiles = mCache.size(),
+            .mObjects = mObjects.size(),
+            .mHeightfields = mHeightfields.size(),
+            .mWater = mWater.size(),
+        };
     }
 
     TileCachedRecastMeshManager::IndexPoint TileCachedRecastMeshManager::makeIndexPoint(

@@ -3,6 +3,7 @@
 
 #include "importinventory.hpp"
 #include <components/esm3/aipackage.hpp>
+#include <cstdint>
 
 namespace ESM
 {
@@ -15,7 +16,7 @@ namespace ESSImport
     /// Creature changes
     struct CREC
     {
-        int mIndex;
+        int32_t mIndex;
 
         Inventory mInventory;
         ESM::AIPackageList mAiPackages;

@@ -15,14 +15,15 @@
 #include <QVariant>
 
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
+#include "columnimp.hpp"
 #include "info.hpp"
 #include "land.hpp"
-#include "landtexture.hpp"
 #include "record.hpp"
 #include "ref.hpp"
 
@@ -72,19 +73,15 @@ namespace CSMWorld
         return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
-    inline void setRecordId(const ESM::RefId& id, LandTexture& record)
+    inline ESM::RefId getRecordId(const ESM::MagicEffect& record)
     {
-        int plugin = 0;
-        int index = 0;
-
-        LandTexture::parseUniqueRecordId(id.getRefIdString(), plugin, index);
-        record.mPluginIndex = plugin;
-        record.mIndex = index;
+        return ESM::RefId::stringRefId(CSMWorld::getStringId(record.mId));
     }
 
-    inline ESM::RefId getRecordId(const LandTexture& record)
+    inline void setRecordId(const ESM::RefId& id, ESM::MagicEffect& record)
     {
-        return ESM::RefId::stringRefId(LandTexture::createUniqueRecordId(record.mPluginIndex, record.mIndex));
+        int index = ESM::MagicEffect::indexNameToIndex(id.getRefIdString());
+        record.mId = ESM::RefId::index(ESM::REC_MGEF, static_cast<std::uint32_t>(index));
     }
 
     inline void setRecordId(const ESM::RefId& id, ESM::Skill& record)
@@ -326,7 +323,7 @@ namespace CSMWorld
         const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
         const int index = cloneRecordImp(origin, destination, type);
-        mRecords.at(index)->get().setPlugin(0);
+        mRecords.at(index)->get().setPlugin(-1);
     }
 
     template <typename ESXRecordT>
@@ -341,7 +338,7 @@ namespace CSMWorld
         const int index = touchRecordImp(id);
         if (index >= 0)
         {
-            mRecords.at(index)->get().setPlugin(0);
+            mRecords.at(index)->get().setPlugin(-1);
             return true;
         }
 
@@ -504,7 +501,7 @@ namespace CSMWorld
 
         auto record2 = std::make_unique<Record<ESXRecordT>>();
         record2->mState = Record<ESXRecordT>::State_ModifiedOnly;
-        record2->mModified = record;
+        record2->mModified = std::move(record);
 
         insertRecord(std::move(record2), getAppendIndex(id, type), type);
     }

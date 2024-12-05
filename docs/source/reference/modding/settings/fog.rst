@@ -125,6 +125,8 @@ By default, the fog becomes thicker proportionally to your distance from the cli
 This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.
 Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 exponential fog
 ---------------
 
@@ -134,6 +136,8 @@ exponential fog
 
 Similar to "radial fog" but uses an exponential formula for the fog.
 Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 sky blending
 ------------
@@ -146,6 +150,8 @@ Whether to use blending with the sky for everything that is close to the clippin
 If enabled the clipping plane becomes invisible.
 Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 sky blending start
 ------------------
 
@@ -154,6 +160,8 @@ sky blending start
 :Default:	0.8
 
 The fraction of the maximum distance at which blending with the sky starts.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 sky rtt resolution
 ------------------

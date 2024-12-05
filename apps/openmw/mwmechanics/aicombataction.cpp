@@ -176,34 +176,35 @@ namespace MWMechanics
             return bestAction;
         }
 
-        if (actor.getClass().hasInventoryStore(actor))
+        const bool hasInventoryStore = actor.getClass().hasInventoryStore(actor);
+        MWWorld::ContainerStore& store = actor.getClass().getContainerStore(actor);
+        for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            if (it->getType() == ESM::Potion::sRecordId)
             {
-                if (it->getType() == ESM::Potion::sRecordId)
+                float rating = ratePotion(*it, actor);
+                if (rating > bestActionRating)
                 {
-                    float rating = ratePotion(*it, actor);
-                    if (rating > bestActionRating)
-                    {
-                        bestActionRating = rating;
-                        bestAction = std::make_unique<ActionPotion>(*it);
-                        antiFleeRating = std::numeric_limits<float>::max();
-                    }
-                }
-                else if (!it->getClass().getEnchantment(*it).empty())
-                {
-                    float rating = rateMagicItem(*it, actor, enemy);
-                    if (rating > bestActionRating)
-                    {
-                        bestActionRating = rating;
-                        bestAction = std::make_unique<ActionEnchantedItem>(it);
-                        antiFleeRating = std::numeric_limits<float>::max();
-                    }
+                    bestActionRating = rating;
+                    bestAction = std::make_unique<ActionPotion>(*it);
+                    antiFleeRating = std::numeric_limits<float>::max();
                 }
             }
+            // TODO remove inventory store check, creatures should be able to use enchanted items they cannot equip
+            else if (hasInventoryStore && !it->getClass().getEnchantment(*it).empty())
+            {
+                float rating = rateMagicItem(*it, actor, enemy);
+                if (rating > bestActionRating)
+                {
+                    bestActionRating = rating;
+                    bestAction = std::make_unique<ActionEnchantedItem>(it);
+                    antiFleeRating = std::numeric_limits<float>::max();
+                }
+            }
+        }
 
+        if (hasInventoryStore)
+        {
             MWWorld::Ptr bestArrow;
             float bestArrowRating = rateAmmo(actor, enemy, bestArrow, ESM::Weapon::Arrow);
 
@@ -354,14 +355,14 @@ namespace MWMechanics
             {
                 const ESM::Spell* spell
                     = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(selectedSpellId);
-                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin();
+                for (std::vector<ESM::IndexedENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin();
                      effectIt != spell->mEffects.mList.end(); ++effectIt)
                 {
-                    if (effectIt->mRange == ESM::RT_Target)
+                    if (effectIt->mData.mRange == ESM::RT_Target)
                     {
                         const ESM::MagicEffect* effect
                             = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-                                effectIt->mEffectID);
+                                effectIt->mData.mEffectID);
                         dist = effect->mData.mSpeed;
                         break;
                     }
@@ -374,14 +375,14 @@ namespace MWMechanics
                 {
                     const ESM::Enchantment* ench
                         = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(enchId);
-                    for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = ench->mEffects.mList.begin();
+                    for (std::vector<ESM::IndexedENAMstruct>::const_iterator effectIt = ench->mEffects.mList.begin();
                          effectIt != ench->mEffects.mList.end(); ++effectIt)
                     {
-                        if (effectIt->mRange == ESM::RT_Target)
+                        if (effectIt->mData.mRange == ESM::RT_Target)
                         {
                             const ESM::MagicEffect* effect
                                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-                                    effectIt->mEffectID);
+                                    effectIt->mData.mEffectID);
                             dist = effect->mData.mSpeed;
                             break;
                         }

@@ -34,7 +34,7 @@ namespace ESM
         RefNum mRefNum;
 
         // Coordinates of target exterior cell
-        int mTarget[2];
+        int32_t mTarget[2];
 
         // The content file format does not support moving objects to an interior cell.
         // The save game format does support moving to interior cells, but uses a different mechanism
@@ -96,8 +96,8 @@ namespace ESM
 
         struct DATAstruct
         {
-            int mFlags{ 0 };
-            int mX{ 0 }, mY{ 0 };
+            int32_t mFlags{ 0 };
+            int32_t mX{ 0 }, mY{ 0 };
         };
 
         struct AMBIstruct
@@ -111,7 +111,7 @@ namespace ESM
             , mRegion(ESM::RefId())
             , mHasAmbi(true)
             , mWater(0)
-            , mWaterInt(false)
+            , mHasWaterHeightSub(false)
             , mMapColor(0)
             , mRefNumCounter(0)
         {
@@ -131,12 +131,12 @@ namespace ESM
         bool mHasAmbi;
 
         float mWater; // Water level
-        bool mWaterInt;
-        int mMapColor;
+        bool mHasWaterHeightSub;
+        int32_t mMapColor;
         // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
         // It prevents overwriting previous refNums, even if they were deleted.
         // as that would collide with refs when a content file is upgraded.
-        int mRefNumCounter;
+        int32_t mRefNumCounter;
 
         // References "leased" from another cell (i.e. a different cell
         //  introduced this ref, and it has been moved here by a plugin)
@@ -153,15 +153,17 @@ namespace ESM
             ESMReader& esm, bool saveContext = true); // Load everything, except NAME, DATAstruct and references
 
         void save(ESMWriter& esm, bool isDeleted = false) const;
-        void saveTempMarker(ESMWriter& esm, int tempCount) const;
+        void saveTempMarker(ESMWriter& esm, int32_t tempCount) const;
 
         bool isExterior() const { return !(mData.mFlags & Interior); }
 
-        int getGridX() const { return mData.mX; }
+        int32_t getGridX() const { return mData.mX; }
 
-        int getGridY() const { return mData.mY; }
+        int32_t getGridY() const { return mData.mY; }
 
         bool hasWater() const { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
+
+        void setHasWaterHeightSub(bool hasWater) { mHasWaterHeightSub = hasWater; }
 
         bool hasAmbient() const { return mHasAmbi; }
 
@@ -172,7 +174,7 @@ namespace ESM
         // somewhere other than the file system, you need to pre-open the
         // ESMReader, and the filename must match the stored filename
         // exactly.
-        void restore(ESMReader& esm, int iCtx) const;
+        void restore(ESMReader& esm, size_t iCtx) const;
 
         std::string getDescription() const;
         ///< Return a short string describing the cell (mostly used for debugging/logging purpose)

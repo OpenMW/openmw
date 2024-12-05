@@ -30,7 +30,7 @@ namespace MWGui
 
         void setPlayerName(const std::string& name);
         void setRace(const ESM::RefId& raceId);
-        void setClass(const ESM::Class& class_);
+        void setClass(const ESM::Class& playerClass);
         void setBirthSign(const ESM::RefId& signId);
 
         void setHealth(const MWMechanics::DynamicStat<float>& value);
@@ -96,7 +96,7 @@ namespace MWGui
         std::map<ESM::RefId, MyGUI::TextBox*> mSkillWidgetMap;
         ESM::RefId mRaceId, mBirthSignId;
         std::string mName;
-        ESM::Class mKlass;
+        ESM::Class mClass;
         std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
 
         bool mUpdateSkillArea;

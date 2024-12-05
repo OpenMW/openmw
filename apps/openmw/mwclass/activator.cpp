@@ -1,6 +1,7 @@
 #include "activator.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadcrea.hpp>
@@ -27,7 +28,6 @@
 #include "../mwrender/vismask.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -59,10 +59,10 @@ namespace MWClass
     void Activator::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
         MWPhysics::PhysicsSystem& physics) const
     {
-        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
+        physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string Activator::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Activator::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Activator>(ptr);
     }
@@ -102,16 +102,13 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
 
-        std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
-        info.text = text;
 
         return info;
     }
@@ -142,16 +139,14 @@ namespace MWClass
 
     ESM::RefId Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
-        const std::string model
-            = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
+        // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
+        const std::string_view model = getModel(ptr);
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::RefId* creatureId = nullptr;
-        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         for (const ESM::Creature& iter : store.get<ESM::Creature>())
         {
-            if (!iter.mModel.empty()
-                && Misc::StringUtils::ciEqual(model, Misc::ResourceHelpers::correctMeshPath(iter.mModel, vfs)))
+            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, iter.mModel))
             {
                 creatureId = !iter.mOriginal.empty() ? &iter.mOriginal : &iter.mId;
                 break;

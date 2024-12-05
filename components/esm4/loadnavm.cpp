@@ -209,11 +209,11 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_NVNM:
+            case ESM::fourCC("NVNM"):
             {
                 // See FIXME in ESM4::Navigation::load.
                 // FO4 updates the format
-                if (esmVer == ESM::VER_100)
+                if (reader.hasFormVersion() && (esmVer == ESM::VER_095 || esmVer == ESM::VER_100))
                 {
                     reader.skipSubRecordData();
                     break;
@@ -224,19 +224,19 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
                 mData.push_back(nvnm); // FIXME try swap
                 break;
             }
-            case ESM4::SUB_ONAM:
-            case ESM4::SUB_PNAM:
-            case ESM4::SUB_NNAM:
-            case ESM4::SUB_NVER: // FO3
-            case ESM4::SUB_DATA: // FO3
-            case ESM4::SUB_NVVX: // FO3
-            case ESM4::SUB_NVTR: // FO3
-            case ESM4::SUB_NVCA: // FO3
-            case ESM4::SUB_NVDP: // FO3
-            case ESM4::SUB_NVGD: // FO3
-            case ESM4::SUB_NVEX: // FO3
-            case ESM4::SUB_EDID: // FO3
-            case ESM4::SUB_MNAM: // FO4
+            case ESM::fourCC("ONAM"):
+            case ESM::fourCC("PNAM"):
+            case ESM::fourCC("NNAM"):
+            case ESM::fourCC("NVER"): // FO3
+            case ESM::fourCC("DATA"): // FO3
+            case ESM::fourCC("NVVX"): // FO3
+            case ESM::fourCC("NVTR"): // FO3
+            case ESM::fourCC("NVCA"): // FO3
+            case ESM::fourCC("NVDP"): // FO3
+            case ESM::fourCC("NVGD"): // FO3
+            case ESM::fourCC("NVEX"): // FO3
+            case ESM::fourCC("EDID"): // FO3
+            case ESM::fourCC("MNAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

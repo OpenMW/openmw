@@ -27,6 +27,7 @@ namespace ESM
 
 namespace MWWorld
 {
+    class Cell;
     class CellStore;
 }
 
@@ -77,8 +78,7 @@ namespace MWGui
         virtual ~LocalMapBase();
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance = Constants::CellGridRadius);
 
-        void setCellPrefix(const std::string& prefix);
-        void setActiveCell(const int x, const int y, bool interior = false);
+        void setActiveCell(const MWWorld::Cell& cell);
         void requestMapRender(const MWWorld::CellStore* cell);
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(int cellX, int cellY, const float nx, const float ny);
@@ -112,23 +112,17 @@ namespace MWGui
     protected:
         void updateLocalMap();
 
-        float mLocalMapZoom = 1.f;
         MWRender::LocalMap* mLocalMapRender;
-
-        int mCurX, mCurY; // the position of the active cell on the global map (in cell coords)
-        bool mHasALastActiveCell = false;
+        const MWWorld::Cell* mActiveCell = nullptr;
         osg::Vec2f mCurPos; // the position of the player in the world (in cell coords)
 
-        bool mInterior;
-        MyGUI::ScrollView* mLocalMap;
-        MyGUI::ImageBox* mCompass;
-        std::string mPrefix;
-        bool mChanged;
-        bool mFogOfWarToggled;
+        MyGUI::ScrollView* mLocalMap = nullptr;
+        MyGUI::ImageBox* mCompass = nullptr;
+        float mLocalMapZoom = 1.f;
+        bool mHasALastActiveCell = false;
+        bool mFogOfWarToggled = true;
         bool mFogOfWarEnabled;
-
-        int mNumCells; // for convenience, mCellDistance * 2 + 1
-        int mCellDistance;
+        bool mNeedDoorMarkersUpdate = false;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
@@ -170,8 +164,7 @@ namespace MWGui
         MyGUI::IntPoint getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const;
         MyGUI::IntCoord getMarkerCoordinates(
             float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const;
-        MyGUI::Widget* createDoorMarker(
-            const std::string& name, const MyGUI::VectorString& notes, float x, float y) const;
+        MyGUI::Widget* createDoorMarker(const std::string& name, float x, float y) const;
         MyGUI::IntCoord getMarkerCoordinates(MyGUI::Widget* widget, size_t markerSize) const;
 
         virtual void notifyPlayerUpdate() {}
@@ -189,12 +182,14 @@ namespace MWGui
         void redraw();
         float getWidgetSize() const;
 
-        float mMarkerUpdateTimer;
+        MWGui::LocalMapBase::MapEntry& addMapEntry();
 
-        float mLastDirectionX;
-        float mLastDirectionY;
+        MyGUI::IntRect mGrid{ -1, -1, 1, 1 };
+        int mExtCellDistance = 0;
+        float mMarkerUpdateTimer = 0.f;
 
-        bool mNeedDoorMarkersUpdate;
+        float mLastDirectionX = 0.f;
+        float mLastDirectionY = 0.f;
 
     private:
         void updateDoorMarkers();

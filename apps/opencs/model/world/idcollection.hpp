@@ -17,6 +17,7 @@
 namespace ESM
 {
     class ESMReader;
+    struct LandTexture;
 }
 
 namespace CSMWorld
@@ -25,9 +26,9 @@ namespace CSMWorld
 
     /// \brief Single type collection of top level records
     template <typename ESXRecordT>
-    class IdCollection : public Collection<ESXRecordT>
+    class BaseIdCollection : public Collection<ESXRecordT>
     {
-        virtual void loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted);
+        virtual void loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted, bool base);
 
     public:
         /// \return Index of loaded record (-1 if no record was loaded)
@@ -46,14 +47,46 @@ namespace CSMWorld
         /// \return Has the ID been deleted?
     };
 
+    template <class ESXRecordT>
+    class IdCollection : public BaseIdCollection<ESXRecordT>
+    {
+    };
+
+    template <>
+    class IdCollection<ESM::LandTexture> : public BaseIdCollection<ESM::LandTexture>
+    {
+        std::map<std::pair<int, std::uint16_t>, ESM::RefId> mIndices;
+
+        void loadRecord(ESM::LandTexture& record, ESM::ESMReader& reader, bool& isDeleted, bool base) override;
+
+        std::uint16_t assignNewIndex(ESM::RefId id);
+
+    public:
+        const Record<ESM::LandTexture>* searchRecord(std::uint16_t index, int plugin) const;
+
+        const std::string* getLandTexture(std::uint16_t index, int plugin) const;
+
+        bool touchRecord(const ESM::RefId& id) override;
+
+        void cloneRecord(
+            const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type) override;
+
+        void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type) override;
+
+        void removeRows(int index, int count) override;
+
+        void replace(int index, std::unique_ptr<RecordBase> record) override;
+    };
+
     template <typename ESXRecordT>
-    void IdCollection<ESXRecordT>::loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted)
+    void BaseIdCollection<ESXRecordT>::loadRecord(
+        ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted, bool base)
     {
         record.load(reader, isDeleted);
     }
 
     template <>
-    inline void IdCollection<Land>::loadRecord(Land& record, ESM::ESMReader& reader, bool& isDeleted)
+    inline void BaseIdCollection<Land>::loadRecord(Land& record, ESM::ESMReader& reader, bool& isDeleted, bool base)
     {
         record.load(reader, isDeleted);
 
@@ -64,15 +97,17 @@ namespace CSMWorld
 
         // Prevent data from being reloaded.
         record.mContext.filename.clear();
+        if (!base)
+            record.setPlugin(-1);
     }
 
     template <typename ESXRecordT>
-    int IdCollection<ESXRecordT>::load(ESM::ESMReader& reader, bool base)
+    int BaseIdCollection<ESXRecordT>::load(ESM::ESMReader& reader, bool base)
     {
         ESXRecordT record;
         bool isDeleted = false;
 
-        loadRecord(record, reader, isDeleted);
+        loadRecord(record, reader, isDeleted, base);
 
         ESM::RefId id = getRecordId(record);
         int index = this->searchId(id);
@@ -103,7 +138,7 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT>
-    int IdCollection<ESXRecordT>::load(const ESXRecordT& record, bool base, int index)
+    int BaseIdCollection<ESXRecordT>::load(const ESXRecordT& record, bool base, int index)
     {
         if (index == -2) // index unknown
             index = this->searchId(getRecordId(record));
@@ -135,7 +170,7 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT>
-    bool IdCollection<ESXRecordT>::tryDelete(const ESM::RefId& id)
+    bool BaseIdCollection<ESXRecordT>::tryDelete(const ESM::RefId& id)
     {
         int index = this->searchId(id);
 
@@ -162,7 +197,7 @@ namespace CSMWorld
     }
 
     template <>
-    int IdCollection<Pathgrid>::load(ESM::ESMReader& reader, bool base);
+    int BaseIdCollection<Pathgrid>::load(ESM::ESMReader& reader, bool base);
 }
 
 #endif

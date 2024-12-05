@@ -24,7 +24,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/stereo/multiview.hpp>
 
 #include "../mwworld/class.hpp"
@@ -34,6 +34,7 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "npcanimation.hpp"
+#include "util.hpp"
 #include "vismask.hpp"
 
 namespace MWRender
@@ -153,8 +154,8 @@ namespace MWRender
 
     public:
         CharacterPreviewRTTNode(uint32_t sizeX, uint32_t sizeY)
-            : RTTNode(sizeX, sizeY, Settings::Manager::getInt("antialiasing", "Video"), false, 0,
-                StereoAwareness::Unaware_MultiViewShaders)
+            : RTTNode(sizeX, sizeY, Settings::video().mAntialiasing, false, 0,
+                StereoAwareness::Unaware_MultiViewShaders, shouldAddMSAAIntermediateTarget())
             , mAspectRatio(static_cast<float>(sizeX) / static_cast<float>(sizeY))
         {
             if (SceneUtil::AutoDepth::isReversed())
@@ -226,9 +227,13 @@ namespace MWRender
         mRTTNode = new CharacterPreviewRTTNode(sizeX, sizeY);
         mRTTNode->setNodeMask(Mask_RenderToTexture);
 
-        bool ffp = mResourceSystem->getSceneManager()->getLightingMethod() == SceneUtil::LightingMethod::FFP;
-
-        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(ffp);
+        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(SceneUtil::LightSettings{
+            .mLightingMethod = mResourceSystem->getSceneManager()->getLightingMethod(),
+            .mMaxLights = Settings::shaders().mMaxLights,
+            .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
+            .mLightFadeStart = Settings::shaders().mLightFadeStart,
+            .mLightBoundsMultiplier = Settings::shaders().mLightBoundsMultiplier,
+        });
         lightManager->setStartLight(1);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
         stateset->setDefine("FORCE_OPAQUE", "1", osg::StateAttribute::ON);
@@ -242,7 +247,7 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
 
-        SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
+        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);
 
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)
@@ -431,7 +436,7 @@ namespace MWRender
 
                 // We still should use one-handed animation as fallback
                 if (mAnimation->hasAnimation(inventoryGroup))
-                    groupname = inventoryGroup;
+                    groupname = std::move(inventoryGroup);
                 else
                 {
                     static const std::string oneHandFallback
@@ -451,15 +456,15 @@ namespace MWRender
 
         mAnimation->showCarriedLeft(showCarriedLeft);
 
-        mCurrentAnimGroup = groupname;
-        mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mCurrentAnimGroup = std::move(groupname);
+        mAnimation->play(mCurrentAnimGroup, 1, BlendMask::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if (torch != inv.end() && torch->getType() == ESM::Light::sRecordId && showCarriedLeft)
         {
             if (!mAnimation->getInfo("torch"))
-                mAnimation->play(
-                    "torch", 2, Animation::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f, ~0ul, true);
+                mAnimation->play("torch", 2, BlendMask::BlendMask_LeftArm, false, 1.0f, "start", "stop", 0.0f,
+                    std::numeric_limits<uint32_t>::max(), true);
         }
         else if (mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
@@ -528,7 +533,7 @@ namespace MWRender
         : CharacterPreview(
             parent, resourceSystem, MWMechanics::getPlayer(), 512, 512, osg::Vec3f(0, 125, 8), osg::Vec3f(0, 0, 8))
         , mBase(*mCharacter.get<ESM::NPC>()->mBase)
-        , mRef(&mBase)
+        , mRef(ESM::makeBlankCellRef(), &mBase)
         , mPitchRadians(osg::DegreesToRadians(6.f))
     {
         mCharacter = MWWorld::Ptr(&mRef, nullptr);
@@ -586,7 +591,7 @@ namespace MWRender
     void RaceSelectionPreview::onSetup()
     {
         CharacterPreview::onSetup();
-        mAnimation->play("idle", 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mAnimation->play("idle", 1, BlendMask::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->runAnimation(0.f);
 
         // attach camera to follow the head node

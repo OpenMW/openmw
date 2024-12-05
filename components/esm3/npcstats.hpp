@@ -23,28 +23,27 @@ namespace ESM
         struct Faction
         {
             bool mExpelled;
-            int mRank;
-            int mReputation;
+            int32_t mRank;
+            int32_t mReputation;
 
             Faction();
         };
 
         bool mIsWerewolf;
 
-        bool mWerewolfDeprecatedData;
-
-        std::map<ESM::RefId, Faction> mFactions; // lower case IDs
-        int mDisposition;
+        std::map<ESM::RefId, Faction> mFactions;
+        int32_t mDisposition;
+        int32_t mCrimeDispositionModifier;
         std::array<StatState<float>, ESM::Skill::Length> mSkills;
-        int mBounty;
-        int mReputation;
-        int mWerewolfKills;
-        int mLevelProgress;
-        std::array<int, ESM::Attribute::Length> mSkillIncrease;
-        std::array<int, 3> mSpecIncreases;
-        std::vector<ESM::RefId> mUsedIds; // lower case IDs
+        int32_t mBounty;
+        int32_t mReputation;
+        int32_t mWerewolfKills;
+        int32_t mLevelProgress;
+        std::array<int32_t, ESM::Attribute::Length> mSkillIncrease;
+        std::array<int32_t, 3> mSpecIncreases;
+        std::vector<ESM::RefId> mUsedIds;
         float mTimeToStartDrowning;
-        int mCrimeId;
+        int32_t mCrimeId;
 
         /// Initialize to default state
         void blank();

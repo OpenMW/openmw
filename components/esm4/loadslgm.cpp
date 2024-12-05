@@ -41,38 +41,38 @@ void ESM4::SoulGem::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIcon);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mData);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_SOUL:
+            case ESM::fourCC("SOUL"):
                 reader.get(mSoul);
                 break;
-            case ESM4::SUB_SLCP:
+            case ESM::fourCC("SLCP"):
                 reader.get(mSoulCapacity);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_NAM0:
-            case ESM4::SUB_OBND:
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("NAM0"):
+            case ESM::fourCC("OBND"):
                 reader.skipSubRecordData();
                 break;
             default:

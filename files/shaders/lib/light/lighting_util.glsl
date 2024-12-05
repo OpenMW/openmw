@@ -59,6 +59,39 @@ uniform int PointLightCount;
 
 #endif
 
+float lcalcConstantAttenuation(int lightIndex)
+{
+#if @lightingMethodPerObjectUniform
+    return @getLight[lightIndex][0].w;
+#elif @lightingMethodUBO
+    return @getLight[lightIndex].attenuation.x;
+#else
+    return @getLight[lightIndex].constantAttenuation;
+#endif
+}
+
+float lcalcLinearAttenuation(int lightIndex)
+{
+#if @lightingMethodPerObjectUniform
+    return @getLight[lightIndex][1].w;
+#elif @lightingMethodUBO
+    return @getLight[lightIndex].attenuation.y;
+#else
+    return @getLight[lightIndex].linearAttenuation;
+#endif
+}
+
+float lcalcQuadraticAttenuation(int lightIndex)
+{
+#if @lightingMethodPerObjectUniform
+    return @getLight[lightIndex][2].w;
+#elif @lightingMethodUBO
+    return @getLight[lightIndex].attenuation.z;
+#else
+    return @getLight[lightIndex].quadraticAttenuation;
+#endif
+}
+
 #if !@lightingMethodFFP
 float lcalcRadius(int lightIndex)
 {
@@ -70,17 +103,14 @@ float lcalcRadius(int lightIndex)
 }
 #endif
 
-float lcalcIllumination(int lightIndex, float lightDistance)
+float lcalcIllumination(int lightIndex, float dist)
 {
-#if @lightingMethodPerObjectUniform
-    float illumination = clamp(1.0 / (@getLight[lightIndex][0].w + @getLight[lightIndex][1].w * lightDistance + @getLight[lightIndex][2].w * lightDistance * lightDistance), 0.0, 1.0);
-    return (illumination * (1.0 - quickstep((lightDistance / lcalcRadius(lightIndex)) - 1.0)));
-#elif @lightingMethodUBO
-    float illumination = clamp(1.0 / (@getLight[lightIndex].attenuation.x + @getLight[lightIndex].attenuation.y * lightDistance + @getLight[lightIndex].attenuation.z * lightDistance * lightDistance), 0.0, 1.0);
-    return (illumination * (1.0 - quickstep((lightDistance / lcalcRadius(lightIndex)) - 1.0)));
-#else
-    return clamp(1.0 / (@getLight[lightIndex].constantAttenuation + @getLight[lightIndex].linearAttenuation * lightDistance + @getLight[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
+    float illumination = 1.0 / (lcalcConstantAttenuation(lightIndex) + lcalcLinearAttenuation(lightIndex) * dist + lcalcQuadraticAttenuation(lightIndex) * dist * dist);
+#if !@classicFalloff && !@lightingMethodFFP
+    // Fade illumination between the radius and the radius doubled to diminish pop-in
+    illumination *= 1.0 - quickstep((dist / lcalcRadius(lightIndex)) - 1.0);
 #endif
+    return illumination;
 }
 
 vec3 lcalcPosition(int lightIndex)

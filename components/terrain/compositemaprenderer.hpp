@@ -38,7 +38,7 @@ namespace Terrain
 
         void drawImplementation(osg::RenderInfo& renderInfo) const override;
 
-        void compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo, double* timeLeft) const;
+        void compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo) const;
 
         /// Set the available time in seconds for compiling (non-immediate) composite maps each frame
         void setMinimumTimeAvailableForCompile(double time);

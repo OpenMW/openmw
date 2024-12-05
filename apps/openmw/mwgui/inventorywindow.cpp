@@ -19,6 +19,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -416,6 +417,8 @@ namespace MWGui
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
     {
+        WindowBase::clampWindowCoordinates(_sender);
+
         adjustPanes();
         const WindowSettingValues settings = getModeSettings(mGuiMode);
 
@@ -439,6 +442,9 @@ namespace MWGui
 
     void InventoryWindow::updateArmorRating()
     {
+        if (mPtr.isEmpty())
+            return;
+
         mArmorRating->setCaptionWithReplacing(
             "#{sArmor}: " + MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
         if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
@@ -555,6 +561,20 @@ namespace MWGui
         std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
         action->execute(player);
 
+        // Handles partial equipping (final part)
+        if (mEquippedStackableCount.has_value())
+        {
+            // the count to unequip
+            int count = ptr.getCellRef().getCount() - mDragAndDrop->mDraggedCount - mEquippedStackableCount.value();
+            if (count > 0)
+            {
+                MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+                invStore.unequipItemQuantity(ptr, count);
+                updateItemView();
+            }
+            mEquippedStackableCount.reset();
+        }
+
         if (isVisible())
         {
             mItemView->update();
@@ -580,27 +600,21 @@ namespace MWGui
             }
 
             // Handles partial equipping
-            const std::pair<std::vector<int>, bool> slots = ptr.getClass().getEquipmentSlots(ptr);
+            mEquippedStackableCount.reset();
+            const auto slots = ptr.getClass().getEquipmentSlots(ptr);
             if (!slots.first.empty() && slots.second)
             {
-                int equippedStackableCount = 0;
                 MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
                 MWWorld::ConstContainerStoreIterator slotIt = invStore.getSlot(slots.first.front());
 
-                // Get the count before useItem()
+                // Save the currently equipped count before useItem()
                 if (slotIt != invStore.end() && slotIt->getCellRef().getRefId() == ptr.getCellRef().getRefId())
-                    equippedStackableCount = slotIt->getRefData().getCount();
-
-                useItem(ptr);
-                int unequipCount = ptr.getRefData().getCount() - mDragAndDrop->mDraggedCount - equippedStackableCount;
-                if (unequipCount > 0)
-                {
-                    invStore.unequipItemQuantity(ptr, unequipCount);
-                    updateItemView();
-                }
+                    mEquippedStackableCount = slotIt->getCellRef().getCount();
+                else
+                    mEquippedStackableCount = 0;
             }
-            else
-                useItem(ptr);
+
+            MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
 
             // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
             // item
@@ -726,7 +740,7 @@ namespace MWGui
         if (!object.getClass().hasToolTip(object))
             return;
 
-        int count = object.getRefData().getCount();
+        int count = object.getCellRef().getCount();
         if (object.getClass().isGold(object))
             count *= object.getClass().getValue(object);
 
@@ -738,16 +752,14 @@ namespace MWGui
 
         // Player must not be paralyzed, knocked down, or dead to pick up an item.
         const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && playerStats.isParalyzed()) || playerStats.getKnockedDown() || playerStats.isDead())
+        if (playerStats.isParalyzed() || playerStats.getKnockedDown() || playerStats.isDead())
             return;
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
-        MWWorld::Ptr newObject
-            = *player.getClass().getContainerStore(player).add(object, object.getRefData().getCount());
+        MWWorld::Ptr newObject = *player.getClass().getContainerStore(player).add(object, count);
 
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject(object);
@@ -779,8 +791,7 @@ namespace MWGui
             return;
 
         const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
             return;
 
         ItemModel::ModelIndex selected = -1;

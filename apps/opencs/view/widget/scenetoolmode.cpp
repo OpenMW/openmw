@@ -10,6 +10,8 @@
 #include <apps/opencs/view/widget/pushbutton.hpp>
 #include <apps/opencs/view/widget/scenetool.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include <type_traits>
 #include <utility>
 
@@ -94,7 +96,7 @@ void CSVWidget::SceneToolMode::showPanel(const QPoint& position)
 
 void CSVWidget::SceneToolMode::addButton(const std::string& icon, const std::string& id, const QString& tooltip)
 {
-    ModeButton* button = new ModeButton(QIcon(QPixmap(icon.c_str())), tooltip, mPanel);
+    ModeButton* button = new ModeButton(Misc::ScalableIcon::load(icon.c_str()), tooltip, mPanel);
     addButton(button, id);
 }
 

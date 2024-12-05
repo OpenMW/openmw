@@ -14,6 +14,8 @@
 
 #include "editmode.hpp"
 #include "instancedragmodes.hpp"
+#include <apps/opencs/model/world/idtable.hpp>
+#include <components/esm3/selectiongroup.hpp>
 
 class QDragEnterEvent;
 class QDropEvent;
@@ -39,17 +41,6 @@ namespace CSVRender
     {
         Q_OBJECT
 
-        enum DropMode
-        {
-            Separate = 0b1,
-
-            Collision = 0b10,
-            Terrain = 0b100,
-
-            CollisionSep = Collision | Separate,
-            TerrainSep = Terrain | Separate,
-        };
-
         CSVWidget::SceneToolMode* mSubMode;
         std::string mSubModeId;
         InstanceSelectionMode* mSelectionMode;
@@ -60,6 +51,7 @@ namespace CSVRender
         osg::ref_ptr<osg::Group> mParentNode;
         osg::Vec3 mDragStart;
         std::vector<osg::Vec3> mObjectsAtDragStart;
+        CSMWorld::IdTable* mSelectionGroups;
 
         int getSubModeFromId(const std::string& id) const;
 
@@ -74,7 +66,7 @@ namespace CSVRender
         osg::Vec3 getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
         void handleSelectDrag(const QPoint& pos);
         void dropInstance(CSVRender::Object* object, float dropHeight);
-        float calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
+        float calculateDropHeight(CSVRender::Object* object, float objectHeight);
         osg::Vec3 calculateSnapPositionRelativeToTarget(osg::Vec3 initalPosition, osg::Vec3 targetPosition,
             osg::Vec3 targetRotation, osg::Vec3 translation, double snap) const;
 
@@ -130,13 +122,13 @@ namespace CSVRender
 
     private slots:
 
+        void setDragAxis(const char axis);
         void subModeChanged(const std::string& id);
-        void deleteSelectedInstances(bool active);
-        void dropSelectedInstancesToCollision();
-        void dropSelectedInstancesToTerrain();
-        void dropSelectedInstancesToCollisionSeparately();
-        void dropSelectedInstancesToTerrainSeparately();
-        void handleDropMethod(DropMode dropMode, QString commandMsg);
+        void deleteSelectedInstances();
+        void cloneSelectedInstances();
+        void getSelectionGroup(const int group);
+        void saveSelectionGroup(const int group);
+        void dropToCollision();
     };
 
     /// \brief Helper class to handle object mask data in safe way

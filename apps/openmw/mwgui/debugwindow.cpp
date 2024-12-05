@@ -129,6 +129,7 @@ namespace MWGui
     static std::mutex sBufferMutex;
     static int64_t sLogStartIndex;
     static int64_t sLogEndIndex;
+    static bool hasPrefix = false;
 
     void DebugWindow::startLogRecording()
     {
@@ -170,11 +171,17 @@ namespace MWGui
                     addChar(c);
                     if (c == '#')
                         addChar(c);
+                    if (c == '\n')
+                        hasPrefix = false;
                 }
             };
             for (char c : color)
                 addChar(c);
-            addShieldedStr(prefix);
+            if (!hasPrefix)
+            {
+                addShieldedStr(prefix);
+                hasPrefix = true;
+            }
             addShieldedStr(msg);
             if (bufferOverflow)
                 sLogStartIndex = (sLogEndIndex + 1) % bufSize;

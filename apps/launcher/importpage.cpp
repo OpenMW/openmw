@@ -37,9 +37,9 @@ Launcher::ImportPage::ImportPage(const Files::ConfigurationManager& cfg, Config:
     // Detect Morrowind configuration files
     QStringList iniPaths;
 
-    for (const QString& path : mGameSettings.getDataDirs())
+    for (const auto& path : mGameSettings.getDataDirs())
     {
-        QDir dir(path);
+        QDir dir(path.value);
         dir.setPath(dir.canonicalPath()); // Resolve symlinks
 
         if (dir.exists(QString("Morrowind.ini")))
@@ -104,9 +104,9 @@ void Launcher::ImportPage::on_importerButton_clicked()
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p> \
-                              <p>Please make sure you have the right permissions \
-                              and try again.</p></body></html>")
+                tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p>"
+                   "<p>Please make sure you have the right permissions "
+                   "and try again.</p></body></html>")
                     .arg(file.fileName()));
             msgBox.exec();
             return;
@@ -125,7 +125,7 @@ void Launcher::ImportPage::on_importerButton_clicked()
         arguments.append(QString("--fonts"));
 
     arguments.append(QString("--encoding"));
-    arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
+    arguments.append(mGameSettings.value(QString("encoding"), { "win1252" }).value);
     arguments.append(QString("--ini"));
     arguments.append(settingsComboBox->currentText());
     arguments.append(QString("--cfg"));
@@ -220,9 +220,15 @@ void Launcher::ImportPage::resetProgressBar()
     progressBar->reset();
 }
 
-void Launcher::ImportPage::saveSettings() {}
+void Launcher::ImportPage::saveSettings()
+{
+    mLauncherSettings.setImportContentSetup(addonsCheckBox->isChecked());
+    mLauncherSettings.setImportFontSetup(fontsCheckBox->isChecked());
+}
 
 bool Launcher::ImportPage::loadSettings()
 {
+    addonsCheckBox->setChecked(mLauncherSettings.getImportContentSetup());
+    fontsCheckBox->setChecked(mLauncherSettings.getImportFontSetup());
     return true;
 }

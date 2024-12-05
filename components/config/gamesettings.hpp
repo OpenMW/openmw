@@ -17,70 +17,108 @@ namespace Files
 
 namespace Config
 {
+    struct SettingValue
+    {
+        QString value = "";
+        // value as found in openmw.cfg, e.g. relative path with ?slug?
+        QString originalRepresentation = value;
+        // path of openmw.cfg, e.g. to resolve relative paths
+        QString context = "";
+
+        friend std::strong_ordering operator<=>(const SettingValue&, const SettingValue&) = default;
+    };
+
     class GameSettings
     {
     public:
         explicit GameSettings(const Files::ConfigurationManager& cfg);
 
-        inline QString value(const QString& key, const QString& defaultValue = QString())
+        inline SettingValue value(const QString& key, const SettingValue& defaultValue = {})
         {
-            return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
+            return mSettings.contains(key) ? mSettings.value(key) : defaultValue;
         }
 
-        inline void setValue(const QString& key, const QString& value)
+        inline void setValue(const QString& key, const SettingValue& value)
         {
-            mSettings.remove(key);
+            remove(key);
             mSettings.insert(key, value);
-            mUserSettings.remove(key);
-            mUserSettings.insert(key, value);
+            if (isUserSetting(value))
+                mUserSettings.insert(key, value);
         }
 
-        inline void setMultiValue(const QString& key, const QString& value)
+        inline void setMultiValue(const QString& key, const SettingValue& value)
         {
-            QStringList values = mSettings.values(key);
+            QList<SettingValue> values = mSettings.values(key);
             if (!values.contains(value))
                 mSettings.insert(key, value);
 
-            values = mUserSettings.values(key);
-            if (!values.contains(value))
-                mUserSettings.insert(key, value);
+            if (isUserSetting(value))
+            {
+                values = mUserSettings.values(key);
+                if (!values.contains(value))
+                    mUserSettings.insert(key, value);
+            }
         }
 
         inline void remove(const QString& key)
         {
-            mSettings.remove(key);
+            // simplify to removeIf when Qt5 goes
+            for (auto itr = mSettings.lowerBound(key); itr != mSettings.upperBound(key);)
+            {
+                if (isUserSetting(*itr))
+                    itr = mSettings.erase(itr);
+                else
+                    ++itr;
+            }
             mUserSettings.remove(key);
         }
 
-        QStringList getDataDirs() const;
-        std::filesystem::path getGlobalDataDir() const;
+        QList<SettingValue> getDataDirs() const;
 
-        inline void removeDataDir(const QString& dir)
+        QString getResourcesVfs() const;
+
+        inline void removeDataDir(const QString& existingDir)
         {
-            if (!dir.isEmpty())
-                mDataDirs.removeAll(dir);
+            if (!existingDir.isEmpty())
+            {
+                // non-user settings can't be removed as we can't edit the openmw.cfg they're in
+                mDataDirs.erase(
+                    std::remove_if(mDataDirs.begin(), mDataDirs.end(),
+                        [&](const SettingValue& dir) { return isUserSetting(dir) && dir.value == existingDir; }),
+                    mDataDirs.end());
+            }
         }
-        inline void addDataDir(const QString& dir)
+
+        inline void addDataDir(const SettingValue& dir)
         {
-            if (!dir.isEmpty())
+            if (!dir.value.isEmpty())
                 mDataDirs.append(dir);
         }
+
         inline QString getDataLocal() const { return mDataLocal; }
 
         bool hasMaster();
 
-        QStringList values(const QString& key, const QStringList& defaultValues = QStringList()) const;
+        QList<SettingValue> values(const QString& key, const QList<SettingValue>& defaultValues = {}) const;
+        bool containsValue(const QString& key, const QString& value) const;
 
-        bool readFile(QTextStream& stream, bool ignoreContent = false);
-        bool readFile(QTextStream& stream, QMultiMap<QString, QString>& settings, bool ignoreContent = false);
-        bool readUserFile(QTextStream& stream, bool ignoreContent = false);
+        bool readFile(QTextStream& stream, const QString& context, bool ignoreContent = false);
+        bool readFile(QTextStream& stream, QMultiMap<QString, SettingValue>& settings, const QString& context,
+            bool ignoreContent = false);
+        bool readUserFile(QTextStream& stream, const QString& context, bool ignoreContent = false);
 
         bool writeFile(QTextStream& stream);
         bool writeFileWithComments(QFile& file);
 
-        QStringList getArchiveList() const;
-        void setContentList(const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames);
-        QStringList getContentList() const;
+        QList<SettingValue> getArchiveList() const;
+        void setContentList(
+            const QList<SettingValue>& dirNames, const QList<SettingValue>& archiveNames, const QStringList& fileNames);
+        QList<SettingValue> getContentList() const;
+
+        const QString& getUserContext() const { return mContexts.back(); }
+        bool isUserSetting(const SettingValue& settingValue) const;
+
+        SettingValue processPathSettingValue(const SettingValue& value);
 
         void clear();
 
@@ -88,10 +126,12 @@ namespace Config
         const Files::ConfigurationManager& mCfgMgr;
 
         void validatePaths();
-        QMultiMap<QString, QString> mSettings;
-        QMultiMap<QString, QString> mUserSettings;
+        QMultiMap<QString, SettingValue> mSettings;
+        QMultiMap<QString, SettingValue> mUserSettings;
 
-        QStringList mDataDirs;
+        QStringList mContexts;
+
+        QList<SettingValue> mDataDirs;
         QString mDataLocal;
 
         static const char sArchiveKey[];
@@ -100,5 +140,11 @@ namespace Config
 
         static bool isOrderedLine(const QString& line);
     };
+
+    QDataStream& operator<<(QDataStream& out, const SettingValue& settingValue);
+    QDataStream& operator>>(QDataStream& in, SettingValue& settingValue);
 }
+
+Q_DECLARE_METATYPE(Config::SettingValue)
+
 #endif // GAMESETTINGS_HPP

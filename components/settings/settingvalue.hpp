@@ -2,11 +2,13 @@
 #define OPENMW_COMPONENTS_SETTINGS_SETTINGVALUE_H
 
 #include "gyroscopeaxis.hpp"
+#include "navmeshrendermode.hpp"
 #include "sanitizer.hpp"
 #include "settings.hpp"
 
-#include "components/debug/debuglog.hpp"
-#include "components/detournavigator/collisionshapetype.hpp"
+#include <components/debug/debuglog.hpp>
+#include <components/detournavigator/collisionshapetype.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include <osg/io_utils>
 
@@ -38,6 +40,12 @@ namespace Settings
         StringArray,
         MyGuiColour,
         GyroscopeAxis,
+        NavMeshRenderMode,
+        LightingMethod,
+        HrtfMode,
+        WindowMode,
+        VSyncMode,
+        NormalizedPath,
     };
 
     template <class T>
@@ -139,6 +147,42 @@ namespace Settings
         return SettingValueType::GyroscopeAxis;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<NavMeshRenderMode>()
+    {
+        return SettingValueType::NavMeshRenderMode;
+    }
+
+    template <>
+    inline constexpr SettingValueType getSettingValueType<SceneUtil::LightingMethod>()
+    {
+        return SettingValueType::LightingMethod;
+    }
+
+    template <>
+    inline constexpr SettingValueType getSettingValueType<HrtfMode>()
+    {
+        return SettingValueType::HrtfMode;
+    }
+
+    template <>
+    inline constexpr SettingValueType getSettingValueType<WindowMode>()
+    {
+        return SettingValueType::WindowMode;
+    }
+
+    template <>
+    inline constexpr SettingValueType getSettingValueType<SDLUtil::VSyncMode>()
+    {
+        return SettingValueType::VSyncMode;
+    }
+
+    template <>
+    inline constexpr SettingValueType getSettingValueType<VFS::Path::Normalized>()
+    {
+        return SettingValueType::NormalizedPath;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -175,6 +219,18 @@ namespace Settings
                 return "colour";
             case SettingValueType::GyroscopeAxis:
                 return "gyroscope axis";
+            case SettingValueType::NavMeshRenderMode:
+                return "navmesh render mode";
+            case SettingValueType::LightingMethod:
+                return "lighting method";
+            case SettingValueType::HrtfMode:
+                return "hrtf mode";
+            case SettingValueType::WindowMode:
+                return "window mode";
+            case SettingValueType::VSyncMode:
+                return "vsync mode";
+            case SettingValueType::NormalizedPath:
+                return "normalized path";
         }
         return "unsupported";
     }
@@ -277,6 +333,15 @@ namespace Settings
             : BaseSettingValue(getSettingValueType<T>(), category, name, index)
             , mSanitizer(std::move(sanitizer))
             , mValue(sanitize(Settings::Manager::get<T>(mName, mCategory)))
+        {
+        }
+
+        explicit SettingValue(Index& index, std::string_view category, std::string_view name, T&& defaultValue,
+            std::unique_ptr<const Sanitizer<T>>&& sanitizer = nullptr)
+            : BaseSettingValue(getSettingValueType<T>(), category, name, index)
+            , mSanitizer(std::move(sanitizer))
+            , mDefaultValue(sanitize(defaultValue))
+            , mValue(sanitize(Settings::Manager::getOrDefault<T>(mName, mCategory, mDefaultValue)))
         {
         }
 

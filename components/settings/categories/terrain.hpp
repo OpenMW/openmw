@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_TERRAIN_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_TERRAIN_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
@@ -37,6 +37,7 @@ namespace Settings
             makeMaxStrictSanitizerFloat(0) };
         SettingValue<float> mObjectPagingMinSizeCostMultiplier{ mIndex, "Terrain",
             "object paging min size cost multiplier", makeMaxStrictSanitizerFloat(0) };
+        SettingValue<bool> mWaterCulling{ mIndex, "Terrain", "water culling" };
     };
 }
 

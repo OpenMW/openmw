@@ -23,6 +23,7 @@
 
 #include <components/esm3/loadpgrd.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include <osg/Camera>
 #include <osg/Vec3f>
@@ -85,8 +86,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 {
                     modified = true;
 
-                    auto cell = std::make_unique<Cell>(
-                        mDocument.getData(), mRootNode, iter->first.getId(mWorldspace), deleted);
+                    auto cell
+                        = std::make_unique<Cell>(mDocument, mRootNode, iter->first.getId(mWorldspace), deleted, true);
 
                     delete iter->second;
                     iter->second = cell.release();
@@ -160,7 +161,6 @@ void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons(CSVWidget::S
 {
     WorldspaceWidget::addVisibilitySelectorButtons(tool);
     tool->addButton(Button_Terrain, Mask_Terrain, "Terrain");
-    tool->addButton(Button_Fog, Mask_Fog, "Fog", "", true);
 }
 
 void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons(CSVWidget::SceneToolMode* tool)
@@ -170,9 +170,10 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons(CSVWidget::Sce
     /// \todo replace EditMode with suitable subclasses
     tool->addButton(new TerrainShapeMode(this, mRootNode, tool), "terrain-shape");
     tool->addButton(new TerrainTextureMode(this, mRootNode, tool), "terrain-texture");
-    tool->addButton(
-        new EditMode(this, QIcon(":placeholder"), Mask_Reference, "Terrain vertex paint editing"), "terrain-vertex");
-    tool->addButton(new EditMode(this, QIcon(":placeholder"), Mask_Reference, "Terrain movement"), "terrain-move");
+    const QIcon vertexIcon = Misc::ScalableIcon::load(":scenetoolbar/editing-terrain-vertex-paint");
+    const QIcon movementIcon = Misc::ScalableIcon::load(":scenetoolbar/editing-terrain-movement");
+    tool->addButton(new EditMode(this, vertexIcon, Mask_Reference, "Terrain vertex paint editing"), "terrain-vertex");
+    tool->addButton(new EditMode(this, movementIcon, Mask_Reference, "Terrain movement"), "terrain-move");
 }
 
 void CSVRender::PagedWorldspaceWidget::handleInteractionPress(const WorldspaceHitResult& hit, InteractionType type)
@@ -464,7 +465,7 @@ void CSVRender::PagedWorldspaceWidget::addCellToScene(const CSMWorld::CellCoordi
 
     bool deleted = index == -1 || cells.getRecord(index).mState == CSMWorld::RecordBase::State_Deleted;
 
-    auto cell = std::make_unique<Cell>(mDocument.getData(), mRootNode, coordinates.getId(mWorldspace), deleted);
+    auto cell = std::make_unique<Cell>(mDocument, mRootNode, coordinates.getId(mWorldspace), deleted, true);
     EditMode* editMode = getEditMode();
     cell->setSubMode(editMode->getSubMode(), editMode->getInteractionMask());
 
@@ -514,7 +515,7 @@ void CSVRender::PagedWorldspaceWidget::moveCellSelection(int x, int y)
             addCellToScene(*iter);
     }
 
-    mSelection = newSelection;
+    mSelection = std::move(newSelection);
 }
 
 void CSVRender::PagedWorldspaceWidget::addCellToSceneFromCamera(int offsetX, int offsetY)
@@ -873,6 +874,18 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::
     }
 
     return result;
+}
+
+void CSVRender::PagedWorldspaceWidget::selectGroup(const std::vector<std::string>& group) const
+{
+    for (const auto& [_, cell] : mCells)
+        cell->selectFromGroup(group);
+}
+
+void CSVRender::PagedWorldspaceWidget::unhideAll() const
+{
+    for (const auto& [_, cell] : mCells)
+        cell->unhideAll();
 }
 
 std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::PagedWorldspaceWidget::getEdited(

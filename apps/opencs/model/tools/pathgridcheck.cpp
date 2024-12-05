@@ -44,9 +44,9 @@ void CSMTools::PathgridCheckStage::perform(int stage, CSMDoc::Messages& messages
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Pathgrid, pathgrid.mId);
 
     // check the number of pathgrid points
-    if (pathgrid.mData.mS2 < static_cast<int>(pathgrid.mPoints.size()))
+    if (pathgrid.mData.mPoints < pathgrid.mPoints.size())
         messages.add(id, "Less points than expected", "", CSMDoc::Message::Severity_Error);
-    else if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
+    else if (pathgrid.mData.mPoints > pathgrid.mPoints.size())
         messages.add(id, "More points than expected", "", CSMDoc::Message::Severity_Error);
 
     std::vector<CSMTools::Point> pointList(pathgrid.mPoints.size());

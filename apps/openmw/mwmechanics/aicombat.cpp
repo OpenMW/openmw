@@ -23,6 +23,7 @@
 #include "actorutil.hpp"
 #include "aicombataction.hpp"
 #include "character.hpp"
+#include "combat.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "pathgrid.hpp"
@@ -114,7 +115,7 @@ namespace MWMechanics
         if (target.isEmpty())
             return true;
 
-        if (!target.getRefData().getCount()
+        if (!target.getCellRef().getCount()
             || !target.getRefData().isEnabled() // Really we should be checking whether the target is currently
                                                 // registered with the MechanicsManager
             || target.getClass().getCreatureStats(target).isDead())
@@ -242,7 +243,7 @@ namespace MWMechanics
         const osg::Vec3f vActorPos(pos.asVec3());
         const osg::Vec3f vTargetPos(target.getRefData().getPosition().asVec3());
 
-        float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
+        float distToTarget = getDistanceToBounds(actor, target);
 
         storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS);
 
@@ -269,7 +270,15 @@ namespace MWMechanics
         {
             storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
             // start new attack
-            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
+            bool canShout = true;
+            ESM::RefId spellId = storage.mCurrentAction->getSpell();
+            if (!spellId.empty())
+            {
+                const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
+                if (spell->mEffects.mList.empty() || spell->mEffects.mList[0].mData.mRange != ESM::RT_Target)
+                    canShout = false;
+            }
+            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat, canShout);
         }
 
         // If actor uses custom destination it has to try to rebuild path because environment can change
@@ -282,8 +291,8 @@ namespace MWMechanics
             const MWBase::World* world = MWBase::Environment::get().getWorld();
             // Try to build path to the target.
             const auto agentBounds = world->getPathfindingAgentBounds(actor);
-            const auto navigatorFlags = getNavigatorFlags(actor);
-            const auto areaCosts = getAreaCosts(actor);
+            const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+            const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
             const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
             const auto& pathGridGraph = getPathGridGraph(pathgrid);
             mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, agentBounds,
@@ -477,8 +486,7 @@ namespace MWMechanics
 
     MWWorld::Ptr AiCombat::getTarget() const
     {
-        if (mCachedTarget.isEmpty() || mCachedTarget.getRefData().isDeleted()
-            || !mCachedTarget.getRefData().isEnabled())
+        if (mCachedTarget.isEmpty() || mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
         {
             mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
         }
@@ -635,7 +643,7 @@ namespace MWMechanics
     }
 
     void AiCombatStorage::startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController,
-        const ESM::Weapon* weapon, bool distantCombat)
+        const ESM::Weapon* weapon, bool distantCombat, bool canShout)
     {
         if (mReadyToAttack && characterController.readyToStartAttack())
         {
@@ -658,12 +666,15 @@ namespace MWMechanics
                     baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->mValue.getFloat();
                 }
 
-                // Say a provoking combat phrase
-                const int iVoiceAttackOdds
-                    = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
-                if (Misc::Rng::roll0to99(prng) < iVoiceAttackOdds)
+                if (canShout)
                 {
-                    MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("attack"));
+                    // Say a provoking combat phrase
+                    const int iVoiceAttackOdds
+                        = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
+                    if (Misc::Rng::roll0to99(prng) < iVoiceAttackOdds)
+                    {
+                        MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("attack"));
+                    }
                 }
                 mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(prng), baseDelay + 0.9);
             }
@@ -707,7 +718,7 @@ namespace MWMechanics
         mFleeDest = ESM::Pathgrid::Point(0, 0, 0);
     }
 
-    bool AiCombatStorage::isFleeing()
+    bool AiCombatStorage::isFleeing() const
     {
         return mFleeState != FleeState_None;
     }

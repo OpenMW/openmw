@@ -584,7 +584,7 @@ void MwIniImporter::importGameFiles(
         reader.close();
     }
 
-    auto sortedFiles = dependencySort(unsortedFiles);
+    auto sortedFiles = dependencySort(std::move(unsortedFiles));
 
     // hard-coded dependency Morrowind - Tribunal - Bloodmoon
     if (findString(sortedFiles, "Morrowind.esm") != sortedFiles.end())

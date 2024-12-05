@@ -810,8 +810,7 @@ bool Wizard::UnshieldWorker::extractFile(
     if (!dir.mkpath(path))
         return false;
 
-    QString fileName(path);
-    fileName.append(QString::fromUtf8(unshield_file_name(unshield, index)));
+    path.append(QString::fromUtf8(unshield_file_name(unshield, index)));
 
     // Calculate the percentage done
     int progress = (((float)counter / (float)unshield_file_count(unshield)) * 100);
@@ -825,13 +824,13 @@ bool Wizard::UnshieldWorker::extractFile(
     emit textChanged(tr("Extracting: %1").arg(QString::fromUtf8(unshield_file_name(unshield, index))));
     emit progressChanged(progress);
 
-    QByteArray array(fileName.toUtf8());
+    QByteArray array(path.toUtf8());
     success = unshield_file_save(unshield, index, array.constData());
 
     if (!success)
     {
         qDebug() << "error";
-        dir.remove(fileName);
+        dir.remove(path);
     }
 
     return success;

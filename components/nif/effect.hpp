@@ -29,67 +29,76 @@
 namespace Nif
 {
 
-    struct NiDynamicEffect : public Node
+    // Abstract
+    struct NiDynamicEffect : public NiAVObject
     {
+        bool mSwitchState{ true };
         void read(NIFStream* nif) override;
     };
 
-    // Used as base for NiAmbientLight, NiDirectionalLight, NiPointLight and NiSpotLight.
+    // Abstract light source
     struct NiLight : NiDynamicEffect
     {
-        float dimmer;
-        osg::Vec3f ambient;
-        osg::Vec3f diffuse;
-        osg::Vec3f specular;
+        float mDimmer;
+        osg::Vec3f mAmbient;
+        osg::Vec3f mDiffuse;
+        osg::Vec3f mSpecular;
 
         void read(NIFStream* nif) override;
     };
 
     struct NiPointLight : public NiLight
     {
-        float constantAttenuation;
-        float linearAttenuation;
-        float quadraticAttenuation;
+        float mConstantAttenuation;
+        float mLinearAttenuation;
+        float mQuadraticAttenuation;
 
         void read(NIFStream* nif) override;
     };
 
     struct NiSpotLight : public NiPointLight
     {
-        float cutoff;
-        float exponent;
+        float mOuterSpotAngle;
+        float mInnerSpotAngle{ 0.f };
+        float mExponent;
         void read(NIFStream* nif) override;
     };
 
     struct NiTextureEffect : NiDynamicEffect
     {
-        NiSourceTexturePtr texture;
-        unsigned int clamp;
-
-        enum TextureType
+        enum class TextureType : uint32_t
         {
-            Projected_Light = 0,
-            Projected_Shadow = 1,
-            Environment_Map = 2,
-            Fog_Map = 3
+            ProjectedLight = 0,
+            ProjectedShadow = 1,
+            EnvironmentMap = 2,
+            FogMap = 3,
         };
-        TextureType textureType;
 
-        enum CoordGenType
+        enum class CoordGenType : uint32_t
         {
-            World_Parallel = 0,
-            World_Perspective,
-            Sphere_Map,
-            Specular_Cube_Map,
-            Diffuse_Cube_Map
+            WorldParallel = 0,
+            WorldPerspective = 1,
+            SphereMap = 2,
+            SpecularCubeMap = 3,
+            DiffuseCubeMap = 4,
         };
-        CoordGenType coordGenType;
+
+        Matrix3 mProjectionRotation;
+        osg::Vec3f mProjectionPosition;
+        uint32_t mFilterMode;
+        NiSourceTexturePtr mTexture;
+        uint16_t mMaxAnisotropy{ 0 };
+        uint32_t mClampMode;
+        TextureType mTextureType;
+        CoordGenType mCoordGenType;
+        uint8_t mEnableClipPlane;
+        osg::Plane mClipPlane;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
 
-        bool wrapT() const { return clamp & 1; }
-        bool wrapS() const { return (clamp >> 1) & 1; }
+        bool wrapT() const { return mClampMode & 1; }
+        bool wrapS() const { return mClampMode & 2; }
     };
 
 } // Namespace

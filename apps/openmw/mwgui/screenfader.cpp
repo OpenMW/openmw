@@ -96,9 +96,10 @@ namespace MWGui
         {
             imageBox->setImageTexture(texturePath);
             const MyGUI::IntSize imageSize = imageBox->getImageSize();
-            imageBox->setImageCoord(
-                MyGUI::IntCoord(texCoordOverride.left * imageSize.width, texCoordOverride.top * imageSize.height,
-                    texCoordOverride.width * imageSize.width, texCoordOverride.height * imageSize.height));
+            imageBox->setImageCoord(MyGUI::IntCoord(static_cast<int>(texCoordOverride.left * imageSize.width),
+                static_cast<int>(texCoordOverride.top * imageSize.height),
+                static_cast<int>(texCoordOverride.width * imageSize.width),
+                static_cast<int>(texCoordOverride.height * imageSize.height)));
         }
     }
 

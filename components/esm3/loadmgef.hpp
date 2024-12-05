@@ -25,7 +25,7 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "MagicEffect"; }
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
 
         enum Flags
@@ -74,9 +74,9 @@ namespace ESM
         {
             RefId mSchool; // Skill id
             float mBaseCost;
-            int mFlags;
+            int32_t mFlags;
             // Glow color for enchanted items with this effect
-            int mRed, mGreen, mBlue;
+            int32_t mRed, mGreen, mBlue;
 
             float mUnknown1; // Called "Size X" in CS
             float mSpeed; // Speed of fired projectile
@@ -107,7 +107,7 @@ namespace ESM
         // there. They can be redefined in mods by setting the name in GMST
         // sEffectSummonCreature04/05 creature id in
         // sMagicCreature04ID/05ID.
-        int mIndex;
+        int32_t mIndex;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

@@ -11,6 +11,8 @@
 
 #include <components/misc/strings/algorithm.hpp>
 
+#include <components/esm/util.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -123,7 +125,7 @@ namespace MWScript
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 MWWorld::Ptr playerPtr = world->getPlayerPtr();
 
-                osg::Vec2 posFromIndex
+                const osg::Vec2f posFromIndex
                     = ESM::indexToPosition(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId), true);
                 pos.pos[0] = posFromIndex.x();
                 pos.pos[1] = posFromIndex.y();

@@ -38,7 +38,7 @@ std::string ESM::loadLuaBinaryData(ESMReader& esm)
     {
         esm.getSubHeader();
         data.resize(esm.getSubSize());
-        esm.getExact(data.data(), static_cast<int>(data.size()));
+        esm.getExact(data.data(), data.size());
     }
     return data;
 }
@@ -56,7 +56,7 @@ void ESM::LuaScriptsCfg::load(ESMReader& esm)
     {
         mScripts.emplace_back();
         ESM::LuaScriptCfg& script = mScripts.back();
-        script.mScriptPath = esm.getHString();
+        script.mScriptPath = VFS::Path::Normalized(esm.getHString());
 
         esm.getSubNameIs("LUAF");
         esm.getSubHeader();
@@ -161,7 +161,7 @@ void ESM::LuaScripts::load(ESMReader& esm)
 {
     while (esm.isNextSub("LUAS"))
     {
-        std::string name = esm.getHString();
+        VFS::Path::Normalized name(esm.getHString());
         std::string data = loadLuaBinaryData(esm);
         std::vector<LuaTimer> timers;
         while (esm.isNextSub("LUAT"))

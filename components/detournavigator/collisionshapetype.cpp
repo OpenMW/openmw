@@ -15,7 +15,7 @@ namespace DetourNavigator
                 return static_cast<CollisionShapeType>(value);
         }
         std::string error("Invalid CollisionShapeType value: \"");
-        error += value;
+        error += std::to_string(value);
         error += '"';
         throw std::invalid_argument(error);
     }

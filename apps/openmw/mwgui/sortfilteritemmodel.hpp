@@ -27,6 +27,7 @@ namespace MWGui
         void setFilter(int filter);
         void setNameFilter(const std::string& filter);
         void setEffectFilter(const std::string& filter);
+        void setApparatusTypeFilter(const int32_t type);
 
         /// Use ItemStack::Type for sorting?
         void setSortByType(bool sort) { mSortByType = sort; }
@@ -49,6 +50,7 @@ namespace MWGui
         static constexpr int Filter_OnlyRepairable = (1 << 5);
         static constexpr int Filter_OnlyRechargable = (1 << 6);
         static constexpr int Filter_OnlyRepairTools = (1 << 7);
+        static constexpr int Filter_OnlyAlchemyTools = (1 << 8);
 
     private:
         std::vector<ItemStack> mItems;
@@ -59,6 +61,7 @@ namespace MWGui
         int mFilter;
         bool mSortByType;
 
+        int32_t mApparatusTypeFilter; // filter by apparatus type
         std::string mNameFilter; // filter by item name
         std::string mEffectFilter; // filter by magic effect
     };

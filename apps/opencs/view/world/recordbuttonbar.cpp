@@ -12,6 +12,8 @@
 
 #include "../world/tablebottombox.hpp"
 
+#include <components/misc/scalableicon.hpp>
+
 #include <apps/opencs/model/prefs/category.hpp>
 #include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/model/world/columns.hpp>
@@ -68,12 +70,12 @@ CSVWorld::RecordButtonBar::RecordButtonBar(const CSMWorld::UniversalId& id, CSMW
 
     // left section
     mPrevButton = new QToolButton(this);
-    mPrevButton->setIcon(QIcon(":record-previous"));
+    mPrevButton->setIcon(Misc::ScalableIcon::load(":record-previous"));
     mPrevButton->setToolTip("Switch to previous record");
     buttonsLayout->addWidget(mPrevButton, 0);
 
     mNextButton = new QToolButton(this);
-    mNextButton->setIcon(QIcon(":/record-next"));
+    mNextButton->setIcon(Misc::ScalableIcon::load(":/record-next"));
     mNextButton->setToolTip("Switch to next record");
     buttonsLayout->addWidget(mNextButton, 1);
 
@@ -83,7 +85,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar(const CSMWorld::UniversalId& id, CSMW
     if (mTable.getFeatures() & CSMWorld::IdTable::Feature_Preview)
     {
         QToolButton* previewButton = new QToolButton(this);
-        previewButton->setIcon(QIcon(":edit-preview"));
+        previewButton->setIcon(Misc::ScalableIcon::load(":edit-preview"));
         previewButton->setToolTip("Open a preview of this record");
         buttonsLayout->addWidget(previewButton);
         connect(previewButton, &QToolButton::clicked, this, &RecordButtonBar::showPreview);
@@ -92,7 +94,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar(const CSMWorld::UniversalId& id, CSMW
     if (mTable.getFeatures() & CSMWorld::IdTable::Feature_View)
     {
         QToolButton* viewButton = new QToolButton(this);
-        viewButton->setIcon(QIcon(":/cell.png"));
+        viewButton->setIcon(Misc::ScalableIcon::load(":cell"));
         viewButton->setToolTip("Open a scene view of the cell this record is located in");
         buttonsLayout->addWidget(viewButton);
         connect(viewButton, &QToolButton::clicked, this, &RecordButtonBar::viewRecord);
@@ -100,22 +102,22 @@ CSVWorld::RecordButtonBar::RecordButtonBar(const CSMWorld::UniversalId& id, CSMW
 
     // right section
     mCloneButton = new QToolButton(this);
-    mCloneButton->setIcon(QIcon(":edit-clone"));
+    mCloneButton->setIcon(Misc::ScalableIcon::load(":edit-clone"));
     mCloneButton->setToolTip("Clone record");
     buttonsLayout->addWidget(mCloneButton);
 
     mAddButton = new QToolButton(this);
-    mAddButton->setIcon(QIcon(":edit-add"));
+    mAddButton->setIcon(Misc::ScalableIcon::load(":edit-add"));
     mAddButton->setToolTip("Add new record");
     buttonsLayout->addWidget(mAddButton);
 
     mDeleteButton = new QToolButton(this);
-    mDeleteButton->setIcon(QIcon(":edit-delete"));
+    mDeleteButton->setIcon(Misc::ScalableIcon::load(":edit-delete"));
     mDeleteButton->setToolTip("Delete record");
     buttonsLayout->addWidget(mDeleteButton);
 
     mRevertButton = new QToolButton(this);
-    mRevertButton->setIcon(QIcon(":edit-undo"));
+    mRevertButton->setIcon(Misc::ScalableIcon::load(":edit-undo"));
     mRevertButton->setToolTip("Revert record");
     buttonsLayout->addWidget(mRevertButton);
 

@@ -5,6 +5,7 @@
 #include <components/esm3/loadland.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <random>
 
 namespace
@@ -24,29 +25,25 @@ namespace
         PreparedNavMeshData mValue;
     };
 
-    template <typename Random>
-    osg::Vec2i generateVec2i(int max, Random& random)
+    osg::Vec2i generateVec2i(int max, auto& random)
     {
         std::uniform_int_distribution<int> distribution(0, max);
         return osg::Vec2i(distribution(random), distribution(random));
     }
 
-    template <typename Random>
-    osg::Vec3f generateAgentHalfExtents(float min, float max, Random& random)
+    osg::Vec3f generateAgentHalfExtents(float min, float max, auto& random)
     {
         std::uniform_int_distribution<int> distribution(min, max);
         return osg::Vec3f(distribution(random), distribution(random), distribution(random));
     }
 
-    template <typename OutputIterator, typename Random>
-    void generateVertices(OutputIterator out, std::size_t number, Random& random)
+    void generateVertices(std::output_iterator<int> auto out, std::size_t number, auto& random)
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         std::generate_n(out, 3 * (number - number % 3), [&] { return distribution(random); });
     }
 
-    template <typename OutputIterator, typename Random>
-    void generateIndices(OutputIterator out, int max, std::size_t number, Random& random)
+    void generateIndices(std::output_iterator<int> auto out, int max, std::size_t number, auto& random)
     {
         std::uniform_int_distribution<int> distribution(0, max);
         std::generate_n(out, number - number % 3, [&] { return distribution(random); });
@@ -70,21 +67,18 @@ namespace
         return AreaType_null;
     }
 
-    template <typename Random>
-    AreaType generateAreaType(Random& random)
+    AreaType generateAreaType(auto& random)
     {
         std::uniform_int_distribution<int> distribution(0, 4);
         return toAreaType(distribution(random));
     }
 
-    template <typename OutputIterator, typename Random>
-    void generateAreaTypes(OutputIterator out, std::size_t triangles, Random& random)
+    void generateAreaTypes(std::output_iterator<AreaType> auto out, std::size_t triangles, auto& random)
     {
         std::generate_n(out, triangles, [&] { return generateAreaType(random); });
     }
 
-    template <typename OutputIterator, typename Random>
-    void generateWater(OutputIterator out, std::size_t count, Random& random)
+    void generateWater(std::output_iterator<CellWater> auto out, std::size_t count, auto& random)
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         std::generate_n(out, count, [&] {
@@ -92,8 +86,7 @@ namespace
         });
     }
 
-    template <class Random>
-    Mesh generateMesh(std::size_t triangles, Random& random)
+    Mesh generateMesh(std::size_t triangles, auto& random)
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         std::vector<float> vertices;
@@ -109,8 +102,7 @@ namespace
         return Mesh(std::move(indices), std::move(vertices), std::move(areaTypes));
     }
 
-    template <class Random>
-    Heightfield generateHeightfield(Random& random)
+    Heightfield generateHeightfield(auto& random)
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         Heightfield result;
@@ -127,8 +119,7 @@ namespace
         return result;
     }
 
-    template <class Random>
-    FlatHeightfield generateFlatHeightfield(Random& random)
+    FlatHeightfield generateFlatHeightfield(auto& random)
     {
         std::uniform_real_distribution<float> distribution(0.0, 1.0);
         FlatHeightfield result;
@@ -138,8 +129,7 @@ namespace
         return result;
     }
 
-    template <class Random>
-    Key generateKey(std::size_t triangles, Random& random)
+    Key generateKey(std::size_t triangles, auto& random)
     {
         const CollisionShapeType agentShapeType = CollisionShapeType::Aabb;
         const osg::Vec3f agentHalfExtents = generateAgentHalfExtents(0.5, 1.5, random);
@@ -158,14 +148,12 @@ namespace
 
     constexpr std::size_t trianglesPerTile = 239;
 
-    template <typename OutputIterator, typename Random>
-    void generateKeys(OutputIterator out, std::size_t count, Random& random)
+    void generateKeys(std::output_iterator<Key> auto out, std::size_t count, auto& random)
     {
         std::generate_n(out, count, [&] { return generateKey(trianglesPerTile, random); });
     }
 
-    template <typename OutputIterator, typename Random>
-    void fillCache(OutputIterator out, Random& random, NavMeshTilesCache& cache)
+    void fillCache(std::output_iterator<Key> auto out, auto& random, NavMeshTilesCache& cache)
     {
         std::size_t size = cache.getStats().mNavMeshCacheSize;
 
@@ -194,7 +182,7 @@ namespace
         for (auto _ : state)
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.get(key.mAgentBounds, key.mTilePosition, key.mRecastMesh);
+            auto result = cache.get(key.mAgentBounds, key.mTilePosition, key.mRecastMesh);
             benchmark::DoNotOptimize(result);
         }
     }
@@ -253,7 +241,7 @@ namespace
         while (state.KeepRunning())
         {
             const auto& key = keys[n++ % keys.size()];
-            const auto result = cache.set(
+            auto result = cache.set(
                 key.mAgentBounds, key.mTilePosition, key.mRecastMesh, std::make_unique<PreparedNavMeshData>());
             benchmark::DoNotOptimize(result);
         }

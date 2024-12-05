@@ -4,24 +4,29 @@
 
 namespace Settings
 {
-    Index* StaticValues::sIndex = nullptr;
-    Values* StaticValues::sValues = nullptr;
+    std::unique_ptr<Index> StaticValues::sIndex;
+    std::unique_ptr<Values> StaticValues::sDefaultValues;
+    std::unique_ptr<Values> StaticValues::sValues;
 
     void StaticValues::initDefaults()
     {
-        if (sValues != nullptr)
-            throw std::logic_error("Default settings already initialized");
-        static Index index;
-        static Values values(index);
-        sIndex = &index;
-        sValues = &values;
+        if (sDefaultValues != nullptr)
+            throw std::logic_error("Default settings are already initialized");
+        sIndex = std::make_unique<Index>();
+        sDefaultValues = std::make_unique<Values>(*sIndex);
     }
 
     void StaticValues::init()
     {
-        if (sValues == nullptr)
+        if (sDefaultValues == nullptr)
             throw std::logic_error("Default settings are not initialized");
-        static Values values(std::move(*sValues));
-        sValues = &values;
+        sValues = std::make_unique<Values>(std::move(*sDefaultValues));
+    }
+
+    void StaticValues::clear()
+    {
+        sValues = nullptr;
+        sDefaultValues = nullptr;
+        sIndex = nullptr;
     }
 }

@@ -13,6 +13,7 @@
 
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
+#include "menuscripts.hpp"
 
 namespace MWLua
 {
@@ -23,6 +24,7 @@ namespace MWLua
         mLocalEventBatch.clear();
         mNewGlobalEventBatch.clear();
         mNewLocalEventBatch.clear();
+        mMenuEvents.clear();
     }
 
     void LuaEvents::finalizeEventBatch()
@@ -51,8 +53,15 @@ namespace MWLua
         mLocalEventBatch.clear();
     }
 
+    void LuaEvents::callMenuEventHandlers()
+    {
+        for (const Global& e : mMenuEvents)
+            mMenuScripts.receiveEvent(e.mEventName, e.mEventData);
+        mMenuEvents.clear();
+    }
+
     template <typename Event>
-    static void saveEvent(ESM::ESMWriter& esm, const ESM::RefNum& dest, const Event& event)
+    static void saveEvent(ESM::ESMWriter& esm, ESM::RefNum dest, const Event& event)
     {
         esm.writeHNString("LUAE", event.mEventName);
         esm.writeFormId(dest, true);

@@ -23,9 +23,10 @@ namespace Terrain
     };
 
     TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
-        Storage* storage, unsigned int nodeMask, ESM::RefId worldspace, unsigned int preCompileMask,
+        Storage* storage, unsigned int nodeMask, ESM::RefId worldspace, double expiryDelay, unsigned int preCompileMask,
         unsigned int borderMask)
-        : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask, worldspace)
+        : Terrain::World(
+            parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask, worldspace, expiryDelay)
         , mNumSplits(4)
     {
     }

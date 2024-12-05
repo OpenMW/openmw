@@ -1,6 +1,8 @@
 #ifndef OPENMW_MECHANICS_COMBAT_H
 #define OPENMW_MECHANICS_COMBAT_H
 
+#include <utility>
+
 namespace osg
 {
     class Vec3f;
@@ -59,6 +61,13 @@ namespace MWMechanics
 
     float getAggroDistance(const MWWorld::Ptr& actor, const osg::Vec3f& lhs, const osg::Vec3f& rhs);
 
+    // Cursed distance calculation used for combat proximity and hit checks in Morrowind
+    float getDistanceToBounds(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+
+    // Similarly cursed hit target selection
+    std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor, float reach);
+
+    bool friendlyHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& target, bool complain);
 }
 
 #endif

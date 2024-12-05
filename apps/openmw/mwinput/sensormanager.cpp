@@ -42,8 +42,7 @@ namespace MWInput
 
         float angle = 0;
 
-        SDL_DisplayOrientation currentOrientation
-            = SDL_GetDisplayOrientation(Settings::Manager::getInt("screen", "Video"));
+        SDL_DisplayOrientation currentOrientation = SDL_GetDisplayOrientation(Settings::video().mScreen);
         switch (currentOrientation)
         {
             case SDL_ORIENTATION_UNKNOWN:

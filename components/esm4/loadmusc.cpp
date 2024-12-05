@@ -43,16 +43,16 @@ void ESM4::Music::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FNAM:
+            case ESM::fourCC("FNAM"):
                 reader.getZString(mMusicFile);
                 break;
-            case ESM4::SUB_ANAM: // FONV float (attenuation in db? loop if positive?)
-            case ESM4::SUB_WNAM: // TES5
-            case ESM4::SUB_PNAM: // TES5
-            case ESM4::SUB_TNAM: // TES5
+            case ESM::fourCC("ANAM"): // FONV float (attenuation in db? loop if positive?)
+            case ESM::fourCC("WNAM"): // TES5
+            case ESM::fourCC("PNAM"): // TES5
+            case ESM::fourCC("TNAM"): // TES5
                 reader.skipSubRecordData();
                 break;
             default:

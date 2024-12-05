@@ -2,18 +2,17 @@
 
 #include "luamanagerimp.hpp"
 
-#include <apps/openmw/profile.hpp>
+#include "apps/openmw/profile.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/settings/values.hpp>
 
-#include <osgViewer/Viewer>
+#include <cassert>
 
 namespace MWLua
 {
-    Worker::Worker(LuaManager& manager, osgViewer::Viewer& viewer)
+    Worker::Worker(LuaManager& manager)
         : mManager(manager)
-        , mViewer(viewer)
     {
         if (Settings::lua().mLuaNumThreads > 0)
             mThread = std::thread([this] { run(); });
@@ -29,26 +28,26 @@ namespace MWLua
         }
     }
 
-    void Worker::allowUpdate()
+    void Worker::allowUpdate(osg::Timer_t frameStart, unsigned frameNumber, osg::Stats& stats)
     {
         if (!mThread)
             return;
         {
             std::lock_guard<std::mutex> lk(mMutex);
-            mUpdateRequest = true;
+            mUpdateRequest = UpdateRequest{ .mFrameStart = frameStart, .mFrameNumber = frameNumber, .mStats = &stats };
         }
         mCV.notify_one();
     }
 
-    void Worker::finishUpdate()
+    void Worker::finishUpdate(osg::Timer_t frameStart, unsigned frameNumber, osg::Stats& stats)
     {
         if (mThread)
         {
             std::unique_lock<std::mutex> lk(mMutex);
-            mCV.wait(lk, [&] { return !mUpdateRequest; });
+            mCV.wait(lk, [&] { return !mUpdateRequest.has_value(); });
         }
         else
-            update();
+            update(frameStart, frameNumber, stats);
     }
 
     void Worker::join()
@@ -64,12 +63,10 @@ namespace MWLua
         }
     }
 
-    void Worker::update()
+    void Worker::update(osg::Timer_t frameStart, unsigned frameNumber, osg::Stats& stats)
     {
-        const osg::Timer_t frameStart = mViewer.getStartTick();
-        const unsigned int frameNumber = mViewer.getFrameStamp()->getFrameNumber();
-        OMW::ScopedProfile<OMW::UserStatsType::Lua> profile(
-            frameStart, frameNumber, *osg::Timer::instance(), *mViewer.getViewerStats());
+        const osg::Timer* const timer = osg::Timer::instance();
+        OMW::ScopedProfile<OMW::UserStatsType::Lua> profile(frameStart, frameNumber, *timer, stats);
 
         mManager.update();
     }
@@ -79,20 +76,22 @@ namespace MWLua
         while (true)
         {
             std::unique_lock<std::mutex> lk(mMutex);
-            mCV.wait(lk, [&] { return mUpdateRequest || mJoinRequest; });
+            mCV.wait(lk, [&] { return mUpdateRequest.has_value() || mJoinRequest; });
             if (mJoinRequest)
                 break;
 
+            assert(mUpdateRequest.has_value());
+
             try
             {
-                update();
+                update(mUpdateRequest->mFrameStart, mUpdateRequest->mFrameNumber, *mUpdateRequest->mStats);
             }
-            catch (std::exception& e)
+            catch (const std::exception& e)
             {
                 Log(Debug::Error) << "Failed to update LuaManager: " << e.what();
             }
 
-            mUpdateRequest = false;
+            mUpdateRequest.reset();
             lk.unlock();
             mCV.notify_one();
         }

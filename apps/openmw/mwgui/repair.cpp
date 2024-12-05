@@ -49,7 +49,7 @@ namespace MWGui
             = new SortFilterItemModel(std::make_unique<InventoryItemModel>(MWMechanics::getPlayer()));
         model->setFilter(SortFilterItemModel::Filter_OnlyRepairable);
         mRepairBox->setModel(model);
-
+        mRepairBox->update();
         // Reset scrollbars
         mRepairBox->resetScrollbars();
     }
@@ -86,7 +86,7 @@ namespace MWGui
         mUsesLabel->setCaptionWithReplacing("#{sUses} " + MyGUI::utility::toString(uses));
         mQualityLabel->setCaptionWithReplacing("#{sQuality} " + qualityStr.str());
 
-        bool toolBoxVisible = (mRepair.getTool().getRefData().getCount() != 0);
+        bool toolBoxVisible = (mRepair.getTool().getCellRef().getCount() != 0);
         mToolBox->setVisible(toolBoxVisible);
         mToolBox->setUserString("Hidden", toolBoxVisible ? "false" : "true");
 
@@ -142,7 +142,7 @@ namespace MWGui
 
     void Repair::onRepairItem(MyGUI::Widget* /*sender*/, const MWWorld::Ptr& ptr)
     {
-        if (!mRepair.getTool().getRefData().getCount())
+        if (!mRepair.getTool().getCellRef().getCount())
             return;
 
         mRepair.repair(ptr);

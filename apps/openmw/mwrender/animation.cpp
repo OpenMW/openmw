@@ -5,7 +5,6 @@
 #include <limits>
 
 #include <osg/BlendFunc>
-#include <osg/ColorMaski>
 #include <osg/LightModel>
 #include <osg/Material>
 #include <osg/MatrixTransform>
@@ -14,8 +13,12 @@
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystem>
 
+#include <osgAnimation/Bone>
+#include <osgAnimation/UpdateBone>
+
 #include <components/debug/debuglog.hpp>
 
+#include <components/resource/animblendrulesmanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -25,16 +28,17 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm4/loadligh.hpp>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/sceneutil/lightcommon.hpp>
-
-#include <components/sceneutil/keyframe.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
-#include <components/sceneutil/actorutil.hpp>
+#include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -46,6 +50,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -53,7 +58,9 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
+#include "../mwmechanics/weapontype.hpp"
 
+#include "actorutil.hpp"
 #include "rotatecontroller.hpp"
 #include "util.hpp"
 #include "vismask.hpp"
@@ -300,11 +307,10 @@ namespace
         RemoveCallbackVisitor()
             : RemoveVisitor()
             , mHasMagicEffects(false)
-            , mEffectId(-1)
         {
         }
 
-        RemoveCallbackVisitor(int effectId)
+        RemoveCallbackVisitor(std::string_view effectId)
             : RemoveVisitor()
             , mHasMagicEffects(false)
             , mEffectId(effectId)
@@ -323,7 +329,7 @@ namespace
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
                 if (vfxCallback)
                 {
-                    bool toRemove = mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId;
+                    bool toRemove = mEffectId == "" || vfxCallback->mParams.mEffectId == mEffectId;
                     if (toRemove)
                         mToRemove.emplace_back(group.asNode(), group.getParent(0));
                     else
@@ -337,7 +343,7 @@ namespace
         void apply(osg::Geometry&) override {}
 
     private:
-        int mEffectId;
+        std::string_view mEffectId;
     };
 
     class FindVfxCallbacksVisitor : public osg::NodeVisitor
@@ -347,11 +353,10 @@ namespace
 
         FindVfxCallbacksVisitor()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mEffectId(-1)
         {
         }
 
-        FindVfxCallbacksVisitor(int effectId)
+        FindVfxCallbacksVisitor(std::string_view effectId)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mEffectId(effectId)
         {
@@ -367,7 +372,7 @@ namespace
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
                 if (vfxCallback)
                 {
-                    if (mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId)
+                    if (mEffectId == "" || vfxCallback->mParams.mEffectId == mEffectId)
                     {
                         mCallbacks.push_back(vfxCallback);
                     }
@@ -381,20 +386,77 @@ namespace
         void apply(osg::Geometry&) override {}
 
     private:
-        int mEffectId;
+        std::string_view mEffectId;
     };
 
-    osg::ref_ptr<osg::LightModel> getVFXLightModelInstance()
+    namespace
     {
-        static osg::ref_ptr<osg::LightModel> lightModel = nullptr;
-
-        if (!lightModel)
+        osg::ref_ptr<osg::LightModel> makeVFXLightModelInstance()
         {
-            lightModel = new osg::LightModel;
+            osg::ref_ptr<osg::LightModel> lightModel = new osg::LightModel;
             lightModel->setAmbientIntensity({ 1, 1, 1, 1 });
+            return lightModel;
         }
 
-        return lightModel;
+        const osg::ref_ptr<osg::LightModel>& getVFXLightModelInstance()
+        {
+            static const osg::ref_ptr<osg::LightModel> lightModel = makeVFXLightModelInstance();
+            return lightModel;
+        }
+    }
+
+    void assignBoneBlendCallbackRecursive(MWRender::BoneAnimBlendController* controller, osg::Node* parent, bool isRoot)
+    {
+        // Attempt to cast node to an osgAnimation::Bone
+        if (!isRoot && dynamic_cast<osgAnimation::Bone*>(parent))
+        {
+            // Wrapping in a custom callback object allows for nested callback chaining, otherwise it has link to self
+            // issues we need to share the base BoneAnimBlendController as that contains blending information and is
+            // guaranteed to update before
+            osgAnimation::Bone* bone = static_cast<osgAnimation::Bone*>(parent);
+            osg::ref_ptr<osg::Callback> cb = new MWRender::BoneAnimBlendControllerWrapper(controller, bone);
+
+            // Ensure there is no other AnimBlendController - this can happen when using
+            // multiple animations with different roots, such as NPC animation
+            osg::Callback* updateCb = bone->getUpdateCallback();
+            while (updateCb)
+            {
+                if (dynamic_cast<MWRender::BoneAnimBlendController*>(updateCb))
+                {
+                    osg::ref_ptr<osg::Callback> nextCb = updateCb->getNestedCallback();
+                    bone->removeUpdateCallback(updateCb);
+                    updateCb = nextCb;
+                }
+                else
+                {
+                    updateCb = updateCb->getNestedCallback();
+                }
+            }
+
+            // Find UpdateBone callback and bind to just after that (order is important)
+            // NOTE: if it doesn't have an UpdateBone callback, we shouldn't be doing blending!
+            updateCb = bone->getUpdateCallback();
+            while (updateCb)
+            {
+                if (dynamic_cast<osgAnimation::UpdateBone*>(updateCb))
+                {
+                    // Override the immediate callback after the UpdateBone
+                    osg::ref_ptr<osg::Callback> lastCb = updateCb->getNestedCallback();
+                    updateCb->setNestedCallback(cb);
+                    if (lastCb)
+                        cb->setNestedCallback(lastCb);
+                    break;
+                }
+
+                updateCb = updateCb->getNestedCallback();
+            }
+        }
+
+        // Traverse child bones if this is a group
+        osg::Group* group = parent->asGroup();
+        if (group)
+            for (unsigned int i = 0; i < group->getNumChildren(); ++i)
+                assignBoneBlendCallbackRecursive(controller, group->getChild(i), false);
     }
 }
 
@@ -446,9 +508,11 @@ namespace MWRender
 
         typedef std::map<std::string, osg::ref_ptr<SceneUtil::KeyframeController>> ControllerMap;
 
-        ControllerMap mControllerMap[Animation::sNumBlendMasks];
+        ControllerMap mControllerMap[sNumBlendMasks];
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
+
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> mAnimBlendRules;
     };
 
     void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -529,6 +593,8 @@ namespace MWRender
         , mBodyPitchRadians(0.f)
         , mHasMagicEffects(false)
         , mAlpha(1.f)
+        , mPlayScriptedOnly(false)
+        , mRequiresBoneMap(false)
     {
         for (size_t i = 0; i < sNumBlendMasks; i++)
             mAnimationTimePtr[i] = std::make_shared<AnimationTime>();
@@ -592,46 +658,57 @@ namespace MWRender
         return mKeyframes->mTextKeys;
     }
 
-    void Animation::loadAllAnimationsInFolder(const std::string& model, const std::string& baseModel)
+    void Animation::loadAdditionalAnimations(VFS::Path::NormalizedView model, const std::string& baseModel)
     {
-        std::string animationPath = model;
-        if (animationPath.find("meshes") == 0)
-        {
-            animationPath.replace(0, 6, "animations");
-        }
-        animationPath.replace(animationPath.size() - 3, 3, "/");
+        constexpr VFS::Path::NormalizedView meshes("meshes/");
+        if (!model.value().starts_with(meshes.value()))
+            return;
 
-        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
+        std::string path(model.value());
+
+        constexpr VFS::Path::NormalizedView animations("animations/");
+        path.replace(0, meshes.value().size(), animations.value());
+
+        const std::string::size_type extensionStart = path.find_last_of(VFS::Path::extensionSeparator);
+        if (extensionStart == std::string::npos)
+            return;
+
+        path.replace(extensionStart, path.size() - extensionStart, "/");
+
+        for (const VFS::Path::Normalized& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(path))
         {
             if (Misc::getFileExtension(name) == "kf")
+            {
                 addSingleAnimSource(name, baseModel);
+            }
         }
     }
 
     void Animation::addAnimSource(std::string_view model, const std::string& baseModel)
     {
-        std::string kfname = Misc::StringUtils::lowerCase(model);
+        VFS::Path::Normalized kfname(model);
 
-        if (kfname.ends_with(".nif"))
-            kfname.replace(kfname.size() - 4, 4, ".kf");
+        if (Misc::getFileExtension(kfname) == "nif")
+            kfname.changeExtension("kf");
 
         addSingleAnimSource(kfname, baseModel);
 
         if (Settings::game().mUseAdditionalAnimSources)
-            loadAllAnimationsInFolder(kfname, baseModel);
+            loadAdditionalAnimations(kfname, baseModel);
     }
 
-    void Animation::addSingleAnimSource(const std::string& kfname, const std::string& baseModel)
+    std::shared_ptr<Animation::AnimSource> Animation::addSingleAnimSource(
+        const std::string& kfname, const std::string& baseModel)
     {
         if (!mResourceSystem->getVFS()->exists(kfname))
-            return;
+            return nullptr;
 
         auto animsrc = std::make_shared<AnimSource>();
-        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
+        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(VFS::Path::toNormalized(kfname));
 
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty()
             || animsrc->mKeyframes->mKeyframeControllers.empty())
-            return;
+            return nullptr;
 
         const NodeMap& nodeMap = getNodeMap();
         const auto& controllerMap = animsrc->mKeyframes->mKeyframeControllers;
@@ -659,7 +736,7 @@ namespace MWRender
             animsrc->mControllerMap[blendMask].insert(std::make_pair(bonename, cloned));
         }
 
-        mAnimSources.push_back(std::move(animsrc));
+        mAnimSources.push_back(animsrc);
 
         for (const std::string& group : mAnimSources.back()->getTextKeys().getGroups())
             mSupportedAnimations.insert(group);
@@ -691,6 +768,37 @@ namespace MWRender
                     break;
             }
         }
+
+        // Get the blending rules
+        if (Settings::game().mSmoothAnimTransitions)
+        {
+            // Note, even if the actual config is .json - we should send a .yaml path to AnimBlendRulesManager, the
+            // manager will check for .json if it will not find a specified .yaml file.
+            VFS::Path::Normalized blendConfigPath(kfname);
+            blendConfigPath.changeExtension("yaml");
+
+            // globalBlendConfigPath is only used with actors! Objects have no default blending.
+            constexpr VFS::Path::NormalizedView globalBlendConfigPath("animations/animation-config.yaml");
+
+            osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
+            if (mPtr.getClass().isActor())
+            {
+                blendRules
+                    = mResourceSystem->getAnimBlendRulesManager()->getRules(globalBlendConfigPath, blendConfigPath);
+                if (blendRules == nullptr)
+                    Log(Debug::Warning) << "Unable to find animation blending rules: '" << blendConfigPath << "' or '"
+                                        << globalBlendConfigPath << "'";
+            }
+            else
+            {
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(blendConfigPath, blendConfigPath);
+            }
+
+            // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
+            animsrc->mAnimBlendRules = blendRules;
+        }
+
+        return animsrc;
     }
 
     void Animation::clearAnimSources()
@@ -711,6 +819,41 @@ namespace MWRender
     bool Animation::hasAnimation(std::string_view anim) const
     {
         return mSupportedAnimations.find(anim) != mSupportedAnimations.end();
+    }
+
+    bool Animation::isLoopingAnimation(std::string_view group) const
+    {
+        // In Morrowind, a some animation groups are always considered looping, regardless
+        // of loop start/stop keys.
+        // To be match vanilla behavior we probably only need to check this list, but we don't
+        // want to prevent modded animations with custom group names from looping either.
+        static const std::unordered_set<std::string_view> loopingAnimations = { "walkforward", "walkback", "walkleft",
+            "walkright", "swimwalkforward", "swimwalkback", "swimwalkleft", "swimwalkright", "runforward", "runback",
+            "runleft", "runright", "swimrunforward", "swimrunback", "swimrunleft", "swimrunright", "sneakforward",
+            "sneakback", "sneakleft", "sneakright", "turnleft", "turnright", "swimturnleft", "swimturnright",
+            "spellturnleft", "spellturnright", "torch", "idle", "idle2", "idle3", "idle4", "idle5", "idle6", "idle7",
+            "idle8", "idle9", "idlesneak", "idlestorm", "idleswim", "jump", "inventoryhandtohand",
+            "inventoryweapononehand", "inventoryweapontwohand", "inventoryweapontwowide" };
+        static const std::vector<std::string_view> shortGroups = MWMechanics::getAllWeaponTypeShortGroups();
+
+        if (getTextKeyTime(std::string(group) + ": loop start") >= 0)
+            return true;
+
+        // Most looping animations have variants for each weapon type shortgroup.
+        // Just remove the shortgroup instead of enumerating all of the possible animation groupnames.
+        // Make sure we pick the longest shortgroup so e.g. "bow" doesn't get picked over "crossbow"
+        // when the shortgroup is crossbow.
+        std::size_t suffixLength = 0;
+        for (std::string_view suffix : shortGroups)
+        {
+            if (suffix.length() > suffixLength && group.ends_with(suffix))
+            {
+                suffixLength = suffix.length();
+            }
+        }
+        group.remove_suffix(suffixLength);
+
+        return loopingAnimations.count(group) > 0;
     }
 
     float Animation::getStartTime(const std::string& groupname) const
@@ -756,21 +899,19 @@ namespace MWRender
                 state.mLoopStopTime = key->first;
         }
 
-        if (mTextKeyListener)
+        try
         {
-            try
-            {
+            if (mTextKeyListener != nullptr)
                 mTextKeyListener->handleTextKey(groupname, key, map);
-            }
-            catch (std::exception& e)
-            {
-                Log(Debug::Error) << "Error handling text key " << evt << ": " << e.what();
-            }
+        }
+        catch (std::exception& e)
+        {
+            Log(Debug::Error) << "Error handling text key " << evt << ": " << e.what();
         }
     }
 
     void Animation::play(std::string_view groupname, const AnimPriority& priority, int blendMask, bool autodisable,
-        float speedmult, std::string_view start, std::string_view stop, float startpoint, size_t loops,
+        float speedmult, std::string_view start, std::string_view stop, float startpoint, uint32_t loops,
         bool loopfallback)
     {
         if (!mObjectRoot || mAnimSources.empty())
@@ -782,19 +923,23 @@ namespace MWRender
             return;
         }
 
+        AnimStateMap::iterator foundstateiter = mStates.find(groupname);
+        if (foundstateiter != mStates.end())
+        {
+            foundstateiter->second.mPriority = priority;
+        }
+
         AnimStateMap::iterator stateiter = mStates.begin();
         while (stateiter != mStates.end())
         {
-            if (stateiter->second.mPriority == priority)
+            if (stateiter->second.mPriority == priority && stateiter->first != groupname)
                 mStates.erase(stateiter++);
             else
                 ++stateiter;
         }
 
-        stateiter = mStates.find(groupname);
-        if (stateiter != mStates.end())
+        if (foundstateiter != mStates.end())
         {
-            stateiter->second.mPriority = priority;
             resetActiveGroups();
             return;
         }
@@ -814,6 +959,8 @@ namespace MWRender
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
                 state.mAutoDisable = autodisable;
+                state.mGroupname = groupname;
+                state.mStartKey = start;
                 mStates[std::string{ groupname }] = state;
 
                 if (state.mPlaying)
@@ -921,7 +1068,7 @@ namespace MWRender
         return true;
     }
 
-    void Animation::setTextKeyListener(Animation::TextKeyListener* listener)
+    void Animation::setTextKeyListener(TextKeyListener* listener)
     {
         mTextKeyListener = listener;
     }
@@ -930,11 +1077,62 @@ namespace MWRender
     {
         if (!mNodeMapCreated && mObjectRoot)
         {
-            SceneUtil::NodeMapVisitor visitor(mNodeMap);
-            mObjectRoot->accept(visitor);
+            // If the base of this animation is an osgAnimation, we should map the bones not matrix transforms
+            if (mRequiresBoneMap)
+            {
+                SceneUtil::NodeMapVisitorBoneOnly visitor(mNodeMap);
+                mObjectRoot->accept(visitor);
+            }
+            else
+            {
+                SceneUtil::NodeMapVisitor visitor(mNodeMap);
+                mObjectRoot->accept(visitor);
+            }
             mNodeMapCreated = true;
         }
         return mNodeMap;
+    }
+
+    template <typename ControllerType>
+    inline osg::Callback* Animation::handleBlendTransform(const osg::ref_ptr<osg::Node>& node,
+        osg::ref_ptr<SceneUtil::KeyframeController> keyframeController,
+        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<ControllerType>>& blendControllers,
+        const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
+        const AnimState& active)
+    {
+        osg::ref_ptr<ControllerType> animController;
+        if (blendControllers.contains(node))
+        {
+            animController = blendControllers.at(node);
+            animController->setKeyframeTrack(keyframeController, stateData, blendRules);
+        }
+        else
+        {
+            animController = new ControllerType(keyframeController, stateData, blendRules);
+            blendControllers.emplace(node, animController);
+
+            if constexpr (std::is_same_v<ControllerType, BoneAnimBlendController>)
+                assignBoneBlendCallbackRecursive(animController, node, true);
+        }
+
+        keyframeController->mTime = active.mTime;
+
+        osg::Callback* asCallback = animController->getAsCallback();
+        if constexpr (std::is_same_v<ControllerType, BoneAnimBlendController>)
+        {
+            // IMPORTANT: we must gather all transforms at point of change before next update
+            // instead of at the root update callback because the root bone may require blending.
+            if (animController->getBlendTrigger())
+                animController->gatherRecursiveBoneTransforms(static_cast<osgAnimation::Bone*>(node.get()));
+
+            // Register blend callback after the initial animation callback
+            node->addUpdateCallback(asCallback);
+            mActiveControllers.emplace_back(node, asCallback);
+
+            return keyframeController->getAsCallback();
+        }
+
+        return asCallback;
     }
 
     void Animation::resetActiveGroups()
@@ -960,7 +1158,7 @@ namespace MWRender
             AnimStateMap::const_iterator state = mStates.begin();
             for (; state != mStates.end(); ++state)
             {
-                if (!(state->second.mBlendMask & (1 << blendMask)))
+                if (!state->second.blendMaskContains(blendMask))
                     continue;
 
                 if (active == mStates.end()
@@ -975,6 +1173,8 @@ namespace MWRender
             if (active != mStates.end())
             {
                 std::shared_ptr<AnimSource> animsrc = active->second.mSource;
+                const AnimBlendStateData stateData
+                    = { .mGroupname = active->second.mGroupname, .mStartKey = active->second.mStartKey };
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin();
                      it != animsrc->mControllerMap[blendMask].end(); ++it)
@@ -982,7 +1182,23 @@ namespace MWRender
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(
                         it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
+                    const bool useSmoothAnims = Settings::game().mSmoothAnimTransitions;
+
                     osg::Callback* callback = it->second->getAsCallback();
+                    if (useSmoothAnims)
+                    {
+                        if (dynamic_cast<NifOsg::MatrixTransform*>(node.get()))
+                        {
+                            callback = handleBlendTransform<NifAnimBlendController>(node, it->second,
+                                mAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
+                        }
+                        else if (dynamic_cast<osgAnimation::Bone*>(node.get()))
+                        {
+                            callback = handleBlendTransform<BoneAnimBlendController>(node, it->second,
+                                mBoneAnimBlendControllers, stateData, animsrc->mAnimBlendRules, active->second);
+                        }
+                    }
+
                     node->addUpdateCallback(callback);
                     mActiveControllers.emplace_back(node, callback);
 
@@ -1002,6 +1218,7 @@ namespace MWRender
                 }
             }
         }
+
         addControllers();
     }
 
@@ -1020,7 +1237,7 @@ namespace MWRender
         return false;
     }
 
-    bool Animation::getInfo(std::string_view groupname, float* complete, float* speedmult) const
+    bool Animation::getInfo(std::string_view groupname, float* complete, float* speedmult, size_t* loopcount) const
     {
         AnimStateMap::const_iterator iter = mStates.find(groupname);
         if (iter == mStates.end())
@@ -1029,6 +1246,8 @@ namespace MWRender
                 *complete = 0.0f;
             if (speedmult)
                 *speedmult = 0.0f;
+            if (loopcount)
+                *loopcount = 0;
             return false;
         }
 
@@ -1042,25 +1261,28 @@ namespace MWRender
         }
         if (speedmult)
             *speedmult = iter->second.mSpeedMult;
+
+        if (loopcount)
+            *loopcount = iter->second.mLoopCount;
         return true;
     }
 
-    float Animation::getCurrentTime(const std::string& groupname) const
+    std::string_view Animation::getActiveGroup(BoneGroup boneGroup) const
+    {
+        if (auto timePtr = mAnimationTimePtr[boneGroup]->getTimePtr())
+            for (auto& state : mStates)
+                if (state.second.mTime == timePtr)
+                    return state.first;
+        return "";
+    }
+
+    float Animation::getCurrentTime(std::string_view groupname) const
     {
         AnimStateMap::const_iterator iter = mStates.find(groupname);
         if (iter == mStates.end())
             return -1.f;
 
         return iter->second.getTime();
-    }
-
-    size_t Animation::getCurrentLoopCount(const std::string& groupname) const
-    {
-        AnimStateMap::const_iterator iter = mStates.find(groupname);
-        if (iter == mStates.end())
-            return 0;
-
-        return iter->second.mLoopCount;
     }
 
     void Animation::disable(std::string_view groupname)
@@ -1141,24 +1363,12 @@ namespace MWRender
 
     osg::Vec3f Animation::runAnimation(float duration)
     {
-        // If we have scripted animations, play only them
-        bool hasScriptedAnims = false;
-        for (AnimStateMap::iterator stateiter = mStates.begin(); stateiter != mStates.end(); stateiter++)
-        {
-            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Persistent))
-                && stateiter->second.mPlaying)
-            {
-                hasScriptedAnims = true;
-                break;
-            }
-        }
-
         osg::Vec3f movement(0.f, 0.f, 0.f);
         AnimStateMap::iterator stateiter = mStates.begin();
         while (stateiter != mStates.end())
         {
             AnimState& state = stateiter->second;
-            if (hasScriptedAnims && !state.mPriority.contains(int(MWMechanics::Priority_Persistent)))
+            if (mPlayScriptedOnly && !state.mPriority.contains(MWMechanics::Priority_Scripted))
             {
                 ++stateiter;
                 continue;
@@ -1236,9 +1446,11 @@ namespace MWRender
             mRootController->setEnabled(enable);
             if (enable)
             {
-                mRootController->setRotate(osg::Quat(mLegsYawRadians, osg::Vec3f(0, 0, 1))
-                    * osg::Quat(mBodyPitchRadians, osg::Vec3f(1, 0, 0)));
+                osg::Quat legYaw = osg::Quat(mLegsYawRadians, osg::Vec3f(0, 0, 1));
+                mRootController->setRotate(legYaw * osg::Quat(mBodyPitchRadians, osg::Vec3f(1, 0, 0)));
                 yawOffset = mLegsYawRadians;
+                // When yawing the root, also update the accumulated movement.
+                movement = legYaw * movement;
             }
         }
         if (mSpineController)
@@ -1262,10 +1474,6 @@ namespace MWRender
                     osg::Quat(mHeadPitchRadians, osg::Vec3f(1, 0, 0)) * osg::Quat(yaw, osg::Vec3f(0, 0, 1)));
         }
 
-        // Scripted animations should not cause movement
-        if (hasScriptedAnims)
-            return osg::Vec3f(0, 0, 0);
-
         return movement;
     }
 
@@ -1277,7 +1485,7 @@ namespace MWRender
     }
 
     void loadBonesFromFile(
-        osg::ref_ptr<osg::Node>& baseNode, const std::string& model, Resource::ResourceSystem* resourceSystem)
+        osg::ref_ptr<osg::Node>& baseNode, VFS::Path::NormalizedView model, Resource::ResourceSystem* resourceSystem)
     {
         const osg::Node* node = resourceSystem->getSceneManager()->getTemplate(model).get();
         osg::ref_ptr<osg::Node> sheathSkeleton(
@@ -1312,7 +1520,7 @@ namespace MWRender
         }
         animationPath.replace(animationPath.size() - 4, 4, "/");
 
-        for (const auto& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
+        for (const VFS::Path::Normalized& name : resourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
             if (Misc::getFileExtension(name) == "nif")
                 loadBonesFromFile(node, name, resourceSystem);
@@ -1330,7 +1538,7 @@ namespace MWRender
             Cache::iterator found = cache.find(model);
             if (found == cache.end())
             {
-                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(VFS::Path::toNormalized(model));
 
                 if (inject)
                 {
@@ -1351,7 +1559,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(VFS::Path::toNormalized(model));
 
             if (inject)
             {
@@ -1394,7 +1602,7 @@ namespace MWRender
                 MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
                 if (ref->mBase->mFlags & ESM::Creature::Bipedal)
                 {
-                    defaultSkeleton = Settings::Manager::getString("xbaseanim", "Models");
+                    defaultSkeleton = Settings::models().mXbaseanim.get().value();
                     inject = true;
                 }
             }
@@ -1411,12 +1619,14 @@ namespace MWRender
                     const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                     const ESM::Race* race = store.get<ESM::Race>().find(ref->mBase->mRace);
 
-                    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-                    bool isFemale = !ref->mBase->isMale();
+                    const bool firstPerson = false;
+                    const bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+                    const bool isFemale = !ref->mBase->isMale();
+                    const bool werewolf = false;
 
-                    defaultSkeleton = SceneUtil::getActorSkeleton(false, isFemale, isBeast, false);
-                    defaultSkeleton
-                        = Misc::ResourceHelpers::correctActorModelPath(defaultSkeleton, mResourceSystem->getVFS());
+                    defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
+                        VFS::Path::toNormalized(getActorSkeleton(firstPerson, isFemale, isBeast, werewolf)),
+                        mResourceSystem->getVFS());
                 }
             }
         }
@@ -1453,6 +1663,10 @@ namespace MWRender
             mInsert->addChild(mObjectRoot);
         }
 
+        // osgAnimation formats with skeletons should have their nodemap be bone instances
+        // FIXME: better way to detect osgAnimation here instead of relying on extension?
+        mRequiresBoneMap = mSkeleton != nullptr && !Misc::StringUtils::ciEndsWith(model, ".nif");
+
         if (previousStateset)
             mObjectRoot->setStateSet(previousStateset);
 
@@ -1485,7 +1699,7 @@ namespace MWRender
         return mObjectRoot.get();
     }
 
-    void Animation::addSpellCastGlow(const ESM::MagicEffect* effect, float glowDuration)
+    void Animation::addSpellCastGlow(const osg::Vec4f& color, float glowDuration)
     {
         if (!mGlowUpdater || (mGlowUpdater->isDone() || (mGlowUpdater->isPermanentGlowUpdater() == true)))
         {
@@ -1494,12 +1708,11 @@ namespace MWRender
 
             if (mGlowUpdater && mGlowUpdater->isPermanentGlowUpdater())
             {
-                mGlowUpdater->setColor(effect->getColor());
+                mGlowUpdater->setColor(color);
                 mGlowUpdater->setDuration(glowDuration);
             }
             else
-                mGlowUpdater
-                    = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, effect->getColor(), glowDuration);
+                mGlowUpdater = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, color, glowDuration);
         }
     }
 
@@ -1511,8 +1724,8 @@ namespace MWRender
         mExtraLightSource->setActorFade(mAlpha);
     }
 
-    void Animation::addEffect(
-        const std::string& model, int effectId, bool loop, std::string_view bonename, std::string_view texture)
+    void Animation::addEffect(std::string_view model, std::string_view effectId, bool loop, std::string_view bonename,
+        std::string_view texture)
     {
         if (!mObjectRoot.get())
             return;
@@ -1562,13 +1775,13 @@ namespace MWRender
         }
         parentNode->addChild(trans);
 
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, trans);
+        osg::ref_ptr<osg::Node> node
+            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), trans);
 
         // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
         node->getOrCreateStateSet()->setAttributeAndModes(
             getVFXLightModelInstance(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-        if (mResourceSystem->getSceneManager()->getSupportsNormalsRT())
-            node->getOrCreateStateSet()->setAttribute(new osg::ColorMaski(1, false, false, false, false));
+        mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(node->getOrCreateStateSet(), false);
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
 
@@ -1591,10 +1804,10 @@ namespace MWRender
         // Notify that this animation has attached magic effects
         mHasMagicEffects = true;
 
-        overrideFirstRootTexture(texture, mResourceSystem, node);
+        overrideFirstRootTexture(texture, mResourceSystem, *node);
     }
 
-    void Animation::removeEffect(int effectId)
+    void Animation::removeEffect(std::string_view effectId)
     {
         RemoveCallbackVisitor visitor(effectId);
         mInsert->accept(visitor);
@@ -1604,16 +1817,18 @@ namespace MWRender
 
     void Animation::removeEffects()
     {
-        removeEffect(-1);
+        removeEffect("");
     }
 
-    void Animation::getLoopingEffects(std::vector<int>& out) const
+    std::vector<std::string_view> Animation::getLoopingEffects() const
     {
         if (!mHasMagicEffects)
-            return;
+            return {};
 
         FindVfxCallbacksVisitor visitor;
         mInsert->accept(visitor);
+
+        std::vector<std::string_view> out;
 
         for (std::vector<UpdateVfxCallback*>::iterator it = visitor.mCallbacks.begin(); it != visitor.mCallbacks.end();
              ++it)
@@ -1623,6 +1838,7 @@ namespace MWRender
             if (callback->mParams.mLoop && !callback->mFinished)
                 out.push_back(callback->mParams.mEffectId);
         }
+        return out;
     }
 
     void Animation::updateEffects()
@@ -1749,13 +1965,15 @@ namespace MWRender
         osg::Callback* cb = node->getUpdateCallback();
         while (cb)
         {
-            if (dynamic_cast<SceneUtil::KeyframeController*>(cb))
+            if (dynamic_cast<NifAnimBlendController*>(cb) || dynamic_cast<BoneAnimBlendController*>(cb)
+                || dynamic_cast<SceneUtil::KeyframeController*>(cb))
             {
                 foundKeyframeCtrl = true;
                 break;
             }
             cb = cb->getNestedCallback();
         }
+        // Note: AnimBlendController also does the reset so if one is present - we should add the rotation node
         // Without KeyframeController the orientation will not be reseted each frame, so
         // RotateController shouldn't be used for such nodes.
         if (!foundKeyframeCtrl)
@@ -1886,7 +2104,8 @@ namespace MWRender
             mObjectRoot->accept(visitor);
         }
 
-        if (ptr.getRefData().getCustomData() != nullptr && ObjectAnimation::canBeHarvested())
+        if (Settings::game().mGraphicHerbalism && ptr.getRefData().getCustomData() != nullptr
+            && ObjectAnimation::canBeHarvested())
         {
             const MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             if (!store.hasVisibleItems())

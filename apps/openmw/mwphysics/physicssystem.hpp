@@ -1,12 +1,12 @@
 #ifndef OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 #define OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <map>
 #include <memory>
 #include <optional>
-#include <set>
 #include <span>
 #include <unordered_map>
 #include <variant>
@@ -16,7 +16,7 @@
 #include <osg/Timer>
 #include <osg/ref_ptr>
 
-#include <components/esm/util.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -56,6 +56,7 @@ namespace MWPhysics
     class Actor;
     class PhysicsTaskScheduler;
     class Projectile;
+    enum ScriptedCollisionType : char;
 
     using ActorMap = std::unordered_map<const MWWorld::LiveCellRefBase*, std::shared_ptr<Actor>>;
 
@@ -79,7 +80,7 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel);
+        ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel, bool isPlayer);
         osg::Vec3f mPosition;
         osg::Vec3f mInertia;
         const btCollisionObject* mStandingOn;
@@ -102,6 +103,7 @@ namespace MWPhysics
         const bool mIsAquatic;
         const bool mWaterCollision;
         const bool mSkipCollisionDetection;
+        const bool mIsPlayer;
     };
 
     struct ProjectileFrameData
@@ -159,12 +161,12 @@ namespace MWPhysics
         void setWaterHeight(float height);
         void disableWater();
 
-        void addObject(const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation,
+        void addObject(const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh, osg::Quat rotation,
             int collisionType = CollisionType_World);
-        void addActor(const MWWorld::Ptr& ptr, const std::string& mesh);
+        void addActor(const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh);
 
         int addProjectile(
-            const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius);
+            const MWWorld::Ptr& caster, const osg::Vec3f& position, VFS::Path::NormalizedView mesh, bool computeRadius);
         void setCaster(int projectileId, const MWWorld::Ptr& caster);
         void removeProjectile(const int projectileId);
 
@@ -207,21 +209,11 @@ namespace MWPhysics
             const MWWorld::ConstPtr& ptr, int collisionGroup, int collisionMask) const;
         osg::Vec3f traceDown(const MWWorld::Ptr& ptr, const osg::Vec3f& position, float maxHeight);
 
-        std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor, const osg::Vec3f& origin,
-            const osg::Quat& orientation, float queryDistance, std::vector<MWWorld::Ptr>& targets);
-
-        /// Get distance from \a point to the collision shape of \a target. Uses a raycast to find where the
-        /// target vector hits the collision shape and then calculates distance from the intersection point.
-        /// This can be used to find out how much nearer we need to move to the target for a "getHitContact" to be
-        /// successful. \note Only Actor targets are supported at the moment.
-        float getHitDistance(const osg::Vec3f& point, const MWWorld::ConstPtr& target) const override;
-
-        /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all
-        /// other actors.
+        /// @param ignore Optional, a list of Ptr to ignore in the list of results. targets are actors to filter for,
+        /// ignoring all other actors.
         RayCastingResult castRay(const osg::Vec3f& from, const osg::Vec3f& to,
-            const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
-            const std::vector<MWWorld::Ptr>& targets = std::vector<MWWorld::Ptr>(), int mask = CollisionType_Default,
-            int group = 0xff) const override;
+            const std::vector<MWWorld::ConstPtr>& ignore = {}, const std::vector<MWWorld::Ptr>& targets = {},
+            int mask = CollisionType_Default, int group = 0xff) const override;
         using RayCastingInterface::castRay;
 
         RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius,
@@ -267,9 +259,8 @@ namespace MWPhysics
         /// Get the handle of all actors standing on \a object in this frame.
         void getActorsStandingOn(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;
 
-        /// Return true if \a actor has collided with \a object in this frame.
-        /// This will detect running into objects, but will not detect climbing stairs, stepping up a small object, etc.
-        bool isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const;
+        /// Return true if an object of the given type has collided with this object
+        bool isObjectCollidingWith(const MWWorld::ConstPtr& object, ScriptedCollisionType type) const;
 
         /// Get the handle of all actors colliding with \a object in this frame.
         void getActorsCollidingWith(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;

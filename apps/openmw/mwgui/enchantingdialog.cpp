@@ -5,6 +5,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_UString.h>
 
 #include <components/misc/strings/format.hpp>
 #include <components/settings/values.hpp>
@@ -26,7 +27,6 @@
 #include "itemwidget.hpp"
 
 #include "sortfilteritemmodel.hpp"
-#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -95,7 +95,7 @@ namespace MWGui
         else
         {
             std::string_view name = item.getClass().getName(item);
-            mName->setCaption(toUString(name));
+            mName->setCaption(MyGUI::UString(name));
             mItemBox->setItem(item);
             mItemBox->setUserString("ToolTipType", "ItemPtr");
             mItemBox->setUserData(MWWorld::Ptr(item));
@@ -115,23 +115,26 @@ namespace MWGui
         switch (mEnchanting.getCastStyle())
         {
             case ESM::Enchantment::CastOnce:
-                mTypeButton->setCaption(toUString(
+                mTypeButton->setCaption(MyGUI::UString(
                     MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce", "Cast Once")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenStrikes:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                    "sItemCastWhenStrikes", "When Strikes")));
+                mTypeButton->setCaption(
+                    MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                        "sItemCastWhenStrikes", "When Strikes")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenUsed:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                    "sItemCastWhenUsed", "When Used")));
+                mTypeButton->setCaption(
+                    MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                        "sItemCastWhenUsed", "When Used")));
                 setConstantEffect(false);
                 break;
             case ESM::Enchantment::ConstantEffect:
-                mTypeButton->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                    "sItemCastConstant", "Cast Constant")));
+                mTypeButton->setCaption(
+                    MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
+                        "sItemCastConstant", "Cast Constant")));
                 setConstantEffect(true);
                 break;
         }
@@ -270,7 +273,7 @@ namespace MWGui
 
     void EnchantingDialog::notifyEffectsChanged()
     {
-        mEffectList.mList = mEffects;
+        mEffectList.populate(mEffects);
         mEnchanting.setEffect(mEffectList);
         updateLabels();
     }
@@ -370,7 +373,7 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("enchant fail"));
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage34}");
-            if (!mEnchanting.getGem().isEmpty() && !mEnchanting.getGem().getRefData().getCount())
+            if (!mEnchanting.getGem().isEmpty() && !mEnchanting.getGem().getCellRef().getCount())
             {
                 setSoulGem(MWWorld::Ptr());
                 mEnchanting.nextCastStyle();

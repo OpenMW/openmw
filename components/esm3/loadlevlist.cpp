@@ -30,7 +30,7 @@ namespace ESM
                     break;
                 case fourCC("INDX"):
                 {
-                    int length = 0;
+                    uint32_t length = 0;
                     esm.getHT(length);
                     mList.resize(length);
 
@@ -87,12 +87,12 @@ namespace ESM
 
         esm.writeHNT("DATA", mFlags);
         esm.writeHNT("NNAM", mChanceNone);
-        esm.writeHNT<int>("INDX", mList.size());
+        esm.writeHNT("INDX", static_cast<uint32_t>(mList.size()));
 
-        for (std::vector<LevelItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
+        for (const auto& item : mList)
         {
-            esm.writeHNCRefId(recName, it->mId);
-            esm.writeHNT("INTV", it->mLevel);
+            esm.writeHNCRefId(recName, item.mId);
+            esm.writeHNT("INTV", item.mLevel);
         }
     }
 

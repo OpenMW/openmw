@@ -15,6 +15,13 @@ namespace Misc::StringUtils
         bool operator()(char x, char y) const { return toLower(x) < toLower(y); }
     };
 
+    inline std::string underscoresToSpaces(const std::string_view oldName)
+    {
+        std::string newName(oldName);
+        std::replace(newName.begin(), newName.end(), '_', ' ');
+        return newName;
+    }
+
     inline bool ciLess(std::string_view x, std::string_view y)
     {
         return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), CiCharLess());
@@ -97,6 +104,13 @@ namespace Misc::StringUtils
         using is_transparent = void;
 
         bool operator()(std::string_view left, std::string_view right) const { return ciLess(left, right); }
+    };
+
+    struct StringHash
+    {
+        using is_transparent = void;
+        [[nodiscard]] size_t operator()(std::string_view sv) const { return std::hash<std::string_view>{}(sv); }
+        [[nodiscard]] size_t operator()(const std::string& s) const { return std::hash<std::string>{}(s); }
     };
 
     /** @brief Replaces all occurrences of a string in another string.

@@ -97,7 +97,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     inventoryColumns.mIcon = &mColumns.back();
     mColumns.emplace_back(Columns::ColumnId_Weight, ColumnBase::Display_Float);
     inventoryColumns.mWeight = &mColumns.back();
-    mColumns.emplace_back(Columns::ColumnId_CoinValue, ColumnBase::Display_Integer);
+    mColumns.emplace_back(Columns::ColumnId_GoldValue, ColumnBase::Display_Integer);
     inventoryColumns.mValue = &mColumns.back();
 
     IngredientColumns ingredientColumns(inventoryColumns);
@@ -210,7 +210,6 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_AiDuration, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_AiWanderToD, CSMWorld::ColumnBase::Display_Integer));
 
-    mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle1, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle2, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle3, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle4, CSMWorld::ColumnBase::Display_Integer));
@@ -218,6 +217,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle6, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle7, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle8, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_Idle9, CSMWorld::ColumnBase::Display_Integer));
 
     mColumns.back().addColumn(new RefIdColumn(Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_Boolean));
     mColumns.back().addColumn(

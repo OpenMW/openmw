@@ -25,11 +25,16 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Potion"; }
 
+        enum Flags
+        {
+            Autocalc = 1 // Determines value
+        };
+
         struct ALDTstruct
         {
             float mWeight;
             int32_t mValue;
-            int32_t mAutoCalc;
+            int32_t mFlags;
         };
         ALDTstruct mData;
 

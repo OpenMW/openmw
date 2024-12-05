@@ -1,5 +1,6 @@
 #include <components/sceneutil/osgacontroller.hpp>
 
+#include <osg/MatrixTransform>
 #include <osg/Node>
 #include <osg/NodeVisitor>
 #include <osg/ref_ptr>
@@ -9,6 +10,7 @@
 #include <osgAnimation/Sampler>
 #include <osgAnimation/UpdateMatrixTransform>
 
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/animation.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -85,9 +87,8 @@ namespace SceneUtil
         }
     }
 
-    osg::Vec3f OsgAnimationController::getTranslation(float time) const
+    osg::Matrixf OsgAnimationController::getTransformForNode(float time, const std::string_view name) const
     {
-        osg::Vec3f translationValue;
         std::string animationName;
         float newTime = time;
 
@@ -98,10 +99,11 @@ namespace SceneUtil
             {
                 newTime = time - emulatedAnimation.mStartTime;
                 animationName = emulatedAnimation.mName;
+                break;
             }
         }
 
-        // Find the root transform track in animation
+        // Find the bone's transform track in animation
         for (const auto& mergedAnimationTrack : mMergedAnimationTracks)
         {
             if (mergedAnimationTrack->getName() != animationName)
@@ -111,7 +113,7 @@ namespace SceneUtil
 
             for (const auto& channel : channels)
             {
-                if (channel->getTargetName() != "bip01" || channel->getName() != "transform")
+                if (!Misc::StringUtils::ciEqual(name, channel->getTargetName()) || channel->getName() != "transform")
                     continue;
 
                 if (osgAnimation::MatrixLinearSampler* templateSampler
@@ -119,13 +121,17 @@ namespace SceneUtil
                 {
                     osg::Matrixf matrix;
                     templateSampler->getValueAt(newTime, matrix);
-                    translationValue = matrix.getTrans();
-                    return osg::Vec3f(translationValue[0], translationValue[1], translationValue[2]);
+                    return matrix;
                 }
             }
         }
 
-        return osg::Vec3f();
+        return osg::Matrixf::identity();
+    }
+
+    osg::Vec3f OsgAnimationController::getTranslation(float time) const
+    {
+        return getTransformForNode(time, "bip01").getTrans();
     }
 
     void OsgAnimationController::update(float time, const std::string& animationName)
@@ -162,6 +168,12 @@ namespace SceneUtil
                     update(time - emulatedAnimation.mStartTime, emulatedAnimation.mName);
                 }
             }
+
+            // Reset the transform of this node to whats in the animation
+            // we force this here because downstream some code relies on the bone having a non-modified transform
+            // as this is how the NIF controller behaves. RotationController is a good example of this.
+            // Without this here, it causes osgAnimation skeletons to spin wildly
+            static_cast<osg::MatrixTransform*>(node)->setMatrix(getTransformForNode(time, node->getName()));
         }
 
         traverse(node, nv);

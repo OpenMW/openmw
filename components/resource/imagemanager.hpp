@@ -1,12 +1,11 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_IMAGEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_IMAGEMANAGER_H
 
-#include <map>
-#include <string>
-
 #include <osg/Image>
 #include <osg/Texture2D>
 #include <osg/ref_ptr>
+
+#include <components/vfs/pathutil.hpp>
 
 #include "resourcemanager.hpp"
 
@@ -23,12 +22,12 @@ namespace Resource
     class ImageManager : public ResourceManager
     {
     public:
-        ImageManager(const VFS::Manager* vfs);
+        explicit ImageManager(const VFS::Manager* vfs, double expiryDelay);
         ~ImageManager();
 
         /// Create or retrieve an Image
         /// Returns the dummy image if the given image is not found.
-        osg::ref_ptr<osg::Image> getImage(std::string_view filename, bool disableFlip = false);
+        osg::ref_ptr<osg::Image> getImage(VFS::Path::NormalizedView path, bool disableFlip = false);
 
         osg::Image* getWarningImage();
 

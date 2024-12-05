@@ -74,7 +74,8 @@ namespace MWMechanics
             ESM::RefId school;
             float skillTerm;
             calcWeakestSchool(&spell, actorSkills, school, skillTerm);
-            assert(!school.empty());
+            if (school.empty())
+                continue;
             SchoolCaps& cap = schoolCaps[school];
 
             if (cap.mReachedLimit && spellCost <= cap.mMinCost)
@@ -220,7 +221,7 @@ namespace MWMechanics
         for (const auto& spellEffect : spell->mEffects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(spellEffect.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(spellEffect.mData.mEffectID);
             static const int iAutoSpellAttSkillMin = MWBase::Environment::get()
                                                          .getESMStore()
                                                          ->get<ESM::GameSetting>()
@@ -229,7 +230,7 @@ namespace MWMechanics
 
             if ((magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill))
             {
-                ESM::RefId skill = ESM::Skill::indexToRefId(spellEffect.mSkill);
+                ESM::RefId skill = ESM::Skill::indexToRefId(spellEffect.mData.mSkill);
                 auto found = actorSkills.find(skill);
                 if (found == actorSkills.end() || found->second.getBase() < iAutoSpellAttSkillMin)
                     return false;
@@ -237,7 +238,7 @@ namespace MWMechanics
 
             if ((magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute))
             {
-                ESM::RefId attribute = ESM::Attribute::indexToRefId(spellEffect.mAttribute);
+                ESM::RefId attribute = ESM::Attribute::indexToRefId(spellEffect.mData.mAttribute);
                 auto found = actorAttributes.find(attribute);
                 if (found == actorAttributes.end() || found->second.getBase() < iAutoSpellAttSkillMin)
                     return false;
@@ -252,22 +253,22 @@ namespace MWMechanics
     {
         // Morrowind for some reason uses a formula slightly different from magicka cost calculation
         float minChance = std::numeric_limits<float>::max();
-        for (const ESM::ENAMstruct& effect : spell->mEffects.mList)
+        for (const ESM::IndexedENAMstruct& effect : spell->mEffects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mData.mEffectID);
 
             int minMagn = 1;
             int maxMagn = 1;
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
             {
-                minMagn = effect.mMagnMin;
-                maxMagn = effect.mMagnMax;
+                minMagn = effect.mData.mMagnMin;
+                maxMagn = effect.mData.mMagnMax;
             }
 
             int duration = 0;
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
-                duration = effect.mDuration;
+                duration = effect.mData.mDuration;
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
                 duration = std::max(1, duration);
 
@@ -280,10 +281,10 @@ namespace MWMechanics
             float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));
             x *= 0.1 * magicEffect->mData.mBaseCost;
             x *= 1 + duration;
-            x += 0.05 * std::max(1, effect.mArea) * magicEffect->mData.mBaseCost;
+            x += 0.05 * std::max(1, effect.mData.mArea) * magicEffect->mData.mBaseCost;
             x *= fEffectCostMult;
 
-            if (effect.mRange == ESM::RT_Target)
+            if (effect.mData.mRange == ESM::RT_Target)
                 x *= 1.5f;
 
             float s = 0.f;

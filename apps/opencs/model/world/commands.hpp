@@ -69,7 +69,7 @@ namespace CSMWorld
         IdTable& mLtexs;
         DataType mOld;
         int mOldState;
-        std::vector<std::string> mCreatedTextures;
+        std::vector<std::unique_ptr<RecordBase>> mTouchedTextures;
     };
 
     /// \brief This command is used to fix LandTexture records and texture

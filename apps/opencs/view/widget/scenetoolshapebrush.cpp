@@ -16,6 +16,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include <components/misc/scalableicon.hpp>
+
 #include <apps/opencs/model/prefs/category.hpp>
 #include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/view/widget/pushbutton.hpp>
@@ -60,10 +62,10 @@ CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidge
     : QFrame(parent, Qt::Popup)
     , mDocument(document)
 {
-    mButtonPoint = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-point")), "", this);
-    mButtonSquare = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-square")), "", this);
-    mButtonCircle = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-circle")), "", this);
-    mButtonCustom = new QPushButton(QIcon(QPixmap(":scenetoolbar/brush-custom")), "", this);
+    mButtonPoint = new QPushButton(Misc::ScalableIcon::load(":scenetoolbar/brush-point"), "", this);
+    mButtonSquare = new QPushButton(Misc::ScalableIcon::load(":scenetoolbar/brush-square"), "", this);
+    mButtonCircle = new QPushButton(Misc::ScalableIcon::load(":scenetoolbar/brush-circle"), "", this);
+    mButtonCustom = new QPushButton(Misc::ScalableIcon::load(":scenetoolbar/brush-custom"), "", this);
 
     mSizeSliders = new ShapeBrushSizeControls("Brush size", this);
 
@@ -107,6 +109,7 @@ CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidge
     mToolSelector->addItem(tr("Height, lower (paint)"));
     mToolSelector->addItem(tr("Smooth (paint)"));
     mToolSelector->addItem(tr("Flatten (paint)"));
+    mToolSelector->addItem(tr("Equalize (paint)"));
 
     QLabel* brushStrengthLabel = new QLabel(this);
     brushStrengthLabel->setText("Brush strength:");
@@ -201,25 +204,25 @@ void CSVWidget::SceneToolShapeBrush::setButtonIcon(CSVWidget::BrushShape brushSh
     {
         case BrushShape_Point:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-point")));
+            setIcon(Misc::ScalableIcon::load(":scenetoolbar/brush-point"));
             tooltip += mShapeBrushWindow->toolTipPoint;
             break;
 
         case BrushShape_Square:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-square")));
+            setIcon(Misc::ScalableIcon::load(":scenetoolbar/brush-square"));
             tooltip += mShapeBrushWindow->toolTipSquare;
             break;
 
         case BrushShape_Circle:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-circle")));
+            setIcon(Misc::ScalableIcon::load(":scenetoolbar/brush-circle"));
             tooltip += mShapeBrushWindow->toolTipCircle;
             break;
 
         case BrushShape_Custom:
 
-            setIcon(QIcon(QPixmap(":scenetoolbar/brush-custom")));
+            setIcon(Misc::ScalableIcon::load(":scenetoolbar/brush-custom"));
             tooltip += mShapeBrushWindow->toolTipCustom;
             break;
     }

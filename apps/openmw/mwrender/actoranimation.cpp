@@ -35,6 +35,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include "actorutil.hpp"
 #include "vismask.hpp"
 
 namespace MWRender
@@ -66,7 +67,7 @@ namespace MWRender
     }
 
     PartHolderPtr ActorAnimation::attachMesh(
-        const std::string& model, std::string_view bonename, bool enchantedGlow, osg::Vec4f* glowColor)
+        VFS::Path::NormalizedView model, std::string_view bonename, const osg::Vec4f* glowColor)
     {
         osg::Group* parent = getBoneByName(bonename);
         if (!parent)
@@ -79,14 +80,14 @@ namespace MWRender
         if (found == nodeMap.end())
             return {};
 
-        if (enchantedGlow)
+        if (glowColor != nullptr)
             mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
         return std::make_unique<PartHolder>(instance);
     }
 
     osg::ref_ptr<osg::Node> ActorAnimation::attach(
-        const std::string& model, std::string_view bonename, std::string_view bonefilter, bool isLight)
+        VFS::Path::NormalizedView model, std::string_view bonename, std::string_view bonefilter, bool isLight)
     {
         osg::ref_ptr<const osg::Node> templateNode = mResourceSystem->getSceneManager()->getTemplate(model);
 
@@ -101,7 +102,7 @@ namespace MWRender
                 templateNode, mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager(), &rotation);
         }
         return SceneUtil::attach(
-            templateNode, mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager());
+            std::move(templateNode), mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager());
     }
 
     std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const
@@ -130,12 +131,11 @@ namespace MWRender
                     if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                         return std::string();
                     if (!bodypart->mModel.empty())
-                        return Misc::ResourceHelpers::correctMeshPath(
-                            bodypart->mModel, MWBase::Environment::get().getResourceSystem()->getVFS());
+                        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)).value();
                 }
             }
         }
-        return shield.getClass().getModel(shield);
+        return shield.getClass().getCorrectedModel(shield);
     }
 
     std::string ActorAnimation::getSheathedShieldMesh(const MWWorld::ConstPtr& shield) const
@@ -145,8 +145,7 @@ namespace MWRender
         if (mesh.empty())
             return mesh;
 
-        std::string holsteredName = mesh;
-        holsteredName = holsteredName.replace(holsteredName.size() - 4, 4, "_sh.nif");
+        const VFS::Path::Normalized holsteredName(addSuffixBeforeExtension(mesh, "_sh"));
         if (mResourceSystem->getVFS()->exists(holsteredName))
         {
             osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);
@@ -217,21 +216,20 @@ namespace MWRender
                 return;
         }
 
-        std::string mesh = getSheathedShieldMesh(*shield);
+        const VFS::Path::Normalized mesh = getSheathedShieldMesh(*shield);
         if (mesh.empty())
             return;
 
-        std::string_view boneName = "Bip01 AttachShield";
-        osg::Vec4f glowColor = shield->getClass().getEnchantmentColor(*shield);
-        std::string holsteredName = mesh;
-        holsteredName = holsteredName.replace(holsteredName.size() - 4, 4, "_sh.nif");
-        bool isEnchanted = !shield->getClass().getEnchantment(*shield).empty();
+        constexpr std::string_view boneName = "Bip01 AttachShield";
+        const bool isEnchanted = !shield->getClass().getEnchantment(*shield).empty();
+        const osg::Vec4f glowColor = isEnchanted ? shield->getClass().getEnchantmentColor(*shield) : osg::Vec4f();
+        const VFS::Path::Normalized holsteredName = addSuffixBeforeExtension(mesh, "_sh");
 
         // If we have no dedicated sheath model, use basic shield model as fallback.
         if (!mResourceSystem->getVFS()->exists(holsteredName))
-            mHolsteredShield = attachMesh(mesh, boneName, isEnchanted, &glowColor);
+            mHolsteredShield = attachMesh(mesh, boneName, isEnchanted ? &glowColor : nullptr);
         else
-            mHolsteredShield = attachMesh(holsteredName, boneName, isEnchanted, &glowColor);
+            mHolsteredShield = attachMesh(holsteredName, boneName, isEnchanted ? &glowColor : nullptr);
 
         if (!mHolsteredShield)
             return;
@@ -315,6 +313,7 @@ namespace MWRender
         if (node == nullptr)
             return;
 
+        // This is used to avoid playing animations intended for equipped weapons on holstered weapons.
         SceneUtil::ForceControllerSourcesVisitor removeVisitor(std::make_shared<NullAnimationTime>());
         node->accept(removeVisitor);
     }
@@ -336,28 +335,29 @@ namespace MWRender
 
         // Since throwing weapons stack themselves, do not show such weapon itself
         int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-        if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
+        auto weaponClass = MWMechanics::getWeaponType(type)->mWeaponClass;
+        if (weaponClass == ESM::WeaponType::Thrown)
             showHolsteredWeapons = false;
 
-        std::string mesh = weapon->getClass().getModel(*weapon);
-        std::string scabbardName = mesh;
-
-        std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
-        if (mesh.empty() || boneName.empty())
+        const VFS::Path::Normalized mesh = weapon->getClass().getCorrectedModel(*weapon);
+        if (mesh.empty())
             return;
 
-        // If the scabbard is not found, use a weapon mesh as fallback.
-        // Note: it is unclear how to handle time for controllers attached to bodyparts, so disable them for now.
-        // We use the similar approach for other bodyparts.
-        scabbardName = scabbardName.replace(scabbardName.size() - 4, 4, "_sh.nif");
-        bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
+        const std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
+        if (boneName.empty())
+            return;
+
+        // If the scabbard is not found, use the weapon mesh as fallback.
+        const VFS::Path::Normalized scabbardName = addSuffixBeforeExtension(mesh, "_sh");
+        const bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
         if (!mResourceSystem->getVFS()->exists(scabbardName))
         {
             if (showHolsteredWeapons)
             {
-                osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
-                mScabbard = attachMesh(mesh, boneName, isEnchanted, &glowColor);
-                if (mScabbard)
+                const osg::Vec4f glowColor
+                    = isEnchanted ? weapon->getClass().getEnchantmentColor(*weapon) : osg::Vec4f();
+                mScabbard = attachMesh(mesh, boneName, isEnchanted ? &glowColor : nullptr);
+                if (mScabbard && weaponClass == ESM::WeaponType::Ranged)
                     resetControllers(mScabbard->getNode());
             }
 
@@ -365,7 +365,7 @@ namespace MWRender
         }
 
         mScabbard = attachMesh(scabbardName, boneName);
-        if (mScabbard)
+        if (mScabbard && weaponClass == ESM::WeaponType::Ranged)
             resetControllers(mScabbard->getNode());
 
         osg::Group* weaponNode = getBoneByName("Bip01 Weapon");
@@ -387,7 +387,9 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::Node> fallbackNode
                     = mResourceSystem->getSceneManager()->getInstance(mesh, weaponNode);
-                resetControllers(fallbackNode);
+
+                if (weaponClass == ESM::WeaponType::Ranged)
+                    resetControllers(fallbackNode);
             }
 
             if (isEnchanted)
@@ -411,7 +413,7 @@ namespace MWRender
         if (weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
             return;
 
-        std::string mesh = weapon->getClass().getModel(*weapon);
+        std::string_view mesh = weapon->getClass().getModel(*weapon);
         std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
         if (mesh.empty() || boneName.empty())
             return;
@@ -428,7 +430,7 @@ namespace MWRender
         const auto& weaponType = MWMechanics::getWeaponType(type);
         if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
         {
-            ammoCount = ammo->getRefData().getCount();
+            ammoCount = ammo->getCellRef().getCount();
             osg::Group* throwingWeaponNode = getBoneByName(weaponType->mAttachBone);
             if (throwingWeaponNode && throwingWeaponNode->getNumChildren())
                 ammoCount--;
@@ -441,7 +443,7 @@ namespace MWRender
             if (ammo == inv.end())
                 return;
 
-            ammoCount = ammo->getRefData().getCount();
+            ammoCount = ammo->getCellRef().getCount();
             bool arrowAttached = isArrowAttached();
             if (arrowAttached)
                 ammoCount--;
@@ -468,7 +470,7 @@ namespace MWRender
 
         // Add new ones
         osg::Vec4f glowColor = ammo->getClass().getEnchantmentColor(*ammo);
-        std::string model = ammo->getClass().getModel(*ammo);
+        const VFS::Path::Normalized model(ammo->getClass().getCorrectedModel(*ammo));
         for (unsigned int i = 0; i < ammoCount; ++i)
         {
             osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
@@ -516,7 +518,7 @@ namespace MWRender
             ItemLightMap::iterator iter = mItemLights.find(item);
             if (iter != mItemLights.end())
             {
-                if (!item.getRefData().getCount())
+                if (!item.getCellRef().getCount())
                 {
                     removeHiddenItemLight(item);
                 }

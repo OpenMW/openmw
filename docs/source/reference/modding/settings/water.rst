@@ -58,6 +58,34 @@ This setting has no effect if the shader setting is false.
 
 This setting can be toggled with the 'Refraction' button in the Water tab of the Video panel of the Options menu.
 
+sunlight scattering
+-------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+This setting enables sunlight scattering.
+This makes incident sunlight seemingly spread through water, simulating the optical property.
+
+This setting has no effect if refraction is turned off.
+
+This setting can be toggled with the 'Sunlight Scattering' button in the Water tab of the Video panel of the Options menu.
+
+wobbly shores
+-------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+This setting makes shores wobbly.
+The water surface will smoothly fade into the shoreline and wobble based on water normal-mapping, which avoids harsh transitions.
+
+This setting has no effect if refraction is turned off.
+
+This setting can be toggled with the 'Wobbly Shores' button in the Water tab of the Video panel of the Options menu.
+
 reflection detail
 -----------------
 

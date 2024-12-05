@@ -14,22 +14,22 @@ class QWidget;
 namespace CSMPrefs
 {
     class Category;
-    class StringSetting : public Setting
+
+    class StringSetting final : public TypedSetting<std::string>
     {
         Q_OBJECT
 
         std::string mTooltip;
-        std::string mDefault;
         QLineEdit* mWidget;
 
     public:
-        StringSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label,
-            std::string_view default_);
+        explicit StringSetting(
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
         StringSetting& setTooltip(const std::string& tooltip);
 
         /// Return label, input widget.
-        std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
+        SettingWidgets makeWidgets(QWidget* parent) override;
 
         void updateWidget() override;
 

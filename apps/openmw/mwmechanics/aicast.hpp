@@ -15,7 +15,7 @@ namespace MWMechanics
     class AiCast final : public TypedAiPackage<AiCast>
     {
     public:
-        AiCast(const ESM::RefId& targetId, const ESM::RefId& spellId, bool manualSpell = false);
+        AiCast(const ESM::RefId& targetId, const ESM::RefId& spellId, bool scriptedSpell = false);
 
         bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state,
             float duration) override;
@@ -37,7 +37,7 @@ namespace MWMechanics
         const ESM::RefId mTargetId;
         const ESM::RefId mSpellId;
         bool mCasting;
-        const bool mManual;
+        const bool mScripted;
         const float mDistance;
     };
 }

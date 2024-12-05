@@ -9,15 +9,14 @@ namespace MWGui
     void resizeSkin(MyGUI::xml::ElementPtr _node)
     {
         _node->setAttribute("type", "ResourceSkin");
-        const std::string size = _node->findAttribute("size");
-        if (!size.empty())
+        if (!_node->findAttribute("size").empty())
             return;
 
-        const std::string textureName = _node->findAttribute("texture");
+        auto textureName = _node->findAttribute("texture");
         if (textureName.empty())
             return;
 
-        MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(textureName);
+        MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(std::string{ textureName });
         if (!texture)
             return;
 
@@ -30,7 +29,7 @@ namespace MWGui
             if (basis->getName() != "BasisSkin")
                 continue;
 
-            const std::string basisSkinType = basis->findAttribute("type");
+            auto basisSkinType = basis->findAttribute("type");
             if (Misc::StringUtils::ciEqual(basisSkinType, "SimpleText"))
                 continue;
             bool isTileRect = Misc::StringUtils::ciEqual(basisSkinType, "TileRect");

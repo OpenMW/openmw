@@ -5,6 +5,8 @@
 #include <osg/TexMat>
 #include <osg/Texture2D>
 
+#include <osgAnimation/Bone>
+
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
@@ -15,11 +17,11 @@
 namespace NifOsg
 {
 
-    ControllerFunction::ControllerFunction(const Nif::Controller* ctrl)
-        : mFrequency(ctrl->frequency)
-        , mPhase(ctrl->phase)
-        , mStartTime(ctrl->timeStart)
-        , mStopTime(ctrl->timeStop)
+    ControllerFunction::ControllerFunction(const Nif::NiTimeController* ctrl)
+        : mFrequency(ctrl->mFrequency)
+        , mPhase(ctrl->mPhase)
+        , mStartTime(ctrl->mTimeStart)
+        , mStopTime(ctrl->mTimeStop)
         , mExtrapolationMode(ctrl->extrapolationMode())
     {
     }
@@ -31,7 +33,7 @@ namespace NifOsg
             return time;
         switch (mExtrapolationMode)
         {
-            case Nif::Controller::ExtrapolationMode::Cycle:
+            case Nif::NiTimeController::ExtrapolationMode::Cycle:
             {
                 float delta = mStopTime - mStartTime;
                 if (delta <= 0)
@@ -40,7 +42,7 @@ namespace NifOsg
                 float remainder = (cycles - std::floor(cycles)) * delta;
                 return mStartTime + remainder;
             }
-            case Nif::Controller::ExtrapolationMode::Reverse:
+            case Nif::NiTimeController::ExtrapolationMode::Reverse:
             {
                 float delta = mStopTime - mStartTime;
                 if (delta <= 0)
@@ -55,9 +57,15 @@ namespace NifOsg
 
                 return mStopTime - remainder;
             }
-            case Nif::Controller::ExtrapolationMode::Constant:
+            case Nif::NiTimeController::ExtrapolationMode::Constant:
             default:
-                return std::clamp(time, mStartTime, mStopTime);
+            {
+                if (time < mStartTime)
+                    return mStartTime;
+                if (time > mStopTime)
+                    return mStopTime;
+                return time;
+            }
         }
     }
 
@@ -90,21 +98,23 @@ namespace NifOsg
             {
                 const Nif::NiTransformInterpolator* interp
                     = static_cast<const Nif::NiTransformInterpolator*>(keyctrl->mInterpolator.getPtr());
-                if (!interp->data.empty())
+                const Nif::NiQuatTransform& defaultTransform = interp->mDefaultValue;
+                if (!interp->mData.empty())
                 {
-                    mRotations = QuaternionInterpolator(interp->data->mRotations, interp->defaultRot);
-                    mXRotations = FloatInterpolator(interp->data->mXRotations);
-                    mYRotations = FloatInterpolator(interp->data->mYRotations);
-                    mZRotations = FloatInterpolator(interp->data->mZRotations);
-                    mTranslations = Vec3Interpolator(interp->data->mTranslations, interp->defaultPos);
-                    mScales = FloatInterpolator(interp->data->mScales, interp->defaultScale);
-                    mAxisOrder = interp->data->mAxisOrder;
+                    mRotations = QuaternionInterpolator(interp->mData->mRotations, defaultTransform.mRotation);
+                    mXRotations = FloatInterpolator(interp->mData->mXRotations);
+                    mYRotations = FloatInterpolator(interp->mData->mYRotations);
+                    mZRotations = FloatInterpolator(interp->mData->mZRotations);
+                    mTranslations = Vec3Interpolator(interp->mData->mTranslations, defaultTransform.mTranslation);
+                    mScales = FloatInterpolator(interp->mData->mScales, defaultTransform.mScale);
+
+                    mAxisOrder = interp->mData->mAxisOrder;
                 }
                 else
                 {
-                    mRotations = QuaternionInterpolator(Nif::QuaternionKeyMapPtr(), interp->defaultRot);
-                    mTranslations = Vec3Interpolator(Nif::Vector3KeyMapPtr(), interp->defaultPos);
-                    mScales = FloatInterpolator(Nif::FloatKeyMapPtr(), interp->defaultScale);
+                    mRotations = QuaternionInterpolator(Nif::QuaternionKeyMapPtr(), defaultTransform.mRotation);
+                    mTranslations = Vec3Interpolator(Nif::Vector3KeyMapPtr(), defaultTransform.mTranslation);
+                    mScales = FloatInterpolator(Nif::FloatKeyMapPtr(), defaultTransform.mScale);
                 }
             }
         }
@@ -117,6 +127,7 @@ namespace NifOsg
             mZRotations = FloatInterpolator(keydata->mZRotations);
             mTranslations = Vec3Interpolator(keydata->mTranslations);
             mScales = FloatInterpolator(keydata->mScales, 1.f);
+
             mAxisOrder = keydata->mAxisOrder;
         }
     }
@@ -166,25 +177,48 @@ namespace NifOsg
 
     void KeyframeController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
+        auto [translation, rotation, scale] = getCurrentTransformation(nv);
+
+        if (rotation)
+        {
+            node->setRotation(*rotation);
+        }
+        else
+        {
+            // This is necessary to prevent first person animations glitching out due to RotationController
+            node->setRotation(node->mRotationScale);
+        }
+
+        if (translation)
+            node->setTranslation(*translation);
+
+        if (scale)
+            node->setScale(*scale);
+
+        traverse(node, nv);
+    }
+
+    KeyframeController::KfTransform KeyframeController::getCurrentTransformation(osg::NodeVisitor* nv)
+    {
+        KfTransform out;
+
         if (hasInput())
         {
             float time = getInputValue(nv);
 
             if (!mRotations.empty())
-                node->setRotation(mRotations.interpKey(time));
+                out.mRotation = mRotations.interpKey(time);
             else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-                node->setRotation(getXYZRotation(time));
-            else
-                node->setRotation(node->mRotationScale);
-
-            if (!mScales.empty())
-                node->setScale(mScales.interpKey(time));
+                out.mRotation = getXYZRotation(time);
 
             if (!mTranslations.empty())
-                node->setTranslation(mTranslations.interpKey(time));
+                out.mTranslation = mTranslations.interpKey(time);
+
+            if (!mScales.empty())
+                out.mScale = mScales.interpKey(time);
         }
 
-        traverse(node, nv);
+        return out;
     }
 
     GeomMorpherController::GeomMorpherController() {}
@@ -251,9 +285,7 @@ namespace NifOsg
         }
     }
 
-    UVController::UVController() {}
-
-    UVController::UVController(const Nif::NiUVData* data, const std::set<int>& textureUnits)
+    UVController::UVController(const Nif::NiUVData* data, const std::set<unsigned int>& textureUnits)
         : mUTrans(data->mKeyList[0], 0.f)
         , mVTrans(data->mKeyList[1], 0.f)
         , mUScale(data->mKeyList[2], 1.f)
@@ -277,8 +309,8 @@ namespace NifOsg
     void UVController::setDefaults(osg::StateSet* stateset)
     {
         osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
-        for (std::set<int>::const_iterator it = mTextureUnits.begin(); it != mTextureUnits.end(); ++it)
-            stateset->setTextureAttributeAndModes(*it, texMat, osg::StateAttribute::ON);
+        for (unsigned int unit : mTextureUnits)
+            stateset->setTextureAttributeAndModes(unit, texMat, osg::StateAttribute::ON);
     }
 
     void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
@@ -314,12 +346,13 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiBoolInterpolator)
-                mInterpolator
-                    = ByteInterpolator(static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()));
+            if (ctrl->mInterpolator->recType != Nif::RC_NiBoolInterpolator)
+                return;
+
+            mInterpolator = { static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()) };
         }
         else if (!ctrl->mData.empty())
-            mData = ctrl->mData->mVis;
+            mData = ctrl->mData->mKeys;
     }
 
     VisController::VisController() {}
@@ -338,15 +371,13 @@ namespace NifOsg
         if (!mInterpolator.empty())
             return mInterpolator.interpKey(time);
 
-        if (mData.size() == 0)
+        if (mData->empty())
             return true;
 
-        for (size_t i = 1; i < mData.size(); i++)
-        {
-            if (mData[i].time > time)
-                return mData[i - 1].isSet;
-        }
-        return mData.back().isSet;
+        auto iter = mData->upper_bound(time);
+        if (iter != mData->begin())
+            --iter;
+        return iter->second;
     }
 
     void VisController::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -442,11 +473,11 @@ namespace NifOsg
         }
     }
 
-    MaterialColorController::MaterialColorController() {}
+    MaterialColorController::MaterialColorController() = default;
 
     MaterialColorController::MaterialColorController(
         const Nif::NiMaterialColorController* ctrl, const osg::Material* baseMaterial)
-        : mTargetColor(static_cast<MaterialColorController::TargetColor>(ctrl->mTargetColor))
+        : mTargetColor(ctrl->mTargetColor)
         , mBaseMaterial(baseMaterial)
     {
         if (!ctrl->mInterpolator.empty())
@@ -479,30 +510,31 @@ namespace NifOsg
         {
             osg::Vec3f value = mData.interpKey(getInputValue(nv));
             osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            using TargetColor = Nif::NiMaterialColorController::TargetColor;
             switch (mTargetColor)
             {
-                case Diffuse:
+                case TargetColor::Diffuse:
                 {
                     osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
                     diffuse.set(value.x(), value.y(), value.z(), diffuse.a());
                     mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
                     break;
                 }
-                case Specular:
+                case TargetColor::Specular:
                 {
                     osg::Vec4f specular = mat->getSpecular(osg::Material::FRONT_AND_BACK);
                     specular.set(value.x(), value.y(), value.z(), specular.a());
                     mat->setSpecular(osg::Material::FRONT_AND_BACK, specular);
                     break;
                 }
-                case Emissive:
+                case TargetColor::Emissive:
                 {
                     osg::Vec4f emissive = mat->getEmission(osg::Material::FRONT_AND_BACK);
                     emissive.set(value.x(), value.y(), value.z(), emissive.a());
                     mat->setEmission(osg::Material::FRONT_AND_BACK, emissive);
                     break;
                 }
-                case Ambient:
+                case TargetColor::Ambient:
                 default:
                 {
                     osg::Vec4f ambient = mat->getAmbient(osg::Material::FRONT_AND_BACK);
@@ -554,14 +586,8 @@ namespace NifOsg
     }
 
     ParticleSystemController::ParticleSystemController(const Nif::NiParticleSystemController* ctrl)
-        : mEmitStart(ctrl->startTime)
-        , mEmitStop(ctrl->stopTime)
-    {
-    }
-
-    ParticleSystemController::ParticleSystemController()
-        : mEmitStart(0.f)
-        , mEmitStop(0.f)
+        : mEmitStart(ctrl->mEmitStartTime)
+        , mEmitStop(ctrl->mEmitStopTime)
     {
     }
 
@@ -596,9 +622,9 @@ namespace NifOsg
     }
 
     PathController::PathController(const Nif::NiPathController* ctrl)
-        : mPath(ctrl->posData->mKeyList, osg::Vec3f())
-        , mPercent(ctrl->floatData->mKeyList, 1.f)
-        , mFlags(ctrl->flags)
+        : mPath(ctrl->mPathData->mKeyList, osg::Vec3f())
+        , mPercent(ctrl->mPercentData->mKeyList, 1.f)
+        , mFlags(ctrl->mPathFlags)
     {
     }
 

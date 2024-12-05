@@ -85,7 +85,9 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                Interpreter::Type_Integer value = ptr.getClass().getCreatureStats(ptr).getLevel();
+                Interpreter::Type_Integer value = -1;
+                if (ptr.getClass().isActor())
+                    value = ptr.getClass().getCreatureStats(ptr).getLevel();
 
                 runtime.push(value);
             }
@@ -102,7 +104,8 @@ namespace MWScript
                 Interpreter::Type_Integer value = runtime[0].mInteger;
                 runtime.pop();
 
-                ptr.getClass().getCreatureStats(ptr).setLevel(value);
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).setLevel(value);
             }
         };
 
@@ -121,7 +124,9 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                Interpreter::Type_Float value = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex).getModified();
+                Interpreter::Type_Float value = 0.f;
+                if (ptr.getClass().isActor())
+                    value = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex).getModified();
 
                 runtime.push(value);
             }
@@ -144,6 +149,9 @@ namespace MWScript
 
                 Interpreter::Type_Float value = runtime[0].mFloat;
                 runtime.pop();
+
+                if (!ptr.getClass().isActor())
+                    return;
 
                 MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
                 attribute.setBase(value, true);
@@ -169,6 +177,9 @@ namespace MWScript
                 Interpreter::Type_Float value = runtime[0].mFloat;
                 runtime.pop();
 
+                if (!ptr.getClass().isActor())
+                    return;
+
                 MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
                 modStat(attribute, value);
                 ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
@@ -189,14 +200,14 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                Interpreter::Type_Float value;
+                Interpreter::Type_Float value = 0.f;
 
                 if (mIndex == 0 && ptr.getClass().hasItemHealth(ptr))
                 {
                     // health is a special case
                     value = static_cast<Interpreter::Type_Float>(ptr.getClass().getItemMaxHealth(ptr));
                 }
-                else
+                else if (ptr.getClass().isActor())
                 {
                     value = ptr.getClass().getCreatureStats(ptr).getDynamic(mIndex).getCurrent();
                     // GetMagicka shouldn't return negative values
@@ -224,6 +235,9 @@ namespace MWScript
 
                 Interpreter::Type_Float value = runtime[0].mFloat;
                 runtime.pop();
+
+                if (!ptr.getClass().isActor())
+                    return;
 
                 MWMechanics::DynamicStat<float> stat(ptr.getClass().getCreatureStats(ptr).getDynamic(mIndex));
 
@@ -253,6 +267,9 @@ namespace MWScript
 
                 Interpreter::Type_Float diff = runtime[0].mFloat;
                 runtime.pop();
+
+                if (!ptr.getClass().isActor())
+                    return;
 
                 // workaround broken endgame scripts that kill dagoth ur
                 if (!R::implicit && ptr.getCellRef().getRefId() == "dagoth_ur_1")
@@ -301,6 +318,9 @@ namespace MWScript
                 Interpreter::Type_Float diff = runtime[0].mFloat;
                 runtime.pop();
 
+                if (!ptr.getClass().isActor())
+                    return;
+
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
                 Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
@@ -336,9 +356,16 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
+
+                if (!ptr.getClass().isActor())
+                {
+                    runtime.push(0.f);
+                    return;
+                }
+
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                runtime.push(stats.getDynamic(mIndex).getRatio());
+                runtime.push(stats.getDynamic(mIndex).getRatio(false));
             }
         };
 
@@ -356,6 +383,12 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
+
+                if (!ptr.getClass().isActor())
+                {
+                    runtime.push(0.f);
+                    return;
+                }
 
                 Interpreter::Type_Float value = ptr.getClass().getSkill(ptr, mId);
 
@@ -381,6 +414,9 @@ namespace MWScript
                 Interpreter::Type_Float value = runtime[0].mFloat;
                 runtime.pop();
 
+                if (!ptr.getClass().isNpc())
+                    return;
+
                 MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats(ptr);
 
                 stats.getSkill(mId).setBase(value, true);
@@ -404,6 +440,9 @@ namespace MWScript
 
                 Interpreter::Type_Float value = runtime[0].mFloat;
                 runtime.pop();
+
+                if (!ptr.getClass().isNpc())
+                    return;
 
                 MWMechanics::SkillValue& skill = ptr.getClass().getNpcStats(ptr).getSkill(mId);
                 modStat(skill, value);
@@ -445,10 +484,12 @@ namespace MWScript
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 MWWorld::Ptr player = world->getPlayerPtr();
-
-                player.getClass().getNpcStats(player).setBounty(
-                    static_cast<int>(runtime[0].mFloat) + player.getClass().getNpcStats(player).getBounty());
+                int bounty = std::max(
+                    0, static_cast<int>(runtime[0].mFloat) + player.getClass().getNpcStats(player).getBounty());
+                player.getClass().getNpcStats(player).setBounty(bounty);
                 runtime.pop();
+                if (bounty == 0)
+                    MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
             }
         };
 
@@ -462,6 +503,9 @@ namespace MWScript
 
                 ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
+
+                if (!ptr.getClass().isActor())
+                    return;
 
                 const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(id);
 
@@ -489,6 +533,9 @@ namespace MWScript
                 ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
+                if (!ptr.getClass().isActor())
+                    return;
+
                 MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
                 creatureStats.getSpells().remove(id);
 
@@ -512,7 +559,8 @@ namespace MWScript
                 ESM::RefId spellid = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                ptr.getClass().getCreatureStats(ptr).getActiveSpells().removeEffects(ptr, spellid);
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().removeEffectsBySourceSpellId(ptr, spellid);
             }
         };
 
@@ -527,7 +575,8 @@ namespace MWScript
                 Interpreter::Type_Integer effectId = runtime[0].mInteger;
                 runtime.pop();
 
-                ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ptr, effectId);
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ptr, effectId);
             }
         };
 
@@ -843,7 +892,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                runtime.push(ptr.getClass().getCreatureStats(ptr).hasCommonDisease());
+                if (ptr.getClass().isActor())
+                    runtime.push(ptr.getClass().getCreatureStats(ptr).hasCommonDisease());
+                else
+                    runtime.push(0);
             }
         };
 
@@ -855,7 +907,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                runtime.push(ptr.getClass().getCreatureStats(ptr).hasBlightDisease());
+                if (ptr.getClass().isActor())
+                    runtime.push(ptr.getClass().getCreatureStats(ptr).hasBlightDisease());
+                else
+                    runtime.push(0);
             }
         };
 
@@ -870,9 +925,16 @@ namespace MWScript
                 ESM::RefId race = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                const ESM::RefId& npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
+                if (ptr.getClass().isNpc())
+                {
+                    const ESM::RefId& npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
 
-                runtime.push(race == npcRace);
+                    runtime.push(race == npcRace);
+                }
+                else
+                {
+                    runtime.push(0);
+                }
             }
         };
 
@@ -938,7 +1000,7 @@ namespace MWScript
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 if (!factionID.empty())
                 {
-                    player.getClass().getNpcStats(player).expell(factionID);
+                    player.getClass().getNpcStats(player).expell(factionID, true);
                 }
             }
         };
@@ -1041,10 +1103,15 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                Interpreter::Type_Integer value = ptr.getClass().getCreatureStats(ptr).hasDied();
+                Interpreter::Type_Integer value = 0;
+                if (ptr.getClass().isActor())
+                {
+                    auto& stats = ptr.getClass().getCreatureStats(ptr);
+                    value = stats.hasDied();
 
-                if (value)
-                    ptr.getClass().getCreatureStats(ptr).clearHasDied();
+                    if (value)
+                        stats.clearHasDied();
+                }
 
                 runtime.push(value);
             }
@@ -1058,10 +1125,15 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                Interpreter::Type_Integer value = ptr.getClass().getCreatureStats(ptr).hasBeenMurdered();
+                Interpreter::Type_Integer value = 0;
+                if (ptr.getClass().isActor())
+                {
+                    auto& stats = ptr.getClass().getCreatureStats(ptr);
+                    value = stats.hasBeenMurdered();
 
-                if (value)
-                    ptr.getClass().getCreatureStats(ptr).clearHasBeenMurdered();
+                    if (value)
+                        stats.clearHasBeenMurdered();
+                }
 
                 runtime.push(value);
             }
@@ -1075,7 +1147,9 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                Interpreter::Type_Integer value = ptr.getClass().getCreatureStats(ptr).getKnockedDownOneFrame();
+                Interpreter::Type_Integer value = 0;
+                if (ptr.getClass().isActor())
+                    value = ptr.getClass().getCreatureStats(ptr).getKnockedDownOneFrame();
 
                 runtime.push(value);
             }
@@ -1088,7 +1162,10 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                runtime.push(ptr.getClass().getNpcStats(ptr).isWerewolf());
+                if (ptr.getClass().isNpc())
+                    runtime.push(ptr.getClass().getNpcStats(ptr).isWerewolf());
+                else
+                    runtime.push(0);
             }
         };
 
@@ -1099,7 +1176,8 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, set);
+                if (ptr.getClass().isNpc())
+                    MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, set);
             }
         };
 
@@ -1110,7 +1188,8 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                MWBase::Environment::get().getMechanicsManager()->applyWerewolfAcrobatics(ptr);
+                if (ptr.getClass().isNpc())
+                    MWBase::Environment::get().getMechanicsManager()->applyWerewolfAcrobatics(ptr);
             }
         };
 
@@ -1121,6 +1200,9 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
+
+                if (!ptr.getClass().isActor())
+                    return;
 
                 if (ptr == MWMechanics::getPlayer())
                 {
@@ -1190,6 +1272,12 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
+                if (!ptr.getClass().isActor())
+                {
+                    runtime.push(0);
+                    return;
+                }
+
                 const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
                 float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
@@ -1224,6 +1312,13 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
+
+                int arg = runtime[0].mInteger;
+                runtime.pop();
+
+                if (!ptr.getClass().isActor())
+                    return;
+
                 MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
                 float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
@@ -1237,8 +1332,6 @@ namespace MWScript
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
                     currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
 
-                int arg = runtime[0].mInteger;
-                runtime.pop();
                 effects.modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
             }
         };
@@ -1259,10 +1352,14 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
                 int arg = runtime[0].mInteger;
                 runtime.pop();
+
+                if (!ptr.getClass().isActor())
+                    return;
+
+                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
                 stats.getMagicEffects().modifyBase(mPositiveEffect, arg);
             }
         };

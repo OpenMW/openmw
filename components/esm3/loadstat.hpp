@@ -31,7 +31,7 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Static"; }
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
         std::string mModel;
 

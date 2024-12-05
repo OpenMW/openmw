@@ -1,6 +1,7 @@
 #include "weapon.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -20,12 +21,12 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -43,17 +44,14 @@ namespace MWClass
         }
     }
 
-    std::string Weapon::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Weapon::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Weapon>(ptr);
     }
 
     std::string_view Weapon::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Weapon>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Weapon::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -150,8 +148,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -240,11 +237,11 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -277,8 +274,8 @@ namespace MWClass
             return { 0, "#{sInventoryMessage1}" };
 
         // Do not allow equip weapons from inventory during attack
-        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
-            && MWBase::Environment::get().getWindowManager()->isGuiMode())
+        if (npc.isInCell() && MWBase::Environment::get().getWindowManager()->isGuiMode()
+            && MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
             return { 0, "#{sCantEquipWeapWarning}" };
 
         std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);

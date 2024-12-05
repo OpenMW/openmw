@@ -48,14 +48,14 @@ namespace MWGui
 
         for (const auto& effect : effects.mList)
         {
-            short effectId = effect.mEffectID;
+            short effectId = effect.mData.mEffectID;
 
             if (effectId != -1)
             {
                 const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(effectId);
                 const ESM::Attribute* attribute
-                    = store.get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(effect.mAttribute));
-                const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(effect.mSkill));
+                    = store.get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(effect.mData.mAttribute));
+                const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(effect.mData.mSkill));
 
                 std::string fullEffectName = MWMechanics::getMagicEffectString(*magicEffect, attribute, skill);
                 std::string convert = Utf8Stream::lowerCaseUtf8(fullEffectName);
@@ -137,7 +137,7 @@ namespace MWGui
             newSpell.mItem = item;
             newSpell.mId = item.getCellRef().getRefId();
             newSpell.mName = item.getClass().getName(item);
-            newSpell.mCount = item.getRefData().getCount();
+            newSpell.mCount = item.getCellRef().getCount();
             newSpell.mType = Spell::Type_EnchantedItem;
             newSpell.mSelected = invStore.getSelectedEnchantItem() == it;
 

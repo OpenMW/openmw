@@ -81,7 +81,7 @@ namespace MWClass
         if (!creature.isEmpty())
         {
             const MWMechanics::CreatureStats& creatureStats = creature.getClass().getCreatureStats(creature);
-            if (creature.getRefData().getCount() == 0)
+            if (creature.getCellRef().getCount() == 0)
                 customData.mSpawn = true;
             else if (creatureStats.isDead())
             {
@@ -97,25 +97,6 @@ namespace MWClass
         }
         else
             customData.mSpawn = true;
-    }
-
-    void CreatureLevList::getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const
-    {
-        // disable for now, too many false positives
-        /*
-        const MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
-        for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = ref->mBase->mList.begin(); it !=
-        ref->mBase->mList.end(); ++it)
-        {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            if (it->mLevel > player.getClass().getCreatureStats(player).getLevel())
-                continue;
-
-            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-            MWWorld::ManualRef ref(store, it->mId);
-            ref.getPtr().getClass().getModelsToPreload(ref.getPtr(), models);
-        }
-        */
     }
 
     void CreatureLevList::insertObjectRendering(
@@ -148,7 +129,7 @@ namespace MWClass
             manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
             manualRef.getPtr().getCellRef().setScale(ptr.getCellRef().getScale());
             MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(
-                manualRef.getPtr(), ptr.getCell(), ptr.getCellRef().getPosition());
+                manualRef.getPtr(), ptr.getCell(), ptr.getRefData().getPosition());
             customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
             customData.mSpawn = false;
         }

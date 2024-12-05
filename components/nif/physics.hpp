@@ -1,9 +1,12 @@
 #ifndef OPENMW_COMPONENTS_NIF_PHYSICS_HPP
 #define OPENMW_COMPONENTS_NIF_PHYSICS_HPP
 
+#include "extra.hpp"
+#include "niftypes.hpp"
 #include "record.hpp"
 #include "recordptr.hpp"
 
+#include <osg/Plane>
 #include <osg/Quat>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
@@ -23,9 +26,10 @@ namespace Nif
 
     struct bhkWorldObjCInfoProperty
     {
-        unsigned int mData;
-        unsigned int mSize;
-        unsigned int mCapacityAndFlags;
+        uint32_t mData;
+        uint32_t mSize;
+        uint32_t mCapacityAndFlags;
+
         void read(NIFStream* nif);
     };
 
@@ -41,28 +45,32 @@ namespace Nif
     {
         BroadPhaseType mPhaseType;
         bhkWorldObjCInfoProperty mProperty;
+
         void read(NIFStream* nif);
     };
 
     struct HavokMaterial
     {
-        unsigned int mMaterial;
+        uint32_t mMaterial;
+
         void read(NIFStream* nif);
     };
 
     struct HavokFilter
     {
-        unsigned char mLayer;
-        unsigned char mFlags;
-        unsigned short mGroup;
+        uint8_t mLayer;
+        uint8_t mFlags;
+        uint16_t mGroup;
+
         void read(NIFStream* nif);
     };
 
     struct hkSubPartData
     {
         HavokMaterial mHavokMaterial;
-        unsigned int mNumVertices;
+        uint32_t mNumVertices;
         HavokFilter mHavokFilter;
+
         void read(NIFStream* nif);
     };
 
@@ -77,22 +85,26 @@ namespace Nif
     struct bhkEntityCInfo
     {
         hkResponseType mResponseType;
-        unsigned short mProcessContactDelay;
+        uint16_t mProcessContactDelay;
+
         void read(NIFStream* nif);
     };
 
     struct hkpMoppCode
     {
         osg::Vec4f mOffset;
-        std::vector<char> mData;
+        uint8_t mBuildType;
+        std::vector<uint8_t> mData;
+
         void read(NIFStream* nif);
     };
 
     struct TriangleData
     {
-        unsigned short mTriangle[3];
-        unsigned short mWeldingInfo;
+        std::array<uint16_t, 3> mTriangle;
+        uint16_t mWeldingInfo;
         osg::Vec3f mNormal;
+
         void read(NIFStream* nif);
     };
 
@@ -100,6 +112,7 @@ namespace Nif
     {
         HavokMaterial mHavokMaterial;
         HavokFilter mHavokFilter;
+
         void read(NIFStream* nif);
     };
 
@@ -107,27 +120,30 @@ namespace Nif
     {
         osg::Vec4f mTranslation;
         osg::Quat mRotation;
+
         void read(NIFStream* nif);
     };
 
     struct bhkCMSBigTri
     {
-        unsigned short mTriangle[3];
-        unsigned int mMaterial;
-        unsigned short mWeldingInfo;
+        std::array<uint16_t, 3> mTriangle;
+        uint32_t mMaterial;
+        uint16_t mWeldingInfo;
+
         void read(NIFStream* nif);
     };
 
     struct bhkCMSChunk
     {
         osg::Vec4f mTranslation;
-        unsigned int mMaterialIndex;
-        unsigned short mReference;
-        unsigned short mTransformIndex;
-        std::vector<unsigned short> mVertices;
-        std::vector<unsigned short> mIndices;
-        std::vector<unsigned short> mStrips;
-        std::vector<unsigned short> mWeldingInfos;
+        uint32_t mMaterialIndex;
+        uint16_t mReference;
+        uint16_t mTransformIndex;
+        std::vector<uint16_t> mVertices;
+        std::vector<uint16_t> mIndices;
+        std::vector<uint16_t> mStrips;
+        std::vector<uint16_t> mWeldingInfos;
+
         void read(NIFStream* nif);
     };
 
@@ -180,12 +196,12 @@ namespace Nif
     {
         HavokFilter mHavokFilter;
         hkResponseType mResponseType;
-        unsigned short mProcessContactDelay;
+        uint16_t mProcessContactDelay;
         osg::Vec4f mTranslation;
         osg::Quat mRotation;
         osg::Vec4f mLinearVelocity;
         osg::Vec4f mAngularVelocity;
-        float mInertiaTensor[3][4];
+        Matrix3 mInertiaTensor;
         osg::Vec4f mCenter;
         float mMass;
         float mLinearDamping;
@@ -203,10 +219,11 @@ namespace Nif
         bool mEnableDeactivation{ true };
         hkSolverDeactivation mSolverDeactivation;
         hkQualityType mQualityType;
-        unsigned char mAutoRemoveLevel;
-        unsigned char mResponseModifierFlags;
-        unsigned char mNumContactPointShapeKeys;
+        uint8_t mAutoRemoveLevel;
+        uint8_t mResponseModifierFlags;
+        uint8_t mNumContactPointShapeKeys;
         bool mForceCollidedOntoPPU;
+
         void read(NIFStream* nif);
     };
 
@@ -222,6 +239,7 @@ namespace Nif
         bhkEntityPtr mEntityA;
         bhkEntityPtr mEntityB;
         ConstraintPriority mPriority;
+
         void read(NIFStream* nif);
         void post(Reader& nif);
     };
@@ -242,6 +260,7 @@ namespace Nif
         float mProportionalRecoveryVelocity;
         float mConstantRecoveryVelocity;
         bool mEnabled;
+
         void read(NIFStream* nif);
     };
 
@@ -252,6 +271,7 @@ namespace Nif
         float mTargetVelocity;
         bool mUseVelocityTarget;
         bool mEnabled;
+
         void read(NIFStream* nif);
     };
 
@@ -261,6 +281,7 @@ namespace Nif
         float mSpringConstant;
         float mSpringDamping;
         bool mEnabled;
+
         void read(NIFStream* nif);
     };
 
@@ -270,6 +291,7 @@ namespace Nif
         bhkPositionConstraintMotor mPositionMotor;
         bhkVelocityConstraintMotor mVelocityMotor;
         bhkSpringDamperConstraintMotor mSpringDamperMotor;
+
         void read(NIFStream* nif);
     };
 
@@ -289,6 +311,7 @@ namespace Nif
         float mTwistMinAngle, mTwistMaxAngle;
         float mMaxFriction;
         bhkConstraintMotorCInfo mMotor;
+
         void read(NIFStream* nif);
     };
 
@@ -301,8 +324,10 @@ namespace Nif
             osg::Vec4f mPerpAxis1;
             osg::Vec4f mPerpAxis2;
         };
+
         HingeData mDataA;
         HingeData mDataB;
+
         void read(NIFStream* nif);
     };
 
@@ -315,12 +340,96 @@ namespace Nif
             osg::Vec4f mPerpAxis1;
             osg::Vec4f mPerpAxis2;
         };
+
         HingeData mDataA;
         HingeData mDataB;
         float mMinAngle, mMaxAngle;
         float mMaxFriction;
         bhkConstraintMotorCInfo mMotor;
+
         void read(NIFStream* nif);
+    };
+
+    struct bhkBallAndSocketConstraintCInfo
+    {
+        osg::Vec4f mPivotA, mPivotB;
+
+        void read(NIFStream* nif);
+    };
+
+    struct bhkStiffSpringConstraintCInfo
+    {
+        osg::Vec4f mPivotA, mPivotB;
+        float mLength;
+
+        void read(NIFStream* nif);
+    };
+
+    struct bhkPrismaticConstraintCInfo
+    {
+        struct Data
+        {
+            osg::Vec4f mSliding;
+            osg::Vec4f mRotation;
+            osg::Vec4f mPlane;
+            osg::Vec4f mPivot;
+        };
+
+        Data mDataA;
+        Data mDataB;
+        float mMinDistance, mMaxDistance;
+        float mFriction;
+        bhkConstraintMotorCInfo mMotor;
+
+        void read(NIFStream* nif);
+    };
+
+    enum class hkConstraintType : uint32_t
+    {
+        BallAndSocket = 0,
+        Hinge = 1,
+        LimitedHinge = 2,
+        Prismatic = 6,
+        Ragdoll = 7,
+        StiffSpring = 8,
+        Malleable = 13,
+    };
+
+    struct bhkWrappedConstraintDataBase
+    {
+        hkConstraintType mType;
+        bhkConstraintCInfo mInfo;
+        bhkBallAndSocketConstraintCInfo mBallAndSocketInfo;
+        bhkHingeConstraintCInfo mHingeInfo;
+        bhkLimitedHingeConstraintCInfo mLimitedHingeInfo;
+        bhkPrismaticConstraintCInfo mPrismaticInfo;
+        bhkRagdollConstraintCInfo mRagdollInfo;
+        bhkStiffSpringConstraintCInfo mStiffSpringInfo;
+    };
+
+    struct bhkMalleableConstraintCInfo : bhkWrappedConstraintDataBase
+    {
+        float mTau;
+        float mDamping;
+        float mStrength;
+
+        void read(NIFStream* nif);
+    };
+
+    struct bhkWrappedConstraintData : bhkWrappedConstraintDataBase
+    {
+        bhkMalleableConstraintCInfo mMalleableInfo;
+
+        void read(NIFStream* nif);
+    };
+
+    struct bhkConstraintChainCInfo
+    {
+        bhkRigidBodyList mEntities;
+        bhkConstraintCInfo mInfo;
+
+        void read(NIFStream* nif);
+        void post(Reader& nif);
     };
 
     /// Record types
@@ -345,11 +454,16 @@ namespace Nif
     {
     };
 
+    // Abstract physics system
+    struct bhkSystem : public Record
+    {
+    };
+
     // Generic collision object
     struct NiCollisionObject : public Record
     {
         // The node that references this object
-        NodePtr mTarget;
+        NiAVObjectPtr mTarget;
 
         void read(NIFStream* nif) override { mTarget.read(nif); }
         void post(Reader& nif) override { mTarget.post(nif); }
@@ -358,7 +472,7 @@ namespace Nif
     // Bethesda Havok-specific collision object
     struct bhkCollisionObject : public NiCollisionObject
     {
-        unsigned short mFlags;
+        uint16_t mFlags;
         bhkWorldObjectPtr mBody;
 
         void read(NIFStream* nif) override;
@@ -369,12 +483,45 @@ namespace Nif
         }
     };
 
+    struct bhkNPCollisionObject : NiCollisionObject
+    {
+        uint16_t mFlags;
+        bhkSystemPtr mData;
+        uint32_t mBodyID;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkBlendCollisionObject : bhkCollisionObject
+    {
+        float mHeirGain;
+        float mVelGain;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkPhysicsSystem : public bhkSystem
+    {
+        std::vector<uint8_t> mData;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkRagdollSystem : public bhkSystem
+    {
+        std::vector<uint8_t> mData;
+
+        void read(NIFStream* nif) override;
+    };
+
     // Abstract Havok shape info record
     struct bhkWorldObject : public bhkSerializable
     {
         bhkShapePtr mShape;
         HavokFilter mHavokFilter;
         bhkWorldObjectCInfo mWorldObjectInfo;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
@@ -383,6 +530,7 @@ namespace Nif
     struct bhkEntity : public bhkWorldObject
     {
         bhkEntityCInfo mInfo;
+
         void read(NIFStream* nif) override;
     };
 
@@ -391,6 +539,7 @@ namespace Nif
     struct bhkBvTreeShape : public bhkShape
     {
         bhkShapePtr mShape;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
@@ -400,6 +549,7 @@ namespace Nif
     {
         float mScale;
         hkpMoppCode mMopp;
+
         void read(NIFStream* nif) override;
     };
 
@@ -408,10 +558,11 @@ namespace Nif
     {
         HavokMaterial mHavokMaterial;
         float mRadius;
-        unsigned int mGrowBy;
+        uint32_t mGrowBy;
         osg::Vec4f mScale{ 1.f, 1.f, 1.f, 0.f };
         NiTriStripsDataList mData;
-        std::vector<unsigned int> mFilters;
+        std::vector<HavokFilter> mHavokFilters;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
@@ -420,7 +571,7 @@ namespace Nif
     struct bhkPackedNiTriStripsShape : public bhkShapeCollection
     {
         std::vector<hkSubPartData> mSubshapes;
-        unsigned int mUserData;
+        uint32_t mUserData;
         float mRadius;
         osg::Vec4f mScale;
         hkPackedNiTriStripsDataPtr mData;
@@ -435,6 +586,7 @@ namespace Nif
         std::vector<TriangleData> mTriangles;
         std::vector<osg::Vec3f> mVertices;
         std::vector<hkSubPartData> mSubshapes;
+
         void read(NIFStream* nif) override;
     };
 
@@ -442,6 +594,7 @@ namespace Nif
     struct bhkSphereRepShape : public bhkShape
     {
         HavokMaterial mHavokMaterial;
+
         void read(NIFStream* nif) override;
     };
 
@@ -449,7 +602,32 @@ namespace Nif
     struct bhkConvexShape : public bhkSphereRepShape
     {
         float mRadius;
+
         void read(NIFStream* nif) override;
+    };
+
+    // A list of convex shapes sharing the same properties
+    struct bhkConvexListShape : public bhkShape
+    {
+        bhkShapeList mSubShapes;
+        HavokMaterial mMaterial;
+        float mRadius;
+        bhkWorldObjCInfoProperty mChildShapeProperty;
+        bool mUseCachedAABB;
+        float mClosestPointMinDistance;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkConvexSweepShape : bhkShape
+    {
+        bhkConvexShapePtr mShape;
+        HavokMaterial mMaterial;
+        float mRadius;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     // A convex shape built from vertices
@@ -459,6 +637,7 @@ namespace Nif
         bhkWorldObjCInfoProperty mNormalsProperty;
         std::vector<osg::Vec4f> mVertices;
         std::vector<osg::Vec4f> mNormals;
+
         void read(NIFStream* nif) override;
     };
 
@@ -468,6 +647,7 @@ namespace Nif
         HavokMaterial mHavokMaterial;
         float mRadius;
         osg::Matrixf mTransform;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
@@ -476,6 +656,7 @@ namespace Nif
     struct bhkBoxShape : public bhkConvexShape
     {
         osg::Vec3f mExtents;
+
         void read(NIFStream* nif) override;
     };
 
@@ -488,8 +669,56 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    // A cylinder
+    struct bhkCylinderShape : public bhkConvexShape
+    {
+        osg::Vec4f mVertexA, mVertexB;
+        float mCylinderRadius;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract shape that can collide with an array of spheres
+    struct bhkHeightfieldShape : bhkShape
+    {
+        HavokMaterial mHavokMaterial;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // A plane bounded by an AABB
+    struct bhkPlaneShape : bhkHeightfieldShape
+    {
+        osg::Plane mPlane;
+        osg::Vec4f mExtents;
+        osg::Vec4f mCenter;
+
+        void read(NIFStream* nif) override;
+    };
+
+    /// A shape based on triangle strips
+    struct bhkMeshShape : bhkShape
+    {
+        float mRadius;
+        osg::Vec4f mScale;
+        std::vector<bhkWorldObjCInfoProperty> mShapeProperties;
+        NiTriStripsDataList mDataList;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // A sphere
     using bhkSphereShape = bhkConvexShape;
+
+    // Multiple spheres
+    struct bhkMultiSphereShape : bhkSphereRepShape
+    {
+        bhkWorldObjCInfoProperty mShapeProperty;
+        std::vector<osg::BoundingSpheref> mSpheres;
+
+        void read(NIFStream* nif) override;
+    };
 
     // A list of shapes
     struct bhkListShape : public bhkShapeCollection
@@ -499,28 +728,30 @@ namespace Nif
         bhkWorldObjCInfoProperty mChildShapeProperty;
         bhkWorldObjCInfoProperty mChildFilterProperty;
         std::vector<HavokFilter> mHavokFilters;
+
         void read(NIFStream* nif) override;
     };
 
     struct bhkCompressedMeshShape : public bhkShape
     {
-        NodePtr mTarget;
-        unsigned int mUserData;
+        NiAVObjectPtr mTarget;
+        uint32_t mUserData;
         float mRadius;
         osg::Vec4f mScale;
         bhkCompressedMeshShapeDataPtr mData;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
 
     struct bhkCompressedMeshShapeData : public bhkRefObject
     {
-        unsigned int mBitsPerIndex, mBitsPerWIndex;
-        unsigned int mMaskWIndex, mMaskIndex;
+        uint32_t mBitsPerIndex, mBitsPerWIndex;
+        uint32_t mMaskWIndex, mMaskIndex;
         float mError;
         osg::Vec4f mAabbMin, mAabbMax;
-        char mWeldingType;
-        char mMaterialType;
+        uint8_t mWeldingType;
+        uint8_t mMaterialType;
         std::vector<bhkMeshMaterial> mMaterials;
         std::vector<bhkQsTransform> mChunkTransforms;
         std::vector<osg::Vec4f> mBigVerts;
@@ -534,14 +765,34 @@ namespace Nif
     {
         bhkRigidBodyCInfo mInfo;
         bhkSerializableList mConstraints;
-        unsigned int mBodyFlags;
+        uint32_t mBodyFlags;
 
         void read(NIFStream* nif) override;
     };
 
-    struct bhkSimpleShapePhantom : public bhkWorldObject
+    // Abstract non-physical object that receives collision events
+    struct bhkPhantom : bhkWorldObject
+    {
+    };
+
+    // A Phantom with an AABB
+    struct bhkAabbPhantom : bhkPhantom
+    {
+        osg::Vec4f mAabbMin, mAabbMax;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract Phantom with a collision shape
+    struct bhkShapePhantom : bhkPhantom
+    {
+    };
+
+    // A ShapePhantom with a transformation
+    struct bhkSimpleShapePhantom : bhkShapePhantom
     {
         osg::Matrixf mTransform;
+
         void read(NIFStream* nif) override;
     };
 
@@ -549,6 +800,7 @@ namespace Nif
     struct bhkConstraint : public bhkSerializable
     {
         bhkConstraintCInfo mInfo;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
@@ -556,18 +808,143 @@ namespace Nif
     struct bhkRagdollConstraint : public bhkConstraint
     {
         bhkRagdollConstraintCInfo mConstraint;
+
         void read(NIFStream* nif) override;
     };
 
     struct bhkHingeConstraint : public bhkConstraint
     {
         bhkHingeConstraintCInfo mConstraint;
+
         void read(NIFStream* nif) override;
     };
 
     struct bhkLimitedHingeConstraint : public bhkConstraint
     {
         bhkLimitedHingeConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkBallAndSocketConstraint : bhkConstraint
+    {
+        bhkBallAndSocketConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkBallSocketConstraintChain : bhkSerializable
+    {
+        std::vector<bhkBallAndSocketConstraintCInfo> mConstraints;
+        float mTau;
+        float mDamping;
+        float mConstraintForceMixing;
+        float mMaxErrorDistance;
+        bhkConstraintChainCInfo mConstraintChainInfo;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkStiffSpringConstraint : bhkConstraint
+    {
+        bhkStiffSpringConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkPrismaticConstraint : bhkConstraint
+    {
+        bhkPrismaticConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkMalleableConstraint : bhkConstraint
+    {
+        bhkMalleableConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkBreakableConstraint : bhkConstraint
+    {
+        bhkWrappedConstraintData mConstraint;
+        float mThreshold;
+        bool mRemoveWhenBroken;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract action applied during the simulation
+    struct bhkAction : bhkSerializable
+    {
+    };
+
+    struct bhkUnaryAction : bhkAction
+    {
+        bhkRigidBodyPtr mEntity;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkLiquidAction : bhkAction
+    {
+        float mInitialStickForce;
+        float mStickStrength;
+        float mNeighborDistance;
+        float mNeighborStrength;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkOrientHingedBodyAction : bhkUnaryAction
+    {
+        osg::Vec4f mHingeAxisLS;
+        osg::Vec4f mForwardLS;
+        float mStrength;
+        float mDamping;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkRagdollTemplate : Extra
+    {
+        NiAVObjectList mBones;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkRagdollTemplateData : Record
+    {
+        std::string mName;
+        float mMass;
+        float mRestitution;
+        float mFriction;
+        float mRadius;
+        HavokMaterial mHavokMaterial;
+        std::vector<bhkWrappedConstraintData> mConstraints;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkPoseArray : Record
+    {
+        struct BoneTransform
+        {
+            osg::Vec3f mTranslation;
+            // FIXME: this and some other quaternions are meant to be read in direct order
+            osg::Quat mRotation;
+            osg::Vec3f mScale;
+
+            void read(NIFStream* nif);
+        };
+
+        std::vector<std::string> mBones;
+        std::vector<std::vector<BoneTransform>> mPoses;
+
         void read(NIFStream* nif) override;
     };
 

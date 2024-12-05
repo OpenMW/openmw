@@ -138,10 +138,10 @@ bool Wizard::ComponentSelectionPage::validatePage()
                 msgBox.setIcon(QMessageBox::Information);
                 msgBox.setStandardButtons(QMessageBox::Cancel);
                 msgBox.setText(
-                    tr("<html><head/><body><p><b>You are about to install Tribunal</b></p> \
-                                  <p>Bloodmoon is already installed on your computer.</p> \
-                                  <p>However, it is recommended that you install Tribunal before Bloodmoon.</p> \
-                                  <p>Would you like to re-install Bloodmoon?</p></body></html>"));
+                    tr("<html><head/><body><p><b>You are about to install Tribunal</b></p>"
+                       "<p>Bloodmoon is already installed on your computer.</p>"
+                       "<p>However, it is recommended that you install Tribunal before Bloodmoon.</p>"
+                       "<p>Would you like to re-install Bloodmoon?</p></body></html>"));
 
                 QAbstractButton* reinstallButton
                     = msgBox.addButton(tr("Re-install &Bloodmoon"), QMessageBox::ActionRole);

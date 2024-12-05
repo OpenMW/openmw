@@ -1,14 +1,14 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm3/loadcont.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/class.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
+#include "apps/openmw/mwworld/class.hpp"
 
 namespace sol
 {
@@ -31,31 +31,34 @@ namespace MWLua
         container["content"] = sol::overload([](const LObject& o) { return Inventory<LObject>{ o }; },
             [](const GObject& o) { return Inventory<GObject>{ o }; });
         container["inventory"] = container["content"];
-        container["encumbrance"] = [](const Object& obj) -> float {
+        container["getEncumbrance"] = [](const Object& obj) -> float {
             const MWWorld::Ptr& ptr = containerPtr(obj);
             return ptr.getClass().getEncumbrance(ptr);
         };
-        container["capacity"] = [](const Object& obj) -> float {
+        container["encumbrance"] = container["getEncumbrance"]; // for compatibility; should be removed later
+        container["getCapacity"] = [](const Object& obj) -> float {
             const MWWorld::Ptr& ptr = containerPtr(obj);
             return ptr.getClass().getCapacity(ptr);
         };
-
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        container["capacity"] = container["getCapacity"]; // for compatibility; should be removed later
 
         addRecordFunctionBinding<ESM::Container>(container, context);
 
-        sol::usertype<ESM::Container> record = context.mLua->sol().new_usertype<ESM::Container>("ESM3_Container");
+        sol::usertype<ESM::Container> record = context.sol().new_usertype<ESM::Container>("ESM3_Container");
         record[sol::meta_function::to_string] = [](const ESM::Container& rec) -> std::string {
             return "ESM3_Container[" + rec.mId.toDebugString() + "]";
         };
         record["id"]
             = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Container& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        addModelProperty(record);
+        record["mwscript"] = sol::readonly_property([](const ESM::Container& rec) -> sol::optional<std::string> {
+            return LuaUtil::serializeRefId(rec.mScript);
         });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Container& rec) -> std::string { return rec.mScript.serializeText(); });
         record["weight"] = sol::readonly_property([](const ESM::Container& rec) -> float { return rec.mWeight; });
+        record["isOrganic"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Organic; });
+        record["isRespawning"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Respawn; });
     }
 }

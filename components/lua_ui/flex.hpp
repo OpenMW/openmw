@@ -11,10 +11,10 @@ namespace LuaUi
         MYGUI_RTTI_DERIVED(LuaFlex)
 
     protected:
-        MyGUI::IntSize calculateSize() override;
+        MyGUI::IntSize calculateSize() const override;
         void updateProperties() override;
         void updateChildren() override;
-        MyGUI::IntSize childScalingSize() override;
+        MyGUI::IntSize childScalingSize() const override;
 
         void updateCoord() override;
 
@@ -26,25 +26,37 @@ namespace LuaUi
         Alignment mArrange;
 
         template <typename T>
-        T& primary(MyGUI::types::TPoint<T>& point)
+        T& primary(MyGUI::types::TPoint<T>& point) const
         {
             return mHorizontal ? point.left : point.top;
         }
 
         template <typename T>
-        T& secondary(MyGUI::types::TPoint<T>& point)
+        T& secondary(MyGUI::types::TPoint<T>& point) const
         {
             return mHorizontal ? point.top : point.left;
         }
 
         template <typename T>
-        T& primary(MyGUI::types::TSize<T>& size)
+        T& primary(MyGUI::types::TSize<T>& size) const
         {
             return mHorizontal ? size.width : size.height;
         }
 
         template <typename T>
-        T& secondary(MyGUI::types::TSize<T>& size)
+        T& secondary(MyGUI::types::TSize<T>& size) const
+        {
+            return mHorizontal ? size.height : size.width;
+        }
+
+        template <typename T>
+        T primary(const MyGUI::types::TSize<T>& size) const
+        {
+            return mHorizontal ? size.width : size.height;
+        }
+
+        template <typename T>
+        T secondary(const MyGUI::types::TSize<T>& size) const
         {
             return mHorizontal ? size.height : size.width;
         }

@@ -68,6 +68,7 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
     set(MYGUI_BUILD_DEMOS OFF CACHE BOOL "")
     set(MYGUI_BUILD_PLUGINS OFF CACHE BOOL "")
     set(MYGUI_BUILD_TOOLS OFF CACHE BOOL "")
+    set(MYGUI_DONT_USE_OBSOLETE ON CACHE BOOL "")
 
     if(MYGUI_STATIC)
         set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -77,8 +78,8 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
 
     include(FetchContent)
     FetchContent_Declare(mygui
-        URL https://github.com/MyGUI/mygui/archive/refs/tags/MyGUI3.4.2.zip
-        URL_HASH SHA512=d15de716102237ca55b952c2ab52f84b91766332a0357a50b17c20cf2f168666ddaab52d088d7bb8f713ad0fc27e19d74e6ae2673f310a8f60a3b5754f0a0ba7
+        URL https://github.com/MyGUI/mygui/archive/refs/tags/MyGUI3.4.3.zip
+        URL_HASH SHA512=c804ef665e786076582367f171082cd2181fdbd214300ddcca4a4245c5a0f45e62e72778ee2d96ec46b393e22477dd729f9bb3006e6eecbf536674e34a057721
         SOURCE_DIR fetched/mygui
     )
     FetchContent_MakeAvailableExcludeFromAll(mygui)
@@ -172,11 +173,10 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "")
     set(RECASTNAVIGATION_EXAMPLES OFF CACHE BOOL "")
 
-    # master on 12 Oct 2022
     include(FetchContent)
     FetchContent_Declare(recastnavigation
-        URL https://github.com/recastnavigation/recastnavigation/archive/405cc095ab3a2df976a298421974a2af83843baf.zip
-        URL_HASH SHA512=39580ca258783ab3bda237843facc918697266e729c85065cdae1f0ed3d0ed1429a7ed08b18b926ba64402d9875a18f52904a87f43fe4fe30252f23edcfa6c70
+        URL https://github.com/recastnavigation/recastnavigation/archive/c393777d26d2ff6519ac23612abf8af42678c9dd.zip
+        URL_HASH SHA512=48f20cee7a70c2f20f4c68bb74d5af11a1434be85294e37f5fe7b7aae820fbcdff4f35d3be286eaf6f9cbce0aed4201fcc090df409a5bd04aec5fd7c29b3ad94
         SOURCE_DIR fetched/recastnavigation
     )
     FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
@@ -212,8 +212,8 @@ if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
 
     include(FetchContent)
     FetchContent_Declare(benchmark
-        URL https://github.com/google/benchmark/archive/refs/tags/v1.7.1.zip
-        URL_HASH SHA512=bec4016263587a57648e02b094c69e838c0a21e16c3dcfc6f03100397ab8f95d5fab1f5fd0d7e0e8adbb8212fff1eb574581158fdda1fa7fd6ff12762154b0cc
+        URL https://github.com/google/benchmark/archive/refs/tags/v1.8.3.zip
+        URL_HASH SHA512=d73587ad9c49338749e1d117a6f8c7ff9c603a91a2ffa91a7355c7df7dea82710b9a810d34ddfef20973ecdc77092ec10fb2b4e4cc8d2e7810cbed79617b3828
         SOURCE_DIR fetched/benchmark
     )
     FetchContent_MakeAvailableExcludeFromAll(benchmark)
@@ -234,7 +234,7 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
     )
     FetchContent_MakeAvailableExcludeFromAll(yaml-cpp)
 
-    if (MSVC)
+    if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
         target_precompile_headers(yaml-cpp PRIVATE <algorithm>)
     endif()
 endif()
@@ -294,7 +294,7 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
     set(ICU_LIBRARIES ICU::i18n ICU::uc ICU::data PARENT_SCOPE)
 endif()
 
-if ((BUILD_UNITTESTS OR BUILD_OPENCS_TESTS) AND NOT OPENMW_USE_SYSTEM_GOOGLETEST)
+if ((BUILD_COMPONENTS_TESTS OR BUILD_OPENCS_TESTS OR BUILD_OPENMW_TESTS) AND NOT OPENMW_USE_SYSTEM_GOOGLETEST)
 
     include(FetchContent)
     FetchContent_Declare(googletest

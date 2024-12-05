@@ -9,7 +9,7 @@ openmw_add_executable(bsatool
 )
 
 target_link_libraries(bsatool
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
 
@@ -18,7 +18,7 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(bsatool gcov)
 endif()
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(bsatool PRIVATE
         <filesystem>
         <fstream>

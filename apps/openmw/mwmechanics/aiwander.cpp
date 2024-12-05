@@ -86,7 +86,7 @@ namespace MWMechanics
             return MWBase::Environment::get()
                 .getWorld()
                 ->getRayCasting()
-                ->castRay(position, visibleDestination, actor, {}, mask)
+                ->castRay(position, visibleDestination, { actor }, {}, mask)
                 .mHit;
         }
 
@@ -224,12 +224,14 @@ namespace MWMechanics
             {
                 const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
                 constexpr float endTolerance = 0;
+                const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+                const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
                 mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(pathgrid),
-                    agentBounds, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, PathType::Full);
+                    agentBounds, navigatorFlags, areaCosts, endTolerance, PathType::Full);
             }
 
             if (mPathFinder.isPathConstructed())
-                storage.setState(AiWanderStorage::Wander_Walking);
+                storage.setState(AiWanderStorage::Wander_Walking, !mUsePathgrid);
         }
 
         if (!cStats.getMovementFlag(CreatureStats::Flag_ForceJump)
@@ -367,8 +369,8 @@ namespace MWMechanics
         const auto world = MWBase::Environment::get().getWorld();
         const auto agentBounds = world->getPathfindingAgentBounds(actor);
         const auto navigator = world->getNavigator();
-        const auto navigatorFlags = getNavigatorFlags(actor);
-        const auto areaCosts = getAreaCosts(actor);
+        const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+        const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
 
         do
@@ -453,27 +455,37 @@ namespace MWMechanics
     void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration,
         MWWorld::MovementDirectionFlags supportedMovementDirections, AiWanderStorage& storage)
     {
-        switch (storage.mState)
+        // Attempt to fast forward to the next state instead of remaining in an intermediate state for a frame
+        for (int i = 0; i < 2; ++i)
         {
-            case AiWanderStorage::Wander_IdleNow:
-                onIdleStatePerFrameActions(actor, duration, storage);
-                break;
+            switch (storage.mState)
+            {
+                case AiWanderStorage::Wander_IdleNow:
+                {
+                    onIdleStatePerFrameActions(actor, duration, storage);
+                    if (storage.mState != AiWanderStorage::Wander_ChooseAction)
+                        return;
+                    continue;
+                }
+                case AiWanderStorage::Wander_Walking:
+                    onWalkingStatePerFrameActions(actor, duration, supportedMovementDirections, storage);
+                    return;
 
-            case AiWanderStorage::Wander_Walking:
-                onWalkingStatePerFrameActions(actor, duration, supportedMovementDirections, storage);
-                break;
+                case AiWanderStorage::Wander_ChooseAction:
+                {
+                    onChooseActionStatePerFrameActions(actor, storage);
+                    if (storage.mState != AiWanderStorage::Wander_IdleNow)
+                        return;
+                    continue;
+                }
+                case AiWanderStorage::Wander_MoveNow:
+                    return; // nothing to do
 
-            case AiWanderStorage::Wander_ChooseAction:
-                onChooseActionStatePerFrameActions(actor, storage);
-                break;
-
-            case AiWanderStorage::Wander_MoveNow:
-                break; // nothing to do
-
-            default:
-                // should never get here
-                assert(false);
-                break;
+                default:
+                    // should never get here
+                    assert(false);
+                    return;
+            }
         }
     }
 
@@ -499,7 +511,7 @@ namespace MWMechanics
         if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
             if (mPathFinder.isPathConstructed())
-                storage.setState(AiWanderStorage::Wander_Walking);
+                storage.setState(AiWanderStorage::Wander_Walking, !mUsePathgrid);
             else
                 storage.setState(AiWanderStorage::Wander_ChooseAction);
         }

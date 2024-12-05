@@ -30,6 +30,7 @@
 #include <cstdint>
 
 #include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 
 #include "reference.hpp" // Placement, EnableParent
@@ -56,6 +57,8 @@ namespace ESM4
         ESM::FormId mGlobal;
 
         EnableParent mEsp;
+
+        std::int32_t mCount = 1;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

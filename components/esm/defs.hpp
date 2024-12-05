@@ -4,12 +4,8 @@
 #include <stdexcept>
 #include <stdint.h>
 
-#include <tuple>
-
-#include <osg/Vec3f>
-
-#include "components/esm/fourcc.hpp"
 #include <components/esm/esmcommon.hpp>
+#include <components/esm/fourcc.hpp>
 #include <components/esm4/common.hpp>
 
 namespace ESM
@@ -18,9 +14,9 @@ namespace ESM
     struct EpochTimeStamp
     {
         float mGameHour;
-        int mDay;
-        int mMonth;
-        int mYear;
+        int32_t mDay;
+        int32_t mMonth;
+        int32_t mYear;
     };
 
     // Pixel color value. Standard four-byte rr,gg,bb,aa format.
@@ -32,37 +28,6 @@ namespace ESM
         RT_Touch = 1,
         RT_Target = 2
     };
-
-    // Position and rotation
-    struct Position
-    {
-        float pos[3]{};
-
-        // In radians
-        float rot[3]{};
-
-        osg::Vec3f asVec3() const { return osg::Vec3f(pos[0], pos[1], pos[2]); }
-
-        osg::Vec3f asRotationVec3() const { return osg::Vec3f(rot[0], rot[1], rot[2]); }
-
-        friend inline bool operator<(const Position& l, const Position& r)
-        {
-            const auto tuple = [](const Position& v) { return std::tuple(v.asVec3(), v.asRotationVec3()); };
-            return tuple(l) < tuple(r);
-        }
-    };
-
-    bool inline operator==(const Position& left, const Position& right) noexcept
-    {
-        return left.pos[0] == right.pos[0] && left.pos[1] == right.pos[1] && left.pos[2] == right.pos[2]
-            && left.rot[0] == right.rot[0] && left.rot[1] == right.rot[1] && left.rot[2] == right.rot[2];
-    }
-
-    bool inline operator!=(const Position& left, const Position& right) noexcept
-    {
-        return left.pos[0] != right.pos[0] || left.pos[1] != right.pos[1] || left.pos[2] != right.pos[2]
-            || left.rot[0] != right.rot[0] || left.rot[1] != right.rot[1] || left.rot[2] != right.rot[2];
-    }
 
     constexpr unsigned int sEsm4RecnameFlag = 0x00800000;
 
@@ -146,8 +111,6 @@ namespace ESM
 
         // format 0 - saved games
         REC_SAVE = esm3Recname("SAVE"),
-        REC_JOUR_LEGACY = esm3Recname("\xa4UOR"), // "\xa4UOR", rather than "JOUR", little oversight when magic numbers
-                                                  // were calculated by hand, needs to be supported for older files now
         REC_JOUR = esm3Recname("JOUR"),
         REC_QUES = esm3Recname("QUES"),
         REC_GSCR = esm3Recname("GSCR"),
@@ -172,6 +135,8 @@ namespace ESM
         // format 1
         REC_FILT = esm3Recname("FILT"),
         REC_DBGP = esm3Recname("DBGP"), ///< only used in project files
+        REC_SELG = esm3Recname("SELG"),
+
         REC_LUAL = esm3Recname("LUAL"), // LuaScriptsCfg (only in omwgame or omwaddon)
 
         // format 16 - Lua scripts in saved games

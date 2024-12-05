@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESSIMPORT_PLAYER_H
 #define OPENMW_ESSIMPORT_PLAYER_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -17,7 +18,7 @@ namespace ESSImport
     /// Other player data
     struct PCDT
     {
-        int mBounty;
+        int32_t mBounty;
         std::string mBirthsign;
 
         std::vector<std::string> mKnownDialogueTopics;
@@ -41,13 +42,11 @@ namespace ESSImport
             PlayerFlags_LevitationDisabled = 0x80000
         };
 
-#pragma pack(push)
-#pragma pack(1)
         struct FNAM
         {
             unsigned char mRank;
             unsigned char mUnknown1[3];
-            int mReputation;
+            int32_t mReputation;
             unsigned char mFlags; // 0x1: unknown, 0x2: expelled
             unsigned char mUnknown2[3];
             ESM::NAME32 mFactionName;
@@ -59,7 +58,7 @@ namespace ESSImport
             {
                 float mX, mY, mZ; // worldspace position
                 float mRotZ; // Z angle in radians
-                int mCellX, mCellY; // grid coordinates; for interior cells this is always (0, 0)
+                int32_t mCellX, mCellY; // grid coordinates; for interior cells this is always (0, 0)
             };
 
             struct Rotation
@@ -67,15 +66,15 @@ namespace ESSImport
                 float mData[3][3];
             };
 
-            int mPlayerFlags; // controls, camera and draw state
-            unsigned int mLevelProgress;
+            int32_t mPlayerFlags; // controls, camera and draw state
+            uint32_t mLevelProgress;
             float mSkillProgress[27]; // skill progress, non-uniform scaled
             unsigned char mSkillIncreases[8]; // number of skill increases for each attribute
-            int mTelekinesisRangeBonus; // in units; seems redundant
+            int32_t mTelekinesisRangeBonus; // in units; seems redundant
             float mVisionBonus; // range: <0.0, 1.0>; affected by light spells and Get/Mod/SetPCVisionBonus
-            int mDetectKeyMagnitude; // seems redundant
-            int mDetectEnchantmentMagnitude; // seems redundant
-            int mDetectAnimalMagnitude; // seems redundant
+            int32_t mDetectKeyMagnitude; // seems redundant
+            int32_t mDetectEnchantmentMagnitude; // seems redundant
+            int32_t mDetectAnimalMagnitude; // seems redundant
             MarkLocation mMarkLocation;
             unsigned char mUnknown3[4];
             Rotation mVerticalRotation;
@@ -85,16 +84,15 @@ namespace ESSImport
 
         struct ENAM
         {
-            int mCellX;
-            int mCellY;
+            int32_t mCellX;
+            int32_t mCellY;
         };
 
         struct AADT // 44 bytes
         {
-            int animGroupIndex; // See convertANIS() for the mapping.
+            int32_t animGroupIndex; // See convertANIS() for the mapping.
             unsigned char mUnknown5[40];
         };
-#pragma pack(pop)
 
         std::vector<FNAM> mFactions;
         PNAM mPNAM;

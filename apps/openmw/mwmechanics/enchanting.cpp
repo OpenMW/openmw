@@ -84,7 +84,8 @@ namespace MWMechanics
             if (getEnchantChance() <= (Misc::Rng::roll0to99(prng)))
                 return false;
 
-            mEnchanter.getClass().skillUsageSucceeded(mEnchanter, ESM::Skill::Enchant, 2);
+            mEnchanter.getClass().skillUsageSucceeded(
+                mEnchanter, ESM::Skill::Enchant, ESM::Skill::Enchant_CreateMagicItem);
         }
 
         enchantment.mEffects = mEffectList;
@@ -197,13 +198,13 @@ namespace MWMechanics
 
         float enchantmentCost = 0.f;
         float cost = 0.f;
-        for (const ESM::ENAMstruct& effect : mEffectList.mList)
+        for (const ESM::IndexedENAMstruct& effect : mEffectList.mList)
         {
-            float baseCost = (store.get<ESM::MagicEffect>().find(effect.mEffectID))->mData.mBaseCost;
-            int magMin = std::max(1, effect.mMagnMin);
-            int magMax = std::max(1, effect.mMagnMax);
-            int area = std::max(1, effect.mArea);
-            float duration = static_cast<float>(effect.mDuration);
+            float baseCost = (store.get<ESM::MagicEffect>().find(effect.mData.mEffectID))->mData.mBaseCost;
+            int magMin = std::max(1, effect.mData.mMagnMin);
+            int magMax = std::max(1, effect.mData.mMagnMax);
+            int area = std::max(1, effect.mData.mArea);
+            float duration = static_cast<float>(effect.mData.mDuration);
             if (mCastStyle == ESM::Enchantment::ConstantEffect)
                 duration = fEnchantmentConstantDurationMult;
 
@@ -211,7 +212,7 @@ namespace MWMechanics
 
             cost = std::max(1.f, cost);
 
-            if (effect.mRange == ESM::RT_Target)
+            if (effect.mData.mRange == ESM::RT_Target)
                 cost *= 1.5f;
 
             enchantmentCost += precise ? cost : std::floor(cost);
@@ -243,13 +244,7 @@ namespace MWMechanics
 
             for (int i = 0; i < static_cast<int>(iter->mEffects.mList.size()); ++i)
             {
-                const ESM::ENAMstruct& first = iter->mEffects.mList[i];
-                const ESM::ENAMstruct& second = toFind.mEffects.mList[i];
-
-                if (first.mEffectID != second.mEffectID || first.mArea != second.mArea || first.mRange != second.mRange
-                    || first.mSkill != second.mSkill || first.mAttribute != second.mAttribute
-                    || first.mMagnMin != second.mMagnMin || first.mMagnMax != second.mMagnMax
-                    || first.mDuration != second.mDuration)
+                if (iter->mEffects.mList[i] != toFind.mEffects.mList[i])
                 {
                     mismatch = true;
                     break;

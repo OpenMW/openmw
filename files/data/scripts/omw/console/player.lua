@@ -71,14 +71,21 @@ local env = {
     storage = require('openmw.storage'),
     core = require('openmw.core'),
     types = require('openmw.types'),
+    vfs = require('openmw.vfs'),
+    markup = require('openmw.markup'),
+    ambient = require('openmw.ambient'),
     async = require('openmw.async'),
     nearby = require('openmw.nearby'),
     self = require('openmw.self'),
     input = require('openmw.input'),
+    postprocessing = require('openmw.postprocessing'),
+    anim = require('openmw.animation'),
     ui = require('openmw.ui'),
     camera = require('openmw.camera'),
     aux_util = require('openmw_aux.util'),
     debug = require('openmw.debug'),
+    calendar = require('openmw_aux.calendar'),
+    time = require('openmw_aux.time'),
     view = require('openmw_aux.util').deepToString,
     print = printToConsole,
     exit = exitLuaMode,
@@ -112,9 +119,12 @@ local function onConsoleCommand(mode, cmd, selectedObject)
                 cmd = 'luag'
             elseif arg == 'selected' then
                 cmd = 'luas'
+            elseif arg == 'menu' then
+                -- handled in menu.lua
             else
                 local msg = [[
-Usage: 'lua player' or 'luap' - enter player context
+Usage: 'lua menu' or 'luam' - enter menu context
+       'lua player' or 'luap' - enter player context
        'lua global' or 'luag' - enter global context
        'lua selected' or 'luas' - enter local context on the selected object]]
                 ui.printToConsole(msg, ui.CONSOLE_COLOR.Info)
@@ -156,4 +166,3 @@ return {
         OMWConsoleHelp = printHelp,
     }
 }
-

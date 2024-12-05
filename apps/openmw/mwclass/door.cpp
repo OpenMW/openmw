@@ -1,6 +1,7 @@
 #include "door.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/doorstate.hpp>
 #include <components/esm3/loaddoor.hpp>
@@ -25,7 +26,6 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/objects.hpp"
@@ -35,6 +35,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -81,7 +82,7 @@ namespace MWClass
     void Door::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
         MWPhysics::PhysicsSystem& physics) const
     {
-        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_Door);
+        physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_Door);
     }
 
     bool Door::isDoor() const
@@ -94,17 +95,14 @@ namespace MWClass
         return true;
     }
 
-    std::string Door::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Door::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Door>(ptr);
     }
 
     std::string_view Door::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Door>* ref = ptr.get<ESM::Door>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Door>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Door::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -136,7 +134,7 @@ namespace MWClass
                 const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(ESM::MagicEffect::Telekinesis);
 
                 animation->addSpellCastGlow(
-                    effect, 1); // 1 second glow to match the time taken for a door opening or closing
+                    effect->getColor(), 1); // 1 second glow to match the time taken for a door opening or closing
             }
         }
 
@@ -267,7 +265,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name));
 
         std::string text;
 
@@ -290,10 +288,10 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

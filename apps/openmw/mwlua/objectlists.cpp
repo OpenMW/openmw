@@ -7,7 +7,6 @@
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "../mwclass/container.hpp"
 
@@ -75,7 +74,7 @@ namespace MWLua
         if (mChanged)
         {
             mList->clear();
-            for (const ObjectId& id : mSet)
+            for (ObjectId id : mSet)
                 mList->push_back(id);
             mChanged = false;
         }

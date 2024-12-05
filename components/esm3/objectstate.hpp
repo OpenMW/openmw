@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "components/esm/luascripts.hpp"
-#include "components/esm3/formatversion.hpp"
+#include <components/esm/luascripts.hpp>
+#include <components/esm/position.hpp>
+#include <components/esm3/formatversion.hpp>
 
 #include "animationstate.hpp"
 #include "cellref.hpp"
@@ -32,9 +33,8 @@ namespace ESM
         Locals mLocals;
         LuaScripts mLuaScripts;
         unsigned char mEnabled;
-        int mCount;
         Position mPosition;
-        unsigned int mFlags;
+        uint32_t mFlags;
 
         // Is there any class-specific state following the ObjectState
         bool mHasCustomState;
@@ -46,7 +46,6 @@ namespace ESM
         ObjectState()
             : mHasLocals(0)
             , mEnabled(0)
-            , mCount(0)
             , mFlags(0)
             , mHasCustomState(true)
         {

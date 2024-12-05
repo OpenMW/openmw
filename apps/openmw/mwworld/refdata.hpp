@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_REFDATA_H
 #define GAME_MWWORLD_REFDATA_H
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/animationstate.hpp>
 
@@ -47,6 +47,10 @@ namespace MWWorld
 
         MWScript::Locals mLocals;
         std::shared_ptr<MWLua::LocalScripts> mLuaScripts;
+        ESM::Position mPosition;
+        ESM::AnimationState mAnimationState;
+        std::unique_ptr<CustomData> mCustomData;
+        unsigned int mFlags;
 
         /// separate delete flag used for deletion by a content file
         /// @note not stored in the save game file.
@@ -58,22 +62,11 @@ namespace MWWorld
         bool mPhysicsPostponed : 1;
 
     private:
-        /// 0: deleted
-        int mCount;
-
-        ESM::Position mPosition;
-
-        ESM::AnimationState mAnimationState;
-
-        std::unique_ptr<CustomData> mCustomData;
+        bool mChanged : 1;
 
         void copy(const RefData& refData);
 
         void cleanup();
-
-        bool mChanged;
-
-        unsigned int mFlags;
 
     public:
         RefData();
@@ -110,26 +103,15 @@ namespace MWWorld
         /// Set base node (can be a null pointer).
         void setBaseNode(osg::ref_ptr<SceneUtil::PositionAttitudeTransform> base);
 
-        int getCount(bool absolute = true) const;
-
         void setLocals(const ESM::Script& script);
 
         MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
         void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
 
-        void setCount(int count);
-        ///< Set object count (an object pile is a simple object with a count >1).
-        ///
-        /// \warning Do not call setCount() to add or remove objects from a
-        /// container or an actor's inventory. Call ContainerStore::add() or
-        /// ContainerStore::remove() instead.
-
         /// This flag is only used for content stack loading and will not be stored in the savegame.
         /// If the object was deleted by gameplay, then use setCount(0) instead.
         void setDeletedByContentFile(bool deleted);
 
-        /// Returns true if the object was either deleted by the content file or by gameplay.
-        bool isDeleted() const;
         /// Returns true if the object was deleted by a content file.
         bool isDeletedByContentFile() const;
 

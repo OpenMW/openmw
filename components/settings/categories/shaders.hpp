@@ -1,8 +1,9 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADERS_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADERS_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/sceneutil/lightingmethod.hpp>
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
@@ -30,11 +31,12 @@ namespace Settings
         SettingValue<std::string> mSpecularMapPattern{ mIndex, "Shaders", "specular map pattern" };
         SettingValue<std::string> mTerrainSpecularMapPattern{ mIndex, "Shaders", "terrain specular map pattern" };
         SettingValue<bool> mApplyLightingToEnvironmentMaps{ mIndex, "Shaders", "apply lighting to environment maps" };
-        SettingValue<std::string> mLightingMethod{ mIndex, "Shaders", "lighting method",
-            makeEnumSanitizerString({ "legacy", "shaders compatibility", "shaders" }) };
+        SettingValue<SceneUtil::LightingMethod> mLightingMethod{ mIndex, "Shaders", "lighting method" };
+        SettingValue<bool> mClassicFalloff{ mIndex, "Shaders", "classic falloff" };
         SettingValue<float> mLightBoundsMultiplier{ mIndex, "Shaders", "light bounds multiplier",
             makeClampSanitizerFloat(0, 5) };
-        SettingValue<float> mMaximumLightDistance{ mIndex, "Shaders", "maximum light distance" };
+        SettingValue<float> mMaximumLightDistance{ mIndex, "Shaders", "maximum light distance",
+            makeMaxSanitizerFloat(0) };
         SettingValue<float> mLightFadeStart{ mIndex, "Shaders", "light fade start", makeClampSanitizerFloat(0, 1) };
         SettingValue<int> mMaxLights{ mIndex, "Shaders", "max lights", makeClampSanitizerInt(2, 64) };
         SettingValue<float> mMinimumInteriorBrightness{ mIndex, "Shaders", "minimum interior brightness",

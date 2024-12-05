@@ -75,7 +75,7 @@ namespace CSVRender
         QString text("Pathgrid: ");
         text += mPathgrid->getId().c_str();
         text += " (";
-        text += QString::number(SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0)));
+        text += QString::number(SceneUtil::getPathgridNode(hit.index0));
         text += ")";
 
         return text;

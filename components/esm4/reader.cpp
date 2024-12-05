@@ -41,6 +41,7 @@
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/to_utf8/to_utf8.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "grouptype.hpp"
 
@@ -82,8 +83,8 @@ namespace ESM4
 
             stream.next_in = reinterpret_cast<Bytef*>(compressed.data());
             stream.next_out = reinterpret_cast<Bytef*>(decompressed.data());
-            stream.avail_in = compressed.size();
-            stream.avail_out = decompressed.size();
+            stream.avail_in = static_cast<uInt>(compressed.size());
+            stream.avail_out = static_cast<uInt>(decompressed.size());
 
             if (const int ec = inflateInit(&stream); ec != Z_OK)
                 return getError("inflateInit error", ec, stream.msg);
@@ -111,9 +112,9 @@ namespace ESM4
                 const auto prevTotalIn = stream.total_in;
                 const auto prevTotalOut = stream.total_out;
                 stream.next_in = reinterpret_cast<Bytef*>(compressed.data());
-                stream.avail_in = std::min(blockSize, compressed.size());
+                stream.avail_in = static_cast<uInt>(std::min(blockSize, compressed.size()));
                 stream.next_out = reinterpret_cast<Bytef*>(decompressed.data());
-                stream.avail_out = std::min(blockSize, decompressed.size());
+                stream.avail_out = static_cast<uInt>(std::min(blockSize, decompressed.size()));
                 const int ec = inflate(&stream, Z_NO_FLUSH);
                 if (ec == Z_STREAM_END)
                     break;
@@ -169,8 +170,8 @@ namespace ESM4
         , currCellGrid(FormId{ 0, 0 })
         , cellGridValid(false)
     {
-        subRecordHeader.typeId = 0;
-        subRecordHeader.dataSize = 0;
+        recordHeader = {};
+        subRecordHeader = {};
     }
 
     Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs,
@@ -201,15 +202,6 @@ namespace ESM4
 
         // restart from the beginning (i.e. "TES4" record header)
         mStream->seekg(0, mStream->beg);
-#if 0
-    unsigned int esmVer = mHeader.mData.version.ui;
-    bool isTes4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
-    //bool isTes5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_170;
-    //bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-
-    // TES4 header size is 4 bytes smaller than TES5 header
-    mCtx.recHeaderSize = isTes4 ? sizeof(ESM4::RecordHeader) - 4 : sizeof(ESM4::RecordHeader);
-#endif
         getRecordHeader();
         if (mCtx.recordHeader.record.typeId == REC_TES4)
         {
@@ -328,16 +320,18 @@ namespace ESM4
         std::filesystem::path path = strings / (prefix + language + suffix);
         if (mVFS != nullptr)
         {
-            std::string vfsPath = Files::pathToUnicodeString(path);
-            if (!mVFS->exists(vfsPath))
+            VFS::Path::Normalized vfsPath(Files::pathToUnicodeString(path));
+            Files::IStreamPtr stream = mVFS->find(vfsPath);
+
+            if (stream == nullptr)
             {
                 path = strings / (prefix + altLanguage + suffix);
-                vfsPath = Files::pathToUnicodeString(path);
+                vfsPath = VFS::Path::Normalized(Files::pathToUnicodeString(path));
+                stream = mVFS->find(vfsPath);
             }
 
-            if (mVFS->exists(vfsPath))
+            if (stream != nullptr)
             {
-                const Files::IStreamPtr stream = mVFS->get(vfsPath);
                 buildLStringIndex(stringType, *stream);
                 return;
             }
@@ -596,7 +590,7 @@ namespace ESM4
 
         // Extended storage subrecord redefines the following subrecord's size.
         // Would need to redesign the loader to support that, so skip over both subrecords.
-        if (result && mCtx.subRecordHeader.typeId == ESM4::SUB_XXXX)
+        if (result && mCtx.subRecordHeader.typeId == ESM::fourCC("XXXX"))
         {
             std::uint32_t extDataSize;
             get(extDataSize);

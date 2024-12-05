@@ -47,9 +47,8 @@ namespace ESM
         std::vector<int> mSummonGraveyard;
 
         TimeStamp mTradeTime;
-        int mGoldPool;
-        int mActorId;
-        // int mHitAttemptActorId;
+        int32_t mGoldPool;
+        int32_t mActorId;
 
         enum Flags
         {

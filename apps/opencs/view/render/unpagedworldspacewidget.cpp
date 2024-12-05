@@ -79,7 +79,7 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget(
 
     update();
 
-    mCell = std::make_unique<Cell>(document.getData(), mRootNode, mCellId);
+    mCell = std::make_unique<Cell>(document, mRootNode, mCellId);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -127,7 +127,7 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop(
 
     mCellId = universalIdData.begin()->getId();
 
-    mCell = std::make_unique<Cell>(getDocument().getData(), mRootNode, mCellId);
+    mCell = std::make_unique<Cell>(getDocument(), mRootNode, mCellId);
     mCamPositionSet = false;
     mOrbitCamControl->reset();
 
@@ -197,6 +197,16 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::UnpagedWorldspaceWidget
     unsigned int elementMask) const
 {
     return mCell->getSelection(elementMask);
+}
+
+void CSVRender::UnpagedWorldspaceWidget::selectGroup(const std::vector<std::string>& group) const
+{
+    mCell->selectFromGroup(group);
+}
+
+void CSVRender::UnpagedWorldspaceWidget::unhideAll() const
+{
+    mCell->unhideAll();
 }
 
 std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::UnpagedWorldspaceWidget::getEdited(
@@ -337,7 +347,6 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons(CSVWidget:
 {
     WorldspaceWidget::addVisibilitySelectorButtons(tool);
     tool->addButton(Button_Terrain, Mask_Terrain, "Terrain", "", true);
-    tool->addButton(Button_Fog, Mask_Fog, "Fog");
 }
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()

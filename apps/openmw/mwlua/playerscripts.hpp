@@ -7,6 +7,7 @@
 
 #include "../mwbase/luamanager.hpp"
 
+#include "inputprocessor.hpp"
 #include "localscripts.hpp"
 
 namespace MWLua
@@ -17,42 +18,14 @@ namespace MWLua
     public:
         PlayerScripts(LuaUtil::LuaState* lua, const LObject& obj)
             : LocalScripts(lua, obj)
+            , mInputProcessor(this)
         {
-            registerEngineHandlers({ &mConsoleCommandHandlers, &mKeyPressHandlers, &mKeyReleaseHandlers,
-                &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers, &mActionHandlers, &mOnFrameHandlers,
-                &mTouchpadPressed, &mTouchpadReleased, &mTouchpadMoved, &mQuestUpdate, &mUiModeChanged });
+            registerEngineHandlers({ &mConsoleCommandHandlers, &mOnFrameHandlers, &mQuestUpdate, &mUiModeChanged });
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
         {
-            using InputEvent = MWBase::LuaManager::InputEvent;
-            switch (event.mType)
-            {
-                case InputEvent::KeyPressed:
-                    callEngineHandlers(mKeyPressHandlers, std::get<SDL_Keysym>(event.mValue));
-                    break;
-                case InputEvent::KeyReleased:
-                    callEngineHandlers(mKeyReleaseHandlers, std::get<SDL_Keysym>(event.mValue));
-                    break;
-                case InputEvent::ControllerPressed:
-                    callEngineHandlers(mControllerButtonPressHandlers, std::get<int>(event.mValue));
-                    break;
-                case InputEvent::ControllerReleased:
-                    callEngineHandlers(mControllerButtonReleaseHandlers, std::get<int>(event.mValue));
-                    break;
-                case InputEvent::Action:
-                    callEngineHandlers(mActionHandlers, std::get<int>(event.mValue));
-                    break;
-                case InputEvent::TouchPressed:
-                    callEngineHandlers(mTouchpadPressed, std::get<SDLUtil::TouchEvent>(event.mValue));
-                    break;
-                case InputEvent::TouchReleased:
-                    callEngineHandlers(mTouchpadReleased, std::get<SDLUtil::TouchEvent>(event.mValue));
-                    break;
-                case InputEvent::TouchMoved:
-                    callEngineHandlers(mTouchpadMoved, std::get<SDLUtil::TouchEvent>(event.mValue));
-                    break;
-            }
+            mInputProcessor.processInputEvent(event);
         }
 
         void onFrame(float dt) { callEngineHandlers(mOnFrameHandlers, dt); }
@@ -66,25 +39,19 @@ namespace MWLua
         }
 
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
-        void uiModeChanged(const MWWorld::Ptr& arg)
+        void uiModeChanged(ObjectId arg, bool byLuaAction)
         {
-            if (arg.isEmpty())
-                callEngineHandlers(mUiModeChanged);
+            if (arg.isZeroOrUnset())
+                callEngineHandlers(mUiModeChanged, byLuaAction);
             else
-                callEngineHandlers(mUiModeChanged, LObject(arg));
+                callEngineHandlers(mUiModeChanged, byLuaAction, LObject(arg));
         }
 
     private:
+        friend class MWLua::InputProcessor<PlayerScripts>;
+        InputProcessor<PlayerScripts> mInputProcessor;
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };
-        EngineHandlerList mKeyPressHandlers{ "onKeyPress" };
-        EngineHandlerList mKeyReleaseHandlers{ "onKeyRelease" };
-        EngineHandlerList mControllerButtonPressHandlers{ "onControllerButtonPress" };
-        EngineHandlerList mControllerButtonReleaseHandlers{ "onControllerButtonRelease" };
-        EngineHandlerList mActionHandlers{ "onInputAction" };
         EngineHandlerList mOnFrameHandlers{ "onFrame" };
-        EngineHandlerList mTouchpadPressed{ "onTouchPress" };
-        EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
-        EngineHandlerList mTouchpadMoved{ "onTouchMove" };
         EngineHandlerList mQuestUpdate{ "onQuestUpdate" };
         EngineHandlerList mUiModeChanged{ "_onUiModeChanged" };
     };

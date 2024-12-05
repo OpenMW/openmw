@@ -174,6 +174,7 @@ namespace MWGui
         : mCategory(Category_All)
         , mFilter(0)
         , mSortByType(true)
+        , mApparatusTypeFilter(-1)
     {
         mSourceModel = std::move(sourceModel);
     }
@@ -287,7 +288,7 @@ namespace MWGui
 
         if ((mFilter & Filter_OnlyRepairable)
             && (!base.getClass().hasItemHealth(base)
-                || (base.getClass().getItemHealth(base) == base.getClass().getItemMaxHealth(base))
+                || (base.getClass().getItemHealth(base) >= base.getClass().getItemMaxHealth(base))
                 || (base.getType() != ESM::Weapon::sRecordId && base.getType() != ESM::Armor::sRecordId)))
             return false;
 
@@ -308,6 +309,16 @@ namespace MWGui
 
             if (base.getCellRef().getEnchantmentCharge() == -1
                 || base.getCellRef().getEnchantmentCharge() >= MWMechanics::getEnchantmentCharge(*ench))
+                return false;
+        }
+
+        if ((mFilter & Filter_OnlyAlchemyTools))
+        {
+            if (base.getType() != ESM::Apparatus::sRecordId)
+                return false;
+
+            int32_t apparatusType = base.get<ESM::Apparatus>()->mBase->mData.mType;
+            if (mApparatusTypeFilter >= 0 && apparatusType != mApparatusTypeFilter)
                 return false;
         }
 
@@ -350,6 +361,11 @@ namespace MWGui
     void SortFilterItemModel::setEffectFilter(const std::string& filter)
     {
         mEffectFilter = Utf8Stream::lowerCaseUtf8(filter);
+    }
+
+    void SortFilterItemModel::setApparatusTypeFilter(const int32_t type)
+    {
+        mApparatusTypeFilter = type;
     }
 
     void SortFilterItemModel::update()

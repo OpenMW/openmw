@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Book::BKDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mWeight, v.mValue, v.mIsScroll, v.mSkillId, v.mEnchant);
+    }
+
     void Book::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -28,7 +36,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("BKDT"):
-                    esm.getHT(mData.mWeight, mData.mValue, mData.mIsScroll, mData.mSkillId, mData.mEnchant);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -70,7 +78,7 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNT("BKDT", mData, 20);
+        esm.writeNamedComposite("BKDT", mData);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOString("TEXT", mText);

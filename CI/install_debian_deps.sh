@@ -33,9 +33,10 @@ declare -rA GROUPED_DEPS=(
     libboost-system-dev libboost-iostreams-dev
 
     libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
-    libsdl2-dev libqt5opengl5-dev libopenal-dev libunshield-dev libtinyxml-dev
-    libbullet-dev liblz4-dev libpng-dev libjpeg-dev libluajit-5.1-dev
-    librecast-dev libsqlite3-dev ca-certificates libicu-dev libyaml-cpp-dev
+    libsdl2-dev libqt5opengl5-dev qttools5-dev qttools5-dev-tools libopenal-dev
+    libunshield-dev libtinyxml-dev libbullet-dev liblz4-dev libpng-dev libjpeg-dev
+    libluajit-5.1-dev librecast-dev libsqlite3-dev ca-certificates libicu-dev
+    libyaml-cpp-dev libqt5svg5 libqt5svg5-dev
   "
 
   # These dependencies can alternatively be built and linked statically.
@@ -86,7 +87,7 @@ declare -rA GROUPED_DEPS=(
     libswresample3
     libswscale5
     libtinyxml2.6.2v5
-    libyaml-cpp0.7
+    libyaml-cpp0.8
     python3-pip
     xvfb
   "
@@ -97,6 +98,12 @@ declare -rA GROUPED_DEPS=(
   
   [openmw-clang-format]="
     clang-format-14
+    git-core
+  "
+
+  [openmw-qt-translations]="
+    qttools5-dev
+    qttools5-dev-tools
     git-core
   "
 )
@@ -122,4 +129,7 @@ mkdir -pv "$APT_CACHE_DIR"
 apt-get update -yqq
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends software-properties-common gnupg >/dev/null
 add-apt-repository -y ppa:openmw/openmw
+add-apt-repository -y ppa:openmw/openmw-daily
+add-apt-repository -y ppa:openmw/staging
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}" >/dev/null
+apt list --installed

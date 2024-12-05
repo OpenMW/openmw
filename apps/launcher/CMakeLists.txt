@@ -33,31 +33,21 @@ set(LAUNCHER_HEADER
     utils/openalutil.hpp
 )
 
-# Headers that must be pre-processed
-set(LAUNCHER_UI
-    ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/graphicspage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/importpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/settingspage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/directorypicker.ui
-)
-
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
 
 set(QT_USE_QTGUI 1)
 
+set (LAUNCHER_RES ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
+
 # Set some platform specific settings
 if(WIN32)
+    set(LAUNCHER_RES ${LAUNCHER_RES} ${CMAKE_SOURCE_DIR}/files/windows/QWindowsVistaDark/dark.qrc)
     set(GUI_TYPE WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
-QT_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
+QT_ADD_RESOURCES(RCC_SRCS ${LAUNCHER_RES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(NOT WIN32)
     include_directories(${LIBUNSHIELD_INCLUDE_DIR})
 endif(NOT WIN32)
@@ -68,21 +58,21 @@ openmw_add_executable(openmw-launcher
     ${LAUNCHER}
     ${LAUNCHER_HEADER}
     ${RCC_SRCS}
-    ${MOC_SRCS}
-    ${UI_HDRS}
 )
+
+add_dependencies(openmw-launcher qm-files)
 
 if (WIN32)
     INSTALL(TARGETS openmw-launcher RUNTIME DESTINATION ".")
 endif (WIN32)
 
 target_link_libraries(openmw-launcher
-    ${SDL2_LIBRARY_ONLY}
+    SDL2::SDL2
     ${OPENAL_LIBRARY}
     components_qt
 )
 
-target_link_libraries(openmw-launcher Qt::Widgets Qt::Core)
+target_link_libraries(openmw-launcher Qt::Widgets Qt::Core Qt::Svg)
 
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-launcher PRIVATE --coverage)
@@ -91,9 +81,11 @@ endif()
 
 if(USE_QT)
     set_property(TARGET openmw-launcher PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-launcher PROPERTY AUTOUIC ON)
+    set_property(TARGET openmw-launcher PROPERTY AUTOUIC_SEARCH_PATHS ui)
 endif(USE_QT)
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-launcher PRIVATE
         <boost/program_options/options_description.hpp>
 

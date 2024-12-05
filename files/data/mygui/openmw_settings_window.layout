@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout" version="3.2.0">
-    <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="MainMenu" name="_Main">
+    <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="Settings" name="_Main">
         <Property key="MinSize" value="640 490"/>
         <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
@@ -98,27 +98,27 @@
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 250 260 28">
+                <Widget type="HBox" position="4 250 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Saves"/>
                         <UserString key="SettingName" value="autosave"/>
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 95 16" align="Left Top">
-                        <Property key="Caption" value="#{sQuick_Save}"/>
+                        <Property key="Caption" value="#{OMWEngine:AutoSaveOnResting}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 280 260 28">
+                <Widget type="HBox" position="4 280 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="best attack"/>
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 89 16" align="Left Top">
-                        <Property key="Caption" value="#{sBestAttack}"/>
+                        <Property key="Caption" value="#{OMWEngine:BestAttack}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 310 260 28">
+                <Widget type="HBox" position="4 310 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="subtitles"/>
@@ -128,14 +128,14 @@
                         <Property key="Caption" value="#{OMWEngine:Subtitles}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" position="4 340 260 28">
+                <Widget type="HBox" position="4 340 340 28">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="HUD"/>
                         <UserString key="SettingName" value="crosshair"/>
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 80 16" align="Left Top">
-                        <Property key="Caption" value="#{sCursorOff}"/>
+                        <Property key="Caption" value="#{OMWEngine:Crosshair}"/>
                     </Widget>
                 </Widget>
             </Widget>
@@ -457,13 +457,41 @@
                                 <UserString key="HStretch" value="true"/>
                                 <UserString key="VStretch" value="false"/>
 
-                                <Widget type="AutoSizedButton" skin="MW_Button">
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="WaterRefractionButton">
                                     <UserString key="SettingCategory" value="Water"/>
                                     <UserString key="SettingName" value="refraction"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText">
                                     <Property key="Caption" value="#{OMWEngine:Refraction}"/>
+                                </Widget>
+                            </Widget>
+
+                            <Widget type="HBox" align="Stretch">
+                                <UserString key="HStretch" value="true"/>
+                                <UserString key="VStretch" value="false"/>
+
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="SunlightScatteringButton">
+                                    <UserString key="SettingCategory" value="Water"/>
+                                    <UserString key="SettingName" value="sunlight scattering"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText">
+                                    <Property key="Caption" value="#{OMWEngine:SunlightScattering}"/>
+                                </Widget>
+                            </Widget>
+
+                            <Widget type="HBox" align="Stretch">
+                                <UserString key="HStretch" value="true"/>
+                                <UserString key="VStretch" value="false"/>
+
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="WobblyShoresButton">
+                                    <UserString key="SettingCategory" value="Water"/>
+                                    <UserString key="SettingName" value="wobbly shores"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText">
+                                    <Property key="Caption" value="#{OMWEngine:WobblyShores}"/>
                                 </Widget>
                             </Widget>
 
@@ -536,6 +564,9 @@
                         <!-- Lighting Method -->
                         <Widget type="TextBox" skin="NormalText" position="0 4 250 18" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:LightingMethod}"/>
+                            <UserString key="ToolTipType" value="Layout"/>
+                            <UserString key="ToolTipLayout" value="TextToolTip"/>
+                            <UserString key="Caption_Text" value="#{OMWEngine:LightsLightingMethodTooltip}"/>
                         </Widget>
                         <Widget type="ComboBox" skin="MW_ComboBox" position="0 28 250 24" align="Left Top" name="LightingMethodButton">
                             <Property key="AddItem" value="legacy"/>
@@ -561,16 +592,50 @@
                             <Property key="AddItem" value="16"/>
                             <Property key="AddItem" value="24"/>
                             <Property key="AddItem" value="32"/>
+                            <Property key="AddItem" value="40"/>
+                            <Property key="AddItem" value="48"/>
+                            <Property key="AddItem" value="56"/>
+                            <Property key="AddItem" value="64"/>
                         </Widget>
-                        <Widget type="ImageBox" skin="MW_HLine" position="0 54 360 18" align="Top HStretch"/>
+
+                        <Widget type="HBox" position="0 60 600 24">
+                            <!-- Per-Pixel Lighting -->
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top">
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="force per pixel lighting"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <!-- Deliberate padding -->
+                                <Property key="Caption" value="#{OMWEngine:ForcePerPixelLighting}  "/>
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="#{OMWEngine:ForcePerPixelLightingTooltip}"/>
+                            </Widget>
+                            <!-- Classic Falloff -->
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top">
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="classic falloff"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="#{OMWEngine:ClassicFalloff}"/>
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="#{OMWEngine:ClassicFalloffTooltip}"/>
+                            </Widget>
+                        </Widget>
+
+                        <Widget type="ImageBox" skin="MW_HLine" position="0 84 360 18" align="Top HStretch"/>
+
                         <!-- Light Fade Start -->
-                        <Widget type="TextBox" skin="NormalText" position="0 78 500 18" align="Left Top" name="MaxLightDistanceText">
+                        <Widget type="TextBox" skin="NormalText" position="0 104 500 18" align="Left Top" name="MaxLightDistanceText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsMaximumDistanceTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 104 352 18" align="HStretch Top">
-                            <Property key="Range" value="8192"/>
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 128 352 18" align="HStretch Top">
+                            <Property key="Range" value="8193"/>
                             <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingMin" value="0"/>
@@ -582,12 +647,12 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMaximumDistance} (%s)"/>
                         </Widget>
                         <!-- Light Fade Multiplier -->
-                        <Widget type="TextBox" skin="NormalText" position="0 128 500 18" align="Left Top" name="LightFadeMultiplierText">
+                        <Widget type="TextBox" skin="NormalText" position="0 152 500 18" align="Left Top" name="LightFadeMultiplierText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsFadeStartMultiplierTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 152 352 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 176 352 18" align="HStretch Top">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="100"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -600,12 +665,12 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsFadeStartMultiplier} (%s)"/>
                         </Widget>
                         <!-- Bounding Sphere Multiplier -->
-                        <Widget type="TextBox" skin="NormalText" position="0 176 500 18" align="Left Top" name="BoundingSphereMultText">
+                        <Widget type="TextBox" skin="NormalText" position="0 200 500 18" align="Left Top" name="BoundingSphereMultText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsBoundingSphereMultiplierTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 200 352 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 224 352 18" align="HStretch Top">
                             <Property key="Range" value="500000"/>
                             <Property key="Page" value="1000"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -618,12 +683,12 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsBoundingSphereMultiplier} (%s)"/>
                         </Widget>
                         <!-- Minimum Ambient Brightness -->
-                        <Widget type="TextBox" skin="NormalText" position="0 224 500 18" align="Left Top" name="MinimumBrightnessText">
+                        <Widget type="TextBox" skin="NormalText" position="0 248 500 18" align="Left Top" name="MinimumBrightnessText">
                             <UserString key="ToolTipType" value="Layout"/>
                             <UserString key="ToolTipLayout" value="TextToolTip"/>
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsMinimumInteriorBrightnessTooltip}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 248 352 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 272 352 18" align="HStretch Top">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="100"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -633,7 +698,7 @@
                             <UserString key="SettingLabelWidget" value="MinimumBrightnessText"/>
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMinimumInteriorBrightness} (%s)"/>
                         </Widget>
-                        <Widget type="AutoSizedButton" skin="MW_Button" position="0 290 0 0" align="Top Left" name="LightsResetButton">
+                        <Widget type="AutoSizedButton" skin="MW_Button" position="0 306 0 0" align="Top Left" name="LightsResetButton">
                             <Property key="Caption" value="#{Interface:Reset}"/>
                         </Widget>
                     </Widget>

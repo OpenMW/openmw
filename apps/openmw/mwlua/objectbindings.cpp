@@ -4,6 +4,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/shapes/box.hpp>
+#include <components/lua/util.hpp>
 #include <components/lua/utilpackage.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/mathutil.hpp>
@@ -11,6 +12,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/localscripts.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -18,6 +20,9 @@
 #include "../mwrender/renderingmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "luaevents.hpp"
 #include "luamanagerimp.hpp"
@@ -77,20 +82,25 @@ namespace MWLua
             return &wm->getExterior(ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace));
         }
 
-        void teleportPlayer(
-            MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot, bool placeOnGround)
+        ESM::Position toPos(const osg::Vec3f& pos, const osg::Vec3f& rot)
         {
-            MWBase::World* world = MWBase::Environment::get().getWorld();
             ESM::Position esmPos;
             static_assert(sizeof(esmPos) == sizeof(osg::Vec3f) * 2);
             std::memcpy(esmPos.pos, &pos, sizeof(osg::Vec3f));
             std::memcpy(esmPos.rot, &rot, sizeof(osg::Vec3f));
+            return esmPos;
+        }
+
+        void teleportPlayer(
+            MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot, bool placeOnGround)
+        {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
             MWWorld::Ptr ptr = world->getPlayerPtr();
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             stats.land(true);
             stats.setTeleported(true);
             world->getPlayer().setTeleported(true);
-            world->changeToCell(destCell->getCell()->getId(), esmPos, false);
+            world->changeToCell(destCell->getCell()->getId(), toPos(pos, rot), false);
             MWWorld::Ptr newPtr = world->getPlayerPtr();
             world->moveObject(newPtr, pos);
             world->rotateObject(newPtr, rot);
@@ -103,15 +113,38 @@ namespace MWLua
             const osg::Vec3f& rot, bool placeOnGround)
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
+            MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
             const MWWorld::Class& cls = ptr.getClass();
             if (cls.isActor())
             {
-                auto& stats = ptr.getClass().getCreatureStats(ptr);
+                auto& stats = cls.getCreatureStats(ptr);
                 stats.land(false);
                 stats.setTeleported(true);
             }
-            MWWorld::Ptr newPtr = world->moveObject(ptr, destCell, pos);
-            world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
+            const MWWorld::CellStore* srcCell = ptr.getCell();
+            MWWorld::Ptr newPtr;
+            if (srcCell == &wm->getDraftCell())
+            {
+                newPtr = cls.moveToCell(ptr, *destCell, toPos(pos, rot));
+                ptr.getCellRef().unsetRefNum();
+                ptr.getRefData().setLuaScripts(nullptr);
+                ptr.getCellRef().setCount(0);
+                ESM::RefId script = cls.getScript(newPtr);
+                if (!script.empty())
+                    world->getLocalScripts().add(script, newPtr);
+                world->addContainerScripts(newPtr, newPtr.getCell());
+            }
+            else
+            {
+                newPtr = world->moveObject(ptr, destCell, pos);
+                if (srcCell == destCell)
+                {
+                    ESM::RefId script = cls.getScript(newPtr);
+                    if (!script.empty())
+                        world->getLocalScripts().add(script, newPtr);
+                }
+                world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
+            }
             if (placeOnGround)
                 world->adjustPosition(newPtr, true);
             if (cls.isDoor())
@@ -131,16 +164,16 @@ namespace MWLua
         void registerObjectList(const std::string& prefix, const Context& context)
         {
             using ListT = ObjectList<ObjectT>;
-            sol::state_view& lua = context.mLua->sol();
+            sol::state_view lua = context.sol();
             sol::usertype<ListT> listT = lua.new_usertype<ListT>(prefix + "ObjectList");
             listT[sol::meta_function::to_string]
                 = [](const ListT& list) { return "{" + std::to_string(list.mIds->size()) + " objects}"; };
             listT[sol::meta_function::length] = [](const ListT& list) { return list.mIds->size(); };
-            listT[sol::meta_function::index] = [](const ListT& list, size_t index) {
+            listT[sol::meta_function::index] = [](const ListT& list, size_t index) -> sol::optional<ObjectT> {
                 if (index > 0 && index <= list.mIds->size())
-                    return ObjectT((*list.mIds)[index - 1]);
+                    return ObjectT((*list.mIds)[LuaUtil::fromLuaIndex(index)]);
                 else
-                    throw std::runtime_error("Index out of range");
+                    return sol::nullopt;
             };
             listT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
             listT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -169,6 +202,79 @@ namespace MWLua
         }
 
         template <class ObjectT>
+        void addOwnerbindings(sol::usertype<ObjectT>& objectT, const std::string& prefix, const Context& context)
+        {
+            using OwnerT = Owner<ObjectT>;
+            sol::usertype<OwnerT> ownerT = context.sol().new_usertype<OwnerT>(prefix + "Owner");
+
+            ownerT[sol::meta_function::to_string] = [](const OwnerT& o) { return "Owner[" + o.mObj.toString() + "]"; };
+
+            auto getOwnerRecordId = [](const OwnerT& o) -> sol::optional<std::string> {
+                ESM::RefId owner = o.mObj.ptr().getCellRef().getOwner();
+                if (owner.empty())
+                    return sol::nullopt;
+                else
+                    return owner.serializeText();
+            };
+            auto setOwnerRecordId = [](const OwnerT& o, sol::optional<std::string_view> ownerId) {
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                    throw std::runtime_error("Local scripts can set an owner only on self");
+                const MWWorld::Ptr& ptr = o.mObj.ptr();
+
+                if (!ownerId)
+                {
+                    ptr.getCellRef().setOwner(ESM::RefId());
+                    return;
+                }
+                ESM::RefId owner = ESM::RefId::deserializeText(*ownerId);
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+                if (!store.get<ESM::NPC>().search(owner))
+                    throw std::runtime_error("Invalid owner record id");
+                ptr.getCellRef().setOwner(owner);
+            };
+            ownerT["recordId"] = sol::property(getOwnerRecordId, setOwnerRecordId);
+
+            auto getOwnerFactionId = [](const OwnerT& o) -> sol::optional<std::string> {
+                ESM::RefId owner = o.mObj.ptr().getCellRef().getFaction();
+                if (owner.empty())
+                    return sol::nullopt;
+                else
+                    return owner.serializeText();
+            };
+            auto setOwnerFactionId = [](const OwnerT& o, sol::optional<std::string> ownerId) {
+                ESM::RefId ownerFac;
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                    throw std::runtime_error("Local scripts can set an owner faction only on self");
+                if (!ownerId)
+                {
+                    o.mObj.ptr().getCellRef().setFaction(ESM::RefId());
+                    return;
+                }
+                ownerFac = ESM::RefId::deserializeText(*ownerId);
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+                if (!store.get<ESM::Faction>().search(ownerFac))
+                    throw std::runtime_error("Invalid owner faction id");
+                o.mObj.ptr().getCellRef().setFaction(ownerFac);
+            };
+            ownerT["factionId"] = sol::property(getOwnerFactionId, setOwnerFactionId);
+
+            auto getOwnerFactionRank = [](const OwnerT& o) -> sol::optional<size_t> {
+                int rank = o.mObj.ptr().getCellRef().getFactionRank();
+                if (rank < 0)
+                    return sol::nullopt;
+                return LuaUtil::toLuaIndex(rank);
+            };
+            auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<size_t> factionRank) {
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                    throw std::runtime_error("Local scripts can set an owner faction rank only on self");
+                o.mObj.ptr().getCellRef().setFactionRank(LuaUtil::fromLuaIndex(factionRank.value_or(0)));
+            };
+            ownerT["factionRank"] = sol::property(getOwnerFactionRank, setOwnerFactionRank);
+
+            objectT["owner"] = sol::readonly_property([](const ObjectT& object) { return OwnerT{ object }; });
+        }
+
+        template <class ObjectT>
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
             objectT["id"] = sol::readonly_property([](const ObjectT& o) -> std::string { return o.id().toString(); });
@@ -182,11 +288,25 @@ namespace MWLua
             objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrEmpty().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
+            objectT["globalVariable"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<std::string> {
+                std::string_view globalVariable = o.ptr().getCellRef().getGlobalVariable();
+                if (globalVariable.empty())
+                    return sol::nullopt;
+                else
+                    return ESM::RefId::stringRefId(globalVariable).serializeText();
+            });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
                 MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
                 if (ptr.isInCell() && ptr.getCell() != &wm->getDraftCell())
                     return Cell<ObjectT>{ ptr.getCell() };
+                else
+                    return sol::nullopt;
+            });
+            objectT["parentContainer"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<ObjectT> {
+                const MWWorld::Ptr& ptr = o.ptr();
+                if (ptr.getContainerStore())
+                    return ObjectT(ptr.getContainerStore()->getPtr());
                 else
                     return sol::nullopt;
             });
@@ -209,73 +329,18 @@ namespace MWLua
                 return LuaUtil::Box{ bb.center(), bb._max - bb.center() };
             };
 
-            objectT["type"] = sol::readonly_property(
-                [types = getTypeToPackageTable(context.mLua->sol())](
-                    const ObjectT& o) mutable { return types[getLiveCellRefType(o.ptr().mRef)]; });
+            objectT["type"]
+                = sol::readonly_property([types = getTypeToPackageTable(context.sol())](const ObjectT& o) mutable {
+                      return types[getLiveCellRefType(o.ptr().mRef)];
+                  });
 
-            objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getRefData().getCount(); });
+            objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getCellRef().getCount(); });
             objectT[sol::meta_function::equal_to] = [](const ObjectT& a, const ObjectT& b) { return a.id() == b.id(); };
             objectT[sol::meta_function::to_string] = &ObjectT::toString;
             objectT["sendEvent"] = [context](const ObjectT& dest, std::string eventName, const sol::object& eventData) {
                 context.mLuaEvents->addLocalEvent(
                     { dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
-            auto getOwnerRecordId = [](const ObjectT& o) -> sol::optional<std::string> {
-                ESM::RefId owner = o.ptr().getCellRef().getOwner();
-                if (owner.empty())
-                    return sol::nullopt;
-                else
-                    return owner.serializeText();
-            };
-            auto setOwnerRecordId = [](const ObjectT& obj, sol::optional<std::string_view> ownerId) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&obj))
-                    throw std::runtime_error("Local scripts can set an owner only on self");
-                const MWWorld::Ptr& ptr = obj.ptr();
-
-                if (!ownerId)
-                {
-                    ptr.getCellRef().setOwner(ESM::RefId());
-                    return;
-                }
-                ESM::RefId owner = ESM::RefId::deserializeText(*ownerId);
-                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-                if (!store.get<ESM::NPC>().search(owner))
-                    throw std::runtime_error("Invalid owner record id");
-                ptr.getCellRef().setOwner(owner);
-            };
-            objectT["ownerRecordId"] = sol::property(getOwnerRecordId, setOwnerRecordId);
-
-            auto getOwnerFactionId = [](const ObjectT& o) -> sol::optional<std::string> {
-                ESM::RefId owner = o.ptr().getCellRef().getFaction();
-                if (owner.empty())
-                    return sol::nullopt;
-                else
-                    return owner.serializeText();
-            };
-            auto setOwnerFactionId = [](const ObjectT& object, sol::optional<std::string> ownerId) {
-                ESM::RefId ownerFac;
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&object))
-                    throw std::runtime_error("Local scripts can set an owner faction only on self");
-                if (!ownerId)
-                {
-                    object.ptr().getCellRef().setFaction(ESM::RefId());
-                    return;
-                }
-                ownerFac = ESM::RefId::deserializeText(*ownerId);
-                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-                if (!store.get<ESM::Faction>().search(ownerFac))
-                    throw std::runtime_error("Invalid owner faction id");
-                object.ptr().getCellRef().setFaction(ownerFac);
-            };
-            objectT["ownerFactionId"] = sol::property(getOwnerFactionId, setOwnerFactionId);
-
-            auto getOwnerFactionRank = [](const ObjectT& o) -> int { return o.ptr().getCellRef().getFactionRank(); };
-            auto setOwnerFactionRank = [](const ObjectT& object, int factionRank) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&object))
-                    throw std::runtime_error("Local scripts can set an owner faction rank only on self");
-                object.ptr().getCellRef().setFactionRank(factionRank);
-            };
-            objectT["ownerFactionRank"] = sol::property(getOwnerFactionRank, setOwnerFactionRank);
 
             objectT["activateBy"] = [](const ObjectT& object, const ObjectT& actor) {
                 const MWWorld::Ptr& objPtr = object.ptr();
@@ -291,10 +356,10 @@ namespace MWLua
 
             auto isEnabled = [](const ObjectT& o) { return o.ptr().getRefData().isEnabled(); };
             auto setEnabled = [context](const GObject& object, bool enable) {
-                if (enable && object.ptr().getRefData().isDeleted())
+                if (enable && object.ptr().mRef->isDeleted())
                     throw std::runtime_error("Object is removed");
                 context.mLuaManager->addAction([object, enable] {
-                    if (object.ptr().getRefData().isDeleted())
+                    if (object.ptr().mRef->isDeleted())
                         return;
                     if (object.ptr().isInCell())
                     {
@@ -325,7 +390,7 @@ namespace MWLua
                 };
                 objectT["addScript"] = [context](const GObject& object, std::string_view path, sol::object initData) {
                     const LuaUtil::ScriptsConfiguration& cfg = context.mLua->getConfiguration();
-                    std::optional<int> scriptId = cfg.findId(path);
+                    std::optional<int> scriptId = cfg.findId(VFS::Path::Normalized(path));
                     if (!scriptId)
                         throw std::runtime_error("Unknown script: " + std::string(path));
                     if (!(cfg[*scriptId].mFlags & ESM::LuaScriptCfg::sCustom))
@@ -342,7 +407,7 @@ namespace MWLua
                 };
                 objectT["hasScript"] = [lua = context.mLua](const GObject& object, std::string_view path) {
                     const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
-                    std::optional<int> scriptId = cfg.findId(path);
+                    std::optional<int> scriptId = cfg.findId(VFS::Path::Normalized(path));
                     if (!scriptId)
                         return false;
                     MWWorld::Ptr ptr = object.ptr();
@@ -354,7 +419,7 @@ namespace MWLua
                 };
                 objectT["removeScript"] = [lua = context.mLua](const GObject& object, std::string_view path) {
                     const LuaUtil::ScriptsConfiguration& cfg = lua->getConfiguration();
-                    std::optional<int> scriptId = cfg.findId(path);
+                    std::optional<int> scriptId = cfg.findId(VFS::Path::Normalized(path));
                     if (!scriptId)
                         throw std::runtime_error("Unknown script: " + std::string(path));
                     MWWorld::Ptr ptr = object.ptr();
@@ -368,20 +433,23 @@ namespace MWLua
 
                 using DelayedRemovalFn = std::function<void(MWWorld::Ptr)>;
                 auto removeFn = [](const MWWorld::Ptr ptr, int countToRemove) -> std::optional<DelayedRemovalFn> {
-                    int currentCount = ptr.getRefData().getCount();
+                    int rawCount = ptr.getCellRef().getCount(false);
+                    int currentCount = std::abs(rawCount);
+                    int signedCountToRemove = (rawCount < 0 ? -1 : 1) * countToRemove;
+
                     if (countToRemove <= 0 || countToRemove > currentCount)
                         throw std::runtime_error("Can't remove " + std::to_string(countToRemove) + " of "
                             + std::to_string(currentCount) + " items");
-                    ptr.getRefData().setCount(currentCount - countToRemove); // Immediately change count
+                    ptr.getCellRef().setCount(rawCount - signedCountToRemove); // Immediately change count
                     if (!ptr.getContainerStore() && currentCount > countToRemove)
                         return std::nullopt;
                     // Delayed action to trigger side effects
-                    return [countToRemove](MWWorld::Ptr ptr) {
+                    return [signedCountToRemove](MWWorld::Ptr ptr) {
                         // Restore the original count
-                        ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
+                        ptr.getCellRef().setCount(ptr.getCellRef().getCount(false) + signedCountToRemove);
                         // And now remove properly
                         if (ptr.getContainerStore())
-                            ptr.getContainerStore()->remove(ptr, countToRemove, false);
+                            ptr.getContainerStore()->remove(ptr, std::abs(signedCountToRemove), false);
                         else
                         {
                             MWBase::Environment::get().getWorld()->disable(ptr);
@@ -391,7 +459,7 @@ namespace MWLua
                 };
                 objectT["remove"] = [removeFn, context](const GObject& object, sol::optional<int> count) {
                     std::optional<DelayedRemovalFn> delayed
-                        = removeFn(object.ptr(), count.value_or(object.ptr().getRefData().getCount()));
+                        = removeFn(object.ptr(), count.value_or(object.ptr().getCellRef().getCount()));
                     if (delayed.has_value())
                         context.mLuaManager->addAction([fn = *delayed, object] { fn(object.ptr()); });
                 };
@@ -411,7 +479,7 @@ namespace MWLua
                 };
                 objectT["moveInto"] = [removeFn, context](const GObject& object, const sol::object& dest) {
                     const MWWorld::Ptr& ptr = object.ptr();
-                    int count = ptr.getRefData().getCount();
+                    int count = ptr.getCellRef().getCount();
                     MWWorld::Ptr destPtr;
                     if (dest.is<GObject>())
                         destPtr = dest.as<GObject>().ptr();
@@ -422,9 +490,9 @@ namespace MWLua
                     std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
                     context.mLuaManager->addAction([item = object, count, cont = GObject(destPtr), delayedRemovalFn] {
                         const MWWorld::Ptr& oldPtr = item.ptr();
-                        auto& refData = oldPtr.getRefData();
+                        auto& refData = oldPtr.getCellRef();
                         refData.setCount(count); // temporarily undo removal to run ContainerStore::add
-                        refData.enable();
+                        oldPtr.getRefData().enable();
                         cont.ptr().getClass().getContainerStore(cont.ptr()).add(oldPtr, count, false);
                         refData.setCount(0);
                         if (delayedRemovalFn.has_value())
@@ -435,7 +503,7 @@ namespace MWLua
                                           const osg::Vec3f& pos, const sol::object& options) {
                     MWWorld::CellStore* cell = findCell(cellOrName, pos);
                     MWWorld::Ptr ptr = object.ptr();
-                    int count = ptr.getRefData().getCount();
+                    int count = ptr.getCellRef().getCount();
                     if (count == 0)
                         throw std::runtime_error("Object is either removed or already in the process of teleporting");
                     osg::Vec3f rot = ptr.getRefData().getPosition().asRotationVec3();
@@ -456,9 +524,9 @@ namespace MWLua
                         context.mLuaManager->addAction(
                             [object, cell, pos, rot, count, delayedRemovalFn, placeOnGround] {
                                 MWWorld::Ptr oldPtr = object.ptr();
-                                oldPtr.getRefData().setCount(count);
+                                oldPtr.getCellRef().setCount(count);
                                 MWWorld::Ptr newPtr = oldPtr.getClass().moveToCell(oldPtr, *cell);
-                                oldPtr.getRefData().setCount(0);
+                                oldPtr.getCellRef().setCount(0);
                                 newPtr.getRefData().disable();
                                 teleportNotPlayer(newPtr, cell, pos, rot, placeOnGround);
                                 delayedRemovalFn(oldPtr);
@@ -470,10 +538,10 @@ namespace MWLua
                             [cell, pos, rot, placeOnGround] { teleportPlayer(cell, pos, rot, placeOnGround); });
                     else
                     {
-                        ptr.getRefData().setCount(0);
+                        ptr.getCellRef().setCount(0);
                         context.mLuaManager->addAction(
                             [object, cell, pos, rot, count, placeOnGround] {
-                                object.ptr().getRefData().setCount(count);
+                                object.ptr().getCellRef().setCount(count);
                                 teleportNotPlayer(object.ptr(), cell, pos, rot, placeOnGround);
                             },
                             "TeleportAction");
@@ -486,12 +554,12 @@ namespace MWLua
         void addInventoryBindings(sol::usertype<ObjectT>& objectT, const std::string& prefix, const Context& context)
         {
             using InventoryT = Inventory<ObjectT>;
-            sol::usertype<InventoryT> inventoryT = context.mLua->sol().new_usertype<InventoryT>(prefix + "Inventory");
+            sol::usertype<InventoryT> inventoryT = context.sol().new_usertype<InventoryT>(prefix + "Inventory");
 
             inventoryT[sol::meta_function::to_string]
                 = [](const InventoryT& inv) { return "Inventory[" + inv.mObj.toString() + "]"; };
 
-            inventoryT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
+            inventoryT["getAll"] = [ids = getPackageToTypeTable(context.mLua->unsafeState())](
                                        const InventoryT& inventory, sol::optional<sol::table> type) {
                 int mask = -1;
                 sol::optional<uint32_t> typeId = sol::nullopt;
@@ -558,13 +626,13 @@ namespace MWLua
                     MWBase::Environment::get().getWorldModel()->registerPtr(item);
                     list->push_back(getId(item));
                 }
-                return ObjectList<ObjectT>{ list };
+                return ObjectList<ObjectT>{ std::move(list) };
             };
 
             inventoryT["countOf"] = [](const InventoryT& inventory, std::string_view recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                return store.count(ESM::RefId::stringRefId(recordId));
+                return store.count(ESM::RefId::deserializeText(recordId));
             };
             if constexpr (std::is_same_v<ObjectT, GObject>)
             {
@@ -582,7 +650,7 @@ namespace MWLua
             inventoryT["find"] = [](const InventoryT& inventory, std::string_view recordId) -> sol::optional<ObjectT> {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                auto itemId = ESM::RefId::stringRefId(recordId);
+                auto itemId = ESM::RefId::deserializeText(recordId);
                 for (const MWWorld::Ptr& item : store)
                 {
                     if (item.getCellRef().getRefId() == itemId)
@@ -596,7 +664,7 @@ namespace MWLua
             inventoryT["findAll"] = [](const InventoryT& inventory, std::string_view recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                auto itemId = ESM::RefId::stringRefId(recordId);
+                auto itemId = ESM::RefId::deserializeText(recordId);
                 ObjectIdList list = std::make_shared<std::vector<ObjectId>>();
                 for (const MWWorld::Ptr& item : store)
                 {
@@ -606,7 +674,7 @@ namespace MWLua
                         list->push_back(getId(item));
                     }
                 }
-                return ObjectList<ObjectT>{ list };
+                return ObjectList<ObjectT>{ std::move(list) };
             };
         }
 
@@ -614,9 +682,10 @@ namespace MWLua
         void initObjectBindings(const std::string& prefix, const Context& context)
         {
             sol::usertype<ObjectT> objectT
-                = context.mLua->sol().new_usertype<ObjectT>(prefix + "Object", sol::base_classes, sol::bases<Object>());
+                = context.sol().new_usertype<ObjectT>(prefix + "Object", sol::base_classes, sol::bases<Object>());
             addBasicBindings<ObjectT>(objectT, context);
             addInventoryBindings<ObjectT>(objectT, prefix, context);
+            addOwnerbindings<ObjectT>(objectT, prefix, context);
 
             registerObjectList<ObjectT>(prefix, context);
         }

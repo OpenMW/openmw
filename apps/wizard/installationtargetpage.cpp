@@ -8,6 +8,7 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include "mainwizard.hpp"
 
@@ -18,6 +19,8 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Fi
     mWizard = qobject_cast<MainWizard*>(parent);
 
     setupUi(this);
+
+    folderIcon->setIcon(Misc::ScalableIcon::load(":folder"));
 
     registerField(QLatin1String("installation.path*"), targetLineEdit);
 }
@@ -48,9 +51,9 @@ bool Wizard::InstallationTargetPage::validatePage()
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<html><head/><body><p><b>Could not create the destination directory</b></p> \
-                              <p>Please make sure you have the right permissions \
-                              and try again, or specify a different location.</p></body></html>"));
+                tr("<html><head/><body><p><b>Could not create the destination directory</b></p>"
+                   "<p>Please make sure you have the right permissions "
+                   "and try again, or specify a different location.</p></body></html>"));
             msgBox.exec();
             return false;
         }
@@ -65,9 +68,9 @@ bool Wizard::InstallationTargetPage::validatePage()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not write to the destination directory</b></p> \
-                          <p>Please make sure you have the right permissions \
-                          and try again, or specify a different location.</p></body></html>"));
+            tr("<html><head/><body><p><b>Could not write to the destination directory</b></p>"
+               "<p>Please make sure you have the right permissions "
+               "and try again, or specify a different location.</p></body></html>"));
         msgBox.exec();
         return false;
     }
@@ -79,9 +82,10 @@ bool Wizard::InstallationTargetPage::validatePage()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>The destination directory is not empty</b></p> \
-                          <p>An existing Morrowind installation is present in the specified location.</p> \
-                          <p>Please specify a different location, or go back and select the location as an existing installation.</p></body></html>"));
+            tr("<html><head/><body><p><b>The destination directory is not empty</b></p>"
+               "<p>An existing Morrowind installation is present in the specified location.</p>"
+               "<p>Please specify a different location, or go back and select the location as an existing "
+               "installation.</p></body></html>"));
         msgBox.exec();
         return false;
     }

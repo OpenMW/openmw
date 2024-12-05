@@ -103,8 +103,7 @@ namespace NavMeshTool
 
             Log(Debug::Debug) << "Loaded " << cellRefs.size() << " cell refs";
 
-            const auto getKey
-                = [](const EsmLoader::Record<CellRef>& v) -> const ESM::RefNum& { return v.mValue.mRefNum; };
+            const auto getKey = [](const EsmLoader::Record<CellRef>& v) -> ESM::RefNum { return v.mValue.mRefNum; };
             std::vector<CellRef> result = prepareRecords(cellRefs, getKey);
 
             Log(Debug::Debug) << "Prepared " << result.size() << " unique cell refs";
@@ -122,7 +121,7 @@ namespace NavMeshTool
 
             for (CellRef& cellRef : cellRefs)
             {
-                std::string model(getModel(esmData, cellRef.mRefId, cellRef.mType));
+                VFS::Path::Normalized model(getModel(esmData, cellRef.mRefId, cellRef.mType));
                 if (model.empty())
                     continue;
 
@@ -132,7 +131,7 @@ namespace NavMeshTool
                 osg::ref_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
-                        return bulletShapeManager.getShape(Misc::ResourceHelpers::correctMeshPath(model, &vfs));
+                        return bulletShapeManager.getShape(Misc::ResourceHelpers::correctMeshPath(model));
                     }
                     catch (const std::exception& e)
                     {
@@ -220,7 +219,8 @@ namespace NavMeshTool
         void serializeToStderr(const T& value)
         {
             const std::vector<std::byte> data = serialize(value);
-            getRawStderr().write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
+            Debug::getRawStderr().write(
+                reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
         }
 
         std::string makeAddObjectErrorMessage(
@@ -235,8 +235,8 @@ namespace NavMeshTool
     }
 
     WorldspaceNavMeshInput::WorldspaceNavMeshInput(
-        std::string worldspace, const DetourNavigator::RecastSettings& settings)
-        : mWorldspace(std::move(worldspace))
+        ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings)
+        : mWorldspace(worldspace)
         , mTileCachedRecastMeshManager(settings)
     {
         mAabb.m_min = btVector3(0, 0, 0);
@@ -249,7 +249,7 @@ namespace NavMeshTool
     {
         Log(Debug::Info) << "Processing " << esmData.mCells.size() << " cells...";
 
-        std::map<std::string_view, std::unique_ptr<WorldspaceNavMeshInput>> navMeshInputs;
+        std::unordered_map<ESM::RefId, std::unique_ptr<WorldspaceNavMeshInput>> navMeshInputs;
         WorldspaceData data;
 
         std::size_t objectsCounter = 0;
@@ -277,8 +277,7 @@ namespace NavMeshTool
 
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
-            const auto cellWorldspace = Misc::StringUtils::lowerCase(
-                (cell.isExterior() ? ESM::Cell::sDefaultWorldspaceId : cell.mId).serializeText());
+            const ESM::RefId cellWorldspace = cell.isExterior() ? ESM::Cell::sDefaultWorldspaceId : cell.mId;
             WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
                 auto it = navMeshInputs.find(cellWorldspace);
                 if (it == navMeshInputs.end())

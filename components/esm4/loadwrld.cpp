@@ -56,46 +56,46 @@ void ESM4::World::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_WCTR: // TES5+
+            case ESM::fourCC("WCTR"): // TES5+
                 reader.get(mCenterCell);
                 break;
-            case ESM4::SUB_WNAM:
+            case ESM::fourCC("WNAM"):
                 reader.getFormId(mParent);
                 break;
-            case ESM4::SUB_SNAM:
+            case ESM::fourCC("SNAM"):
                 reader.get(mSound);
                 break; // sound, Oblivion only?
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mMapFile);
                 break;
-            case ESM4::SUB_CNAM:
+            case ESM::fourCC("CNAM"):
                 reader.getFormId(mClimate);
                 break;
-            case ESM4::SUB_NAM2:
+            case ESM::fourCC("NAM2"):
                 reader.getFormId(mWater);
                 break;
-            case ESM4::SUB_NAM0:
+            case ESM::fourCC("NAM0"):
             {
                 reader.get(mMinX);
                 reader.get(mMinY);
                 break;
             }
-            case ESM4::SUB_NAM9:
+            case ESM::fourCC("NAM9"):
             {
                 reader.get(mMaxX);
                 reader.get(mMaxY);
                 break;
             }
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mWorldFlags);
                 break;
-            case ESM4::SUB_MNAM:
+            case ESM::fourCC("MNAM"):
             {
                 reader.get(mMap.width);
                 reader.get(mMap.height);
@@ -113,7 +113,7 @@ void ESM4::World::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_DNAM: // defaults
+            case ESM::fourCC("DNAM"): // defaults
             {
                 reader.get(mLandLevel); //  -2700.f for TES5
                 reader.get(mWaterLevel); // -14000.f for TES5
@@ -135,37 +135,37 @@ void ESM4::World::load(ESM4::Reader& reader)
             // 00119D2E freeside\freeside_01.mp3 0012D94D FreesideNorthWorld (Freeside)
             // 00119D2E freeside\freeside_01.mp3 0012D94E FreesideFortWorld (Old Mormon Fort)
             // NOTE: FONV DefaultObjectManager has 00090908 "explore" as the default music
-            case ESM4::SUB_ZNAM:
+            case ESM::fourCC("ZNAM"):
                 reader.getFormId(mMusic);
                 break;
-            case ESM4::SUB_PNAM:
+            case ESM::fourCC("PNAM"):
                 reader.get(mParentUseFlags);
                 break;
-            case ESM4::SUB_OFST:
-            case ESM4::SUB_RNAM: // multiple
-            case ESM4::SUB_MHDT:
-            case ESM4::SUB_LTMP:
-            case ESM4::SUB_XEZN:
-            case ESM4::SUB_XLCN:
-            case ESM4::SUB_NAM3:
-            case ESM4::SUB_NAM4:
-            case ESM4::SUB_NAMA:
-            case ESM4::SUB_ONAM:
-            case ESM4::SUB_TNAM:
-            case ESM4::SUB_UNAM:
-            case ESM4::SUB_XWEM:
-            case ESM4::SUB_MODL: // Model data start
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_INAM: // FO3
-            case ESM4::SUB_NNAM: // FO3
-            case ESM4::SUB_XNAM: // FO3
-            case ESM4::SUB_IMPS: // FO3 Anchorage
-            case ESM4::SUB_IMPF: // FO3 Anchorage
-            case ESM4::SUB_CLSZ: // FO4
-            case ESM4::SUB_WLEV: // FO4
+            case ESM::fourCC("OFST"):
+            case ESM::fourCC("RNAM"): // multiple
+            case ESM::fourCC("MHDT"):
+            case ESM::fourCC("LTMP"):
+            case ESM::fourCC("XEZN"):
+            case ESM::fourCC("XLCN"):
+            case ESM::fourCC("NAM3"):
+            case ESM::fourCC("NAM4"):
+            case ESM::fourCC("NAMA"):
+            case ESM::fourCC("ONAM"):
+            case ESM::fourCC("TNAM"):
+            case ESM::fourCC("UNAM"):
+            case ESM::fourCC("XWEM"):
+            case ESM::fourCC("MODL"): // Model data start
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("INAM"): // FO3
+            case ESM::fourCC("NNAM"): // FO3
+            case ESM::fourCC("XNAM"): // FO3
+            case ESM::fourCC("IMPS"): // FO3 Anchorage
+            case ESM::fourCC("IMPF"): // FO3 Anchorage
+            case ESM::fourCC("CLSZ"): // FO4
+            case ESM::fourCC("WLEV"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:
@@ -185,6 +185,10 @@ void ESM4::World::load(ESM4::Reader& reader)
                 mWaterLevel = 0.f;
             }
         }
+
+        // TES4 doesn't define PNAM. Exact parent worldspace behavior needs research
+        if (!reader.hasFormVersion())
+            mParentUseFlags = 0xFFFF;
     }
 }
 

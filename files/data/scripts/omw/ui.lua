@@ -1,6 +1,7 @@
 local ui = require('openmw.ui')
 local util = require('openmw.util')
 local self = require('openmw.self')
+local core = require('openmw.core')
 local ambient = require('openmw.ambient')
 
 local MODE = ui._getAllUiModes()
@@ -9,6 +10,11 @@ local WINDOW = ui._getAllWindowIds()
 local replacedWindows = {}
 local hiddenWindows = {}
 local modeStack = {}
+
+local modePause = {}
+for _, mode in pairs(MODE) do
+    modePause[mode] = true
+end
 
 local function registerWindow(window, showFn, hideFn)
     if not WINDOW[window] then
@@ -93,7 +99,7 @@ local function removeMode(mode)
 end
 
 local oldMode = nil
-local function onUiModeChanged(arg)
+local function onUiModeChanged(changedByLua, arg)
     local newStack = ui._getUiModeStack()
     for i = 1, math.max(#modeStack, #newStack) do
         modeStack[i] = newStack[i]
@@ -106,6 +112,9 @@ local function onUiModeChanged(arg)
     end
     local mode = newStack[#newStack]
     if mode then
+        if not changedByLua then
+            updateHidden(mode)
+        end
         for _, w in pairs(ui._getAllowedWindows(mode)) do
             local state = replacedWindows[w]
             if state and not hiddenWindows[w] then
@@ -113,6 +122,15 @@ local function onUiModeChanged(arg)
                 state.visible = true
             end
         end
+    end
+    local shouldPause = false
+    for _, m in pairs(modeStack) do
+        shouldPause = shouldPause or modePause[m]
+    end
+    if shouldPause then
+        core.sendGlobalEvent('Pause', 'ui')
+    else
+        core.sendGlobalEvent('Unpause', 'ui')
     end
     self:sendEvent('UiModeChanged', {oldMode = oldMode, newMode = mode, arg = arg})
     oldMode = mode
@@ -145,7 +163,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#UI] #number version
-        version = 0,
+        version = 1,
 
         --- All available UI modes.
         -- Use `view(I.UI.MODE)` in `luap` console mode to see the list.
@@ -204,10 +222,25 @@ return {
         -- @param #string mode Mode to drop
         removeMode = removeMode,
 
+        --- Set whether the mode should pause the game.
+        -- @function [parent=#UI] setPauseOnMode
+        -- @param #string mode Mode to configure
+        -- @param #boolean shouldPause
+        setPauseOnMode = function(mode, shouldPause) modePause[mode] = shouldPause end,
+
+        --- Set whether the UI should be visible.
+        -- @function [parent=#UI] setHudVisibility
+        -- @param #boolean showHud
+        setHudVisibility = function(showHud) ui._setHudVisibility(showHud) end,
+
+        ---
+        -- Returns if the player HUD is visible or not
+        -- @function [parent=#UI] isHudVisible
+        -- @return #boolean
+        isHudVisible = function() return ui._isHudVisible() end,
+
         -- TODO
         -- registerHudElement = function(name, showFn, hideFn) end,
-        -- showHud = function(bool) end,
-        -- isHudVisible = function() end,
         -- showHudElement = function(name, bool) end,
         -- hudElements,  -- map from element name to its visibility
     },
@@ -216,5 +249,7 @@ return {
     },
     eventHandlers = {
         UiModeChanged = onUiModeChangedEvent,
+        AddUiMode = function(options) addMode(options.mode, options) end,
+        SetUiMode = function(options) setMode(options.mode, options) end,
     },
 }

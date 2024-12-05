@@ -43,22 +43,24 @@ void ESM4::StaticCollection::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_MODL: // Model data start
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_ONAM:
-            case ESM4::SUB_DATA:
-            case ESM4::SUB_FLTR: // FO4
-            case ESM4::SUB_PTRN: // FO4
+            case ESM::fourCC("MODL"): // Model data start
+                reader.getZString(mModel);
+                break;
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("ONAM"):
+            case ESM::fourCC("DATA"):
+            case ESM::fourCC("FLTR"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

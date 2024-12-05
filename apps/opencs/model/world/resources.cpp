@@ -11,6 +11,7 @@
 
 #include <components/misc/strings/lower.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 CSMWorld::Resources::Resources(
     const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type, const char* const* extensions)
@@ -27,20 +28,20 @@ void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char* const* e
 
     size_t baseSize = mBaseDirectory.size();
 
-    for (const auto& filepath : vfs->getRecursiveDirectoryIterator(""))
+    for (const auto& filepath : vfs->getRecursiveDirectoryIterator())
     {
-        if (filepath.size() < baseSize + 1 || filepath.substr(0, baseSize) != mBaseDirectory
-            || (filepath[baseSize] != '/' && filepath[baseSize] != '\\'))
+        const std::string_view view = filepath.view();
+        if (view.size() < baseSize + 1 || !view.starts_with(mBaseDirectory) || view[baseSize] != '/')
             continue;
 
         if (extensions)
         {
-            std::string::size_type extensionIndex = filepath.find_last_of('.');
+            const auto extensionIndex = view.find_last_of('.');
 
-            if (extensionIndex == std::string::npos)
+            if (extensionIndex == std::string_view::npos)
                 continue;
 
-            std::string extension = filepath.substr(extensionIndex + 1);
+            std::string_view extension = view.substr(extensionIndex + 1);
 
             int i = 0;
 
@@ -52,10 +53,9 @@ void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char* const* e
                 continue;
         }
 
-        std::string file = filepath.substr(baseSize + 1);
+        std::string file(view.substr(baseSize + 1));
         mFiles.push_back(file);
-        std::replace(file.begin(), file.end(), '\\', '/');
-        mIndex.insert(std::make_pair(Misc::StringUtils::lowerCase(file), static_cast<int>(mFiles.size()) - 1));
+        mIndex.emplace(std::move(file), static_cast<int>(mFiles.size()) - 1);
     }
 }
 

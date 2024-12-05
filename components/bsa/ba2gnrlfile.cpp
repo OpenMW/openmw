@@ -6,16 +6,19 @@
 
 #include <lz4frame.h>
 
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-
 #if defined(_MSC_VER)
+// why is this necessary? These are included with /external:I
 #pragma warning(push)
 #pragma warning(disable : 4706)
+#pragma warning(disable : 4702)
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #pragma warning(pop)
 #else
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #endif
 
 #include <boost/iostreams/device/array.hpp>
@@ -104,11 +107,22 @@ namespace Bsa
             input.read(reinterpret_cast<char*>(header), 16);
             input.read(reinterpret_cast<char*>(&fileTableOffset), 8);
 
-            if (header[0] == 0x00415342) /*"BSA\x00"*/
-                fail("Unrecognized compressed BSA format");
+            if (header[0] != ESM::fourCC("BTDX"))
+                fail("Unrecognized BA2 signature");
             mVersion = header[1];
-            if (mVersion != 0x01 /*FO4*/)
-                fail("Unrecognized compressed BSA version");
+            switch (static_cast<BA2Version>(mVersion))
+            {
+                case BA2Version::Fallout4:
+                case BA2Version::Fallout4NextGen_v7:
+                case BA2Version::Fallout4NextGen_v8:
+                    break;
+                case BA2Version::StarfieldGeneral:
+                    uint64_t dummy;
+                    input.read(reinterpret_cast<char*>(&dummy), 8);
+                    break;
+                default:
+                    fail("Unrecognized general BA2 version");
+            }
 
             type = header[2];
             fileCount = header[3];
@@ -167,7 +181,7 @@ namespace Bsa
             return FileRecord(); // folder not found, return default which has offset of sInvalidOffset
 
         uint32_t fileHash = generateHash(fileName);
-        uint32_t extHash = *reinterpret_cast<const uint32_t*>(ext.data() + 1);
+        uint32_t extHash = generateExtensionHash(ext);
         auto iter = it->second.find({ fileHash, extHash });
         if (iter == it->second.end())
             return FileRecord(); // file not found, return default which has offset of sInvalidOffset

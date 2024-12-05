@@ -5,6 +5,8 @@
 
 #include <SDL_types.h>
 
+#include "vsyncmode.hpp"
+
 struct SDL_Window;
 
 namespace osgViewer
@@ -26,7 +28,7 @@ namespace SDLUtil
         VideoWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer);
         ~VideoWrapper();
 
-        void setSyncToVBlank(int mode);
+        void setSyncToVBlank(VSyncMode vsyncMode);
 
         void setGammaContrast(float gamma, float contrast);
 

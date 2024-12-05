@@ -21,7 +21,7 @@ void main(void)
     position = gl_Vertex;
 
     worldPos = position.xyz + nodePosition.xyz;
-    rippleMapUV = (worldPos.xy - playerPos.xy + (@ripple_map_size * @ripple_map_world_scale / 2.0)) / @ripple_map_size / @ripple_map_world_scale;
+    rippleMapUV = (worldPos.xy - playerPos.xy + (@rippleMapSize * @rippleMapWorldScale / 2.0)) / @rippleMapSize / @rippleMapWorldScale;
 
     vec4 viewPos = modelToView(gl_Vertex);
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);

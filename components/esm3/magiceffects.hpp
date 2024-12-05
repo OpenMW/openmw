@@ -16,7 +16,7 @@ namespace ESM
     struct MagicEffects
     {
         // <Effect Id, Base value, Modifier>
-        std::map<int, std::pair<int, float>> mEffects;
+        std::map<int32_t, std::pair<int32_t, float>> mEffects;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
@@ -24,16 +24,16 @@ namespace ESM
 
     struct SummonKey
     {
-        SummonKey(int effectId, const ESM::RefId& sourceId, int index)
+        SummonKey(int32_t effectId, const ESM::RefId& sourceId, int32_t index)
             : mEffectId(effectId)
             , mSourceId(sourceId)
             , mEffectIndex(index)
         {
         }
 
-        int mEffectId;
+        int32_t mEffectId;
         ESM::RefId mSourceId;
-        int mEffectIndex;
+        int32_t mEffectIndex;
     };
 
     inline auto makeTupleRef(const SummonKey& value) noexcept

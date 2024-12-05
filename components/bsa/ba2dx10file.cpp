@@ -6,17 +6,21 @@
 
 #include <lz4frame.h>
 
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-
 #if defined(_MSC_VER)
+// why is this necessary? These are included with /external:I
 #pragma warning(push)
 #pragma warning(disable : 4706)
+#pragma warning(disable : 4702)
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #pragma warning(pop)
 #else
+#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
 #endif
 
 #include <boost/iostreams/device/array.hpp>
@@ -76,7 +80,7 @@ namespace Bsa
                     fail("Corrupted BSA");
             }
 
-            mFolders[dirHash][{ nameHash, extHash }] = file;
+            mFolders[dirHash][{ nameHash, extHash }] = std::move(file);
 
             FileStruct fileStruct{};
             mFiles.push_back(fileStruct);
@@ -109,11 +113,26 @@ namespace Bsa
             input.read(reinterpret_cast<char*>(header), 16);
             input.read(reinterpret_cast<char*>(&fileTableOffset), 8);
 
-            if (header[0] == 0x00415342) /*"BSA\x00"*/
-                fail("Unrecognized compressed BSA format");
+            if (header[0] != ESM::fourCC("BTDX"))
+                fail("Unrecognized BA2 signature");
             mVersion = header[1];
-            if (mVersion != 0x01 /*F04*/)
-                fail("Unrecognized compressed BSA version");
+            switch (static_cast<BA2Version>(mVersion))
+            {
+                case BA2Version::Fallout4:
+                case BA2Version::Fallout4NextGen_v7:
+                case BA2Version::Fallout4NextGen_v8:
+                    break;
+                case BA2Version::StarfieldDDS:
+                    uint64_t dummy;
+                    input.read(reinterpret_cast<char*>(&dummy), 8);
+                    uint32_t compressionMethod;
+                    input.read(reinterpret_cast<char*>(&compressionMethod), 4);
+                    if (compressionMethod == 3)
+                        fail("Unsupported LZ4-compressed DDS BA2");
+                    break;
+                default:
+                    fail("Unrecognized DDS BA2 version");
+            }
 
             type = header[2];
             fileCount = header[3];
@@ -172,7 +191,7 @@ namespace Bsa
             return std::nullopt; // folder not found
 
         uint32_t fileHash = generateHash(fileName);
-        uint32_t extHash = *reinterpret_cast<const uint32_t*>(ext.data() + 1);
+        uint32_t extHash = generateExtensionHash(ext);
         auto iter = it->second.find({ fileHash, extHash });
         if (iter == it->second.end())
             return std::nullopt; // file not found

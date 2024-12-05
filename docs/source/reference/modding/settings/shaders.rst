@@ -8,11 +8,15 @@ force shaders
 :Range:		True/False
 :Default:	False
 
-Force rendering with shaders. By default, only bump-mapped objects will use shaders.
-Enabling this option may cause slightly different visuals if the "clamp lighting" option is set to false.
+Force rendering with shaders, even for objects that don't strictly need them.
+By default, only objects with certain effects, such as bump or normal maps will use shaders.
+With enhancements enabled, such as :ref:`enable shadows` and :ref:`reverse z`, shaders must be used for all objects, as if this setting is true.
+Typically, one or more of these enhancements will be enabled, and shaders will be needed for everything anyway, meaning toggling this setting will have no effect.
+
+Some settings, such as :ref:`clamp lighting` only apply to objects using shaders, so enabling this option may cause slightly different visuals when used at the same time.
 Otherwise, there should not be a visual difference.
 
-Please note enabling shaders has a significant performance impact on most systems.
+Please note enabling shaders may have a significant performance impact on some systems, and a mild impact on many others.
 
 force per pixel lighting
 ------------------------
@@ -21,12 +25,10 @@ force per pixel lighting
 :Range:		True/False
 :Default:	False
 
-Force the use of per pixel lighting. By default, only bump mapped objects use per-pixel lighting.
-Has no effect if the 'force shaders' option is false.
-Enabling per-pixel lighting results in visual differences to the original MW engine.
-It is not recommended to enable this option when using vanilla Morrowind files,
-because certain lights in Morrowind rely on vertex lighting to look as intended.
-Note that groundcover shaders ignore this setting.
+Force the use of per pixel lighting. By default, only bump and normal mapped objects use per-pixel lighting.
+Only affects objects drawn with shaders (see :ref:`force shaders` option).
+Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended.
+Note that groundcover shaders and particle effects ignore this setting.
 
 clamp lighting
 --------------
@@ -36,8 +38,8 @@ clamp lighting
 :Default:	True
 
 Restrict the amount of lighting that an object can receive to a maximum of (1,1,1).
-Only affects objects that render with shaders (see 'force shaders' option).
-Always affects terrain.
+Only affects objects drawn with shaders (see :ref:`force shaders` option) as objects drawn without shaders always have clamped lighting.
+When disabled, terrain is always drawn with shaders to prevent seams between tiles that are and that aren't.
 
 Leaving this option at its default makes the lighting compatible with Morrowind's fixed-function method,
 but the lighting may appear dull and there might be colour shifts.
@@ -51,9 +53,9 @@ auto use object normal maps
 :Default:	False
 
 If this option is enabled, normal maps are automatically recognized and used if they are named appropriately
-(see 'normal map pattern', e.g. for a base texture foo.dds, the normal map texture would have to be named foo_n.dds).
+(see :ref:`normal map pattern`, e.g. for a base texture ``foo.dds``, the normal map texture would have to be named ``foo_n.dds``).
 If this option is disabled,
-normal maps are only used if they are explicitly listed within the mesh file (.nif or .osg file). Affects objects.
+normal maps are only used if they are explicitly listed within the mesh file (``.nif`` or ``.osg`` file). Affects objects.
 
 auto use object specular maps
 -----------------------------
@@ -63,10 +65,10 @@ auto use object specular maps
 :Default:	False
 
 If this option is enabled, specular maps are automatically recognized and used if they are named appropriately
-(see 'specular map pattern', e.g. for a base texture foo.dds,
-the specular map texture would have to be named foo_spec.dds).
+(see :ref:`specular map pattern`, e.g. for a base texture ``foo.dds``,
+the specular map texture would have to be named ``foo_spec.dds``).
 If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file
-(.osg file, not supported in .nif files). Affects objects.
+(``.osg`` file, not supported in ``.nif`` files). Affects objects.
 
 auto use terrain normal maps
 ----------------------------
@@ -75,7 +77,7 @@ auto use terrain normal maps
 :Range:		True/False
 :Default:	False
 
-See 'auto use object normal maps'. Affects terrain.
+See :ref:`auto use object normal maps`. Affects terrain.
 
 auto use terrain specular maps
 ------------------------------
@@ -84,7 +86,7 @@ auto use terrain specular maps
 :Range:		True/False
 :Default:	False
 
-If a file with pattern 'terrain specular map pattern' exists, use that file as a 'diffuse specular' map.
+If a file with pattern :ref:`terrain specular map pattern` exists, use that file as a 'diffuse specular' map.
 The texture must contain the layer colour in the RGB channel (as usual), and a specular multiplier in the alpha channel.
 
 normal map pattern
@@ -95,7 +97,7 @@ normal map pattern
 :Default:	_n
 
 The filename pattern to probe for when detecting normal maps
-(see 'auto use object normal maps', 'auto use terrain normal maps')
+(see :ref:`auto use object normal maps`, :ref:`auto use terrain normal maps`)
 
 normal height map pattern
 -------------------------
@@ -115,7 +117,7 @@ specular map pattern
 :Range:
 :Default:	_spec
 
-The filename pattern to probe for when detecting object specular maps (see 'auto use object specular maps')
+The filename pattern to probe for when detecting object specular maps (see :ref:`auto use object specular maps`)
 
 terrain specular map pattern
 ----------------------------
@@ -124,7 +126,7 @@ terrain specular map pattern
 :Range:
 :Default:	_diffusespec
 
-The filename pattern to probe for when detecting terrain specular maps (see 'auto use terrain specular maps')
+The filename pattern to probe for when detecting terrain specular maps (see :ref:`auto use terrain specular maps`)
 
 apply lighting to environment maps
 ----------------------------------
@@ -146,13 +148,13 @@ lighting method
 
 Sets the internal handling of light sources.
 
-'legacy' is restricted to 8 lights per object and emulates fixed function
-pipeline compatible lighting.
+'legacy' is restricted to 8 lights per object and it is the method closest to
+fixed function pipeline lighting.
 
 'shaders compatibility' removes the light limit controllable through :ref:`max
 lights` and follows a modified attenuation formula which can drastically reduce
-light popping and seams. This mode also enables lighting on groundcover and a
-configurable light fade. It is recommended to use this with older hardware and a
+light popping and seams. This mode also enables lighting on groundcover.
+It is recommended to use this with older hardware and a
 light limit closer to 8. Because of its wide range of compatibility it is set as
 the default.
 
@@ -168,7 +170,7 @@ normal maps are provided. This is due to some groundcover mods using the Z-Up
 normals technique to avoid some common issues with shading. As a consequence,
 per pixel lighting would give undesirable results.
 
-Note that the rendering will act as if you have 'force shaders' option enabled
+Note that the rendering will act as if you have :ref:`force shaders` option enabled
 when not set to 'legacy'. This means that shaders will be used to render all objects and
 the terrain.
 
@@ -187,7 +189,26 @@ increase in :ref:`max lights` and thus carries a performance penalty. This
 especially helps with abrupt light popping with handheld light sources such as
 torches and lanterns.
 
-This setting has no effect if :ref:`lighting method` is 'legacy'.
+In Morrowind, this multiplier is non-existent, i.e. it is always 1.0.
+
+classic falloff
+---------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Use the traditional point light attenuation formula which lacks an early fade out.
+
+A flaw of the traditional formula is that light influence never quite reaches zero.
+This is physically accurate, but because lights don't have infinite radius (see :ref:`light bounds multiplier`),
+this can cause lighting seams between objects that got the relevant point light assigned and objects that didn't.
+Early fade out helps diminish these seams at the cost of darkening the scene.
+
+Morrowind uses the traditional formula, so you may want to enable this if you dislike the brightness differences.
+Alternatively, refer to :ref:`minimum interior brightness`.
+
+'legacy' :ref:`lighting method` behaves as if this setting were enabled.
 
 maximum light distance
 ----------------------
@@ -200,7 +221,7 @@ The maximum distance from the camera that lights will be illuminated, applies to
 both interiors and exteriors. A lower distance will improve performance. Set
 this to a non-positive value to disable fading.
 
-This setting has no effect if :ref:`lighting method` is 'legacy'.
+In Morrowind, there is no distance-based light fading.
 
 light fade start
 ----------------
@@ -212,8 +233,7 @@ light fade start
 The fraction of the maximum distance at which lights will begin to fade away.
 Tweaking it will make the transition proportionally more or less smooth.
 
-This setting has no effect if the :ref:`maximum light distance` is non-positive
-or :ref:`lighting method` is 'legacy'.
+This setting has no effect if the :ref:`maximum light distance` is non-positive.
 
 max lights
 ----------
@@ -236,17 +256,19 @@ minimum interior brightness
 :Range:		0.0-1.0
 :Default:	0.08
 
-Sets the minimum interior ambient brightness for interior cells when
-:ref:`lighting method` is not 'legacy'. A consequence of the new lighting system
-is that interiors will sometimes be darker since light sources now have sensible
-fall-offs. A couple solutions are to either add more lights or increase their
+Sets the minimum interior ambient brightness for interior cells.
+
+A consequence of the new lighting system is that interiors will sometimes be darker
+since light sources now have sensible fall-offs.
+A couple solutions are to either add more lights or increase their
 radii to compensate, but these require content changes. For best results it is
 recommended to set this to 0.0 to retain the colors that level designers
 intended. If brighter interiors are wanted, however, this setting should be
 increased. Note, it is advised to keep this number small (< 0.1) to avoid the
 aforementioned changes in visuals.
 
-This setting has no effect if :ref:`lighting method` is 'legacy'.
+This setting has no effect if :ref:`lighting method` is 'legacy'
+or if :ref:`classic falloff` is enabled.
 
 antialias alpha test
 --------------------
@@ -285,7 +307,7 @@ between them. Note, this relies on overriding specific properties of particle
 systems that potentially differ from the source content, this setting may change
 the look of some particle systems.
 
-Note that the rendering will act as if you have 'force shaders' option enabled.
+Note that the rendering will act as if you have :ref:`force shaders` option enabled.
 This means that shaders will be used to render all objects and the terrain.
 
 weather particle occlusion

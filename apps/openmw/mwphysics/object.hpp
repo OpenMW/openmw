@@ -18,6 +18,14 @@ namespace MWPhysics
 {
     class PhysicsTaskScheduler;
 
+    enum ScriptedCollisionType : char
+    {
+        ScriptedCollisionType_None = 0,
+        ScriptedCollisionType_Actor = 1,
+        // Note that this isn't 3, colliding with a player doesn't count as colliding with an actor
+        ScriptedCollisionType_Player = 2
+    };
+
     class Object final : public PtrHolder
     {
     public:
@@ -38,6 +46,9 @@ namespace MWPhysics
         /// @brief update object shape
         /// @return true if shape changed
         bool animateCollisionShapes();
+        bool collidedWith(ScriptedCollisionType type) const;
+        void addCollision(ScriptedCollisionType type);
+        void resetCollisions();
 
     private:
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
@@ -50,6 +61,7 @@ namespace MWPhysics
         bool mTransformUpdatePending = false;
         mutable std::mutex mPositionMutex;
         PhysicsTaskScheduler* mTaskScheduler;
+        char mCollidedWith;
     };
 }
 

@@ -42,8 +42,8 @@ Allowed options)");
         Files::ConfigurationManager cfgManager(true);
         cfgManager.readConfiguration(variables, desc);
 
-        const auto essFile = variables["mwsave"].as<Files::MaybeQuotedPath>();
-        const auto outputFile = variables["output"].as<Files::MaybeQuotedPath>();
+        const auto& essFile = variables["mwsave"].as<Files::MaybeQuotedPath>();
+        const auto& outputFile = variables["output"].as<Files::MaybeQuotedPath>();
         std::string encoding = variables["encoding"].as<std::string>();
 
         ESSImport::Importer importer(essFile, outputFile, encoding);

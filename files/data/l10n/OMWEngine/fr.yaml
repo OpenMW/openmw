@@ -2,11 +2,11 @@
 
 ConsoleWindow: "Console"
 
-
 # Debug window
 
 DebugWindow: "Fenêtre de débogage"
 LogViewer: "Journal"
+LuaProfiler: "Profileur Lua"
 PhysicsProfiler: "Profileur des performances de la physique"
 
 
@@ -22,26 +22,44 @@ LoadingInProgress: "Chargement de la sauvegarde"
 LoadingRequiresNewVersionError: |-
     Ce fichier de sauvegarde provient d'une version plus récente d'OpenMW, il n'est par consequent pas supporté.
     Mettez à jour votre version d'OpenMW afin de pouvoir charger cette sauvegarde.
+LoadingRequiresOldVersionError: |-
+    Ce fichier de sauvegarde provient d'une version trop ancienne d'OpenMW, il n'est par consequent pas supporté.
+    Ouvrez et enregistez cette sauvegarde avec {version} pour la mettre à jour.
 NewGameConfirmation: "Voulez-vous démarrer une nouvelle partie ? Toute progression non sauvegardée sera perdue."
+QuitGameConfirmation: "Quitter la partie ?"
 SaveGameDenied: "Sauvegarde impossible"
 SavingInProgress: "Sauvegarde en cours..."
-QuitGameConfirmation: "Quitter la partie ?"
+ScreenshotFailed: "Échec de la sauvegarde de la capture d'écran"
+ScreenshotMade: "Capture d'écran %s sauvegardée"
 
 
 # Save game menu
 
-SelectCharacter: "Sélection du personnage..."
-TimePlayed: "Temps de jeu"
-
 DeleteGame: "Supprimer la partie"
 DeleteGameConfirmation: "Voulez-vous réellement supprimer cette partie sauvegardée ?"
 EmptySaveNameError: "Impossible de sauvegarder une partie lui donner un nom !"
+Health: "Santé"
+Level: "Niveau"
 LoadGameConfirmation: "Voulez-vous charger cette autre partie ? Toute progression non sauvegardée sera perdue."
-MissingContentFilesConfirmation: |
+MissingContentFilesConfirmation: |-
     Les données de jeu actuellement sélectionnées ne correspondent pas à celle indiquée dans cette sauvegarde.
     Cela peut entraîner des erreurs lors du chargement, mais aussi lors de votre partie.
     Voulez-vous continuer ?
+MissingContentFilesList: |-
+  {files, plural,
+    one{\n\nUn fichier manquant trouvé : }
+    few{\n\n{files} fichiers manquant trouvés :\n}
+    other{\n\n{files} fichiers manquant trouvés :\n}
+  }
+MissingContentFilesListCopy: |-
+  {files, plural,
+    one{\n\nCliquez sur Copier pour placer ce nom dans le presse-papier.}
+    few{\n\nCliquez sur Copier pour placer ces noms dans le presse-papier.}
+    other{\n\nCliquez sur Copier pour placer ces noms dans le presse-papier.}
+  }
 OverwriteGameConfirmation: "Écraser la sauvegarde précédente ?"
+SelectCharacter: "Sélection du personnage..."
+TimePlayed: "Temps de jeu"
 
 
 # Settings menu
@@ -54,14 +72,28 @@ AudioFootsteps: "Bruits de pas"
 AudioMaster: "Général"
 AudioMusic: "Musique"
 AudioVoice: "Voix"
+AutoSaveOnResting: "Sauvegarde auto au repos"
+BestAttack: "Toujours meilleure attaque"
 CameraSensitivity: "Sensibilité de la caméra"
 CameraZoomIn: "Zoom avant de la caméra"
 CameraZoomOut: "Zoom arrière de la caméra"
 ChangeRequiresRestart: "Ce changement requiert un redémarrage de l'application pour prendre effet."
+ClassicFalloff: "Atténuation classique"
+ClassicFalloffTooltip: |-
+    valeur par défaut: inactif
+    Utilise la formule traditionnelle d'atténuation de la lumière ponctuelle qui n'a pas de diminution précoce.
+
+    Un défaut de la formule traditionnelle est que l'influence de la lumière n'atteint jamais tout à fait zéro.
+    C'est physiquement précis, mais peut causer des coutures d'éclairage car les lumières n'affectent pas toute la scène.
+    La diminution précoce aide à atténuer ces coutures au prix d'un assombrissement de la scène.
+
+    Morrowind utilise la formule traditionnelle, vous pourriez donc vouloir activer ceci si vous n'aimez pas les différences de luminosité.
+    Alternativement, essayez de modifier la luminosité minimale intérieure.
 ConfirmResetBindings: "Réinitialiser tous les contrôles à leurs valeurs par défaut ?"
 ConfirmResolution: "La nouvelle résolution d'affichage sera appliquée instantanément. Voulez-vous continuer ?"
 Controller: "Manette"
 Controls: "Contrôles"
+Crosshair: "Viseur"
 DelayHigh: "Lent"
 DelayLow: "Rapide"
 DetailLevel: "Niveau de détails"
@@ -74,6 +106,15 @@ EnableController: "Activer la manette"
 FieldOfView: "Champ de vision"
 FieldOfViewHigh: "Étendu"
 FieldOfViewLow: "Restreint"
+ForcePerPixelLighting: "Éclairage par pixel"
+ForcePerPixelLightingTooltip: |-
+    Force l'usage de l'éclairage par pixel. Par défaut, seuls les objets avec des "bump" et "normal" maps utilisent l'éclairage par pixel.
+
+    Affecte uniquement les objets rendus via des shaders.
+
+    Activer l'éclairage par pixel donne des résultats visuels différents de ceux du moteur de jeu original, car certaines lumières de Morrowind furent implémentées pour un éclairage par vertex.
+
+    Les shaders de végétation au sol et les particules ignorent cette option.
 FrameRateHint: "Note: Appuyez sur F3 pour afficher la fréquence d'affichage (FPS)."
 GammaCorrection: "Correction Gamma"
 GammaDark: "Sombre"
@@ -83,27 +124,31 @@ InvertXAxis: "Inverser l'axe X"
 InvertYAxis: "Inverser l'axe Y"
 Language: "Localisation"
 LanguageNote: "Note: Ce paramètre n'affecte pas les textes des fichiers ESM."
-LightingMethodLegacy: "Traditionnelle"
 LightingMethod: "Méthode d'affichage des lumières"
-LightingMethodShadersCompatibility: "Shaders (mode de compatibilité)"
+LightingMethodLegacy: "Traditionnelle"
 LightingMethodShaders: "Shaders"
+LightingMethodShadersCompatibility: "Shaders (mode de compatibilité)"
 LightingResetToDefaults: "Voulez-vous réinitialiser les paramètres d'affichage des lumières à leur valeur par défaut ? Ces changements requièrent un redémarrage de l'application."
+Lights: "Sources lumineuses"
 LightsBoundingSphereMultiplier: "Multiplicateur de sphère englobante"
 LightsBoundingSphereMultiplierTooltip: "valeur par défaut: 1.65\nMultiplicateur pour le rayon de la sphère incluant les sources lumineuses.\nUn multiplicateur plus élevé permet une extinction plus douce, mais applique un plus grand nombre de sources lumineuses sur chaque objet.\n\nCe paramètre ne modifie ni l'intensité ni la luminance des lumières."
 LightsFadeStartMultiplier: "Seuil de perte d'éclat lumineux"
 LightsFadeStartMultiplierTooltip: "valeur par défaut: 0.85\nFraction de la distance maximale d'une source à partir de laquelle l'intensité lumineuse commence à décroître.\n\nSélectionnez une valeur basse pour une transition douce ou une valeur plus élevée pour une transition plus abrupte."
+LightsLightingMethodTooltip: "Définit la gestion des sources lumineuses :\n\n
+    \"Traditionnelle\" Chaque objet est éclairé par 8 sources lumineuses. Cet méthode est la plus proche du jeu original.\n\n
+    \"Shaders (mode de compatibilité)\" supprime la limite des 8 sources lumineuses. Cette méthode permet d'éclairer la végétation au sol. Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.\n\n
+    \"Shaders\" offre tous les bénéfices apportés par \"Shaders (mode de compatibilité)\", mais utilise une approche moderne. Celle-ci permet, sur du matériel moderne, d'augmenter le nombre de sources lumineuses par objet sans perte de performance."
 LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
 LightsMinimumInteriorBrightness: "Luminosité intérieure minimale"
-LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres."
-Lights: "Sources lumineuses"
+LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres.\n\nCela n'a aucun effet si l'atténuation classique est utilisée."
 MaxLights: "Maximum de sources lumineuses"
 MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles obtenues avec la méthode d'éclairage traditionnelle."
 MenuHelpDelay: "Délai d'affichage du menu d'aide"
 MenuTransparency: "Transparence des menus"
 MouseAndKeyboard: "Souris/Clavier"
-PostProcessingIsNotEnabled: "Le post-traitement est désactivé"
 PostProcessing: "Post-traitement"
+PostProcessingIsNotEnabled: "Le post-traitement est désactivé"
 PostProcessingTooltip: "Modifiable dans le HUD de post-traitement, accessible à partir les paramètres de contrôle."
 Preferences: "Préférences"
 PrimaryLanguage: "Localisation principale"
@@ -126,19 +171,21 @@ ReflectionShaderDetailWorld: "Monde"
 Refraction: "Réfraction"
 ResetControls: "Réinitialiser les contrôles"
 Screenshot: "Capture d'écran"
-ScriptsDisabled: "Chargez une sauvegarde pour accéder aux paramètres des scripts."
 Scripts: "Scripts"
+ScriptsDisabled: "Chargez une sauvegarde pour accéder aux paramètres des scripts."
 SecondaryLanguage: "Localisation secondaire"
 SecondaryLanguageTooltip: "Localisation utilisée si le texte est absent de la localisation principale."
 SensitivityHigh: "Haute"
 SensitivityLow: "Faible"
 SettingsWindow: "Options"
 Subtitles: "Sous-titres"
+SunlightScattering: "Diffusion des rayons solaires"
 TestingExteriorCells: "Vérification des espaces (cells) extérieurs"
 TestingInteriorCells: "Vérification des espaces (cells) intérieurs"
-TextureFilteringBilinear: "Bilinéaire"
-TextureFilteringDisabled: "Aucun"
 TextureFiltering: "Filtre appliqué aux textures"
+TextureFilteringBilinear: "Bilinéaire"
+TextureFilteringNearest: "Plus proche voisin"
+TextureFilteringDisabled: "Aucun"
 TextureFilteringOther: "Autre"
 TextureFilteringTrilinear: "Trilinéaire"
 ToggleHUD: "Afficher/masquer le HUD"
@@ -148,11 +195,14 @@ TransparencyNone: "Basse"
 Video: "Graphisme"
 ViewDistance: "Distance d'affichage"
 VSync: "VSync"
+VSyncAdaptive: "Adaptif"
 Water: "Eau"
 WaterShader: "Shader pour l'eau"
 WaterShaderTextureQuality: "Qualité des textures"
 WindowBorder: "Bordure de fenêtre"
-WindowModeFullscreen: "Plein écran"
 WindowMode: "Mode d'affichage"
+WindowModeFullscreen: "Plein écran"
+WindowModeHint: "Info : Le mode \"Fenêtré plein écran\" utilise toujours la résolution native de l'écran."
 WindowModeWindowed: "Fenêtré"
 WindowModeWindowedFullscreen: "Fenêtré plein écran"
+WobblyShores: "Rivages vacillants"

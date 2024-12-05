@@ -28,7 +28,6 @@ namespace ContentSelectorModel
         }
         inline ErrorCode errorCode() const { return mErrorCode; }
         inline QString fileName() const { return mFileName; }
-        QString toolTip() const;
 
     private:
         ErrorCode mErrorCode;

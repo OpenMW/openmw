@@ -4,6 +4,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_UString.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -20,7 +21,6 @@
 #include <components/vfs/manager.hpp>
 
 #include "tooltips.hpp"
-#include "ustring.hpp"
 
 namespace
 {
@@ -129,10 +129,10 @@ namespace MWGui
 
         if (shown)
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     void PickClassDialog::onOpen()
@@ -248,27 +248,27 @@ namespace MWGui
         if (mCurrentClassId.empty())
             return;
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-        const ESM::Class* klass = store.get<ESM::Class>().search(mCurrentClassId);
-        if (!klass)
+        const ESM::Class* currentClass = store.get<ESM::Class>().search(mCurrentClassId);
+        if (!currentClass)
             return;
 
         ESM::Class::Specialization specialization
-            = static_cast<ESM::Class::Specialization>(klass->mData.mSpecialization);
+            = static_cast<ESM::Class::Specialization>(currentClass->mData.mSpecialization);
 
         std::string specName{ MWBase::Environment::get().getWindowManager()->getGameSettingString(
             ESM::Class::sGmstSpecializationIds[specialization], ESM::Class::sGmstSpecializationIds[specialization]) };
         mSpecializationName->setCaption(specName);
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
-        mFavoriteAttribute[0]->setAttributeId(ESM::Attribute::indexToRefId(klass->mData.mAttribute[0]));
-        mFavoriteAttribute[1]->setAttributeId(ESM::Attribute::indexToRefId(klass->mData.mAttribute[1]));
+        mFavoriteAttribute[0]->setAttributeId(ESM::Attribute::indexToRefId(currentClass->mData.mAttribute[0]));
+        mFavoriteAttribute[1]->setAttributeId(ESM::Attribute::indexToRefId(currentClass->mData.mAttribute[1]));
         ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
         ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
-        for (size_t i = 0; i < klass->mData.mSkills.size(); ++i)
+        for (size_t i = 0; i < currentClass->mData.mSkills.size(); ++i)
         {
-            ESM::RefId minor = ESM::Skill::indexToRefId(klass->mData.mSkills[i][0]);
-            ESM::RefId major = ESM::Skill::indexToRefId(klass->mData.mSkills[i][1]);
+            ESM::RefId minor = ESM::Skill::indexToRefId(currentClass->mData.mSkills[i][0]);
+            ESM::RefId major = ESM::Skill::indexToRefId(currentClass->mData.mSkills[i][1]);
             mMinorSkill[i]->setSkillId(minor);
             mMajorSkill[i]->setSkillId(major);
             ToolTips::createSkillToolTip(mMinorSkill[i], minor);
@@ -546,10 +546,10 @@ namespace MWGui
 
         if (shown)
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
         else
             okButton->setCaption(
-                toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
     // widget controls
@@ -869,7 +869,7 @@ namespace MWGui
         getWidget(okButton, "OKButton");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DescriptionDialog::onOkClicked);
         okButton->setCaption(
-            toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sInputMenu1", {})));
+            MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sInputMenu1", {})));
 
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);

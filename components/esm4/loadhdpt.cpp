@@ -37,6 +37,9 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
+    mExtraFlags2 = 0;
+    mData = 0;
+    mType = 0;
 
     std::optional<std::uint32_t> type;
 
@@ -45,29 +48,32 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("XALG"): // FO76
+                reader.get(mExtraFlags2);
+                break;
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mData);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_HNAM:
-                reader.getFormId(mAdditionalPart);
+            case ESM::fourCC("HNAM"):
+                reader.getFormId(mExtraParts.emplace_back());
                 break;
-            case ESM4::SUB_NAM0: // TES5
+            case ESM::fourCC("NAM0"): // TES5
             {
                 std::uint32_t value;
                 reader.get(value);
                 type = value;
                 break;
             }
-            case ESM4::SUB_NAM1: // TES5
+            case ESM::fourCC("NAM1"): // TES5
             {
                 std::string file;
                 reader.getZString(file);
@@ -84,17 +90,29 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
                 mTriFile[*type] = std::move(file);
                 break;
             }
-            case ESM4::SUB_TNAM:
+            case ESM::fourCC("TNAM"):
                 reader.getFormId(mBaseTexture);
                 break;
-            case ESM4::SUB_PNAM:
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_RNAM:
-            case ESM4::SUB_CNAM:
-            case ESM4::SUB_CTDA:
+            case ESM::fourCC("CNAM"):
+                reader.getFormId(mColor);
+                break;
+            case ESM::fourCC("RNAM"):
+                reader.getFormId(mValidRaces.emplace_back());
+                break;
+            case ESM::fourCC("PNAM"):
+                reader.get(mType);
+                break;
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"):
+            case ESM::fourCC("ENLM"):
+            case ESM::fourCC("XFLG"):
+            case ESM::fourCC("ENLT"):
+            case ESM::fourCC("ENLS"):
+            case ESM::fourCC("AUUV"):
+            case ESM::fourCC("MODD"): // Model data end
+            case ESM::fourCC("CTDA"):
                 reader.skipSubRecordData();
                 break;
             default:

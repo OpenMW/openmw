@@ -10,6 +10,7 @@
 #include <components/widgets/box.hpp>
 #include <components/widgets/numericeditbox.hpp>
 
+#include "itemselection.hpp"
 #include "windowbase.hpp"
 
 #include "../mwmechanics/alchemy.hpp"
@@ -44,6 +45,8 @@ namespace MWGui
         };
         FilterType mCurrentFilter;
 
+        std::unique_ptr<ItemSelectionDialog> mItemSelectionDialog;
+
         ItemView* mItemView;
         InventoryItemModel* mModel;
         SortFilterItemModel* mSortModel;
@@ -63,6 +66,7 @@ namespace MWGui
         void onCancelButtonClicked(MyGUI::Widget* _sender);
         void onCreateButtonClicked(MyGUI::Widget* _sender);
         void onIngredientSelected(MyGUI::Widget* _sender);
+        void onApparatusSelected(MyGUI::Widget* _sender);
         void onAccept(MyGUI::EditBox*);
         void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
@@ -84,7 +88,8 @@ namespace MWGui
 
         void onSelectedItem(int index);
 
-        void removeIngredient(MyGUI::Widget* ingredient);
+        void onItemSelected(MWWorld::Ptr item);
+        void onItemCancel();
 
         void createPotions(int count);
 

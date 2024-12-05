@@ -6,6 +6,8 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/aisequence.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "actorutil.hpp"
 #include "aiactivate.hpp"
@@ -17,6 +19,7 @@
 #include "aipursue.hpp"
 #include "aitravel.hpp"
 #include "aiwander.hpp"
+#include "creaturestats.hpp"
 
 namespace MWMechanics
 {
@@ -79,7 +82,11 @@ namespace MWMechanics
     void AiSequence::onPackageRemoved(const AiPackage& package)
     {
         if (package.getTypeId() == AiPackageTypeId::Combat)
+        {
             mNumCombatPackages--;
+            if (mNumCombatPackages == 0)
+                mResetFriendlyHits = true;
+        }
         else if (package.getTypeId() == AiPackageTypeId::Pursue)
             mNumPursuitPackages--;
 
@@ -135,6 +142,15 @@ namespace MWMechanics
         return mNumPursuitPackages > 0;
     }
 
+    bool AiSequence::isFleeing() const
+    {
+        if (!isInCombat())
+            return false;
+
+        const AiCombatStorage* storage = mAiState.getPtr<AiCombatStorage>();
+        return storage && storage->isFleeing();
+    }
+
     bool AiSequence::isEngagedWithActor() const
     {
         if (!isInCombat())
@@ -164,11 +180,11 @@ namespace MWMechanics
         if (!isInCombat())
             return false;
 
-        for (auto it = mPackages.begin(); it != mPackages.end(); ++it)
+        for (const auto& package : mPackages)
         {
-            if ((*it)->getTypeId() == AiPackageTypeId::Combat)
+            if (package->getTypeId() == AiPackageTypeId::Combat)
             {
-                if ((*it)->getTarget() == actor)
+                if (package->targetIs(actor))
                     return true;
             }
         }
@@ -234,6 +250,12 @@ namespace MWMechanics
             return;
         }
 
+        if (mResetFriendlyHits)
+        {
+            actor.getClass().getCreatureStats(actor).resetFriendlyHits();
+            mResetFriendlyHits = false;
+        }
+
         if (mPackages.empty())
         {
             mLastAiPackage = AiPackageTypeId::None;
@@ -272,7 +294,9 @@ namespace MWMechanics
                 }
                 else
                 {
-                    float rating = MWMechanics::getBestActionRating(actor, target);
+                    float rating = 0.f;
+                    if (MWMechanics::canFight(actor, target))
+                        rating = MWMechanics::getBestActionRating(actor, target);
 
                     const ESM::Position& targetPos = target.getRefData().getPosition();
 
@@ -354,7 +378,20 @@ namespace MWMechanics
 
         // Stop combat when a non-combat AI package is added
         if (isActualAiPackage(package.getTypeId()))
+        {
+            if (package.getTypeId() == MWMechanics::AiPackageTypeId::Follow
+                || package.getTypeId() == MWMechanics::AiPackageTypeId::Escort)
+            {
+                const auto& mechanicsManager = MWBase::Environment::get().getMechanicsManager();
+                std::vector<MWWorld::Ptr> newAllies = mechanicsManager->getActorsSidingWith(package.getTarget());
+                std::vector<MWWorld::Ptr> allies = mechanicsManager->getActorsSidingWith(actor);
+                for (const auto& ally : allies)
+                    ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(newAllies);
+                for (const auto& ally : newAllies)
+                    ally.getClass().getCreatureStats(ally).getAiSequence().stopCombat(allies);
+            }
             stopCombat();
+        }
 
         // We should return a wandering actor back after combat, casting or pursuit.
         // The same thing for actors without AI packages.
@@ -456,7 +493,7 @@ namespace MWMechanics
             {
                 ESM::AITarget data = esmPackage.mTarget;
                 package = std::make_unique<MWMechanics::AiEscort>(ESM::RefId::stringRefId(data.mId.toStringView()),
-                    data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
+                    esmPackage.mCellName, data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
             }
             else if (esmPackage.mType == ESM::AI_Travel)
             {
@@ -473,7 +510,7 @@ namespace MWMechanics
             {
                 ESM::AITarget data = esmPackage.mTarget;
                 package = std::make_unique<MWMechanics::AiFollow>(ESM::RefId::stringRefId(data.mId.toStringView()),
-                    data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
+                    esmPackage.mCellName, data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
             }
 
             onPackageAdded(*package);

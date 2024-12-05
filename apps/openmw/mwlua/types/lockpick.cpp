@@ -1,13 +1,14 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm3/loadlock.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include <apps/openmw/mwbase/environment.hpp>
-#include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/esmstore.hpp>
+#include "apps/openmw/mwbase/environment.hpp"
 
 namespace sol
 {
@@ -25,17 +26,16 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Lockpick>(lockpick, context);
 
-        sol::usertype<ESM::Lockpick> record = context.mLua->sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
+        sol::usertype<ESM::Lockpick> record = context.sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
         record[sol::meta_function::to_string]
             = [](const ESM::Lockpick& rec) { return "ESM3_Lockpick[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([vfs](const ESM::Lockpick& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
+        addModelProperty(record);
+        record["mwscript"] = sol::readonly_property([](const ESM::Lockpick& rec) -> sol::optional<std::string> {
+            return LuaUtil::serializeRefId(rec.mScript);
         });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Lockpick& rec) -> std::string { return rec.mScript.serializeText(); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Lockpick& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

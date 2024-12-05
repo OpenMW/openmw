@@ -3,12 +3,14 @@
 
 #include <algorithm>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace CSMPrefs
 {
     class State;
     class Setting;
+    class Subcategory;
 
     class Category
     {
@@ -20,6 +22,7 @@ namespace CSMPrefs
         State* mParent;
         std::string mKey;
         Container mSettings;
+        std::unordered_map<std::string, Setting*> mIndex;
 
     public:
         Category(State* parent, const std::string& key);
@@ -29,6 +32,8 @@ namespace CSMPrefs
         State* getState() const;
 
         void addSetting(Setting* setting);
+
+        void addSubcategory(Subcategory* setting);
 
         Iterator begin();
 

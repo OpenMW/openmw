@@ -29,6 +29,7 @@
 #include "settingvalue.hpp"
 
 #include <cassert>
+#include <memory>
 #include <string_view>
 
 namespace Settings
@@ -71,9 +72,12 @@ namespace Settings
 
         static void init();
 
+        static void clear();
+
     private:
-        static Index* sIndex;
-        static Values* sValues;
+        static std::unique_ptr<Index> sIndex;
+        static std::unique_ptr<Values> sDefaultValues;
+        static std::unique_ptr<Values> sValues;
 
         friend Values& values();
 

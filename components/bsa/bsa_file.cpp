@@ -325,43 +325,33 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
 {
     std::ifstream input(filePath, std::ios_base::binary);
 
-    // Total archive size
-    std::streamoff fsize = 0;
-    if (input.seekg(0, std::ios_base::end))
-    {
-        fsize = input.tellg();
-        input.seekg(0);
-    }
-
-    if (fsize < 12)
-    {
-        return BSAVER_UNKNOWN;
-    }
-
     // Get essential header numbers
 
     // First 12 bytes
     uint32_t head[3];
 
-    input.read(reinterpret_cast<char*>(head), 12);
+    input.read(reinterpret_cast<char*>(head), sizeof(head));
 
-    if (head[0] == static_cast<uint32_t>(BSAVER_UNCOMPRESSED))
+    if (input.gcount() != sizeof(head))
+        return BsaVersion::Unknown;
+
+    if (head[0] == static_cast<uint32_t>(BsaVersion::Uncompressed))
     {
-        return BSAVER_UNCOMPRESSED;
+        return BsaVersion::Uncompressed;
     }
 
-    if (head[0] == static_cast<uint32_t>(BSAVER_COMPRESSED) || head[0] == ESM::fourCC("BTDX"))
+    if (head[0] == static_cast<uint32_t>(BsaVersion::Compressed))
     {
-        if (head[1] == static_cast<uint32_t>(0x01))
-        {
-            if (head[2] == ESM::fourCC("GNRL"))
-                return BSAVER_BA2_GNRL;
-            if (head[2] == ESM::fourCC("DX10"))
-                return BSAVER_BA2_DX10;
-            return BSAVER_UNKNOWN;
-        }
-        return BSAVER_COMPRESSED;
+        return BsaVersion::Compressed;
     }
 
-    return BSAVER_UNKNOWN;
+    if (head[0] == ESM::fourCC("BTDX"))
+    {
+        if (head[2] == ESM::fourCC("GNRL"))
+            return BsaVersion::BA2GNRL;
+        if (head[2] == ESM::fourCC("DX10"))
+            return BsaVersion::BA2DX10;
+    }
+
+    return BsaVersion::Unknown;
 }

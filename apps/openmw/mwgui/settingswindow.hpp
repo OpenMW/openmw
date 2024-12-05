@@ -14,6 +14,8 @@ namespace MWGui
 
         void onOpen() override;
 
+        void onFrame(float duration) override;
+
         void updateControlsBox();
 
         void updateLightSettings();
@@ -35,6 +37,9 @@ namespace MWGui
         MyGUI::Button* mWindowBorderButton;
         MyGUI::ComboBox* mTextureFilteringButton;
 
+        MyGUI::Button* mWaterRefractionButton;
+        MyGUI::Button* mSunlightScatteringButton;
+        MyGUI::Button* mWobblyShoresButton;
         MyGUI::ComboBox* mWaterTextureSize;
         MyGUI::ComboBox* mWaterReflectionDetail;
         MyGUI::ComboBox* mWaterRainRippleDetail;
@@ -74,6 +79,7 @@ namespace MWGui
         void onResolutionCancel();
         void highlightCurrentResolution();
 
+        void onRefractionButtonClicked(MyGUI::Widget* _sender);
         void onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
         void onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos);
         void onWaterRainRippleDetailChanged(MyGUI::ComboBox* _sender, size_t pos);

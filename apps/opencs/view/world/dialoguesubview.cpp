@@ -30,6 +30,7 @@
 #include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/model/world/commanddispatcher.hpp>
 #include <apps/opencs/model/world/data.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/idtablebase.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 #include <apps/opencs/view/doc/subview.hpp>
@@ -129,30 +130,24 @@ QWidget* CSVWorld::NotEditableSubDelegate::createEditor(
 /*
 ==============================DialogueDelegateDispatcherProxy==========================================
 */
-CSVWorld::DialogueDelegateDispatcherProxy::refWrapper::refWrapper(const QModelIndex& index)
-    : mIndex(index)
-{
-}
-
 CSVWorld::DialogueDelegateDispatcherProxy::DialogueDelegateDispatcherProxy(
     QWidget* editor, CSMWorld::ColumnBase::Display display)
     : mEditor(editor)
     , mDisplay(display)
-    , mIndexWrapper(nullptr)
 {
 }
 
 void CSVWorld::DialogueDelegateDispatcherProxy::editorDataCommited()
 {
-    if (mIndexWrapper.get())
+    if (mIndex.has_value())
     {
-        emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
+        emit editorDataCommited(mEditor, mIndex.value(), mDisplay);
     }
 }
 
 void CSVWorld::DialogueDelegateDispatcherProxy::setIndex(const QModelIndex& index)
 {
-    mIndexWrapper = std::make_unique<refWrapper>(index);
+    mIndex = index;
 }
 
 QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const
@@ -655,7 +650,7 @@ void CSVWorld::EditWidget::remake(int row)
                         ++unlocked;
                     }
 
-                    if (mTable->index(row, i).data().type() == QVariant::UserType)
+                    if (CSMWorld::DisableTag::isDisableTag(mTable->index(row, i).data()))
                     {
                         editor->setEnabled(false);
                         label->setEnabled(false);
@@ -705,7 +700,7 @@ void CSVWorld::EditWidget::remake(int row)
                         unlockedLayout->addWidget(editor, unlocked, 1);
                         ++unlocked;
 
-                        if (tree->index(0, col, tree->index(row, i)).data().type() == QVariant::UserType)
+                        if (CSMWorld::DisableTag::isDisableTag(tree->index(0, col, tree->index(row, i)).data()))
                         {
                             editor->setEnabled(false);
                             label->setEnabled(false);

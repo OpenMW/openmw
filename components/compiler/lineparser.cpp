@@ -271,18 +271,14 @@ namespace Compiler
                     mCode.insert(mCode.end(), code.begin(), code.end());
                     extensions->generateInstructionCode(keyword, mCode, mLiterals, mExplicit, optionals);
 
+                    SkipParser skip(getErrorHandler(), getContext(), true);
+                    scanner.scan(skip);
+
                     mState = EndState;
                     return true;
                 }
-            }
 
-            if (const Extensions* extensions = getContext().getExtensions())
-            {
                 char returnType;
-                std::string argumentType;
-
-                bool hasExplicit = mState == ExplicitState;
-
                 if (extensions->isFunction(keyword, returnType, argumentType, hasExplicit))
                 {
                     if (!hasExplicit && mState == ExplicitState)
@@ -302,6 +298,9 @@ namespace Compiler
                         int optionals = mExprParser.parseArguments(argumentType, scanner, code, keyword);
                         mCode.insert(mCode.end(), code.begin(), code.end());
                         extensions->generateFunctionCode(keyword, mCode, mLiterals, mExplicit, optionals);
+
+                        SkipParser skip(getErrorHandler(), getContext(), true);
+                        scanner.scan(skip);
                     }
                     mState = EndState;
                     return true;

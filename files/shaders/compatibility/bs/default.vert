@@ -36,6 +36,7 @@ varying vec3 passNormal;
 
 #include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_vertex.glsl"
+#include "compatibility/normals.glsl"
 
 void main(void)
 {
@@ -45,6 +46,14 @@ void main(void)
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
+    passColor = gl_Color;
+    passViewPos = viewPos.xyz;
+    passNormal = gl_Normal.xyz;
+    normalToViewMatrix = gl_NormalMatrix;
+
+#if @normalMap
+    normalToViewMatrix *= generateTangentSpace(gl_MultiTexCoord7.xyzw, passNormal);
+#endif
 
 #if @diffuseMap
     diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
@@ -56,15 +65,11 @@ void main(void)
 
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
-    passTangent = gl_MultiTexCoord7.xyzw;
 #endif
 
-    passColor = gl_Color;
-    passViewPos = viewPos.xyz;
-    passNormal = gl_Normal.xyz;
 
 #if @shadows_enabled
-    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
     setupShadowCoords(viewPos, viewNormal);
 #endif
 }

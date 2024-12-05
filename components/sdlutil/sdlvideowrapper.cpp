@@ -30,14 +30,8 @@ namespace SDLUtil
             SDL_SetWindowGammaRamp(mWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
     }
 
-    void VideoWrapper::setSyncToVBlank(int mode)
+    void VideoWrapper::setSyncToVBlank(VSyncMode vsyncMode)
     {
-        VSyncMode vsyncMode = VSyncMode::Disabled;
-        if (mode == 1)
-            vsyncMode = VSyncMode::Enabled;
-        else if (mode == 2)
-            vsyncMode = VSyncMode::Adaptive;
-
         osgViewer::Viewer::Windows windows;
         mViewer->getWindows(windows);
         mViewer->stopThreading();
@@ -47,7 +41,7 @@ namespace SDLUtil
             if (GraphicsWindowSDL2* sdl2win = dynamic_cast<GraphicsWindowSDL2*>(win))
                 sdl2win->setSyncToVBlank(vsyncMode);
             else
-                win->setSyncToVBlank(static_cast<bool>(mode));
+                win->setSyncToVBlank(vsyncMode != VSyncMode::Disabled);
         }
         mViewer->startThreading();
     }

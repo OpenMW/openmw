@@ -1,16 +1,11 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SOUND_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SOUND_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/settings/hrtfmode.hpp>
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
-#include <osg/Math>
-#include <osg/Vec2f>
-#include <osg/Vec3f>
-
-#include <cstdint>
 #include <string>
-#include <string_view>
 
 namespace Settings
 {
@@ -26,8 +21,9 @@ namespace Settings
         SettingValue<float> mVoiceVolume{ mIndex, "Sound", "voice volume", makeClampSanitizerFloat(0, 1) };
         SettingValue<int> mBufferCacheMin{ mIndex, "Sound", "buffer cache min", makeMaxSanitizerInt(1) };
         SettingValue<int> mBufferCacheMax{ mIndex, "Sound", "buffer cache max", makeMaxSanitizerInt(1) };
-        SettingValue<int> mHrtfEnable{ mIndex, "Sound", "hrtf enable", makeEnumSanitizerInt({ -1, 0, 1 }) };
+        SettingValue<HrtfMode> mHrtfEnable{ mIndex, "Sound", "hrtf enable" };
         SettingValue<std::string> mHrtf{ mIndex, "Sound", "hrtf" };
+        SettingValue<bool> mCameraListener{ mIndex, "Sound", "camera listener" };
     };
 }
 

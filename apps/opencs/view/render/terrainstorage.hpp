@@ -38,7 +38,7 @@ namespace CSVRender
         std::array<float, ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE> mAlteredHeight;
 
         osg::ref_ptr<const ESMTerrain::LandObject> getLand(ESM::ExteriorCellLocation cellLocation) override;
-        const ESM::LandTexture* getLandTexture(int index, short plugin) override;
+        const std::string* getLandTexture(std::uint16_t index, int plugin) override;
 
         void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) override;
 

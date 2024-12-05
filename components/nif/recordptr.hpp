@@ -1,9 +1,10 @@
 #ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 #define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
+#include <vector>
+
 #include "niffile.hpp"
 #include "nifstream.hpp"
-#include <vector>
 
 namespace Nif
 {
@@ -39,7 +40,7 @@ namespace Nif
             assert(index == -2);
 
             // Store the index for later
-            index = nif->getInt();
+            index = nif->get<int32_t>();
             assert(index >= -1);
         }
 
@@ -90,12 +91,13 @@ namespace Nif
     template <class T>
     void readRecordList(NIFStream* nif, RecordListT<T>& list)
     {
-        const int length = nif->getInt();
+        const std::uint32_t length = nif->get<std::uint32_t>();
 
-        if (length < 0)
-            throw std::runtime_error("Negative NIF record list length: " + std::to_string(length));
+        // No reasonable list can hit this generous limit
+        if (length >= (1 << 24))
+            throw std::runtime_error("Record list too long: " + std::to_string(length));
 
-        list.resize(static_cast<std::size_t>(length));
+        list.resize(length);
 
         for (auto& value : list)
             value.read(nif);
@@ -108,14 +110,14 @@ namespace Nif
             value.post(nif);
     }
 
-    struct Node;
+    struct NiAVObject;
     struct Extra;
-    struct Property;
+    struct NiProperty;
     struct NiUVData;
     struct NiPosData;
     struct NiVisData;
-    struct Controller;
-    struct Named;
+    struct NiTimeController;
+    struct NiObjectNET;
     struct NiSkinData;
     struct NiFloatData;
     struct NiMorphData;
@@ -127,17 +129,30 @@ namespace Nif
     struct NiSourceTexture;
     struct NiPalette;
     struct NiParticleModifier;
+    struct BSMasterParticleSystem;
+    struct NiParticleSystem;
+    struct NiPSysCollider;
+    struct NiPSysColliderManager;
+    struct NiPSysEmitterCtlrData;
+    struct NiPSysModifier;
+    struct NiPSysSpawnModifier;
     struct NiBoolData;
+    struct NiBSplineData;
+    struct NiBSplineBasisData;
     struct NiSkinPartition;
     struct BSShaderTextureSet;
+    struct NiTriBasedGeom;
     struct NiGeometryData;
     struct BSShaderProperty;
     struct NiAlphaProperty;
     struct NiCollisionObject;
+    struct bhkSystem;
     struct bhkWorldObject;
     struct bhkShape;
     struct bhkSerializable;
     struct bhkEntity;
+    struct bhkConvexShape;
+    struct bhkRigidBody;
     struct hkPackedNiTriStripsData;
     struct NiAccumulator;
     struct NiInterpolator;
@@ -149,14 +164,17 @@ namespace Nif
     struct bhkCompressedMeshShapeData;
     struct BSMultiBound;
     struct BSMultiBoundData;
+    struct BSSkinBoneData;
+    struct BSAnimNote;
+    struct BSAnimNotes;
 
-    using NodePtr = RecordPtrT<Node>;
+    using NiAVObjectPtr = RecordPtrT<NiAVObject>;
     using ExtraPtr = RecordPtrT<Extra>;
     using NiUVDataPtr = RecordPtrT<NiUVData>;
     using NiPosDataPtr = RecordPtrT<NiPosData>;
     using NiVisDataPtr = RecordPtrT<NiVisData>;
-    using ControllerPtr = RecordPtrT<Controller>;
-    using NamedPtr = RecordPtrT<Named>;
+    using NiTimeControllerPtr = RecordPtrT<NiTimeController>;
+    using NiObjectNETPtr = RecordPtrT<NiObjectNET>;
     using NiSkinDataPtr = RecordPtrT<NiSkinData>;
     using NiMorphDataPtr = RecordPtrT<NiMorphData>;
     using NiPixelDataPtr = RecordPtrT<NiPixelData>;
@@ -167,16 +185,29 @@ namespace Nif
     using NiSourceTexturePtr = RecordPtrT<NiSourceTexture>;
     using NiPalettePtr = RecordPtrT<NiPalette>;
     using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
+    using BSMasterParticleSystemPtr = RecordPtrT<BSMasterParticleSystem>;
+    using NiParticleSystemPtr = RecordPtrT<NiParticleSystem>;
+    using NiPSysColliderPtr = RecordPtrT<NiPSysCollider>;
+    using NiPSysColliderManagerPtr = RecordPtrT<NiPSysColliderManager>;
+    using NiPSysEmitterCtlrDataPtr = RecordPtrT<NiPSysEmitterCtlrData>;
+    using NiPSysModifierPtr = RecordPtrT<NiPSysModifier>;
+    using NiPSysSpawnModifierPtr = RecordPtrT<NiPSysSpawnModifier>;
     using NiBoolDataPtr = RecordPtrT<NiBoolData>;
+    using NiBSplineDataPtr = RecordPtrT<NiBSplineData>;
+    using NiBSplineBasisDataPtr = RecordPtrT<NiBSplineBasisData>;
     using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
     using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
+    using NiTriBasedGeomPtr = RecordPtrT<NiTriBasedGeom>;
     using NiGeometryDataPtr = RecordPtrT<NiGeometryData>;
     using BSShaderPropertyPtr = RecordPtrT<BSShaderProperty>;
     using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
     using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
+    using bhkSystemPtr = RecordPtrT<bhkSystem>;
     using bhkWorldObjectPtr = RecordPtrT<bhkWorldObject>;
     using bhkShapePtr = RecordPtrT<bhkShape>;
     using bhkEntityPtr = RecordPtrT<bhkEntity>;
+    using bhkConvexShapePtr = RecordPtrT<bhkConvexShape>;
+    using bhkRigidBodyPtr = RecordPtrT<bhkRigidBody>;
     using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
     using NiAccumulatorPtr = RecordPtrT<NiAccumulator>;
     using NiInterpolatorPtr = RecordPtrT<NiInterpolator>;
@@ -187,9 +218,10 @@ namespace Nif
     using bhkCompressedMeshShapeDataPtr = RecordPtrT<bhkCompressedMeshShapeData>;
     using BSMultiBoundPtr = RecordPtrT<BSMultiBound>;
     using BSMultiBoundDataPtr = RecordPtrT<BSMultiBoundData>;
+    using BSSkinBoneDataPtr = RecordPtrT<BSSkinBoneData>;
 
-    using NodeList = RecordListT<Node>;
-    using PropertyList = RecordListT<Property>;
+    using NiAVObjectList = RecordListT<NiAVObject>;
+    using NiPropertyList = RecordListT<NiProperty>;
     using ExtraList = RecordListT<Extra>;
     using NiSourceTextureList = RecordListT<NiSourceTexture>;
     using NiInterpolatorList = RecordListT<NiInterpolator>;
@@ -197,7 +229,12 @@ namespace Nif
     using bhkShapeList = RecordListT<bhkShape>;
     using bhkSerializableList = RecordListT<bhkSerializable>;
     using bhkEntityList = RecordListT<bhkEntity>;
+    using bhkRigidBodyList = RecordListT<bhkEntity>;
     using NiControllerSequenceList = RecordListT<NiControllerSequence>;
+    using NiPSysModifierList = RecordListT<NiPSysModifier>;
+    using NiTriBasedGeomList = RecordListT<NiTriBasedGeom>;
+    using BSAnimNoteList = RecordListT<BSAnimNote>;
+    using BSAnimNotesList = RecordListT<BSAnimNotes>;
 
 } // Namespace
 #endif

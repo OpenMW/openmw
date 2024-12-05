@@ -74,7 +74,7 @@ namespace MWClass
         std::unique_ptr<MWWorld::Action> use(const MWWorld::Ptr& ptr, bool force = false) const override;
         ///< Generate action for using via inventory menu
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
 
         int getEnchantmentPoints(const MWWorld::ConstPtr& ptr) const override;
 

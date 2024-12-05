@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include <QApplication>
 #include <QDragEnterEvent>
 #include <QMenu>
 #include <QPainter>
@@ -424,6 +425,7 @@ void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent* event)
     painter.setBackgroundMode(Qt::OpaqueMode);
     QFont font = painter.font();
     QBrush background = painter.background();
+    QColor textColor = QApplication::palette().text().color();
 
     while (block.isValid() && top <= event->rect().bottom())
     {
@@ -440,7 +442,7 @@ void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent* event)
             else
             {
                 painter.setBackground(background);
-                painter.setPen(Qt::black);
+                painter.setPen(textColor);
             }
             painter.setFont(newFont);
             painter.drawText(0, top, mLineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GraphicsPage</class>
+ <widget class="QWidget" name="GraphicsPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>650</width>
+    <height>358</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
+        <item row="5" column="0">
+         <widget class="QLabel" name="screenLabel">
+          <property name="text">
+           <string>Screen</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="windowModeLabel">
+          <property name="text">
+           <string>Window Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <layout class="QGridLayout" name="resolutionLayout">
+          <item row="1" column="2">
+           <layout class="QHBoxLayout" name="customResolutionLayout" stretch="1,0,1">
+            <item>
+             <widget class="QSpinBox" name="customWidthSpinBox">
+              <property name="minimum">
+               <number>800</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="multiplyLabel">
+              <property name="text">
+               <string> × </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="customHeightSpinBox">
+              <property name="minimum">
+               <number>600</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="1">
+           <widget class="QRadioButton" name="customRadioButton">
+            <property name="text">
+             <string>Custom:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QRadioButton" name="standardRadioButton">
+            <property name="text">
+             <string>Standard:</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QComboBox" name="resolutionComboBox"/>
+          </item>
+         </layout>
+        </item>
+        <item row="4" column="1">
+         <widget class="QComboBox" name="antiAliasingComboBox">
+          <item>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>16</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="framerateLimitCheckBox">
+          <property name="text">
+           <string>Framerate Limit</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="windowBorderCheckBox">
+          <property name="text">
+           <string>Window Border</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QComboBox" name="screenComboBox"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="vSyncComboBox">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>Disabled</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Enabled</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Adaptive</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QComboBox" name="windowModeComboBox">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>Fullscreen</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Windowed Fullscreen</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Windowed</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="resolutionLabel">
+          <property name="text">
+           <string>Resolution</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="framerateLimitSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="suffix">
+           <string> FPS</string>
+          </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>15.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>300.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="antiAliasingLabel">
+          <property name="text">
+           <string>Anti-Aliasing</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="vSyncLabel">
+          <property name="text">
+           <string>Vertical Synchronization</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

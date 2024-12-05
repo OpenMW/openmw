@@ -2,6 +2,7 @@
 
 #include <QIcon>
 
+#include <components/misc/scalableicon.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 
 #include "../../model/prefs/state.hpp"
@@ -36,8 +37,8 @@ class QWidget;
 namespace CSVRender
 {
     PathgridMode::PathgridMode(WorldspaceWidget* worldspaceWidget, QWidget* parent)
-        : EditMode(worldspaceWidget, QIcon(":placeholder"), Mask_Pathgrid | Mask_Terrain | Mask_Reference, getTooltip(),
-            parent)
+        : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-pathgrid"),
+            Mask_Pathgrid | Mask_Terrain | Mask_Reference, getTooltip(), parent)
         , mDragMode(DragMode_None)
         , mFromNode(0)
         , mSelectionMode(nullptr)
@@ -107,7 +108,7 @@ namespace CSVRender
             {
                 if (tag->getPathgrid()->isSelected())
                 {
-                    unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+                    unsigned short node = SceneUtil::getPathgridNode(hit.index0);
 
                     QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
                     QString description = "Connect node to selected nodes";
@@ -128,7 +129,7 @@ namespace CSVRender
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
             {
                 mLastId = tag->getPathgrid()->getId();
-                unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+                unsigned short node = SceneUtil::getPathgridNode(hit.index0);
                 tag->getPathgrid()->toggleSelected(node);
             }
         }
@@ -146,7 +147,7 @@ namespace CSVRender
                     mLastId = tag->getPathgrid()->getId();
                 }
 
-                unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+                unsigned short node = SceneUtil::getPathgridNode(hit.index0);
                 tag->getPathgrid()->toggleSelected(node);
 
                 return;
@@ -189,7 +190,7 @@ namespace CSVRender
             {
                 mDragMode = DragMode_Edge;
                 mEdgeId = tag->getPathgrid()->getId();
-                mFromNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+                mFromNode = SceneUtil::getPathgridNode(hit.index0);
 
                 tag->getPathgrid()->setDragOrigin(mFromNode);
                 return true;
@@ -229,7 +230,7 @@ namespace CSVRender
                 if (hit.tag && (tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
                     && tag->getPathgrid()->getId() == mEdgeId)
                 {
-                    unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+                    unsigned short node = SceneUtil::getPathgridNode(hit.index0);
                     cell->getPathgrid()->setDragEndpoint(node);
                 }
                 else
@@ -267,7 +268,7 @@ namespace CSVRender
                 {
                     if (tag->getPathgrid()->getId() == mEdgeId)
                     {
-                        unsigned short toNode = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));
+                        unsigned short toNode = SceneUtil::getPathgridNode(hit.index0);
 
                         QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
                         QString description = "Add edge between nodes";

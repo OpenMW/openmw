@@ -21,7 +21,7 @@
 #include <apps/opencs/view/tools/merge.hpp>
 
 #ifdef _WIN32
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 #endif
 
 #include <components/debug/debugging.hpp>
@@ -119,8 +119,6 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
         boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(
             Files::MaybeQuotedPathContainer::value_type(), ""));
     addOption("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
-    addOption("resources",
-        boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"));
     addOption("fallback-archive",
         boost::program_options::value<std::vector<std::string>>()
             ->default_value(std::vector<std::string>(), "fallback-archive")
@@ -128,20 +126,13 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
     addOption("fallback",
         boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")->multitoken()->composing(),
         "fallback values");
-    addOption("script-blacklist",
-        boost::program_options::value<std::vector<std::string>>()
-            ->default_value(std::vector<std::string>(), "")
-            ->multitoken(),
-        "exclude specified script from the verifier (if the use of the blacklist is enabled)");
-    addOption("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)->default_value(true),
-        "enable script blacklisting");
     Files::ConfigurationManager::addCommonOptions(desc);
 
     boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc, false);
     Settings::Manager::load(mCfgMgr, true);
-    setupLogging(mCfgMgr.getLogPath(), "OpenMW-CS");
+    Debug::setupLogging(mCfgMgr.getLogPath(), "OpenMW-CS");
 
     return variables;
 }
@@ -160,9 +151,6 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
                                                      .as<Files::MaybeQuotedPath>()
                                                      .u8string()); // This call to u8string is redundant, but required
                                                                    // to build on MSVC 14.26 due to implementation bugs.
-
-    if (variables["script-blacklist-use"].as<bool>())
-        mDocumentManager.setBlacklistedScripts(variables["script-blacklist"].as<std::vector<std::string>>());
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty())
@@ -199,6 +187,8 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
     }
 
     dataDirs.insert(dataDirs.end(), dataLocal.begin(), dataLocal.end());
+
+    dataDirs.insert(dataDirs.begin(), mResources / "vfs");
 
     // iterate the data directories and add them to the file dialog for loading
     mFileDialog.addFiles(dataDirs);

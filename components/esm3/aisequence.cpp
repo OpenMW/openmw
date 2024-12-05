@@ -3,45 +3,66 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 #include <algorithm>
 #include <memory>
 
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<AiSequence::AiWanderData> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mDistance, v.mDuration, v.mTimeOfDay, v.mIdle, v.mShouldRepeat);
+    }
+
+    template <Misc::SameAsWithoutCvref<AiSequence::AiWanderDuration> T>
+    void decompose(T&& v, const auto& f)
+    {
+        std::uint32_t unused = 0;
+        f(v.mRemainingDuration, unused);
+    }
+
+    template <Misc::SameAsWithoutCvref<AiSequence::AiTravelData> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mX, v.mY, v.mZ);
+    }
+
+    template <Misc::SameAsWithoutCvref<AiSequence::AiEscortData> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mX, v.mY, v.mZ, v.mDuration);
+    }
+
     namespace AiSequence
     {
-
         void AiWander::load(ESMReader& esm)
         {
-            esm.getHNT("DATA", mData.mDistance, mData.mDuration, mData.mTimeOfDay, mData.mIdle, mData.mShouldRepeat);
-            esm.getHNT("STAR", mDurationData.mRemainingDuration, mDurationData.unused); // was mStartTime
-            mStoredInitialActorPosition = false;
-            if (esm.isNextSub("POS_"))
-            {
-                mStoredInitialActorPosition = true;
-                esm.getHT(mInitialActorPosition.mValues);
-            }
+            esm.getNamedComposite("DATA", mData);
+            esm.getNamedComposite("STAR", mDurationData); // was mStartTime
+            mStoredInitialActorPosition = esm.getHNOT("POS_", mInitialActorPosition.mValues);
         }
 
         void AiWander::save(ESMWriter& esm) const
         {
-            esm.writeHNT("DATA", mData);
-            esm.writeHNT("STAR", mDurationData);
+            esm.writeNamedComposite("DATA", mData);
+            esm.writeNamedComposite("STAR", mDurationData); // was mStartTime
             if (mStoredInitialActorPosition)
-                esm.writeHNT("POS_", mInitialActorPosition);
+                esm.writeHNT("POS_", mInitialActorPosition.mValues);
         }
 
         void AiTravel::load(ESMReader& esm)
         {
-            esm.getHNT("DATA", mData.mX, mData.mY, mData.mZ);
-            esm.getHNOT(mHidden, "HIDD");
+            esm.getNamedComposite("DATA", mData);
+            esm.getHNT(mHidden, "HIDD");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
         }
 
         void AiTravel::save(ESMWriter& esm) const
         {
-            esm.writeHNT("DATA", mData);
+            esm.writeNamedComposite("DATA", mData);
             esm.writeHNT("HIDD", mHidden);
             if (mRepeat)
                 esm.writeHNT("REPT", mRepeat);
@@ -49,7 +70,7 @@ namespace ESM
 
         void AiEscort::load(ESMReader& esm)
         {
-            esm.getHNT("DATA", mData.mX, mData.mY, mData.mZ, mData.mDuration);
+            esm.getNamedComposite("DATA", mData);
             mTargetId = esm.getHNRefId("TARG");
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
@@ -69,7 +90,7 @@ namespace ESM
 
         void AiEscort::save(ESMWriter& esm) const
         {
-            esm.writeHNT("DATA", mData);
+            esm.writeNamedComposite("DATA", mData);
             esm.writeHNRefId("TARG", mTargetId);
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
@@ -81,7 +102,7 @@ namespace ESM
 
         void AiFollow::load(ESMReader& esm)
         {
-            esm.getHNT("DATA", mData.mX, mData.mY, mData.mZ, mData.mDuration);
+            esm.getNamedComposite("DATA", mData);
             mTargetId = esm.getHNRefId("TARG");
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
@@ -106,7 +127,7 @@ namespace ESM
 
         void AiFollow::save(ESMWriter& esm) const
         {
-            esm.writeHNT("DATA", mData);
+            esm.writeNamedComposite("DATA", mData);
             esm.writeHNRefId("TARG", mTargetId);
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
@@ -196,7 +217,7 @@ namespace ESM
             int count = 0;
             while (esm.isNextSub("AIPK"))
             {
-                int type;
+                int32_t type;
                 esm.getHT(type);
 
                 mPackages.emplace_back();
@@ -263,7 +284,7 @@ namespace ESM
                 }
             }
 
-            esm.getHNOT(mLastAiPackage, "LAST");
+            esm.getHNT(mLastAiPackage, "LAST");
 
             if (count > 1 && esm.getFormatVersion() <= MaxOldAiPackageFormatVersion)
             {

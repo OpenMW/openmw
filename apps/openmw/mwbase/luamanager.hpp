@@ -8,6 +8,7 @@
 #include <SDL_events.h>
 
 #include "../mwgui/mode.hpp"
+#include "../mwrender/animationpriority.hpp"
 #include <components/sdlutil/events.hpp>
 
 namespace MWWorld
@@ -29,6 +30,14 @@ namespace ESM
     struct LuaScripts;
 }
 
+namespace LuaUtil
+{
+    namespace InputAction
+    {
+        class Registry;
+    }
+}
+
 namespace MWBase
 {
     // \brief LuaManager is the central interface through which the engine invokes lua scripts.
@@ -46,23 +55,40 @@ namespace MWBase
 
         virtual void newGameStarted() = 0;
         virtual void gameLoaded() = 0;
+        virtual void gameEnded() = 0;
+        virtual void noGame() = 0;
         virtual void objectAddedToScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectRemovedFromScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectTeleported(const MWWorld::Ptr& ptr) = 0;
         virtual void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) = 0;
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
+        virtual void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) = 0;
+        virtual void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) = 0;
+        virtual void playAnimation(const MWWorld::Ptr& object, const std::string& groupname,
+            const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
+            std::string_view start, std::string_view stop, float startpoint, uint32_t loops, bool loopfallback)
+            = 0;
+        virtual void skillLevelUp(const MWWorld::Ptr& actor, ESM::RefId skillId, std::string_view source) = 0;
+        virtual void skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale) = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
+        virtual void actorDied(const MWWorld::Ptr& actor) = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
-
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
 
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,
-        //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) = 0;
+        //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful,
+        //                          DamageSourceType sourceType) = 0;
 
         struct InputEvent
         {
+            struct WheelChange
+            {
+                int x;
+                int y;
+            };
+
             enum
             {
                 KeyPressed,
@@ -73,8 +99,11 @@ namespace MWBase
                 TouchPressed,
                 TouchReleased,
                 TouchMoved,
+                MouseButtonPressed,
+                MouseButtonReleased,
+                MouseWheel,
             } mType;
-            std::variant<SDL_Keysym, int, SDLUtil::TouchEvent> mValue;
+            std::variant<SDL_Keysym, int, SDLUtil::TouchEvent, WheelChange> mValue;
         };
         virtual void inputEvent(const InputEvent& event) = 0;
 

@@ -79,7 +79,7 @@ namespace LuaUi
         WidgetExtension::updateChildren();
     }
 
-    MyGUI::IntSize LuaFlex::childScalingSize()
+    MyGUI::IntSize LuaFlex::childScalingSize() const
     {
         // Call the base method to prevent relativeSize feedback loop
         MyGUI::IntSize size = WidgetExtension::calculateSize();
@@ -88,7 +88,7 @@ namespace LuaUi
         return size;
     }
 
-    MyGUI::IntSize LuaFlex::calculateSize()
+    MyGUI::IntSize LuaFlex::calculateSize() const
     {
         MyGUI::IntSize size = WidgetExtension::calculateSize();
         if (mAutoSized)

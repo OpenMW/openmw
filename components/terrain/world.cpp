@@ -5,6 +5,7 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/settings/values.hpp>
 
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
@@ -17,12 +18,11 @@ namespace Terrain
 
     World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
         Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask,
-        ESM::RefId worldspace)
+        ESM::RefId worldspace, double expiryDelay)
         : mStorage(storage)
         , mParent(parent)
         , mResourceSystem(resourceSystem)
         , mBorderVisible(false)
-        , mHeightCullCallback(new HeightCullCallback)
         , mWorldspace(worldspace)
     {
         mTerrainRoot = new osg::Group;
@@ -45,9 +45,9 @@ namespace Terrain
 
         mParent->addChild(mTerrainRoot);
 
-        mTextureManager = std::make_unique<TextureManager>(mResourceSystem->getSceneManager());
-        mChunkManager = std::make_unique<ChunkManager>(
-            mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer, mWorldspace);
+        mTextureManager = std::make_unique<TextureManager>(mResourceSystem->getSceneManager(), expiryDelay);
+        mChunkManager = std::make_unique<ChunkManager>(mStorage, mResourceSystem->getSceneManager(),
+            mTextureManager.get(), mCompositeMapRenderer, mWorldspace, expiryDelay);
         mChunkManager->setNodeMask(nodeMask);
         mCellBorder
             = std::make_unique<CellBorder>(this, mTerrainRoot.get(), borderMask, mResourceSystem->getSceneManager());
@@ -66,7 +66,6 @@ namespace Terrain
         , mChunkManager(nullptr)
         , mCellBorder(nullptr)
         , mBorderVisible(false)
-        , mHeightCullCallback(nullptr)
         , mWorldspace(worldspace)
     {
         mTerrainRoot = new osg::Group;
@@ -142,9 +141,17 @@ namespace Terrain
             mChunkManager->clearCache();
     }
 
+    void World::enableHeightCullCallback(bool enable)
+    {
+        if (enable)
+            mHeightCullCallback = new HeightCullCallback;
+        else
+            mHeightCullCallback = nullptr;
+    }
+
     osg::Callback* World::getHeightCullCallback(float highz, unsigned int mask)
     {
-        if (!mHeightCullCallback)
+        if (!mHeightCullCallback || mTerrainRoot->getNumChildren() == 0)
             return nullptr;
 
         mHeightCullCallback->setHighZ(highz);

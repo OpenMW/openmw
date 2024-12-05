@@ -13,7 +13,8 @@ const char Config::GameSettings::sDirectoryKey[] = "data";
 
 namespace
 {
-    QStringList reverse(QStringList values)
+    template <typename T>
+    QList<T> reverse(QList<T> values)
     {
         std::reverse(values.begin(), values.end());
         return values;
@@ -23,82 +24,109 @@ namespace
 Config::GameSettings::GameSettings(const Files::ConfigurationManager& cfg)
     : mCfgMgr(cfg)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    // this needs calling once so Qt can see its stream operators, which it needs when dragging and dropping
+    // it's automatic with Qt 6
+    qRegisterMetaTypeStreamOperators<SettingValue>("Config::SettingValue");
+#endif
 }
 
 void Config::GameSettings::validatePaths()
 {
-    QStringList paths = mSettings.values(QString("data"));
-    Files::PathContainer dataDirs;
+    QList<SettingValue> paths = mSettings.values(QString("data"));
 
-    for (const QString& path : paths)
-    {
-        dataDirs.emplace_back(Files::pathFromQString(path));
-    }
-
-    // Parse the data dirs to convert the tokenized paths
-    mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
     mDataDirs.clear();
 
-    for (const auto& dataDir : dataDirs)
+    for (const auto& dataDir : paths)
     {
-        if (is_directory(dataDir))
-            mDataDirs.append(Files::pathToQString(dataDir));
+        if (QDir(dataDir.value).exists())
+        {
+            SettingValue copy = dataDir;
+            copy.value = QDir(dataDir.value).canonicalPath();
+            mDataDirs.append(copy);
+        }
     }
 
     // Do the same for data-local
-    QString local = mSettings.value(QString("data-local"));
-    if (local.length() && local.at(0) == QChar('\"'))
+    const QString& local = mSettings.value(QString("data-local")).value;
+
+    if (!local.isEmpty() && QDir(local).exists())
     {
-        local.remove(0, 1);
-        local.chop(1);
-    }
-
-    if (local.isEmpty())
-        return;
-
-    dataDirs.clear();
-    dataDirs.emplace_back(Files::pathFromQString(local));
-
-    mCfgMgr.processPaths(dataDirs, /*basePath=*/"");
-
-    if (!dataDirs.empty())
-    {
-        const auto& path = dataDirs.front();
-        if (is_directory(path))
-            mDataLocal = Files::pathToQString(path);
+        mDataLocal = QDir(local).canonicalPath();
     }
 }
 
-std::filesystem::path Config::GameSettings::getGlobalDataDir() const
+QString Config::GameSettings::getResourcesVfs() const
 {
-    // global data dir may not exists if OpenMW is not installed (ie if run from build directory)
-    const auto& path = mCfgMgr.getGlobalDataPath();
-    if (std::filesystem::exists(path))
-        return std::filesystem::canonical(path);
-    return {};
+    QString resources = mSettings.value(QString("resources"), { "./resources", "", "" }).value;
+    resources += "/vfs";
+    return QFileInfo(resources).canonicalFilePath();
 }
 
-QStringList Config::GameSettings::values(const QString& key, const QStringList& defaultValues) const
+QList<Config::SettingValue> Config::GameSettings::values(
+    const QString& key, const QList<SettingValue>& defaultValues) const
 {
     if (!mSettings.values(key).isEmpty())
         return mSettings.values(key);
     return defaultValues;
 }
 
-bool Config::GameSettings::readFile(QTextStream& stream, bool ignoreContent)
+bool Config::GameSettings::containsValue(const QString& key, const QString& value) const
 {
-    return readFile(stream, mSettings, ignoreContent);
+    auto [itr, end] = mSettings.equal_range(key);
+    while (itr != end)
+    {
+        if (itr->value == value)
+            return true;
+        ++itr;
+    }
+    return false;
 }
 
-bool Config::GameSettings::readUserFile(QTextStream& stream, bool ignoreContent)
+bool Config::GameSettings::readFile(QTextStream& stream, const QString& context, bool ignoreContent)
 {
-    return readFile(stream, mUserSettings, ignoreContent);
+    if (readFile(stream, mSettings, context, ignoreContent))
+    {
+        mContexts.push_back(context);
+        return true;
+    }
+    return false;
 }
 
-bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QString>& settings, bool ignoreContent)
+bool Config::GameSettings::readUserFile(QTextStream& stream, const QString& context, bool ignoreContent)
 {
-    QMultiMap<QString, QString> cache;
+    return readFile(stream, mUserSettings, context, ignoreContent);
+}
+
+bool Config::GameSettings::readFile(
+    QTextStream& stream, QMultiMap<QString, SettingValue>& settings, const QString& context, bool ignoreContent)
+{
+    QMultiMap<QString, SettingValue> cache;
+    QRegularExpression replaceRe("^\\s*replace\\s*=\\s*(.+)$");
     QRegularExpression keyRe("^([^=]+)\\s*=\\s*(.+)$");
+
+    auto initialPos = stream.pos();
+
+    while (!stream.atEnd())
+    {
+        QString line = stream.readLine();
+
+        if (line.isEmpty() || line.startsWith("#"))
+            continue;
+
+        QRegularExpressionMatch match = replaceRe.match(line);
+        if (match.hasMatch())
+        {
+            QString key = match.captured(1).trimmed();
+            // Replace composing entries with a replace= line
+            if (key == QLatin1String("config") || key == QLatin1String("replace") || key == QLatin1String("data")
+                || key == QLatin1String("fallback-archive") || key == QLatin1String("content")
+                || key == QLatin1String("groundcover") || key == QLatin1String("fallback"))
+                settings.remove(key);
+        }
+    }
+
+    stream.seek(initialPos);
 
     while (!stream.atEnd())
     {
@@ -111,27 +139,31 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
         if (match.hasMatch())
         {
             QString key = match.captured(1).trimmed();
-            QString value = match.captured(2).trimmed();
+            SettingValue value{ match.captured(2).trimmed(), value.value, context };
 
             // Don't remove composing entries
-            if (key != QLatin1String("data") && key != QLatin1String("fallback-archive")
-                && key != QLatin1String("content") && key != QLatin1String("groundcover")
-                && key != QLatin1String("script-blacklist"))
+            if (key != QLatin1String("config") && key != QLatin1String("replace") && key != QLatin1String("data")
+                && key != QLatin1String("fallback-archive") && key != QLatin1String("content")
+                && key != QLatin1String("groundcover") && key != QLatin1String("fallback"))
                 settings.remove(key);
 
-            if (key == QLatin1String("data") || key == QLatin1String("data-local") || key == QLatin1String("resources")
+            if (key == QLatin1String("config") || key == QLatin1String("user-data") || key == QLatin1String("resources")
+                || key == QLatin1String("data") || key == QLatin1String("data-local")
                 || key == QLatin1String("load-savegame"))
             {
                 // Path line (e.g. 'data=...'), so needs processing to deal with ampersands and quotes
-                // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not
-                // work as there are too may QStrings involved
+                // The following is based on boost::io::detail::quoted_manip.hpp, but we don't actually use
+                // boost::filesystem::path anymore, and use a custom class MaybeQuotedPath which uses Boost-like quoting
+                // rules but internally stores as a std::filesystem::path.
+                // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked,
+                // and we rely on that.
                 QChar delim = '\"';
                 QChar escape = '&';
 
-                if (value.at(0) == delim)
+                if (value.value.at(0) == delim)
                 {
-                    QString valueOriginal = value;
-                    value = "";
+                    QString valueOriginal = value.value;
+                    value.value = "";
 
                     for (QString::const_iterator it = valueOriginal.begin() + 1; it != valueOriginal.end(); ++it)
                     {
@@ -139,17 +171,29 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
                             ++it;
                         else if (*it == delim)
                             break;
-                        value += *it;
+                        value.value += *it;
                     }
+                    value.originalRepresentation = value.value;
                 }
+
+                value = processPathSettingValue(value);
             }
             if (ignoreContent && (key == QLatin1String("content") || key == QLatin1String("data")))
                 continue;
 
-            QStringList values = cache.values(key);
+            QList<SettingValue> values = cache.values(key);
             values.append(settings.values(key));
 
-            if (!values.contains(value))
+            bool exists = false;
+            for (const auto& existingValue : values)
+            {
+                if (existingValue.value == value.value)
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
             {
                 cache.insert(key, value);
             }
@@ -184,15 +228,16 @@ bool Config::GameSettings::writeFile(QTextStream& stream)
         // Boost-like quoting rules but internally stores as a std::filesystem::path.
         // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked, and we
         // rely on that.
-        if (i.key() == QLatin1String("data") || i.key() == QLatin1String("data-local")
-            || i.key() == QLatin1String("resources") || i.key() == QLatin1String("load-savegame"))
+        if (i.key() == QLatin1String("config") || i.key() == QLatin1String("user-data")
+            || i.key() == QLatin1String("resources") || i.key() == QLatin1String("data")
+            || i.key() == QLatin1String("data-local") || i.key() == QLatin1String("load-savegame"))
         {
             stream << i.key() << "=";
 
             // Equivalent to stream << std::quoted(i.value(), '"', '&'), which won't work on QStrings.
             QChar delim = '\"';
             QChar escape = '&';
-            QString string = i.value();
+            QString string = i.value().originalRepresentation;
 
             stream << delim;
             for (auto& it : string)
@@ -207,7 +252,7 @@ bool Config::GameSettings::writeFile(QTextStream& stream)
             continue;
         }
 
-        stream << i.key() << "=" << i.value() << "\n";
+        stream << i.key() << "=" << i.value().originalRepresentation << "\n";
     }
 
     return true;
@@ -362,16 +407,17 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
             *iter = QString(); // assume no match
             QString key = match.captured(1);
             QString keyVal = match.captured(1) + "=" + match.captured(2);
-            QMultiMap<QString, QString>::const_iterator i = mUserSettings.find(key);
+            QMultiMap<QString, SettingValue>::const_iterator i = mUserSettings.find(key);
             while (i != mUserSettings.end() && i.key() == key)
             {
-                QString settingLine = i.key() + "=" + i.value();
+                // todo: does this need to handle paths?
+                QString settingLine = i.key() + "=" + i.value().originalRepresentation;
                 QRegularExpressionMatch keyMatch = settingRegex.match(settingLine);
                 if (keyMatch.hasMatch())
                 {
                     if ((keyMatch.captured(1) + "=" + keyMatch.captured(2)) == keyVal)
                     {
-                        *iter = settingLine;
+                        *iter = std::move(settingLine);
                         break;
                     }
                 }
@@ -408,15 +454,16 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
         // Boost-like quoting rules but internally stores as a std::filesystem::path.
         // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked, and we
         // rely on that.
-        if (it.key() == QLatin1String("data") || it.key() == QLatin1String("data-local")
-            || it.key() == QLatin1String("resources") || it.key() == QLatin1String("load-savegame"))
+        if (it.key() == QLatin1String("config") || it.key() == QLatin1String("user-data")
+            || it.key() == QLatin1String("resources") || it.key() == QLatin1String("data")
+            || it.key() == QLatin1String("data-local") || it.key() == QLatin1String("load-savegame"))
         {
             settingLine = it.key() + "=";
 
             // Equivalent to settingLine += std::quoted(it.value(), '"', '&'), which won't work on QStrings.
             QChar delim = '\"';
             QChar escape = '&';
-            QString string = it.value();
+            QString string = it.value().originalRepresentation;
 
             settingLine += delim;
             for (auto& iter : string)
@@ -428,7 +475,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
             settingLine += delim;
         }
         else
-            settingLine = it.key() + "=" + it.value();
+            settingLine = it.key() + "=" + it.value().originalRepresentation;
 
         QRegularExpressionMatch match = settingRegex.match(settingLine);
         if (match.hasMatch())
@@ -487,11 +534,11 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
 bool Config::GameSettings::hasMaster()
 {
     bool result = false;
-    QStringList content = mSettings.values(QString(Config::GameSettings::sContentKey));
+    QList<SettingValue> content = mSettings.values(QString(Config::GameSettings::sContentKey));
     for (int i = 0; i < content.count(); ++i)
     {
-        if (content.at(i).endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive)
-            || content.at(i).endsWith(QLatin1String(".esm"), Qt::CaseInsensitive))
+        if (content.at(i).value.endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive)
+            || content.at(i).value.endsWith(QLatin1String(".esm"), Qt::CaseInsensitive))
         {
             result = true;
             break;
@@ -502,40 +549,70 @@ bool Config::GameSettings::hasMaster()
 }
 
 void Config::GameSettings::setContentList(
-    const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames)
+    const QList<SettingValue>& dirNames, const QList<SettingValue>& archiveNames, const QStringList& fileNames)
 {
-    auto const reset = [this](const char* key, const QStringList& list) {
-        remove(key);
-        for (auto const& item : list)
-            setMultiValue(key, item);
-    };
-
-    reset(sDirectoryKey, dirNames);
-    reset(sArchiveKey, archiveNames);
-    reset(sContentKey, fileNames);
+    remove(sDirectoryKey);
+    for (auto const& item : dirNames)
+        setMultiValue(sDirectoryKey, item);
+    remove(sArchiveKey);
+    for (auto const& item : archiveNames)
+        setMultiValue(sArchiveKey, item);
+    remove(sContentKey);
+    for (auto const& item : fileNames)
+        setMultiValue(sContentKey, { item });
 }
 
-QStringList Config::GameSettings::getDataDirs() const
+QList<Config::SettingValue> Config::GameSettings::getDataDirs() const
 {
     return reverse(mDataDirs);
 }
 
-QStringList Config::GameSettings::getArchiveList() const
+QList<Config::SettingValue> Config::GameSettings::getArchiveList() const
 {
     // QMap returns multiple rows in LIFO order, so need to reverse
     return reverse(values(sArchiveKey));
 }
 
-QStringList Config::GameSettings::getContentList() const
+QList<Config::SettingValue> Config::GameSettings::getContentList() const
 {
     // QMap returns multiple rows in LIFO order, so need to reverse
     return reverse(values(sContentKey));
 }
 
+bool Config::GameSettings::isUserSetting(const SettingValue& settingValue) const
+{
+    return settingValue.context.isEmpty() || settingValue.context == getUserContext();
+}
+
+Config::SettingValue Config::GameSettings::processPathSettingValue(const SettingValue& value)
+{
+    std::filesystem::path path = Files::pathFromQString(value.value);
+    std::filesystem::path basePath = Files::pathFromQString(value.context.isEmpty() ? getUserContext() : value.context);
+    mCfgMgr.processPath(path, basePath);
+    return SettingValue{ Files::pathToQString(path), value.originalRepresentation, value.context };
+}
+
 void Config::GameSettings::clear()
 {
     mSettings.clear();
+    mContexts.clear();
     mUserSettings.clear();
     mDataDirs.clear();
     mDataLocal.clear();
+}
+
+QDataStream& Config::operator<<(QDataStream& out, const SettingValue& settingValue)
+{
+    out << settingValue.value;
+    out << settingValue.originalRepresentation;
+    out << settingValue.context;
+    return out;
+}
+
+QDataStream& Config::operator>>(QDataStream& in, SettingValue& settingValue)
+{
+    in >> settingValue.value;
+    in >> settingValue.originalRepresentation;
+    in >> settingValue.context;
+    return in;
 }

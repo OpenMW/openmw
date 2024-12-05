@@ -2,8 +2,9 @@
 #define OPENMW_COMPONENTS_RESOURCE_FILESYSTEMARCHIVE_H
 
 #include "archive.hpp"
-#include <filesystem>
+#include "file.hpp"
 
+#include <filesystem>
 #include <string>
 
 namespace VFS
@@ -27,17 +28,14 @@ namespace VFS
     public:
         FileSystemArchive(const std::filesystem::path& path);
 
-        void listResources(std::map<std::string, File*>& out) override;
+        void listResources(FileMap& out) override;
 
-        bool contains(const std::string& file) const override;
+        bool contains(Path::NormalizedView file) const override;
 
         std::string getDescription() const override;
 
     private:
-        typedef std::map<std::string, FileSystemArchiveFile> index;
-        index mIndex;
-
-        bool mBuiltIndex;
+        std::map<VFS::Path::Normalized, FileSystemArchiveFile, std::less<>> mIndex;
         std::filesystem::path mPath;
     };
 

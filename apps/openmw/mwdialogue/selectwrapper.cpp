@@ -10,431 +10,264 @@
 namespace
 {
     template <typename T1, typename T2>
-    bool selectCompareImp(char comp, T1 value1, T2 value2)
+    bool selectCompareImp(ESM::DialogueCondition::Comparison comp, T1 value1, T2 value2)
     {
         switch (comp)
         {
-            case '0':
+            case ESM::DialogueCondition::Comp_Eq:
                 return value1 == value2;
-            case '1':
+            case ESM::DialogueCondition::Comp_Ne:
                 return value1 != value2;
-            case '2':
+            case ESM::DialogueCondition::Comp_Gt:
                 return value1 > value2;
-            case '3':
+            case ESM::DialogueCondition::Comp_Ge:
                 return value1 >= value2;
-            case '4':
+            case ESM::DialogueCondition::Comp_Ls:
                 return value1 < value2;
-            case '5':
+            case ESM::DialogueCondition::Comp_Le:
                 return value1 <= value2;
+            default:
+                throw std::runtime_error("unknown compare type in dialogue info select");
         }
-
-        throw std::runtime_error("unknown compare type in dialogue info select");
     }
 
     template <typename T>
-    bool selectCompareImp(const ESM::DialInfo::SelectStruct& select, T value1)
+    bool selectCompareImp(const ESM::DialogueCondition& select, T value1)
     {
-        if (select.mValue.getType() == ESM::VT_Int)
-        {
-            return selectCompareImp(select.mSelectRule[4], value1, select.mValue.getInteger());
-        }
-        else if (select.mValue.getType() == ESM::VT_Float)
-        {
-            return selectCompareImp(select.mSelectRule[4], value1, select.mValue.getFloat());
-        }
-        else
-            throw std::runtime_error("unsupported variable type in dialogue info select");
+        return std::visit(
+            [&](auto value) { return selectCompareImp(select.mComparison, value1, value); }, select.mValue);
     }
 }
 
-MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() const
-{
-    const int index = Misc::StringUtils::toNumeric<int>(mSelect.mSelectRule.substr(2, 2), 0);
-
-    switch (index)
-    {
-        case 0:
-            return Function_RankLow;
-        case 1:
-            return Function_RankHigh;
-        case 2:
-            return Function_RankRequirement;
-        case 3:
-            return Function_Reputation;
-        case 4:
-            return Function_HealthPercent;
-        case 5:
-            return Function_PCReputation;
-        case 6:
-            return Function_PcLevel;
-        case 7:
-            return Function_PcHealthPercent;
-        case 8:
-        case 9:
-            return Function_PcDynamicStat;
-        case 10:
-            return Function_PcAttribute;
-        case 11:
-        case 12:
-        case 13:
-        case 14:
-        case 15:
-        case 16:
-        case 17:
-        case 18:
-        case 19:
-        case 20:
-        case 21:
-        case 22:
-        case 23:
-        case 24:
-        case 25:
-        case 26:
-        case 27:
-        case 28:
-        case 29:
-        case 30:
-        case 31:
-        case 32:
-        case 33:
-        case 34:
-        case 35:
-        case 36:
-        case 37:
-            return Function_PcSkill;
-        case 38:
-            return Function_PcGender;
-        case 39:
-            return Function_PcExpelled;
-        case 40:
-            return Function_PcCommonDisease;
-        case 41:
-            return Function_PcBlightDisease;
-        case 42:
-            return Function_PcClothingModifier;
-        case 43:
-            return Function_PcCrimeLevel;
-        case 44:
-            return Function_SameGender;
-        case 45:
-            return Function_SameRace;
-        case 46:
-            return Function_SameFaction;
-        case 47:
-            return Function_FactionRankDiff;
-        case 48:
-            return Function_Detected;
-        case 49:
-            return Function_Alarmed;
-        case 50:
-            return Function_Choice;
-        case 51:
-        case 52:
-        case 53:
-        case 54:
-        case 55:
-        case 56:
-        case 57:
-            return Function_PcAttribute;
-        case 58:
-            return Function_PcCorprus;
-        case 59:
-            return Function_Weather;
-        case 60:
-            return Function_PcVampire;
-        case 61:
-            return Function_Level;
-        case 62:
-            return Function_Attacked;
-        case 63:
-            return Function_TalkedToPc;
-        case 64:
-            return Function_PcDynamicStat;
-        case 65:
-            return Function_CreatureTargetted;
-        case 66:
-            return Function_FriendlyHit;
-        case 67:
-        case 68:
-        case 69:
-        case 70:
-            return Function_AiSetting;
-        case 71:
-            return Function_ShouldAttack;
-        case 72:
-            return Function_Werewolf;
-        case 73:
-            return Function_WerewolfKills;
-    }
-
-    return Function_False;
-}
-
-MWDialogue::SelectWrapper::SelectWrapper(const ESM::DialInfo::SelectStruct& select)
+MWDialogue::SelectWrapper::SelectWrapper(const ESM::DialogueCondition& select)
     : mSelect(select)
 {
 }
 
-MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() const
+ESM::DialogueCondition::Function MWDialogue::SelectWrapper::getFunction() const
 {
-    char type = mSelect.mSelectRule[1];
-
-    switch (type)
-    {
-        case '1':
-            return decodeFunction();
-        case '2':
-            return Function_Global;
-        case '3':
-            return Function_Local;
-        case '4':
-            return Function_Journal;
-        case '5':
-            return Function_Item;
-        case '6':
-            return Function_Dead;
-        case '7':
-            return Function_NotId;
-        case '8':
-            return Function_NotFaction;
-        case '9':
-            return Function_NotClass;
-        case 'A':
-            return Function_NotRace;
-        case 'B':
-            return Function_NotCell;
-        case 'C':
-            return Function_NotLocal;
-    }
-
-    return Function_None;
+    return mSelect.mFunction;
 }
 
 int MWDialogue::SelectWrapper::getArgument() const
 {
-    if (mSelect.mSelectRule[1] != '1')
-        return 0;
-
-    int index = 0;
-
-    std::istringstream(mSelect.mSelectRule.substr(2, 2)) >> index;
-
-    switch (index)
+    switch (mSelect.mFunction)
     {
         // AI settings
-        case 67:
+        case ESM::DialogueCondition::Function_Fight:
             return 1;
-        case 68:
+        case ESM::DialogueCondition::Function_Hello:
             return 0;
-        case 69:
+        case ESM::DialogueCondition::Function_Alarm:
             return 3;
-        case 70:
+        case ESM::DialogueCondition::Function_Flee:
             return 2;
 
         // attributes
-        case 10:
+        case ESM::DialogueCondition::Function_PcStrength:
             return 0;
-        case 51:
+        case ESM::DialogueCondition::Function_PcIntelligence:
             return 1;
-        case 52:
+        case ESM::DialogueCondition::Function_PcWillpower:
             return 2;
-        case 53:
+        case ESM::DialogueCondition::Function_PcAgility:
             return 3;
-        case 54:
+        case ESM::DialogueCondition::Function_PcSpeed:
             return 4;
-        case 55:
+        case ESM::DialogueCondition::Function_PcEndurance:
             return 5;
-        case 56:
+        case ESM::DialogueCondition::Function_PcPersonality:
             return 6;
-        case 57:
+        case ESM::DialogueCondition::Function_PcLuck:
             return 7;
 
         // skills
-        case 11:
+        case ESM::DialogueCondition::Function_PcBlock:
             return 0;
-        case 12:
+        case ESM::DialogueCondition::Function_PcArmorer:
             return 1;
-        case 13:
+        case ESM::DialogueCondition::Function_PcMediumArmor:
             return 2;
-        case 14:
+        case ESM::DialogueCondition::Function_PcHeavyArmor:
             return 3;
-        case 15:
+        case ESM::DialogueCondition::Function_PcBluntWeapon:
             return 4;
-        case 16:
+        case ESM::DialogueCondition::Function_PcLongBlade:
             return 5;
-        case 17:
+        case ESM::DialogueCondition::Function_PcAxe:
             return 6;
-        case 18:
+        case ESM::DialogueCondition::Function_PcSpear:
             return 7;
-        case 19:
+        case ESM::DialogueCondition::Function_PcAthletics:
             return 8;
-        case 20:
+        case ESM::DialogueCondition::Function_PcEnchant:
             return 9;
-        case 21:
+        case ESM::DialogueCondition::Function_PcDestruction:
             return 10;
-        case 22:
+        case ESM::DialogueCondition::Function_PcAlteration:
             return 11;
-        case 23:
+        case ESM::DialogueCondition::Function_PcIllusion:
             return 12;
-        case 24:
+        case ESM::DialogueCondition::Function_PcConjuration:
             return 13;
-        case 25:
+        case ESM::DialogueCondition::Function_PcMysticism:
             return 14;
-        case 26:
+        case ESM::DialogueCondition::Function_PcRestoration:
             return 15;
-        case 27:
+        case ESM::DialogueCondition::Function_PcAlchemy:
             return 16;
-        case 28:
+        case ESM::DialogueCondition::Function_PcUnarmored:
             return 17;
-        case 29:
+        case ESM::DialogueCondition::Function_PcSecurity:
             return 18;
-        case 30:
+        case ESM::DialogueCondition::Function_PcSneak:
             return 19;
-        case 31:
+        case ESM::DialogueCondition::Function_PcAcrobatics:
             return 20;
-        case 32:
+        case ESM::DialogueCondition::Function_PcLightArmor:
             return 21;
-        case 33:
+        case ESM::DialogueCondition::Function_PcShortBlade:
             return 22;
-        case 34:
+        case ESM::DialogueCondition::Function_PcMarksman:
             return 23;
-        case 35:
+        case ESM::DialogueCondition::Function_PcMerchantile:
             return 24;
-        case 36:
+        case ESM::DialogueCondition::Function_PcSpeechcraft:
             return 25;
-        case 37:
+        case ESM::DialogueCondition::Function_PcHandToHand:
             return 26;
 
         // dynamic stats
-        case 8:
+        case ESM::DialogueCondition::Function_PcMagicka:
             return 1;
-        case 9:
+        case ESM::DialogueCondition::Function_PcFatigue:
             return 2;
-        case 64:
+        case ESM::DialogueCondition::Function_PcHealth:
+            return 0;
+        default:
             return 0;
     }
-
-    return 0;
 }
 
 MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
 {
-    static const Function integerFunctions[] = {
-        Function_Journal,
-        Function_Item,
-        Function_Dead,
-        Function_Choice,
-        Function_AiSetting,
-        Function_PcAttribute,
-        Function_PcSkill,
-        Function_FriendlyHit,
-        Function_PcLevel,
-        Function_PcGender,
-        Function_PcClothingModifier,
-        Function_PcCrimeLevel,
-        Function_RankRequirement,
-        Function_Level,
-        Function_PCReputation,
-        Function_Weather,
-        Function_Reputation,
-        Function_FactionRankDiff,
-        Function_WerewolfKills,
-        Function_RankLow,
-        Function_RankHigh,
-        Function_CreatureTargetted,
-        // end marker
-        Function_None,
-    };
-
-    static const Function numericFunctions[] = {
-        Function_Global,
-        Function_Local,
-        Function_NotLocal,
-        Function_PcDynamicStat,
-        Function_PcHealthPercent,
-        Function_HealthPercent,
-        // end marker
-        Function_None,
-    };
-
-    static const Function booleanFunctions[] = {
-        Function_False,
-        Function_SameGender,
-        Function_SameRace,
-        Function_SameFaction,
-        Function_PcCommonDisease,
-        Function_PcBlightDisease,
-        Function_PcCorprus,
-        Function_PcExpelled,
-        Function_PcVampire,
-        Function_TalkedToPc,
-        Function_Alarmed,
-        Function_Detected,
-        Function_Attacked,
-        Function_ShouldAttack,
-        Function_Werewolf,
-        // end marker
-        Function_None,
-    };
-
-    static const Function invertedBooleanFunctions[] = {
-        Function_NotId,
-        Function_NotFaction,
-        Function_NotClass,
-        Function_NotRace,
-        Function_NotCell,
-        // end marker
-        Function_None,
-    };
-
-    Function function = getFunction();
-
-    for (int i = 0; integerFunctions[i] != Function_None; ++i)
-        if (integerFunctions[i] == function)
+    switch (mSelect.mFunction)
+    {
+        case ESM::DialogueCondition::Function_Journal:
+        case ESM::DialogueCondition::Function_Item:
+        case ESM::DialogueCondition::Function_Dead:
+        case ESM::DialogueCondition::Function_Choice:
+        case ESM::DialogueCondition::Function_Fight:
+        case ESM::DialogueCondition::Function_Hello:
+        case ESM::DialogueCondition::Function_Alarm:
+        case ESM::DialogueCondition::Function_Flee:
+        case ESM::DialogueCondition::Function_PcStrength:
+        case ESM::DialogueCondition::Function_PcIntelligence:
+        case ESM::DialogueCondition::Function_PcWillpower:
+        case ESM::DialogueCondition::Function_PcAgility:
+        case ESM::DialogueCondition::Function_PcSpeed:
+        case ESM::DialogueCondition::Function_PcEndurance:
+        case ESM::DialogueCondition::Function_PcPersonality:
+        case ESM::DialogueCondition::Function_PcLuck:
+        case ESM::DialogueCondition::Function_PcBlock:
+        case ESM::DialogueCondition::Function_PcArmorer:
+        case ESM::DialogueCondition::Function_PcMediumArmor:
+        case ESM::DialogueCondition::Function_PcHeavyArmor:
+        case ESM::DialogueCondition::Function_PcBluntWeapon:
+        case ESM::DialogueCondition::Function_PcLongBlade:
+        case ESM::DialogueCondition::Function_PcAxe:
+        case ESM::DialogueCondition::Function_PcSpear:
+        case ESM::DialogueCondition::Function_PcAthletics:
+        case ESM::DialogueCondition::Function_PcEnchant:
+        case ESM::DialogueCondition::Function_PcDestruction:
+        case ESM::DialogueCondition::Function_PcAlteration:
+        case ESM::DialogueCondition::Function_PcIllusion:
+        case ESM::DialogueCondition::Function_PcConjuration:
+        case ESM::DialogueCondition::Function_PcMysticism:
+        case ESM::DialogueCondition::Function_PcRestoration:
+        case ESM::DialogueCondition::Function_PcAlchemy:
+        case ESM::DialogueCondition::Function_PcUnarmored:
+        case ESM::DialogueCondition::Function_PcSecurity:
+        case ESM::DialogueCondition::Function_PcSneak:
+        case ESM::DialogueCondition::Function_PcAcrobatics:
+        case ESM::DialogueCondition::Function_PcLightArmor:
+        case ESM::DialogueCondition::Function_PcShortBlade:
+        case ESM::DialogueCondition::Function_PcMarksman:
+        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcSpeechcraft:
+        case ESM::DialogueCondition::Function_PcHandToHand:
+        case ESM::DialogueCondition::Function_FriendHit:
+        case ESM::DialogueCondition::Function_PcLevel:
+        case ESM::DialogueCondition::Function_PcGender:
+        case ESM::DialogueCondition::Function_PcClothingModifier:
+        case ESM::DialogueCondition::Function_PcCrimeLevel:
+        case ESM::DialogueCondition::Function_RankRequirement:
+        case ESM::DialogueCondition::Function_Level:
+        case ESM::DialogueCondition::Function_PcReputation:
+        case ESM::DialogueCondition::Function_Weather:
+        case ESM::DialogueCondition::Function_Reputation:
+        case ESM::DialogueCondition::Function_FactionRankDifference:
+        case ESM::DialogueCondition::Function_PcWerewolfKills:
+        case ESM::DialogueCondition::Function_FacReactionLowest:
+        case ESM::DialogueCondition::Function_FacReactionHighest:
+        case ESM::DialogueCondition::Function_CreatureTarget:
             return Type_Integer;
-
-    for (int i = 0; numericFunctions[i] != Function_None; ++i)
-        if (numericFunctions[i] == function)
+        case ESM::DialogueCondition::Function_Global:
+        case ESM::DialogueCondition::Function_Local:
+        case ESM::DialogueCondition::Function_NotLocal:
+        case ESM::DialogueCondition::Function_PcHealth:
+        case ESM::DialogueCondition::Function_PcMagicka:
+        case ESM::DialogueCondition::Function_PcFatigue:
+        case ESM::DialogueCondition::Function_PcHealthPercent:
+        case ESM::DialogueCondition::Function_Health_Percent:
             return Type_Numeric;
-
-    for (int i = 0; booleanFunctions[i] != Function_None; ++i)
-        if (booleanFunctions[i] == function)
+        case ESM::DialogueCondition::Function_SameSex:
+        case ESM::DialogueCondition::Function_SameRace:
+        case ESM::DialogueCondition::Function_SameFaction:
+        case ESM::DialogueCondition::Function_PcCommonDisease:
+        case ESM::DialogueCondition::Function_PcBlightDisease:
+        case ESM::DialogueCondition::Function_PcCorprus:
+        case ESM::DialogueCondition::Function_PcExpelled:
+        case ESM::DialogueCondition::Function_PcVampire:
+        case ESM::DialogueCondition::Function_TalkedToPc:
+        case ESM::DialogueCondition::Function_Alarmed:
+        case ESM::DialogueCondition::Function_Detected:
+        case ESM::DialogueCondition::Function_Attacked:
+        case ESM::DialogueCondition::Function_ShouldAttack:
+        case ESM::DialogueCondition::Function_Werewolf:
             return Type_Boolean;
-
-    for (int i = 0; invertedBooleanFunctions[i] != Function_None; ++i)
-        if (invertedBooleanFunctions[i] == function)
+        case ESM::DialogueCondition::Function_NotId:
+        case ESM::DialogueCondition::Function_NotFaction:
+        case ESM::DialogueCondition::Function_NotClass:
+        case ESM::DialogueCondition::Function_NotRace:
+        case ESM::DialogueCondition::Function_NotCell:
             return Type_Inverted;
-
-    return Type_None;
+        default:
+            return Type_None;
+    };
 }
 
 bool MWDialogue::SelectWrapper::isNpcOnly() const
 {
-    static const Function functions[] = {
-        Function_NotFaction,
-        Function_NotClass,
-        Function_NotRace,
-        Function_SameGender,
-        Function_SameRace,
-        Function_SameFaction,
-        Function_RankRequirement,
-        Function_Reputation,
-        Function_FactionRankDiff,
-        Function_Werewolf,
-        Function_WerewolfKills,
-        Function_RankLow,
-        Function_RankHigh,
-        // end marker
-        Function_None,
-    };
-
-    Function function = getFunction();
-
-    for (int i = 0; functions[i] != Function_None; ++i)
-        if (functions[i] == function)
+    switch (mSelect.mFunction)
+    {
+        case ESM::DialogueCondition::Function_NotFaction:
+        case ESM::DialogueCondition::Function_NotClass:
+        case ESM::DialogueCondition::Function_NotRace:
+        case ESM::DialogueCondition::Function_SameSex:
+        case ESM::DialogueCondition::Function_SameRace:
+        case ESM::DialogueCondition::Function_SameFaction:
+        case ESM::DialogueCondition::Function_RankRequirement:
+        case ESM::DialogueCondition::Function_Reputation:
+        case ESM::DialogueCondition::Function_FactionRankDifference:
+        case ESM::DialogueCondition::Function_Werewolf:
+        case ESM::DialogueCondition::Function_PcWerewolfKills:
+        case ESM::DialogueCondition::Function_FacReactionLowest:
+        case ESM::DialogueCondition::Function_FacReactionHighest:
             return true;
-
-    return false;
+        default:
+            return false;
+    }
 }
 
 bool MWDialogue::SelectWrapper::selectCompare(int value) const
@@ -454,5 +287,15 @@ bool MWDialogue::SelectWrapper::selectCompare(bool value) const
 
 std::string MWDialogue::SelectWrapper::getName() const
 {
-    return Misc::StringUtils::lowerCase(std::string_view(mSelect.mSelectRule).substr(5));
+    return Misc::StringUtils::lowerCase(mSelect.mVariable);
+}
+
+std::string_view MWDialogue::SelectWrapper::getCellName() const
+{
+    return mSelect.mVariable;
+}
+
+ESM::RefId MWDialogue::SelectWrapper::getId() const
+{
+    return ESM::RefId::stringRefId(mSelect.mVariable);
 }

@@ -8,6 +8,8 @@
 #include <QHeaderView>
 #include <QTableWidget>
 
+#include <components/misc/scalableicon.hpp>
+
 #include <apps/opencs/view/widget/pushbutton.hpp>
 #include <apps/opencs/view/widget/scenetool.hpp>
 
@@ -60,7 +62,7 @@ CSVWidget::SceneToolRun::SceneToolRun(
     , mSelected(mProfiles.begin())
     , mToolTip(toolTip)
 {
-    setIcon(QIcon(icon));
+    setIcon(Misc::ScalableIcon::load(icon));
     updateIcon();
     adjustToolTips();
 

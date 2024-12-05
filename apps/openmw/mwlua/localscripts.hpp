@@ -22,7 +22,7 @@ namespace MWLua
         class CachedStat
         {
         public:
-            using Index = std::variant<int, ESM::RefId>;
+            using Index = std::variant<int, ESM::RefId, std::monostate>;
             using Setter = void (*)(const Index&, std::string_view, const MWWorld::Ptr&, const sol::object&);
 
             CachedStat(Setter setter, Index index, std::string_view prop)
@@ -62,15 +62,32 @@ namespace MWLua
     {
     public:
         static void initializeSelfPackage(const Context&);
-        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
+        LocalScripts(LuaUtil::LuaState* lua, const LObject& obj, LuaUtil::ScriptTracker* tracker = nullptr);
 
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
         const MWWorld::Ptr& getPtrOrEmpty() const { return mData.ptrOrEmpty(); }
 
         void setActive(bool active);
+        bool isActive() const override { return mData.mIsActive; }
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
         void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }
         void onTeleported() { callEngineHandlers(mOnTeleportedHandlers); }
+        void onAnimationTextKey(std::string_view groupname, std::string_view key)
+        {
+            callEngineHandlers(mOnAnimationTextKeyHandlers, groupname, key);
+        }
+        void onPlayAnimation(std::string_view groupname, const sol::table& options)
+        {
+            callEngineHandlers(mOnPlayAnimationHandlers, groupname, options);
+        }
+        void onSkillUse(std::string_view skillId, int useType, float scale)
+        {
+            callEngineHandlers(mOnSkillUse, skillId, useType, scale);
+        }
+        void onSkillLevelUp(std::string_view skillId, std::string_view source)
+        {
+            callEngineHandlers(mOnSkillLevelUp, skillId, source);
+        }
 
         void applyStatsCache();
 
@@ -83,6 +100,10 @@ namespace MWLua
         EngineHandlerList mOnConsumeHandlers{ "onConsume" };
         EngineHandlerList mOnActivatedHandlers{ "onActivated" };
         EngineHandlerList mOnTeleportedHandlers{ "onTeleported" };
+        EngineHandlerList mOnAnimationTextKeyHandlers{ "_onAnimationTextKey" };
+        EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
+        EngineHandlerList mOnSkillUse{ "_onSkillUse" };
+        EngineHandlerList mOnSkillLevelUp{ "_onSkillLevelUp" };
     };
 
 }

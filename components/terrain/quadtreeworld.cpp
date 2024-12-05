@@ -7,6 +7,7 @@
 
 #include <limits>
 
+#include <components/esm/util.hpp>
 #include <components/loadinglistener/reporter.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>
@@ -280,8 +281,9 @@ namespace Terrain
     QuadTreeWorld::QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
         Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask,
         int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize,
-        bool debugChunks, ESM::RefId worldspace)
-        : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, worldspace, preCompileMask, borderMask)
+        bool debugChunks, ESM::RefId worldspace, double expiryDelay)
+        : TerrainGrid(
+            parent, compileRoot, resourceSystem, storage, nodeMask, worldspace, expiryDelay, preCompileMask, borderMask)
         , mViewDataMap(new ViewDataMap)
         , mQuadTreeBuilt(false)
         , mLodFactor(lodFactor)
@@ -402,63 +404,68 @@ namespace Terrain
         }
     }
 
-    void updateWaterCullingView(
-        HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
+    namespace
     {
-        if (!(cv->getTraversalMask() & callback->getCullMask()))
-            return;
-        float lowZ = std::numeric_limits<float>::max();
-        float highZ = callback->getHighZ();
-        if (cv->getEyePoint().z() <= highZ || outofworld)
+        osg::ref_ptr<osg::StateSet> makeStateSet()
         {
-            callback->setLowZ(-std::numeric_limits<float>::max());
-            return;
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+            stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+            stateSet->setAttributeAndModes(
+                new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE),
+                osg::StateAttribute::ON);
+            osg::ref_ptr<osg::Material> material = new osg::Material;
+            material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 1, 1));
+            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
+            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
+            stateSet->setAttributeAndModes(material, osg::StateAttribute::ON);
+            stateSet->setRenderBinDetails(100, "RenderBin");
+            return stateSet;
         }
-        cv->pushCurrentMask();
-        static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
-        for (unsigned int i = 0; i < vd->getNumEntries(); ++i)
-        {
-            ViewDataEntry& entry = vd->getEntry(i);
-            osg::BoundingBox bb
-                = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
-            if (!bb.valid())
-                continue;
-            osg::Vec3f ofs(
-                entry.mNode->getCenter().x() * cellworldsize, entry.mNode->getCenter().y() * cellworldsize, 0.f);
-            bb._min += ofs;
-            bb._max += ofs;
-            bb._min.z() = highZ;
-            bb._max.z() = highZ;
-            if (cv->isCulled(bb))
-                continue;
-            lowZ = bb._min.z();
 
-            if (!debug)
-                break;
-            osg::Box* b = new osg::Box;
-            b->set(bb.center(), bb._max - bb.center());
-            osg::ShapeDrawable* drw = new osg::ShapeDrawable(b);
-            static osg::ref_ptr<osg::StateSet> stateset = nullptr;
-            if (!stateset)
+        void updateWaterCullingView(
+            HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
+        {
+            if (!(cv->getTraversalMask() & callback->getCullMask()))
+                return;
+            float lowZ = std::numeric_limits<float>::max();
+            float highZ = callback->getHighZ();
+            if (cv->getEyePoint().z() <= highZ || outofworld)
             {
-                stateset = new osg::StateSet;
-                stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-                stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-                stateset->setAttributeAndModes(
-                    new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE),
-                    osg::StateAttribute::ON);
-                osg::Material* m = new osg::Material;
-                m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 1, 1));
-                m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
-                m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
-                stateset->setAttributeAndModes(m, osg::StateAttribute::ON);
-                stateset->setRenderBinDetails(100, "RenderBin");
+                callback->setLowZ(-std::numeric_limits<float>::max());
+                return;
             }
-            drw->setStateSet(stateset);
-            drw->accept(*cv);
+            cv->pushCurrentMask();
+            static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
+            for (unsigned int i = 0; i < vd->getNumEntries(); ++i)
+            {
+                ViewDataEntry& entry = vd->getEntry(i);
+                osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))
+                                          ->getWaterBoundingBox();
+                if (!bb.valid())
+                    continue;
+                osg::Vec3f ofs(
+                    entry.mNode->getCenter().x() * cellworldsize, entry.mNode->getCenter().y() * cellworldsize, 0.f);
+                bb._min += ofs;
+                bb._max += ofs;
+                bb._min.z() = highZ;
+                bb._max.z() = highZ;
+                if (cv->isCulled(bb))
+                    continue;
+                lowZ = bb._min.z();
+
+                if (!debug)
+                    break;
+                osg::Box* b = new osg::Box;
+                b->set(bb.center(), bb._max - bb.center());
+                osg::ShapeDrawable* drw = new osg::ShapeDrawable(b);
+                static const osg::ref_ptr<osg::StateSet> stateset = makeStateSet();
+                drw->setStateSet(stateset);
+                drw->accept(*cv);
+            }
+            callback->setLowZ(lowZ);
+            cv->popCurrentMask();
         }
-        callback->setLowZ(lowZ);
-        cv->popCurrentMask();
     }
 
     void QuadTreeWorld::accept(osg::NodeVisitor& nv)
@@ -544,37 +551,16 @@ namespace Terrain
         vd->setViewPoint(viewPoint);
         vd->setActiveGrid(grid);
 
-        for (unsigned int pass = 0; pass < 3; ++pass)
+        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, cellWorldSize);
+        mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
+
+        reporter.addTotal(vd->getNumEntries());
+
+        for (unsigned int i = 0, n = vd->getNumEntries(); i < n && !abort; ++i)
         {
-            unsigned int startEntry = vd->getNumEntries();
-
-            float distanceModifier = 0.f;
-            if (pass == 1)
-                distanceModifier = 1024;
-            else if (pass == 2)
-                distanceModifier = -1024;
-            DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, cellWorldSize, distanceModifier);
-            mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
-
-            if (pass == 0)
-            {
-                std::size_t progressTotal = 0;
-                for (unsigned int i = 0, n = vd->getNumEntries(); i < n; ++i)
-                    progressTotal += vd->getEntry(i).mNode->getSize();
-
-                reporter.addTotal(progressTotal);
-            }
-
-            for (unsigned int i = startEntry; i < vd->getNumEntries() && !abort; ++i)
-            {
-                ViewDataEntry& entry = vd->getEntry(i);
-
-                loadRenderingNode(entry, vd, cellWorldSize, grid, true);
-                if (pass == 0)
-                    reporter.addProgress(entry.mNode->getSize());
-                vd->removeNodeFromIndex(entry.mNode);
-                entry.mNode = nullptr; // Clear node lest we break the neighbours search for the next pass
-            }
+            ViewDataEntry& entry = vd->getEntry(i);
+            loadRenderingNode(entry, vd, cellWorldSize, grid, true);
+            reporter.addProgress(1);
         }
     }
 

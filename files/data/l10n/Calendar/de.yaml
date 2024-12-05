@@ -1,0 +1,49 @@
+month1: "Januar"
+month2: "Februar"
+month3: "März"
+month4: "April"
+month5: "Mai"
+month6: "Juni"
+month7: "Juli"
+month8: "August"
+month9: "September"
+month10: "Oktober"
+month11: "November"
+month12: "Dezember"
+
+# In German, there are two different options to generate the genitive form of a month name:
+#
+# (1) Apply standard rules for genitive (too complicated to elaborate here, but you usually add an "s"/"es" at the end of the word).
+# (2) Use the nominative version.
+#
+# Nowadays, option (2) is more commonly used, so let's apply that here as well.
+monthInGenitive1: "Januar"
+monthInGenitive2: "Februar"
+monthInGenitive3: "März"
+monthInGenitive4: "April"
+monthInGenitive5: "Mai"
+monthInGenitive6: "Juni"
+monthInGenitive7: "Juli"
+monthInGenitive8: "August"
+monthInGenitive9: "September"
+monthInGenitive10: "Oktober"
+monthInGenitive11: "November"
+monthInGenitive12: "Dezember"
+
+# Standard German date format: d. MMMM YYYY
+# Example: "23. Februar 1337"
+dateFormat: "{day}. {month} {year, number, :: group-off}"
+
+weekday1: "Sonntag"
+weekday2: "Montag"
+weekday3: "Dienstag"
+weekday4: "Mittwoch"
+weekday5: "Donnerstag"
+weekday6: "Freitag"
+weekday7: "Samstag"
+
+# In German, there are usually no "a.m."/"p.m." shenanigans going on.
+# In case of ambiguity, "vormittags" ("mornings") and "nachmittags" ("in the afternoon") are used.
+am: "vormittags"
+pm: "nachmittags"
+day: "Tag"

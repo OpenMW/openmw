@@ -25,6 +25,7 @@ namespace MWGui
     WindowSettingValues makeCompanionWindowSettingValues();
     WindowSettingValues makeConsoleWindowSettingValues();
     WindowSettingValues makeContainerWindowSettingValues();
+    WindowSettingValues makeDebugWindowSettingValues();
     WindowSettingValues makeDialogueWindowSettingValues();
     WindowSettingValues makeInventoryWindowSettingValues();
     WindowSettingValues makeInventoryBarterWindowSettingValues();

@@ -48,12 +48,12 @@ namespace NavMeshTool
 
     struct WorldspaceNavMeshInput
     {
-        std::string mWorldspace;
+        ESM::RefId mWorldspace;
         TileCachedRecastMeshManager mTileCachedRecastMeshManager;
         btAABB mAabb;
         bool mAabbInitialized = false;
 
-        explicit WorldspaceNavMeshInput(std::string worldspace, const DetourNavigator::RecastSettings& settings);
+        explicit WorldspaceNavMeshInput(ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings);
     };
 
     class BulletObject

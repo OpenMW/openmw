@@ -10,15 +10,14 @@
 #include <osgParticle/Placer>
 #include <osgParticle/Shooter>
 
+#include <components/nif/particle.hpp> // NiGravity::ForceType
+
 #include <components/sceneutil/nodecallback.hpp>
 
 #include "controller.hpp" // ValueInterpolator
 
 namespace Nif
 {
-    struct NiGravity;
-    struct NiPlanarCollider;
-    struct NiSphericalCollider;
     struct NiColorData;
 }
 
@@ -180,7 +179,7 @@ namespace NifOsg
     {
     public:
         GravityAffector(const Nif::NiGravity* gravity);
-        GravityAffector();
+        GravityAffector() = default;
         GravityAffector(const GravityAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
         GravityAffector& operator=(const GravityAffector&) = delete;
@@ -191,16 +190,36 @@ namespace NifOsg
         void beginOperate(osgParticle::Program*) override;
 
     private:
-        float mForce;
-        enum ForceType
-        {
-            Type_Wind,
-            Type_Point
-        };
-        ForceType mType;
+        float mForce{ 0.f };
+        Nif::ForceType mType{ Nif::ForceType::Wind };
         osg::Vec3f mPosition;
         osg::Vec3f mDirection;
-        float mDecay;
+        float mDecay{ 0.f };
+        osg::Vec3f mCachedWorldPosition;
+        osg::Vec3f mCachedWorldDirection;
+    };
+
+    class ParticleBomb : public osgParticle::Operator
+    {
+    public:
+        ParticleBomb(const Nif::NiParticleBomb* bomb);
+        ParticleBomb() = default;
+        ParticleBomb(const ParticleBomb& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        ParticleBomb& operator=(const ParticleBomb&) = delete;
+
+        META_Object(NifOsg, ParticleBomb)
+
+        void operate(osgParticle::Particle* particle, double dt) override;
+        void beginOperate(osgParticle::Program*) override;
+
+    private:
+        float mRange{ 0.f };
+        float mStrength{ 0.f };
+        Nif::DecayType mDecayType{ Nif::DecayType::None };
+        Nif::SymmetryType mSymmetryType{ Nif::SymmetryType::Spherical };
+        osg::Vec3f mPosition;
+        osg::Vec3f mDirection;
         osg::Vec3f mCachedWorldPosition;
         osg::Vec3f mCachedWorldDirection;
     };

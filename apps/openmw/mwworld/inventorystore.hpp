@@ -81,9 +81,9 @@ namespace MWWorld
         void fireEquipmentChangedEvent();
 
         void storeEquipmentState(
-            const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const override;
+            const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const override;
         void readEquipmentState(
-            const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory) override;
+            const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory) override;
 
         ContainerStoreIterator findSlot(int slot) const;
 
@@ -93,9 +93,6 @@ namespace MWWorld
         InventoryStore(const InventoryStore& store);
 
         InventoryStore& operator=(const InventoryStore& store);
-
-        const MWWorld::Ptr& getActor() const { return mActor; }
-        void setActor(const MWWorld::Ptr& actor) { mActor = actor; }
 
         std::unique_ptr<ContainerStore> clone() override
         {

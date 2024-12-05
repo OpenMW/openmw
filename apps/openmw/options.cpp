@@ -35,10 +35,6 @@ namespace OpenMW
             bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")->multitoken()->composing(),
             "set fallback BSA archives (later archives have higher priority)");
 
-        addOption("resources",
-            bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
-            "set resources directory");
-
         addOption("start", bpo::value<std::string>()->default_value(""), "set initial cell");
 
         addOption("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
@@ -67,13 +63,6 @@ namespace OpenMW
             "\t0 - ignore warning\n"
             "\t1 - show warning but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors");
-
-        addOption("script-blacklist",
-            bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
-            "ignore the specified script (if the use of the blacklist is enabled)");
-
-        addOption("script-blacklist-use", bpo::value<bool>()->implicit_value(true)->default_value(true),
-            "enable script blacklisting");
 
         addOption("load-savegame", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
             "load a save game file on game startup (specify an absolute filename or a filename relative to the current "

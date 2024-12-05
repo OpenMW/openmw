@@ -457,7 +457,6 @@
 
     <Resource type="ResourceSkin" name="MW_Window" size="256 256">
         <Property key="TextAlign" value="Center"/>
-        <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset="0 0 256 256" align="Stretch"/>
@@ -592,7 +591,6 @@
 
     <Resource type="ResourceSkin" name="MW_Window_NoCaption" size="256 256">
         <Property key="TextAlign" value="Center"/>
-        <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>
@@ -729,7 +727,6 @@
 
     <Resource type="ResourceSkin" name="MW_Window_Pinnable" size="256 256">
         <Property key="TextAlign" value="Center"/>
-        <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>

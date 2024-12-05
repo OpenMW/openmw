@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "animblendrulesmanager.hpp"
+#include "bgsmfilemanager.hpp"
 #include "imagemanager.hpp"
 #include "keyframemanager.hpp"
 #include "niffilemanager.hpp"
@@ -10,19 +12,25 @@
 namespace Resource
 {
 
-    ResourceSystem::ResourceSystem(const VFS::Manager* vfs)
+    ResourceSystem::ResourceSystem(
+        const VFS::Manager* vfs, double expiryDelay, const ToUTF8::StatelessUtf8Encoder* encoder)
         : mVFS(vfs)
     {
-        mNifFileManager = std::make_unique<NifFileManager>(vfs);
-        mImageManager = std::make_unique<ImageManager>(vfs);
-        mSceneManager = std::make_unique<SceneManager>(vfs, mImageManager.get(), mNifFileManager.get());
-        mKeyframeManager = std::make_unique<KeyframeManager>(vfs, mSceneManager.get());
+        mNifFileManager = std::make_unique<NifFileManager>(vfs, encoder);
+        mBgsmFileManager = std::make_unique<BgsmFileManager>(vfs, expiryDelay);
+        mImageManager = std::make_unique<ImageManager>(vfs, expiryDelay);
+        mSceneManager = std::make_unique<SceneManager>(
+            vfs, mImageManager.get(), mNifFileManager.get(), mBgsmFileManager.get(), expiryDelay);
+        mKeyframeManager = std::make_unique<KeyframeManager>(vfs, mSceneManager.get(), expiryDelay, encoder);
+        mAnimBlendRulesManager = std::make_unique<AnimBlendRulesManager>(vfs, expiryDelay);
 
         addResourceManager(mNifFileManager.get());
+        addResourceManager(mBgsmFileManager.get());
         addResourceManager(mKeyframeManager.get());
         // note, scene references images so add images afterwards for correct implementation of updateCache()
         addResourceManager(mSceneManager.get());
         addResourceManager(mImageManager.get());
+        addResourceManager(mAnimBlendRulesManager.get());
     }
 
     ResourceSystem::~ResourceSystem()
@@ -42,6 +50,11 @@ namespace Resource
         return mImageManager.get();
     }
 
+    BgsmFileManager* ResourceSystem::getBgsmFileManager()
+    {
+        return mBgsmFileManager.get();
+    }
+
     NifFileManager* ResourceSystem::getNifFileManager()
     {
         return mNifFileManager.get();
@@ -50,6 +63,11 @@ namespace Resource
     KeyframeManager* ResourceSystem::getKeyframeManager()
     {
         return mKeyframeManager.get();
+    }
+
+    AnimBlendRulesManager* ResourceSystem::getAnimBlendRulesManager()
+    {
+        return mAnimBlendRulesManager.get();
     }
 
     void ResourceSystem::setExpiryDelay(double expiryDelay)

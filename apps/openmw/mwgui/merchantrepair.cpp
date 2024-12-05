@@ -47,13 +47,15 @@ namespace MWGui
 
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
+        std::vector<std::tuple<std::string, int, MWWorld::Ptr>> items;
+
         for (MWWorld::ContainerStoreIterator iter(store.begin(categories)); iter != store.end(); ++iter)
         {
             if (iter->getClass().hasItemHealth(*iter))
             {
                 int maxDurability = iter->getClass().getItemMaxHealth(*iter);
                 int durability = iter->getClass().getItemHealth(*iter);
-                if (maxDurability == durability || maxDurability == 0)
+                if (maxDurability <= durability || maxDurability == 0)
                     continue;
 
                 int basePrice = iter->getClass().getValue(*iter);
@@ -76,22 +78,31 @@ namespace MWGui
                 name += " - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("sgp")->mValue.getString();
 
-                MyGUI::Button* button = mList->createWidget<MyGUI::Button>(price <= playerGold
-                        ? "SandTextButton"
-                        : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
-                    0, currentY, 0, lineHeight, MyGUI::Align::Default);
-
-                currentY += lineHeight;
-
-                button->setUserString("Price", MyGUI::utility::toString(price));
-                button->setUserData(MWWorld::Ptr(*iter));
-                button->setCaptionWithReplacing(name);
-                button->setSize(mList->getWidth(), lineHeight);
-                button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);
-                button->setUserString("ToolTipType", "ItemPtr");
-                button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
+                items.emplace_back(name, price, *iter);
             }
         }
+
+        std::stable_sort(items.begin(), items.end(),
+            [](const auto& a, const auto& b) { return Misc::StringUtils::ciLess(std::get<0>(a), std::get<0>(b)); });
+
+        for (const auto& [name, price, ptr] : items)
+        {
+            MyGUI::Button* button = mList->createWidget<MyGUI::Button>(price <= playerGold
+                    ? "SandTextButton"
+                    : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
+                0, currentY, 0, lineHeight, MyGUI::Align::Default);
+
+            currentY += lineHeight;
+
+            button->setUserString("Price", MyGUI::utility::toString(price));
+            button->setUserData(MWWorld::Ptr(ptr));
+            button->setCaptionWithReplacing(name);
+            button->setSize(mList->getWidth(), lineHeight);
+            button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);
+            button->setUserString("ToolTipType", "ItemPtr");
+            button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
+        }
+
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
         // scrollbar is hidden
         mList->setVisibleVScroll(false);

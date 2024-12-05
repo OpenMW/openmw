@@ -36,9 +36,9 @@ namespace ESM
         };
 
         // Type
-        int mType;
+        int32_t mType;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mCreature, mSound;
 
         void load(ESMReader& esm, bool& isDeleted);

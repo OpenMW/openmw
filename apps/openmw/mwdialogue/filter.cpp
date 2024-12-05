@@ -30,16 +30,16 @@ namespace
 {
     bool matchesStaticFilters(const MWDialogue::SelectWrapper& select, const MWWorld::Ptr& actor)
     {
-        const ESM::RefId selectId = ESM::RefId::stringRefId(select.getName());
-        if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotId)
+        const ESM::RefId selectId = select.getId();
+        if (select.getFunction() == ESM::DialogueCondition::Function_NotId)
             return actor.getCellRef().getRefId() != selectId;
         if (actor.getClass().isNpc())
         {
-            if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotFaction)
+            if (select.getFunction() == ESM::DialogueCondition::Function_NotFaction)
                 return actor.getClass().getPrimaryFaction(actor) != selectId;
-            else if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotClass)
+            else if (select.getFunction() == ESM::DialogueCondition::Function_NotClass)
                 return actor.get<ESM::NPC>()->mBase->mClass != selectId;
-            else if (select.getFunction() == MWDialogue::SelectWrapper::Function_NotRace)
+            else if (select.getFunction() == ESM::DialogueCondition::Function_NotRace)
                 return actor.get<ESM::NPC>()->mBase->mRace != selectId;
         }
         return true;
@@ -47,7 +47,7 @@ namespace
 
     bool matchesStaticFilters(const ESM::DialInfo& info, const MWWorld::Ptr& actor)
     {
-        for (const ESM::DialInfo::SelectStruct& select : info.mSelects)
+        for (const auto& select : info.mSelects)
         {
             MWDialogue::SelectWrapper wrapper = select;
             if (wrapper.getType() == MWDialogue::SelectWrapper::Type_Boolean)
@@ -62,7 +62,7 @@ namespace
             }
             else if (wrapper.getType() == MWDialogue::SelectWrapper::Type_Numeric)
             {
-                if (wrapper.getFunction() == MWDialogue::SelectWrapper::Function_Local)
+                if (wrapper.getFunction() == ESM::DialogueCondition::Function_Local)
                 {
                     const ESM::RefId& scriptName = actor.getClass().getScript(actor);
                     if (scriptName.empty())
@@ -207,9 +207,8 @@ bool MWDialogue::Filter::testPlayer(const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testSelectStructs(const ESM::DialInfo& info) const
 {
-    for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter(info.mSelects.begin());
-         iter != info.mSelects.end(); ++iter)
-        if (!testSelectStruct(*iter))
+    for (const auto& select : info.mSelects)
+        if (!testSelectStruct(select))
             return false;
 
     return true;
@@ -270,11 +269,11 @@ bool MWDialogue::Filter::testSelectStruct(const SelectWrapper& select) const
         // If the actor is a creature, we pass all conditions only applicable to NPCs.
         return true;
 
-    if (select.getFunction() == SelectWrapper::Function_Choice && mChoice == -1)
+    if (select.getFunction() == ESM::DialogueCondition::Function_Choice && mChoice == -1)
         // If not currently in a choice, we reject all conditions that test against choices.
         return false;
 
-    if (select.getFunction() == SelectWrapper::Function_Weather
+    if (select.getFunction() == ESM::DialogueCondition::Function_Weather
         && !(MWBase::Environment::get().getWorld()->isCellExterior()
             || MWBase::Environment::get().getWorld()->isCellQuasiExterior()))
         // Reject weather conditions in interior cells
@@ -305,29 +304,31 @@ bool MWDialogue::Filter::testSelectStructNumeric(const SelectWrapper& select) co
 {
     switch (select.getFunction())
     {
-        case SelectWrapper::Function_Global:
+        case ESM::DialogueCondition::Function_Global:
 
             // internally all globals are float :(
             return select.selectCompare(MWBase::Environment::get().getWorld()->getGlobalFloat(select.getName()));
 
-        case SelectWrapper::Function_Local:
+        case ESM::DialogueCondition::Function_Local:
         {
             return testFunctionLocal(select);
         }
 
-        case SelectWrapper::Function_NotLocal:
+        case ESM::DialogueCondition::Function_NotLocal:
         {
             return !testFunctionLocal(select);
         }
 
-        case SelectWrapper::Function_PcHealthPercent:
+        case ESM::DialogueCondition::Function_PcHealthPercent:
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
             return select.selectCompare(
                 static_cast<int>(player.getClass().getCreatureStats(player).getHealth().getRatio() * 100));
         }
 
-        case SelectWrapper::Function_PcDynamicStat:
+        case ESM::DialogueCondition::Function_PcMagicka:
+        case ESM::DialogueCondition::Function_PcFatigue:
+        case ESM::DialogueCondition::Function_PcHealth:
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
 
@@ -336,7 +337,7 @@ bool MWDialogue::Filter::testSelectStructNumeric(const SelectWrapper& select) co
             return select.selectCompare(value);
         }
 
-        case SelectWrapper::Function_HealthPercent:
+        case ESM::DialogueCondition::Function_Health_Percent:
         {
             return select.selectCompare(
                 static_cast<int>(mActor.getClass().getCreatureStats(mActor).getHealth().getRatio() * 100));
@@ -354,59 +355,100 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
 
     switch (select.getFunction())
     {
-        case SelectWrapper::Function_Journal:
+        case ESM::DialogueCondition::Function_Journal:
 
-            return MWBase::Environment::get().getJournal()->getJournalIndex(ESM::RefId::stringRefId(select.getName()));
+            return MWBase::Environment::get().getJournal()->getJournalIndex(select.getId());
 
-        case SelectWrapper::Function_Item:
+        case ESM::DialogueCondition::Function_Item:
         {
             MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
-            return store.count(ESM::RefId::stringRefId(select.getName()));
+            return store.count(select.getId());
         }
 
-        case SelectWrapper::Function_Dead:
+        case ESM::DialogueCondition::Function_Dead:
 
-            return MWBase::Environment::get().getMechanicsManager()->countDeaths(
-                ESM::RefId::stringRefId(select.getName()));
+            return MWBase::Environment::get().getMechanicsManager()->countDeaths(select.getId());
 
-        case SelectWrapper::Function_Choice:
+        case ESM::DialogueCondition::Function_Choice:
 
             return mChoice;
 
-        case SelectWrapper::Function_AiSetting:
+        case ESM::DialogueCondition::Function_Fight:
+        case ESM::DialogueCondition::Function_Hello:
+        case ESM::DialogueCondition::Function_Alarm:
+        case ESM::DialogueCondition::Function_Flee:
+        {
+            int argument = select.getArgument();
+            if (argument < 0 || argument > 3)
+            {
+                throw std::runtime_error("AiSetting index is out of range");
+            }
 
             return mActor.getClass()
                 .getCreatureStats(mActor)
-                .getAiSetting((MWMechanics::AiSetting)select.getArgument())
+                .getAiSetting(static_cast<MWMechanics::AiSetting>(argument))
                 .getModified(false);
-
-        case SelectWrapper::Function_PcAttribute:
+        }
+        case ESM::DialogueCondition::Function_PcStrength:
+        case ESM::DialogueCondition::Function_PcIntelligence:
+        case ESM::DialogueCondition::Function_PcWillpower:
+        case ESM::DialogueCondition::Function_PcAgility:
+        case ESM::DialogueCondition::Function_PcSpeed:
+        case ESM::DialogueCondition::Function_PcEndurance:
+        case ESM::DialogueCondition::Function_PcPersonality:
+        case ESM::DialogueCondition::Function_PcLuck:
         {
             ESM::RefId attribute = ESM::Attribute::indexToRefId(select.getArgument());
             return player.getClass().getCreatureStats(player).getAttribute(attribute).getModified();
         }
-        case SelectWrapper::Function_PcSkill:
+        case ESM::DialogueCondition::Function_PcBlock:
+        case ESM::DialogueCondition::Function_PcArmorer:
+        case ESM::DialogueCondition::Function_PcMediumArmor:
+        case ESM::DialogueCondition::Function_PcHeavyArmor:
+        case ESM::DialogueCondition::Function_PcBluntWeapon:
+        case ESM::DialogueCondition::Function_PcLongBlade:
+        case ESM::DialogueCondition::Function_PcAxe:
+        case ESM::DialogueCondition::Function_PcSpear:
+        case ESM::DialogueCondition::Function_PcAthletics:
+        case ESM::DialogueCondition::Function_PcEnchant:
+        case ESM::DialogueCondition::Function_PcDestruction:
+        case ESM::DialogueCondition::Function_PcAlteration:
+        case ESM::DialogueCondition::Function_PcIllusion:
+        case ESM::DialogueCondition::Function_PcConjuration:
+        case ESM::DialogueCondition::Function_PcMysticism:
+        case ESM::DialogueCondition::Function_PcRestoration:
+        case ESM::DialogueCondition::Function_PcAlchemy:
+        case ESM::DialogueCondition::Function_PcUnarmored:
+        case ESM::DialogueCondition::Function_PcSecurity:
+        case ESM::DialogueCondition::Function_PcSneak:
+        case ESM::DialogueCondition::Function_PcAcrobatics:
+        case ESM::DialogueCondition::Function_PcLightArmor:
+        case ESM::DialogueCondition::Function_PcShortBlade:
+        case ESM::DialogueCondition::Function_PcMarksman:
+        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcSpeechcraft:
+        case ESM::DialogueCondition::Function_PcHandToHand:
         {
             ESM::RefId skill = ESM::Skill::indexToRefId(select.getArgument());
             return static_cast<int>(player.getClass().getNpcStats(player).getSkill(skill).getModified());
         }
-        case SelectWrapper::Function_FriendlyHit:
+        case ESM::DialogueCondition::Function_FriendHit:
         {
             int hits = mActor.getClass().getCreatureStats(mActor).getFriendlyHits();
 
             return hits > 4 ? 4 : hits;
         }
 
-        case SelectWrapper::Function_PcLevel:
+        case ESM::DialogueCondition::Function_PcLevel:
 
             return player.getClass().getCreatureStats(player).getLevel();
 
-        case SelectWrapper::Function_PcGender:
+        case ESM::DialogueCondition::Function_PcGender:
 
             return player.get<ESM::NPC>()->mBase->isMale() ? 0 : 1;
 
-        case SelectWrapper::Function_PcClothingModifier:
+        case ESM::DialogueCondition::Function_PcClothingModifier:
         {
             const MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
@@ -423,11 +465,11 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
             return value;
         }
 
-        case SelectWrapper::Function_PcCrimeLevel:
+        case ESM::DialogueCondition::Function_PcCrimeLevel:
 
             return player.getClass().getNpcStats(player).getBounty();
 
-        case SelectWrapper::Function_RankRequirement:
+        case ESM::DialogueCondition::Function_RankRequirement:
         {
             const ESM::RefId& faction = mActor.getClass().getPrimaryFaction(mActor);
             if (faction.empty())
@@ -449,23 +491,23 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
             return result;
         }
 
-        case SelectWrapper::Function_Level:
+        case ESM::DialogueCondition::Function_Level:
 
             return mActor.getClass().getCreatureStats(mActor).getLevel();
 
-        case SelectWrapper::Function_PCReputation:
+        case ESM::DialogueCondition::Function_PcReputation:
 
             return player.getClass().getNpcStats(player).getReputation();
 
-        case SelectWrapper::Function_Weather:
+        case ESM::DialogueCondition::Function_Weather:
 
             return MWBase::Environment::get().getWorld()->getCurrentWeather();
 
-        case SelectWrapper::Function_Reputation:
+        case ESM::DialogueCondition::Function_Reputation:
 
             return mActor.getClass().getNpcStats(mActor).getReputation();
 
-        case SelectWrapper::Function_FactionRankDiff:
+        case ESM::DialogueCondition::Function_FactionRankDifference:
         {
             const ESM::RefId& faction = mActor.getClass().getPrimaryFaction(mActor);
 
@@ -477,14 +519,14 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
             return rank - npcRank;
         }
 
-        case SelectWrapper::Function_WerewolfKills:
+        case ESM::DialogueCondition::Function_PcWerewolfKills:
 
             return player.getClass().getNpcStats(player).getWerewolfKills();
 
-        case SelectWrapper::Function_RankLow:
-        case SelectWrapper::Function_RankHigh:
+        case ESM::DialogueCondition::Function_FacReactionLowest:
+        case ESM::DialogueCondition::Function_FacReactionHighest:
         {
-            bool low = select.getFunction() == SelectWrapper::Function_RankLow;
+            bool low = select.getFunction() == ESM::DialogueCondition::Function_FacReactionLowest;
 
             const ESM::RefId& factionId = mActor.getClass().getPrimaryFaction(mActor);
 
@@ -507,7 +549,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
             return value;
         }
 
-        case SelectWrapper::Function_CreatureTargetted:
+        case ESM::DialogueCondition::Function_CreatureTarget:
 
         {
             MWWorld::Ptr target;
@@ -534,53 +576,49 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
     switch (select.getFunction())
     {
-        case SelectWrapper::Function_False:
+        case ESM::DialogueCondition::Function_NotId:
 
-            return false;
+            return mActor.getCellRef().getRefId() != select.getId();
 
-        case SelectWrapper::Function_NotId:
+        case ESM::DialogueCondition::Function_NotFaction:
 
-            return !(mActor.getCellRef().getRefId() == ESM::RefId::stringRefId(select.getName()));
+            return mActor.getClass().getPrimaryFaction(mActor) != select.getId();
 
-        case SelectWrapper::Function_NotFaction:
+        case ESM::DialogueCondition::Function_NotClass:
 
-            return !(mActor.getClass().getPrimaryFaction(mActor) == ESM::RefId::stringRefId(select.getName()));
+            return mActor.get<ESM::NPC>()->mBase->mClass != select.getId();
 
-        case SelectWrapper::Function_NotClass:
+        case ESM::DialogueCondition::Function_NotRace:
 
-            return !(mActor.get<ESM::NPC>()->mBase->mClass == ESM::RefId::stringRefId(select.getName()));
+            return mActor.get<ESM::NPC>()->mBase->mRace != select.getId();
 
-        case SelectWrapper::Function_NotRace:
-
-            return !(mActor.get<ESM::NPC>()->mBase->mRace == ESM::RefId::stringRefId(select.getName()));
-
-        case SelectWrapper::Function_NotCell:
+        case ESM::DialogueCondition::Function_NotCell:
         {
             std::string_view actorCell = MWBase::Environment::get().getWorld()->getCellName(mActor.getCell());
-            return !Misc::StringUtils::ciStartsWith(actorCell, select.getName());
+            return !Misc::StringUtils::ciStartsWith(actorCell, select.getCellName());
         }
-        case SelectWrapper::Function_SameGender:
+        case ESM::DialogueCondition::Function_SameSex:
 
             return (player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female)
                 == (mActor.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female);
 
-        case SelectWrapper::Function_SameRace:
+        case ESM::DialogueCondition::Function_SameRace:
 
             return mActor.get<ESM::NPC>()->mBase->mRace == player.get<ESM::NPC>()->mBase->mRace;
 
-        case SelectWrapper::Function_SameFaction:
+        case ESM::DialogueCondition::Function_SameFaction:
 
             return player.getClass().getNpcStats(player).isInFaction(mActor.getClass().getPrimaryFaction(mActor));
 
-        case SelectWrapper::Function_PcCommonDisease:
+        case ESM::DialogueCondition::Function_PcCommonDisease:
 
             return player.getClass().getCreatureStats(player).hasCommonDisease();
 
-        case SelectWrapper::Function_PcBlightDisease:
+        case ESM::DialogueCondition::Function_PcBlightDisease:
 
             return player.getClass().getCreatureStats(player).hasBlightDisease();
 
-        case SelectWrapper::Function_PcCorprus:
+        case ESM::DialogueCondition::Function_PcCorprus:
 
             return player.getClass()
                        .getCreatureStats(player)
@@ -589,7 +627,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
                        .getMagnitude()
                 != 0;
 
-        case SelectWrapper::Function_PcExpelled:
+        case ESM::DialogueCondition::Function_PcExpelled:
         {
             const ESM::RefId& faction = mActor.getClass().getPrimaryFaction(mActor);
 
@@ -599,7 +637,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
             return player.getClass().getNpcStats(player).getExpelled(faction);
         }
 
-        case SelectWrapper::Function_PcVampire:
+        case ESM::DialogueCondition::Function_PcVampire:
 
             return player.getClass()
                        .getCreatureStats(player)
@@ -608,27 +646,27 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
                        .getMagnitude()
                 > 0;
 
-        case SelectWrapper::Function_TalkedToPc:
+        case ESM::DialogueCondition::Function_TalkedToPc:
 
             return mTalkedToPlayer;
 
-        case SelectWrapper::Function_Alarmed:
+        case ESM::DialogueCondition::Function_Alarmed:
 
             return mActor.getClass().getCreatureStats(mActor).isAlarmed();
 
-        case SelectWrapper::Function_Detected:
+        case ESM::DialogueCondition::Function_Detected:
 
             return MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, mActor);
 
-        case SelectWrapper::Function_Attacked:
+        case ESM::DialogueCondition::Function_Attacked:
 
             return mActor.getClass().getCreatureStats(mActor).getAttacked();
 
-        case SelectWrapper::Function_ShouldAttack:
+        case ESM::DialogueCondition::Function_ShouldAttack:
 
             return MWBase::Environment::get().getMechanicsManager()->isAggressive(mActor, MWMechanics::getPlayer());
 
-        case SelectWrapper::Function_Werewolf:
+        case ESM::DialogueCondition::Function_Werewolf:
 
             return mActor.getClass().getNpcStats(mActor).isWerewolf();
 

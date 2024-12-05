@@ -58,7 +58,7 @@ void WindowBase::setVisible(bool visible)
         onClose();
 }
 
-bool WindowBase::isVisible()
+bool WindowBase::isVisible() const
 {
     return mMainWidget->getVisible();
 }
@@ -75,6 +75,34 @@ void WindowBase::center()
     coord.left = (layerSize.width - coord.width) / 2;
     coord.top = (layerSize.height - coord.height) / 2;
     mMainWidget->setCoord(coord);
+}
+
+void WindowBase::clampWindowCoordinates(MyGUI::Window* window)
+{
+    MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+    if (window->getLayer())
+        viewSize = window->getLayer()->getSize();
+
+    // Window's minimum size is larger than the screen size, can not clamp coordinates
+    auto minSize = window->getMinSize();
+    if (minSize.width > viewSize.width || minSize.height > viewSize.height)
+        return;
+
+    int left = std::max(0, window->getPosition().left);
+    int top = std::max(0, window->getPosition().top);
+    int width = std::clamp(window->getSize().width, 0, viewSize.width);
+    int height = std::clamp(window->getSize().height, 0, viewSize.height);
+    if (left + width > viewSize.width)
+        left = viewSize.width - width;
+
+    if (top + height > viewSize.height)
+        top = viewSize.height - height;
+
+    if (window->getSize().width != width || window->getSize().height != height)
+        window->setSize(width, height);
+
+    if (window->getPosition().left != left || window->getPosition().top != top)
+        window->setPosition(left, top);
 }
 
 WindowModal::WindowModal(const std::string& parLayout)

@@ -19,6 +19,7 @@
 #include <components/files/conversion.hpp>
 #include <components/files/multidircollection.hpp>
 #include <components/platform/platform.hpp>
+#include <components/resource/bgsmfilemanager.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/niffilemanager.hpp>
@@ -88,10 +89,6 @@ namespace NavMeshTool
                     ->composing(),
                 "set fallback BSA archives (later archives have higher priority)");
 
-            addOption("resources",
-                bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"),
-                "set resources directory");
-
             addOption("content",
                 bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
                 "content file(s): esm/esp, or omwgame/omwaddon/omwscripts");
@@ -143,14 +140,14 @@ namespace NavMeshTool
 
             if (variables.find("help") != variables.end())
             {
-                getRawStdout() << desc << std::endl;
+                Debug::getRawStdout() << desc << std::endl;
                 return 0;
             }
 
             Files::ConfigurationManager config;
             config.readConfiguration(variables, desc);
 
-            setupLogging(config.getLogPath(), applicationName);
+            Debug::setupLogging(config.getLogPath(), applicationName);
 
             const std::string encoding(variables["encoding"].as<std::string>());
             Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
@@ -164,13 +161,14 @@ namespace NavMeshTool
 
             config.filterOutNonExistingPaths(dataDirs);
 
-            const auto resDir = variables["resources"].as<Files::MaybeQuotedPath>();
-            Version::Version v = Version::getOpenmwVersion(resDir);
-            Log(Debug::Info) << v.describe();
+            const auto& resDir = variables["resources"].as<Files::MaybeQuotedPath>();
+            Log(Debug::Info) << Version::getOpenmwVersionDescription();
             dataDirs.insert(dataDirs.begin(), resDir / "vfs");
-            const auto fileCollections = Files::Collections(dataDirs);
-            const auto archives = variables["fallback-archive"].as<StringsVector>();
-            const auto contentFiles = variables["content"].as<StringsVector>();
+            const Files::Collections fileCollections(dataDirs);
+            const auto& archives = variables["fallback-archive"].as<StringsVector>();
+            StringsVector contentFiles{ "builtin.omwscripts" };
+            const auto& configContentFiles = variables["content"].as<StringsVector>();
+            contentFiles.insert(contentFiles.end(), configContentFiles.begin(), configContentFiles.end());
             const std::size_t threadsNumber = variables["threads"].as<std::size_t>();
 
             if (threadsNumber < 1)
@@ -200,7 +198,7 @@ namespace NavMeshTool
                 Settings::game().mActorCollisionShapeType,
                 Settings::game().mDefaultActorPathfindHalfExtents,
             };
-            const std::uint64_t maxDbFileSize = Settings::Manager::getUInt64("max navmeshdb file size", "Navigator");
+            const std::uint64_t maxDbFileSize = Settings::navigator().mMaxNavmeshdbFileSize;
             const auto dbPath = Files::pathToUnicodeString(config.getUserDataPath() / "navmesh.db");
 
             Log(Debug::Info) << "Using navmeshdb at " << dbPath;
@@ -219,10 +217,13 @@ namespace NavMeshTool
             const EsmLoader::EsmData esmData
                 = EsmLoader::loadEsmData(query, contentFiles, fileCollections, readers, &encoder);
 
-            Resource::ImageManager imageManager(&vfs);
-            Resource::NifFileManager nifFileManager(&vfs);
-            Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager);
-            Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager);
+            constexpr double expiryDelay = 0;
+
+            Resource::ImageManager imageManager(&vfs, expiryDelay);
+            Resource::NifFileManager nifFileManager(&vfs, &encoder.getStatelessEncoder());
+            Resource::BgsmFileManager bgsmFileManager(&vfs, expiryDelay);
+            Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, &bgsmFileManager, expiryDelay);
+            Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
             DetourNavigator::RecastGlobalAllocator::init();
             DetourNavigator::Settings navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
             navigatorSettings.mRecast.mSwimHeightScale
@@ -257,7 +258,11 @@ namespace NavMeshTool
     }
 }
 
+#ifdef ANDROID
+extern "C" int SDL_main(int argc, char* argv[])
+#else
 int main(int argc, char* argv[])
+#endif
 {
-    return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
+    return Debug::wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
 }

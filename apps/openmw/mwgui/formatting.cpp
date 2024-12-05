@@ -23,7 +23,7 @@
 namespace MWGui::Formatting
 {
     /* BookTextParser */
-    BookTextParser::BookTextParser(const std::string& text)
+    BookTextParser::BookTextParser(const std::string& text, bool shrinkTextAtLastTag)
         : mIndex(0)
         , mText(text)
         , mIgnoreNewlineTags(true)
@@ -36,20 +36,25 @@ namespace MWGui::Formatting
 
         Misc::StringUtils::replaceAll(mText, "\r", {});
 
-        // vanilla game does not show any text after the last EOL tag.
-        const std::string lowerText = Misc::StringUtils::lowerCase(mText);
-        size_t brIndex = lowerText.rfind("<br>");
-        size_t pIndex = lowerText.rfind("<p>");
-        mPlainTextEnd = 0;
-        if (brIndex != pIndex)
+        if (shrinkTextAtLastTag)
         {
-            if (brIndex != std::string::npos && pIndex != std::string::npos)
-                mPlainTextEnd = std::max(brIndex, pIndex);
-            else if (brIndex != std::string::npos)
-                mPlainTextEnd = brIndex;
-            else
-                mPlainTextEnd = pIndex;
+            // vanilla game does not show any text after the last EOL tag.
+            const std::string lowerText = Misc::StringUtils::lowerCase(mText);
+            size_t brIndex = lowerText.rfind("<br>");
+            size_t pIndex = lowerText.rfind("<p>");
+            mPlainTextEnd = 0;
+            if (brIndex != pIndex)
+            {
+                if (brIndex != std::string::npos && pIndex != std::string::npos)
+                    mPlainTextEnd = std::max(brIndex, pIndex);
+                else if (brIndex != std::string::npos)
+                    mPlainTextEnd = brIndex;
+                else
+                    mPlainTextEnd = pIndex;
+            }
         }
+        else
+            mPlainTextEnd = mText.size();
 
         registerTag("br", Event_BrTag);
         registerTag("p", Event_PTag);
@@ -73,6 +78,17 @@ namespace MWGui::Formatting
         while (mIndex < mText.size())
         {
             char ch = mText[mIndex];
+            if (ch == '[')
+            {
+                constexpr std::string_view pageBreakTag = "[pagebreak]\n";
+                if (std::string_view(mText.data() + mIndex, mText.size() - mIndex).starts_with(pageBreakTag))
+                {
+                    mIndex += pageBreakTag.size();
+                    flushBuffer();
+                    mIgnoreNewlineTags = false;
+                    return Event_PageBreak;
+                }
+            }
             if (ch == '<')
             {
                 const size_t tagStart = mIndex + 1;
@@ -98,6 +114,8 @@ namespace MWGui::Formatting
                             }
                         }
                         mIgnoreLineEndings = true;
+                        if (type == Event_PTag && !mAttributes.empty())
+                            flushBuffer();
                     }
                     else
                         flushBuffer();
@@ -180,9 +198,9 @@ namespace MWGui::Formatting
             if (tag.empty())
                 return;
 
-            if (tag[0] == '"')
+            if (tag[0] == '"' || tag[0] == '\'')
             {
-                size_t quoteEndPos = tag.find('"', 1);
+                size_t quoteEndPos = tag.find(tag[0], 1);
                 if (quoteEndPos == std::string::npos)
                     throw std::runtime_error("BookTextParser Error: Missing end quote in tag");
                 value = tag.substr(1, quoteEndPos - 1);
@@ -203,13 +221,13 @@ namespace MWGui::Formatting
                 }
             }
 
-            mAttributes[key] = value;
+            mAttributes[key] = std::move(value);
         }
     }
 
     /* BookFormatter */
-    Paginator::Pages BookFormatter::markupToWidget(
-        MyGUI::Widget* parent, const std::string& markup, const int pageWidth, const int pageHeight)
+    Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget* parent, const std::string& markup,
+        const int pageWidth, const int pageHeight, bool shrinkTextAtLastTag)
     {
         Paginator pag(pageWidth, pageHeight);
 
@@ -225,14 +243,16 @@ namespace MWGui::Formatting
             MyGUI::IntCoord(0, 0, pag.getPageWidth(), pag.getPageHeight()), MyGUI::Align::Left | MyGUI::Align::Top);
         paper->setNeedMouseFocus(false);
 
-        BookTextParser parser(markup);
+        BookTextParser parser(markup, shrinkTextAtLastTag);
 
         bool brBeforeLastTag = false;
         bool isPrevImg = false;
+        bool inlineImageInserted = false;
         for (;;)
         {
             BookTextParser::Events event = parser.next();
-            if (event == BookTextParser::Event_BrTag || event == BookTextParser::Event_PTag)
+            if (event == BookTextParser::Event_BrTag
+                || (event == BookTextParser::Event_PTag && parser.getAttributes().empty()))
                 continue;
 
             std::string plainText = parser.getReadyText();
@@ -272,6 +292,12 @@ namespace MWGui::Formatting
 
                 if (!plainText.empty() || brBeforeLastTag || isPrevImg)
                 {
+                    if (inlineImageInserted)
+                    {
+                        pag.setCurrentTop(pag.getCurrentTop() - mTextStyle.mTextSize);
+                        plainText = "        " + plainText;
+                        inlineImageInserted = false;
+                    }
                     TextElement elem(paper, pag, mBlockStyle, mTextStyle, plainText);
                     elem.paginate();
                 }
@@ -286,6 +312,10 @@ namespace MWGui::Formatting
 
             switch (event)
             {
+                case BookTextParser::Event_PageBreak:
+                    pag << Paginator::Page(pag.getStartTop(), pag.getCurrentTop());
+                    pag.setStartTop(pag.getCurrentTop());
+                    break;
                 case BookTextParser::Event_ImgTag:
                 {
                     const BookTextParser::Attributes& attr = parser.getAttributes();
@@ -293,22 +323,38 @@ namespace MWGui::Formatting
                     auto srcIt = attr.find("src");
                     if (srcIt == attr.end())
                         continue;
-                    auto widthIt = attr.find("width");
-                    if (widthIt == attr.end())
-                        continue;
-                    auto heightIt = attr.find("height");
-                    if (heightIt == attr.end())
-                        continue;
+                    int width = 0;
+                    if (auto widthIt = attr.find("width"); widthIt != attr.end())
+                        width = MyGUI::utility::parseInt(widthIt->second);
+                    int height = 0;
+                    if (auto heightIt = attr.find("height"); heightIt != attr.end())
+                        height = MyGUI::utility::parseInt(heightIt->second);
 
                     const std::string& src = srcIt->second;
-                    int width = MyGUI::utility::parseInt(widthIt->second);
-                    int height = MyGUI::utility::parseInt(heightIt->second);
-
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    std::string correctedSrc = Misc::ResourceHelpers::correctBookartPath(src, width, height, vfs);
-                    bool exists = vfs->exists(correctedSrc);
 
-                    if (!exists)
+                    std::string correctedSrc;
+
+                    constexpr std::string_view imgPrefix = "img://";
+                    if (src.starts_with(imgPrefix))
+                    {
+                        correctedSrc = src.substr(imgPrefix.size(), src.size() - imgPrefix.size());
+                        if (width == 0)
+                        {
+                            width = 50;
+                            inlineImageInserted = true;
+                        }
+                        if (height == 0)
+                            height = 50;
+                    }
+                    else
+                    {
+                        if (width == 0 || height == 0)
+                            continue;
+                        correctedSrc = Misc::ResourceHelpers::correctBookartPath(src, width, height, vfs);
+                    }
+
+                    if (!vfs->exists(correctedSrc))
                     {
                         Log(Debug::Warning) << "Warning: Could not find \"" << src << "\" referenced by an <img> tag.";
                         break;
@@ -326,6 +372,7 @@ namespace MWGui::Formatting
                     else
                         handleFont(parser.getAttributes());
                     break;
+                case BookTextParser::Event_PTag:
                 case BookTextParser::Event_DivTag:
                     handleDiv(parser.getAttributes());
                     break;
@@ -343,9 +390,10 @@ namespace MWGui::Formatting
         return pag.getPages();
     }
 
-    Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget* parent, const std::string& markup)
+    Paginator::Pages BookFormatter::markupToWidget(
+        MyGUI::Widget* parent, const std::string& markup, bool shrinkTextAtLastTag)
     {
-        return markupToWidget(parent, markup, parent->getWidth(), parent->getHeight());
+        return markupToWidget(parent, markup, parent->getWidth(), parent->getHeight(), shrinkTextAtLastTag);
     }
 
     void BookFormatter::resetFontProperties()

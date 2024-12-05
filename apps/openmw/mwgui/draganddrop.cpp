@@ -126,7 +126,7 @@ namespace MWGui
 
     void DragAndDrop::onFrame()
     {
-        if (mIsOnDragAndDrop && mItem.mBase.getRefData().getCount() == 0)
+        if (mIsOnDragAndDrop && mItem.mBase.getCellRef().getCount() == 0)
             finish();
     }
 

@@ -1,6 +1,8 @@
 #ifndef GAME_SOUND_SOUND_DECODER_H
 #define GAME_SOUND_SOUND_DECODER_H
 
+#include <components/vfs/pathutil.hpp>
+
 #include <string>
 #include <vector>
 
@@ -36,7 +38,7 @@ namespace MWSound
     {
         const VFS::Manager* mResourceMgr;
 
-        virtual void open(const std::string& fname) = 0;
+        virtual void open(VFS::Path::NormalizedView fname) = 0;
         virtual void close() = 0;
 
         virtual std::string getName() = 0;

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="48pt"
+   height="48pt"
+   viewBox="0 0 16.933333 16.933333"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="Main">
+      <stop
+         style="stop-color:#4d4d4d;stop-opacity:1;"
+         offset="0"
+         id="stop2082" />
+    </linearGradient>
+    <linearGradient
+       id="Main-6">
+      <stop
+         style="stop-color:#4d4d4d;stop-opacity:1;"
+         offset="0"
+         id="stop2082-2" />
+    </linearGradient>
+  </defs>
+  <g
+     id="selection-mode-sphere"
+     style="display:inline"
+     transform="matrix(0.95633709,0,0,0.97689208,-70.52014,-63.444673)">
+    <path
+       style="display:inline;fill:none;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.18246;stroke-dasharray:none;stroke-opacity:1"
+       d="m 76.860371,76.010117 8.085388,-1.488233 3.370361,3.890874 -8.140511,1.599832 z"
+       id="path6-9" />
+    <path
+       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:0.18246;stroke-dasharray:none;stroke-opacity:1"
+       d="m 84.948261,67.211494 0.0099,7.346147"
+       id="path9" />
+    <g
+       id="layer1"
+       transform="matrix(1.0456564,0,0,1.0236545,73.739836,64.945427)"
+       style="display:inline">
+      <ellipse
+         style="fill:#1d99fd;fill-opacity:1;stroke:none;stroke-width:0.100474;stroke-opacity:1"
+         id="path11"
+         cx="8.4666662"
+         cy="8.4666662"
+         rx="3.5277777"
+         ry="3.5277779" />
+    </g>
+    <path
+       style="fill:none;stroke:#4d4d4d;stroke-width:0.18246;stroke-dasharray:none;stroke-opacity:1"
+       d="m 76.827402,68.667241 -0.0041,7.322622"
+       id="path7" />
+    <path
+       style="fill:none;stroke:#4d4d4d;stroke-width:0.18246;stroke-dasharray:none;stroke-opacity:1"
+       d="m 80.171228,72.658937 -8.53e-4,7.368065"
+       id="path8" />
+    <path
+       style="fill:none;stroke:#4d4d4d;stroke-width:0.18246;stroke-dasharray:none;stroke-opacity:1"
+       d="m 88.360783,71.120908 -0.004,7.324058"
+       id="path10" />
+    <path
+       style="display:inline;fill:none;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.18246;stroke-dasharray:none;stroke-opacity:1"
+       d="m 76.867489,68.699562 8.085387,-1.488233 3.370361,3.890874 -8.14051,1.599832 z"
+       id="path6-9-9" />
+  </g>
+</svg>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MethodSelectionPage</class>
+ <widget class="QWizardPage" name="MethodSelectionPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>396</width>
+    <height>296</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>WizardPage</string>
+  </property>
+  <property name="title">
+   <string>Select Installation Method</string>
+  </property>
+  <property name="subTitle">
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how you would like to install &lt;i&gt;The Elder Scrolls III: Morrowind&lt;/i&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QRadioButton" name="retailDiscRadioButton">
+     <property name="text">
+      <string>Retail CD/DVD</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="retailDiscLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Maximum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="installerIcon">
+       <property name="styleSheet">
+        <string notr="true">QToolButton { border: none; padding: 0px; }</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>48</width>
+         <height>48</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="retailDiscLabel">
+       <property name="text">
+        <string>Install from a retail disc to a new location.</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="existingLocationRadioButton">
+     <property name="text">
+      <string>Existing Installation</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="existingLocationLayout">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Maximum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="folderIcon">
+       <property name="styleSheet">
+        <string notr="true">QToolButton { border: none; padding: 0px; }</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>48</width>
+         <height>48</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="existingLocationLabel">
+       <property name="text">
+        <string>Select an existing installation.</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Don't have a copy?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buyGameLayout">
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buyLinkButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Buy the game</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>48</width>
+         <height>48</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

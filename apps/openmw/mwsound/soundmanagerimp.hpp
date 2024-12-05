@@ -9,6 +9,7 @@
 
 #include <components/fallback/fallback.hpp>
 #include <components/misc/objectpool.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/soundmanager.hpp"
@@ -16,7 +17,6 @@
 #include "regionsoundselector.hpp"
 #include "sound_buffer.hpp"
 #include "type.hpp"
-#include "volumesettings.hpp"
 #include "watersoundupdater.hpp"
 
 namespace VFS
@@ -52,13 +52,6 @@ namespace MWSound
 
         std::unique_ptr<Sound_Output> mOutput;
 
-        // Caches available music tracks by <playlist name, (sound files) >
-        std::unordered_map<std::string, std::vector<std::string>> mMusicFiles;
-        std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
-        std::string mLastPlayedMusic; // The music file that was last played
-
-        VolumeSettings mVolumeSettings;
-
         WaterSoundUpdater mWaterSoundUpdater;
 
         SoundBufferPool mSoundBuffers;
@@ -93,7 +86,7 @@ namespace MWSound
         TrackList mActiveTracks;
 
         StreamPtr mMusic;
-        std::string mCurrentPlaylist;
+        MusicType mMusicType;
 
         bool mListenerUnderwater;
         osg::Vec3f mListenerPos;
@@ -105,7 +98,7 @@ namespace MWSound
         Sound* mUnderwaterSound;
         Sound* mNearWaterSound;
 
-        std::string mNextMusic;
+        VFS::Path::Normalized mNextMusic;
         bool mPlaybackPaused;
 
         RegionSoundSelector mRegionSoundSelector;
@@ -119,16 +112,15 @@ namespace MWSound
         Sound_Buffer* insertSound(const std::string& soundId, const ESM::Sound* sound);
 
         // returns a decoder to start streaming, or nullptr if the sound was not found
-        DecoderPtr loadVoice(const std::string& voicefile);
+        DecoderPtr loadVoice(VFS::Path::NormalizedView voicefile);
 
         SoundPtr getSoundRef();
         StreamPtr getStreamRef();
 
         StreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f& pos, bool playlocal);
 
-        void streamMusicFull(const std::string& filename);
-        void advanceMusic(const std::string& filename);
-        void startRandomTitle();
+        void streamMusicFull(VFS::Path::NormalizedView filename);
+        void advanceMusic(VFS::Path::NormalizedView filename, float fadeOut = 1.f);
 
         void cull3DSound(SoundBase* sound);
 
@@ -143,8 +135,6 @@ namespace MWSound
         void updateRegionSound(float duration);
         void updateWaterSound();
         void updateMusic(float duration);
-
-        float volumeFromType(Type type) const;
 
         enum class WaterSoundAction
         {
@@ -173,26 +163,28 @@ namespace MWSound
 
         void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
+        bool isEnabled() const override { return mOutput->isInitialized(); }
+        ///< Returns true if sound system is enabled
+
         void stopMusic() override;
         ///< Stops music if it's playing
 
-        void streamMusic(const std::string& filename) override;
+        MWSound::MusicType getMusicType() const override { return mMusicType; }
+
+        void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) override;
         ///< Play a soundifle
-        /// \param filename name of a sound file in "Music/" in the data directory.
+        /// \param filename name of a sound file in the data directory.
+        /// \param type music type.
+        /// \param fade time in seconds to fade out current track before start this one.
 
         bool isMusicPlaying() override;
         ///< Returns true if music is playing
 
-        void playPlaylist(const std::string& playlist) override;
-        ///< Start playing music from the selected folder
-        /// \param name of the folder that contains the playlist
-        /// Title music playlist is predefined
-
-        void say(const MWWorld::ConstPtr& reference, const std::string& filename) override;
+        void say(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView filename) override;
         ///< Make an actor say some text.
         /// \param filename name of a sound file in the VFS
 
-        void say(const std::string& filename) override;
+        void say(VFS::Path::NormalizedView filename) override;
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in the VFS
 

@@ -1,5 +1,7 @@
 #include "contentselector.hpp"
 
+#include "ui_contentselector.h"
+
 #include <components/contentselector/model/esmfile.hpp>
 
 #include <QClipboard>
@@ -9,14 +11,15 @@
 
 ContentSelectorView::ContentSelector::ContentSelector(QWidget* parent, bool showOMWScripts)
     : QObject(parent)
+    , ui(std::make_unique<Ui::ContentSelector>())
 {
-    ui.setupUi(parent);
-    ui.addonView->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->setupUi(parent);
+    ui->addonView->setDragDropMode(QAbstractItemView::InternalMove);
 
     if (!showOMWScripts)
     {
-        ui.languageComboBox->setHidden(true);
-        ui.refreshButton->setHidden(true);
+        ui->languageComboBox->setHidden(true);
+        ui->refreshButton->setHidden(true);
     }
 
     buildContentModel(showOMWScripts);
@@ -24,21 +27,24 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget* parent, bool show
     buildAddonView();
 }
 
+ContentSelectorView::ContentSelector::~ContentSelector() = default;
+
 void ContentSelectorView::ContentSelector::buildContentModel(bool showOMWScripts)
 {
-    QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
-    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon, showOMWScripts);
+    QIcon warningIcon(ui->addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning));
+    QIcon errorIcon(ui->addonView->style()->standardIcon(QStyle::SP_MessageBoxCritical));
+    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon, errorIcon, showOMWScripts);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
 {
-    ui.gameFileView->addItem("<No game file>");
-    ui.gameFileView->setVisible(true);
+    ui->gameFileView->addItem(tr("<No game file>"));
+    ui->gameFileView->setVisible(true);
 
-    connect(ui.gameFileView, qOverload<int>(&ComboBox::currentIndexChanged), this,
+    connect(ui->gameFileView, qOverload<int>(&ComboBox::currentIndexChanged), this,
         &ContentSelector::slotCurrentGameFileIndexChanged);
 
-    ui.gameFileView->setCurrentIndex(0);
+    ui->gameFileView->setCurrentIndex(0);
 }
 
 class AddOnProxyModel : public QSortFilterProxyModel
@@ -60,9 +66,34 @@ public:
     }
 };
 
+bool ContentSelectorView::ContentSelector::isGamefileSelected() const
+{
+    return ui->gameFileView->currentIndex() > 0;
+}
+
+QWidget* ContentSelectorView::ContentSelector::uiWidget() const
+{
+    return ui->contentGroupBox;
+}
+
+QComboBox* ContentSelectorView::ContentSelector::languageBox() const
+{
+    return ui->languageComboBox;
+}
+
+QToolButton* ContentSelectorView::ContentSelector::refreshButton() const
+{
+    return ui->refreshButton;
+}
+
+QLineEdit* ContentSelectorView::ContentSelector::searchFilter() const
+{
+    return ui->searchFilter;
+}
+
 void ContentSelectorView::ContentSelector::buildAddonView()
 {
-    ui.addonView->setVisible(true);
+    ui->addonView->setVisible(true);
 
     mAddonProxyModel = new AddOnProxyModel(this);
     mAddonProxyModel->setFilterRegularExpression(searchFilter()->text());
@@ -70,26 +101,32 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     mAddonProxyModel->setDynamicSortFilter(true);
     mAddonProxyModel->setSourceModel(mContentModel);
 
-    connect(ui.searchFilter, &QLineEdit::textEdited, mAddonProxyModel, &QSortFilterProxyModel::setFilterWildcard);
-    connect(ui.searchFilter, &QLineEdit::textEdited, this, &ContentSelector::slotSearchFilterTextChanged);
+    connect(ui->searchFilter, &QLineEdit::textEdited, mAddonProxyModel, &QSortFilterProxyModel::setFilterWildcard);
+    connect(ui->searchFilter, &QLineEdit::textEdited, this, &ContentSelector::slotSearchFilterTextChanged);
 
-    ui.addonView->setModel(mAddonProxyModel);
+    ui->addonView->setModel(mAddonProxyModel);
 
-    connect(ui.addonView, &QTableView::activated, this, &ContentSelector::slotAddonTableItemActivated);
+    connect(ui->addonView, &QTableView::activated, this, &ContentSelector::slotAddonTableItemActivated);
     connect(mContentModel, &ContentSelectorModel::ContentModel::dataChanged, this,
         &ContentSelector::signalAddonDataChanged);
+    connect(mContentModel, &ContentSelectorModel::ContentModel::dataChanged, this, &ContentSelector::slotRowsMoved);
     buildContextMenu();
 }
 
 void ContentSelectorView::ContentSelector::buildContextMenu()
 {
-    ui.addonView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui.addonView, &QTableView::customContextMenuRequested, this, &ContentSelector::slotShowContextMenu);
+    ui->addonView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->addonView, &QTableView::customContextMenuRequested, this, &ContentSelector::slotShowContextMenu);
 
-    mContextMenu = new QMenu(ui.addonView);
+    mContextMenu = new QMenu(ui->addonView);
     mContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
     mContextMenu->addAction(tr("&Uncheck Selected"), this, SLOT(slotUncheckMultiSelectedItems()));
     mContextMenu->addAction(tr("&Copy Path(s) to Clipboard"), this, SLOT(slotCopySelectedItemsPaths()));
+}
+
+void ContentSelectorView::ContentSelector::setNonUserContent(const QStringList& fileList)
+{
+    mContentModel->setNonUserContent(fileList);
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList& fileList)
@@ -116,7 +153,7 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString& filename)
     if (!filename.isEmpty())
     {
         const ContentSelectorModel::EsmFile* file = mContentModel->item(filename);
-        index = ui.gameFileView->findText(file->fileName());
+        index = ui->gameFileView->findText(file->fileName());
 
         // verify that the current index is also checked in the model
         if (!mContentModel->setCheckState(filename, true))
@@ -126,7 +163,7 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString& filename)
         }
     }
 
-    ui.gameFileView->setCurrentIndex(index);
+    ui->gameFileView->setCurrentIndex(index);
 }
 
 void ContentSelectorView::ContentSelector::clearCheckStates()
@@ -143,7 +180,7 @@ void ContentSelectorView::ContentSelector::setContentList(const QStringList& lis
 {
     if (list.isEmpty())
     {
-        slotCurrentGameFileIndexChanged(ui.gameFileView->currentIndex());
+        slotCurrentGameFileIndexChanged(ui->gameFileView->currentIndex());
     }
     else
         mContentModel->setContentList(list);
@@ -164,14 +201,14 @@ void ContentSelectorView::ContentSelector::addFiles(const QString& path, bool ne
     // add any game files to the combo box
     for (const QString& gameFileName : mContentModel->gameFiles())
     {
-        if (ui.gameFileView->findText(gameFileName) == -1)
+        if (ui->gameFileView->findText(gameFileName) == -1)
         {
-            ui.gameFileView->addItem(gameFileName);
+            ui->gameFileView->addItem(gameFileName);
         }
     }
 
-    if (ui.gameFileView->currentIndex() != 0)
-        ui.gameFileView->setCurrentIndex(0);
+    if (ui->gameFileView->currentIndex() != 0)
+        ui->gameFileView->setCurrentIndex(0);
 
     mContentModel->uncheckAll();
     mContentModel->checkForLoadOrderErrors();
@@ -194,10 +231,10 @@ void ContentSelectorView::ContentSelector::clearFiles()
 
 QString ContentSelectorView::ContentSelector::currentFile() const
 {
-    QModelIndex currentIdx = ui.addonView->currentIndex();
+    QModelIndex currentIdx = ui->addonView->currentIndex();
 
-    if (!currentIdx.isValid() && ui.gameFileView->currentIndex() > 0)
-        return ui.gameFileView->currentText();
+    if (!currentIdx.isValid() && ui->gameFileView->currentIndex() > 0)
+        return ui->gameFileView->currentText();
 
     QModelIndex idx = mContentModel->index(mAddonProxyModel->mapToSource(currentIdx).row(), 0, QModelIndex());
     return mContentModel->data(idx, Qt::DisplayRole).toString();
@@ -225,7 +262,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 
 void ContentSelectorView::ContentSelector::setGameFileSelected(int index, bool selected)
 {
-    QString fileName = ui.gameFileView->itemText(index);
+    QString fileName = ui->gameFileView->itemText(index);
     const ContentSelectorModel::EsmFile* file = mContentModel->item(fileName);
     if (file != nullptr)
     {
@@ -253,14 +290,14 @@ void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QMo
 
 void ContentSelectorView::ContentSelector::slotShowContextMenu(const QPoint& pos)
 {
-    QPoint globalPos = ui.addonView->viewport()->mapToGlobal(pos);
+    QPoint globalPos = ui->addonView->viewport()->mapToGlobal(pos);
     mContextMenu->exec(globalPos);
 }
 
 void ContentSelectorView::ContentSelector::setCheckStateForMultiSelectedItems(bool checked)
 {
     Qt::CheckState checkState = checked ? Qt::Checked : Qt::Unchecked;
-    for (const QModelIndex& index : ui.addonView->selectionModel()->selectedIndexes())
+    for (const QModelIndex& index : ui->addonView->selectionModel()->selectedIndexes())
     {
         QModelIndex sourceIndex = mAddonProxyModel->mapToSource(index);
         if (mContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() != checkState)
@@ -283,21 +320,26 @@ void ContentSelectorView::ContentSelector::slotCheckMultiSelectedItems()
 void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()
 {
     QClipboard* clipboard = QApplication::clipboard();
-    QString filepaths;
-    for (const QModelIndex& index : ui.addonView->selectionModel()->selectedIndexes())
+    QStringList filepaths;
+    for (const QModelIndex& index : ui->addonView->selectionModel()->selectedIndexes())
     {
         int row = mAddonProxyModel->mapToSource(index).row();
         const ContentSelectorModel::EsmFile* file = mContentModel->item(row);
-        filepaths += file->filePath() + "\n";
+        filepaths.push_back(file->filePath());
     }
 
     if (!filepaths.isEmpty())
     {
-        clipboard->setText(filepaths);
+        clipboard->setText(filepaths.join("\n"));
     }
 }
 
 void ContentSelectorView::ContentSelector::slotSearchFilterTextChanged(const QString& newText)
 {
-    ui.addonView->setDragEnabled(newText.isEmpty());
+    ui->addonView->setDragEnabled(newText.isEmpty());
+}
+
+void ContentSelectorView::ContentSelector::slotRowsMoved()
+{
+    ui->addonView->selectionModel()->clearSelection();
 }

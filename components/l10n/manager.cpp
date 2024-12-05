@@ -36,15 +36,26 @@ namespace l10n
 
     void Manager::readLangData(const std::string& name, MessageBundles& ctx, const icu::Locale& lang)
     {
-        std::string path = "l10n/";
-        path.append(name);
-        path.append("/");
-        path.append(lang.getName());
-        path.append(".yaml");
-        if (!mVFS->exists(path))
+        std::string langName(lang.getName());
+        langName += ".yaml";
+
+        VFS::Path::Normalized path("l10n");
+        path /= name;
+        path /= langName;
+
+        const Files::IStreamPtr stream = mVFS->find(path);
+
+        if (stream == nullptr)
             return;
 
-        ctx.load(*mVFS->get(path), lang, path);
+        try
+        {
+            ctx.load(*stream, lang);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Cannot load message bundles from " << path << ": " << e.what();
+        }
     }
 
     void Manager::updateContext(const std::string& name, MessageBundles& ctx)

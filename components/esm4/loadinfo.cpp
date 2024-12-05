@@ -41,7 +41,6 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
     mEditorId = ESM::RefId(mId).serializeText(); // FIXME: quick workaround to use existing code
 
-    static ScriptLocalVariableData localVar;
     bool ignore = false;
 
     while (reader.getSubRecordHeader())
@@ -49,13 +48,13 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_QSTI:
+            case ESM::fourCC("QSTI"):
                 reader.getFormId(mQuest);
                 break; // FormId quest id
-            case ESM4::SUB_SNDD:
+            case ESM::fourCC("SNDD"):
                 reader.getFormId(mSound);
                 break; // FO3 (not used in FONV?)
-            case ESM4::SUB_TRDT:
+            case ESM::fourCC("TRDT"):
             {
                 if (subHdr.dataSize == 16) // TES4
                     reader.get(&mResponseData, 16);
@@ -70,16 +69,16 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_NAM1:
+            case ESM::fourCC("NAM1"):
                 reader.getLocalizedString(mResponse);
                 break; // response text
-            case ESM4::SUB_NAM2:
+            case ESM::fourCC("NAM2"):
                 reader.getZString(mNotes);
                 break; // actor notes
-            case ESM4::SUB_NAM3:
+            case ESM::fourCC("NAM3"):
                 reader.getZString(mEdits);
                 break; // not in TES4
-            case ESM4::SUB_CTDA: // FIXME: how to detect if 1st/2nd param is a formid?
+            case ESM::fourCC("CTDA"): // FIXME: how to detect if 1st/2nd param is a formid?
             {
                 if (subHdr.dataSize == 24) // TES4
                     reader.get(&mTargetCondition, 24);
@@ -105,7 +104,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_SCHR:
+            case ESM::fourCC("SCHR"):
             {
                 if (!ignore)
                     reader.get(mScript.scriptHeader);
@@ -114,37 +113,39 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_SCDA:
+            case ESM::fourCC("SCDA"):
                 reader.skipSubRecordData();
                 break; // compiled script data
-            case ESM4::SUB_SCTX:
+            case ESM::fourCC("SCTX"):
                 reader.getString(mScript.scriptSource);
                 break;
-            case ESM4::SUB_SCRO:
+            case ESM::fourCC("SCRO"):
                 reader.getFormId(mScript.globReference);
                 break;
-            case ESM4::SUB_SLSD:
+            case ESM::fourCC("SLSD"):
             {
-                localVar.clear();
+                ScriptLocalVariableData localVar;
                 reader.get(localVar.index);
                 reader.get(localVar.unknown1);
                 reader.get(localVar.unknown2);
                 reader.get(localVar.unknown3);
                 reader.get(localVar.type);
                 reader.get(localVar.unknown4);
+                mScript.localVarData.push_back(std::move(localVar));
                 // WARN: assumes SCVR will follow immediately
 
                 break;
             }
-            case ESM4::SUB_SCVR: // assumed always pair with SLSD
+            case ESM::fourCC("SCVR"): // assumed always pair with SLSD
             {
-                reader.getZString(localVar.variableName);
-
-                mScript.localVarData.push_back(localVar);
+                if (!mScript.localVarData.empty())
+                    reader.getZString(mScript.localVarData.back().variableName);
+                else
+                    reader.skipSubRecordData();
 
                 break;
             }
-            case ESM4::SUB_SCRV:
+            case ESM::fourCC("SCRV"):
             {
                 std::uint32_t index;
                 reader.get(index);
@@ -153,13 +154,13 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_NEXT: // FO3/FONV marker for next script header
+            case ESM::fourCC("NEXT"): // FO3/FONV marker for next script header
             {
                 ignore = true;
 
                 break;
             }
-            case ESM4::SUB_DATA: // always 3 for TES4 ?
+            case ESM::fourCC("DATA"): // always 3 for TES4 ?
             {
                 if (subHdr.dataSize == 4) // FO3/FONV
                 {
@@ -171,48 +172,48 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
                     reader.skipSubRecordData(); // FIXME
                 break;
             }
-            case ESM4::SUB_NAME: // FormId add topic (not always present)
-            case ESM4::SUB_CTDT: // older version of CTDA? 20 bytes
-            case ESM4::SUB_SCHD: // 28 bytes
-            case ESM4::SUB_TCLT: // FormId choice
-            case ESM4::SUB_TCLF: // FormId
-            case ESM4::SUB_PNAM: // TES4 DLC
-            case ESM4::SUB_TPIC: // TES4 DLC
-            case ESM4::SUB_ANAM: // FO3 speaker formid
-            case ESM4::SUB_DNAM: // FO3 speech challenge
-            case ESM4::SUB_KNAM: // FO3 formid
-            case ESM4::SUB_LNAM: // FONV
-            case ESM4::SUB_TCFU: // FONV
-            case ESM4::SUB_TIFC: // TES5
-            case ESM4::SUB_TWAT: // TES5
-            case ESM4::SUB_CIS1: // TES5
-            case ESM4::SUB_CIS2: // TES5
-            case ESM4::SUB_CNAM: // TES5
-            case ESM4::SUB_ENAM: // TES5
-            case ESM4::SUB_EDID: // TES5
-            case ESM4::SUB_VMAD: // TES5
-            case ESM4::SUB_BNAM: // TES5
-            case ESM4::SUB_SNAM: // TES5
-            case ESM4::SUB_ONAM: // TES5
-            case ESM4::SUB_QNAM: // TES5 for mScript
-            case ESM4::SUB_RNAM: // TES5
-            case ESM4::SUB_ALFA: // FO4
-            case ESM4::SUB_GNAM: // FO4
-            case ESM4::SUB_GREE: // FO4
-            case ESM4::SUB_INAM: // FO4
-            case ESM4::SUB_INCC: // FO4
-            case ESM4::SUB_INTV: // FO4
-            case ESM4::SUB_IOVR: // FO4
-            case ESM4::SUB_MODQ: // FO4
-            case ESM4::SUB_NAM0: // FO4
-            case ESM4::SUB_NAM4: // FO4
-            case ESM4::SUB_NAM9: // FO4
-            case ESM4::SUB_SRAF: // FO4
-            case ESM4::SUB_TIQS: // FO4
-            case ESM4::SUB_TNAM: // FO4
-            case ESM4::SUB_TRDA: // FO4
-            case ESM4::SUB_TSCE: // FO4
-            case ESM4::SUB_WZMD: // FO4
+            case ESM::fourCC("NAME"): // FormId add topic (not always present)
+            case ESM::fourCC("CTDT"): // older version of CTDA? 20 bytes
+            case ESM::fourCC("SCHD"): // 28 bytes
+            case ESM::fourCC("TCLT"): // FormId choice
+            case ESM::fourCC("TCLF"): // FormId
+            case ESM::fourCC("PNAM"): // TES4 DLC
+            case ESM::fourCC("TPIC"): // TES4 DLC
+            case ESM::fourCC("ANAM"): // FO3 speaker formid
+            case ESM::fourCC("DNAM"): // FO3 speech challenge
+            case ESM::fourCC("KNAM"): // FO3 formid
+            case ESM::fourCC("LNAM"): // FONV
+            case ESM::fourCC("TCFU"): // FONV
+            case ESM::fourCC("TIFC"): // TES5
+            case ESM::fourCC("TWAT"): // TES5
+            case ESM::fourCC("CIS1"): // TES5
+            case ESM::fourCC("CIS2"): // TES5
+            case ESM::fourCC("CNAM"): // TES5
+            case ESM::fourCC("ENAM"): // TES5
+            case ESM::fourCC("EDID"): // TES5
+            case ESM::fourCC("VMAD"): // TES5
+            case ESM::fourCC("BNAM"): // TES5
+            case ESM::fourCC("SNAM"): // TES5
+            case ESM::fourCC("ONAM"): // TES5
+            case ESM::fourCC("QNAM"): // TES5 for mScript
+            case ESM::fourCC("RNAM"): // TES5
+            case ESM::fourCC("ALFA"): // FO4
+            case ESM::fourCC("GNAM"): // FO4
+            case ESM::fourCC("GREE"): // FO4
+            case ESM::fourCC("INAM"): // FO4
+            case ESM::fourCC("INCC"): // FO4
+            case ESM::fourCC("INTV"): // FO4
+            case ESM::fourCC("IOVR"): // FO4
+            case ESM::fourCC("MODQ"): // FO4
+            case ESM::fourCC("NAM0"): // FO4
+            case ESM::fourCC("NAM4"): // FO4
+            case ESM::fourCC("NAM9"): // FO4
+            case ESM::fourCC("SRAF"): // FO4
+            case ESM::fourCC("TIQS"): // FO4
+            case ESM::fourCC("TNAM"): // FO4
+            case ESM::fourCC("TRDA"): // FO4
+            case ESM::fourCC("TSCE"): // FO4
+            case ESM::fourCC("WZMD"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

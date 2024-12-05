@@ -15,15 +15,25 @@
 --     end
 -- end))
 
+--- Possible @{#LifeTime} values
+-- @field [parent=#storage] #LifeTime LIFE_TIME
+
+--- `storage.LIFE_TIME`
+-- @type LifeTime
+-- @field #number Persistent "0" Data is stored for the whole game session and remains on disk after quitting the game
+-- @field #number GameSession "1" Data is stored for the whole game session
+-- @field #number Temporary "2" Data is stored until script context reset
+
 ---
 -- Get a section of the global storage; can be used by any script, but only global scripts can change values.
+-- Menu scripts can only access it when a game is running.
 -- Creates the section if it doesn't exist.
 -- @function [parent=#storage] globalSection
 -- @param #string sectionName
 -- @return #StorageSection
 
 ---
--- Get a section of the player storage; can be used by player scripts only.
+-- Get a section of the player storage; can only be used by player and menu scripts.
 -- Creates the section if it doesn't exist.
 -- @function [parent=#storage] playerSection
 -- @param #string sectionName
@@ -36,7 +46,7 @@
 -- @return #table
 
 ---
--- Get all global sections as a table; can be used by player scripts only.
+-- Get all player sections as a table; can only be used by player and menu scripts.
 -- Note that adding/removing items to the returned table doesn't create or remove sections.
 -- @function [parent=#storage] allPlayerSections
 -- @return #table
@@ -82,12 +92,28 @@
 -- @param #table values (optional) New values
 
 ---
--- Make the whole section temporary: will be removed on exit or when load a save.
+-- (DEPRECATED, use `setLifeTime(openmw.storage.LIFE_TIME.Temporary)`) Make the whole section temporary: will be removed on exit or when load a save.
 -- Temporary sections have the same interface to get/set values, the only difference is they will not
 -- be saved to the permanent storage on exit.
--- This function can not be used for a global storage section from a local script.
+-- This function can be used for a global storage section from a global script or for a player storage section from a player or menu script.
 -- @function [parent=#StorageSection] removeOnExit
 -- @param self
+-- @usage
+-- local storage = require('openmw.storage')
+-- local myModData = storage.globalSection('MyModExample')
+-- myModData:removeOnExit()
+
+---
+-- Set the life time of given storage section.
+-- New sections initially have a Persistent life time.
+-- This function can be used for a global storage section from a global script or for a player storage section from a player or menu script.
+-- @function [parent=#StorageSection] setLifeTime
+-- @param self
+-- @param #LifeTime lifeTime Section life time
+-- @usage
+-- local storage = require('openmw.storage')
+-- local myModData = storage.globalSection('MyModExample')
+-- myModData:setLifeTime(storage.LIFE_TIME.Temporary)
 
 ---
 -- Set value by a string key; can not be used for global storage from a local script.

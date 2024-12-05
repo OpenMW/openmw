@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="48pt"
+   height="48pt"
+   viewBox="0 0 16.933333 16.933333"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="Main"
+       gradientTransform="translate(63.499994,-1.8137688)">
+      <stop
+         style="stop-color:#4d4d4d;stop-opacity:1;"
+         offset="0"
+         id="stop2082" />
+    </linearGradient>
+    <linearGradient
+       id="Blue"
+       gradientTransform="matrix(0.26458333,0,0,0.26458333,-13.80713,103.48169)">
+      <stop
+         style="stop-color:#55c3ff;stop-opacity:1;"
+         offset="0"
+         id="stop2484" />
+    </linearGradient>
+  </defs>
+  <g
+     id="editing-instance"
+     style="display:inline"
+     transform="matrix(1.3333335,0,0,1.333334,-0.35277843,-127.35282)">
+    <path
+       id="path2834"
+       style="font-variation-settings:normal;display:inline;opacity:1;fill:none;fill-opacity:1;stroke:url(#Main);stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 9.9218752,99.880206 v 3.704174 m -3.1750001,1.5875 3.1750005,-1.58756 m -2e-7,-3.704086 -3.1750005,-1.587546 M 3.571875,99.880211 v 3.704179 m 3.1750005,1.58755 -3.1750005,-1.58756 m 0,-3.704169 3.1750005,-1.587546" />
+    <path
+       id="path2840"
+       style="font-variation-settings:normal;display:inline;opacity:1;fill:none;fill-opacity:1;stroke:url(#Main);stroke-width:0.2116666;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="M 6.7468751,101.46771 9.9218756,99.880147 M 6.7468755,101.46777 3.571875,99.880211 m 3.1750001,1.587499 v 3.70417" />
+    <rect
+       style="opacity:0;fill:#ffbe6f;stroke:#eff0f1;stroke-width:0;paint-order:stroke fill markers;stop-color:#000000"
+       id="rect2566"
+       width="12.699999"
+       height="12.699994"
+       x="0.2645838"
+       y="95.514572" />
+  </g>
+</svg>

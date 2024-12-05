@@ -84,12 +84,12 @@ namespace ESM
 
     unsigned int ESMWriter::getVersion() const
     {
-        return mHeader.mData.version;
+        return mHeader.mData.version.ui;
     }
 
     void ESMWriter::setVersion(unsigned int ver)
     {
-        mHeader.mData.version = ver;
+        mHeader.mData.version.ui = ver;
     }
 
     void ESMWriter::setType(int type)
@@ -97,14 +97,14 @@ namespace ESM
         mHeader.mData.type = type;
     }
 
-    void ESMWriter::setAuthor(const std::string& auth)
+    void ESMWriter::setAuthor(std::string_view auth)
     {
-        mHeader.mData.author.assign(auth);
+        mHeader.mData.author = auth;
     }
 
-    void ESMWriter::setDescription(const std::string& desc)
+    void ESMWriter::setDescription(std::string_view desc)
     {
-        mHeader.mData.desc.assign(desc);
+        mHeader.mData.desc = desc;
     }
 
     void ESMWriter::setRecordCount(int count)
@@ -122,7 +122,7 @@ namespace ESM
         mHeader.mMaster.clear();
     }
 
-    void ESMWriter::addMaster(const std::string& name, uint64_t size)
+    void ESMWriter::addMaster(std::string_view name, uint64_t size)
     {
         Header::MasterData d;
         d.name = name;
@@ -208,14 +208,14 @@ namespace ESM
         endRecord(NAME(name));
     }
 
-    void ESMWriter::writeHNString(NAME name, const std::string& data)
+    void ESMWriter::writeHNString(NAME name, std::string_view data)
     {
         startSubRecord(name);
         writeHString(data);
         endRecord(name);
     }
 
-    void ESMWriter::writeHNString(NAME name, const std::string& data, size_t size)
+    void ESMWriter::writeHNString(NAME name, std::string_view data, size_t size)
     {
         assert(data.size() <= size);
         startSubRecord(name);
@@ -278,9 +278,9 @@ namespace ESM
         write(string.c_str(), string.size());
     }
 
-    void ESMWriter::writeHString(const std::string& data)
+    void ESMWriter::writeHString(std::string_view data)
     {
-        if (data.size() == 0)
+        if (data.empty())
             write("\0", 1);
         else
         {
@@ -291,7 +291,7 @@ namespace ESM
         }
     }
 
-    void ESMWriter::writeHCString(const std::string& data)
+    void ESMWriter::writeHCString(std::string_view data)
     {
         writeHString(data);
         if (data.size() > 0 && data[data.size() - 1] != '\0')

@@ -194,7 +194,8 @@ int extract(std::unique_ptr<File>& bsa, Arguments& info)
     // Get a stream for the file to extract
     for (auto it = bsa->getList().rbegin(); it != bsa->getList().rend(); ++it)
     {
-        if (Misc::StringUtils::ciEqual(Misc::StringUtils::stringToU8String(it->name()), archivePath))
+        auto streamPath = Misc::StringUtils::stringToU8String(it->name());
+        if (Misc::StringUtils::ciEqual(streamPath, archivePath) || Misc::StringUtils::ciEqual(streamPath, extractPath))
         {
             stream = bsa->getFile(&*it);
             break;
@@ -320,21 +321,27 @@ int main(int argc, char** argv)
 
         // Open file
 
+        // TODO: add a version argument for this mode after compressed BSA writing is a thing
+        if (info.mode == "create")
+            return call<Bsa::BSAFile>(info);
+
         Bsa::BsaVersion bsaVersion = Bsa::BSAFile::detectVersion(info.filename);
 
         switch (bsaVersion)
         {
-            case Bsa::BSAVER_COMPRESSED:
-                return call<Bsa::CompressedBSAFile>(info);
-            case Bsa::BSAVER_BA2_GNRL:
-                return call<Bsa::BA2GNRLFile>(info);
-            case Bsa::BSAVER_BA2_DX10:
-                return call<Bsa::BA2DX10File>(info);
-            case Bsa::BSAVER_UNCOMPRESSED:
+            case Bsa::BsaVersion::Unknown:
+                break;
+            case Bsa::BsaVersion::Uncompressed:
                 return call<Bsa::BSAFile>(info);
-            default:
-                throw std::runtime_error("Unrecognised BSA archive");
+            case Bsa::BsaVersion::Compressed:
+                return call<Bsa::CompressedBSAFile>(info);
+            case Bsa::BsaVersion::BA2GNRL:
+                return call<Bsa::BA2GNRLFile>(info);
+            case Bsa::BsaVersion::BA2DX10:
+                return call<Bsa::BA2DX10File>(info);
         }
+
+        throw std::runtime_error("Unrecognised BSA archive");
     }
     catch (std::exception& e)
     {

@@ -22,6 +22,8 @@ namespace MWMechanics
         MWWorld::Ptr player = getPlayer();
         MWWorld::LiveCellRef<ESM::Repair>* ref = mTool.get<ESM::Repair>();
 
+        MWBase::Environment::get().getWorld()->breakInvisibility(player);
+
         // unstack tool if required
         player.getClass().getContainerStore(player).unstack(mTool);
 
@@ -68,7 +70,7 @@ namespace MWMechanics
                 stacked->getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
 
             // increase skill
-            player.getClass().skillUsageSucceeded(player, ESM::Skill::Armorer, 0);
+            player.getClass().skillUsageSucceeded(player, ESM::Skill::Armorer, ESM::Skill::Armorer_Repair);
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Repair"));
             MWBase::Environment::get().getWindowManager()->messageBox("#{sRepairSuccess}");

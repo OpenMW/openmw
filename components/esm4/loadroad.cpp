@@ -45,7 +45,7 @@ void ESM4::Road::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_PGRP:
+            case ESM::fourCC("PGRP"):
             {
                 std::size_t numNodes = subHdr.dataSize / sizeof(PGRP);
 
@@ -57,10 +57,10 @@ void ESM4::Road::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PGRR:
+            case ESM::fourCC("PGRR"):
             {
-                static PGRR link;
-                static RDRP linkPt;
+                PGRR link;
+                RDRP linkPt;
 
                 for (std::size_t i = 0; i < mNodes.size(); ++i)
                 {

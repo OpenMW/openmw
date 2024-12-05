@@ -41,11 +41,13 @@
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadprob.hpp>
 #include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadweap.hpp>
 
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/conversion.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -105,7 +107,7 @@ namespace
                     std::string fileName;
                     if (image)
                         fileName = image->getFileName();
-                    mTextures.emplace_back(texture->getName(), fileName);
+                    mTextures.emplace_back(SceneUtil::getTextureType(*stateset, *texture, i), fileName);
                 }
             }
 
@@ -184,6 +186,14 @@ namespace MWScript
                 MWWorld::Ptr target = R()(runtime, false);
                 ESM::RefId name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
+
+                if (!MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(name))
+                {
+                    runtime.getContext().report(
+                        "Failed to start global script '" + name.getRefIdString() + "': script record not found");
+                    return;
+                }
+
                 MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript(name, target);
             }
         };
@@ -206,6 +216,14 @@ namespace MWScript
             {
                 const ESM::RefId& name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
+
+                if (!MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(name))
+                {
+                    runtime.getContext().report(
+                        "Failed to stop global script '" + name.getRefIdString() + "': script record not found");
+                    return;
+                }
+
                 MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript(name);
             }
         };
@@ -585,15 +603,15 @@ namespace MWScript
                     key = ESM::MagicEffect::effectGmstIdToIndex(effect);
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-
-                const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
-
-                for (const auto& activeEffect : effects)
+                for (const auto& spell : stats.getActiveSpells())
                 {
-                    if (activeEffect.first.mId == key && activeEffect.second.getModifier() > 0)
+                    for (const auto& effect : spell.getEffects())
                     {
-                        runtime.push(1);
-                        return;
+                        if (effect.mFlags & ESM::ActiveEffect::Flag_Applied && effect.mEffectId == key)
+                        {
+                            runtime.push(1);
+                            return;
+                        }
                     }
                 }
                 runtime.push(0);
@@ -614,7 +632,7 @@ namespace MWScript
                 ESM::RefId gem = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                if (!ptr.getClass().hasInventoryStore(ptr))
+                if (!ptr.getClass().isActor())
                     return;
 
                 const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -647,10 +665,10 @@ namespace MWScript
                 for (unsigned int i = 0; i < arg0; ++i)
                     runtime.pop();
 
-                if (!ptr.getClass().hasInventoryStore(ptr))
+                if (!ptr.getClass().isActor())
                     return;
 
-                MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
                     if (it->getCellRef().getSoul() == soul)
@@ -687,46 +705,48 @@ namespace MWScript
                 if (!ptr.getClass().isActor())
                     return;
 
+                MWWorld::InventoryStore* invStorePtr = nullptr;
                 if (ptr.getClass().hasInventoryStore(ptr))
                 {
+                    invStorePtr = &ptr.getClass().getInventoryStore(ptr);
                     // Prefer dropping unequipped items first; re-stack if possible by unequipping items before dropping
                     // them.
-                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                    int numNotEquipped = store.count(item);
+                    int numNotEquipped = invStorePtr->count(item);
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
-                        MWWorld::ConstContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && it->getCellRef().getRefId() == item)
+                        MWWorld::ConstContainerStoreIterator it = invStorePtr->getSlot(slot);
+                        if (it != invStorePtr->end() && it->getCellRef().getRefId() == item)
                         {
-                            numNotEquipped -= it->getRefData().getCount();
+                            numNotEquipped -= it->getCellRef().getCount();
                         }
                     }
 
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots && amount > numNotEquipped; ++slot)
                     {
-                        MWWorld::ContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && it->getCellRef().getRefId() == item)
+                        MWWorld::ContainerStoreIterator it = invStorePtr->getSlot(slot);
+                        if (it != invStorePtr->end() && it->getCellRef().getRefId() == item)
                         {
-                            int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
-                            store.unequipItemQuantity(*it, numToRemove);
+                            int numToRemove = std::min(amount - numNotEquipped, it->getCellRef().getCount());
+                            invStorePtr->unequipItemQuantity(*it, numToRemove);
                             numNotEquipped += numToRemove;
                         }
                     }
+                }
 
-                    for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                {
+                    if (iter->getCellRef().getRefId() == item && (!invStorePtr || !invStorePtr->isEquipped(*iter)))
                     {
-                        if (iter->getCellRef().getRefId() == item && !store.isEquipped(*iter))
-                        {
-                            int removed = store.remove(*iter, amount);
-                            MWWorld::Ptr dropped
-                                = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
-                            dropped.getCellRef().setOwner(ESM::RefId());
+                        int removed = store.remove(*iter, amount);
+                        MWWorld::Ptr dropped
+                            = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
+                        dropped.getCellRef().setOwner(ESM::RefId());
 
-                            amount -= removed;
+                        amount -= removed;
 
-                            if (amount <= 0)
-                                break;
-                        }
+                        if (amount <= 0)
+                            break;
                     }
                 }
 
@@ -763,10 +783,10 @@ namespace MWScript
                 ESM::RefId soul = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                if (!ptr.getClass().hasInventoryStore(ptr))
+                if (!ptr.getClass().isActor())
                     return;
 
-                MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
 
                 for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
                 {
@@ -1329,8 +1349,10 @@ namespace MWScript
             {
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 player.getClass().getNpcStats(player).setBounty(0);
-                MWBase::Environment::get().getWorld()->confiscateStolenItems(player);
-                MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                world->confiscateStolenItems(player);
+                world->getPlayer().recordCrimeId();
+                world->getPlayer().setDrawState(MWMechanics::DrawState::Nothing);
             }
         };
 
@@ -1399,7 +1421,7 @@ namespace MWScript
 
                 if (ptr.getRefData().isDeletedByContentFile())
                     msg << "[Deleted by content file]" << std::endl;
-                if (!ptr.getRefData().getCount())
+                if (!ptr.getCellRef().getCount())
                     msg << "[Deleted]" << std::endl;
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
@@ -1415,9 +1437,9 @@ namespace MWScript
                     osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    std::string model
-                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), vfs);
-                    msg << "Model: " << model << std::endl;
+                    const VFS::Path::Normalized model
+                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs);
+                    msg << "Model: " << model.value() << std::endl;
                     if (!model.empty())
                     {
                         const std::string archive = vfs->getArchive(model);
@@ -1454,7 +1476,7 @@ namespace MWScript
 
                                 if (lastTextureSrc.empty() || textureSrc != lastTextureSrc)
                                 {
-                                    lastTextureSrc = textureSrc;
+                                    lastTextureSrc = std::move(textureSrc);
                                     if (lastTextureSrc.empty())
                                         lastTextureSrc = "[No Source]";
 
@@ -1692,7 +1714,7 @@ namespace MWScript
                 for (const T& record : store.get<T>())
                 {
                     MWWorld::ManualRef ref(store, record.mId);
-                    std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
+                    VFS::Path::Normalized model(ref.getPtr().getClass().getCorrectedModel(ref.getPtr()));
                     if (!model.empty())
                     {
                         sceneManager->getTemplate(model);

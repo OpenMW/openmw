@@ -1,5 +1,11 @@
-#include <QApplication>
 #include <QDir>
+
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
+#include <components/files/qtconversion.hpp>
+#include <components/l10n/qttranslations.hpp>
+#include <components/platform/application.hpp>
 
 #include "mainwizard.hpp"
 
@@ -11,8 +17,13 @@
 
 int main(int argc, char* argv[])
 {
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description description;
+    Files::ConfigurationManager configurationManager;
+    configurationManager.addCommonOptions(description);
+    configurationManager.readConfiguration(variables, description, true);
 
-    QApplication app(argc, argv);
+    Platform::Application app(argc, argv);
 
     // Now we make sure the current dir is set to application path
     QDir dir(QCoreApplication::applicationDirPath());
@@ -28,9 +39,15 @@ int main(int argc, char* argv[])
     app.setLibraryPaths(libraryPaths);
 #endif
 
-    QDir::setCurrent(dir.absolutePath());
+    QString resourcesPath(".");
+    if (!variables["resources"].empty())
+    {
+        resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
+    }
 
-    Wizard::MainWizard wizard;
+    l10n::installQtTranslations(app, "wizard", resourcesPath);
+
+    Wizard::MainWizard wizard(std::move(configurationManager));
 
     wizard.show();
     return app.exec();

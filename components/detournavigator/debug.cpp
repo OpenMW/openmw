@@ -79,13 +79,13 @@ namespace DetourNavigator
         switch (v)
         {
             case CollisionShapeType::Aabb:
-                return s << "AgentShapeType::Aabb";
+                return s << "CollisionShapeType::Aabb";
             case CollisionShapeType::RotatingBox:
-                return s << "AgentShapeType::RotatingBox";
+                return s << "CollisionShapeType::RotatingBox";
             case CollisionShapeType::Cylinder:
-                return s << "AgentShapeType::Cylinder";
+                return s << "CollisionShapeType::Cylinder";
         }
-        return s << "AgentShapeType::" << static_cast<std::underlying_type_t<CollisionShapeType>>(v);
+        return s << "CollisionShapeType::" << static_cast<std::underlying_type_t<CollisionShapeType>>(v);
     }
 
     std::ostream& operator<<(std::ostream& s, const AgentBounds& v)
@@ -184,8 +184,6 @@ namespace DetourNavigator
         {
             case ChangeType::remove:
                 return stream << "ChangeType::remove";
-            case ChangeType::mixed:
-                return stream << "ChangeType::mixed";
             case ChangeType::add:
                 return stream << "ChangeType::add";
             case ChangeType::update:

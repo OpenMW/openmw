@@ -27,7 +27,7 @@ namespace MWRender
         clear();
     }
 
-    void EffectManager::addEffect(const std::string& model, std::string_view textureOverride,
+    void EffectManager::addEffect(VFS::Path::NormalizedView model, std::string_view textureOverride,
         const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
     {
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model);
@@ -52,9 +52,9 @@ namespace MWRender
         node->accept(assignVisitor);
 
         if (isMagicVFX)
-            overrideFirstRootTexture(textureOverride, mResourceSystem, node);
+            overrideFirstRootTexture(textureOverride, mResourceSystem, *node);
         else
-            overrideTexture(textureOverride, mResourceSystem, node);
+            overrideTexture(textureOverride, mResourceSystem, *node);
 
         mParentNode->addChild(trans);
 

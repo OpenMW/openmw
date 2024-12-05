@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Miscellaneous::MCDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mWeight, v.mValue, v.mFlags);
+    }
+
     void Miscellaneous::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -28,7 +36,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("MCDT"):
-                    esm.getHTSized<12>(mData);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -65,7 +73,7 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNT("MCDT", mData, 12);
+        esm.writeNamedComposite("MCDT", mData);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
     }

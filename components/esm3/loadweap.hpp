@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_WEAP_H
 #define OPENMW_ESM_WEAP_H
 
+#include <array>
 #include <string>
 
 #include "components/esm/refid.hpp"
@@ -24,6 +25,7 @@ namespace ESM
 
         enum Type
         {
+            First = -4,
             PickProbe = -4,
             HandToHand = -3,
             Spell = -2,
@@ -41,7 +43,8 @@ namespace ESM
             MarksmanCrossbow = 10,
             MarksmanThrown = 11,
             Arrow = 12,
-            Bolt = 13
+            Bolt = 13,
+            Last = 13
         };
 
         enum AttackType
@@ -57,24 +60,21 @@ namespace ESM
             Silver = 0x02
         };
 
-#pragma pack(push)
-#pragma pack(1)
         struct WPDTstruct
         {
             float mWeight;
-            int mValue;
-            short mType;
-            unsigned short mHealth;
+            int32_t mValue;
+            int16_t mType;
+            uint16_t mHealth;
             float mSpeed, mReach;
-            unsigned short mEnchant; // Enchantment points. The real value is mEnchant/10.f
-            unsigned char mChop[2], mSlash[2], mThrust[2]; // Min and max
-            int mFlags;
+            uint16_t mEnchant; // Enchantment points. The real value is mEnchant/10.f
+            std::array<unsigned char, 2> mChop, mSlash, mThrust; // Min and max
+            int32_t mFlags;
         }; // 32 bytes
-#pragma pack(pop)
 
         WPDTstruct mData;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mEnchant, mScript;
         std::string mName, mModel, mIcon;
 

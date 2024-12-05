@@ -16,6 +16,7 @@
 
 #endif
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/conversion.hpp>
@@ -87,6 +88,37 @@ namespace Settings
             stream << value;
             return stream.str();
         }
+
+        std::string toString(SceneUtil::LightingMethod value)
+        {
+            switch (value)
+            {
+                case SceneUtil::LightingMethod::FFP:
+                    return "legacy";
+                case SceneUtil::LightingMethod::PerObjectUniform:
+                    return "shaders compatibility";
+                case SceneUtil::LightingMethod::SingleUBO:
+                    return "shaders";
+            }
+
+            throw std::invalid_argument("Invalid LightingMethod value: " + std::to_string(static_cast<int>(value)));
+        }
+
+        int toInt(HrtfMode value)
+        {
+            switch (value)
+            {
+                case HrtfMode::Auto:
+                    return -1;
+                case HrtfMode::Disable:
+                    return 0;
+                case HrtfMode::Enable:
+                    return 1;
+            }
+
+            Log(Debug::Warning) << "Invalid HRTF mode value: " << static_cast<int>(value) << ", fallback to auto (-1)";
+            return -1;
+        }
     }
 
     CategorySettingValueMap Manager::mDefaultSettings = CategorySettingValueMap();
@@ -96,6 +128,8 @@ namespace Settings
 
     void Manager::clear()
     {
+        sInitialized.clear();
+        StaticValues::clear();
         mDefaultSettings.clear();
         mUserSettings.clear();
         mChangedSettings.clear();
@@ -459,6 +493,26 @@ namespace Settings
         setString(setting, category, value.print());
     }
 
+    void Manager::set(std::string_view setting, std::string_view category, SceneUtil::LightingMethod value)
+    {
+        setString(setting, category, toString(value));
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, HrtfMode value)
+    {
+        setInt(setting, category, toInt(value));
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, WindowMode value)
+    {
+        setInt(setting, category, static_cast<int>(value));
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, SDLUtil::VSyncMode value)
+    {
+        setInt(setting, category, static_cast<int>(value));
+    }
+
     void Manager::recordInit(std::string_view setting, std::string_view category)
     {
         sInitialized.emplace(category, setting);
@@ -480,5 +534,29 @@ namespace Settings
             return GyroscopeAxis::MinusZ;
 
         throw std::runtime_error("Invalid gyroscope axis: " + std::string(value));
+    }
+
+    NavMeshRenderMode parseNavMeshRenderMode(std::string_view value)
+    {
+        if (value == "area type")
+            return NavMeshRenderMode::AreaType;
+        if (value == "update frequency")
+            return NavMeshRenderMode::UpdateFrequency;
+
+        throw std::invalid_argument("Invalid navigation mesh rendering mode: " + std::string(value));
+    }
+
+    SceneUtil::LightingMethod parseLightingMethod(std::string_view value)
+    {
+        if (value == "legacy")
+            return SceneUtil::LightingMethod::FFP;
+        if (value == "shaders compatibility")
+            return SceneUtil::LightingMethod::PerObjectUniform;
+        if (value == "shaders")
+            return SceneUtil::LightingMethod::SingleUBO;
+
+        constexpr const char* fallback = "shaders compatibility";
+        Log(Debug::Warning) << "Unknown lighting method '" << value << "', returning fallback '" << fallback << "'";
+        return SceneUtil::LightingMethod::PerObjectUniform;
     }
 }

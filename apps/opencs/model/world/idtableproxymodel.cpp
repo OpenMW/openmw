@@ -63,9 +63,18 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow(int sourceRow, const QModelIn
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent)
+    , mFilterTimer{ new QTimer(this) }
     , mSourceModel(nullptr)
 {
     setSortCaseSensitivity(Qt::CaseInsensitive);
+
+    mFilterTimer->setSingleShot(true);
+    int intervalSetting = CSMPrefs::State::get()["ID Tables"]["filter-delay"].toInt();
+    mFilterTimer->setInterval(intervalSetting);
+
+    connect(&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged, this,
+        [this](const CSMPrefs::Setting* setting) { this->settingChanged(setting); });
+    connect(mFilterTimer.get(), &QTimer::timeout, this, [this]() { this->timerTimeout(); });
 }
 
 QModelIndex CSMWorld::IdTableProxyModel::getModelIndex(const std::string& id, int column) const
@@ -87,10 +96,8 @@ void CSMWorld::IdTableProxyModel::setSourceModel(QAbstractItemModel* model)
 
 void CSMWorld::IdTableProxyModel::setFilter(const std::shared_ptr<CSMFilter::Node>& filter)
 {
-    beginResetModel();
-    mFilter = filter;
-    updateColumnMap();
-    endResetModel();
+    mAwaitingFilter = filter;
+    mFilterTimer->start();
 }
 
 bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
@@ -128,6 +135,26 @@ void CSMWorld::IdTableProxyModel::refreshFilter()
     {
         updateColumnMap();
         invalidateFilter();
+    }
+}
+
+void CSMWorld::IdTableProxyModel::timerTimeout()
+{
+    if (mAwaitingFilter)
+    {
+        beginResetModel();
+        mFilter = mAwaitingFilter;
+        updateColumnMap();
+        endResetModel();
+        mAwaitingFilter.reset();
+    }
+}
+
+void CSMWorld::IdTableProxyModel::settingChanged(const CSMPrefs::Setting* setting)
+{
+    if (*setting == "ID Tables/filter-delay")
+    {
+        mFilterTimer->setInterval(setting->toInt());
     }
 }
 

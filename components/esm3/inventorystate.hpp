@@ -2,6 +2,7 @@
 #define OPENMW_ESM_INVENTORYSTATE_H
 
 #include <map>
+#include <optional>
 
 #include "objectstate.hpp"
 #include <components/esm/refid.hpp>
@@ -19,20 +20,13 @@ namespace ESM
         std::vector<ObjectState> mItems;
 
         // <Index in mItems, equipment slot>
-        std::map<int, int> mEquipmentSlots;
+        std::map<uint32_t, int32_t> mEquipmentSlots;
 
-        std::map<std::pair<ESM::RefId, std::string>, int> mLevelledItemMap;
+        std::map<ESM::RefId, std::vector<std::pair<float, float>>> mPermanentMagicEffectMagnitudes;
 
-        typedef std::map<ESM::RefId, std::vector<std::pair<float, float>>> TEffectMagnitudes;
-        TEffectMagnitudes mPermanentMagicEffectMagnitudes;
+        std::optional<uint32_t> mSelectedEnchantItem; // For inventories only
 
-        int mSelectedEnchantItem; // For inventories only
-
-        InventoryState()
-            : mSelectedEnchantItem(-1)
-        {
-        }
-        virtual ~InventoryState() {}
+        virtual ~InventoryState() = default;
 
         virtual void load(ESMReader& esm);
         virtual void save(ESMWriter& esm) const;

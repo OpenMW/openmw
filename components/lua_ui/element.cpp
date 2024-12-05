@@ -38,18 +38,65 @@ namespace LuaUi
                 if (typeField != sol::nil && templateType != type)
                     throw std::logic_error(std::string("Template layout type ") + type
                         + std::string(" doesn't match template type ") + templateType);
-                type = templateType;
+                type = std::move(templateType);
             }
             return type;
         }
 
-        void destroyWidget(LuaUi::WidgetExtension* ext)
+        void destroyWidget(WidgetExtension* ext)
         {
             ext->deinitialize();
             MyGUI::Gui::getInstancePtr()->destroyWidget(ext->widget());
         }
 
-        WidgetExtension* createWidget(const sol::table& layout, uint64_t depth);
+        void destroyChild(WidgetExtension* ext)
+        {
+            if (!ext->isRoot())
+                destroyWidget(ext);
+            else
+                ext->detachFromParent();
+        }
+
+        void detachElements(WidgetExtension* ext)
+        {
+            auto predicate = [](WidgetExtension* child) {
+                if (child->isRoot())
+                    return true;
+                detachElements(child);
+                return false;
+            };
+            ext->detachChildrenIf(predicate);
+            ext->detachTemplateChildrenIf(predicate);
+        }
+
+        void destroyRoot(WidgetExtension* ext)
+        {
+            detachElements(ext);
+            destroyWidget(ext);
+        }
+
+        void updateRootCoord(WidgetExtension* ext)
+        {
+            WidgetExtension* root = ext;
+            while (root->getParent())
+                root = root->getParent();
+            root->updateCoord();
+        }
+
+        WidgetExtension* pluckElementRoot(const sol::object& child, uint64_t depth)
+        {
+            std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
+            if (element->mState == Element::Destroyed || element->mState == Element::Destroy)
+                throw std::logic_error("Using a destroyed element as a layout child");
+            // child Element was created in the same frame and its action hasn't been processed yet
+            if (element->mState == Element::New)
+                element->create(depth + 1);
+            WidgetExtension* root = element->mRoot;
+            assert(root);
+            return root;
+        }
+
+        WidgetExtension* createWidget(const sol::table& layout, bool isRoot, uint64_t depth);
         void updateWidget(WidgetExtension* ext, const sol::table& layout, uint64_t depth);
 
         std::vector<WidgetExtension*> updateContent(
@@ -60,31 +107,52 @@ namespace LuaUi
             if (contentObj == sol::nil)
             {
                 for (WidgetExtension* w : children)
-                    destroyWidget(w);
+                    destroyChild(w);
                 return result;
             }
             ContentView content(LuaUtil::cast<sol::table>(contentObj));
             result.resize(content.size());
             size_t minSize = std::min(children.size(), content.size());
+            std::vector<WidgetExtension*> toDestroy;
             for (size_t i = 0; i < minSize; i++)
             {
                 WidgetExtension* ext = children[i];
-                sol::table newLayout = content.at(i);
-                if (ext->widget()->getTypeName() == widgetType(newLayout))
+                sol::object child = content.at(i);
+                if (child.is<Element>())
                 {
-                    updateWidget(ext, newLayout, depth);
+                    WidgetExtension* root = pluckElementRoot(child, depth);
+                    if (ext != root)
+                        toDestroy.emplace_back(ext);
+                    result[i] = root;
                 }
                 else
                 {
-                    destroyWidget(ext);
-                    ext = createWidget(newLayout, depth);
+                    sol::table newLayout = child.as<sol::table>();
+                    if (ext->widget()->getTypeName() == widgetType(newLayout))
+                    {
+                        updateWidget(ext, newLayout, depth);
+                    }
+                    else
+                    {
+                        toDestroy.emplace_back(ext);
+                        ext = createWidget(newLayout, false, depth);
+                    }
+                    result[i] = ext;
                 }
-                result[i] = ext;
             }
-            for (size_t i = minSize; i < children.size(); i++)
-                destroyWidget(children[i]);
             for (size_t i = minSize; i < content.size(); i++)
-                result[i] = createWidget(content.at(i), depth);
+            {
+                sol::object child = content.at(i);
+                if (child.is<Element>())
+                    result[i] = pluckElementRoot(child, depth);
+                else
+                    result[i] = createWidget(child.as<sol::table>(), false, depth);
+            }
+            // Don't destroy anything until element creation has had a chance to throw
+            for (size_t i = minSize; i < children.size(); i++)
+                destroyChild(children[i]);
+            for (WidgetExtension* ext : toDestroy)
+                destroyChild(ext);
             return result;
         }
 
@@ -97,7 +165,7 @@ namespace LuaUi
             ext->setTemplateChildren(updateContent(ext->templateChildren(), content, depth));
         }
 
-        void setEventCallbacks(LuaUi::WidgetExtension* ext, const sol::object& eventsObj)
+        void setEventCallbacks(WidgetExtension* ext, const sol::object& eventsObj)
         {
             ext->clearCallbacks();
             if (eventsObj == sol::nil)
@@ -116,7 +184,7 @@ namespace LuaUi
             });
         }
 
-        WidgetExtension* createWidget(const sol::table& layout, uint64_t depth)
+        WidgetExtension* createWidget(const sol::table& layout, bool isRoot, uint64_t depth)
         {
             static auto widgetTypeMap = widgetTypeToName();
             std::string type = widgetType(layout);
@@ -124,13 +192,13 @@ namespace LuaUi
                 throw std::logic_error(std::string("Invalid widget type ") += type);
 
             std::string name = layout.get_or(LayoutKeys::name, std::string());
-            MyGUI::Widget* widget = MyGUI::Gui::getInstancePtr()->createWidgetT(
-                type, "", MyGUI::IntCoord(), MyGUI::Align::Default, std::string(), name);
+            MyGUI::Widget* widget
+                = MyGUI::Gui::getInstancePtr()->createWidgetT(type, {}, {}, MyGUI::Align::Default, {}, name);
 
             WidgetExtension* ext = dynamic_cast<WidgetExtension*>(widget);
             if (!ext)
                 throw std::runtime_error("Invalid widget!");
-            ext->initialize(layout.lua_state(), widget);
+            ext->initialize(layout.lua_state(), widget, isRoot);
 
             updateWidget(ext, layout, depth);
             return ext;
@@ -153,7 +221,9 @@ namespace LuaUi
         std::string setLayer(WidgetExtension* ext, const sol::table& layout)
         {
             MyGUI::ILayer* layerNode = ext->widget()->getLayer();
-            std::string currentLayer = layerNode ? layerNode->getName() : std::string();
+            std::string_view currentLayer;
+            if (layerNode)
+                currentLayer = layerNode->getName();
             std::string newLayer = layout.get_or(LayoutKeys::layer, std::string());
             if (!newLayer.empty() && !MyGUI::LayerManager::getInstance().isExist(newLayer))
                 throw std::logic_error(std::string("Layer ") + newLayer + " doesn't exist");
@@ -165,93 +235,97 @@ namespace LuaUi
         }
     }
 
-    std::map<Element*, std::shared_ptr<Element>> Element::sAllElements;
+    std::map<Element*, std::shared_ptr<Element>> Element::sMenuElements;
+    std::map<Element*, std::shared_ptr<Element>> Element::sGameElements;
 
     Element::Element(sol::table layout)
         : mRoot(nullptr)
-        , mAttachedTo(nullptr)
         , mLayout(std::move(layout))
         , mLayer()
-        , mUpdate(false)
-        , mDestroy(false)
+        , mState(Element::New)
     {
     }
 
-    std::shared_ptr<Element> Element::make(sol::table layout)
+    std::shared_ptr<Element> Element::make(sol::table layout, bool menu)
     {
         std::shared_ptr<Element> ptr(new Element(std::move(layout)));
-        sAllElements[ptr.get()] = ptr;
+        auto& container = menu ? sMenuElements : sGameElements;
+        container[ptr.get()] = ptr;
         return ptr;
     }
 
-    void Element::create()
+    void Element::erase(Element* element)
     {
-        assert(!mRoot);
-        if (!mRoot)
+        element->destroy();
+        sMenuElements.erase(element);
+        sGameElements.erase(element);
+    }
+
+    void Element::create(uint64_t depth)
+    {
+        if (mState == New)
         {
-            mRoot = createWidget(layout(), 0);
+            assert(!mRoot);
+            mRoot = createWidget(layout(), true, depth);
             mLayer = setLayer(mRoot, layout());
-            updateAttachment();
+            updateRootCoord(mRoot);
+            mState = Created;
         }
     }
 
     void Element::update()
     {
-        if (mRoot && mUpdate)
+        if (mState == Update)
         {
+            assert(mRoot);
             if (mRoot->widget()->getTypeName() != widgetType(layout()))
             {
-                destroyWidget(mRoot);
-                mRoot = createWidget(layout(), 0);
+                destroyRoot(mRoot);
+                WidgetExtension* parent = mRoot->getParent();
+                auto children = parent->children();
+                auto it = std::find(children.begin(), children.end(), mRoot);
+                assert(it != children.end());
+                try
+                {
+                    mRoot = createWidget(layout(), true, 0);
+                    *it = mRoot;
+                }
+                catch (...)
+                {
+                    // Remove mRoot from its parent's children even if we couldn't replace it
+                    children.erase(it);
+                    parent->setChildren(children);
+                    mRoot = nullptr;
+                    throw;
+                }
+                parent->setChildren(children);
+                mRoot->updateCoord();
             }
             else
             {
                 updateWidget(mRoot, layout(), 0);
             }
             mLayer = setLayer(mRoot, layout());
-            updateAttachment();
+            updateRootCoord(mRoot);
+            mState = Created;
         }
-        mUpdate = false;
     }
 
     void Element::destroy()
     {
-        if (mRoot)
+        if (mState != Destroyed)
         {
-            destroyWidget(mRoot);
-            mRoot = nullptr;
+            if (mRoot != nullptr)
+            {
+                // If someone decided to destroy an element used as another element's content, we need to detach it
+                // first so the parent doesn't end up holding a stale pointer
+                if (WidgetExtension* parent = mRoot->getParent())
+                    parent->detachChildrenIf([&](WidgetExtension* child) { return child == mRoot; });
+                destroyRoot(mRoot);
+                mRoot = nullptr;
+            }
             mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
         }
-        sAllElements.erase(this);
-    }
-
-    void Element::attachToWidget(WidgetExtension* w)
-    {
-        if (mAttachedTo)
-            throw std::logic_error("A UI element can't be attached to two widgets at once");
-        mAttachedTo = w;
-        updateAttachment();
-    }
-
-    void Element::detachFromWidget()
-    {
-        if (mRoot)
-            mRoot->widget()->detachFromWidget();
-        if (mAttachedTo)
-            mAttachedTo->setChildren({});
-        mAttachedTo = nullptr;
-    }
-
-    void Element::updateAttachment()
-    {
-        if (!mRoot)
-            return;
-        if (mAttachedTo)
-        {
-            if (!mLayer.empty())
-                Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
-            mAttachedTo->setChildren({ mRoot });
-            mAttachedTo->updateCoord();
-        }
+        mState = Destroyed;
     }
 }

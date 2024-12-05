@@ -24,6 +24,8 @@ namespace LuaUtil
 
         static bool isLuaCallback(const sol::object&);
         static Callback fromLua(const sol::table&);
+        static sol::table makeMetatable(lua_State* L);
+        static sol::table make(const AsyncPackageId& asyncId, sol::main_protected_function fn, sol::table metatable);
 
         bool isValid() const { return mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil; }
 

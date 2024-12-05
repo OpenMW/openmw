@@ -3,6 +3,7 @@
 
 #include "recasttempallocator.hpp"
 
+#include <DetourAlloc.h>
 #include <RecastAlloc.h>
 
 #include <cstdlib>
@@ -14,10 +15,14 @@ namespace DetourNavigator
     public:
         static void init() { instance(); }
 
-        static void* alloc(size_t size, rcAllocHint hint)
+        static void* recastAlloc(size_t size, rcAllocHint hint) { return alloc(size, hint == RC_ALLOC_TEMP); }
+
+        static void* detourAlloc(size_t size, dtAllocHint hint) { return alloc(size, hint == DT_ALLOC_TEMP); }
+
+        static void* alloc(size_t size, bool temp)
         {
             void* result = nullptr;
-            if (rcLikely(hint == RC_ALLOC_TEMP))
+            if (rcLikely(temp))
                 result = tempAllocator().alloc(size);
             if (rcUnlikely(!result))
                 result = allocPerm(size);
@@ -38,7 +43,11 @@ namespace DetourNavigator
         }
 
     private:
-        RecastGlobalAllocator() { rcAllocSetCustom(&RecastGlobalAllocator::alloc, &RecastGlobalAllocator::free); }
+        RecastGlobalAllocator()
+        {
+            rcAllocSetCustom(&RecastGlobalAllocator::recastAlloc, &RecastGlobalAllocator::free);
+            dtAllocSetCustom(&RecastGlobalAllocator::detourAlloc, &RecastGlobalAllocator::free);
+        }
 
         static RecastGlobalAllocator& instance()
         {

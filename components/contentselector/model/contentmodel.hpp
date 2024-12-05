@@ -7,6 +7,8 @@
 #include <QSet>
 #include <QStringList>
 
+#include <set>
+
 namespace ContentSelectorModel
 {
     class EsmFile;
@@ -23,7 +25,7 @@ namespace ContentSelectorModel
     {
         Q_OBJECT
     public:
-        explicit ContentModel(QObject* parent, QIcon& warningIcon, bool showOMWScripts);
+        explicit ContentModel(QObject* parent, QIcon& warningIcon, QIcon& errorIcon, bool showOMWScripts);
         ~ContentModel();
 
         void setEncoding(const QString& encoding);
@@ -57,10 +59,10 @@ namespace ContentSelectorModel
         void setCurrentGameFile(const EsmFile* file);
 
         bool isEnabled(const QModelIndex& index) const;
-        bool isChecked(const QString& filepath) const;
         bool setCheckState(const QString& filepath, bool isChecked);
         bool isNew(const QString& filepath) const;
         void setNew(const QString& filepath, bool isChecked);
+        void setNonUserContent(const QStringList& fileList);
         void setContentList(const QStringList& fileList);
         ContentFileList checkedItems() const;
         void uncheckAll();
@@ -84,13 +86,18 @@ namespace ContentSelectorModel
 
         const EsmFile* mGameFile;
         ContentFileList mFiles;
-        QStringList mArchives;
-        QHash<QString, Qt::CheckState> mCheckStates;
+        QStringList mNonUserContent;
+        std::set<const EsmFile*> mCheckedFiles;
         QHash<QString, bool> mNewFiles;
         QSet<QString> mPluginsWithLoadOrderError;
         QString mEncoding;
         QIcon mWarningIcon;
+        QIcon mErrorIcon;
         bool mShowOMWScripts;
+
+        QString mErrorToolTips[ContentSelectorModel::LoadOrderError::ErrorCode_LoadOrder]
+            = { tr("Unable to find dependent file: %1"), tr("Dependent file needs to be active: %1"),
+                  tr("This file needs to load after %1") };
 
     public:
         QString mMimeType;

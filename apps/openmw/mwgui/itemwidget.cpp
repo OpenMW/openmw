@@ -202,7 +202,7 @@ namespace MWGui
         setIcon(ptr);
     }
 
-    void SpellWidget::setSpellIcon(const std::string& icon)
+    void SpellWidget::setSpellIcon(std::string_view icon)
     {
         if (mFrame && !mCurrentFrame.empty())
         {

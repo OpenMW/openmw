@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 
+#include <MyGUI_Types.h>
 #include <osg/BoundingBox>
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -98,15 +99,14 @@ namespace MWRender
 
         osg::Group* getRoot();
 
+        MyGUI::IntRect getInteriorGrid() const;
+
     private:
         osg::ref_ptr<osg::Group> mRoot;
         osg::ref_ptr<osg::Node> mSceneRoot;
 
         typedef std::vector<osg::ref_ptr<LocalMapRenderToTexture>> RTTVector;
         RTTVector mLocalMapRTTs;
-
-        typedef std::set<std::pair<int, int>> Grid;
-        Grid mCurrentGrid;
 
         enum NeighbourCellFlag : std::uint8_t
         {
@@ -157,8 +157,9 @@ namespace MWRender
         void setupRenderToTexture(
             int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
 
-        bool mInterior;
         osg::BoundingBox mBounds;
+        osg::Vec2f mCenter;
+        bool mInterior;
 
         std::uint8_t getExteriorNeighbourFlags(int cellX, int cellY) const;
     };

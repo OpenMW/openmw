@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Clothing::CTDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mType, v.mWeight, v.mValue, v.mEnchant);
+    }
+
     void Clothing::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -30,7 +38,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("CTDT"):
-                    esm.getHT(mData.mType, mData.mWeight, mData.mValue, mData.mEnchant);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -73,7 +81,7 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNT("CTDT", mData, 12);
+        esm.writeNamedComposite("CTDT", mData);
 
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);

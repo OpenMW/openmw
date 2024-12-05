@@ -255,29 +255,21 @@ namespace MWWorld
     template <>
     class Store<ESM::LandTexture> : public DynamicStore
     {
-        // For multiple ESM/ESP files we need one list per file.
-        typedef std::vector<ESM::LandTexture> LandTextureList;
-        std::vector<LandTextureList> mStatic;
+        using PluginIndex = std::pair<int, std::uint32_t>; // This is essentially a FormId
+        std::unordered_map<ESM::RefId, std::string> mStatic;
+        std::map<PluginIndex, ESM::RefId> mMappings;
 
     public:
         Store();
 
-        typedef std::vector<ESM::LandTexture>::const_iterator iterator;
-
         // Must be threadsafe! Called from terrain background loading threads.
         // Not a big deal here, since ESM::LandTexture can never be modified or inserted/erased
-        const ESM::LandTexture* search(size_t index, size_t plugin) const;
-        const ESM::LandTexture* find(size_t index, size_t plugin) const;
-
-        void resize(std::size_t num);
+        const std::string* search(std::uint32_t index, int plugin) const;
 
         size_t getSize() const override;
-        size_t getSize(size_t plugin) const;
+        bool eraseStatic(const ESM::RefId& id) override;
 
         RecordId load(ESM::ESMReader& esm) override;
-
-        iterator begin(size_t plugin) const;
-        iterator end(size_t plugin) const;
     };
 
     template <>

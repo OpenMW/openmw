@@ -7,6 +7,7 @@
 #include <osg/Group>
 #include <osg/MatrixTransform>
 #include <osg/Node>
+#include <osg/Vec3d>
 
 #include <apps/opencs/model/world/actoradapter.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
@@ -29,7 +30,7 @@ namespace CSVRender
     Actor::Actor(const ESM::RefId& id, CSMWorld::Data& data)
         : mId(id)
         , mData(data)
-        , mBaseNode(new osg::Group())
+        , mBaseNode(new osg::PositionAttitudeTransform())
         , mSkeleton(nullptr)
     {
         mActorData = mData.getActorAdapter()->getActorData(mId);
@@ -46,7 +47,7 @@ namespace CSVRender
         mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
 
         // Load skeleton
-        std::string skeletonModel = mActorData->getSkeleton();
+        VFS::Path::Normalized skeletonModel = mActorData->getSkeleton();
         skeletonModel
             = Misc::ResourceHelpers::correctActorModelPath(skeletonModel, mData.getResourceSystem()->getVFS());
         loadSkeleton(skeletonModel);
@@ -60,6 +61,10 @@ namespace CSVRender
 
             // Attach parts to skeleton
             loadBodyParts();
+
+            const osg::Vec2f& attributes = mActorData->getRaceWeightHeight();
+
+            mBaseNode->setScale(osg::Vec3d(attributes.x(), attributes.x(), attributes.y()));
         }
         else
         {
@@ -85,7 +90,7 @@ namespace CSVRender
     {
         auto sceneMgr = mData.getResourceSystem()->getSceneManager();
 
-        osg::ref_ptr<osg::Node> temp = sceneMgr->getInstance(model);
+        osg::ref_ptr<osg::Node> temp = sceneMgr->getInstance(VFS::Path::toNormalized(model));
         mSkeleton = dynamic_cast<SceneUtil::Skeleton*>(temp.get());
         if (!mSkeleton)
         {
@@ -118,7 +123,7 @@ namespace CSVRender
         auto node = mNodeMap.find(boneName);
         if (!mesh.empty() && node != mNodeMap.end())
         {
-            auto instance = sceneMgr->getInstance(mesh);
+            auto instance = sceneMgr->getInstance(VFS::Path::toNormalized(mesh));
             SceneUtil::attach(instance, mSkeleton, boneName, node->second, sceneMgr);
         }
     }

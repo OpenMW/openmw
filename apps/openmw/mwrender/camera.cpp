@@ -109,8 +109,7 @@ namespace MWRender
 
     void Camera::updateCamera(osg::Camera* cam)
     {
-        osg::Quat orient = osg::Quat(mRoll + mExtraRoll, osg::Vec3d(0, 1, 0))
-            * osg::Quat(mPitch + mExtraPitch, osg::Vec3d(1, 0, 0)) * osg::Quat(mYaw + mExtraYaw, osg::Vec3d(0, 0, 1));
+        osg::Quat orient = getOrient();
         osg::Vec3d forward = orient * osg::Vec3d(0, 1, 0);
         osg::Vec3d up = orient * osg::Vec3d(0, 0, 1);
 
@@ -138,14 +137,12 @@ namespace MWRender
         if (mProcessViewChange)
             processViewChange();
 
-        if (paused)
-            return;
-
         // only show the crosshair in game mode
         MWBase::WindowManager* wm = MWBase::Environment::get().getWindowManager();
         wm->showCrosshair(!wm->isGuiMode() && mShowCrosshair);
 
-        updateFocalPointOffset(duration);
+        if (!paused)
+            updateFocalPointOffset(duration);
         updatePosition();
     }
 
@@ -209,6 +206,12 @@ namespace MWRender
         }
 
         mPosition = focal + offset;
+    }
+
+    osg::Quat Camera::getOrient() const
+    {
+        return osg::Quat(mRoll + mExtraRoll, osg::Vec3d(0, 1, 0)) * osg::Quat(mPitch + mExtraPitch, osg::Vec3d(1, 0, 0))
+            * osg::Quat(mYaw + mExtraYaw, osg::Vec3d(0, 0, 1));
     }
 
     void Camera::setMode(Mode newMode, bool force)

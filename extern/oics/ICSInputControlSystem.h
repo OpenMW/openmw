@@ -84,11 +84,11 @@ namespace ICS
 		// in seconds
 		void update(float timeSinceLastFrame);
 
-        inline Channel* getChannel(int i){ return mChannels[i]; };
+		Channel* getChannel(int i){ return mChannels.at(i); };
 		float getChannelValue(int i);
 		inline int getChannelCount(){ return (int)mChannels.size(); };
 
-		inline Control* getControl(int i){ return mControls[i]; };
+		Control* getControl(int i){ return mControls.at(i); };
 		float getControlValue(int i);
 		inline int getControlCount(){ return (int)mControls.size(); };
 		inline void addControl(Control* control){ mControls.push_back(control); };
@@ -144,7 +144,7 @@ namespace ICS
 		void cancelDetectingBindingState();
         bool detectingBindingState();
 
-		bool save(std::string fileName = "");
+		bool save(const std::string& fileName);
 
 		void adjustMouseRegion (Uint16 width, Uint16 height);
 

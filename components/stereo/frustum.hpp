@@ -45,7 +45,7 @@ namespace Stereo
     class StereoFrustumManager
     {
     public:
-        StereoFrustumManager(osg::Camera* camera);
+        StereoFrustumManager(bool sharedShadowMaps, osg::Camera* camera);
         ~StereoFrustumManager();
 
         void update(std::array<osg::Matrix, 2> projections);

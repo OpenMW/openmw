@@ -37,7 +37,7 @@ namespace MWGui
         /// Sets the visibility of the window
         void setVisible(bool visible) override;
         /// Returns the visibility state of the window
-        bool isVisible();
+        bool isVisible() const;
 
         void center();
 
@@ -51,6 +51,8 @@ namespace MWGui
 
         virtual std::string_view getWindowIdForLua() const { return ""; }
         void setDisabledByLua(bool disabled) { mDisabledByLua = disabled; }
+
+        static void clampWindowCoordinates(MyGUI::Window* window);
 
     protected:
         virtual void onTitleDoubleClicked();

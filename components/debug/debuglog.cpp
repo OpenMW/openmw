@@ -5,15 +5,13 @@
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/conversion.hpp>
 
-namespace Debug
-{
-    Level CurrentDebugLevel = Level::NoLevel;
-}
-
 static std::mutex sLock;
 
+Debug::Level Log::sMinDebugLevel = Debug::All;
+bool Log::sWriteLevel = false;
+
 Log::Log(Debug::Level level)
-    : mShouldLog(level <= Debug::CurrentDebugLevel)
+    : mShouldLog(level <= sMinDebugLevel)
 {
     // No need to hold the lock if there will be no logging anyway
     if (!mShouldLog)
@@ -22,9 +20,7 @@ Log::Log(Debug::Level level)
     // Locks a global lock while the object is alive
     sLock.lock();
 
-    // If the app has no logging system enabled, log level is not specified.
-    // Show all messages without marker - we just use the plain cout in this case.
-    if (Debug::CurrentDebugLevel == Debug::NoLevel)
+    if (!sWriteLevel)
         return;
 
     std::cout << static_cast<unsigned char>(level);

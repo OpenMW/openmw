@@ -36,6 +36,15 @@
 -- @return #boolean
 
 ---
+-- Toggles AI
+-- @function [parent=#Debug] toggleAI
+
+---
+-- Is AI enabled
+-- @function [parent=#Debug] isAIEnabled
+-- @return #boolean
+
+---
 -- Toggles collisions
 -- @function [parent=#Debug] toggleCollision
 
@@ -43,6 +52,19 @@
 -- Is player collision enabled
 -- @function [parent=#Debug] isCollisionEnabled
 -- @return #boolean
+
+---
+-- Toggles MWScripts
+-- @function [parent=#Debug] toggleMWScript
+
+---
+-- Is MWScripts enabled
+-- @function [parent=#Debug] isMWScriptEnabled
+-- @return #boolean
+
+---
+-- Reloads all Lua scripts
+-- @function [parent=#Debug] reloadLua
 
 ---
 -- Navigation mesh rendering modes
@@ -62,7 +84,7 @@
 ---
 -- Enable/disable automatic reload of modified shaders
 -- @function [parent=#Debug] setShaderHotReloadEnabled
--- @param #bool value
+-- @param #boolean value
 
 ---
 -- To reload modified shaders

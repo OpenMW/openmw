@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../mwmechanics/greetingstate.hpp"
+#include "../mwrender/animationpriority.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -104,7 +105,9 @@ namespace MWBase
         virtual bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
 
         /// Makes \a ptr fight \a target. Also shouts a combat taunt.
-        virtual void startCombat(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
+        virtual void startCombat(
+            const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, const std::set<MWWorld::Ptr>* targetAllies)
+            = 0;
 
         /// Removes an actor and its allies from combat with the actor's targets.
         virtual void stopCombat(const MWWorld::Ptr& ptr) = 0;
@@ -165,16 +168,33 @@ namespace MWBase
         ///< Forces an object to refresh its animation state.
 
         virtual bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number = 1, bool persist = false)
+            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number = 1, bool scripted = false)
             = 0;
         ///< Run animation for a MW-reference. Calls to this function for references that are currently not
         /// in the scene should be ignored.
         ///
         /// \param mode 0 normal, 1 immediate start, 2 immediate loop
-        /// \param count How many times the animation should be run
-        /// \param persist Whether the animation state should be stored in saved games
-        ///                and persist after cell unload.
+        /// \param number How many times the animation should be run
+        /// \param scripted Whether the animation should be treated as a scripted animation.
         /// \return Success or error
+        virtual bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops,
+            float speed, std::string_view startKey, std::string_view stopKey, bool forceLoop)
+            = 0;
+        ///< Lua variant of playAnimationGroup. The mode parameter is omitted
+        /// and forced to 0. modes 1 and 2 can be emulated by doing clearAnimationQueue() and
+        /// setting the startKey.
+        ///
+        /// \param number How many times the animation should be run
+        /// \param speed How fast to play the animation, where 1.f = normal speed
+        /// \param startKey Which textkey to start the animation from
+        /// \param stopKey Which textkey to stop the animation on
+        /// \param forceLoop Force the animation to be looping, even if it's normally not looping.
+        /// \param blendMask See MWRender::Animation::BlendMask
+        /// \param scripted Whether the animation should be treated as as scripted animation
+        /// \return Success or error
+        ///
+
+        virtual void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable) = 0;
 
         virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
         ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
@@ -182,8 +202,13 @@ namespace MWBase
 
         virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
 
+        virtual bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const = 0;
+
         /// Save the current animation state of managed references to their RefData.
         virtual void persistAnimationStates() = 0;
+
+        /// Clear out the animation queue, and cancel any animation currently playing from the queue
+        virtual void clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted) = 0;
 
         /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
         /// paused we may want to do it manually (after equipping permanent enchantment)
@@ -235,7 +260,7 @@ namespace MWBase
         virtual bool isReadyToBlock(const MWWorld::Ptr& ptr) const = 0;
         virtual bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const = 0;
 
-        virtual void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell) = 0;
+        virtual void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell) = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& settings) = 0;
 

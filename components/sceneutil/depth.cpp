@@ -4,6 +4,7 @@
 #include <array>
 
 #include <components/debug/debuglog.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/settings/values.hpp>
 
 namespace SceneUtil
@@ -116,8 +117,7 @@ namespace SceneUtil
 
         if (Settings::camera().mReverseZ)
         {
-            osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
-            if (exts && exts->isClipControlSupported)
+            if (SceneUtil::getGLExtensions().isClipControlSupported)
             {
                 enableReverseZ = true;
                 Log(Debug::Info) << "Using reverse-z depth buffer";

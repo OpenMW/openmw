@@ -1,4 +1,5 @@
-# source: https://en.uesp.net/wiki/Lore:Calendar
+# Source for month and weekday names: German Morrowind GOTY version
+# For reference: https://www.elderscrollsportal.de/almanach/Tamriel-Almanach:%C3%9Cbersetzungskompendium
 
 month1: "Morgenstern"
 month2: "Morgenröte"
@@ -13,8 +14,26 @@ month10: "Eisherbst"
 month11: "Abenddämmerung"
 month12: "Abendstern"
 
-# The variant of month names in the context "day X of month Y".
-# In English it is the same, but some languages require a different form.
+# In German, there are two different options to generate the genitive form of a month name:
+#
+# (1) Apply standard rules for genitive (too complicated to elaborate here, but you usually add an "s"/"es" at the end of the word).
+# (2) Use the nominative version.
+#
+# Nowadays, option (2) is more commonly used, so let's apply that here as well.
+# Let me add the names for option (1) in case we want to switch in the future:
+#
+# monthInGenitive1: "des Morgensterns"
+# monthInGenitive2: "der Morgenröte"
+# monthInGenitive3: "der Erstsaat"
+# monthInGenitive4: "der Regenhand"
+# monthInGenitive5: "der Zweitsaat"
+# monthInGenitive6: "des Mittjahres"
+# monthInGenitive7: "der Sonnenhöhe"
+# monthInGenitive8: "der Herbstsaat"
+# monthInGenitive9: "des Herdfeuers"
+# monthInGenitive10: "des Eisherbstes"
+# monthInGenitive11: "der Abenddämmerung"
+# monthInGenitive12: "des Abendsterns"
 monthInGenitive1: "Morgenstern"
 monthInGenitive2: "Morgenröte"
 monthInGenitive3: "Erstsaat"
@@ -28,7 +47,9 @@ monthInGenitive10: "Eisherbst"
 monthInGenitive11: "Abenddämmerung"
 monthInGenitive12: "Abendstern"
 
-dateFormat: "tag {day} im {monthInGenitive} {year, number, :: group-off}"
+# Standard German date format: d. MMMM YYYY
+# Modified example for TES lore: "16. Herbstsaat 3E 427"
+dateFormat: "{day}. {month} {year, number, :: group-off}"
 
 weekday1: "Sundas"
 weekday2: "Morndas"
@@ -37,3 +58,9 @@ weekday4: "Middas"
 weekday5: "Turdas"
 weekday6: "Fredas"
 weekday7: "Loredas"
+
+# In German, there are usually no "a.m."/"p.m." shenanigans going on.
+# In case of ambiguity, "vormittags" ("mornings") and "nachmittags" ("in the afternoon") are used.
+am: "vormittags"
+pm: "nachmittags"
+day: "Tag"

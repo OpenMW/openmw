@@ -23,11 +23,21 @@
 -- @type MWScriptFunctions
 
 ---
+-- @type MWScriptVariables
+-- @map <#string, #number>
+
+---
 -- Returns local mwscript on ``object``. Returns `nil` if the script doesn't exist or is not started.
 -- @function [parent=#MWScriptFunctions] getLocalScript
 -- @param openmw.core#GameObject object
 -- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to get the script if there is a separate instance for each player. Currently has no effect.
 -- @return #MWScript, #nil
+
+---
+-- Returns mutable global variables. In multiplayer, these may be specific to the provided player.
+-- @function [parent=#MWScriptFunctions] getGlobalVariables
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to get the globals if there is a separate instance for each player. Currently has no effect.
+-- @return #MWScriptVariables
 
 ---
 -- Returns global mwscript with given recordId. Returns `nil` if the script doesn't exist or is not started.
@@ -42,6 +52,7 @@
 -- @field #string recordId Id of the script
 -- @field openmw.core#GameObject object The object the script is attached to.
 -- @field openmw.core#GameObject player The player the script refers to.
+-- @field #boolean isRunning Whether the script is currently running
 -- @field #MWScriptVariables variables Local variables of the script (mutable)
 -- @usage
 -- for _, script in ipairs(world.mwscript.getLocalScripts(object)) do
@@ -55,6 +66,12 @@
 -- Loads a named cell
 -- @function [parent=#world] getCellByName
 -- @param #string cellName
+-- @return openmw.core#Cell
+
+---
+-- Loads a cell by ID provided
+-- @function [parent=#world] getCellById
+-- @param #string cellId
 -- @return openmw.core#Cell
 
 ---
@@ -109,12 +126,12 @@
 ---
 -- Pause the game starting from the next frame.
 -- @function [parent=#world] pause
--- @param #string tag (optional) The game will be paused until `unpause` is called with the same tag.
+-- @param #string tag (optional, empty string by default) The game will be paused until `unpause` is called with the same tag.
 
 ---
 -- Remove given tag from the list of pause tags. Resume the game starting from the next frame if the list became empty.
 -- @function [parent=#world] unpause
--- @param #string tag (optional) Needed to undo `pause` called with this tag.
+-- @param #string tag (optional, empty string by default) Needed to undo `pause` called with this tag.
 
 ---
 -- The tags that are currently pausing the game.
@@ -134,6 +151,7 @@
 ---
 -- Create a new instance of the given record.
 -- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
+-- Note that dynamically created creatures, NPCs, and container inventories will not respawn.
 -- @function [parent=#world] createObject
 -- @param #string recordId Record ID. Non-generated IDs are always lowercase. If a generated ID is provided, it must be provided exactly as generated.
 -- @param #number count (optional, 1 by default) The number of objects in stack
@@ -151,13 +169,38 @@
 -- Creates a custom record in the world database; the record ID from this record is case sensitive if generated.
 -- Eventually meant to support all records, but the current
 -- set of supported types is limited to:
+--
 -- * @{openmw.types#PotionRecord},
 -- * @{openmw.types#ArmorRecord},
 -- * @{openmw.types#BookRecord},
 -- * @{openmw.types#MiscellaneousRecord},
--- * @{openmw.types#ActivatorRecord}
+-- * @{openmw.types#ClothingRecord},
+-- * @{openmw.types#WeaponRecord},
+-- * @{openmw.types#ActivatorRecord},
+-- * @{openmw.types#LightRecord}
 -- @function [parent=#world] createRecord
 -- @param #any record A record to be registered in the database. Must be one of the supported types. The id field is not used, one will be generated for you.
 -- @return #any A new record added to the database. The type is the same as the input's.
+
+--- @{#VFX}: Visual effects
+-- @field [parent=#world] #VFX vfx
+
+---
+-- Spawn a VFX at the given location in the world. Best invoked through the SpawnVfx global event
+-- @function [parent=#VFX] spawn
+-- @param #string model string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
+-- @param openmw.util#Vector3 position
+-- @param #table options optional table of parameters. Can contain:
+--
+--   * `mwMagicVfx` - Boolean that if true causes the textureOverride parameter to only affect nodes with the Nif::RC_NiTexturingProperty property set. (default: true).
+--   * `particleTextureOverride` - Name of a particle texture that should override this effect's default texture. (default: "")
+--   * `scale` - A number that scales the size of the vfx (Default: 1)
+--
+-- @usage -- Spawn a sanctuary effect near the player
+-- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
+-- local pos = self.position + util.vector3(0, 100, 0)
+-- local model = types.Static.record(effect.castingStatic).model
+-- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos})
+--
 
 return nil

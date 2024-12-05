@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_ESM3_LANDRECORDDATA_H
 #define OPENMW_COMPONENTS_ESM3_LANDRECORDDATA_H
 
+#include <array>
 #include <cstdint>
 
 namespace ESM
@@ -19,27 +20,21 @@ namespace ESM
         // total number of textures per land
         static constexpr unsigned sLandNumTextures = sLandTextureSize * sLandTextureSize;
 
-        // Initial reference height for the first vertex, only needed for filling mHeights
-        float mHeightOffset = 0;
         // Height in world space for each vertex
-        float mHeights[sLandNumVerts];
+        std::array<float, sLandNumVerts> mHeights;
         float mMinHeight = 0;
         float mMaxHeight = 0;
 
         // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
-        std::int8_t mNormals[sLandNumVerts * 3];
+        std::array<std::int8_t, 3 * sLandNumVerts> mNormals;
 
         // 2D array of texture indices. An index can be used to look up an LandTexture,
         // but to do so you must subtract 1 from the index first!
         // An index of 0 indicates the default texture.
-        std::uint16_t mTextures[sLandNumTextures];
+        std::array<std::uint16_t, sLandNumTextures> mTextures;
 
         // 24-bit RGB color for each vertex
-        std::uint8_t mColours[3 * sLandNumVerts];
-
-        // ???
-        std::uint16_t mUnk1 = 0;
-        std::uint8_t mUnk2 = 0;
+        std::array<std::uint8_t, 3 * sLandNumVerts> mColours;
 
         int mDataLoaded = 0;
     };

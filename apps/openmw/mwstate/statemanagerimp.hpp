@@ -14,14 +14,19 @@ namespace MWState
     {
         bool mQuitRequest;
         bool mAskLoadRecent;
+        bool mNewGameRequest = false;
+        std::optional<std::filesystem::path> mLoadRequest;
         State mState;
         CharacterManager mCharacterManager;
         double mTimePlayed;
+        std::filesystem::path mLastSavegame;
 
     private:
         void cleanup(bool force = false);
 
-        bool verifyProfile(const ESM::SavedGame& profile) const;
+        void printSavegameFormatError(const std::string& exceptionText, const std::string& messageBoxText);
+
+        bool confirmLoading(const std::vector<std::string_view>& missingFiles) const;
 
         void writeScreenshot(std::vector<char>& imageData) const;
 
@@ -35,6 +40,9 @@ namespace MWState
         bool hasQuitRequest() const override;
 
         void askLoadRecent() override;
+
+        void requestNewGame() override { mNewGameRequest = true; }
+        void requestLoad(const std::filesystem::path& filepath) override { mLoadRequest = filepath; }
 
         State getState() const override;
 

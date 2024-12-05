@@ -22,14 +22,6 @@ namespace ESM
                 esm.getHNT(reaction, "INTV");
                 mChangedFactionReaction[faction][faction2] = reaction;
             }
-
-            // no longer used
-            while (esm.isNextSub("REAC"))
-            {
-                esm.skipHSub();
-                esm.getSubName();
-                esm.skipHSub();
-            }
         }
     }
 

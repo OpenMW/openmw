@@ -8,6 +8,7 @@
 #include <istream>
 #include <stdexcept>
 #include <stdint.h>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -15,11 +16,17 @@
 #include <components/misc/endianness.hpp>
 #include <components/misc/float16.hpp>
 
+#include <osg/BoundingSphere>
 #include <osg/Quat>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
 #include "niftypes.hpp"
+
+namespace ToUTF8
+{
+    class StatelessUtf8Encoder;
+}
 
 namespace Nif
 {
@@ -66,11 +73,15 @@ namespace Nif
     {
         const Reader& mReader;
         Files::IStreamPtr mStream;
+        const ToUTF8::StatelessUtf8Encoder* mEncoder;
+        std::string mBuffer;
 
     public:
-        explicit NIFStream(const Reader& reader, Files::IStreamPtr&& stream)
+        explicit NIFStream(
+            const Reader& reader, Files::IStreamPtr&& stream, const ToUTF8::StatelessUtf8Encoder* encoder)
             : mReader(reader)
             , mStream(std::move(stream))
+            , mEncoder(encoder)
         {
         }
 
@@ -145,22 +156,6 @@ namespace Nif
 
         /// Read a sequence of null-terminated strings
         std::string getStringPalette();
-
-        /// DEPRECATED: Use read() or get()
-        char getChar() { return get<char>(); }
-        short getShort() { return get<short>(); }
-        unsigned short getUShort() { return get<unsigned short>(); }
-        int getInt() { return get<int>(); }
-        unsigned int getUInt() { return get<unsigned int>(); }
-        float getFloat() { return get<float>(); }
-        osg::Vec2f getVector2() { return get<osg::Vec2f>(); }
-        osg::Vec3f getVector3() { return get<osg::Vec3f>(); }
-        osg::Vec4f getVector4() { return get<osg::Vec4f>(); }
-        Matrix3 getMatrix3() { return get<Matrix3>(); }
-        osg::Quat getQuaternion() { return get<osg::Quat>(); }
-        Transformation getTrafo() { return get<Transformation>(); }
-        bool getBoolean() { return get<bool>(); }
-        std::string getString() { return get<std::string>(); }
     };
 
     template <>
@@ -174,7 +169,11 @@ namespace Nif
     template <>
     void NIFStream::read<osg::Quat>(osg::Quat& quat);
     template <>
-    void NIFStream::read<Transformation>(Transformation& t);
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref& sphere);
+    template <>
+    void NIFStream::read<NiTransform>(NiTransform& transform);
+    template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform& transform);
     template <>
     void NIFStream::read<bool>(bool& data);
     template <>
@@ -191,7 +190,11 @@ namespace Nif
     template <>
     void NIFStream::read<osg::Quat>(osg::Quat* dest, size_t size);
     template <>
-    void NIFStream::read<Transformation>(Transformation* dest, size_t size);
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref* dest, size_t size);
+    template <>
+    void NIFStream::read<NiTransform>(NiTransform* dest, size_t size);
+    template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform* dest, size_t size);
     template <>
     void NIFStream::read<bool>(bool* dest, size_t size);
     template <>

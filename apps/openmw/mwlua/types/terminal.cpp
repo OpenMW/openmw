@@ -1,12 +1,12 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm4/loadterm.hpp>
 #include <components/lua/utilpackage.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
-
-#include "apps/openmw/mwworld/esmstore.hpp"
 
 namespace sol
 {
@@ -21,12 +21,9 @@ namespace MWLua
 
     void addESM4TerminalBindings(sol::table term, const Context& context)
     {
-
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM4::Terminal>(term, context, "ESM4Terminal");
 
-        sol::usertype<ESM4::Terminal> record = context.mLua->sol().new_usertype<ESM4::Terminal>("ESM4_Terminal");
+        sol::usertype<ESM4::Terminal> record = context.sol().new_usertype<ESM4::Terminal>("ESM4_Terminal");
         record[sol::meta_function::to_string] = [](const ESM4::Terminal& rec) -> std::string {
             return "ESM4_Terminal[" + ESM::RefId(rec.mId).toDebugString() + "]";
         };
@@ -38,8 +35,6 @@ namespace MWLua
         record["resultText"]
             = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string { return rec.mResultText; });
         record["name"] = sol::readonly_property([](const ESM4::Terminal& rec) -> std::string { return rec.mFullName; });
-        record["model"] = sol::readonly_property([vfs](const ESM4::Terminal& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
-        });
+        addModelProperty(record);
     }
 }

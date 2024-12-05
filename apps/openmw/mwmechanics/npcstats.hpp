@@ -3,6 +3,7 @@
 
 #include "creaturestats.hpp"
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <map>
 #include <set>
@@ -22,6 +23,7 @@ namespace MWMechanics
     class NpcStats : public CreatureStats
     {
         int mDisposition;
+        int mCrimeDispositionModifier;
         std::map<ESM::RefId, SkillValue> mSkills; // SkillValue.mProgress used by the player only
 
         int mReputation;
@@ -54,6 +56,10 @@ namespace MWMechanics
         int getBaseDisposition() const;
         void setBaseDisposition(int disposition);
 
+        int getCrimeDispositionModifier() const;
+        void setCrimeDispositionModifier(int value);
+        void modCrimeDispositionModifier(int value);
+
         int getReputation() const;
         void setReputation(int reputation);
 
@@ -74,23 +80,22 @@ namespace MWMechanics
 
         const std::set<ESM::RefId>& getExpelled() const { return mExpelled; }
         bool getExpelled(const ESM::RefId& factionID) const;
-        void expell(const ESM::RefId& factionID);
+        void expell(const ESM::RefId& factionID, bool printMessage);
         void clearExpelled(const ESM::RefId& factionID);
 
         bool isInFaction(const ESM::RefId& faction) const;
 
         float getSkillProgressRequirement(ESM::RefId id, const ESM::Class& class_) const;
 
-        void useSkill(ESM::RefId id, const ESM::Class& class_, int usageType = -1, float extraFactor = 1.f);
-        ///< Increase skill by usage.
-
-        void increaseSkill(ESM::RefId id, const ESM::Class& class_, bool preserveProgress, bool readBook = false);
-
         int getLevelProgress() const;
+        void setLevelProgress(int progress);
 
         int getLevelupAttributeMultiplier(ESM::Attribute::AttributeID attribute) const;
+        int getSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute) const;
+        void setSkillIncreasesForAttribute(ESM::Attribute::AttributeID, int increases);
 
-        int getSkillIncreasesForSpecialization(int spec) const;
+        int getSkillIncreasesForSpecialization(ESM::Class::Specialization spec) const;
+        void setSkillIncreasesForSpecialization(ESM::Class::Specialization spec, int increases);
 
         void levelUp();
 

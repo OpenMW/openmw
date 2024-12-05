@@ -41,16 +41,16 @@ void ESM4::Sound::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FNAM:
+            case ESM::fourCC("FNAM"):
                 reader.getZString(mSoundFile);
                 break;
-            case ESM4::SUB_SNDX:
+            case ESM::fourCC("SNDX"):
                 reader.get(mData);
                 break;
-            case ESM4::SUB_SNDD:
+            case ESM::fourCC("SNDD"):
                 if (subHdr.dataSize == 8)
                     reader.get(&mData, 8);
                 else
@@ -59,13 +59,13 @@ void ESM4::Sound::load(ESM4::Reader& reader)
                     reader.get(mExtra);
                 }
                 break;
-            case ESM4::SUB_OBND: // TES5 only
-            case ESM4::SUB_SDSC: // TES5 only
-            case ESM4::SUB_ANAM: // FO3
-            case ESM4::SUB_GNAM: // FO3
-            case ESM4::SUB_HNAM: // FO3
-            case ESM4::SUB_RNAM: // FONV
-            case ESM4::SUB_REPT: // FO4
+            case ESM::fourCC("OBND"): // TES5 only
+            case ESM::fourCC("SDSC"): // TES5 only
+            case ESM::fourCC("ANAM"): // FO3
+            case ESM::fourCC("GNAM"): // FO3
+            case ESM::fourCC("HNAM"): // FO3
+            case ESM::fourCC("RNAM"): // FONV
+            case ESM::fourCC("REPT"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

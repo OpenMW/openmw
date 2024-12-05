@@ -41,23 +41,23 @@ void ESM4::Grass::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mData);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_OBND:
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("OBND"):
                 reader.skipSubRecordData();
                 break;
             default:

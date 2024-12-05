@@ -34,6 +34,8 @@ namespace CSMFilter
         ///< Return a string that represents this node.
         ///
         /// \param numericColumns Use numeric IDs instead of string to represent columns.
+
+        bool isValid() { return mRegExp.isValid(); }
     };
 }
 

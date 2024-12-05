@@ -31,7 +31,6 @@ varying vec2 emissiveMapUV;
 
 #if @normalMap
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
 
 #if @envMap
@@ -50,18 +49,25 @@ varying vec2 specularMapUV;
 varying vec2 glossMapUV;
 #endif
 
-#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
+centroid varying vec3 passSpecular;
 centroid varying vec3 shadowDiffuseLighting;
+centroid varying vec3 shadowSpecularLighting;
 uniform float emissiveMult;
+uniform float specStrength;
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
+#if @normalMap || @diffuseParallax
+varying vec4 passTangent;
+#endif
 
 #include "vertexcolors.glsl"
 #include "shadows_vertex.glsl"
+#include "compatibility/normals.glsl"
 
 #include "lib/light/lighting.glsl"
 #include "lib/view/depth.glsl"
@@ -84,9 +90,18 @@ void main(void)
 
     vec4 viewPos = modelToView(gl_Vertex);
     gl_ClipVertex = viewPos;
+    passColor = gl_Color;
+    passViewPos = viewPos.xyz;
+    passNormal = gl_Normal.xyz;
+    normalToViewMatrix = gl_NormalMatrix;
 
-#if (@envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
-    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+#if @normalMap || @diffuseParallax
+    passTangent = gl_MultiTexCoord7.xyzw;
+    normalToViewMatrix *= generateTangentSpace(passTangent, passNormal);
+#endif
+
+#if @envMap || !PER_PIXEL_LIGHTING || @shadows_enabled
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
 #endif
 
 #if @envMap
@@ -118,7 +133,6 @@ void main(void)
 
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
-    passTangent = gl_MultiTexCoord7.xyzw;
 #endif
 
 #if @bumpMap
@@ -133,17 +147,14 @@ void main(void)
     glossMapUV = (gl_TextureMatrix[@glossMapUV] * gl_MultiTexCoord@glossMapUV).xy;
 #endif
 
-    passColor = gl_Color;
-    passViewPos = viewPos.xyz;
-    passNormal = gl_Normal.xyz;
-
 #if !PER_PIXEL_LIGHTING
-    vec3 diffuseLight, ambientLight;
-    doLighting(viewPos.xyz, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
-    vec3 emission = getEmissionColor().xyz * emissiveMult;
-    passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, shadowSpecularLighting);
+    passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
+    passSpecular = getSpecularColor().xyz * specularLight * specStrength;
     clampLightingResult(passLighting);
     shadowDiffuseLighting *= getDiffuseColor().xyz;
+    shadowSpecularLighting *= getSpecularColor().xyz * specStrength;
 #endif
 
 #if (@shadows_enabled)

@@ -20,7 +20,7 @@ namespace CSVDoc
         int mColumn;
         QGridLayout* mLayout;
 
-        QPushButton* addButton(const QString& label, const QIcon& icon);
+        QPushButton* addButton(const QString& label, const QString& icon);
 
         QWidget* createButtons();
 

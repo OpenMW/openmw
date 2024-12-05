@@ -146,7 +146,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
             CSMWorld::UniversalId type = types[counter];
             current->first->setText(QString::fromUtf8(type.getTypeName().c_str()));
             current->first->setChecked(true);
-            current->second = type;
+            current->second = std::move(type);
             ++counter;
         }
         else

@@ -6,6 +6,7 @@
 #include <components/process/processinvoker.hpp>
 
 #include <QDir>
+#include <QMenu>
 #include <QStringList>
 #include <QWidget>
 
@@ -24,6 +25,7 @@ namespace ContentSelectorView
 namespace Config
 {
     class GameSettings;
+    struct SettingValue;
     class LauncherSettings;
 }
 
@@ -39,6 +41,8 @@ namespace Launcher
 
         ContentSelectorView::ContentSelector* mSelector;
         Ui::DataFilesPage ui;
+        QMenu* mArchiveContextMenu;
+        QMenu* mDataFilesContextMenu;
 
     public:
         explicit DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
@@ -71,9 +75,14 @@ namespace Launcher
         void updateCloneProfileOkButton(const QString& text);
         void addSubdirectories(bool append);
         void sortDirectories();
+        void sortArchives();
         void removeDirectory();
-        void moveArchive(int step);
-        void moveDirectory(int step);
+        void moveSources(QListWidget* sourceList, int step);
+
+        void slotShowArchiveContextMenu(const QPoint& pos);
+        void slotShowDataFilesContextMenu(const QPoint& pos);
+        void slotCheckMultiSelectedItems();
+        void slotUncheckMultiSelectedItems();
 
         void on_newProfileAction_triggered();
         void on_cloneProfileAction_triggered();
@@ -121,6 +130,9 @@ namespace Launcher
         void addArchive(const QString& name, Qt::CheckState selected, int row = -1);
         void addArchivesFromDir(const QString& dir);
         void buildView();
+        void buildArchiveContextMenu();
+        void buildDataFilesContextMenu();
+        void setCheckStateForMultiSelectedItems(bool checked);
         void setProfile(int index, bool savePrevious);
         void setProfile(const QString& previous, const QString& current, bool savePrevious);
         void removeProfile(const QString& profile);
@@ -131,15 +143,16 @@ namespace Launcher
         void reloadCells(QStringList selectedFiles);
         void refreshDataFilesView();
         void updateNavMeshProgress(int minDataSize);
-        QString selectDirectory();
+        void slotCopySelectedItemsPaths();
+        void slotOpenSelectedItemsPaths();
 
         /**
          * Returns the file paths of all selected content files
          * @return the file paths of all selected content files
          */
         QStringList selectedFilePaths() const;
-        QStringList selectedArchivePaths() const;
-        QStringList selectedDirectoriesPaths() const;
+        QList<Config::SettingValue> selectedArchivePaths() const;
+        QList<Config::SettingValue> selectedDirectoriesPaths() const;
     };
 }
 #endif

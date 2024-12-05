@@ -31,8 +31,12 @@ function M.runLocalTest(obj, name)
     currentLocalTest = name
     currentLocalTestError = nil
     obj:sendEvent('runLocalTest', name)
-    while currentLocalTest do coroutine.yield() end
-    if currentLocalTestError then error(currentLocalTestError, 2) end
+    while currentLocalTest do
+        coroutine.yield()
+    end
+    if currentLocalTestError then
+        error(currentLocalTestError, 2)
+    end
 end
 
 function M.expect(cond, delta, msg)
@@ -74,6 +78,12 @@ end
 function M.expectEqual(v1, v2, msg)
     if not (v1 == v2) then
         error(string.format('%s: %s ~= %s', msg or '', v1, v2), 2)
+    end
+end
+
+function M.expectNotEqual(v1, v2, msg)
+    if v1 == v2 then
+        error(string.format('%s: %s == %s', msg or '', v1, v2), 2)
     end
 end
 
@@ -134,6 +144,20 @@ function M.elementsAreArray(expected)
 end
 
 ---
+-- Matcher verifying that given number is not a nan.
+-- @function isNotNan
+-- @usage
+-- expectThat(value, isNotNan())
+function M.isNotNan(expected)
+    return function(actual)
+        if actual ~= actual then
+            return 'actual value is nan, expected to be not nan'
+        end
+        return ''
+    end
+end
+
+---
 -- Verifies that given value matches provided matcher.
 -- @function expectThat
 -- @param value#any any value to match.
@@ -154,6 +178,10 @@ function M.expectThat(value, matcher, msg)
     end
 end
 
+function M.formatActualExpected(actual, expected)
+    return string.format('actual: %s, expected: %s', actual, expected)
+end
+
 local localTests = {}
 local localTestRunner = nil
 
@@ -163,7 +191,9 @@ end
 
 function M.updateLocal()
     if localTestRunner and coroutine.status(localTestRunner) ~= 'dead' then
-        coroutine.resume(localTestRunner)
+        if not core.isWorldPaused() then
+            coroutine.resume(localTestRunner)
+        end
     else
         localTestRunner = nil
     end
@@ -178,7 +208,9 @@ M.eventHandlers = {
         end
         localTestRunner = coroutine.create(function()
             local status, err = pcall(fn)
-            if status then err = nil end
+            if status then
+                err = nil
+            end
             core.sendGlobalEvent('localTestFinished', {name=name, errMsg=err})
         end)
     end,

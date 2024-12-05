@@ -42,16 +42,16 @@ void ESM4::Book::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DESC:
+            case ESM::fourCC("DESC"):
                 reader.getLocalizedString(mText);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 switch (subHdr.dataSize)
                 {
@@ -82,53 +82,53 @@ void ESM4::Book::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIcon);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_ANAM:
+            case ESM::fourCC("ANAM"):
                 reader.get(mEnchantmentPoints);
                 break;
-            case ESM4::SUB_ENAM:
+            case ESM::fourCC("ENAM"):
                 reader.getFormId(mEnchantment);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_YNAM:
+            case ESM::fourCC("YNAM"):
                 reader.getFormId(mPickUpSound);
                 break;
-            case ESM4::SUB_ZNAM:
+            case ESM::fourCC("ZNAM"):
                 reader.getFormId(mDropSound);
                 break;
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_CNAM:
-            case ESM4::SUB_INAM:
-            case ESM4::SUB_VMAD:
-            case ESM4::SUB_DAMC: // Destructible
-            case ESM4::SUB_DEST:
-            case ESM4::SUB_DMDC:
-            case ESM4::SUB_DMDL:
-            case ESM4::SUB_DMDT:
-            case ESM4::SUB_DMDS:
-            case ESM4::SUB_DSTA:
-            case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF: // Destructible end
-            case ESM4::SUB_DNAM: // FO4
-            case ESM4::SUB_FIMD: // FO4
-            case ESM4::SUB_MICO: // FO4
-            case ESM4::SUB_PTRN: // FO4
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("CNAM"):
+            case ESM::fourCC("INAM"):
+            case ESM::fourCC("VMAD"):
+            case ESM::fourCC("DAMC"): // Destructible
+            case ESM::fourCC("DEST"):
+            case ESM::fourCC("DMDC"):
+            case ESM::fourCC("DMDL"):
+            case ESM::fourCC("DMDT"):
+            case ESM::fourCC("DMDS"):
+            case ESM::fourCC("DSTA"):
+            case ESM::fourCC("DSTD"):
+            case ESM::fourCC("DSTF"): // Destructible end
+            case ESM::fourCC("DNAM"): // FO4
+            case ESM::fourCC("FIMD"): // FO4
+            case ESM::fourCC("MICO"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

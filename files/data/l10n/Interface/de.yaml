@@ -1,27 +1,34 @@
+DurationDay: "{days} d "
+DurationHour: "{hours} h "
+DurationMinute: "{minutes} min "
+# There is no abbreviation for "Monat" ("month") in German, so full terms are used instead.
+DurationMonth: |-
+ {months, plural,
+   one{{months} Monat }
+   other{{months} Monate }
+ }
+DurationSecond: "{seconds} s "
+# In German, "J."/"Jr." exist as abbreviations for "Jahr" ("year") but are seldomly used.
+# A plural version of these does not exist (at least, to my knowledge).
+#
+# To avoid confusion, use full terms instead.
+DurationYear: |-
+ {years, plural,
+   one{{years} Jahr }
+   other{{years} Jahre }
+ }
 No: "Nein"
 NotAvailableShort: "N/A"
 Reset: "Zurücksetzen"
 Yes: "Ja"
-
-# To be translated:
-
-#DurationDay: "{days} d "
-#DurationHour: "{hours} h "
-#DurationMinute: "{minutes} min "
-#DurationMonth: |-
-#  {months, plural,
-#    one{{months} mo }
-#    other{{months} mos }
-#  }
-#DurationSecond: "{seconds} s "
-#DurationYear: |-
-#  {years, plural,
-#    one{{years} yr }
-#    other{{years} yrs }
-#  }
-#Cancel: "Cancel"
-#Close: "Close"
-#None: "None"
-#OK: "OK"
-#Off: "Off"
-#On: "On"
+Cancel: "Abbrechen"
+Close: "Schließen"
+# This one is a bit tricky since it can be translated to
+# "keiner"/"keine"/"keines", "nichts", or "leer" ("empty") depending on context.
+#
+# Using the "keine" option for now.
+None: "Keine"
+OK: "OK"
+Off: "Aus"
+On: "Ein"
+Copy: "Kopieren"

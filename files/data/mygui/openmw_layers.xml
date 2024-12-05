@@ -13,6 +13,7 @@
     <Layer name="DrowningBar" overlapped="false" pick="false"/>
     <Layer name="MainMenuBackground" overlapped="true" pick="true"/>
     <Layer name="MainMenu" overlapped="true" pick="true"/>
+    <Layer name="Settings" overlapped="true" pick="true"/>
     <Layer name="LoadingScreenBackground" overlapped="false" pick="true"/>
     <Layer name="LoadingScreen" overlapped="false" pick="true"/>
     <Layer name="Debug" overlapped="true" pick="true"/>

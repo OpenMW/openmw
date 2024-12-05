@@ -1,21 +1,21 @@
 #ifndef OPENMW_MWRENDER_RENDERINGMANAGER_H
 #define OPENMW_MWRENDER_RENDERINGMANAGER_H
 
-#include <osg/Camera>
-#include <osg/Light>
-#include <osg/ref_ptr>
-
-#include <components/settings/settings.hpp>
-
-#include <osgUtil/IncrementalCompileOperation>
-
-#include "navmeshmode.hpp"
 #include "objects.hpp"
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
 
+#include <components/settings/settings.hpp>
+#include <components/vfs/pathutil.hpp>
+
+#include <osg/Light>
+#include <osg/ref_ptr>
+
+#include <osgUtil/IncrementalCompileOperation>
+
 #include <deque>
 #include <memory>
+#include <span>
 #include <unordered_map>
 
 namespace osg
@@ -88,6 +88,7 @@ namespace MWRender
     class StateUpdater;
     class SharedUniformStateUpdater;
     class PerViewUniformStateUpdater;
+    class IntersectionVisitorWithIgnoreList;
 
     class EffectManager;
     class ScreenshotManager;
@@ -134,7 +135,6 @@ namespace MWRender
 
         void setAmbientColour(const osg::Vec4f& colour);
 
-        void skySetDate(int day, int month);
         int skyGetMasserPhase() const;
         int skyGetSecundaPhase() const;
         void skySetMoonColour(bool red);
@@ -166,7 +166,6 @@ namespace MWRender
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
         void screenshot(osg::Image* image, int w, int h);
-        bool screenshot360(osg::Image* image);
 
         struct RayResult
         {
@@ -178,8 +177,8 @@ namespace MWRender
             float mRatio;
         };
 
-        RayResult castRay(
-            const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer, bool ignoreActors = false);
+        RayResult castRay(const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer,
+            bool ignoreActors = false, std::span<const MWWorld::Ptr> ignoreList = {});
 
         /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen
         /// coordinates, where (0,0) is the top left corner.
@@ -196,7 +195,7 @@ namespace MWRender
 
         SkyManager* getSkyManager();
 
-        void spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition,
+        void spawnEffect(VFS::Path::NormalizedView model, std::string_view texture, const osg::Vec3f& worldPosition,
             float scale = 1.f, bool isMagicVFX = true);
 
         /// Clear all savegame-specific data
@@ -275,13 +274,12 @@ namespace MWRender
 
         void setScreenRes(int width, int height);
 
-        void setNavMeshMode(NavMeshMode value);
+        void setNavMeshMode(Settings::NavMeshRenderMode value);
 
     private:
         void updateTextureFiltering();
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
-        void updateThirdPersonViewMode();
 
         struct WorldspaceChunkMgr
         {
@@ -300,10 +298,10 @@ namespace MWRender
 
         const bool mSkyBlending;
 
-        osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(
-            osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
+        osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector,
+            bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList = {});
 
-        osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
+        osg::ref_ptr<IntersectionVisitorWithIgnoreList> mIntersectionVisitor;
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
@@ -336,14 +334,13 @@ namespace MWRender
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;
-        std::unique_ptr<Debug::DebugDrawer> mDebugDraw;
+        osg::ref_ptr<Debug::DebugDrawer> mDebugDraw;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
         osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;
         osg::ref_ptr<PerViewUniformStateUpdater> mPerViewUniformStateUpdater;
 
         osg::Vec4f mAmbientColor;
-        float mMinimumAmbientLuminance;
         float mNightEyeFactor;
 
         float mNearClip;

@@ -16,7 +16,7 @@ openmw_add_executable(esmtool
 )
 
 target_link_libraries(esmtool
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
 
@@ -25,7 +25,7 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(esmtool gcov)
 endif()
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(esmtool PRIVATE
         <fstream>
         <string>

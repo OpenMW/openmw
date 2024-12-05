@@ -50,15 +50,31 @@ namespace SceneUtil
         std::vector<osg::Node*> mFoundNodes;
     };
 
+    typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash,
+        Misc::StringUtils::CiEqual>
+        NodeMap;
+
     /// Maps names to nodes
     class NodeMapVisitor : public osg::NodeVisitor
     {
     public:
-        typedef std::unordered_map<std::string, osg::ref_ptr<osg::MatrixTransform>, Misc::StringUtils::CiHash,
-            Misc::StringUtils::CiEqual>
-            NodeMap;
-
         NodeMapVisitor(NodeMap& map)
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+            , mMap(map)
+        {
+        }
+
+        void apply(osg::MatrixTransform& trans) override;
+
+    private:
+        NodeMap& mMap;
+    };
+
+    /// Maps names to bone nodes
+    class NodeMapVisitorBoneOnly : public osg::NodeVisitor
+    {
+    public:
+        NodeMapVisitorBoneOnly(NodeMap& map)
             : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
             , mMap(map)
         {

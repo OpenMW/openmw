@@ -32,6 +32,7 @@
 #include "reference.hpp" // EnableParent
 
 #include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm/refid.hpp>
 
 namespace ESM4
@@ -97,7 +98,7 @@ namespace ESM4
 
         EnableParent mEsp;
 
-        std::uint32_t mCount = 1; // only if > 1
+        std::int32_t mCount = 1; // only if > 1
 
         ESM::FormId mAudioLocation;
 

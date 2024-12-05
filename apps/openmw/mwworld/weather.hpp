@@ -156,9 +156,13 @@ namespace MWWorld
             float FogOffset;
         } mDL;
 
-        // Sound effect
+        // Sound effects
         // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
         ESM::RefId mAmbientLoopSoundID;
+        // This is used for Rain and Thunderstorm
+        ESM::RefId mRainLoopSoundID;
+
+        std::array<ESM::RefId, 4> mThunderSoundID;
 
         // Is this an ash storm / blight storm? If so, the following will happen:
         // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
@@ -211,7 +215,6 @@ namespace MWWorld
         // non-zero values.
         float mThunderFrequency;
         float mThunderThreshold;
-        ESM::RefId mThunderSoundID[4];
         float mFlashDecrement;
 
         float mFlashBrightness;
@@ -230,7 +233,7 @@ namespace MWWorld
 
         operator ESM::RegionWeatherState() const;
 
-        void setChances(const std::vector<char>& chances);
+        void setChances(const std::vector<uint8_t>& chances);
 
         void setWeather(int weatherID);
 
@@ -238,7 +241,7 @@ namespace MWWorld
 
     private:
         int mWeather;
-        std::vector<char> mChances;
+        std::vector<uint8_t> mChances;
 
         void chooseNewWeather();
     };
@@ -286,7 +289,7 @@ namespace MWWorld
          * @param ID of the weather setting to shift to
          */
         void changeWeather(const ESM::RefId& regionID, const unsigned int weatherID);
-        void modRegion(const ESM::RefId& regionID, const std::vector<char>& chances);
+        void modRegion(const ESM::RefId& regionID, const std::vector<uint8_t>& chances);
         void playerTeleported(const ESM::RefId& playerRegion, bool isExterior);
 
         /**
@@ -369,8 +372,10 @@ namespace MWWorld
         std::map<ESM::RefId, RegionWeather> mRegions;
         MWRender::WeatherResult mResult;
 
-        MWBase::Sound* mAmbientSound;
-        ESM::RefId mPlayingSoundID;
+        MWBase::Sound* mAmbientSound{ nullptr };
+        ESM::RefId mPlayingAmbientSoundID;
+        MWBase::Sound* mRainSound{ nullptr };
+        ESM::RefId mPlayingRainSoundID;
 
         void addWeather(
             const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect = "");

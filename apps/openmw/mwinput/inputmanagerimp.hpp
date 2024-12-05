@@ -49,10 +49,8 @@ namespace MWInput
     {
     public:
         InputManager(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer,
-            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
-            osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-            const std::filesystem::path& userFile, bool userFileExists,
-            const std::filesystem::path& userControllerBindingsFile,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler, const std::filesystem::path& userFile,
+            bool userFileExists, const std::filesystem::path& userControllerBindingsFile,
             const std::filesystem::path& controllerBindingsFile, bool grab);
 
         ~InputManager() final;
@@ -68,6 +66,7 @@ namespace MWInput
 
         void setDragDrop(bool dragDrop) override;
         void setGamepadGuiCursorEnabled(bool enabled) override;
+        bool isGamepadGuiCursorEnabled() override;
 
         void toggleControlSwitch(std::string_view sw, bool value) override;
         bool getControlSwitch(std::string_view sw) override;
@@ -105,16 +104,6 @@ namespace MWInput
         bool controlsDisabled() override { return mControlsDisabled; }
 
     private:
-        void convertMousePosForMyGUI(int& x, int& y);
-
-        void handleGuiArrowKey(int action);
-
-        void quickKey(int index);
-        void showQuickKeysMenu();
-
-        void loadKeyDefaults(bool force = false);
-        void loadControllerDefaults(bool force = false);
-
         bool mControlsDisabled;
 
         std::unique_ptr<SDLUtil::InputWrapper> mInputWrapper;

@@ -58,22 +58,17 @@ namespace osgMyGUI
         throw std::runtime_error("DataManager::getDataListNames is not implemented - VFS is used");
     }
 
-    const std::string& DataManager::getDataPath(const std::string& name) const
+    std::string DataManager::getDataPath(const std::string& name) const
     {
-        static std::string result;
-        result.clear();
-
         if (name.empty())
         {
-            result = Files::pathToUnicodeString(mResourcePath);
-            return result;
+            return Files::pathToUnicodeString(mResourcePath);
         }
 
         if (!isDataExist(name))
-            return result;
+            return {};
 
-        result = Files::pathToUnicodeString(mResourcePath / name);
-        return result;
+        return Files::pathToUnicodeString(mResourcePath / name);
     }
 
 }

@@ -57,7 +57,7 @@ namespace ESM
             return;
         }
 
-        esm.writeHNT("DATA", mType, 4);
+        esm.writeHNT("DATA", mType);
         esm.writeHNOCRefId("CNAM", mCreature);
         esm.writeHNOCRefId("SNAM", mSound);
     }

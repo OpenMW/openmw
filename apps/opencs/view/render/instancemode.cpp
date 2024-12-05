@@ -40,6 +40,7 @@
 #include <apps/opencs/view/render/tagbase.hpp>
 
 #include <components/esm/defs.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include "../../model/prefs/shortcut.hpp"
 #include "../../model/world/commandmacro.hpp"
@@ -58,6 +59,24 @@
 #include "object.hpp"
 #include "pagedworldspacewidget.hpp"
 #include "worldspacewidget.hpp"
+
+namespace
+{
+    constexpr std::string_view sInstanceModeTooltip = R"(
+        Instance editing
+        <ul><li>Use {scene-select-primary} and {scene-select-secondary} to select and unselect instances</li>
+        <li>Use {scene-edit-primary} to manipulate instances</li>
+        <li>Use {scene-select-tertiary} to select a reference object and then {scene-edit-secondary} to snap 
+        selection relative to the reference object</li>
+        <li>Use {scene-submode-move}, {scene-submode-rotate}, {scene-submode-scale} to change to move, rotate, and 
+        scale modes respectively</li>
+        <li>Use {scene-axis-x}, {scene-axis-y}, and {scene-axis-z} to lock changes to X, Y, and Z axes 
+        respectively</li>
+        <li>Use {scene-delete} to delete currently selected objects</li>
+        <li>Use {scene-duplicate} to duplicate instances</li>
+        <li>Use {scene-instance-drop} to drop instances</li></ul>
+)";
+}
 
 int CSVRender::InstanceMode::getSubModeFromId(const std::string& id) const
 {
@@ -186,10 +205,117 @@ osg::Vec3f CSVRender::InstanceMode::getMousePlaneCoords(const QPoint& point, con
     return mousePlanePoint;
 }
 
+void CSVRender::InstanceMode::saveSelectionGroup(const int group)
+{
+    QStringList strings;
+    QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+    QVariant selectionObjects;
+    CSMWorld::CommandMacro macro(undoStack, "Replace Selection Group");
+    std::string groupName = "project::" + std::to_string(group);
+
+    const auto& selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    const int selectionObjectsIndex
+        = mSelectionGroups->findColumnIndex(CSMWorld::Columns::ColumnId_SelectionGroupObjects);
+
+    if (dynamic_cast<CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
+        groupName += "-ext";
+    else
+        groupName += "-" + getWorldspaceWidget().getCellId(osg::Vec3f(0, 0, 0));
+
+    CSMWorld::CreateCommand* newGroup = new CSMWorld::CreateCommand(*mSelectionGroups, groupName);
+
+    newGroup->setType(CSMWorld::UniversalId::Type_SelectionGroup);
+
+    for (const auto& object : selection)
+        if (const CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(object.get()))
+            strings << QString::fromStdString(objectTag->mObject->getReferenceId());
+
+    selectionObjects.setValue(strings);
+
+    newGroup->addValue(selectionObjectsIndex, selectionObjects);
+
+    if (mSelectionGroups->getModelIndex(groupName, 0).row() != -1)
+        macro.push(new CSMWorld::DeleteCommand(*mSelectionGroups, groupName));
+
+    macro.push(newGroup);
+
+    getWorldspaceWidget().clearSelection(Mask_Reference);
+}
+
+void CSVRender::InstanceMode::getSelectionGroup(const int group)
+{
+    std::string groupName = "project::" + std::to_string(group);
+    std::vector<std::string> targets;
+
+    const auto& selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    const int selectionObjectsIndex
+        = mSelectionGroups->findColumnIndex(CSMWorld::Columns::ColumnId_SelectionGroupObjects);
+
+    if (dynamic_cast<CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
+        groupName += "-ext";
+    else
+        groupName += "-" + getWorldspaceWidget().getCellId(osg::Vec3f(0, 0, 0));
+
+    const QModelIndex groupSearch = mSelectionGroups->getModelIndex(groupName, selectionObjectsIndex);
+
+    if (groupSearch.row() == -1)
+        return;
+
+    for (const QString& target : groupSearch.data().toStringList())
+        targets.push_back(target.toStdString());
+
+    if (!selection.empty())
+        getWorldspaceWidget().clearSelection(Mask_Reference);
+
+    getWorldspaceWidget().selectGroup(targets);
+}
+
+void CSVRender::InstanceMode::setDragAxis(const char axis)
+{
+    int newDragAxis;
+
+    const std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
+
+    if (selection.empty())
+        return;
+
+    switch (axis)
+    {
+        case 'x':
+            newDragAxis = 0;
+            break;
+        case 'y':
+            newDragAxis = 1;
+            break;
+        case 'z':
+            newDragAxis = 2;
+            break;
+        default:
+            return;
+    }
+
+    if (newDragAxis == mDragAxis)
+        newDragAxis = -1;
+
+    if (mSubModeId == "move")
+    {
+        mObjectsAtDragStart.clear();
+
+        for (const auto& object : selection)
+            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(object.get()))
+            {
+                const osg::Vec3f thisPoint = objectTag->mObject->getPosition().asVec3();
+                mDragStart = thisPoint;
+                mObjectsAtDragStart.emplace_back(thisPoint);
+            }
+    }
+    mDragAxis = newDragAxis;
+}
+
 CSVRender::InstanceMode::InstanceMode(
     WorldspaceWidget* worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget* parent)
-    : EditMode(worldspaceWidget, QIcon(":scenetoolbar/editing-instance"), Mask_Reference | Mask_Terrain,
-        "Instance editing", parent)
+    : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-instance"),
+        Mask_Reference | Mask_Terrain, sInstanceModeTooltip.data(), parent)
     , mSubMode(nullptr)
     , mSubModeId("move")
     , mSelectionMode(nullptr)
@@ -199,30 +325,42 @@ CSVRender::InstanceMode::InstanceMode(
     , mUnitScaleDist(1)
     , mParentNode(std::move(parentNode))
 {
+    mSelectionGroups = dynamic_cast<CSMWorld::IdTable*>(
+        worldspaceWidget->getDocument().getData().getTableModel(CSMWorld::UniversalId::Type_SelectionGroup));
+
     connect(this, &InstanceMode::requestFocus, worldspaceWidget, &WorldspaceWidget::requestFocus);
 
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("scene-delete", worldspaceWidget);
-    connect(
-        deleteShortcut, qOverload<bool>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::deleteSelectedInstances);
+    connect(deleteShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::deleteSelectedInstances);
 
-    // Following classes could be simplified by using QSignalMapper, which is obsolete in Qt5.10, but not in Qt4.8 and
-    // Qt5.14
-    CSMPrefs::Shortcut* dropToCollisionShortcut
-        = new CSMPrefs::Shortcut("scene-instance-drop-collision", worldspaceWidget);
-    connect(dropToCollisionShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToCollision);
-    CSMPrefs::Shortcut* dropToTerrainLevelShortcut
-        = new CSMPrefs::Shortcut("scene-instance-drop-terrain", worldspaceWidget);
-    connect(dropToTerrainLevelShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToTerrain);
-    CSMPrefs::Shortcut* dropToCollisionShortcut2
-        = new CSMPrefs::Shortcut("scene-instance-drop-collision-separately", worldspaceWidget);
-    connect(dropToCollisionShortcut2, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToCollisionSeparately);
-    CSMPrefs::Shortcut* dropToTerrainLevelShortcut2
-        = new CSMPrefs::Shortcut("scene-instance-drop-terrain-separately", worldspaceWidget);
-    connect(dropToTerrainLevelShortcut2, qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        &InstanceMode::dropSelectedInstancesToTerrainSeparately);
+    CSMPrefs::Shortcut* duplicateShortcut = new CSMPrefs::Shortcut("scene-duplicate", worldspaceWidget);
+
+    connect(
+        duplicateShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::cloneSelectedInstances);
+
+    connect(new CSMPrefs::Shortcut("scene-instance-drop", worldspaceWidget),
+        qOverload<>(&CSMPrefs::Shortcut::activated), this, &InstanceMode::dropToCollision);
+
+    for (short i = 0; i <= 9; i++)
+    {
+        connect(new CSMPrefs::Shortcut("scene-group-" + std::to_string(i), worldspaceWidget),
+            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, i] { this->getSelectionGroup(i); });
+        connect(new CSMPrefs::Shortcut("scene-save-" + std::to_string(i), worldspaceWidget),
+            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, i] { this->saveSelectionGroup(i); });
+    }
+
+    connect(new CSMPrefs::Shortcut("scene-submode-move", worldspaceWidget), qOverload<>(&CSMPrefs::Shortcut::activated),
+        this, [this] { mSubMode->setButton("move"); });
+
+    connect(new CSMPrefs::Shortcut("scene-submode-scale", worldspaceWidget),
+        qOverload<>(&CSMPrefs::Shortcut::activated), this, [this] { mSubMode->setButton("scale"); });
+
+    connect(new CSMPrefs::Shortcut("scene-submode-rotate", worldspaceWidget),
+        qOverload<>(&CSMPrefs::Shortcut::activated), this, [this] { mSubMode->setButton("rotate"); });
+
+    for (const char axis : "xyz")
+        connect(new CSMPrefs::Shortcut(std::string("scene-axis-") + axis, worldspaceWidget),
+            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, axis] { this->setDragAxis(axis); });
 }
 
 void CSVRender::InstanceMode::activate(CSVWidget::SceneToolbar* toolbar)
@@ -1068,7 +1206,7 @@ void CSVRender::InstanceMode::handleSelectDrag(const QPoint& pos)
     mDragMode = DragMode_None;
 }
 
-void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
+void CSVRender::InstanceMode::deleteSelectedInstances()
 {
     std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
     if (selection.empty())
@@ -1087,6 +1225,27 @@ void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
     getWorldspaceWidget().clearSelection(Mask_Reference);
 }
 
+void CSVRender::InstanceMode::cloneSelectedInstances()
+{
+    std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    if (selection.empty())
+        return;
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& referencesTable
+        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_References));
+    QUndoStack& undoStack = document.getUndoStack();
+
+    CSMWorld::CommandMacro macro(undoStack, "Clone Instances");
+    for (osg::ref_ptr<TagBase> tag : selection)
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
+        {
+            macro.push(new CSMWorld::CloneCommand(referencesTable, objectTag->mObject->getReferenceId(),
+                "ref#" + std::to_string(referencesTable.rowCount()), CSMWorld::UniversalId::Type_Reference));
+        }
+    // getWorldspaceWidget().clearSelection(Mask_Reference);
+}
+
 void CSVRender::InstanceMode::dropInstance(CSVRender::Object* object, float dropHeight)
 {
     object->setEdited(Object::Override_Position);
@@ -1095,7 +1254,7 @@ void CSVRender::InstanceMode::dropInstance(CSVRender::Object* object, float drop
     object->setPosition(position.pos);
 }
 
-float CSVRender::InstanceMode::calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight)
+float CSVRender::InstanceMode::calculateDropHeight(CSVRender::Object* object, float objectHeight)
 {
     osg::Vec3d point = object->getPosition().asVec3();
 
@@ -1109,10 +1268,7 @@ float CSVRender::InstanceMode::calculateDropHeight(DropMode dropMode, CSVRender:
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    if (dropMode & Terrain)
-        visitor.setTraversalMask(Mask_Terrain);
-    if (dropMode & Collision)
-        visitor.setTraversalMask(Mask_Terrain | Mask_Reference);
+    visitor.setTraversalMask(Mask_Terrain | Mask_Reference);
 
     mParentNode->accept(visitor);
 
@@ -1127,27 +1283,7 @@ float CSVRender::InstanceMode::calculateDropHeight(DropMode dropMode, CSVRender:
     return 0.0f;
 }
 
-void CSVRender::InstanceMode::dropSelectedInstancesToCollision()
-{
-    handleDropMethod(Collision, "Drop instances to next collision");
-}
-
-void CSVRender::InstanceMode::dropSelectedInstancesToTerrain()
-{
-    handleDropMethod(Terrain, "Drop instances to terrain level");
-}
-
-void CSVRender::InstanceMode::dropSelectedInstancesToCollisionSeparately()
-{
-    handleDropMethod(CollisionSep, "Drop instances to next collision level separately");
-}
-
-void CSVRender::InstanceMode::dropSelectedInstancesToTerrainSeparately()
-{
-    handleDropMethod(TerrainSep, "Drop instances to terrain level separately");
-}
-
-void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString commandMsg)
+void CSVRender::InstanceMode::dropToCollision()
 {
     std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
     if (selection.empty())
@@ -1156,43 +1292,19 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     QUndoStack& undoStack = document.getUndoStack();
 
-    CSMWorld::CommandMacro macro(undoStack, commandMsg);
+    CSMWorld::CommandMacro macro(undoStack, "Drop objects to collision");
 
     DropObjectHeightHandler dropObjectDataHandler(&getWorldspaceWidget());
 
-    if (dropMode & Separate)
-    {
-        int counter = 0;
-        for (osg::ref_ptr<TagBase> tag : selection)
-            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
-            {
-                float objectHeight = dropObjectDataHandler.mObjectHeights[counter];
-                float dropHeight = calculateDropHeight(dropMode, objectTag->mObject, objectHeight);
-                dropInstance(objectTag->mObject, dropHeight);
-                objectTag->mObject->apply(macro);
-                counter++;
-            }
-    }
-    else
-    {
-        float smallestDropHeight = std::numeric_limits<float>::max();
-        int counter = 0;
-        for (osg::ref_ptr<TagBase> tag : selection)
-            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
-            {
-                float objectHeight = dropObjectDataHandler.mObjectHeights[counter];
-                float thisDrop = calculateDropHeight(dropMode, objectTag->mObject, objectHeight);
-                if (thisDrop < smallestDropHeight)
-                    smallestDropHeight = thisDrop;
-                counter++;
-            }
-        for (osg::ref_ptr<TagBase> tag : selection)
-            if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
-            {
-                dropInstance(objectTag->mObject, smallestDropHeight);
-                objectTag->mObject->apply(macro);
-            }
-    }
+    int counter = 0;
+    for (osg::ref_ptr<TagBase> tag : selection)
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(tag.get()))
+        {
+            float objectHeight = dropObjectDataHandler.mObjectHeights[counter++];
+            float dropHeight = calculateDropHeight(objectTag->mObject, objectHeight);
+            dropInstance(objectTag->mObject, dropHeight);
+            objectTag->mObject->apply(macro);
+        }
 }
 
 CSVRender::DropObjectHeightHandler::DropObjectHeightHandler(WorldspaceWidget* worldspacewidget)

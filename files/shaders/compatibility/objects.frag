@@ -1,5 +1,5 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE)
+#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
 #if @useUBO
     #extension GL_ARB_uniform_buffer_object : require
@@ -37,7 +37,6 @@ varying vec2 emissiveMapUV;
 #if @normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
 
 #if @envMap
@@ -67,18 +66,24 @@ uniform vec2 screenRes;
 uniform float near;
 uniform float far;
 uniform float alphaRef;
+uniform float distortionStrength;
 
-#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
+centroid varying vec3 passSpecular;
 centroid varying vec3 shadowDiffuseLighting;
+centroid varying vec3 shadowSpecularLighting;
 #else
 uniform float emissiveMult;
-#endif
 uniform float specStrength;
+#endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
+#if @normalMap || @diffuseParallax
+varying vec4 passTangent;
+#endif
 
 #if @additiveBlending
 #define ADDITIVE_BLENDING
@@ -87,17 +92,19 @@ varying vec3 passNormal;
 #include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
 #include "lib/material/alpha.glsl"
+#include "lib/util/distortion.glsl"
 
 #include "fog.glsl"
 #include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
+#include "compatibility/normals.glsl"
 
 #if @softParticles
 #include "lib/particle/soft.glsl"
 
-uniform sampler2D opaqueDepthTex;
 uniform float particleSize;
 uniform bool particleFade;
+uniform float softFalloffDepth;
 #endif
 
 #if @particleOcclusion
@@ -106,53 +113,45 @@ uniform sampler2D orthoDepthMap;
 varying vec3 orthoDepthMapCoord;
 #endif
 
+uniform sampler2D opaqueDepthTex;
+
 void main()
 {
 #if @particleOcclusion
     applyOcclusionDiscard(orthoDepthMapCoord, texture2D(orthoDepthMap, orthoDepthMapCoord.xy * 0.5 + 0.5).r);
 #endif
 
-#if @diffuseMap
-    vec2 adjustedDiffuseUV = diffuseMapUV;
-#endif
+    // only offset diffuse and normal maps for now, other textures are more likely to be using a completely different UV set
+    vec2 offset = vec2(0.0);
 
-    vec3 normal = normalize(passNormal);
-    vec3 viewVec = normalize(passViewPos.xyz);
-
-#if @normalMap
-    vec4 normalTex = texture2D(normalMap, normalMapUV);
-
-    vec3 normalizedNormal = normal;
-    vec3 normalizedTangent = normalize(passTangent.xyz);
-    vec3 binormal = cross(normalizedTangent, normalizedNormal) * passTangent.w;
-    mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
-
-    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
-#endif
-
+#if @parallax || @diffuseParallax
 #if @parallax
-    vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
-    vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
-    vec3 eyeDir = normalize(cameraPos - objectPos);
-    vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, normalTex.a, (passTangent.w > 0.0) ? -1.f : 1.f);
-    adjustedDiffuseUV += offset; // only offset diffuse for now, other textures are more likely to be using a completely different UV set
-
-    // TODO: check not working as the same UV buffer is being bound to different targets
-    // if diffuseMapUV == normalMapUV
-#if 1
-    // fetch a new normal using updated coordinates
-    normalTex = texture2D(normalMap, adjustedDiffuseUV);
-
-    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
+    float height = texture2D(normalMap, normalMapUV).a;
+    float flipY = (passTangent.w > 0.0) ? -1.f : 1.f;
+#else
+    float height = texture2D(diffuseMap, diffuseMapUV).a;
+    // FIXME: shouldn't be necessary, but in this path false-positives are common
+    float flipY = -1.f;
+#endif
+    offset = getParallaxOffset(transpose(normalToViewMatrix) * normalize(-passViewPos), height, flipY);
 #endif
 
-#endif
-
-vec3 viewNormal = normalize(gl_NormalMatrix * normal);
+vec2 screenCoords = gl_FragCoord.xy / screenRes;
 
 #if @diffuseMap
-    gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
-    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
+    gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV + offset);
+
+#if defined(DISTORTION) && DISTORTION
+    gl_FragData[0].a *= getDiffuseColor().a;
+    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords / @distorionRTRatio).x);
+    return;
+#endif
+
+#if @diffuseParallax
+    gl_FragData[0].a = 1.0;
+#else
+    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV + offset);
+#endif
 #else
     gl_FragData[0] = vec4(1.0);
 #endif
@@ -166,6 +165,19 @@ vec3 viewNormal = normalize(gl_NormalMatrix * normal);
 #endif
 
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
+
+#if @normalMap
+    vec4 normalTex = texture2D(normalMap, normalMapUV + offset);
+    vec3 normal = normalTex.xyz * 2.0 - 1.0;
+#if @reconstructNormalZ
+    normal.z = sqrt(1.0 - dot(normal.xy, normal.xy));
+#endif
+    vec3 viewNormal = normalToView(normal);
+#else
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
+#endif
+
+    vec3 viewVec = normalize(passViewPos);
 
 #if @detailMap
     gl_FragData[0].xyz *= texture2D(detailMap, detailMapUV).xyz * 2.0;
@@ -207,19 +219,27 @@ vec3 viewNormal = normalize(gl_NormalMatrix * normal);
 #endif
 
     float shadowing = unshadowedLightRatio(-passViewPos.z);
-    vec3 lighting;
+    vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
     lighting = passLighting + shadowDiffuseLighting * shadowing;
+    specular = passSpecular + shadowSpecularLighting * shadowing;
 #else
-    vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
-    vec3 emission = getEmissionColor().xyz * emissiveMult;
-    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
+#if @specularMap
+    vec4 specTex = texture2D(specularMap, specularMapUV);
+    float shininess = specTex.a * 255.0;
+    vec3 specularColor = specTex.xyz;
+#else
+    float shininess = gl_FrontMaterial.shininess;
+    vec3 specularColor = getSpecularColor().xyz;
+#endif
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
+    specular = specularColor * specularLight * specStrength;
 #endif
 
     clampLightingResult(lighting);
-
-    gl_FragData[0].xyz *= lighting;
+    gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
 #if @envMap && !@preLightEnv
     gl_FragData[0].xyz += envEffect;
@@ -229,24 +249,8 @@ vec3 viewNormal = normalize(gl_NormalMatrix * normal);
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
 
-#if @specularMap
-    vec4 specTex = texture2D(specularMap, specularMapUV);
-    float shininess = specTex.a * 255.0;
-    vec3 matSpec = specTex.xyz;
-#else
-    float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = getSpecularColor().xyz;
-#endif
-
-    matSpec *= specStrength;
-    if (matSpec != vec3(0.0))
-    {
-        gl_FragData[0].xyz += getSpecular(viewNormal, viewVec, shininess, matSpec) * shadowing;
-    }
-
     gl_FragData[0] = applyFogAtPos(gl_FragData[0], passViewPos, far);
 
-    vec2 screenCoords = gl_FragCoord.xy / screenRes;
 #if !defined(FORCE_OPAQUE) && @softParticles
     gl_FragData[0].a *= calcSoftParticleFade(
         viewVec,
@@ -256,7 +260,8 @@ vec3 viewNormal = normalize(gl_NormalMatrix * normal);
         far,
         texture2D(opaqueDepthTex, screenCoords).x,
         particleSize,
-        particleFade
+        particleFade,
+        softFalloffDepth
     );
 #endif
 

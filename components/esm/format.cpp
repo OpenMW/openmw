@@ -3,6 +3,7 @@
 #include <cstring>
 #include <istream>
 #include <stdexcept>
+#include <string>
 
 namespace ESM
 {

@@ -7,40 +7,32 @@
 
 namespace ESM
 {
+    namespace
+    {
+        constexpr uint32_t sInvalidSlot = static_cast<uint32_t>(-1);
+    }
 
     void InventoryState::load(ESMReader& esm)
     {
         // obsolete
-        int index = 0;
         while (esm.isNextSub("IOBJ"))
         {
-            int unused; // no longer used
-            esm.getHT(unused);
+            esm.skipHT<int32_t>();
 
             ObjectState state;
-
-            // obsolete
-            if (esm.isNextSub("SLOT"))
-            {
-                int slot;
-                esm.getHT(slot);
-                mEquipmentSlots[index] = slot;
-            }
 
             state.mRef.loadId(esm, true);
             state.load(esm);
 
-            if (state.mCount == 0)
+            if (state.mRef.mCount == 0)
                 continue;
 
             mItems.push_back(state);
-
-            ++index;
         }
 
-        int itemsCount = 0;
+        uint32_t itemsCount = 0;
         esm.getHNOT(itemsCount, "ICNT");
-        for (int i = 0; i < itemsCount; i++)
+        for (; itemsCount > 0; --itemsCount)
         {
             ObjectState state;
 
@@ -51,26 +43,23 @@ namespace ESM
             if (!esm.applyContentFileMapping(state.mRef.mRefNum))
                 state.mRef.mRefNum = FormId(); // content file removed; unset refnum, but keep object.
 
-            if (state.mCount == 0)
+            if (state.mRef.mCount == 0)
                 continue;
 
             mItems.push_back(state);
         }
 
+        std::map<std::pair<ESM::RefId, std::string>, int32_t> levelledItemMap;
         // Next item is Levelled item
         while (esm.isNextSub("LEVM"))
         {
             // Get its name
             ESM::RefId id = esm.getRefId();
-            int count;
-            std::string parentGroup;
+            int32_t count;
             // Then get its count
             esm.getHNT(count, "COUN");
-            // Old save formats don't have information about parent group; check for that
-            if (esm.isNextSub("LGRP"))
-                // Newest saves contain parent group
-                parentGroup = esm.getHString();
-            mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
+            std::string parentGroup = esm.getHNString("LGRP");
+            levelledItemMap[std::make_pair(id, parentGroup)] = count;
         }
 
         while (esm.isNextSub("MAGI"))
@@ -85,15 +74,15 @@ namespace ESM
                 esm.getHNT(multiplier, "MULT");
                 params.emplace_back(rand, multiplier);
             }
-            mPermanentMagicEffectMagnitudes[id] = params;
+            mPermanentMagicEffectMagnitudes[id] = std::move(params);
         }
 
         while (esm.isNextSub("EQUI"))
         {
             esm.getSubHeader();
-            int equipIndex;
+            int32_t equipIndex;
             esm.getT(equipIndex);
-            int slot;
+            int32_t slot;
             esm.getT(slot);
             mEquipmentSlots[equipIndex] = slot;
         }
@@ -101,38 +90,42 @@ namespace ESM
         if (esm.isNextSub("EQIP"))
         {
             esm.getSubHeader();
-            int slotsCount = 0;
+            uint32_t slotsCount = 0;
             esm.getT(slotsCount);
-            for (int i = 0; i < slotsCount; i++)
+            for (; slotsCount > 0; --slotsCount)
             {
-                int equipIndex;
+                int32_t equipIndex;
                 esm.getT(equipIndex);
-                int slot;
+                int32_t slot;
                 esm.getT(slot);
                 mEquipmentSlots[equipIndex] = slot;
             }
         }
 
-        mSelectedEnchantItem = -1;
-        esm.getHNOT(mSelectedEnchantItem, "SELE");
+        uint32_t selectedEnchantItem = sInvalidSlot;
+        esm.getHNOT(selectedEnchantItem, "SELE");
+        if (selectedEnchantItem == sInvalidSlot)
+            mSelectedEnchantItem.reset();
+        else
+            mSelectedEnchantItem = selectedEnchantItem;
 
         // Old saves had restocking levelled items in a special map
         // This turns items from that map into negative quantities
-        for (const auto& entry : mLevelledItemMap)
+        for (const auto& entry : levelledItemMap)
         {
             const ESM::RefId& id = entry.first.first;
             const int count = entry.second;
             for (auto& item : mItems)
             {
-                if (item.mCount == count && id == item.mRef.mRefID)
-                    item.mCount = -count;
+                if (item.mRef.mCount == count && id == item.mRef.mRefID)
+                    item.mRef.mCount = -count;
             }
         }
     }
 
     void InventoryState::save(ESMWriter& esm) const
     {
-        int itemsCount = static_cast<int>(mItems.size());
+        uint32_t itemsCount = static_cast<uint32_t>(mItems.size());
         if (itemsCount > 0)
         {
             esm.writeHNT("ICNT", itemsCount);
@@ -142,41 +135,32 @@ namespace ESM
             }
         }
 
-        for (auto it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+        for (const auto& [id, params] : mPermanentMagicEffectMagnitudes)
         {
-            esm.writeHNRefId("LEVM", it->first.first);
-            esm.writeHNT("COUN", it->second);
-            esm.writeHNString("LGRP", it->first.second);
-        }
+            esm.writeHNRefId("MAGI", id);
 
-        for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin();
-             it != mPermanentMagicEffectMagnitudes.end(); ++it)
-        {
-            esm.writeHNRefId("MAGI", it->first);
-
-            const std::vector<std::pair<float, float>>& params = it->second;
-            for (std::vector<std::pair<float, float>>::const_iterator pIt = params.begin(); pIt != params.end(); ++pIt)
+            for (const auto& [rand, mult] : params)
             {
-                esm.writeHNT("RAND", pIt->first);
-                esm.writeHNT("MULT", pIt->second);
+                esm.writeHNT("RAND", rand);
+                esm.writeHNT("MULT", mult);
             }
         }
 
-        int slotsCount = static_cast<int>(mEquipmentSlots.size());
+        uint32_t slotsCount = static_cast<uint32_t>(mEquipmentSlots.size());
         if (slotsCount > 0)
         {
             esm.startSubRecord("EQIP");
             esm.writeT(slotsCount);
-            for (std::map<int, int>::const_iterator it = mEquipmentSlots.begin(); it != mEquipmentSlots.end(); ++it)
+            for (const auto& [index, slot] : mEquipmentSlots)
             {
-                esm.writeT(it->first);
-                esm.writeT(it->second);
+                esm.writeT(index);
+                esm.writeT(slot);
             }
             esm.endRecord("EQIP");
         }
 
-        if (mSelectedEnchantItem != -1)
-            esm.writeHNT("SELE", mSelectedEnchantItem);
+        if (mSelectedEnchantItem)
+            esm.writeHNT("SELE", *mSelectedEnchantItem);
     }
 
 }

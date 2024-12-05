@@ -5,14 +5,10 @@
 
 #include <osgViewer/GraphicsWindow>
 
+#include "vsyncmode.hpp"
+
 namespace SDLUtil
 {
-    enum VSyncMode
-    {
-        Disabled = 0,
-        Enabled = 1,
-        Adaptive = 2
-    };
 
     class GraphicsWindowSDL2 : public osgViewer::GraphicsWindow
     {
@@ -29,7 +25,7 @@ namespace SDLUtil
         virtual ~GraphicsWindowSDL2();
 
     public:
-        GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits, int vsync);
+        GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits, VSyncMode vsyncMode);
 
         bool isSameKindAs(const Object* object) const override
         {

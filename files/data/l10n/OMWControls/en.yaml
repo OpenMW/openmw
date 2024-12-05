@@ -1,16 +1,130 @@
 ControlsPage: "OpenMW Controls"
-ControlsPageDescription: "Additional settings related to player controls"
+ControlsPageDescription: "Additional settings related to player controls."
 
 MovementSettings: "Movement"
 
-alwaysRun: "Always run"
+alwaysRun: "Always Run"
 alwaysRunDescription: |
-    If this setting is true, the character is running by default, otherwise the character is walking by default.
-    The shift key will temporarily invert this setting, and the caps lock key will invert this setting while it's "locked".
+    If this setting is true, the character will run by default, otherwise the character will walk by default.
+    The Shift key will temporarily invert this setting, and the Caps Lock key will invert this setting while it's "locked".
 
-toggleSneak: "Toggle sneak"
+toggleSneak: "Toggle Sneak"
 toggleSneakDescription: |
-    This setting causes the behavior of the sneak key (bound to Ctrl by default)
-    to toggle sneaking on and off rather than requiring the key to be held down while sneaking.
+    This setting makes the Sneak key (bound to Ctrl by default) toggle sneaking instead of having to be held down to sneak.
     Players that spend significant time sneaking may find the character easier to control with this option enabled.
 
+smoothControllerMovement: "Smooth Controller Movement"
+smoothControllerMovementDescription: |
+   Enables smooth controller stick movement. This makes the transition from walking to running less abrupt.
+
+TogglePOV_name: "Toggle POV"
+TogglePOV_description: "Toggle between first and third person view. Hold to enter preview mode."
+
+Zoom3rdPerson_name: "Zoom In/Out"
+Zoom3rdPerson_description: "Moves the camera closer / further away when in third person view."
+
+MoveForward_name: "Move Forward"
+MoveForward_description: "Can cancel out with Move Backward."
+
+MoveBackward_name: "Move Backward"
+MoveBackward_description: "Can cancel out with Move Forward."
+
+MoveLeft_name: "Move Left"
+MoveLeft_description: "Can cancel out with Move Right."
+
+MoveRight_name: "Move Right"
+MoveRight_description: "Can cancel out with Move Left."
+
+Use_name: "Use"
+Use_description: "Attack with a weapon or cast a spell depending on the current stance."
+
+Run_name: "Run"
+Run_description: "Hold to run/walk depending on the Always Run setting."
+
+AlwaysRun_name: "Always Run"
+AlwaysRun_description: "Toggle the Always Run setting."
+
+Jump_name: "Jump"
+Jump_description: "Jump whenever you are on the ground."
+
+AutoMove_name: "Auto Run"
+AutoMove_description: "Toggle continuous forward movement."
+
+Sneak_name: "Sneak"
+Sneak_description: "Hold to sneak if the Toggle Sneak setting is off."
+
+ToggleSneak_name: "Toggle Sneak"
+ToggleSneak_description: "Toggle sneak if the Toggle Sneak setting is on."
+
+ToggleWeapon_name: "Ready Weapon"
+ToggleWeapon_description: "Enter or leave the weapon stance."
+
+ToggleSpell_name: "Ready Magic"
+ToggleSpell_description: "Enter or leave the magic stance."
+
+Inventory_name: "Inventory"
+Inventory_description: "Open the inventory."
+
+Journal_name: "Journal"
+Journal_description: "Open the journal."
+
+QuickKeysMenu_name: "Quick Menu"
+QuickKeysMenu_description: "Open the quick keys menu."
+
+SmoothMoveForward_name: "Smooth Move Forward"
+SmoothMoveForward_description: "Forward movement adjusted for smooth Walk-Run transitions."
+
+SmoothMoveBackward_name: "Smooth Move Backward"
+SmoothMoveBackward_description: "Backward movement adjusted for smooth Walk-Run transitions."
+
+SmoothMoveLeft_name: "Smooth Move Left"
+SmoothMoveLeft_description: "Left movement adjusted for smooth Walk-Run transitions."
+
+SmoothMoveRight_name: "Smooth Move Right"
+SmoothMoveRight_description: "Right movement adjusted for smooth Walk-Run transitions."
+
+#  Non-dehardcoded actions
+Activate_name: "Activate"
+Activate_description: "Fallback for input.ACTIONS.Activate, binding does not do anything yet"
+Console_name: "Console"
+Console_description: "Fallback for input.ACTIONS.Console, binding does not do anything yet"
+CycleSpellLeft_name: "CycleSpellLeft"
+CycleSpellLeft_description: "Fallback for input.ACTIONS.CycleSpellLeft, binding does not do anything yet"
+CycleSpellRight_name: "CycleSpellRight"
+CycleSpellRight_description: "Fallback for input.ACTIONS.CycleSpellRight, binding does not do anything yet"
+CycleWeaponLeft_name: "CycleWeaponLeft"
+CycleWeaponLeft_description: "Fallback for input.ACTIONS.CycleWeaponLeft, binding does not do anything yet"
+CycleWeaponRight_name: "CycleWeaponRight"
+CycleWeaponRight_description: "Fallback for input.ACTIONS.CycleWeaponRight, binding does not do anything yet"
+GameMenu_name: "GameMenu"
+GameMenu_description: "Fallback for input.ACTIONS.GameMenu, binding does not do anything yet"
+QuickLoad_name: "QuickLoad"
+QuickLoad_description: "Fallback for input.ACTIONS.QuickLoad, binding does not do anything yet"
+QuickSave_name: "QuickSave"
+QuickSave_description: "Fallback for input.ACTIONS.QuickSave, binding does not do anything yet"
+Screenshot_name: "Screenshot"
+Screenshot_description: "Fallback for input.ACTIONS.Screenshot, binding does not do anything yet"
+ToggleDebug_name: "ToggleDebug"
+ToggleDebug_description: "Fallback for input.ACTIONS.ToggleDebug, binding does not do anything yet"
+ToggleHUD_name: "ToggleHUD"
+ToggleHUD_description: "Fallback for input.ACTIONS.ToggleHUD, binding does not do anything yet"
+TogglePostProcessorHUD_name: "TogglePostProcessorHUD"
+TogglePostProcessorHUD_description: "Fallback for input.ACTIONS.TogglePostProcessorHUD, binding does not do anything yet"
+QuickKey1_name: "QuickKey1"
+QuickKey1_description: "Fallback for input.ACTIONS.QuickKey1, binding does not do anything yet"
+QuickKey2_name: "QuickKey2"
+QuickKey2_description: "Fallback for input.ACTIONS.QuickKey2, binding does not do anything yet"
+QuickKey3_name: "QuickKey3"
+QuickKey3_description: "Fallback for input.ACTIONS.QuickKey3, binding does not do anything yet"
+QuickKey4_name: "QuickKey4"
+QuickKey4_description: "Fallback for input.ACTIONS.QuickKey4, binding does not do anything yet"
+QuickKey5_name: "QuickKey5"
+QuickKey5_description: "Fallback for input.ACTIONS.QuickKey5, binding does not do anything yet"
+QuickKey6_name: "QuickKey6"
+QuickKey6_description: "Fallback for input.ACTIONS.QuickKey6, binding does not do anything yet"
+QuickKey7_name: "QuickKey7"
+QuickKey7_description: "Fallback for input.ACTIONS.QuickKey7, binding does not do anything yet"
+QuickKey8_name: "QuickKey8"
+QuickKey8_description: "Fallback for input.ACTIONS.QuickKey8, binding does not do anything yet"
+QuickKey9_name: "QuickKey9"
+QuickKey9_description: "Fallback for input.ACTIONS.QuickKey9, binding does not do anything yet"

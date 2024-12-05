@@ -35,6 +35,7 @@
 
 #include "renderbin.hpp"
 #include "skyutil.hpp"
+#include "util.hpp"
 #include "vismask.hpp"
 
 namespace
@@ -205,7 +206,8 @@ namespace
     {
     public:
         SkyRTT(osg::Vec2f size, osg::Group* earlyRenderBinRoot)
-            : RTTNode(static_cast<int>(size.x()), static_cast<int>(size.y()), 0, false, 1, StereoAwareness::Aware)
+            : RTTNode(static_cast<int>(size.x()), static_cast<int>(size.y()), 0, false, 1, StereoAwareness::Aware,
+                MWRender::shouldAddMSAAIntermediateTarget())
             , mEarlyRenderBinRoot(earlyRenderBinRoot)
         {
             setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
@@ -218,7 +220,7 @@ namespace
             camera->setNodeMask(MWRender::Mask_RenderToTexture);
             camera->setCullMask(MWRender::Mask_Sky);
             camera->addChild(mEarlyRenderBinRoot);
-            SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
+            SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*camera->getOrCreateStateSet());
         }
 
     private:
@@ -236,10 +238,8 @@ namespace MWRender
         , mAtmosphereNightRoll(0.f)
         , mCreated(false)
         , mIsStorm(false)
-        , mDay(0)
-        , mMonth(0)
+        , mTimescaleClouds(Fallback::Map::getBool("Weather_Timescale_Clouds"))
         , mCloudAnimationTimer(0.f)
-        , mRainTimer(0.f)
         , mStormParticleDirection(MWWorld::Weather::defaultDirection())
         , mStormDirection(MWWorld::Weather::defaultDirection())
         , mClouds()
@@ -247,18 +247,17 @@ namespace MWRender
         , mCloudBlendFactor(0.f)
         , mCloudSpeed(0.f)
         , mStarsOpacity(0.f)
-        , mRemainingTransitionTime(0.f)
-        , mRainEnabled(false)
         , mRainSpeed(0.f)
         , mRainDiameter(0.f)
         , mRainMinHeight(0.f)
         , mRainMaxHeight(0.f)
         , mRainEntranceSpeed(1.f)
         , mRainMaxRaindrops(0)
+        , mRainRipplesEnabled(Fallback::Map::getBool("Weather_Rain_Ripples"))
+        , mSnowRipplesEnabled(Fallback::Map::getBool("Weather_Snow_Ripples"))
         , mWindSpeed(0.f)
         , mBaseWindSpeed(0.f)
         , mEnabled(true)
-        , mSunEnabled(true)
         , mSunglareEnabled(true)
         , mPrecipitationAlpha(0.f)
         , mDirtyParticlesEffect(false)
@@ -269,7 +268,8 @@ namespace MWRender
         if (!mSceneManager->getForceShaders())
             skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
                 osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED | osg::StateAttribute::ON);
-        SceneUtil::ShadowManager::disableShadowsForStateSet(skyroot->getOrCreateStateSet());
+        mSceneManager->setUpNormalsRTForStateSet(skyroot->getOrCreateStateSet(), false);
+        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*skyroot->getOrCreateStateSet());
         parentNode->addChild(skyroot);
 
         mEarlyRenderBinRoot = new osg::Group;
@@ -292,7 +292,7 @@ namespace MWRender
         mRootNode->addChild(mEarlyRenderBinRoot);
         mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
 
-        mPrecipitationOcclusion = Settings::Manager::getBool("weather particle occlusion", "Shaders");
+        mPrecipitationOcclusion = Settings::shaders().mWeatherParticleOcclusion;
         mPrecipitationOccluder = std::make_unique<PrecipitationOccluder>(skyroot, parentNode, rootNode, camera);
     }
 
@@ -302,8 +302,7 @@ namespace MWRender
 
         bool forceShaders = mSceneManager->getForceShaders();
 
-        mAtmosphereDay
-            = mSceneManager->getInstance(Settings::Manager::getString("skyatmosphere", "Models"), mEarlyRenderBinRoot);
+        mAtmosphereDay = mSceneManager->getInstance(Settings::models().mSkyatmosphere.get(), mEarlyRenderBinRoot);
         ModVertexAlphaVisitor modAtmosphere(ModVertexAlphaVisitor::Atmosphere);
         mAtmosphereDay->accept(modAtmosphere);
 
@@ -315,12 +314,10 @@ namespace MWRender
         mEarlyRenderBinRoot->addChild(mAtmosphereNightNode);
 
         osg::ref_ptr<osg::Node> atmosphereNight;
-        if (mSceneManager->getVFS()->exists(Settings::Manager::getString("skynight02", "Models")))
-            atmosphereNight = mSceneManager->getInstance(
-                Settings::Manager::getString("skynight02", "Models"), mAtmosphereNightNode);
+        if (mSceneManager->getVFS()->exists(Settings::models().mSkynight02.get()))
+            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight02.get(), mAtmosphereNightNode);
         else
-            atmosphereNight = mSceneManager->getInstance(
-                Settings::Manager::getString("skynight01", "Models"), mAtmosphereNightNode);
+            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight01.get(), mAtmosphereNightNode);
         atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(
             createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
@@ -341,7 +338,7 @@ namespace MWRender
 
         mCloudMesh = new osg::PositionAttitudeTransform;
         osg::ref_ptr<osg::Node> cloudMeshChild
-            = mSceneManager->getInstance(Settings::Manager::getString("skyclouds", "Models"), mCloudMesh);
+            = mSceneManager->getInstance(Settings::models().mSkyclouds.get(), mCloudMesh);
         mCloudUpdater = new CloudUpdater(forceShaders);
         mCloudUpdater->setOpacity(1.f);
         cloudMeshChild->addUpdateCallback(mCloudUpdater);
@@ -349,7 +346,7 @@ namespace MWRender
 
         mNextCloudMesh = new osg::PositionAttitudeTransform;
         osg::ref_ptr<osg::Node> nextCloudMeshChild
-            = mSceneManager->getInstance(Settings::Manager::getString("skyclouds", "Models"), mNextCloudMesh);
+            = mSceneManager->getInstance(Settings::models().mSkyclouds.get(), mNextCloudMesh);
         mNextCloudUpdater = new CloudUpdater(forceShaders);
         mNextCloudUpdater->setOpacity(0.f);
         nextCloudMeshChild->addUpdateCallback(mNextCloudUpdater);
@@ -400,8 +397,9 @@ namespace MWRender
 
         osg::ref_ptr<osg::StateSet> stateset = mRainParticleSystem->getOrCreateStateSet();
 
+        constexpr VFS::Path::NormalizedView raindropImage("textures/tx_raindrop_01.dds");
         osg::ref_ptr<osg::Texture2D> raindropTex
-            = new osg::Texture2D(mSceneManager->getImageManager()->getImage("textures/tx_raindrop_01.dds"));
+            = new osg::Texture2D(mSceneManager->getImageManager()->getImage(raindropImage));
         raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -518,6 +516,20 @@ namespace MWRender
         return mRainNode != nullptr;
     }
 
+    bool SkyManager::getRainRipplesEnabled() const
+    {
+        if (!mEnabled || mIsStorm)
+            return false;
+
+        if (hasRain())
+            return mRainRipplesEnabled;
+
+        if (mParticleNode && mCurrentParticleEffect == Settings::models().mWeathersnow.get())
+            return mSnowRipplesEnabled;
+
+        return false;
+    }
+
     float SkyManager::getPrecipitationAlpha() const
     {
         if (mEnabled && !mIsStorm && (hasRain() || mParticleNode))
@@ -538,13 +550,22 @@ namespace MWRender
             osg::Quat quat;
             quat.makeRotate(MWWorld::Weather::defaultDirection(), mStormParticleDirection);
             // Morrowind deliberately rotates the blizzard mesh, so so should we.
-            if (mCurrentParticleEffect == "meshes\\blizzard.nif")
+            if (mCurrentParticleEffect == Settings::models().mWeatherblizzard.get())
                 quat.makeRotate(osg::Vec3f(-1, 0, 0), mStormParticleDirection);
             mParticleNode->setAttitude(quat);
         }
 
+        const float timeScale = MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale();
+
         // UV Scroll the clouds
-        mCloudAnimationTimer += duration * mCloudSpeed * 0.003;
+        float cloudDelta = duration * mCloudSpeed / 400.f;
+        if (mTimescaleClouds)
+            cloudDelta *= timeScale / 60.f;
+
+        mCloudAnimationTimer += cloudDelta;
+        if (mCloudAnimationTimer >= 4.f)
+            mCloudAnimationTimer -= 4.f;
+
         mNextCloudUpdater->setTextureCoord(mCloudAnimationTimer);
         mCloudUpdater->setTextureCoord(mCloudAnimationTimer);
 
@@ -560,8 +581,7 @@ namespace MWRender
         }
 
         // rotate the stars by 360 degrees every 4 days
-        mAtmosphereNightRoll += MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale() * duration
-            * osg::DegreesToRadians(360.f) / (3600 * 96.f);
+        mAtmosphereNightRoll += timeScale * duration * osg::DegreesToRadians(360.f) / (3600 * 96.f);
         if (mAtmosphereNightNode->getNodeMask() != 0)
             mAtmosphereNightNode->setAttitude(osg::Quat(mAtmosphereNightRoll, osg::Vec3f(0, 0, 1)));
         mPrecipitationOccluder->update();
@@ -702,7 +722,7 @@ namespace MWRender
 
                 const osg::Vec3 defaultWrapRange = osg::Vec3(1024, 1024, 800);
                 const bool occlusionEnabledForEffect
-                    = !mRainEffect.empty() || mCurrentParticleEffect == "meshes\\snow.nif";
+                    = !mRainEffect.empty() || mCurrentParticleEffect == Settings::models().mWeathersnow.get();
 
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {
@@ -743,14 +763,15 @@ namespace MWRender
         {
             mClouds = weather.mCloudTexture;
 
-            std::string texture = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
+            const VFS::Path::Normalized texture
+                = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
 
             osg::ref_ptr<osg::Texture2D> cloudTex
                 = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
             cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
             cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
-            mCloudUpdater->setTexture(cloudTex);
+            mCloudUpdater->setTexture(std::move(cloudTex));
         }
 
         if (mStormDirection != weather.mStormDirection)
@@ -765,14 +786,15 @@ namespace MWRender
 
             if (!mNextClouds.empty())
             {
-                std::string texture = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
+                const VFS::Path::Normalized texture
+                    = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
 
                 osg::ref_ptr<osg::Texture2D> cloudTex
                     = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
                 cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
                 cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
-                mNextCloudUpdater->setTexture(cloudTex);
+                mNextCloudUpdater->setTexture(std::move(cloudTex));
                 mNextStormDirection = weather.mStormDirection;
             }
         }
@@ -893,12 +915,6 @@ namespace MWRender
         mSecunda->setState(state);
     }
 
-    void SkyManager::setDate(int day, int month)
-    {
-        mDay = day;
-        mMonth = month;
-    }
-
     void SkyManager::setGlareTimeOfDayFade(float val)
     {
         mSun->setGlareTimeOfDayFade(val);
@@ -909,18 +925,19 @@ namespace MWRender
         mUnderwaterSwitch->setWaterLevel(height);
     }
 
-    void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures)
+    void SkyManager::listAssetsToPreload(
+        std::vector<VFS::Path::Normalized>& models, std::vector<VFS::Path::Normalized>& textures)
     {
-        models.emplace_back(Settings::Manager::getString("skyatmosphere", "Models"));
-        if (mSceneManager->getVFS()->exists(Settings::Manager::getString("skynight02", "Models")))
-            models.emplace_back(Settings::Manager::getString("skynight02", "Models"));
-        models.emplace_back(Settings::Manager::getString("skynight01", "Models"));
-        models.emplace_back(Settings::Manager::getString("skyclouds", "Models"));
+        models.push_back(Settings::models().mSkyatmosphere);
+        if (mSceneManager->getVFS()->exists(Settings::models().mSkynight02.get()))
+            models.push_back(Settings::models().mSkynight02);
+        models.push_back(Settings::models().mSkynight01);
+        models.push_back(Settings::models().mSkyclouds);
 
-        models.emplace_back(Settings::Manager::getString("weatherashcloud", "Models"));
-        models.emplace_back(Settings::Manager::getString("weatherblightcloud", "Models"));
-        models.emplace_back(Settings::Manager::getString("weathersnow", "Models"));
-        models.emplace_back(Settings::Manager::getString("weatherblizzard", "Models"));
+        models.push_back(Settings::models().mWeatherashcloud);
+        models.push_back(Settings::models().mWeatherblightcloud);
+        models.push_back(Settings::models().mWeathersnow);
+        models.push_back(Settings::models().mWeatherblizzard);
 
         textures.emplace_back("textures/tx_mooncircle_full_s.dds");
         textures.emplace_back("textures/tx_mooncircle_full_m.dds");

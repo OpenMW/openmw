@@ -27,6 +27,7 @@
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loaddoor.hpp>
 #include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadwrld.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
@@ -60,6 +61,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -87,6 +89,8 @@
 #include "../mwphysics/collisiontype.hpp"
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/physicssystem.hpp"
+
+#include "../mwsound/constants.hpp"
 
 #include "actionteleport.hpp"
 #include "cellstore.hpp"
@@ -237,7 +241,6 @@ namespace MWWorld
     {
         if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
-            updateSkyDate();
             mRendering->setSkyEnabled(true);
         }
         else
@@ -273,8 +276,6 @@ namespace MWWorld
         const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         mContentFiles = contentFiles;
-        if (encoder)
-            mReaders.setStatelessEncoder(encoder->getStatelessEncoder());
         mESMVersions.resize(mContentFiles.size(), -1);
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
@@ -294,7 +295,7 @@ namespace MWWorld
     {
         mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(mResourceSystem, rootNode);
 
-        if (Settings::Manager::getBool("enable", "Navigator"))
+        if (Settings::navigator().mEnable)
         {
             auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
             navigatorSettings.mRecast.mSwimHeightScale = mSwimHeightScale;
@@ -351,6 +352,8 @@ namespace MWWorld
         else
             mGlobalVariables[Globals::sCharGenState].setInteger(-1);
 
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
+
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
@@ -391,7 +394,11 @@ namespace MWWorld
         {
             std::string_view video = Fallback::Map::getString("Movies_New_Game");
             if (!video.empty())
+            {
+                // Make sure that we do not continue to play a Title music after a new game video.
+                MWBase::Environment::get().getSoundManager()->stopMusic();
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
+            }
         }
 
         // enable collision
@@ -420,8 +427,6 @@ namespace MWWorld
         if (mPlayer)
         {
             mPlayer->clear();
-            mPlayer->setCell(nullptr);
-            mPlayer->getPlayer().getRefData() = RefData();
             mPlayer->set(mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player")));
         }
 
@@ -432,6 +437,7 @@ namespace MWWorld
         mLevitationEnabled = true;
         mPlayerTraveling = false;
         mPlayerInJail = false;
+        mIdsRebuilt = false;
 
         fillGlobalVariables();
     }
@@ -469,8 +475,8 @@ namespace MWWorld
 
         mStore.write(writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                         // references to custom made records will be recognized
+        mWorldModel.write(writer, progress); // the player's cell needs to be loaded before the player
         mPlayer->write(writer, progress);
-        mWorldModel.write(writer, progress);
         mGlobalVariables.write(writer, progress);
         mWeatherManager->write(writer, progress);
         mProjectileManager->write(writer, progress);
@@ -503,11 +509,11 @@ namespace MWWorld
             }
             break;
             case ESM::REC_PLAY:
-                // World::write always puts `ESM::REC_PLAY` between ESMStore (that contains dynamic records)
-                // and WorldModel (that can contain instances of dynamic records). Here we need to rebuild
-                // ESMStore index in order to be able to lookup dynamic records while loading the player and
-                // WorldModel.
-                mStore.rebuildIdsIndex();
+                if (reader.getFormatVersion() <= ESM::MaxPlayerBeforeCellDataFormatVersion && !mIdsRebuilt)
+                {
+                    mStore.rebuildIdsIndex();
+                    mIdsRebuilt = true;
+                }
 
                 mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
@@ -516,13 +522,22 @@ namespace MWWorld
                     if (getPlayerPtr().getCell()->isExterior())
                         mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3(),
                             getPlayerPtr().getCell()->getCell()->getWorldSpace());
-                    mWorldScene->preloadCell(*getPlayerPtr().getCell(), true);
+                    mWorldScene->preloadCellWithSurroundings(*getPlayerPtr().getCell());
                 }
+                break;
+            case ESM::REC_CSTA:
+                // We need to rebuild the ESMStore index in order to be able to lookup dynamic records while loading the
+                // WorldModel and, afterwards, the player.
+                if (!mIdsRebuilt)
+                {
+                    mStore.rebuildIdsIndex();
+                    mIdsRebuilt = true;
+                }
+                mWorldModel.readRecord(reader, type);
                 break;
             default:
                 if (!mStore.readRecord(reader, type) && !mGlobalVariables.readRecord(reader, type)
-                    && !mWeatherManager->readRecord(reader, type) && !mWorldModel.readRecord(reader, type)
-                    && !mProjectileManager->readRecord(reader, type))
+                    && !mWeatherManager->readRecord(reader, type) && !mProjectileManager->readRecord(reader, type))
                 {
                     throw std::runtime_error("unknown record in saved game");
                 }
@@ -586,6 +601,12 @@ namespace MWWorld
         // Must be cleared before mRendering is destroyed
         if (mProjectileManager)
             mProjectileManager->clear();
+
+        if (Settings::navigator().mWaitForAllJobsOnExit)
+        {
+            Log(Debug::Verbose) << "Waiting for all navmesh jobs to be done...";
+            mNavigator->wait(DetourNavigator::WaitConditionType::allJobsDone, nullptr);
+        }
     }
 
     void World::setRandomSeed(uint32_t seed)
@@ -615,19 +636,13 @@ namespace MWWorld
 
     void World::setGlobalInt(GlobalVariableName name, int value)
     {
-        bool dateUpdated = mTimeManager->updateGlobalInt(name, value);
-        if (dateUpdated)
-            updateSkyDate();
-
+        mTimeManager->updateGlobalInt(name, value);
         mGlobalVariables[name].setInteger(value);
     }
 
     void World::setGlobalFloat(GlobalVariableName name, float value)
     {
-        bool dateUpdated = mTimeManager->updateGlobalFloat(name, value);
-        if (dateUpdated)
-            updateSkyDate();
-
+        mTimeManager->updateGlobalFloat(name, value);
         mGlobalVariables[name].setFloat(value);
     }
 
@@ -655,32 +670,36 @@ namespace MWWorld
 
     std::string_view World::getCellName(const MWWorld::Cell& cell) const
     {
-        if (!cell.isExterior() || !cell.getNameId().empty())
-            return cell.getNameId();
+        if (!cell.isExterior() || !cell.getDisplayName().empty())
+            return cell.getDisplayName();
 
-        return ESM::visit(ESM::VisitOverload{
-                              [&](const ESM::Cell& cellIn) -> std::string_view { return getCellName(&cellIn); },
-                              [&](const ESM4::Cell& cellIn) -> std::string_view {
-                                  return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
-                              },
-                          },
-            cell);
-    }
-
-    std::string_view World::getCellName(const ESM::Cell* cell) const
-    {
-        if (cell)
+        if (!cell.getRegion().empty())
         {
-            if (!cell->isExterior() || !cell->mName.empty())
-                return cell->mName;
-
-            if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
-                return region->mName;
+            std::string_view regionName
+                = ESM::visit(ESM::VisitOverload{
+                                 [&](const ESM::Cell& cellIn) -> std::string_view {
+                                     if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getRegion()))
+                                         return !region->mName.empty() ? region->mName : region->mId.getRefIdString();
+                                     return {};
+                                 },
+                                 [&](const ESM4::Cell& cellIn) -> std::string_view { return {}; },
+                             },
+                    cell);
+            if (!regionName.empty())
+                return regionName;
         }
+
+        if (!cell.getWorldSpace().empty() && ESM::isEsm4Ext(cell.getWorldSpace()))
+        {
+            if (const ESM4::World* worldspace = mStore.get<ESM4::World>().search(cell.getWorldSpace()))
+                if (!worldspace->mFullName.empty())
+                    return worldspace->mFullName;
+        }
+
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
     }
 
-    void World::removeRefScript(MWWorld::RefData* ref)
+    void World::removeRefScript(const MWWorld::CellRef* ref)
     {
         mLocalScripts.remove(ref);
     }
@@ -822,7 +841,7 @@ namespace MWWorld
             reference.getRefData().enable();
 
             if (mWorldScene->getActiveCells().find(reference.getCell()) != mWorldScene->getActiveCells().end()
-                && reference.getRefData().getCount())
+                && reference.getCellRef().getCount())
                 mWorldScene->addObjectToScene(reference);
 
             if (reference.getCellRef().getRefNum().hasContentFile())
@@ -874,7 +893,7 @@ namespace MWWorld
         }
 
         if (mWorldScene->getActiveCells().find(reference.getCell()) != mWorldScene->getActiveCells().end()
-            && reference.getRefData().getCount())
+            && reference.getCellRef().getCount())
         {
             mWorldScene->removeObjectFromScene(reference);
             mWorldScene->addPostponedPhysicsObjects();
@@ -897,7 +916,6 @@ namespace MWWorld
 
         mWeatherManager->advanceTime(hours, incremental);
         mTimeManager->advanceTime(hours, mGlobalVariables);
-        updateSkyDate();
 
         if (!incremental)
         {
@@ -992,6 +1010,9 @@ namespace MWWorld
     {
         MWWorld::Ptr facedObject;
 
+        if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
+            return facedObject;
+
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
             && MWBase::Environment::get().getWindowManager()->isConsoleMode())
             facedObject = getFacedObject(getMaxActivationDistance() * 50, false);
@@ -1032,52 +1053,14 @@ namespace MWWorld
         return osg::Matrixf::translate(actor.getRefData().getPosition().asVec3());
     }
 
-    std::pair<MWWorld::Ptr, osg::Vec3f> World::getHitContact(
-        const MWWorld::ConstPtr& ptr, float distance, std::vector<MWWorld::Ptr>& targets)
-    {
-        const ESM::Position& posdata = ptr.getRefData().getPosition();
-
-        osg::Quat rot
-            = osg::Quat(posdata.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0, 0, -1));
-
-        osg::Vec3f halfExtents = mPhysics->getHalfExtents(ptr);
-
-        // the origin of hitbox is an actor's front, not center
-        distance += halfExtents.y();
-
-        // special cased for better aiming with the camera
-        // if we do not hit anything, will use the default approach as fallback
-        if (ptr == getPlayerPtr())
-        {
-            osg::Vec3f pos = getActorHeadTransform(ptr).getTrans();
-
-            std::pair<MWWorld::Ptr, osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance, targets);
-            if (!result.first.isEmpty())
-                return std::make_pair(result.first, result.second);
-        }
-
-        osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
-
-        // general case, compatible with all types of different creatures
-        // note: we intentionally do *not* use the collision box offset here, this is required to make
-        // some flying creatures work that have their collision box offset in the air
-        pos.z() += halfExtents.z();
-
-        std::pair<MWWorld::Ptr, osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance, targets);
-        if (result.first.isEmpty())
-            return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
-
-        return std::make_pair(result.first, result.second);
-    }
-
     void World::deleteObject(const Ptr& ptr)
     {
-        if (!ptr.getRefData().isDeleted() && ptr.getContainerStore() == nullptr)
+        if (!ptr.mRef->isDeleted() && ptr.getContainerStore() == nullptr)
         {
             if (ptr == getPlayerPtr())
                 throw std::runtime_error("can not delete player object");
 
-            ptr.getRefData().setCount(0);
+            ptr.getCellRef().setCount(0);
 
             if (ptr.isInCell()
                 && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
@@ -1094,9 +1077,9 @@ namespace MWWorld
     {
         if (!ptr.getCellRef().hasContentFile())
             return;
-        if (ptr.getRefData().isDeleted())
+        if (ptr.mRef->isDeleted())
         {
-            ptr.getRefData().setCount(1);
+            ptr.getCellRef().setCount(1);
             if (mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
                 && ptr.getRefData().isEnabled())
             {
@@ -1425,7 +1408,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, const ESM::Position& pos)
     {
-        return copyObjectToCell(ptr, cell, pos, ptr.getRefData().getCount(), false);
+        return copyObjectToCell(ptr, cell, pos, ptr.getCellRef().getCount(), false);
     }
 
     MWWorld::Ptr World::safePlaceObject(const ConstPtr& ptr, const ConstPtr& referenceObject,
@@ -1476,7 +1459,7 @@ namespace MWWorld
             ipos.rot[1] = 0;
         }
 
-        MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getRefData().getCount(), false);
+        MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getCellRef().getCount(), false);
         adjustPosition(placed, true); // snap to ground
         return placed;
     }
@@ -1769,22 +1752,27 @@ namespace MWWorld
 
     void World::updateSoundListener()
     {
-        osg::Vec3f cameraPosition = mRendering->getCamera()->getPosition();
-        const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
-        osg::Vec3f listenerPos;
+        const MWRender::Camera* camera = mRendering->getCamera();
+        const auto& player = getPlayerPtr();
+        const ESM::Position& refpos = player.getRefData().getPosition();
+        osg::Vec3f listenerPos, up, forward;
+        osg::Quat listenerOrient;
 
-        if (isFirstPerson())
-            listenerPos = cameraPosition;
+        if (isFirstPerson() || Settings::sound().mCameraListener)
+            listenerPos = camera->getPosition();
         else
-            listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(getPlayerPtr()).z());
+            listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(player).z());
 
-        osg::Quat listenerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0, -1, 0))
-            * osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1));
+        if (isFirstPerson() || Settings::sound().mCameraListener)
+            listenerOrient = camera->getOrient();
+        else
+            listenerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0, -1, 0))
+                * osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1));
 
-        osg::Vec3f forward = listenerOrient * osg::Vec3f(0, 1, 0);
-        osg::Vec3f up = listenerOrient * osg::Vec3f(0, 0, 1);
+        forward = listenerOrient * osg::Vec3f(0, 1, 0);
+        up = listenerOrient * osg::Vec3f(0, 0, 1);
 
-        bool underwater = isUnderwater(getPlayerPtr().getCell(), cameraPosition);
+        bool underwater = isUnderwater(player.getCell(), camera->getPosition());
 
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(listenerPos, forward, up, underwater);
     }
@@ -1847,9 +1835,10 @@ namespace MWWorld
     }
 
     bool World::castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-        bool ignorePlayer, bool ignoreActors)
+        bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList)
     {
-        MWRender::RenderingManager::RayResult rayRes = mRendering->castRay(from, to, ignorePlayer, ignoreActors);
+        MWRender::RenderingManager::RayResult rayRes
+            = mRendering->castRay(from, to, ignorePlayer, ignoreActors, ignoreList);
         res.mHit = rayRes.mHit;
         res.mHitPos = rayRes.mHitPointWorld;
         res.mHitNormal = rayRes.mHitNormalWorld;
@@ -1912,7 +1901,7 @@ namespace MWWorld
         mWeatherManager->changeWeather(region, id);
     }
 
-    void World::modRegion(const ESM::RefId& regionid, const std::vector<char>& chances)
+    void World::modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances)
     {
         mWeatherManager->modRegion(regionid, chances);
     }
@@ -1925,7 +1914,7 @@ namespace MWWorld
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *static_cast<MWWorld::LiveCellRef<ESM::Door>*>(ptr.getBase());
 
-            if (!ref.mData.isEnabled() || ref.mData.isDeleted())
+            if (!ref.mData.isEnabled() || ref.isDeleted())
                 return true;
 
             if (ref.mRef.getTeleport())
@@ -2336,7 +2325,7 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
         mPhysics->remove(getPlayerPtr());
-        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getModel(getPlayerPtr()));
+        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getCorrectedModel(getPlayerPtr()));
 
         applyLoopingParticles(player);
 
@@ -2398,11 +2387,6 @@ namespace MWWorld
         mRendering->screenshot(image, w, h);
     }
 
-    bool World::screenshot360(osg::Image* image)
-    {
-        return mRendering->screenshot360(image);
-    }
-
     void World::activateDoor(const MWWorld::Ptr& door)
     {
         auto state = door.getClass().getDoorState(door);
@@ -2457,15 +2441,12 @@ namespace MWWorld
 
     bool World::getPlayerCollidingWith(const MWWorld::ConstPtr& object)
     {
-        MWWorld::Ptr player = getPlayerPtr();
-        return mPhysics->isActorCollidingWith(player, object);
+        return mPhysics->isObjectCollidingWith(object, MWPhysics::ScriptedCollisionType_Player);
     }
 
     bool World::getActorCollidingWith(const MWWorld::ConstPtr& object)
     {
-        std::vector<MWWorld::Ptr> actors;
-        mPhysics->getActorsCollidingWith(object, actors);
-        return !actors.empty();
+        return mPhysics->isObjectCollidingWith(object, MWPhysics::ScriptedCollisionType_Actor);
     }
 
     void World::hurtStandingActors(const ConstPtr& object, float healthPerSecond)
@@ -2573,7 +2554,7 @@ namespace MWWorld
 
         bool operator()(const MWWorld::Ptr& ptr)
         {
-            if (ptr.getRefData().isDeleted())
+            if (ptr.mRef->isDeleted())
                 return true;
 
             // vanilla Morrowind does not allow to sell items from containers with zero capacity
@@ -2631,7 +2612,7 @@ namespace MWWorld
             collisionTypes |= MWPhysics::CollisionType_Water;
         }
         MWPhysics::RayCastingResult result
-            = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
+            = mPhysics->castRay(from, to, { MWWorld::Ptr() }, std::vector<MWWorld::Ptr>(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;
@@ -2693,7 +2674,11 @@ namespace MWWorld
             for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source.getReadOnlyDoors().mList)
             {
                 if (cellId == destDoor.mRef.getDestCell())
-                    return destDoor.mRef.getDoorDest();
+                {
+                    ESM::Position doorDest = destDoor.mRef.getDoorDest();
+                    doorDest.rot[0] = doorDest.rot[1] = doorDest.rot[2] = 0;
+                    return doorDest;
+                }
             }
             for (const MWWorld::LiveCellRef<ESM4::Door>& destDoor : source.getReadOnlyEsm4Doors().mList)
             {
@@ -2795,7 +2780,7 @@ namespace MWWorld
 
         int x = ext->getGridX();
         int y = ext->getGridY();
-        osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
+        const osg::Vec2f posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
         pos.pos[0] = posFromIndex.x();
         pos.pos[1] = posFromIndex.y();
 
@@ -2959,96 +2944,82 @@ namespace MWWorld
         return result;
     }
 
-    void World::castSpell(const Ptr& actor, bool manualSpell)
+    void World::castSpell(const Ptr& actor, bool scriptedSpell)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit
-        // result.
-        std::vector<MWWorld::Ptr> targetActors;
-        if (!actor.isEmpty() && actor != MWMechanics::getPlayer() && !manualSpell)
-            stats.getAiSequence().getCombatTargets(targetActors);
-
-        const float fCombatDistance = mStore.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
-
-        osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
-
-        // for player we can take faced object first
+        const bool casterIsPlayer = actor == MWMechanics::getPlayer();
         MWWorld::Ptr target;
-        if (actor == MWMechanics::getPlayer())
-            target = getFacedObject();
-
-        // if the faced object can not be activated, do not use it
-        if (!target.isEmpty() && !target.getClass().hasToolTip(target))
-            target = nullptr;
-
-        if (target.isEmpty())
+        // For scripted spells we should not use hit contact
+        if (scriptedSpell)
         {
-            // For scripted spells we should not use hit contact
-            if (manualSpell)
+            if (!casterIsPlayer)
             {
-                if (actor != MWMechanics::getPlayer())
+                for (const auto& package : stats.getAiSequence())
                 {
-                    for (const auto& package : stats.getAiSequence())
+                    if (package->getTypeId() == MWMechanics::AiPackageTypeId::Cast)
                     {
-                        if (package->getTypeId() == MWMechanics::AiPackageTypeId::Cast)
-                        {
-                            target = package->getTarget();
-                            break;
-                        }
+                        target = package->getTarget();
+                        break;
                     }
                 }
             }
-            else
+        }
+        else
+        {
+            if (casterIsPlayer)
+                target = getFacedObject();
+
+            if (target.isEmpty() || !target.getClass().hasToolTip(target))
             {
-                // For actor targets, we want to use hit contact with bounding boxes.
+                // For actor targets, we want to use melee hit contact.
                 // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would
-                // be very hard to aim at otherwise. For object targets, we want the detailed shapes (rendering
-                // raycast). If we used the bounding boxes for static objects, then we would not be able to target e.g.
+                // be very hard to aim at otherwise.
+                // For object targets, we want the detailed shapes (rendering raycast).
+                // If we used the bounding boxes for static objects, then we would not be able to target e.g.
                 // objects lying on a shelf.
-                std::pair<MWWorld::Ptr, osg::Vec3f> result1 = getHitContact(actor, fCombatDistance, targetActors);
+                const float fCombatDistance = mStore.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
+                target = MWMechanics::getHitContact(actor, fCombatDistance).first;
 
-                // Get the target to use for "on touch" effects, using the facing direction from Head node
-                osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
-
-                osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1, 0, 0))
-                    * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
-
-                osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
-                float distance = getMaxActivationDistance();
-                osg::Vec3f dest = origin + direction * distance;
-
-                MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
-
-                float dist1 = std::numeric_limits<float>::max();
-                float dist2 = std::numeric_limits<float>::max();
-
-                if (!result1.first.isEmpty() && result1.first.getClass().isActor())
-                    dist1 = (origin - result1.second).length();
-                if (result2.mHit)
-                    dist2 = (origin - result2.mHitPointWorld).length();
-
-                if (!result1.first.isEmpty() && result1.first.getClass().isActor())
+                if (target.isEmpty())
                 {
-                    target = result1.first;
-                    hitPosition = result1.second;
-                    if (dist1 > getMaxActivationDistance())
-                        target = nullptr;
-                }
-                else if (result2.mHit)
-                {
-                    target = result2.mHitObject;
-                    hitPosition = result2.mHitPointWorld;
-                    if (dist2 > getMaxActivationDistance() && !target.isEmpty()
-                        && !target.getClass().hasToolTip(target))
-                        target = nullptr;
+                    // Get the target using the facing direction from Head node
+                    const osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
+                    const osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1, 0, 0))
+                        * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
+                    const osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
+                    const osg::Vec3f dest = origin + direction * getMaxActivationDistance();
+                    const MWRender::RenderingManager::RayResult result = mRendering->castRay(origin, dest, true, true);
+                    if (result.mHit)
+                        target = result.mHitObject;
                 }
             }
         }
 
+        osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
+        if (!target.isEmpty())
+        {
+            // Touch explosion placement doesn't depend on where the target was "touched".
+            // In Morrowind, it's at 0.7 of the actor's AABB height for actors
+            // or at 0.7 of the player's height for non-actors if the player is the caster
+            // This is probably meant to prevent the explosion from being too far above on large objects
+            // but it often puts the explosions way above small objects, so we'll deviate here
+            // and use the object's bounds when reasonable (it's $CURRENT_YEAR, we can afford that)
+            // Note collision object origin is intentionally not used
+            hitPosition = target.getRefData().getPosition().asVec3();
+            constexpr float explosionHeight = 0.7f;
+            float targetHeight = getHalfExtents(target).z() * 2.f;
+            if (!target.getClass().isActor() && casterIsPlayer)
+            {
+                const float playerHeight = getHalfExtents(actor).z() * 2.f;
+                targetHeight = std::min(targetHeight, playerHeight);
+            }
+            hitPosition.z() += targetHeight * explosionHeight;
+        }
+
         const ESM::RefId& selectedSpell = stats.getSpells().getSelectedSpell();
 
-        MWMechanics::CastSpell cast(actor, target, false, manualSpell);
+        MWMechanics::CastSpell cast(actor, target, false, scriptedSpell);
         cast.mHitPosition = hitPosition;
 
         if (!selectedSpell.empty())
@@ -3093,8 +3064,8 @@ namespace MWWorld
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
         // Check for impact, if yes, handle hit, if not, launch projectile
-        MWPhysics::RayCastingResult result
-            = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(
+            sourcePos, worldPos, { actor }, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
         if (result.mHit)
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
         else
@@ -3280,22 +3251,71 @@ namespace MWWorld
 
     MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, const ESM::RefId& id)
     {
-        MWWorld::ConstPtr closestMarker;
-        float closestDistance = std::numeric_limits<float>::max();
+        const ESM::ExteriorCellLocation posIndex = ESM::positionToExteriorCellLocation(worldPos.x(), worldPos.y());
 
-        std::vector<MWWorld::Ptr> markers;
+        // Potential optimization: don't scan the entire world for markers and actually do the Todd spiral
+        std::vector<Ptr> markers;
         mWorldModel.getExteriorPtrs(id, markers);
+
+        struct MarkerInfo
+        {
+            Ptr mPtr;
+            int mColumn, mRow; // Local coordinates in the valid marker grid
+        };
+        std::vector<MarkerInfo> validMarkers;
+        validMarkers.reserve(markers.size());
+
+        // The idea is to collect all markers that belong to the smallest possible square grid around worldPos
+        // They are grouped with their position on that grid's edge where the origin is the SW corner
+        int minGridSize = std::numeric_limits<int>::max();
         for (const Ptr& marker : markers)
         {
-            osg::Vec3f markerPos = marker.getRefData().getPosition().asVec3();
-            float distance = (worldPos - markerPos).length2();
-            if (distance < closestDistance)
+            const osg::Vec3f markerPos = marker.getRefData().getPosition().asVec3();
+            const ESM::ExteriorCellLocation index = ESM::positionToExteriorCellLocation(markerPos.x(), markerPos.y());
+
+            const int deltaX = index.mX - posIndex.mX;
+            const int deltaY = index.mY - posIndex.mY;
+            const int gridSize = std::max(std::abs(deltaX), std::abs(deltaY)) * 2;
+            if (gridSize == 0)
+                return marker;
+
+            if (gridSize <= minGridSize)
             {
-                closestDistance = distance;
-                closestMarker = marker;
+                if (gridSize < minGridSize)
+                {
+                    validMarkers.clear();
+                    minGridSize = gridSize;
+                }
+                validMarkers.push_back({ marker, gridSize / 2 + deltaX, gridSize / 2 + deltaY });
             }
         }
 
+        ConstPtr closestMarker;
+        if (validMarkers.empty())
+            return closestMarker;
+        if (validMarkers.size() == 1)
+            return validMarkers[0].mPtr;
+
+        // All the markers are on the edge of the grid
+        // Break ties by picking the earliest marker on SW -> SE -> NE -> NW -> SW path
+        int earliestDistance = std::numeric_limits<int>::max();
+        for (const MarkerInfo& marker : validMarkers)
+        {
+            int distance = 0;
+            if (marker.mRow == 0) // South edge (plus SW and SE corners)
+                distance = marker.mColumn;
+            else if (marker.mColumn == minGridSize) // East edge and NE corner
+                distance = minGridSize + marker.mRow;
+            else if (marker.mRow == minGridSize) // North edge and NW corner
+                distance = minGridSize * 3 - marker.mColumn;
+            else // West edge
+                distance = minGridSize * 4 - marker.mRow;
+            if (distance < earliestDistance)
+            {
+                closestMarker = marker.mPtr;
+                earliestDistance = distance;
+            }
+        }
         return closestMarker;
     }
 
@@ -3365,7 +3385,7 @@ namespace MWWorld
                 >= mSquaredDist)
                 return true;
 
-            if (!ptr.getRefData().isEnabled() || ptr.getRefData().isDeleted())
+            if (!ptr.getRefData().isEnabled() || ptr.mRef->isDeleted())
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in
@@ -3389,9 +3409,10 @@ namespace MWWorld
                                     return true;
                                 }
                             }
-                            catch (const std::exception&)
+                            catch (const std::exception& e)
                             {
-                                // Ignore invalid item id
+                                Log(Debug::Warning)
+                                    << "Failed to process container item " << containerItem.mItem << ": " << e.what();
                             }
                         }
                     }
@@ -3660,15 +3681,16 @@ namespace MWWorld
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
-        std::string model = Misc::ResourceHelpers::correctMeshPath(
-            std::string{ Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))) }, // [0, 2]
-            mResourceSystem->getVFS());
+        // [0, 2]
+        const int number = Misc::Rng::rollDice(3);
+        const VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(
+            VFS::Path::Normalized(Fallback::Map::getString("Blood_Model_" + std::to_string(number))));
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
 
-    void World::spawnEffect(const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos,
-        float scale, bool isMagicVFX)
+    void World::spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
+        const osg::Vec3f& worldPos, float scale, bool isMagicVFX)
     {
         mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
     }
@@ -3719,49 +3741,44 @@ namespace MWWorld
         return (targetPos - weaponPos);
     }
 
-    float World::getHitDistance(const ConstPtr& actor, const ConstPtr& target)
+    namespace
     {
-        osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
-        osg::Vec3f halfExtents = mPhysics->getHalfExtents(actor);
-        weaponPos.z() += halfExtents.z();
-
-        return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
-    }
-
-    void preload(MWWorld::Scene* scene, const ESMStore& store, const ESM::RefId& obj)
-    {
-        if (obj.empty())
-            return;
-        try
+        void preload(MWWorld::Scene* scene, const ESMStore& store, const ESM::RefId& obj)
         {
-            MWWorld::ManualRef ref(store, obj);
-            std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
-            if (!model.empty())
-                scene->preload(model, ref.getPtr().getClass().useAnim());
-        }
-        catch (std::exception&)
-        {
+            if (obj.empty())
+                return;
+            try
+            {
+                MWWorld::ManualRef ref(store, obj);
+                std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
+                if (!model.empty())
+                    scene->preload(model, ref.getPtr().getClass().useAnim());
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Warning) << "Failed to preload scene object " << obj << ": " << e.what();
+            }
         }
     }
 
     void World::preloadEffects(const ESM::EffectList* effectList)
     {
-        for (const ESM::ENAMstruct& effectInfo : effectList->mList)
+        for (const ESM::IndexedENAMstruct& effectInfo : effectList->mList)
         {
-            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
+            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mData.mEffectID);
 
-            if (MWMechanics::isSummoningEffect(effectInfo.mEffectID))
+            if (MWMechanics::isSummoningEffect(effectInfo.mData.mEffectID))
             {
                 preload(mWorldScene.get(), mStore, ESM::RefId::stringRefId("VFX_Summon_Start"));
-                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(effectInfo.mEffectID));
+                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(effectInfo.mData.mEffectID));
             }
 
             preload(mWorldScene.get(), mStore, effect->mCasting);
             preload(mWorldScene.get(), mStore, effect->mHit);
 
-            if (effectInfo.mArea > 0)
+            if (effectInfo.mData.mArea > 0)
                 preload(mWorldScene.get(), mStore, effect->mArea);
-            if (effectInfo.mRange == ESM::RT_Target)
+            if (effectInfo.mData.mRange == ESM::RT_Target)
                 preload(mWorldScene.get(), mStore, effect->mBolt);
         }
     }
@@ -3829,12 +3846,7 @@ namespace MWWorld
     {
         DetourNavigator::reportStats(mNavigator->getStats(), frameNumber, stats);
         mPhysics->reportStats(frameNumber, stats);
-    }
-
-    void World::updateSkyDate()
-    {
-        ESM::EpochTimeStamp currentDate = mTimeManager->getEpochTimeStamp();
-        mRendering->skySetDate(currentDate.mDay, currentDate.mMonth);
+        mWorldScene->reportStats(frameNumber, stats);
     }
 
     std::vector<MWWorld::Ptr> World::getAll(const ESM::RefId& id)

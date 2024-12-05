@@ -1,6 +1,7 @@
 #include "apparatus.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -15,9 +16,9 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -35,17 +36,14 @@ namespace MWClass
         }
     }
 
-    std::string Apparatus::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Apparatus::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Apparatus>(ptr);
     }
 
     std::string_view Apparatus::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Apparatus>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Apparatus::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -92,8 +90,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -103,10 +100,10 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

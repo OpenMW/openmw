@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Enchantment::ENDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mType, v.mCost, v.mCharge, v.mFlags);
+    }
+
     void Enchantment::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -23,7 +31,7 @@ namespace ESM
                     hasName = true;
                     break;
                 case fourCC("ENDT"):
-                    esm.getHT(mData.mType, mData.mCost, mData.mCharge, mData.mFlags);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("ENAM"):
@@ -55,7 +63,7 @@ namespace ESM
             return;
         }
 
-        esm.writeHNT("ENDT", mData, 16);
+        esm.writeNamedComposite("ENDT", mData);
         mEffects.save(esm);
     }
 

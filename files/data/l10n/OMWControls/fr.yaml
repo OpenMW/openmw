@@ -1,16 +1,87 @@
 ControlsPage: "OpenMW : Contrôles"
-ControlsPageDescription: "Paramètres additionnels de contrôle"
+ControlsPageDescription: "Paramètres additionnels des contrôles d'OpenMW"
 
 MovementSettings: "Mouvements"
 
 alwaysRun: "Course permanente"
 alwaysRunDescription: |
-    Actif : Le personnage se déplace par défaut en courant ; \n\n
-    Inactif : Le personnage se déplace par défaut en marchant.\n\n
-    La touche Maj.  inverse temporairement ce paramètre.\n\n
+    Actif : Le personnage se déplace par défaut en courant ;
+    Inactif : Le personnage se déplace par défaut en marchant.
+    La touche Maj.  inverse temporairement ce paramètre.
     La touche Verr Maj inverse ce paramètre lorsqu'elle est verrouillée.
+
 toggleSneak: "Mode discrétion maintenu"
 toggleSneakDescription: |
-    Une simple pression de la touche associée (Ctrl par défaut) active le mode discrétion, une seconde pression désactive le mode discrétion.\n\n
-    Il n'est plus nécessaire de maintenir une touche appuyée pour que le mode discrétion soit actif.\n\n
+    Une simple pression de la touche associée (Ctrl par défaut) active le mode discrétion, une seconde pression désactive le mode discrétion.
+    Il n'est plus nécessaire de maintenir une touche appuyée pour que le mode discrétion soit actif.
     Certains joueurs ayant une utilisation intensive du mode discrétion considèrent qu'il est plus aisé de contrôler leur personnage ainsi.
+
+smoothControllerMovement: "Mouvements à la manette adoucis"
+smoothControllerMovementDescription: |
+    Active le lissage des mouvements du stick analogique. Ceci permet une transition entre marche et course moins abrupte.
+
+TogglePOV_name: "Changer de vue"
+TogglePOV_description: "Change entre la vue à la première et la troisième personne. Maintenir la touche pour activer le mode attente."
+
+Zoom3rdPerson_name: "Zoom Avant/Arrière"
+Zoom3rdPerson_description: "Approche / éloigne la caméra lorsque la caméra est à la troisième personne."
+
+MoveForward_name: "En avant"
+MoveForward_description: "Annulé par En arrière."
+
+MoveBackward_name: "En arrière"
+MoveBackward_description: "Annulé par En avant."
+
+MoveLeft_name: "À gauche"
+MoveLeft_description: "Annulé par Droite."
+
+MoveRight_name: "À droite"
+MoveRight_description: "Annulé par Gauche."
+
+Use_name: "Utiliser"
+Use_description: "Attaque avec une arme ou lance une magie, dépend de la préparation du joueur."
+
+Run_name: "Courir"
+Run_description: "Maintenir pour courir/marcher, en fonction du paramètre Toujours Courir."
+
+AlwaysRun_name: "Toujours courir"
+AlwaysRun_description: "Active le paramètre Toujours courir."
+
+Jump_name: "Sauter"
+Jump_description: "Saute lorsque le joueur touche le sol."
+
+AutoMove_name: "Course automatique"
+AutoMove_description: "Active un mouvement continu vers l'avant."
+
+Sneak_name: "Discrétion"
+Sneak_description: "Maintenez la touche si le paramètre Mode discrétion maintenu est désactivé."
+
+ToggleSneak_name: "Maintenir la discrétion"
+ToggleSneak_description: "Entre en mode discrétion si le paramètre Mode discrétion maintenu est activé."
+
+ToggleWeapon_name: "Préparer arme"
+ToggleWeapon_description: "Entre ou sort de la position armée."
+
+ToggleSpell_name: "Préparer sort"
+ToggleSpell_description: "Entre ou sort de la position lanceur de sort."
+
+Inventory_name: "Inventaire"
+Inventory_description: "Ouvre l'inventaire."
+
+Journal_name: "Journal"
+Journal_description: "Ouvre le journal."
+
+QuickKeysMenu_name: "Menu Touches rapides"
+QuickKeysMenu_description: "Ouvre le menu des touches rapides."
+
+SmoothMoveForward_name: "En avant, doux"
+SmoothMoveForward_description: "Déplace le joueur en avant, avec une transition douce entre la marche et la course."
+
+SmoothMoveBackward_name: "En arrière, doux"
+SmoothMoveBackward_description: "Déplace le joueur en arrière, avec une transition douce entre la marche et la course."
+
+SmoothMoveLeft_name: "À gauche, doux"
+SmoothMoveLeft_description: "Déplace le joueur à gauche, avec une transition douce entre la marche et la course.."
+
+SmoothMoveRight_name: "À droite, doux"
+SmoothMoveRight_description: "Déplace le joueur à droite, avec une transition douce entre la marche et la course."

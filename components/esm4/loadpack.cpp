@@ -42,10 +42,10 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_PKDT:
+            case ESM::fourCC("PKDT"):
             {
                 if (subHdr.dataSize != sizeof(PKDT) && subHdr.dataSize == 4)
                 {
@@ -60,7 +60,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PSDT: // reader.get(mSchedule); break;
+            case ESM::fourCC("PSDT"): // reader.get(mSchedule); break;
             {
                 if (subHdr.dataSize != sizeof(mSchedule))
                     reader.skipSubRecordData(); // FIXME:
@@ -69,7 +69,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PLDT:
+            case ESM::fourCC("PLDT"):
             {
                 if (subHdr.dataSize != sizeof(mLocation))
                     reader.skipSubRecordData(); // FIXME:
@@ -82,7 +82,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_PTDT:
+            case ESM::fourCC("PTDT"):
             {
                 if (subHdr.dataSize != sizeof(mTarget))
                     reader.skipSubRecordData(); // FIXME: FO3
@@ -95,7 +95,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_CTDA:
+            case ESM::fourCC("CTDA"):
             {
                 if (subHdr.dataSize != sizeof(CTDA))
                 {
@@ -103,7 +103,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
                     break;
                 }
 
-                static CTDA condition;
+                CTDA condition;
                 reader.get(condition);
                 // FIXME: how to "unadjust" if not FormId?
                 // adjustFormId(condition.param1);
@@ -112,55 +112,55 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_CTDT: // always 20 for TES4
-            case ESM4::SUB_TNAM: // FO3
-            case ESM4::SUB_INAM: // FO3
-            case ESM4::SUB_CNAM: // FO3
-            case ESM4::SUB_SCHR: // FO3
-            case ESM4::SUB_POBA: // FO3
-            case ESM4::SUB_POCA: // FO3
-            case ESM4::SUB_POEA: // FO3
-            case ESM4::SUB_SCTX: // FO3
-            case ESM4::SUB_SCDA: // FO3
-            case ESM4::SUB_SCRO: // FO3
-            case ESM4::SUB_IDLA: // FO3
-            case ESM4::SUB_IDLC: // FO3
-            case ESM4::SUB_IDLF: // FO3
-            case ESM4::SUB_IDLT: // FO3
-            case ESM4::SUB_PKDD: // FO3
-            case ESM4::SUB_PKD2: // FO3
-            case ESM4::SUB_PKPT: // FO3
-            case ESM4::SUB_PKED: // FO3
-            case ESM4::SUB_PKE2: // FO3
-            case ESM4::SUB_PKAM: // FO3
-            case ESM4::SUB_PUID: // FO3
-            case ESM4::SUB_PKW3: // FO3
-            case ESM4::SUB_PTD2: // FO3
-            case ESM4::SUB_PLD2: // FO3
-            case ESM4::SUB_PKFD: // FO3
-            case ESM4::SUB_SLSD: // FO3
-            case ESM4::SUB_SCVR: // FO3
-            case ESM4::SUB_SCRV: // FO3
-            case ESM4::SUB_IDLB: // FO3
-            case ESM4::SUB_ANAM: // TES5
-            case ESM4::SUB_BNAM: // TES5
-            case ESM4::SUB_FNAM: // TES5
-            case ESM4::SUB_PNAM: // TES5
-            case ESM4::SUB_QNAM: // TES5
-            case ESM4::SUB_UNAM: // TES5
-            case ESM4::SUB_XNAM: // TES5
-            case ESM4::SUB_PDTO: // TES5
-            case ESM4::SUB_PTDA: // TES5
-            case ESM4::SUB_PFOR: // TES5
-            case ESM4::SUB_PFO2: // TES5
-            case ESM4::SUB_PRCB: // TES5
-            case ESM4::SUB_PKCU: // TES5
-            case ESM4::SUB_PKC2: // TES5
-            case ESM4::SUB_CITC: // TES5
-            case ESM4::SUB_CIS1: // TES5
-            case ESM4::SUB_CIS2: // TES5
-            case ESM4::SUB_VMAD: // TES5
-            case ESM4::SUB_TPIC: // TES5
+            case ESM::fourCC("CTDT"): // always 20 for TES4
+            case ESM::fourCC("TNAM"): // FO3
+            case ESM::fourCC("INAM"): // FO3
+            case ESM::fourCC("CNAM"): // FO3
+            case ESM::fourCC("SCHR"): // FO3
+            case ESM::fourCC("POBA"): // FO3
+            case ESM::fourCC("POCA"): // FO3
+            case ESM::fourCC("POEA"): // FO3
+            case ESM::fourCC("SCTX"): // FO3
+            case ESM::fourCC("SCDA"): // FO3
+            case ESM::fourCC("SCRO"): // FO3
+            case ESM::fourCC("IDLA"): // FO3
+            case ESM::fourCC("IDLC"): // FO3
+            case ESM::fourCC("IDLF"): // FO3
+            case ESM::fourCC("IDLT"): // FO3
+            case ESM::fourCC("PKDD"): // FO3
+            case ESM::fourCC("PKD2"): // FO3
+            case ESM::fourCC("PKPT"): // FO3
+            case ESM::fourCC("PKED"): // FO3
+            case ESM::fourCC("PKE2"): // FO3
+            case ESM::fourCC("PKAM"): // FO3
+            case ESM::fourCC("PUID"): // FO3
+            case ESM::fourCC("PKW3"): // FO3
+            case ESM::fourCC("PTD2"): // FO3
+            case ESM::fourCC("PLD2"): // FO3
+            case ESM::fourCC("PKFD"): // FO3
+            case ESM::fourCC("SLSD"): // FO3
+            case ESM::fourCC("SCVR"): // FO3
+            case ESM::fourCC("SCRV"): // FO3
+            case ESM::fourCC("IDLB"): // FO3
+            case ESM::fourCC("ANAM"): // TES5
+            case ESM::fourCC("BNAM"): // TES5
+            case ESM::fourCC("FNAM"): // TES5
+            case ESM::fourCC("PNAM"): // TES5
+            case ESM::fourCC("QNAM"): // TES5
+            case ESM::fourCC("UNAM"): // TES5
+            case ESM::fourCC("XNAM"): // TES5
+            case ESM::fourCC("PDTO"): // TES5
+            case ESM::fourCC("PTDA"): // TES5
+            case ESM::fourCC("PFOR"): // TES5
+            case ESM::fourCC("PFO2"): // TES5
+            case ESM::fourCC("PRCB"): // TES5
+            case ESM::fourCC("PKCU"): // TES5
+            case ESM::fourCC("PKC2"): // TES5
+            case ESM::fourCC("CITC"): // TES5
+            case ESM::fourCC("CIS1"): // TES5
+            case ESM::fourCC("CIS2"): // TES5
+            case ESM::fourCC("VMAD"): // TES5
+            case ESM::fourCC("TPIC"): // TES5
                 reader.skipSubRecordData();
                 break;
             default:

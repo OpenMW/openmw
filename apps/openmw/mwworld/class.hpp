@@ -13,8 +13,11 @@
 #include "ptr.hpp"
 
 #include "../mwmechanics/aisetting.hpp"
+#include "../mwmechanics/damagesourcetype.hpp"
+
 #include <components/esm/refid.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace ESM
 {
@@ -142,15 +145,12 @@ namespace MWWorld
         /// (default implementation: throw an exception)
 
         virtual void onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const;
+            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+            const MWMechanics::DamageSourceType sourceType) const;
         ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
         /// true (else fatigue) by \a object (sword, arrow, etc). \a attacker specifies the
-        /// actor responsible for the attack, and \a successful specifies if the hit is
-        /// successful or not.
-
-        virtual void block(const Ptr& ptr) const;
-        ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
-        /// (default implementation: throw an exception)
+        /// actor responsible for the attack. \a successful specifies if the hit is
+        /// successful or not. \a sourceType classifies the damage source.
 
         virtual std::unique_ptr<Action> activate(const Ptr& ptr, const Ptr& actor) const;
         ///< Generate action for activation (default implementation: return a null action).
@@ -167,7 +167,7 @@ namespace MWWorld
         ///< Return inventory store or throw an exception, if class does not have a
         /// inventory store (default implementation: throw an exception)
 
-        virtual bool hasInventoryStore(const Ptr& ptr) const;
+        virtual bool hasInventoryStore(const ConstPtr& ptr) const;
         ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
 
         virtual bool canLock(const ConstPtr& ptr) const;
@@ -276,12 +276,14 @@ namespace MWWorld
 
         virtual int getServices(const MWWorld::ConstPtr& actor) const;
 
-        virtual std::string getModel(const MWWorld::ConstPtr& ptr) const;
+        virtual std::string_view getModel(const MWWorld::ConstPtr& ptr) const;
+
+        virtual VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const;
 
         virtual bool useAnim() const;
         ///< Whether or not to use animated variant of model (default false)
 
-        virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
+        virtual void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 

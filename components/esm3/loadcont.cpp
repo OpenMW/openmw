@@ -100,8 +100,8 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNT("CNDT", mWeight, 4);
-        esm.writeHNT("FLAG", mFlags, 4);
+        esm.writeHNT("CNDT", mWeight);
+        esm.writeHNT("FLAG", mFlags);
 
         esm.writeHNOCRefId("SCRI", mScript);
 

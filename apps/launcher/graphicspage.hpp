@@ -3,7 +3,7 @@
 
 #include "ui_graphicspage.h"
 
-#include <components/settings/settings.hpp>
+#include <components/settings/windowmode.hpp>
 
 namespace Files
 {
@@ -31,7 +31,6 @@ namespace Launcher
         void slotFullScreenChanged(int state);
         void slotStandardToggled(bool checked);
         void slotFramerateLimitToggled(bool checked);
-        void slotShadowDistLimitToggled(bool checked);
 
     private:
         QVector<QStringList> mResolutionsPerScreen;
@@ -40,6 +39,7 @@ namespace Launcher
         static QRect getMaximumResolution();
 
         bool setupSDL();
+        void handleWindowModeChange(Settings::WindowMode state);
     };
 }
 #endif

@@ -32,7 +32,7 @@ namespace MWState
         void addSlot(const ESM::SavedGame& profile);
 
     public:
-        Character(std::filesystem::path saves, const std::string& game);
+        Character(const std::filesystem::path& saves, const std::string& game);
 
         void cleanup();
         ///< Delete the directory we used, if it is empty

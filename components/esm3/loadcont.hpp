@@ -19,7 +19,7 @@ namespace ESM
 
     struct ContItem
     {
-        int mCount{ 0 };
+        int32_t mCount{ 0 };
         ESM::RefId mItem;
     };
 
@@ -48,12 +48,12 @@ namespace ESM
             Unknown = 8
         };
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mScript;
         std::string mName, mModel;
 
         float mWeight; // Not sure, might be max total weight allowed?
-        int mFlags;
+        int32_t mFlags;
         InventoryList mInventory;
 
         void load(ESMReader& esm, bool& isDeleted);

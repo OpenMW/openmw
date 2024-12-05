@@ -9,6 +9,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -63,7 +64,7 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 {
     if (!mCachedTarget.isEmpty())
     {
-        if (mCachedTarget.getRefData().isDeleted() || !mCachedTarget.getRefData().isEnabled())
+        if (mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
             mCachedTarget = MWWorld::Ptr();
         else
             return mCachedTarget;
@@ -97,6 +98,26 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
     return mCachedTarget;
 }
 
+bool MWMechanics::AiPackage::targetIs(const MWWorld::Ptr& ptr) const
+{
+    if (mTargetActorId == -2)
+        return ptr.isEmpty();
+    else if (mTargetActorId == -1)
+    {
+        if (mTargetActorRefId.empty())
+        {
+            mTargetActorId = -2;
+            return ptr.isEmpty();
+        }
+        if (!ptr.isEmpty() && ptr.getCellRef().getRefId() == mTargetActorRefId)
+            return getTarget() == ptr;
+        return false;
+    }
+    if (ptr.isEmpty() || !ptr.getClass().isActor())
+        return false;
+    return ptr.getClass().getCreatureStats(ptr).getActorId() == mTargetActorId;
+}
+
 void MWMechanics::AiPackage::reset()
 {
     // reset all members
@@ -120,12 +141,12 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     MWBase::World* world = MWBase::Environment::get().getWorld();
     const DetourNavigator::AgentBounds agentBounds = world->getPathfindingAgentBounds(actor);
 
-    /// Stops the actor when it gets too close to a unloaded cell
-    //... At current time, this test is unnecessary. AI shuts down when actor is more than "actors processing range"
-    // setting value
-    //... units from player, and exterior cells are 8192 units long and wide.
+    /// Stops the actor when it gets too close to a unloaded cell or when the actor is playing a scripted animation
+    //... At current time, the first test is unnecessary. AI shuts down when actor is more than
+    //... "actors processing range" setting value units from player, and exterior cells are 8192 units long and wide.
     //... But AI processing distance may increase in the future.
-    if (isNearInactiveCell(position))
+    if (isNearInactiveCell(position)
+        || MWBase::Environment::get().getMechanicsManager()->checkScriptedAnimationPlaying(actor))
     {
         actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
@@ -157,8 +178,10 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             {
                 const ESM::Pathgrid* pathgrid
                     = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
+                const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+                const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
                 mPathFinder.buildLimitedPath(actor, position, dest, actor.getCell(), getPathGridGraph(pathgrid),
-                    agentBounds, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, pathType);
+                    agentBounds, navigatorFlags, areaCosts, endTolerance, pathType);
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -486,13 +509,11 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
     return result;
 }
 
-DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::Ptr& actor) const
+DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(
+    const MWWorld::Ptr& actor, DetourNavigator::Flags flags) const
 {
     DetourNavigator::AreaCosts costs;
-    const DetourNavigator::Flags flags = getNavigatorFlags(actor);
     const MWWorld::Class& actorClass = actor.getClass();
-
-    const float swimSpeed = (flags & DetourNavigator::Flag_swim) == 0 ? 0.0f : actorClass.getSwimSpeed(actor);
 
     const float walkSpeed = [&] {
         if ((flags & DetourNavigator::Flag_walk) == 0)
@@ -500,6 +521,14 @@ DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::P
         if (getTypeId() == AiPackageTypeId::Wander)
             return actorClass.getWalkSpeed(actor);
         return actorClass.getRunSpeed(actor);
+    }();
+
+    const float swimSpeed = [&] {
+        if ((flags & DetourNavigator::Flag_swim) == 0)
+            return 0.0f;
+        if (hasWaterWalking(actor))
+            return walkSpeed;
+        return actorClass.getSwimSpeed(actor);
     }();
 
     const float maxSpeed = std::max(swimSpeed, walkSpeed);

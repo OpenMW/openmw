@@ -12,6 +12,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadmisc.hpp>
@@ -30,15 +31,21 @@
 #include <components/esm4/loadclot.hpp>
 #include <components/esm4/loadcont.hpp>
 #include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadflor.hpp>
 #include <components/esm4/loadfurn.hpp>
+#include <components/esm4/loadimod.hpp>
 #include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadmisc.hpp>
+#include <components/esm4/loadmstt.hpp>
 #include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadscol.hpp>
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/loadtree.hpp>
 #include <components/esm4/loadweap.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/worldmodel.hpp"
 
@@ -62,7 +69,8 @@ namespace MWLua
     template <class CellT, class ObjectT>
     static void initCellBindings(const std::string& prefix, const Context& context)
     {
-        sol::usertype<CellT> cellT = context.mLua->sol().new_usertype<CellT>(prefix + "Cell");
+        auto view = context.sol();
+        sol::usertype<CellT> cellT = view.new_usertype<CellT>(prefix + "Cell");
 
         cellT[sol::meta_function::equal_to] = [](const CellT& a, const CellT& b) { return a.mStore == b.mStore; };
         cellT[sol::meta_function::to_string] = [](const CellT& c) {
@@ -77,6 +85,8 @@ namespace MWLua
         };
 
         cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getNameId(); });
+        cellT["id"]
+            = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getId().serializeText(); });
         cellT["region"] = sol::readonly_property(
             [](const CellT& c) -> std::string { return c.mStore->getCell()->getRegion().serializeText(); });
         cellT["worldSpaceId"] = sol::readonly_property(
@@ -109,15 +119,21 @@ namespace MWLua
             return cell == c.mStore || (cell->getCell()->getWorldSpace() == c.mStore->getCell()->getWorldSpace());
         };
 
+        cellT["waterLevel"] = sol::readonly_property([](const CellT& c) -> sol::optional<float> {
+            if (c.mStore->getCell()->hasWater())
+                return c.mStore->getWaterLevel();
+            else
+                return sol::nullopt;
+        });
+
         if constexpr (std::is_same_v<CellT, GCell>)
         { // only for global scripts
-            cellT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
-                                  const CellT& cell, sol::optional<sol::table> type) {
+            cellT["getAll"] = [ids = getPackageToTypeTable(view)](const CellT& cell, sol::optional<sol::table> type) {
                 if (cell.mStore->getState() != MWWorld::CellStore::State_Loaded)
                     cell.mStore->load();
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
-                    if (ptr.getRefData().isDeleted())
+                    if (ptr.mRef->isDeleted())
                         return true;
                     MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     if (getLiveCellRefType(ptr.mRef) == ptr.getType())
@@ -198,6 +214,9 @@ namespace MWLua
                         case ESM::REC_STAT:
                             cell.mStore->template forEachType<ESM::Static>(visitor);
                             break;
+                        case ESM::REC_LEVC:
+                            cell.mStore->template forEachType<ESM::CreatureLevList>(visitor);
+                            break;
 
                         case ESM::REC_ACTI4:
                             cell.mStore->template forEachType<ESM4::Activator>(visitor);
@@ -220,8 +239,14 @@ namespace MWLua
                         case ESM::REC_DOOR4:
                             cell.mStore->template forEachType<ESM4::Door>(visitor);
                             break;
+                        case ESM::REC_FLOR4:
+                            cell.mStore->template forEachType<ESM4::Flora>(visitor);
+                            break;
                         case ESM::REC_FURN4:
                             cell.mStore->template forEachType<ESM4::Furniture>(visitor);
+                            break;
+                        case ESM::REC_IMOD4:
+                            cell.mStore->template forEachType<ESM4::ItemMod>(visitor);
                             break;
                         case ESM::REC_INGR4:
                             cell.mStore->template forEachType<ESM4::Ingredient>(visitor);
@@ -232,8 +257,14 @@ namespace MWLua
                         case ESM::REC_MISC4:
                             cell.mStore->template forEachType<ESM4::MiscItem>(visitor);
                             break;
+                        case ESM::REC_MSTT4:
+                            cell.mStore->template forEachType<ESM4::MovableStatic>(visitor);
+                            break;
                         case ESM::REC_ALCH4:
                             cell.mStore->template forEachType<ESM4::Potion>(visitor);
+                            break;
+                        case ESM::REC_SCOL4:
+                            cell.mStore->template forEachType<ESM4::StaticCollection>(visitor);
                             break;
                         case ESM::REC_STAT4:
                             cell.mStore->template forEachType<ESM4::Static>(visitor);
@@ -252,7 +283,7 @@ namespace MWLua
                 if (!ok)
                     throw std::runtime_error(
                         std::string("Incorrect type argument in cell:getAll: " + LuaUtil::toString(*type)));
-                return GObjectList{ res };
+                return GObjectList{ std::move(res) };
             };
         }
     }

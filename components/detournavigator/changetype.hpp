@@ -6,15 +6,9 @@ namespace DetourNavigator
     enum class ChangeType
     {
         remove = 0,
-        mixed = 1,
-        add = 2,
-        update = 3,
+        add = 1,
+        update = 2,
     };
-
-    inline ChangeType addChangeType(const ChangeType current, const ChangeType add)
-    {
-        return current == add ? current : ChangeType::mixed;
-    }
 }
 
 #endif

@@ -1,12 +1,19 @@
 #include "loadcrea.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/concepts.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Creature::NPDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mType, v.mLevel, v.mAttributes, v.mHealth, v.mMana, v.mFatigue, v.mSoul, v.mCombat, v.mMagic, v.mStealth,
+            v.mAttack, v.mGold);
+    }
 
     void Creature::load(ESMReader& esm, bool& isDeleted)
     {
@@ -48,7 +55,7 @@ namespace ESM
                     mScript = esm.getRefId();
                     break;
                 case fourCC("NPDT"):
-                    esm.getHTSized<96>(mData);
+                    esm.getSubComposite(mData);
                     hasNpdt = true;
                     break;
                 case fourCC("FLAG"):
@@ -68,7 +75,7 @@ namespace ESM
                     mSpells.add(esm);
                     break;
                 case fourCC("AIDT"):
-                    esm.getHExact(&mAiData, sizeof(mAiData));
+                    esm.getSubComposite(mAiData);
                     break;
                 case fourCC("DODT"):
                 case fourCC("DNAM"):
@@ -120,7 +127,7 @@ namespace ESM
         esm.writeHNOCRefId("CNAM", mOriginal);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCRefId("SCRI", mScript);
-        esm.writeHNT("NPDT", mData, 96);
+        esm.writeNamedComposite("NPDT", mData);
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
         if (mScale != 1.0)
         {
@@ -129,7 +136,7 @@ namespace ESM
 
         mInventory.save(esm);
         mSpells.save(esm);
-        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
+        esm.writeNamedComposite("AIDT", mAiData);
         mTransport.save(esm);
         mAiPackage.save(esm);
     }
@@ -139,8 +146,7 @@ namespace ESM
         mRecordFlags = 0;
         mData.mType = 0;
         mData.mLevel = 0;
-        mData.mStrength = mData.mIntelligence = mData.mWillpower = mData.mAgility = mData.mSpeed = mData.mEndurance
-            = mData.mPersonality = mData.mLuck = 0;
+        mData.mAttributes.fill(0);
         mData.mHealth = mData.mMana = mData.mFatigue = 0;
         mData.mSoul = 0;
         mData.mCombat = mData.mMagic = mData.mStealth = 0;

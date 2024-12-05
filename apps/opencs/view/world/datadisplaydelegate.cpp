@@ -17,6 +17,8 @@
 #include <apps/opencs/view/world/enumdelegate.hpp>
 #include <apps/opencs/view/world/util.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 class QModelIndex;
 class QObject;
 
@@ -39,12 +41,43 @@ CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList& values, cons
     , mIconSize(QSize(16, 16))
     , mHorizontalMargin(QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1)
     , mTextLeftOffset(8)
+    , mPixmapsColor(QApplication::palette().text().color())
+    , mUiScale(static_cast<QGuiApplication*>(QGuiApplication::instance())->devicePixelRatio())
     , mSettingKey(pageName + '/' + settingName)
 {
+    if (parent)
+        parent->installEventFilter(this);
+
     buildPixmaps();
 
     if (!pageName.empty())
         updateDisplayMode(CSMPrefs::get()[pageName][settingName].toString());
+}
+
+bool CSVWorld::DataDisplayDelegate::eventFilter(QObject* target, QEvent* event)
+{
+    if (event->type() == QEvent::Resize)
+    {
+        auto uiScale = static_cast<QGuiApplication*>(QGuiApplication::instance())->devicePixelRatio();
+        if (mUiScale != uiScale)
+        {
+            mUiScale = uiScale;
+
+            buildPixmaps();
+        }
+    }
+    else if (event->type() == QEvent::PaletteChange)
+    {
+        QColor themeColor = QApplication::palette().text().color();
+        if (themeColor != mPixmapsColor)
+        {
+            mPixmapsColor = std::move(themeColor);
+
+            buildPixmaps();
+        }
+    }
+
+    return false;
 }
 
 void CSVWorld::DataDisplayDelegate::buildPixmaps()
@@ -161,7 +194,7 @@ void CSVWorld::DataDisplayDelegateFactory::add(int enumValue, const QString& enu
     Icon icon;
     icon.mValue = enumValue;
     icon.mName = enumName;
-    icon.mIcon = QIcon(iconFilename);
+    icon.mIcon = Misc::ScalableIcon::load(iconFilename);
 
     for (auto it = mIcons.begin(); it != mIcons.end(); ++it)
     {

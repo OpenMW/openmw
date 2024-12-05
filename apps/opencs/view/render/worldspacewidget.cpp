@@ -23,6 +23,7 @@
 #include <apps/opencs/view/widget/modebutton.hpp>
 
 #include <components/esm/defs.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include <osg/Camera>
 #include <osg/Group>
@@ -50,6 +51,7 @@
 
 #include "cameracontroller.hpp"
 #include "instancemode.hpp"
+#include "mask.hpp"
 #include "object.hpp"
 #include "pathgridmode.hpp"
 
@@ -73,6 +75,7 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     , mShowToolTips(false)
     , mToolTipDelay(0)
     , mInConstructor(true)
+    , mSelectedNavigationMode(0)
 {
     setAcceptDrops(true);
 
@@ -135,6 +138,19 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
     connect(abortShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &WorldspaceWidget::abortDrag);
 
+    connect(new CSMPrefs::Shortcut("scene-toggle-visibility", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::toggleHiddenInstances);
+
+    connect(new CSMPrefs::Shortcut("scene-unhide-all", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::unhideAll);
+
+    connect(new CSMPrefs::Shortcut("scene-clear-selection", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        [this] { this->clearSelection(Mask_Reference); });
+
+    CSMPrefs::Shortcut* switchPerspectiveShortcut = new CSMPrefs::Shortcut("scene-cam-cycle", this);
+    connect(switchPerspectiveShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::cycleNavigationMode);
+
     mInConstructor = false;
 }
 
@@ -174,11 +190,11 @@ void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 
 void CSVRender::WorldspaceWidget::centerOrbitCameraOnSelection()
 {
-    std::vector<osg::ref_ptr<TagBase>> selection = getSelection(~0u);
+    std::vector<osg::ref_ptr<TagBase>> selection = getSelection(Mask_Reference);
 
     for (std::vector<osg::ref_ptr<TagBase>>::iterator it = selection.begin(); it != selection.end(); ++it)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(it->get()))
+        if (CSVRender::ObjectTag* objectTag = static_cast<CSVRender::ObjectTag*>(it->get()))
         {
             mOrbitCamControl->setCenter(objectTag->mObject->getPosition().asVec3());
         }
@@ -210,7 +226,7 @@ CSVWidget::SceneToolMode* CSVRender::WorldspaceWidget::makeNavigationSelector(CS
         "<li>Hold {free-forward:mod} to speed up movement</li>"
         "</ul>");
     tool->addButton(
-        new CSVRender::OrbitCameraMode(this, QIcon(":scenetoolbar/orbiting-camera"),
+        new CSVRender::OrbitCameraMode(this, Misc::ScalableIcon::load(":scenetoolbar/orbiting-camera"),
             "Orbiting Camera"
             "<ul><li>Always facing the centre point</li>"
             "<li>Rotate around the centre point via {orbit-up}, {orbit-left}, {orbit-down}, {orbit-right} or by moving "
@@ -224,9 +240,11 @@ CSVWidget::SceneToolMode* CSVRender::WorldspaceWidget::makeNavigationSelector(CS
             tool),
         "orbit");
 
-    connect(tool, &CSVWidget::SceneToolMode::modeChanged, this, &WorldspaceWidget::selectNavigationMode);
+    mCameraMode = tool;
 
-    return tool;
+    connect(mCameraMode, &CSVWidget::SceneToolMode::modeChanged, this, &WorldspaceWidget::selectNavigationMode);
+
+    return mCameraMode;
 }
 
 CSVWidget::SceneToolToggle2* CSVRender::WorldspaceWidget::makeSceneVisibilitySelector(CSVWidget::SceneToolbar* parent)
@@ -430,7 +448,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
             osg::Node* node = *nodeIter;
             if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase*>(node->getUserData()))
             {
-                WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
+                WorldspaceHitResult hit = { true, std::move(tag), 0, 0, 0, intersection.getWorldIntersectPoint() };
                 if (intersection.indexList.size() >= 3)
                 {
                     hit.index0 = intersection.indexList[0];
@@ -738,6 +756,44 @@ void CSVRender::WorldspaceWidget::tertiarySelect(bool activate)
 void CSVRender::WorldspaceWidget::speedMode(bool activate)
 {
     mSpeedMode = activate;
+}
+
+void CSVRender::WorldspaceWidget::toggleHiddenInstances()
+{
+    const std::vector<osg::ref_ptr<TagBase>> selection = getSelection(Mask_Reference);
+
+    if (selection.empty())
+        return;
+
+    const CSVRender::ObjectTag* firstSelection = static_cast<CSVRender::ObjectTag*>(selection.begin()->get());
+    assert(firstSelection != nullptr);
+
+    const CSVRender::Mask firstMask
+        = firstSelection->mObject->getRootNode()->getNodeMask() == Mask_Hidden ? Mask_Reference : Mask_Hidden;
+
+    for (const auto& object : selection)
+        if (const auto objectTag = static_cast<CSVRender::ObjectTag*>(object.get()))
+            objectTag->mObject->getRootNode()->setNodeMask(firstMask);
+}
+
+void CSVRender::WorldspaceWidget::cycleNavigationMode()
+{
+    switch (++mSelectedNavigationMode)
+    {
+        case (CameraMode::FirstPerson):
+            mCameraMode->setButton("1st");
+            break;
+        case (CameraMode::Orbit):
+            mCameraMode->setButton("orbit");
+            break;
+        case (CameraMode::Free):
+            mCameraMode->setButton("free");
+            break;
+        default:
+            mCameraMode->setButton("1st");
+            mSelectedNavigationMode = 0;
+            break;
+    }
 }
 
 void CSVRender::WorldspaceWidget::handleInteraction(InteractionType type, bool activate)

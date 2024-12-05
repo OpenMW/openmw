@@ -39,30 +39,30 @@ namespace MWMechanics
     class CreatureStats
     {
         static int sActorId;
-        DrawState mDrawState;
         std::map<ESM::RefId, AttributeValue> mAttributes;
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
+        DrawState mDrawState = DrawState::Nothing;
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
-        bool mDead;
-        bool mDeathAnimationFinished;
-        bool mDied; // flag for OnDeath script function
-        bool mMurdered;
-        int mFriendlyHits;
-        bool mTalkedTo;
-        bool mAlarmed;
-        bool mAttacked;
-        bool mKnockdown;
-        bool mKnockdownOneFrame;
-        bool mKnockdownOverOneFrame;
-        bool mHitRecovery;
-        bool mBlock;
-        unsigned int mMovementFlags;
+        bool mDead = false;
+        bool mDeathAnimationFinished = false;
+        bool mDied = false; // flag for OnDeath script function
+        bool mMurdered = false;
+        int mFriendlyHits = 0;
+        bool mTalkedTo = false;
+        bool mAlarmed = false;
+        bool mAttacked = false;
+        bool mKnockdown = false;
+        bool mKnockdownOneFrame = false;
+        bool mKnockdownOverOneFrame = false;
+        bool mHitRecovery = false;
+        bool mBlock = false;
+        unsigned int mMovementFlags = 0;
 
-        float mFallHeight;
+        float mFallHeight = 0.f;
 
         ESM::RefId mLastHitObject; // The last object to hit this actor
         ESM::RefId mLastHitAttemptObject; // The last object to attempt to hit this actor
@@ -71,21 +71,17 @@ namespace MWMechanics
         MWWorld::TimeStamp mLastRestock;
 
         // The pool of merchant gold (not in inventory)
-        int mGoldPool;
+        int mGoldPool = 0;
 
-        int mActorId;
-        int mHitAttemptActorId; // Stores an actor that attacked this actor. Only one is stored at a time,
-                                // and it is not changed if a different actor attacks. It is cleared when combat ends.
-
-        // The index of the death animation that was played, or -1 if none played
-        signed char mDeathAnimation;
-
-        MWWorld::TimeStamp mTimeOfDeath;
+        int mActorId = -1;
+        // Stores an actor that attacked this actor. Only one is stored at a time, and it is not changed if a different
+        // actor attacks. It is cleared when combat ends.
+        int mHitAttemptActorId = -1;
 
         // The difference between view direction and lower body direction.
-        float mSideMovementAngle;
+        float mSideMovementAngle = 0;
 
-        bool mTeleported = false;
+        MWWorld::TimeStamp mTimeOfDeath;
 
     private:
         std::multimap<int, int> mSummonedCreatures; // <Effect, ActorId>
@@ -95,8 +91,15 @@ namespace MWMechanics
         std::vector<int> mSummonGraveyard;
 
     protected:
-        int mLevel;
-        bool mAttackingOrSpell;
+        std::string mAttackType;
+        int mLevel = 0;
+        bool mAttackingOrSpell = false;
+
+    private:
+        // The index of the death animation that was played, or -1 if none played
+        signed char mDeathAnimation = -1;
+
+        bool mTeleported = false;
 
     public:
         CreatureStats();
@@ -130,6 +133,7 @@ namespace MWMechanics
         const MagicEffects& getMagicEffects() const;
 
         bool getAttackingOrSpell() const { return mAttackingOrSpell; }
+        std::string_view getAttackType() const { return mAttackType; }
 
         int getLevel() const;
 
@@ -155,6 +159,8 @@ namespace MWMechanics
         void modifyMagicEffects(const MagicEffects& effects);
 
         void setAttackingOrSpell(bool attackingOrSpell) { mAttackingOrSpell = attackingOrSpell; }
+
+        void setAttackType(std::string_view attackType) { mAttackType = attackType; }
 
         void setLevel(int level);
 
@@ -199,6 +205,8 @@ namespace MWMechanics
 
         void friendlyHit();
         ///< Increase number of friendly hits by one.
+
+        void resetFriendlyHits();
 
         bool hasTalkedToPlayer() const;
         ///< Has this creature talked with the player before?
@@ -294,7 +302,7 @@ namespace MWMechanics
         bool wasTeleported() const { return mTeleported; }
         void setTeleported(bool v) { mTeleported = v; }
 
-        const std::map<ESM::RefId, AttributeValue> getAttributes() const { return mAttributes; }
+        const std::map<ESM::RefId, AttributeValue>& getAttributes() const { return mAttributes; }
     };
 }
 

@@ -41,22 +41,22 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_LVLD:
+            case ESM::fourCC("LVLD"):
                 reader.get(mChanceNone);
                 break;
-            case ESM4::SUB_LVLF:
+            case ESM::fourCC("LVLF"):
                 reader.get(mLvlItemFlags);
                 mHasLvlItemFlags = true;
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 reader.get(mData);
                 break;
-            case ESM4::SUB_LVLO:
+            case ESM::fourCC("LVLO"):
             {
-                static LVLO lvlo;
+                LVLO lvlo;
                 if (subHdr.dataSize != 12)
                 {
                     if (subHdr.dataSize == 8)
@@ -76,14 +76,14 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
                 mLvlObject.push_back(lvlo);
                 break;
             }
-            case ESM4::SUB_LLCT:
-            case ESM4::SUB_OBND: // FO3/FONV
-            case ESM4::SUB_COED: // FO3/FONV
-            case ESM4::SUB_LVLG: // FO3/FONV
-            case ESM4::SUB_LLKC: // FO4
-            case ESM4::SUB_LVLM: // FO4
-            case ESM4::SUB_LVSG: // FO4
-            case ESM4::SUB_ONAM: // FO4
+            case ESM::fourCC("LLCT"):
+            case ESM::fourCC("OBND"): // FO3/FONV
+            case ESM::fourCC("COED"): // FO3/FONV
+            case ESM::fourCC("LVLG"): // FO3/FONV
+            case ESM::fourCC("LLKC"): // FO4
+            case ESM::fourCC("LVLM"): // FO4
+            case ESM::fourCC("LVSG"): // FO4
+            case ESM::fourCC("ONAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

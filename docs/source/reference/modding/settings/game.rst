@@ -16,7 +16,7 @@ If the setting is 2, the crosshair is the colour of the colour crosshair owned s
 If the setting is 3, both the tool tip background and the crosshair are coloured.
 The crosshair is not visible if crosshair is false.
 
-This setting can be configured in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 show projectile damage
 ----------------------
@@ -27,7 +27,7 @@ show projectile damage
 
 If this setting is true, the damage bonus of arrows and bolts will show on their tooltip.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 show melee info
 ---------------
@@ -38,7 +38,7 @@ show melee info
 
 If this setting is true, the reach and speed of weapons will show on their tooltip.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 show enchant chance
 -------------------
@@ -49,7 +49,7 @@ show enchant chance
 
 Whether or not the chance of success will be displayed in the enchanting menu.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 best attack
 -----------
@@ -78,7 +78,7 @@ If this setting is false, player has to wait until end of death animation in all
 Makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
 Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 difficulty
 ----------
@@ -123,7 +123,7 @@ and the caster will absorb their own stat resulting in no effect on either the c
 This makes the gameplay as a mage easier, but these spells become imbalanced.
 This is how Morrowind behaves.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 classic calm spells behavior
 ----------------------------------------
@@ -137,7 +137,7 @@ This means that a Calm spell of any magnitude will always take actors out of com
 This is how Morrowind behaves without the Morrowind Code Patch. If this setting is off,
 Calm spells will only take their target out of combat once. Allowing them to re-engage if the spell was not sufficiently strong.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 use magic item animations
 -------------------------
@@ -161,7 +161,7 @@ show effect duration
 Show the remaining duration of magic effects and lights if this setting is true.
 The remaining duration is displayed in the tooltip by hovering over the magical effect.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 enchanted weapons are magical
 -----------------------------
@@ -173,7 +173,7 @@ enchanted weapons are magical
 Make enchanted weapons without Magical flag bypass normal weapons resistance (and weakness) certain creatures have.
 This is how Morrowind behaves.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 prevent merchant equipping
 --------------------------
@@ -184,7 +184,7 @@ prevent merchant equipping
 
 Prevent merchants from equipping items that are sold to them.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 followers attack on sight
 -------------------------
@@ -196,7 +196,8 @@ followers attack on sight
 Make player followers and escorters start combat with enemies who have started combat with them or the player.
 Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
-This setting can be toggled in the Settings tab of the launcher.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 shield sheathing
 ----------------
@@ -214,6 +215,8 @@ To avoid conflicts, you can use _sh mesh without "Bip01 Sheath" node for such "s
 Also you can use an _sh node with empty "Bip01 Sheath" node.
 In this case the engine will use basic shield model, but will use transformations from the "Bip01 Sheath" node.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 weapon sheathing
 ----------------
 
@@ -225,6 +228,8 @@ If this setting is true, OpenMW will utilize weapon sheathing-compatible assets 
 
 To make use of this, you need to have an xbase_anim_sh.nif file with weapon bones that will be injected into the skeleton.
 Additional _sh suffix models are not essential for weapon sheathing to work but will act as quivers or scabbards for the weapons they correspond to.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 use additional anim sources
 ---------------------------
@@ -238,7 +243,8 @@ For example, if the main animation mesh has name Meshes/x.nif,
 the engine will load all KF-files from Animations/x folder and its child folders.
 This can be useful if you want to use several animation replacers without merging them.
 Attention: animations from AnimKit have their own format and are not supposed to be directly loaded in-game!
-This setting can only be configured by editing the settings configuration file.
+
+This setting can be controlled in the Settings tab of the launcher.
 
 barter disposition change is permanent
 --------------------------------------
@@ -251,7 +257,7 @@ If this setting is true,
 disposition change of merchants caused by trading will be permanent and won't be discarded upon exiting dialogue with them.
 This imitates the option that Morrowind Code Patch offers.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 only appropriate ammunition bypasses resistance
 -----------------------------------------------
@@ -264,7 +270,7 @@ If this setting is true, you will have to use the appropriate ammunition to bypa
 An enchanted bow with chitin arrows will no longer be enough for the purpose, while a steel longbow with glass arrows will still work.
 This was previously the default engine behavior that diverged from Morrowind design.
 
-This setting can be toggled in the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 strength influences hand to hand
 --------------------------------
@@ -454,6 +460,8 @@ Some mods add harvestable container models. When this setting is enabled, activa
 
 When this setting is turned off or when activating a regular container, the menu will open as usual.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 allow actors to follow over water surface
 -----------------------------------------
 
@@ -489,6 +497,8 @@ day night switches
 
 Some mods add models which change visuals based on time of day. When this setting is enabled, supporting models will automatically make use of Day/night state.
 
+This setting can be controlled in the Settings tab of the launcher.
+
 unarmed creature attacks damage armor
 -------------------------------------
 
@@ -500,7 +510,7 @@ If disabled unarmed creature attacks do not reduce armor condition, just as with
 
 If enabled unarmed creature attacks reduce armor condition, the same as attacks from NPCs and armed creatures.
 
-This setting can be controlled in the Settings tab of the launcher, under Game Mechanics.
+This setting can be controlled in the Settings tab of the launcher.
 
 actor collision shape type
 --------------------------
@@ -517,3 +527,45 @@ will not be useful with another.
 * 0: Axis-aligned bounding box
 * 1: Rotating box
 * 2: Cylinder
+
+This setting can be controlled in the Settings tab of the launcher.
+
+player movement ignores animation
+---------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+In third person, the camera will sway along with the movement animations of the player. 
+Enabling this option disables this swaying by having the player character move independently of its animation.
+
+This setting can be controlled in the Settings tab of the launcher.
+
+smooth animation transitions
+----------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enabling this option uses smooth transitions between animations making them a lot less jarring. Also allows to load modded animation blending.
+
+This setting can be controlled in the Settings tab of the launcher.
+
+rebalance soul gem values
+-------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enabling this option drastically reduces the value of filled soul gems.
+The value will depend on soul magnitude but not the size of the used
+soul gem.
+
+The new value formula is based on the Morrowind Code Patch project::
+
+	new value = 0.0001 * (soul magnitude)³ + 2 * (soul magnitude)
+
+This setting can be controlled in the Settings tab of the launcher.

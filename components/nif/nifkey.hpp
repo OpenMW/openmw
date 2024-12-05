@@ -49,7 +49,9 @@ namespace Nif
         using ValueType = T;
         using KeyType = KeyT<T>;
 
-        unsigned int mInterpolationType = InterpolationType_Unknown;
+        std::string mFrameName;
+        float mLegacyWeight;
+        uint32_t mInterpolationType = InterpolationType_Unknown;
         MapType mKeys;
 
         // Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
@@ -57,21 +59,25 @@ namespace Nif
         {
             assert(nif);
 
-            if (morph && nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106))
-                nif->getString(); // Frame name
-
-            if (morph && nif->getVersion() > NIFStream::generateVersion(10, 1, 0, 0))
+            if (morph)
             {
-                if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 104)
-                    && nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 2) && nif->getBethVersion() < 10)
-                    nif->getFloat(); // Legacy weight
-                return;
+                if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106))
+                    nif->read(mFrameName);
+
+                if (nif->getVersion() > NIFStream::generateVersion(10, 1, 0, 0))
+                {
+                    if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 104)
+                        && nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 2) && nif->getBethVersion() < 10)
+                        nif->read(mLegacyWeight);
+                    return;
+                }
             }
 
-            size_t count = nif->getUInt();
+            uint32_t count;
+            nif->read(count);
 
             if (count != 0 || morph)
-                mInterpolationType = nif->getUInt();
+                nif->read(mInterpolationType);
 
             KeyType key = {};
 
@@ -79,7 +85,8 @@ namespace Nif
             {
                 for (size_t i = 0; i < count; i++)
                 {
-                    float time = nif->getFloat();
+                    float time;
+                    nif->read(time);
                     readValue(*nif, key);
                     mKeys[time] = key;
                 }
@@ -88,7 +95,8 @@ namespace Nif
             {
                 for (size_t i = 0; i < count; i++)
                 {
-                    float time = nif->getFloat();
+                    float time;
+                    nif->read(time);
                     readQuadratic(*nif, key);
                     mKeys[time] = key;
                 }
@@ -97,7 +105,8 @@ namespace Nif
             {
                 for (size_t i = 0; i < count; i++)
                 {
-                    float time = nif->getFloat();
+                    float time;
+                    nif->read(time);
                     readTBC(*nif, key);
                     mKeys[time] = key;
                 }
@@ -134,22 +143,22 @@ namespace Nif
         static void readTBC(NIFStream& nif, KeyT<T>& key)
         {
             readValue(nif, key);
-            /*key.mTension = */ nif.getFloat();
-            /*key.mBias = */ nif.getFloat();
-            /*key.mContinuity = */ nif.getFloat();
+            /*key.mTension = */ nif.get<float>();
+            /*key.mBias = */ nif.get<float>();
+            /*key.mContinuity = */ nif.get<float>();
         }
     };
-    using FloatKeyMap = KeyMapT<float, &NIFStream::getFloat>;
-    using Vector3KeyMap = KeyMapT<osg::Vec3f, &NIFStream::getVector3>;
-    using Vector4KeyMap = KeyMapT<osg::Vec4f, &NIFStream::getVector4>;
-    using QuaternionKeyMap = KeyMapT<osg::Quat, &NIFStream::getQuaternion>;
-    using ByteKeyMap = KeyMapT<char, &NIFStream::getChar>;
+    using FloatKeyMap = KeyMapT<float, &NIFStream::get<float>>;
+    using Vector3KeyMap = KeyMapT<osg::Vec3f, &NIFStream::get<osg::Vec3f>>;
+    using Vector4KeyMap = KeyMapT<osg::Vec4f, &NIFStream::get<osg::Vec4f>>;
+    using QuaternionKeyMap = KeyMapT<osg::Quat, &NIFStream::get<osg::Quat>>;
+    using BoolKeyMap = KeyMapT<bool, &NIFStream::get<bool>>;
 
     using FloatKeyMapPtr = std::shared_ptr<FloatKeyMap>;
     using Vector3KeyMapPtr = std::shared_ptr<Vector3KeyMap>;
     using Vector4KeyMapPtr = std::shared_ptr<Vector4KeyMap>;
     using QuaternionKeyMapPtr = std::shared_ptr<QuaternionKeyMap>;
-    using ByteKeyMapPtr = std::shared_ptr<ByteKeyMap>;
+    using BoolKeyMapPtr = std::shared_ptr<BoolKeyMap>;
 
 } // Namespace
 #endif //#ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP

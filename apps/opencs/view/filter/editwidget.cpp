@@ -18,6 +18,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include "../../model/prefs/shortcut.hpp"
 #include "../../model/world/columns.hpp"
@@ -44,7 +45,7 @@ CSVFilter::EditWidget::EditWidget(CSMWorld::Data& data, QWidget* parent)
 
     mHelpAction = new QAction(tr("Help"), this);
     connect(mHelpAction, &QAction::triggered, this, &EditWidget::openHelp);
-    mHelpAction->setIcon(QIcon(":/info.png"));
+    mHelpAction->setIcon(Misc::ScalableIcon::load(":info"));
     addAction(mHelpAction);
     auto* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
     openHelpShortcut->associateAction(mHelpAction);

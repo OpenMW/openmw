@@ -6,6 +6,7 @@
 namespace MWClass
 {
     class CreatureCustomData;
+    class ESM4NpcCustomData;
     class NpcCustomData;
     class ContainerCustomData;
     class DoorCustomData;
@@ -38,6 +39,9 @@ namespace MWWorld
 
         virtual MWClass::CreatureLevListCustomData& asCreatureLevListCustomData();
         virtual const MWClass::CreatureLevListCustomData& asCreatureLevListCustomData() const;
+
+        virtual MWClass::ESM4NpcCustomData& asESM4NpcCustomData();
+        virtual const MWClass::ESM4NpcCustomData& asESM4NpcCustomData() const;
     };
 
     template <class T>

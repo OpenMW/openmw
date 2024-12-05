@@ -15,14 +15,21 @@ namespace osg
     class State;
 }
 
+namespace ToUTF8
+{
+    class StatelessUtf8Encoder;
+}
+
 namespace Resource
 {
 
     class SceneManager;
     class ImageManager;
+    class BgsmFileManager;
     class NifFileManager;
     class KeyframeManager;
     class BaseResourceManager;
+    class AnimBlendRulesManager;
 
     /// @brief Wrapper class that constructs and provides access to the most commonly used resource subsystems.
     /// @par Resource subsystems can be used with multiple OpenGL contexts, just like the OSG equivalents, but
@@ -30,13 +37,16 @@ namespace Resource
     class ResourceSystem
     {
     public:
-        ResourceSystem(const VFS::Manager* vfs);
+        explicit ResourceSystem(
+            const VFS::Manager* vfs, double expiryDelay, const ToUTF8::StatelessUtf8Encoder* encoder);
         ~ResourceSystem();
 
         SceneManager* getSceneManager();
         ImageManager* getImageManager();
+        BgsmFileManager* getBgsmFileManager();
         NifFileManager* getNifFileManager();
         KeyframeManager* getKeyframeManager();
+        AnimBlendRulesManager* getAnimBlendRulesManager();
 
         /// Indicates to each resource manager to clear the cache, i.e. to drop cached objects that are no longer
         /// referenced.
@@ -68,8 +78,10 @@ namespace Resource
     private:
         std::unique_ptr<SceneManager> mSceneManager;
         std::unique_ptr<ImageManager> mImageManager;
+        std::unique_ptr<BgsmFileManager> mBgsmFileManager;
         std::unique_ptr<NifFileManager> mNifFileManager;
         std::unique_ptr<KeyframeManager> mKeyframeManager;
+        std::unique_ptr<AnimBlendRulesManager> mAnimBlendRulesManager;
 
         // Store the base classes separately to get convenient access to the common interface
         // Here users can register their own resourcemanager as well

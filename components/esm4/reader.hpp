@@ -36,11 +36,15 @@
 
 #include <components/esm/formid.hpp>
 #include <components/files/istreamptr.hpp>
-#include <components/vfs/manager.hpp>
 
 namespace ToUTF8
 {
     class StatelessUtf8Encoder;
+}
+
+namespace VFS
+{
+    class Manager;
 }
 
 namespace ESM4
@@ -247,7 +251,11 @@ namespace ESM4
         void setRecHeaderSize(const std::size_t size);
 
         inline unsigned int esmVersion() const { return mHeader.mData.version.ui; }
+        inline float esmVersionF() const { return mHeader.mData.version.f; }
         inline unsigned int numRecords() const { return mHeader.mData.records; }
+
+        inline bool hasFormVersion() const { return mCtx.recHeaderSize == sizeof(RecordHeader); }
+        inline unsigned int formVersion() const { return mCtx.recordHeader.record.version; }
 
         void buildLStringIndex();
         void getLocalizedString(std::string& str);
@@ -327,7 +335,7 @@ namespace ESM4
 
         // Get a subrecord of a particular type and data type
         template <typename T>
-        bool getSubRecord(const ESM4::SubRecordTypes type, T& t)
+        bool getSubRecord(const std::uint32_t type, T& t)
         {
             ESM4::SubRecordHeader hdr;
             if (!getExact(hdr) || (hdr.typeId != type) || (hdr.dataSize != sizeof(T)))

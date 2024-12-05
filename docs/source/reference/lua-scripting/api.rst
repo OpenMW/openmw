@@ -2,6 +2,8 @@
 Lua API reference
 #################
 
+.. include:: version.rst
+
 .. toctree::
     :hidden:
 
@@ -10,31 +12,40 @@ Lua API reference
     aipackages
     setting_renderers
     events
-    openmw_util
-    openmw_storage
-    openmw_core
-    openmw_types
-    openmw_async
-    openmw_world
-    openmw_self
-    openmw_nearby
-    openmw_input
     openmw_ambient
-    openmw_ui
+    openmw_animation
+    openmw_async
     openmw_camera
-    openmw_postprocessing
+    openmw_core
     openmw_debug
+    openmw_input
+    openmw_markup
+    openmw_menu
+    openmw_nearby
+    openmw_postprocessing
+    openmw_self
+    openmw_storage
+    openmw_types
+    openmw_ui
+    openmw_util
+    openmw_vfs
+    openmw_world
     openmw_aux_calendar
-    openmw_aux_util
     openmw_aux_time
     openmw_aux_ui
+    openmw_aux_util
     interface_activation
     interface_ai
+    interface_animation
     interface_camera
     interface_controls
+    interface_gamepadcontrols
+    interface_item_usage
     interface_mwui
     interface_settings
+    interface_skill_progression
     interface_ui
+    interface_crimes
     iterables
 
 
@@ -62,36 +73,6 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 
 .. include:: tables/aux_packages.rst
 
-Interfaces of built-in scripts
-------------------------------
+**Interfaces of built-in scripts**
 
-.. list-table::
-  :widths: 20 20 60
-
-  * - Interface
-    - Can be used
-    - Description
-  * - :ref:`Activation <Interface Activation>`
-    - by global scripts
-    - Allows to extend or override built-in activation mechanics.
-  * - :ref:`AI <Interface AI>`
-    - by local scripts
-    - Control basic AI of NPCs and creatures.
-  * - :ref:`Camera <Interface Camera>`
-    - by player scripts
-    - | Allows to alter behavior of the built-in camera script
-      | without overriding the script completely.
-  * - :ref:`Controls <Interface Controls>`
-    - by player scripts
-    - | Allows to alter behavior of the built-in script
-      | that handles player controls.
-  * - :ref:`Settings <Interface Settings>`
-    - by player and global scripts
-    - Save, display and track changes of setting values.
-  * - :ref:`MWUI <Interface MWUI>`
-    - by player scripts
-    - Morrowind-style UI templates.
-  * - :ref:`UI <Interface UI>`
-    - by player scripts
-    - | High-level UI modes interface. Allows to override parts
-      | of the interface.
+.. include:: tables/interfaces.rst

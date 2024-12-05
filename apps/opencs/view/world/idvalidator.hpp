@@ -13,9 +13,6 @@ namespace CSVWorld
         std::string mNamespace;
         mutable std::string mError;
 
-    private:
-        bool isValid(const QChar& c, bool first) const;
-
     public:
         IdValidator(bool relaxed = false, QObject* parent = nullptr);
         ///< \param relaxed Relaxed rules for IDs that also functino as user visible text

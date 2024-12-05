@@ -2,7 +2,9 @@
 
 #include <limits>
 
+#include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -22,13 +24,13 @@ namespace MWMechanics
         {
             float cost = 0;
 
-            for (const ESM::ENAMstruct& effect : list.mList)
+            for (const ESM::IndexedENAMstruct& effect : list.mList)
             {
-                float effectCost = std::max(0.f, MWMechanics::calcEffectCost(effect, nullptr, method));
+                float effectCost = std::max(0.f, MWMechanics::calcEffectCost(effect.mData, nullptr, method));
 
                 // This is applied to the whole spell cost for each effect when
                 // creating spells, but is only applied on the effect itself in TES:CS.
-                if (effect.mRange == ESM::RT_Target)
+                if (effect.mData.mRange == ESM::RT_Target)
                     effectCost *= 1.5;
 
                 cost += effectCost;
@@ -48,7 +50,7 @@ namespace MWMechanics
         bool appliedOnce = magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce;
         int minMagn = hasMagnitude ? effect.mMagnMin : 1;
         int maxMagn = hasMagnitude ? effect.mMagnMax : 1;
-        if (method != EffectCostMethod::GameEnchantment)
+        if (method == EffectCostMethod::PlayerSpell || method == EffectCostMethod::GameSpell)
         {
             minMagn = std::max(1, minMagn);
             maxMagn = std::max(1, maxMagn);
@@ -57,13 +59,20 @@ namespace MWMechanics
         if (!appliedOnce)
             duration = std::max(1, duration);
         static const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
+        static const float iAlchemyMod = store.get<ESM::GameSetting>().find("iAlchemyMod")->mValue.getFloat();
 
         int durationOffset = 0;
         int minArea = 0;
+        float costMult = fEffectCostMult;
         if (method == EffectCostMethod::PlayerSpell)
         {
             durationOffset = 1;
             minArea = 1;
+        }
+        else if (method == EffectCostMethod::GamePotion)
+        {
+            minArea = 1;
+            costMult = iAlchemyMod;
         }
 
         float x = 0.5 * (minMagn + maxMagn);
@@ -71,7 +80,7 @@ namespace MWMechanics
         x *= durationOffset + duration;
         x += 0.05 * std::max(minArea, effect.mArea) * magicEffect->mData.mBaseCost;
 
-        return x * fEffectCostMult;
+        return x * costMult;
     }
 
     int calcSpellCost(const ESM::Spell& spell)
@@ -140,25 +149,93 @@ namespace MWMechanics
         return enchantment.mData.mCharge;
     }
 
+    int getPotionValue(const ESM::Potion& potion)
+    {
+        if (potion.mData.mFlags & ESM::Potion::Autocalc)
+        {
+            float cost = getTotalCost(potion.mEffects, EffectCostMethod::GamePotion);
+            return std::round(cost);
+        }
+        return potion.mData.mValue;
+    }
+
+    std::optional<ESM::EffectList> rollIngredientEffect(
+        MWWorld::Ptr caster, const ESM::Ingredient* ingredient, uint32_t index)
+    {
+        if (index >= 4)
+            throw std::range_error("Index out of range");
+
+        ESM::ENAMstruct effect;
+        effect.mEffectID = ingredient->mData.mEffectID[index];
+        effect.mSkill = ingredient->mData.mSkills[index];
+        effect.mAttribute = ingredient->mData.mAttributes[index];
+        effect.mRange = ESM::RT_Self;
+        effect.mArea = 0;
+
+        if (effect.mEffectID < 0)
+            return std::nullopt;
+
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+        const auto magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
+        const MWMechanics::CreatureStats& creatureStats = caster.getClass().getCreatureStats(caster);
+
+        float x = (caster.getClass().getSkill(caster, ESM::Skill::Alchemy)
+                      + 0.2f * creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified()
+                      + 0.1f * creatureStats.getAttribute(ESM::Attribute::Luck).getModified())
+            * creatureStats.getFatigueTerm();
+
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        int roll = Misc::Rng::roll0to99(prng);
+        if (roll > x)
+        {
+            return std::nullopt;
+        }
+
+        float magnitude = 0;
+        float y = roll / std::min(x, 100.f);
+        y *= 0.25f * x;
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
+            effect.mDuration = 1;
+        else
+            effect.mDuration = static_cast<int>(y);
+        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+        {
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+                magnitude = floor((0.05f * y) / (0.1f * magicEffect->mData.mBaseCost));
+            else
+                magnitude = floor(y / (0.1f * magicEffect->mData.mBaseCost));
+            magnitude = std::max(1.f, magnitude);
+        }
+        else
+            magnitude = 1;
+
+        effect.mMagnMax = static_cast<int>(magnitude);
+        effect.mMagnMin = static_cast<int>(magnitude);
+
+        ESM::EffectList effects;
+        effects.mList.push_back({ effect, index });
+        return effects;
+    }
+
     float calcSpellBaseSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, ESM::RefId* effectiveSchool)
     {
         // Morrowind for some reason uses a formula slightly different from magicka cost calculation
         float y = std::numeric_limits<float>::max();
         float lowestSkill = 0;
 
-        for (const ESM::ENAMstruct& effect : spell->mEffects.mList)
+        for (const ESM::IndexedENAMstruct& effect : spell->mEffects.mList)
         {
-            float x = static_cast<float>(effect.mDuration);
+            float x = static_cast<float>(effect.mData.mDuration);
             const auto magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mData.mEffectID);
 
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
                 x = std::max(1.f, x);
 
             x *= 0.1f * magicEffect->mData.mBaseCost;
-            x *= 0.5f * (effect.mMagnMin + effect.mMagnMax);
-            x += effect.mArea * 0.05f * magicEffect->mData.mBaseCost;
-            if (effect.mRange == ESM::RT_Target)
+            x *= 0.5f * (effect.mData.mMagnMin + effect.mData.mMagnMax);
+            x += effect.mData.mArea * 0.05f * magicEffect->mData.mBaseCost;
+            if (effect.mData.mRange == ESM::RT_Target)
                 x *= 1.5f;
             static const float fEffectCostMult = MWBase::Environment::get()
                                                      .getESMStore()

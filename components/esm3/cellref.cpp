@@ -107,16 +107,16 @@ namespace ESM
                         getHTOrSkip(cellRef.mChargeInt);
                         break;
                     case fourCC("NAM9"):
-                        getHTOrSkip(cellRef.mGoldValue);
+                        getHTOrSkip(cellRef.mCount);
                         break;
                     case fourCC("DODT"):
                         if constexpr (load)
                         {
-                            esm.getHT(cellRef.mDoorDest.pos, cellRef.mDoorDest.rot);
+                            esm.getSubComposite(cellRef.mDoorDest);
                             cellRef.mTeleport = true;
                         }
                         else
-                            esm.skipHTSized<24, ESM::Position>();
+                            esm.skipHSub();
                         break;
                     case fourCC("DNAM"):
                         getHStringOrSkip(cellRef.mDestCell);
@@ -132,9 +132,9 @@ namespace ESM
                         break;
                     case fourCC("DATA"):
                         if constexpr (load)
-                            esm.getHT(cellRef.mPos.pos, cellRef.mPos.rot);
+                            esm.getSubComposite(cellRef.mPos);
                         else
-                            esm.skipHTSized<24, decltype(cellRef.mPos)>();
+                            esm.skipHSub();
                         break;
                     case fourCC("NAM0"):
                     {
@@ -219,23 +219,25 @@ namespace ESM
         if (mChargeInt != -1)
             esm.writeHNT("INTV", mChargeInt);
 
-        if (mGoldValue > 1)
-            esm.writeHNT("NAM9", mGoldValue);
+        if (mCount != 1)
+            esm.writeHNT("NAM9", mCount);
 
         if (!inInventory && mTeleport)
         {
-            esm.writeHNT("DODT", mDoorDest);
+            esm.writeNamedComposite("DODT", mDoorDest);
             esm.writeHNOCString("DNAM", mDestCell);
         }
 
         if (!inInventory)
         {
-            int lockLevel = mLockLevel;
-            if (lockLevel == 0 && mIsLocked)
-                lockLevel = ZeroLock;
-            if (lockLevel != 0)
+            if (mIsLocked)
+            {
+                int lockLevel = mLockLevel;
+                if (lockLevel == 0)
+                    lockLevel = ZeroLock;
                 esm.writeHNT("FLTV", lockLevel);
-            esm.writeHNOCRefId("KNAM", mKey);
+                esm.writeHNOCRefId("KNAM", mKey);
+            }
             esm.writeHNOCRefId("TNAM", mTrap);
         }
 
@@ -243,7 +245,7 @@ namespace ESM
             esm.writeHNT("UNAM", mReferenceBlocked);
 
         if (!inInventory)
-            esm.writeHNT("DATA", mPos, 24);
+            esm.writeNamedComposite("DATA", mPos);
     }
 
     void CellRef::blank()
@@ -259,7 +261,7 @@ namespace ESM
         mChargeInt = -1;
         mChargeIntRemainder = 0.0f;
         mEnchantmentCharge = -1;
-        mGoldValue = 1;
+        mCount = 1;
         mDestCell.clear();
         mLockLevel = 0;
         mIsLocked = false;
@@ -285,4 +287,10 @@ namespace ESM
         loadDataImpl<false>(esm, isDeleted, cellRef);
     }
 
+    CellRef makeBlankCellRef()
+    {
+        CellRef result;
+        result.blank();
+        return result;
+    }
 }

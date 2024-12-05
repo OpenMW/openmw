@@ -111,8 +111,6 @@ namespace MWRender
 
         ImageDestMap mPendingImageDest;
 
-        std::vector<std::pair<int, int>> mExploredCells;
-
         osg::ref_ptr<osg::Texture2D> mBaseTexture;
         osg::ref_ptr<osg::Texture2D> mAlphaTexture;
 

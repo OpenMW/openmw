@@ -7,6 +7,7 @@
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/world.hpp"
 
@@ -134,10 +135,11 @@ namespace MWWorld
         ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
         uint32_t mRandomSeed{};
+        bool mIdsRebuilt{};
 
         // not implemented
-        World(const World&);
-        World& operator=(const World&);
+        World(const World&) = delete;
+        World& operator=(const World&) = delete;
 
         void updateWeather(float duration, bool paused = false);
 
@@ -169,8 +171,6 @@ namespace MWWorld
         void ensureNeededRecords();
 
         void fillGlobalVariables();
-
-        void updateSkyDate();
 
         void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
             ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
@@ -239,6 +239,8 @@ namespace MWWorld
 
         MWWorld::ESMStore& getStore() override { return mStore; }
 
+        const MWWorld::ESMStore& getStore() const override { return mStore; }
+
         const std::vector<int>& getESMVersions() const override;
 
         LocalScripts& getLocalScripts() override;
@@ -273,9 +275,8 @@ namespace MWWorld
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
         std::string_view getCellName(const MWWorld::Cell& cell) const override;
-        std::string_view getCellName(const ESM::Cell* cell) const override;
 
-        void removeRefScript(MWWorld::RefData* ref) override;
+        void removeRefScript(const MWWorld::CellRef* ref) override;
         //< Remove the script attached to ref from mLocalScripts
 
         Ptr getPtr(const ESM::RefId& name, bool activeOnly) override;
@@ -329,7 +330,7 @@ namespace MWWorld
 
         void setMoonColour(bool red) override;
 
-        void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) override;
+        void modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances) override;
 
         void changeToInteriorCell(const std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
@@ -344,12 +345,6 @@ namespace MWWorld
         ///< Return pointer to the object the player is looking at, if it is within activation range
 
         float getDistanceToFacedObject() override;
-
-        /// Returns a pointer to the object the provided object would hit (if within the
-        /// specified distance), and the point where the hit occurs. This will attempt to
-        /// use the "Head" node as a basis.
-        std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(
-            const MWWorld::ConstPtr& ptr, float distance, std::vector<MWWorld::Ptr>& targets) override;
 
         /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
         void deleteObject(const Ptr& ptr) override;
@@ -398,7 +393,7 @@ namespace MWWorld
         const MWPhysics::RayCastingInterface* getRayCasting() const override;
 
         bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-            bool ignorePlayer, bool ignoreActors) override;
+            bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList) override;
 
         void setActorCollisionMode(const Ptr& ptr, bool internal, bool external) override;
         bool isActorCollisionEnabled(const Ptr& ptr) override;
@@ -522,7 +517,6 @@ namespace MWWorld
 
         /// \todo this does not belong here
         void screenshot(osg::Image* image, int w, int h) override;
-        bool screenshot360(osg::Image* image) override;
 
         /// Find center of exterior cell above land surface
         /// \return false if exterior with given name not exists, true otherwise
@@ -608,8 +602,8 @@ namespace MWWorld
         /// Spawn a blood effect for \a ptr at \a worldPosition
         void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
-        void spawnEffect(const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos,
-            float scale = 1.f, bool isMagicVFX = true) override;
+        void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
+            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) override;
 
         /// @see MWWorld::WeatherManager::isInStorm
         bool isInStorm() const override;
@@ -626,9 +620,6 @@ namespace MWWorld
         /// @note The length of the vector is the distance between actor and target.
         osg::Vec3f aimToTarget(
             const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target, bool isRangedCombat) override;
-
-        /// Return the distance between actor's weapon and target's collision box.
-        float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
         bool isPlayerInJail() const override;
 

@@ -13,14 +13,19 @@ parser.add_argument("--omw", type=str, default="openmw", help="path to openmw bi
 parser.add_argument(
     "--workdir", type=str, default="integration_tests_output", help="directory for temporary files and logs"
 )
+parser.add_argument("--verbose", action='store_true', help="print all openmw output")
 args = parser.parse_args()
 
 example_suite_dir = Path(args.example_suite).resolve()
-example_suite_content = example_suite_dir / "game_template" / "data" / "template.omwgame"
-if not example_suite_content.is_file():
-    sys.exit(
-        f"{example_suite_content} not found, use 'git clone https://gitlab.com/OpenMW/example-suite/' to get it"
-    )
+
+content_paths = (
+    example_suite_dir / "game_template" / "data" / "template.omwgame",
+    example_suite_dir / "example_animated_creature" / "data" / "landracer.omwaddon",
+    example_suite_dir / "the_hub" / "data" / "the_hub.omwaddon",
+)
+for path in content_paths:
+    if not path.is_file():
+        sys.exit(f"{path} is not found, use 'git clone https://gitlab.com/OpenMW/example-suite/' to get it")
 
 openmw_binary = Path(args.omw).resolve()
 if not openmw_binary.is_file():
@@ -42,15 +47,17 @@ def runTest(name):
     shutil.copyfile(example_suite_dir / "settings.cfg", config_dir / "settings.cfg")
     test_dir = tests_dir / name
     with open(config_dir / "openmw.cfg", "w", encoding="utf-8") as omw_cfg:
+        for path in content_paths:
+            omw_cfg.write(f'data="{path.parent}"\n')
         omw_cfg.writelines(
             (
-                f'data="{example_suite_dir}{os.sep}game_template{os.sep}data"\n',
                 f'data="{testing_util_dir}"\n',
                 f'data-local="{test_dir}"\n',
                 f'user-data="{userdata_dir}"\n',
-                "content=template.omwgame\n",
             )
         )
+        for path in content_paths:
+            omw_cfg.write(f'content={path.name}\n')
         if (test_dir / "openmw.cfg").exists():
             omw_cfg.write(open(test_dir / "openmw.cfg").read())
         elif (test_dir / "test.omwscripts").exists():
@@ -61,6 +68,10 @@ def runTest(name):
             "resolution x = 640\n"
             "resolution y = 480\n"
             "framerate limit = 60\n"
+            "[Game]\n"
+            "smooth animation transitions = true\n"
+            "[Lua]\n"
+            f"memory limit = {1024 * 1024 * 256}\n"
         )
     stdout_lines = list()
     exit_ok = True
@@ -78,7 +89,10 @@ def runTest(name):
     ) as process:
         quit_requested = False
         for line in process.stdout:
-            stdout_lines.append(line)
+            if args.verbose:
+                sys.stdout.write(line)
+            else:
+                stdout_lines.append(line)
             words = line.split(" ")
             if len(words) > 1 and words[1] == "E]":
                 print(line, end="")
@@ -102,7 +116,7 @@ def runTest(name):
             exit_ok = False
     if os.path.exists(config_dir / "openmw.log"):
         shutil.copyfile(config_dir / "openmw.log", work_dir / f"{name}.{time_str}.log")
-    if not exit_ok:
+    if not exit_ok and not args.verbose:
         sys.stdout.writelines(stdout_lines)
     if test_success and exit_ok:
         print(f"{name} succeeded")
@@ -116,6 +130,7 @@ for entry in tests_dir.glob("test_*"):
     if entry.is_dir():
         if not runTest(entry.name):
             status = -1
-shutil.rmtree(config_dir, ignore_errors=True)
-shutil.rmtree(userdata_dir, ignore_errors=True)
+if status == 0:
+    shutil.rmtree(config_dir, ignore_errors=True)
+    shutil.rmtree(userdata_dir, ignore_errors=True)
 exit(status)

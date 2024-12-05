@@ -38,6 +38,13 @@ namespace MWMechanics
             return *result;
         }
 
+        /// \brief returns pointer to stored object in the desired type
+        template <class Derived>
+        Derived* getPtr() const
+        {
+            return dynamic_cast<Derived*>(mStorage.get());
+        }
+
         template <class Derived>
         void copy(DerivedClassStorage& destination) const
         {

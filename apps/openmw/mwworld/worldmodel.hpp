@@ -7,7 +7,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/misc/algorithm.hpp>
 
 #include "cellstore.hpp"
@@ -77,9 +77,11 @@ namespace MWWorld
 
         std::size_t getPtrRegistryRevision() const { return mPtrRegistry.getRevision(); }
 
-        void registerPtr(const Ptr& ptr) { mPtrRegistry.insert(ptr); }
+        void registerPtr(const Ptr& ptr);
 
-        void deregisterPtr(const Ptr& ptr) { mPtrRegistry.remove(ptr); }
+        void deregisterLiveCellRef(LiveCellRefBase& ref) noexcept;
+
+        void assignSaveFileRefNum(ESM::CellRef& ref) { mPtrRegistry.assign(ref); }
 
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)
@@ -102,6 +104,8 @@ namespace MWWorld
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
 
     private:
+        struct GetCellStoreCallback;
+
         PtrRegistry mPtrRegistry; // defined before mCells because during destruction it should be the last
 
         MWWorld::ESMStore& mStore;

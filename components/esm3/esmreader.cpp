@@ -153,7 +153,7 @@ namespace ESM
     {
         if (isNextSub(name))
             return getHString();
-        return "";
+        return {};
     }
 
     ESM::RefId ESMReader::getHNORefId(NAME name)
@@ -244,26 +244,11 @@ namespace ESM
         skipHString();
     }
 
-    void ESMReader::getHExact(void* p, int size)
-    {
-        getSubHeader();
-        if (size != static_cast<int>(mCtx.leftSub))
-            reportSubSizeMismatch(size, mCtx.leftSub);
-        getExact(p, size);
-    }
-
-    // Read the given number of bytes from a named subrecord
-    void ESMReader::getHNExact(void* p, int size, NAME name)
-    {
-        getSubNameIs(name);
-        getHExact(p, size);
-    }
-
     FormId ESMReader::getFormId(bool wide, NAME tag)
     {
         FormId res;
         if (wide)
-            getHNTSized<8>(res, tag);
+            getHNT(tag, res.mIndex, res.mContentFile);
         else
             getHNT(res.mIndex, tag);
         return res;
@@ -316,7 +301,7 @@ namespace ESM
 
         // reading the subrecord data anyway.
         const std::size_t subNameSize = decltype(mCtx.subName)::sCapacity;
-        getExact(mCtx.subName.mData, static_cast<int>(subNameSize));
+        getExact(mCtx.subName.mData, subNameSize);
         mCtx.leftRec -= static_cast<std::uint32_t>(subNameSize);
     }
 
@@ -326,10 +311,10 @@ namespace ESM
         skip(mCtx.leftSub);
     }
 
-    void ESMReader::skipHSubSize(int size)
+    void ESMReader::skipHSubSize(std::size_t size)
     {
         skipHSub();
-        if (static_cast<int>(mCtx.leftSub) != size)
+        if (mCtx.leftSub != size)
             reportSubSizeMismatch(mCtx.leftSub, size);
     }
 
@@ -496,7 +481,8 @@ namespace ESM
             case RefIdType::FormId:
             {
                 FormId formId{};
-                getTSized<8>(formId);
+                getT(formId.mIndex);
+                getT(formId.mContentFile);
                 if (applyContentFileMapping(formId))
                     return RefId(formId);
                 else
@@ -505,7 +491,7 @@ namespace ESM
             case RefIdType::Generated:
             {
                 std::uint64_t generated{};
-                getExact(&generated, sizeof(std::uint64_t));
+                getT(generated);
                 return RefId::generated(generated);
             }
             case RefIdType::Index:
@@ -513,14 +499,14 @@ namespace ESM
                 RecNameInts recordType{};
                 getExact(&recordType, sizeof(std::uint32_t));
                 std::uint32_t index{};
-                getExact(&index, sizeof(std::uint32_t));
+                getT(index);
                 return RefId::index(recordType, index);
             }
             case RefIdType::ESM3ExteriorCell:
             {
                 int32_t x, y;
-                getExact(&x, sizeof(std::int32_t));
-                getExact(&y, sizeof(std::int32_t));
+                getT(x);
+                getT(y);
                 return RefId::esm3ExteriorCell(x, y);
             }
         }
@@ -528,7 +514,7 @@ namespace ESM
         fail("Unsupported RefIdType: " + std::to_string(static_cast<unsigned>(refIdType)));
     }
 
-    [[noreturn]] void ESMReader::fail(const std::string& msg)
+    [[noreturn]] void ESMReader::fail(std::string_view msg)
     {
         std::stringstream ss;
 

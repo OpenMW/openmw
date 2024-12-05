@@ -10,6 +10,8 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
 #include "visitor.hpp"
@@ -37,6 +39,12 @@ namespace SceneUtil
                 return;
 
             const osg::Node* node = &drawable;
+            bool isRig = dynamic_cast<const SceneUtil::RigGeometry*>(node) != nullptr;
+            if (!isRig)
+                isRig = dynamic_cast<const SceneUtil::RigGeometryHolder*>(node) != nullptr;
+            if (!isRig)
+                return;
+
             for (auto it = getNodePath().rbegin() + 1; it != getNodePath().rend(); ++it)
             {
                 const osg::Node* parent = *it;
@@ -74,18 +82,32 @@ namespace SceneUtil
         std::string_view mFilter;
     };
 
-    void mergeUserData(const osg::UserDataContainer* source, osg::Object* target)
+    namespace
     {
-        if (!source)
-            return;
 
-        if (!target->getUserDataContainer())
-            target->setUserDataContainer(osg::clone(source, osg::CopyOp::SHALLOW_COPY));
-        else
+        void mergeUserData(const osg::UserDataContainer* source, osg::Object* target)
         {
-            for (unsigned int i = 0; i < source->getNumUserObjects(); ++i)
-                target->getUserDataContainer()->addUserObject(
-                    osg::clone(source->getUserObject(i), osg::CopyOp::SHALLOW_COPY));
+            if (!source)
+                return;
+
+            if (!target->getUserDataContainer())
+                target->setUserDataContainer(osg::clone(source, osg::CopyOp::SHALLOW_COPY));
+            else
+            {
+                for (unsigned int i = 0; i < source->getNumUserObjects(); ++i)
+                    target->getUserDataContainer()->addUserObject(
+                        osg::clone(source->getUserObject(i), osg::CopyOp::SHALLOW_COPY));
+            }
+        }
+
+        osg::ref_ptr<osg::StateSet> makeFrontFaceStateSet()
+        {
+            osg::ref_ptr<osg::FrontFace> frontFace = new osg::FrontFace;
+            frontFace->setMode(osg::FrontFace::CLOCKWISE);
+
+            osg::ref_ptr<osg::StateSet> frontFaceStateSet = new osg::StateSet;
+            frontFaceStateSet->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+            return frontFaceStateSet;
         }
     }
 
@@ -151,14 +173,8 @@ namespace SceneUtil
                 // Note: for absolute correctness we would need to check the current front face for every mesh then
                 // invert it However MW isn't doing this either, so don't. Assuming all meshes are using backface
                 // culling is more efficient.
-                static osg::ref_ptr<osg::StateSet> frontFaceStateSet;
-                if (!frontFaceStateSet)
-                {
-                    frontFaceStateSet = new osg::StateSet;
-                    osg::FrontFace* frontFace = new osg::FrontFace;
-                    frontFace->setMode(osg::FrontFace::CLOCKWISE);
-                    frontFaceStateSet->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
-                }
+                static const osg::ref_ptr<osg::StateSet> frontFaceStateSet = makeFrontFaceStateSet();
+
                 trans->setStateSet(frontFaceStateSet);
             }
 

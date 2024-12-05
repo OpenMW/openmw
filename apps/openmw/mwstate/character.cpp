@@ -7,11 +7,11 @@
 #include <tuple>
 #include <utility>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/esmreader.hpp>
-#include <components/misc/utf8stream.hpp>
-
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/utf8stream.hpp>
 
 bool MWState::operator<(const Slot& left, const Slot& right)
 {
@@ -84,8 +84,8 @@ void MWState::Character::addSlot(const ESM::SavedGame& profile)
     mSlots.push_back(slot);
 }
 
-MWState::Character::Character(std::filesystem::path saves, const std::string& game)
-    : mPath(std::move(saves))
+MWState::Character::Character(const std::filesystem::path& saves, const std::string& game)
+    : mPath(saves)
 {
     if (!std::filesystem::is_directory(mPath))
     {
@@ -99,9 +99,11 @@ MWState::Character::Character(std::filesystem::path saves, const std::string& ga
             {
                 addSlot(iter, game);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
-            } // ignoring bad saved game files for now
+                Log(Debug::Warning) << "Failed to add slot for game \"" << game << "\" save " << iter << ": "
+                                    << e.what();
+            }
         }
 
         std::sort(mSlots.begin(), mSlots.end());
@@ -132,9 +134,9 @@ const MWState::Slot* MWState::Character::createSlot(const ESM::SavedGame& profil
 
 void MWState::Character::deleteSlot(const Slot* slot)
 {
-    int index = slot - mSlots.data();
+    std::ptrdiff_t index = slot - mSlots.data();
 
-    if (index < 0 || index >= static_cast<int>(mSlots.size()))
+    if (index < 0 || static_cast<std::size_t>(index) >= mSlots.size())
     {
         // sanity check; not entirely reliable
         throw std::logic_error("slot not found");
@@ -147,9 +149,9 @@ void MWState::Character::deleteSlot(const Slot* slot)
 
 const MWState::Slot* MWState::Character::updateSlot(const Slot* slot, const ESM::SavedGame& profile)
 {
-    int index = slot - mSlots.data();
+    std::ptrdiff_t index = slot - mSlots.data();
 
-    if (index < 0 || index >= static_cast<int>(mSlots.size()))
+    if (index < 0 || static_cast<std::size_t>(index) >= mSlots.size())
     {
         // sanity check; not entirely reliable
         throw std::logic_error("slot not found");

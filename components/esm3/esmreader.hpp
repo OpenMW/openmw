@@ -12,8 +12,10 @@
 
 #include <components/to_utf8/to_utf8.hpp>
 
+#include "components/esm/decompose.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
+
 #include "loadtes3.hpp"
 
 namespace ESM
@@ -53,9 +55,9 @@ namespace ESM
          *
          *************************************************************************/
 
-        int getVer() const { return mHeader.mData.version; }
+        int getVer() const { return mHeader.mData.version.ui; }
         int getRecordCount() const { return mHeader.mData.records; }
-        float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
+        float esmVersionF() const { return (mHeader.mData.version.f); }
         const std::string& getAuthor() const { return mHeader.mData.author; }
         const std::string& getDesc() const { return mHeader.mData.desc; }
         const std::vector<Header::MasterData>& getGameFiles() const { return mHeader.mMaster; }
@@ -131,10 +133,10 @@ namespace ESM
         ESM::RefId getCellId();
 
         // Read data of a given type, stored in a subrecord of a given name
-        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
+        template <typename X>
         void getHNT(X& x, NAME name)
         {
-            getHNTSized<sizeof(X)>(x, name);
+            getHNT(name, x);
         }
 
         template <class... Args>
@@ -149,26 +151,21 @@ namespace ESM
         }
 
         // Optional version of getHNT
-        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
+        template <typename X>
         void getHNOT(X& x, NAME name)
         {
-            getHNOTSized<sizeof(X)>(x, name);
+            getHNOT(name, x);
         }
 
-        // Version with extra size checking, to make sure the compiler
-        // doesn't mess up our struct padding.
-        template <std::size_t size, typename X>
-        void getHNTSized(X& x, NAME name)
-        {
-            getSubNameIs(name);
-            getHTSized<size>(x);
-        }
-
-        template <std::size_t size, typename X>
-        void getHNOTSized(X& x, NAME name)
+        template <class... Args>
+        bool getHNOT(NAME name, Args&... args)
         {
             if (isNextSub(name))
-                getHTSized<size>(x);
+            {
+                getHT(args...);
+                return true;
+            }
+            return false;
         }
 
         // Get data of a given type/size, including subrecord header
@@ -182,38 +179,39 @@ namespace ESM
             (getT(args), ...);
         }
 
+        void getNamedComposite(NAME name, auto& value)
+        {
+            decompose(value, [&](auto&... args) { getHNT(name, args...); });
+        }
+
+        bool getOptionalComposite(NAME name, auto& value)
+        {
+            if (isNextSub(name))
+            {
+                getSubComposite(value);
+                return true;
+            }
+            return false;
+        }
+
+        void getComposite(auto& value)
+        {
+            decompose(value, [&](auto&... args) { (getT(args), ...); });
+        }
+
+        void getSubComposite(auto& value)
+        {
+            decompose(value, [&](auto&... args) { getHT(args...); });
+        }
+
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
         void skipHT()
         {
-            skipHTSized<sizeof(T), T>();
-        }
-
-        // Version with extra size checking, to make sure the compiler
-        // doesn't mess up our struct padding.
-        template <std::size_t size, typename X>
-        void getHTSized(X& x)
-        {
-            getSubHeader();
-            if (mCtx.leftSub != size)
-                reportSubSizeMismatch(size, mCtx.leftSub);
-            getTSized<size>(x);
-        }
-
-        template <std::size_t size, typename T>
-        void skipHTSized()
-        {
-            static_assert(sizeof(T) == size);
+            constexpr size_t size = sizeof(T);
             getSubHeader();
             if (mCtx.leftSub != size)
                 reportSubSizeMismatch(size, mCtx.leftSub);
             skip(size);
-        }
-
-        template <std::size_t size, typename X>
-        void getTSized(X& x)
-        {
-            static_assert(sizeof(X) == size);
-            getExact(&x, size);
         }
 
         // Read a string by the given name if it is the next record.
@@ -238,12 +236,6 @@ namespace ESM
         void skipHString();
 
         void skipHRefId();
-
-        // Read the given number of bytes from a subrecord
-        void getHExact(void* p, int size);
-
-        // Read the given number of bytes from a named subrecord
-        void getHNExact(void* p, int size, NAME name);
 
         ESM::FormId getFormId(bool wide = false, NAME tag = "FRMR");
 
@@ -277,7 +269,7 @@ namespace ESM
         void skipHSub();
 
         // Skip sub record and check its size
-        void skipHSubSize(int size);
+        void skipHSubSize(std::size_t size);
 
         // Skip all subrecords until the given subrecord or no more subrecords remaining
         void skipHSubUntil(NAME name);
@@ -333,7 +325,7 @@ namespace ESM
             mEsm->read(static_cast<char*>(x), static_cast<std::streamsize>(size));
         }
 
-        void getName(NAME& name) { getTSized<4>(name); }
+        void getName(NAME& name) { getT(name.mData); }
         void getUint(uint32_t& u) { getT(u); }
 
         std::string getMaybeFixedStringSize(std::size_t size);
@@ -356,7 +348,7 @@ namespace ESM
         }
 
         /// Used for error handling
-        [[noreturn]] void fail(const std::string& msg);
+        [[noreturn]] void fail(std::string_view msg);
 
         /// Sets font encoder for ESM strings
         void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; }

@@ -13,6 +13,8 @@
 #include <osg/StateSet>
 #include <osg/Texture2D>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "lexer.hpp"
 #include "pass.hpp"
 #include "types.hpp"
@@ -54,10 +56,14 @@ namespace fx
             osg::ref_ptr<osg::FrameBufferObject> mRenderTarget;
             osg::ref_ptr<osg::Texture2D> mRenderTexture;
             bool mResolve = false;
+            Types::SizeProxy mSize;
+            bool mMipMap = false;
 
             SubPass(const SubPass& other, const osg::CopyOp& copyOp = osg::CopyOp::SHALLOW_COPY)
                 : mStateSet(new osg::StateSet(*other.mStateSet, copyOp))
                 , mResolve(other.mResolve)
+                , mSize(other.mSize)
+                , mMipMap(other.mMipMap)
             {
                 if (other.mRenderTarget)
                     mRenderTarget = new osg::FrameBufferObject(*other.mRenderTarget, copyOp);
@@ -99,8 +105,8 @@ namespace fx
         using UniformMap = std::vector<std::shared_ptr<Types::UniformBase>>;
         using RenderTargetMap = std::unordered_map<std::string_view, Types::RenderTarget>;
 
-        inline static std::string sExt = ".omwfx";
-        inline static std::string sSubdir = "shaders";
+        static constexpr std::string_view sExt = ".omwfx";
+        static constexpr std::string_view sSubdir = "shaders";
 
         enum class Status
         {
@@ -124,7 +130,7 @@ namespace fx
 
         std::string getName() const;
 
-        std::string getFileName() const;
+        const VFS::Path::Normalized& getFileName() const { return mFilePath; }
 
         bool setLastModificationTime(std::filesystem::file_time_type timeStamp);
 
@@ -170,6 +176,9 @@ namespace fx
 
         void setLocked(bool locked) { mLocked = locked; }
         bool getLocked() const { return mLocked; }
+
+        void setInternal(bool internal) { mInternal = internal; }
+        bool getInternal() const { return mInternal; }
 
     private:
         [[noreturn]] void error(const std::string& msg);
@@ -219,6 +228,12 @@ namespace fx
 
         int parseSourceFormat();
 
+        template <class SrcT, class T>
+        void parseWidgetType(Types::Uniform<SrcT>& uniform);
+
+        template <class SrcT, class T>
+        SrcT getUniformValue();
+
         osg::BlendEquation::Equation parseBlendEquation();
 
         osg::BlendFunc::BlendFuncMode parseBlendFuncMode();
@@ -244,7 +259,7 @@ namespace fx
 
         std::string mShared;
         std::string mName;
-        std::string mFileName;
+        VFS::Path::Normalized mFilePath;
         std::string_view mBlockName;
         std::string_view mAuthor;
         std::string_view mDescription;
@@ -291,6 +306,7 @@ namespace fx
 
         bool mDynamic = false;
         bool mLocked = false;
+        bool mInternal = false;
     };
 
     template <>

@@ -38,6 +38,8 @@
 #include "../world/record.hpp"
 #include "../world/universalid.hpp"
 
+#include "effectlistcheck.hpp"
+
 namespace ESM
 {
     class Script;
@@ -330,7 +332,8 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, potion.mId);
 
     inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
-    /// \todo Check magic effects for validity
+
+    effectListCheck(potion.mEffects.mList, messages, id);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Potion>(potion, messages, id.toString());
@@ -456,22 +459,12 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
     if (creature.mData.mLevel <= 0)
         messages.add(id, "Level is non-positive", "", CSMDoc::Message::Severity_Warning);
 
-    if (creature.mData.mStrength < 0)
-        messages.add(id, "Strength is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mIntelligence < 0)
-        messages.add(id, "Intelligence is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mWillpower < 0)
-        messages.add(id, "Willpower is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mAgility < 0)
-        messages.add(id, "Agility is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mSpeed < 0)
-        messages.add(id, "Speed is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mEndurance < 0)
-        messages.add(id, "Endurance is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mPersonality < 0)
-        messages.add(id, "Personality is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mLuck < 0)
-        messages.add(id, "Luck is negative", "", CSMDoc::Message::Severity_Warning);
+    for (size_t i = 0; i < creature.mData.mAttributes.size(); ++i)
+    {
+        if (creature.mData.mAttributes[i] < 0)
+            messages.add(id, ESM::Attribute::indexToRefId(i).toDebugString() + " is negative", {},
+                CSMDoc::Message::Severity_Warning);
+    }
 
     if (creature.mData.mCombat < 0)
         messages.add(id, "Combat is negative", "", CSMDoc::Message::Severity_Warning);
@@ -575,6 +568,8 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Ingredient>(ingredient, messages, id.toString());
+
+    ingredientEffectListCheck(ingredient, messages, id);
 }
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
@@ -700,25 +695,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
                 CSMDoc::Message::Severity_Error); // should not happen?
             return;
         }
-    }
-    else if (npc.mNpdt.mHealth != 0)
-    {
-        if (npc.mNpdt.mStrength == 0)
-            messages.add(id, "Strength is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mIntelligence == 0)
-            messages.add(id, "Intelligence is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mWillpower == 0)
-            messages.add(id, "Willpower is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mAgility == 0)
-            messages.add(id, "Agility is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mSpeed == 0)
-            messages.add(id, "Speed is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mEndurance == 0)
-            messages.add(id, "Endurance is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mPersonality == 0)
-            messages.add(id, "Personality is equal to zero", "", CSMDoc::Message::Severity_Warning);
-        if (npc.mNpdt.mLuck == 0)
-            messages.add(id, "Luck is equal to zero", "", CSMDoc::Message::Severity_Warning);
     }
 
     if (level <= 0)

@@ -26,9 +26,9 @@ namespace Terrain
     class TerrainGrid : public Terrain::World
     {
     public:
-        TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
-            Storage* storage, unsigned int nodeMask, ESM::RefId worldspace, unsigned int preCompileMask = ~0u,
-            unsigned int borderMask = 0);
+        explicit TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
+            Storage* storage, unsigned int nodeMask, ESM::RefId worldspace, double expiryDelay,
+            unsigned int preCompileMask = ~0u, unsigned int borderMask = 0);
         TerrainGrid(osg::Group* parent, Storage* storage, ESM::RefId worldspace, unsigned int nodeMask = ~0u);
         ~TerrainGrid();
 

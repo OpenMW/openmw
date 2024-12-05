@@ -43,13 +43,13 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 if (subHdr.dataSize == 10) // FO3 has 15 bytes even though VER_094
@@ -79,126 +79,126 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIcon);
                 break;
-            case ESM4::SUB_MICO:
+            case ESM::fourCC("MICO"):
                 reader.getZString(mMiniIcon);
                 break; // FO3
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_ANAM:
+            case ESM::fourCC("ANAM"):
                 reader.get(mEnchantmentPoints);
                 break;
-            case ESM4::SUB_ENAM:
+            case ESM::fourCC("ENAM"):
                 reader.getFormId(mEnchantment);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_DESC:
+            case ESM::fourCC("DESC"):
                 reader.getLocalizedString(mText);
                 break;
-            case ESM4::SUB_YNAM:
+            case ESM::fourCC("YNAM"):
                 reader.getFormId(mPickUpSound);
                 break;
-            case ESM4::SUB_ZNAM:
+            case ESM::fourCC("ZNAM"):
                 reader.getFormId(mDropSound);
                 break;
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_BAMT:
-            case ESM4::SUB_BIDS:
-            case ESM4::SUB_INAM:
-            case ESM4::SUB_CNAM:
-            case ESM4::SUB_CRDT:
-            case ESM4::SUB_DNAM:
-            case ESM4::SUB_EAMT:
-            case ESM4::SUB_EITM:
-            case ESM4::SUB_ETYP:
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_NAM8:
-            case ESM4::SUB_NAM9:
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_SNAM:
-            case ESM4::SUB_TNAM:
-            case ESM4::SUB_UNAM:
-            case ESM4::SUB_VMAD:
-            case ESM4::SUB_VNAM:
-            case ESM4::SUB_WNAM:
-            case ESM4::SUB_XNAM: // Dawnguard only?
-            case ESM4::SUB_NNAM:
-            case ESM4::SUB_NAM0: // FO3
-            case ESM4::SUB_REPL: // FO3
-            case ESM4::SUB_MOD2: // FO3
-            case ESM4::SUB_MO2T: // FO3
-            case ESM4::SUB_MO2S: // FO3
-            case ESM4::SUB_NAM6: // FO3
-            case ESM4::SUB_MOD4: // First person model data
-            case ESM4::SUB_MO4T:
-            case ESM4::SUB_MO4S:
-            case ESM4::SUB_MO4C:
-            case ESM4::SUB_MO4F: // First person model data end
-            case ESM4::SUB_BIPL: // FO3
-            case ESM4::SUB_NAM7: // FO3
-            case ESM4::SUB_MOD3: // FO3
-            case ESM4::SUB_MO3T: // FO3
-            case ESM4::SUB_MO3S: // FO3
-            case ESM4::SUB_MODD: // FO3
-                                 // case ESM4::SUB_MOSD: // FO3
-            case ESM4::SUB_DAMC: // Destructible
-            case ESM4::SUB_DEST:
-            case ESM4::SUB_DMDC:
-            case ESM4::SUB_DMDL:
-            case ESM4::SUB_DMDT:
-            case ESM4::SUB_DMDS:
-            case ESM4::SUB_DSTA:
-            case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF: // Destructible end
-            case ESM4::SUB_VATS: // FONV
-            case ESM4::SUB_VANM: // FONV
-            case ESM4::SUB_MWD1: // FONV
-            case ESM4::SUB_MWD2: // FONV
-            case ESM4::SUB_MWD3: // FONV
-            case ESM4::SUB_MWD4: // FONV
-            case ESM4::SUB_MWD5: // FONV
-            case ESM4::SUB_MWD6: // FONV
-            case ESM4::SUB_MWD7: // FONV
-            case ESM4::SUB_WMI1: // FONV
-            case ESM4::SUB_WMI2: // FONV
-            case ESM4::SUB_WMI3: // FONV
-            case ESM4::SUB_WMS1: // FONV
-            case ESM4::SUB_WMS2: // FONV
-            case ESM4::SUB_WNM1: // FONV
-            case ESM4::SUB_WNM2: // FONV
-            case ESM4::SUB_WNM3: // FONV
-            case ESM4::SUB_WNM4: // FONV
-            case ESM4::SUB_WNM5: // FONV
-            case ESM4::SUB_WNM6: // FONV
-            case ESM4::SUB_WNM7: // FONV
-            case ESM4::SUB_EFSD: // FONV DeadMoney
-            case ESM4::SUB_APPR: // FO4
-            case ESM4::SUB_DAMA: // FO4
-            case ESM4::SUB_FLTR: // FO4
-            case ESM4::SUB_FNAM: // FO4
-            case ESM4::SUB_INRD: // FO4
-            case ESM4::SUB_LNAM: // FO4
-            case ESM4::SUB_MASE: // FO4
-            case ESM4::SUB_PTRN: // FO4
-            case ESM4::SUB_STCP: // FO4
-            case ESM4::SUB_WAMD: // FO4
-            case ESM4::SUB_WZMD: // FO4
-            case ESM4::SUB_OBTE: // FO4 object template start
-            case ESM4::SUB_OBTF:
-            case ESM4::SUB_OBTS:
-            case ESM4::SUB_STOP: // FO4 object template end
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("BAMT"):
+            case ESM::fourCC("BIDS"):
+            case ESM::fourCC("INAM"):
+            case ESM::fourCC("CNAM"):
+            case ESM::fourCC("CRDT"):
+            case ESM::fourCC("DNAM"):
+            case ESM::fourCC("EAMT"):
+            case ESM::fourCC("EITM"):
+            case ESM::fourCC("ETYP"):
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("NAM8"):
+            case ESM::fourCC("NAM9"):
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("SNAM"):
+            case ESM::fourCC("TNAM"):
+            case ESM::fourCC("UNAM"):
+            case ESM::fourCC("VMAD"):
+            case ESM::fourCC("VNAM"):
+            case ESM::fourCC("WNAM"):
+            case ESM::fourCC("XNAM"): // Dawnguard only?
+            case ESM::fourCC("NNAM"):
+            case ESM::fourCC("NAM0"): // FO3
+            case ESM::fourCC("REPL"): // FO3
+            case ESM::fourCC("MOD2"): // FO3
+            case ESM::fourCC("MO2T"): // FO3
+            case ESM::fourCC("MO2S"): // FO3
+            case ESM::fourCC("NAM6"): // FO3
+            case ESM::fourCC("MOD4"): // First person model data
+            case ESM::fourCC("MO4T"):
+            case ESM::fourCC("MO4S"):
+            case ESM::fourCC("MO4C"):
+            case ESM::fourCC("MO4F"): // First person model data end
+            case ESM::fourCC("BIPL"): // FO3
+            case ESM::fourCC("NAM7"): // FO3
+            case ESM::fourCC("MOD3"): // FO3
+            case ESM::fourCC("MO3T"): // FO3
+            case ESM::fourCC("MO3S"): // FO3
+            case ESM::fourCC("MODD"): // FO3
+                                      // case ESM::fourCC("MOSD"): // FO3
+            case ESM::fourCC("DAMC"): // Destructible
+            case ESM::fourCC("DEST"):
+            case ESM::fourCC("DMDC"):
+            case ESM::fourCC("DMDL"):
+            case ESM::fourCC("DMDT"):
+            case ESM::fourCC("DMDS"):
+            case ESM::fourCC("DSTA"):
+            case ESM::fourCC("DSTD"):
+            case ESM::fourCC("DSTF"): // Destructible end
+            case ESM::fourCC("VATS"): // FONV
+            case ESM::fourCC("VANM"): // FONV
+            case ESM::fourCC("MWD1"): // FONV
+            case ESM::fourCC("MWD2"): // FONV
+            case ESM::fourCC("MWD3"): // FONV
+            case ESM::fourCC("MWD4"): // FONV
+            case ESM::fourCC("MWD5"): // FONV
+            case ESM::fourCC("MWD6"): // FONV
+            case ESM::fourCC("MWD7"): // FONV
+            case ESM::fourCC("WMI1"): // FONV
+            case ESM::fourCC("WMI2"): // FONV
+            case ESM::fourCC("WMI3"): // FONV
+            case ESM::fourCC("WMS1"): // FONV
+            case ESM::fourCC("WMS2"): // FONV
+            case ESM::fourCC("WNM1"): // FONV
+            case ESM::fourCC("WNM2"): // FONV
+            case ESM::fourCC("WNM3"): // FONV
+            case ESM::fourCC("WNM4"): // FONV
+            case ESM::fourCC("WNM5"): // FONV
+            case ESM::fourCC("WNM6"): // FONV
+            case ESM::fourCC("WNM7"): // FONV
+            case ESM::fourCC("EFSD"): // FONV DeadMoney
+            case ESM::fourCC("APPR"): // FO4
+            case ESM::fourCC("DAMA"): // FO4
+            case ESM::fourCC("FLTR"): // FO4
+            case ESM::fourCC("FNAM"): // FO4
+            case ESM::fourCC("INRD"): // FO4
+            case ESM::fourCC("LNAM"): // FO4
+            case ESM::fourCC("MASE"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
+            case ESM::fourCC("STCP"): // FO4
+            case ESM::fourCC("WAMD"): // FO4
+            case ESM::fourCC("WZMD"): // FO4
+            case ESM::fourCC("OBTE"): // FO4 object template start
+            case ESM::fourCC("OBTF"):
+            case ESM::fourCC("OBTS"):
+            case ESM::fourCC("STOP"): // FO4 object template end
                 reader.skipSubRecordData();
                 break;
             default:

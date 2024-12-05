@@ -38,7 +38,7 @@ namespace MWWorld
         }
 
         /// Remove all references with the given refNum from this list.
-        void remove(const ESM::RefNum& refNum)
+        void remove(ESM::RefNum refNum)
         {
             for (typename List::iterator it = mList.begin(); it != mList.end();)
             {

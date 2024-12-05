@@ -171,10 +171,9 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
 
     // Check info conditions
 
-    for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator it = topicInfo.mSelects.begin();
-         it != topicInfo.mSelects.end(); ++it)
+    for (const auto& select : topicInfo.mSelects)
     {
-        verifySelectStruct((*it), id, messages);
+        verifySelectStruct(select, id, messages);
     }
 }
 
@@ -308,47 +307,13 @@ bool CSMTools::TopicInfoCheckStage::verifyItem(
 }
 
 bool CSMTools::TopicInfoCheckStage::verifySelectStruct(
-    const ESM::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+    const ESM::DialogueCondition& select, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     CSMWorld::ConstInfoSelectWrapper infoCondition(select);
 
-    if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_None)
+    if (select.mFunction == ESM::DialogueCondition::Function_None)
     {
         messages.add(id, "Invalid condition '" + infoCondition.toString() + "'", "", CSMDoc::Message::Severity_Error);
-        return false;
-    }
-    else if (!infoCondition.variantTypeIsValid())
-    {
-        std::ostringstream stream;
-        stream << "Value of condition '" << infoCondition.toString() << "' has invalid ";
-
-        switch (select.mValue.getType())
-        {
-            case ESM::VT_None:
-                stream << "None";
-                break;
-            case ESM::VT_Short:
-                stream << "Short";
-                break;
-            case ESM::VT_Int:
-                stream << "Int";
-                break;
-            case ESM::VT_Long:
-                stream << "Long";
-                break;
-            case ESM::VT_Float:
-                stream << "Float";
-                break;
-            case ESM::VT_String:
-                stream << "String";
-                break;
-            default:
-                stream << "unknown";
-                break;
-        }
-        stream << " type";
-
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (infoCondition.conditionIsAlwaysTrue())
@@ -365,48 +330,48 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(
     }
 
     // Id checks
-    if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Global
-        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mGlobals, id, messages))
+    if (select.mFunction == ESM::DialogueCondition::Function_Global
+        && !verifyId(ESM::RefId::stringRefId(select.mVariable), mGlobals, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Journal
-        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mJournals, id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_Journal
+        && !verifyId(ESM::RefId::stringRefId(select.mVariable), mJournals, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Item
-        && !verifyItem(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_Item
+        && !verifyItem(ESM::RefId::stringRefId(select.mVariable), id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Dead
-        && !verifyActor(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_Dead
+        && !verifyActor(ESM::RefId::stringRefId(select.mVariable), id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotId
-        && !verifyActor(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_NotId
+        && !verifyActor(ESM::RefId::stringRefId(select.mVariable), id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotFaction
-        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mFactions, id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_NotFaction
+        && !verifyId(ESM::RefId::stringRefId(select.mVariable), mFactions, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotClass
-        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mClasses, id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_NotClass
+        && !verifyId(ESM::RefId::stringRefId(select.mVariable), mClasses, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotRace
-        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mRaces, id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_NotRace
+        && !verifyId(ESM::RefId::stringRefId(select.mVariable), mRaces, id, messages))
     {
         return false;
     }
-    else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotCell
-        && !verifyCell(infoCondition.getVariableName(), id, messages))
+    else if (select.mFunction == ESM::DialogueCondition::Function_NotCell
+        && !verifyCell(select.mVariable, id, messages))
     {
         return false;
     }

@@ -102,11 +102,11 @@ namespace MWScript
                 std::string_view region{ runtime.getStringLiteral(runtime[0].mInteger) };
                 runtime.pop();
 
-                std::vector<char> chances;
+                std::vector<uint8_t> chances;
                 chances.reserve(10);
                 while (arg0 > 0)
                 {
-                    chances.push_back(std::clamp(runtime[0].mInteger, 0, 127));
+                    chances.push_back(std::clamp(runtime[0].mInteger, 0, 100));
                     runtime.pop();
                     arg0--;
                 }

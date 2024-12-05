@@ -1,7 +1,7 @@
 #include "sdlinputwrapper.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <osgViewer/Viewer>
 
@@ -187,8 +187,10 @@ namespace SDLUtil
                     {
                         case SDL_DISPLAYEVENT_ORIENTATION:
                             if (mSensorListener
-                                && evt.display.display == (unsigned int)Settings::Manager::getInt("screen", "Video"))
+                                && evt.display.display == static_cast<Uint32>(Settings::video().mScreen))
+                            {
                                 mSensorListener->displayOrientationChanged();
+                            }
                             break;
                         default:
                             break;
@@ -250,6 +252,11 @@ namespace SDLUtil
                 SDL_GL_GetDrawableSize(mSDLWindow, &w, &h);
                 int x, y;
                 SDL_GetWindowPosition(mSDLWindow, &x, &y);
+
+                // Happens when you Alt-Tab out of game
+                if (w == 0 && h == 0)
+                    return;
+
                 mViewer->getCamera()->getGraphicsContext()->resized(x, y, w, h);
 
                 mViewer->getEventQueue()->windowResize(x, y, w, h);

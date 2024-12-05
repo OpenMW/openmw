@@ -183,6 +183,10 @@ namespace MWGui
                 return switchFocus(D_Down, false);
             case MyGUI::KeyCode::Tab:
                 return switchFocus(MyGUI::InputManager::getInstance().isShiftPressed() ? D_Prev : D_Next, true);
+            case MyGUI::KeyCode::Period:
+                return switchFocus(D_Prev, true);
+            case MyGUI::KeyCode::Slash:
+                return switchFocus(D_Next, true);
             case MyGUI::KeyCode::Return:
             case MyGUI::KeyCode::NumpadEnter:
             case MyGUI::KeyCode::Space:
@@ -242,12 +246,12 @@ namespace MWGui
 
         bool forward = (direction == D_Next || direction == D_Right || direction == D_Down);
 
-        int index = found - keyFocusList.begin();
+        std::ptrdiff_t index{ found - keyFocusList.begin() };
         index = forward ? (index + 1) : (index - 1);
         if (wrap)
             index = (index + keyFocusList.size()) % keyFocusList.size();
         else
-            index = std::clamp<int>(index, 0, keyFocusList.size() - 1);
+            index = std::clamp<std::ptrdiff_t>(index, 0, keyFocusList.size() - 1);
 
         MyGUI::Widget* next = keyFocusList[index];
         int vertdiff = next->getTop() - focus->getTop();

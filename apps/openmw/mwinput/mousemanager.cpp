@@ -10,8 +10,11 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwgui/settingswindow.hpp"
 
 #include "../mwworld/player.hpp"
 
@@ -117,15 +120,22 @@ namespace MWInput
             mBindingsManager->setPlayerControlsEnabled(!guiMode);
             mBindingsManager->mouseReleased(arg, id);
         }
+
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            { MWBase::LuaManager::InputEvent::MouseButtonReleased, arg.button });
     }
 
     void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent& arg)
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         if (mBindingsManager->isDetectingBindingState() || !input->controlsDisabled())
+        {
             mBindingsManager->mouseWheelMoved(arg);
+        }
 
         input->setJoystickLastUsed(false);
+        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::MouseWheel,
+            MWBase::LuaManager::InputEvent::WheelChange{ arg.x, arg.y } });
     }
 
     void MouseManager::mousePressed(const SDL_MouseButtonEvent& arg, Uint8 id)
@@ -156,9 +166,12 @@ namespace MWInput
 
         // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
         // Also do not trigger bindings when input controls are disabled, e.g. during save loading
-        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
-            && !input->controlsDisabled())
+        if (!MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible() && !input->controlsDisabled())
+        {
             mBindingsManager->mousePressed(arg, id);
+        }
+        MWBase::Environment::get().getLuaManager()->inputEvent(
+            { MWBase::LuaManager::InputEvent::MouseButtonPressed, arg.button });
     }
 
     void MouseManager::updateCursorMode()
@@ -205,14 +218,14 @@ namespace MWInput
         };
 
         // Only actually turn player when we're not in vanity mode
-        bool controls = MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols");
-        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && controls)
+        bool playerLooking = MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking");
+        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && playerLooking)
         {
             MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
             player.yaw(-rot[2]);
             player.pitch(-rot[0]);
         }
-        else if (!controls)
+        else if (!playerLooking)
             MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
 
         MWBase::Environment::get().getInputManager()->resetIdleTime();
@@ -246,7 +259,8 @@ namespace MWInput
 
     void MouseManager::warpMouse()
     {
-        float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-        mInputWrapper->warpMouse(static_cast<int>(mGuiCursorX * uiScale), static_cast<int>(mGuiCursorY * uiScale));
+        float guiUiScale = Settings::gui().mScalingFactor;
+        mInputWrapper->warpMouse(
+            static_cast<int>(mGuiCursorX * guiUiScale), static_cast<int>(mGuiCursorY * guiUiScale));
     }
 }

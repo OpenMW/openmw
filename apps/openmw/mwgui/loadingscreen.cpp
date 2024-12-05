@@ -9,6 +9,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>
@@ -17,6 +18,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -37,7 +39,6 @@ namespace MWGui
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
         , mImportantLabel(false)
-        , mVisible(false)
         , mNestedLoadingCount(0)
         , mProgress(0)
         , mShowWallpaper(true)
@@ -65,7 +66,8 @@ namespace MWGui
                 != supported_extensions.end();
         };
 
-        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator("Splash/"))
+        constexpr VFS::Path::NormalizedView splash("splash/");
+        for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(splash))
         {
             if (isSupportedExtension(Misc::getFileExtension(name)))
                 mSplashScreens.push_back(name);
@@ -139,7 +141,7 @@ namespace MWGui
         osg::BoundingSphere computeBound(const osg::Node&) const override { return osg::BoundingSphere(); }
     };
 
-    void LoadingScreen::loadingOn(bool visible)
+    void LoadingScreen::loadingOn()
     {
         // Early-out if already on
         if (mNestedLoadingCount++ > 0 && mMainWidget->getVisible())
@@ -158,16 +160,7 @@ namespace MWGui
             mOldIcoMax = ico->getMaximumNumOfObjectsToCompilePerFrame();
         }
 
-        mVisible = visible;
-        mLoadingBox->setVisible(mVisible);
         setVisible(true);
-
-        if (!mVisible)
-        {
-            mShowWallpaper = false;
-            draw();
-            return;
-        }
 
         mShowWallpaper = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
 
@@ -183,7 +176,6 @@ namespace MWGui
     {
         if (--mNestedLoadingCount > 0)
             return;
-        mLoadingBox->setVisible(true); // restore
 
         if (mLastRenderTime < mLoadingOnTime)
         {
@@ -191,7 +183,7 @@ namespace MWGui
             // we may still want to show the label if the caller requested it
             if (mImportantLabel)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption().asUTF8());
+                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption());
                 mImportantLabel = false;
             }
         }
@@ -324,7 +316,7 @@ namespace MWGui
 
     void LoadingScreen::draw()
     {
-        if (mVisible && !needToDrawLoadingScreen())
+        if (!needToDrawLoadingScreen())
             return;
 
         if (mShowWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000 * 1)
@@ -340,7 +332,12 @@ namespace MWGui
 
         MWBase::Environment::get().getInputManager()->update(0, true, true);
 
-        mResourceSystem->reportStats(mViewer->getFrameStamp()->getFrameNumber(), mViewer->getViewerStats());
+        osg::Stats* const stats = mViewer->getViewerStats();
+        const unsigned frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+
+        stats->setAttribute(frameNumber, "Loading", 1);
+
+        mResourceSystem->reportStats(frameNumber, stats);
         if (osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
         {
             ico->setMinimumTimeAvailableForGLCompileAndDeletePerFrame(1.f / getTargetFrameRate());

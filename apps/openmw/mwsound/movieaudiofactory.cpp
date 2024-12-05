@@ -1,6 +1,7 @@
 #include "movieaudiofactory.hpp"
 
 #include <extern/osg-ffmpeg-videoplayer/audiodecoder.hpp>
+#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
 #include <extern/osg-ffmpeg-videoplayer/videostate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -24,8 +25,10 @@ namespace MWSound
     private:
         MWSound::MovieAudioDecoder* mDecoder;
 
-        void open(const std::string& fname) override;
-        void close() override;
+        void open(VFS::Path::NormalizedView fname) override { throw std::runtime_error("Method not implemented"); }
+
+        void close() override {}
+
         std::string getName() override;
         void getInfo(int* samplerate, ChannelConfig* chans, SampleType* type) override;
         size_t read(char* buffer, size_t bytes) override;
@@ -44,12 +47,19 @@ namespace MWSound
 
         size_t getSampleOffset()
         {
+#if OPENMW_FFMPEG_5_OR_GREATER
+            ssize_t clock_delay = (mFrameSize - mFramePos) / mOutputChannelLayout.nb_channels
+#else
             ssize_t clock_delay = (mFrameSize - mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout)
+#endif
                 / av_get_bytes_per_sample(mOutputSampleFormat);
             return (size_t)(mAudioClock * mAudioContext->sample_rate) - clock_delay;
         }
 
-        std::string getStreamName() { return std::string(); }
+        std::string getStreamName()
+        {
+            return std::string();
+        }
 
     private:
         // MovieAudioDecoder overrides
@@ -91,12 +101,6 @@ namespace MWSound
         MWBase::SoundStream* mAudioTrack;
         std::shared_ptr<MWSoundDecoderBridge> mDecoderBridge;
     };
-
-    void MWSoundDecoderBridge::open(const std::string& fname)
-    {
-        throw std::runtime_error("Method not implemented");
-    }
-    void MWSoundDecoderBridge::close() {}
 
     std::string MWSoundDecoderBridge::getName()
     {

@@ -543,7 +543,8 @@ namespace MWDialogue
         mPermanentDispositionChange += perm;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
+        player.getClass().skillUsageSucceeded(
+            player, ESM::Skill::Speechcraft, success ? ESM::Skill::Speechcraft_Success : ESM::Skill::Speechcraft_Fail);
 
         if (success)
         {
@@ -619,25 +620,25 @@ namespace MWDialogue
         return false;
     }
 
-    void DialogueManager::say(const MWWorld::Ptr& actor, const ESM::RefId& topic)
+    bool DialogueManager::say(const MWWorld::Ptr& actor, const ESM::RefId& topic)
     {
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         if (sndMgr->sayActive(actor))
         {
             // Actor is already saying something.
-            return;
+            return false;
         }
 
         if (actor.getClass().isNpc() && MWBase::Environment::get().getWorld()->isSwimming(actor))
         {
             // NPCs don't talk while submerged
-            return;
+            return false;
         }
 
         if (actor.getClass().getCreatureStats(actor).getKnockedDown())
         {
             // Unconscious actors can not speak
-            return;
+            return false;
         }
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -652,10 +653,11 @@ namespace MWDialogue
             if (Settings::gui().mSubtitles)
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
-                sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(info->mSound));
+                sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(info->mSound)));
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
         }
+        return info != nullptr;
     }
 
     int DialogueManager::countSavedGameRecords() const
@@ -735,6 +737,17 @@ namespace MWDialogue
                 return it->second;
         }
         return 0;
+    }
+
+    const std::map<ESM::RefId, int>* DialogueManager::getFactionReactionOverrides(const ESM::RefId& faction) const
+    {
+        // Make sure the faction exists
+        MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction);
+
+        const auto found = mChangedFactionReaction.find(faction);
+        if (found != mChangedFactionReaction.end())
+            return &found->second;
+        return nullptr;
     }
 
     void DialogueManager::clearInfoActor(const MWWorld::Ptr& actor) const

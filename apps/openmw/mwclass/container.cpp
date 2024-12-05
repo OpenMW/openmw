@@ -1,6 +1,7 @@
 #include "container.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/containerstate.hpp>
 #include <components/esm3/loadcont.hpp>
@@ -21,9 +22,9 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/objects.hpp"
@@ -33,6 +34,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -68,10 +70,12 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
+            MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
             MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
 
             // store
             ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(*ref->mBase, ptr.getCell()));
+            getContainerStore(ptr).setPtr(ptr);
 
             MWBase::Environment::get().getWorld()->addContainerScripts(ptr, ptr.getCell());
         }
@@ -120,10 +124,10 @@ namespace MWClass
     void Container::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
         MWPhysics::PhysicsSystem& physics) const
     {
-        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
+        physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string Container::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Container::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Container>(ptr);
     }
@@ -214,18 +218,13 @@ namespace MWClass
 
     std::string_view Container::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Container>(ptr);
     }
 
     MWWorld::ContainerStore& Container::getContainerStore(const MWWorld::Ptr& ptr) const
     {
         ensureCustomData(ptr);
-        auto& data = ptr.getRefData().getCustomData()->asContainerCustomData();
-        data.mStore.mPtr = ptr;
-        return data.mStore;
+        return ptr.getRefData().getCustomData()->asContainerCustomData().mStore;
     }
 
     ESM::RefId Container::getScript(const MWWorld::ConstPtr& ptr) const
@@ -248,7 +247,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption = MyGUI::TextIterator::toTagsString(MWGui::toUString(name));
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name));
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();
@@ -264,13 +263,13 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
             if (ptr.getCellRef().getRefId() == "stolen_goods")
-                text += "\nYou can not use evidence chests";
+                info.extra += "\nYou cannot use evidence chests";
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -301,8 +300,13 @@ namespace MWClass
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const
     {
         const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
-
-        return MWWorld::Ptr(cell.insert(ref), &cell);
+        MWWorld::Ptr newPtr(cell.insert(ref), &cell);
+        if (newPtr.getRefData().getCustomData())
+        {
+            MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+            getContainerStore(newPtr).setPtr(newPtr);
+        }
+        return newPtr;
     }
 
     void Container::readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
@@ -312,6 +316,9 @@ namespace MWClass
 
         const ESM::ContainerState& containerState = state.asContainerState();
         ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory));
+
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+        getContainerStore(ptr).setPtr(ptr);
     }
 
     void Container::writeAdditionalState(const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const

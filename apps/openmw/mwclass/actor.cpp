@@ -3,6 +3,7 @@
 #include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -14,6 +15,7 @@
 #include "../mwphysics/physicssystem.hpp"
 
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 namespace MWClass
 {
@@ -25,7 +27,7 @@ namespace MWClass
     void Actor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
         MWPhysics::PhysicsSystem& physics) const
     {
-        physics.addActor(ptr, model);
+        physics.addActor(ptr, VFS::Path::toNormalized(model));
         if (getCreatureStats(ptr).isDead() && getCreatureStats(ptr).isDeathAnimationFinished())
             MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
     }
@@ -33,23 +35,6 @@ namespace MWClass
     bool Actor::useAnim() const
     {
         return true;
-    }
-
-    void Actor::block(const MWWorld::Ptr& ptr) const
-    {
-        const MWWorld::InventoryStore& inv = getInventoryStore(ptr);
-        MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if (shield == inv.end())
-            return;
-
-        MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-        const ESM::RefId skill = shield->getClass().getEquipmentSkill(*shield);
-        if (skill == ESM::Skill::LightArmor)
-            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
-        else if (skill == ESM::Skill::MediumArmor)
-            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
-        else if (skill == ESM::Skill::HeavyArmor)
-            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
     }
 
     osg::Vec3f Actor::getRotationVector(const MWWorld::Ptr& ptr) const
@@ -89,5 +74,20 @@ namespace MWClass
         if (movementSettings.mIsStrafing)
             moveSpeed *= 0.75f;
         return moveSpeed;
+    }
+
+    bool Actor::consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const
+    {
+        MWMechanics::CastSpell cast(actor, actor);
+        const ESM::RefId& recordId = consumable.getCellRef().getRefId();
+        MWBase::Environment::get().getWorldModel()->registerPtr(consumable);
+        MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
+        actor.getClass().getContainerStore(actor).remove(consumable, 1);
+        if (cast.cast(recordId))
+        {
+            MWBase::Environment::get().getWorld()->breakInvisibility(actor);
+            return true;
+        }
+        return false;
     }
 }

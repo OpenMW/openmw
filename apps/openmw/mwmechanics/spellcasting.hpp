@@ -26,7 +26,7 @@ namespace MWMechanics
         MWWorld::Ptr mCaster; // May be empty
         MWWorld::Ptr mTarget; // May be empty
 
-        void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects) const;
+        void playSpellCastingEffects(const std::vector<ESM::IndexedENAMstruct>& effects) const;
 
         void explodeSpell(const ESM::EffectList& effects, const MWWorld::Ptr& ignore, ESM::RangeType rangeType) const;
 
@@ -41,13 +41,13 @@ namespace MWMechanics
             false
         }; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
         bool mFromProjectile; // True if spell is cast by enchantment of some projectile (arrow, bolt or thrown weapon)
-        bool mManualSpell; // True if spell is casted from script and ignores some checks (mana level, success chance,
-                           // etc.)
+        bool mScriptedSpell; // True if spell is casted from script and ignores some checks (mana level, success chance,
+                             // etc.)
         ESM::RefNum mItem;
-        ESM::ActiveSpells::EffectType mType{ ESM::ActiveSpells::Type_Temporary };
+        ESM::ActiveSpells::Flags mFlags{ ESM::ActiveSpells::Flag_Temporary };
 
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile = false,
-            const bool manualSpell = false);
+            const bool scriptedSpell = false);
 
         bool cast(const ESM::Spell* spell);
 

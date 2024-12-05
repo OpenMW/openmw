@@ -16,7 +16,7 @@ namespace MWLua
     // ObjectId is a unique identifier of a game object.
     // It can change only if the order of content files was change.
     using ObjectId = ESM::RefNum;
-    inline const ObjectId& getId(const MWWorld::Ptr& ptr)
+    inline ObjectId getId(const MWWorld::Ptr& ptr)
     {
         return ptr.getCellRef().getRefNum();
     }
@@ -68,6 +68,12 @@ namespace MWLua
 
     template <typename Obj>
     struct Inventory
+    {
+        Obj mObj;
+    };
+
+    template <typename Obj>
+    struct Owner
     {
         Obj mObj;
     };

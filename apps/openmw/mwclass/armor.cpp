@@ -1,6 +1,7 @@
 #include "armor.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadgmst.hpp>
@@ -24,9 +25,9 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -44,17 +45,14 @@ namespace MWClass
         }
     }
 
-    std::string Armor::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Armor::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Armor>(ptr);
     }
 
     std::string_view Armor::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Armor>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Armor::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -217,8 +215,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -258,15 +255,15 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.enchant = ref->mBase->mEnchant;
         if (!info.enchant.empty())
             info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

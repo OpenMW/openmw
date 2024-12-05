@@ -20,7 +20,7 @@ namespace DetourNavigator
         {
         }
 
-        std::shared_ptr<RecastMesh> getMesh(std::string_view worldspace, const TilePosition& tilePosition) const
+        std::shared_ptr<RecastMesh> getMesh(ESM::RefId worldspace, const TilePosition& tilePosition) const
         {
             return mImpl.get().getNewMesh(worldspace, tilePosition);
         }

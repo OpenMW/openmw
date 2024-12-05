@@ -17,10 +17,13 @@
 
 #include <apps/opencs/view/doc/subview.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
 #include "../doc/sizehint.hpp"
+#include "../doc/view.hpp"
 #include "../filter/filterbox.hpp"
 #include "../filter/filterdata.hpp"
 #include "table.hpp"
@@ -60,7 +63,7 @@ CSVWorld::TableSubView::TableSubView(
     mOptions->hide();
 
     QPushButton* opt = new QPushButton();
-    opt->setIcon(QIcon(":startup/configure"));
+    opt->setIcon(Misc::ScalableIcon::load(":startup/configure"));
     opt->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     opt->setToolTip("Open additional options for this subview.");
     connect(opt, &QPushButton::clicked, this, &TableSubView::toggleOptions);
@@ -78,8 +81,11 @@ CSVWorld::TableSubView::TableSubView(
     widget->setLayout(layout);
 
     setWidget(widget);
+
+    QScreen* screen = CSVDoc::View::getWidgetScreen(pos());
+
     // prefer height of the screen and full width of the table
-    const QRect rect = QApplication::screenAt(pos())->geometry();
+    const QRect rect = screen->geometry();
     int frameHeight = 40; // set a reasonable default
     QWidget* topLevel = QApplication::topLevelAt(pos());
     if (topLevel)
@@ -169,7 +175,7 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
         {
             CSVFilter::FilterData filterData;
             filterData.searchData = it->getId();
-            filterData.columns = col;
+            filterData.columns = std::move(col);
             sourceFilter.emplace_back(filterData);
         }
 
@@ -195,7 +201,7 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
 
         CSVFilter::FilterData filterData;
         filterData.searchData = qData;
-        filterData.columns = searchColumns;
+        filterData.columns = std::move(searchColumns);
 
         sourceFilterByValue.emplace_back(filterData);
 

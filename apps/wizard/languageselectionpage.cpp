@@ -1,5 +1,7 @@
 #include "languageselectionpage.hpp"
 
+#include <components/misc/scalableicon.hpp>
+
 #include "mainwizard.hpp"
 
 Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
@@ -9,17 +11,21 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
 
     setupUi(this);
 
-    registerField(QLatin1String("installation.language"), languageComboBox);
+    flagIcon->setIcon(Misc::ScalableIcon::load(":preferences-desktop-locale"));
+
+    registerField(QLatin1String("installation.language"), languageComboBox, "currentData", "currentDataChanged");
 }
 
 void Wizard::LanguageSelectionPage::initializePage()
 {
-    QStringList languages;
-    languages << QLatin1String("English") << QLatin1String("French") << QLatin1String("German")
-              << QLatin1String("Italian") << QLatin1String("Polish") << QLatin1String("Russian")
-              << QLatin1String("Spanish");
+    QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
+        { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
+        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
 
-    languageComboBox->addItems(languages);
+    for (auto lang : languages)
+    {
+        languageComboBox->addItem(lang.second, lang.first);
+    }
 }
 
 int Wizard::LanguageSelectionPage::nextId() const

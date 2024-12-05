@@ -56,9 +56,11 @@ namespace CSMWorld
             { ColumnId_FactionIndex, "Faction Index" },
             { ColumnId_Charges, "Charges" },
             { ColumnId_Enchantment, "Enchantment" },
-            { ColumnId_CoinValue, "Coin Value" },
+            { ColumnId_StackCount, "Count" },
+            { ColumnId_GoldValue, "Value" },
             { ColumnId_Teleport, "Teleport" },
             { ColumnId_TeleportCell, "Teleport Cell" },
+            { ColumnId_IsLocked, "Locked" },
             { ColumnId_LockLevel, "Lock Level" },
             { ColumnId_Key, "Key" },
             { ColumnId_Trap, "Trap" },
@@ -235,6 +237,7 @@ namespace CSMWorld
             { ColumnId_RegionSounds, "Sounds" },
             { ColumnId_SoundName, "Sound Name" },
             { ColumnId_SoundChance, "Chance" },
+            { ColumnId_SoundProbability, "Probability" },
 
             { ColumnId_FactionReactions, "Reactions" },
             { ColumnId_FactionRanks, "Ranks" },
@@ -321,7 +324,6 @@ namespace CSMWorld
             { ColumnId_MaxAttack, "Max Attack" },
             { ColumnId_CreatureMisc, "Creature Misc" },
 
-            { ColumnId_Idle1, "Idle 1" },
             { ColumnId_Idle2, "Idle 2" },
             { ColumnId_Idle3, "Idle 3" },
             { ColumnId_Idle4, "Idle 4" },
@@ -329,6 +331,7 @@ namespace CSMWorld
             { ColumnId_Idle6, "Idle 6" },
             { ColumnId_Idle7, "Idle 7" },
             { ColumnId_Idle8, "Idle 8" },
+            { ColumnId_Idle9, "Idle 9" },
 
             { ColumnId_RegionWeather, "Weather" },
             { ColumnId_WeatherName, "Type" },
@@ -376,6 +379,7 @@ namespace CSMWorld
             { ColumnId_Blocked, "Blocked" },
 
             { ColumnId_LevelledCreatureId, "Levelled Creature" },
+            { ColumnId_ProjectileSpeed, "Projectile Speed" },
 
             // end marker
             { -1, 0 },

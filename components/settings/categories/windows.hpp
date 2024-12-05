@@ -1,8 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_WINDOWS_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_WINDOWS_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
@@ -161,6 +160,15 @@ namespace Settings
         SettingValue<float> mPostprocessorMaximizedW{ mIndex, "Windows", "postprocessor maximized w" };
         SettingValue<float> mPostprocessorMaximizedH{ mIndex, "Windows", "postprocessor maximized h" };
         SettingValue<bool> mPostprocessorMaximized{ mIndex, "Windows", "postprocessor maximized" };
+        SettingValue<float> mDebugX{ mIndex, "Windows", "debug x" };
+        SettingValue<float> mDebugY{ mIndex, "Windows", "debug y" };
+        SettingValue<float> mDebugW{ mIndex, "Windows", "debug w" };
+        SettingValue<float> mDebugH{ mIndex, "Windows", "debug h" };
+        SettingValue<float> mDebugMaximizedX{ mIndex, "Windows", "debug maximized x" };
+        SettingValue<float> mDebugMaximizedY{ mIndex, "Windows", "debug maximized y" };
+        SettingValue<float> mDebugMaximizedW{ mIndex, "Windows", "debug maximized w" };
+        SettingValue<float> mDebugMaximizedH{ mIndex, "Windows", "debug maximized h" };
+        SettingValue<bool> mDebugMaximized{ mIndex, "Windows", "debug maximized" };
     };
 }
 

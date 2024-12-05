@@ -1,12 +1,20 @@
 #include "debugging.hpp"
 
 #include <chrono>
+#include <deque>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <memory>
 
+#ifdef _MSC_VER
+// TODO: why is this necessary? this has /external:I
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
 #include <boost/iostreams/stream.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/conversion.hpp>
@@ -16,7 +24,7 @@
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/files/conversion.hpp>
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 
 #include <Knownfolders.h>
 
@@ -53,6 +61,11 @@ namespace Debug
         bool outRedirected = isRedirected(STD_OUTPUT_HANDLE);
         bool errRedirected = isRedirected(STD_ERROR_HANDLE);
 
+        // Note: Do not spend three days reinvestigating this PowerShell bug thinking its our bug.
+        // https://gitlab.com/OpenMW/openmw/-/merge_requests/408#note_447467393
+        // The handles look valid, but GetFinalPathNameByHandleA can't tell what files they go to and writing to them
+        // doesn't work.
+
         if (AttachConsole(ATTACH_PARENT_PROCESS))
         {
             fflush(stdout);
@@ -65,16 +78,19 @@ namespace Debug
             {
                 _wfreopen(L"CON", L"r", stdin);
                 freopen("CON", "r", stdin);
+                std::cin.clear();
             }
             if (!outRedirected)
             {
                 _wfreopen(L"CON", L"w", stdout);
                 freopen("CON", "w", stdout);
+                std::cout.clear();
             }
             if (!errRedirected)
             {
                 _wfreopen(L"CON", L"w", stderr);
                 freopen("CON", "w", stderr);
+                std::cerr.clear();
             }
 
             return true;
@@ -93,25 +109,22 @@ namespace Debug
     class DebugOutputBase : public boost::iostreams::sink
     {
     public:
-        DebugOutputBase()
-        {
-            if (CurrentDebugLevel == NoLevel)
-                fillCurrentDebugLevel();
-        }
-
         virtual std::streamsize write(const char* str, std::streamsize size)
         {
             if (size <= 0)
                 return size;
-            std::string_view msg{ str, size_t(size) };
+            std::string_view msg{ str, static_cast<size_t>(size) };
 
             // Skip debug level marker
-            Level level = getLevelMarker(str);
-            if (level != NoLevel)
+            Level level = All;
+            if (Log::sWriteLevel)
+            {
+                level = getLevelMarker(msg[0]);
                 msg = msg.substr(1);
+            }
 
             char prefix[32];
-            int prefixSize;
+            std::size_t prefixSize;
             {
                 prefix[0] = '[';
                 const auto now = std::chrono::system_clock::now();
@@ -149,37 +162,11 @@ namespace Debug
         virtual ~DebugOutputBase() = default;
 
     protected:
-        static Level getLevelMarker(const char* str)
+        static Level getLevelMarker(char marker)
         {
-            if (unsigned(*str) <= unsigned(Marker))
-            {
-                return Level(*str);
-            }
-
-            return NoLevel;
-        }
-
-        static void fillCurrentDebugLevel()
-        {
-            const char* env = getenv("OPENMW_DEBUG_LEVEL");
-            if (env)
-            {
-                std::string value(env);
-                if (value == "ERROR")
-                    CurrentDebugLevel = Error;
-                else if (value == "WARNING")
-                    CurrentDebugLevel = Warning;
-                else if (value == "INFO")
-                    CurrentDebugLevel = Info;
-                else if (value == "VERBOSE")
-                    CurrentDebugLevel = Verbose;
-                else if (value == "DEBUG")
-                    CurrentDebugLevel = Debug;
-
-                return;
-            }
-
-            CurrentDebugLevel = Verbose;
+            if (0 <= marker && static_cast<unsigned>(marker) < static_cast<unsigned>(All))
+                return static_cast<Level>(marker);
+            return All;
         }
 
         virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
@@ -205,177 +192,292 @@ namespace Debug
     };
 #else
 
-    class Tee : public DebugOutputBase
+    namespace
     {
-    public:
-        Tee(std::ostream& stream, std::ostream& stream2)
-            : out(stream)
-            , out2(stream2)
+        struct Record
         {
-            // TODO: check which stream is stderr?
-            mUseColor = useColoredOutput();
+            std::string mValue;
+            Level mLevel;
+        };
 
-            mColors[Error] = Red;
-            mColors[Warning] = Yellow;
-            mColors[Info] = Reset;
-            mColors[Verbose] = DarkGray;
-            mColors[Debug] = DarkGray;
-            mColors[NoLevel] = Reset;
+        std::deque<Record> globalBuffer;
+
+        Color getColor(Level level)
+        {
+            switch (level)
+            {
+                case Error:
+                    return Red;
+                case Warning:
+                    return Yellow;
+                case Info:
+                    return Reset;
+                case Verbose:
+                    return DarkGray;
+                case Debug:
+                    return DarkGray;
+                case All:
+                    return Reset;
+            }
+            return Reset;
         }
 
-        std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) override
+        bool useColoredOutput()
         {
-            out.write(str, size);
-            out.flush();
-
-            if (mUseColor)
-            {
-                out2 << "\033[0;" << mColors[debugLevel] << "m";
-                out2.write(str, size);
-                out2 << "\033[0;" << Reset << "m";
-            }
-            else
-            {
-                out2.write(str, size);
-            }
-            out2.flush();
-
-            return size;
-        }
-
-        virtual ~Tee() = default;
-
-    private:
-        static bool useColoredOutput()
-        {
-            // Note: cmd.exe in Win10 should support ANSI colors, but in its own way.
 #if defined(_WIN32)
-            return 0;
-#else
-            char* term = getenv("TERM");
-            bool useColor = term && !getenv("NO_COLOR") && isatty(fileno(stderr));
+            if (std::getenv("NO_COLOR") != nullptr)
+                return false;
 
-            return useColor;
+            DWORD mode;
+            if (GetConsoleMode(GetStdHandle(STD_ERROR_HANDLE), &mode) && mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+                return true;
+
+            // some console emulators may not use the Win32 API, so try the Unixy approach
+            return std::getenv("TERM") != nullptr && GetFileType(GetStdHandle(STD_ERROR_HANDLE)) == FILE_TYPE_CHAR;
+#else
+            return std::getenv("TERM") != nullptr && std::getenv("NO_COLOR") == nullptr && isatty(fileno(stderr));
 #endif
         }
 
-        std::ostream& out;
-        std::ostream& out2;
-        bool mUseColor;
+        class Identity
+        {
+        public:
+            explicit Identity(std::ostream& stream)
+                : mStream(stream)
+            {
+            }
 
-        std::map<Level, int> mColors;
-    };
+            void write(const char* str, std::streamsize size, Level /*level*/)
+            {
+                mStream.write(str, size);
+                mStream.flush();
+            }
+
+        private:
+            std::ostream& mStream;
+        };
+
+        class Coloured
+        {
+        public:
+            explicit Coloured(std::ostream& stream)
+                : mStream(stream)
+                // TODO: check which stream is stderr?
+                , mUseColor(useColoredOutput())
+            {
+            }
+
+            void write(const char* str, std::streamsize size, Level level)
+            {
+                if (mUseColor)
+                    mStream << "\033[0;" << getColor(level) << 'm';
+                mStream.write(str, size);
+                if (mUseColor)
+                    mStream << "\033[0;" << Reset << 'm';
+                mStream.flush();
+            }
+
+        private:
+            std::ostream& mStream;
+            bool mUseColor;
+        };
+
+        class Buffer
+        {
+        public:
+            explicit Buffer(std::size_t capacity, std::deque<Record>& buffer)
+                : mCapacity(capacity)
+                , mBuffer(buffer)
+            {
+            }
+
+            void write(const char* str, std::streamsize size, Level debugLevel)
+            {
+                while (mBuffer.size() >= mCapacity)
+                    mBuffer.pop_front();
+                mBuffer.push_back(Record{ std::string(str, size), debugLevel });
+            }
+
+        private:
+            std::size_t mCapacity;
+            std::deque<Record>& mBuffer;
+        };
+
+        template <class First, class Second>
+        class Tee : public DebugOutputBase
+        {
+        public:
+            explicit Tee(First first, Second second)
+                : mFirst(first)
+                , mSecond(second)
+            {
+            }
+
+            std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) override
+            {
+                mFirst.write(str, size, debugLevel);
+                mSecond.write(str, size, debugLevel);
+                return size;
+            }
+
+        private:
+            First mFirst;
+            Second mSecond;
+        };
+    }
 #endif
 
-}
-
-static std::unique_ptr<std::ostream> rawStdout = nullptr;
-static std::unique_ptr<std::ostream> rawStderr = nullptr;
-static std::unique_ptr<std::mutex> rawStderrMutex = nullptr;
-static std::ofstream logfile;
+    static std::unique_ptr<std::ostream> rawStdout = nullptr;
+    static std::unique_ptr<std::ostream> rawStderr = nullptr;
+    static std::unique_ptr<std::mutex> rawStderrMutex = nullptr;
+    static std::ofstream logfile;
 
 #if defined(_WIN32) && defined(_DEBUG)
-static boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
+    static boost::iostreams::stream_buffer<DebugOutput> sb;
 #else
-static boost::iostreams::stream_buffer<Debug::Tee> coutsb;
-static boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
+    static boost::iostreams::stream_buffer<Tee<Identity, Coloured>> standardOut;
+    static boost::iostreams::stream_buffer<Tee<Identity, Coloured>> standardErr;
+    static boost::iostreams::stream_buffer<Tee<Buffer, Coloured>> bufferedOut;
+    static boost::iostreams::stream_buffer<Tee<Buffer, Coloured>> bufferedErr;
 #endif
 
-std::ostream& getRawStdout()
-{
-    return rawStdout ? *rawStdout : std::cout;
-}
+    std::ostream& getRawStdout()
+    {
+        return rawStdout ? *rawStdout : std::cout;
+    }
 
-std::ostream& getRawStderr()
-{
-    return rawStderr ? *rawStderr : std::cerr;
-}
+    std::ostream& getRawStderr()
+    {
+        return rawStderr ? *rawStderr : std::cerr;
+    }
 
-Misc::Locked<std::ostream&> getLockedRawStderr()
-{
-    return Misc::Locked<std::ostream&>(*rawStderrMutex, getRawStderr());
-}
+    Misc::Locked<std::ostream&> getLockedRawStderr()
+    {
+        return Misc::Locked<std::ostream&>(*rawStderrMutex, getRawStderr());
+    }
 
-// Redirect cout and cerr to the log file
-void setupLogging(const std::filesystem::path& logDir, std::string_view appName, std::ios_base::openmode mode)
-{
-#if defined(_WIN32) && defined(_DEBUG)
-    // Redirect cout and cerr to VS debug output when running in debug mode
-    sb.open(Debug::DebugOutput());
-    std::cout.rdbuf(&sb);
-    std::cerr.rdbuf(&sb);
-#else
-    const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-    logfile.open(logDir / logName, mode);
+    Level getDebugLevel()
+    {
+        if (const char* env = getenv("OPENMW_DEBUG_LEVEL"))
+        {
+            const std::string_view value(env);
+            if (value == "ERROR")
+                return Error;
+            if (value == "WARNING")
+                return Warning;
+            if (value == "INFO")
+                return Info;
+            if (value == "VERBOSE")
+                return Verbose;
+            if (value == "DEBUG")
+                return Debug;
+        }
 
-    coutsb.open(Debug::Tee(logfile, *rawStdout));
-    cerrsb.open(Debug::Tee(logfile, *rawStderr));
+        return Verbose;
+    }
 
-    std::cout.rdbuf(&coutsb);
-    std::cerr.rdbuf(&cerrsb);
+    void setupLogging(const std::filesystem::path& logDir, std::string_view appName)
+    {
+        Log::sMinDebugLevel = getDebugLevel();
+        Log::sWriteLevel = true;
+
+#if !(defined(_WIN32) && defined(_DEBUG))
+        const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
+        logfile.open(logDir / logName, std::ios::out);
+
+        Identity log(logfile);
+
+        for (const Record& v : globalBuffer)
+            log.write(v.mValue.data(), v.mValue.size(), v.mLevel);
+
+        globalBuffer.clear();
+
+        standardOut.open(Tee(log, Coloured(*rawStdout)));
+        standardErr.open(Tee(log, Coloured(*rawStderr)));
+
+        std::cout.rdbuf(&standardOut);
+        std::cerr.rdbuf(&standardErr);
 #endif
 
 #ifdef _WIN32
-    if (Crash::CrashCatcher::instance())
-    {
-        Crash::CrashCatcher::instance()->updateDumpPath(logDir);
-    }
-#endif
-}
-
-int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], std::string_view appName)
-{
-#if defined _WIN32
-    (void)Debug::attachParentConsole();
-#endif
-    rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
-    rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
-    rawStderrMutex = std::make_unique<std::mutex>();
-
-    int ret = 0;
-    try
-    {
-        if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER");
-            env == nullptr || Misc::StringUtils::toNumeric<int>(env, 0) == 0)
+        if (Crash::CrashCatcher::instance())
         {
-#if defined(_WIN32)
-            const std::string crashDumpName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
-            const std::string freezeDumpName = Misc::StringUtils::lowerCase(appName) + "-freeze.dmp";
-            std::filesystem::path dumpDirectory = std::filesystem::temp_directory_path();
-            PWSTR userProfile = nullptr;
-            if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &userProfile)))
-            {
-                dumpDirectory = userProfile;
-            }
-            CoTaskMemFree(userProfile);
-            Crash::CrashCatcher crashy(argc, argv, dumpDirectory, crashDumpName, freezeDumpName);
-#else
-            const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
-            // install the crash handler as soon as possible.
-            crashCatcherInstall(
-                argc, argv, Files::pathToUnicodeString(std::filesystem::temp_directory_path() / crashLogName));
-#endif
-            ret = innerApplication(argc, argv);
+            Crash::CrashCatcher::instance()->updateDumpPath(logDir);
         }
-        else
-            ret = innerApplication(argc, argv);
-    }
-    catch (const std::exception& e)
-    {
-#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
-        if (!isatty(fileno(stdin)))
 #endif
-            SDL_ShowSimpleMessageBox(0, (std::string(appName) + ": Fatal error").c_str(), e.what(), nullptr);
-
-        Log(Debug::Error) << "Error: " << e.what();
-
-        ret = 1;
     }
 
-    // Restore cout and cerr
-    std::cout.rdbuf(rawStdout->rdbuf());
-    std::cerr.rdbuf(rawStderr->rdbuf());
-    Debug::CurrentDebugLevel = Debug::NoLevel;
+    int wrapApplication(
+        int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], std::string_view appName)
+    {
+#if defined _WIN32
+        (void)attachParentConsole();
+#endif
+        rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
+        rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
+        rawStderrMutex = std::make_unique<std::mutex>();
 
-    return ret;
+#if defined(_WIN32) && defined(_DEBUG)
+        // Redirect cout and cerr to VS debug output when running in debug mode
+        sb.open(DebugOutput());
+        std::cout.rdbuf(&sb);
+        std::cerr.rdbuf(&sb);
+#else
+        constexpr std::size_t bufferCapacity = 1024;
+
+        bufferedOut.open(Tee(Buffer(bufferCapacity, globalBuffer), Coloured(*rawStdout)));
+        bufferedErr.open(Tee(Buffer(bufferCapacity, globalBuffer), Coloured(*rawStderr)));
+
+        std::cout.rdbuf(&bufferedOut);
+        std::cerr.rdbuf(&bufferedErr);
+#endif
+
+        int ret = 0;
+        try
+        {
+            if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER");
+                env == nullptr || Misc::StringUtils::toNumeric<int>(env, 0) == 0)
+            {
+#if defined(_WIN32)
+                const std::string crashDumpName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
+                const std::string freezeDumpName = Misc::StringUtils::lowerCase(appName) + "-freeze.dmp";
+                std::filesystem::path dumpDirectory = std::filesystem::temp_directory_path();
+                PWSTR userProfile = nullptr;
+                if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &userProfile)))
+                {
+                    dumpDirectory = userProfile;
+                }
+                CoTaskMemFree(userProfile);
+                Crash::CrashCatcher crashy(argc, argv, dumpDirectory, crashDumpName, freezeDumpName);
+#else
+                const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
+                // install the crash handler as soon as possible.
+                crashCatcherInstall(argc, argv, std::filesystem::temp_directory_path() / crashLogName);
+#endif
+                ret = innerApplication(argc, argv);
+            }
+            else
+                ret = innerApplication(argc, argv);
+        }
+        catch (const std::exception& e)
+        {
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+            if (!isatty(fileno(stdin)))
+#endif
+                SDL_ShowSimpleMessageBox(0, (std::string(appName) + ": Fatal error").c_str(), e.what(), nullptr);
+
+            Log(Debug::Error) << "Fatal error: " << e.what();
+
+            ret = 1;
+        }
+
+        // Restore cout and cerr
+        std::cout.rdbuf(rawStdout->rdbuf());
+        std::cerr.rdbuf(rawStderr->rdbuf());
+
+        Log::sMinDebugLevel = All;
+        Log::sWriteLevel = false;
+
+        return ret;
+    }
 }

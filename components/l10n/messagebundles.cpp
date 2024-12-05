@@ -66,31 +66,25 @@ namespace l10n
         return status.isSuccess();
     }
 
-    void MessageBundles::load(std::istream& input, const icu::Locale& lang, const std::string& path)
+    void MessageBundles::load(std::istream& input, const icu::Locale& lang)
     {
-        try
+        YAML::Node data = YAML::Load(input);
+        std::string localeName = lang.getName();
+        const icu::Locale& langOrEn = localeName == "gmst" ? icu::Locale::getEnglish() : lang;
+        for (const auto& it : data)
         {
-            YAML::Node data = YAML::Load(input);
-            std::string localeName = lang.getName();
-            const icu::Locale& langOrEn = localeName == "gmst" ? icu::Locale::getEnglish() : lang;
-            for (const auto& it : data)
+            const auto key = it.first.as<std::string>();
+            const auto value = it.second.as<std::string>();
+            icu::UnicodeString pattern
+                = icu::UnicodeString::fromUTF8(icu::StringPiece(value.data(), static_cast<std::int32_t>(value.size())));
+            icu::ErrorCode status;
+            UParseError parseError;
+            icu::MessageFormat message(pattern, langOrEn, parseError, status);
+            if (checkSuccess(status, std::string("Failed to create message ") + key + " for locale " + lang.getName(),
+                    parseError))
             {
-                const auto key = it.first.as<std::string>();
-                const auto value = it.second.as<std::string>();
-                icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(icu::StringPiece(value.data(), value.size()));
-                icu::ErrorCode status;
-                UParseError parseError;
-                icu::MessageFormat message(pattern, langOrEn, parseError, status);
-                if (checkSuccess(status,
-                        std::string("Failed to create message ") + key + " for locale " + lang.getName(), parseError))
-                {
-                    mBundles[localeName].insert(std::make_pair(key, message));
-                }
+                mBundles[localeName].insert(std::make_pair(key, message));
             }
-        }
-        catch (std::exception& e)
-        {
-            Log(Debug::Error) << "Can not load " << path << ": " << e.what();
         }
     }
 
@@ -115,7 +109,8 @@ namespace l10n
         std::vector<icu::Formattable> argValues;
         for (auto& [k, v] : args)
         {
-            argNames.push_back(icu::UnicodeString::fromUTF8(icu::StringPiece(k.data(), k.size())));
+            argNames.push_back(
+                icu::UnicodeString::fromUTF8(icu::StringPiece(k.data(), static_cast<std::int32_t>(k.size()))));
             argValues.push_back(v);
         }
         return formatMessage(key, argNames, argValues);
@@ -160,9 +155,9 @@ namespace l10n
         if (message)
         {
             if (!args.empty() && !argNames.empty())
-                message->format(argNames.data(), args.data(), args.size(), result, success);
+                message->format(argNames.data(), args.data(), static_cast<std::int32_t>(args.size()), result, success);
             else
-                message->format(nullptr, nullptr, args.size(), result, success);
+                message->format(nullptr, nullptr, static_cast<std::int32_t>(args.size()), result, success);
             checkSuccess(success, std::string("Failed to format message ") + key.data());
             result.toUTF8String(resultString);
             return resultString;
@@ -174,15 +169,17 @@ namespace l10n
         }
         UParseError parseError;
         icu::MessageFormat defaultMessage(
-            icu::UnicodeString::fromUTF8(icu::StringPiece(key.data(), key.size())), defaultLocale, parseError, success);
+            icu::UnicodeString::fromUTF8(icu::StringPiece(key.data(), static_cast<std::int32_t>(key.size()))),
+            defaultLocale, parseError, success);
         if (!checkSuccess(success, std::string("Failed to create message ") + key.data(), parseError))
             // If we can't parse the key as a pattern, just return the key
             return std::string(key);
 
         if (!args.empty() && !argNames.empty())
-            defaultMessage.format(argNames.data(), args.data(), args.size(), result, success);
+            defaultMessage.format(
+                argNames.data(), args.data(), static_cast<std::int32_t>(args.size()), result, success);
         else
-            defaultMessage.format(nullptr, nullptr, args.size(), result, success);
+            defaultMessage.format(nullptr, nullptr, static_cast<std::int32_t>(args.size()), result, success);
         checkSuccess(success, std::string("Failed to format message ") + key.data());
         result.toUTF8String(resultString);
         return resultString;

@@ -11,7 +11,7 @@ scaling factor
 This setting scales GUI windows.
 A value of 1.0 results in the normal scale. Larger values are useful to increase the scale of the GUI for high resolution displays.
 
-This setting can be configured in the Interface section of the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 font size
 ---------
@@ -24,7 +24,7 @@ Allows to specify glyph size for in-game fonts.
 Note: default bitmap fonts are supposed to work with 16px size, otherwise glyphs will be blurry.
 TrueType fonts do not have this issue.
 
-This setting can be configured in the Interface section of the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 menu transparency
 -----------------
@@ -52,6 +52,15 @@ such as weight, value, damage, armor rating, magical effects, and detailed descr
 This setting can be adjusted between 0.0 and 1.0 in game
 with the Menu Help Delay slider in the Prefs panel of the Options menu.
 
+keyboard navigation
+-------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Enable or disable keyboard navigation, such as arrow keys and tab moving UI focus, spacebar and Use keys pressing buttons.
+
 stretch menu background
 -----------------------
 
@@ -65,7 +74,7 @@ The Bethesda provided assets have a 4:3 aspect ratio, but other assets are permi
 If this setting is false, the assets will be centered in the mentioned 4:3 aspect ratio,
 with black bars filling the remainder of the screen.
 
-This setting can be configured in the Interface section of the Settings tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 subtitles
 ---------
@@ -148,8 +157,8 @@ color topic specific
 --------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.45 0.5 0.8 1 (blue)
 
 This setting overrides the colour of dialogue topics that have a response unique to the actors speaking.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
@@ -157,15 +166,67 @@ The alpha value is currently ignored.
 
 A topic response is considered unique if its Actor filter field contains the speaking actor's object ID and hasn't yet been read.
 
+color topic specific over
+-------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.6 0.6 0.85 1 (blue)
+
+This setting provides an "over" colour to dialogue topics that meet the color topic specific criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "over" if it is the active GUI element through keyboard or mouse events.
+
+color topic specific pressed
+----------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.3 0.35 0.75 1 (blue)
+
+This setting provides an "pressed" colour to dialogue topics that meet the color topic specific criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "pressed" if it is the active GUI element and it receives a sustained keyboard or mouse event.
+
 color topic exhausted
 ---------------------
 
 :Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.3 0.3 0.3 1 (grey)
 
 This setting overrides the colour of dialogue topics which have been "exhausted" by the player.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
 The alpha value is currently ignored.
 
 A topic is considered "exhausted" if the response the player is about to see has already been seen.
+
+color topic exhausted over
+--------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.55 0.55 0.55 1 (grey)
+
+This setting provides an "over" colour to dialogue topics that meet the color topic exhausted criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "over" if it is the active GUI element through keyboard or mouse events.
+
+color topic exhausted pressed
+-----------------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0 for each channel
+:Default:	0.45 0.45 0.45 1 (grey)
+
+This setting provides a "pressed" colour to dialogue topics that meet the color topic exhausted criteria.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+A dialogue topic is considered "pressed" if it is the active GUI element and it receives a sustained keyboard or mouse event.

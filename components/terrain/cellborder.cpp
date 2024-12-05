@@ -6,6 +6,7 @@
 
 #include "world.hpp"
 
+#include <components/esm/util.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/terrain/storage.hpp>
@@ -25,7 +26,7 @@ namespace Terrain
     osg::ref_ptr<osg::Group> CellBorder::createBorderGeometry(float x, float y, float size, Terrain::Storage* terrain,
         Resource::SceneManager* sceneManager, int mask, ESM::RefId worldspace, float offset, osg::Vec4f color)
     {
-        const int cellSize = ESM::Land::REAL_SIZE;
+        const int cellSize = ESM::getCellSize(worldspace);
         const int borderSegments = 40;
 
         osg::Vec3 cellCorner = osg::Vec3(x * cellSize, y * cellSize, 0);

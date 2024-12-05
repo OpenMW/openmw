@@ -14,6 +14,8 @@
 #include <apps/opencs/model/world/columnbase.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "dragdroputils.hpp"
 
 void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTable& table, const QModelIndex& index)
@@ -29,7 +31,7 @@ void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTab
     mime->setIndexAtDragStart(index);
     QDrag* drag = new QDrag(this);
     drag->setMimeData(mime);
-    drag->setPixmap(QString::fromUtf8(mime->getIcon().c_str()));
+    drag->setPixmap(Misc::ScalableIcon::load(mime->getIcon().c_str()).pixmap(QSize(16, 16)));
     drag->exec(Qt::CopyAction);
 }
 
@@ -92,7 +94,7 @@ void CSVWorld::DragRecordTable::dropEvent(QDropEvent* event)
     if (CSVWorld::DragDropUtils::isTopicOrJournal(*event, display))
     {
         const CSMWorld::TableMimeData* tableMimeData = CSVWorld::DragDropUtils::getTableMimeData(*event);
-        for (auto universalId : tableMimeData->getData())
+        for (const auto& universalId : tableMimeData->getData())
         {
             emit createNewInfoRecord(universalId.getId());
         }

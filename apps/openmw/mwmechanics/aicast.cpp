@@ -25,11 +25,11 @@ namespace MWMechanics
     }
 }
 
-MWMechanics::AiCast::AiCast(const ESM::RefId& targetId, const ESM::RefId& spellId, bool manualSpell)
+MWMechanics::AiCast::AiCast(const ESM::RefId& targetId, const ESM::RefId& spellId, bool scriptedSpell)
     : mTargetId(targetId)
     , mSpellId(spellId)
     , mCasting(false)
-    , mManual(manualSpell)
+    , mScripted(scriptedSpell)
     , mDistance(getInitialDistance(spellId))
 {
 }
@@ -49,7 +49,7 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
         if (target.isEmpty())
             return true;
 
-        if (!mManual
+        if (!mScripted
             && !pathTo(actor, target.getRefData().getPosition().asVec3(), duration,
                 characterController.getSupportedMovementDirections(), mDistance))
         {
@@ -85,7 +85,7 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
 
     if (!mCasting)
     {
-        MWBase::Environment::get().getMechanicsManager()->castSpell(actor, mSpellId, mManual);
+        MWBase::Environment::get().getMechanicsManager()->castSpell(actor, mSpellId, mScripted);
         mCasting = true;
         return false;
     }

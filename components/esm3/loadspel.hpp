@@ -39,13 +39,13 @@ namespace ESM
 
         struct SPDTstruct
         {
-            int mType; // SpellType
-            int mCost; // Mana cost
-            int mFlags; // Flags
+            int32_t mType; // SpellType
+            int32_t mCost; // Mana cost
+            int32_t mFlags; // Flags
         };
 
         SPDTstruct mData;
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         std::string mName;
         RefId mId;
         EffectList mEffects;

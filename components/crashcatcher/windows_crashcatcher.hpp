@@ -4,7 +4,7 @@
 #include <filesystem>
 
 #include <components/crashcatcher/crashcatcher.hpp>
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 
 namespace Crash
 {

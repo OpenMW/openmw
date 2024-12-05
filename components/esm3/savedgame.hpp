@@ -20,7 +20,7 @@ namespace ESM
 
         std::vector<std::string> mContentFiles;
         std::string mPlayerName;
-        int mPlayerLevel;
+        int32_t mPlayerLevel;
 
         // ID of class
         ESM::RefId mPlayerClassId;
@@ -34,8 +34,14 @@ namespace ESM
         std::string mDescription;
         std::vector<char> mScreenshot; // raw jpg-encoded data
 
+        int32_t mCurrentDay = 0;
+        float mCurrentHealth = 0;
+        float mMaximumHealth = 0;
+
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
+
+        std::vector<std::string_view> getMissingContentFiles(const std::vector<std::string>& allContentFiles) const;
     };
 }
 

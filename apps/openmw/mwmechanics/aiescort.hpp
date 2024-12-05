@@ -51,6 +51,8 @@ namespace MWMechanics
 
         osg::Vec3f getDestination() const override { return osg::Vec3f(mX, mY, mZ); }
 
+        std::optional<float> getDuration() const override { return mDuration; }
+
     private:
         const std::string mCellId;
         const float mX;
@@ -59,9 +61,6 @@ namespace MWMechanics
         float mMaxDist = 450;
         const float mDuration; // In hours
         float mRemainingDuration; // In hours
-
-        const int mCellX;
-        const int mCellY;
     };
 }
 #endif

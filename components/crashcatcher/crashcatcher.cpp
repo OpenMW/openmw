@@ -1,23 +1,27 @@
+#include <algorithm>
 #include <cstring>
-#include <errno.h>
 #include <filesystem>
 #include <fstream>
+#include <optional>
+#include <span>
+
+#include <errno.h>
 #include <limits.h>
+#include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
+#include <sys/ptrace.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <pthread.h>
-#include <stdbool.h>
-#include <sys/ptrace.h>
-
 #include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
 
 #include <SDL_messagebox.h>
 
@@ -59,149 +63,214 @@ static struct
 {
     int signum;
     pid_t pid;
-    int has_siginfo;
-    siginfo_t siginfo;
-    char buf[1024];
+    std::optional<siginfo_t> siginfo;
 } crash_info;
 
-static const struct
+namespace
 {
-    const char* name;
-    int signum;
-} signals[] = { { "Segmentation fault", SIGSEGV }, { "Illegal instruction", SIGILL }, { "FPU exception", SIGFPE },
-    { "System BUS error", SIGBUS }, { nullptr, 0 } };
+    constexpr char crash_switch[] = "--cc-handle-crash";
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigill_codes[] = {
+    struct SignalInfo
+    {
+        int mCode;
+        const char* mDescription;
+        const char* mName = "";
+    };
+
+    constexpr SignalInfo signals[] = {
+        { SIGSEGV, "Segmentation fault", "SIGSEGV" },
+        { SIGILL, "Illegal instruction", "SIGILL" },
+        { SIGFPE, "FPU exception", "SIGFPE" },
+        { SIGBUS, "System BUS error", "SIGBUS" },
+        { SIGABRT, "Abnormal termination condition", "SIGABRT" },
+    };
+
+    constexpr SignalInfo sigIllCodes[] = {
 #if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
-    { ILL_ILLOPC, "Illegal opcode" }, { ILL_ILLOPN, "Illegal operand" }, { ILL_ILLADR, "Illegal addressing mode" },
-    { ILL_ILLTRP, "Illegal trap" }, { ILL_PRVOPC, "Privileged opcode" }, { ILL_PRVREG, "Privileged register" },
-    { ILL_COPROC, "Coprocessor error" }, { ILL_BADSTK, "Internal stack error" },
+        { ILL_ILLOPC, "Illegal opcode" },
+        { ILL_ILLOPN, "Illegal operand" },
+        { ILL_ILLADR, "Illegal addressing mode" },
+        { ILL_ILLTRP, "Illegal trap" },
+        { ILL_PRVOPC, "Privileged opcode" },
+        { ILL_PRVREG, "Privileged register" },
+        { ILL_COPROC, "Coprocessor error" },
+        { ILL_BADSTK, "Internal stack error" },
 #endif
-    { 0, nullptr }
-};
+    };
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigfpe_codes[] = { { FPE_INTDIV, "Integer divide by zero" }, { FPE_INTOVF, "Integer overflow" },
-    { FPE_FLTDIV, "Floating point divide by zero" }, { FPE_FLTOVF, "Floating point overflow" },
-    { FPE_FLTUND, "Floating point underflow" }, { FPE_FLTRES, "Floating point inexact result" },
-    { FPE_FLTINV, "Floating point invalid operation" }, { FPE_FLTSUB, "Subscript out of range" }, { 0, nullptr } };
+    constexpr SignalInfo sigFpeCodes[] = {
+        { FPE_INTDIV, "Integer divide by zero" },
+        { FPE_INTOVF, "Integer overflow" },
+        { FPE_FLTDIV, "Floating point divide by zero" },
+        { FPE_FLTOVF, "Floating point overflow" },
+        { FPE_FLTUND, "Floating point underflow" },
+        { FPE_FLTRES, "Floating point inexact result" },
+        { FPE_FLTINV, "Floating point invalid operation" },
+        { FPE_FLTSUB, "Subscript out of range" },
+    };
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigsegv_codes[] = {
+    constexpr SignalInfo sigSegvCodes[] = {
 #ifndef __FreeBSD__
-    { SEGV_MAPERR, "Address not mapped to object" }, { SEGV_ACCERR, "Invalid permissions for mapped object" },
+        { SEGV_MAPERR, "Address not mapped to object" },
+        { SEGV_ACCERR, "Invalid permissions for mapped object" },
 #endif
-    { 0, nullptr }
-};
+    };
 
-static const struct
-{
-    int code;
-    const char* name;
-} sigbus_codes[] = {
+    constexpr SignalInfo sigBusCodes[] = {
 #ifndef __FreeBSD__
-    { BUS_ADRALN, "Invalid address alignment" }, { BUS_ADRERR, "Non-existent physical address" },
-    { BUS_OBJERR, "Object specific hardware error" },
+        { BUS_ADRALN, "Invalid address alignment" },
+        { BUS_ADRERR, "Non-existent physical address" },
+        { BUS_OBJERR, "Object specific hardware error" },
 #endif
-    { 0, nullptr }
-};
+    };
 
-static int (*cc_user_info)(char*, char*);
+    const char* findSignalDescription(std::span<const SignalInfo> info, int code)
+    {
+        const auto it = std::find_if(info.begin(), info.end(), [&](const SignalInfo& v) { return v.mCode == code; });
+        return it == info.end() ? "" : it->mDescription;
+    }
 
-static void gdb_info(pid_t pid)
-{
-    char respfile[64];
-    FILE* f;
-    int fd;
+    struct Close
+    {
+        void operator()(const int* value) { close(*value); }
+    };
 
-    /*
-     * Create a temp file to put gdb commands into.
-     * Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
-     * Modern systems implement it and suggest to do not touch masks in multithreaded applications.
-     * So CoverityScan warning is valid only for ancient versions of stdlib.
-     */
-    strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
+    struct CloseFile
+    {
+        void operator()(FILE* value) { fclose(value); }
+    };
+
+    struct Remove
+    {
+        void operator()(const char* value) { remove(value); }
+    };
+
+    template <class T>
+    bool printDebuggerInfo(pid_t pid)
+    {
+        // Create a temp file to put gdb commands into.
+        // Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
+        // Modern systems implement it and suggest to do not touch masks in multithreaded applications.
+        // So CoverityScan warning is valid only for ancient versions of stdlib.
+        char scriptPath[64];
+
+        std::snprintf(scriptPath, sizeof(scriptPath), "/tmp/%s-script-XXXXXX", T::sName);
+
 #ifdef __COVERITY__
-    umask(0600);
+        umask(0600);
 #endif
-    if ((fd = mkstemp(respfile)) >= 0 && (f = fdopen(fd, "w")) != nullptr)
-    {
-        fprintf(f,
-            "attach %d\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Loaded Libraries\"\n"
-            "info sharedlibrary\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Threads\"\n"
-            "info threads\n"
-            "shell echo \"\"\n"
-            "shell echo \"* FPU Status\"\n"
-            "info float\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Registers\"\n"
-            "info registers\n"
-            "shell echo \"\"\n"
-            "shell echo \"* Backtrace\"\n"
-            "thread apply all backtrace full 1000\n"
-            "detach\n"
-            "quit\n",
-            pid);
-        fclose(f);
 
-        /* Run gdb and print process info. */
-        char cmd_buf[128];
-        snprintf(cmd_buf, sizeof(cmd_buf), "gdb --quiet --batch --command=%s", respfile);
-        printf("Executing: %s\n", cmd_buf);
-        fflush(stdout);
-
-        int ret = system(cmd_buf);
-
-        if (ret != 0)
-            printf(
-                "\nFailed to create a crash report. Please make sure that 'gdb' is installed and present in PATH then "
-                "crash again."
-                "\nCurrent PATH: %s\n",
-                getenv("PATH"));
-        fflush(stdout);
-
-        /* Clean up */
-        if (remove(respfile) != 0)
-            Log(Debug::Warning) << "Warning: can not remove file '" << respfile
-                                << "': " << std::generic_category().message(errno);
-    }
-    else
-    {
-        /* Error creating temp file */
-        if (fd >= 0)
+        const int fd = mkstemp(scriptPath);
+        if (fd == -1)
         {
-            if (close(fd) != 0)
-                Log(Debug::Warning) << "Warning: can not close file '" << respfile
-                                    << "': " << std::generic_category().message(errno);
-            else if (remove(respfile) != 0)
-                Log(Debug::Warning) << "Warning: can not remove file '" << respfile
-                                    << "': " << std::generic_category().message(errno);
+            printf("Failed to call mkstemp: %s\n", std::generic_category().message(errno).c_str());
+            return false;
         }
-        printf("!!! Could not create gdb command file\n");
+        std::unique_ptr<const char, Remove> tempFile(scriptPath);
+        std::unique_ptr<const int, Close> scopedFd(&fd);
+
+        FILE* const file = fdopen(fd, "w");
+        if (file == nullptr)
+        {
+            printf("Failed to open file for %s output \"%s\": %s\n", T::sName, scriptPath,
+                std::generic_category().message(errno).c_str());
+            return false;
+        }
+        std::unique_ptr<FILE, CloseFile> scopedFile(file);
+
+        if (fprintf(file, "%s", T::sScript) < 0)
+        {
+            printf("Failed to write debugger script to file \"%s\": %s\n", scriptPath,
+                std::generic_category().message(errno).c_str());
+            return false;
+        }
+
+        scopedFile = nullptr;
+        scopedFd = nullptr;
+
+        char command[128];
+        snprintf(command, sizeof(command), T::sCommandTemplate, pid, scriptPath);
+        printf("Executing: %s\n", command);
+        fflush(stdout);
+
+        const int ret = system(command);
+
+        const bool result = (ret == 0);
+
+        if (ret == -1)
+            printf(
+                "\nFailed to create a crash report: %s.\n"
+                "Please make sure that '%s' is installed and present in PATH then crash again.\n"
+                "Current PATH: %s\n",
+                std::generic_category().message(errno).c_str(), T::sName, getenv("PATH"));
+        else if (ret != 0)
+            printf(
+                "\nFailed to create a crash report.\n"
+                "Please make sure that '%s' is installed and present in PATH then crash again.\n"
+                "Current PATH: %s\n",
+                T::sName, getenv("PATH"));
+
+        fflush(stdout);
+
+        return result;
     }
-    fflush(stdout);
+
+    struct Gdb
+    {
+        static constexpr char sName[] = "gdb";
+        static constexpr char sScript[] = R"(shell echo ""
+shell echo "* Loaded Libraries"
+info sharedlibrary
+shell echo ""
+shell echo "* Threads"
+info threads
+shell echo ""
+shell echo "* FPU Status"
+info float
+shell echo ""
+shell echo "* Registers"
+info registers
+shell echo ""
+shell echo "* Backtrace"
+thread apply all backtrace full 1000
+detach
+quit
+)";
+        static constexpr char sCommandTemplate[] = "gdb --pid %d --quiet --batch --command %s";
+    };
+
+    struct Lldb
+    {
+        static constexpr char sName[] = "lldb";
+        static constexpr char sScript[] = R"(script print("\n* Loaded Libraries")
+image list
+script print('\n* Threads')
+thread list
+script print('\n* Registers')
+register read --all
+script print('\n* Backtrace')
+script print(''.join(f'{t}\n' + ''.join(''.join([f'  {f}\n', ''.join(f'    {s}\n' for s in f.statics), ''.join(f'    {v}\n' for v in f.variables)]) for f in t.frames) for t in lldb.process.threads))
+detach
+quit
+)";
+        static constexpr char sCommandTemplate[] = "lldb --attach-pid %d --batch --source %s";
+    };
+
+    void printProcessInfo(pid_t pid)
+    {
+        if (printDebuggerInfo<Gdb>(pid))
+            return;
+        if (printDebuggerInfo<Lldb>(pid))
+            return;
+    }
 }
 
-static void sys_info(void)
+static void printSystemInfo(void)
 {
 #ifdef __unix__
     struct utsname info;
-    if (uname(&info))
-        printf("!!! Failed to get system information\n");
+    if (uname(&info) == -1)
+        printf("Failed to get system information: %s\n", std::generic_category().message(errno).c_str());
     else
         printf("System: %s %s %s %s %s\n", info.sysname, info.nodename, info.release, info.version, info.machine);
 
@@ -214,8 +283,8 @@ static size_t safe_write(int fd, const void* buf, size_t len)
     size_t ret = 0;
     while (ret < len)
     {
-        ssize_t rem;
-        if ((rem = write(fd, (const char*)buf + ret, len - ret)) == -1)
+        const ssize_t rem = write(fd, (const char*)buf + ret, len - ret);
+        if (rem == -1)
         {
             if (errno == EINTR)
                 continue;
@@ -226,12 +295,8 @@ static size_t safe_write(int fd, const void* buf, size_t len)
     return ret;
 }
 
-static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
+static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
 {
-    // ucontext_t *ucontext = (ucontext_t*)context;
-    pid_t dbg_pid;
-    int fd[2];
-
     /* Make sure the effective uid is the real uid */
     if (getuid() != geteuid())
     {
@@ -240,6 +305,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
     }
 
     safe_write(STDERR_FILENO, fatal_err, sizeof(fatal_err) - 1);
+    int fd[2];
     if (pipe(fd) == -1)
     {
         safe_write(STDERR_FILENO, pipe_err, sizeof(pipe_err) - 1);
@@ -249,14 +315,14 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
 
     crash_info.signum = signum;
     crash_info.pid = getpid();
-    crash_info.has_siginfo = !!siginfo;
-    if (siginfo)
+    if (siginfo == nullptr)
+        crash_info.siginfo = std::nullopt;
+    else
         crash_info.siginfo = *siginfo;
-    if (cc_user_info)
-        cc_user_info(crash_info.buf, crash_info.buf + sizeof(crash_info.buf));
 
+    const pid_t dbg_pid = fork();
     /* Fork off to start a crash handler */
-    switch ((dbg_pid = fork()))
+    switch (dbg_pid)
     {
         /* Error */
         case -1:
@@ -296,110 +362,68 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* context)
     }
 }
 
-static void crash_handler(const char* logfile)
+[[noreturn]] static void handleCrash(const char* logfile)
 {
-    const char* sigdesc = "";
-    int i;
-
     if (fread(&crash_info, sizeof(crash_info), 1, stdin) != 1)
     {
-        fprintf(stderr, "!!! Failed to retrieve info from crashed process\n");
+        fprintf(stderr, "Failed to retrieve info from crashed process: %s\n",
+            std::generic_category().message(errno).c_str());
         exit(1);
     }
 
-    /* Get the signal description */
-    for (i = 0; signals[i].name; ++i)
-    {
-        if (signals[i].signum == crash_info.signum)
-        {
-            sigdesc = signals[i].name;
-            break;
-        }
-    }
+    const char* sigdesc = findSignalDescription(signals, crash_info.signum);
 
-    if (crash_info.has_siginfo)
+    if (crash_info.siginfo.has_value())
     {
         switch (crash_info.signum)
         {
             case SIGSEGV:
-                for (i = 0; sigsegv_codes[i].name; ++i)
-                {
-                    if (sigsegv_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigsegv_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigSegvCodes, crash_info.siginfo->si_code);
                 break;
 
             case SIGFPE:
-                for (i = 0; sigfpe_codes[i].name; ++i)
-                {
-                    if (sigfpe_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigfpe_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigFpeCodes, crash_info.siginfo->si_code);
                 break;
 
             case SIGILL:
-                for (i = 0; sigill_codes[i].name; ++i)
-                {
-                    if (sigill_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigill_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigIllCodes, crash_info.siginfo->si_code);
                 break;
 
             case SIGBUS:
-                for (i = 0; sigbus_codes[i].name; ++i)
-                {
-                    if (sigbus_codes[i].code == crash_info.siginfo.si_code)
-                    {
-                        sigdesc = sigbus_codes[i].name;
-                        break;
-                    }
-                }
+                sigdesc = findSignalDescription(sigBusCodes, crash_info.siginfo->si_code);
                 break;
         }
     }
     fprintf(stderr, "%s (signal %i)\n", sigdesc, crash_info.signum);
-    if (crash_info.has_siginfo)
-        fprintf(stderr, "Address: %p\n", crash_info.siginfo.si_addr);
+    if (crash_info.siginfo.has_value())
+        fprintf(stderr, "Address: %p\n", crash_info.siginfo->si_addr);
     fputc('\n', stderr);
 
-    if (logfile)
+    /* Create crash log file and redirect shell output to it */
+    if (freopen(logfile, "wa", stdout) != stdout)
     {
-        /* Create crash log file and redirect shell output to it */
-        if (freopen(logfile, "wa", stdout) != stdout)
-        {
-            fprintf(stderr, "!!! Could not create %s following signal\n", logfile);
-            exit(1);
-        }
-        fprintf(stderr, "Generating %s and killing process %d, please wait... ", logfile, crash_info.pid);
-
-        printf(
-            "*** Fatal Error ***\n"
-            "%s (signal %i)\n",
-            sigdesc, crash_info.signum);
-        if (crash_info.has_siginfo)
-            printf("Address: %p\n", crash_info.siginfo.si_addr);
-        fputc('\n', stdout);
-        fflush(stdout);
+        fprintf(stderr, "Could not create %s following signal: %s\n", logfile,
+            std::generic_category().message(errno).c_str());
+        exit(1);
     }
+    fprintf(stderr, "Generating %s and killing process %d, please wait... ", logfile, crash_info.pid);
 
-    sys_info();
+    printf(
+        "*** Fatal Error ***\n"
+        "%s (signal %i)\n",
+        sigdesc, crash_info.signum);
+    if (crash_info.siginfo.has_value())
+        printf("Address: %p\n", crash_info.siginfo->si_addr);
+    fputc('\n', stdout);
+    fflush(stdout);
 
-    crash_info.buf[sizeof(crash_info.buf) - 1] = '\0';
-    printf("%s\n", crash_info.buf);
+    printSystemInfo();
+
     fflush(stdout);
 
     if (crash_info.pid > 0)
     {
-        gdb_info(crash_info.pid);
+        printProcessInfo(crash_info.pid);
         kill(crash_info.pid, SIGKILL);
     }
 
@@ -408,12 +432,9 @@ static void crash_handler(const char* logfile)
     // even faulty applications shouldn't be able to freeze the X server.
     usleep(100000);
 
-    if (logfile)
-    {
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile)
-            + "'.\n Please report this to https://gitlab.com/OpenMW/openmw/issues !";
-        SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
-    }
+    const std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile)
+        + "'.\n Please report this to https://gitlab.com/OpenMW/openmw/issues !";
+    SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
 
     exit(0);
 }
@@ -426,13 +447,16 @@ static void getExecPath(char** argv)
 
     if (sysctl(mib, 4, argv0, &size, nullptr, 0) == 0)
         return;
+
+    Log(Debug::Warning) << "Failed to call sysctl: " << std::generic_category().message(errno);
 #endif
 
 #if defined(__APPLE__)
     if (proc_pidpath(getpid(), argv0, sizeof(argv0)) > 0)
         return;
+
+    Log(Debug::Warning) << "Failed to call proc_pidpath: " << std::generic_category().message(errno);
 #endif
-    int cwdlen;
     const char* statusPaths[] = { "/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file" };
     memset(argv0, 0, sizeof(argv0));
 
@@ -440,60 +464,83 @@ static void getExecPath(char** argv)
     {
         if (readlink(path, argv0, sizeof(argv0)) != -1)
             return;
+
+        Log(Debug::Warning) << "Failed to call readlink for \"" << path
+                            << "\": " << std::generic_category().message(errno);
     }
 
     if (argv[0][0] == '/')
-        snprintf(argv0, sizeof(argv0), "%s", argv[0]);
-    else if (getcwd(argv0, sizeof(argv0)) != nullptr)
     {
-        cwdlen = strlen(argv0);
-        snprintf(argv0 + cwdlen, sizeof(argv0) - cwdlen, "/%s", argv[0]);
+        snprintf(argv0, sizeof(argv0), "%s", argv[0]);
+        return;
     }
+
+    if (getcwd(argv0, sizeof(argv0)) == nullptr)
+    {
+        Log(Debug::Error) << "Failed to call getcwd: " << std::generic_category().message(errno);
+        return;
+    }
+
+    const int cwdlen = strlen(argv0);
+    snprintf(argv0 + cwdlen, sizeof(argv0) - cwdlen, "/%s", argv[0]);
 }
 
-int crashCatcherInstallHandlers(
-    int argc, char** argv, int num_signals, int* signals, const char* logfile, int (*user_info)(char*, char*))
+static bool crashCatcherInstallHandlers(char** argv)
 {
-    struct sigaction sa;
-    stack_t altss;
-    int retval;
-
-    if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
-        crash_handler(logfile);
-
-    cc_user_info = user_info;
-
     getExecPath(argv);
 
     /* Set an alternate signal stack so SIGSEGVs caused by stack overflows
      * still run */
     static char* altstack = new char[SIGSTKSZ];
+    stack_t altss;
     altss.ss_sp = altstack;
     altss.ss_flags = 0;
     altss.ss_size = SIGSTKSZ;
-    sigaltstack(&altss, nullptr);
+    if (sigaltstack(&altss, nullptr) == -1)
+    {
+        Log(Debug::Error) << "Failed to call sigaltstack: " << std::generic_category().message(errno);
+        return false;
+    }
 
+    struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_sigaction = crash_catcher;
     sa.sa_flags = SA_RESETHAND | SA_NODEFER | SA_SIGINFO | SA_ONSTACK;
-    sigemptyset(&sa.sa_mask);
-
-    retval = 0;
-    while (num_signals--)
+    if (sigemptyset(&sa.sa_mask) == -1)
     {
-        if ((*signals != SIGSEGV && *signals != SIGILL && *signals != SIGFPE && *signals != SIGABRT
-                && *signals != SIGBUS)
-            || sigaction(*signals, &sa, nullptr) == -1)
-        {
-            *signals = 0;
-            retval = -1;
-        }
-        ++signals;
+        Log(Debug::Error) << "Failed to call sigemptyset: " << std::generic_category().message(errno);
+        return false;
     }
-    return retval;
+
+    for (const SignalInfo& signal : signals)
+    {
+        if (sigaction(signal.mCode, &sa, nullptr) == -1)
+        {
+            Log(Debug::Error) << "Failed to call sigaction for signal " << signal.mName << " (" << signal.mCode
+                              << "): " << std::generic_category().message(errno);
+            return false;
+        }
+    }
+
+    return true;
 }
 
-static bool is_debugger_present()
+namespace
+{
+#if defined(__APPLE__)
+    bool isDebuggerPresent(const auto& info)
+    {
+        return (info.kp_proc.p_flag & P_TRACED) != 0;
+    }
+#elif defined(__FreeBSD__)
+    bool isDebuggerPresent(const auto& info)
+    {
+        return (info.ki_flag & P_TRACED) != 0;
+    }
+#endif
+}
+
+static bool isDebuggerPresent()
 {
 #if defined(__linux__)
     std::filesystem::path procstatus = std::filesystem::path("/proc/self/status");
@@ -512,44 +559,23 @@ static bool is_debugger_present()
         }
     }
     return false;
-#elif defined(__APPLE__)
-    int junk;
-    int mib[4];
+#elif defined(__APPLE__) || defined(__FreeBSD__)
     struct kinfo_proc info;
-    size_t size;
-
-    // Initialize the flags so that, if sysctl fails for some bizarre
-    // reason, we get a predictable result.
-
-    info.kp_proc.p_flag = 0;
+    std::memset(&info, 0, sizeof(info));
 
     // Initialize mib, which tells sysctl the info we want, in this case
     // we're looking for information about a specific process ID.
-
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PID;
-    mib[3] = getpid();
-
-    // Call sysctl.
-
-    size = sizeof(info);
-    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0);
-    assert(junk == 0);
-
-    // We're being debugged if the P_TRACED flag is set.
-
-    return (info.kp_proc.p_flag & P_TRACED) != 0;
-#elif defined(__FreeBSD__)
-    struct kinfo_proc info;
-    size_t size = sizeof(info);
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
 
-    if (sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0) == 0)
-        return (info.ki_flag & P_TRACED) != 0;
-    else
-        perror("Failed to retrieve process info");
-    return false;
+    size_t size = sizeof(info);
+    if (sysctl(mib, std::size(mib), &info, &size, nullptr, 0) == -1)
+    {
+        Log(Debug::Warning) << "Failed to call sysctl, assuming no debugger: "
+                            << std::generic_category().message(errno);
+        return false;
+    }
+
+    return isDebuggerPresent(info);
 #else
     return false;
 #endif
@@ -557,14 +583,14 @@ static bool is_debugger_present()
 
 void crashCatcherInstall(int argc, char** argv, const std::filesystem::path& crashLogPath)
 {
-    if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
-    {
-        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), nullptr) == -1)
-        {
-            Log(Debug::Warning) << "Installing crash handler failed";
-        }
-        else
-            Log(Debug::Info) << "Crash handler installed";
-    }
+    if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
+        handleCrash(Files::pathToUnicodeString(crashLogPath).c_str());
+
+    if (isDebuggerPresent())
+        return;
+
+    if (crashCatcherInstallHandlers(argv))
+        Log(Debug::Info) << "Crash handler installed";
+    else
+        Log(Debug::Warning) << "Installing crash handler failed";
 }

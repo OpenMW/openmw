@@ -6,6 +6,7 @@
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm/attr.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -19,8 +20,6 @@
 #include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwworld/esmstore.hpp"
-
-#include "ustring.hpp"
 
 namespace MWGui::Widgets
 {
@@ -135,8 +134,7 @@ namespace MWGui::Widgets
             }
             else
             {
-                MyGUI::UString name = toUString(attribute->mName);
-                mAttributeNameWidget->setCaption(name);
+                mAttributeNameWidget->setCaption(MyGUI::UString(attribute->mName));
             }
         }
         if (mAttributeValueWidget)
@@ -197,18 +195,18 @@ namespace MWGui::Widgets
         const ESM::Spell* spell = store.get<ESM::Spell>().search(mId);
         MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
-        for (const ESM::ENAMstruct& effectInfo : spell->mEffects.mList)
+        for (const ESM::IndexedENAMstruct& effectInfo : spell->mEffects.mList)
         {
             MWSpellEffectPtr effect
                 = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
             SpellEffectParams params;
-            params.mEffectID = effectInfo.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mAttribute);
-            params.mDuration = effectInfo.mDuration;
-            params.mMagnMin = effectInfo.mMagnMin;
-            params.mMagnMax = effectInfo.mMagnMax;
-            params.mRange = effectInfo.mRange;
+            params.mEffectID = effectInfo.mData.mEffectID;
+            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mData.mSkill);
+            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mData.mAttribute);
+            params.mDuration = effectInfo.mData.mDuration;
+            params.mMagnMin = effectInfo.mData.mMagnMin;
+            params.mMagnMax = effectInfo.mData.mMagnMax;
+            params.mRange = effectInfo.mData.mRange;
             params.mIsConstant = (flags & MWEffectList::EF_Constant) != 0;
             params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
             params.mNoMagnitude = (flags & MWEffectList::EF_NoMagnitude);
@@ -310,17 +308,17 @@ namespace MWGui::Widgets
     SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
     {
         SpellEffectList result;
-        for (const ESM::ENAMstruct& effectInfo : effects->mList)
+        for (const ESM::IndexedENAMstruct& effectInfo : effects->mList)
         {
             SpellEffectParams params;
-            params.mEffectID = effectInfo.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mAttribute);
-            params.mDuration = effectInfo.mDuration;
-            params.mMagnMin = effectInfo.mMagnMin;
-            params.mMagnMax = effectInfo.mMagnMax;
-            params.mRange = effectInfo.mRange;
-            params.mArea = effectInfo.mArea;
+            params.mEffectID = effectInfo.mData.mEffectID;
+            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mData.mSkill);
+            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mData.mAttribute);
+            params.mDuration = effectInfo.mData.mDuration;
+            params.mMagnMin = effectInfo.mData.mMagnMin;
+            params.mMagnMax = effectInfo.mData.mMagnMax;
+            params.mRange = effectInfo.mData.mRange;
+            params.mArea = effectInfo.mData.mArea;
             result.push_back(params);
         }
         return result;
@@ -355,11 +353,9 @@ namespace MWGui::Widgets
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
-        const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
+        const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(mEffectParams.mEffectID);
         const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(mEffectParams.mAttribute);
         const ESM::Skill* skill = store.get<ESM::Skill>().search(mEffectParams.mSkill);
-
-        assert(magicEffect);
 
         auto windowManager = MWBase::Environment::get().getWindowManager();
 
@@ -375,7 +371,7 @@ namespace MWGui::Widgets
 
         std::string spellLine = MWMechanics::getMagicEffectString(*magicEffect, attribute, skill);
 
-        if (mEffectParams.mMagnMin || mEffectParams.mMagnMax)
+        if ((mEffectParams.mMagnMin || mEffectParams.mMagnMax) && !mEffectParams.mNoMagnitude)
         {
             ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
             if (displayType == ESM::MagicEffect::MDT_TimesInt)
@@ -390,7 +386,7 @@ namespace MWGui::Widgets
 
                 spellLine += formatter.str();
             }
-            else if (displayType != ESM::MagicEffect::MDT_None && !mEffectParams.mNoMagnitude)
+            else if (displayType != ESM::MagicEffect::MDT_None)
             {
                 spellLine += " " + MyGUI::utility::toString(mEffectParams.mMagnMin);
                 if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
@@ -499,13 +495,13 @@ namespace MWGui::Widgets
         {
             std::stringstream out;
             out << mValue << "/" << mMax;
-            mBarTextWidget->setCaption(out.str().c_str());
+            mBarTextWidget->setCaption(out.str());
         }
     }
     void MWDynamicStat::setTitle(std::string_view text)
     {
         if (mTextWidget)
-            mTextWidget->setCaption(toUString(text));
+            mTextWidget->setCaption(MyGUI::UString(text));
     }
 
     MWDynamicStat::~MWDynamicStat() {}

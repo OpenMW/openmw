@@ -1,6 +1,7 @@
 #include "light.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadnpc.hpp>
@@ -21,12 +22,12 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -62,7 +63,7 @@ namespace MWClass
     {
         // TODO: add option somewhere to enable collision for placeable objects
         if ((ptr.get<ESM::Light>()->mBase->mData.mFlags & ESM::Light::Carry) == 0)
-            physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
+            physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
     bool Light::useAnim() const
@@ -70,7 +71,7 @@ namespace MWClass
         return true;
     }
 
-    std::string Light::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Light::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Light>(ptr);
     }
@@ -81,9 +82,7 @@ namespace MWClass
 
         if (ref->mBase->mModel.empty())
             return {};
-
-        const std::string& name = ref->mBase->mName;
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Light>(ptr);
     }
 
     bool Light::isItem(const MWWorld::ConstPtr& ptr) const
@@ -159,8 +158,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -174,11 +172,11 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

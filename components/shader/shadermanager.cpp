@@ -503,7 +503,7 @@ namespace Shader
                         {
                             break;
                         }
-                        shaderSource = source;
+                        shaderSource = std::move(source);
 
                         std::vector<std::string> linkedShaderNames;
                         if (!Manager.createSourceFromTemplate(
@@ -554,7 +554,7 @@ namespace Shader
             if (!addLineDirectivesAfterConditionalBlocks(source)
                 || !parseIncludes(mPath, source, templateName, fileNumber, {}, insertedPaths))
                 return nullptr;
-            mHotReloadManager->templateIncludedFiles[templateName] = insertedPaths;
+            mHotReloadManager->templateIncludedFiles[templateName] = std::move(insertedPaths);
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;
         }
 
@@ -597,7 +597,7 @@ namespace Shader
         if (!vert || !frag)
             throw std::runtime_error("failed initializing shader: " + templateName);
 
-        return getProgram(vert, frag, programTemplate);
+        return getProgram(std::move(vert), std::move(frag), programTemplate);
     }
 
     osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader,

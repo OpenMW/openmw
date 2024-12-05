@@ -65,6 +65,7 @@ namespace MWRender
         bool mIsStorm;
 
         ESM::RefId mAmbientLoopSoundID;
+        ESM::RefId mRainLoopSoundID;
         float mAmbientSoundVolume;
 
         std::string mParticleEffect;

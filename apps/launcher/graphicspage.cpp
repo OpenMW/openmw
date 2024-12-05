@@ -2,6 +2,9 @@
 
 #include "sdlinit.hpp"
 
+#include <components/misc/display.hpp>
+#include <components/settings/values.hpp>
+
 #include <QMessageBox>
 #include <QScreen>
 
@@ -14,22 +17,6 @@
 #include <SDL_video.h>
 
 #include <array>
-#include <numeric>
-
-QString getAspect(int x, int y)
-{
-    int gcd = std::gcd(x, y);
-    if (gcd == 0)
-        return QString();
-
-    int xaspect = x / gcd;
-    int yaspect = y / gcd;
-    // special case: 8 : 5 is usually referred to as 16:10
-    if (xaspect == 8 && yaspect == 5)
-        return QString("16:10");
-
-    return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
-}
 
 Launcher::GraphicsPage::GraphicsPage(QWidget* parent)
     : QWidget(parent)
@@ -47,7 +34,6 @@ Launcher::GraphicsPage::GraphicsPage(QWidget* parent)
     connect(standardRadioButton, &QRadioButton::toggled, this, &GraphicsPage::slotStandardToggled);
     connect(screenComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &GraphicsPage::screenChanged);
     connect(framerateLimitCheckBox, &QCheckBox::toggled, this, &GraphicsPage::slotFramerateLimitToggled);
-    connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &GraphicsPage::slotShadowDistLimitToggled);
 }
 
 bool Launcher::GraphicsPage::setupSDL()
@@ -94,32 +80,29 @@ bool Launcher::GraphicsPage::loadSettings()
 
     // Visuals
 
-    int vsync = Settings::Manager::getInt("vsync mode", "Video");
-    if (vsync < 0 || vsync > 2)
-        vsync = 0;
+    const int vsync = Settings::video().mVsyncMode;
 
     vSyncComboBox->setCurrentIndex(vsync);
 
-    size_t windowMode = static_cast<size_t>(Settings::Manager::getInt("window mode", "Video"));
-    if (windowMode > static_cast<size_t>(Settings::WindowMode::Windowed))
-        windowMode = 0;
-    windowModeComboBox->setCurrentIndex(windowMode);
-    slotFullScreenChanged(windowMode);
+    const Settings::WindowMode windowMode = Settings::video().mWindowMode;
 
-    if (Settings::Manager::getBool("window border", "Video"))
+    windowModeComboBox->setCurrentIndex(static_cast<int>(windowMode));
+    handleWindowModeChange(windowMode);
+
+    if (Settings::video().mWindowBorder)
         windowBorderCheckBox->setCheckState(Qt::Checked);
 
     // aaValue is the actual value (0, 1, 2, 4, 8, 16)
-    int aaValue = Settings::Manager::getInt("antialiasing", "Video");
+    const int aaValue = Settings::video().mAntialiasing;
     // aaIndex is the index into the allowed values in the pull down.
-    int aaIndex = antiAliasingComboBox->findText(QString::number(aaValue));
+    const int aaIndex = antiAliasingComboBox->findText(QString::number(aaValue));
     if (aaIndex != -1)
         antiAliasingComboBox->setCurrentIndex(aaIndex);
 
-    int width = Settings::Manager::getInt("resolution x", "Video");
-    int height = Settings::Manager::getInt("resolution y", "Video");
-    QString resolution = QString::number(width) + QString(" x ") + QString::number(height);
-    screenComboBox->setCurrentIndex(Settings::Manager::getInt("screen", "Video"));
+    const int width = Settings::video().mResolutionX;
+    const int height = Settings::video().mResolutionY;
+    QString resolution = QString::number(width) + QString(" × ") + QString::number(height);
+    screenComboBox->setCurrentIndex(Settings::video().mScreen);
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -135,51 +118,12 @@ bool Launcher::GraphicsPage::loadSettings()
         customHeightSpinBox->setValue(height);
     }
 
-    float fpsLimit = Settings::Manager::getFloat("framerate limit", "Video");
+    const float fpsLimit = Settings::video().mFramerateLimit;
     if (fpsLimit != 0)
     {
         framerateLimitCheckBox->setCheckState(Qt::Checked);
         framerateLimitSpinBox->setValue(fpsLimit);
     }
-
-    // Lighting
-    int lightingMethod = 1;
-    if (Settings::Manager::getString("lighting method", "Shaders") == "legacy")
-        lightingMethod = 0;
-    else if (Settings::Manager::getString("lighting method", "Shaders") == "shaders")
-        lightingMethod = 2;
-    lightingMethodComboBox->setCurrentIndex(lightingMethod);
-
-    // Shadows
-    if (Settings::Manager::getBool("actor shadows", "Shadows"))
-        actorShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("player shadows", "Shadows"))
-        playerShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("terrain shadows", "Shadows"))
-        terrainShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("object shadows", "Shadows"))
-        objectShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("enable indoor shadows", "Shadows"))
-        indoorShadowsCheckBox->setCheckState(Qt::Checked);
-
-    shadowComputeSceneBoundsComboBox->setCurrentIndex(shadowComputeSceneBoundsComboBox->findText(
-        QString(tr(Settings::Manager::getString("compute scene bounds", "Shadows").c_str()))));
-
-    int shadowDistLimit = Settings::Manager::getInt("maximum shadow map distance", "Shadows");
-    if (shadowDistLimit > 0)
-    {
-        shadowDistanceCheckBox->setCheckState(Qt::Checked);
-        shadowDistanceSpinBox->setValue(shadowDistLimit);
-    }
-
-    float shadowFadeStart = Settings::Manager::getFloat("shadow fade start", "Shadows");
-    if (shadowFadeStart != 0)
-        fadeStartSpinBox->setValue(shadowFadeStart);
-
-    int shadowRes = Settings::Manager::getInt("shadow map resolution", "Shadows");
-    int shadowResIndex = shadowResolutionComboBox->findText(QString::number(shadowRes));
-    if (shadowResIndex != -1)
-        shadowResolutionComboBox->setCurrentIndex(shadowResIndex);
 
     return true;
 }
@@ -188,29 +132,16 @@ void Launcher::GraphicsPage::saveSettings()
 {
     // Visuals
 
-    // Ensure we only set the new settings if they changed. This is to avoid cluttering the
-    // user settings file (which by definition should only contain settings the user has touched)
-    int cVSync = vSyncComboBox->currentIndex();
-    if (cVSync != Settings::Manager::getInt("vsync mode", "Video"))
-        Settings::Manager::setInt("vsync mode", "Video", cVSync);
-
-    int cWindowMode = windowModeComboBox->currentIndex();
-    if (cWindowMode != Settings::Manager::getInt("window mode", "Video"))
-        Settings::Manager::setInt("window mode", "Video", cWindowMode);
-
-    bool cWindowBorder = windowBorderCheckBox->checkState();
-    if (cWindowBorder != Settings::Manager::getBool("window border", "Video"))
-        Settings::Manager::setBool("window border", "Video", cWindowBorder);
-
-    int cAAValue = antiAliasingComboBox->currentText().toInt();
-    if (cAAValue != Settings::Manager::getInt("antialiasing", "Video"))
-        Settings::Manager::setInt("antialiasing", "Video", cAAValue);
+    Settings::video().mVsyncMode.set(static_cast<SDLUtil::VSyncMode>(vSyncComboBox->currentIndex()));
+    Settings::video().mWindowMode.set(static_cast<Settings::WindowMode>(windowModeComboBox->currentIndex()));
+    Settings::video().mWindowBorder.set(windowBorderCheckBox->checkState() == Qt::Checked);
+    Settings::video().mAntialiasing.set(antiAliasingComboBox->currentText().toInt());
 
     int cWidth = 0;
     int cHeight = 0;
     if (standardRadioButton->isChecked())
     {
-        QRegularExpression resolutionRe("^(\\d+) x (\\d+)");
+        QRegularExpression resolutionRe("^(\\d+) × (\\d+)");
         QRegularExpressionMatch match = resolutionRe.match(resolutionComboBox->currentText().simplified());
         if (match.hasMatch())
         {
@@ -224,83 +155,18 @@ void Launcher::GraphicsPage::saveSettings()
         cHeight = customHeightSpinBox->value();
     }
 
-    if (cWidth != Settings::Manager::getInt("resolution x", "Video"))
-        Settings::Manager::setInt("resolution x", "Video", cWidth);
-
-    if (cHeight != Settings::Manager::getInt("resolution y", "Video"))
-        Settings::Manager::setInt("resolution y", "Video", cHeight);
-
-    int cScreen = screenComboBox->currentIndex();
-    if (cScreen != Settings::Manager::getInt("screen", "Video"))
-        Settings::Manager::setInt("screen", "Video", cScreen);
+    Settings::video().mResolutionX.set(cWidth);
+    Settings::video().mResolutionY.set(cHeight);
+    Settings::video().mScreen.set(screenComboBox->currentIndex());
 
     if (framerateLimitCheckBox->checkState() != Qt::Unchecked)
     {
-        float cFpsLimit = framerateLimitSpinBox->value();
-        if (cFpsLimit != Settings::Manager::getFloat("framerate limit", "Video"))
-            Settings::Manager::setFloat("framerate limit", "Video", cFpsLimit);
+        Settings::video().mFramerateLimit.set(framerateLimitSpinBox->value());
     }
-    else if (Settings::Manager::getFloat("framerate limit", "Video") != 0)
+    else if (Settings::video().mFramerateLimit != 0)
     {
-        Settings::Manager::setFloat("framerate limit", "Video", 0);
+        Settings::video().mFramerateLimit.set(0);
     }
-
-    // Lighting
-    static std::array<std::string, 3> lightingMethodMap = { "legacy", "shaders compatibility", "shaders" };
-    const std::string& cLightingMethod = lightingMethodMap[lightingMethodComboBox->currentIndex()];
-    if (cLightingMethod != Settings::Manager::getString("lighting method", "Shaders"))
-        Settings::Manager::setString("lighting method", "Shaders", cLightingMethod);
-
-    // Shadows
-    int cShadowDist = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
-    if (Settings::Manager::getInt("maximum shadow map distance", "Shadows") != cShadowDist)
-        Settings::Manager::setInt("maximum shadow map distance", "Shadows", cShadowDist);
-    float cFadeStart = fadeStartSpinBox->value();
-    if (cShadowDist > 0 && Settings::Manager::getFloat("shadow fade start", "Shadows") != cFadeStart)
-        Settings::Manager::setFloat("shadow fade start", "Shadows", cFadeStart);
-
-    bool cActorShadows = actorShadowsCheckBox->checkState();
-    bool cObjectShadows = objectShadowsCheckBox->checkState();
-    bool cTerrainShadows = terrainShadowsCheckBox->checkState();
-    bool cPlayerShadows = playerShadowsCheckBox->checkState();
-    if (cActorShadows || cObjectShadows || cTerrainShadows || cPlayerShadows)
-    {
-        if (!Settings::Manager::getBool("enable shadows", "Shadows"))
-            Settings::Manager::setBool("enable shadows", "Shadows", true);
-        if (Settings::Manager::getBool("actor shadows", "Shadows") != cActorShadows)
-            Settings::Manager::setBool("actor shadows", "Shadows", cActorShadows);
-        if (Settings::Manager::getBool("player shadows", "Shadows") != cPlayerShadows)
-            Settings::Manager::setBool("player shadows", "Shadows", cPlayerShadows);
-        if (Settings::Manager::getBool("object shadows", "Shadows") != cObjectShadows)
-            Settings::Manager::setBool("object shadows", "Shadows", cObjectShadows);
-        if (Settings::Manager::getBool("terrain shadows", "Shadows") != cTerrainShadows)
-            Settings::Manager::setBool("terrain shadows", "Shadows", cTerrainShadows);
-    }
-    else
-    {
-        if (Settings::Manager::getBool("enable shadows", "Shadows"))
-            Settings::Manager::setBool("enable shadows", "Shadows", false);
-        if (Settings::Manager::getBool("actor shadows", "Shadows"))
-            Settings::Manager::setBool("actor shadows", "Shadows", false);
-        if (Settings::Manager::getBool("player shadows", "Shadows"))
-            Settings::Manager::setBool("player shadows", "Shadows", false);
-        if (Settings::Manager::getBool("object shadows", "Shadows"))
-            Settings::Manager::setBool("object shadows", "Shadows", false);
-        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
-            Settings::Manager::setBool("terrain shadows", "Shadows", false);
-    }
-
-    bool cIndoorShadows = indoorShadowsCheckBox->checkState();
-    if (Settings::Manager::getBool("enable indoor shadows", "Shadows") != cIndoorShadows)
-        Settings::Manager::setBool("enable indoor shadows", "Shadows", cIndoorShadows);
-
-    int cShadowRes = shadowResolutionComboBox->currentText().toInt();
-    if (cShadowRes != Settings::Manager::getInt("shadow map resolution", "Shadows"))
-        Settings::Manager::setInt("shadow map resolution", "Shadows", cShadowRes);
-
-    auto cComputeSceneBounds = shadowComputeSceneBoundsComboBox->currentText().toStdString();
-    if (cComputeSceneBounds != Settings::Manager::getString("compute scene bounds", "Shadows"))
-        Settings::Manager::setString("compute scene bounds", "Shadows", cComputeSceneBounds);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
@@ -335,19 +201,8 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
             return result;
         }
 
-        QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
-
-        QString aspect = getAspect(mode.w, mode.h);
-        if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10"))
-        {
-            resolution.append(tr("\t(Wide ") + aspect + ")");
-        }
-        else if (aspect == QLatin1String("4:3"))
-        {
-            resolution.append(tr("\t(Standard 4:3)"));
-        }
-
-        result.append(resolution);
+        auto str = Misc::getResolutionText(mode.w, mode.h, "%i × %i (%i:%i)");
+        result.append(QString(str.c_str()));
     }
 
     result.removeDuplicates();
@@ -380,8 +235,12 @@ void Launcher::GraphicsPage::screenChanged(int screen)
 
 void Launcher::GraphicsPage::slotFullScreenChanged(int mode)
 {
-    if (mode == static_cast<int>(Settings::WindowMode::Fullscreen)
-        || mode == static_cast<int>(Settings::WindowMode::WindowedFullscreen))
+    handleWindowModeChange(static_cast<Settings::WindowMode>(mode));
+}
+
+void Launcher::GraphicsPage::handleWindowModeChange(Settings::WindowMode mode)
+{
+    if (mode == Settings::WindowMode::Fullscreen || mode == Settings::WindowMode::WindowedFullscreen)
     {
         standardRadioButton->toggle();
         customRadioButton->setEnabled(false);
@@ -417,10 +276,4 @@ void Launcher::GraphicsPage::slotStandardToggled(bool checked)
 void Launcher::GraphicsPage::slotFramerateLimitToggled(bool checked)
 {
     framerateLimitSpinBox->setEnabled(checked);
-}
-
-void Launcher::GraphicsPage::slotShadowDistLimitToggled(bool checked)
-{
-    shadowDistanceSpinBox->setEnabled(checked);
-    fadeStartSpinBox->setEnabled(checked);
 }

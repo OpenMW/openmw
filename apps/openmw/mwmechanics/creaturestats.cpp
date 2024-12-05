@@ -20,31 +20,6 @@ namespace MWMechanics
     int CreatureStats::sActorId = 0;
 
     CreatureStats::CreatureStats()
-        : mDrawState(DrawState::Nothing)
-        , mDead(false)
-        , mDeathAnimationFinished(false)
-        , mDied(false)
-        , mMurdered(false)
-        , mFriendlyHits(0)
-        , mTalkedTo(false)
-        , mAlarmed(false)
-        , mAttacked(false)
-        , mKnockdown(false)
-        , mKnockdownOneFrame(false)
-        , mKnockdownOverOneFrame(false)
-        , mHitRecovery(false)
-        , mBlock(false)
-        , mMovementFlags(0)
-        , mFallHeight(0)
-        , mLastRestock(0, 0)
-        , mGoldPool(0)
-        , mActorId(-1)
-        , mHitAttemptActorId(-1)
-        , mDeathAnimation(-1)
-        , mTimeOfDeath()
-        , mSideMovementAngle(0)
-        , mLevel(0)
-        , mAttackingOrSpell(false)
     {
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
@@ -241,6 +216,11 @@ namespace MWMechanics
 
     bool CreatureStats::isParalyzed() const
     {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::Ptr player = world->getPlayerPtr();
+        if (world->getGodModeState() && this == &player.getClass().getCreatureStats(player))
+            return false;
+
         return mMagicEffects.getOrDefault(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
     }
 
@@ -317,6 +297,11 @@ namespace MWMechanics
     void CreatureStats::friendlyHit()
     {
         ++mFriendlyHits;
+    }
+
+    void CreatureStats::resetFriendlyHits()
+    {
+        mFriendlyHits = 0;
     }
 
     bool CreatureStats::hasTalkedToPlayer() const

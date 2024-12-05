@@ -3,11 +3,11 @@
 
 #include <string>
 
-#include "components/esm/defs.hpp"
-#include "npcstate.hpp"
+#include <components/esm/attr.hpp>
+#include <components/esm/position.hpp>
 
-#include "components/esm/attr.hpp"
 #include "loadskil.hpp"
+#include "npcstate.hpp"
 
 namespace ESM
 {
@@ -27,14 +27,13 @@ namespace ESM
         RefId mMarkedCell;
         ESM::RefId mBirthsign;
 
-        int mCurrentCrimeId;
-        int mPaidCrimeId;
+        int32_t mCurrentCrimeId;
+        int32_t mPaidCrimeId;
 
         float mSaveAttributes[Attribute::Length];
         float mSaveSkills[Skill::Length];
 
-        typedef std::map<ESM::RefId, ESM::RefId> PreviousItems; // previous equipped items, needed for bound spells
-        PreviousItems mPreviousItems;
+        std::map<ESM::RefId, ESM::RefId> mPreviousItems; // previous equipped items, needed for bound spells
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;

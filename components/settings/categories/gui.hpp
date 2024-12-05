@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GUI_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GUI_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
@@ -28,14 +28,16 @@ namespace Settings
         SettingValue<bool> mSubtitles{ mIndex, "GUI", "subtitles" };
         SettingValue<bool> mHitFader{ mIndex, "GUI", "hit fader" };
         SettingValue<bool> mWerewolfOverlay{ mIndex, "GUI", "werewolf overlay" };
-        SettingValue<float> mColorBackgroundOwned{ mIndex, "GUI", "color background owned",
-            makeClampSanitizerFloat(0, 1) };
-        SettingValue<float> mColorCrosshairOwned{ mIndex, "GUI", "color crosshair owned",
-            makeClampSanitizerFloat(0, 1) };
+        SettingValue<MyGUI::Colour> mColorBackgroundOwned{ mIndex, "GUI", "color background owned" };
+        SettingValue<MyGUI::Colour> mColorCrosshairOwned{ mIndex, "GUI", "color crosshair owned" };
         SettingValue<bool> mKeyboardNavigation{ mIndex, "GUI", "keyboard navigation" };
         SettingValue<bool> mColorTopicEnable{ mIndex, "GUI", "color topic enable" };
         SettingValue<MyGUI::Colour> mColorTopicSpecific{ mIndex, "GUI", "color topic specific" };
+        SettingValue<MyGUI::Colour> mColorTopicSpecificOver{ mIndex, "GUI", "color topic specific over" };
+        SettingValue<MyGUI::Colour> mColorTopicSpecificPressed{ mIndex, "GUI", "color topic specific pressed" };
         SettingValue<MyGUI::Colour> mColorTopicExhausted{ mIndex, "GUI", "color topic exhausted" };
+        SettingValue<MyGUI::Colour> mColorTopicExhaustedOver{ mIndex, "GUI", "color topic exhausted over" };
+        SettingValue<MyGUI::Colour> mColorTopicExhaustedPressed{ mIndex, "GUI", "color topic exhausted pressed" };
     };
 }
 

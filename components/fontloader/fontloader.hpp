@@ -27,7 +27,7 @@ namespace Gui
     public:
         FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor);
 
-        void overrideLineHeight(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
+        void overrideLineHeight(MyGUI::xml::ElementPtr _node, std::string_view _file, MyGUI::Version _version);
 
         static std::string_view getFontForFace(std::string_view face);
 

@@ -10,11 +10,14 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -22,13 +25,13 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
+#include "constants.hpp"
+#include "ffmpeg_decoder.hpp"
+#include "openal_output.hpp"
 #include "sound.hpp"
 #include "sound_buffer.hpp"
 #include "sound_decoder.hpp"
 #include "sound_output.hpp"
-
-#include "ffmpeg_decoder.hpp"
-#include "openal_output.hpp"
 
 namespace MWSound
 {
@@ -71,6 +74,33 @@ namespace MWSound
 
             return 1.0;
         }
+
+        // Gets the combined volume settings for the given sound type
+        float volumeFromType(Type type)
+        {
+            float volume = Settings::sound().mMasterVolume;
+
+            switch (type)
+            {
+                case Type::Sfx:
+                    volume *= Settings::sound().mSfxVolume;
+                    break;
+                case Type::Voice:
+                    volume *= Settings::sound().mVoiceVolume;
+                    break;
+                case Type::Foot:
+                    volume *= Settings::sound().mFootstepsVolume;
+                    break;
+                case Type::Music:
+                    volume *= Settings::sound().mMusicVolume;
+                    break;
+                case Type::Movie:
+                case Type::Mask:
+                    break;
+            }
+
+            return volume;
+        }
     }
 
     // For combining PlayMode and Type flags
@@ -84,6 +114,7 @@ namespace MWSound
         , mOutput(std::make_unique<OpenAL_Output>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*mOutput)
+        , mMusicType(MWSound::MusicType::Normal)
         , mListenerUnderwater(false)
         , mListenerPos(0, 0, 0)
         , mListenerDir(1, 0, 0)
@@ -101,12 +132,7 @@ namespace MWSound
             return;
         }
 
-        const std::string& hrtfname = Settings::Manager::getString("hrtf", "Sound");
-        int hrtfstate = Settings::Manager::getInt("hrtf enable", "Sound");
-        HrtfMode hrtfmode = hrtfstate < 0 ? HrtfMode::Auto : hrtfstate > 0 ? HrtfMode::Enable : HrtfMode::Disable;
-
-        const std::string& devname = Settings::Manager::getString("device", "Sound");
-        if (!mOutput->init(devname, hrtfname, hrtfmode))
+        if (!mOutput->init(Settings::sound().mDevice, Settings::sound().mHrtf, Settings::sound().mHrtfEnable))
         {
             Log(Debug::Error) << "Failed to initialize audio output, sound disabled";
             return;
@@ -131,15 +157,6 @@ namespace MWSound
 
             Log(Debug::Info) << stream.str();
         }
-
-        // TODO: dehardcode this
-        std::vector<std::string> titleMusic;
-        std::string_view titlefile = "music/special/morrowind title.mp3";
-        if (mVFS->exists(titlefile))
-            titleMusic.emplace_back(titlefile);
-        else
-            Log(Debug::Warning) << "Title music not found";
-        mMusicFiles["Title"] = titleMusic;
     }
 
     SoundManager::~SoundManager()
@@ -155,12 +172,12 @@ namespace MWSound
         return std::make_shared<FFmpeg_Decoder>(mVFS);
     }
 
-    DecoderPtr SoundManager::loadVoice(const std::string& voicefile)
+    DecoderPtr SoundManager::loadVoice(VFS::Path::NormalizedView voicefile)
     {
         try
         {
             DecoderPtr decoder = getDecoder();
-            decoder->open(Misc::ResourceHelpers::correctSoundPath(voicefile, decoder->mResourceMgr));
+            decoder->open(Misc::ResourceHelpers::correctSoundPath(voicefile, *decoder->mResourceMgr));
             return decoder;
         }
         catch (std::exception& e)
@@ -206,7 +223,7 @@ namespace MWSound
                 params.mFlags = PlayMode::NoEnv | Type::Voice | Play_2D;
                 return params;
             }());
-            played = mOutput->streamSound(decoder, sound.get(), true);
+            played = mOutput->streamSound(std::move(decoder), sound.get(), true);
         }
         else
         {
@@ -219,17 +236,11 @@ namespace MWSound
                 params.mFlags = PlayMode::Normal | Type::Voice | Play_3D;
                 return params;
             }());
-            played = mOutput->streamSound3D(decoder, sound.get(), true);
+            played = mOutput->streamSound3D(std::move(decoder), sound.get(), true);
         }
         if (!played)
             return nullptr;
         return sound;
-    }
-
-    // Gets the combined volume settings for the given sound type
-    float SoundManager::volumeFromType(Type type) const
-    {
-        return mVolumeSettings.getVolumeFromType(type);
     }
 
     void SoundManager::stopMusic()
@@ -241,26 +252,25 @@ namespace MWSound
         }
     }
 
-    void SoundManager::streamMusicFull(const std::string& filename)
+    void SoundManager::streamMusicFull(VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
 
         stopMusic();
-        if (filename.empty())
+        if (filename.value().empty())
             return;
 
-        Log(Debug::Info) << "Playing " << filename;
-        mLastPlayedMusic = filename;
+        Log(Debug::Info) << "Playing \"" << filename << "\"";
 
         DecoderPtr decoder = getDecoder();
         try
         {
             decoder->open(filename);
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
-            Log(Debug::Error) << "Failed to load audio from " << filename << ": " << e.what();
+            Log(Debug::Error) << "Failed to load audio from \"" << filename << "\": " << e.what();
             return;
         }
 
@@ -271,10 +281,10 @@ namespace MWSound
             params.mFlags = PlayMode::NoEnvNoScaling | Type::Music | Play_2D;
             return params;
         }());
-        mOutput->streamSound(decoder, mMusic.get());
+        mOutput->streamSound(std::move(decoder), mMusic.get());
     }
 
-    void SoundManager::advanceMusic(const std::string& filename)
+    void SoundManager::advanceMusic(VFS::Path::NormalizedView filename, float fadeOut)
     {
         if (!isMusicPlaying())
         {
@@ -284,44 +294,7 @@ namespace MWSound
 
         mNextMusic = filename;
 
-        mMusic->setFadeout(1.f);
-    }
-
-    void SoundManager::startRandomTitle()
-    {
-        const std::vector<std::string>& filelist = mMusicFiles[mCurrentPlaylist];
-        if (filelist.empty())
-        {
-            advanceMusic(std::string());
-            return;
-        }
-
-        auto& tracklist = mMusicToPlay[mCurrentPlaylist];
-
-        // Do a Fisher-Yates shuffle
-
-        // Repopulate if playlist is empty
-        if (tracklist.empty())
-        {
-            tracklist.resize(filelist.size());
-            std::iota(tracklist.begin(), tracklist.end(), 0);
-        }
-
-        int i = Misc::Rng::rollDice(tracklist.size());
-
-        // Reshuffle if last played music is the same after a repopulation
-        if (filelist[tracklist[i]] == mLastPlayedMusic)
-            i = (i + 1) % tracklist.size();
-
-        // Remove music from list after advancing music
-        advanceMusic(filelist[tracklist[i]]);
-        tracklist[i] = tracklist.back();
-        tracklist.pop_back();
-    }
-
-    void SoundManager::streamMusic(const std::string& filename)
-    {
-        advanceMusic("Music/" + filename);
+        mMusic->setFadeout(fadeOut);
     }
 
     bool SoundManager::isMusicPlaying()
@@ -329,32 +302,17 @@ namespace MWSound
         return mMusic && mOutput->isStreamPlaying(mMusic.get());
     }
 
-    void SoundManager::playPlaylist(const std::string& playlist)
+    void SoundManager::streamMusic(VFS::Path::NormalizedView filename, MusicType type, float fade)
     {
-        if (mCurrentPlaylist == playlist)
+        // Can not interrupt scripted music by built-in playlists
+        if (mMusicType == MusicType::MWScript && type != MusicType::MWScript)
             return;
 
-        if (mMusicFiles.find(playlist) == mMusicFiles.end())
-        {
-            std::vector<std::string> filelist;
-            for (const auto& name : mVFS->getRecursiveDirectoryIterator("Music/" + playlist + '/'))
-                filelist.push_back(name);
-
-            mMusicFiles[playlist] = filelist;
-        }
-
-        // No Battle music? Use Explore playlist
-        if (playlist == "Battle" && mMusicFiles[playlist].empty())
-        {
-            playPlaylist("Explore");
-            return;
-        }
-
-        mCurrentPlaylist = playlist;
-        startRandomTitle();
+        mMusicType = type;
+        advanceMusic(filename, fade);
     }
 
-    void SoundManager::say(const MWWorld::ConstPtr& ptr, const std::string& filename)
+    void SoundManager::say(const MWWorld::ConstPtr& ptr, VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
@@ -367,7 +325,7 @@ namespace MWSound
         const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
 
         stopSay(ptr);
-        StreamPtr sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
+        StreamPtr sound = playVoice(std::move(decoder), pos, (ptr == MWMechanics::getPlayer()));
         if (!sound)
             return;
 
@@ -386,7 +344,7 @@ namespace MWSound
         return 0.0f;
     }
 
-    void SoundManager::say(const std::string& filename)
+    void SoundManager::say(VFS::Path::NormalizedView filename)
     {
         if (!mOutput->isInitialized())
             return;
@@ -396,7 +354,7 @@ namespace MWSound
             return;
 
         stopSay(MWWorld::ConstPtr());
-        StreamPtr sound = playVoice(decoder, osg::Vec3f(), true);
+        StreamPtr sound = playVoice(std::move(decoder), osg::Vec3f(), true);
         if (!sound)
             return;
 
@@ -869,13 +827,14 @@ namespace MWSound
         const MWWorld::ConstPtr player = world->getPlayerPtr();
         auto cell = player.getCell()->getCell();
 
-        if (!cell->isExterior())
+        if (!cell->isExterior() && !cell->isQuasiExterior())
             return;
         if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
             return;
 
-        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion()))
-            mCurrentRegionSound = playSound(*next, 1.0f, 1.0f);
+        ESM::RefId next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion());
+        if (!next.empty())
+            mCurrentRegionSound = playSound(next, 1.0f, 1.0f);
     }
 
     void SoundManager::updateWaterSound()
@@ -990,10 +949,6 @@ namespace MWSound
             return;
         duration = mTimePassed;
         mTimePassed = 0.0f;
-
-        // Make sure music is still playing
-        if (!isMusicPlaying() && !mCurrentPlaylist.empty())
-            startRandomTitle();
 
         Environment env = Env_Normal;
         if (mListenerUnderwater)
@@ -1110,11 +1065,13 @@ namespace MWSound
         if (!mMusic || !mMusic->updateFade(duration) || !mOutput->isStreamPlaying(mMusic.get()))
         {
             stopMusic();
-            if (!mNextMusic.empty())
+            if (!mNextMusic.value().empty())
             {
                 streamMusicFull(mNextMusic);
-                mNextMusic.clear();
+                mNextMusic = VFS::Path::Normalized();
             }
+            else
+                mMusicType = MusicType::Normal;
         }
         else
         {
@@ -1127,8 +1084,18 @@ namespace MWSound
         if (!mOutput->isInitialized() || mPlaybackPaused)
             return;
 
+        MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
+        bool isMainMenu = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+            && state == MWBase::StateManager::State_NoGame;
+
+        if (isMainMenu && !isMusicPlaying())
+        {
+            if (mVFS->exists(MWSound::titleMusic))
+                streamMusic(MWSound::titleMusic, MWSound::MusicType::Normal);
+        }
+
         updateSounds(duration);
-        if (MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+        if (state != MWBase::StateManager::State_NoGame)
         {
             updateRegionSound(duration);
             updateWaterSound();
@@ -1137,8 +1104,6 @@ namespace MWSound
 
     void SoundManager::processChangedSettings(const Settings::CategorySettingVector& settings)
     {
-        mVolumeSettings.update();
-
         if (!mOutput->isInitialized())
             return;
         mOutput->startUpdate();
@@ -1291,7 +1256,8 @@ namespace MWSound
 
     void SoundManager::clear()
     {
-        SoundManager::stopMusic();
+        stopMusic();
+        mMusicType = MusicType::Normal;
 
         for (SoundMap::value_type& snd : mActiveSounds)
         {

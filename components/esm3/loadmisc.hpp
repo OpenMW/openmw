@@ -27,8 +27,8 @@ namespace ESM
         struct MCDTstruct
         {
             float mWeight;
-            int mValue;
-            int mFlags;
+            int32_t mValue;
+            int32_t mFlags;
         };
 
         enum Flags
@@ -38,7 +38,7 @@ namespace ESM
 
         MCDTstruct mData;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mScript;
         std::string mName, mModel, mIcon;
 

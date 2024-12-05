@@ -20,8 +20,8 @@ namespace Terrain
 {
 
     ChunkManager::ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager,
-        CompositeMapRenderer* renderer, ESM::RefId worldspace)
-        : GenericResourceManager<ChunkId>(nullptr)
+        CompositeMapRenderer* renderer, ESM::RefId worldspace, double expiryDelay)
+        : GenericResourceManager<ChunkKey>(nullptr, expiryDelay)
         , QuadTreeWorld::ChunkManager(worldspace)
         , mStorage(storage)
         , mSceneManager(sceneMgr)
@@ -39,55 +39,43 @@ namespace Terrain
         mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);
     }
 
-    struct FindChunkTemplate
-    {
-        void operator()(ChunkId id, osg::Object* obj)
-        {
-            if (std::get<0>(id) == std::get<0>(mId) && std::get<1>(id) == std::get<1>(mId))
-                mFoundTemplate = obj;
-        }
-        ChunkId mId;
-        osg::ref_ptr<osg::Object> mFoundTemplate;
-    };
-
     osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& center, unsigned char lod,
         unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
         // Override lod with the vertexLodMod adjusted value.
         // TODO: maybe we can refactor this code by moving all vertexLodMod code into this class.
         lod = static_cast<unsigned char>(lodFlags >> (4 * 4));
-        ChunkId id = std::make_tuple(center, lod, lodFlags);
-        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
-        if (obj)
+
+        const ChunkKey key{ .mCenter = center, .mLod = lod, .mLodFlags = lodFlags };
+        if (osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(key))
             return static_cast<osg::Node*>(obj.get());
-        else
-        {
-            FindChunkTemplate find;
-            find.mId = id;
-            mCache->call(find);
-            TerrainDrawable* templateGeometry
-                = find.mFoundTemplate ? static_cast<TerrainDrawable*>(find.mFoundTemplate.get()) : nullptr;
-            osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile, templateGeometry);
-            mCache->addEntryToObjectCache(id, node.get());
-            return node;
-        }
+
+        const TerrainDrawable* templateGeometry = nullptr;
+        const TemplateKey templateKey{ .mCenter = center, .mLod = lod };
+        const auto pair = mCache->lowerBound(templateKey);
+        if (pair.has_value() && templateKey == TemplateKey{ .mCenter = pair->first.mCenter, .mLod = pair->first.mLod })
+            templateGeometry = static_cast<const TerrainDrawable*>(pair->second.get());
+
+        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile, templateGeometry);
+        mCache->addEntryToObjectCache(key, node.get());
+        return node;
     }
 
     void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Terrain Chunk", mCache->getCacheSize());
+        Resource::reportStats("Terrain Chunk", frameNumber, mCache->getStats(), *stats);
     }
 
     void ChunkManager::clearCache()
     {
-        GenericResourceManager<ChunkId>::clearCache();
+        GenericResourceManager<ChunkKey>::clearCache();
 
         mBufferCache.clearCache();
     }
 
     void ChunkManager::releaseGLObjects(osg::State* state)
     {
-        GenericResourceManager<ChunkId>::releaseGLObjects(state);
+        GenericResourceManager<ChunkKey>::releaseGLObjects(state);
         mBufferCache.releaseGLObjects(state);
     }
 
@@ -202,7 +190,7 @@ namespace Terrain
     }
 
     osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f& chunkCenter, unsigned char lod,
-        unsigned int lodFlags, bool compile, TerrainDrawable* templateGeometry)
+        unsigned int lodFlags, bool compile, const TerrainDrawable* templateGeometry)
     {
         osg::ref_ptr<TerrainDrawable> geometry(new TerrainDrawable);
 

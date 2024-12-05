@@ -4,6 +4,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -182,22 +183,19 @@ namespace MWWorld
             return months[month];
     }
 
-    bool DateTimeManager::updateGlobalFloat(GlobalVariableName name, float value)
+    void DateTimeManager::updateGlobalFloat(GlobalVariableName name, float value)
     {
         if (name == Globals::sGameHour)
         {
             setHour(value);
-            return true;
         }
         else if (name == Globals::sDay)
         {
             setDay(static_cast<int>(value));
-            return true;
         }
         else if (name == Globals::sMonth)
         {
             setMonth(static_cast<int>(value));
-            return true;
         }
         else if (name == Globals::sYear)
         {
@@ -211,26 +209,21 @@ namespace MWWorld
         {
             mDaysPassed = static_cast<int>(value);
         }
-
-        return false;
     }
 
-    bool DateTimeManager::updateGlobalInt(GlobalVariableName name, int value)
+    void DateTimeManager::updateGlobalInt(GlobalVariableName name, int value)
     {
         if (name == Globals::sGameHour)
         {
             setHour(static_cast<float>(value));
-            return true;
         }
         else if (name == Globals::sDay)
         {
             setDay(value);
-            return true;
         }
         else if (name == Globals::sMonth)
         {
             setMonth(value);
-            return true;
         }
         else if (name == Globals::sYear)
         {
@@ -244,8 +237,6 @@ namespace MWWorld
         {
             mDaysPassed = value;
         }
-
-        return false;
     }
 
     void DateTimeManager::setSimulationTimeScale(float scale)
@@ -263,6 +254,9 @@ namespace MWWorld
 
     void DateTimeManager::updateIsPaused()
     {
-        mPaused = !mPausedTags.empty() || MWBase::Environment::get().getWindowManager()->isGuiMode();
+        auto stateManager = MWBase::Environment::get().getStateManager();
+        auto wm = MWBase::Environment::get().getWindowManager();
+        mPaused = !mPausedTags.empty() || wm->isConsoleMode() || wm->isPostProcessorHudVisible()
+            || wm->isInteractiveMessageBoxActive() || stateManager->getState() == MWBase::StateManager::State_NoGame;
     }
 }

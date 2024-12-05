@@ -32,6 +32,7 @@ namespace ESM
         };
 
         static const std::string_view sGmstSpecializationIds[3];
+        static const std::array<std::string_view, 3> specializationIndexToLuaId;
 
         struct CLDTstruct
         {

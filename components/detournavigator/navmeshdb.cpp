@@ -200,34 +200,35 @@ namespace DetourNavigator
     }
 
     std::optional<Tile> NavMeshDb::findTile(
-        std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input)
+        ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input)
     {
         Tile result;
         auto row = std::tie(result.mTileId, result.mVersion);
         const std::vector<std::byte> compressedInput = Misc::compress(input);
-        if (&row == request(*mDb, mFindTile, &row, 1, worldspace, tilePosition, compressedInput))
+        if (&row == request(*mDb, mFindTile, &row, 1, worldspace.serializeText(), tilePosition, compressedInput))
             return {};
         return result;
     }
 
     std::optional<TileData> NavMeshDb::getTileData(
-        std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input)
+        ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input)
     {
         TileData result;
         auto row = std::tie(result.mTileId, result.mVersion, result.mData);
         const std::vector<std::byte> compressedInput = Misc::compress(input);
-        if (&row == request(*mDb, mGetTileData, &row, 1, worldspace, tilePosition, compressedInput))
+        if (&row == request(*mDb, mGetTileData, &row, 1, worldspace.serializeText(), tilePosition, compressedInput))
             return {};
         result.mData = Misc::decompress(result.mData);
         return result;
     }
 
-    int NavMeshDb::insertTile(TileId tileId, std::string_view worldspace, const TilePosition& tilePosition,
+    int NavMeshDb::insertTile(TileId tileId, ESM::RefId worldspace, const TilePosition& tilePosition,
         TileVersion version, const std::vector<std::byte>& input, const std::vector<std::byte>& data)
     {
         const std::vector<std::byte> compressedInput = Misc::compress(input);
         const std::vector<std::byte> compressedData = Misc::compress(data);
-        return execute(*mDb, mInsertTile, tileId, worldspace, tilePosition, version, compressedInput, compressedData);
+        return execute(*mDb, mInsertTile, tileId, worldspace.serializeText(), tilePosition, version, compressedInput,
+            compressedData);
     }
 
     int NavMeshDb::updateTile(TileId tileId, TileVersion version, const std::vector<std::byte>& data)
@@ -236,20 +237,19 @@ namespace DetourNavigator
         return execute(*mDb, mUpdateTile, tileId, version, compressedData);
     }
 
-    int NavMeshDb::deleteTilesAt(std::string_view worldspace, const TilePosition& tilePosition)
+    int NavMeshDb::deleteTilesAt(ESM::RefId worldspace, const TilePosition& tilePosition)
     {
-        return execute(*mDb, mDeleteTilesAt, worldspace, tilePosition);
+        return execute(*mDb, mDeleteTilesAt, worldspace.serializeText(), tilePosition);
     }
 
-    int NavMeshDb::deleteTilesAtExcept(
-        std::string_view worldspace, const TilePosition& tilePosition, TileId excludeTileId)
+    int NavMeshDb::deleteTilesAtExcept(ESM::RefId worldspace, const TilePosition& tilePosition, TileId excludeTileId)
     {
-        return execute(*mDb, mDeleteTilesAtExcept, worldspace, tilePosition, excludeTileId);
+        return execute(*mDb, mDeleteTilesAtExcept, worldspace.serializeText(), tilePosition, excludeTileId);
     }
 
-    int NavMeshDb::deleteTilesOutsideRange(std::string_view worldspace, const TilesPositionsRange& range)
+    int NavMeshDb::deleteTilesOutsideRange(ESM::RefId worldspace, const TilesPositionsRange& range)
     {
-        return execute(*mDb, mDeleteTilesOutsideRange, worldspace, range);
+        return execute(*mDb, mDeleteTilesOutsideRange, worldspace.serializeText(), range);
     }
 
     ShapeId NavMeshDb::getMaxShapeId()

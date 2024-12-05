@@ -16,55 +16,55 @@
 #include <array>
 #include <cassert>
 #include <functional>
+#include <iterator>
 #include <span>
 #include <vector>
 
 namespace DetourNavigator
 {
-    template <class OutputIterator, class Function>
-    class OutputTransformIterator
+    template <std::output_iterator<osg::Vec3f> OutputIterator>
+    class FromNavMeshCoordinatesIterator
     {
     public:
-        explicit OutputTransformIterator(OutputIterator& impl, Function&& function)
+        using iterator_category = std::output_iterator_tag;
+        using value_type = osg::Vec3f;
+        using difference_type = std::ptrdiff_t;
+        using pointer = osg::Vec3f*;
+        using reference = osg::Vec3f&;
+
+        explicit FromNavMeshCoordinatesIterator(OutputIterator& impl, const RecastSettings& settings)
             : mImpl(impl)
-            , mFunction(std::forward<Function>(function))
+            , mSettings(settings)
         {
         }
 
-        OutputTransformIterator& operator*() { return *this; }
+        FromNavMeshCoordinatesIterator& operator*() { return *this; }
 
-        OutputTransformIterator& operator++()
+        FromNavMeshCoordinatesIterator& operator++()
         {
             ++mImpl.get();
             return *this;
         }
 
-        OutputTransformIterator operator++(int)
+        FromNavMeshCoordinatesIterator operator++(int)
         {
             const auto copy = *this;
             ++(*this);
             return copy;
         }
 
-        OutputTransformIterator& operator=(const osg::Vec3f& value)
+        FromNavMeshCoordinatesIterator& operator=(const osg::Vec3f& value)
         {
-            *mImpl.get() = mFunction(value);
+            *mImpl.get() = fromNavMeshCoordinates(mSettings, value);
             return *this;
         }
 
     private:
         std::reference_wrapper<OutputIterator> mImpl;
-        Function mFunction;
+        std::reference_wrapper<const RecastSettings> mSettings;
     };
 
-    template <class OutputIterator>
-    auto withFromNavMeshCoordinates(OutputIterator& impl, const RecastSettings& settings)
-    {
-        return OutputTransformIterator(
-            impl, [&settings](const osg::Vec3f& value) { return fromNavMeshCoordinates(settings, value); });
-    }
-
-    inline std::optional<std::size_t> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
+    inline std::optional<std::size_t> findPolygonPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
         const dtPolyRef endRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& queryFilter,
         std::span<dtPolyRef> pathBuffer)
     {
@@ -78,10 +78,9 @@ namespace DetourNavigator
         return static_cast<std::size_t>(pathLen);
     }
 
-    template <class OutputIterator>
     Status makeSmoothPath(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& start, const osg::Vec3f& end,
         std::span<dtPolyRef> polygonPath, std::size_t polygonPathSize, std::size_t maxSmoothPathSize,
-        OutputIterator& out)
+        std::output_iterator<osg::Vec3f> auto& out)
     {
         assert(polygonPathSize <= polygonPath.size());
 
@@ -102,10 +101,9 @@ namespace DetourNavigator
         return Status::Success;
     }
 
-    template <class OutputIterator>
     Status findSmoothPath(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents, const osg::Vec3f& start,
         const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts, const DetourSettings& settings,
-        float endTolerance, OutputIterator out)
+        float endTolerance, std::output_iterator<osg::Vec3f> auto out)
     {
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
@@ -134,7 +132,7 @@ namespace DetourNavigator
 
         std::vector<dtPolyRef> polygonPath(settings.mMaxPolygonPathSize);
         const auto polygonPathSize
-            = findPath(navMeshQuery, startRef, endRef, startNavMeshPos, endNavMeshPos, queryFilter, polygonPath);
+            = findPolygonPath(navMeshQuery, startRef, endRef, startNavMeshPos, endNavMeshPos, queryFilter, polygonPath);
 
         if (!polygonPathSize.has_value())
             return Status::FindPathOverPolygonsFailed;

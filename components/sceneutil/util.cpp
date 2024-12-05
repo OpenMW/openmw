@@ -1,6 +1,7 @@
 #include "util.hpp"
 
 #include <algorithm>
+#include <array>
 #include <iomanip>
 #include <sstream>
 
@@ -14,28 +15,51 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/texturetype.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace SceneUtil
 {
-
-    class FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
+    namespace
     {
-    public:
-        FindLowestUnusedTexUnitVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mLowestUnusedTexUnit(0)
+        std::array<VFS::Path::Normalized, 32> generateGlowTextureNames()
         {
+            constexpr VFS::Path::NormalizedView prefix("textures/magicitem");
+            std::array<VFS::Path::Normalized, 32> result;
+            for (std::size_t i = 0; i < result.size(); ++i)
+            {
+                std::stringstream stream;
+                stream << "caust";
+                stream << std::setw(2);
+                stream << std::setfill('0');
+                stream << i;
+                stream << ".dds";
+                result[i] = prefix / VFS::Path::Normalized(std::move(stream).str());
+            }
+            return result;
         }
 
-        void apply(osg::Node& node) override
-        {
-            if (osg::StateSet* stateset = node.getStateSet())
-                mLowestUnusedTexUnit = std::max(mLowestUnusedTexUnit, int(stateset->getTextureAttributeList().size()));
+        const std::array<VFS::Path::Normalized, 32> glowTextureNames = generateGlowTextureNames();
 
-            traverse(node);
-        }
-        int mLowestUnusedTexUnit;
-    };
+        struct FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
+        {
+            FindLowestUnusedTexUnitVisitor()
+                : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            {
+            }
+
+            void apply(osg::Node& node) override
+            {
+                if (osg::StateSet* stateset = node.getStateSet())
+                    mLowestUnusedTexUnit
+                        = std::max(mLowestUnusedTexUnit, int(stateset->getTextureAttributeList().size()));
+
+                traverse(node);
+            }
+
+            int mLowestUnusedTexUnit = 0;
+        };
+    }
 
     GlowUpdater::GlowUpdater(int texUnit, const osg::Vec4f& color,
         const std::vector<osg::ref_ptr<osg::Texture2D>>& textures, osg::Node* node, float duration,
@@ -197,18 +221,10 @@ namespace SceneUtil
         const osg::Vec4f& glowColor, float glowDuration)
     {
         std::vector<osg::ref_ptr<osg::Texture2D>> textures;
-        for (int i = 0; i < 32; ++i)
+        for (const VFS::Path::Normalized& name : glowTextureNames)
         {
-            std::stringstream stream;
-            stream << "textures/magicitem/caust";
-            stream << std::setw(2);
-            stream << std::setfill('0');
-            stream << i;
-            stream << ".dds";
-
-            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(stream.str());
+            osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(name);
             osg::ref_ptr<osg::Texture2D> tex(new osg::Texture2D(image));
-            tex->setName("envMap");
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
             tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
             resourceSystem->getSceneManager()->applyFilterSettings(tex);
@@ -233,19 +249,19 @@ namespace SceneUtil
             node->setStateSet(writableStateSet);
         }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
+        writableStateSet->setTextureAttributeAndModes(texUnit, new TextureType("envMap"), osg::StateAttribute::ON);
         writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
-        resourceSystem->getSceneManager()->recreateShaders(node);
+        resourceSystem->getSceneManager()->recreateShaders(std::move(node));
 
         return glowUpdater;
     }
 
-    bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer,
-        osg::Texture* texture, unsigned int level, unsigned int face, bool mipMapGeneration)
+    void attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer,
+        osg::Texture* texture, unsigned int level, unsigned int face, bool mipMapGeneration,
+        bool addMSAAIntermediateTarget)
     {
         unsigned int samples = 0;
         unsigned int colourSamples = 0;
-        bool addMSAAIntermediateTarget = Settings::Manager::getBool("antialias alpha test", "Shaders")
-            && Settings::Manager::getInt("antialiasing", "Video") > 1;
         if (addMSAAIntermediateTarget)
         {
             // Alpha-to-coverage requires a multisampled framebuffer.
@@ -255,7 +271,6 @@ namespace SceneUtil
             colourSamples = 1;
         }
         camera->attach(buffer, texture, level, face, mipMapGeneration, samples, colourSamples);
-        return addMSAAIntermediateTarget;
     }
 
     OperationSequence::OperationSequence(bool keep)
@@ -274,4 +289,133 @@ namespace SceneUtil
         mOperationQueue->add(operation);
     }
 
+    GLenum computeUnsizedPixelFormat(GLenum format)
+    {
+        switch (format)
+        {
+            // Try compressed formats first, they're more likely to be used
+
+            // Generic
+            case GL_COMPRESSED_ALPHA_ARB:
+                return GL_ALPHA;
+            case GL_COMPRESSED_INTENSITY_ARB:
+                return GL_INTENSITY;
+            case GL_COMPRESSED_LUMINANCE_ALPHA_ARB:
+                return GL_LUMINANCE_ALPHA;
+            case GL_COMPRESSED_LUMINANCE_ARB:
+                return GL_LUMINANCE;
+            case GL_COMPRESSED_RGB_ARB:
+                return GL_RGB;
+            case GL_COMPRESSED_RGBA_ARB:
+                return GL_RGBA;
+
+            // S3TC
+            case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+            case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
+                return GL_RGB;
+            case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+            case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
+            case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+            case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
+            case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+            case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+                return GL_RGBA;
+
+            // RGTC
+            case GL_COMPRESSED_RED_RGTC1_EXT:
+            case GL_COMPRESSED_SIGNED_RED_RGTC1_EXT:
+                return GL_RED;
+            case GL_COMPRESSED_RED_GREEN_RGTC2_EXT:
+            case GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT:
+                return GL_RG;
+
+            // PVRTC
+            case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+            case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+                return GL_RGB;
+            case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+            case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+                return GL_RGBA;
+
+            // ETC
+            case GL_COMPRESSED_R11_EAC:
+            case GL_COMPRESSED_SIGNED_R11_EAC:
+                return GL_RED;
+            case GL_COMPRESSED_RG11_EAC:
+            case GL_COMPRESSED_SIGNED_RG11_EAC:
+                return GL_RG;
+            case GL_ETC1_RGB8_OES:
+            case GL_COMPRESSED_RGB8_ETC2:
+            case GL_COMPRESSED_SRGB8_ETC2:
+                return GL_RGB;
+            case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+            case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+            case GL_COMPRESSED_RGBA8_ETC2_EAC:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+                return GL_RGBA;
+
+            // ASTC
+            case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+            case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
+            case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
+                return GL_RGBA;
+
+            // Plug in some holes computePixelFormat has, you never know when these could come in handy
+            case GL_INTENSITY4:
+            case GL_INTENSITY8:
+            case GL_INTENSITY12:
+            case GL_INTENSITY16:
+                return GL_INTENSITY;
+
+            case GL_LUMINANCE4:
+            case GL_LUMINANCE8:
+            case GL_LUMINANCE12:
+            case GL_LUMINANCE16:
+                return GL_LUMINANCE;
+
+            case GL_LUMINANCE4_ALPHA4:
+            case GL_LUMINANCE6_ALPHA2:
+            case GL_LUMINANCE8_ALPHA8:
+            case GL_LUMINANCE12_ALPHA4:
+            case GL_LUMINANCE12_ALPHA12:
+            case GL_LUMINANCE16_ALPHA16:
+                return GL_LUMINANCE_ALPHA;
+        }
+
+        return osg::Image::computePixelFormat(format);
+    }
+
+    const std::string& getTextureType(const osg::StateSet& stateset, const osg::Texture& texture, unsigned int texUnit)
+    {
+        const osg::StateAttribute* type = stateset.getTextureAttribute(texUnit, SceneUtil::TextureType::AttributeType);
+        if (type)
+            return static_cast<const SceneUtil::TextureType*>(type)->getName();
+
+        return texture.getName();
+    }
 }

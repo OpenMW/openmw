@@ -6,6 +6,8 @@
 #include <new>
 #include <memory>
 
+#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
+
 #if defined(_MSC_VER)
     #pragma warning (push)
     #pragma warning (disable : 4244)
@@ -43,7 +45,11 @@ protected:
     AVCodecContext* mAudioContext;
     AVStream *mAVStream;
     enum AVSampleFormat mOutputSampleFormat;
+    #if OPENMW_FFMPEG_5_OR_GREATER
+    AVChannelLayout mOutputChannelLayout;
+    #else
     uint64_t mOutputChannelLayout;
+    #endif
     int mOutputSampleRate;
     ssize_t mFramePos;
     ssize_t mFrameSize;

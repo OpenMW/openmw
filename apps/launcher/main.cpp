@@ -1,13 +1,15 @@
 #include <iostream>
 
 #include <QDir>
-#include <QTranslator>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
 #include <components/debug/debugging.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/qtconversion.hpp>
+#include <components/l10n/qttranslations.hpp>
+#include <components/platform/application.hpp>
 #include <components/platform/platform.hpp>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -28,23 +30,19 @@ int runLauncher(int argc, char* argv[])
     configurationManager.addCommonOptions(description);
     configurationManager.readConfiguration(variables, description, true);
 
-    setupLogging(configurationManager.getLogPath(), "Launcher");
+    Debug::setupLogging(configurationManager.getLogPath(), "Launcher");
 
     try
     {
-        QApplication app(argc, argv);
+        Platform::Application app(argc, argv);
 
-        // Internationalization
-        QString locale = QLocale::system().name().section('_', 0, 0);
+        QString resourcesPath(".");
+        if (!variables["resources"].empty())
+        {
+            resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
+        }
 
-        QTranslator appTranslator;
-        appTranslator.load(":/translations/" + locale + ".qm");
-        app.installTranslator(&appTranslator);
-
-        // Now we make sure the current dir is set to application path
-        QDir dir(QCoreApplication::applicationDirPath());
-
-        QDir::setCurrent(dir.absolutePath());
+        l10n::installQtTranslations(app, "launcher", resourcesPath);
 
         Launcher::MainDialog mainWin(configurationManager);
 
@@ -68,5 +66,5 @@ int runLauncher(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(runLauncher, argc, argv, "Launcher");
+    return Debug::wrapApplication(runLauncher, argc, argv, "Launcher");
 }

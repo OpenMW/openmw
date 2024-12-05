@@ -9,8 +9,6 @@
 #include <optional>
 #include <string>
 
-#include <components/to_utf8/to_utf8.hpp>
-
 namespace ESM
 {
     class ReadersCache
@@ -57,15 +55,7 @@ namespace ESM
 
         BusyItem get(std::size_t index);
 
-        void setStatelessEncoder(const ToUTF8::StatelessUtf8Encoder& statelessEncoderPtr)
-        {
-            mStatelessEncoder.emplace(statelessEncoderPtr);
-        }
-
-        const ToUTF8::StatelessUtf8Encoder* getStatelessEncoder()
-        {
-            return mStatelessEncoder.has_value() ? &mStatelessEncoder.value() : nullptr;
-        }
+        void clear();
 
     private:
         const std::size_t mCapacity;
@@ -73,7 +63,7 @@ namespace ESM
         std::list<Item> mBusyItems;
         std::list<Item> mFreeItems;
         std::list<Item> mClosedItems;
-        std::optional<ToUTF8::StatelessUtf8Encoder> mStatelessEncoder;
+
         inline void closeExtraReaders();
 
         inline void releaseItem(std::list<Item>::iterator it) noexcept;

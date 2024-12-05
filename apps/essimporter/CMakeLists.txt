@@ -34,7 +34,7 @@ openmw_add_executable(openmw-essimporter
 )
 
 target_link_libraries(openmw-essimporter
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
 
@@ -47,7 +47,7 @@ if (WIN32)
     INSTALL(TARGETS openmw-essimporter RUNTIME DESTINATION ".")
 endif(WIN32)
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-essimporter PRIVATE
         <algorithm>
         <filesystem>

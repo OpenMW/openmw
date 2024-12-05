@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWRENDER_OBJECTPAGING_H
 #define OPENMW_MWRENDER_OBJECTPAGING_H
 
-#include <components/esm3/loadcell.hpp>
+#include <components/esm3/refnum.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
 
@@ -10,15 +10,6 @@
 namespace Resource
 {
     class SceneManager;
-}
-namespace MWWorld
-{
-    class ESMStore;
-}
-
-namespace ESM
-{
-    class ReadersCache;
 }
 
 namespace MWRender
@@ -41,11 +32,10 @@ namespace MWRender
         unsigned int getNodeMask() override;
 
         /// @return true if view needs rebuild
-        bool enableObject(
-            int type, const ESM::RefNum& refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);
+        bool enableObject(int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);
 
         /// @return true if view needs rebuild
-        bool blacklistObject(int type, const ESM::RefNum& refnum, const osg::Vec3f& pos, const osg::Vec2i& cell);
+        bool blacklistObject(int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell);
 
         void clear();
 
@@ -83,16 +73,13 @@ namespace MWRender
         const RefTracker& getRefTracker() const { return mRefTracker; }
         RefTracker& getWritableRefTracker() { return mRefTrackerLocked ? mRefTrackerNew : mRefTracker; }
 
-        std::map<ESM::RefNum, ESM::CellRef> collectESM3References(
-            float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers) const;
-
         std::mutex mSizeCacheMutex;
         typedef std::map<ESM::RefNum, float> SizeCache;
         SizeCache mSizeCache;
 
         std::mutex mLODNameCacheMutex;
         typedef std::pair<std::string, unsigned char> LODNameCacheKey; // Key: mesh name, lod level
-        typedef std::map<LODNameCacheKey, std::string> LODNameCache; // Cache: key, mesh name to use
+        using LODNameCache = std::map<LODNameCacheKey, VFS::Path::Normalized>; // Cache: key, mesh name to use
         LODNameCache mLODNameCache;
     };
 

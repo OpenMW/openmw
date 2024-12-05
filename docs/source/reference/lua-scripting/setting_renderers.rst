@@ -1,6 +1,8 @@
 Built-in Setting Renderers
 ==========================
 
+.. include:: version.rst
+
 textLine
 --------
 
@@ -124,3 +126,26 @@ Table with the following optional fields:
   * - disabled
     - bool (false)
     - Disables changing the setting from the UI
+
+inputBinding
+------------
+
+Allows the user to bind inputs to an action or trigger
+
+**Argument**
+
+Table with the following fields:
+
+.. list-table::
+  :header-rows: 1
+  :widths: 20 20 60
+
+  * - name
+    - type (default)
+    - description
+  * - key
+    - #string
+    - Key of the action or trigger to which the input is bound
+  * - type
+    - 'action', 'trigger'
+    - Type of the key

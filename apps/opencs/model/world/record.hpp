@@ -19,6 +19,11 @@ namespace CSMWorld
 
         State mState;
 
+        explicit RecordBase(State state)
+            : mState(state)
+        {
+        }
+
         virtual ~RecordBase() = default;
 
         virtual std::unique_ptr<RecordBase> clone() const = 0;
@@ -69,21 +74,18 @@ namespace CSMWorld
 
     template <typename ESXRecordT>
     Record<ESXRecordT>::Record()
-        : mBase()
+        : RecordBase(State_BaseOnly)
+        , mBase()
         , mModified()
     {
     }
 
     template <typename ESXRecordT>
     Record<ESXRecordT>::Record(State state, const ESXRecordT* base, const ESXRecordT* modified)
+        : RecordBase(state)
+        , mBase(base == nullptr ? ESXRecordT{} : *base)
+        , mModified(modified == nullptr ? ESXRecordT{} : *modified)
     {
-        if (base)
-            mBase = *base;
-
-        if (modified)
-            mModified = *modified;
-
-        this->mState = state;
     }
 
     template <typename ESXRecordT>

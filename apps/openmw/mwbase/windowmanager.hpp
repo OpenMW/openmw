@@ -77,6 +77,7 @@ namespace MWGui
     class JailScreen;
     class MessageBox;
     class PostProcessorHud;
+    class SettingsWindow;
 
     enum ShowInDialogueMode
     {
@@ -119,7 +120,7 @@ namespace MWBase
 
         virtual void pushGuiMode(MWGui::GuiMode mode, const MWWorld::Ptr& arg) = 0;
         virtual void pushGuiMode(MWGui::GuiMode mode) = 0;
-        virtual void popGuiMode() = 0;
+        virtual void popGuiMode(bool forceExit = false) = 0;
 
         virtual void removeGuiMode(MWGui::GuiMode mode) = 0;
         ///< can be anywhere in the stack
@@ -134,8 +135,9 @@ namespace MWBase
         virtual bool isGuiMode() const = 0;
 
         virtual bool isConsoleMode() const = 0;
-
         virtual bool isPostProcessorHudVisible() const = 0;
+        virtual bool isSettingsWindowVisible() const = 0;
+        virtual bool isInteractiveMessageBoxActive() const = 0;
 
         virtual void toggleVisible(MWGui::GuiWindow wnd) = 0;
 
@@ -164,7 +166,8 @@ namespace MWBase
 
         virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
         virtual MWWorld::Ptr getConsoleSelectedObject() const = 0;
-        virtual void setConsoleMode(const std::string& mode) = 0;
+        virtual void setConsoleMode(std::string_view mode) = 0;
+        virtual const std::string& getConsoleMode() = 0;
 
         static constexpr std::string_view sConsoleColor_Default = "#FFFFFF";
         static constexpr std::string_view sConsoleColor_Error = "#FF2222";
@@ -199,9 +202,6 @@ namespace MWBase
 
         virtual bool getFullHelp() const = 0;
 
-        virtual void setActiveMap(int x, int y, bool interior) = 0;
-        ///< set the indices of the map texture that should be used
-
         /// sets the visibility of the drowning bar
         virtual void setDrowningBarVisibility(bool visible) = 0;
 
@@ -229,7 +229,8 @@ namespace MWBase
         virtual void unsetSelectedWeapon() = 0;
 
         virtual void showCrosshair(bool show) = 0;
-        virtual bool toggleHud() = 0;
+        virtual bool setHudVisibility(bool show) = 0;
+        virtual bool isHudVisible() const = 0;
 
         virtual void disallowMouse() = 0;
         virtual void allowMouse() = 0;
@@ -253,8 +254,8 @@ namespace MWBase
             = 0;
         virtual void staticMessageBox(std::string_view message) = 0;
         virtual void removeStaticMessageBox() = 0;
-        virtual void interactiveMessageBox(
-            std::string_view message, const std::vector<std::string>& buttons = {}, bool block = false)
+        virtual void interactiveMessageBox(std::string_view message, const std::vector<std::string>& buttons = {},
+            bool block = false, int defaultFocus = -1)
             = 0;
 
         /// returns the index of the pressed button or -1 if no button was pressed
@@ -289,7 +290,7 @@ namespace MWBase
 
         virtual void setEnemy(const MWWorld::Ptr& enemy) = 0;
 
-        virtual int getMessagesCount() const = 0;
+        virtual std::size_t getMessagesCount() const = 0;
 
         virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
@@ -341,6 +342,7 @@ namespace MWBase
         virtual void toggleConsole() = 0;
         virtual void toggleDebugWindow() = 0;
         virtual void togglePostProcessorHud() = 0;
+        virtual void toggleSettingsWindow() = 0;
 
         /// Cycle to next or previous spell
         virtual void cycleSpell(bool next) = 0;

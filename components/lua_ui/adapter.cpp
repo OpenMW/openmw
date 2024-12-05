@@ -18,9 +18,14 @@ namespace LuaUi
     {
         mContainer = MyGUI::Gui::getInstancePtr()->createWidget<LuaContainer>(
             "", MyGUI::IntCoord(), MyGUI::Align::Default, "", "");
-        mContainer->initialize(luaState, mContainer);
-        mContainer->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord) { setSize(coord.size()); });
+        mContainer->initialize(luaState, mContainer, false);
+        mContainer->widget()->eventChangeCoord += MyGUI::newDelegate(this, &LuaAdapter::containerChangedCoord);
         mContainer->widget()->attachToWidget(this);
+    }
+
+    void LuaAdapter::containerChangedCoord(MyGUI::Widget*)
+    {
+        setSize(mContainer->getSize());
     }
 
     void LuaAdapter::attach(const std::shared_ptr<Element>& element)
@@ -44,14 +49,20 @@ namespace LuaUi
 
     void LuaAdapter::attachElement()
     {
-        if (mElement.get())
-            mElement->attachToWidget(mContainer);
+        if (!mElement.get())
+            return;
+        if (!mElement->mRoot)
+            throw std::logic_error("Attempting to use a destroyed UI Element");
+        mContainer->setChildren({ mElement->mRoot });
+        mElement->mRoot->updateCoord();
+        mContainer->updateCoord();
     }
 
     void LuaAdapter::detachElement()
     {
-        if (mElement.get())
-            mElement->detachFromWidget();
+        mContainer->setChildren({});
+        if (mElement && mElement->mRoot)
+            mElement->mRoot->widget()->detachFromWidget();
         mElement = nullptr;
     }
 }

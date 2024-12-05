@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <optional>
+#include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
@@ -53,23 +54,20 @@ namespace MWWorld
 
         const ESM::Cell* createEsmCell(ESM::ExteriorCellLocation location, ESMStore& store)
         {
-            ESM::Cell record;
+            ESM::Cell record = {};
             record.mData.mFlags = ESM::Cell::HasWater;
             record.mData.mX = location.mX;
             record.mData.mY = location.mY;
-            record.mWater = 0;
-            record.mMapColor = 0;
             record.updateId();
             return store.insert(record);
         }
 
         const ESM4::Cell* createEsm4Cell(ESM::ExteriorCellLocation location, ESMStore& store)
         {
-            ESM4::Cell record;
+            ESM4::Cell record = {};
             record.mParent = location.mWorldspace;
             record.mX = location.mX;
             record.mY = location.mY;
-            record.mCellFlags = 0;
             return store.insert(record);
         }
 
@@ -103,6 +101,24 @@ namespace MWWorld
             if (const ESM::Cell* cell = store.get<ESM::Cell>().search(id))
                 return Cell(*cell);
             return std::nullopt;
+        }
+
+        CellStore* getOrCreateExterior(const ESM::ExteriorCellLocation& location,
+            std::map<ESM::ExteriorCellLocation, MWWorld::CellStore*>& exteriors, ESMStore& store,
+            ESM::ReadersCache& readers, std::unordered_map<ESM::RefId, CellStore>& cells, bool triggerEvent)
+        {
+            if (const auto it = exteriors.find(location); it != exteriors.end())
+            {
+                assert(it->second != nullptr);
+                return it->second;
+            }
+            auto [cell, created] = createExteriorCell(location, store);
+            const ESM::RefId id = cell.getId();
+            CellStore* const cellStore = &emplaceCellStore(id, std::move(cell), store, readers, cells);
+            exteriors.emplace(location, cellStore);
+            if (created && triggerEvent)
+                MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
+            return cellStore;
         }
     }
 }
@@ -181,23 +197,7 @@ namespace MWWorld
 {
     CellStore& WorldModel::getExterior(ESM::ExteriorCellLocation location, bool forceLoad) const
     {
-        const auto it = mExteriors.find(location);
-        CellStore* cellStore = nullptr;
-
-        if (it == mExteriors.end())
-        {
-            auto [cell, created] = createExteriorCell(location, mStore);
-            const ESM::RefId id = cell.getId();
-            cellStore = &emplaceCellStore(id, std::move(cell), mStore, mReaders, mCells);
-            mExteriors.emplace(location, cellStore);
-            if (created)
-                MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
-        }
-        else
-        {
-            assert(it->second != nullptr);
-            cellStore = it->second;
-        }
+        CellStore* cellStore = getOrCreateExterior(location, mExteriors, mStore, mReaders, mCells, true);
 
         if (forceLoad && cellStore->getState() != CellStore::State_Loaded)
             cellStore->load();
@@ -340,6 +340,20 @@ namespace MWWorld
             throw std::runtime_error(std::string("Can't find cell with name ") + std::string(name));
         return *result;
     }
+
+    void WorldModel::registerPtr(const Ptr& ptr)
+    {
+        if (ptr.mRef == nullptr)
+            throw std::logic_error("Ptr with nullptr mRef is not allowed to be registered");
+        mPtrRegistry.insert(ptr);
+        ptr.mRef->mWorldModel = this;
+    }
+
+    void WorldModel::deregisterLiveCellRef(LiveCellRefBase& ref) noexcept
+    {
+        mPtrRegistry.remove(ref);
+        ref.mWorldModel = nullptr;
+    }
 }
 
 MWWorld::Ptr MWWorld::WorldModel::getPtrByRefId(const ESM::RefId& name)
@@ -450,17 +464,26 @@ void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progr
         }
 }
 
-struct GetCellStoreCallback : public MWWorld::CellStore::GetCellStoreCallback
+struct MWWorld::WorldModel::GetCellStoreCallback : public CellStore::GetCellStoreCallback
 {
 public:
-    GetCellStoreCallback(MWWorld::WorldModel& worldModel)
+    GetCellStoreCallback(WorldModel& worldModel)
         : mWorldModel(worldModel)
     {
     }
 
-    MWWorld::WorldModel& mWorldModel;
+    WorldModel& mWorldModel;
 
-    MWWorld::CellStore* getCellStore(const ESM::RefId& cellId) override { return mWorldModel.findCell(cellId); }
+    CellStore* getCellStore(const ESM::RefId& cellId) override
+    {
+        if (const auto* exteriorId = cellId.getIf<ESM::ESM3ExteriorCellRefId>())
+        {
+            ESM::ExteriorCellLocation location(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId);
+            return getOrCreateExterior(
+                location, mWorldModel.mExteriors, mWorldModel.mStore, mWorldModel.mReaders, mWorldModel.mCells, false);
+        }
+        return mWorldModel.findCell(cellId);
+    }
 };
 
 bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type)
@@ -470,7 +493,10 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type)
         ESM::CellState state;
         state.mId = reader.getCellId();
 
-        CellStore* const cellStore = findCell(state.mId);
+        GetCellStoreCallback callback(*this);
+
+        CellStore* const cellStore = callback.getCellStore(state.mId);
+
         if (cellStore == nullptr)
         {
             Log(Debug::Warning) << "Dropping state for cell " << state.mId << " (cell no longer exists)";
@@ -486,8 +512,6 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type)
 
         if (cellStore->getState() != CellStore::State_Loaded)
             cellStore->load();
-
-        GetCellStoreCallback callback(*this);
 
         cellStore->readReferences(reader, &callback);
 

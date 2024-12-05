@@ -25,7 +25,7 @@ namespace ESM
         static std::string_view getRecordType() { return "Sound"; }
 
         SOUNstruct mData;
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         std::string mSound;
         RefId mId;
 

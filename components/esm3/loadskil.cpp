@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 #include <cstdint>
@@ -37,6 +38,12 @@ namespace ESM
     const SkillId Skill::Speechcraft("Speechcraft");
     const SkillId Skill::HandToHand("HandToHand");
 
+    template <Misc::SameAsWithoutCvref<Skill::SKDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mAttribute, v.mSpecialization, v.mUseValue);
+    }
+
     void Skill::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false; // Skill record can't be deleted now (may be changed in the future)
@@ -55,7 +62,7 @@ namespace ESM
                     hasIndex = true;
                     break;
                 case fourCC("SKDT"):
-                    esm.getHTSized<24>(mData);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("DESC"):
@@ -78,7 +85,7 @@ namespace ESM
     void Skill::save(ESMWriter& esm, bool /*isDeleted*/) const
     {
         esm.writeHNT("INDX", refIdToIndex(mId));
-        esm.writeHNT("SKDT", mData, 24);
+        esm.writeNamedComposite("SKDT", mData);
         esm.writeHNOString("DESC", mDescription);
     }
 

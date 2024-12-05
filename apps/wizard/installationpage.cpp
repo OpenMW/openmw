@@ -1,5 +1,6 @@
 #include "installationpage.hpp"
 
+#include <QComboBox>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QThread>
@@ -17,7 +18,7 @@ Wizard::InstallationPage::InstallationPage(QWidget* parent, Config::GameSettings
     mFinished = false;
 
     mThread = std::make_unique<QThread>();
-    mUnshield = std::make_unique<UnshieldWorker>(mGameSettings.value("morrowind-bsa-filesize").toLongLong());
+    mUnshield = std::make_unique<UnshieldWorker>(mGameSettings.value("morrowind-bsa-filesize").value.toLongLong());
     mUnshield->moveToThread(mThread.get());
 
     connect(mThread.get(), &QThread::started, mUnshield.get(), &UnshieldWorker::extract);
@@ -175,8 +176,8 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     if (path.isEmpty())
     {
         logTextEdit->appendHtml(
-            tr("<p><br/><span style=\"color:red;\"> \
-                                    <b>Error: The installation was aborted by the user</b></span></p>"));
+            tr("<p><br/><span style=\"color:red;\">"
+               "<b>Error: The installation was aborted by the user</b></span></p>"));
 
         mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
         mWizard->mError = true;
@@ -205,8 +206,8 @@ void Wizard::InstallationPage::showOldVersionDialog()
     if (ret == QMessageBox::No)
     {
         logTextEdit->appendHtml(
-            tr("<p><br/><span style=\"color:red;\"> \
-                                    <b>Error: The installation was aborted by the user</b></span></p>"));
+            tr("<p><br/><span style=\"color:red;\">"
+               "<b>Error: The installation was aborted by the user</b></span></p>"));
 
         mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
         mWizard->mError = true;
@@ -236,14 +237,8 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
 {
     installProgressLabel->setText(tr("Installation failed!"));
 
-    logTextEdit->appendHtml(
-        tr("<p><br/><span style=\"color:red;\"> \
-                               <b>Error: %1</b></p>")
-            .arg(text));
-    logTextEdit->appendHtml(
-        tr("<p><span style=\"color:red;\"> \
-                               <b>%1</b></p>")
-            .arg(details));
+    logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text));
+    logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"><b>%1</b></p>").arg(details));
 
     mWizard->addLogText(QLatin1String("Error: ") + text);
     mWizard->addLogText(details);
@@ -254,9 +249,9 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
     msgBox.setIcon(QMessageBox::Critical);
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setText(
-        tr("<html><head/><body><p><b>The Wizard has encountered an error</b></p> \
-                      <p>The error reported was:</p><p>%1</p> \
-                      <p>Press &quot;Show Details...&quot; for more information.</p></body></html>")
+        tr("<html><head/><body><p><b>The Wizard has encountered an error</b></p>"
+           "<p>The error reported was:</p><p>%1</p>"
+           "<p>Press &quot;Show Details...&quot; for more information.</p></body></html>")
             .arg(text));
 
     msgBox.setDetailedText(details);

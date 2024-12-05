@@ -38,7 +38,7 @@ namespace Gui
         void shareStateWith(const ButtonGroup& shared);
 
         /// @note The ButtonGroup connection will be destroyed when any widget in the group gets destroyed.
-        static void createButtonGroup(ButtonGroup group);
+        static void createButtonGroup(ButtonGroup& group);
 
         //! Set button selected state
         void setStateSelected(bool _value);

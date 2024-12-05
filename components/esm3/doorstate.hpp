@@ -9,7 +9,7 @@ namespace ESM
 
     struct DoorState final : public ObjectState
     {
-        int mDoorState = 0;
+        int32_t mDoorState = 0;
 
         void load(ESMReader& esm) override;
         void save(ESMWriter& esm, bool inInventory = false) const override;

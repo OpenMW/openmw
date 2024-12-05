@@ -18,7 +18,6 @@ varying vec2 diffuseMapUV;
 #if @normalMap
 uniform sampler2D normalMap;
 varying vec2 normalMapUV;
-varying vec4 passTangent;
 #endif
 
 // Other shaders respect forcePPL, but legacy groundcover mods were designed to work with vertex lighting.
@@ -44,23 +43,10 @@ varying vec3 passNormal;
 #include "lib/light/lighting.glsl"
 #include "lib/material/alpha.glsl"
 #include "fog.glsl"
+#include "compatibility/normals.glsl"
 
 void main()
 {
-    vec3 normal = normalize(passNormal);
-
-#if @normalMap
-    vec4 normalTex = texture2D(normalMap, normalMapUV);
-
-    vec3 normalizedNormal = normal;
-    vec3 normalizedTangent = normalize(passTangent.xyz);
-    vec3 binormal = cross(normalizedTangent, normalizedNormal) * passTangent.w;
-    mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
-
-    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
-#endif
-    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
-
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
 #else
@@ -72,14 +58,25 @@ void main()
 
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
+#if @normalMap
+    vec4 normalTex = texture2D(normalMap, normalMapUV);
+    vec3 normal = normalTex.xyz * 2.0 - 1.0;
+#if @reconstructNormalZ
+    normal.z = sqrt(1.0 - dot(normal.xy, normal.xy));
+#endif
+    vec3 viewNormal = normalToView(normal);
+#else
+    vec3 viewNormal = normalToView(normalize(passNormal));
+#endif
+
     float shadowing = unshadowedLightRatio(linearDepth);
 
     vec3 lighting;
 #if !PER_PIXEL_LIGHTING
     lighting = passLighting + shadowDiffuseLighting * shadowing;
 #else
-    vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
+    vec3 diffuseLight, ambientLight, specularLight;
+    doLighting(passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
     lighting = diffuseLight + ambientLight;
 #endif
 

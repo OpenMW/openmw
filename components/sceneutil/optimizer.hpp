@@ -390,6 +390,17 @@ class Optimizer
             void apply(osg::Sequence& sequenceNode) override;
         };
 
+        struct GeometryArraySizes
+        {
+            unsigned mVertex = 0;
+            unsigned mNormal = 0;
+            unsigned mColor = 0;
+            unsigned mSecondaryColor = 0;
+            unsigned mFogCoord = 0;
+            std::vector<unsigned> mTexCoord;
+            std::vector<unsigned> mVertexAttrib;
+        };
+
         class MergeGeometryVisitor : public BaseOptimizerVisitor
         {
             public:
@@ -427,7 +438,7 @@ class Optimizer
 
                 bool mergeGroup(osg::Group& group);
 
-                static bool mergeGeometry(osg::Geometry& lhs,osg::Geometry& rhs);
+                static bool mergeGeometry(osg::Geometry& lhs, osg::Geometry& rhs, const GeometryArraySizes& sizes);
 
                 static bool mergePrimitive(osg::DrawArrays& lhs,osg::DrawArrays& rhs);
                 static bool mergePrimitive(osg::DrawArrayLengths& lhs,osg::DrawArrayLengths& rhs);

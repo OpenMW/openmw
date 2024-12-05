@@ -2,6 +2,7 @@
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/misc/osgpluginchecker.hpp>
 #include <components/misc/rng.hpp>
 #include <components/platform/platform.hpp>
 #include <components/version/version.hpp>
@@ -14,7 +15,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #if defined(_WIN32)
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 // makes __argc and __argv available on windows
 #include <cstdlib>
 
@@ -52,33 +53,20 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     if (variables.count("help"))
     {
-        getRawStdout() << desc << std::endl;
+        Debug::getRawStdout() << desc << std::endl;
         return false;
     }
 
     if (variables.count("version"))
     {
-        cfgMgr.readConfiguration(variables, desc, true);
-
-        Version::Version v
-            = Version::getOpenmwVersion(variables["resources"]
-                                            .as<Files::MaybeQuotedPath>()
-                                            .u8string()); // This call to u8string is redundant, but required to build
-                                                          // on MSVC 14.26 due to implementation bugs.
-        getRawStdout() << v.describe() << std::endl;
+        Debug::getRawStdout() << Version::getOpenmwVersionDescription() << std::endl;
         return false;
     }
 
     cfgMgr.readConfiguration(variables, desc);
 
-    setupLogging(cfgMgr.getLogPath(), "OpenMW");
-
-    Version::Version v
-        = Version::getOpenmwVersion(variables["resources"]
-                                        .as<Files::MaybeQuotedPath>()
-                                        .u8string()); // This call to u8string is redundant, but required to build on
-                                                      // MSVC 14.26 due to implementation bugs.
-    Log(Debug::Info) << v.describe();
+    Debug::setupLogging(cfgMgr.getLogPath(), "OpenMW");
+    Log(Debug::Info) << Version::getOpenmwVersionDescription();
 
     Settings::Manager::load(cfgMgr);
 
@@ -121,7 +109,8 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
         return false;
     }
-    std::set<std::string> contentDedupe;
+    engine.addContentFile("builtin.omwscripts");
+    std::set<std::string> contentDedupe{ "builtin.omwscripts" };
     for (const auto& contentFile : content)
     {
         if (!contentDedupe.insert(contentFile).second)
@@ -160,14 +149,6 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     engine.setScriptConsoleMode(variables["script-console"].as<bool>());
     engine.setStartupScript(variables["script-run"].as<std::string>());
     engine.setWarningsMode(variables["script-warn"].as<int>());
-    std::vector<ESM::RefId> scriptBlacklist;
-    auto& scriptBlacklistString = variables["script-blacklist"].as<StringsVector>();
-    for (const auto& blacklistString : scriptBlacklistString)
-    {
-        scriptBlacklist.push_back(ESM::RefId::stringRefId(blacklistString));
-    }
-    engine.setScriptBlacklist(scriptBlacklist);
-    engine.setScriptBlacklistUse(variables["script-blacklist-use"].as<bool>());
     engine.setSaveGameFile(variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
 
     // other settings
@@ -232,8 +213,6 @@ int runApplication(int argc, char* argv[])
     Platform::init();
 
 #ifdef __APPLE__
-    std::filesystem::path binary_path = std::filesystem::absolute(std::filesystem::path(argv[0]));
-    std::filesystem::current_path(binary_path.parent_path());
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
 
@@ -243,6 +222,9 @@ int runApplication(int argc, char* argv[])
 
     if (parseOptions(argc, argv, *engine, cfgMgr))
     {
+        if (!Misc::checkRequiredOSGPluginsArePresent())
+            return 1;
+
         engine->go();
     }
 
@@ -255,7 +237,7 @@ extern "C" int SDL_main(int argc, char** argv)
 int main(int argc, char** argv)
 #endif
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW");
+    return Debug::wrapApplication(&runApplication, argc, argv, "OpenMW");
 }
 
 // Platform specific for Windows when there is no console built into the executable.

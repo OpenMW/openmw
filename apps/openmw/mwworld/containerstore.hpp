@@ -125,11 +125,6 @@ namespace MWWorld
 
         bool mRechargingItemsUpToDate;
 
-        // Non-empty only if is InventoryStore.
-        // The actor whose inventory it is.
-        // TODO: Consider merging mActor and mPtr.
-        MWWorld::Ptr mActor;
-
     private:
         MWWorld::CellRefList<ESM::Potion> potions;
         MWWorld::CellRefList<ESM::Apparatus> appas;
@@ -150,7 +145,7 @@ namespace MWWorld
         bool mModified;
         bool mResolved;
         unsigned int mSeed;
-        MWWorld::Ptr mPtr; // Container that contains this store. Set in MWClass::Container::getContainerStore
+        MWWorld::SafePtr mPtr; // Container or actor that holds this store.
         std::weak_ptr<ResolutionListener> mResolutionListener;
 
         ContainerStoreIterator addImp(const Ptr& ptr, int count, bool markModified = true);
@@ -166,21 +161,21 @@ namespace MWWorld
         void storeState(const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
         template <typename T>
-        void storeStates(
-            const CellRefList<T>& collection, ESM::InventoryState& inventory, int& index, bool equipable = false) const;
+        void storeStates(const CellRefList<T>& collection, ESM::InventoryState& inventory, size_t& index,
+            bool equipable = false) const;
 
         void updateRechargingItems();
 
         virtual void storeEquipmentState(
-            const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
+            const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const;
 
         virtual void readEquipmentState(
-            const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
+            const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory);
 
     public:
         ContainerStore();
 
-        virtual ~ContainerStore();
+        virtual ~ContainerStore() = default;
 
         virtual std::unique_ptr<ContainerStore> clone()
         {
@@ -188,6 +183,10 @@ namespace MWWorld
             res->updateRefNums();
             return res;
         }
+
+        // Container or actor that holds this store.
+        const Ptr& getPtr() const { return mPtr.ptrOrEmpty(); }
+        void setPtr(const Ptr& ptr) { mPtr = SafePtr(ptr); }
 
         ConstContainerStoreIterator cbegin(int mask = Type_All) const;
         ConstContainerStoreIterator cend() const;

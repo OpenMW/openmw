@@ -15,6 +15,9 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/projectilestate.hpp>
 
+#include <components/esm/quaternion.hpp>
+#include <components/esm/vector3.hpp>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -79,18 +82,17 @@ namespace
         int count = 0;
         speed = 0.0f;
         ESM::EffectList projectileEffects;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter(effects->mList.begin()); iter != effects->mList.end();
-             ++iter)
+        for (const ESM::IndexedENAMstruct& effect : effects->mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(iter->mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mData.mEffectID);
 
             // Speed of multi-effect projectiles should be the average of the constituent effects,
             // based on observation of the original engine.
             speed += magicEffect->mData.mSpeed;
             count++;
 
-            if (iter->mRange != ESM::RT_Target)
+            if (effect.mData.mRange != ESM::RT_Target)
                 continue;
 
             if (magicEffect->mBolt.empty())
@@ -106,7 +108,7 @@ namespace
                                    ->get<ESM::Skill>()
                                    .find(magicEffect->mData.mSchool)
                                    ->mSchool->mBoltSound);
-            projectileEffects.mList.push_back(*iter);
+            projectileEffects.mList.push_back(effect);
         }
 
         if (count != 0)
@@ -117,7 +119,7 @@ namespace
         {
             const ESM::MagicEffect* magicEffect
                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
-                    effects->mList.begin()->mEffectID);
+                    effects->mList.begin()->mData.mEffectID);
             texture = magicEffect->mParticle;
         }
 
@@ -136,10 +138,10 @@ namespace
     {
         // Calculate combined light diffuse color from magical effects
         osg::Vec4 lightDiffuseColor;
-        for (const ESM::ENAMstruct& enam : effects.mList)
+        for (const ESM::IndexedENAMstruct& enam : effects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mData.mEffectID);
             lightDiffuseColor += magicEffect->getColor();
         }
         int numberOfEffects = effects.mList.size();
@@ -187,8 +189,8 @@ namespace MWWorld
         float mRotateSpeed;
     };
 
-    void ProjectileManager::createModel(State& state, const std::string& model, const osg::Vec3f& pos,
-        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture)
+    void ProjectileManager::createModel(State& state, VFS::Path::NormalizedView model, const osg::Vec3f& pos,
+        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, const std::string& texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -209,8 +211,6 @@ namespace MWWorld
 
         if (state.mIdMagic.size() > 1)
         {
-            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
             {
                 std::ostringstream nodeName;
@@ -222,7 +222,8 @@ namespace MWWorld
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
                     mResourceSystem->getSceneManager()->getInstance(
-                        Misc::ResourceHelpers::correctMeshPath(weapon->mModel, vfs), findVisitor.mFoundNode);
+                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(weapon->mModel)),
+                        findVisitor.mFoundNode);
             }
         }
 
@@ -254,7 +255,7 @@ namespace MWWorld
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);
 
-        MWRender::overrideFirstRootTexture(texture, mResourceSystem, std::move(projectile));
+        MWRender::overrideFirstRootTexture(texture, mResourceSystem, *projectile);
     }
 
     void ProjectileManager::update(State& state, float duration)
@@ -313,7 +314,7 @@ namespace MWWorld
 
         osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
 
-        auto model = ptr.getClass().getModel(ptr);
+        VFS::Path::Normalized model = ptr.getClass().getCorrectedModel(ptr);
         createModel(state, model, pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -329,9 +330,8 @@ namespace MWWorld
         // shape
         if (state.mIdMagic.size() > 1)
         {
-            model = Misc::ResourceHelpers::correctMeshPath(
-                MWBase::Environment::get().getESMStore()->get<ESM::Weapon>().find(state.mIdMagic[1])->mModel,
-                MWBase::Environment::get().getResourceSystem()->getVFS());
+            model = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(
+                MWBase::Environment::get().getESMStore()->get<ESM::Weapon>().find(state.mIdMagic[1])->mModel));
         }
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
@@ -354,7 +354,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        const auto model = ptr.getClass().getModel(ptr);
+        const VFS::Path::Normalized model = ptr.getClass().getCorrectedModel(ptr);
         createModel(state, model, pos, orient, false, false, osg::Vec4(0, 0, 0, 0));
         if (!ptr.getClass().getEnchantment(ptr).empty())
             SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
@@ -437,7 +437,7 @@ namespace MWWorld
             MWWorld::Ptr caster = magicBoltState.getCaster();
             if (!caster.isEmpty() && caster.getClass().isActor())
             {
-                if (caster.getRefData().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
+                if (caster.getCellRef().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
                 {
                     cleanupMagicBolt(magicBoltState);
                     continue;
@@ -453,7 +453,7 @@ namespace MWWorld
             {
                 const auto npc = caster.get<ESM::NPC>()->mBase;
                 const auto race = store.get<ESM::Race>().find(npc->mRace);
-                speed *= npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+                speed *= npc->isMale() ? race->mData.mMaleWeight : race->mData.mFemaleWeight;
             }
             osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
             direction.normalize();
@@ -694,20 +694,22 @@ namespace MWWorld
             state.mAttackStrength = esm.mAttackStrength;
             state.mToDelete = false;
 
-            std::string model;
+            VFS::Path::Normalized model;
             try
             {
                 MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
-                model = ptr.getClass().getModel(ptr);
+                model = ptr.getClass().getCorrectedModel(ptr);
                 int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
                 state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
 
                 state.mProjectileId
                     = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, false);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
+                Log(Debug::Warning) << "Failed to add projectile for " << esm.mId
+                                    << " while reading projectile record: " << e.what();
                 return true;
             }
 
@@ -735,10 +737,10 @@ namespace MWWorld
                 state.mEffects = getMagicBoltData(
                     state.mIdMagic, state.mSoundIds, state.mSpeed, texture, state.mSourceName, state.mSpellId);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
-                Log(Debug::Warning) << "Warning: Failed to recreate magic projectile from saved data (id \""
-                                    << state.mSpellId << "\" no longer exists?)";
+                Log(Debug::Warning) << "Failed to recreate magic projectile for " << esm.mId << " and spell "
+                                    << state.mSpellId << " while reading projectile record: " << e.what();
                 return true;
             }
 
@@ -747,15 +749,17 @@ namespace MWWorld
                                        // file's effect list, which is already trimmed of non-projectile
                                        // effects. We need to use the stored value.
 
-            std::string model;
+            VFS::Path::Normalized model;
             try
             {
                 MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), state.mIdMagic.at(0));
                 MWWorld::Ptr ptr = ref.getPtr();
-                model = ptr.getClass().getModel(ptr);
+                model = ptr.getClass().getCorrectedModel(ptr);
             }
-            catch (...)
+            catch (const std::exception& e)
             {
+                Log(Debug::Warning) << "Failed to get model for " << state.mIdMagic.at(0)
+                                    << " while reading projectile record: " << e.what();
                 return true;
             }
 

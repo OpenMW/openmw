@@ -42,34 +42,34 @@ void ESM4::MediaLocationController::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getZString(mFullName);
                 break;
-            case ESM4::SUB_GNAM:
+            case ESM::fourCC("GNAM"):
                 reader.getFormId(mBattleSets.emplace_back());
                 break;
-            case ESM4::SUB_LNAM:
+            case ESM::fourCC("LNAM"):
                 reader.getFormId(mLocationSets.emplace_back());
                 break;
-            case ESM4::SUB_YNAM:
+            case ESM::fourCC("YNAM"):
                 reader.getFormId(mEnemySets.emplace_back());
                 break;
-            case ESM4::SUB_HNAM:
+            case ESM::fourCC("HNAM"):
                 reader.getFormId(mNeutralSets.emplace_back());
                 break;
-            case ESM4::SUB_XNAM:
+            case ESM::fourCC("XNAM"):
                 reader.getFormId(mFriendSets.emplace_back());
                 break;
-            case ESM4::SUB_ZNAM:
+            case ESM::fourCC("ZNAM"):
                 reader.getFormId(mAllySets.emplace_back());
                 break;
-            case ESM4::SUB_RNAM:
+            case ESM::fourCC("RNAM"):
                 reader.getFormId(mConditionalFaction);
                 break;
-            case ESM4::SUB_NAM1:
+            case ESM::fourCC("NAM1"):
             {
                 reader.get(mMediaFlags);
                 std::uint8_t flags = mMediaFlags.loopingOptions;
@@ -77,21 +77,21 @@ void ESM4::MediaLocationController::load(ESM4::Reader& reader)
                 mMediaFlags.factionNotFound = flags & 0x0F; // WARN: overwriting data
                 break;
             }
-            case ESM4::SUB_NAM4:
+            case ESM::fourCC("NAM4"):
                 reader.get(mLocationDelay);
                 break;
-            case ESM4::SUB_NAM7:
+            case ESM::fourCC("NAM7"):
                 reader.get(mRetriggerDelay);
                 break;
-            case ESM4::SUB_NAM5:
+            case ESM::fourCC("NAM5"):
                 reader.get(mDayStart);
                 break;
-            case ESM4::SUB_NAM6:
+            case ESM::fourCC("NAM6"):
                 reader.get(mNightStart);
                 break;
-            case ESM4::SUB_NAM2: // always 0? 4 bytes
-            case ESM4::SUB_NAM3: // always 0? 4 bytes
-            case ESM4::SUB_FNAM: // always 0? 4 bytes
+            case ESM::fourCC("NAM2"): // always 0? 4 bytes
+            case ESM::fourCC("NAM3"): // always 0? 4 bytes
+            case ESM::fourCC("FNAM"): // always 0? 4 bytes
             {
 #if 0
                 std::vector<unsigned char> mDataBuf(subHdr.dataSize);

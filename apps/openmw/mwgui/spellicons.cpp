@@ -172,7 +172,7 @@ namespace MWGui
                 w += 16;
 
                 ToolTipInfo* tooltipInfo = image->getUserData<ToolTipInfo>();
-                tooltipInfo->text = sourcesDescription;
+                tooltipInfo->text = std::move(sourcesDescription);
 
                 // Fade out
                 if (totalDuration >= fadeTime && fadeTime > 0.f)

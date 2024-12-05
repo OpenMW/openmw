@@ -18,16 +18,18 @@
 #include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/esm3/cellref.hpp>
+#include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadfact.hpp>
 
 CSMTools::ReferenceCheckStage::ReferenceCheckStage(const CSMWorld::RefCollection& references,
     const CSMWorld::RefIdCollection& referencables, const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
-    const CSMWorld::IdCollection<ESM::Faction>& factions)
+    const CSMWorld::IdCollection<ESM::Faction>& factions, const CSMWorld::IdCollection<ESM::BodyPart>& bodyparts)
     : mReferences(references)
     , mObjects(referencables)
     , mDataSet(referencables.getDataSet())
     , mCells(cells)
     , mFactions(factions)
+    , mBodyParts(bodyparts)
 {
     mIgnoreBaseRecords = false;
 }
@@ -43,15 +45,27 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     const CSMWorld::CellRef& cellRef = record.get();
     const CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Reference, cellRef.mId);
 
+    // Check RefNum is unique per content file, otherwise can cause load issues
+    const auto refNum = cellRef.mRefNum;
+    const auto insertResult = mUsedReferenceIDs.emplace(refNum, cellRef.mId);
+    if (!insertResult.second)
+        messages.add(id,
+            "Duplicate RefNum: " + std::to_string(refNum.mContentFile) + std::string("-")
+                + std::to_string(refNum.mIndex) + " shared with cell reference "
+                + insertResult.first->second.toString(),
+            "", CSMDoc::Message::Severity_Error);
+
     // Check reference id
     if (cellRef.mRefID.empty())
         messages.add(id, "Instance is not based on an object", "", CSMDoc::Message::Severity_Error);
     else
     {
         // Check for non existing referenced object
-        if (mObjects.searchId(cellRef.mRefID) == -1)
+        if (mObjects.searchId(cellRef.mRefID) == -1 && mBodyParts.searchId(cellRef.mRefID) == -1)
+        {
             messages.add(id, "Instance of a non-existent object '" + cellRef.mRefID.getRefIdString() + "'", "",
                 CSMDoc::Message::Severity_Error);
+        }
         else
         {
             // Check if reference charge is valid for it's proper referenced type
@@ -98,14 +112,14 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     if (cellRef.mEnchantmentCharge < -1)
         messages.add(id, "Negative number of enchantment points", "", CSMDoc::Message::Severity_Error);
 
-    // Check if gold value isn't negative
-    if (cellRef.mGoldValue < 0)
-        messages.add(id, "Negative gold value", "", CSMDoc::Message::Severity_Error);
+    if (cellRef.mCount < 1)
+        messages.add(id, "Reference without count", {}, CSMDoc::Message::Severity_Error);
 }
 
 int CSMTools::ReferenceCheckStage::setup()
 {
     mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mUsedReferenceIDs.clear();
 
     return mReferences.getSize();
 }

@@ -1,0 +1,99 @@
+# Source for most of the setting names: German Morrowind GOTY version
+
+ControlsPage: "OpenMW-Steuerung"
+ControlsPageDescription: "Zusätzliche Einstellungen für Spielereingaben"
+
+MovementSettings: "Fortbewegung"
+
+alwaysRun: "Immer rennen"
+alwaysRunDescription: |
+    Falls aktiviert, rennt der Spielercharakter standardmäßig; falls deaktiviert, geht er standardmäßig.
+    Gedrückthalten der Umschalttaste ("Shift") invertiert das aktuelle Verhalten vorübergehend, Drücken der Feststelltaste ("Caps Lock") schaltet das aktuelle Verhalten um.
+
+toggleSneak: "Schleichen umschalten"
+toggleSneakDescription: |
+    Falls aktiviert, schaltet die "Schleichen"-Taste den Schleichen-Modus dauerhaft ein bzw. aus; falls deaktiviert, muss die "Schleichen"-Taste gedrückt gehalten werden, um im Schleichen-Modus zu bleiben.
+    Diese Option ist vor allem für Spieler mit schleichlastigen Spielercharakteren zu empfehlen.
+
+smoothControllerMovement: "Sanfte Controller-Bewegung"
+smoothControllerMovementDescription: |
+   Aktiviert die sanfte Controller-Steuerung mit den Analog-Sticks. Dies macht den Übergang zwischen gehen und rennen weniger abrupt.
+
+TogglePOV_name: "Perspektive umschalten"
+TogglePOV_description: "Zwischen Ego- und Verfolgerperspektive umschalten. Gedrückt halten, um den Vorschau-Modus zu aktivieren."
+
+Zoom3rdPerson_name: "Hinein-/Herauszoomen"
+Zoom3rdPerson_description: "Bewegt die Kamera in Verfolgerperspektive näher an den Spielercharakter oder weiter von ihm weg."
+
+MoveForward_name: "Vorwärts"
+MoveForward_description: |
+   Kann sich mit "Rückwärts"-Eingabe aufheben.
+
+MoveBackward_name: "Rückwärts"
+MoveBackward_description: |
+   Kann sich mit "Vorwärts"-Eingabe aufheben.
+
+MoveLeft_name: "Links"
+MoveLeft_description: |
+   Kann sich mit "Rechts"-Eingabe aufheben.
+
+MoveRight_name: "Rechts"
+MoveRight_description: |
+   Kann sich mit "Links"-Eingabe aufheben.
+
+Use_name: "Benutzen"
+Use_description: "Abhängig von der Haltung des Spielercharakters mit einer Waffe angreifen, einen Zauber wirken oder ein Objekt verwenden bzw. aktivieren."
+
+Run_name: "Rennen"
+Run_description: |
+   Gedrückt halten, um den Spielercharakter abhängig vom "Immer rennen"-Status gehen bzw. rennen zu lassen.
+
+AlwaysRun_name: "Immer rennen"
+AlwaysRun_description: |
+   "Immer rennen"-Status umschalten.
+
+Jump_name: "Sprung"
+Jump_description: "Springen, solange sich der Spielercharakter auf dem Boden befindet."
+
+AutoMove_name: "Automatische Vorwärts-Bewegung"
+AutoMove_description: |
+   "Automatische Bewegung"-Status umschalten. Falls aktiviert, bewegt sich der Spielercharakter kontinuierlich vorwärts.
+
+Sneak_name: "Schleichen"
+Sneak_description: |
+   "Gedrückt halten, um bei ausgeschalteter "Schleichen umschalten"-Option zu schleichen.
+
+ToggleSneak_name: "Schleichen umschalten"
+ToggleSneak_description: |
+   "Bei eingeschalteter "Schleichen umschalten"-Option den Schleichen-Modus umschalten.
+
+ToggleWeapon_name: "Waffe ziehen"
+ToggleWeapon_description: "Kampfhaltung einnehmen bzw. verlassen."
+
+ToggleSpell_name: "Zauber vorbereiten"
+ToggleSpell_description: "Zauberhaltung einnehmen bzw. verlassen."
+
+Inventory_name: "Menü-Modus"
+Inventory_description: "Inventar-Modus öffnen bzw. schließen."
+
+Journal_name: "Tagebuch"
+Journal_description: "Tagebuch öffnen bzw. schließen."
+
+QuickKeysMenu_name: "Kurzmenü"
+QuickKeysMenu_description: "Kurzmenü für Schnellauswahl von Gegenständen und Zaubern öffnen bzw. schließen."
+
+SmoothMoveForward_name: "Sanfte Vorwärts-Bewegung"
+SmoothMoveForward_description: |
+   Angepasste Vorwärts-Bewegung für aktivierte "Sanfte Controller-Bewegung"-Option
+
+SmoothMoveBackward_name: "Sanfte Rückwärts-Bewegung"
+SmoothMoveBackward_description: |
+   Angepasste Rückwärts-Bewegung für aktivierte "Sanfte Controller-Bewegung"-Option
+
+SmoothMoveLeft_name: "Sanfte Bewegung nach links"
+SmoothMoveLeft_description: |
+   Angepasste Bewegung nach links für aktivierte "Sanfte Controller-Bewegung"-Option
+
+SmoothMoveRight_name: "Sanfte Bewegung nach rechts"
+SmoothMoveRight_description: |
+   Angepasste Bewegung nach rechts für aktivierte "Sanfte Controller-Bewegung"-Option

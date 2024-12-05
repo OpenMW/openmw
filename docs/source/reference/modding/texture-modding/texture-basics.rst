@@ -25,6 +25,19 @@ Content creators need to know that OpenMW uses the DX format for normal maps, an
 
 See the section `Automatic use`_ further down below for detailed information.
 
+The RGB channels of the normal map are used to store XYZ components of tangent space normals and the alpha channel of the normal map may be used to store a height map used for parallax.
+
+This is different from the setup used in Bethesda games that use the traditional pipeline, which may store specular information in the alpha channel.
+
+Special pixel formats that only store two color channels exist and are used by Bethesda games that employ a PBR-based pipeline. Compressed red-green formats are optimized for use with normal maps and suffer from far less quality degradation than S3TC-compressed normal maps of equivalent size.
+
+OpenMW supports the use of such pixel formats. When a red-green normal map is provided, the Z component of the normal will be reconstructed based on XY components it stores.
+Naturally, since these formats cannot provide an alpha channel, they do not support parallax.
+
+Keep in mind, however, that while the necessary hardware support is widespread for compressed red-green formats, it is less ubiquitous than the support for S3TC family of compressed formats.
+Should you run into the consequences of this, you might want to convert such textures into an uncompressed red-green format such as R8G8.
+Be careful not to try and convert such textures into a full-color format as the previously non-existent blue channel would then be used.
+
 Specular Mapping
 ################
 

@@ -49,7 +49,6 @@
 
 #include "closestnotmerayresultcallback.hpp"
 #include "contacttestresultcallback.hpp"
-#include "deepestnotmecontacttestresultcallback.hpp"
 #include "hasspherecollisioncallback.hpp"
 #include "heightfield.hpp"
 #include "movementsolver.hpp"
@@ -69,7 +68,7 @@ namespace
         // Advance acrobatics and set flag for GetPCJumping
         if (isPlayer)
         {
-            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, 0);
+            ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, ESM::Skill::Acrobatics_Jump);
             MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
         }
 
@@ -94,8 +93,9 @@ namespace
 namespace MWPhysics
 {
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
-        : mShapeManager(std::make_unique<Resource::BulletShapeManager>(
-            resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
+        : mShapeManager(
+            std::make_unique<Resource::BulletShapeManager>(resourceSystem->getVFS(), resourceSystem->getSceneManager(),
+                resourceSystem->getNifFileManager(), Settings::cells().mCacheExpiryDelay))
         , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
@@ -191,95 +191,9 @@ namespace MWPhysics
         return true;
     }
 
-    std::pair<MWWorld::Ptr, osg::Vec3f> PhysicsSystem::getHitContact(const MWWorld::ConstPtr& actor,
-        const osg::Vec3f& origin, const osg::Quat& orient, float queryDistance, std::vector<MWWorld::Ptr>& targets)
-    {
-        // First of all, try to hit where you aim to
-        int hitmask = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
-        RayCastingResult result = castRay(origin, origin + (orient * osg::Vec3f(0.0f, queryDistance, 0.0f)), actor,
-            targets, hitmask, CollisionType_Actor);
-
-        if (result.mHit)
-        {
-            reportCollision(Misc::Convert::toBullet(result.mHitPos), Misc::Convert::toBullet(result.mHitNormal));
-            return std::make_pair(result.mHitObject, result.mHitPos);
-        }
-
-        // Use cone shape as fallback
-        const MWWorld::Store<ESM::GameSetting>& store
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-
-        btConeShape shape(osg::DegreesToRadians(store.find("fCombatAngleXY")->mValue.getFloat() / 2.0f), queryDistance);
-        shape.setLocalScaling(btVector3(
-            1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->mValue.getFloat() / 2.0f) / shape.getRadius()));
-
-        // The shape origin is its center, so we have to move it forward by half the length. The
-        // real origin will be provided to getFilteredContact to find the closest.
-        osg::Vec3f center = origin + (orient * osg::Vec3f(0.0f, queryDistance * 0.5f, 0.0f));
-
-        btCollisionObject object;
-        object.setCollisionShape(&shape);
-        object.setWorldTransform(btTransform(Misc::Convert::toBullet(orient), Misc::Convert::toBullet(center)));
-
-        const btCollisionObject* me = nullptr;
-        std::vector<const btCollisionObject*> targetCollisionObjects;
-
-        const Actor* physactor = getActor(actor);
-        if (physactor)
-            me = physactor->getCollisionObject();
-
-        if (!targets.empty())
-        {
-            for (MWWorld::Ptr& target : targets)
-            {
-                const Actor* targetActor = getActor(target);
-                if (targetActor)
-                    targetCollisionObjects.push_back(targetActor->getCollisionObject());
-            }
-        }
-
-        DeepestNotMeContactTestResultCallback resultCallback(
-            me, targetCollisionObjects, Misc::Convert::toBullet(origin));
-        resultCallback.m_collisionFilterGroup = CollisionType_Actor;
-        resultCallback.m_collisionFilterMask
-            = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
-        mTaskScheduler->contactTest(&object, resultCallback);
-
-        if (resultCallback.mObject)
-        {
-            PtrHolder* holder = static_cast<PtrHolder*>(resultCallback.mObject->getUserPointer());
-            if (holder)
-            {
-                reportCollision(resultCallback.mContactPoint, resultCallback.mContactNormal);
-                return std::make_pair(holder->getPtr(), Misc::Convert::toOsg(resultCallback.mContactPoint));
-            }
-        }
-        return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
-    }
-
-    float PhysicsSystem::getHitDistance(const osg::Vec3f& point, const MWWorld::ConstPtr& target) const
-    {
-        btCollisionObject* targetCollisionObj = nullptr;
-        const Actor* actor = getActor(target);
-        if (actor)
-            targetCollisionObj = actor->getCollisionObject();
-        if (!targetCollisionObj)
-            return 0.f;
-
-        btTransform rayFrom;
-        rayFrom.setIdentity();
-        rayFrom.setOrigin(Misc::Convert::toBullet(point));
-
-        auto hitpoint = mTaskScheduler->getHitPoint(rayFrom, targetCollisionObj);
-        if (hitpoint)
-            return (point - Misc::Convert::toOsg(*hitpoint)).length();
-
-        // didn't hit the target. this could happen if point is already inside the collision box
-        return 0.f;
-    }
-
     RayCastingResult PhysicsSystem::castRay(const osg::Vec3f& from, const osg::Vec3f& to,
-        const MWWorld::ConstPtr& ignore, const std::vector<MWWorld::Ptr>& targets, int mask, int group) const
+        const std::vector<MWWorld::ConstPtr>& ignore, const std::vector<MWWorld::Ptr>& targets, int mask,
+        int group) const
     {
         if (from == to)
         {
@@ -290,19 +204,22 @@ namespace MWPhysics
         btVector3 btFrom = Misc::Convert::toBullet(from);
         btVector3 btTo = Misc::Convert::toBullet(to);
 
-        const btCollisionObject* me = nullptr;
+        std::vector<const btCollisionObject*> ignoreList;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
-        if (!ignore.isEmpty())
+        for (const auto& ptr : ignore)
         {
-            const Actor* actor = getActor(ignore);
-            if (actor)
-                me = actor->getCollisionObject();
-            else
+            if (!ptr.isEmpty())
             {
-                const Object* object = getObject(ignore);
-                if (object)
-                    me = object->getCollisionObject();
+                const Actor* actor = getActor(ptr);
+                if (actor)
+                    ignoreList.push_back(actor->getCollisionObject());
+                else
+                {
+                    const Object* object = getObject(ptr);
+                    if (object)
+                        ignoreList.push_back(object->getCollisionObject());
+                }
             }
         }
 
@@ -316,7 +233,7 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo);
+        ClosestNotMeRayResultCallback resultCallback(ignoreList, targetCollisionObjects, btFrom, btTo);
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
@@ -490,14 +407,14 @@ namespace MWPhysics
     }
 
     void PhysicsSystem::addObject(
-        const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType)
+        const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh, osg::Quat rotation, int collisionType)
     {
         if (ptr.mRef->mData.mPhysicsPostponed)
             return;
 
-        std::string animationMesh = mesh;
-        if (ptr.getClass().useAnim())
-            animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        const VFS::Path::Normalized animationMesh = ptr.getClass().useAnim()
+            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS())
+            : VFS::Path::Normalized(mesh);
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(animationMesh);
         if (!shapeInstance || !shapeInstance->mCollisionShape)
             return;
@@ -643,9 +560,10 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::addActor(const MWWorld::Ptr& ptr, const std::string& mesh)
+    void PhysicsSystem::addActor(const MWWorld::Ptr& ptr, VFS::Path::NormalizedView mesh)
     {
-        std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        const VFS::Path::Normalized animationMesh
+            = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(animationMesh);
 
         // Try to get shape from basic model as fallback for creatures
@@ -671,7 +589,7 @@ namespace MWPhysics
     }
 
     int PhysicsSystem::addProjectile(
-        const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius)
+        const MWWorld::Ptr& caster, const osg::Vec3f& position, VFS::Path::NormalizedView mesh, bool computeRadius)
     {
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
         assert(shapeInstance);
@@ -759,12 +677,13 @@ namespace MWPhysics
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             const float slowFall
                 = 1.f - std::clamp(effects.getOrDefault(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f, 0.f, 1.f);
-            const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
+            const bool isPlayer = ptr == world->getPlayerConstPtr();
+            const bool godmode = isPlayer && world->getGodModeState();
             const bool inert = stats.isDead()
                 || (!godmode && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Paralyze).getModifier() > 0);
 
             simulations.emplace_back(ActorSimulation{
-                physicActor, ActorFrameData{ *physicActor, inert, waterCollision, slowFall, waterlevel } });
+                physicActor, ActorFrameData{ *physicActor, inert, waterCollision, slowFall, waterlevel, isPlayer } });
 
             // if the simulation will run, a jump request will be fulfilled. Update mechanics accordingly.
             if (willSimulate)
@@ -794,6 +713,8 @@ namespace MWPhysics
                 changed = false;
             }
         }
+        for (auto& [_, object] : mObjects)
+            object->resetCollisions();
 
 #ifndef BT_NO_PROFILE
         CProfileManager::Reset();
@@ -868,10 +789,12 @@ namespace MWPhysics
         }
     }
 
-    bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const
+    bool PhysicsSystem::isObjectCollidingWith(const MWWorld::ConstPtr& object, ScriptedCollisionType type) const
     {
-        std::vector<MWWorld::Ptr> collisions = getCollisions(object, CollisionType_World, CollisionType_Actor);
-        return (std::find(collisions.begin(), collisions.end(), actor) != collisions.end());
+        auto found = mObjects.find(object.mRef);
+        if (found != mObjects.end())
+            return found->second->collidedWith(type);
+        return false;
     }
 
     void PhysicsSystem::getActorsCollidingWith(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const
@@ -976,7 +899,8 @@ namespace MWPhysics
             mDebugDrawer->addCollision(position, normal);
     }
 
-    ActorFrameData::ActorFrameData(Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel)
+    ActorFrameData::ActorFrameData(
+        Actor& actor, bool inert, bool waterCollision, float slowFall, float waterlevel, bool isPlayer)
         : mPosition()
         , mStandingOn(nullptr)
         , mIsOnGround(actor.getOnGround())
@@ -1003,6 +927,7 @@ namespace MWPhysics
         , mIsAquatic(actor.getPtr().getClass().isPureWaterCreature(actor.getPtr()))
         , mWaterCollision(waterCollision)
         , mSkipCollisionDetection(!actor.getCollisionMode())
+        , mIsPlayer(isPlayer)
     {
     }
 

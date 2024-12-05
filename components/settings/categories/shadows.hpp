@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADOWS_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADOWS_H
 
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
@@ -23,7 +23,6 @@ namespace Settings
             makeClampSanitizerInt(1, 8) };
         SettingValue<float> mMaximumShadowMapDistance{ mIndex, "Shadows", "maximum shadow map distance" };
         SettingValue<float> mShadowFadeStart{ mIndex, "Shadows", "shadow fade start", makeClampSanitizerFloat(0, 1) };
-        SettingValue<bool> mAllowShadowMapOverlap{ mIndex, "Shadows", "allow shadow map overlap" };
         SettingValue<float> mSplitPointUniformLogarithmicRatio{ mIndex, "Shadows",
             "split point uniform logarithmic ratio", makeClampSanitizerFloat(0, 1) };
         SettingValue<float> mSplitPointBias{ mIndex, "Shadows", "split point bias" };

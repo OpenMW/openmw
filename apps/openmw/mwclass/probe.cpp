@@ -1,6 +1,7 @@
 #include "probe.hpp"
 
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_UString.h>
 
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadprob.hpp>
@@ -15,12 +16,12 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/ustring.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -38,17 +39,14 @@ namespace MWClass
         }
     }
 
-    std::string Probe::getModel(const MWWorld::ConstPtr& ptr) const
+    std::string_view Probe::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Probe>(ptr);
     }
 
     std::string_view Probe::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Probe>* ref = ptr.get<ESM::Probe>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Probe>(ptr);
     }
     std::unique_ptr<MWWorld::Action> Probe::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
     {
@@ -103,8 +101,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
-        info.caption
-            = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -118,11 +115,11 @@ namespace MWClass
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
+            info.extra += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+            info.extra += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }

@@ -48,6 +48,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "../widget/scenetoolmode.hpp"
@@ -76,6 +77,8 @@ namespace CSVRender
             = new osgViewer::GraphicsWindowEmbedded(0, 0, width(), height());
         mWidget->setGraphicsWindowEmbedded(window);
 
+        mRenderer->setRealizeOperation(new SceneUtil::GetGLExtensionsOperation());
+
         int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
         mRenderer->setRunMaxFrameRate(frameRateLimit);
         mRenderer->setUseConfigureAffinity(false);
@@ -87,10 +90,10 @@ namespace CSVRender
 
         mView->getCamera()->setGraphicsContext(window);
 
-        SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
+        osg::ref_ptr<SceneUtil::LightManager> lightMgr = new SceneUtil::LightManager;
         lightMgr->setStartLight(1);
         lightMgr->setLightingMask(Mask_Lighting);
-        mRootNode = lightMgr;
+        mRootNode = std::move(lightMgr);
 
         mView->getCamera()->setViewport(new osg::Viewport(0, 0, width(), height()));
 

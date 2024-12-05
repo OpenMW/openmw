@@ -75,6 +75,7 @@ namespace CSVRender
         CSMDoc::Document& mDocument;
         unsigned int mInteractionMask;
         CSVWidget::SceneToolMode* mEditMode;
+        CSVWidget::SceneToolMode* mCameraMode;
         bool mLocked;
         int mDragMode;
         bool mDragging;
@@ -89,6 +90,7 @@ namespace CSVRender
         bool mShowToolTips;
         int mToolTipDelay;
         bool mInConstructor;
+        int mSelectedNavigationMode;
 
     public:
         enum DropType
@@ -201,6 +203,10 @@ namespace CSVRender
 
         virtual std::vector<osg::ref_ptr<TagBase>> getSelection(unsigned int elementMask) const = 0;
 
+        virtual void selectGroup(const std::vector<std::string>&) const = 0;
+
+        virtual void unhideAll() const = 0;
+
         virtual std::vector<osg::ref_ptr<TagBase>> getEdited(unsigned int elementMask) const = 0;
 
         virtual void setSubMode(int subMode, unsigned int elementMask) = 0;
@@ -218,8 +224,14 @@ namespace CSVRender
             Button_Reference = 0x1,
             Button_Pathgrid = 0x2,
             Button_Water = 0x4,
-            Button_Fog = 0x8,
-            Button_Terrain = 0x10
+            Button_Terrain = 0x8
+        };
+
+        enum CameraMode
+        {
+            FirstPerson,
+            Orbit,
+            Free
         };
 
         virtual void addVisibilitySelectorButtons(CSVWidget::SceneToolToggle2* tool);
@@ -236,6 +248,8 @@ namespace CSVRender
         void settingChanged(const CSMPrefs::Setting* setting) override;
 
         bool getSpeedMode();
+
+        void cycleNavigationMode();
 
     private:
         void dragEnterEvent(QDragEnterEvent* event) override;
@@ -299,6 +313,8 @@ namespace CSVRender
         void tertiarySelect(bool activate);
 
         void speedMode(bool activate);
+
+        void toggleHiddenInstances();
 
     protected slots:
 

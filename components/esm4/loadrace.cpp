@@ -38,7 +38,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
     mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
-    bool isTES4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
+    bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100) && !reader.hasFormVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
     bool isFO3 = false;
 
@@ -52,7 +52,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
         // std::cout << "RACE " << ESM::printName(subHdr.typeId) << std::endl;
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
             {
                 reader.getZString(mEditorId);
                 // TES4
@@ -73,10 +73,10 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 // Imperial    0x00000907
                 break;
             }
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DESC:
+            case ESM::fourCC("DESC"):
             {
                 if (subHdr.dataSize == 1) // FO3?
                 {
@@ -87,10 +87,10 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mDesc);
                 break;
             }
-            case ESM4::SUB_SPLO: // bonus spell formid (TES5 may have SPCT and multiple SPLO)
+            case ESM::fourCC("SPLO"): // bonus spell formid (TES5 may have SPCT and multiple SPLO)
                 reader.getFormId(mBonusSpells.emplace_back());
                 break;
-            case ESM4::SUB_DATA: // ?? different length for TES5
+            case ESM::fourCC("DATA"): // ?? different length for TES5
             {
 // DATA:size 128
 // 0f 0f ff 00 ff 00 ff 00 ff 00 ff 00 ff 00 00 00
@@ -210,14 +210,14 @@ void ESM4::Race::load(ESM4::Reader& reader)
 #endif
                 break;
             }
-            case ESM4::SUB_DNAM:
+            case ESM::fourCC("DNAM"):
             {
                 reader.getFormId(mDefaultHair[0]); // male
                 reader.getFormId(mDefaultHair[1]); // female
 
                 break;
             }
-            case ESM4::SUB_CNAM:
+            case ESM::fourCC("CNAM"):
                 //              CNAM       SNAM                     VNAM
                 // Sheogorath   0x0  0000  98 2b  10011000 00101011
                 // Golden Saint 0x3  0011  26 46  00100110 01000110
@@ -238,13 +238,13 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.skipSubRecordData();
                     break;
                 }
-            case ESM4::SUB_PNAM:
+            case ESM::fourCC("PNAM"):
                 reader.get(mFaceGenMainClamp);
                 break; // 0x40A00000 = 5.f
-            case ESM4::SUB_UNAM:
+            case ESM::fourCC("UNAM"):
                 reader.get(mFaceGenFaceClamp);
                 break; // 0x40400000 = 3.f
-            case ESM4::SUB_ATTR: // Only in TES4?
+            case ESM::fourCC("ATTR"): // Only in TES4?
             {
                 if (subHdr.dataSize == 2) // FO3?
                 {
@@ -276,7 +276,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             //          |             |
             //          +-------------+
             //
-            case ESM4::SUB_NAM0: // start marker head data /* 1 */
+            case ESM::fourCC("NAM0"): // start marker head data /* 1 */
             {
                 curr_part = 0; // head part
 
@@ -296,7 +296,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 currentIndex = 0xffffffff;
                 break;
             }
-            case ESM4::SUB_INDX:
+            case ESM::fourCC("INDX"):
             {
                 reader.get(currentIndex);
                 // FIXME: below check is rather useless
@@ -313,7 +313,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
             {
                 if (currentIndex == 0xffffffff)
                 {
@@ -350,10 +350,10 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.skipSubRecordData();
                 break; // always 0x0000?
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
             {
                 if (currentIndex == 0xffffffff)
                 {
@@ -379,7 +379,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break;
             }
             //
-            case ESM4::SUB_NAM1: // start marker body data /* 4 */
+            case ESM::fourCC("NAM1"): // start marker body data /* 4 */
             {
 
                 if (isFO3 || isFONV)
@@ -406,14 +406,14 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_MNAM:
+            case ESM::fourCC("MNAM"):
                 isMale = true;
                 break; /* 2, 5, 7 */
-            case ESM4::SUB_FNAM:
+            case ESM::fourCC("FNAM"):
                 isMale = false;
                 break; /* 3, 6, 8 */
             //
-            case ESM4::SUB_HNAM:
+            case ESM::fourCC("HNAM"):
             {
                 // FIXME: this is a texture name in FO4
                 if (subHdr.dataSize % sizeof(ESM::FormId32) != 0)
@@ -428,7 +428,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_ENAM:
+            case ESM::fourCC("ENAM"):
             {
                 std::size_t numEyeChoices = subHdr.dataSize / sizeof(ESM::FormId32);
                 mEyeChoices.resize(numEyeChoices);
@@ -437,7 +437,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_FGGS:
+            case ESM::fourCC("FGGS"):
             {
                 if (isMale || isTES4)
                 {
@@ -454,7 +454,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_FGGA:
+            case ESM::fourCC("FGGA"):
             {
                 if (isMale || isTES4)
                 {
@@ -471,7 +471,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_FGTS:
+            case ESM::fourCC("FGTS"):
             {
                 if (isMale || isTES4)
                 {
@@ -489,12 +489,12 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break;
             }
             //
-            case ESM4::SUB_SNAM: // skipping...2 // only in TES4?
+            case ESM::fourCC("SNAM"): // skipping...2 // only in TES4?
             {
                 reader.skipSubRecordData();
                 break;
             }
-            case ESM4::SUB_XNAM:
+            case ESM::fourCC("XNAM"):
             {
                 ESM::FormId race;
                 std::int32_t adjustment;
@@ -504,7 +504,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_VNAM:
+            case ESM::fourCC("VNAM"):
             {
                 if (subHdr.dataSize == 8) // TES4
                 {
@@ -528,7 +528,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break;
             }
             //
-            case ESM4::SUB_ANAM: // TES5
+            case ESM::fourCC("ANAM"): // TES5
             {
                 if (isMale)
                     reader.getZString(mModelMale);
@@ -536,10 +536,10 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.getZString(mModelFemale);
                 break;
             }
-            case ESM4::SUB_KSIZ:
+            case ESM::fourCC("KSIZ"):
                 reader.get(mNumKeywords);
                 break;
-            case ESM4::SUB_KWDA:
+            case ESM::fourCC("KWDA"):
             {
                 ESM::FormId formid;
                 for (unsigned int i = 0; i < mNumKeywords; ++i)
@@ -547,13 +547,13 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break;
             }
             //
-            case ESM4::SUB_WNAM: // ARMO FormId
+            case ESM::fourCC("WNAM"): // ARMO FormId
             {
                 reader.getFormId(mSkin);
                 // std::cout << mEditorId << " skin " << formIdToString(mSkin) << std::endl; // FIXME
                 break;
             }
-            case ESM4::SUB_BODT: // body template
+            case ESM::fourCC("BODT"): // body template
             {
                 reader.get(mBodyTemplate.bodyPart);
                 reader.get(mBodyTemplate.flags);
@@ -564,7 +564,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_BOD2:
+            case ESM::fourCC("BOD2"):
             {
                 if (subHdr.dataSize == 8 || subHdr.dataSize == 4) // TES5, FO4
                 {
@@ -584,7 +584,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_HEAD: // TES5
+            case ESM::fourCC("HEAD"): // TES5
             {
                 ESM::FormId formId;
                 reader.getFormId(formId);
@@ -611,7 +611,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_NAM3: // start of hkx model
+            case ESM::fourCC("NAM3"): // start of hkx model
             {
                 curr_part = 3; // for TES5 NAM3 indicates the start of hkx model
 
@@ -651,7 +651,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             // ManakinRace
             // ManakinRace
             // ManakinRace FX0
-            case ESM4::SUB_NAME: // TES5 biped object names (x32)
+            case ESM::fourCC("NAME"): // TES5 biped object names (x32)
             {
                 std::string name;
                 reader.getZString(name);
@@ -659,112 +659,112 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_MTNM: // movement type
-            case ESM4::SUB_ATKD: // attack data
-            case ESM4::SUB_ATKE: // attach event
-            case ESM4::SUB_GNAM: // body part data
-            case ESM4::SUB_NAM4: // material type
-            case ESM4::SUB_NAM5: // unarmed impact?
-            case ESM4::SUB_LNAM: // close loot sound
-            case ESM4::SUB_QNAM: // equipment slot formid
-            case ESM4::SUB_HCLF: // default hair colour
-            case ESM4::SUB_UNES: // unarmed equipment slot formid
-            case ESM4::SUB_TINC:
-            case ESM4::SUB_TIND:
-            case ESM4::SUB_TINI:
-            case ESM4::SUB_TINL:
-            case ESM4::SUB_TINP:
-            case ESM4::SUB_TINT:
-            case ESM4::SUB_TINV:
-            case ESM4::SUB_TIRS:
-            case ESM4::SUB_PHWT:
-            case ESM4::SUB_AHCF:
-            case ESM4::SUB_AHCM:
-            case ESM4::SUB_MPAI:
-            case ESM4::SUB_MPAV:
-            case ESM4::SUB_DFTF:
-            case ESM4::SUB_DFTM:
-            case ESM4::SUB_FLMV:
-            case ESM4::SUB_FTSF:
-            case ESM4::SUB_FTSM:
-            case ESM4::SUB_MTYP:
-            case ESM4::SUB_NAM7:
-            case ESM4::SUB_NAM8:
-            case ESM4::SUB_PHTN:
-            case ESM4::SUB_RNAM:
-            case ESM4::SUB_RNMV:
-            case ESM4::SUB_RPRF:
-            case ESM4::SUB_RPRM:
-            case ESM4::SUB_SNMV:
-            case ESM4::SUB_SPCT:
-            case ESM4::SUB_SPED:
-            case ESM4::SUB_SWMV:
-            case ESM4::SUB_WKMV:
-            case ESM4::SUB_SPMV:
-            case ESM4::SUB_ATKR:
-            case ESM4::SUB_CTDA:
-            case ESM4::SUB_CIS1:
-            case ESM4::SUB_CIS2:
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
+            case ESM::fourCC("MTNM"): // movement type
+            case ESM::fourCC("ATKD"): // attack data
+            case ESM::fourCC("ATKE"): // attach event
+            case ESM::fourCC("GNAM"): // body part data
+            case ESM::fourCC("NAM4"): // material type
+            case ESM::fourCC("NAM5"): // unarmed impact?
+            case ESM::fourCC("LNAM"): // close loot sound
+            case ESM::fourCC("QNAM"): // equipment slot formid
+            case ESM::fourCC("HCLF"): // default hair colour
+            case ESM::fourCC("UNES"): // unarmed equipment slot formid
+            case ESM::fourCC("TINC"):
+            case ESM::fourCC("TIND"):
+            case ESM::fourCC("TINI"):
+            case ESM::fourCC("TINL"):
+            case ESM::fourCC("TINP"):
+            case ESM::fourCC("TINT"):
+            case ESM::fourCC("TINV"):
+            case ESM::fourCC("TIRS"):
+            case ESM::fourCC("PHWT"):
+            case ESM::fourCC("AHCF"):
+            case ESM::fourCC("AHCM"):
+            case ESM::fourCC("MPAI"):
+            case ESM::fourCC("MPAV"):
+            case ESM::fourCC("DFTF"):
+            case ESM::fourCC("DFTM"):
+            case ESM::fourCC("FLMV"):
+            case ESM::fourCC("FTSF"):
+            case ESM::fourCC("FTSM"):
+            case ESM::fourCC("MTYP"):
+            case ESM::fourCC("NAM7"):
+            case ESM::fourCC("NAM8"):
+            case ESM::fourCC("PHTN"):
+            case ESM::fourCC("RNAM"):
+            case ESM::fourCC("RNMV"):
+            case ESM::fourCC("RPRF"):
+            case ESM::fourCC("RPRM"):
+            case ESM::fourCC("SNMV"):
+            case ESM::fourCC("SPCT"):
+            case ESM::fourCC("SPED"):
+            case ESM::fourCC("SWMV"):
+            case ESM::fourCC("WKMV"):
+            case ESM::fourCC("SPMV"):
+            case ESM::fourCC("ATKR"):
+            case ESM::fourCC("CTDA"):
+            case ESM::fourCC("CIS1"):
+            case ESM::fourCC("CIS2"):
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
             //
-            case ESM4::SUB_YNAM: // FO3
-            case ESM4::SUB_NAM2: // FO3
-            case ESM4::SUB_VTCK: // FO3
-            case ESM4::SUB_MODD: // FO3
-            case ESM4::SUB_ONAM: // FO3
-            case ESM4::SUB_APPR: // FO4
-            case ESM4::SUB_ATKS: // FO4
-            case ESM4::SUB_ATKT: // FO4
-            case ESM4::SUB_ATKW: // FO4
-            case ESM4::SUB_BMMP: // FO4
-            case ESM4::SUB_BSMB: // FO4
-            case ESM4::SUB_BSMP: // FO4
-            case ESM4::SUB_BSMS: // FO4
+            case ESM::fourCC("YNAM"): // FO3
+            case ESM::fourCC("NAM2"): // FO3
+            case ESM::fourCC("VTCK"): // FO3
+            case ESM::fourCC("MODD"): // FO3
+            case ESM::fourCC("ONAM"): // FO3
+            case ESM::fourCC("APPR"): // FO4
+            case ESM::fourCC("ATKS"): // FO4
+            case ESM::fourCC("ATKT"): // FO4
+            case ESM::fourCC("ATKW"): // FO4
+            case ESM::fourCC("BMMP"): // FO4
+            case ESM::fourCC("BSMB"): // FO4
+            case ESM::fourCC("BSMP"): // FO4
+            case ESM::fourCC("BSMS"): // FO4
 
-            case ESM4::SUB_FMRI: // FO4
-            case ESM4::SUB_FMRN: // FO4
-            case ESM4::SUB_HLTX: // FO4
-            case ESM4::SUB_MLSI: // FO4
-            case ESM4::SUB_MPGN: // FO4
-            case ESM4::SUB_MPGS: // FO4
-            case ESM4::SUB_MPPC: // FO4
-            case ESM4::SUB_MPPF: // FO4
-            case ESM4::SUB_MPPI: // FO4
-            case ESM4::SUB_MPPK: // FO4
-            case ESM4::SUB_MPPM: // FO4
-            case ESM4::SUB_MPPN: // FO4
-            case ESM4::SUB_MPPT: // FO4
-            case ESM4::SUB_MSID: // FO4
-            case ESM4::SUB_MSM0: // FO4
-            case ESM4::SUB_MSM1: // FO4
-            case ESM4::SUB_NNAM: // FO4
-            case ESM4::SUB_NTOP: // FO4
-            case ESM4::SUB_PRPS: // FO4
-            case ESM4::SUB_PTOP: // FO4
-            case ESM4::SUB_QSTI: // FO4
-            case ESM4::SUB_RBPC: // FO4
-            case ESM4::SUB_SADD: // FO4
-            case ESM4::SUB_SAKD: // FO4
-            case ESM4::SUB_SAPT: // FO4
-            case ESM4::SUB_SGNM: // FO4
-            case ESM4::SUB_SRAC: // FO4
-            case ESM4::SUB_SRAF: // FO4
-            case ESM4::SUB_STCP: // FO4
-            case ESM4::SUB_STKD: // FO4
-            case ESM4::SUB_TETI: // FO4
-            case ESM4::SUB_TTEB: // FO4
-            case ESM4::SUB_TTEC: // FO4
-            case ESM4::SUB_TTED: // FO4
-            case ESM4::SUB_TTEF: // FO4
-            case ESM4::SUB_TTET: // FO4
-            case ESM4::SUB_TTGE: // FO4
-            case ESM4::SUB_TTGP: // FO4
-            case ESM4::SUB_UNWP: // FO4
-            case ESM4::SUB_WMAP: // FO4
-            case ESM4::SUB_ZNAM: // FO4
+            case ESM::fourCC("FMRI"): // FO4
+            case ESM::fourCC("FMRN"): // FO4
+            case ESM::fourCC("HLTX"): // FO4
+            case ESM::fourCC("MLSI"): // FO4
+            case ESM::fourCC("MPGN"): // FO4
+            case ESM::fourCC("MPGS"): // FO4
+            case ESM::fourCC("MPPC"): // FO4
+            case ESM::fourCC("MPPF"): // FO4
+            case ESM::fourCC("MPPI"): // FO4
+            case ESM::fourCC("MPPK"): // FO4
+            case ESM::fourCC("MPPM"): // FO4
+            case ESM::fourCC("MPPN"): // FO4
+            case ESM::fourCC("MPPT"): // FO4
+            case ESM::fourCC("MSID"): // FO4
+            case ESM::fourCC("MSM0"): // FO4
+            case ESM::fourCC("MSM1"): // FO4
+            case ESM::fourCC("NNAM"): // FO4
+            case ESM::fourCC("NTOP"): // FO4
+            case ESM::fourCC("PRPS"): // FO4
+            case ESM::fourCC("PTOP"): // FO4
+            case ESM::fourCC("QSTI"): // FO4
+            case ESM::fourCC("RBPC"): // FO4
+            case ESM::fourCC("SADD"): // FO4
+            case ESM::fourCC("SAKD"): // FO4
+            case ESM::fourCC("SAPT"): // FO4
+            case ESM::fourCC("SGNM"): // FO4
+            case ESM::fourCC("SRAC"): // FO4
+            case ESM::fourCC("SRAF"): // FO4
+            case ESM::fourCC("STCP"): // FO4
+            case ESM::fourCC("STKD"): // FO4
+            case ESM::fourCC("TETI"): // FO4
+            case ESM::fourCC("TTEB"): // FO4
+            case ESM::fourCC("TTEC"): // FO4
+            case ESM::fourCC("TTED"): // FO4
+            case ESM::fourCC("TTEF"): // FO4
+            case ESM::fourCC("TTET"): // FO4
+            case ESM::fourCC("TTGE"): // FO4
+            case ESM::fourCC("TTGP"): // FO4
+            case ESM::fourCC("UNWP"): // FO4
+            case ESM::fourCC("WMAP"): // FO4
+            case ESM::fourCC("ZNAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

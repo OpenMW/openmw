@@ -10,7 +10,6 @@
 #include "globalcreator.hpp"
 #include "infocreator.hpp"
 #include "landcreator.hpp"
-#include "landtexturecreator.hpp"
 #include "pathgridcreator.hpp"
 #include "previewsubview.hpp"
 #include "referenceablecreator.hpp"
@@ -92,7 +91,7 @@ void CSVWorld::addSubViewFactories(CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<LandCreator>>);
 
     manager.add(CSMWorld::UniversalId::Type_LandTextures,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<LandTextureCreator>>);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator>>);
 
     manager.add(CSMWorld::UniversalId::Type_Globals,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GlobalCreator>>);
@@ -195,7 +194,7 @@ void CSVWorld::addSubViewFactories(CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<LandCreator>>(false));
 
     manager.add(CSMWorld::UniversalId::Type_LandTexture,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<LandTextureCreator>>(false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator>>(false));
 
     manager.add(CSMWorld::UniversalId::Type_DebugProfile,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView,

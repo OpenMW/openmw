@@ -6,6 +6,7 @@ local util = require('openmw.util')
 local I = require('openmw.interfaces')
 
 local Actor = require('openmw.types').Actor
+local Player = require('openmw.types').Player
 
 local MODE = camera.MODE
 
@@ -29,6 +30,27 @@ local function turnOff()
     end
 end
 
+local function processZoom3rdPerson()
+    if
+        not Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) or
+        not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) or
+        input.getBooleanActionValue('TogglePOV') or
+        not I.Camera.isModeControlEnabled() or
+        not I.Camera.isZoomEnabled()
+    then
+        return
+    end
+    local Zoom3rdPerson = input.getNumberActionValue('Zoom3rdPerson')
+    if Zoom3rdPerson > 0 and camera.getMode() == MODE.Preview
+        and I.Camera.getBaseThirdPersonDistance() == 30 then
+        self.controls.yawChange = camera.getYaw() - self.rotation:getYaw()
+        camera.setMode(MODE.FirstPerson)
+    elseif Zoom3rdPerson < 0 and camera.getMode() == MODE.FirstPerson then
+        camera.setMode(MODE.Preview)
+        I.Camera.setBaseThirdPersonDistance(30)
+    end
+end
+
 function M.onFrame(dt)
     if core.isWorldPaused() then return end
     local newActive = M.enabled and Actor.getStance(self) == Actor.STANCE.Nothing
@@ -38,9 +60,10 @@ function M.onFrame(dt)
         turnOff()
     end
     if not active then return end
+    processZoom3rdPerson()
     if camera.getMode() == MODE.Static then return end
     if camera.getMode() == MODE.ThirdPerson then camera.setMode(MODE.Preview) end
-    if camera.getMode() == MODE.Preview and not input.isActionPressed(input.ACTION.TogglePOV) then
+    if camera.getMode() == MODE.Preview and not input.getBooleanActionValue('TogglePOV') then
         camera.showCrosshair(camera.getFocalPreferredOffset():length() > 5)
         local move = util.vector2(self.controls.sideMovement, self.controls.movement)
         local yawDelta = camera.getYaw() - self.rotation:getYaw()
@@ -55,24 +78,6 @@ function M.onFrame(dt)
         else
             self.controls.yawChange = 0
         end
-    end
-end
-
-function M.onInputAction(action)
-    if not active or core.isWorldPaused() or
-       not input.getControlSwitch(input.CONTROL_SWITCH.ViewMode) or
-       not input.getControlSwitch(input.CONTROL_SWITCH.Controls) or
-       input.isActionPressed(input.ACTION.TogglePOV) or
-       not I.Camera.isModeControlEnabled() then
-        return
-    end
-    if action == input.ACTION.ZoomIn and camera.getMode() == MODE.Preview
-       and I.Camera.getBaseThirdPersonDistance() == 30 then
-        self.controls.yawChange = camera.getYaw() - self.rotation:getYaw()
-        camera.setMode(MODE.FirstPerson)
-    elseif action == input.ACTION.ZoomOut and camera.getMode() == MODE.FirstPerson then
-        camera.setMode(MODE.Preview)
-        I.Camera.setBaseThirdPersonDistance(30)
     end
 end
 

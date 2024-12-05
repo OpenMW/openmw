@@ -98,6 +98,20 @@ namespace MWWorld
             return mContainerStore;
         }
 
+        std::string toString() const
+        {
+            if (mRef == nullptr)
+                return "null object";
+            std::string result = mRef->isDeleted() ? "deleted object" : "object";
+            result += mRef->mRef.getRefNum().toString();
+            result += " (";
+            result += mRef->getTypeDescription();
+            result += ", ";
+            result += mRef->mRef.getRefId().toDebugString();
+            result += ")";
+            return result;
+        }
+
         template <template <class> class TypeTransform2>
         bool operator==(const PtrBase<TypeTransform2>& other) const
         {
@@ -128,8 +142,6 @@ namespace MWWorld
             : PtrBase(liveCellRef, cell, nullptr)
         {
         }
-
-        std::string toString() const;
     };
 
     /// @note The difference between Ptr and ConstPtr is that the second one adds const to the underlying pointers.
@@ -153,8 +165,9 @@ namespace MWWorld
     class SafePtr
     {
     public:
-        using Id = ESM::RefNum;
+        using Id = ESM::FormId;
 
+        SafePtr() = default;
         explicit SafePtr(Id id)
             : mId(id)
         {
@@ -172,7 +185,7 @@ namespace MWWorld
         }
 
     private:
-        const Id mId;
+        Id mId;
 
         mutable Ptr mPtr;
         mutable size_t mLastUpdate = 0;

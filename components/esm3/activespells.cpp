@@ -93,11 +93,12 @@ namespace ESM
         {
             for (const auto& params : spells)
             {
-                esm.writeHNRefId(tag, params.mId);
+                esm.writeHNRefId(tag, params.mSourceSpellId);
+                esm.writeHNRefId("SPID", params.mActiveSpellId);
 
                 esm.writeHNT("CAST", params.mCasterActorId);
                 esm.writeHNString("DISP", params.mDisplayName);
-                esm.writeHNT("TYPE", params.mType);
+                esm.writeHNT("FLAG", params.mFlags);
                 if (params.mItem.isSet())
                     esm.writeFormId(params.mItem, true, "ITEM");
                 if (params.mWorsenings >= 0)
@@ -130,23 +131,44 @@ namespace ESM
             while (esm.isNextSub(tag))
             {
                 ActiveSpells::ActiveSpellParams params;
-                params.mId = esm.getRefId();
+                params.mSourceSpellId = esm.getRefId();
+                if (format > MaxActiveSpellTypeVersion)
+                    params.mActiveSpellId = esm.getHNRefId("SPID");
                 esm.getHNT(params.mCasterActorId, "CAST");
                 params.mDisplayName = esm.getHNString("DISP");
                 if (format <= MaxClearModifiersFormatVersion)
-                    params.mType = ActiveSpells::Type_Temporary;
+                    params.mFlags = Compatibility::ActiveSpells::Type_Temporary_Flags;
                 else
                 {
-                    esm.getHNT(params.mType, "TYPE");
-                    if (esm.peekNextSub("ITEM"))
+                    if (format <= MaxActiveSpellTypeVersion)
                     {
-                        if (format <= MaxActiveSpellSlotIndexFormatVersion)
-                            // Previous versions saved slot index in this record.
-                            // Ignore these values as we can't use them
-                            esm.getFormId(true, "ITEM");
-                        else
-                            params.mItem = esm.getFormId(true, "ITEM");
+                        Compatibility::ActiveSpells::EffectType type;
+                        esm.getHNT(type, "TYPE");
+                        switch (type)
+                        {
+                            case Compatibility::ActiveSpells::Type_Ability:
+                                params.mFlags = Compatibility::ActiveSpells::Type_Ability_Flags;
+                                break;
+                            case Compatibility::ActiveSpells::Type_Consumable:
+                                params.mFlags = Compatibility::ActiveSpells::Type_Consumable_Flags;
+                                break;
+                            case Compatibility::ActiveSpells::Type_Enchantment:
+                                params.mFlags = Compatibility::ActiveSpells::Type_Enchantment_Flags;
+                                break;
+                            case Compatibility::ActiveSpells::Type_Permanent:
+                                params.mFlags = Compatibility::ActiveSpells::Type_Permanent_Flags;
+                                break;
+                            case Compatibility::ActiveSpells::Type_Temporary:
+                                params.mFlags = Compatibility::ActiveSpells::Type_Temporary_Flags;
+                                break;
+                        }
                     }
+                    else
+                    {
+                        esm.getHNT(params.mFlags, "FLAG");
+                    }
+                    if (esm.peekNextSub("ITEM"))
+                        params.mItem = esm.getFormId(true, "ITEM");
                 }
                 if (esm.isNextSub("WORS"))
                 {

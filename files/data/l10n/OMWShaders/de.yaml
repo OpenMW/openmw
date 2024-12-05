@@ -1,6 +1,6 @@
 # Post-processing HUD
 
-Abovewater: "Überwasser"
+Abovewater: "Über Wasser"
 ActiveShaders: "Aktive Shader"
 Author: "Autor"
 Description: "Beschreibung"
@@ -8,27 +8,66 @@ InactiveShaders: "Inaktive Shader"
 InExteriors: "Außenbereich"
 InInteriors: "Innenbereich"
 KeyboardControls: |
-    Tastatursteuerung::
+    Tastatursteuerung:
 
     Shift+Pfeil-Rechts > Aktiviere Shader
     Shift+Pfeil-Links > Deaktiviere Shader
-    Shift+Pfeil-Hoch > Verschiebe Shader nach oben
-    Shift+Pfeil-Runter > Verschiebe Shader nach unten
-PostProcessHUD: "Nachbearbeitungs HUD"
-ResetShader: "Setze Shader auf Standardzustand zurück"
-ShaderLocked: "Verschlossen"
-ShaderLockedDescription: "Kann nicht umgeschaltet oder verschoben werden, gesteuert durch externes Lua-Skript"
+    Shift+Pfeil-Hoch > Verschiebe Shader in Liste nach oben
+    Shift+Pfeil-Runter > Verschiebe Shader in Liste nach unten
+# Better avoid the German translation "Nachbearbeitung" as it might lead to confusion.
+PostProcessHUD: "Post-Processing-HUD"
+ResetShader: "Shader zurücksetzen"
+ShaderLocked: "Gesperrt"
+ShaderLockedDescription: "Shader kann nicht umgeschaltet oder verschoben werden, sondern wird durch externes Lua-Skript gesteuert."
 ShaderResetUniform: "r"
-Underwater: "Unterwasser"
+Underwater: "Unter Wasser"
 Version: "Version"
 
 
 # Built-in post-processing shaders
 
-DisplayDepthName: "Visualisiert den Tiefenpuffer."
-DisplayDepthFactorDescription: "Bestimmt die Korrelation zwischen dem Pixeltiefenwert und seiner Ausgabefarbe. Hohe Werte führen zu einem helleren Bild."
-DisplayDepthFactorName: "Farbfaktor"
-ContrastLevelDescription: "Kontraststufe"
+# Adjustments
+# <Meta>
+AdjustmentsDescription: "Farbanpassungen"
+# "Contrast Level"
+ContrastLevelDescription: "Kontrast-Wert"
 ContrastLevelName: "Kontrast"
-GammaLevelDescription: "Gamma-Level"
+# "Gamma Level"
 GammaLevelName: "Gamma"
+GammaLevelDescription: "Gamma-Wert"
+
+# Bloom
+# <Meta>
+BloomDescription: "Bloom-Shader, der seine Berechnungen bei ungefähr linearem Licht durchführt."
+# "Bloom Clamp Level"
+BloomClampLevelName: "Oberer Grenzwert"
+BloomClampLevelDescription: "Begrenze die Helligkeit einzelner Pixel auf diesen Wert, bevor Bloom in die Szene gemischt wird."
+# "Bloom Threshold Level"
+BloomThresholdLevelName: "Unterer Schwellenwert"
+BloomThresholdLevelDescription: "Ignoriere Pixel, deren Helligkeit geringer als dieser Wert ist, bei der Berechnung der Bloom-Unschärfe. Dies wirkt sich nicht auf den Himmel aus."
+# "Gamma Level"
+# (see above)
+# "Radius Level"
+RadiusLevelName: "Radius"
+RadiusLevelDescription: "Radius des Effektes"
+# "Sky Factor Level"
+SkyFactorLevelName: "Himmel-Faktor"
+SkyFactorLevelDescription: "Multiplikator für Licht, das direkt vom Himmel kommt."
+# "Strength Level"
+StrengthLevelName: "Strength"
+StrengthLevelDescription: "Stärke des Effektes"
+
+
+# Debug
+# <Meta>
+DebugDescription: "Debug-Shader"
+# "Display Depth"
+DebugHeaderDepth: "Tiefenpuffer (Z-Buffer)"
+DisplayDepthName: "Visualisiere den Tiefenpuffer (Z-Puffer)"
+# "Depth Factor"
+DisplayDepthFactorName: "Faktor für Tiefenfärbung"
+DisplayDepthFactorDescription: "Verknüpfungsfaktor zwischen dem Tiefenwert eines Pixels und der ausgegebenen Farbe. Größere Werte führen zu einem helleren Bild."
+# "Display Normals"
+DebugHeaderNormals: "Normalenvektoren"
+DisplayNormalsName: "Visualisiere Normalenvektoren"
+NormalsInWorldSpace: "Zeige Normalenvektoren in Spielwelt-Koordinaten"

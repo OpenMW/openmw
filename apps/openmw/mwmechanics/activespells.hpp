@@ -33,12 +33,13 @@ namespace MWMechanics
         using ActiveEffect = ESM::ActiveEffect;
         class ActiveSpellParams
         {
-            ESM::RefId mId;
+            ESM::RefId mActiveSpellId;
+            ESM::RefId mSourceSpellId;
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
             int mCasterActorId;
             ESM::RefNum mItem;
-            ESM::ActiveSpells::EffectType mType;
+            ESM::ActiveSpells::Flags mFlags;
             int mWorsenings;
             MWWorld::TimeStamp mNextWorsening;
             MWWorld::Ptr mSource;
@@ -57,14 +58,16 @@ namespace MWMechanics
             friend class ActiveSpells;
 
         public:
-            ActiveSpellParams(const CastSpell& cast, const MWWorld::Ptr& caster);
+            ActiveSpellParams(
+                const MWWorld::Ptr& caster, const ESM::RefId& id, std::string_view sourceName, ESM::RefNum item);
 
-            const ESM::RefId& getId() const { return mId; }
+            ESM::RefId getActiveSpellId() const { return mActiveSpellId; }
+            void setActiveSpellId(ESM::RefId id) { mActiveSpellId = id; }
+
+            const ESM::RefId& getSourceSpellId() const { return mSourceSpellId; }
 
             const std::vector<ActiveEffect>& getEffects() const { return mEffects; }
             std::vector<ActiveEffect>& getEffects() { return mEffects; }
-
-            ESM::ActiveSpells::EffectType getType() const { return mType; }
 
             int getCasterActorId() const { return mCasterActorId; }
 
@@ -73,6 +76,11 @@ namespace MWMechanics
             const std::string& getDisplayName() const { return mDisplayName; }
 
             ESM::RefNum getItem() const { return mItem; }
+            ESM::RefId getEnchantment() const;
+
+            const ESM::Spell* getSpell() const;
+            bool hasFlag(ESM::ActiveSpells::Flags flags) const;
+            void setFlag(ESM::ActiveSpells::Flags flags);
 
             // Increments worsenings count and sets the next timestamp
             void worsen();
@@ -91,6 +99,8 @@ namespace MWMechanics
         TIterator begin() const;
 
         TIterator end() const;
+
+        TIterator getActiveSpellById(const ESM::RefId& id);
 
         void update(const MWWorld::Ptr& ptr, float duration);
 
@@ -131,7 +141,9 @@ namespace MWMechanics
         void addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor);
 
         /// Removes the active effects from this spell/potion/.. with \a id
-        void removeEffects(const MWWorld::Ptr& ptr, const ESM::RefId& id);
+        void removeEffectsBySourceSpellId(const MWWorld::Ptr& ptr, const ESM::RefId& id);
+        /// Removes the active effects of a specific active spell
+        void removeEffectsByActiveSpellId(const MWWorld::Ptr& ptr, const ESM::RefId& id);
 
         /// Remove all active effects with this effect id
         void purgeEffect(const MWWorld::Ptr& ptr, int effectId, ESM::RefId effectArg = {});

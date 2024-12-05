@@ -1,6 +1,8 @@
 User interface reference
 ========================
 
+.. include:: version.rst
+
 Layouts
 -------
 

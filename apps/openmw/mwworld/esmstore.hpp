@@ -86,22 +86,27 @@ namespace ESM4
     struct Container;
     struct Creature;
     struct Door;
+    struct Flora;
     struct Furniture;
     struct Hair;
     struct HeadPart;
     struct Ingredient;
+    struct ItemMod;
     struct Land;
+    struct LandTexture;
     struct LevelledCreature;
     struct LevelledItem;
     struct LevelledNpc;
     struct Light;
     struct MiscItem;
+    struct MovableStatic;
     struct Npc;
     struct Outfit;
     struct Potion;
     struct Race;
     struct Reference;
     struct Static;
+    struct StaticCollection;
     struct Terminal;
     struct Tree;
     struct Weapon;
@@ -136,11 +141,13 @@ namespace MWWorld
 
             Store<ESM4::Activator>, Store<ESM4::ActorCharacter>, Store<ESM4::ActorCreature>, Store<ESM4::Ammunition>,
             Store<ESM4::Armor>, Store<ESM4::ArmorAddon>, Store<ESM4::Book>, Store<ESM4::Cell>, Store<ESM4::Clothing>,
-            Store<ESM4::Container>, Store<ESM4::Creature>, Store<ESM4::Door>, Store<ESM4::Furniture>, Store<ESM4::Hair>,
-            Store<ESM4::HeadPart>, Store<ESM4::Ingredient>, Store<ESM4::Land>, Store<ESM4::LevelledCreature>,
-            Store<ESM4::LevelledItem>, Store<ESM4::LevelledNpc>, Store<ESM4::Light>, Store<ESM4::MiscItem>,
+            Store<ESM4::Container>, Store<ESM4::Creature>, Store<ESM4::Door>, Store<ESM4::Furniture>,
+            Store<ESM4::Flora>, Store<ESM4::Hair>, Store<ESM4::HeadPart>, Store<ESM4::Ingredient>, Store<ESM4::ItemMod>,
+            Store<ESM4::Land>, Store<ESM4::LandTexture>, Store<ESM4::LevelledCreature>, Store<ESM4::LevelledItem>,
+            Store<ESM4::LevelledNpc>, Store<ESM4::Light>, Store<ESM4::MiscItem>, Store<ESM4::MovableStatic>,
             Store<ESM4::Npc>, Store<ESM4::Outfit>, Store<ESM4::Potion>, Store<ESM4::Race>, Store<ESM4::Reference>,
-            Store<ESM4::Static>, Store<ESM4::Terminal>, Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>>;
+            Store<ESM4::Static>, Store<ESM4::StaticCollection>, Store<ESM4::Terminal>, Store<ESM4::Tree>,
+            Store<ESM4::Weapon>, Store<ESM4::World>>;
 
     private:
         template <typename T>
@@ -157,7 +164,7 @@ namespace MWWorld
         std::vector<StoreBase*> mStores;
         std::vector<DynamicStore*> mDynamicStores;
 
-        unsigned int mDynamicCount;
+        uint64_t mDynamicCount;
 
         mutable std::unordered_map<ESM::RefId, std::weak_ptr<MWMechanics::SpellList>> mSpellListCache;
 
@@ -204,6 +211,7 @@ namespace MWWorld
 
         void clearDynamic();
         void rebuildIdsIndex();
+        ESM::RefId generateId() { return ESM::RefId::generated(mDynamicCount++); }
 
         void movePlayerRecord();
 
@@ -224,7 +232,7 @@ namespace MWWorld
         template <class T>
         const T* insert(const T& x)
         {
-            const ESM::RefId id = ESM::RefId::generated(mDynamicCount++);
+            const ESM::RefId id = generateId();
 
             Store<T>& store = getWritable<T>();
             if (store.search(id) != nullptr)

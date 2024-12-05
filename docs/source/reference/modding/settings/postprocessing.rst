@@ -1,6 +1,8 @@
 Post Processing Settings
 ########################
 
+.. _Post Processing:
+
 enabled
 -------
 

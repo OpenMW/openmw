@@ -117,7 +117,7 @@ void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data& data)
                 completer->setPopup(popup); // The completer takes ownership of the popup
                 completer->setMaxVisibleItems(10);
 
-                mCompleters[current->first] = completer;
+                mCompleters[current->first] = std::move(completer);
             }
         }
     }

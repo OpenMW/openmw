@@ -2,10 +2,10 @@
 
 namespace NifOsg
 {
-    MatrixTransform::MatrixTransform(const Nif::Transformation& trafo)
-        : osg::MatrixTransform(trafo.toMatrix())
-        , mScale(trafo.scale)
-        , mRotationScale(trafo.rotation)
+    MatrixTransform::MatrixTransform(const Nif::NiTransform& transform)
+        : osg::MatrixTransform(transform.toMatrix())
+        , mScale(transform.mScale)
+        , mRotationScale(transform.mRotation)
     {
     }
 

@@ -1,5 +1,6 @@
 #include "uibindings.hpp"
 
+#include <components/lua/util.hpp>
 #include <components/lua_ui/alignment.hpp>
 #include <components/lua_ui/content.hpp>
 #include <components/lua_ui/element.hpp>
@@ -36,18 +37,7 @@ namespace MWLua
             }
         }
 
-        // Lua arrays index from 1
-        inline size_t fromLuaIndex(size_t i)
-        {
-            return i - 1;
-        }
-        inline size_t toLuaIndex(size_t i)
-        {
-            return i + 1;
-        }
-
         const std::unordered_map<MWGui::GuiMode, std::string_view> modeToName{
-            { MWGui::GM_Settings, "SettingsMenu" },
             { MWGui::GM_Inventory, "Interface" },
             { MWGui::GM_Container, "Container" },
             { MWGui::GM_Companion, "Companion" },
@@ -90,35 +80,41 @@ namespace MWLua
         }();
     }
 
-    sol::table initUserInterfacePackage(const Context& context)
+    sol::table registerUiApi(const Context& context)
     {
+        sol::state_view lua = context.sol();
+        bool menu = context.mType == Context::Menu;
+
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
-        auto element = context.mLua->sol().new_usertype<LuaUi::Element>("Element");
-        element["layout"] = sol::property([](LuaUi::Element& element) { return element.mLayout; },
-            [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
-        element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
-            if (element->mDestroy || element->mUpdate)
-                return;
-            element->mUpdate = true;
-            luaManager->addAction([element] { wrapAction(element, [&] { element->update(); }); }, "Update UI");
+        sol::table api(lua, sol::create);
+        api["_setHudVisibility"] = [luaManager = context.mLuaManager](bool state) {
+            luaManager->addAction([state] { MWBase::Environment::get().getWindowManager()->setHudVisibility(state); });
         };
-        element["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
-            if (element->mDestroy)
-                return;
-            element->mDestroy = true;
-            luaManager->addAction([element] { wrapAction(element, [&] { element->destroy(); }); }, "Destroy UI");
-        };
-
-        sol::table api = context.mLua->newTable();
+        api["_isHudVisible"] = []() -> bool { return MWBase::Environment::get().getWindowManager()->isHudVisible(); };
         api["showMessage"]
-            = [luaManager = context.mLuaManager](std::string_view message) { luaManager->addUIMessage(message); };
-        api["CONSOLE_COLOR"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string, Misc::Color>({
-            { "Default", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Default.substr(1)) },
-            { "Error", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Error.substr(1)) },
-            { "Success", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Success.substr(1)) },
-            { "Info", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Info.substr(1)) },
-        }));
+            = [luaManager = context.mLuaManager](std::string_view message, const sol::optional<sol::table>& options) {
+                  MWGui::ShowInDialogueMode mode = MWGui::ShowInDialogueMode_IfPossible;
+                  if (options.has_value())
+                  {
+                      auto showInDialogue = options->get<sol::optional<bool>>("showInDialogue");
+                      if (showInDialogue.has_value())
+                      {
+                          if (*showInDialogue)
+                              mode = MWGui::ShowInDialogueMode_Only;
+                          else
+                              mode = MWGui::ShowInDialogueMode_Never;
+                      }
+                  }
+                  luaManager->addUIMessage(message, mode);
+              };
+        api["CONSOLE_COLOR"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string, Misc::Color>(lua,
+            {
+                { "Default", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Default.substr(1)) },
+                { "Error", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Error.substr(1)) },
+                { "Success", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Success.substr(1)) },
+                { "Info", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Info.substr(1)) },
+            }));
         api["printToConsole"]
             = [luaManager = context.mLuaManager](const std::string& message, const Misc::Color& color) {
                   luaManager->addInGameConsoleMessage(message + "\n", color);
@@ -126,6 +122,7 @@ namespace MWLua
         api["setConsoleMode"] = [luaManager = context.mLuaManager, windowManager](std::string_view mode) {
             luaManager->addAction([mode = std::string(mode), windowManager] { windowManager->setConsoleMode(mode); });
         };
+        api["getConsoleMode"] = [windowManager]() -> std::string_view { return windowManager->getConsoleMode(); };
         api["setConsoleSelectedObject"] = [luaManager = context.mLuaManager, windowManager](const sol::object& obj) {
             if (obj == sol::nil)
                 luaManager->addAction([windowManager] { windowManager->setConsoleSelectedObject(MWWorld::Ptr()); });
@@ -138,38 +135,33 @@ namespace MWLua
             }
         };
         api["content"] = LuaUi::loadContentConstructor(context.mLua);
-        api["create"] = [luaManager = context.mLuaManager](const sol::table& layout) {
-            auto element = LuaUi::Element::make(layout);
+
+        api["create"] = [luaManager = context.mLuaManager, menu](const sol::table& layout) {
+            auto element = LuaUi::Element::make(layout, menu);
             luaManager->addAction([element] { wrapAction(element, [&] { element->create(); }); }, "Create UI");
             return element;
         };
-        api["updateAll"] = [context]() {
-            LuaUi::Element::forEach([](LuaUi::Element* e) { e->mUpdate = true; });
-            context.mLuaManager->addAction(
-                []() { LuaUi::Element::forEach([](LuaUi::Element* e) { e->update(); }); }, "Update all UI elements");
+
+        api["updateAll"] = [luaManager = context.mLuaManager, menu]() {
+            LuaUi::Element::forEach(menu, [](LuaUi::Element* e) {
+                if (e->mState == LuaUi::Element::Created)
+                    e->mState = LuaUi::Element::Update;
+            });
+            luaManager->addAction([menu]() { LuaUi::Element::forEach(menu, [](LuaUi::Element* e) { e->update(); }); },
+                "Update all menu UI elements");
         };
         api["_getMenuTransparency"] = []() -> float { return Settings::gui().mMenuTransparency; };
 
-        auto uiLayer = context.mLua->sol().new_usertype<LuaUi::Layer>("UiLayer");
-        uiLayer["name"] = sol::property([](LuaUi::Layer& self) { return self.name(); });
-        uiLayer["size"] = sol::property([](LuaUi::Layer& self) { return self.size(); });
-        uiLayer[sol::meta_function::to_string]
-            = [](LuaUi::Layer& self) { return Misc::StringUtils::format("UiLayer(%s)", self.name()); };
-
-        sol::table layers = context.mLua->newTable();
-        layers[sol::meta_function::length] = []() { return LuaUi::Layer::count(); };
-        layers[sol::meta_function::index] = [](size_t index) {
-            index = fromLuaIndex(index);
-            return LuaUi::Layer(index);
-        };
-        layers["indexOf"] = [](std::string_view name) -> sol::optional<size_t> {
+        sol::table layersTable(lua, sol::create);
+        layersTable["indexOf"] = [](std::string_view name) -> sol::optional<size_t> {
             size_t index = LuaUi::Layer::indexOf(name);
             if (index == LuaUi::Layer::count())
                 return sol::nullopt;
             else
-                return toLuaIndex(index);
+                return LuaUtil::toLuaIndex(index);
         };
-        layers["insertAfter"] = [context](std::string_view afterName, std::string_view name, const sol::object& opt) {
+        layersTable["insertAfter"] = [context](
+                                         std::string_view afterName, std::string_view name, const sol::object& opt) {
             LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
             size_t index = LuaUi::Layer::indexOf(afterName);
@@ -178,7 +170,8 @@ namespace MWLua
             index++;
             context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
-        layers["insertBefore"] = [context](std::string_view beforename, std::string_view name, const sol::object& opt) {
+        layersTable["insertBefore"] = [context](
+                                          std::string_view beforename, std::string_view name, const sol::object& opt) {
             LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
             size_t index = LuaUi::Layer::indexOf(beforename);
@@ -186,6 +179,16 @@ namespace MWLua
                 throw std::logic_error(std::string("Layer not found"));
             context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
+        sol::table layers = LuaUtil::makeReadOnly(layersTable);
+        sol::table layersMeta = layers[sol::metatable_key];
+        layersMeta[sol::meta_function::length] = []() { return LuaUi::Layer::count(); };
+        layersMeta[sol::meta_function::index] = sol::overload(
+            [](const sol::object& self, size_t index) {
+                index = LuaUtil::fromLuaIndex(index);
+                return LuaUi::Layer(index);
+            },
+            [layersTable](
+                const sol::object& self, std::string_view key) { return layersTable.raw_get<sol::object>(key); });
         {
             auto pairs = [layers](const sol::object&) {
                 auto next = [](const sol::table& l, size_t i) -> sol::optional<std::tuple<size_t, LuaUi::Layer>> {
@@ -196,21 +199,22 @@ namespace MWLua
                 };
                 return std::make_tuple(next, layers, 0);
             };
-            layers[sol::meta_function::pairs] = pairs;
-            layers[sol::meta_function::ipairs] = pairs;
+            layersMeta[sol::meta_function::pairs] = pairs;
+            layersMeta[sol::meta_function::ipairs] = pairs;
         }
-        api["layers"] = LuaUtil::makeReadOnly(layers);
+        api["layers"] = layers;
 
-        sol::table typeTable = context.mLua->newTable();
+        sol::table typeTable(lua, sol::create);
         for (const auto& it : LuaUi::widgetTypeToName())
             typeTable.set(it.second, it.first);
         api["TYPE"] = LuaUtil::makeStrictReadOnly(typeTable);
 
-        api["ALIGNMENT"] = LuaUtil::makeStrictReadOnly(
-            context.mLua->tableFromPairs<std::string_view, LuaUi::Alignment>({ { "Start", LuaUi::Alignment::Start },
-                { "Center", LuaUi::Alignment::Center }, { "End", LuaUi::Alignment::End } }));
+        api["ALIGNMENT"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, LuaUi::Alignment>(lua,
+            { { "Start", LuaUi::Alignment::Start }, { "Center", LuaUi::Alignment::Center },
+                { "End", LuaUi::Alignment::End } }));
 
         api["registerSettingsPage"] = &LuaUi::registerSettingsPage;
+        api["removeSettingsPage"] = &LuaUi::removeSettingsPage;
 
         api["texture"] = [luaManager = context.mLuaManager](const sol::table& options) {
             LuaUi::TextureData data;
@@ -225,13 +229,10 @@ namespace MWLua
             sol::object size = LuaUtil::getFieldOrNil(options, "size");
             if (size.is<osg::Vec2f>())
                 data.mSize = size.as<osg::Vec2f>();
-            return luaManager->uiResourceManager()->registerTexture(data);
+            return luaManager->uiResourceManager()->registerTexture(std::move(data));
         };
 
-        api["screenSize"] = []() {
-            return osg::Vec2f(
-                Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
-        };
+        api["screenSize"] = []() { return osg::Vec2f(Settings::video().mResolutionX, Settings::video().mResolutionY); };
 
         api["_getAllUiModes"] = [](sol::this_state lua) {
             sol::table res(lua, sol::create);
@@ -250,9 +251,9 @@ namespace MWLua
             = [windowManager, luaManager = context.mLuaManager](sol::table modes, sol::optional<LObject> arg) {
                   std::vector<MWGui::GuiMode> newStack(modes.size());
                   for (unsigned i = 0; i < newStack.size(); ++i)
-                      newStack[i] = nameToMode.at(LuaUtil::cast<std::string_view>(modes[i + 1]));
+                      newStack[i] = nameToMode.at(LuaUtil::cast<std::string_view>(modes[LuaUtil::toLuaIndex(i)]));
                   luaManager->addAction(
-                      [windowManager, newStack, arg]() {
+                      [windowManager, newStack = std::move(newStack), arg = std::move(arg)]() {
                           MWWorld::Ptr ptr;
                           if (arg.has_value())
                               ptr = arg->ptr();
@@ -263,7 +264,7 @@ namespace MWLua
                           // TODO: Maybe disallow opening/closing special modes (main menu, settings, loading screen)
                           // from player scripts. Add new Lua context "menu" that can do it.
                           for (unsigned i = stack.size() - common; i > 0; i--)
-                              windowManager->popGuiMode();
+                              windowManager->popGuiMode(true);
                           if (common == newStack.size() && !newStack.empty() && arg.has_value())
                               windowManager->pushGuiMode(newStack.back(), ptr);
                           for (unsigned i = common; i < newStack.size(); ++i)
@@ -289,9 +290,54 @@ namespace MWLua
               };
 
         // TODO
-        // api["_showHUD"] = [](bool) {};
         // api["_showMouseCursor"] = [](bool) {};
 
-        return LuaUtil::makeReadOnly(api);
+        return api;
+    }
+
+    sol::table initUserInterfacePackage(const Context& context)
+    {
+        if (context.initializeOnce("openmw_ui_usertypes"))
+        {
+            auto element = context.sol().new_usertype<LuaUi::Element>("UiElement");
+            element[sol::meta_function::to_string] = [](const LuaUi::Element& element) {
+                std::stringstream res;
+                res << "UiElement";
+                if (element.mLayer != "")
+                    res << "[" << element.mLayer << "]";
+                return res.str();
+            };
+            element["layout"] = sol::property([](const LuaUi::Element& element) { return element.mLayout; },
+                [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
+            element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
+                if (element->mState != LuaUi::Element::Created)
+                    return;
+                element->mState = LuaUi::Element::Update;
+                luaManager->addAction([element] { wrapAction(element, [&] { element->update(); }); }, "Update UI");
+            };
+            element["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
+                if (element->mState == LuaUi::Element::Destroyed)
+                    return;
+                element->mState = LuaUi::Element::Destroy;
+                luaManager->addAction(
+                    [element] { wrapAction(element, [&] { LuaUi::Element::erase(element.get()); }); }, "Destroy UI");
+            };
+
+            auto uiLayer = context.sol().new_usertype<LuaUi::Layer>("UiLayer");
+            uiLayer["name"]
+                = sol::readonly_property([](LuaUi::Layer& self) -> std::string_view { return self.name(); });
+            uiLayer["size"] = sol::readonly_property([](LuaUi::Layer& self) { return self.size(); });
+            uiLayer[sol::meta_function::to_string]
+                = [](LuaUi::Layer& self) { return Misc::StringUtils::format("UiLayer(%s)", self.name()); };
+        }
+
+        sol::object cached = context.getTypePackage("openmw_ui");
+        if (cached != sol::nil)
+            return cached;
+        else
+        {
+            sol::table api = LuaUtil::makeReadOnly(registerUiApi(context));
+            return context.setTypePackage(api, "openmw_ui");
+        }
     }
 }

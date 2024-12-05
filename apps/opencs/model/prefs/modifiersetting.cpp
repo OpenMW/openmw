@@ -19,21 +19,22 @@ class QWidget;
 
 namespace CSMPrefs
 {
-    ModifierSetting::ModifierSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label)
-        : Setting(parent, mutex, key, label)
+    ModifierSetting::ModifierSetting(
+        Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index)
+        : TypedSetting(parent, mutex, key, label, index)
         , mButton(nullptr)
         , mEditorActive(false)
     {
     }
 
-    std::pair<QWidget*, QWidget*> ModifierSetting::makeWidgets(QWidget* parent)
+    SettingWidgets ModifierSetting::makeWidgets(QWidget* parent)
     {
         int modifier = 0;
         State::get().getShortcutManager().getModifier(getKey(), modifier);
 
         QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(modifier).c_str());
 
-        QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+        QLabel* label = new QLabel(getLabel(), parent);
         QPushButton* widget = new QPushButton(text, parent);
 
         widget->setCheckable(true);
@@ -46,14 +47,14 @@ namespace CSMPrefs
 
         connect(widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
 
-        return std::make_pair(label, widget);
+        return SettingWidgets{ .mLabel = label, .mInput = widget };
     }
 
     void ModifierSetting::updateWidget()
     {
         if (mButton)
         {
-            const std::string& shortcut = Settings::Manager::getString(getKey(), getParent()->getKey());
+            const std::string& shortcut = getValue();
 
             int modifier;
             State::get().getShortcutManager().convertFromString(shortcut, modifier);
@@ -131,15 +132,7 @@ namespace CSMPrefs
     void ModifierSetting::storeValue(int modifier)
     {
         State::get().getShortcutManager().setModifier(getKey(), modifier);
-
-        // Convert to string and assign
-        std::string value = State::get().getShortcutManager().convertToString(modifier);
-
-        {
-            QMutexLocker lock(getMutex());
-            Settings::Manager::setString(getKey(), getParent()->getKey(), value);
-        }
-
+        setValue(State::get().getShortcutManager().convertToString(modifier));
         getParent()->getState()->update(*this);
     }
 

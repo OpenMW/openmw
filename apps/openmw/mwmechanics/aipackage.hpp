@@ -87,6 +87,8 @@ namespace MWMechanics
 
         /// Get the target actor the AI is targeted at (not applicable to all AI packages, default return empty Ptr)
         virtual MWWorld::Ptr getTarget() const;
+        /// Optimized version of getTarget() == ptr
+        virtual bool targetIs(const MWWorld::Ptr& ptr) const;
 
         /// Get the destination point of the AI package (not applicable to all AI packages, default return (0, 0, 0))
         virtual osg::Vec3f getDestination(const MWWorld::Ptr& actor) const { return osg::Vec3f(0, 0, 0); }
@@ -107,6 +109,10 @@ namespace MWMechanics
         bool getRepeat() const { return mOptions.mRepeat; }
 
         virtual osg::Vec3f getDestination() const { return osg::Vec3f(0, 0, 0); }
+
+        virtual std::optional<int> getDistance() const { return std::nullopt; }
+
+        virtual std::optional<float> getDuration() const { return std::nullopt; }
 
         /// Return true if any loaded actor with this AI package must be active.
         bool alwaysActive() const { return mOptions.mAlwaysActive; }
@@ -150,7 +156,7 @@ namespace MWMechanics
 
         DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
 
-        DetourNavigator::AreaCosts getAreaCosts(const MWWorld::Ptr& actor) const;
+        DetourNavigator::AreaCosts getAreaCosts(const MWWorld::Ptr& actor, DetourNavigator::Flags flags) const;
 
         const AiPackageTypeId mTypeId;
         const Options mOptions;

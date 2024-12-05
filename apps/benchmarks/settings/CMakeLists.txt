@@ -8,7 +8,7 @@ if (UNIX AND NOT APPLE)
     target_link_libraries(openmw_settings_access_benchmark ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if (MSVC)
+if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw_settings_access_benchmark PRIVATE <algorithm>)
 endif()
 

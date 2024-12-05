@@ -15,11 +15,11 @@ namespace MWSound
             return;
 
         int samplesPerSegment = static_cast<int>(mSampleRate / mSamplesPerSec);
-        int numSamples = bytesToFrames(mQueue.size(), mChannelConfig, mSampleType);
-        int advance = framesToBytes(1, mChannelConfig, mSampleType);
+        std::size_t numSamples = bytesToFrames(mQueue.size(), mChannelConfig, mSampleType);
+        std::size_t advance = framesToBytes(1, mChannelConfig, mSampleType);
 
-        int segment = 0;
-        int sample = 0;
+        std::size_t segment = 0;
+        std::size_t sample = 0;
         while (segment < numSamples / samplesPerSegment)
         {
             float sum = 0;
@@ -61,7 +61,7 @@ namespace MWSound
         if (mSamplesPerSec <= 0.0f || mSamples.empty() || sec < 0.0f)
             return 0.0f;
 
-        size_t index = std::clamp<size_t>(sec * mSamplesPerSec, 0, mSamples.size() - 1);
+        size_t index = std::min(static_cast<size_t>(sec * mSamplesPerSec), mSamples.size() - 1);
         return mSamples[index];
     }
 

@@ -1,0 +1,62 @@
+#include <components/version/version.hpp>
+
+#include <filesystem>
+#include <fstream>
+
+namespace Version
+{
+    std::string_view getVersion()
+    {
+        return "@OPENMW_VERSION@";
+    }
+
+    std::string_view getCommitHash()
+    {
+        return "@OPENMW_VERSION_COMMITHASH@";
+    }
+
+    std::string_view getTagHash()
+    {
+        return "@OPENMW_VERSION_TAGHASH@";
+    }
+
+    int getLuaApiRevision()
+    {
+        return @OPENMW_LUA_API_REVISION@;
+    }
+
+    int getPostprocessingApiRevision()
+    {
+        return @OPENMW_POSTPROCESSING_API_REVISION@;
+    }
+
+    std::string getOpenmwVersionDescription()
+    {
+        std::string str = "OpenMW version ";
+        str += getVersion();
+        if (!getCommitHash().empty())
+        {
+            str += "\nRevision: ";
+            str += getCommitHash().substr(0, 10);
+        }
+        return str;
+    }
+
+    bool checkResourcesVersion(const std::filesystem::path& resourcePath)
+    {
+        std::ifstream stream(resourcePath / "version");
+        std::string version, commitHash, tagHash;
+        std::getline(stream, version);
+        std::getline(stream, commitHash);
+        std::getline(stream, tagHash);
+        return getVersion() == version && getCommitHash() == commitHash && getTagHash() == tagHash;
+    }
+
+    std::string_view getDocumentationUrl()
+    {
+        if constexpr (std::string_view("@OPENMW_VERSION_COMMITHASH@") == "@OPENMW_VERSION_TAGHASH@")
+            return OPENMW_DOC_BASEURL "openmw-@OPENMW_VERSION_MAJOR@.@OPENMW_VERSION_MINOR@.@OPENMW_VERSION_RELEASE@/";
+        else
+            return OPENMW_DOC_BASEURL "latest/";
+    }
+}

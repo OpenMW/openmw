@@ -42,16 +42,16 @@ void ESM4::Quest::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getZString(mQuestName);
                 break;
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mFileName);
                 break; // TES4 (none in FO3/FONV)
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
             {
                 if (subHdr.dataSize == 2) // TES4
                 {
@@ -66,10 +66,10 @@ void ESM4::Quest::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mQuestScript);
                 break;
-            case ESM4::SUB_CTDA: // FIXME: how to detect if 1st/2nd param is a formid?
+            case ESM::fourCC("CTDA"): // FIXME: how to detect if 1st/2nd param is a formid?
             {
                 if (subHdr.dataSize == 24) // TES4
                 {
@@ -95,80 +95,80 @@ void ESM4::Quest::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_SCHR:
+            case ESM::fourCC("SCHR"):
                 reader.get(mScript.scriptHeader);
                 break;
-            case ESM4::SUB_SCDA:
+            case ESM::fourCC("SCDA"):
                 reader.skipSubRecordData();
                 break; // compiled script data
-            case ESM4::SUB_SCTX:
+            case ESM::fourCC("SCTX"):
                 reader.getString(mScript.scriptSource);
                 break;
-            case ESM4::SUB_SCRO:
+            case ESM::fourCC("SCRO"):
                 reader.getFormId(mScript.globReference);
                 break;
-            case ESM4::SUB_INDX:
-            case ESM4::SUB_QSDT:
-            case ESM4::SUB_CNAM:
-            case ESM4::SUB_QSTA:
-            case ESM4::SUB_NNAM: // FO3
-            case ESM4::SUB_QOBJ: // FO3
-            case ESM4::SUB_NAM0: // FO3
-            case ESM4::SUB_ANAM: // TES5
-            case ESM4::SUB_DNAM: // TES5
-            case ESM4::SUB_ENAM: // TES5
-            case ESM4::SUB_FNAM: // TES5
-            case ESM4::SUB_NEXT: // TES5
-            case ESM4::SUB_ALCA: // TES5
-            case ESM4::SUB_ALCL: // TES5
-            case ESM4::SUB_ALCO: // TES5
-            case ESM4::SUB_ALDN: // TES5
-            case ESM4::SUB_ALEA: // TES5
-            case ESM4::SUB_ALED: // TES5
-            case ESM4::SUB_ALEQ: // TES5
-            case ESM4::SUB_ALFA: // TES5
-            case ESM4::SUB_ALFC: // TES5
-            case ESM4::SUB_ALFD: // TES5
-            case ESM4::SUB_ALFE: // TES5
-            case ESM4::SUB_ALFI: // TES5
-            case ESM4::SUB_ALFL: // TES5
-            case ESM4::SUB_ALFR: // TES5
-            case ESM4::SUB_ALID: // TES5
-            case ESM4::SUB_ALLS: // TES5
-            case ESM4::SUB_ALNA: // TES5
-            case ESM4::SUB_ALNT: // TES5
-            case ESM4::SUB_ALPC: // TES5
-            case ESM4::SUB_ALRT: // TES5
-            case ESM4::SUB_ALSP: // TES5
-            case ESM4::SUB_ALST: // TES5
-            case ESM4::SUB_ALUA: // TES5
-            case ESM4::SUB_CIS1: // TES5
-            case ESM4::SUB_CIS2: // TES5
-            case ESM4::SUB_CNTO: // TES5
-            case ESM4::SUB_COCT: // TES5
-            case ESM4::SUB_ECOR: // TES5
-            case ESM4::SUB_FLTR: // TES5
-            case ESM4::SUB_KNAM: // TES5
-            case ESM4::SUB_KSIZ: // TES5
-            case ESM4::SUB_KWDA: // TES5
-            case ESM4::SUB_QNAM: // TES5
-            case ESM4::SUB_QTGL: // TES5
-            case ESM4::SUB_SPOR: // TES5
-            case ESM4::SUB_VMAD: // TES5
-            case ESM4::SUB_VTCK: // TES5
-            case ESM4::SUB_ALCC: // FO4
-            case ESM4::SUB_ALCS: // FO4
-            case ESM4::SUB_ALDI: // FO4
-            case ESM4::SUB_ALFV: // FO4
-            case ESM4::SUB_ALLA: // FO4
-            case ESM4::SUB_ALMI: // FO4
-            case ESM4::SUB_GNAM: // FO4
-            case ESM4::SUB_GWOR: // FO4
-            case ESM4::SUB_LNAM: // FO4
-            case ESM4::SUB_NAM2: // FO4
-            case ESM4::SUB_OCOR: // FO4
-            case ESM4::SUB_SNAM: // FO4
-            case ESM4::SUB_XNAM: // FO4
+            case ESM::fourCC("INDX"):
+            case ESM::fourCC("QSDT"):
+            case ESM::fourCC("CNAM"):
+            case ESM::fourCC("QSTA"):
+            case ESM::fourCC("NNAM"): // FO3
+            case ESM::fourCC("QOBJ"): // FO3
+            case ESM::fourCC("NAM0"): // FO3
+            case ESM::fourCC("ANAM"): // TES5
+            case ESM::fourCC("DNAM"): // TES5
+            case ESM::fourCC("ENAM"): // TES5
+            case ESM::fourCC("FNAM"): // TES5
+            case ESM::fourCC("NEXT"): // TES5
+            case ESM::fourCC("ALCA"): // TES5
+            case ESM::fourCC("ALCL"): // TES5
+            case ESM::fourCC("ALCO"): // TES5
+            case ESM::fourCC("ALDN"): // TES5
+            case ESM::fourCC("ALEA"): // TES5
+            case ESM::fourCC("ALED"): // TES5
+            case ESM::fourCC("ALEQ"): // TES5
+            case ESM::fourCC("ALFA"): // TES5
+            case ESM::fourCC("ALFC"): // TES5
+            case ESM::fourCC("ALFD"): // TES5
+            case ESM::fourCC("ALFE"): // TES5
+            case ESM::fourCC("ALFI"): // TES5
+            case ESM::fourCC("ALFL"): // TES5
+            case ESM::fourCC("ALFR"): // TES5
+            case ESM::fourCC("ALID"): // TES5
+            case ESM::fourCC("ALLS"): // TES5
+            case ESM::fourCC("ALNA"): // TES5
+            case ESM::fourCC("ALNT"): // TES5
+            case ESM::fourCC("ALPC"): // TES5
+            case ESM::fourCC("ALRT"): // TES5
+            case ESM::fourCC("ALSP"): // TES5
+            case ESM::fourCC("ALST"): // TES5
+            case ESM::fourCC("ALUA"): // TES5
+            case ESM::fourCC("CIS1"): // TES5
+            case ESM::fourCC("CIS2"): // TES5
+            case ESM::fourCC("CNTO"): // TES5
+            case ESM::fourCC("COCT"): // TES5
+            case ESM::fourCC("ECOR"): // TES5
+            case ESM::fourCC("FLTR"): // TES5
+            case ESM::fourCC("KNAM"): // TES5
+            case ESM::fourCC("KSIZ"): // TES5
+            case ESM::fourCC("KWDA"): // TES5
+            case ESM::fourCC("QNAM"): // TES5
+            case ESM::fourCC("QTGL"): // TES5
+            case ESM::fourCC("SPOR"): // TES5
+            case ESM::fourCC("VMAD"): // TES5
+            case ESM::fourCC("VTCK"): // TES5
+            case ESM::fourCC("ALCC"): // FO4
+            case ESM::fourCC("ALCS"): // FO4
+            case ESM::fourCC("ALDI"): // FO4
+            case ESM::fourCC("ALFV"): // FO4
+            case ESM::fourCC("ALLA"): // FO4
+            case ESM::fourCC("ALMI"): // FO4
+            case ESM::fourCC("GNAM"): // FO4
+            case ESM::fourCC("GWOR"): // FO4
+            case ESM::fourCC("LNAM"): // FO4
+            case ESM::fourCC("NAM2"): // FO4
+            case ESM::fourCC("OCOR"): // FO4
+            case ESM::fourCC("SNAM"): // FO4
+            case ESM::fourCC("XNAM"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

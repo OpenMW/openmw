@@ -5,28 +5,36 @@ namespace Nif
     void Extra::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
-            name = nif->getString();
+            nif->read(mName);
         else if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
         {
-            next.read(nif);
-            recordSize = nif->getUInt();
+            mNext.read(nif);
+            nif->read(mRecordSize);
         }
     }
 
-    void Named::read(NIFStream* nif)
+    void NiObjectNET::read(NIFStream* nif)
     {
-        name = nif->getString();
+        nif->read(mName);
         if (nif->getVersion() < NIFStream::generateVersion(10, 0, 1, 0))
-            extra.read(nif);
+            mExtra.read(nif);
         else
-            readRecordList(nif, extralist);
-        controller.read(nif);
+            readRecordList(nif, mExtraList);
+        mController.read(nif);
     }
 
-    void Named::post(Reader& nif)
+    void NiObjectNET::post(Reader& nif)
     {
-        extra.post(nif);
-        postRecordList(nif, extralist);
-        controller.post(nif);
+        mExtra.post(nif);
+        postRecordList(nif, mExtraList);
+        mController.post(nif);
+    }
+
+    ExtraList NiObjectNET::getExtraList() const
+    {
+        ExtraList list = mExtraList;
+        for (ExtraPtr extra = mExtra; !extra.empty(); extra = extra->mNext)
+            list.emplace_back(extra);
+        return list;
     }
 }

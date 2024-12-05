@@ -6,7 +6,6 @@
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/ColorMask>
-#include <osg/ColorMaski>
 #include <osg/Depth>
 #include <osg/Geometry>
 #include <osg/Material>
@@ -29,6 +28,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/texturetype.hpp>
 
 #include <components/fallback/fallback.hpp>
 
@@ -406,7 +406,7 @@ namespace MWRender
             }
         }
 
-        void setTextures(const std::string& phaseTex, const std::string& circleTex)
+        void setTextures(VFS::Path::NormalizedView phaseTex, VFS::Path::NormalizedView circleTex)
         {
             mPhaseTex = new osg::Texture2D(mImageManager.getImage(phaseTex));
             mPhaseTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -766,12 +766,15 @@ namespace MWRender
 
         Resource::ImageManager& imageManager = *sceneManager.getImageManager();
 
-        osg::ref_ptr<osg::Texture2D> sunTex = new osg::Texture2D(imageManager.getImage("textures/tx_sun_05.dds"));
+        constexpr VFS::Path::NormalizedView image("textures/tx_sun_05.dds");
+
+        osg::ref_ptr<osg::Texture2D> sunTex = new osg::Texture2D(imageManager.getImage(image));
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        sunTex->setName("diffuseMap");
 
         mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex);
+        mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(
+            0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         mGeom->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sun)));
 
         osg::ref_ptr<osg::Group> queryNode = new osg::Group;
@@ -788,14 +791,14 @@ namespace MWRender
             stateset->setAttributeAndModes(alphaFunc);
         }
         stateset->setTextureAttributeAndModes(0, sunTex);
+        stateset->setTextureAttributeAndModes(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         stateset->setAttributeAndModes(createUnlitMaterial());
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunflash_Query)));
 
         // Disable writing to the color buffer. We are using this geometry for visibility tests only.
         osg::ref_ptr<osg::ColorMask> colormask = new osg::ColorMask(0, 0, 0, 0);
         stateset->setAttributeAndModes(colormask);
-        if (sceneManager.getSupportsNormalsRT())
-            stateset->setAttributeAndModes(new osg::ColorMaski(1, false, false, false, false));
+        sceneManager.setUpNormalsRTForStateSet(stateset, false);
         mTransform->addChild(queryNode);
 
         mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryNode, true);
@@ -882,12 +885,11 @@ namespace MWRender
         osg::StateSet* queryStateSet = new osg::StateSet;
         if (queryVisible)
         {
-            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth(osg::Depth::LEQUAL);
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
             // This is a trick to make fragments written by the query always use the maximum depth value,
             // without having to retrieve the current far clipping distance.
             // We want the sun glare to be "infinitely" far away.
             double far = SceneUtil::AutoDepth::isReversed() ? 0.0 : 1.0;
-            depth->setFunction(osg::Depth::LEQUAL);
             depth->setZNear(far);
             depth->setZFar(far);
             depth->setWriteMask(false);
@@ -906,11 +908,10 @@ namespace MWRender
 
     void Sun::createSunFlash(Resource::ImageManager& imageManager)
     {
-        osg::ref_ptr<osg::Texture2D> tex
-            = new osg::Texture2D(imageManager.getImage("textures/tx_sun_flash_grey_05.dds"));
+        constexpr VFS::Path::NormalizedView image("textures/tx_sun_flash_grey_05.dds");
+        osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D(imageManager.getImage(image));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        tex->setName("diffuseMap");
 
         osg::ref_ptr<osg::Group> group(new osg::Group);
 
@@ -923,6 +924,7 @@ namespace MWRender
         osg::StateSet* stateset = geom->getOrCreateStateSet();
 
         stateset->setTextureAttributeAndModes(0, tex);
+        stateset->setTextureAttributeAndModes(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
@@ -1114,10 +1116,18 @@ namespace MWRender
 
         textureName += ".dds";
 
+        const VFS::Path::Normalized texturePath(std::move(textureName));
+
         if (mType == Moon::Type_Secunda)
-            mUpdater->setTextures(textureName, "textures/tx_mooncircle_full_s.dds");
+        {
+            constexpr VFS::Path::NormalizedView secunda("textures/tx_mooncircle_full_s.dds");
+            mUpdater->setTextures(texturePath, secunda);
+        }
         else
-            mUpdater->setTextures(textureName, "textures/tx_mooncircle_full_m.dds");
+        {
+            constexpr VFS::Path::NormalizedView masser("textures/tx_mooncircle_full_m.dds");
+            mUpdater->setTextures(texturePath, masser);
+        }
     }
 
     int RainCounter::numParticlesToCreate(double dt) const

@@ -16,6 +16,7 @@
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "ref.hpp"
 
@@ -89,6 +90,13 @@ namespace MWScript
                 ESM::RefId topic = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
+                if (!MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topic))
+                {
+                    runtime.getContext().report(
+                        "Failed to add topic '" + topic.getRefIdString() + "': topic record not found");
+                    return;
+                }
+
                 MWBase::Environment::get().getDialogueManager()->addTopic(topic);
             }
         };
@@ -134,6 +142,15 @@ namespace MWScript
                     Log(Debug::Warning) << error;
                     return;
                 }
+
+                bool greetWerewolves = false;
+                const ESM::RefId& script = ptr.getClass().getScript(ptr);
+                if (!script.empty())
+                    greetWerewolves = ptr.getRefData().getLocals().hasVar(script, "allowwerewolfforcegreeting");
+
+                const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                if (player.getClass().getNpcStats(player).isWerewolf() && !greetWerewolves)
+                    return;
 
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue, ptr);
             }

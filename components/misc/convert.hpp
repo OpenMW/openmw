@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_MISC_CONVERT_H
 #define OPENMW_COMPONENTS_MISC_CONVERT_H
 
-#include <components/esm/defs.hpp>
+#include <components/esm/position.hpp>
 #include <components/esm3/loadpgrd.hpp>
 
 #include <LinearMath/btQuaternion.h>

@@ -8,7 +8,7 @@
 
 #include <components/esm3/loadregn.hpp>
 #include <components/misc/strings/format.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -186,7 +186,7 @@ namespace MWGui
 
     void WaitDialog::startWaiting(int hoursToWait)
     {
-        if (Settings::Manager::getBool("autosave", "Saves")) // autosaves when enabled
+        if (Settings::saves().mAutosave) // autosaves when enabled
             MWBase::Environment::get().getStateManager()->quickSave("Autosave");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();

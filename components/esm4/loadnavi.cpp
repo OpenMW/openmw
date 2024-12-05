@@ -241,17 +241,16 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: // seems to be unused?
+            case ESM::fourCC("EDID"): // seems to be unused?
             {
                 if (!reader.getZString(mEditorId))
                     throw std::runtime_error("NAVI EDID data read error");
                 break;
             }
-            case ESM4::SUB_NVPP:
+            case ESM::fourCC("NVPP"):
             {
-                // FIXME: this is both the version for FO4 and for some TES4 files
-                // How to distinguish?
-                if (esmVer == ESM::VER_100)
+                // FIXME: FO4 updates the format
+                if (reader.hasFormVersion() && (esmVer == ESM::VER_095 || esmVer == ESM::VER_100))
                 {
                     reader.skipSubRecordData();
                     break;
@@ -331,14 +330,14 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 }
                 break;
             }
-            case ESM4::SUB_NVER:
+            case ESM::fourCC("NVER"):
             {
                 std::uint32_t version; // always the same? (0x0c)
                 reader.get(version); // TODO: store this or use it for merging?
                 // std::cout << "NAVI version " << std::dec << version << std::endl;
                 break;
             }
-            case ESM4::SUB_NVMI: // multiple
+            case ESM::fourCC("NVMI"): // multiple
             {
                 // Can only read TES4 navmesh data
                 // Note FO4 FIXME above
@@ -354,8 +353,8 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 mNavMeshInfo.push_back(nvmi);
                 break;
             }
-            case ESM4::SUB_NVSI: // from Dawnguard onwards
-            case ESM4::SUB_NVCI: // FO3
+            case ESM::fourCC("NVSI"): // from Dawnguard onwards
+            case ESM::fourCC("NVCI"): // FO3
             {
                 reader.skipSubRecordData(); // FIXME:
                 break;

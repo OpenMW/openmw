@@ -50,6 +50,8 @@ namespace DetourNavigator
     }
 
     TilesPositionsRange getIntersection(const TilesPositionsRange& a, const TilesPositionsRange& b) noexcept;
+
+    TilesPositionsRange getUnion(const TilesPositionsRange& a, const TilesPositionsRange& b) noexcept;
 }
 
 #endif

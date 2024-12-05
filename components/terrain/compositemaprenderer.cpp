@@ -43,19 +43,18 @@ namespace Terrain
             mImmediateCompileSet.erase(node);
 
             mMutex.unlock();
-            compile(*node, renderInfo, nullptr);
+            compile(*node, renderInfo);
             mMutex.lock();
         }
 
-        double timeLeft = availableTime;
-
-        while (!mCompileSet.empty() && timeLeft > 0)
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::duration<double>(availableTime);
+        while (!mCompileSet.empty() && std::chrono::steady_clock::now() < deadline)
         {
             osg::ref_ptr<CompositeMap> node = *mCompileSet.begin();
             mCompileSet.erase(node);
 
             mMutex.unlock();
-            compile(*node, renderInfo, &timeLeft);
+            compile(*node, renderInfo);
             mMutex.lock();
 
             if (node->mCompiled < node->mDrawables.size())
@@ -68,7 +67,7 @@ namespace Terrain
         mTimer.setStartTick();
     }
 
-    void CompositeMapRenderer::compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo, double* timeLeft) const
+    void CompositeMapRenderer::compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo) const
     {
         // if there are no more external references we can assume the texture is no longer required
         if (compositeMap.mTexture->referenceCount() <= 1)
@@ -124,15 +123,6 @@ namespace Terrain
             ++compositeMap.mCompiled;
 
             compositeMap.mDrawables[i] = nullptr;
-
-            if (timeLeft)
-            {
-                *timeLeft -= timer.time_s();
-                timer.setStartTick();
-
-                if (*timeLeft <= 0)
-                    break;
-            }
         }
         if (compositeMap.mCompiled == compositeMap.mDrawables.size())
             compositeMap.mDrawables = std::vector<osg::ref_ptr<osg::Drawable>>();

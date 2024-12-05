@@ -5,6 +5,7 @@
 
 #include "setting.hpp"
 #include "state.hpp"
+#include "subcategory.hpp"
 
 CSMPrefs::Category::Category(State* parent, const std::string& key)
     : mParent(parent)
@@ -24,6 +25,14 @@ CSMPrefs::State* CSMPrefs::Category::getState() const
 
 void CSMPrefs::Category::addSetting(Setting* setting)
 {
+    if (!mIndex.emplace(setting->getKey(), setting).second)
+        throw std::logic_error("Category " + mKey + " already has setting: " + setting->getKey());
+
+    mSettings.push_back(setting);
+}
+
+void CSMPrefs::Category::addSubcategory(Subcategory* setting)
+{
     mSettings.push_back(setting);
 }
 
@@ -39,11 +48,12 @@ CSMPrefs::Category::Iterator CSMPrefs::Category::end()
 
 CSMPrefs::Setting& CSMPrefs::Category::operator[](const std::string& key)
 {
-    for (Iterator iter = mSettings.begin(); iter != mSettings.end(); ++iter)
-        if ((*iter)->getKey() == key)
-            return **iter;
+    const auto it = mIndex.find(key);
 
-    throw std::logic_error("Invalid user setting: " + key);
+    if (it != mIndex.end())
+        return *it->second;
+
+    throw std::logic_error("Invalid user setting in " + mKey + " category: " + key);
 }
 
 void CSMPrefs::Category::update()

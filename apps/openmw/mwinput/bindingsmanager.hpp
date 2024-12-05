@@ -47,8 +47,8 @@ namespace MWInput
 
         SDL_GameController* getControllerOrNull() const;
 
-        void mousePressed(const SDL_MouseButtonEvent& evt, int deviceID);
-        void mouseReleased(const SDL_MouseButtonEvent& arg, int deviceID);
+        void mousePressed(const SDL_MouseButtonEvent& evt, Uint8 deviceID);
+        void mouseReleased(const SDL_MouseButtonEvent& arg, Uint8 deviceID);
         void mouseMoved(const SDLUtil::MouseMotionEvent& arg);
         void mouseWheelMoved(const SDL_MouseWheelEvent& arg);
 

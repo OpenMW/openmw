@@ -41,13 +41,13 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DATA:
+            case ESM::fourCC("DATA"):
                 if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 {
                     reader.get(mData.value);
@@ -61,24 +61,24 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
                     reader.get(mData.quality);
                 }
                 break;
-            case ESM4::SUB_ICON:
+            case ESM::fourCC("ICON"):
                 reader.getZString(mIcon);
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_MODB:
+            case ESM::fourCC("MODB"):
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_DESC:
+            case ESM::fourCC("DESC"):
                 reader.getLocalizedString(mText);
                 break;
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_QUAL:
+            case ESM::fourCC("MODT"):
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("QUAL"):
                 reader.skipSubRecordData();
                 break;
             default:

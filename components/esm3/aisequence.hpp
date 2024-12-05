@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "components/esm/refid.hpp"
-#include "components/esm/util.hpp"
+#include <components/esm/refid.hpp>
+#include <components/esm/vector3.hpp>
 
 namespace ESM
 {
@@ -36,31 +36,30 @@ namespace ESM
             virtual ~AiPackage() {}
         };
 
-#pragma pack(push, 1)
         struct AiWanderData
         {
             int16_t mDistance;
             int16_t mDuration;
-            unsigned char mTimeOfDay;
-            unsigned char mIdle[8];
-            unsigned char mShouldRepeat;
+            std::uint8_t mTimeOfDay;
+            std::uint8_t mIdle[8];
+            std::uint8_t mShouldRepeat;
         };
+
         struct AiWanderDuration
         {
             float mRemainingDuration;
-            int32_t unused;
         };
+
         struct AiTravelData
         {
             float mX, mY, mZ;
         };
+
         struct AiEscortData
         {
             float mX, mY, mZ;
             int16_t mDuration;
         };
-
-#pragma pack(pop)
 
         struct AiWander : AiPackage
         {

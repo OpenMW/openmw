@@ -9,13 +9,14 @@ namespace LuaUi
     {
         MYGUI_RTTI_DERIVED(LuaContainer)
 
-        MyGUI::IntSize calculateSize() override;
+    public:
+        MyGUI::IntSize calculateSize() const override;
         void updateCoord() override;
 
     protected:
         void updateChildren() override;
-        MyGUI::IntSize childScalingSize() override;
-        MyGUI::IntSize templateScalingSize() override;
+        MyGUI::IntSize childScalingSize() const override;
+        MyGUI::IntSize templateScalingSize() const override;
 
     private:
         void updateSizeToFit();

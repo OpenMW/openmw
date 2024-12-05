@@ -27,9 +27,6 @@ If enabled, this setting allows the NIF loader to make use of that functionality
 	
 	**Do not enable** this if you're not so sure that you know what you're doing.
 
-To help debug possible issues OpenMW will log its progress in loading
-every file that uses an unsupported NIF version.
-
 xbaseanim
 ---------
 
@@ -263,13 +260,3 @@ weatherblizzard
 Path to the file used for the blizzard clouds weather effect in Morrowind. 
 OpenMW doesn't use this file, instead it renders a similar looking particle 
 effect. Changing this won't have any effect.
-
-write nif debug log
--------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	True
-
-If enabled, log the loading process of unsupported NIF files.
-:ref:`load unsupported nif files` setting must be enabled for this setting to have any effect.

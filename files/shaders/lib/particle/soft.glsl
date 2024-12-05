@@ -19,7 +19,8 @@ float calcSoftParticleFade(
     float far,
     float depth,
     float size,
-    bool fade
+    bool fade,
+    float softFalloffDepth
     )
 {
     float euclidianDepth = length(viewPos);
@@ -32,13 +33,12 @@ float calcSoftParticleFade(
     float falloff = size * falloffMultiplier;
     float delta = particleDepth - sceneDepth;
 
-    const float nearMult = 300.0;
     float viewBias = 1.0;
 
     if (fade)
     {
         float VdotN = dot(viewDir, viewNormal);
-        viewBias = abs(VdotN) * quickstep(euclidianDepth / nearMult) * (1.0 - pow(1.0 + VdotN, 1.3));
+        viewBias = abs(VdotN) * quickstep(euclidianDepth / softFalloffDepth) * (1.0 - pow(1.0 - abs(VdotN), 1.3));
     }
 
     const float shift = 0.845;

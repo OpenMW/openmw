@@ -5,6 +5,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextBox.h>
+#include <MyGUI_UString.h>
 
 #include <components/fallback/fallback.hpp>
 #include <components/widgets/box.hpp>
@@ -21,8 +22,9 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwsound/constants.hpp"
+
 #include "class.hpp"
-#include "ustring.hpp"
 
 namespace
 {
@@ -164,8 +166,10 @@ namespace MWGui
         const MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         setClassImage(mClassImage,
-            ESM::RefId::stringRefId(getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
-                pcStats.getSkillIncreasesForSpecialization(1), pcStats.getSkillIncreasesForSpecialization(2))));
+            ESM::RefId::stringRefId(
+                getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(ESM::Class::Specialization::Combat),
+                    pcStats.getSkillIncreasesForSpecialization(ESM::Class::Specialization::Magic),
+                    pcStats.getSkillIncreasesForSpecialization(ESM::Class::Specialization::Stealth))));
 
         int level = creatureStats.getLevel() + 1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
@@ -176,7 +180,7 @@ namespace MWGui
         if (levelupdescription.empty())
             levelupdescription = Fallback::Map::getString("Level_Up_Default");
 
-        mLevelDescription->setCaption(toUString(levelupdescription));
+        mLevelDescription->setCaption(MyGUI::UString(levelupdescription));
 
         unsigned int availableAttributes = 0;
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
@@ -214,7 +218,7 @@ namespace MWGui
         center();
 
         // Play LevelUp Music
-        MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Triumph.mp3");
+        MWBase::Environment::get().getSoundManager()->streamMusic(MWSound::triumphMusic, MWSound::MusicType::Normal);
     }
 
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)

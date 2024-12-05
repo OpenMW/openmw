@@ -41,17 +41,17 @@ void CSMTools::RaceCheckStage::performPerRecord(int stage, CSMDoc::Messages& mes
         messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for positive height
-    if (race.mData.mHeight.mMale <= 0)
+    if (race.mData.mMaleHeight <= 0)
         messages.add(id, "Male height is non-positive", "", CSMDoc::Message::Severity_Error);
 
-    if (race.mData.mHeight.mFemale <= 0)
+    if (race.mData.mFemaleHeight <= 0)
         messages.add(id, "Female height is non-positive", "", CSMDoc::Message::Severity_Error);
 
     // test for non-negative weight
-    if (race.mData.mWeight.mMale < 0)
+    if (race.mData.mMaleWeight < 0)
         messages.add(id, "Male weight is negative", "", CSMDoc::Message::Severity_Error);
 
-    if (race.mData.mWeight.mFemale < 0)
+    if (race.mData.mFemaleWeight < 0)
         messages.add(id, "Female weight is negative", "", CSMDoc::Message::Severity_Error);
 
     /// \todo check data members that can't be edited in the table view

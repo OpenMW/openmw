@@ -4,8 +4,10 @@
 #include <string>
 #include <vector>
 
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
+
+#include "dialoguecondition.hpp"
 #include "variant.hpp"
 
 namespace ESM
@@ -35,25 +37,17 @@ namespace ESM
 
         struct DATAstruct
         {
-            int mUnknown1 = 0;
+            int32_t mType = 0; // See Dialogue::Type
             union
             {
-                int mDisposition = 0; // Used for dialogue responses
-                int mJournalIndex; // Used for journal entries
+                int32_t mDisposition = 0; // Used for dialogue responses
+                int32_t mJournalIndex; // Used for journal entries
             };
             signed char mRank = -1; // Rank of NPC
             signed char mGender = Gender::NA; // See Gender enum
             signed char mPCrank = -1; // Player rank
-            signed char mUnknown2 = 0;
         }; // 12 bytes
         DATAstruct mData;
-
-        // The rules for whether or not we will select this dialog item.
-        struct SelectStruct
-        {
-            std::string mSelectRule; // This has a complicated format
-            Variant mValue;
-        };
 
         // Journal quest indices (introduced with the quest system in Tribunal)
         enum QuestStatus
@@ -66,7 +60,7 @@ namespace ESM
 
         // Rules for when to include this item in the final list of options
         // visible to the player.
-        std::vector<SelectStruct> mSelects;
+        std::vector<DialogueCondition> mSelects;
 
         // Id of this, previous and next INFO items
         RefId mId, mPrev, mNext;

@@ -15,12 +15,11 @@
 #include "state.hpp"
 
 CSMPrefs::DoubleSetting::DoubleSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, double default_)
-    : Setting(parent, mutex, key, label)
+    Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index)
+    : TypedSetting(parent, mutex, key, label, index)
     , mPrecision(2)
     , mMin(0)
     , mMax(std::numeric_limits<double>::max())
-    , mDefault(default_)
     , mWidget(nullptr)
 {
 }
@@ -56,14 +55,14 @@ CSMPrefs::DoubleSetting& CSMPrefs::DoubleSetting::setTooltip(const std::string& 
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::DoubleSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::DoubleSetting::makeWidgets(QWidget* parent)
 {
-    QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+    QLabel* label = new QLabel(getLabel(), parent);
 
     mWidget = new QDoubleSpinBox(parent);
     mWidget->setDecimals(mPrecision);
     mWidget->setRange(mMin, mMax);
-    mWidget->setValue(mDefault);
+    mWidget->setValue(getValue());
 
     if (!mTooltip.empty())
     {
@@ -74,23 +73,17 @@ std::pair<QWidget*, QWidget*> CSMPrefs::DoubleSetting::makeWidgets(QWidget* pare
 
     connect(mWidget, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &DoubleSetting::valueChanged);
 
-    return std::make_pair(label, mWidget);
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget };
 }
 
 void CSMPrefs::DoubleSetting::updateWidget()
 {
     if (mWidget)
-    {
-        mWidget->setValue(Settings::Manager::getFloat(getKey(), getParent()->getKey()));
-    }
+        mWidget->setValue(getValue());
 }
 
 void CSMPrefs::DoubleSetting::valueChanged(double value)
 {
-    {
-        QMutexLocker lock(getMutex());
-        Settings::Manager::setFloat(getKey(), getParent()->getKey(), value);
-    }
-
+    setValue(value);
     getParent()->getState()->update(*this);
 }

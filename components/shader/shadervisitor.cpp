@@ -22,9 +22,12 @@
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/sceneutil/texturetype.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
 #include <components/vfs/manager.hpp>
@@ -181,7 +184,9 @@ namespace Shader
         , mAlphaBlend(false)
         , mBlendFuncOverridden(false)
         , mAdditiveBlending(false)
+        , mDiffuseHeight(false)
         , mNormalHeight(false)
+        , mReconstructNormalZ(false)
         , mTexStageRequiringTangents(-1)
         , mSoftParticles(false)
         , mNode(nullptr)
@@ -325,7 +330,7 @@ namespace Shader
                     const osg::Texture* texture = attr->asTexture();
                     if (texture)
                     {
-                        std::string texName = texture->getName();
+                        std::string texName = SceneUtil::getTextureType(*stateset, *texture, unit);
                         if ((texName.empty() || !isTextureNameRecognized(texName)) && unit == 0)
                             texName = "diffuseMap";
 
@@ -350,7 +355,17 @@ namespace Shader
                                 normalMap = texture;
                             }
                             else if (texName == "diffuseMap")
+                            {
+                                int applyMode;
+                                // Oblivion parallax
+                                if (node.getUserValue("applyMode", applyMode) && applyMode == 4)
+                                {
+                                    mRequirements.back().mShaderRequired = true;
+                                    mRequirements.back().mDiffuseHeight = true;
+                                    mRequirements.back().mTexStageRequiringTangents = unit;
+                                }
                                 diffuseMap = texture;
+                            }
                             else if (texName == "specularMap")
                                 specularMap = texture;
                             else if (texName == "bumpMap")
@@ -389,17 +404,19 @@ namespace Shader
                 bool normalHeight = false;
                 std::string normalHeightMap = normalMapFileName;
                 Misc::StringUtils::replaceLast(normalHeightMap, ".", mNormalHeightMapPattern + ".");
-                if (mImageManager.getVFS()->exists(normalHeightMap))
+                const VFS::Path::Normalized normalHeightMapPath(normalHeightMap);
+                if (mImageManager.getVFS()->exists(normalHeightMapPath))
                 {
-                    image = mImageManager.getImage(normalHeightMap);
+                    image = mImageManager.getImage(normalHeightMapPath);
                     normalHeight = true;
                 }
                 else
                 {
                     Misc::StringUtils::replaceLast(normalMapFileName, ".", mNormalMapPattern + ".");
-                    if (mImageManager.getVFS()->exists(normalMapFileName))
+                    const VFS::Path::Normalized normalMapPath(normalMapFileName);
+                    if (mImageManager.getVFS()->exists(normalMapPath))
                     {
-                        image = mImageManager.getImage(normalMapFileName);
+                        image = mImageManager.getImage(normalMapPath);
                     }
                 }
                 // Avoid using the auto-detected normal map if it's already being used as a bump map.
@@ -416,25 +433,43 @@ namespace Shader
                     normalMapTex->setFilter(osg::Texture::MIN_FILTER, diffuseMap->getFilter(osg::Texture::MIN_FILTER));
                     normalMapTex->setFilter(osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
                     normalMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
-                    normalMapTex->setName("normalMap");
+                    normalMap = normalMapTex;
 
                     int unit = texAttributes.size();
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
                     writableStateSet->setTextureAttributeAndModes(unit, normalMapTex, osg::StateAttribute::ON);
+                    writableStateSet->setTextureAttributeAndModes(
+                        unit, new SceneUtil::TextureType("normalMap"), osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "normalMap";
                     mRequirements.back().mTexStageRequiringTangents = unit;
                     mRequirements.back().mShaderRequired = true;
                     mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
+
+            if (normalMap != nullptr && normalMap->getImage(0))
+            {
+                // Special handling for red-green normal maps (e.g. BC5 or R8G8)
+                switch (SceneUtil::computeUnsizedPixelFormat(normalMap->getImage(0)->getPixelFormat()))
+                {
+                    case GL_RG:
+                    case GL_RG_INTEGER:
+                    {
+                        mRequirements.back().mReconstructNormalZ = true;
+                        mRequirements.back().mNormalHeight = false;
+                    }
+                }
+            }
+
             if (mAutoUseSpecularMaps && diffuseMap != nullptr && specularMap == nullptr && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
                 Misc::StringUtils::replaceLast(specularMapFileName, ".", mSpecularMapPattern + ".");
-                if (mImageManager.getVFS()->exists(specularMapFileName))
+                const VFS::Path::Normalized specularMapPath(specularMapFileName);
+                if (mImageManager.getVFS()->exists(specularMapPath))
                 {
-                    osg::ref_ptr<osg::Image> image(mImageManager.getImage(specularMapFileName));
+                    osg::ref_ptr<osg::Image> image(mImageManager.getImage(specularMapPath));
                     osg::ref_ptr<osg::Texture2D> specularMapTex(new osg::Texture2D(image));
                     specularMapTex->setTextureSize(image->s(), image->t());
                     specularMapTex->setWrap(osg::Texture::WRAP_S, diffuseMap->getWrap(osg::Texture::WRAP_S));
@@ -444,12 +479,13 @@ namespace Shader
                     specularMapTex->setFilter(
                         osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
                     specularMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
-                    specularMapTex->setName("specularMap");
 
                     int unit = texAttributes.size();
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
                     writableStateSet->setTextureAttributeAndModes(unit, specularMapTex, osg::StateAttribute::ON);
+                    writableStateSet->setTextureAttributeAndModes(
+                        unit, new SceneUtil::TextureType("specularMap"), osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "specularMap";
                     mRequirements.back().mShaderRequired = true;
                 }
@@ -615,7 +651,9 @@ namespace Shader
             addedState->addUniform("useDiffuseMapForShadowAlpha");
         }
 
+        defineMap["diffuseParallax"] = reqs.mDiffuseHeight ? "1" : "0";
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
+        defineMap["reconstructNormalZ"] = reqs.mReconstructNormalZ ? "1" : "0";
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
         addedState->addUniform("colorMode");
@@ -664,8 +702,7 @@ namespace Shader
                 defineMap["adjustCoverage"] = "1";
 
             // Preventing alpha tested stuff shrinking as lower mip levels are used requires knowing the texture size
-            osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
-            if (exts && exts->isGpuShader4Supported)
+            if (SceneUtil::getGLExtensions().isGpuShader4Supported)
                 defineMap["useGPUShader4"] = "1";
             // We could fall back to a texture size uniform if EXT_gpu_shader4 is missing
         }
@@ -680,14 +717,23 @@ namespace Shader
 
         bool particleOcclusion = false;
         node.getUserValue("particleOcclusion", particleOcclusion);
-        defineMap["particleOcclusion"]
-            = particleOcclusion && Settings::Manager::getBool("weather particle occlusion", "Shaders") ? "1" : "0";
+        defineMap["particleOcclusion"] = particleOcclusion && mWeatherParticleOcclusion ? "1" : "0";
 
         if (reqs.mAlphaBlend && mSupportsNormalsRT)
         {
             if (reqs.mSoftParticles)
                 defineMap["disableNormals"] = "1";
-            writableStateSet->setAttribute(new osg::ColorMaski(1, false, false, false, false));
+            auto colorMask = new osg::ColorMaski(1, false, false, false, false);
+            writableStateSet->setAttribute(colorMask);
+            addedState->setAttribute(colorMask);
+        }
+
+        if (reqs.mSoftParticles)
+        {
+            const int unitSoftEffect
+                = mShaderManager.reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
+            writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", unitSoftEffect));
+            addedState->addUniform("opaqueDepthTex");
         }
 
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT
@@ -719,7 +765,7 @@ namespace Shader
 
         auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate);
         writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
-        addedState->setAttributeAndModes(program);
+        addedState->setAttributeAndModes(std::move(program));
 
         for (const auto& [unit, name] : reqs.mTextures)
         {
@@ -843,12 +889,29 @@ namespace Shader
         if (mAllowedToModifyStateSets && (useShader || generateTangents))
         {
             // make sure that all UV sets are there
-            for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end();
-                 ++it)
+            // it's not safe to assume there's one for slot zero, so try and use one from another slot if possible
+            // if there are none at all, bail.
+            // the TangentSpaceGenerator would bail, but getTangentArray would give an empty array, which is enough to
+            // bypass null checks, but feeds the driver a bad pointer
+            if (sourceGeometry.getTexCoordArray(0) == nullptr)
             {
-                if (sourceGeometry.getTexCoordArray(it->first) == nullptr)
+                for (const auto& array : sourceGeometry.getTexCoordArrayList())
                 {
-                    sourceGeometry.setTexCoordArray(it->first, sourceGeometry.getTexCoordArray(0));
+                    if (array)
+                    {
+                        sourceGeometry.setTexCoordArray(0, array);
+                        break;
+                    }
+                }
+                if (sourceGeometry.getTexCoordArray(0) == nullptr)
+                    return changed;
+            }
+
+            for (const auto& [unit, name] : reqs.mTextures)
+            {
+                if (sourceGeometry.getTexCoordArray(unit) == nullptr)
+                {
+                    sourceGeometry.setTexCoordArray(unit, sourceGeometry.getTexCoordArray(0));
                     changed = true;
                 }
             }
@@ -913,13 +976,13 @@ namespace Shader
         {
             osg::ref_ptr<osg::Geometry> sourceGeometry = rig->getSourceGeometry();
             if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
-                rig->setSourceGeometry(sourceGeometry);
+                rig->setSourceGeometry(std::move(sourceGeometry));
         }
         else if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&drawable))
         {
             osg::ref_ptr<osg::Geometry> sourceGeometry = morph->getSourceGeometry();
             if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
-                morph->setSourceGeometry(sourceGeometry);
+                morph->setSourceGeometry(std::move(sourceGeometry));
         }
         else if (auto osgaRig = dynamic_cast<SceneUtil::RigGeometryHolder*>(&drawable))
         {
@@ -927,8 +990,8 @@ namespace Shader
             osg::ref_ptr<osg::Geometry> sourceGeometry = sourceOsgaRigGeometry->getSourceGeometry();
             if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
             {
-                sourceOsgaRigGeometry->setSourceGeometry(sourceGeometry);
-                osgaRig->setSourceRigGeometry(sourceOsgaRigGeometry);
+                sourceOsgaRigGeometry->setSourceGeometry(std::move(sourceGeometry));
+                osgaRig->setSourceRigGeometry(std::move(sourceOsgaRigGeometry));
             }
         }
 

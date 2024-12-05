@@ -1,8 +1,6 @@
 #ifndef LIB_WATER_RIPPLES
 #define LIB_WATER_RIPPLES
 
-#define RAIN_RIPPLE_DETAIL @rain_ripple_detail
-
 const float RAIN_RIPPLE_GAPS = 10.0;
 const float RAIN_RIPPLE_RADIUS = 0.2;
 
@@ -51,7 +49,7 @@ vec4 circle(vec2 coords, vec2 corner, float adjusted_time)
   float d = length(toCenter);
   float ringfollower = (phase-d/r)/RAIN_RING_TIME_OFFSET-1.0; // -1.0 ~ +1.0 cover the breadth of the ripple's ring
 
-#if RAIN_RIPPLE_DETAIL > 0
+#if @rainRippleDetail > 0
 // normal mapped ripples
   if(ringfollower < -1.0 || ringfollower > 1.0)
     return vec4(0.0);
@@ -88,7 +86,7 @@ vec4 rain(vec2 uv, float time)
   vec2 f_part = fract(uv);
   vec2 i_part = floor(uv);
   float adjusted_time = time * 1.2 + randPhase(i_part);
-#if RAIN_RIPPLE_DETAIL > 0
+#if @rainRippleDetail > 0
   vec4 a = circle(f_part, i_part, adjusted_time);
   vec4 b = circle(f_part, i_part, adjusted_time - RAIN_RING_TIME_OFFSET);
   vec4 c = circle(f_part, i_part, adjusted_time - RAIN_RING_TIME_OFFSET*2.0);
@@ -115,11 +113,11 @@ vec4 rainCombined(vec2 uv, float time) // returns ripple normal in xyz and fake 
   return
     rain(uv, time)
   + rain(complex_mult(uv, vec2(0.4, 0.7)) + vec2(1.2, 3.0),time)
-    #if RAIN_RIPPLE_DETAIL == 2
+#if @rainRippleDetail == 2
       + rain(uv * 0.75 + vec2( 3.7,18.9),time)
       + rain(uv * 0.9  + vec2( 5.7,30.1),time)
       + rain(uv * 1.0  + vec2(10.5 ,5.7),time)
-    #endif
+#endif
   ;
 }
 

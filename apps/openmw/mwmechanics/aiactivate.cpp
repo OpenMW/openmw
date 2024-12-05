@@ -30,7 +30,7 @@ namespace MWMechanics
 
         // Stop if the target doesn't exist
         // Really we should be checking whether the target is currently registered with the MechanicsManager
-        if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
+        if (target == MWWorld::Ptr() || !target.getCellRef().getCount() || !target.getRefData().isEnabled())
             return true;
 
         // Turn to target and move to it directly, without pathfinding.

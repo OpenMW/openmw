@@ -3,6 +3,8 @@
 
 #include "tileposition.hpp"
 
+#include <components/esm/refid.hpp>
+
 #include <string>
 
 #include <Recast.h>
@@ -14,8 +16,7 @@ namespace DetourNavigator
     class RecastContext final : public rcContext
     {
     public:
-        explicit RecastContext(
-            std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds);
+        explicit RecastContext(ESM::RefId worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds);
 
         const std::string& getPrefix() const { return mPrefix; }
 

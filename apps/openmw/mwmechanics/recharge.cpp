@@ -38,11 +38,13 @@ namespace MWMechanics
 
     bool rechargeItem(const MWWorld::Ptr& item, const MWWorld::Ptr& gem)
     {
-        if (!gem.getRefData().getCount())
+        if (!gem.getCellRef().getCount())
             return false;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
+
+        MWBase::Environment::get().getWorld()->breakInvisibility(player);
 
         float luckTerm = 0.1f * stats.getAttribute(ESM::Attribute::Luck).getModified();
         if (luckTerm < 1 || luckTerm > 10)
@@ -82,10 +84,10 @@ namespace MWMechanics
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Enchant Fail"));
         }
 
-        player.getClass().skillUsageSucceeded(player, ESM::Skill::Enchant, 0);
+        player.getClass().skillUsageSucceeded(player, ESM::Skill::Enchant, ESM::Skill::Enchant_Recharge);
         gem.getContainerStore()->remove(gem, 1);
 
-        if (gem.getRefData().getCount() == 0)
+        if (gem.getCellRef().getCount() == 0)
         {
             std::string message = MWBase::Environment::get()
                                       .getESMStore()

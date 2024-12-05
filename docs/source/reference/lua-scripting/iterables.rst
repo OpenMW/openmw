@@ -1,6 +1,8 @@
 Iterable types
 ==============
 
+.. include:: version.rst
+
 List Iterable
 -------------
 

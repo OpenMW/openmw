@@ -51,7 +51,7 @@ namespace MWClass
         ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override;
+        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
 
         MWWorld::DoorState getDoorState(const MWWorld::ConstPtr& ptr) const override;
         /// This does not actually cause the door to move. Use World::activateDoor instead.

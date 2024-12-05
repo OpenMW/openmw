@@ -41,73 +41,73 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID:
+            case ESM::fourCC("EDID"):
                 reader.getZString(mEditorId);
                 break;
-            case ESM4::SUB_FULL:
+            case ESM::fourCC("FULL"):
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_DESC:
+            case ESM::fourCC("DESC"):
                 reader.getLocalizedString(mText);
                 break;
-            case ESM4::SUB_SCRI:
+            case ESM::fourCC("SCRI"):
                 reader.getFormId(mScriptId);
                 break;
-            case ESM4::SUB_PNAM:
+            case ESM::fourCC("PNAM"):
                 reader.getFormId(mPasswordNote);
                 break;
-            case ESM4::SUB_SNAM:
+            case ESM::fourCC("SNAM"):
                 if (subHdr.dataSize == 4)
                     reader.getFormId(mSound);
                 // FIXME: FO4 sound marker params
                 else
                     reader.skipSubRecordData();
                 break;
-            case ESM4::SUB_MODL:
+            case ESM::fourCC("MODL"):
                 reader.getZString(mModel);
                 break;
-            case ESM4::SUB_RNAM:
+            case ESM::fourCC("RNAM"):
                 reader.getZString(mResultText);
                 break;
-            case ESM4::SUB_DNAM: // difficulty
-            case ESM4::SUB_ANAM: // flags
-            case ESM4::SUB_CTDA:
-            case ESM4::SUB_CIS1:
-            case ESM4::SUB_CIS2:
-            case ESM4::SUB_INAM:
-            case ESM4::SUB_ITXT: // Menu Item
-            case ESM4::SUB_MODT: // Model data
-            case ESM4::SUB_MODC:
-            case ESM4::SUB_MODS:
-            case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_SCDA:
-            case ESM4::SUB_SCHR:
-            case ESM4::SUB_SCRO:
-            case ESM4::SUB_SCRV:
-            case ESM4::SUB_SCTX:
-            case ESM4::SUB_SCVR:
-            case ESM4::SUB_SLSD:
-            case ESM4::SUB_TNAM:
-            case ESM4::SUB_OBND:
-            case ESM4::SUB_VMAD:
-            case ESM4::SUB_KSIZ:
-            case ESM4::SUB_KWDA:
-            case ESM4::SUB_BSIZ: // FO4
-            case ESM4::SUB_BTXT: // FO4
-            case ESM4::SUB_COCT: // FO4
-            case ESM4::SUB_CNTO: // FO4
-            case ESM4::SUB_FNAM: // FO4
-            case ESM4::SUB_ISIZ: // FO4
-            case ESM4::SUB_ITID: // FO4
-            case ESM4::SUB_MNAM: // FO4
-            case ESM4::SUB_NAM0: // FO4
-            case ESM4::SUB_PRPS: // FO4
-            case ESM4::SUB_PTRN: // FO4
-            case ESM4::SUB_UNAM: // FO4
-            case ESM4::SUB_VNAM: // FO4
-            case ESM4::SUB_WBDT: // FO4
-            case ESM4::SUB_WNAM: // FO4
-            case ESM4::SUB_XMRK: // FO4
+            case ESM::fourCC("DNAM"): // difficulty
+            case ESM::fourCC("ANAM"): // flags
+            case ESM::fourCC("CTDA"):
+            case ESM::fourCC("CIS1"):
+            case ESM::fourCC("CIS2"):
+            case ESM::fourCC("INAM"):
+            case ESM::fourCC("ITXT"): // Menu Item
+            case ESM::fourCC("MODT"): // Model data
+            case ESM::fourCC("MODC"):
+            case ESM::fourCC("MODS"):
+            case ESM::fourCC("MODF"): // Model data end
+            case ESM::fourCC("SCDA"):
+            case ESM::fourCC("SCHR"):
+            case ESM::fourCC("SCRO"):
+            case ESM::fourCC("SCRV"):
+            case ESM::fourCC("SCTX"):
+            case ESM::fourCC("SCVR"):
+            case ESM::fourCC("SLSD"):
+            case ESM::fourCC("TNAM"):
+            case ESM::fourCC("OBND"):
+            case ESM::fourCC("VMAD"):
+            case ESM::fourCC("KSIZ"):
+            case ESM::fourCC("KWDA"):
+            case ESM::fourCC("BSIZ"): // FO4
+            case ESM::fourCC("BTXT"): // FO4
+            case ESM::fourCC("COCT"): // FO4
+            case ESM::fourCC("CNTO"): // FO4
+            case ESM::fourCC("FNAM"): // FO4
+            case ESM::fourCC("ISIZ"): // FO4
+            case ESM::fourCC("ITID"): // FO4
+            case ESM::fourCC("MNAM"): // FO4
+            case ESM::fourCC("NAM0"): // FO4
+            case ESM::fourCC("PRPS"): // FO4
+            case ESM::fourCC("PTRN"): // FO4
+            case ESM::fourCC("UNAM"): // FO4
+            case ESM::fourCC("VNAM"): // FO4
+            case ESM::fourCC("WBDT"): // FO4
+            case ESM::fourCC("WNAM"): // FO4
+            case ESM::fourCC("XMRK"): // FO4
                 reader.skipSubRecordData();
                 break;
             default:

@@ -40,13 +40,12 @@ namespace CSMWorld
     private:
         struct CellDescription
         {
+            float mMaxLandHeight;
             bool mDeleted;
             ESM::RefId mRegion;
             std::string mName;
 
-            CellDescription();
-
-            CellDescription(const Record<Cell>& cell);
+            CellDescription(const Record<Cell>& cell, float landHeight);
         };
 
         Data& mData;

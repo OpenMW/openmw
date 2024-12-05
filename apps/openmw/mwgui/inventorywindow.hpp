@@ -74,6 +74,7 @@ namespace MWGui
         DragAndDrop* mDragAndDrop;
 
         int mSelectedItem;
+        std::optional<int> mEquippedStackableCount;
 
         MWWorld::Ptr mPtr;
 

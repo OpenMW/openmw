@@ -46,7 +46,7 @@ namespace LuaUi
             updateCoord();
     }
 
-    MyGUI::IntSize LuaText::calculateSize()
+    MyGUI::IntSize LuaText::calculateSize() const
     {
         if (mAutoSized)
             return getTextSize();

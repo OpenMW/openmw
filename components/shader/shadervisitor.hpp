@@ -51,6 +51,8 @@ namespace Shader
 
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
 
+        void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
+
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -78,6 +80,7 @@ namespace Shader
         bool mAdjustCoverageForAlphaTest;
 
         bool mSupportsNormalsRT;
+        bool mWeatherParticleOcclusion = false;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;
@@ -105,7 +108,9 @@ namespace Shader
             bool mBlendFuncOverridden;
             bool mAdditiveBlending;
 
+            bool mDiffuseHeight; // true if diffuse map has height info in alpha channel
             bool mNormalHeight; // true if normal map has height info in alpha channel
+            bool mReconstructNormalZ; // used for red-green normal maps (e.g. BC5)
 
             // -1 == no tangents required
             int mTexStageRequiringTangents;

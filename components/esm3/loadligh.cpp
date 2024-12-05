@@ -3,8 +3,16 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<Light::LHDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mWeight, v.mValue, v.mTime, v.mRadius, v.mColor, v.mFlags);
+    }
+
     void Light::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -31,7 +39,7 @@ namespace ESM
                     mIcon = esm.getHString();
                     break;
                 case fourCC("LHDT"):
-                    esm.getHTSized<24>(mData);
+                    esm.getSubComposite(mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -68,7 +76,7 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCString("ITEX", mIcon);
-        esm.writeHNT("LHDT", mData, 24);
+        esm.writeNamedComposite("LHDT", mData);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCRefId("SNAM", mSound);
     }

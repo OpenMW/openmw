@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <iosfwd>
+#include <string>
 
 namespace ESM
 {

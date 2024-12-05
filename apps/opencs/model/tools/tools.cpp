@@ -105,8 +105,8 @@ CSMDoc::OperationHolder* CSMTools::Tools::getVerifier()
                 mData.getFactions(), mData.getScripts(), mData.getResources(CSMWorld::UniversalId::Type_Meshes),
                 mData.getResources(CSMWorld::UniversalId::Type_Icons), mData.getBodyParts()));
 
-        mVerifierOperation->appendStage(new ReferenceCheckStage(
-            mData.getReferences(), mData.getReferenceables(), mData.getCells(), mData.getFactions()));
+        mVerifierOperation->appendStage(new ReferenceCheckStage(mData.getReferences(), mData.getReferenceables(),
+            mData.getCells(), mData.getFactions(), mData.getBodyParts()));
 
         mVerifierOperation->appendStage(new ScriptCheckStage(mDocument));
 

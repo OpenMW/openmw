@@ -17,13 +17,25 @@ local function ESM4DoorActivation(door, actor)
     return false -- disable activation handling in C++ mwmechanics code
 end
 
+local function ESM4BookActivation(book, actor)
+    if actor.type == types.Player then
+        actor:sendEvent('AddUiMode', { mode = 'Book', target = book })
+    end
+end
+
 local handlersPerObject = {}
 local handlersPerType = {}
 
+handlersPerType[types.ESM4Book] = { ESM4BookActivation }
 handlersPerType[types.ESM4Door] = { ESM4DoorActivation }
 
 local function onActivate(obj, actor)
-    types.Actor.activeEffects(actor):remove('invisibility')
+    if world.isWorldPaused() then
+        return
+    end
+    if obj.parentContainer then
+        return
+    end
     local handlers = handlersPerObject[obj.id]
     if handlers then
         for i = #handlers, 1, -1 do
@@ -40,6 +52,7 @@ local function onActivate(obj, actor)
             end
         end
     end
+    types.Actor.activeEffects(actor):remove('invisibility')
     world._runStandardActivationAction(obj, actor)
 end
 

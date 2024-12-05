@@ -26,6 +26,7 @@
 #include <apps/opencs/view/render/terrainselection.hpp>
 #include <apps/opencs/view/widget/scenetool.hpp>
 
+#include <components/misc/scalableicon.hpp>
 #include <components/misc/strings/conversion.hpp>
 
 #include "../widget/scenetoolbar.hpp"
@@ -37,7 +38,6 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
-#include "../../model/world/landtexture.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
 
@@ -49,9 +49,8 @@
 
 CSVRender::TerrainTextureMode::TerrainTextureMode(
     WorldspaceWidget* worldspaceWidget, osg::Group* parentNode, QWidget* parent)
-    : EditMode(worldspaceWidget, QIcon{ ":scenetoolbar/editing-terrain-texture" }, Mask_Terrain | Mask_Reference,
-        "Terrain texture editing", parent)
-    , mBrushTexture("L0#0")
+    : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-terrain-texture"),
+        Mask_Terrain | Mask_Reference, "Terrain texture editing", parent)
     , mBrushSize(1)
     , mBrushShape(CSVWidget::BrushShape_Point)
     , mTextureBrushScenetool(nullptr)
@@ -136,8 +135,8 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
     mCellId = getWorldspaceWidget().getCellId(hit.worldPos);
 
     QUndoStack& undoStack = document.getUndoStack();
-    CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-    int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
+    CSMWorld::IdCollection<ESM::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
+    int index = landtexturesCollection.searchId(mBrushTexture);
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == nullptr)
     {
@@ -185,8 +184,8 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag(const QPoint& pos)
 
     mDragMode = InteractionType_PrimaryEdit;
 
-    CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-    const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
+    CSMWorld::IdCollection<ESM::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
+    const int index = landtexturesCollection.searchId(mBrushTexture);
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == nullptr)
     {
@@ -241,8 +240,8 @@ void CSVRender::TerrainTextureMode::drag(const QPoint& pos, int diffX, int diffY
         std::string cellId = getWorldspaceWidget().getCellId(hit.worldPos);
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
 
-        CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-        const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
+        CSMWorld::IdCollection<ESM::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
+        const int index = landtexturesCollection.searchId(mBrushTexture);
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == nullptr)
         {
@@ -272,8 +271,8 @@ void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos)
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
 
-        CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-        const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
+        CSMWorld::IdCollection<ESM::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
+        const int index = landtexturesCollection.searchId(mBrushTexture);
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
         {
@@ -302,18 +301,7 @@ void CSVRender::TerrainTextureMode::handleDropEvent(QDropEvent* event)
 
         for (const CSMWorld::UniversalId& uid : ids)
         {
-            mBrushTexture = uid.getId();
-            emit passBrushTexture(mBrushTexture);
-        }
-    }
-    if (mime->holdsType(CSMWorld::UniversalId::Type_Texture))
-    {
-        const std::vector<CSMWorld::UniversalId> ids = mime->getData();
-
-        for (const CSMWorld::UniversalId& uid : ids)
-        {
-            std::string textureFileName = uid.toString();
-            createTexture(textureFileName);
+            mBrushTexture = ESM::RefId::stringRefId(uid.getId());
             emit passBrushTexture(mBrushTexture);
         }
     }
@@ -358,11 +346,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 
     int textureColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandTexturesIndex);
 
-    std::size_t hashlocation = mBrushTexture.find('#');
-    std::string mBrushTextureInt = mBrushTexture.substr(hashlocation + 1);
-
     // All indices are offset by +1
-    int brushInt = Misc::StringUtils::toNumeric<int>(mBrushTexture.substr(hashlocation + 1), 0) + 1;
+    uint32_t brushInt = document.getData().getLandTextures().getRecord(mBrushTexture).get().mIndex + 1;
 
     int r = static_cast<float>(mBrushSize) / 2;
 
@@ -541,7 +526,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                             = landTable.data(landTable.getModelIndex(cellId, textureColumn))
                                   .value<CSMWorld::LandTexturesColumn::DataType>();
                         newTerrainOtherCell[yInOtherCell * landTextureSize + xInOtherCell] = brushInt;
-                        pushEditToCommand(newTerrainOtherCell, document, landTable, cellId);
+                        pushEditToCommand(newTerrainOtherCell, document, landTable, std::move(cellId));
                     }
                 }
             }
@@ -659,50 +644,6 @@ void CSVRender::TerrainTextureMode::pushEditToCommand(CSMWorld::LandTexturesColu
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.push(new CSMWorld::ModifyCommand(landTable, index, changedLand));
     undoStack.push(new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
-}
-
-void CSVRender::TerrainTextureMode::createTexture(const std::string& textureFileName)
-{
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-
-    CSMWorld::IdTable& ltexTable
-        = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
-
-    QUndoStack& undoStack = document.getUndoStack();
-
-    std::string newId;
-
-    int counter = 0;
-    bool freeIndexFound = false;
-    do
-    {
-        const size_t maxCounter = std::numeric_limits<uint16_t>::max() - 1;
-        try
-        {
-            newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
-            if (ltexTable.getRecord(newId).isDeleted() == 0)
-                counter = (counter + 1) % maxCounter;
-        }
-        catch (const std::exception&)
-        {
-            newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
-            freeIndexFound = true;
-        }
-    } while (freeIndexFound == false);
-
-    std::size_t idlocation = textureFileName.find("Texture: ");
-    QString fileName = QString::fromStdString(textureFileName.substr(idlocation + 9));
-
-    QVariant textureFileNameVariant;
-    textureFileNameVariant.setValue(fileName);
-
-    undoStack.beginMacro("Add land texture record");
-
-    undoStack.push(new CSMWorld::CreateCommand(ltexTable, newId));
-    QModelIndex index(ltexTable.getModelIndex(newId, ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture)));
-    undoStack.push(new CSMWorld::ModifyCommand(ltexTable, index, textureFileNameVariant));
-    undoStack.endMacro();
-    mBrushTexture = newId;
 }
 
 bool CSVRender::TerrainTextureMode::allowLandTextureEditing(const std::string& cellId)
@@ -831,7 +772,7 @@ void CSVRender::TerrainTextureMode::setBrushShape(CSVWidget::BrushShape brushSha
     }
 }
 
-void CSVRender::TerrainTextureMode::setBrushTexture(std::string brushTexture)
+void CSVRender::TerrainTextureMode::setBrushTexture(ESM::RefId brushTexture)
 {
-    mBrushTexture = std::move(brushTexture);
+    mBrushTexture = brushTexture;
 }

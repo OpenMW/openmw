@@ -45,7 +45,7 @@ namespace CSMWorld
             ColumnId_FactionIndex = 31,
             ColumnId_Charges = 32,
             ColumnId_Enchantment = 33,
-            ColumnId_CoinValue = 34,
+            ColumnId_StackCount = 34,
             ColumnId_Teleport = 35,
             ColumnId_TeleportCell = 36,
             ColumnId_LockLevel = 37,
@@ -310,14 +310,14 @@ namespace CSMWorld
             ColumnId_MaxAttack = 284,
             ColumnId_CreatureMisc = 285,
 
-            ColumnId_Idle1 = 286,
-            ColumnId_Idle2 = 287,
-            ColumnId_Idle3 = 288,
-            ColumnId_Idle4 = 289,
-            ColumnId_Idle5 = 290,
-            ColumnId_Idle6 = 291,
-            ColumnId_Idle7 = 292,
-            ColumnId_Idle8 = 293,
+            ColumnId_Idle2 = 286,
+            ColumnId_Idle3 = 287,
+            ColumnId_Idle4 = 288,
+            ColumnId_Idle5 = 289,
+            ColumnId_Idle6 = 290,
+            ColumnId_Idle7 = 291,
+            ColumnId_Idle8 = 292,
+            ColumnId_Idle9 = 293,
 
             ColumnId_RegionWeather = 294,
             ColumnId_WeatherName = 295,
@@ -346,6 +346,16 @@ namespace CSMWorld
             ColumnId_Blocked = 314,
 
             ColumnId_LevelledCreatureId = 315,
+
+            ColumnId_SelectionGroupObjects = 316,
+
+            ColumnId_SoundProbability = 317,
+
+            ColumnId_IsLocked = 318,
+
+            ColumnId_ProjectileSpeed = 319,
+
+            ColumnId_GoldValue = 320,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

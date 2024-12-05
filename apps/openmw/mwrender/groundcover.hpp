@@ -4,6 +4,7 @@
 #include <components/esm3/loadcell.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace MWWorld
 {
@@ -46,13 +47,14 @@ namespace MWRender
         };
 
     private:
+        using InstanceMap = std::map<VFS::Path::Normalized, std::vector<GroundcoverEntry>, std::less<>>;
+
         Resource::SceneManager* mSceneManager;
         float mDensity;
         osg::ref_ptr<osg::StateSet> mStateset;
         osg::ref_ptr<osg::Program> mProgramTemplate;
         const MWWorld::GroundcoverStore& mGroundcoverStore;
 
-        typedef std::map<std::string, std::vector<GroundcoverEntry>> InstanceMap;
         osg::ref_ptr<osg::Node> createChunk(InstanceMap& instances, const osg::Vec2f& center);
         void collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center);
     };

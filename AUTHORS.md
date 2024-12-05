@@ -15,6 +15,7 @@ Programmers
     Nicolay Korslund - Project leader 2008-2010
     scrawl - Top contributor
 
+    AbduSharif
     Adam Hogan (aurix)
     Aesylwinn
     aegis
@@ -60,6 +61,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     crussell187
+    Sam Hellawell (cykoder)
     Dan Vukelich (sanchezman)
     darkf
     Dave Corley (S3ctor)
@@ -79,6 +81,7 @@ Programmers
     Eduard Cot (trombonecot)
     Eli2
     Emanuel Guével (potatoesmaster)
+    Epoch
     Eris Caffee (eris)
     eroen
     escondida
@@ -96,6 +99,7 @@ Programmers
     gugus/gus
     guidoj
     Haoda Wang (h313)
+    holorat
     hristoast
     Internecine
     Ivan Beloborodov (myrix)
@@ -140,6 +144,8 @@ Programmers
     Lordrea
     Łukasz Gołębiewski (lukago)
     Lukasz Gromanowski (lgro)
+    Mads Sandvei (Foal)
+    Maksim Eremenko (Max Yari)
     Marc Bouvier (CramitDeFrog)
     Marcin Hulist (Gohan)
     Mark Siewert (mark76)
@@ -150,6 +156,7 @@ Programmers
     Mateusz Malisz (malice)
     Max Henzerling (SaintMercury)
     megaton
+    Mehdi Yousfi-Monod (mym)
     Michael Hogan (Xethik)
     Michael Mc Donnell
     Michael Papageorgiou (werdanith)
@@ -186,6 +193,7 @@ Programmers
     pkubik
     PLkolek
     PlutonicOverkill
+    Qlonever
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
     Randy Davin (Kindi)
@@ -225,6 +233,7 @@ Programmers
     thegriglat
     Thomas Luppi (Digmaster)
     tlmullis
+    trav
     tri4ng1e
     Thoronador
     Tobias Tribble (zackhasacat)
@@ -244,6 +253,7 @@ Programmers
     xyzz
     Yohaulticetl
     Yuri Krupenin
+    Yury Stepovikov
     zelurker
 
 Documentation

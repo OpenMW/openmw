@@ -17,7 +17,7 @@ namespace ESM
         template <typename T, bool orDefault = false>
         struct GetValue
         {
-            constexpr T operator()(int value) const { return static_cast<T>(value); }
+            constexpr T operator()(int32_t value) const { return static_cast<T>(value); }
 
             constexpr T operator()(float value) const { return static_cast<T>(value); }
 
@@ -41,7 +41,7 @@ namespace ESM
             {
             }
 
-            void operator()(int& value) const { value = static_cast<int>(mValue); }
+            void operator()(int32_t& value) const { value = static_cast<int32_t>(mValue); }
 
             void operator()(float& value) const { value = static_cast<float>(mValue); }
 
@@ -58,9 +58,9 @@ namespace ESM
         return std::get<std::string>(mData);
     }
 
-    int Variant::getInteger() const
+    int32_t Variant::getInteger() const
     {
-        return std::visit(GetValue<int>{}, mData);
+        return std::visit(GetValue<int32_t>{}, mData);
     }
 
     float Variant::getFloat() const
@@ -194,17 +194,17 @@ namespace ESM
 
             case VT_Short:
 
-                stream << "variant short: " << std::get<int>(mData);
+                stream << "variant short: " << std::get<int32_t>(mData);
                 break;
 
             case VT_Int:
 
-                stream << "variant int: " << std::get<int>(mData);
+                stream << "variant int: " << std::get<int32_t>(mData);
                 break;
 
             case VT_Long:
 
-                stream << "variant long: " << std::get<int>(mData);
+                stream << "variant long: " << std::get<int32_t>(mData);
                 break;
 
             case VT_Float:
@@ -259,7 +259,7 @@ namespace ESM
         std::get<std::string>(mData) = std::move(value);
     }
 
-    void Variant::setInteger(int value)
+    void Variant::setInteger(int32_t value)
     {
         std::visit(SetValue(value), mData);
     }

@@ -52,7 +52,7 @@ namespace MWLua
             {
                 std::vector<ESM::RefNum> buf;
                 buf.reserve(objList->size());
-                for (const ESM::RefNum& v : *objList)
+                for (ESM::RefNum v : *objList)
                     buf.push_back({ Misc::toLittleEndian(v.mIndex), Misc::toLittleEndian(v.mContentFile) });
                 append(out, sObjListTypeName, buf.data(), buf.size() * sizeof(ESM::RefNum));
             }

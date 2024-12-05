@@ -70,8 +70,12 @@ namespace ESM4
     struct Container;
     struct Door;
     struct Furniture;
+    struct Flora;
     struct Ingredient;
+    struct ItemMod;
     struct MiscItem;
+    struct MovableStatic;
+    struct StaticCollection;
     struct Terminal;
     struct Tree;
     struct Weapon;
@@ -93,9 +97,10 @@ namespace MWWorld
 
         CellRefList<ESM4::Static>, CellRefList<ESM4::Light>, CellRefList<ESM4::Activator>, CellRefList<ESM4::Potion>,
         CellRefList<ESM4::Ammunition>, CellRefList<ESM4::Armor>, CellRefList<ESM4::Book>, CellRefList<ESM4::Clothing>,
-        CellRefList<ESM4::Container>, CellRefList<ESM4::Door>, CellRefList<ESM4::Ingredient>,
-        CellRefList<ESM4::Terminal>, CellRefList<ESM4::Tree>, CellRefList<ESM4::MiscItem>, CellRefList<ESM4::Weapon>,
-        CellRefList<ESM4::Furniture>, CellRefList<ESM4::Creature>, CellRefList<ESM4::Npc>>;
+        CellRefList<ESM4::Container>, CellRefList<ESM4::Door>, CellRefList<ESM4::Flora>, CellRefList<ESM4::Ingredient>,
+        CellRefList<ESM4::ItemMod>, CellRefList<ESM4::Terminal>, CellRefList<ESM4::Tree>, CellRefList<ESM4::MiscItem>,
+        CellRefList<ESM4::MovableStatic>, CellRefList<ESM4::Weapon>, CellRefList<ESM4::Furniture>,
+        CellRefList<ESM4::Creature>, CellRefList<ESM4::Npc>, CellRefList<ESM4::StaticCollection>>;
 
     /// \brief Mutable state of a cell
     class CellStore
@@ -114,7 +119,7 @@ namespace MWWorld
         /// scripting compatibility, and the fact that objects may be "un-deleted" in the original game).
         static bool isAccessible(const MWWorld::RefData& refdata, const MWWorld::CellRef& cref)
         {
-            return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || refdata.getCount() > 0);
+            return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || cref.getCount() > 0);
         }
 
         /// Moves object from this cell to the given cell.
@@ -140,7 +145,7 @@ namespace MWWorld
         }
 
         /// @param readerList The readers to use for loading of the cell on-demand.
-        CellStore(MWWorld::Cell cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
+        CellStore(MWWorld::Cell&& cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
 
         CellStore(const CellStore&) = delete;
 
@@ -205,8 +210,8 @@ namespace MWWorld
         /// false will abort the iteration.
         /// \note Prefer using forEachConst when possible.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class Visitor>
         bool forEach(Visitor&& visitor)
         {
@@ -220,12 +225,12 @@ namespace MWWorld
 
             mHasState = true;
 
-            for (unsigned int i = 0; i < mMergedRefs.size(); ++i)
+            for (LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
-                if (!visitor(MWWorld::Ptr(mMergedRefs[i], this)))
+                if (!visitor(MWWorld::Ptr(mergedRef, this)))
                     return false;
             }
             return true;
@@ -234,8 +239,8 @@ namespace MWWorld
         /// Call visitor (MWWorld::ConstPtr) for each reference. visitor must return a bool. Returning
         /// false will abort the iteration.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class Visitor>
         bool forEachConst(Visitor&& visitor) const
         {
@@ -245,12 +250,12 @@ namespace MWWorld
             if (mMergedRefsNeedsUpdate)
                 updateMergedRefs();
 
-            for (unsigned int i = 0; i < mMergedRefs.size(); ++i)
+            for (const LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
-                if (!visitor(MWWorld::ConstPtr(mMergedRefs[i], this)))
+                if (!visitor(MWWorld::ConstPtr(mergedRef, this)))
                     return false;
             }
             return true;
@@ -259,10 +264,10 @@ namespace MWWorld
         /// Call visitor (ref) for each reference of given type. visitor must return a bool. Returning
         /// false will abort the iteration.
         /// \note Do not modify this cell (i.e. remove/add objects) during the forEach, doing this may result in
-        /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
-        /// completed?
+        /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
+        /// \return Iteration completed?
         template <class T, class Visitor>
-        bool forEachType(Visitor& visitor)
+        bool forEachType(Visitor&& visitor)
         {
             if (mState != State_Loaded)
                 return false;

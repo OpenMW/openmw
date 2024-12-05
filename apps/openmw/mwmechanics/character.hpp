@@ -40,7 +40,7 @@ namespace MWMechanics
         Priority_Torch,
         Priority_Storm,
         Priority_Death,
-        Priority_Persistent,
+        Priority_Scripted,
 
         Num_Priorities
     };
@@ -134,11 +134,17 @@ namespace MWMechanics
         struct AnimationQueueEntry
         {
             std::string mGroup;
-            size_t mLoopCount;
-            bool mPersist;
+            uint32_t mLoopCount;
+            float mTime;
+            bool mLooping;
+            bool mScripted;
+            std::string mStartKey;
+            std::string mStopKey;
+            float mSpeed;
         };
         typedef std::deque<AnimationQueueEntry> AnimationQueue;
         AnimationQueue mAnimQueue;
+        bool mLuaAnimations{ false };
 
         CharacterState mIdleState{ CharState_None };
         std::string mCurrentIdle;
@@ -147,7 +153,7 @@ namespace MWMechanics
         std::string mCurrentMovement;
         float mMovementAnimSpeed{ 0.f };
         bool mAdjustMovementAnimSpeed{ false };
-        bool mMovementAnimationControlled{ true };
+        bool mMovementAnimationHasMovement{ false };
 
         CharacterState mDeathState{ CharState_None };
         std::string mCurrentDeath;
@@ -186,7 +192,7 @@ namespace MWMechanics
 
         bool mCanCast{ false };
 
-        bool mCastingManualSpell{ false };
+        bool mCastingScriptedSpell{ false };
 
         bool mIsMovingBackward{ false };
         osg::Vec2f mSmoothedSpeed;
@@ -207,17 +213,16 @@ namespace MWMechanics
         void refreshMovementAnims(CharacterState movement, bool force = false);
         void refreshIdleAnims(CharacterState idle, bool force = false);
 
-        void clearAnimQueue(bool clearPersistAnims = false);
-
         bool updateWeaponState();
         void updateIdleStormState(bool inwater) const;
 
         std::string chooseRandomAttackAnimation() const;
         static bool isRandomAttackAnimation(std::string_view group);
 
-        bool isPersistentAnimPlaying() const;
+        bool isMovementAnimationControlled() const;
 
         void updateAnimQueue();
+        void playAnimQueue(bool useLoopStart = false);
 
         void updateHeadTracking(float duration);
 
@@ -241,6 +246,8 @@ namespace MWMechanics
 
         bool getAttackingOrSpell() const;
         void setAttackingOrSpell(bool attackingOrSpell) const;
+
+        std::string_view getDesiredAttackType() const;
 
         void prepareHit();
 
@@ -269,9 +276,17 @@ namespace MWMechanics
         void persistAnimationState() const;
         void unpersistAnimationState();
 
-        bool playGroup(std::string_view groupname, int mode, int count, bool persist = false);
+        void playBlendedAnimation(const std::string& groupname, const MWRender::AnimPriority& priority, int blendMask,
+            bool autodisable, float speedmult, std::string_view start, std::string_view stop, float startpoint,
+            uint32_t loops, bool loopfallback = false) const;
+        bool playGroup(std::string_view groupname, int mode, uint32_t count, bool scripted = false);
+        bool playGroupLua(std::string_view groupname, float speed, std::string_view startKey, std::string_view stopKey,
+            uint32_t loops, bool forceLoop);
+        void enableLuaAnimations(bool enable);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
+        bool isScriptedAnimPlaying() const;
+        void clearAnimQueue(bool clearScriptedAnims = false);
 
         enum KillResult
         {
@@ -299,7 +314,7 @@ namespace MWMechanics
         bool isAttackingOrSpell() const;
 
         void setVisibility(float visibility) const;
-        void castSpell(const ESM::RefId& spellId, bool manualSpell = false);
+        void castSpell(const ESM::RefId& spellId, bool scriptedSpell = false);
         void setAIAttackType(std::string_view attackType);
         static std::string_view getRandomAttackType();
 
@@ -317,6 +332,8 @@ namespace MWMechanics
         void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 
         void playSwishSound() const;
+
+        float getAnimationMovementDirection() const;
 
         MWWorld::MovementDirectionFlags getSupportedMovementDirections() const;
     };

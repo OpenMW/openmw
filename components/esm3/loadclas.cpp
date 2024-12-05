@@ -2,7 +2,9 @@
 
 #include <stdexcept>
 
-#include "components/esm/defs.hpp"
+#include <components/esm/defs.hpp>
+#include <components/misc/concepts.hpp>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -10,6 +12,13 @@ namespace ESM
 {
     const std::string_view Class::sGmstSpecializationIds[3]
         = { "sSpecializationCombat", "sSpecializationMagic", "sSpecializationStealth" };
+    const std::array<std::string_view, 3> Class::specializationIndexToLuaId = { "combat", "magic", "stealth" };
+
+    template <Misc::SameAsWithoutCvref<Class::CLDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mAttribute, v.mSpecialization, v.mSkills, v.mIsPlayable, v.mServices);
+    }
 
     int32_t& Class::CLDTstruct::getSkill(int index, bool major)
     {
@@ -41,8 +50,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("CLDT"):
-                    esm.getHT(
-                        mData.mAttribute, mData.mSpecialization, mData.mSkills, mData.mIsPlayable, mData.mServices);
+                    esm.getSubComposite(mData);
                     if (mData.mIsPlayable > 1)
                         esm.fail("Unknown bool value");
                     hasData = true;
@@ -76,7 +84,7 @@ namespace ESM
         }
 
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNT("CLDT", mData, 60);
+        esm.writeNamedComposite("CLDT", mData);
         esm.writeHNOString("DESC", mDescription);
     }
 

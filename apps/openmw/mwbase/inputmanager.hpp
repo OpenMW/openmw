@@ -45,6 +45,7 @@ namespace MWBase
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& changed) = 0;
 
         virtual void setDragDrop(bool dragDrop) = 0;
+        virtual bool isGamepadGuiCursorEnabled() = 0;
         virtual void setGamepadGuiCursorEnabled(bool enabled) = 0;
 
         virtual void toggleControlSwitch(std::string_view sw, bool value) = 0;

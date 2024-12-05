@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include <apps/opencs/model/world/columnbase.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/record.hpp>
 #include <apps/opencs/model/world/refiddata.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
@@ -33,7 +34,7 @@ QVariant CSMWorld::PotionRefIdAdapter::getData(const RefIdColumn* column, const 
         data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Potion)));
 
     if (column == mAutoCalc)
-        return record.get().mData.mAutoCalc != 0;
+        return record.get().mData.mFlags & ESM::Potion::Autocalc;
 
     // to show nested tables in dialogue subview, see IdTree::hasChildren()
     if (column == mColumns.mEffects)
@@ -51,7 +52,7 @@ void CSMWorld::PotionRefIdAdapter::setData(
     ESM::Potion potion = record.get();
 
     if (column == mAutoCalc)
-        potion.mData.mAutoCalc = value.toInt();
+        potion.mData.mFlags = value.toBool();
     else
     {
         InventoryRefIdAdapter<ESM::Potion>::setData(column, data, index, value);
@@ -194,6 +195,26 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
     {
         case 0:
             ingredient.mData.mEffectID[subRowIndex] = value.toInt();
+            switch (ingredient.mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainSkill:
+                case ESM::MagicEffect::DamageSkill:
+                case ESM::MagicEffect::RestoreSkill:
+                case ESM::MagicEffect::FortifySkill:
+                case ESM::MagicEffect::AbsorbSkill:
+                    ingredient.mData.mAttributes[subRowIndex] = -1;
+                    break;
+                case ESM::MagicEffect::DrainAttribute:
+                case ESM::MagicEffect::DamageAttribute:
+                case ESM::MagicEffect::RestoreAttribute:
+                case ESM::MagicEffect::FortifyAttribute:
+                case ESM::MagicEffect::AbsorbAttribute:
+                    ingredient.mData.mSkills[subRowIndex] = -1;
+                    break;
+                default:
+                    ingredient.mData.mSkills[subRowIndex] = -1;
+                    ingredient.mData.mAttributes[subRowIndex] = -1;
+            }
             break;
         case 1:
             ingredient.mData.mSkills[subRowIndex] = value.toInt();
@@ -516,10 +537,18 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData(const RefIdColumn* column, cons
     if (column == mColumns.mBloodType)
         return record.get().mBloodType;
 
-    std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mColumns.mFlags.find(column);
+    {
+        std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mColumns.mFlags.find(column);
 
-    if (iter != mColumns.mFlags.end())
-        return (record.get().mFlags & iter->second) != 0;
+        if (iter != mColumns.mFlags.end())
+            return (record.get().mFlags & iter->second) != 0;
+    }
+
+    {
+        std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mColumns.mServices.find(column);
+        if (iter != mColumns.mServices.end() && iter->second == ESM::NPC::Training)
+            return QVariant();
+    }
 
     return ActorRefIdAdapter<ESM::Creature>::getData(column, data, index);
 }
@@ -930,30 +959,9 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData(
 
     if (subColIndex == 0)
         return subRowIndex;
-    else if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                return static_cast<int>(npcStruct.mStrength);
-            case 1:
-                return static_cast<int>(npcStruct.mIntelligence);
-            case 2:
-                return static_cast<int>(npcStruct.mWillpower);
-            case 3:
-                return static_cast<int>(npcStruct.mAgility);
-            case 4:
-                return static_cast<int>(npcStruct.mSpeed);
-            case 5:
-                return static_cast<int>(npcStruct.mEndurance);
-            case 6:
-                return static_cast<int>(npcStruct.mPersonality);
-            case 7:
-                return static_cast<int>(npcStruct.mLuck);
-            default:
-                return QVariant(); // throw an exception here?
-        }
-    else
-        return QVariant(); // throw an exception here?
+    else if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
+        return static_cast<int>(npcStruct.mAttributes[subRowIndex]);
+    return QVariant(); // throw an exception here?
 }
 
 void CSMWorld::NpcAttributesRefIdAdapter::setNestedData(
@@ -964,36 +972,8 @@ void CSMWorld::NpcAttributesRefIdAdapter::setNestedData(
     ESM::NPC npc = record.get();
     ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt;
 
-    if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                npcStruct.mStrength = static_cast<unsigned char>(value.toInt());
-                break;
-            case 1:
-                npcStruct.mIntelligence = static_cast<unsigned char>(value.toInt());
-                break;
-            case 2:
-                npcStruct.mWillpower = static_cast<unsigned char>(value.toInt());
-                break;
-            case 3:
-                npcStruct.mAgility = static_cast<unsigned char>(value.toInt());
-                break;
-            case 4:
-                npcStruct.mSpeed = static_cast<unsigned char>(value.toInt());
-                break;
-            case 5:
-                npcStruct.mEndurance = static_cast<unsigned char>(value.toInt());
-                break;
-            case 6:
-                npcStruct.mPersonality = static_cast<unsigned char>(value.toInt());
-                break;
-            case 7:
-                npcStruct.mLuck = static_cast<unsigned char>(value.toInt());
-                break;
-            default:
-                return; // throw an exception here?
-        }
+    if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
+        npcStruct.mAttributes[subRowIndex] = static_cast<unsigned char>(value.toInt());
     else
         return; // throw an exception here?
 
@@ -1138,11 +1118,11 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData(
             case 0:
                 return static_cast<int>(record.get().mNpdt.mLevel);
             case 1:
-                return QVariant(QVariant::UserType);
+                return CSMWorld::DisableTag::getVariant();
             case 2:
-                return QVariant(QVariant::UserType);
+                return CSMWorld::DisableTag::getVariant();
             case 3:
-                return QVariant(QVariant::UserType);
+                return CSMWorld::DisableTag::getVariant();
             case 4:
                 return static_cast<int>(record.get().mNpdt.mDisposition);
             case 5:
@@ -1307,30 +1287,9 @@ QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData(
 
     if (subColIndex == 0)
         return subRowIndex;
-    else if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                return creature.mData.mStrength;
-            case 1:
-                return creature.mData.mIntelligence;
-            case 2:
-                return creature.mData.mWillpower;
-            case 3:
-                return creature.mData.mAgility;
-            case 4:
-                return creature.mData.mSpeed;
-            case 5:
-                return creature.mData.mEndurance;
-            case 6:
-                return creature.mData.mPersonality;
-            case 7:
-                return creature.mData.mLuck;
-            default:
-                return QVariant(); // throw an exception here?
-        }
-    else
-        return QVariant(); // throw an exception here?
+    else if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
+        return creature.mData.mAttributes[subRowIndex];
+    return QVariant(); // throw an exception here?
 }
 
 void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData(
@@ -1338,42 +1297,14 @@ void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData(
 {
     Record<ESM::Creature>& record
         = static_cast<Record<ESM::Creature>&>(data.getRecord(RefIdData::LocalIndex(row, UniversalId::Type_Creature)));
-    ESM::Creature creature = record.get();
 
-    if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                creature.mData.mStrength = value.toInt();
-                break;
-            case 1:
-                creature.mData.mIntelligence = value.toInt();
-                break;
-            case 2:
-                creature.mData.mWillpower = value.toInt();
-                break;
-            case 3:
-                creature.mData.mAgility = value.toInt();
-                break;
-            case 4:
-                creature.mData.mSpeed = value.toInt();
-                break;
-            case 5:
-                creature.mData.mEndurance = value.toInt();
-                break;
-            case 6:
-                creature.mData.mPersonality = value.toInt();
-                break;
-            case 7:
-                creature.mData.mLuck = value.toInt();
-                break;
-            default:
-                return; // throw an exception here?
-        }
-    else
-        return; // throw an exception here?
-
-    record.setModified(creature);
+    if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
+    {
+        ESM::Creature creature = record.get();
+        creature.mData.mAttributes[subRowIndex] = value.toInt();
+        record.setModified(creature);
+    }
+    // throw an exception here?
 }
 
 int CSMWorld::CreatureAttributesRefIdAdapter::getNestedColumnsCount(

@@ -1,6 +1,12 @@
 #!/bin/bash -ex
 
-git clone --depth=1 https://gitlab.com/OpenMW/example-suite.git
+mkdir example-suite
+cd example-suite
+git init
+git remote add origin https://gitlab.com/OpenMW/example-suite.git
+git fetch --depth=1 origin ${EXAMPLE_SUITE_REVISION}
+git checkout FETCH_HEAD
+cd ..
 
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24x60' \
     scripts/integration_tests.py --omw build/install/bin/openmw --workdir integration_tests_output example-suite/

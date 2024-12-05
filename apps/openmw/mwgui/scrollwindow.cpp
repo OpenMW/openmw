@@ -3,6 +3,7 @@
 #include <MyGUI_ScrollView.h>
 
 #include <components/esm3/loadbook.hpp>
+#include <components/esm4/loadbook.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -42,17 +43,22 @@ namespace MWGui
 
     void ScrollWindow::setPtr(const MWWorld::Ptr& scroll)
     {
-        if (scroll.isEmpty() || scroll.getType() != ESM::REC_BOOK)
+        if (scroll.isEmpty() || (scroll.getType() != ESM::REC_BOOK && scroll.getType() != ESM::REC_BOOK4))
             throw std::runtime_error("Invalid argument in ScrollWindow::setPtr");
         mScroll = scroll;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         bool showTakeButton = scroll.getContainerStore() != &player.getClass().getContainerStore(player);
 
-        MWWorld::LiveCellRef<ESM::Book>* ref = mScroll.get<ESM::Book>();
+        const std::string* text;
+        if (scroll.getType() == ESM::REC_BOOK)
+            text = &scroll.get<ESM::Book>()->mBase->mText;
+        else
+            text = &scroll.get<ESM4::Book>()->mBase->mText;
+        bool shrinkTextAtLastTag = scroll.getType() == ESM::REC_BOOK;
 
         Formatting::BookFormatter formatter;
-        formatter.markupToWidget(mTextView, ref->mBase->mText, 390, mTextView->getHeight());
+        formatter.markupToWidget(mTextView, *text, 390, mTextView->getHeight(), shrinkTextAtLastTag);
         MyGUI::IntSize size = mTextView->getChildAt(0)->getSize();
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the

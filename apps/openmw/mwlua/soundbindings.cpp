@@ -1,4 +1,5 @@
 #include "soundbindings.hpp"
+#include "recordstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -11,6 +12,7 @@
 #include <components/vfs/pathutil.hpp>
 
 #include "luamanagerimp.hpp"
+#include "objectvariant.hpp"
 
 namespace
 {
@@ -22,6 +24,32 @@ namespace
         float mPitch = 1.f;
         float mTimeOffset = 0.f;
     };
+
+    struct StreamMusicArgs
+    {
+        float mFade = 1.f;
+    };
+
+    MWWorld::Ptr getMutablePtrOrThrow(const MWLua::ObjectVariant& variant)
+    {
+        if (variant.isLObject())
+            throw std::runtime_error("Local scripts can only modify object they are attached to.");
+
+        MWWorld::Ptr ptr = variant.ptr();
+        if (ptr.isEmpty())
+            throw std::runtime_error("Invalid object");
+
+        return ptr;
+    }
+
+    MWWorld::Ptr getPtrOrThrow(const MWLua::ObjectVariant& variant)
+    {
+        MWWorld::Ptr ptr = variant.ptr();
+        if (ptr.isEmpty())
+            throw std::runtime_error("Invalid object");
+
+        return ptr;
+    }
 
     PlaySoundArgs getPlaySoundArgs(const sol::optional<sol::table>& options)
     {
@@ -55,13 +83,28 @@ namespace
             return MWSound::PlayMode::NoEnvNoScaling;
         return MWSound::PlayMode::NoEnv;
     }
+
+    StreamMusicArgs getStreamMusicArgs(const sol::optional<sol::table>& options)
+    {
+        StreamMusicArgs args;
+
+        if (options.has_value())
+        {
+            args.mFade = options->get_or("fadeOut", 1.f);
+        }
+        return args;
+    }
 }
 
 namespace MWLua
 {
     sol::table initAmbientPackage(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::state_view lua = context.sol();
+        if (lua["openmw_ambient"] != sol::nil)
+            return lua["openmw_ambient"];
+
+        sol::table api(lua, sol::create);
 
         api["playSound"] = [](std::string_view soundId, const sol::optional<sol::table>& options) {
             auto args = getPlaySoundArgs(options);
@@ -95,88 +138,102 @@ namespace MWLua
             return MWBase::Environment::get().getSoundManager()->getSoundPlaying(MWWorld::Ptr(), fileName);
         };
 
-        return LuaUtil::makeReadOnly(api);
+        api["streamMusic"] = [](std::string_view fileName, const sol::optional<sol::table>& options) {
+            auto args = getStreamMusicArgs(options);
+            MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->streamMusic(VFS::Path::Normalized(fileName), MWSound::MusicType::Normal, args.mFade);
+        };
+
+        api["say"]
+            = [luaManager = context.mLuaManager](std::string_view fileName, sol::optional<std::string_view> text) {
+                  MWBase::Environment::get().getSoundManager()->say(VFS::Path::Normalized(fileName));
+                  if (text)
+                      luaManager->addUIMessage(*text);
+              };
+
+        api["stopSay"] = []() { MWBase::Environment::get().getSoundManager()->stopSay(MWWorld::ConstPtr()); };
+        api["isSayActive"]
+            = []() { return MWBase::Environment::get().getSoundManager()->sayActive(MWWorld::ConstPtr()); };
+
+        api["isMusicPlaying"] = []() { return MWBase::Environment::get().getSoundManager()->isMusicPlaying(); };
+
+        api["stopMusic"] = []() {
+            MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+            if (sndMgr->getMusicType() == MWSound::MusicType::MWScript)
+                return;
+
+            sndMgr->stopMusic();
+        };
+
+        lua["openmw_ambient"] = LuaUtil::makeReadOnly(api);
+        return lua["openmw_ambient"];
     }
 
     sol::table initCoreSoundBindings(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::table api(lua, sol::create);
 
+        api["isEnabled"] = []() { return MWBase::Environment::get().getSoundManager()->isEnabled(); };
+
         api["playSound3d"]
-            = [](std::string_view soundId, const Object& object, const sol::optional<sol::table>& options) {
+            = [](std::string_view soundId, const sol::object& object, const sol::optional<sol::table>& options) {
                   auto args = getPlaySoundArgs(options);
                   auto playMode = getPlayMode(args, true);
 
                   ESM::RefId sound = ESM::RefId::deserializeText(soundId);
+                  MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
 
                   MWBase::Environment::get().getSoundManager()->playSound3D(
-                      object.ptr(), sound, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
+                      ptr, sound, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
               };
         api["playSoundFile3d"]
-            = [](std::string_view fileName, const Object& object, const sol::optional<sol::table>& options) {
+            = [](std::string_view fileName, const sol::object& object, const sol::optional<sol::table>& options) {
                   auto args = getPlaySoundArgs(options);
                   auto playMode = getPlayMode(args, true);
+                  MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
 
-                  MWBase::Environment::get().getSoundManager()->playSound3D(object.ptr(), fileName, args.mVolume,
-                      args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
+                  MWBase::Environment::get().getSoundManager()->playSound3D(
+                      ptr, fileName, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
               };
 
-        api["stopSound3d"] = [](std::string_view soundId, const Object& object) {
+        api["stopSound3d"] = [](std::string_view soundId, const sol::object& object) {
             ESM::RefId sound = ESM::RefId::deserializeText(soundId);
-            MWBase::Environment::get().getSoundManager()->stopSound3D(object.ptr(), sound);
+            MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
+            MWBase::Environment::get().getSoundManager()->stopSound3D(ptr, sound);
         };
-        api["stopSoundFile3d"] = [](std::string_view fileName, const Object& object) {
-            MWBase::Environment::get().getSoundManager()->stopSound3D(object.ptr(), fileName);
+        api["stopSoundFile3d"] = [](std::string_view fileName, const sol::object& object) {
+            MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
+            MWBase::Environment::get().getSoundManager()->stopSound3D(ptr, fileName);
         };
 
-        api["isSoundPlaying"] = [](std::string_view soundId, const Object& object) {
+        api["isSoundPlaying"] = [](std::string_view soundId, const sol::object& object) {
             ESM::RefId sound = ESM::RefId::deserializeText(soundId);
-            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(object.ptr(), sound);
+            const MWWorld::Ptr& ptr = getPtrOrThrow(ObjectVariant(object));
+            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(ptr, sound);
         };
-        api["isSoundFilePlaying"] = [](std::string_view fileName, const Object& object) {
-            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(object.ptr(), fileName);
+        api["isSoundFilePlaying"] = [](std::string_view fileName, const sol::object& object) {
+            const MWWorld::Ptr& ptr = getPtrOrThrow(ObjectVariant(object));
+            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(ptr, fileName);
         };
 
-        api["say"] = sol::overload(
-            [luaManager = context.mLuaManager](
-                std::string_view fileName, const Object& object, sol::optional<std::string_view> text) {
-                MWBase::Environment::get().getSoundManager()->say(object.ptr(), std::string(fileName));
-                if (text)
-                    luaManager->addUIMessage(*text);
-            },
-            [luaManager = context.mLuaManager](std::string_view fileName, sol::optional<std::string_view> text) {
-                MWBase::Environment::get().getSoundManager()->say(std::string(fileName));
-                if (text)
-                    luaManager->addUIMessage(*text);
-            });
-        api["stopSay"] = sol::overload(
-            [](const Object& object) {
-                const MWWorld::Ptr& objPtr = object.ptr();
-                MWBase::Environment::get().getSoundManager()->stopSay(objPtr);
-            },
-            []() { MWBase::Environment::get().getSoundManager()->stopSay(MWWorld::ConstPtr()); });
-        api["isSayActive"] = sol::overload(
-            [](const Object& object) {
-                const MWWorld::Ptr& objPtr = object.ptr();
-                return MWBase::Environment::get().getSoundManager()->sayActive(objPtr);
-            },
-            []() { return MWBase::Environment::get().getSoundManager()->sayActive(MWWorld::ConstPtr()); });
+        api["say"] = [luaManager = context.mLuaManager](
+                         std::string_view fileName, const sol::object& object, sol::optional<std::string_view> text) {
+            MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
+            MWBase::Environment::get().getSoundManager()->say(ptr, VFS::Path::Normalized(fileName));
+            if (text)
+                luaManager->addUIMessage(*text);
+        };
+        api["stopSay"] = [](const sol::object& object) {
+            MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
+            MWBase::Environment::get().getSoundManager()->stopSay(ptr);
+        };
+        api["isSayActive"] = [](const sol::object& object) {
+            const MWWorld::Ptr& ptr = getPtrOrThrow(ObjectVariant(object));
+            return MWBase::Environment::get().getSoundManager()->sayActive(ptr);
+        };
 
-        using SoundStore = MWWorld::Store<ESM::Sound>;
-        sol::usertype<SoundStore> soundStoreT = lua.new_usertype<SoundStore>("ESM3_SoundStore");
-        soundStoreT[sol::meta_function::to_string]
-            = [](const SoundStore& store) { return "ESM3_SoundStore{" + std::to_string(store.getSize()) + " sounds}"; };
-        soundStoreT[sol::meta_function::length] = [](const SoundStore& store) { return store.getSize(); };
-        soundStoreT[sol::meta_function::index] = sol::overload(
-            [](const SoundStore& store, size_t index) -> const ESM::Sound* { return store.at(index - 1); },
-            [](const SoundStore& store, std::string_view soundId) -> const ESM::Sound* {
-                return store.find(ESM::RefId::deserializeText(soundId));
-            });
-        soundStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
-        soundStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
-
-        api["sounds"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>();
+        addRecordFunctionBinding<ESM::Sound>(api, context);
 
         // Sound record
         auto soundT = lua.new_usertype<ESM::Sound>("ESM3_Sound");
@@ -190,7 +247,7 @@ namespace MWLua
         soundT["maxRange"]
             = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mMaxRange; });
         soundT["fileName"] = sol::readonly_property([](const ESM::Sound& rec) -> std::string {
-            return VFS::Path::normalizeFilename(Misc::ResourceHelpers::correctSoundPath(rec.mSound));
+            return Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(rec.mSound)).value();
         });
 
         return LuaUtil::makeReadOnly(api);

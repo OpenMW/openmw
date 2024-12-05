@@ -7,6 +7,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -114,7 +115,8 @@ namespace MWGui
         MWWorld::ContainerStore& store = source.first.getClass().getContainerStore(source.first);
         if (item.mBase.getContainerStore() == &store)
             throw std::runtime_error("Item to copy needs to be from a different container!");
-        return *store.add(item.mBase.getCellRef().getRefId(), count, allowAutoEquip);
+        MWWorld::ManualRef newRef(*MWBase::Environment::get().getESMStore(), item.mBase, count);
+        return *store.add(newRef.getPtr(), count, allowAutoEquip);
     }
 
     void ContainerItemModel::removeItem(const ItemStack& item, size_t count)
@@ -129,7 +131,7 @@ namespace MWGui
             {
                 if (stacks(*it, item.mBase))
                 {
-                    int quantity = it->mRef->mData.getCount(false);
+                    int quantity = it->mRef->mRef.getCount(false);
                     // If this is a restocking quantity, just don't remove it
                     if (quantity < 0 && mTrading)
                         toRemove += quantity;
@@ -144,11 +146,11 @@ namespace MWGui
         {
             if (stacks(source, item.mBase))
             {
-                int refCount = source.getRefData().getCount();
+                int refCount = source.getCellRef().getCount();
                 if (refCount - toRemove <= 0)
                     MWBase::Environment::get().getWorld()->deleteObject(source);
                 else
-                    source.getRefData().setCount(std::max(0, refCount - toRemove));
+                    source.getCellRef().setCount(std::max(0, refCount - toRemove));
                 toRemove -= refCount;
                 if (toRemove <= 0)
                     return;
@@ -176,7 +178,7 @@ namespace MWGui
                     if (stacks(*it, itemStack.mBase))
                     {
                         // we already have an item stack of this kind, add to it
-                        itemStack.mCount += it->getRefData().getCount();
+                        itemStack.mCount += it->getCellRef().getCount();
                         found = true;
                         break;
                     }
@@ -185,7 +187,7 @@ namespace MWGui
                 if (!found)
                 {
                     // no stack yet, create one
-                    ItemStack newItem(*it, this, it->getRefData().getCount());
+                    ItemStack newItem(*it, this, it->getCellRef().getCount());
                     mItems.push_back(newItem);
                 }
             }
@@ -198,7 +200,7 @@ namespace MWGui
                 if (stacks(source, itemStack.mBase))
                 {
                     // we already have an item stack of this kind, add to it
-                    itemStack.mCount += source.getRefData().getCount();
+                    itemStack.mCount += source.getCellRef().getCount();
                     found = true;
                     break;
                 }
@@ -207,7 +209,7 @@ namespace MWGui
             if (!found)
             {
                 // no stack yet, create one
-                ItemStack newItem(source, this, source.getRefData().getCount());
+                ItemStack newItem(source, this, source.getCellRef().getCount());
                 mItems.push_back(newItem);
             }
         }

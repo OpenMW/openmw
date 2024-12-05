@@ -1,0 +1,50 @@
+# Swedish does not actually upper-case first letter on months and weekday names, so I'm doing them lower case right now.
+
+month1: "januari"
+month2: "februari"
+month3: "mars"
+month4: "april"
+month5: "maj"
+month6: "juni"
+month7: "juli"
+month8: "augusti"
+month9: "september"
+month10: "oktober"
+month11: "november"
+month12: "december"
+
+# There are no different grammatical forms of the months in Swedish
+
+monthInGenitive1: "januari"
+monthInGenitive2: "februari"
+monthInGenitive3: "mars"
+monthInGenitive4: "april"
+monthInGenitive5: "maj"
+monthInGenitive6: "juni"
+monthInGenitive7: "juli"
+monthInGenitive8: "augusti"
+monthInGenitive9: "september"
+monthInGenitive10: "oktober"
+monthInGenitive11: "november"
+monthInGenitive12: "december"
+
+# Standard Swedish date format: d MMMM YYYY
+# Source: http://www4.sprakochfolkminnen.se/cgi-bin/srfl/visasvar.py?sok=datum&svar=26089
+# Example: "23 februari 1337"
+dateFormat: "{day} {month} {year, number, :: group-off}"
+
+# The Swedish week starts with monday actually, but whatever.
+
+weekday1: "söndag"
+weekday2: "måndag"
+weekday3: "tisdag"
+weekday4: "onsdag"
+weekday5: "torsdag"
+weekday6: "fredag"
+weekday7: "lördag"
+
+# In Swedish, as with German, we don't use AM/PM but instead a 24h clock.
+# But instead of that, we could use "förmiddag" and "eftermiddag", which is basically "morning" and "afternoon"
+am: "f.m."
+pm: "e.m."
+day: "Dag"

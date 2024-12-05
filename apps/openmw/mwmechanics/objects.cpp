@@ -99,12 +99,12 @@ namespace MWMechanics
     }
 
     bool Objects::playAnimationGroup(
-        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist)
+        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number, bool scripted)
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
         {
-            return iter->second->playGroup(groupName, mode, number, persist);
+            return iter->second->playGroup(groupName, mode, number, scripted);
         }
         else
         {
@@ -113,6 +113,23 @@ namespace MWMechanics
             return false;
         }
     }
+
+    bool Objects::playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops,
+        float speed, std::string_view startKey, std::string_view stopKey, bool forceLoop)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            return iter->second->playGroupLua(groupName, speed, startKey, stopKey, loops, forceLoop);
+        return false;
+    }
+
+    void Objects::enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            iter->second->enableLuaAnimations(enable);
+    }
+
     void Objects::skipAnimation(const MWWorld::Ptr& ptr)
     {
         const auto iter = mIndex.find(ptr.mRef);
@@ -124,6 +141,13 @@ namespace MWMechanics
     {
         for (CharacterController& object : mObjects)
             object.persistAnimationState();
+    }
+
+    void Objects::clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted)
+    {
+        const auto iter = mIndex.find(ptr.mRef);
+        if (iter != mIndex.end())
+            iter->second->clearAnimQueue(clearScripted);
     }
 
     void Objects::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const

@@ -4,7 +4,7 @@
 
 #include <SDL_keyboard.h>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -27,13 +27,11 @@
 namespace MWInput
 {
 
-    ActionManager::ActionManager(BindingsManager* bindingsManager,
-        osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-        osg::ref_ptr<osgViewer::Viewer> viewer, osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler)
+    ActionManager::ActionManager(BindingsManager* bindingsManager, osg::ref_ptr<osgViewer::Viewer> viewer,
+        osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler)
         : mBindingsManager(bindingsManager)
         , mViewer(std::move(viewer))
         , mScreenCaptureHandler(std::move(screenCaptureHandler))
-        , mScreenCaptureOperation(screenCaptureOperation)
         , mTimeIdle(0.f)
     {
     }
@@ -118,7 +116,7 @@ namespace MWInput
                 quickKey(10);
                 break;
             case A_ToggleHUD:
-                windowManager->toggleHud();
+                windowManager->setHudVisibility(!windowManager->isHudVisible());
                 break;
             case A_ToggleDebug:
                 windowManager->toggleDebugWindow();
@@ -170,24 +168,8 @@ namespace MWInput
 
     void ActionManager::screenshot()
     {
-        const std::string& settingStr = Settings::Manager::getString("screenshot type", "Video");
-        bool regularScreenshot = settingStr.empty() || settingStr == "regular";
-
-        if (regularScreenshot)
-        {
-            mScreenCaptureHandler->setFramesToCapture(1);
-            mScreenCaptureHandler->captureNextFrame(*mViewer);
-        }
-        else
-        {
-            osg::ref_ptr<osg::Image> screenshot(new osg::Image);
-
-            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get()))
-            {
-                (*mScreenCaptureOperation)(*(screenshot.get()), 0);
-                // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
-            }
-        }
+        mScreenCaptureHandler->setFramesToCapture(1);
+        mScreenCaptureHandler->captureNextFrame(*mViewer);
     }
 
     void ActionManager::toggleMainMenu()

@@ -40,7 +40,7 @@ namespace Gui
         notifySizeChange(this);
     }
 
-    void AutoSizedTextBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+    void AutoSizedTextBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (_key == "ExpandDirection")
         {
@@ -103,7 +103,7 @@ namespace Gui
         setEditStatic(true);
     }
 
-    void AutoSizedEditBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+    void AutoSizedEditBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (_key == "ExpandDirection")
         {
@@ -136,7 +136,7 @@ namespace Gui
         notifySizeChange(this);
     }
 
-    void AutoSizedButton::setPropertyOverride(const std::string& _key, const std::string& _value)
+    void AutoSizedButton::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (_key == "ExpandDirection")
         {
@@ -147,6 +147,7 @@ namespace Gui
             Gui::Button::setPropertyOverride(_key, _value);
         }
     }
+
     Box::Box()
         : mSpacing(4)
         , mPadding(0)
@@ -159,7 +160,7 @@ namespace Gui
         align();
     }
 
-    bool Box::_setPropertyImpl(const std::string& _key, const std::string& _value)
+    bool Box::_setPropertyImpl(std::string_view _key, std::string_view _value)
     {
         if (_key == "Spacing")
             mSpacing = MyGUI::utility::parseValue<int>(_value);
@@ -260,7 +261,7 @@ namespace Gui
         }
     }
 
-    void HBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+    void HBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (!Box::_setPropertyImpl(_key, _value))
             MyGUI::Widget::setPropertyOverride(_key, _value);
@@ -415,7 +416,7 @@ namespace Gui
         }
     }
 
-    void VBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+    void VBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (!Box::_setPropertyImpl(_key, _value))
             MyGUI::Widget::setPropertyOverride(_key, _value);

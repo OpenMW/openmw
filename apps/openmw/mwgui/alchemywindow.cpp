@@ -6,7 +6,9 @@
 #include <MyGUI_ControllerRepeatClick.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_UString.h>
 
+#include <components/esm3/loadappa.hpp>
 #include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadmgef.hpp>
 
@@ -27,7 +29,6 @@
 #include "itemview.hpp"
 #include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
-#include "ustring.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -76,6 +77,11 @@ namespace MWGui
         mIngredients[1]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredients[2]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredients[3]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
+
+        mApparatus[0]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onApparatusSelected);
+        mApparatus[1]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onApparatusSelected);
+        mApparatus[2]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onApparatusSelected);
+        mApparatus[3]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onApparatusSelected);
 
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
@@ -141,12 +147,12 @@ namespace MWGui
         }
 
         // remove ingredient slots that have been fully used up
-        for (int i = 0; i < 4; ++i)
+        for (size_t i = 0; i < mIngredients.size(); ++i)
             if (mIngredients[i]->isUserString("ToolTipType"))
             {
                 MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
-                if (ingred.getRefData().getCount() == 0)
-                    removeIngredient(mIngredients[i]);
+                if (ingred.getCellRef().getCount() == 0)
+                    mAlchemy->removeIngredient(i);
             }
 
         updateFilters();
@@ -158,7 +164,7 @@ namespace MWGui
         auto const& wm = MWBase::Environment::get().getWindowManager();
         std::string_view ingredient = wm->getGameSettingString("sIngredients", "Ingredients");
 
-        if (mFilterType->getCaption() == toUString(ingredient))
+        if (mFilterType->getCaption() == ingredient)
             mCurrentFilter = FilterType::ByName;
         else
             mCurrentFilter = FilterType::ByEffect;
@@ -170,17 +176,17 @@ namespace MWGui
     void AlchemyWindow::switchFilterType(MyGUI::Widget* _sender)
     {
         auto const& wm = MWBase::Environment::get().getWindowManager();
-        MyGUI::UString ingredient = toUString(wm->getGameSettingString("sIngredients", "Ingredients"));
+        std::string_view ingredient = wm->getGameSettingString("sIngredients", "Ingredients");
         auto* button = _sender->castType<MyGUI::Button>();
 
         if (button->getCaption() == ingredient)
         {
-            button->setCaption(toUString(wm->getGameSettingString("sMagicEffects", "Magic Effects")));
+            button->setCaption(MyGUI::UString(wm->getGameSettingString("sMagicEffects", "Magic Effects")));
             mCurrentFilter = FilterType::ByEffect;
         }
         else
         {
-            button->setCaption(ingredient);
+            button->setCaption(MyGUI::UString(ingredient));
             mCurrentFilter = FilterType::ByName;
         }
         mSortModel->setNameFilter({});
@@ -289,7 +295,85 @@ namespace MWGui
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
     {
-        removeIngredient(_sender);
+        size_t i = std::distance(mIngredients.begin(), std::find(mIngredients.begin(), mIngredients.end(), _sender));
+        mAlchemy->removeIngredient(i);
+        update();
+    }
+
+    void AlchemyWindow::onItemSelected(MWWorld::Ptr item)
+    {
+        mItemSelectionDialog->setVisible(false);
+
+        int32_t index = item.get<ESM::Apparatus>()->mBase->mData.mType;
+        const auto& widget = mApparatus[index];
+
+        widget->setItem(item);
+
+        if (item.isEmpty())
+        {
+            widget->clearUserStrings();
+            return;
+        }
+
+        mAlchemy->addApparatus(item);
+
+        widget->setUserString("ToolTipType", "ItemPtr");
+        widget->setUserData(MWWorld::Ptr(item));
+
+        MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
+        update();
+    }
+
+    void AlchemyWindow::onItemCancel()
+    {
+        mItemSelectionDialog->setVisible(false);
+    }
+
+    void AlchemyWindow::onApparatusSelected(MyGUI::Widget* _sender)
+    {
+        size_t i = std::distance(mApparatus.begin(), std::find(mApparatus.begin(), mApparatus.end(), _sender));
+        if (_sender->getUserData<MWWorld::Ptr>()->isEmpty()) // if this apparatus slot is empty
+        {
+            std::string title;
+            switch (i)
+            {
+                case ESM::Apparatus::AppaType::MortarPestle:
+                    title = "#{sMortar}";
+                    break;
+                case ESM::Apparatus::AppaType::Alembic:
+                    title = "#{sAlembic}";
+                    break;
+                case ESM::Apparatus::AppaType::Calcinator:
+                    title = "#{sCalcinator}";
+                    break;
+                case ESM::Apparatus::AppaType::Retort:
+                    title = "#{sRetort}";
+                    break;
+                default:
+                    title = "#{sApparatus}";
+            }
+
+            mItemSelectionDialog = std::make_unique<ItemSelectionDialog>(title);
+            mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &AlchemyWindow::onItemSelected);
+            mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &AlchemyWindow::onItemCancel);
+            mItemSelectionDialog->setVisible(true);
+            mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
+            mItemSelectionDialog->getSortModel()->setApparatusTypeFilter(i);
+            mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyAlchemyTools);
+        }
+        else
+        {
+            const auto& widget = mApparatus[i];
+            mAlchemy->removeApparatus(i);
+
+            if (widget->getChildCount())
+                MyGUI::Gui::getInstance().destroyWidget(widget->getChildAt(0));
+
+            widget->clearUserStrings();
+            widget->setItem(MWWorld::Ptr());
+            widget->setUserData(MWWorld::Ptr());
+        }
+
         update();
     }
 
@@ -311,8 +395,10 @@ namespace MWGui
     {
         std::string suggestedName = mAlchemy->suggestPotionName();
         if (suggestedName != mSuggestedPotionName)
+        {
             mNameEdit->setCaptionWithReplacing(suggestedName);
-        mSuggestedPotionName = suggestedName;
+            mSuggestedPotionName = std::move(suggestedName);
+        }
 
         mSortModel->clearDragItems();
 
@@ -329,7 +415,7 @@ namespace MWGui
             }
 
             if (!item.isEmpty())
-                mSortModel->addDragItem(item, item.getRefData().getCount());
+                mSortModel->addDragItem(item, item.getCellRef().getCount());
 
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
@@ -344,12 +430,12 @@ namespace MWGui
             ingredient->setUserString("ToolTipType", "ItemPtr");
             ingredient->setUserData(MWWorld::Ptr(item));
 
-            ingredient->setCount(item.getRefData().getCount());
+            ingredient->setCount(item.getCellRef().getCount());
         }
 
         mItemView->update();
 
-        std::set<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
+        std::vector<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
         Widgets::SpellEffectList list;
         unsigned int effectIndex = 0;
         for (const MWMechanics::EffectKey& effectKey : effectIds)
@@ -384,15 +470,6 @@ namespace MWGui
         std::vector<MyGUI::Widget*> effectItems;
         effectsWidget->createEffectWidgets(effectItems, mEffectsBox, coord, false, 0);
         effectsWidget->setCoord(coord);
-    }
-
-    void AlchemyWindow::removeIngredient(MyGUI::Widget* ingredient)
-    {
-        for (int i = 0; i < 4; ++i)
-            if (mIngredients[i] == ingredient)
-                mAlchemy->removeIngredient(i);
-
-        update();
     }
 
     void AlchemyWindow::addRepeatController(MyGUI::Widget* widget)

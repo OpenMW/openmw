@@ -7,6 +7,8 @@
 
 namespace fx
 {
+    std::string StateUpdater::sDefinition = UniformData::getDefinition("_omw_data");
+
     StateUpdater::StateUpdater(bool useUBO)
         : mUseUBO(useUBO)
     {

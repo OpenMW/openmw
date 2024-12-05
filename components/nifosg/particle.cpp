@@ -9,7 +9,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
-#include <components/nif/controlled.hpp>
 #include <components/nif/data.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
@@ -281,17 +280,10 @@ namespace NifOsg
 
     GravityAffector::GravityAffector(const Nif::NiGravity* gravity)
         : mForce(gravity->mForce)
-        , mType(static_cast<ForceType>(gravity->mType))
+        , mType(gravity->mType)
         , mPosition(gravity->mPosition)
         , mDirection(gravity->mDirection)
         , mDecay(gravity->mDecay)
-    {
-    }
-
-    GravityAffector::GravityAffector()
-        : mForce(0)
-        , mType(Type_Wind)
-        , mDecay(0.f)
     {
     }
 
@@ -311,8 +303,8 @@ namespace NifOsg
     {
         bool absolute = (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF);
 
-        if (mType == Type_Point
-            || mDecay != 0.f) // we don't need the position for Wind gravity, except if decay is being applied
+        // We don't need the position for Wind gravity, except if decay is being applied
+        if (mType == Nif::ForceType::Point || mDecay != 0.f)
             mCachedWorldPosition = absolute ? program->transformLocalToWorld(mPosition) : mPosition;
 
         mCachedWorldDirection = absolute ? program->rotateLocalToWorld(mDirection) : mDirection;
@@ -324,7 +316,7 @@ namespace NifOsg
         const float magic = 1.6f;
         switch (mType)
         {
-            case Type_Wind:
+            case Nif::ForceType::Wind:
             {
                 float decayFactor = 1.f;
                 if (mDecay != 0.f)
@@ -338,7 +330,7 @@ namespace NifOsg
 
                 break;
             }
-            case Type_Point:
+            case Nif::ForceType::Point:
             {
                 osg::Vec3f diff = mCachedWorldPosition - particle->getPosition();
 
@@ -352,6 +344,84 @@ namespace NifOsg
                 break;
             }
         }
+    }
+
+    ParticleBomb::ParticleBomb(const Nif::NiParticleBomb* bomb)
+        : mRange(bomb->mRange)
+        , mStrength(bomb->mStrength)
+        , mDecayType(bomb->mDecayType)
+        , mSymmetryType(bomb->mSymmetryType)
+        , mPosition(bomb->mPosition)
+        , mDirection(bomb->mDirection)
+    {
+    }
+
+    ParticleBomb::ParticleBomb(const ParticleBomb& copy, const osg::CopyOp& copyop)
+        : osgParticle::Operator(copy, copyop)
+    {
+        mRange = copy.mRange;
+        mStrength = copy.mStrength;
+        mDecayType = copy.mDecayType;
+        mSymmetryType = copy.mSymmetryType;
+        mCachedWorldPosition = copy.mCachedWorldPosition;
+        mCachedWorldDirection = copy.mCachedWorldDirection;
+    }
+
+    void ParticleBomb::beginOperate(osgParticle::Program* program)
+    {
+        bool absolute = (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF);
+
+        mCachedWorldPosition = absolute ? program->transformLocalToWorld(mPosition) : mPosition;
+
+        // We don't need the direction for Spherical bomb
+        if (mSymmetryType != Nif::SymmetryType::Spherical)
+        {
+            mCachedWorldDirection = absolute ? program->rotateLocalToWorld(mDirection) : mDirection;
+            mCachedWorldDirection.normalize();
+        }
+    }
+
+    void ParticleBomb::operate(osgParticle::Particle* particle, double dt)
+    {
+        float decay = 1.f;
+        osg::Vec3f explosionDir;
+
+        osg::Vec3f particleDir = particle->getPosition() - mCachedWorldPosition;
+        float distance = particleDir.length();
+        particleDir.normalize();
+
+        switch (mDecayType)
+        {
+            case Nif::DecayType::None:
+                break;
+            case Nif::DecayType::Linear:
+                decay = 1.f - distance / mRange;
+                break;
+            case Nif::DecayType::Exponential:
+                decay = std::exp(-distance / mRange);
+                break;
+        }
+
+        if (decay <= 0.f)
+            return;
+
+        switch (mSymmetryType)
+        {
+            case Nif::SymmetryType::Spherical:
+                explosionDir = particleDir;
+                break;
+            case Nif::SymmetryType::Cylindrical:
+                explosionDir = particleDir - mCachedWorldDirection * (mCachedWorldDirection * particleDir);
+                explosionDir.normalize();
+                break;
+            case Nif::SymmetryType::Planar:
+                explosionDir = mCachedWorldDirection;
+                if (explosionDir * particleDir < 0)
+                    explosionDir = -explosionDir;
+                break;
+        }
+
+        particle->addVelocity(explosionDir * mStrength * decay * dt);
     }
 
     Emitter::Emitter()

@@ -30,8 +30,8 @@
 #include <cstdint>
 #include <string>
 
-#include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/position.hpp>
 
 namespace ESM4
 {
@@ -39,7 +39,13 @@ namespace ESM4
     struct EnableParent
     {
         ESM::FormId parent;
-        std::uint32_t flags; // 0x0001 = Set Enable State Opposite Parent, 0x0002 = Pop In
+        std::uint32_t flags;
+
+        enum Flags
+        {
+            Flag_Inversed = 0x1, // Set enable state opposite to the parent
+            Flag_PopIn = 0x2,
+        };
     };
 
     struct LODReference

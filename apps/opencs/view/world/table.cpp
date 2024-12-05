@@ -25,6 +25,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/scalableicon.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 #include "../../model/doc/document.hpp"
@@ -323,7 +324,7 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
 
     mEditAction = new QAction(tr("Edit Record"), this);
     connect(mEditAction, &QAction::triggered, this, &Table::editRecord);
-    mEditAction->setIcon(QIcon(":edit-edit"));
+    mEditAction->setIcon(Misc::ScalableIcon::load(":edit-edit"));
     addAction(mEditAction);
     CSMPrefs::Shortcut* editShortcut = new CSMPrefs::Shortcut("table-edit", this);
     editShortcut->associateAction(mEditAction);
@@ -332,14 +333,14 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
     {
         mCreateAction = new QAction(tr("Add Record"), this);
         connect(mCreateAction, &QAction::triggered, this, &Table::createRequest);
-        mCreateAction->setIcon(QIcon(":edit-add"));
+        mCreateAction->setIcon(Misc::ScalableIcon::load(":edit-add"));
         addAction(mCreateAction);
         CSMPrefs::Shortcut* createShortcut = new CSMPrefs::Shortcut("table-add", this);
         createShortcut->associateAction(mCreateAction);
 
         mCloneAction = new QAction(tr("Clone Record"), this);
         connect(mCloneAction, &QAction::triggered, this, &Table::cloneRecord);
-        mCloneAction->setIcon(QIcon(":edit-clone"));
+        mCloneAction->setIcon(Misc::ScalableIcon::load(":edit-clone"));
         addAction(mCloneAction);
         CSMPrefs::Shortcut* cloneShortcut = new CSMPrefs::Shortcut("table-clone", this);
         cloneShortcut->associateAction(mCloneAction);
@@ -349,7 +350,7 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
     {
         mTouchAction = new QAction(tr("Touch Record"), this);
         connect(mTouchAction, &QAction::triggered, this, &Table::touchRecord);
-        mTouchAction->setIcon(QIcon(":edit-touch"));
+        mTouchAction->setIcon(Misc::ScalableIcon::load(":edit-touch"));
         addAction(mTouchAction);
         CSMPrefs::Shortcut* touchShortcut = new CSMPrefs::Shortcut("table-touch", this);
         touchShortcut->associateAction(mTouchAction);
@@ -357,56 +358,56 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
 
     mRevertAction = new QAction(tr("Revert Record"), this);
     connect(mRevertAction, &QAction::triggered, mDispatcher, &CSMWorld::CommandDispatcher::executeRevert);
-    mRevertAction->setIcon(QIcon(":edit-undo"));
+    mRevertAction->setIcon(Misc::ScalableIcon::load(":edit-undo"));
     addAction(mRevertAction);
     CSMPrefs::Shortcut* revertShortcut = new CSMPrefs::Shortcut("table-revert", this);
     revertShortcut->associateAction(mRevertAction);
 
     mDeleteAction = new QAction(tr("Delete Record"), this);
     connect(mDeleteAction, &QAction::triggered, mDispatcher, &CSMWorld::CommandDispatcher::executeDelete);
-    mDeleteAction->setIcon(QIcon(":edit-delete"));
+    mDeleteAction->setIcon(Misc::ScalableIcon::load(":edit-delete"));
     addAction(mDeleteAction);
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("table-remove", this);
     deleteShortcut->associateAction(mDeleteAction);
 
     mMoveUpAction = new QAction(tr("Move Up"), this);
     connect(mMoveUpAction, &QAction::triggered, this, &Table::moveUpRecord);
-    mMoveUpAction->setIcon(QIcon(":record-up"));
+    mMoveUpAction->setIcon(Misc::ScalableIcon::load(":record-up"));
     addAction(mMoveUpAction);
     CSMPrefs::Shortcut* moveUpShortcut = new CSMPrefs::Shortcut("table-moveup", this);
     moveUpShortcut->associateAction(mMoveUpAction);
 
     mMoveDownAction = new QAction(tr("Move Down"), this);
     connect(mMoveDownAction, &QAction::triggered, this, &Table::moveDownRecord);
-    mMoveDownAction->setIcon(QIcon(":record-down"));
+    mMoveDownAction->setIcon(Misc::ScalableIcon::load(":record-down"));
     addAction(mMoveDownAction);
     CSMPrefs::Shortcut* moveDownShortcut = new CSMPrefs::Shortcut("table-movedown", this);
     moveDownShortcut->associateAction(mMoveDownAction);
 
     mViewAction = new QAction(tr("View"), this);
     connect(mViewAction, &QAction::triggered, this, &Table::viewRecord);
-    mViewAction->setIcon(QIcon(":/cell.png"));
+    mViewAction->setIcon(Misc::ScalableIcon::load(":cell"));
     addAction(mViewAction);
     CSMPrefs::Shortcut* viewShortcut = new CSMPrefs::Shortcut("table-view", this);
     viewShortcut->associateAction(mViewAction);
 
     mPreviewAction = new QAction(tr("Preview"), this);
     connect(mPreviewAction, &QAction::triggered, this, &Table::previewRecord);
-    mPreviewAction->setIcon(QIcon(":edit-preview"));
+    mPreviewAction->setIcon(Misc::ScalableIcon::load(":edit-preview"));
     addAction(mPreviewAction);
     CSMPrefs::Shortcut* previewShortcut = new CSMPrefs::Shortcut("table-preview", this);
     previewShortcut->associateAction(mPreviewAction);
 
     mExtendedDeleteAction = new QAction(tr("Extended Delete Record"), this);
     connect(mExtendedDeleteAction, &QAction::triggered, this, &Table::executeExtendedDelete);
-    mExtendedDeleteAction->setIcon(QIcon(":edit-delete"));
+    mExtendedDeleteAction->setIcon(Misc::ScalableIcon::load(":edit-delete"));
     addAction(mExtendedDeleteAction);
     CSMPrefs::Shortcut* extendedDeleteShortcut = new CSMPrefs::Shortcut("table-extendeddelete", this);
     extendedDeleteShortcut->associateAction(mExtendedDeleteAction);
 
     mExtendedRevertAction = new QAction(tr("Extended Revert Record"), this);
     connect(mExtendedRevertAction, &QAction::triggered, this, &Table::executeExtendedRevert);
-    mExtendedRevertAction->setIcon(QIcon(":edit-undo"));
+    mExtendedRevertAction->setIcon(Misc::ScalableIcon::load(":edit-undo"));
     addAction(mExtendedRevertAction);
     CSMPrefs::Shortcut* extendedRevertShortcut = new CSMPrefs::Shortcut("table-extendedrevert", this);
     extendedRevertShortcut->associateAction(mExtendedRevertAction);
@@ -417,7 +418,7 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
 
     mHelpAction = new QAction(tr("Help"), this);
     connect(mHelpAction, &QAction::triggered, this, &Table::openHelp);
-    mHelpAction->setIcon(QIcon(":/info.png"));
+    mHelpAction->setIcon(Misc::ScalableIcon::load(":info"));
     addAction(mHelpAction);
     CSMPrefs::Shortcut* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
     openHelpShortcut->associateAction(mHelpAction);
@@ -694,10 +695,10 @@ void CSVWorld::Table::previewRecord()
 
     if (selectedRows.size() == 1)
     {
-        std::string id = getUniversalId(selectedRows.begin()->row()).getId();
+        CSMWorld::UniversalId id = getUniversalId(selectedRows.begin()->row());
 
         QModelIndex index
-            = mModel->getModelIndex(id, mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Modification));
+            = mModel->getModelIndex(id.getId(), mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Modification));
 
         if (mModel->data(index) != CSMWorld::RecordBase::State_Deleted)
             emit editRequest(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, id), "");

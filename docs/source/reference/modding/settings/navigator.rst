@@ -13,16 +13,15 @@ enable
 :Range:		True/False
 :Default:	True
 
-Enable navigator.
-When enabled background threads are started to build nav mesh for world geometry.
-Pathfinding system uses nav mesh to build paths.
-When disabled only pathgrid is used to build paths.
-Single-core CPU systems may have big performance impact on exiting interior location and moving across exterior world.
+Enable navigator to make all settings in this category take effect.
+When enabled, a navigation mesh (navmesh) is built in the background for world geometry to be used for pathfinding.
+When disabled only the path grid is used to build paths.
+Single-core CPU systems may have a big performance impact on existing interior location and moving across the exterior world.
 May slightly affect performance on multi-core CPU systems.
-Multi-core CPU systems may have different latency for nav mesh update depending on other settings and system performance.
-Moving across external world, entering/exiting location produce nav mesh update.
-NPC and creatures may not be able to find path before nav mesh is built around them.
-Try to disable this if you want to have old fashioned AI which doesn't know where to go when you stand behind that stone and casting a firebolt.
+Multi-core CPU systems may have different latency for navigation mesh update depending on other settings and system performance.
+Moving across external world, entering/exiting location produce navigation mesh update.
+NPC and creatures may not be able to find path before navigation mesh is built around them.
+Try to disable this if you want to have old fashioned AI which doesn't know where to go when you stand behind that stone and cast a firebolt.
 
 max tiles number
 ----------------
@@ -31,14 +30,14 @@ max tiles number
 :Range:		>= 0
 :Default:	512
 
-Number of tiles at nav mesh.
+Number of tiles at navigation mesh.
 Nav mesh covers circle area around player.
-This option allows to set an explicit limit for nav mesh size, how many tiles should fit into circle.
-If actor is inside this area it able to find path over nav mesh.
+This option allows to set an explicit limit for navigation mesh size, how many tiles should fit into circle.
+If actor is inside this area it able to find path over navigation mesh.
 Increasing this value may decrease performance.
 
 .. note::
-    Don't expect infinite nav mesh size increasing.
+    Don't expect infinite navigation mesh size increasing.
     This condition is always true: ``max tiles number * max polygons per tile <= 4194304``.
     It's a limitation of `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library.
 
@@ -49,9 +48,9 @@ wait until min distance to player
 :Range:		>= 0
 :Default:	5
 
-Distance in navmesh tiles around the player to keep loading screen until navigation mesh is generated.
+Distance in navigation mesh tiles around the player to keep loading screen until navigation mesh is generated.
 Allows to complete cell loading only when minimal navigation mesh area is generated to correctly find path for actors
-nearby the player. Increasing this value will keep loading screen longer but will slightly increase nav mesh generation
+nearby the player. Increasing this value will keep loading screen longer but will slightly increase navigation mesh generation
 speed on systems bound by CPU. Zero means no waiting.
 
 enable nav mesh disk cache
@@ -61,8 +60,8 @@ enable nav mesh disk cache
 :Range:		True/False
 :Default:	True
 
-If true navmesh cache stored on disk will be used in addition to memory cache.
-If navmesh tile is not present in memory cache, it will be looked up in the disk cache.
+If true navigation mesh cache stored on disk will be used in addition to memory cache.
+If navigation mesh tile is not present in memory cache, it will be looked up in the disk cache.
 If it's not found there it will be generated.
 
 write to navmeshdb
@@ -72,7 +71,7 @@ write to navmeshdb
 :Range:		True/False
 :Default:	True
 
-If true generated navmesh tiles will be stored into disk cache while game is running.
+If true generated navigation mesh tiles will be stored into disk cache while game is running.
 
 max navmeshdb file size
 -----------------------
@@ -95,8 +94,8 @@ async nav mesh updater threads
 :Range:		>= 1
 :Default:	1
 
-Number of background threads to update nav mesh.
-Increasing this value may decrease performance, but also may decrease or increase nav mesh update latency depending on number of CPU cores.
+Number of background threads to update navigation mesh.
+Increasing this value may decrease performance, but also may decrease or increase navigation mesh update latency depending on number of CPU cores.
 On systems with not less than 4 CPU cores latency dependens approximately like 1/log(n) from number of threads.
 Don't expect twice better latency by doubling this value.
 
@@ -107,12 +106,12 @@ max nav mesh tiles cache size
 :Range:		>= 0
 :Default:	268435456
 
-Maximum total cached size of all nav mesh tiles in bytes.
-Setting greater than zero value will reduce nav mesh update latency for previously visited locations.
+Maximum total cached size of all navigation mesh tiles in bytes.
+Setting greater than zero value will reduce navigation mesh update latency for previously visited locations.
 Increasing this value may increase total memory consumption, but potentially will reduce latency for recently visited locations.
 Limit this value by total available physical memory minus base game memory consumption and other applications.
 Game will not eat all memory at once.
-Memory will be consumed in approximately linear dependency from number of nav mesh updates.
+Memory will be consumed in approximately linear dependency from number of navigation mesh updates.
 But only for new locations or already dropped from cache.
 
 min update interval ms
@@ -122,17 +121,17 @@ min update interval ms
 :Range:		>= 0
 :Default:	250
 
-Minimum time duration required to pass before next navmesh update for the same tile in milliseconds.
+Minimum time duration required to pass before next navigation mesh update for the same tile in milliseconds.
 Only tiles affected where objects are transformed.
 Next update for tile with added or removed object will not be delayed.
-Visible ingame effect is navmesh update around opening or closing door.
+Visible ingame effect is navigation mesh update around opening or closing door.
 Primary usage is for rotating signs like in Seyda Neen at Arrille's Tradehouse entrance.
 Decreasing this value may increase CPU usage by background threads.
 
 Developer's settings
 ********************
 
-This section is for developers or anyone who wants to investigate how nav mesh system works in OpenMW.
+This section is for developers or anyone who wants to learn how navigation mesh system works in OpenMW.
 
 enable write recast mesh to file
 --------------------------------
@@ -141,8 +140,8 @@ enable write recast mesh to file
 :Range:		True/False
 :Default:	False
 
-Write recast mesh to file in .obj format for each use to update nav mesh.
-Option is used to find out what world geometry is used to build nav mesh.
+Write recast mesh to file in .obj format for each use to update navigation mesh.
+Option is used to find out what world geometry is used to build navigation mesh.
 Potentially decreases performance.
 
 enable write nav mesh to file
@@ -152,7 +151,7 @@ enable write nav mesh to file
 :Range:		True/False
 :Default:	False
 
-Write nav mesh to file to be able to open by RecastDemo application.
+Write navigation mesh to file to be able to open by RecastDemo application.
 Usually it is more useful to have both enable write recast mesh to file and this options enabled.
 RecastDemo supports .obj files.
 Potentially decreases performance.
@@ -175,9 +174,9 @@ enable nav mesh file name revision
 :Range:		True/False
 :Default:	False
 
-Write each nav mesh file with revision in name.
+Write each navigation mesh file with revision in name.
 Otherwise will rewrite same file.
-If it is unclear when nav mesh is changed use this option to dump multiple files for each state.
+If it is unclear when navigation mesh is changed use this option to dump multiple files for each state.
 
 recast mesh path prefix
 -----------------------
@@ -195,7 +194,7 @@ nav mesh path prefix
 :Range:		file system path
 :Default:	""
 
-Write nav mesh file at path with this prefix.
+Write navigation mesh file at path with this prefix.
 
 enable nav mesh render
 ----------------------
@@ -206,7 +205,7 @@ enable nav mesh render
 
 Render navigation mesh.
 Allows to do in-game debug.
-Every nav mesh is visible and every update is noticeable.
+Every navigation mesh is visible and every update is noticeable.
 Potentially decreases performance.
 
 nav mesh render mode
@@ -246,16 +245,15 @@ Absent pieces usually mean a bug in recast mesh tiles building.
 Allows to do in-game debug.
 Potentially decreases performance.
 
-nav mesh version
-----------------
+wait for all jobs on exit
+-------------------------
 
-:Type:		integer
-:Range:		> 0
-:Default:	1
+:Type:		boolean
+:Range:		True/False
+:Default:	False
 
-Version of navigation mesh generation algorithm.
-Should be increased each time there is a difference between output of makeNavMeshTileData function for the same input.
-Changing the value will invalidate navmesh disk cache.
+Wait until all queued async navmesh jobs are processed before exiting the engine.
+Useful when a benchmark generates jobs to write into navmeshdb faster than they are processed.
 
 Expert settings
 ***************
@@ -269,12 +267,12 @@ recast scale factor
 :Range:		> 0.0
 :Default:	0.029411764705882353
 
-Scale of nav mesh coordinates to world coordinates. Recastnavigation builds voxels for world geometry.
+Scale of navigation mesh coordinates to world coordinates. Recastnavigation builds voxels for world geometry.
 Basically voxel size is 1 / "cell size". To reduce amount of voxels we apply scale factor, to make voxel size
 "recast scale factor" / "cell size". Default value calculates by this equation:
 sStepSizeUp * "recast scale factor" / "cell size" = 5 (max climb height should be equal to 4 voxels).
-Changing this value will change generated nav mesh. Some locations may become unavailable for NPC and creatures.
-Pay attention to slopes and roofs when change it. Increasing this value will reduce nav mesh update latency.
+Changing this value will change generated navigation mesh. Some locations may become unavailable for NPC and creatures.
+Pay attention to slopes and roofs when change it. Increasing this value will reduce navigation mesh update latency.
 
 max polygon path size
 ---------------------
@@ -397,13 +395,13 @@ max polygons per tile
 :Range:		2^n, 0 < n < 22
 :Default:	4096
 
-Maximum number of polygons per nav mesh tile. Maximum number of nav mesh tiles depends on
+Maximum number of polygons per navigation mesh tile. Maximum number of navigation mesh tiles depends on
 this value. 22 bits is a limit to store both tile identifier and polygon identifier (tiles = 2^(22 - log2(polygons))).
 See `recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ for more details.
 
 .. Warning::
-    Lower value may lead to ignored world geometry on nav mesh.
-    Greater value will reduce number of nav mesh tiles.
+    Lower value may lead to ignored world geometry on navigation mesh.
+    Greater value will reduce number of navigation mesh tiles.
     This condition is always true: ``max tiles number * max polygons per tile <= 4194304``.
     It's a limitation of `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library.
 

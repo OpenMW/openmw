@@ -224,6 +224,10 @@ CSVWorld::RegionMap::RegionMap(const CSMWorld::UniversalId& universalId, CSMDoc:
     addAction(mViewInTableAction);
 
     setAcceptDrops(true);
+
+    // Make columns square incase QSizeHint doesnt apply
+    for (int column = 0; column < this->model()->columnCount(); ++column)
+        this->setColumnWidth(column, this->rowHeight(0));
 }
 
 void CSVWorld::RegionMap::selectAll()
@@ -358,12 +362,23 @@ std::vector<CSMWorld::UniversalId> CSVWorld::RegionMap::getDraggedRecords() cons
     return ids;
 }
 
+void CSVWorld::RegionMap::dragMoveEvent(QDragMoveEvent* event)
+{
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData());
+    if (mime != nullptr && (mime->holdsType(CSMWorld::UniversalId::Type_Region)))
+    {
+        event->accept();
+        return;
+    }
+
+    event->ignore();
+}
+
 void CSVWorld::RegionMap::dropEvent(QDropEvent* event)
 {
     QModelIndex index = indexAt(event->pos());
 
     bool exists = QTableView::model()->data(index, Qt::BackgroundRole) != QBrush(Qt::DiagCrossPattern);
-
     if (!index.isValid() || !exists)
     {
         return;

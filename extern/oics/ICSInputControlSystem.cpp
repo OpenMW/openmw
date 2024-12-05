@@ -42,6 +42,7 @@ namespace ICS
         , mXmouseAxisBinded(false), mYmouseAxisBinded(false)
         , mClientWidth(1)
         , mClientHeight(1)
+        , mMouseAxisBindingInitialValues{0}
 	{
 		ICS_LOG(" - Creating InputControlSystem - ");
 
@@ -356,14 +357,9 @@ namespace ICS
 		return file.substr(0, file.find_last_of("."));
 	}
 
-	bool InputControlSystem::save(std::string fileName)
+	bool InputControlSystem::save(const std::string& fileName)
 	{
-		if(fileName != "")
-		{
-			mFileName = fileName;
-		}
-
-		TiXmlDocument doc(  mFileName.c_str() );
+		TiXmlDocument doc(fileName.c_str());
 
 		TiXmlDeclaration dec;
 		dec.Parse( "<?xml version='1.0' encoding='utf-8'?>", 0, TIXML_ENCODING_UNKNOWN );
@@ -802,11 +798,7 @@ namespace ICS
 
     std::string InputControlSystem::scancodeToString(SDL_Scancode key)
 	{
-        SDL_Keycode code = SDL_GetKeyFromScancode(key);
-        if (code == SDLK_UNKNOWN)
-            return std::string(SDL_GetScancodeName(key));
-        else
-            return std::string(SDL_GetKeyName(code));
+		return std::string(SDL_GetScancodeName(key));
 	}
 
     void InputControlSystem::adjustMouseRegion(Uint16 width, Uint16 height)

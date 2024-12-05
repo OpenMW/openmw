@@ -122,10 +122,10 @@ namespace SceneUtil
                               << mScreenshotFormat << "\": " << e.what();
         }
         if (fileName.empty())
-            mCallback("Failed to save screenshot");
+            mCallback(std::string());
         else
         {
-            mCallback(Files::pathToUnicodeString(fileName) + " has been saved");
+            mCallback(Files::pathToUnicodeString(fileName));
             Log(Debug::Info) << mScreenshotPath / fileName << " has been saved";
         }
     }

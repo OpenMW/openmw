@@ -106,9 +106,6 @@ void CSMTools::ScriptCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
     mId = mDocument.getData().getScripts().getId(stage);
 
-    if (mDocument.isBlacklisted(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Script, mId.getRefIdString())))
-        return;
-
     // Skip "Base" records (setting!) and "Deleted" records
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;

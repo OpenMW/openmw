@@ -41,8 +41,8 @@ namespace
         {
             std::ostringstream texname;
             texname << "textures/water/" << tex << std::setw(2) << std::setfill('0') << i << ".dds";
-            osg::ref_ptr<osg::Texture2D> tex2(
-                new osg::Texture2D(resourceSystem->getImageManager()->getImage(texname.str())));
+            const VFS::Path::Normalized path(texname.str());
+            osg::ref_ptr<osg::Texture2D> tex2(new osg::Texture2D(resourceSystem->getImageManager()->getImage(path)));
             tex2->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
             tex2->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
             resourceSystem->getSceneManager()->applyFilterSettings(tex2);
@@ -80,6 +80,25 @@ namespace
 
         node->setStateSet(stateset);
     }
+
+    int findOldestParticleAlive(const osgParticle::ParticleSystem* partsys)
+    {
+        int oldest = -1;
+        float oldestAge = 0.f;
+        for (int i = 0; i < partsys->numParticles(); ++i)
+        {
+            const osgParticle::Particle* particle = partsys->getParticle(i);
+            if (!particle->isAlive())
+                continue;
+            const float age = particle->getAge();
+            if (oldest == -1 || age > oldestAge)
+            {
+                oldest = i;
+                oldestAge = age;
+            }
+        }
+        return oldest;
+    }
 }
 
 namespace MWRender
@@ -87,6 +106,7 @@ namespace MWRender
 
     RippleSimulation::RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem)
         : mParent(parent)
+        , mMaxNumberRipples(Fallback::Map::getInt("Water_MaxNumberRipples"))
     {
         mParticleSystem = new osgParticle::ParticleSystem;
 
@@ -159,9 +179,6 @@ namespace MWRender
 
                 currentPos.z() = mParticleNode->getPosition().z();
 
-                if (mParticleSystem->numParticles() - mParticleSystem->numDeadParticles() > 500)
-                    continue; // TODO: remove the oldest particle to make room?
-
                 emitRipple(currentPos);
             }
         }
@@ -226,7 +243,19 @@ namespace MWRender
             }
             else
             {
+                if (mMaxNumberRipples <= 0)
+                    return;
+
                 osgParticle::ParticleSystem::ScopedWriteLock lock(*mParticleSystem->getReadWriteMutex());
+                if (mParticleSystem->numParticles() - mParticleSystem->numDeadParticles() > mMaxNumberRipples)
+                {
+                    // osgParticle::ParticleSystem design requires this to be O(N)
+                    // However, the number of particles we'll have to go through is not large
+                    // If the user makes the limit absurd and manages to actually hit it this could be a problem
+                    const int oldest = findOldestParticleAlive(mParticleSystem);
+                    if (oldest != -1)
+                        mParticleSystem->reuseParticle(oldest);
+                }
                 osgParticle::Particle* p = mParticleSystem->createParticle(nullptr);
                 p->setPosition(osg::Vec3f(pos.x(), pos.y(), 0.f));
                 p->setAngle(osg::Vec3f(0, 0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));

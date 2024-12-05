@@ -15,6 +15,9 @@ namespace osg
 
 namespace SceneUtil
 {
+    void setupSoftEffect(osg::Node& node, float size, bool falloff, float falloffDepth);
+    void setupDistortion(osg::Node& node, float distortionStrength);
+
     class ProcessExtraDataVisitor : public osg::NodeVisitor
     {
     public:
@@ -27,8 +30,6 @@ namespace SceneUtil
         void apply(osg::Node& node) override;
 
     private:
-        void setupSoftEffect(osg::Node& node, float size, bool falloff);
-
         Resource::SceneManager* mSceneMgr;
     };
 }

@@ -8,10 +8,16 @@ namespace osg
     class StateSet;
     class Group;
 }
+
 namespace osgShadow
 {
     class ShadowSettings;
     class ShadowedScene;
+}
+
+namespace Settings
+{
+    struct ShadowsCategory;
 }
 
 namespace SceneUtil
@@ -20,24 +26,28 @@ namespace SceneUtil
     class ShadowManager
     {
     public:
-        static void disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateSet);
-
         static Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
 
-        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode,
+        static const ShadowManager& instance();
+
+        explicit ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode,
             unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, unsigned int worldMask,
-            Shader::ShaderManager& shaderManager);
+            const Settings::ShadowsCategory& settings, Shader::ShaderManager& shaderManager);
         ~ShadowManager();
 
-        void setupShadowSettings(Shader::ShaderManager& shaderManager);
+        void setupShadowSettings(const Settings::ShadowsCategory& settings, Shader::ShaderManager& shaderManager);
 
-        Shader::ShaderManager::DefineMap getShadowDefines();
+        void disableShadowsForStateSet(osg::StateSet& stateset) const;
 
-        void enableIndoorMode();
+        Shader::ShaderManager::DefineMap getShadowDefines(const Settings::ShadowsCategory& settings) const;
+
+        void enableIndoorMode(const Settings::ShadowsCategory& settings);
 
         void enableOutdoorMode();
 
     protected:
+        static ShadowManager* sInstance;
+
         bool mEnableShadows;
 
         osg::ref_ptr<osgShadow::ShadowedScene> mShadowedScene;

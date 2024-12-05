@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESSIMPORT_IMPORTINVENTORY_H
 #define OPENMW_ESSIMPORT_IMPORTINVENTORY_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -19,7 +20,7 @@ namespace ESSImport
 
     struct ContItem
     {
-        int mCount;
+        int32_t mCount;
         ESM::NAME32 mItem;
     };
 
@@ -28,8 +29,8 @@ namespace ESSImport
         struct InventoryItem : public ESM::CellRef
         {
             std::string mId;
-            int mCount;
-            int mRelativeEquipmentSlot;
+            int32_t mCount;
+            int32_t mRelativeEquipmentSlot;
             SCRI mSCRI;
         };
         std::vector<InventoryItem> mItems;

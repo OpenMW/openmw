@@ -24,7 +24,7 @@ namespace ESM
         ESM::RefId mFailureSound;
         ESM::RefId mHitSound;
         std::string mName;
-        int mAutoCalcMax;
+        int32_t mAutoCalcMax;
 
         static constexpr int Length = 6;
 
@@ -44,16 +44,48 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Skill"; }
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         SkillId mId;
+
+        //! Enum that defines the index into SKDTstruct::mUseValue for all vanilla skill uses
+        enum UseType
+        {
+            // These are shared by multiple skills
+            Armor_HitByOpponent = 0,
+            Block_Success = 0,
+            Spellcast_Success = 0,
+            Weapon_SuccessfulHit = 0,
+
+            // Skill-specific use types
+            Alchemy_CreatePotion = 0,
+            Alchemy_UseIngredient = 1,
+            Enchant_Recharge = 0,
+            Enchant_UseMagicItem = 1,
+            Enchant_CreateMagicItem = 2,
+            Enchant_CastOnStrike = 3,
+            Acrobatics_Jump = 0,
+            Acrobatics_Fall = 1,
+            Mercantile_Success = 0,
+            Mercantile_Bribe = 1, //!< \Note This is bugged in vanilla and is not actually in use.
+            Security_DisarmTrap = 0,
+            Security_PickLock = 1,
+            Sneak_AvoidNotice = 0,
+            Sneak_PickPocket = 1,
+            Speechcraft_Success = 0,
+            Speechcraft_Fail = 1,
+            Armorer_Repair = 0,
+            Athletics_RunOneSecond = 0,
+            Athletics_SwimOneSecond = 1,
+
+        };
 
         struct SKDTstruct
         {
-            int mAttribute; // see defs.hpp
-            int mSpecialization; // 0 - Combat, 1 - Magic, 2 - Stealth
+            int32_t mAttribute; // see defs.hpp
+            int32_t mSpecialization; // 0 - Combat, 1 - Magic, 2 - Stealth
             float mUseValue[4]; // How much skill improves through use. Meaning
                                 // of each field depends on what skill this
-                                // is. We should document this better later.
+                                // is. See UseType above
         }; // Total size: 24 bytes
         SKDTstruct mData;
 

@@ -58,7 +58,7 @@ std::string CSMWorld::TableMimeData::getIcon() const
 
         if (tmpIcon != id.getIcon())
         {
-            return ":/multitype.png"; // icon stolen from gnome TODO: get new icon
+            return ":multitype";
         }
 
         tmpIcon = id.getIcon();

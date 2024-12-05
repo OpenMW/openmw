@@ -1,6 +1,7 @@
 
 #include "stringsetting.hpp"
 
+#include <QLabel>
 #include <QLineEdit>
 #include <QMutexLocker>
 
@@ -12,9 +13,8 @@
 #include "state.hpp"
 
 CSMPrefs::StringSetting::StringSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, std::string_view default_)
-    : Setting(parent, mutex, key, label)
-    , mDefault(default_)
+    Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index)
+    : TypedSetting(parent, mutex, key, label, index)
     , mWidget(nullptr)
 {
 }
@@ -25,35 +25,33 @@ CSMPrefs::StringSetting& CSMPrefs::StringSetting::setTooltip(const std::string& 
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::StringSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::StringSetting::makeWidgets(QWidget* parent)
 {
-    mWidget = new QLineEdit(QString::fromUtf8(mDefault.c_str()), parent);
+    QLabel* label = new QLabel(getLabel(), parent);
+
+    mWidget = new QLineEdit(QString::fromStdString(getValue()), parent);
+    mWidget->setMinimumWidth(300);
 
     if (!mTooltip.empty())
     {
         QString tooltip = QString::fromUtf8(mTooltip.c_str());
+        label->setToolTip(tooltip);
         mWidget->setToolTip(tooltip);
     }
 
     connect(mWidget, &QLineEdit::textChanged, this, &StringSetting::textChanged);
 
-    return std::make_pair(static_cast<QWidget*>(nullptr), mWidget);
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget };
 }
 
 void CSMPrefs::StringSetting::updateWidget()
 {
     if (mWidget)
-    {
-        mWidget->setText(QString::fromStdString(Settings::Manager::getString(getKey(), getParent()->getKey())));
-    }
+        mWidget->setText(QString::fromStdString(getValue()));
 }
 
 void CSMPrefs::StringSetting::textChanged(const QString& text)
 {
-    {
-        QMutexLocker lock(getMutex());
-        Settings::Manager::setString(getKey(), getParent()->getKey(), text.toStdString());
-    }
-
+    setValue(text.toStdString());
     getParent()->getState()->update(*this);
 }

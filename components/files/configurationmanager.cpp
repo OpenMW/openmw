@@ -68,6 +68,9 @@ namespace Files
         bool silent = mSilent;
         mSilent = quiet;
 
+        // ensure defaults are present
+        bpo::store(bpo::parsed_options(&description), variables);
+
         std::optional<bpo::variables_map> config = loadConfig(mFixedPath.getLocalPath(), description);
         if (config)
             mActiveConfigPaths.push_back(mFixedPath.getLocalPath());
@@ -194,6 +197,10 @@ namespace Files
             "instead of being appended");
         addOption("user-data", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
             "set user data directory (used for saves, screenshots, etc)");
+        addOption("resources",
+            boost::program_options::value<Files::MaybeQuotedPath>()->default_value(
+                Files::MaybeQuotedPath(), "resources"),
+            "set resources directory");
     }
 
     bpo::variables_map separateComposingVariables(
@@ -309,7 +316,7 @@ namespace Files
                     tempPath /= str.substr(pos + 1, str.length() - pos);
                 }
 
-                path = tempPath;
+                path = std::move(tempPath);
             }
             else
             {
@@ -405,11 +412,6 @@ namespace Files
     const std::filesystem::path& ConfigurationManager::getLocalPath() const
     {
         return mFixedPath.getLocalPath();
-    }
-
-    const std::filesystem::path& ConfigurationManager::getGlobalDataPath() const
-    {
-        return mFixedPath.getGlobalDataPath();
     }
 
     const std::filesystem::path& ConfigurationManager::getCachePath() const

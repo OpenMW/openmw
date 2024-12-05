@@ -3,10 +3,11 @@ local util = require('openmw.util')
 local self = require('openmw.self')
 local nearby = require('openmw.nearby')
 local async = require('openmw.async')
+local storage = require('openmw.storage')
 
 local Actor = require('openmw.types').Actor
 
-local settings = require('scripts.omw.camera.settings').thirdPerson
+local settings = storage.playerSection('SettingsOMWCameraThirdPerson')
 
 local MODE = camera.MODE
 local STATE = { RightShoulder = 0, LeftShoulder = 1, Combat = 2, Swimming = 3 }
@@ -15,7 +16,7 @@ local M = {
     baseDistance = 192,
     preferredDistance = 0,
     standingPreview = false,
-    noOffsetControl = 0,
+    noOffsetControl = {},
 }
 
 local viewOverShoulder, autoSwitchShoulder
@@ -31,7 +32,7 @@ local function updateSettings()
     viewOverShoulder = settings:get('viewOverShoulder')
     autoSwitchShoulder = settings:get('autoSwitchShoulder')
     shoulderOffset = util.vector2(settings:get('shoulderOffsetX'),
-                                  settings:get('shoulderOffsetY'))
+        settings:get('shoulderOffsetY'))
     zoomOutWhenMoveCoef = settings:get('zoomOutWhenMoveCoef')
 
     defaultShoulder = (shoulderOffset.x > 0 and STATE.RightShoulder) or STATE.LeftShoulder
@@ -46,7 +47,7 @@ local state = defaultShoulder
 
 local function ray(from, angle, limit)
     local to = from + util.transform.rotateZ(angle) * util.vector3(0, limit, 0)
-    local res = nearby.castRay(from, to, {collisionType = camera.getCollisionType()})
+    local res = nearby.castRay(from, to, { collisionType = camera.getCollisionType() })
     if res.hit then
         return (res.hitPos - from):length()
     else
@@ -55,8 +56,8 @@ local function ray(from, angle, limit)
 end
 
 local function trySwitchShoulder()
-    local limitToSwitch = 120  -- switch to other shoulder if wall is closer than this limit
-    local limitToSwitchBack = 300  -- switch back to default shoulder if there is no walls at this distance
+    local limitToSwitch = 120     -- switch to other shoulder if wall is closer than this limit
+    local limitToSwitchBack = 300 -- switch back to default shoulder if there is no walls at this distance
 
     local pos = camera.getTrackedPosition()
     local rayRight = ray(pos, camera.getYaw() + math.rad(90), limitToSwitchBack + 1)
@@ -79,7 +80,7 @@ end
 local function calculateDistance(smoothedSpeed)
     local smoothedSpeedSqr = smoothedSpeed * smoothedSpeed
     return (M.baseDistance + math.max(camera.getPitch(), 0) * 50
-            + smoothedSpeedSqr / (smoothedSpeedSqr + 300*300) * zoomOutWhenMoveCoef)
+        + smoothedSpeedSqr / (smoothedSpeedSqr + 300 * 300) * zoomOutWhenMoveCoef)
 end
 
 local function updateState()
@@ -95,7 +96,7 @@ local function updateState()
         state = defaultShoulder
     end
     if (mode == MODE.ThirdPerson or Actor.getCurrentSpeed(self) > 0 or state ~= oldState or noThirdPersonLastFrame)
-       and (state == STATE.LeftShoulder or state == STATE.RightShoulder) then
+        and (state == STATE.LeftShoulder or state == STATE.RightShoulder) then
         if autoSwitchShoulder then
             trySwitchShoulder()
         else
@@ -108,11 +109,11 @@ local function updateState()
             -- Player doesn't touch controls for a long time. Transition should be very slow.
             camera.setFocalTransitionSpeed(0.2)
         elseif (oldState == STATE.Combat or state == STATE.Combat) and
-               (mode ~= MODE.Preview or M.standingPreview) then
+            (mode ~= MODE.Preview or M.standingPreview) then
             -- Transition to/from combat mode and we are not in preview mode. Should be fast.
             camera.setFocalTransitionSpeed(5.0)
         else
-            camera.setFocalTransitionSpeed(1.0)  -- Default transition speed.
+            camera.setFocalTransitionSpeed(1.0) -- Default transition speed.
         end
 
         if state == STATE.RightShoulder then
@@ -142,14 +143,14 @@ function M.update(dt, smoothedSpeed)
         return
     end
 
-    if M.noOffsetControl == 0 then
+    if not next(M.noOffsetControl) then
         updateState()
     else
         state = nil
     end
 
     M.preferredDistance = calculateDistance(smoothedSpeed)
-    if noThirdPersonLastFrame then  -- just switched to third person view
+    if noThirdPersonLastFrame then -- just switched to third person view
         camera.setPreferredThirdPersonDistance(M.preferredDistance)
         camera.instantTransition()
         noThirdPersonLastFrame = false
@@ -161,4 +162,3 @@ function M.update(dt, smoothedSpeed)
 end
 
 return M
-

@@ -36,6 +36,7 @@ namespace MWMechanics
     class Actor;
     class CharacterController;
     class CreatureStats;
+    class SidingCache;
 
     class Actors
     {
@@ -66,16 +67,13 @@ namespace MWMechanics
 
         void resurrect(const MWWorld::Ptr& ptr) const;
 
-        void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell = false) const;
+        void castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool scriptedSpell = false) const;
 
         void updateActor(const MWWorld::Ptr& old, const MWWorld::Ptr& ptr) const;
         ///< Updates an actor with a new Ptr
 
         void dropActors(const MWWorld::CellStore* cellStore, const MWWorld::Ptr& ignore);
         ///< Deregister all actors (except for \a ignore) in the given cell.
-
-        void updateCombatMusic();
-        ///< Update combat music state
 
         void update(float duration, bool paused);
         ///< Update actor stats and store desired velocity vectors in \a movement
@@ -115,11 +113,16 @@ namespace MWMechanics
 
         void forceStateUpdate(const MWWorld::Ptr& ptr) const;
 
-        bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist = false) const;
+        bool playAnimationGroup(const MWWorld::Ptr& ptr, std::string_view groupName, int mode, uint32_t number,
+            bool scripted = false) const;
+        bool playAnimationGroupLua(const MWWorld::Ptr& ptr, std::string_view groupName, uint32_t loops, float speed,
+            std::string_view startKey, std::string_view stopKey, bool forceLoop);
+        void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable);
         void skipAnimation(const MWWorld::Ptr& ptr) const;
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) const;
+        bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const;
         void persistAnimationStates() const;
+        void clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted);
 
         void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out) const;
 
@@ -165,13 +168,6 @@ namespace MWMechanics
         bool isTurningToPlayer(const MWWorld::Ptr& ptr) const;
 
     private:
-        enum class MusicType
-        {
-            Title,
-            Explore,
-            Battle
-        };
-
         std::map<ESM::RefId, int> mDeathCount;
         std::list<Actor> mActors;
         std::map<const MWWorld::LiveCellRefBase*, std::list<Actor>::iterator> mIndex;
@@ -182,7 +178,6 @@ namespace MWMechanics
         float mTimerUpdateHello = 0;
         float mSneakTimer = 0; // Times update of sneak icon
         float mSneakSkillTimer = 0; // Times sneak skill progress from "avoid notice"
-        MusicType mCurrentMusic = MusicType::Title;
 
         void updateVisibility(const MWWorld::Ptr& ptr, CharacterController& ctrl) const;
 
@@ -190,7 +185,7 @@ namespace MWMechanics
 
         void calculateRestoration(const MWWorld::Ptr& ptr, float duration) const;
 
-        void updateCrimePursuit(const MWWorld::Ptr& ptr, float duration) const;
+        void updateCrimePursuit(const MWWorld::Ptr& ptr, float duration, SidingCache& cachedAllies) const;
 
         void killDeadActors();
 
@@ -202,13 +197,25 @@ namespace MWMechanics
             @Notes: If againstPlayer = true then actor2 should be the Player.
                     If one of the combatants is creature it should be actor1.
         */
-        void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2,
-            std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr>>& cachedAllies, bool againstPlayer) const;
+        void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, SidingCache& cachedAllies,
+            bool againstPlayer) const;
+    };
 
-        /// Recursive version of getActorsSidingWith that takes, adds to and returns a cache of
-        /// actors mapped to their allies. Excludes infighting
-        void getActorsSidingWith(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out,
-            std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr>>& cachedAllies) const;
+    class SidingCache
+    {
+        const Actors& mActors;
+        const bool mExcludeInfighting;
+        std::map<MWWorld::Ptr, std::set<MWWorld::Ptr>> mCache;
+
+    public:
+        SidingCache(const Actors& actors, bool excludeInfighting)
+            : mActors(actors)
+            , mExcludeInfighting(excludeInfighting)
+        {
+        }
+
+        /// Recursive version of getActorsSidingWith that takes, returns a cached set of allies
+        const std::set<MWWorld::Ptr>& getActorsSidingWith(const MWWorld::Ptr& actor);
     };
 }
 

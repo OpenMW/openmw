@@ -1,11 +1,19 @@
 #ifndef OPENMW_MWWORLD_CELLPRELOADER_H
 #define OPENMW_MWWORLD_CELLPRELOADER_H
 
+#include "positioncellgrid.hpp"
+
 #include <components/sceneutil/workqueue.hpp>
-#include <map>
-#include <osg/Vec3f>
-#include <osg/Vec4i>
+
 #include <osg/ref_ptr>
+
+#include <map>
+#include <span>
+
+namespace osg
+{
+    class Stats;
+}
 
 namespace Resource
 {
@@ -56,25 +64,28 @@ namespace MWWorld
         void setExpiryDelay(double expiryDelay);
 
         /// The minimum number of preloaded cells before unused cells get thrown out.
-        void setMinCacheSize(unsigned int num);
+        void setMinCacheSize(std::size_t value) { mMinCacheSize = value; }
 
         /// The maximum number of preloaded cells.
-        void setMaxCacheSize(unsigned int num);
+        void setMaxCacheSize(std::size_t value) { mMaxCacheSize = value; }
 
         /// Enables the creation of instances in the preloading thread.
         void setPreloadInstances(bool preload);
 
-        unsigned int getMaxCacheSize() const;
+        std::size_t getMaxCacheSize() const { return mMaxCacheSize; }
+
+        std::size_t getCacheSize() const { return mPreloadCells.size(); }
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
-        typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
-        void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
+        void setTerrainPreloadPositions(std::span<const PositionCellGrid> positions);
 
         void syncTerrainLoad(Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid* exceptPos);
-        bool isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const;
+        bool isTerrainLoaded(const PositionCellGrid& position, double referenceTime) const;
         void setTerrain(Terrain::World* terrain);
+
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
     private:
         void clearAllTasks();
@@ -85,8 +96,8 @@ namespace MWWorld
         MWRender::LandManager* mLandManager;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
         double mExpiryDelay;
-        unsigned int mMinCacheSize;
-        unsigned int mMaxCacheSize;
+        std::size_t mMinCacheSize = 0;
+        std::size_t mMaxCacheSize = 0;
         bool mPreloadInstances;
 
         double mLastResourceCacheUpdate;
@@ -118,6 +129,10 @@ namespace MWWorld
 
         std::vector<PositionCellGrid> mLoadedTerrainPositions;
         double mLoadedTerrainTimestamp;
+        std::size_t mEvicted = 0;
+        std::size_t mAdded = 0;
+        std::size_t mExpired = 0;
+        std::size_t mLoaded = 0;
     };
 
 }

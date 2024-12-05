@@ -3,8 +3,17 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/concepts.hpp>
+
 namespace ESM
 {
+    template <Misc::SameAsWithoutCvref<DialInfo::DATAstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        char padding = 0;
+        f(v.mType, v.mDisposition, v.mRank, v.mGender, v.mPCrank, padding);
+    }
+
     void DialInfo::load(ESMReader& esm, bool& isDeleted)
     {
         mId = esm.getHNRefId("INAM");
@@ -23,7 +32,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case fourCC("DATA"):
-                    esm.getHTSized<12>(mData);
+                    esm.getSubComposite(mData);
                     break;
                 case fourCC("ONAM"):
                     mActor = esm.getRefId();
@@ -57,10 +66,9 @@ namespace ESM
                     break;
                 case fourCC("SCVR"):
                 {
-                    SelectStruct ss;
-                    ss.mSelectRule = esm.getHString();
-                    ss.mValue.read(esm, Variant::Format_Info);
-                    mSelects.push_back(ss);
+                    auto filter = DialogueCondition::load(esm, mId);
+                    if (filter)
+                        mSelects.emplace_back(std::move(*filter));
                     break;
                 }
                 case fourCC("BNAM"):
@@ -101,7 +109,7 @@ namespace ESM
             return;
         }
 
-        esm.writeHNT("DATA", mData, 12);
+        esm.writeNamedComposite("DATA", mData);
         esm.writeHNOCRefId("ONAM", mActor);
         esm.writeHNOCRefId("RNAM", mRace);
         esm.writeHNOCRefId("CNAM", mClass);
@@ -111,11 +119,8 @@ namespace ESM
         esm.writeHNOCString("SNAM", mSound);
         esm.writeHNOString("NAME", mResponse);
 
-        for (std::vector<SelectStruct>::const_iterator it = mSelects.begin(); it != mSelects.end(); ++it)
-        {
-            esm.writeHNString("SCVR", it->mSelectRule);
-            it->mValue.write(esm, Variant::Format_Info);
-        }
+        for (const auto& rule : mSelects)
+            rule.save(esm);
 
         esm.writeHNOString("BNAM", mResultScript);
 

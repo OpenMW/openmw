@@ -96,8 +96,9 @@ namespace SceneUtil
         const osg::Vec4f& glowColor, float glowDuration = -1);
 
     // Alpha-to-coverage requires a multisampled framebuffer, so we need to set that up for RTTs
-    bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer,
-        osg::Texture* texture, unsigned int level = 0, unsigned int face = 0, bool mipMapGeneration = false);
+    void attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer,
+        osg::Texture* texture, unsigned int level, unsigned int face, bool mipMapGeneration,
+        bool addMSAAIntermediateTarget);
 
     class OperationSequence : public osg::Operation
     {
@@ -111,6 +112,14 @@ namespace SceneUtil
     protected:
         osg::ref_ptr<osg::OperationQueue> mOperationQueue;
     };
+
+    // Compute the unsized format equivalent to the given pixel format
+    // Unlike osg::Image::computePixelFormat, this also covers compressed formats
+    GLenum computeUnsizedPixelFormat(GLenum format);
+
+    // Recover the presumed texture type for the given texture unit
+    // It may be set as a state attribute or it may come from the used texture's name
+    const std::string& getTextureType(const osg::StateSet& stateset, const osg::Texture& texture, unsigned int texUnit);
 }
 
 #endif

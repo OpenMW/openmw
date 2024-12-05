@@ -99,7 +99,7 @@ namespace MWWorld
             global.load(reader, isDeleted);
 
             if (const auto iter = mVariables.find(global.mId); iter != mVariables.end())
-                iter->second = global;
+                iter->second = std::move(global);
 
             return true;
         }

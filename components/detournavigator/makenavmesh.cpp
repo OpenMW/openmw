@@ -186,16 +186,35 @@ namespace DetourNavigator
                 &context, solid, width, height, bmin.ptr(), bmax.ptr(), settings.mCellSize, settings.mCellHeight);
         }
 
+        bool isSupportedCoordinate(float value)
+        {
+            constexpr float maxVertexCoordinate = static_cast<float>(1 << 22);
+            return -maxVertexCoordinate < value && value < maxVertexCoordinate;
+        }
+
+        template <class Iterator>
+        bool isSupportedCoordinates(Iterator begin, Iterator end)
+        {
+            return std::all_of(begin, end, isSupportedCoordinate);
+        }
+
         [[nodiscard]] bool rasterizeTriangles(RecastContext& context, const Mesh& mesh, const RecastSettings& settings,
             const RecastParams& params, rcHeightfield& solid)
         {
             std::vector<unsigned char> areas(mesh.getAreaTypes().begin(), mesh.getAreaTypes().end());
             std::vector<float> vertices = mesh.getVertices();
 
-            for (std::size_t i = 0; i < vertices.size(); i += 3)
+            constexpr std::size_t verticesPerTriangle = 3;
+
+            for (std::size_t i = 0; i < vertices.size(); i += verticesPerTriangle)
             {
-                for (std::size_t j = 0; j < 3; ++j)
-                    vertices[i + j] = toNavMeshCoordinates(settings, vertices[i + j]);
+                for (std::size_t j = 0; j < verticesPerTriangle; ++j)
+                {
+                    const float coordinate = toNavMeshCoordinates(settings, vertices[i + j]);
+                    if (!isSupportedCoordinate(coordinate))
+                        return false;
+                    vertices[i + j] = coordinate;
+                }
                 std::swap(vertices[i + 1], vertices[i + 2]);
             }
 
@@ -216,6 +235,9 @@ namespace DetourNavigator
                 rectangle.mBounds.mMax.x(), rectangle.mHeight, rectangle.mBounds.mMax.y(), // vertex 2
                 rectangle.mBounds.mMax.x(), rectangle.mHeight, rectangle.mBounds.mMin.y(), // vertex 3
             };
+
+            if (!isSupportedCoordinates(vertices.begin(), vertices.end()))
+                return false;
 
             const std::array indices{
                 0, 1, 2, // triangle 0
@@ -458,15 +480,6 @@ namespace DetourNavigator
             return true;
         }
 
-        template <class T>
-        unsigned long getMinValuableBitsNumber(const T value)
-        {
-            unsigned long power = 0;
-            while (power < sizeof(T) * 8 && (static_cast<T>(1) << power) < value)
-                ++power;
-            return power;
-        }
-
         std::pair<float, float> getBoundsByZ(
             const RecastMesh& recastMesh, float agentHalfExtentsZ, const RecastSettings& settings)
         {
@@ -506,13 +519,9 @@ namespace DetourNavigator
             return { minZ, maxZ };
         }
     }
-} // namespace DetourNavigator
 
-namespace DetourNavigator
-{
-    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
-        std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds,
-        const RecastSettings& settings)
+    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh, ESM::RefId worldspace,
+        const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings)
     {
         RecastContext context(worldspace, tilePosition, agentBounds);
 
@@ -599,22 +608,12 @@ namespace DetourNavigator
 
     void initEmptyNavMesh(const Settings& settings, dtNavMesh& navMesh)
     {
-        // Max tiles and max polys affect how the tile IDs are caculated.
-        // There are 22 bits available for identifying a tile and a polygon.
-        const int polysAndTilesBits = 22;
-        const auto polysBits = getMinValuableBitsNumber(settings.mDetour.mMaxPolys);
-
-        if (polysBits >= polysAndTilesBits)
-            throw InvalidArgument("Too many polygons per tile");
-
-        const auto tilesBits = polysAndTilesBits - polysBits;
-
         dtNavMeshParams params;
         std::fill_n(params.orig, 3, 0.0f);
         params.tileWidth = settings.mRecast.mTileSize * settings.mRecast.mCellSize;
         params.tileHeight = settings.mRecast.mTileSize * settings.mRecast.mCellSize;
-        params.maxTiles = 1 << tilesBits;
-        params.maxPolys = 1 << polysBits;
+        params.maxTiles = settings.mMaxTilesNumber;
+        params.maxPolys = settings.mDetour.mMaxPolys;
 
         const auto status = navMesh.init(&params);
 

@@ -7,23 +7,20 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_UString.h>
 
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
 
 #include <components/debug/debuglog.hpp>
-
-#include <components/myguiplatform/myguitexture.hpp>
-
-#include <components/misc/strings/lower.hpp>
-
-#include <components/settings/settings.hpp>
-
+#include <components/esm3/loadclas.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/memorystream.hpp>
+#include <components/l10n/manager.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/misc/timeconvert.hpp>
-
-#include <components/esm3/loadclas.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -35,7 +32,6 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
-#include "ustring.hpp"
 
 namespace MWGui
 {
@@ -168,7 +164,7 @@ namespace MWGui
 
         mCurrentCharacter = mgr->getCurrentCharacter();
 
-        const std::string& directory = Settings::Manager::getString("character", "Saves");
+        const std::string& directory = Settings::saves().mCharacter;
 
         size_t selectedIndex = MyGUI::ITEM_NONE;
 
@@ -197,8 +193,8 @@ namespace MWGui
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
-                title << " (#{sLevel} " << signature.mPlayerLevel << " "
-                      << MyGUI::TextIterator::toTagsString(toUString(className)) << ")";
+                title << " (#{OMWEngine:Level} " << signature.mPlayerLevel << " "
+                      << MyGUI::TextIterator::toTagsString(MyGUI::UString(className)) << ")";
 
                 mCharacterSelection->addItem(MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 
@@ -302,7 +298,7 @@ namespace MWGui
 
         if (mSaving)
         {
-            MWBase::Environment::get().getStateManager()->saveGame(mSaveNameEdit->getCaption().asUTF8(), mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->saveGame(mSaveNameEdit->getCaption(), mCurrentSlot);
         }
         else
         {
@@ -367,18 +363,23 @@ namespace MWGui
 
     std::string formatTimeplayed(const double timeInSeconds)
     {
-        int timePlayed = (int)floor(timeInSeconds);
-        int days = timePlayed / 60 / 60 / 24;
-        int hours = (timePlayed / 60 / 60) % 24;
-        int minutes = (timePlayed / 60) % 60;
-        int seconds = timePlayed % 60;
+        auto l10n = MWBase::Environment::get().getL10nManager()->getContext("Interface");
+        int duration = static_cast<int>(timeInSeconds);
+        if (duration <= 0)
+            return l10n->formatMessage("DurationSecond", { "seconds" }, { 0 });
 
-        std::stringstream stream;
-        stream << std::setfill('0') << std::setw(2) << days << ":";
-        stream << std::setfill('0') << std::setw(2) << hours << ":";
-        stream << std::setfill('0') << std::setw(2) << minutes << ":";
-        stream << std::setfill('0') << std::setw(2) << seconds;
-        return stream.str();
+        std::string result;
+        int hours = duration / 3600;
+        int minutes = (duration / 60) % 60;
+        int seconds = duration % 60;
+        if (hours)
+            result += l10n->formatMessage("DurationHour", { "hours" }, { hours });
+        if (minutes)
+            result += l10n->formatMessage("DurationMinute", { "minutes" }, { minutes });
+        if (seconds)
+            result += l10n->formatMessage("DurationSecond", { "seconds" }, { seconds });
+
+        return result;
     }
 
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox* sender, size_t pos)
@@ -412,7 +413,11 @@ namespace MWGui
 
         text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
 
-        text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
+        if (mCurrentSlot->mProfile.mMaximumHealth > 0)
+            text << "#{OMWEngine:Health} " << static_cast<int>(mCurrentSlot->mProfile.mCurrentHealth) << "/"
+                 << static_cast<int>(mCurrentSlot->mProfile.mMaximumHealth) << "\n";
+
+        text << "#{OMWEngine:Level} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCellName << "}\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
@@ -422,12 +427,15 @@ namespace MWGui
         if (hour == 0)
             hour = 12;
 
+        if (mCurrentSlot->mProfile.mCurrentDay > 0)
+            text << "#{Calendar:day} " << mCurrentSlot->mProfile.mCurrentDay << "\n";
+
         text << mCurrentSlot->mProfile.mInGameTime.mDay << " "
              << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(
                     mCurrentSlot->mProfile.mInGameTime.mMonth)
              << " " << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}");
 
-        if (Settings::Manager::getBool("timeplayed", "Saves"))
+        if (mCurrentSlot->mProfile.mTimePlayed > 0)
         {
             text << "\n"
                  << "#{OMWEngine:TimePlayed}: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);

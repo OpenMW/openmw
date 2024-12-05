@@ -33,7 +33,6 @@
 #include <osg/StateAttribute>
 #include <osg/StateSet>
 #include <osg/Vec3>
-#include <osg/Vec4f>
 
 #include <osgFX/Scribe>
 
@@ -152,7 +151,9 @@ void CSVRender::Object::update()
         }
         else if (!model.empty())
         {
-            std::string path = "meshes\\" + model;
+            constexpr VFS::Path::NormalizedView meshes("meshes");
+            VFS::Path::Normalized path(meshes);
+            path /= model;
             mResourceSystem->getSceneManager()->getInstance(path, mBaseNode);
         }
         else
@@ -485,7 +486,7 @@ CSVRender::Object::~Object()
     mParentNode->removeChild(mRootNode);
 }
 
-void CSVRender::Object::setSelected(bool selected)
+void CSVRender::Object::setSelected(bool selected, const osg::Vec4f& color)
 {
     mSelected = selected;
 
@@ -499,7 +500,7 @@ void CSVRender::Object::setSelected(bool selected)
     mRootNode->removeChild(mBaseNode);
     if (selected)
     {
-        mOutline->setWireframeColor(osg::Vec4f(1, 1, 1, 1));
+        mOutline->setWireframeColor(color);
         mOutline->addChild(mBaseNode);
         mRootNode->addChild(mOutline);
     }
@@ -714,7 +715,7 @@ void CSVRender::Object::setScale(float scale)
 {
     mOverrideFlags |= Override_Scale;
 
-    mScaleOverride = scale;
+    mScaleOverride = std::clamp(scale, 0.5f, 2.0f);
 
     adjustTransform();
 }

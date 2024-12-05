@@ -74,24 +74,25 @@ namespace MWMechanics
         bool hasSpell(const ESM::RefId& spell) const;
         bool hasSpell(const ESM::Spell* spell) const;
 
-        void add(const ESM::RefId& spell);
+        void add(const ESM::RefId& spell, bool modifyBase = true);
         ///< Adding a spell that is already listed in *this is a no-op.
 
-        void add(const ESM::Spell* spell);
+        void add(const ESM::Spell* spell, bool modifyBase = true);
         ///< Adding a spell that is already listed in *this is a no-op.
 
-        void remove(const ESM::RefId& spell);
+        void remove(const ESM::RefId& spell, bool modifyBase = true);
+        void remove(const ESM::Spell* spell, bool modifyBase = true);
         ///< If the spell to be removed is the selected spell, the selected spell will be changed to
-        /// no spell (empty string).
+        /// no spell (empty id).
 
         void clear(bool modifyBase = false);
-        ///< Remove all spells of al types.
+        ///< Remove all spells of all types.
 
         void setSelectedSpell(const ESM::RefId& spellId);
         ///< This function does not verify, if the spell is available.
 
         const ESM::RefId& getSelectedSpell() const;
-        ///< May return an empty string.
+        ///< May return an empty id.
 
         bool hasCommonDisease() const;
 

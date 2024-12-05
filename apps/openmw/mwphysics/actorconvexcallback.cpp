@@ -9,35 +9,28 @@
 
 namespace MWPhysics
 {
-    class ActorOverlapTester : public btCollisionWorld::ContactResultCallback
+    namespace
     {
-    public:
-        bool overlapping = false;
-
-        btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0,
-            int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) override
+        struct ActorOverlapTester : public btCollisionWorld::ContactResultCallback
         {
-            if (cp.getDistance() <= 0.0f)
-                overlapping = true;
-            return btScalar(1);
-        }
-    };
+            bool mOverlapping = false;
 
-    ActorConvexCallback::ActorConvexCallback(
-        const btCollisionObject* me, const btVector3& motion, btScalar minCollisionDot, const btCollisionWorld* world)
-        : btCollisionWorld::ClosestConvexResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0))
-        , mMe(me)
-        , mMotion(motion)
-        , mMinCollisionDot(minCollisionDot)
-        , mWorld(world)
-    {
+            btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* /*colObj0Wrap*/,
+                int /*partId0*/, int /*index0*/, const btCollisionObjectWrapper* /*colObj1Wrap*/, int /*partId1*/,
+                int /*index1*/) override
+            {
+                if (cp.getDistance() <= 0.0f)
+                    mOverlapping = true;
+                return 1;
+            }
+        };
     }
 
     btScalar ActorConvexCallback::addSingleResult(
         btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
     {
         if (convexResult.m_hitCollisionObject == mMe)
-            return btScalar(1);
+            return 1;
 
         // override data for actor-actor collisions
         // vanilla Morrowind seems to make overlapping actors collide as though they are both cylinders with a diameter
@@ -52,7 +45,7 @@ namespace MWPhysics
                 const_cast<btCollisionObject*>(mMe), const_cast<btCollisionObject*>(convexResult.m_hitCollisionObject),
                 isOverlapping);
 
-            if (isOverlapping.overlapping)
+            if (isOverlapping.mOverlapping)
             {
                 auto originA = Misc::Convert::toOsg(mMe->getWorldTransform().getOrigin());
                 auto originB = Misc::Convert::toOsg(convexResult.m_hitCollisionObject->getWorldTransform().getOrigin());
@@ -73,7 +66,7 @@ namespace MWPhysics
                 }
                 else
                 {
-                    return btScalar(1);
+                    return 1;
                 }
             }
         }
@@ -82,10 +75,10 @@ namespace MWPhysics
         {
             auto* projectileHolder = static_cast<Projectile*>(convexResult.m_hitCollisionObject->getUserPointer());
             if (!projectileHolder->isActive())
-                return btScalar(1);
+                return 1;
             if (projectileHolder->isValidTarget(mMe))
                 projectileHolder->hit(mMe, convexResult.m_hitPointLocal, convexResult.m_hitNormalLocal);
-            return btScalar(1);
+            return 1;
         }
 
         btVector3 hitNormalWorld;
@@ -101,7 +94,7 @@ namespace MWPhysics
         // dot product of the motion vector against the collision contact normal
         btScalar dotCollision = mMotion.dot(hitNormalWorld);
         if (dotCollision <= mMinCollisionDot)
-            return btScalar(1);
+            return 1;
 
         return ClosestConvexResultCallback::addSingleResult(convexResult, normalInWorldSpace);
     }

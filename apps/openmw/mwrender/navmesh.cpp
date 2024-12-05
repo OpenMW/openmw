@@ -1,4 +1,5 @@
 #include "navmesh.hpp"
+
 #include "vismask.hpp"
 
 #include <components/detournavigator/guardednavmeshcacheitem.hpp>
@@ -6,10 +7,13 @@
 #include <components/detournavigator/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/detourdebugdraw.hpp>
 #include <components/sceneutil/navmesh.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
+#include <osg/BlendFunc>
+#include <osg/LineWidth>
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
 
@@ -22,6 +26,29 @@
 
 namespace MWRender
 {
+    namespace
+    {
+        osg::ref_ptr<osg::StateSet> makeDebugDrawStateSet()
+        {
+            const osg::ref_ptr<osg::LineWidth> lineWidth = new osg::LineWidth();
+
+            const osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            const osg::ref_ptr<SceneUtil::AutoDepth> depth = new SceneUtil::AutoDepth;
+            depth->setWriteMask(false);
+
+            osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+            stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+            stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            stateSet->setAttributeAndModes(lineWidth);
+            stateSet->setAttributeAndModes(blendFunc);
+            stateSet->setAttributeAndModes(depth);
+
+            return stateSet;
+        }
+    }
+
     struct NavMesh::LessByTilePosition
     {
         bool operator()(const DetourNavigator::TilePosition& lhs,
@@ -46,7 +73,7 @@ namespace MWRender
         const osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
         const DetourNavigator::Settings mSettings;
         std::map<DetourNavigator::TilePosition, Tile> mTiles;
-        NavMeshMode mMode;
+        Settings::NavMeshRenderMode mMode;
         std::atomic_bool mAborted{ false };
         std::mutex mMutex;
         bool mStarted = false;
@@ -57,7 +84,7 @@ namespace MWRender
             std::weak_ptr<DetourNavigator::GuardedNavMeshCacheItem> navMesh,
             const osg::ref_ptr<osg::StateSet>& groupStateSet, const osg::ref_ptr<osg::StateSet>& debugDrawStateSet,
             const DetourNavigator::Settings& settings, const std::map<DetourNavigator::TilePosition, Tile>& tiles,
-            NavMeshMode mode)
+            Settings::NavMeshRenderMode mode)
             : mId(id)
             , mVersion(version)
             , mNavMesh(std::move(navMesh))
@@ -110,13 +137,13 @@ namespace MWRender
 
             const unsigned char flags = SceneUtil::NavMeshTileDrawFlagsOffMeshConnections
                 | SceneUtil::NavMeshTileDrawFlagsClosedList
-                | (mMode == NavMeshMode::UpdateFrequency ? SceneUtil::NavMeshTileDrawFlagsHeat : 0);
+                | (mMode == Settings::NavMeshRenderMode::UpdateFrequency ? SceneUtil::NavMeshTileDrawFlagsHeat : 0);
 
             for (const auto& [position, version] : existingTiles)
             {
                 const auto it = mTiles.find(position);
                 if (it != mTiles.end() && it->second.mGroup != nullptr && it->second.mVersion == version
-                    && mMode != NavMeshMode::UpdateFrequency)
+                    && mMode != Settings::NavMeshRenderMode::UpdateFrequency)
                     continue;
 
                 osg::ref_ptr<osg::Group> group;
@@ -129,16 +156,17 @@ namespace MWRender
                     if (mAborted.load(std::memory_order_acquire))
                         return;
 
-                    group = SceneUtil::createNavMeshTileGroup(navMesh->getImpl(), *meshTile, mSettings, mGroupStateSet,
-                        mDebugDrawStateSet, flags, minSalt, maxSalt);
+                    group = SceneUtil::createNavMeshTileGroup(
+                        navMesh->getImpl(), *meshTile, mSettings, mDebugDrawStateSet, flags, minSalt, maxSalt);
                 }
                 if (group == nullptr)
                 {
                     removedTiles.push_back(position);
                     continue;
                 }
-                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
                 group->setNodeMask(Mask_Debug);
+                group->setStateSet(mGroupStateSet);
+                MWBase::Environment::get().getResourceSystem()->getSceneManager()->recreateShaders(group, "debug");
                 updatedTiles.emplace_back(position, Tile{ version, std::move(group) });
             }
 
@@ -163,11 +191,11 @@ namespace MWRender
     };
 
     NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
-        bool enabled, NavMeshMode mode)
+        bool enabled, Settings::NavMeshRenderMode mode)
         : mRootNode(root)
         , mWorkQueue(workQueue)
-        , mGroupStateSet(SceneUtil::makeNavMeshTileStateSet())
-        , mDebugDrawStateSet(SceneUtil::DebugDraw::makeStateSet())
+        , mGroupStateSet(SceneUtil::makeDetourGroupStateSet())
+        , mDebugDrawStateSet(makeDebugDrawStateSet())
         , mEnabled(enabled)
         , mMode(mode)
         , mId(std::numeric_limits<std::size_t>::max())
@@ -310,7 +338,7 @@ namespace MWRender
         mEnabled = false;
     }
 
-    void NavMesh::setMode(NavMeshMode value)
+    void NavMesh::setMode(Settings::NavMeshRenderMode value)
     {
         if (mMode == value)
             return;

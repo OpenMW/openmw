@@ -25,17 +25,14 @@
 namespace MWInput
 {
     InputManager::InputManager(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer,
-        osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
-        osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-        const std::filesystem::path& userFile, bool userFileExists,
-        const std::filesystem::path& userControllerBindingsFile, const std::filesystem::path& controllerBindingsFile,
-        bool grab)
+        osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler, const std::filesystem::path& userFile,
+        bool userFileExists, const std::filesystem::path& userControllerBindingsFile,
+        const std::filesystem::path& controllerBindingsFile, bool grab)
         : mControlsDisabled(false)
         , mInputWrapper(std::make_unique<SDLUtil::InputWrapper>(window, viewer, grab))
         , mBindingsManager(std::make_unique<BindingsManager>(userFile, userFileExists))
         , mControlSwitch(std::make_unique<ControlSwitch>())
-        , mActionManager(std::make_unique<ActionManager>(
-              mBindingsManager.get(), screenCaptureOperation, viewer, screenCaptureHandler))
+        , mActionManager(std::make_unique<ActionManager>(mBindingsManager.get(), viewer, screenCaptureHandler))
         , mKeyboardManager(std::make_unique<KeyboardManager>(mBindingsManager.get()))
         , mMouseManager(std::make_unique<MouseManager>(mBindingsManager.get(), mInputWrapper.get(), window))
         , mControllerManager(std::make_unique<ControllerManager>(
@@ -100,6 +97,11 @@ namespace MWInput
     void InputManager::setGamepadGuiCursorEnabled(bool enabled)
     {
         mControllerManager->setGamepadGuiCursorEnabled(enabled);
+    }
+
+    bool InputManager::isGamepadGuiCursorEnabled()
+    {
+        return mControllerManager->gamepadGuiCursorEnabled();
     }
 
     void InputManager::changeInputMode(bool guiMode)

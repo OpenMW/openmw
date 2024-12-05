@@ -1,5 +1,7 @@
 local self = require('openmw.self')
 local interfaces = require('openmw.interfaces')
+local types = require('openmw.types')
+local util = require('openmw.util')
 
 local function startPackage(args)
     local cancelOther = args.cancelOther
@@ -9,19 +11,40 @@ local function startPackage(args)
         self:_startAiCombat(args.target, cancelOther)
     elseif args.type == 'Pursue' then
         if not args.target then error("target required") end
+        if not types.Player.objectIsInstance(args.target) then error("target must be a player") end
         self:_startAiPursue(args.target, cancelOther)
     elseif args.type == 'Follow' then
         if not args.target then error("target required") end
-        self:_startAiFollow(args.target, cancelOther)
+        self:_startAiFollow(args.target, args.cellId, args.duration or 0, args.destPosition or util.vector3(0, 0, 0), args.isRepeat or false, cancelOther)
     elseif args.type == 'Escort' then
         if not args.target then error("target required") end
         if not args.destPosition then error("destPosition required") end
         self:_startAiEscort(args.target, args.destCell or self.cell, args.duration or 0, args.destPosition, cancelOther)
     elseif args.type == 'Wander' then
-        self:_startAiWander(args.distance or 0, args.duration or 0, cancelOther)
+        local key = "idle"
+        local idle = {}
+        local duration = 0
+        if args.idle then
+            for i = 2, 9 do
+                local val = args.idle[key .. i]
+                if val == nil then
+                    idle[i-1] = 0
+                else
+                    local v = tonumber(val) or 0
+                    if v < 0 or v > 100 then
+                        error("idle values cannot exceed 100")
+                    end
+                    idle[i-1] = v
+                end
+            end
+        end
+        if args.duration then
+            duration = args.duration / 3600
+        end
+        self:_startAiWander(args.distance or 0, duration, idle, args.isRepeat or false, cancelOther)
     elseif args.type == 'Travel' then
         if not args.destPosition then error("destPosition required") end
-        self:_startAiTravel(args.destPosition, cancelOther)
+        self:_startAiTravel(args.destPosition, args.isRepeat or false, cancelOther)
     else
         error('Unsupported AI Package: ' .. args.type)
     end
@@ -47,11 +70,20 @@ return {
         -- @field openmw.core#GameObject target Target (usually an actor) of the AI package (can be nil).
         -- @field #boolean sideWithTarget Whether to help the target in combat (true or false).
         -- @field openmw.util#Vector3 destPosition Destination point of the AI package.
+        -- @field #number distance Distance value (can be nil).
+        -- @field #number duration Duration value (can be nil).
+        -- @field #table idle Idle value (can be nil).
+        -- @field #boolean isRepeat Should this package be repeated (true or false).
 
         --- Return the currently active AI package (or `nil` if there are no AI packages).
         -- @function [parent=#AI] getActivePackage
         -- @return #Package
         getActivePackage = function() return self:_getActiveAiPackage() end,
+
+        --- Return whether the actor is fleeing.
+        -- @function [parent=#AI] isFleeing
+        -- @return #boolean
+        isFleeing = function() return self:_isFleeing() end,
 
         --- Start new AI package.
         -- @function [parent=#AI] startPackage

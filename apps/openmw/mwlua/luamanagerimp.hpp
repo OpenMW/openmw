@@ -6,17 +6,21 @@
 #include <osg/Stats>
 #include <set>
 
+#include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/scripttracker.hpp>
 #include <components/lua/storage.hpp>
 #include <components/lua_ui/resources.hpp>
 #include <components/misc/color.hpp>
 
 #include "../mwbase/luamanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "engineevents.hpp"
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
 #include "luaevents.hpp"
+#include "menuscripts.hpp"
 #include "object.hpp"
 #include "objectlists.hpp"
 
@@ -33,6 +37,7 @@ namespace MWLua
         LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir);
         LuaManager(const LuaManager&) = delete;
         LuaManager(LuaManager&&) = delete;
+        ~LuaManager();
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();
@@ -66,6 +71,8 @@ namespace MWLua
         // LuaManager queues these events and propagates to scripts on the next `update` call.
         void newGameStarted() override;
         void gameLoaded() override;
+        void gameEnded() override;
+        void noGame() override;
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void inputEvent(const InputEvent& event) override;
@@ -77,6 +84,14 @@ namespace MWLua
         {
             mEngineEvents.addToQueue(EngineEvents::OnActivate{ getId(actor), getId(object) });
         }
+        void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) override;
+        void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) override;
+        void playAnimation(const MWWorld::Ptr& actor, const std::string& groupname,
+            const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
+            std::string_view start, std::string_view stop, float startpoint, uint32_t loops,
+            bool loopfallback) override;
+        void skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale) override;
+        void skillLevelUp(const MWWorld::Ptr& actor, ESM::RefId skillId, std::string_view source) override;
         void exteriorCreated(MWWorld::CellStore& cell) override
         {
             mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });
@@ -84,6 +99,7 @@ namespace MWLua
         void objectTeleported(const MWWorld::Ptr& ptr) override;
         void questUpdated(const ESM::RefId& questId, int stage) override;
         void uiModeChanged(const MWWorld::Ptr& arg) override;
+        void actorDied(const MWWorld::Ptr& actor) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 
@@ -92,7 +108,11 @@ namespace MWLua
 
         // Used only in Lua bindings
         void addCustomLocalScript(const MWWorld::Ptr&, int scriptId, std::string_view initData);
-        void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
+        void addUIMessage(
+            std::string_view message, MWGui::ShowInDialogueMode mode = MWGui::ShowInDialogueMode_IfPossible)
+        {
+            mUIMessages.emplace_back(message, mode);
+        }
         void addInGameConsoleMessage(const std::string& msg, const Misc::Color& color)
         {
             mInGameConsoleMessages.push_back({ msg, color });
@@ -112,8 +132,9 @@ namespace MWLua
         void loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data) override;
         void setContentFileMapping(const std::map<int, int>& mapping) override { mContentFileMapping = mapping; }
 
-        // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
-        void reloadAllScripts() override;
+        // At the end of the next `synchronizedUpdate` drops script cache and reloads all scripts.
+        // Calls `onSave` and `onLoad` for every script.
+        void reloadAllScripts() override { mReloadAllScriptsRequested = true; }
 
         void handleConsoleCommand(
             const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) override;
@@ -130,8 +151,9 @@ namespace MWLua
         template <class Arg>
         std::function<void(Arg)> wrapLuaCallback(const LuaUtil::Callback& c)
         {
-            return
-                [this, c](Arg arg) { this->queueCallback(c, sol::main_object(this->mLua.sol(), sol::in_place, arg)); };
+            return [this, c](Arg arg) {
+                this->queueCallback(c, sol::main_object(this->mLua.unsafeState(), sol::in_place, arg));
+            };
         }
 
         LuaUi::ResourceManager* uiResourceManager() { return &mUiResourceManager; }
@@ -141,30 +163,40 @@ namespace MWLua
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
         std::string formatResourceUsageStats() const override;
 
+        LuaUtil::InputAction::Registry& inputActions() { return mInputActions; }
+        LuaUtil::InputTrigger::Registry& inputTriggers() { return mInputTriggers; }
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
             std::optional<LuaUtil::ScriptIdsWithInitializationData> autoStartConf = std::nullopt);
+        void reloadAllScriptsImpl();
+        void synchronizedUpdateUnsafe();
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
         bool mProcessingInputEvents = false;
+        bool mApplyingDelayedActions = false;
         bool mNewGameStarted = false;
+        bool mReloadAllScriptsRequested = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;
         std::map<std::string, sol::object> mLocalPackages;
         std::map<std::string, sol::object> mPlayerPackages;
 
+        MenuScripts mMenuScripts{ &mLua };
         GlobalScripts mGlobalScripts{ &mLua };
         std::set<LocalScripts*> mActiveLocalScripts;
+        std::vector<LocalScripts*> mQueuedAutoStartedScripts;
         ObjectLists mObjectLists;
 
         MWWorld::Ptr mPlayer;
 
-        LuaEvents mLuaEvents{ mGlobalScripts };
+        LuaEvents mLuaEvents{ mGlobalScripts, mMenuScripts };
         EngineEvents mEngineEvents{ mGlobalScripts };
         std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
+        std::vector<MWBase::LuaManager::InputEvent> mMenuInputEvents;
 
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalSerializer;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalSerializer;
@@ -194,11 +226,17 @@ namespace MWLua
         };
         std::vector<DelayedAction> mActionQueue;
         std::optional<DelayedAction> mTeleportPlayerAction;
-        std::vector<std::string> mUIMessages;
+        std::vector<std::pair<std::string, MWGui::ShowInDialogueMode>> mUIMessages;
         std::vector<std::pair<std::string, Misc::Color>> mInGameConsoleMessages;
+        std::optional<ObjectId> mDelayedUiModeChangedArg;
 
-        LuaUtil::LuaStorage mGlobalStorage{ mLua.sol() };
-        LuaUtil::LuaStorage mPlayerStorage{ mLua.sol() };
+        LuaUtil::LuaStorage mGlobalStorage;
+        LuaUtil::LuaStorage mPlayerStorage;
+
+        LuaUtil::InputAction::Registry mInputActions;
+        LuaUtil::InputTrigger::Registry mInputTriggers;
+
+        LuaUtil::ScriptTracker mScriptTracker;
     };
 
 }

@@ -25,10 +25,11 @@ namespace MWGui
         void onFrame(float frameDuration);
         void createMessageBox(std::string_view message, bool stat = false);
         void removeStaticMessageBox();
-        bool createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons);
+        bool createInteractiveMessageBox(std::string_view message, const std::vector<std::string>& buttons,
+            bool immediate = false, int defaultFocus = -1);
         bool isInteractiveMessageBox();
 
-        int getMessagesCount();
+        std::size_t getMessagesCount();
 
         const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe.get(); }
 
@@ -39,6 +40,10 @@ namespace MWGui
 
         /// @param reset Reset the pressed button to -1 after reading it.
         int readPressedButton(bool reset = true);
+
+        void resetInteractiveMessageBox();
+
+        void setLastButtonPressed(int index);
 
         typedef MyGUI::delegates::MultiDelegate<int> EventHandle_Int;
 
@@ -88,7 +93,7 @@ namespace MWGui
     {
     public:
         InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
-            const std::vector<std::string>& buttons);
+            const std::vector<std::string>& buttons, bool immediate, int defaultFocus);
         void mousePressed(MyGUI::Widget* _widget);
         int readPressedButton();
 
@@ -107,6 +112,8 @@ namespace MWGui
         std::vector<MyGUI::Button*> mButtons;
 
         int mButtonPressed;
+        int mDefaultFocus;
+        bool mImmediate;
     };
 
 }
