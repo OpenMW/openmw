@@ -153,7 +153,7 @@
 -- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
 -- Note that dynamically created creatures, NPCs, and container inventories will not respawn.
 -- @function [parent=#world] createObject
--- @param #string recordId Record ID. Non-generated IDs are always lowercase. If a generated ID is provided, it must be provided exactly as generated.
+-- @param #string recordId Record ID. String ids that came from ESM3 content files are lower-cased. If another ID is provided, it must be provided exactly as it is, case sensitive.
 -- @param #number count (optional, 1 by default) The number of objects in stack
 -- @return openmw.core#GameObject
 -- @usage  -- put 100 gold on the ground at the position of `actor`
@@ -166,7 +166,7 @@
 -- potion = world.createObject('Generated:0x0', 1)
 
 ---
--- Creates a custom record in the world database; the record ID from this record is case sensitive if generated.
+-- Creates a custom record in the world database; String ids that came from ESM3 content files are lower-cased.
 -- Eventually meant to support all records, but the current
 -- set of supported types is limited to:
 --
