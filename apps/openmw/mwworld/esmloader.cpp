@@ -45,9 +45,10 @@ namespace MWWorld
                 reader->open(filepath);
                 reader->resolveParentFileIndices(mReaders);
 
-                assert(reader->getGameFiles().size() == reader->getParentFileIndices().size());
-                for (std::size_t i = 0, n = reader->getParentFileIndices().size(); i < n; ++i)
-                    if (i == static_cast<std::size_t>(reader->getIndex()))
+                const std::vector<int>& parentIndices = reader->getParentFileIndices();
+                assert(reader->getGameFiles().size() == parentIndices.size());
+                for (std::size_t i = 0, n = parentIndices.size(); i < n; ++i)
+                    if (parentIndices[i] == reader->getIndex())
                         throw std::runtime_error("File " + Files::pathToUnicodeString(reader->getName()) + " asks for parent file "
                 + reader->getGameFiles()[i].name
                 + ", but it is not available or has been loaded in the wrong order. "

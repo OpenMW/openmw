@@ -223,6 +223,7 @@
     Bug #8223: Ghosts don't move while spellcasting
     Bug #8231: AGOP doesn't like NiCollisionSwitch
     Bug #8237: Non-bipedal creatures should *not* use spellcast equip/unequip animations
+    Bug #8252: Plugin dependencies are not required to be loaded
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
