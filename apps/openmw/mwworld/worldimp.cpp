@@ -602,7 +602,7 @@ namespace MWWorld
         if (mProjectileManager)
             mProjectileManager->clear();
 
-        if (Settings::navigator().mWaitForAllJobsOnExit)
+        if (Settings::navigator().mWaitForAllJobsOnExit && mNavigator != nullptr)
         {
             Log(Debug::Verbose) << "Waiting for all navmesh jobs to be done...";
             mNavigator->wait(DetourNavigator::WaitConditionType::allJobsDone, nullptr);
