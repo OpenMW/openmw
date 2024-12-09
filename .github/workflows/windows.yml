@@ -1,0 +1,184 @@
+name: Reusable Windows workflow
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: MSVC image (2019/2022)
+        required: true
+        type: string
+      vcpkg-deps-tag:
+        description: Git tag of our deps
+        required: true
+        type: string
+      build-type:
+        default: RelWithDebInfo
+        type: string
+
+jobs:
+  Windows:
+    name: windows-${{ inputs.image }}
+
+    runs-on: windows-${{ inputs.image }}
+
+    env:
+      archive: FAILEDTODOWNLOAD
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create directories for dependencies
+      run: |
+        mkdir -p ${{ github.workspace }}/deps
+        mkdir -p ${{ github.workspace }}/deps/Qt
+
+    - name: Download prebuilt vcpkg packages
+      working-directory: ${{ github.workspace }}/deps
+      run: |
+        $MANIFEST = "vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}.txt"
+        curl --fail --retry 3 -L -o "$MANIFEST" "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/$MANIFEST"
+        $lines = Get-Content "$MANIFEST"
+        $URL = $lines[0]
+        $split = -split $lines[1]
+        $HASH = $split[0]
+        $FILE = $split[1]
+        curl --fail --retry 3 -L -o "$FILE" "$URL"
+        $filehash = Get-FileHash "$FILE" -Algorithm SHA512
+        if ( $filehash.hash -ne "$HASH" ) {
+          exit 1
+        }
+        echo "archive=$FILE" >> $env:GITHUB_ENV
+
+    - name: Extract archived prebuilt vcpkg packages
+      working-directory: ${{ github.workspace }}/deps
+      run: 7z x -y -ovcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }} ${{ env.archive }}
+
+    - name: Cache Qt
+      id: qt-cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
+        key: qt-cache-6.6.3-msvc2019_64-v1
+
+    - name: Download aqt
+      if: steps.qt-cache.outputs.cache-hit != 'true'
+      working-directory: ${{ github.workspace }}/deps/Qt
+      run: >
+        curl --fail --retry 3 -L
+        -o aqt_x64.exe
+        https://github.com/miurahr/aqtinstall/releases/download/v3.1.15/aqt_x64.exe
+
+    - name: Install Qt with aqt
+      if: steps.qt-cache.outputs.cache-hit != 'true'
+      working-directory: ${{ github.workspace }}/deps/Qt
+      run: .\aqt_x64.exe install-qt windows desktop 6.6.3 win64_msvc2019_64
+
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Configure OpenMW
+      run: >
+        cmake
+        -S .
+        -B ${{ github.workspace }}/build
+        -G Ninja
+        -D CMAKE_BUILD_TYPE=${{ inputs.build-type }}
+        -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/scripts/buildsystems/vcpkg.cmake'
+        -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64'
+        -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/include/luajit'
+        -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/lib/lua51.lib'
+        -D BUILD_BENCHMARKS=ON
+        -D BUILD_COMPONENTS_TESTS=ON
+        -D BUILD_OPENMW_TESTS=ON
+        -D BUILD_OPENCS_TESTS=ON
+        -D OPENMW_USE_SYSTEM_SQLITE3=OFF
+        -D OPENMW_USE_SYSTEM_YAML_CPP=OFF
+        -D OPENMW_LTO_BUILD=ON
+
+    - name: Build OpenMW
+      run: cmake --build ${{ github.workspace }}/build
+
+    - name: Install OpenMW
+      run: cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
+
+    - name: Copy missing DLLs
+      run: |
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/install
+        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/install
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/install
+
+    - name: Copy Qt DLLs
+      working-directory: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
+      run: |
+        cp bin/Qt6Core.dll ${{ github.workspace }}/install
+        cp bin/Qt6Gui.dll ${{ github.workspace }}/install
+        cp bin/Qt6Network.dll ${{ github.workspace }}/install
+        cp bin/Qt6OpenGL.dll ${{ github.workspace }}/install
+        cp bin/Qt6OpenGLWidgets.dll ${{ github.workspace }}/install
+        cp bin/Qt6Widgets.dll ${{ github.workspace }}/install
+        cp bin/Qt6Svg.dll ${{ github.workspace }}/install
+        mkdir ${{ github.workspace }}/install/styles
+        cp plugins/styles/qwindowsvistastyle.dll ${{ github.workspace }}/install/styles
+        mkdir ${{ github.workspace }}/install/platforms
+        cp plugins/platforms/qwindows.dll ${{ github.workspace }}/install/platforms
+        mkdir ${{ github.workspace }}/install/imageformats
+        cp plugins/imageformats/qsvg.dll ${{ github.workspace }}/install/imageformats
+        mkdir ${{ github.workspace }}/install/iconengines
+        cp plugins/iconengines/qsvgicon.dll ${{ github.workspace }}/install/iconengines
+
+    - name: Move pdb files
+      run: |
+        robocopy install pdb *.pdb /MOVE
+        if ($lastexitcode -lt 8) {
+          $global:LASTEXITCODE = $null
+        }
+
+    - name: Remove extra pdb files
+      shell: bash
+      run: |
+        rm -rf install/bin
+        rm -rf install/_deps
+
+    - name: Generate CI-ID.txt
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        job_url=$(gh run --repo ${{ github.repository }} view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name == "windows-${{ inputs.image }}") | .url')
+        printf "Ref ${{ github.ref }}\nJob ${job_url}\nCommit ${{ github.sha }}\n" > install/CI-ID.txt
+        cp install/CI-ID.txt pdb/CI-ID.txt
+
+    - name: Store OpenMW archived pdb files
+      uses: actions/upload-artifact@v4
+      with:
+        name: openmw-windows-${{ inputs.image }}-pdb-${{ github.sha }}
+        path: ${{ github.workspace }}/pdb/*
+
+    - name: Store OpenMW build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openmw-windows-${{ inputs.image }}-${{ github.sha }}
+        path: ${{ github.workspace }}/install/*
+
+    - name: Add install directory to PATH
+      shell: bash
+      run: echo '${{ github.workspace }}/install' >> ${GITHUB_PATH}
+
+    - name: Run components tests
+      run: build/components-tests.exe
+
+    - name: Run OpenMW tests
+      run: build/openmw-tests.exe
+
+    - name: Run OpenMW-CS tests
+      run: build/openmw-cs-tests.exe
+
+    - name: Run detournavigator navmeshtilescache benchmark
+      run: build/openmw_detournavigator_navmeshtilescache_benchmark.exe
+
+    - name: Run settings access benchmark
+      run: build/openmw_settings_access_benchmark.exe
+
+    - name: Run esm refid benchmark
+      run: build/openmw_esm_refid_benchmark.exe
