@@ -89,7 +89,20 @@ jobs:
         cd build
         make -j $(sysctl -n hw.logicalcpu) package
 
+  # This is a fairly silly job to work around `env` not being available in `with`
+  Output-Envs:
+    name: Pass environment variables along
+    runs-on: ubuntu-latest
+    outputs:
+      VCPKG_DEPS_TAG: ${{ env.VCPKG_DEPS_TAG }}
+      BUILD_TYPE: ${{ env.BUILD_TYPE }}
+    steps:
+      - run: echo "Doing nothing"
+
   Windows:
+    needs:
+      - Output-Envs
+
     strategy:
       fail-fast: true
       matrix:
@@ -100,5 +113,5 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       image: ${{ matrix.image }}
-      vcpkg-deps-tag: ${{ env.VCPKG_DEPS_TAG }}
-      build-type: ${{ env.BUILD_TYPE }}
+      vcpkg-deps-tag: ${{ needs.Output-Envs.outputs.VCPKG_DEPS_TAG }}
+      build-type: ${{ needs.Output-Envs.outputs.BUILD_TYPE }}
