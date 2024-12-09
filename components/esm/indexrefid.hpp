@@ -25,7 +25,8 @@ namespace ESM
 
         std::string toDebugString() const;
 
-        friend inline constexpr auto tie(const IndexRefId& value) noexcept
+        friend inline constexpr std::tuple<const ESM::RecNameInts&, const uint32_t&> tie(
+            const IndexRefId& value) noexcept
         {
             return std::tie(value.mRecordType, value.mValue);
         }
