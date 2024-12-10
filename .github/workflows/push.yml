@@ -6,10 +6,12 @@ on:
 
 env:
   BUILD_TYPE: RelWithDebInfo
-  VCPKG_DEPS_TAG: 2024-11-10
 
 jobs:
   Ubuntu:
+    # TODO remove
+    if: false
+
     runs-on: ubuntu-latest
 
     steps:
@@ -68,6 +70,9 @@ jobs:
     #     name: build_artifact.7z
 
   MacOS:
+    # TODO remove
+    if: false
+
     runs-on: macos-latest
 
     steps:
@@ -89,17 +94,20 @@ jobs:
         cd build
         make -j $(sysctl -n hw.logicalcpu) package
 
-  # This is a fairly silly job to work around `env` not being available in `with`
   Output-Envs:
-    name: Pass environment variables along
+    name: Read .env file and expose it as output
     runs-on: ubuntu-latest
     outputs:
       VCPKG_DEPS_TAG: ${{ env.VCPKG_DEPS_TAG }}
       BUILD_TYPE: ${{ env.BUILD_TYPE }}
     steps:
-      - run: echo "Doing nothing"
+      - uses: actions/checkout@v2
+      - run: cat "${{ github.workspace }}/CI/github.env" >> $GITHUB_ENV
 
   Windows:
+    # TODO remove
+    if: false
+
     needs:
       - Output-Envs
 

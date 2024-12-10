@@ -14,6 +14,9 @@ on:
       build-type:
         default: RelWithDebInfo
         type: string
+      package:
+        default: false
+        type: boolean
 
 jobs:
   Windows:
@@ -166,19 +169,25 @@ jobs:
       run: echo '${{ github.workspace }}/install' >> ${GITHUB_PATH}
 
     - name: Run components tests
+      if: ${{ ! inputs.package }}
       run: build/components-tests.exe
 
     - name: Run OpenMW tests
+      if: ${{ ! inputs.package }}
       run: build/openmw-tests.exe
 
     - name: Run OpenMW-CS tests
+      if: ${{ ! inputs.package }}
       run: build/openmw-cs-tests.exe
 
     - name: Run detournavigator navmeshtilescache benchmark
+      if: ${{ ! inputs.package }}
       run: build/openmw_detournavigator_navmeshtilescache_benchmark.exe
 
     - name: Run settings access benchmark
+      if: ${{ ! inputs.package }}
       run: build/openmw_settings_access_benchmark.exe
 
     - name: Run esm refid benchmark
+      if: ${{ ! inputs.package }}
       run: build/openmw_esm_refid_benchmark.exe
