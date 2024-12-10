@@ -28,6 +28,10 @@ jobs:
       archive: FAILEDTODOWNLOAD
 
     steps:
+    - name: Install NSIS
+      if: ${{ inputs.package }}
+      run: choco install nsis
+
     - uses: actions/checkout@v2
 
     - name: Create directories for dependencies
@@ -89,12 +93,14 @@ jobs:
         -D CMAKE_BUILD_TYPE=${{ inputs.build-type }}
         -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/scripts/buildsystems/vcpkg.cmake'
         -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64'
+        ${{ inputs.package && '-D CMAKE_CXX_FLAGS_RELEASE="/O2 /Ob2 /DNDEBUG"' || '' }}
+        ${{ inputs.package && '-D "CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=/DEBUG /INCREMENTAL:NO"' || '' }}
         -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/include/luajit'
         -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/lib/lua51.lib'
-        -D BUILD_BENCHMARKS=ON
-        -D BUILD_COMPONENTS_TESTS=ON
-        -D BUILD_OPENMW_TESTS=ON
-        -D BUILD_OPENCS_TESTS=ON
+        -D BUILD_BENCHMARKS=${{ inputs.package && 'OFF' || 'ON' }}
+        -D BUILD_COMPONENTS_TESTS=${{ inputs.package && 'OFF' || 'ON' }}
+        -D BUILD_OPENMW_TESTS=${{ inputs.package && 'OFF' || 'ON' }}
+        -D BUILD_OPENCS_TESTS=${{ inputs.package && 'OFF' || 'ON' }}
         -D OPENMW_USE_SYSTEM_SQLITE3=OFF
         -D OPENMW_USE_SYSTEM_YAML_CPP=OFF
         -D OPENMW_LTO_BUILD=ON
@@ -103,15 +109,18 @@ jobs:
       run: cmake --build ${{ github.workspace }}/build
 
     - name: Install OpenMW
+      if: ${{ ! inputs.package }}
       run: cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
 
     - name: Copy missing DLLs
+      if: ${{ ! inputs.package }}
       run: |
         cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/install
         cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/install
         cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/install
 
     - name: Copy Qt DLLs
+      if: ${{ ! inputs.package }}
       working-directory: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
       run: |
         cp bin/Qt6Core.dll ${{ github.workspace }}/install
@@ -131,6 +140,7 @@ jobs:
         cp plugins/iconengines/qsvgicon.dll ${{ github.workspace }}/install/iconengines
 
     - name: Move pdb files
+      if: ${{ ! inputs.package }}
       run: |
         robocopy install pdb *.pdb /MOVE
         if ($lastexitcode -lt 8) {
@@ -138,12 +148,14 @@ jobs:
         }
 
     - name: Remove extra pdb files
+      if: ${{ ! inputs.package }}
       shell: bash
       run: |
         rm -rf install/bin
         rm -rf install/_deps
 
     - name: Generate CI-ID.txt
+      if: ${{ ! inputs.package }}
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
@@ -151,6 +163,10 @@ jobs:
         job_url=$(gh run --repo ${{ github.repository }} view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name == "windows-${{ inputs.image }}") | .url')
         printf "Ref ${{ github.ref }}\nJob ${job_url}\nCommit ${{ github.sha }}\n" > install/CI-ID.txt
         cp install/CI-ID.txt pdb/CI-ID.txt
+
+    - name: Package OpenMW
+      if: ${{ inputs.package }}
+      run: cpack --config "${{ github.workspace }}/build/CPackConfig.cmake"
 
     - name: Store OpenMW archived pdb files
       uses: actions/upload-artifact@v4
