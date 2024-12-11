@@ -104,6 +104,7 @@ jobs:
         -D OPENMW_USE_SYSTEM_SQLITE3=OFF
         -D OPENMW_USE_SYSTEM_YAML_CPP=OFF
         -D OPENMW_LTO_BUILD=ON
+        ${{ inputs.package && format('-D "VCREDIST64={0}/vc_redist.x64.exe"', env.VCToolsRedistDir) || '' }}
 
     - name: Build OpenMW
       run: cmake --build ${{ github.workspace }}/build
@@ -116,9 +117,7 @@ jobs:
 
     - name: Ensure DLLs end up in the build dir
       if: ${{ inputs.package }}
-      run: |
-        cp "${{ env.VCToolsRedistDir }}/vc_redist.x64.exe" "${{ github.workspace }}/build"
-        echo "dlldir=${{ github.workspace }}/build" >> $env:GITHUB_ENV
+      run: echo "dlldir=${{ github.workspace }}/build" >> $env:GITHUB_ENV
 
     - name: Copy missing DLLs
       run: |
