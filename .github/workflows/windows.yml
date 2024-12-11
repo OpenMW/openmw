@@ -110,34 +110,44 @@ jobs:
 
     - name: Install OpenMW
       if: ${{ ! inputs.package }}
-      run: cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
+      run: |
+        cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
+        echo "dlldir=${{ github.workspace }}/install" >> $env:GITHUB_ENV
+
+    - name: Ensure DLLs end up in the build dir
+      if: ${{ inputs.package }}
+      run: echo "dlldir=${{ github.workspace }}/build" >> $env:GITHUB_ENV
 
     - name: Copy missing DLLs
-      if: ${{ ! inputs.package }}
       run: |
-        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/install
-        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/install
-        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/install
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ env.dlldir }}
+        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ env.dlldir }}
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/*.dll ${{ env.dlldir }}
 
     - name: Copy Qt DLLs
-      if: ${{ ! inputs.package }}
       working-directory: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
       run: |
-        cp bin/Qt6Core.dll ${{ github.workspace }}/install
-        cp bin/Qt6Gui.dll ${{ github.workspace }}/install
-        cp bin/Qt6Network.dll ${{ github.workspace }}/install
-        cp bin/Qt6OpenGL.dll ${{ github.workspace }}/install
-        cp bin/Qt6OpenGLWidgets.dll ${{ github.workspace }}/install
-        cp bin/Qt6Widgets.dll ${{ github.workspace }}/install
-        cp bin/Qt6Svg.dll ${{ github.workspace }}/install
-        mkdir ${{ github.workspace }}/install/styles
-        cp plugins/styles/qwindowsvistastyle.dll ${{ github.workspace }}/install/styles
-        mkdir ${{ github.workspace }}/install/platforms
-        cp plugins/platforms/qwindows.dll ${{ github.workspace }}/install/platforms
-        mkdir ${{ github.workspace }}/install/imageformats
-        cp plugins/imageformats/qsvg.dll ${{ github.workspace }}/install/imageformats
-        mkdir ${{ github.workspace }}/install/iconengines
-        cp plugins/iconengines/qsvgicon.dll ${{ github.workspace }}/install/iconengines
+        cp bin/Qt6Core.dll ${{ env.dlldir }}
+        cp bin/Qt6Gui.dll ${{ env.dlldir }}
+        cp bin/Qt6Network.dll ${{ env.dlldir }}
+        cp bin/Qt6OpenGL.dll ${{ env.dlldir }}
+        cp bin/Qt6OpenGLWidgets.dll ${{ env.dlldir }}
+        cp bin/Qt6Widgets.dll ${{ env.dlldir }}
+        cp bin/Qt6Svg.dll ${{ env.dlldir }}
+        mkdir ${{ env.dlldir }}/styles
+        cp plugins/styles/qwindowsvistastyle.dll ${{ env.dlldir }}/styles
+        mkdir ${{ env.dlldir }}/platforms
+        cp plugins/platforms/qwindows.dll ${{ env.dlldir }}/platforms
+        mkdir ${{ env.dlldir }}/imageformats
+        cp plugins/imageformats/qsvg.dll ${{ env.dlldir }}/imageformats
+        mkdir ${{ env.dlldir }}/iconengines
+        cp plugins/iconengines/qsvgicon.dll ${{ env.dlldir }}/iconengines
+
+    - name: Package OpenMW
+      if: ${{ inputs.package }}
+      run: |
+        cpack --config "${{ github.workspace }}/build/CPackConfig.cmake" -B "${{ github.workspace }}/install"
+        rm -r -f "${{ github.workspace }}/install/_CPack_Packages"
 
     - name: Move pdb files
       run: |
@@ -152,12 +162,6 @@ jobs:
       run: |
         rm -rf install/bin
         rm -rf install/_deps
-
-    - name: Package OpenMW
-      if: ${{ inputs.package }}
-      run: |
-        echo "${{ env.VCToolsRedistDir }}"
-        cpack --config "${{ github.workspace }}/build/CPackConfig.cmake" -B "${{ github.workspace }}/install"
 
     - name: Generate CI-ID.txt
       shell: bash
