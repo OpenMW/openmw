@@ -116,7 +116,9 @@ jobs:
 
     - name: Ensure DLLs end up in the build dir
       if: ${{ inputs.package }}
-      run: echo "dlldir=${{ github.workspace }}/build" >> $env:GITHUB_ENV
+      run: |
+        cp "${{ env.VCToolsRedistDir }}/vc_redist.x64.exe" "${{ github.workspace }}/build"
+        echo "dlldir=${{ github.workspace }}/build" >> $env:GITHUB_ENV
 
     - name: Copy missing DLLs
       run: |
@@ -147,7 +149,7 @@ jobs:
       if: ${{ inputs.package }}
       run: |
         cpack --config "${{ github.workspace }}/build/CPackConfig.cmake" -B "${{ github.workspace }}/install"
-        rm -r -f "${{ github.workspace }}/install/_CPack_Packages"
+        rm -r -Force "${{ github.workspace }}/install/_CPack_Packages"
 
     - name: Move pdb files
       run: |
