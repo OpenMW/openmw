@@ -140,9 +140,8 @@ jobs:
         cp plugins/iconengines/qsvgicon.dll ${{ github.workspace }}/install/iconengines
 
     - name: Move pdb files
-      if: ${{ ! inputs.package }}
       run: |
-        robocopy install pdb *.pdb /MOVE
+        robocopy ${{ inputs.package && 'build' || 'install' }} pdb *.pdb /MOVE
         if ($lastexitcode -lt 8) {
           $global:LASTEXITCODE = $null
         }
@@ -154,8 +153,13 @@ jobs:
         rm -rf install/bin
         rm -rf install/_deps
 
+    - name: Package OpenMW
+      if: ${{ inputs.package }}
+      run: |
+        echo "${{ env.VCToolsRedistDir }}"
+        cpack --config "${{ github.workspace }}/build/CPackConfig.cmake" -B "${{ github.workspace }}/install"
+
     - name: Generate CI-ID.txt
-      if: ${{ ! inputs.package }}
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
@@ -163,10 +167,6 @@ jobs:
         job_url=$(gh run --repo ${{ github.repository }} view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name == "windows-${{ inputs.image }}") | .url')
         printf "Ref ${{ github.ref }}\nJob ${job_url}\nCommit ${{ github.sha }}\n" > install/CI-ID.txt
         cp install/CI-ID.txt pdb/CI-ID.txt
-
-    - name: Package OpenMW
-      if: ${{ inputs.package }}
-      run: cpack --config "${{ github.workspace }}/build/CPackConfig.cmake"
 
     - name: Store OpenMW archived pdb files
       uses: actions/upload-artifact@v4
