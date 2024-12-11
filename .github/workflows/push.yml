@@ -9,9 +9,6 @@ env:
 
 jobs:
   Ubuntu:
-    # TODO remove
-    if: false
-
     runs-on: ubuntu-latest
 
     steps:
@@ -70,9 +67,6 @@ jobs:
     #     name: build_artifact.7z
 
   MacOS:
-    # TODO remove
-    if: false
-
     runs-on: macos-latest
 
     steps:
@@ -105,9 +99,6 @@ jobs:
       - run: cat "${{ github.workspace }}/CI/github.env" >> $GITHUB_ENV
 
   Windows:
-    # TODO remove
-    if: false
-
     needs:
       - Output-Envs
 

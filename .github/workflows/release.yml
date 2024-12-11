@@ -1,7 +1,9 @@
 name: Release
 
 on:
-  - push
+  push:
+      tags:
+        - openmw-**
 
 jobs:
   Output-Envs:
