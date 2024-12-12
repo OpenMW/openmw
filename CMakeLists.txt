@@ -1006,24 +1006,11 @@ elseif(NOT APPLE)
         SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
         SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
 
-        SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe" CACHE FILEPATH "Path to vcredist_x86.exe")
-        if(EXISTS ${VCREDIST32})
-            INSTALL(FILES ${VCREDIST32} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x86.exe\\\" /q /norestart'" )
-        endif(EXISTS ${VCREDIST32})
-
         SET(VCREDIST64 "${OpenMW_BINARY_DIR}/vcredist_x64.exe" CACHE FILEPATH "Path to vcredist_x64.exe")
         if(EXISTS ${VCREDIST64})
             INSTALL(FILES ${VCREDIST64} DESTINATION "redist")
             SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x64.exe\\\" /q /norestart'" )
         endif(EXISTS ${VCREDIST64})
-
-        SET(OALREDIST "${OpenMW_BINARY_DIR}/oalinst.exe")
-        if(EXISTS ${OALREDIST})
-            INSTALL(FILES ${OALREDIST} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
-                ExecWait '\\\"$INSTDIR\\\\redist\\\\oalinst.exe\\\" /s'" )
-        endif(EXISTS ${OALREDIST})
 
         if(CMAKE_CL_64)
             SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
