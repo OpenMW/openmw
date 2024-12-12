@@ -32,7 +32,7 @@ jobs:
       if: ${{ inputs.package }}
       run: choco install nsis
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Create directories for dependencies
       run: |
@@ -58,7 +58,7 @@ jobs:
 
     - name: Extract archived prebuilt vcpkg packages
       working-directory: ${{ github.workspace }}/deps
-      run: 7z x -y -ovcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }} ${{ env.archive }}
+      run: 7z x -y -ovcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }} $env:archive
 
     - name: Cache Qt
       id: qt-cache
@@ -93,69 +93,63 @@ jobs:
         -D CMAKE_BUILD_TYPE=${{ inputs.build-type }}
         -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/scripts/buildsystems/vcpkg.cmake'
         -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64'
-        ${{ inputs.package && '-D CMAKE_CXX_FLAGS_RELEASE="/O2 /Ob2 /DNDEBUG"' || '' }}
-        ${{ inputs.package && '-D "CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=/DEBUG /INCREMENTAL:NO"' || '' }}
+        ${{ inputs.package && '-D CMAKE_CXX_FLAGS_RELEASE="/O2 /Ob2 /DNDEBUG /Zi"' || '' }}
+        ${{ inputs.package && '-D "CMAKE_EXE_LINKER_FLAGS_RELEASE=/DEBUG /INCREMENTAL:NO"' || '' }}
         -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/include/luajit'
         -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/lib/lua51.lib'
-        -D BUILD_BENCHMARKS=${{ inputs.package && 'OFF' || 'ON' }}
-        -D BUILD_COMPONENTS_TESTS=${{ inputs.package && 'OFF' || 'ON' }}
-        -D BUILD_OPENMW_TESTS=${{ inputs.package && 'OFF' || 'ON' }}
-        -D BUILD_OPENCS_TESTS=${{ inputs.package && 'OFF' || 'ON' }}
+        -D BUILD_BENCHMARKS=${{ ! inputs.package }}
+        -D BUILD_COMPONENTS_TESTS=${{ ! inputs.package }}
+        -D BUILD_OPENMW_TESTS=${{ ! inputs.package }}
+        -D BUILD_OPENCS_TESTS=${{ ! inputs.package }}
         -D OPENMW_USE_SYSTEM_SQLITE3=OFF
         -D OPENMW_USE_SYSTEM_YAML_CPP=OFF
         -D OPENMW_LTO_BUILD=ON
-        ${{ inputs.package && format('-D "VCREDIST64={0}/vc_redist.x64.exe"', env.VCToolsRedistDir) || '' }}
+        ${{ inputs.package && '-D "VCREDIST64=$env:VCToolsRedistDir/vc_redist.x64.exe"' || '' }}
 
     - name: Build OpenMW
       run: cmake --build ${{ github.workspace }}/build
 
-    - name: Install OpenMW
-      if: ${{ ! inputs.package }}
-      run: |
-        cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
-        echo "dlldir=${{ github.workspace }}/install" >> $env:GITHUB_ENV
-
-    - name: Ensure DLLs end up in the build dir
-      if: ${{ inputs.package }}
-      run: echo "dlldir=${{ github.workspace }}/build" >> $env:GITHUB_ENV
-
     - name: Copy missing DLLs
       run: |
-        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ env.dlldir }}
-        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ env.dlldir }}
-        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/*.dll ${{ env.dlldir }}
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/build
+        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/build
+        cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.image }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/build
 
     - name: Copy Qt DLLs
       working-directory: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
       run: |
-        cp bin/Qt6Core.dll ${{ env.dlldir }}
-        cp bin/Qt6Gui.dll ${{ env.dlldir }}
-        cp bin/Qt6Network.dll ${{ env.dlldir }}
-        cp bin/Qt6OpenGL.dll ${{ env.dlldir }}
-        cp bin/Qt6OpenGLWidgets.dll ${{ env.dlldir }}
-        cp bin/Qt6Widgets.dll ${{ env.dlldir }}
-        cp bin/Qt6Svg.dll ${{ env.dlldir }}
-        mkdir ${{ env.dlldir }}/styles
-        cp plugins/styles/qwindowsvistastyle.dll ${{ env.dlldir }}/styles
-        mkdir ${{ env.dlldir }}/platforms
-        cp plugins/platforms/qwindows.dll ${{ env.dlldir }}/platforms
-        mkdir ${{ env.dlldir }}/imageformats
-        cp plugins/imageformats/qsvg.dll ${{ env.dlldir }}/imageformats
-        mkdir ${{ env.dlldir }}/iconengines
-        cp plugins/iconengines/qsvgicon.dll ${{ env.dlldir }}/iconengines
+        cp bin/Qt6Core.dll ${{ github.workspace }}/build
+        cp bin/Qt6Gui.dll ${{ github.workspace }}/build
+        cp bin/Qt6Network.dll ${{ github.workspace }}/build
+        cp bin/Qt6OpenGL.dll ${{ github.workspace }}/build
+        cp bin/Qt6OpenGLWidgets.dll ${{ github.workspace }}/build
+        cp bin/Qt6Widgets.dll ${{ github.workspace }}/build
+        cp bin/Qt6Svg.dll ${{ github.workspace }}/build
+        mkdir ${{ github.workspace }}/build/styles
+        cp plugins/styles/qwindowsvistastyle.dll ${{ github.workspace }}/build/styles
+        mkdir ${{ github.workspace }}/build/platforms
+        cp plugins/platforms/qwindows.dll ${{ github.workspace }}/build/platforms
+        mkdir ${{ github.workspace }}/build/imageformats
+        cp plugins/imageformats/qsvg.dll ${{ github.workspace }}/build/imageformats
+        mkdir ${{ github.workspace }}/build/iconengines
+        cp plugins/iconengines/qsvgicon.dll ${{ github.workspace }}/build/iconengines
+
+    - name: Move pdb files
+      run: |
+        robocopy build pdb *.pdb /MOVE
+        if ($lastexitcode -lt 8) {
+          $global:LASTEXITCODE = $null
+        }
+
+    - name: Install OpenMW
+      if: ${{ ! inputs.package }}
+      run: cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
 
     - name: Package OpenMW
       if: ${{ inputs.package }}
       run: |
         cpack --config "${{ github.workspace }}/build/CPackConfig.cmake" -B "${{ github.workspace }}/install"
         rm -r -Force "${{ github.workspace }}/install/_CPack_Packages"
-
-    - name: Move pdb files
-      run: |
-        robocopy ${{ inputs.package && 'build' || 'install' }} pdb *.pdb /MOVE
-        if ($lastexitcode -lt 8) {
-          $global:LASTEXITCODE = $null
-        }
 
     - name: Remove extra pdb files
       if: ${{ ! inputs.package }}
