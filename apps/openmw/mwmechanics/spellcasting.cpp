@@ -454,11 +454,15 @@ namespace MWMechanics
             ESM::ActiveSpells::Flag_Temporary | ESM::ActiveSpells::Flag_Stackable);
         mSourceName = ingredient->mName;
 
-        auto effect = rollIngredientEffect(mCaster, ingredient, mCaster != getPlayer());
+        std::optional<ESM::EffectList> effect = rollIngredientEffect(mCaster, ingredient, 0);
 
         if (effect)
+        {
             inflict(mCaster, *effect, ESM::RT_Self);
-        else
+            return true;
+        }
+
+        if (mCaster == getPlayer())
         {
             // "X has no effect on you"
             std::string message = MWBase::Environment::get()
@@ -468,10 +472,9 @@ namespace MWMechanics
                                       ->mValue.getString();
             message = Misc::StringUtils::format(message, ingredient->mName);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
-            return false;
         }
 
-        return true;
+        return false;
     }
 
     void CastSpell::playSpellCastingEffects(const ESM::Enchantment* enchantment) const
