@@ -415,6 +415,11 @@ namespace MWLua
             return ptr.getClass().getEncumbrance(ptr);
         };
 
+        actor["getCapacity"] = [](const Object& actor) -> float {
+            const MWWorld::Ptr ptr = actor.ptr();
+            return ptr.getClass().getCapacity(ptr);
+        };
+
         addActorStatsBindings(actor, context);
         addActorMagicBindings(actor, context);
     }
