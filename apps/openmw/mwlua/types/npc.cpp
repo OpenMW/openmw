@@ -353,9 +353,5 @@ namespace MWLua
 
             return res;
         };
-        npc["getCapacity"] = [](const Object& actor) -> float {
-            const MWWorld::Ptr ptr = actor.ptr();
-            return ptr.getClass().getCapacity(ptr);
-        };
     }
 }
