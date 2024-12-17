@@ -135,8 +135,10 @@ jobs:
         cp plugins/iconengines/qsvgicon.dll ${{ github.workspace }}/build/iconengines
 
     - name: Create symbol server directory structure
+      working-directory: ${{ github.workspace }}/build
       run: |
-        .\CI\Store-Symbols.ps1
+        ${{ github.workspace }}\CI\Store-Symbols.ps1
+        Move-Item ${{ github.workspace }}\build\SymStore ${{ github.workspace }}
 
     - name: Move pdb files
       run: |
