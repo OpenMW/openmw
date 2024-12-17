@@ -1,0 +1,116 @@
+name: Build and test
+
+on:
+- push
+- pull_request
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add OpenMW PPA Dependencies
+      run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
+
+    - name: Install Building Dependencies
+      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+
+    - name: Prime ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+        max-size: 1000M
+
+    - name: Configure
+      run: >
+        cmake .
+        -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
+        -D USE_SYSTEM_TINYXML=ON
+        -D BUILD_COMPONENTS_TESTS=ON
+        -D BUILD_OPENMW_TESTS=ON
+        -D BUILD_OPENCS_TESTS=ON
+        -D CMAKE_INSTALL_PREFIX=install
+
+    - name: Build
+      run: cmake --build . -- -j$(nproc)
+
+    - name: Run components tests
+      run: ./components-tests
+
+    - name: Run OpenMW tests
+      run: ./openmw-tests
+
+    - name: Run OpenMW-CS tests
+      run: ./openmw-cs-tests
+
+    # - name: Install
+    #   shell: bash
+    #   run: cmake --install .
+
+    # - name: Create Artifact
+    #   shell: bash
+    #   working-directory: install
+    #   run: |
+    #     ls -laR
+    #     7z a ../build_artifact.7z .
+
+    # - name: Upload Artifact
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     path: ./build_artifact.7z
+    #     name: build_artifact.7z
+
+  MacOS:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Building Dependencies
+      run: CI/before_install.osx.sh
+
+    - name: Prime ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+        max-size: 1000M
+
+    - name: Configure
+      run: CI/before_script.osx.sh
+    - name: Build
+      run: |
+        cd build
+        make -j $(sysctl -n hw.logicalcpu) package
+
+  Output-Envs:
+    name: Read .env file and expose it as output
+    runs-on: ubuntu-latest
+    outputs:
+      VCPKG_DEPS_TAG: ${{ env.VCPKG_DEPS_TAG }}
+      BUILD_TYPE: ${{ env.BUILD_TYPE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cat "${{ github.workspace }}/CI/github.env" >> $GITHUB_ENV
+
+  Windows:
+    needs:
+      - Output-Envs
+
+    strategy:
+      fail-fast: true
+      matrix:
+        image:
+        - "2019"
+        - "2022"
+
+    uses: ./.github/workflows/windows.yml
+    with:
+      image: ${{ matrix.image }}
+      vcpkg-deps-tag: ${{ needs.Output-Envs.outputs.VCPKG_DEPS_TAG }}
+      build-type: ${{ needs.Output-Envs.outputs.BUILD_TYPE }}
