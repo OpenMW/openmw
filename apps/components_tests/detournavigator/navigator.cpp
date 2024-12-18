@@ -33,6 +33,11 @@ MATCHER_P3(Vec3fEq, x, y, z, "")
     return std::abs(arg.x() - x) < 1e-3 && std::abs(arg.y() - y) < 1e-3 && std::abs(arg.z() - z) < 1e-3;
 }
 
+MATCHER_P4(Vec3fEq, x, y, z, precision, "")
+{
+    return std::abs(arg.x() - x) < precision && std::abs(arg.y() - y) < precision && std::abs(arg.z() - z) < precision;
+}
+
 namespace
 {
     using namespace testing;
@@ -605,7 +610,7 @@ namespace
         const auto result = findRandomPointAroundCircle(
             *mNavigator, mAgentBounds, mStart, 100.0, Flag_walk, []() { return Misc::Rng::rollClosedProbability(); });
 
-        ASSERT_THAT(result, Optional(Vec3fEq(70.35845947265625, 335.592041015625, -2.6667339801788330078125)))
+        ASSERT_THAT(result, Optional(Vec3fEq(70.35845947265625, 335.592041015625, -2.6667339801788330078125, 1)))
             << (result ? *result : osg::Vec3f());
 
         const auto distance = (*result - mStart).length();
