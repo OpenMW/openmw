@@ -172,6 +172,7 @@ jobs:
         job_url=$(gh run --repo ${{ github.repository }} view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name == "windows-${{ inputs.image }}") | .url')
         printf "Ref ${{ github.ref }}\nJob ${job_url}\nCommit ${{ github.sha }}\n" > install/CI-ID.txt
         cp install/CI-ID.txt pdb/CI-ID.txt
+        cp install/CI-ID.txt SymStore/CI-ID.txt
 
     - name: Store OpenMW archived pdb files
       uses: actions/upload-artifact@v4
