@@ -192,6 +192,15 @@ jobs:
         name: openmw-windows-${{ inputs.image }}-sym-store-${{ github.sha }}
         path: ${{ github.workspace }}/SymStore/*
 
+    - name: Upload to symbol server
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-west-3
+      if: ${{ env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' && inputs.package }}
+      working-directory: ${{ github.workspace }}/SymStore
+      run: aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only --exclude * --include *.ex_ --include *.dl_ --include *.pd_ . s3://openmw-sym
+
     - name: Add install directory to PATH
       shell: bash
       run: echo '${{ github.workspace }}/install' >> ${GITHUB_PATH}
