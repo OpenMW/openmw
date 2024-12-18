@@ -728,14 +728,14 @@ namespace MWClass
         {
             MWMechanics::CreatureStats& statsAttacker = attacker.getClass().getCreatureStats(attacker);
             // First handle the attacked actor
-            if ((stats.getHitAttemptActorId() == -1)
+            if (!stats.getHitAttemptActor().isSet()
                 && (statsAttacker.getAiSequence().isInCombat(ptr) || attacker == MWMechanics::getPlayer()))
-                stats.setHitAttemptActorId(statsAttacker.getActorId());
+                stats.setHitAttemptActor(attacker.getCellRef().getRefNum());
 
             // Next handle the attacking actor
-            if ((statsAttacker.getHitAttemptActorId() == -1)
+            if (!statsAttacker.getHitAttemptActor().isSet()
                 && (statsAttacker.getAiSequence().isInCombat(ptr) || attacker == MWMechanics::getPlayer()))
-                statsAttacker.setHitAttemptActorId(stats.getActorId());
+                statsAttacker.setHitAttemptActor(ptr.getCellRef().getRefNum());
         }
 
         if (!object.empty())

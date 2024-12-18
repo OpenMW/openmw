@@ -76,7 +76,7 @@ namespace MWMechanics
         int mActorId = -1;
         // Stores an actor that attacked this actor. Only one is stored at a time, and it is not changed if a different
         // actor attacks. It is cleared when combat ends.
-        int mHitAttemptActorId = -1;
+        ESM::RefNum mHitAttemptActor;
 
         // The difference between view direction and lower body direction.
         float mSideMovementAngle = 0;
@@ -266,8 +266,8 @@ namespace MWMechanics
         void setLastHitAttemptObject(const ESM::RefId& objectid);
         void clearLastHitAttemptObject();
         const ESM::RefId& getLastHitAttemptObject() const;
-        void setHitAttemptActorId(const int actorId);
-        int getHitAttemptActorId() const;
+        void setHitAttemptActor(ESM::RefNum actorId);
+        ESM::RefNum getHitAttemptActor() const;
 
         void writeState(ESM::CreatureStats& state) const;
 

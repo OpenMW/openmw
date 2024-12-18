@@ -36,6 +36,12 @@ namespace
 
     osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target,
         const osg::Vec3f& vLastTargetPos, float duration, int weapType, float strength);
+
+    bool hitAttemptMatchesTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
+    {
+        ESM::RefNum hitNum = actor.getClass().getCreatureStats(actor).getHitAttemptActor();
+        return hitNum.isSet() && target.getCellRef().getRefNum() == hitNum;
+    }
 }
 
 namespace MWMechanics
@@ -194,8 +200,7 @@ namespace MWMechanics
                 = (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), target)
                     != playerFollowersAndEscorters.end());
             if ((target == MWMechanics::getPlayer() || targetSidesWithPlayer)
-                && ((stats.getHitAttemptActorId() == target.getClass().getCreatureStats(target).getActorId())
-                    || (target.getClass().getCreatureStats(target).getHitAttemptActorId() == stats.getActorId())))
+                && (hitAttemptMatchesTarget(actor, target) || hitAttemptMatchesTarget(target, actor)))
                 forceFlee = true;
             else // Otherwise end combat
                 return true;

@@ -25,6 +25,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/scene.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -641,12 +642,13 @@ namespace MWMechanics
             if (creatureStats1.getAiSequence().isInCombat(ally))
                 continue;
 
-            if (creatureStats2.matchesActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId()))
+            ESM::RefNum allyHitNum = ally.getClass().getCreatureStats(ally).getHitAttemptActor();
+            if (allyHitNum.isSet() && actor2.getCellRef().getRefNum() == allyHitNum)
             {
                 mechanicsManager->startCombat(actor1, actor2, &cachedAllies.getActorsSidingWith(actor2));
                 // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
                 // if the player gets out of reach, while the ally would continue combat with the player
-                creatureStats1.setHitAttemptActorId(ally.getClass().getCreatureStats(ally).getHitAttemptActorId());
+                creatureStats1.setHitAttemptActor(allyHitNum);
                 return;
             }
 
@@ -1155,9 +1157,10 @@ namespace MWMechanics
                     = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->mValue.getInteger();
                 if (playerStats.getBounty() >= cutoff * iCrimeThresholdMultiplier)
                 {
+                    ESM::RefNum playerNum = player.getCellRef().getRefNum();
                     mechanicsManager->startCombat(ptr, player, &cachedAllies.getActorsSidingWith(player));
                     // Stops the guard from quitting combat if player is unreachable
-                    creatureStats.setHitAttemptActorId(playerClass.getCreatureStats(player).getActorId());
+                    creatureStats.setHitAttemptActor(playerNum);
                 }
                 else
                     creatureStats.getAiSequence().stack(AiPursue(player), ptr);
@@ -1517,13 +1520,14 @@ namespace MWMechanics
             SidingCache cachedAllies{ *this, true }; // will be filled as engageCombat iterates
 
             const bool aiActive = MWBase::Environment::get().getMechanicsManager()->isAIActive();
-            const int attackedByPlayerId = player.getClass().getCreatureStats(player).getHitAttemptActorId();
-            if (attackedByPlayerId != -1)
+            const ESM::RefNum attackedByPlayerNum = player.getClass().getCreatureStats(player).getHitAttemptActor();
+            if (attackedByPlayerNum.isSet())
             {
-                const MWWorld::Ptr playerHitAttemptActor = world->searchPtrViaActorId(attackedByPlayerId);
+                const MWWorld::Ptr playerHitAttemptActor
+                    = MWBase::Environment::get().getWorldModel()->getPtr(attackedByPlayerNum);
 
                 if (!playerHitAttemptActor.isInCell())
-                    player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
+                    player.getClass().getCreatureStats(player).setHitAttemptActor({});
             }
             const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
 
@@ -1548,10 +1552,10 @@ namespace MWMechanics
                         || !actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getAiSequence().isInCombat()
                         || !inProcessingRange))
                 {
-                    actor.getPtr().getClass().getCreatureStats(actor.getPtr()).setHitAttemptActorId(-1);
-                    if (player.getClass().getCreatureStats(player).getHitAttemptActorId()
-                        == actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getActorId())
-                        player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
+                    actor.getPtr().getClass().getCreatureStats(actor.getPtr()).setHitAttemptActor({});
+                    ESM::RefNum playerHitNum = player.getClass().getCreatureStats(player).getHitAttemptActor();
+                    if (playerHitNum.isSet() && playerHitNum == actor.getPtr().getCellRef().getRefNum())
+                        player.getClass().getCreatureStats(player).setHitAttemptActor({});
                 }
 
                 const Misc::TimerStatus engageCombatTimerStatus = actor.updateEngageCombatTimer(duration);

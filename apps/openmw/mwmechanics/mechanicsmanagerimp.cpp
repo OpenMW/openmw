@@ -1734,8 +1734,9 @@ namespace MWMechanics
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
+                const ESM::RefNum playerNum = target.getCellRef().getRefNum();
                 // Stops guard from ending combat if player is unreachable
-                stats.setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId());
+                stats.setHitAttemptActor(playerNum);
                 for (const Actor& actor : mActors)
                 {
                     if (actor.isInvalid())
@@ -1752,7 +1753,7 @@ namespace MWMechanics
                             actor.getPtr()
                                 .getClass()
                                 .getCreatureStats(actor.getPtr())
-                                .setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId());
+                                .setHitAttemptActor(playerNum);
                         }
                     }
                 }

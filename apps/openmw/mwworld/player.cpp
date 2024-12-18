@@ -343,6 +343,7 @@ namespace MWWorld
 
             MWBase::Environment::get().getWorldModel()->deregisterLiveCellRef(mPlayer);
             mPlayer.load(player.mObject);
+            MWBase::Environment::get().getWorldModel()->registerPtr(getPlayer());
 
             for (size_t i = 0; i < mSaveAttributes.size(); ++i)
                 mSaveAttributes[i] = player.mSaveAttributes[i];

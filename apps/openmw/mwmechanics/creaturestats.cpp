@@ -365,14 +365,14 @@ namespace MWMechanics
         return mLastHitAttemptObject;
     }
 
-    void CreatureStats::setHitAttemptActorId(int actorId)
+    void CreatureStats::setHitAttemptActor(ESM::RefNum actor)
     {
-        mHitAttemptActorId = actorId;
+        mHitAttemptActor = actor;
     }
 
-    int CreatureStats::getHitAttemptActorId() const
+    ESM::RefNum CreatureStats::getHitAttemptActor() const
     {
-        return mHitAttemptActorId;
+        return mHitAttemptActor;
     }
 
     void CreatureStats::addToFallHeight(float height)
