@@ -945,23 +945,39 @@ elseif(NOT APPLE)
 
     if(WIN32)
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
-                                                                              PATTERN "deps" EXCLUDE
+                                                                              PATTERN ".cmake" EXCLUDE
+                                                                              PATTERN ".qt" EXCLUDE
+                                                                              PATTERN "_deps" EXCLUDE
                                                                               PATTERN "apps" EXCLUDE
+                                                                              PATTERN "bin" EXCLUDE
                                                                               PATTERN "CMakeFiles" EXCLUDE
                                                                               PATTERN "components" EXCLUDE
+                                                                              PATTERN "deps" EXCLUDE
                                                                               PATTERN "docs" EXCLUDE
                                                                               PATTERN "extern" EXCLUDE
                                                                               PATTERN "files" EXCLUDE
-                                                                              PATTERN "Testing" EXCLUDE)
+                                                                              PATTERN "lib" EXCLUDE
+                                                                              PATTERN "SymStore" EXCLUDE
+                                                                              PATTERN "symstore-venv" EXCLUDE
+                                                                              PATTERN "Testing" EXCLUDE
+                                                                              PATTERN "try-compile")
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
-                                                                                                                  PATTERN "deps" EXCLUDE
+                                                                                                                  PATTERN ".cmake" EXCLUDE
+                                                                                                                  PATTERN ".qt" EXCLUDE
+                                                                                                                  PATTERN "_deps" EXCLUDE
                                                                                                                   PATTERN "apps" EXCLUDE
+                                                                                                                  PATTERN "bin" EXCLUDE
                                                                                                                   PATTERN "CMakeFiles" EXCLUDE
                                                                                                                   PATTERN "components" EXCLUDE
+                                                                                                                  PATTERN "deps" EXCLUDE
                                                                                                                   PATTERN "docs" EXCLUDE
                                                                                                                   PATTERN "extern" EXCLUDE
                                                                                                                   PATTERN "files" EXCLUDE
-                                                                                                                  PATTERN "Testing" EXCLUDE)
+                                                                                                                  PATTERN "lib" EXCLUDE
+                                                                                                                  PATTERN "SymStore" EXCLUDE
+                                                                                                                  PATTERN "symstore-venv" EXCLUDE
+                                                                                                                  PATTERN "Testing" EXCLUDE
+                                                                                                                  PATTERN "try-compile")
         INSTALL(FILES "${INSTALL_SOURCE}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
