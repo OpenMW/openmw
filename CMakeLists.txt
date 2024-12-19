@@ -947,6 +947,7 @@ elseif(NOT APPLE)
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
                                                                               PATTERN ".cmake" EXCLUDE
                                                                               PATTERN ".qt" EXCLUDE
+                                                                              PATTERN "_CPack_Packages" EXCLUDE
                                                                               PATTERN "_deps" EXCLUDE
                                                                               PATTERN "apps" EXCLUDE
                                                                               PATTERN "bin" EXCLUDE
@@ -960,10 +961,12 @@ elseif(NOT APPLE)
                                                                               PATTERN "SymStore" EXCLUDE
                                                                               PATTERN "symstore-venv" EXCLUDE
                                                                               PATTERN "Testing" EXCLUDE
+                                                                              PATTERN "tests_output" EXCLUDE
                                                                               PATTERN "try-compile")
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
                                                                                                                   PATTERN ".cmake" EXCLUDE
                                                                                                                   PATTERN ".qt" EXCLUDE
+                                                                                                                  PATTERN "_CPack_Packages" EXCLUDE
                                                                                                                   PATTERN "_deps" EXCLUDE
                                                                                                                   PATTERN "apps" EXCLUDE
                                                                                                                   PATTERN "bin" EXCLUDE
@@ -977,6 +980,7 @@ elseif(NOT APPLE)
                                                                                                                   PATTERN "SymStore" EXCLUDE
                                                                                                                   PATTERN "symstore-venv" EXCLUDE
                                                                                                                   PATTERN "Testing" EXCLUDE
+                                                                                                                  PATTERN "tests_output" EXCLUDE
                                                                                                                   PATTERN "try-compile")
         INSTALL(FILES "${INSTALL_SOURCE}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
