@@ -1029,7 +1029,11 @@ elseif(NOT APPLE)
         SET(VCREDIST64 "${OpenMW_BINARY_DIR}/vcredist_x64.exe" CACHE FILEPATH "Path to vcredist_x64.exe")
         if(EXISTS ${VCREDIST64})
             INSTALL(FILES ${VCREDIST64} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x64.exe\\\" /q /norestart'" )
+            get_filename_component(REDIST_FILENAME "${VCREDIST64}" NAME)
+            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+                ExecWait '\\\"$INSTDIR\\\\redist\\\\${REDIST_FILENAME}\\\" /q /norestart'
+                RMDir /r \\\"$INSTDIR\\\\redist\\\"
+                ")
         endif(EXISTS ${VCREDIST64})
 
         if(CMAKE_CL_64)
