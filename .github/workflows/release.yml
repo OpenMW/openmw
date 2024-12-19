@@ -24,3 +24,4 @@ jobs:
       vcpkg-deps-tag: ${{ needs.Output-Envs.outputs.VCPKG_DEPS_TAG }}
       build-type: Release
       package: true
+    secrets: inherit

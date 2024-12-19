@@ -134,6 +134,12 @@ jobs:
         mkdir ${{ github.workspace }}/build/iconengines
         cp plugins/iconengines/qsvgicon.dll ${{ github.workspace }}/build/iconengines
 
+    - name: Create symbol server directory structure
+      working-directory: ${{ github.workspace }}/build
+      run: |
+        ${{ github.workspace }}\CI\Store-Symbols.ps1
+        Move-Item ${{ github.workspace }}\build\SymStore ${{ github.workspace }}
+
     - name: Move pdb files
       run: |
         robocopy build pdb *.pdb /MOVE
@@ -166,6 +172,7 @@ jobs:
         job_url=$(gh run --repo ${{ github.repository }} view ${{ github.run_id }} --json jobs --jq '.jobs[] | select(.name == "windows-${{ inputs.image }}") | .url')
         printf "Ref ${{ github.ref }}\nJob ${job_url}\nCommit ${{ github.sha }}\n" > install/CI-ID.txt
         cp install/CI-ID.txt pdb/CI-ID.txt
+        cp install/CI-ID.txt SymStore/CI-ID.txt
 
     - name: Store OpenMW archived pdb files
       uses: actions/upload-artifact@v4
@@ -178,6 +185,21 @@ jobs:
       with:
         name: openmw-windows-${{ inputs.image }}-${{ github.sha }}
         path: ${{ github.workspace }}/install/*
+
+    - name: Store symbol server artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openmw-windows-${{ inputs.image }}-sym-store-${{ github.sha }}
+        path: ${{ github.workspace }}/SymStore/*
+
+    - name: Upload to symbol server
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-west-3
+      if: ${{ env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' && inputs.package }}
+      working-directory: ${{ github.workspace }}/SymStore
+      run: aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only --exclude * --include *.ex_ --include *.dl_ --include *.pd_ . s3://openmw-sym
 
     - name: Add install directory to PATH
       shell: bash
