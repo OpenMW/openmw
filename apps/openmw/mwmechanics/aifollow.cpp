@@ -30,7 +30,8 @@ namespace MWMechanics
 {
     int AiFollow::mFollowIndexCounter = 0;
 
-    AiFollow::AiFollow(const ESM::RefId& actorId, float duration, float x, float y, float z, bool repeat)
+    AiFollow::AiFollow(
+        ESM::RefNum actor, std::string_view cellId, float duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiFollow>(repeat)
         , mAlwaysFollow(false)
         , mDuration(duration)
@@ -41,7 +42,7 @@ namespace MWMechanics
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
-        mTargetActorRefId = actorId;
+        mTargetActor = actor;
     }
 
     AiFollow::AiFollow(
@@ -72,12 +73,12 @@ namespace MWMechanics
         , mFollowIndex(mFollowIndexCounter++)
     {
         mTargetActorRefId = actor.getCellRef().getRefId();
-        mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
+        mTargetActor = actor.getCellRef().getRefNum();
     }
 
     AiFollow::AiFollow(const ESM::AiSequence::AiFollow* follow)
         : TypedAiPackage<AiFollow>(
-            makeDefaultOptions().withShouldCancelPreviousAi(!follow->mCommanded).withRepeat(follow->mRepeat))
+              makeDefaultOptions().withShouldCancelPreviousAi(!follow->mCommanded).withRepeat(follow->mRepeat))
         , mAlwaysFollow(follow->mAlwaysFollow)
         , mDuration(follow->mData.mDuration)
         , mRemainingDuration(follow->mRemainingDuration)
@@ -89,7 +90,7 @@ namespace MWMechanics
         , mFollowIndex(mFollowIndexCounter++)
     {
         mTargetActorRefId = follow->mTargetId;
-        mTargetActorId = follow->mTargetActorId;
+        mTargetActor = follow->mTargetActor;
     }
 
     bool AiFollow::execute(
@@ -246,7 +247,7 @@ namespace MWMechanics
         follow->mData.mZ = mZ;
         follow->mData.mDuration = static_cast<int16_t>(mDuration);
         follow->mTargetId = mTargetActorRefId;
-        follow->mTargetActorId = mTargetActorId;
+        follow->mTargetActor = mTargetActor;
         follow->mRemainingDuration = mRemainingDuration;
         follow->mCellId = mCellId;
         follow->mAlwaysFollow = mAlwaysFollow;

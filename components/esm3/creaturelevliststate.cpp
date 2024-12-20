@@ -16,7 +16,7 @@ namespace ESM
             esm.getHNOT(mSpawnedActor.mIndex, "SPAW");
         }
         else if (esm.peekNextSub("SPAW"))
-            esm.getFormId(true, "SPAW");
+            mSpawnedActor = esm.getFormId(true, "SPAW");
 
         mSpawn = false;
         esm.getHNOT(mSpawn, "RESP");

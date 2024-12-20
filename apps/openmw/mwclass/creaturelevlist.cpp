@@ -152,13 +152,7 @@ namespace MWClass
         customData.mSpawnedActor = levListState.mSpawnedActor;
         customData.mSpawn = levListState.mSpawn;
         if (state.mActorIdConverter)
-        {
-            if (state.mActorIdConverter->convert(customData.mSpawnedActor, customData.mSpawnedActor.mIndex))
-                return;
-            state.mActorIdConverter->addConverter([converter = state.mActorIdConverter, &customData]() {
-                customData.mSpawnedActor = converter->convert(customData.mSpawnedActor.mIndex);
-            });
-        }
+            state.mActorIdConverter->convert(customData.mSpawnedActor, customData.mSpawnedActor.mIndex);
     }
 
     void CreatureLevList::writeAdditionalState(const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const

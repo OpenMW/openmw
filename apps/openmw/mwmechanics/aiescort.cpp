@@ -24,7 +24,7 @@
 
 namespace MWMechanics
 {
-    AiEscort::AiEscort(const ESM::RefId& actorId, int duration, float x, float y, float z, bool repeat)
+    AiEscort::AiEscort(ESM::RefNum actor, std::string_view cellId, int duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiEscort>(repeat)
         , mX(x)
         , mY(y)
@@ -32,7 +32,7 @@ namespace MWMechanics
         , mDuration(static_cast<float>(duration))
         , mRemainingDuration(static_cast<float>(duration))
     {
-        mTargetActorRefId = actorId;
+        mTargetActor = actor;
     }
 
     AiEscort::AiEscort(
@@ -58,7 +58,7 @@ namespace MWMechanics
         , mRemainingDuration(escort->mRemainingDuration)
     {
         mTargetActorRefId = escort->mTargetId;
-        mTargetActorId = escort->mTargetActorId;
+        mTargetActor = escort->mTargetActor;
     }
 
     bool AiEscort::execute(
@@ -131,7 +131,7 @@ namespace MWMechanics
         escort->mData.mZ = mZ;
         escort->mData.mDuration = static_cast<int16_t>(mDuration);
         escort->mTargetId = mTargetActorRefId;
-        escort->mTargetActorId = mTargetActorId;
+        escort->mTargetActor = mTargetActor;
         escort->mRemainingDuration = mRemainingDuration;
         escort->mCellId = mCellId;
         escort->mRepeat = getRepeat();

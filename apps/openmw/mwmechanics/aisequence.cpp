@@ -4,6 +4,7 @@
 #include <limits>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -538,6 +539,7 @@ namespace MWMechanics
         for (auto& container : sequence.mPackages)
         {
             std::unique_ptr<MWMechanics::AiPackage> package;
+            bool hasTarget = false;
             switch (container.mType)
             {
                 case ESM::AiSequence::Ai_Wander:
@@ -560,12 +562,14 @@ namespace MWMechanics
                 {
                     package = std::make_unique<AiEscort>(
                         &static_cast<const ESM::AiSequence::AiEscort&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 case ESM::AiSequence::Ai_Follow:
                 {
                     package = std::make_unique<AiFollow>(
                         &static_cast<const ESM::AiSequence::AiFollow&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 case ESM::AiSequence::Ai_Activate:
@@ -578,12 +582,14 @@ namespace MWMechanics
                 {
                     package = std::make_unique<AiCombat>(
                         &static_cast<const ESM::AiSequence::AiCombat&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 case ESM::AiSequence::Ai_Pursue:
                 {
                     package = std::make_unique<AiPursue>(
                         &static_cast<const ESM::AiSequence::AiPursue&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 default:
@@ -592,6 +598,8 @@ namespace MWMechanics
 
             if (!package.get())
                 continue;
+            if (hasTarget && sequence.mActorIdConverter)
+                sequence.mActorIdConverter->convert(package->mTargetActor, package->mTargetActor.mIndex);
 
             onPackageAdded(*package);
             mPackages.push_back(std::move(package));

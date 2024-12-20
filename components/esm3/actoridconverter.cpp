@@ -4,29 +4,29 @@ namespace ESM
 {
     void ActorIdConverter::apply()
     {
-        for (auto& converter : mConverters)
-            converter();
+        for (auto& [refNum, actorId] : mToConvert)
+        {
+            auto it = mMappings.find(actorId);
+            if (it == mMappings.end())
+                refNum = {};
+            else
+                refNum = it->second;
+        }
     }
 
-    ESM::RefNum ActorIdConverter::convert(int actorId) const
-    {
-        auto it = mMappings.find(actorId);
-        if (it == mMappings.end())
-            return {};
-        return it->second;
-    }
-
-    bool ActorIdConverter::convert(ESM::RefNum& refNum, int actorId) const
+    void ActorIdConverter::convert(ESM::RefNum& refNum, int actorId)
     {
         if (actorId == -1)
         {
             refNum = {};
-            return true;
+            return;
         }
         auto it = mMappings.find(actorId);
         if (it == mMappings.end())
-            return false;
+        {
+            mToConvert.emplace_back(refNum, actorId);
+            return;
+        }
         refNum = it->second;
-        return true;
     }
 }

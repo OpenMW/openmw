@@ -18,6 +18,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwlua/localscripts.hpp"
+
 #include "actorutil.hpp"
 #include "aicombataction.hpp"
 #include "character.hpp"
@@ -48,12 +50,12 @@ namespace MWMechanics
 {
     AiCombat::AiCombat(const MWWorld::Ptr& actor)
     {
-        mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
+        mTargetActor = actor.getCellRef().getRefNum();
     }
 
     AiCombat::AiCombat(const ESM::AiSequence::AiCombat* combat)
     {
-        mTargetActorId = combat->mTargetActorId;
+        mTargetActor = combat->mTargetActor;
     }
 
     void AiCombat::init() {}
@@ -115,15 +117,20 @@ namespace MWMechanics
         if (actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
-        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
-        if (target.isEmpty())
-            return true;
+        const MWWorld::Ptr target = getTarget(); // The target to follow
 
-        if (!target.getCellRef().getCount()
-            || !target.getRefData().isEnabled() // Really we should be checking whether the target is currently
-                                                // registered with the MechanicsManager
+        // Stop if the target doesn't exist
+        if (target.isEmpty() || !target.getCellRef().getCount() || !target.getRefData().isEnabled()
             || target.getClass().getCreatureStats(target).isDead())
             return true;
+
+        // This is equivalent to checking if the actor is registered with the mechanics manager since every actor has a
+        // script
+        if (const MWLua::LocalScripts* scripts = target.getRefData().getLuaScripts())
+        {
+            if (!scripts->isActive())
+                return true;
+        }
 
         if (actor == target) // This should never happen.
             return true;
@@ -496,19 +503,10 @@ namespace MWMechanics
         storage.mRotateMove = !smoothTurn(actor, targetAngleRadians, axis, eps);
     }
 
-    MWWorld::Ptr AiCombat::getTarget() const
-    {
-        if (mCachedTarget.isEmpty() || mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
-        {
-            mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
-        }
-        return mCachedTarget;
-    }
-
     void AiCombat::writeState(ESM::AiSequence::AiSequence& sequence) const
     {
         auto combat = std::make_unique<ESM::AiSequence::AiCombat>();
-        combat->mTargetActorId = mTargetActorId;
+        combat->mTargetActor = mTargetActor;
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Combat;

@@ -7,6 +7,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwlua/localscripts.hpp"
+
 #include "../mwworld/class.hpp"
 
 #include "actorutil.hpp"
@@ -19,12 +21,12 @@ namespace MWMechanics
 
     AiPursue::AiPursue(const MWWorld::Ptr& actor)
     {
-        mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
+        mTargetActor = actor.getCellRef().getRefNum();
     }
 
     AiPursue::AiPursue(const ESM::AiSequence::AiPursue* pursue)
     {
-        mTargetActorId = pursue->mTargetActorId;
+        mTargetActor = pursue->mTargetActor;
     }
 
     bool AiPursue::execute(
@@ -33,13 +35,18 @@ namespace MWMechanics
         if (actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
-        const MWWorld::Ptr target
-            = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId); // The target to follow
+        const MWWorld::Ptr target = getTarget(); // The target to follow
 
         // Stop if the target doesn't exist
-        // Really we should be checking whether the target is currently registered with the MechanicsManager
-        if (target == MWWorld::Ptr() || !target.getCellRef().getCount() || !target.getRefData().isEnabled())
+        if (target.isEmpty() || !target.getCellRef().getCount() || !target.getRefData().isEnabled())
             return true;
+
+        // This is equivalent to checking if the actor is registered with the mechanics manager since every actor has a script
+        if (const MWLua::LocalScripts* scripts = target.getRefData().getLuaScripts())
+        {
+            if (!scripts->isActive())
+                return true;
+        }
 
         if (isTargetMagicallyHidden(target)
             && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor, false))
@@ -79,23 +86,10 @@ namespace MWMechanics
         return false;
     }
 
-    MWWorld::Ptr AiPursue::getTarget() const
-    {
-        if (!mCachedTarget.isEmpty())
-        {
-            if (mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
-                mCachedTarget = MWWorld::Ptr();
-            else
-                return mCachedTarget;
-        }
-        mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
-        return mCachedTarget;
-    }
-
     void AiPursue::writeState(ESM::AiSequence::AiSequence& sequence) const
     {
         auto pursue = std::make_unique<ESM::AiSequence::AiPursue>();
-        pursue->mTargetActorId = mTargetActorId;
+        pursue->mTargetActor = mTargetActor;
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Pursue;

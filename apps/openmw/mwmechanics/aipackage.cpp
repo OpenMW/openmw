@@ -16,6 +16,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwphysics/raycasting.hpp"
 
@@ -51,71 +52,35 @@ MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options
     : mTypeId(typeId)
     , mOptions(options)
     , mReaction(MWBase::Environment::get().getWorld()->getPrng())
-    , mTargetActorId(-1)
-    , mCachedTarget()
-    , mRotateOnTheRunChecks(0)
-    , mIsShortcutting(false)
-    , mShortcutProhibited(false)
-    , mShortcutFailPos()
 {
 }
 
 MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 {
-    if (!mCachedTarget.isEmpty())
-    {
-        if (mCachedTarget.mRef->isDeleted() || !mCachedTarget.getRefData().isEnabled())
-            mCachedTarget = MWWorld::Ptr();
-        else
-            return mCachedTarget;
-    }
-
-    if (mTargetActorId == -2)
-        return MWWorld::Ptr();
-
-    if (mTargetActorId == -1)
-    {
-        if (mTargetActorRefId.empty())
-        {
-            mTargetActorId = -2;
-            return MWWorld::Ptr();
-        }
-        mCachedTarget = MWBase::Environment::get().getWorld()->searchPtr(mTargetActorRefId, false);
-        if (mCachedTarget.isEmpty())
-        {
-            mTargetActorId = -2;
-            return mCachedTarget;
-        }
-        else
-            mTargetActorId = mCachedTarget.getClass().getCreatureStats(mCachedTarget).getActorId();
-    }
-
-    if (mTargetActorId != -1)
-        mCachedTarget = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+    if (mTargetActor.isSet())
+        return MWBase::Environment::get().getWorldModel()->getPtr(mTargetActor);
+    if (mTargetActorRefId.empty() || mTargetNotFound)
+        return {};
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtr(mTargetActorRefId, false);
+    if (ptr.isEmpty())
+        mTargetNotFound = true;
     else
-        return MWWorld::Ptr();
-
-    return mCachedTarget;
+    {
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+        mTargetActor = ptr.getCellRef().getRefNum();
+    }
+    return ptr;
 }
 
 bool MWMechanics::AiPackage::targetIs(const MWWorld::Ptr& ptr) const
 {
-    if (mTargetActorId == -2)
-        return ptr.isEmpty();
-    else if (mTargetActorId == -1)
-    {
-        if (mTargetActorRefId.empty())
-        {
-            mTargetActorId = -2;
-            return ptr.isEmpty();
-        }
-        if (!ptr.isEmpty() && ptr.getCellRef().getRefId() == mTargetActorRefId)
-            return getTarget() == ptr;
+    if (ptr.isEmpty())
+        return getTarget() == ptr;
+    if (mTargetActor.isSet())
+        return ptr.getCellRef().getRefNum() == mTargetActor;
+    if (ptr.getCellRef().getRefId() != mTargetActorRefId)
         return false;
-    }
-    if (ptr.isEmpty() || !ptr.getClass().isActor())
-        return false;
-    return ptr.getClass().getCreatureStats(ptr).getActorId() == mTargetActorId;
+    return getTarget() == ptr;
 }
 
 void MWMechanics::AiPackage::reset()
@@ -125,7 +90,7 @@ void MWMechanics::AiPackage::reset()
     mIsShortcutting = false;
     mShortcutProhibited = false;
     mShortcutFailPos = osg::Vec3f();
-    mCachedTarget = MWWorld::Ptr();
+    mTargetNotFound = false;
 
     mPathFinder.clearPath();
     mObstacleCheck.clear();
