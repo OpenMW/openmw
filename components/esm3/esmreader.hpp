@@ -43,6 +43,7 @@ namespace ESM
     inline constexpr bool IsReadable<void> = false;
 
     class ReadersCache;
+    class ActorIdConverter; // For old save games
 
     class ESMReader
     {
@@ -118,10 +119,12 @@ namespace ESM
 
         // Used only when loading saves to adjust FormIds if load order was changes.
         void setContentFileMapping(const std::map<int, int>* mapping) { mContentFileMapping = mapping; }
-        const std::map<int, int>* getContentFileMapping();
 
         // Returns false if content file not found.
         bool applyContentFileMapping(FormId& id);
+
+        void setActorIdConverter(ActorIdConverter* converter) { mActorIdConverter = converter; }
+        ActorIdConverter* getActorIdConverter() const { return mActorIdConverter; }
 
         /*************************************************************************
          *
@@ -386,6 +389,8 @@ namespace ESM
         size_t mFileSize;
 
         const std::map<int, int>* mContentFileMapping = nullptr;
+
+        ActorIdConverter* mActorIdConverter = nullptr;
     };
 }
 #endif

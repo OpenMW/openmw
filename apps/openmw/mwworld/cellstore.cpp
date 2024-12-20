@@ -7,6 +7,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/format.hpp>
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/containerstate.hpp>
@@ -274,6 +275,14 @@ namespace
         {
             if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertEnchantmentSlots(state.mCreatureStats, state.mInventory);
+        }
+        if (reader.getActorIdConverter())
+        {
+            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+            {
+                MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(state.mRef);
+                reader.getActorIdConverter()->mMappings.emplace(state.mCreatureStats.mActorId, state.mRef.mRefNum);
+            }
         }
 
         if (state.mRef.mRefNum.hasContentFile())
