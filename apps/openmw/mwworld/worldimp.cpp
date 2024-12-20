@@ -2307,11 +2307,12 @@ namespace MWWorld
         return true;
     }
 
-    void World::saveLoaded()
+    void World::saveLoaded(const ESM::ESMReader& reader)
     {
         mStore.rebuildIdsIndex();
         mStore.validateDynamic();
         mTimeManager->setup(mGlobalVariables);
+        mProjectileManager->saveLoaded(reader);
     }
 
     void World::setupPlayer()

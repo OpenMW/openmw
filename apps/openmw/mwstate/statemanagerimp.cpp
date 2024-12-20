@@ -594,7 +594,6 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 currentPercent = progressPercent;
             }
         }
-        actorIdConverter.apply();
         mCharacterManager.setCurrentCharacter(character);
 
         mState = State_Running;
@@ -604,7 +603,8 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         mLastSavegame = filepath;
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
-        MWBase::Environment::get().getWorld()->saveLoaded();
+        MWBase::Environment::get().getWorld()->saveLoaded(reader);
+        actorIdConverter.apply();
         MWBase::Environment::get().getWorld()->setupPlayer();
         MWBase::Environment::get().getWorld()->renderPlayer();
         MWBase::Environment::get().getWindowManager()->updatePlayer();

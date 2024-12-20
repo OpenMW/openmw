@@ -467,7 +467,7 @@ namespace MWWorld
         void applyDeferredPreviewRotationToPlayer(float dt) override;
         void disableDeferredPreviewRotation() override;
 
-        void saveLoaded() override;
+        void saveLoaded(const ESM::ESMReader& reader) override;
 
         void setupPlayer() override;
         void renderPlayer() override;

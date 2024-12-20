@@ -375,7 +375,7 @@ namespace MWBase
         virtual void applyDeferredPreviewRotationToPlayer(float dt) = 0;
         virtual void disableDeferredPreviewRotation() = 0;
 
-        virtual void saveLoaded() = 0;
+        virtual void saveLoaded(const ESM::ESMReader& reader) = 0;
 
         virtual void setupPlayer() = 0;
         virtual void renderPlayer() = 0;

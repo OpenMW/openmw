@@ -68,6 +68,7 @@ namespace MWWorld
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
         size_t countSavedGameRecords() const;
+        void saveLoaded(const ESM::ESMReader& reader);
 
     private:
         osg::ref_ptr<osg::Group> mParent;
@@ -81,11 +82,7 @@ namespace MWWorld
             osg::ref_ptr<osg::PositionAttitudeTransform> mNode;
             std::shared_ptr<MWRender::EffectAnimationTime> mEffectAnimationTime;
 
-            int mActorId;
-            int mProjectileId;
-
-            // TODO: this will break when the game is saved and reloaded, since there is currently
-            // no way to write identifiers for non-actors to a savegame.
+            ESM::RefNum mCaster;
             MWWorld::Ptr mCasterHandle;
 
             MWWorld::Ptr getCaster();
@@ -96,6 +93,7 @@ namespace MWWorld
             // MW-id of an arrow projectile
             ESM::RefId mIdArrow;
 
+            int mProjectileId;
             bool mToDelete;
         };
 
