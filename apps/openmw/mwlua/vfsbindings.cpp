@@ -190,7 +190,9 @@ namespace MWLua
                 return seek(lua, self, std::ios_base::cur, off);
             });
         handle["lines"] = [](sol::this_state lua, sol::object self) {
-            return sol::as_function([lua, self]() {
+            return sol::as_function([lua, self]() -> sol::object {
+                if (!self.is<FileHandle*>())
+                    return sol::nil;
                 FileHandle* handle = self.as<FileHandle*>();
                 validateFile(*handle);
                 return readLineFromFile(lua, *handle);
