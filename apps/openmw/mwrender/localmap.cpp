@@ -266,7 +266,7 @@ namespace MWRender
         if (segment.mFogOfWarImage != nullptr)
             return;
 
-        if (cell->getFog())
+        if (cell->getFog() && !cell->getFog()->mFogTextures.empty())
             segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
         else
             segment.initFogOfWar();
