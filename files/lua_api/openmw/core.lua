@@ -42,7 +42,7 @@
 -- @return #number
 
 ---
--- Whether the world is paused (onUpdate doesn't work when the world is paused).
+-- Whether the world is paused.
 -- @function [parent=#core] isWorldPaused
 -- @return #boolean
 

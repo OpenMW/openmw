@@ -212,13 +212,12 @@ namespace MWLua
 
         // Run engine handlers
         mEngineEvents.callEngineHandlers();
-        if (!timeManager.isPaused())
-        {
-            float frameDuration = MWBase::Environment::get().getFrameDuration();
-            for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->update(frameDuration);
-            mGlobalScripts.update(frameDuration);
-        }
+        bool isPaused = timeManager.isPaused();
+
+        float frameDuration = MWBase::Environment::get().getFrameDuration();
+        for (LocalScripts* scripts : mActiveLocalScripts)
+            scripts->update(isPaused ? 0 : frameDuration);
+        mGlobalScripts.update(isPaused ? 0 : frameDuration);
 
         mLua.protectedCall([&](LuaUtil::LuaView& lua) { mScriptTracker.unloadInactiveScripts(lua); });
     }

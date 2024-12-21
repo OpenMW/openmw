@@ -96,7 +96,11 @@ local function skillUsedHandler(skillid, params)
     end
 end
 
-local function onUpdate()
+local function onUpdate(dt)
+    if dt <= 0 then
+        return
+    end
+
     if self.cell ~= cell then
         cell = self.cell
         onCellChange()
