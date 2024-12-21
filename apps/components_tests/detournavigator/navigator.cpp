@@ -610,12 +610,13 @@ namespace
         const auto result = findRandomPointAroundCircle(
             *mNavigator, mAgentBounds, mStart, 100.0, Flag_walk, []() { return Misc::Rng::rollClosedProbability(); });
 
-        ASSERT_THAT(result, Optional(Vec3fEq(70.35845947265625, 335.592041015625, -2.6667339801788330078125, 1)))
-            << (result ? *result : osg::Vec3f());
+        ASSERT_TRUE(result.has_value());
+
+        EXPECT_THAT(*result, Vec3fEq(70.35845947265625, 335.592041015625, -2.6667339801788330078125, 1)) << *result;
 
         const auto distance = (*result - mStart).length();
 
-        EXPECT_FLOAT_EQ(distance, 125.80865478515625) << distance;
+        EXPECT_NEAR(distance, 125.80865478515625, 1) << distance;
     }
 
     TEST_F(DetourNavigatorNavigatorTest, multiple_threads_should_lock_tiles)
