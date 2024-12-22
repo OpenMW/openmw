@@ -1013,34 +1013,24 @@ namespace MWRender
         mScreenshotManager->screenshot(image, w, h);
     }
 
-    osg::Vec4f RenderingManager::getScreenBounds(const osg::BoundingBox& worldbb)
+    osg::Vec2f RenderingManager::getScreenCoords(const osg::BoundingBox& bb)
     {
-        if (!worldbb.valid())
-            return osg::Vec4f();
-        osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
-        float min_x = 1.0f, max_x = 0.0f, min_y = 1.0f, max_y = 0.0f;
-        for (int i = 0; i < 8; ++i)
+        if (bb.valid())
         {
-            osg::Vec3f corner = worldbb.corner(i);
-            corner = corner * viewProj;
-
-            float x = (corner.x() + 1.f) * 0.5f;
-            float y = (corner.y() - 1.f) * (-0.5f);
-
-            if (x < min_x)
-                min_x = x;
-
-            if (x > max_x)
-                max_x = x;
-
-            if (y < min_y)
-                min_y = y;
-
-            if (y > max_y)
-                max_y = y;
+            const osg::Matrix viewProj
+                = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
+            const osg::Vec3f worldPoint((bb.xMin() + bb.xMax()) * 0.5f, (bb.yMin() + bb.yMax()) * 0.5f, bb.zMax());
+            const osg::Vec4f clipPoint = osg::Vec4f(worldPoint, 1.0f) * viewProj;
+            if (clipPoint.w() > 0.f)
+            {
+                const float screenPointX = (clipPoint.x() / clipPoint.w() + 1.f) * 0.5f;
+                const float screenPointY = (clipPoint.y() / clipPoint.w() - 1.f) * (-0.5f);
+                if (screenPointX >= 0.f && screenPointX <= 1.f && screenPointY >= 0.f && screenPointY <= 1.f)
+                    return osg::Vec2f(screenPointX, screenPointY);
+            }
         }
 
-        return osg::Vec4f(min_x, min_y, max_x, max_y);
+        return osg::Vec2f(0.5f, 0.f);
     }
 
     RenderingManager::RayResult getIntersectionResult(osgUtil::LineSegmentIntersector* intersector,

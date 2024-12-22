@@ -308,9 +308,9 @@ namespace MWGui
             {
                 MyGUI::IntSize tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), true, checkOwned());
 
-                setCoord(viewSize.width / 2 - tooltipSize.width / 2,
-                    std::max(0, int(mFocusToolTipY * viewSize.height - tooltipSize.height)), tooltipSize.width,
-                    tooltipSize.height);
+                const int left = viewSize.width / 2 - tooltipSize.width / 2;
+                const int top = std::max(0, int(mFocusToolTipY * viewSize.height - tooltipSize.height - 20));
+                setCoord(left, top, tooltipSize.width, tooltipSize.height);
 
                 mDynamicToolTipBox->setVisible(true);
             }
@@ -818,10 +818,10 @@ namespace MWGui
         return mFullHelp;
     }
 
-    void ToolTips::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
+    void ToolTips::setFocusObjectScreenCoords(float x, float y)
     {
-        mFocusToolTipX = (min_x + max_x) / 2;
-        mFocusToolTipY = min_y;
+        mFocusToolTipX = x;
+        mFocusToolTipY = y;
     }
 
     void ToolTips::createSkillToolTip(MyGUI::Widget* widget, ESM::RefId skillId)
