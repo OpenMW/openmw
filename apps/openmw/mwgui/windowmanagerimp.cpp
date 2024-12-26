@@ -1038,9 +1038,9 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
+    void WindowManager::setFocusObjectScreenCoords(float x, float y)
     {
-        mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
+        mToolTips->setFocusObjectScreenCoords(x, y);
     }
 
     bool WindowManager::toggleFullHelp()
