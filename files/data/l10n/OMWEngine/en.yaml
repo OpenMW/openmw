@@ -142,6 +142,12 @@ LightsMaximumDistance: "Maximum Light Distance"
 LightsMaximumDistanceTooltip: "Default: 8192\nMaximum distance at which lights will appear (measured in units).\n\nSet this to 0 to use an unlimited distance."
 LightsMinimumInteriorBrightness: "Minimum Interior Brightness"
 LightsMinimumInteriorBrightnessTooltip: "Default: 0.08\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark.\n\nThis has no effect if classic falloff is used."
+MatchSunlightToSun: "Match Sunlight to Sun"
+MatchSunlightToSunTooltip: |-
+    In Morrowind, the apparent sun position does not match its light direction due to mysterious reasons.
+    We preserve this unrealistic behavior for compatibility.
+
+    This option makes the sun light source's position match the sun's position.
 MaxLights: "Max Lights"
 MaxLightsTooltip: "Default: 8\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see with legacy lighting."
 MenuHelpDelay: "Menu Help Delay"

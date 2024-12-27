@@ -210,6 +210,18 @@ Alternatively, refer to :ref:`minimum interior brightness`.
 
 'legacy' :ref:`lighting method` behaves as if this setting were enabled.
 
+match sunlight to sun
+---------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+In Morrowind, the apparent sun position does not match its light direction due to mysterious reasons.
+We preserve this unrealistic behavior for compatibility.
+
+This option makes the sun light source's position match the sun's position.
+
 maximum light distance
 ----------------------
 

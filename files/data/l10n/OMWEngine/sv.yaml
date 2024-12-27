@@ -143,6 +143,12 @@ LightsMaximumDistance: "Maximalt ljusavstånd"
 LightsMaximumDistanceTooltip: "Förvalt: 8192\nMaximala avståndet där ljuskällor syns (mätt i enheter).\n\nVärdet 0 ger oändligt avstånd."
 LightsMinimumInteriorBrightness: "Minsta ljusstyrka i interiörer"
 LightsMinimumInteriorBrightnessTooltip: "Förvalt: 0.08\nMinsta omgivande ljusstyrka i interiörer.\n\nÖka värdet om du anser att interiörer är för mörka.\n\nDetta har ingen effekt om klassiskt ljusavtagande används."
+MatchSunlightToSun: "Matcha solljus med solen"
+MatchSunlightToSunTooltip: |-
+    I Morrowind stämmer inte solens synbara position överens med dess ljusriktning av mystiska skäl.
+    Vi behåller detta orealistiska beteende för att behålla kompatibilitet.
+
+    Detta alternativ gör att solljuskällans position matchar solens synliga position.
 MaxLights: "Max antal ljuskällor"
 MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp som vid ljussättningsmetoden Gammaldags."
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
