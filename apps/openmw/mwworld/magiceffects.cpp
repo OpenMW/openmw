@@ -196,7 +196,7 @@ namespace MWWorld
                     {
                         if (effect.mEffectId == key.mEffectId && effect.mEffectIndex == key.mEffectIndex)
                         {
-                            effect.mArg = ESM::RefId::generated(static_cast<uint64_t>(actorId));
+                            effect.mArg = actorId;
                             effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
                             found = true;
                             break;
