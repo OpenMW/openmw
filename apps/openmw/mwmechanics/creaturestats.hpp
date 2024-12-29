@@ -84,11 +84,7 @@ namespace MWMechanics
         MWWorld::TimeStamp mTimeOfDeath;
 
     private:
-        std::multimap<int, int> mSummonedCreatures; // <Effect, ActorId>
-
-        // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
-        // This may be necessary when the creature is in an inactive cell.
-        std::vector<int> mSummonGraveyard;
+        std::multimap<int, ESM::RefNum> mSummonedCreatures; // <Effect, ActorId>
 
         float mAwarenessTimer = 0.f;
         int mAwarenessRoll = -1;
@@ -237,8 +233,7 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::multimap<int, int>& getSummonedCreatureMap(); // <Effect, ActorId of summoned creature>
-        std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
+        std::multimap<int, ESM::RefNum>& getSummonedCreatureMap(); // <Effect, ActorId of summoned creature>
 
         enum Flag
         {

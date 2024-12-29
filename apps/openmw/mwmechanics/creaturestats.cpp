@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/creaturestats.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -550,7 +551,6 @@ namespace MWMechanics
         mMagicEffects.writeState(state.mMagicEffects);
 
         state.mSummonedCreatures = mSummonedCreatures;
-        state.mSummonGraveyard = mSummonGraveyard;
 
         state.mHasAiSettings = true;
         for (size_t i = 0; i < state.mAiSettings.size(); ++i)
@@ -596,7 +596,7 @@ namespace MWMechanics
         mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;
         mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
-        // mHitAttemptActorId = state.mHitAttemptActorId;
+        // mHitAttemptActor = state.mHitAttemptActor;
 
         mSpells.readState(state.mSpells, this);
         mActiveSpells.readState(state.mActiveSpells);
@@ -604,13 +604,19 @@ namespace MWMechanics
         mMagicEffects.readState(state.mMagicEffects);
 
         mSummonedCreatures = state.mSummonedCreatures;
-        mSummonGraveyard = state.mSummonGraveyard;
 
         if (state.mHasAiSettings)
             for (size_t i = 0; i < state.mAiSettings.size(); ++i)
                 mAiSettings[i].readState(state.mAiSettings[i]);
         if (state.mRecalcDynamicStats)
             recalculateMagicka();
+        if (state.mAiSequence.mActorIdConverter)
+        {
+            for (auto& [_, refNum] : mSummonedCreatures)
+                state.mAiSequence.mActorIdConverter->convert(refNum, refNum.mIndex);
+            auto& graveyard = state.mAiSequence.mActorIdConverter->mGraveyard;
+            graveyard.insert(graveyard.end(), state.mSummonGraveyard.begin(), state.mSummonGraveyard.end());
+        }
     }
 
     void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
@@ -677,14 +683,9 @@ namespace MWMechanics
         return mTimeOfDeath;
     }
 
-    std::multimap<int, int>& CreatureStats::getSummonedCreatureMap()
+    std::multimap<int, ESM::RefNum>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
-    }
-
-    std::vector<int>& CreatureStats::getSummonedCreatureGraveyard()
-    {
-        return mSummonGraveyard;
     }
 
     void CreatureStats::updateAwareness(float duration)

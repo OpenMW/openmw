@@ -651,6 +651,12 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         MWBase::Environment::get().getWorldScene()->markCellAsUnchanged();
 
         MWBase::Environment::get().getLuaManager()->gameLoaded();
+        for (int actorId : actorIdConverter.mGraveyard)
+        {
+            auto mapped = actorIdConverter.mMappings.find(actorId);
+            if (mapped != actorIdConverter.mMappings.end())
+                MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mapped->second);
+        }
     }
     catch (const SaveVersionTooNewError& e)
     {

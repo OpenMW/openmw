@@ -2042,9 +2042,9 @@ namespace MWMechanics
         skill.setModifier(acrobatics->mWerewolfValue - skill.getModified());
     }
 
-    void MechanicsManager::cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId)
+    void MechanicsManager::cleanupSummonedCreature(ESM::RefNum creature)
     {
-        mActors.cleanupSummonedCreature(caster.getClass().getCreatureStats(caster), creatureActorId);
+        mActors.cleanupSummonedCreature(creature);
     }
 
     void MechanicsManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const

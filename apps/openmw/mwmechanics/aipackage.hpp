@@ -181,6 +181,7 @@ namespace MWMechanics
         bool mShortcutProhibited = false; // shortcutting may be prohibited after unsuccessful attempt
 
         friend class AiSequence;
+
     private:
         bool isNearInactiveCell(osg::Vec3f position);
     };

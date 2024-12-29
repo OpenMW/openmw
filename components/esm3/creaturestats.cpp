@@ -251,11 +251,6 @@ namespace ESM
             esm.writeHNT("ACID", actorId);
         }
 
-        for (int32_t key : mSummonGraveyard)
-        {
-            esm.writeHNT("GRAV", key);
-        }
-
         esm.writeHNT("AISE", mHasAiSettings);
         if (mHasAiSettings)
         {

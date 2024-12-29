@@ -41,7 +41,8 @@ namespace MWMechanics
         if (target.isEmpty() || !target.getCellRef().getCount() || !target.getRefData().isEnabled())
             return true;
 
-        // This is equivalent to checking if the actor is registered with the mechanics manager since every actor has a script
+        // This is equivalent to checking if the actor is registered with the mechanics manager since every actor has a
+        // script
         if (const MWLua::LocalScripts* scripts = target.getRefData().getLuaScripts())
         {
             if (!scripts->isActive())

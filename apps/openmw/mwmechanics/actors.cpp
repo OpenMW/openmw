@@ -179,7 +179,7 @@ namespace
             {
                 if (effect.mEffectId != ESM::MagicEffect::Soultrap || effect.mMagnitude <= 0.f)
                     continue;
-                MWWorld::Ptr caster = world->searchPtrViaActorId(params.getCasterActorId());
+                MWWorld::Ptr caster = MWBase::Environment::get().getWorldModel()->getPtr(params.getCaster());
                 if (caster.isEmpty() || !caster.getClass().isActor())
                     continue;
 
@@ -791,8 +791,7 @@ namespace MWMechanics
             {
                 bool actorKilled = false;
 
-                MWWorld::Ptr caster
-                    = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.getCasterActorId());
+                MWWorld::Ptr caster = MWBase::Environment::get().getWorldModel()->getPtr(spell.getCaster());
                 if (caster.isEmpty())
                     continue;
                 for (const auto& effect : spell.getEffects())
@@ -833,7 +832,7 @@ namespace MWMechanics
         if (!creature.isInCell())
             return;
 
-        if (!creatureStats.getSummonedCreatureMap().empty() || !creatureStats.getSummonedCreatureGraveyard().empty())
+        if (!creatureStats.getSummonedCreatureMap().empty())
             updateSummons(creature, mTimerDisposeSummonsCorpses == 0.f);
     }
 
@@ -1816,7 +1815,7 @@ namespace MWMechanics
                     = stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Vampirism).getMagnitude();
                 stats.getActiveSpells().clear(actor.getPtr());
                 // Make sure spell effects are removed
-                purgeSpellEffects(stats.getActorId());
+                purgeSpellEffects(actor.getPtr().getCellRef().getRefNum());
 
                 stats.getMagicEffects().add(ESM::MagicEffect::Vampirism, vampirism);
 
@@ -1834,9 +1833,9 @@ namespace MWMechanics
         }
     }
 
-    void Actors::cleanupSummonedCreature(MWMechanics::CreatureStats& casterStats, int creatureActorId) const
+    void Actors::cleanupSummonedCreature(ESM::RefNum creature) const
     {
-        const MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(creatureActorId);
+        const MWWorld::Ptr ptr = MWBase::Environment::get().getWorldModel()->getPtr(creature);
         if (!ptr.isEmpty())
         {
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
@@ -1849,24 +1848,16 @@ namespace MWMechanics
                     ptr.getRefData().getPosition().asVec3());
 
             // Remove the summoned creature's summoned creatures as well
-            MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-            auto& creatureMap = stats.getSummonedCreatureMap();
-            for (const auto& creature : creatureMap)
-                cleanupSummonedCreature(stats, creature.second);
+            auto& creatureMap = ptr.getClass().getCreatureStats(ptr).getSummonedCreatureMap();
+            for (const auto& [_, refNum] : creatureMap)
+                cleanupSummonedCreature(refNum);
             creatureMap.clear();
         }
-        else if (creatureActorId != -1)
-        {
-            // We didn't find the creature. It's probably in an inactive cell.
-            // Add to graveyard so we can delete it when the cell becomes active.
-            std::vector<int>& graveyard = casterStats.getSummonedCreatureGraveyard();
-            graveyard.push_back(creatureActorId);
-        }
 
-        purgeSpellEffects(creatureActorId);
+        purgeSpellEffects(creature);
     }
 
-    void Actors::purgeSpellEffects(int casterActorId) const
+    void Actors::purgeSpellEffects(ESM::RefNum creature) const
     {
         for (const Actor& actor : mActors)
         {
@@ -1874,7 +1865,7 @@ namespace MWMechanics
                 continue;
             MWMechanics::ActiveSpells& spells
                 = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getActiveSpells();
-            spells.purge(actor.getPtr(), casterActorId);
+            spells.purge(actor.getPtr(), creature);
         }
     }
 

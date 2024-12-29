@@ -14,6 +14,7 @@ namespace ESM
 
     public:
         std::map<int, ESM::RefNum> mMappings;
+        std::vector<int> mGraveyard;
 
         void apply();
 
