@@ -66,7 +66,6 @@ void MWState::StateManager::cleanup(bool force)
         mCharacterManager.setCurrentCharacter(nullptr);
         mTimePlayed = 0;
         mLastSavegame.clear();
-        MWMechanics::CreatureStats::cleanup();
 
         mState = State_NoGame;
         MWBase::Environment::get().getLuaManager()->noGame();

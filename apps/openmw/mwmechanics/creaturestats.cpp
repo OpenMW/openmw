@@ -18,8 +18,6 @@
 
 namespace MWMechanics
 {
-    int CreatureStats::sActorId = 0;
-
     CreatureStats::CreatureStats()
     {
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
@@ -540,7 +538,6 @@ namespace MWMechanics
         state.mRecalcDynamicStats = false;
         state.mDrawState = static_cast<int>(mDrawState);
         state.mLevel = mLevel;
-        state.mActorId = mActorId;
         state.mDeathAnimation = mDeathAnimation;
         state.mTimeOfDeath = mTimeOfDeath.toEsm();
         // state.mHitAttemptActorId = mHitAttemptActorId;
@@ -593,7 +590,6 @@ namespace MWMechanics
         mLastHitAttemptObject = state.mLastHitAttemptObject;
         mDrawState = DrawState(state.mDrawState);
         mLevel = state.mLevel;
-        mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;
         mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
         // mHitAttemptActor = state.mHitAttemptActor;
@@ -636,36 +632,6 @@ namespace MWMechanics
     int CreatureStats::getGoldPool() const
     {
         return mGoldPool;
-    }
-
-    int CreatureStats::getActorId()
-    {
-        if (mActorId == -1)
-            mActorId = sActorId++;
-
-        return mActorId;
-    }
-
-    bool CreatureStats::matchesActorId(int id) const
-    {
-        return mActorId != -1 && id == mActorId;
-    }
-
-    void CreatureStats::cleanup()
-    {
-        sActorId = 0;
-    }
-
-    void CreatureStats::writeActorIdCounter(ESM::ESMWriter& esm)
-    {
-        esm.startRecord(ESM::REC_ACTC);
-        esm.writeHNT("COUN", sActorId);
-        esm.endRecord(ESM::REC_ACTC);
-    }
-
-    void CreatureStats::readActorIdCounter(ESM::ESMReader& esm)
-    {
-        esm.getHNT(sActorId, "COUN");
     }
 
     signed char CreatureStats::getDeathAnimation() const

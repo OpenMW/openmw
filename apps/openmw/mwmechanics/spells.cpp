@@ -250,7 +250,7 @@ namespace MWMechanics
 
             // Import data only for player, other actors should not suffer from corprus worsening.
             MWWorld::Ptr player = getPlayer();
-            if (creatureStats->getActorId() != player.getClass().getCreatureStats(player).getActorId())
+            if (creatureStats != &player.getClass().getCreatureStats(player))
                 return;
 
             // Note: if target actor has the Restore attribute effects, stats will be restored.

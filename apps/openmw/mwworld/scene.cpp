@@ -1083,17 +1083,6 @@ namespace MWWorld
         return mActiveCells.contains(&cell);
     }
 
-    Ptr Scene::searchPtrViaActorId(int actorId)
-    {
-        for (CellStoreCollection::const_iterator iter(mActiveCells.begin()); iter != mActiveCells.end(); ++iter)
-        {
-            Ptr ptr = (*iter)->searchViaActorId(actorId);
-            if (!ptr.isEmpty())
-                return ptr;
-        }
-        return Ptr();
-    }
-
     class PreloadMeshItem : public SceneUtil::WorkItem
     {
     public:

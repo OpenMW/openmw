@@ -449,7 +449,6 @@ namespace MWWorld
             + mGlobalVariables.countSavedGameRecords() + mProjectileManager->countSavedGameRecords()
             + 1 // player record
             + 1 // weather record
-            + 1 // actorId counter
             + 1 // levitation/teleport enabled state
             + 1 // camera
             + 1; // random state.
@@ -471,8 +470,6 @@ namespace MWWorld
         {
             MWBase::Environment::get().getWindowManager()->writeFog(cellstore);
         }
-
-        MWMechanics::CreatureStats::writeActorIdCounter(writer);
 
         mStore.write(writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                         // references to custom made records will be recognized
@@ -497,7 +494,7 @@ namespace MWWorld
         switch (type)
         {
             case ESM::REC_ACTC:
-                MWMechanics::CreatureStats::readActorIdCounter(reader);
+                reader.skipRecord();
                 return;
             case ESM::REC_ENAB:
                 reader.getHNT(mTeleportEnabled, "TELE");
@@ -748,15 +745,6 @@ namespace MWWorld
         if (activeOnly)
             error += " in active cells";
         throw std::runtime_error(error);
-    }
-
-    Ptr World::searchPtrViaActorId(int actorId)
-    {
-        // The player is not registered in any CellStore so must be checked manually
-        if (actorId == getPlayerPtr().getClass().getCreatureStats(getPlayerPtr()).getActorId())
-            return getPlayerPtr();
-        // Now search cells
-        return mWorldScene->searchPtrViaActorId(actorId);
     }
 
     struct FindContainerVisitor

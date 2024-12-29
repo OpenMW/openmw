@@ -288,9 +288,6 @@ namespace MWWorld
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do not search inactive cells.
 
-        Ptr searchPtrViaActorId(int actorId) override;
-        ///< Search is limited to the active cells.
-
         MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) override;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
         /// \note Search is limited to the active cells.
