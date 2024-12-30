@@ -17,6 +17,9 @@ on:
       package:
         default: false
         type: boolean
+      release:
+        default: false
+        type: boolean
 
 jobs:
   Windows:
@@ -228,3 +231,10 @@ jobs:
     - name: Run esm refid benchmark
       if: ${{ ! inputs.package }}
       run: build/openmw_esm_refid_benchmark.exe
+
+    - name: Create prerelease
+      if: ${{ inputs.release }}
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ github.workspace }}/install/*.exe
+        prerelease: true
