@@ -107,7 +107,8 @@ namespace ESM
         {
             esm.writeNamedComposite("DATA", mData);
             esm.writeHNRefId("TARG", mTargetId);
-            esm.writeFormId(mTargetActor, true, "TAID");
+            if (esm.getFormatVersion() > MaxActorIdSaveGameFormatVersion)
+                esm.writeFormId(mTargetActor, true, "TAID");
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
                 esm.writeHNString("CELL", mCellId);
@@ -143,7 +144,8 @@ namespace ESM
         {
             esm.writeNamedComposite("DATA", mData);
             esm.writeHNRefId("TARG", mTargetId);
-            esm.writeFormId(mTargetActor, true, "TAID");
+            if (esm.getFormatVersion() > MaxActorIdSaveGameFormatVersion)
+                esm.writeFormId(mTargetActor, true, "TAID");
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
                 esm.writeHNString("CELL", mCellId);
