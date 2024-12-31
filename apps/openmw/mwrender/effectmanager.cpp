@@ -28,7 +28,7 @@ namespace MWRender
     }
 
     void EffectManager::addEffect(VFS::Path::NormalizedView model, std::string_view textureOverride,
-        const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
+        const osg::Vec3f& worldPosition, float scale, bool isMagicVFX, bool useAmbientLight)
     {
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model);
 
@@ -57,6 +57,15 @@ namespace MWRender
             overrideTexture(textureOverride, mResourceSystem, *node);
 
         mParentNode->addChild(trans);
+
+        if (useAmbientLight)
+        {
+            // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
+            node->getOrCreateStateSet()->setAttributeAndModes(
+                getVFXLightModelInstance(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        }
+
+        mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(node->getOrCreateStateSet(), false);
 
         mEffects.push_back(std::move(effect));
     }

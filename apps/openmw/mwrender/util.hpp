@@ -1,6 +1,7 @@
 #ifndef OPENMW_MWRENDER_UTIL_H
 #define OPENMW_MWRENDER_UTIL_H
 
+#include <osg/LightModel>
 #include <osg/NodeCallback>
 
 #include <string_view>
@@ -35,6 +36,8 @@ namespace MWRender
     };
 
     bool shouldAddMSAAIntermediateTarget();
+
+    const osg::ref_ptr<osg::LightModel>& getVFXLightModelInstance();
 }
 
 #endif

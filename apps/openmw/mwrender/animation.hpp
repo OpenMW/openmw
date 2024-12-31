@@ -342,10 +342,13 @@ namespace MWRender
          *              you need to remove it manually using removeEffect when the effect should end.
          * @param bonename Bone to attach to, or empty string to use the scene node instead
          * @param texture override the texture specified in the model's materials - if empty, do not override
+         * @param useAmbientLight attach white ambient light to the root VFX node of the scenegraph (Morrowind
+         * default)
          * @note Will not add an effect twice.
          */
         void addEffect(std::string_view model, std::string_view effectId, bool loop = false,
-            std::string_view bonename = {}, std::string_view texture = {});
+            std::string_view bonename = {}, std::string_view texture = {}, bool useAmbientLight = true);
+
         void removeEffect(std::string_view effectId);
         void removeEffects();
         std::vector<std::string_view> getLoopingEffects() const;
