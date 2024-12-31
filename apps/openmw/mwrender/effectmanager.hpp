@@ -35,7 +35,7 @@ namespace MWRender
 
         /// Add an effect. When it's finished playing, it will be removed automatically.
         void addEffect(VFS::Path::NormalizedView model, std::string_view textureOverride,
-            const osg::Vec3f& worldPosition, float scale, bool isMagicVFX = true, bool useAmbientLight = false);
+            const osg::Vec3f& worldPosition, float scale, bool isMagicVFX = true, bool useAmbientLight = true);
 
         void update(float dt);
 
