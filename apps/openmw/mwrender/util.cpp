@@ -74,4 +74,16 @@ namespace MWRender
         return Settings::shaders().mAntialiasAlphaTest && Settings::video().mAntialiasing > 1;
     }
 
+    osg::ref_ptr<osg::LightModel> makeVFXLightModelInstance()
+    {
+        osg::ref_ptr<osg::LightModel> lightModel = new osg::LightModel;
+        lightModel->setAmbientIntensity({ 1, 1, 1, 1 });
+        return lightModel;
+    }
+
+    const osg::ref_ptr<osg::LightModel>& getVFXLightModelInstance()
+    {
+        static const osg::ref_ptr<osg::LightModel> lightModel = makeVFXLightModelInstance();
+        return lightModel;
+    }
 }
