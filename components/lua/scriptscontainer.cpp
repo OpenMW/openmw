@@ -92,13 +92,16 @@ namespace LuaUtil
         if (hasScript(scriptId))
             return false; // already present
 
+        LoadedData& data = ensureLoaded();
+        if (data.mScripts.count(scriptId) != 0)
+            return false; // bail if the script we're adding was auto started
+
         const VFS::Path::Normalized& path = scriptPath(scriptId);
         std::string debugName = mNamePrefix;
         debugName.push_back('[');
         debugName.append(path);
         debugName.push_back(']');
 
-        LoadedData& data = ensureLoaded();
         Script& script = data.mScripts[scriptId];
         script.mHiddenData = view.newTable();
         script.mHiddenData[sScriptIdKey] = ScriptId{ this, scriptId };
