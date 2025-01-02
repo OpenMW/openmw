@@ -7,6 +7,7 @@
     Bug #4127: Weapon animation looks choppy
     Bug #4204: Dead slaughterfish doesn't float to water surface after loading saved game
     Bug #4207: RestoreHealth/Fatigue spells have a huge priority even if a success chance is near 0
+    Bug #4289: Script compilation fails if an NPC deleted in a content file is disabled
     Bug #4382: Sound output device does not change when it should
     Bug #4508: Can't stack enchantment buffs from different instances of the same self-cast generic magic apparel
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
