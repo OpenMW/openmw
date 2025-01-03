@@ -227,16 +227,18 @@ end
 
 local function testVFS()
     local file = 'test_vfs_dir/lines.txt'
+    local nosuchfile = 'test_vfs_dir/nosuchfile'
     testing.expectEqual(vfs.fileExists(file), true, 'lines.txt should exist')
-    testing.expectEqual(vfs.fileExists('test_vfs_dir/nosuchfile'), false, 'nosuchfile should not exist')
+    testing.expectEqual(vfs.fileExists(nosuchfile), false, 'nosuchfile should not exist')
 
+    local expectedLines = { '1', '2', '', '4' }
     local getLine = vfs.lines(file)
-    for _,v in pairs({ '1', '2', '', '4' }) do
+    for _,v in pairs(expectedLines) do
         testing.expectEqual(getLine(), v)
     end
     testing.expectEqual(getLine(), nil, 'All lines should have been read')
     local ok = pcall(function()
-        vfs.lines('test_vfs_dir/nosuchfile')
+        vfs.lines(nosuchfile)
     end)
     testing.expectEqual(ok, false, 'Should not be able to read lines from nonexistent file')
 
@@ -259,6 +261,14 @@ local function testVFS()
 
     testing.expectEqual(handle:close(), true, 'File should be closeable')
     testing.expectEqual(vfs.type(handle), 'closed file', 'File should be closed')
+
+    handle = vfs.open(nosuchfile)
+    testing.expectEqual(handle, nil, 'vfs.open should return nil on nonexistent files')
+
+    getLine = vfs.open(file):lines()
+    for _,v in pairs(expectedLines) do
+        testing.expectEqual(getLine(), v)
+    end
 end
 
 local function testCommitCrime()
