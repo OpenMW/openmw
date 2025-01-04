@@ -403,6 +403,12 @@ namespace MWMechanics
             resetCurrentIdleState();
         }
 
+        if (!mPtr.getClass().isNpc() && mUpperBodyState > UpperBodyState::WeaponEquipped)
+        {
+            recovery = false;
+            stats.setHitRecovery(false);
+        }
+
         if (mHitState != CharState_None)
         {
             if (!mAnimation->isPlaying(mCurrentHit))
