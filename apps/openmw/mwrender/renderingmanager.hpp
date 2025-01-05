@@ -195,7 +195,7 @@ namespace MWRender
         SkyManager* getSkyManager();
 
         void spawnEffect(VFS::Path::NormalizedView model, std::string_view texture, const osg::Vec3f& worldPosition,
-            float scale = 1.f, bool isMagicVFX = true, bool useAmbientLight = false);
+            float scale = 1.f, bool isMagicVFX = true, bool useAmbientLight = true);
 
         /// Clear all savegame-specific data
         void clear();

@@ -3685,7 +3685,7 @@ namespace MWWorld
         const VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(
             VFS::Path::Normalized(Fallback::Map::getString("Blood_Model_" + std::to_string(number))));
 
-        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
+        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false, false);
     }
 
     void World::spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,

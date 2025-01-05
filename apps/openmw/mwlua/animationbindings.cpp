@@ -329,10 +329,8 @@ namespace MWLua
                   }
                   else
                   {
-                      context.mLuaManager->addAction(
-                          [world, model = VFS::Path::Normalized(model), worldPos]() {
-                              world->spawnEffect(model, "", worldPos, 1.f, true, true);
-                          },
+                      context.mLuaManager->addAction([world, model = VFS::Path::Normalized(model),
+                                                         worldPos]() { world->spawnEffect(model, "", worldPos, 1.f); },
                           "openmw.vfx.spawn");
                   }
               };
