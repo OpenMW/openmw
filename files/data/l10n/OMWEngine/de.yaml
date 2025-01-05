@@ -142,6 +142,12 @@ LightsMaximumDistance: "Maximale Lichtreichweite"
 LightsMaximumDistanceTooltip: "Standard: 8192 (1 Zelle)\nMaximale Entfernung, bis zu der Lichtquellen noch dargestellt werden (gemessen in In-Game-Einheiten).\n\nEin Wert von 0 entspricht einer unbegrenzten Reichweite."
 LightsMinimumInteriorBrightness: "Minimale Helligkeit in Innenräumen"
 LightsMinimumInteriorBrightnessTooltip: "Standard: 0,08\nMinimale Umgebungshelligkeit in Innenräumen.\n\nKann erhöht werden, falls Innenräume zu dunkel dargestellt werden.\n\nDies hat keine Auswirkung, wenn der klassische Lichtabfall verwendet wird."
+MatchSunlightToSun: "Licht an Sonne ausrichten"
+MatchSunlightToSunTooltip: |-
+    In Morrowind stimmt die sichtbare Sonnenposition aus mysteriösen Gründen nicht mit ihrer Lichtrichtung überein.
+    Wir bewahren dieses unrealistische Verhalten, um die Kompatibilität sicherzustellen.
+
+    Diese Option passt die Position der Sonnenlichtquelle an die sichtbare Position der Sonne an.
 MaxLights: "Maximale Anzahl von Lichtquellen pro Objekt"
 MaxLightsTooltip: "Standard: 8\nMaximale Anzahl von Lichtquellen, die ein Objekt beleuchten können.\n\nKleine Werte können gerade an Orten mit vielen Lichtquellen zum Aufploppen und zum schnellen Wechsel von Lichtern führen, wie es aus der Original-Engine und anderen The-Elder-Scrolls-Titeln bekannt ist."
 MenuHelpDelay: "Verzögerung des Hilfe-Menüs"

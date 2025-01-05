@@ -142,6 +142,12 @@ LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
 LightsMinimumInteriorBrightness: "Luminosité intérieure minimale"
 LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres.\n\nCela n'a aucun effet si l'atténuation classique est utilisée."
+MatchSunlightToSun: "Aligner la lumière du soleil"
+MatchSunlightToSunTooltip: |-
+    Dans Morrowind, la position apparente du soleil ne correspond pas à la direction de sa lumière pour des raisons mystérieuses.
+    Nous conservons ce comportement irréaliste pour maintenir la compatibilité.
+
+    Cette option aligne la source lumineuse du soleil sur la position réelle du soleil.
 MaxLights: "Maximum de sources lumineuses"
 MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles obtenues avec la méthode d'éclairage traditionnelle."
 MenuHelpDelay: "Délai d'affichage du menu d'aide"

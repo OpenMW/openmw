@@ -33,6 +33,7 @@ namespace Settings
         SettingValue<bool> mApplyLightingToEnvironmentMaps{ mIndex, "Shaders", "apply lighting to environment maps" };
         SettingValue<SceneUtil::LightingMethod> mLightingMethod{ mIndex, "Shaders", "lighting method" };
         SettingValue<bool> mClassicFalloff{ mIndex, "Shaders", "classic falloff" };
+        SettingValue<bool> mMatchSunlightToSun{ mIndex, "Shaders", "match sunlight to sun" };
         SettingValue<float> mLightBoundsMultiplier{ mIndex, "Shaders", "light bounds multiplier",
             makeClampSanitizerFloat(0, 5) };
         SettingValue<float> mMaximumLightDistance{ mIndex, "Shaders", "maximum light distance",

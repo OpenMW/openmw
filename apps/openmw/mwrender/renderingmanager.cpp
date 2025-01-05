@@ -754,13 +754,18 @@ namespace MWRender
 
     void RenderingManager::setSunDirection(const osg::Vec3f& direction)
     {
-        osg::Vec3 position = direction * -1;
-        // need to wrap this in a StateUpdater?
-        mSunLight->setPosition(osg::Vec4(position.x(), position.y(), position.z(), 0));
+        osg::Vec3f position = -direction;
 
-        // The sun is not synchronized with the sunlight because sunlight origin can't reach the horizon
+        // The sun is not synchronized with the sunlight because reasons
         // This is based on exterior sun orbit and won't make sense for interiors, see WeatherManager::update
         position.z() = 400.f - std::abs(position.x());
+
+        // need to wrap this in a StateUpdater?
+        if (Settings::shaders().mMatchSunlightToSun)
+            mSunLight->setPosition(osg::Vec4f(position, 0.f));
+        else
+            mSunLight->setPosition(osg::Vec4f(-direction, 0.f));
+
         mSky->setSunDirection(position);
 
         mPostProcessor->getStateUpdater()->setSunPos(osg::Vec4f(position, 0.f), mNight);
