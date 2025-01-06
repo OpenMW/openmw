@@ -1,5 +1,4 @@
 #include "debug.hpp"
-#include "exceptions.hpp"
 #include "recastmesh.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
@@ -17,7 +16,7 @@
 #include <filesystem>
 #include <fstream>
 #include <ostream>
-#include <string_view>
+#include <system_error>
 
 namespace DetourNavigator
 {
@@ -224,7 +223,8 @@ namespace DetourNavigator
         const auto path = pathPrefix + "recastmesh" + revision + ".obj";
         std::ofstream file(std::filesystem::path(path), std::ios::out);
         if (!file.is_open())
-            throw NavigatorException("Open file failed: " + path);
+            throw std::system_error(
+                errno, std::generic_category(), "Failed to open file to write recast mesh: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);
         file.precision(std::numeric_limits<float>::max_exponent10);
         std::vector<float> vertices = recastMesh.getMesh().getVertices();
@@ -271,7 +271,7 @@ namespace DetourNavigator
         const auto path = pathPrefix + "all_tiles_navmesh" + revision + ".bin";
         std::ofstream file(std::filesystem::path(path), std::ios::out | std::ios::binary);
         if (!file.is_open())
-            throw NavigatorException("Open file failed: " + path);
+            throw std::system_error(errno, std::generic_category(), "Failed to open file to write navmesh: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);
 
         NavMeshSetHeader header;
