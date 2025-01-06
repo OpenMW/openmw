@@ -106,7 +106,7 @@ namespace MWLua
                     return values;
 
                 const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
-                if (textureId.second > 0 && textureId.second < contentList.size())
+                if (textureId.second >= 0 && static_cast<size_t>(textureId.second) < contentList.size())
                     values.push_back(sol::make_object<std::string>(lua, contentList[textureId.second]));
             }
 
