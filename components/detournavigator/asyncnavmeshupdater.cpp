@@ -10,6 +10,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/strings/conversion.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/misc/thread.hpp>
 
 #include <DetourNavMesh.h>
@@ -73,6 +74,36 @@ namespace DetourNavigator
         bool isWritingDbJob(const Job& job)
         {
             return job.mGeneratedNavMeshData != nullptr;
+        }
+
+        std::string makeRevision(const Version& version)
+        {
+            return Misc::StringUtils::format(".%zu.%zu", version.mGeneration, version.mRevision);
+        }
+
+        void writeDebugRecastMesh(
+            const Settings& settings, const TilePosition& tilePosition, const RecastMesh& recastMesh)
+        {
+            if (!settings.mEnableWriteRecastMeshToFile)
+                return;
+            std::string revision;
+            if (settings.mEnableRecastMeshFileNameRevision)
+                revision = makeRevision(recastMesh.getVersion());
+            writeToFile(recastMesh,
+                Misc::StringUtils::format(
+                    "%s%d.%d.", settings.mRecastMeshPathPrefix, tilePosition.x(), tilePosition.y()),
+                revision, settings.mRecast);
+        }
+
+        void writeDebugNavMesh(
+            const Settings& settings, const GuardedNavMeshCacheItem& navMeshCacheItem, const Version& version)
+        {
+            if (!settings.mEnableWriteNavMeshToFile)
+                return;
+            std::string revision;
+            if (settings.mEnableNavMeshFileNameRevision)
+                revision = makeRevision(version);
+            writeToFile(navMeshCacheItem.lockConst()->getImpl(), settings.mNavMeshPathPrefix, revision);
         }
     }
 
@@ -512,6 +543,8 @@ namespace DetourNavigator
             return JobStatus::Done;
         }
 
+        writeDebugRecastMesh(mSettings, job.mChangedTile, *recastMesh);
+
         NavMeshTilesCache::Value cachedNavMeshData
             = mNavMeshTilesCache.get(job.mAgentBounds, job.mChangedTile, *recastMesh);
         std::unique_ptr<PreparedNavMeshData> preparedNavMeshData;
@@ -633,7 +666,7 @@ namespace DetourNavigator
             mPresentTiles.insert(std::make_tuple(job.mAgentBounds, job.mChangedTile));
         }
 
-        writeDebugFiles(job, &recastMesh);
+        writeDebugNavMesh(mSettings, navMeshCacheItem, navMeshVersion);
 
         return isSuccess(status) ? JobStatus::Done : JobStatus::Fail;
     }
@@ -686,31 +719,6 @@ namespace DetourNavigator
         mPushed.erase(getAgentAndTile(*job));
 
         return job;
-    }
-
-    void AsyncNavMeshUpdater::writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const
-    {
-        std::string revision;
-        std::string recastMeshRevision;
-        std::string navMeshRevision;
-        if ((mSettings.get().mEnableWriteNavMeshToFile || mSettings.get().mEnableWriteRecastMeshToFile)
-            && (mSettings.get().mEnableRecastMeshFileNameRevision || mSettings.get().mEnableNavMeshFileNameRevision))
-        {
-            revision = "."
-                + std::to_string((std::chrono::steady_clock::now() - std::chrono::steady_clock::time_point()).count());
-            if (mSettings.get().mEnableRecastMeshFileNameRevision)
-                recastMeshRevision = revision;
-            if (mSettings.get().mEnableNavMeshFileNameRevision)
-                navMeshRevision = std::move(revision);
-        }
-        if (recastMesh && mSettings.get().mEnableWriteRecastMeshToFile)
-            writeToFile(*recastMesh,
-                mSettings.get().mRecastMeshPathPrefix + std::to_string(job.mChangedTile.x()) + "_"
-                    + std::to_string(job.mChangedTile.y()) + "_",
-                recastMeshRevision, mSettings.get().mRecast);
-        if (mSettings.get().mEnableWriteNavMeshToFile)
-            if (const auto shared = job.mNavMeshCacheItem.lock())
-                writeToFile(shared->lockConst()->getImpl(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }
 
     bool AsyncNavMeshUpdater::lockTile(
