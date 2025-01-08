@@ -114,15 +114,6 @@ namespace ESMTerrain
 
         float getHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace) override;
 
-        static float getHeightAt(
-            const std::span<const float> data, const int landSize, const osg::Vec3f& worldPos, const float cellSize);
-
-        static osg::Vec3f getTextureCorrectedWorldPos(
-            const osg::Vec3f& uncorrectedWorldPos, const int textureSize, const float cellSize);
-
-        static UniqueTextureId getTextureAt(const std::span<const std::uint16_t> landData, const int plugin,
-            const int textureSize, const osg::Vec3f& worldPos, const float cellSize);
-
         /// Get the transformation factor for mapping cell units to world units.
         float getCellWorldSize(ESM::RefId worldspace) override;
 
@@ -131,17 +122,12 @@ namespace ESMTerrain
 
         int getBlendmapScale(float chunkSize) override;
 
-        static float getVertexHeight(const ESM::LandData* data, int x, int y)
+        float getVertexHeight(const ESM::LandData* data, int x, int y)
         {
             const int landSize = data->getLandSize();
-            return getVertexHeight(data->getHeights(), landSize, x, y);
-        }
-
-        static float getVertexHeight(const std::span<const float> data, const int landSize, int x, int y)
-        {
             assert(x < landSize);
             assert(y < landSize);
-            return data[y * landSize + x];
+            return data->getHeights()[y * landSize + x];
         }
 
     private:

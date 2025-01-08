@@ -13,6 +13,39 @@
 
 namespace
 {
+    osg::Vec3f getTextureCorrectedWorldPos(
+        const osg::Vec3f& uncorrectedWorldPos, const int textureSize, const float cellSize)
+    {
+        // the offset is [-0.25, +0.25] of a single texture's size
+        // TODO: verify whether or not this works in TES4 and beyond
+        float offset = (cellSize / textureSize) * 0.25;
+        return uncorrectedWorldPos + osg::Vec3f{ -offset, +offset, 0.0f };
+    }
+
+    // Takes in a corrected world pos to match the visuals.
+    ESMTerrain::UniqueTextureId getTextureAt(const std::span<const std::uint16_t> landData, const int plugin,
+        const int textureSize, const osg::Vec3f& correctedWorldPos, const float cellSize)
+    {
+        int cellX = static_cast<int>(std::floor(correctedWorldPos.x() / cellSize));
+        int cellY = static_cast<int>(std::floor(correctedWorldPos.y() / cellSize));
+
+        // Normalized position in the cell
+        float nX = (correctedWorldPos.x() - (cellX * cellSize)) / cellSize;
+        float nY = (correctedWorldPos.y() - (cellY * cellSize)) / cellSize;
+
+        int startX = static_cast<int>(nX * textureSize);
+        int startY = static_cast<int>(nY * textureSize);
+
+        assert(startX < ESM::Land::LAND_TEXTURE_SIZE);
+        assert(startY < ESM::Land::LAND_TEXTURE_SIZE);
+
+        const std::uint16_t tex = landData[startY * ESM::Land::LAND_TEXTURE_SIZE + startX];
+        if (tex == 0)
+            return { 0, 0 }; // vtex 0 is always the base texture, regardless of plugin
+
+        return { tex, plugin };
+    }
+
     const ESM::RefId worldspaceAt(const osg::Vec3f& pos, sol::object cellOrName)
     {
         ESM::RefId worldspace;
@@ -65,7 +98,7 @@ namespace MWLua
         landApi["getTextureAt"] = [lua = lua](const osg::Vec3f& pos, sol::object cellOrName) {
             sol::variadic_results values;
             auto store = MWBase::Environment::get().getESMStore();
-            const auto &landStore = store->get<ESM::Land>();
+            const auto& landStore = store->get<ESM::Land>();
 
             const float cellSize = ESM::getCellSize(worldspaceAt(pos, cellOrName));
             // We need to read land twice. Once to get the amount of texture samples per cell edge, and the second time
@@ -82,8 +115,7 @@ namespace MWLua
 
             // Use landData to get amount of sampler per cell edge (sLandTextureSize)
             // and then get the corrected position that will map to the rendered texture
-            const osg::Vec3f correctedPos
-                = ESMTerrain::Storage::getTextureCorrectedWorldPos(pos, landData->sLandTextureSize, cellSize);
+            const osg::Vec3f correctedPos = getTextureCorrectedWorldPos(pos, landData->sLandTextureSize, cellSize);
 
             const ESM::Land* correctedLand = nullptr;
             const ESM::Land::LandData* correctedLandData = nullptr;
@@ -93,7 +125,7 @@ namespace MWLua
 
             // We're passing in sLandTextureSize, NOT sLandSize like with getHeightAt
             const ESMTerrain::UniqueTextureId textureId
-                = ESMTerrain::Storage::getTextureAt(correctedLandData->mTextures, correctedLand->getPlugin(),
+                = getTextureAt(correctedLandData->mTextures, correctedLand->getPlugin(),
                     correctedLandData->sLandTextureSize, correctedPos, cellSize);
 
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
