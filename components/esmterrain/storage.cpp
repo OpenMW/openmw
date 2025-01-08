@@ -505,8 +505,6 @@ namespace ESMTerrain
     float Storage::getHeightAt(
         const std::span<const float> data, const int landSize, const osg::Vec3f& worldPos, const float cellSize)
     {
-        // if (!data)
-        // return defaultHeight;
         int cellX = static_cast<int>(std::floor(worldPos.x() / cellSize));
         int cellY = static_cast<int>(std::floor(worldPos.y() / cellSize));
 

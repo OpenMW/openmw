@@ -11,40 +11,43 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 
-static const ESM::RefId worldspaceAt(const osg::Vec3f& pos, sol::object cellOrName)
+namespace
 {
-    ESM::RefId worldspace;
-    if (cellOrName.is<MWLua::GCell>())
-        worldspace = cellOrName.as<MWLua::GCell>().mStore->getCell()->getWorldSpace();
-    else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
-        worldspace = MWBase::Environment::get()
-                         .getWorldModel()
-                         ->getCell(cellOrName.as<std::string_view>())
-                         .getCell()
-                         ->getWorldSpace();
-    else
-        worldspace = ESM::Cell::sDefaultWorldspaceId;
+    const ESM::RefId worldspaceAt(const osg::Vec3f& pos, sol::object cellOrName)
+    {
+        ESM::RefId worldspace;
+        if (cellOrName.is<MWLua::GCell>())
+            worldspace = cellOrName.as<MWLua::GCell>().mStore->getCell()->getWorldSpace();
+        else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
+            worldspace = MWBase::Environment::get()
+                             .getWorldModel()
+                             ->getCell(cellOrName.as<std::string_view>())
+                             .getCell()
+                             ->getWorldSpace();
+        else
+            worldspace = ESM::Cell::sDefaultWorldspaceId;
 
-    return worldspace;
-}
+        return worldspace;
+    }
 
-static bool fillLandData(const MWWorld::Store<ESM::Land>* landStore, const osg::Vec3f& pos, const float cellSize,
-    const ESM::Land** land, const ESM::Land::LandData** landData)
-{
-    int cellX = static_cast<int>(std::floor(pos.x() / cellSize));
-    int cellY = static_cast<int>(std::floor(pos.y() / cellSize));
+    bool fillLandData(const MWWorld::Store<ESM::Land>& landStore, const osg::Vec3f& pos, const float cellSize,
+        const ESM::Land::LandData*& landData)
+    {
+        int cellX = static_cast<int>(std::floor(pos.x() / cellSize));
+        int cellY = static_cast<int>(std::floor(pos.y() / cellSize));
 
-    *land = landStore->search(cellX, cellY);
+        const ESM::Land* land = landStore.search(cellX, cellY);
 
-    if (*land != nullptr)
-        *landData = (*land)->getLandData(ESM::Land::DATA_VTEX);
+        if (land != nullptr)
+            landData = land->getLandData(ESM::Land::DATA_VTEX);
 
-    // If we fail to preload land data, return, we need to be able to get *any* land to know how to correct
-    // the position used to sample terrain
-    if (*landData == nullptr)
-        return false;
+        // If we fail to preload land data, return, we need to be able to get *any* land to know how to correct
+        // the position used to sample terrain
+        if (landData == nullptr)
+            return false;
 
-    return true;
+        return true;
+    }
 }
 
 namespace MWLua
@@ -72,10 +75,9 @@ namespace MWLua
             // as it differs between tes3 and tes4. It's equal -
             // Once we know the value, we will calculate the offset and retrieve a sample again, this time
             // with the offset taken into account.
-            const ESM::Land* land = nullptr;
             const ESM::Land::LandData* landData = nullptr;
 
-            if (!fillLandData(&landStore, pos, cellSize, &land, &landData))
+            if (!fillLandData(landStore, pos, cellSize, landData))
                 return values;
 
             // Use landData to get amount of sampler per cell edge (sLandTextureSize)
@@ -86,7 +88,7 @@ namespace MWLua
             const ESM::Land* correctedLand = nullptr;
             const ESM::Land::LandData* correctedLandData = nullptr;
 
-            if (!fillLandData(&landStore, correctedPos, cellSize, &correctedLand, &correctedLandData))
+            if (!fillLandData(landStore, correctedPos, cellSize, correctedLandData))
                 return values;
 
             // We're passing in sLandTextureSize, NOT sLandSize like with getHeightAt
