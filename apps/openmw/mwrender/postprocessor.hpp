@@ -178,6 +178,8 @@ namespace MWRender
 
         std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame = false);
 
+        TechniqueList getChain();
+
         bool isEnabled() const { return mUsePostProcessing; }
 
         void disable();

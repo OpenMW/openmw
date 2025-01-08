@@ -786,6 +786,11 @@ namespace MWRender
         return mTemplates.back();
     }
 
+    PostProcessor::TechniqueList PostProcessor::getChain()
+    {
+        return mTechniques;
+    }
+
     void PostProcessor::loadChain()
     {
         mTechniques.clear();
