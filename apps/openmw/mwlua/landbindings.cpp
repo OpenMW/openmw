@@ -64,12 +64,12 @@ namespace
     }
 
     bool fillLandData(const MWWorld::Store<ESM::Land>& landStore, const osg::Vec3f& pos, const float cellSize,
-        const ESM::Land::LandData*& landData)
+        const ESM::Land*& land, const ESM::Land::LandData*& landData)
     {
         int cellX = static_cast<int>(std::floor(pos.x() / cellSize));
         int cellY = static_cast<int>(std::floor(pos.y() / cellSize));
 
-        const ESM::Land* land = landStore.search(cellX, cellY);
+        land = landStore.search(cellX, cellY);
 
         if (land != nullptr)
             landData = land->getLandData(ESM::Land::DATA_VTEX);
@@ -108,9 +108,10 @@ namespace MWLua
             // as it differs between tes3 and tes4. It's equal -
             // Once we know the value, we will calculate the offset and retrieve a sample again, this time
             // with the offset taken into account.
+            const ESM::Land* land = nullptr;
             const ESM::Land::LandData* landData = nullptr;
 
-            if (!fillLandData(landStore, pos, cellSize, landData))
+            if (!fillLandData(landStore, pos, cellSize, land, landData))
                 return values;
 
             // Use landData to get amount of sampler per cell edge (sLandTextureSize)
@@ -120,13 +121,12 @@ namespace MWLua
             const ESM::Land* correctedLand = nullptr;
             const ESM::Land::LandData* correctedLandData = nullptr;
 
-            if (!fillLandData(landStore, correctedPos, cellSize, correctedLandData))
+            if (!fillLandData(landStore, correctedPos, cellSize, correctedLand, correctedLandData))
                 return values;
 
             // We're passing in sLandTextureSize, NOT sLandSize like with getHeightAt
-            const ESMTerrain::UniqueTextureId textureId
-                = getTextureAt(correctedLandData->mTextures, correctedLand->getPlugin(),
-                    correctedLandData->sLandTextureSize, correctedPos, cellSize);
+            const ESMTerrain::UniqueTextureId textureId = getTextureAt(correctedLandData->mTextures,
+                correctedLand->getPlugin(), correctedLandData->sLandTextureSize, correctedPos, cellSize);
 
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
             if (textureId.first != 0)
