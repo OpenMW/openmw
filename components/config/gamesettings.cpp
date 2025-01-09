@@ -325,7 +325,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
     //        +----------------------------------------------------------+
     //
     //
-    QRegularExpression settingRegex("^([^=]+)\\s*=\\s*([^,]+)(.*)$");
+    QRegularExpression settingRegex("^([^=]+)\\s*=\\s*(.+?)\\s*$");
     std::vector<QString> comments;
     auto commentStart = fileCopy.end();
     std::map<QString, std::vector<QString>> commentsMap;
