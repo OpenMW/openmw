@@ -274,9 +274,8 @@ bool Config::GameSettings::isOrderedLine(const QString& line)
 // - Always ignore a line beginning with '#' or empty lines; added above a config
 //   entry.
 //
-// - If a line in file exists with matching key and first part of value (before ',',
-//   '\n', etc) also matches, then replace the line with that of mUserSettings.
-// - else remove line
+// - If a line in file exists with matching key and value, then replace the line with that of mUserSettings.
+// - else if only the key matches, remove comment
 //
 // - If there is no corresponding line in file, add at the end
 //
@@ -395,8 +394,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
             // look for a key in the line
             if (!match.hasMatch() || settingRegex.captureCount() < 2)
             {
-                // no key or first part of value found in line, replace with a null string which
-                // will be removed later
+                // no key or no value found in line, replace with a null string which will be removed later
                 *iter = QString();
                 comments.clear();
                 commentStart = fileCopy.end();
