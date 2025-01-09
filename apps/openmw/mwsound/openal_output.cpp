@@ -420,12 +420,12 @@ namespace MWSound
                     std::basic_string_view<ALCchar> defaultName = getDeviceName(nullptr);
                     if (mCurrentName != defaultName)
                     {
-                        Log(Debug::Info) << "Default audio device changed";
+                        mCurrentName = defaultName;
+                        Log(Debug::Info) << "Default audio device changed to \"" << mCurrentName << "\"";
                         ALCboolean reopened = alcReopenDeviceSOFT(
-                            mOutput.mDevice, defaultName.data(), mOutput.mContextAttributes.data());
+                            mOutput.mDevice, mCurrentName.data(), mOutput.mContextAttributes.data());
                         if (reopened == AL_FALSE)
                             Log(Debug::Warning) << "Failed to switch to new audio device";
-                        mCurrentName = defaultName;
                     }
                 }
                 mCondVar.wait_for(lock, std::chrono::seconds(2));
