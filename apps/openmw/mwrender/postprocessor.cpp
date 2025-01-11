@@ -220,46 +220,26 @@ namespace MWRender
             bool supportHalfFloatAttachment = osg::isGLExtensionSupported(ext->contextID, "GL_EXT_color_buffer_half_float");
             bool supportShaderFramebufferFetch = osg::isGLExtensionSupported(ext->contextID, "GL_EXT_shader_framebuffer_fetch");
 
-            mUseCameraFallback = (!supportHalfFloatTexture || !supportHalfFloatAttachment ||  Settings::postProcessing().mForceCameraNormalsFallback) ? true : false;
-
-            if (getenv("OPENMW_CAMERA") != nullptr)
-                mUseCameraFallback = true;
-
-            if (getenv("OPENMW_RERENDER") != nullptr)
+            if (getenv("OPENMW_FETCH") != nullptr || (supportHalfFloatTexture && supportHalfFloatAttachment && supportShaderFramebufferFetch && getenv("OPENMW_RERENDER") == nullptr && getenv("OPENMW_CAMERA") == nullptr))
             {
-                mUseCameraFallback = false;
-                supportShaderFramebufferFetch = false;
+                mNormalsMode = NormalsMode_PackedTextureFetchOnly;
+                Log(Debug::Warning) << "glDisablei' unsupported, pass normals use full packed texture fallback.";
             }
-
-            if (getenv("OPENMW_FETCH") != nullptr)
+            else if (getenv("OPENMW_RERENDER") != nullptr || (supportHalfFloatTexture && supportHalfFloatAttachment && getenv("OPENMW_CAMERA") == nullptr))
             {
-                mUseCameraFallback = false;
-                supportShaderFramebufferFetch = true;
+                mNormalsMode = NormalsMode_PackedTextureRerender;
+                Log(Debug::Warning) << "'glDisablei' unsupported, pass normals use packed texture fallback.";
             }
-
-            if (mUseCameraFallback)
+            else
             {
                 mNormalsMode = NormalsMode_Camera;
                 Log(Debug::Warning) << "'glDisablei' unsupported, pass normals use camera fallback.";
             }
-            else
+
+            if (getenv("OPENMW_NOBLEND") != nullptr)
             {
-                mNormalsMode = NormalsMode_PackedTextureRerender;
-                Log(Debug::Warning) << "'glDisablei' unsupported, pass normals use packed texture fallback.";
-
-                if (supportShaderFramebufferFetch)
-                {
-                    mNormalsMode = NormalsMode_PackedTextureFetchOnly;
-                    Log(Debug::Warning) << "Shader framebuffer fetch supported.";
-
-                }
-
-                if (getenv("OPENMW_NOBLEND") != nullptr)
-                {
-                    Log(Debug::Warning) << "uhh";
-                    mNormalsMode = NormalsMode_PackedTextureFetch;
-                }
-
+                mNormalsMode = NormalsMode_PackedTextureFetch;
+                Log(Debug::Warning) << "uhh";
             }
 
             mNormalsFallback = std::make_unique<NormalsFallback>(

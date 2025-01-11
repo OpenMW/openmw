@@ -94,10 +94,6 @@ namespace MWRender
             camera->setCullMask(mCullMask);
             camera->setNodeMask(Mask_RenderToTexture);
 
-            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
-            depth->setFunction(osg::Depth::LEQUAL);
-            camera->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
             osg::Camera::CullingMode cullingMode;
             cullingMode = osg::Camera::DEFAULT_CULLING | osg::Camera::FAR_PLANE_CULLING;
             if (!Settings::camera().mSmallFeatureCulling)
@@ -318,7 +314,7 @@ Settings::camera().mFieldOfView, aspect, Settings::camera().mNearClip, mViewDist
 
     void NormalsFallback::enable()
     {
-        Log(Debug::Error) << "NormalsFallback::enable";
+   //     Log(Debug::Error) << "NormalsFallback::enable";
 
         MWBase::Environment::get().getWorld()->getRenderingManager()->setNormalsFallbackDefines(true, mNormalsMode);
 
@@ -346,7 +342,7 @@ Settings::camera().mFieldOfView, aspect, Settings::camera().mNearClip, mViewDist
 
     void NormalsFallback::disable()
     {
-        Log(Debug::Error) << "NormalsFallback::disable";
+ //       Log(Debug::Error) << "NormalsFallback::disable";
 
         MWBase::Environment::get().getWorld()->getRenderingManager()->setNormalsFallbackDefines(false, mNormalsMode);
 

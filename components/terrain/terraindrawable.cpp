@@ -72,7 +72,8 @@ namespace Terrain
 
         bool shadowcam = cv->getCurrentCamera()->getName() == "ShadowCamera";
         bool normalscam = (cv->getCurrentCamera()->getName().find("Normals Camera") == std::string::npos) ? false : true;
-        bool normalMaps, redrawMode;
+        bool normalMaps = false;
+        bool redrawMode = false;
 
         if (normalscam)
         {
@@ -105,7 +106,7 @@ namespace Terrain
         if (osg::isNaN(depth))
             return;
 
-        if (shadowcam || normalMaps)
+        if (shadowcam || (normalscam && !normalMaps))
         {
             cv->addDrawableAndDepth(this, &matrix, depth);
             return;
@@ -121,16 +122,13 @@ namespace Terrain
 
         osg::StateSet* stateset = getStateSet();
 
-        if (!normalscam && !shadowcam)
+        if (stateset && cv->getCurrentCamera()->getName() == "SceneCam")
         {
             MWRender::PostProcessor* postProcessor = static_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
-            if (stateset && postProcessor)
+            if (postProcessor && (postProcessor->getNormalsMode() == NormalsMode_PackedTextureFetchOnly || postProcessor->getNormalsMode() == NormalsMode_PackedTextureFetch))
             {
-                if (postProcessor->getNormalsMode() == NormalsMode_PackedTextureFetchOnly || postProcessor->getNormalsMode() == NormalsMode_PackedTextureFetch)
-                {
-                    stateset->setMode(GL_BLEND, (postProcessor->getNormalsEnabled()) ? osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE : osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-                    stateset->setDefine("SHADER_BLENDING", (postProcessor->getNormalsEnabled()) ? "1" : "0", osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-                }
+                stateset->setMode(GL_BLEND, (postProcessor->getNormalsEnabled()) ? osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE : osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                stateset->setDefine("SHADER_BLENDING", (postProcessor->getNormalsEnabled()) ? "1" : "0", osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
             }
         }
 
