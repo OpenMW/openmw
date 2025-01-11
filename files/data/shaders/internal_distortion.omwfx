@@ -13,6 +13,13 @@ fragment main {
         float occlusionFactor = omw_Texture2D(omw_SamplerDistortion, omw_TexCoord+offset).b;
 
         omw_FragColor = mix(omw_GetLastShader(omw_TexCoord + offset), omw_GetLastShader(omw_TexCoord), occlusionFactor);
+
+#if OMW_NORMALSMODE == 4
+        vec4 scene, normals;
+        decode(omw_FragColor, scene, normals);
+        omw_FragColor = scene;
+#endif
+
     }
 }
 

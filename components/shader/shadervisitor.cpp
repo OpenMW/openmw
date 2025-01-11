@@ -186,6 +186,8 @@ namespace Shader
         , mAlphaBlend(false)
         , mBlendFuncOverridden(false)
         , mAdditiveBlending(false)
+        , mSrcBlendFunc(GL_SRC_ALPHA)
+        , mDstBlendFunc(GL_ONE_MINUS_SRC_ALPHA)
         , mDiffuseHeight(false)
         , mNormalHeight(false)
         , mReconstructNormalZ(false)
@@ -367,6 +369,10 @@ namespace Shader
                                     mRequirements.back().mTexStageRequiringTangents = unit;
                                 }
                                 diffuseMap = texture;
+
+                                if (!writableStateSet)
+                                    writableStateSet = getWritableStateSet(node);
+                                writableStateSet->addUniform(new osg::Uniform("texSize", osg::Vec2(texture->getTextureWidth(), texture->getTextureHeight())));
                             }
                             else if (texName == "specularMap")
                                 specularMap = texture;
@@ -569,6 +575,9 @@ namespace Shader
                         const osg::BlendFunc* blend = static_cast<const osg::BlendFunc*>(it->second.first.get());
                         mRequirements.back().mAdditiveBlending = blend->getSource() == osg::BlendFunc::SRC_ALPHA
                             && blend->getDestination() == osg::BlendFunc::ONE;
+
+                        mRequirements.back().mSrcBlendFunc = blend->getSource();
+                        mRequirements.back().mDstBlendFunc = blend->getDestination();
                     }
                 }
             }
@@ -760,14 +769,19 @@ namespace Shader
             updateRemovedState(*writableUserData, removedState);
         }
 
-        if (reqs.mAlphaBlend && Settings::postProcessing().mTransparentPostpass && Settings::postProcessing().mEnabled)
-        {
-            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
-            depth->setWriteMask(false);
-            writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-        }
-
         defineMap["softParticles"] = reqs.mSoftParticles ? "1" : "0";
+
+        writableStateSet->setDefine("OBJECT", "1", osg::StateAttribute::ON);
+        writableStateSet->setDefine("Dparallax", reqs.mNormalHeight ? "1" : "0", osg::StateAttribute::ON);
+        writableStateSet->setDefine("DdifuseMap", defineMap["difuseMap"], osg::StateAttribute::ON);
+        writableStateSet->setDefine("DnormalMap", defineMap["normalMap"], osg::StateAttribute::ON);
+
+        if (dynamic_cast<osgParticle::ParticleSystem*>(&node))
+            writableStateSet->setDefine("PARTICLE", "1", osg::StateAttribute::ON);
+
+        defineMap["blend"] = std::to_string(reqs.mAlphaBlend);
+        defineMap["srcBlendFunc"] = std::to_string(reqs.mSrcBlendFunc);
+        defineMap["dstBlendFunc"] = std::to_string(reqs.mDstBlendFunc);
 
         Stereo::shaderStereoDefines(defineMap);
 
@@ -776,7 +790,11 @@ namespace Shader
             shaderPrefix = mDefaultShaderPrefix;
 
         auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate);
-        writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
+        if (shaderPrefix == "groundcover_paging")
+            writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+        else
+            writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
+
         addedState->setAttributeAndModes(std::move(program));
 
         for (const auto& [unit, name] : reqs.mTextures)

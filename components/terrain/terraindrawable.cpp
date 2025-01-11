@@ -7,6 +7,8 @@
 
 #include "compositemaprenderer.hpp"
 
+#include "apps/openmw/mwrender/postprocessor.hpp"
+
 namespace Terrain
 {
 
@@ -69,6 +71,23 @@ namespace Terrain
             return;
 
         bool shadowcam = cv->getCurrentCamera()->getName() == "ShadowCamera";
+        bool normalscam = (cv->getCurrentCamera()->getName().find("Normals Camera") == std::string::npos) ? false : true;
+        bool normalMaps, redrawMode;
+
+        if (normalscam)
+        {
+            normalMaps = (cv->getCurrentCamera()->getName().find("singlelayer", 14) == std::string::npos) ? false : true;
+            redrawMode = (cv->getCurrentCamera()->getName().find("redraw", 14) == std::string::npos) ? false : true;
+
+            if (redrawMode)
+            {
+                for (PassVector::const_iterator it = mPasses.begin(); it != mPasses.end(); ++it)
+                {
+                    if ((*it)->getMode(GL_BLEND) != osg::StateAttribute::ON) 
+                        return;
+                }
+            }
+        }
 
         if (cv->getCullingMode() & osg::CullStack::CLUSTER_CULLING
             && clusterCull(mClusterCullingCallback, cv->getEyePoint(), shadowcam))
@@ -86,7 +105,7 @@ namespace Terrain
         if (osg::isNaN(depth))
             return;
 
-        if (shadowcam)
+        if (shadowcam || normalMaps)
         {
             cv->addDrawableAndDepth(this, &matrix, depth);
             return;
@@ -101,6 +120,20 @@ namespace Terrain
         bool pushedLight = mLightListCallback && mLightListCallback->pushLightState(this, cv);
 
         osg::StateSet* stateset = getStateSet();
+
+        if (!normalscam && !shadowcam)
+        {
+            MWRender::PostProcessor* postProcessor = static_cast<MWRender::PostProcessor*>(cv->getCurrentCamera()->getUserData());
+            if (stateset && postProcessor)
+            {
+                if (postProcessor->getNormalsMode() == NormalsMode_PackedTextureFetchOnly || postProcessor->getNormalsMode() == NormalsMode_PackedTextureFetch)
+                {
+                    stateset->setMode(GL_BLEND, (postProcessor->getNormalsEnabled()) ? osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE : osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                    stateset->setDefine("SHADER_BLENDING", (postProcessor->getNormalsEnabled()) ? "1" : "0", osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                }
+            }
+        }
+
         if (stateset)
             cv->pushStateSet(stateset);
 

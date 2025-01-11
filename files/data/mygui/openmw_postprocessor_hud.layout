@@ -3,7 +3,7 @@
   <Widget type="Window" skin="MW_Window" position="0 0 500 500" layer="Debug" name="_Main" align="Stretch">
     <Property key="Visible" value="false"/>
     <Property key="Caption" value="#{OMWShaders:PostProcessHUD}"/>
-    <Property key="MinSize" value="600 400"/>
+    <Property key="MinSize" value="600 430"/>
 
     <Widget type="TabControl" skin="TabControl_NoBorder" position="8 8 468 450" align="Stretch" name="TabControl">
         <Property key="ButtonAutoWidth" value="true"/>
@@ -20,7 +20,7 @@
             <Property key="Padding" value="0"/>
             <Property key="Spacing" value="8"/>
 
-            <Widget type="Widget" position ="0 0 0 300">
+            <Widget type="Widget" position ="0 0 0 215">
                 <UserString key="HStretch" value="true"/>
                 <UserString key="VStretch" value="false"/>
 

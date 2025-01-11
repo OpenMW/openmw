@@ -305,6 +305,14 @@ namespace Terrain
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
+                stateset->setDefine("DnormalMap", (it->mNormalMap) ? "1" : "0", osg::StateAttribute::ON);
+                stateset->setDefine("DblendMap", (!blendmaps.empty()) ? "1" : "0", osg::StateAttribute::ON);
+                stateset->setDefine("Dparallax", parallax ? "1" : "0", osg::StateAttribute::ON);
+                stateset->setDefine("TERRAIN", "1", osg::StateAttribute::ON);
+
+                defineMap["dstBlendFunc"] = (it == layers.begin()) ? "0" : "1";
+                defineMap["srcBlendFunc"] = "770";
+
                 stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));
                 stateset->addUniform(UniformCollection::value().mColorMode);
             }

@@ -1,13 +1,5 @@
 #version 120
-#pragma import_defines(CLASSIC_FALLOFF, MAX_LIGHTS)
-
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
-#if @useGPUShader4
-    #extension GL_EXT_gpu_shader4: require
-#endif
+#pragma import_defines(CLASSIC_FALLOFF, MAX_LIGHTS, ENCODE_NORMALS, NORMALS_ONLY)
 
 #define GROUNDCOVER
 
@@ -40,6 +32,7 @@ centroid varying vec3 shadowDiffuseLighting;
 
 varying vec3 passNormal;
 
+#include "lib/util/packcolors.glsl"
 #include "shadows_fragment.glsl"
 #include "lib/light/lighting.glsl"
 #include "lib/material/alpha.glsl"
@@ -88,6 +81,15 @@ void main()
 
     if(gl_FrontMaterial.emission.xyz != vec3(0.0))
         gl_FragData[0].xyz += gl_FrontMaterial.emission.xyz;
+
+#if defined(ENCODE_NORMALS) && ENCODE_NORMALS
+   // gl_FragData[0].a = 1.0;
+    gl_FragData[0] = encode(gl_FragData[0], vec4(viewNormal * 0.5 + 0.5, gl_FragData[0].a));
+#endif
+
+#if defined(NORMALS_ONLY) && NORMALS_ONLY
+    gl_FragData[0] = vec4(viewNormal * 0.5 + 0.5, gl_FragData[0].a);
+#endif
 
     applyShadowDebugOverlay();
 }

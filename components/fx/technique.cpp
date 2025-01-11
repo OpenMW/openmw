@@ -50,7 +50,7 @@ namespace fx
     }
 
     Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
-        int height, bool ubo, bool supportsNormals)
+        int height, bool ubo, bool supportsNormals, int normalsMode)
         : mName(std::move(name))
         , mFilePath(makeFilePath(mName))
         , mLastModificationTime(std::filesystem::file_time_type::clock::now())
@@ -60,6 +60,7 @@ namespace fx
         , mImageManager(imageManager)
         , mUBO(ubo)
         , mSupportsNormals(supportsNormals)
+        , mNormalsMode(normalsMode)
     {
         clear();
     }
@@ -155,6 +156,9 @@ namespace fx
                     mGLSLExtensions.insert("GL_EXT_texture_array");
                 }
 
+                // if android
+                mGLSLExtensions.insert("GL_EXT_shader_non_constant_global_initializers");
+
                 it->second->compile(*this, mShared);
 
                 if (!it->second->mTarget.empty())
@@ -247,7 +251,7 @@ namespace fx
             else if (key == "hdr")
                 mHDR = parseBool();
             else if (key == "pass_normals")
-                mNormals = parseBool() && mSupportsNormals;
+                mNormals = parseBool();
             else if (key == "pass_lights")
                 mLights = parseBool();
             else if (key == "glsl_profile")

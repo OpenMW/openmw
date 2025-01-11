@@ -276,6 +276,8 @@ namespace MWRender
 
         void setNavMeshMode(Settings::NavMeshRenderMode value);
 
+        void setNormalsFallbackDefines(bool enabled, int mode);
+
     private:
         void updateTextureFiltering();
         void updateAmbient();
@@ -360,6 +362,8 @@ namespace MWRender
 
         void operator=(const RenderingManager&);
         RenderingManager(const RenderingManager&);
+
+        int mNormalsMode;
     };
 
 }

@@ -10,6 +10,8 @@
 #define FUNC_GEQUAL                         518 // 0x0206
 #define FUNC_ALWAYS                         519 // 0x0207
 
+uniform vec2 texSize;
+
 float mipmapLevel(vec2 scaleduv)
 {
     vec2 dUVdx = dFdx(scaleduv);
@@ -25,7 +27,7 @@ float coveragePreservingAlphaScale(sampler2D diffuseMap, vec2 uv)
         #if @useGPUShader4
             textureSize = textureSize2D(diffuseMap, 0);
         #else
-            textureSize = vec2(256.0);
+            textureSize = texSize;
         #endif
             return 1.0 + mipmapLevel(uv * textureSize) * 0.25;
     #else

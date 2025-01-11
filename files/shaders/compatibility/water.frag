@@ -1,14 +1,12 @@
 #version 120
-#pragma import_defines(CLASSIC_FALLOFF, MAX_LIGHTS)
+#pragma import_defines(CLASSIC_FALLOFF, MAX_LIGHTS, ENCODE_NORMALS, SHADER_BLENDING, NORMALS_ONLY)
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
+#if defined(SHADER_BLENDING) && SHADER_BLENDING && !@waterRefraction
+    #extension GL_EXT_shader_framebuffer_fetch : enable
+    #define BLEND
 #endif
 
-#if @useGPUShader4
-    #extension GL_EXT_gpu_shader4: require
-#endif
-
+#include "lib/util/packcolors.glsl"
 #include "lib/core/fragment.h.glsl"
 
 // Inspired by Blender GLSL Water by martinsh ( https://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
@@ -135,6 +133,11 @@ void main(void)
                    normal3 * midWaves.y + normal4 * smallWaves.x + normal5 * smallWaves.y + rippleAdd);
     normal = normalize(vec3(-normal.x * bump, -normal.y * bump, normal.z));
 
+#if defined(NORMALS_ONLY) && NORMALS_ONLY
+    gl_FragData[0] = vec4(normalize(gl_NormalMatrix * normal) * 0.5 + 0.5, 1.0);
+    return;
+#endif
+
     vec3 sunWorldDir = normalize((gl_ModelViewMatrixInverse * vec4(lcalcPosition(0).xyz, 0.0)).xyz);
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 viewDir = normalize(position.xyz - cameraPos.xyz);
@@ -242,6 +245,11 @@ void main(void)
 
 #if !@disableNormals
     gl_FragData[1].rgb = normalize(gl_NormalMatrix * normal) * 0.5 + 0.5;
+#endif
+
+#if defined(ENCODE_NORMALS) && ENCODE_NORMALS && @NormalsMode != 2
+    vec4 normals = vec4(normalize(gl_NormalMatrix * normal) * 0.5 + 0.5, 1.0);
+    gl_FragData[0] = encode(gl_FragData[0], normals);
 #endif
 
     applyShadowDebugOverlay();

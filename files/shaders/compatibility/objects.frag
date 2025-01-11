@@ -1,12 +1,9 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE, DISTORTION, FORCE_PPL, CLASSIC_FALLOFF, MAX_LIGHTS)
+#pragma import_defines(FORCE_OPAQUE, DISTORTION, FORCE_PPL, CLASSIC_FALLOFF, MAX_LIGHTS, ENCODE_NORMALS, NORMALS_ONLY, SHADER_BLENDING, PARTICLE)
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
-#if @useGPUShader4
-    #extension GL_EXT_gpu_shader4: require
+#if @blend && defined(SHADER_BLENDING) && SHADER_BLENDING
+    #extension GL_EXT_shader_framebuffer_fetch : enable
+    #define BLEND
 #endif
 
 #if @diffuseMap
@@ -93,6 +90,7 @@ varying vec4 passTangent;
 #define ADDITIVE_BLENDING
 #endif
 
+#include "lib/util/packcolors.glsl"
 #include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
 #include "lib/material/alpha.glsl"
@@ -179,6 +177,15 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     vec3 viewNormal = normalToView(normal);
 #else
     vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
+#endif
+
+#if defined(NORMALS_ONLY) && NORMALS_ONLY
+#if defined(PARTICLE) && PARTICLE
+    gl_FragData[0] = vec4(0.0);
+#else
+    gl_FragData[0].rgb = viewNormal * 0.5 + 0.5;
+#endif
+    return;
 #endif
 
     vec3 viewVec = normalize(passViewPos);
@@ -276,6 +283,24 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 
 #if !defined(FORCE_OPAQUE) && !@disableNormals
     gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
+#endif
+
+#if DEBUG
+    gl_FragData[0] = vec4(vec3(smoothstep(300.0, 3000.0, length(passViewPos))), 1.0);
+#endif
+
+vec4 normals = vec4(viewNormal * 0.5 + 0.5, gl_FragData[0].a);
+/*
+#if defined(PARTICLE) && PARTICLE
+    normals = vec4(0.0);
+#endif
+*/
+#if @NormalsMode == 2 && @blend
+    return;
+#endif
+
+#if !defined(FORCE_OPAQUE) && defined(ENCODE_NORMALS) && ENCODE_NORMALS
+    gl_FragData[0] = encode(gl_FragData[0], normals);
 #endif
 
     applyShadowDebugOverlay();

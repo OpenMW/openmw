@@ -124,7 +124,7 @@ namespace fx
         static constexpr FlagsType Flag_Hidden = (1 << 5);
 
         Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
-            int height, bool ubo, bool supportsNormals);
+            int height, bool ubo, bool supportsNormals, int normalsMode);
 
         bool compile();
 
@@ -138,7 +138,9 @@ namespace fx
 
         bool getHDR() const { return mHDR; }
 
-        bool getNormals() const { return mNormals && mSupportsNormals; }
+        bool getNormals() const { return mNormals; }
+
+        int getNormalsMode() const { return mNormalsMode; }
 
         bool getLights() const { return mLights; }
 
@@ -299,6 +301,7 @@ namespace fx
         Resource::ImageManager& mImageManager;
         bool mUBO;
         bool mSupportsNormals;
+        int mNormalsMode;
 
         std::string mBuffer;
 

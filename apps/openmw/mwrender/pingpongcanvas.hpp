@@ -56,6 +56,10 @@ namespace MWRender
 
         const osg::ref_ptr<osg::Texture>& getSceneTexture(size_t frameId) const { return mTextureScene; }
 
+        void setExternalTextureNormals(osg::ref_ptr<osg::Texture> tex) { mExternalTextureNormals = tex; }
+
+        void setNormalsMode(int mode) { mNormalsMode = mode; }
+
     private:
         bool mAvgLum = false;
         bool mPostprocessing = false;
@@ -72,6 +76,7 @@ namespace MWRender
         osg::ref_ptr<osg::Texture> mTextureDepth;
         osg::ref_ptr<osg::Texture> mTextureNormals;
         osg::ref_ptr<osg::Texture> mTextureDistortion;
+        osg::ref_ptr<osg::Texture> mExternalTextureNormals;
 
         mutable bool mDirty = false;
         mutable std::vector<fx::Types::RenderTarget> mDirtyAttachments;
@@ -80,6 +85,8 @@ namespace MWRender
         mutable osg::ref_ptr<osg::FrameBufferObject> mDestinationFBO;
         mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
         mutable std::shared_ptr<LuminanceCalculator> mLuminanceCalculator;
+
+        int mNormalsMode;
     };
 }
 

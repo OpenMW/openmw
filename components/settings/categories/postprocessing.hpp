@@ -23,6 +23,8 @@ namespace Settings
         SettingValue<float> mAutoExposureSpeed{ mIndex, "Post Processing", "auto exposure speed",
             makeMaxStrictSanitizerFloat(0.0001f) };
         SettingValue<bool> mTransparentPostpass{ mIndex, "Post Processing", "transparent postpass" };
+        SettingValue<bool> mForceCameraNormalsFallback{ mIndex, "Post Processing", "force camera normals fallback" };
+        SettingValue<float> mCameraNormalsFallbackRenderingDistance{ mIndex, "Post Processing", "camera normals fallback rendering distance", makeMaxStrictSanitizerFloat(0) };
     };
 }
 

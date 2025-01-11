@@ -321,7 +321,8 @@ namespace MWRender
             mDepth->setWriteMask(true);
 
             mStateSet = new osg::StateSet;
-            mStateSet->setAttributeAndModes(new osg::ColorMask(false, false, false, false), osg::StateAttribute::ON);
+            //mStateSet->setAttributeAndModes(new osg::ColorMask(false, false, false, false), osg::StateAttribute::ON);
+            mStateSet->setDefine("NORMALS_ONLY", "1", osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
             mStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
         }
 
@@ -344,7 +345,7 @@ namespace MWRender
             auto primaryFBO = postProcessor->getPrimaryFbo(frameId);
             primaryFBO->apply(*state);
 
-//            postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
+            postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
 
             // depth accumulation pass
             osg::ref_ptr<osg::StateSet> restore = bin->getStateSet();
@@ -526,6 +527,24 @@ namespace MWRender
         {
             mObjectRoot->setNodeMask(Mask_FirstPerson);
             mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
+
+            PostProcessor* postProcessor = MWBase::Environment::get().getWorld()->getPostProcessor();
+            if (postProcessor->getNormalsMode() != NormalsMode_PackedTextureFetchOnly)
+                mObjectRoot->getOrCreateStateSet()->setDefine("ENCODE_NORMALS", "0", osg::StateAttribute::ON);
+
+            if (postProcessor->getNormalsMode() == NormalsMode_PackedTextureFetchOnly)
+            {
+                if (postProcessor->getNormalsEnabled())
+                {
+                    mObjectRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+                    mObjectRoot->getOrCreateStateSet()->setDefine("SHADER_BLENDING", "1", osg::StateAttribute::ON);
+                }
+                else
+                {
+                    mObjectRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                    mObjectRoot->getOrCreateStateSet()->setDefine("SHADER_BLENDING", "0", osg::StateAttribute::ON);
+                }
+            }
         }
 
         mWeaponAnimationTime->updateStartTime();
@@ -1290,4 +1309,9 @@ namespace MWRender
         return mAmmunition != nullptr;
     }
 
+    void NpcAnimation::setBlending(bool enable)
+    {
+        mObjectRoot->getOrCreateStateSet()->setMode(GL_BLEND, (enable) ? osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE : osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        mObjectRoot->getOrCreateStateSet()->setDefine("SHADER_BLENDING", (enable) ? "1" : "0", osg::StateAttribute::ON);
+    }
 }

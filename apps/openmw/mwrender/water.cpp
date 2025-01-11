@@ -273,6 +273,9 @@ namespace MWRender
             camera->getOrCreateStateSet()->setAttributeAndModes(
                 fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
 
+            // Inform the shader that we're in a refraction
+            camera->getOrCreateStateSet()->addUniform(new osg::Uniform("isRefraction", true));
+
             camera->addChild(mClipCullNode);
             camera->setNodeMask(Mask_RenderToTexture);
 
@@ -450,6 +453,7 @@ namespace MWRender
         , mTop(0)
         , mInterior(false)
         , mShowWorld(true)
+        , mNoBlend(false)
         , mCullCallback(nullptr)
         , mShaderWaterStateSetUpdater(nullptr)
     {
@@ -625,19 +629,26 @@ namespace MWRender
         sceneManager->setForceShaders(true);
         sceneManager->recreateShaders(node);
         sceneManager->setForceShaders(oldValue);
+
+        if (mNoBlend)
+        {
+            node->getStateSet()->setMode(GL_BLEND, osg::StateAttribute::OFF);
+            node->getStateSet()->setDefine("SHADER_BLENDING", "1", osg::StateAttribute::ON);
+        }
     }
 
     class ShaderWaterStateSetUpdater : public SceneUtil::StateSetUpdater
     {
     public:
         ShaderWaterStateSetUpdater(Water* water, Reflection* reflection, Refraction* refraction, Ripples* ripples,
-            osg::ref_ptr<osg::Program> program, osg::ref_ptr<osg::Texture2D> normalMap)
+            osg::ref_ptr<osg::Program> program, osg::ref_ptr<osg::Texture2D> normalMap, bool noBlend)
             : mWater(water)
             , mReflection(reflection)
             , mRefraction(refraction)
             , mRipples(ripples)
             , mProgram(std::move(program))
             , mNormalMap(std::move(normalMap))
+            , mNoBlend(noBlend)
         {
         }
 
@@ -646,7 +657,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("normalMap", 0));
             stateset->setTextureAttributeAndModes(0, mNormalMap, osg::StateAttribute::ON);
             stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-            stateset->setAttributeAndModes(mProgram, osg::StateAttribute::ON);
+            stateset->setAttributeAndModes(mProgram, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
 
             stateset->addUniform(new osg::Uniform("reflectionMap", 1));
             if (mRefraction)
@@ -657,7 +668,10 @@ namespace MWRender
             }
             else
             {
-                stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+                if (!mNoBlend)
+                    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+                stateset->setDefine("SHADER_BLENDING", (mNoBlend) ? "1" : "0", osg::StateAttribute::ON);
+
                 stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
                 osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
                 depth->setWriteMask(false);
@@ -694,6 +708,7 @@ namespace MWRender
         Ripples* mRipples;
         osg::ref_ptr<osg::Program> mProgram;
         osg::ref_ptr<osg::Texture2D> mNormalMap;
+        bool mNoBlend;
     };
 
     void Water::createShaderWaterStateSet(osg::Node* node, bool supportShaderWaterRipples)
@@ -711,6 +726,9 @@ namespace MWRender
 
         Stereo::shaderStereoDefines(defineMap);
 
+        defineMap["srcBlendFunc"] = "770";
+        defineMap["dstBlendFunc"] = "771";
+
         Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
         osg::ref_ptr<osg::Program> program = shaderMgr.getProgram("water", defineMap);
 
@@ -725,7 +743,7 @@ namespace MWRender
         node->setUpdateCallback(mRainSettingsUpdater);
 
         mShaderWaterStateSetUpdater = new ShaderWaterStateSetUpdater(
-            this, mReflection, mRefraction, mRipples, std::move(program), std::move(normalMap));
+            this, mReflection, mRefraction, mRipples, std::move(program), std::move(normalMap), mNoBlend);
         node->addCullCallback(mShaderWaterStateSetUpdater);
     }
 
@@ -903,4 +921,9 @@ namespace MWRender
         mShowWorld = show;
     }
 
+    void Water::setBlending(bool enable)
+    {
+        mNoBlend = enable;
+        updateWaterMaterial();
+    }
 }
