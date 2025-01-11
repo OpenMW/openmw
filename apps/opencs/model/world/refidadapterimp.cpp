@@ -1287,7 +1287,7 @@ QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData(
 
     if (subColIndex == 0)
         return subRowIndex;
-    else if (subColIndex == 1 && subRowIndex > 0 && subRowIndex < ESM::Attribute::Length)
+    else if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
         return creature.mData.mAttributes[subRowIndex];
     return QVariant(); // throw an exception here?
 }
@@ -1298,7 +1298,7 @@ void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData(
     Record<ESM::Creature>& record
         = static_cast<Record<ESM::Creature>&>(data.getRecord(RefIdData::LocalIndex(row, UniversalId::Type_Creature)));
 
-    if (subColIndex == 1 && subRowIndex > 0 && subRowIndex < ESM::Attribute::Length)
+    if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
     {
         ESM::Creature creature = record.get();
         creature.mData.mAttributes[subRowIndex] = value.toInt();

@@ -295,6 +295,9 @@ namespace
     using namespace Nif::Testing;
     using NifBullet::BulletNifLoader;
 
+    constexpr VFS::Path::NormalizedView testNif("test.nif");
+    constexpr VFS::Path::NormalizedView xtestNif("xtest.nif");
+
     void copy(const btTransform& src, Nif::NiTransform& dst)
     {
         dst.mTranslation = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
@@ -366,7 +369,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_zero_num_roots_should_return_default)
     {
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mHash = mHash;
 
         const auto result = mLoader.load(file);
@@ -380,7 +383,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, should_ignore_nullptr_root)
     {
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(nullptr);
         file.mHash = mHash;
 
@@ -393,7 +396,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_default_root_nif_node_should_return_default)
     {
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNode);
         file.mHash = mHash;
 
@@ -408,7 +411,7 @@ namespace
     {
         mNode.recType = Nif::RC_RootCollisionNode;
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNode);
         file.mHash = mHash;
 
@@ -421,7 +424,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_default_root_nif_node_and_filename_starting_with_x_should_return_default)
     {
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNode);
         file.mHash = mHash;
 
@@ -439,7 +442,7 @@ namespace
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNode);
         file.mHash = mHash;
 
@@ -461,7 +464,7 @@ namespace
         mNode.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -487,7 +490,7 @@ namespace
         mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -519,7 +522,7 @@ namespace
         mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-7, -8, -9);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -551,7 +554,7 @@ namespace
         mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-7, -8, -9);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -570,7 +573,7 @@ namespace
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNode);
         file.mHash = mHash;
 
@@ -583,7 +586,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_root_node_should_return_static_shape)
     {
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiTriShape);
         file.mHash = mHash;
 
@@ -609,7 +612,7 @@ namespace
         mNiTriShape.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNiTriShape.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiTriShape);
         file.mHash = mHash;
 
@@ -634,7 +637,7 @@ namespace
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -661,7 +664,7 @@ namespace
         mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiTriShape.mParents.push_back(&mNiNode2);
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -687,7 +690,7 @@ namespace
         mNiTriShape2.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiTriShape2) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -719,7 +722,7 @@ namespace
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -743,7 +746,7 @@ namespace
         copy(mTransform, mNiTriShape.mTransform);
         mNiTriShape.mTransform.mScale = 3;
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiTriShape);
         file.mHash = mHash;
 
@@ -769,7 +772,7 @@ namespace
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode.mTransform.mScale = 4;
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -801,7 +804,7 @@ namespace
 
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiTriShape2) };
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -836,7 +839,7 @@ namespace
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode.mTransform.mScale = 4;
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -872,7 +875,7 @@ namespace
         };
         mNiNode.mTransform.mScale = 4;
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -903,7 +906,7 @@ namespace
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiNode);
         file.mRoots.push_back(&mNiTriShape2);
         file.mHash = mHash;
@@ -938,7 +941,7 @@ namespace
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode.recType = Nif::RC_AvoidNode;
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -963,7 +966,7 @@ namespace
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -982,7 +985,7 @@ namespace
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1002,7 +1005,7 @@ namespace
         mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1033,7 +1036,7 @@ namespace
         mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1062,7 +1065,7 @@ namespace
         mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1092,7 +1095,7 @@ namespace
         mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1120,7 +1123,7 @@ namespace
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1155,7 +1158,7 @@ namespace
         mNiNode.mChildren
             = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&niTriShape), Nif::NiAVObjectPtr(&emptyCollisionNode) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1184,7 +1187,7 @@ namespace
         mNiNode.mExtraList.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
         file.mVersion = Nif::NIFStream::generateVersion(10, 0, 1, 0);
@@ -1205,7 +1208,7 @@ namespace
         mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1218,7 +1221,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_strips_root_node_should_return_static_shape)
     {
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiTriStrips);
         file.mHash = mHash;
 
@@ -1242,7 +1245,7 @@ namespace
     {
         mNiTriStripsData.mStrips.clear();
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiTriStrips);
         file.mHash = mHash;
 
@@ -1257,7 +1260,7 @@ namespace
     {
         mNiTriStripsData.mStrips.front() = { 0, 1 };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiTriStrips);
         file.mHash = mHash;
 
@@ -1275,7 +1278,7 @@ namespace
         mNiNode.recType = Nif::RC_AvoidNode;
         mNiTriStripsData.mStrips.front() = { 0, 1 };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiTriStrips);
         file.mHash = mHash;
 
@@ -1292,7 +1295,7 @@ namespace
         mNiTriStrips.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriStrips) };
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
 
@@ -1309,7 +1312,7 @@ namespace
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiNode);
         file.mRoots.push_back(&mNiTriStrips);
         file.mHash = mHash;
@@ -1340,7 +1343,7 @@ namespace
         mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode2.mTransform.mScale = 3;
 
-        Nif::NIFFile file("xtest.nif");
+        Nif::NIFFile file(xtestNif);
         file.mRoots.push_back(&mNiNode);
         file.mRoots.push_back(&mNiNode2);
         file.mHash = mHash;
@@ -1378,7 +1381,7 @@ namespace
 
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiTriShape2) };
 
-        Nif::NIFFile file("test.nif");
+        Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
 
         const auto result = mLoader.load(file);

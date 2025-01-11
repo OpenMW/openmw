@@ -365,7 +365,7 @@ namespace MWScript
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-                runtime.push(stats.getDynamic(mIndex).getRatio());
+                runtime.push(stats.getDynamic(mIndex).getRatio(false));
             }
         };
 

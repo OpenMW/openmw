@@ -16,6 +16,12 @@
 -- @return #number
 
 ---
+-- Get the total weight that the actor can carry.
+-- @function [parent=#Actor] getCapacity
+-- @param openmw.core#GameObject actor
+-- @return #number
+
+---
 -- Check if the given actor is dead (health reached 0, so death process started).
 -- @function [parent=#Actor] isDead
 -- @param openmw.core#GameObject actor
@@ -1034,12 +1040,6 @@
 -- @param openmw.core#GameObject object
 -- @param openmw.core#GameObject player The player that you want to modify the disposition for.
 -- @param #number value Base disposition modification value
-
----
--- Get the total weight that the actor can carry.
--- @function [parent=#NPC] getCapacity
--- @param openmw.core#GameObject actor
--- @return #number
 
 --- @{#Classes}: Class Data
 -- @field [parent=#NPC] #Classes classes

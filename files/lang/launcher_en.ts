@@ -390,6 +390,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Delete</source>
         <translation></translation>
     </message>
+    <message>
+        <source>&amp;Copy Path(s) to Clipboard</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&amp;Open Path in File Explorer</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>Launcher::GraphicsPage</name>

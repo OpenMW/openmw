@@ -298,8 +298,6 @@ namespace MWSound
 
         std::atomic<bool> mIsFinished;
 
-        void updateAll(bool local);
-
         OpenAL_SoundStream(const OpenAL_SoundStream& rhs);
         OpenAL_SoundStream& operator=(const OpenAL_SoundStream& rhs);
 
@@ -419,19 +417,15 @@ namespace MWSound
             {
                 {
                     const std::lock_guard<std::mutex> openLock(mOutput.mReopenMutex);
-                    auto defaultName = getDeviceName(nullptr);
+                    std::basic_string_view<ALCchar> defaultName = getDeviceName(nullptr);
                     if (mCurrentName != defaultName)
                     {
-                        Log(Debug::Info) << "Default audio device changed";
-                        ALCboolean reopened
-                            = alcReopenDeviceSOFT(mOutput.mDevice, nullptr, mOutput.mContextAttributes.data());
+                        mCurrentName = defaultName;
+                        Log(Debug::Info) << "Default audio device changed to \"" << mCurrentName << "\"";
+                        ALCboolean reopened = alcReopenDeviceSOFT(
+                            mOutput.mDevice, mCurrentName.data(), mOutput.mContextAttributes.data());
                         if (reopened == AL_FALSE)
-                        {
-                            mCurrentName = defaultName;
                             Log(Debug::Warning) << "Failed to switch to new audio device";
-                        }
-                        else
-                            mCurrentName = getDeviceName(mOutput.mDevice);
                     }
                 }
                 mCondVar.wait_for(lock, std::chrono::seconds(2));

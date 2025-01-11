@@ -79,7 +79,8 @@ namespace MWRender
         std::string animationMesh = mesh;
         if (animated && !mesh.empty())
         {
-            animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+            animationMesh = Misc::ResourceHelpers::correctActorModelPath(
+                VFS::Path::toNormalized(mesh), mResourceSystem->getVFS());
             if (animationMesh == mesh && Misc::StringUtils::ciEndsWith(animationMesh, ".nif"))
                 animated = false;
         }
@@ -96,7 +97,8 @@ namespace MWRender
         ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
         bool animated = true;
-        std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        std::string animationMesh
+            = Misc::ResourceHelpers::correctActorModelPath(VFS::Path::toNormalized(mesh), mResourceSystem->getVFS());
         if (animationMesh == mesh && Misc::StringUtils::ciEndsWith(animationMesh, ".nif"))
             animated = false;
 

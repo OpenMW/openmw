@@ -4,7 +4,6 @@
 #include "../mwworld/livecellref.hpp"
 #include "../mwworld/ptr.hpp"
 
-#include <string>
 #include <string_view>
 
 namespace MWClass

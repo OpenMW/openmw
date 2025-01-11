@@ -254,7 +254,26 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr;
+                if (!R::implicit)
+                {
+                    ESM::RefId name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
+                    runtime.pop();
+
+                    ptr = MWBase::Environment::get().getWorld()->searchPtr(name, false);
+                    // We don't normally want to let this go, but some mods insist on trying this
+                    if (ptr.isEmpty())
+                    {
+                        const std::string error = "Failed to find an instance of object " + name.toDebugString();
+                        runtime.getContext().report(error);
+                        Log(Debug::Error) << error;
+                        return;
+                    }
+                }
+                else
+                {
+                    ptr = R()(runtime);
+                }
                 MWBase::Environment::get().getWorld()->disable(ptr);
             }
         };
@@ -1437,8 +1456,8 @@ namespace MWScript
                     osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    const VFS::Path::Normalized model(
-                        ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs));
+                    const VFS::Path::Normalized model
+                        = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs);
                     msg << "Model: " << model.value() << std::endl;
                     if (!model.empty())
                     {

@@ -267,10 +267,11 @@ namespace MWLua
                     [object = ObjectVariant(object), model = std::string(model),
                         effectId = options->get_or<std::string>("vfxId", ""), loop = options->get_or("loop", false),
                         boneName = options->get_or<std::string>("boneName", ""),
-                        particleTexture = options->get_or<std::string>("particleTextureOverride", "")] {
+                        particleTexture = options->get_or<std::string>("particleTextureOverride", ""),
+                        useAmbientLight = options->get_or("useAmbientLight", true)] {
                         MWRender::Animation* anim = getMutableAnimationOrThrow(ObjectVariant(object));
 
-                        anim->addEffect(model, effectId, loop, boneName, particleTexture);
+                        anim->addEffect(model, effectId, loop, boneName, particleTexture, useAmbientLight);
                     },
                     "addVfxAction");
             }
@@ -318,15 +319,18 @@ namespace MWLua
                       bool magicVfx = options->get_or("mwMagicVfx", true);
                       std::string texture = options->get_or<std::string>("particleTextureOverride", "");
                       float scale = options->get_or("scale", 1.f);
+                      bool useAmbientLight = options->get_or("useAmbientLight", true);
                       context.mLuaManager->addAction(
                           [world, model = VFS::Path::Normalized(model), texture = std::move(texture), worldPos, scale,
-                              magicVfx]() { world->spawnEffect(model, texture, worldPos, scale, magicVfx); },
+                              magicVfx, useAmbientLight]() {
+                              world->spawnEffect(model, texture, worldPos, scale, magicVfx, useAmbientLight);
+                          },
                           "openmw.vfx.spawn");
                   }
                   else
                   {
                       context.mLuaManager->addAction([world, model = VFS::Path::Normalized(model),
-                                                         worldPos]() { world->spawnEffect(model, "", worldPos); },
+                                                         worldPos]() { world->spawnEffect(model, "", worldPos, 1.f); },
                           "openmw.vfx.spawn");
                   }
               };

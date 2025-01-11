@@ -163,6 +163,29 @@ return {
 }
 )X");
 
+    constexpr VFS::Path::NormalizedView customDataPath("customdata.lua");
+
+    VFSTestFile customDataScript(R"X(
+data = nil
+return {
+    engineHandlers = {
+        onSave = function()
+            return data
+        end,
+        onLoad = function(state)
+            data = state
+        end,
+        onInit = function(state)
+            data = state
+        end
+    },
+    eventHandlers = {
+        WakeUp = function()
+        end
+    }
+}
+)X");
+
     struct LuaScriptsContainerTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
@@ -178,6 +201,7 @@ return {
             { overrideInterfacePath, &overrideInterfaceScript },
             { useInterfacePath, &useInterfaceScript },
             { unloadPath, &unloadScript },
+            { customDataPath, &customDataScript },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;
@@ -199,6 +223,7 @@ CUSTOM, PLAYER: testInterface.lua
 CUSTOM, PLAYER: overrideInterface.lua
 CUSTOM, PLAYER: useInterface.lua
 CUSTOM: unload.lua
+CUSTOM: customdata.lua
 )X");
             mCfg.init(std::move(cfg));
         }
@@ -569,5 +594,59 @@ CUSTOM: unload.lua
         EXPECT_EQ(tracker.size(), 0);
         scripts1.load(data);
         EXPECT_EQ(tracker.size(), 0);
+    }
+
+    TEST_F(LuaScriptsContainerTest, LoadOrderChange)
+    {
+        LuaUtil::ScriptTracker tracker;
+        LuaUtil::ScriptsContainer scripts1(&mLua, "Test", &tracker, false);
+        LuaUtil::BasicSerializer serializer1;
+        LuaUtil::BasicSerializer serializer2([](int contentFileIndex) -> int {
+            if (contentFileIndex == 12)
+                return 34;
+            else if (contentFileIndex == 37)
+                return 12;
+            return contentFileIndex;
+        });
+        scripts1.setSerializer(&serializer1);
+        scripts1.setSavedDataDeserializer(&serializer2);
+
+        mLua.protectedCall([&](LuaUtil::LuaView& lua) {
+            sol::object id1 = sol::make_object_userdata(lua.sol(), ESM::RefNum{ 42, 12 });
+            sol::object id2 = sol::make_object_userdata(lua.sol(), ESM::RefNum{ 13, 37 });
+            sol::table table = lua.newTable();
+            table[id1] = id2;
+            LuaUtil::BinaryData serialized = LuaUtil::serialize(table, &serializer1);
+
+            EXPECT_TRUE(scripts1.addCustomScript(*mCfg.findId(customDataPath), serialized));
+            EXPECT_EQ(tracker.size(), 1);
+            for (int i = 0; i < 600; ++i)
+                tracker.unloadInactiveScripts(lua);
+            EXPECT_EQ(tracker.size(), 0);
+            scripts1.receiveEvent("WakeUp", {});
+            EXPECT_EQ(tracker.size(), 1);
+        });
+
+        ESM::LuaScripts data1;
+        ESM::LuaScripts data2;
+        scripts1.save(data1);
+        scripts1.load(data1);
+        scripts1.save(data2);
+        EXPECT_NE(data1.mScripts[0].mData, data2.mScripts[0].mData);
+
+        mLua.protectedCall([&](LuaUtil::LuaView& lua) {
+            sol::object deserialized = LuaUtil::deserialize(lua.sol(), data2.mScripts[0].mData, &serializer1);
+            EXPECT_TRUE(deserialized.is<sol::table>());
+            sol::table table = deserialized;
+            for (const auto& [key, value] : table)
+            {
+                EXPECT_TRUE(key.is<ESM::RefNum>());
+                EXPECT_TRUE(value.is<ESM::RefNum>());
+                EXPECT_EQ(key.as<ESM::RefNum>(), (ESM::RefNum{ 42, 34 }));
+                EXPECT_EQ(value.as<ESM::RefNum>(), (ESM::RefNum{ 13, 12 }));
+                return;
+            }
+            EXPECT_FALSE(true);
+        });
     }
 }

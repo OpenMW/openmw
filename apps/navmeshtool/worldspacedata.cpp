@@ -121,7 +121,7 @@ namespace NavMeshTool
 
             for (CellRef& cellRef : cellRefs)
             {
-                std::string model(getModel(esmData, cellRef.mRefId, cellRef.mType));
+                VFS::Path::Normalized model(getModel(esmData, cellRef.mRefId, cellRef.mType));
                 if (model.empty())
                     continue;
 
@@ -131,8 +131,7 @@ namespace NavMeshTool
                 osg::ref_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
-                        return bulletShapeManager.getShape(
-                            VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(model)));
+                        return bulletShapeManager.getShape(Misc::ResourceHelpers::correctMeshPath(model));
                     }
                     catch (const std::exception& e)
                     {

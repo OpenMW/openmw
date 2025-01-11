@@ -603,7 +603,8 @@ namespace MWWorld
         void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
         void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
-            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) override;
+            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true,
+            bool useAmbientLight = true) override;
 
         /// @see MWWorld::WeatherManager::isInStorm
         bool isInStorm() const override;

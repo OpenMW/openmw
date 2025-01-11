@@ -82,7 +82,7 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 68)
+set(OPENMW_LUA_API_REVISION 69)
 set(OPENMW_POSTPROCESSING_API_REVISION 2)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -950,23 +950,43 @@ elseif(NOT APPLE)
 
     if(WIN32)
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
-                                                                              PATTERN "deps" EXCLUDE
+                                                                              PATTERN ".cmake" EXCLUDE
+                                                                              PATTERN ".qt" EXCLUDE
+                                                                              PATTERN "_CPack_Packages" EXCLUDE
+                                                                              PATTERN "_deps" EXCLUDE
                                                                               PATTERN "apps" EXCLUDE
+                                                                              PATTERN "bin" EXCLUDE
                                                                               PATTERN "CMakeFiles" EXCLUDE
                                                                               PATTERN "components" EXCLUDE
+                                                                              PATTERN "deps" EXCLUDE
                                                                               PATTERN "docs" EXCLUDE
                                                                               PATTERN "extern" EXCLUDE
                                                                               PATTERN "files" EXCLUDE
-                                                                              PATTERN "Testing" EXCLUDE)
+                                                                              PATTERN "lib" EXCLUDE
+                                                                              PATTERN "SymStore" EXCLUDE
+                                                                              PATTERN "symstore-venv" EXCLUDE
+                                                                              PATTERN "Testing" EXCLUDE
+                                                                              PATTERN "tests_output" EXCLUDE
+                                                                              PATTERN "try-compile")
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
-                                                                                                                  PATTERN "deps" EXCLUDE
+                                                                                                                  PATTERN ".cmake" EXCLUDE
+                                                                                                                  PATTERN ".qt" EXCLUDE
+                                                                                                                  PATTERN "_CPack_Packages" EXCLUDE
+                                                                                                                  PATTERN "_deps" EXCLUDE
                                                                                                                   PATTERN "apps" EXCLUDE
+                                                                                                                  PATTERN "bin" EXCLUDE
                                                                                                                   PATTERN "CMakeFiles" EXCLUDE
                                                                                                                   PATTERN "components" EXCLUDE
+                                                                                                                  PATTERN "deps" EXCLUDE
                                                                                                                   PATTERN "docs" EXCLUDE
                                                                                                                   PATTERN "extern" EXCLUDE
                                                                                                                   PATTERN "files" EXCLUDE
-                                                                                                                  PATTERN "Testing" EXCLUDE)
+                                                                                                                  PATTERN "lib" EXCLUDE
+                                                                                                                  PATTERN "SymStore" EXCLUDE
+                                                                                                                  PATTERN "symstore-venv" EXCLUDE
+                                                                                                                  PATTERN "Testing" EXCLUDE
+                                                                                                                  PATTERN "tests_output" EXCLUDE
+                                                                                                                  PATTERN "try-compile")
         INSTALL(FILES "${INSTALL_SOURCE}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
@@ -1011,24 +1031,15 @@ elseif(NOT APPLE)
         SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
         SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
 
-        SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
-        if(EXISTS ${VCREDIST32})
-            INSTALL(FILES ${VCREDIST32} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x86.exe\\\" /q /norestart'" )
-        endif(EXISTS ${VCREDIST32})
-
-        SET(VCREDIST64 "${OpenMW_BINARY_DIR}/vcredist_x64.exe")
+        SET(VCREDIST64 "${OpenMW_BINARY_DIR}/vcredist_x64.exe" CACHE FILEPATH "Path to vcredist_x64.exe")
         if(EXISTS ${VCREDIST64})
             INSTALL(FILES ${VCREDIST64} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x64.exe\\\" /q /norestart'" )
+            get_filename_component(REDIST_FILENAME "${VCREDIST64}" NAME)
+            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+                ExecWait '\\\"$INSTDIR\\\\redist\\\\${REDIST_FILENAME}\\\" /q /norestart'
+                RMDir /r \\\"$INSTDIR\\\\redist\\\"
+                ")
         endif(EXISTS ${VCREDIST64})
-
-        SET(OALREDIST "${OpenMW_BINARY_DIR}/oalinst.exe")
-        if(EXISTS ${OALREDIST})
-            INSTALL(FILES ${OALREDIST} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
-                ExecWait '\\\"$INSTDIR\\\\redist\\\\oalinst.exe\\\" /s'" )
-        endif(EXISTS ${OALREDIST})
 
         if(CMAKE_CL_64)
             SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")

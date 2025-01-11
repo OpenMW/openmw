@@ -441,15 +441,15 @@ namespace MWClass
         return model.substr(prefix.size());
     }
 
-    std::string Npc::getCorrectedModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::Normalized Npc::getCorrectedModel(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
         const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
         if (race->mData.mFlags & ESM::Race::Beast)
-            return Settings::models().mBaseanimkna.get().value();
+            return Settings::models().mBaseanimkna.get();
 
-        return Settings::models().mBaseanim.get().value();
+        return Settings::models().mBaseanim.get();
     }
 
     void Npc::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const

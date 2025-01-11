@@ -138,11 +138,19 @@ namespace MWRender
         {
         public:
             bool mOptimizeBillboards = true;
+            bool mActiveGrid = false;
             LODRange mDistances = { 0.f, 0.f };
             osg::Vec3f mViewVector;
             bool mGroundcover = false;
             osg::Node::NodeMask mCopyMask = ~0u;
             mutable std::vector<const osg::Node*> mNodePath;
+
+            CopyOp(bool activeGrid, osg::Node::NodeMask copyMask, bool groundcover)
+                : mActiveGrid(activeGrid)
+                , mCopyMask(copyMask)
+                , mGroundcover(groundcover)
+            {
+            }
 
             void copy(const osg::Node* toCopy, osg::Group* attachTo)
             {
@@ -234,7 +242,8 @@ namespace MWRender
                 mNodePath.push_back(node);
 
                 osg::Node* cloned = static_cast<osg::Node*>(node->clone(*this));
-                cloned->setDataVariance(osg::Object::STATIC);
+                if (!mActiveGrid)
+                    cloned->setDataVariance(osg::Object::STATIC);
                 cloned->setUserDataContainer(nullptr);
                 cloned->setName("");
 
@@ -766,7 +775,7 @@ namespace MWRender
                     model = mLODNameCache
                                 .emplace_hint(found, std::move(key),
                                     Misc::ResourceHelpers::getLODMeshName(world.getESMVersions()[refNum.mContentFile],
-                                        model, mSceneManager->getVFS(), lod))
+                                        model, *mSceneManager->getVFS(), lod))
                                 ->second;
             }
 
@@ -821,9 +830,9 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
         osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
-        CopyOp copyop;
-        copyop.mGroundcover = mGroundcover;
-        copyop.mCopyMask = copyMask;
+
+        CopyOp copyop(activeGrid, copyMask, mGroundcover);
+
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;

@@ -227,7 +227,7 @@ namespace MWLua
             | DetourNavigator::Flag_swim | DetourNavigator::Flag_openDoor | DetourNavigator::Flag_usePathgrid;
 
         api["findPath"]
-            = [](const osg::Vec3f& source, const osg::Vec3f& destination, const sol::optional<sol::table>& options) {
+            = [lua](const osg::Vec3f& source, const osg::Vec3f& destination, const sol::optional<sol::table>& options) {
                   DetourNavigator::AgentBounds agentBounds = defaultAgentBounds;
                   DetourNavigator::Flags includeFlags = defaultIncludeFlags;
                   DetourNavigator::AreaCosts areaCosts{};
@@ -259,13 +259,15 @@ namespace MWLua
                           destinationTolerance = *v;
                   }
 
-                  std::vector<osg::Vec3f> result;
+                  std::vector<osg::Vec3f> path;
 
-                  const DetourNavigator::Status status = DetourNavigator::findPath(
-                      *MWBase::Environment::get().getWorld()->getNavigator(), agentBounds, source, destination,
-                      includeFlags, areaCosts, destinationTolerance, std::back_inserter(result));
+                  const DetourNavigator::Status status
+                      = DetourNavigator::findPath(*MWBase::Environment::get().getWorld()->getNavigator(), agentBounds,
+                          source, destination, includeFlags, areaCosts, destinationTolerance, std::back_inserter(path));
 
-                  return std::make_tuple(status, std::move(result));
+                  sol::table result(lua, sol::create);
+                  LuaUtil::copyVectorToTable(path, result);
+                  return std::make_tuple(status, result);
               };
 
         api["findRandomPointAroundCircle"] = [](const osg::Vec3f& position, float maxRadius,

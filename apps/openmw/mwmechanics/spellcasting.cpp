@@ -72,12 +72,12 @@ namespace MWMechanics
             {
                 if (effectInfo.mData.mRange == ESM::RT_Target)
                     world->spawnEffect(
-                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel)), texture,
+                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(areaStatic->mModel)), texture,
                         mHitPosition, 1.0f);
                 continue;
             }
             else
-                world->spawnEffect(VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel)),
+                world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(areaStatic->mModel)),
                     texture, mHitPosition, static_cast<float>(effectInfo.mData.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
@@ -454,11 +454,15 @@ namespace MWMechanics
             ESM::ActiveSpells::Flag_Temporary | ESM::ActiveSpells::Flag_Stackable);
         mSourceName = ingredient->mName;
 
-        auto effect = rollIngredientEffect(mCaster, ingredient, mCaster != getPlayer());
+        std::optional<ESM::EffectList> effect = rollIngredientEffect(mCaster, ingredient, 0);
 
         if (effect)
+        {
             inflict(mCaster, *effect, ESM::RT_Self);
-        else
+            return true;
+        }
+
+        if (mCaster == getPlayer())
         {
             // "X has no effect on you"
             std::string message = MWBase::Environment::get()
@@ -468,10 +472,9 @@ namespace MWMechanics
                                       ->mValue.getString();
             message = Misc::StringUtils::format(message, ingredient->mName);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
-            return false;
         }
 
-        return true;
+        return false;
     }
 
     void CastSpell::playSpellCastingEffects(const ESM::Enchantment* enchantment) const
@@ -487,7 +490,7 @@ namespace MWMechanics
     void CastSpell::playSpellCastingEffects(const std::vector<ESM::IndexedENAMstruct>& effects) const
     {
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-        std::vector<std::string> addedEffects;
+        std::vector<VFS::Path::Normalized> addedEffects;
 
         for (const ESM::IndexedENAMstruct& effectData : effects)
         {
@@ -500,17 +503,18 @@ namespace MWMechanics
             else
                 castStatic = store.get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_DefaultCast"));
 
+            VFS::Path::Normalized castStaticModel
+                = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
+
             // check if the effect was already added
-            if (std::find(addedEffects.begin(), addedEffects.end(),
-                    Misc::ResourceHelpers::correctMeshPath(castStatic->mModel))
-                != addedEffects.end())
+            if (std::find(addedEffects.begin(), addedEffects.end(), castStaticModel) != addedEffects.end())
                 continue;
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
             if (animation)
             {
-                animation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
-                    ESM::MagicEffect::indexToName(effect->mIndex), false, {}, effect->mParticle);
+                animation->addEffect(castStaticModel.value(), ESM::MagicEffect::indexToName(effect->mIndex), false, {},
+                    effect->mParticle);
             }
             else
             {
@@ -539,15 +543,13 @@ namespace MWMechanics
                     scale *= npcScaleVec.z();
                 }
                 scale = std::max(scale, 1.f);
-                MWBase::Environment::get().getWorld()->spawnEffect(
-                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel)),
-                    effect->mParticle, pos, scale);
+                MWBase::Environment::get().getWorld()->spawnEffect(castStaticModel, effect->mParticle, pos, scale);
             }
 
             if (animation && !mCaster.getClass().isActor())
                 animation->addSpellCastGlow(effect->getColor());
 
-            addedEffects.push_back(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel));
+            addedEffects.push_back(std::move(castStaticModel));
 
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
             if (!effect->mCastSound.empty())
@@ -584,8 +586,12 @@ namespace MWMechanics
         {
             // Don't play particle VFX unless the effect is new or it should be looping.
             if (playNonLooping || loop)
-                anim->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
-                    ESM::MagicEffect::indexToName(magicEffect.mIndex), loop, {}, magicEffect.mParticle);
+            {
+                const VFS::Path::Normalized castStaticModel
+                    = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
+                anim->addEffect(castStaticModel.value(), ESM::MagicEffect::indexToName(magicEffect.mIndex), loop, {},
+                    magicEffect.mParticle);
+            }
         }
     }
 }

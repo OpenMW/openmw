@@ -389,22 +389,6 @@ namespace
         std::string_view mEffectId;
     };
 
-    namespace
-    {
-        osg::ref_ptr<osg::LightModel> makeVFXLightModelInstance()
-        {
-            osg::ref_ptr<osg::LightModel> lightModel = new osg::LightModel;
-            lightModel->setAmbientIntensity({ 1, 1, 1, 1 });
-            return lightModel;
-        }
-
-        const osg::ref_ptr<osg::LightModel>& getVFXLightModelInstance()
-        {
-            static const osg::ref_ptr<osg::LightModel> lightModel = makeVFXLightModelInstance();
-            return lightModel;
-        }
-    }
-
     void assignBoneBlendCallbackRecursive(MWRender::BoneAnimBlendController* controller, osg::Node* parent, bool isRoot)
     {
         // Attempt to cast node to an osgAnimation::Bone
@@ -704,7 +688,7 @@ namespace MWRender
             return nullptr;
 
         auto animsrc = std::make_shared<AnimSource>();
-        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
+        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(VFS::Path::toNormalized(kfname));
 
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty()
             || animsrc->mKeyframes->mKeyframeControllers.empty())
@@ -1625,7 +1609,8 @@ namespace MWRender
                     const bool werewolf = false;
 
                     defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
-                        getActorSkeleton(firstPerson, isFemale, isBeast, werewolf), mResourceSystem->getVFS());
+                        VFS::Path::toNormalized(getActorSkeleton(firstPerson, isFemale, isBeast, werewolf)),
+                        mResourceSystem->getVFS());
                 }
             }
         }
@@ -1724,7 +1709,7 @@ namespace MWRender
     }
 
     void Animation::addEffect(std::string_view model, std::string_view effectId, bool loop, std::string_view bonename,
-        std::string_view texture)
+        std::string_view texture, bool useAmbientLight)
     {
         if (!mObjectRoot.get())
             return;
@@ -1777,10 +1762,15 @@ namespace MWRender
         osg::ref_ptr<osg::Node> node
             = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), trans);
 
-        // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
-        node->getOrCreateStateSet()->setAttributeAndModes(
-            getVFXLightModelInstance(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        if (useAmbientLight)
+        {
+            // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
+            node->getOrCreateStateSet()->setAttributeAndModes(
+                getVFXLightModelInstance(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        }
+
         mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(node->getOrCreateStateSet(), false);
+
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
 

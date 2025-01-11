@@ -602,7 +602,7 @@ namespace MWWorld
         if (mProjectileManager)
             mProjectileManager->clear();
 
-        if (Settings::navigator().mWaitForAllJobsOnExit)
+        if (Settings::navigator().mWaitForAllJobsOnExit && mNavigator != nullptr)
         {
             Log(Debug::Verbose) << "Waiting for all navmesh jobs to be done...";
             mNavigator->wait(DetourNavigator::WaitConditionType::allJobsDone, nullptr);
@@ -1784,7 +1784,7 @@ namespace MWWorld
             // inform the GUI about focused object
             MWWorld::Ptr object = getFacedObject();
 
-            // retrieve object dimensions so we know where to place the floating label
+            // retrieve the object's top point's screen position so we know where to place the floating label
             if (!object.isEmpty())
             {
                 osg::BoundingBox bb = mPhysics->getBoundingBox(object);
@@ -1795,9 +1795,8 @@ namespace MWWorld
                     object.getRefData().getBaseNode()->accept(computeBoundsVisitor);
                     bb = computeBoundsVisitor.getBoundingBox();
                 }
-                osg::Vec4f screenBounds = mRendering->getScreenBounds(bb);
-                MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
-                    screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
+                const osg::Vec2f pos = mRendering->getScreenCoords(bb);
+                MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(pos.x(), pos.y());
             }
 
             MWBase::Environment::get().getWindowManager()->setFocusObject(object);
@@ -2325,8 +2324,7 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
         mPhysics->remove(getPlayerPtr());
-        mPhysics->addActor(
-            getPlayerPtr(), VFS::Path::toNormalized(getPlayerPtr().getClass().getCorrectedModel(getPlayerPtr())));
+        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getCorrectedModel(getPlayerPtr()));
 
         applyLoopingParticles(player);
 
@@ -3682,16 +3680,18 @@ namespace MWWorld
         if (texture.empty())
             texture = Fallback::Map::getString("Blood_Texture_0");
 
-        VFS::Path::Normalized model(Misc::ResourceHelpers::correctMeshPath(std::string{
-            Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))) } /*[0, 2]*/));
+        // [0, 2]
+        const int number = Misc::Rng::rollDice(3);
+        const VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(
+            VFS::Path::Normalized(Fallback::Map::getString("Blood_Model_" + std::to_string(number))));
 
-        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
+        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false, false);
     }
 
     void World::spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
-        const osg::Vec3f& worldPos, float scale, bool isMagicVFX)
+        const osg::Vec3f& worldPos, float scale, bool isMagicVFX, bool useAmbientLight)
     {
-        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
+        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX, useAmbientLight);
     }
 
     struct ResetActorsVisitor

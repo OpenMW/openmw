@@ -18,6 +18,7 @@
 #include <SDL_video.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/l10n/manager.hpp>
 #include <components/lua_ui/scriptsettings.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/display.hpp>
@@ -659,6 +660,7 @@ namespace MWGui
 
         Settings::shaders().mForcePerPixelLighting.reset();
         Settings::shaders().mClassicFalloff.reset();
+        Settings::shaders().mMatchSunlightToSun.reset();
         Settings::shaders().mLightBoundsMultiplier.reset();
         Settings::shaders().mMaximumLightDistance.reset();
         Settings::shaders().mLightFadeStart.reset();
@@ -677,12 +679,12 @@ namespace MWGui
 
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
-        std::string_view on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
+        const std::string on = MWBase::Environment::get().getL10nManager()->getMessage("Interface", "On");
+        const std::string off = MWBase::Environment::get().getL10nManager()->getMessage("Interface", "Off");
         bool newState;
         if (_sender->castType<MyGUI::Button>()->getCaption() == on)
         {
-            _sender->castType<MyGUI::Button>()->setCaption(
-                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "Off")));
+            _sender->castType<MyGUI::Button>()->setCaption(MyGUI::UString(off));
             newState = false;
         }
         else

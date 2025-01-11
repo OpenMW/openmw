@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+      tags:
+        - openmw-**
+
+jobs:
+  Output-Envs:
+    name: Read .env file and expose it as output
+    runs-on: ubuntu-latest
+    outputs:
+      VCPKG_DEPS_TAG: ${{ env.VCPKG_DEPS_TAG }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cat "${{ github.workspace }}/CI/github.env" >> $GITHUB_ENV
+
+  Windows:
+    needs:
+      - Output-Envs
+    uses: ./.github/workflows/windows.yml
+    with:
+      image: "2022"
+      vcpkg-deps-tag: ${{ needs.Output-Envs.outputs.VCPKG_DEPS_TAG }}
+      build-type: Release
+      package: true
+      release: true
+    secrets: inherit

@@ -607,7 +607,6 @@ namespace MWRender
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
         Nif::Reader::setLoadUnsupportedFiles(Settings::models().mLoadUnsupportedNifFiles);
-        Nif::Reader::setWriteNifDebugLog(Settings::models().mWriteNifDebugLog);
 
         mStateUpdater->setFogEnd(mViewDistance);
 
@@ -780,13 +779,18 @@ namespace MWRender
 
     void RenderingManager::setSunDirection(const osg::Vec3f& direction)
     {
-        osg::Vec3 position = direction * -1;
-        // need to wrap this in a StateUpdater?
-        mSunLight->setPosition(osg::Vec4(position.x(), position.y(), position.z(), 0));
+        osg::Vec3f position = -direction;
 
-        // The sun is not synchronized with the sunlight because sunlight origin can't reach the horizon
+        // The sun is not synchronized with the sunlight because reasons
         // This is based on exterior sun orbit and won't make sense for interiors, see WeatherManager::update
         position.z() = 400.f - std::abs(position.x());
+
+        // need to wrap this in a StateUpdater?
+        if (Settings::shaders().mMatchSunlightToSun)
+            mSunLight->setPosition(osg::Vec4f(position, 0.f));
+        else
+            mSunLight->setPosition(osg::Vec4f(-direction, 0.f));
+
         mSky->setSunDirection(position);
 
         mPostProcessor->getStateUpdater()->setSunPos(osg::Vec4f(position, 0.f), mNight);
@@ -1056,34 +1060,24 @@ namespace MWRender
         mScreenshotManager->screenshot(image, w, h);
     }
 
-    osg::Vec4f RenderingManager::getScreenBounds(const osg::BoundingBox& worldbb)
+    osg::Vec2f RenderingManager::getScreenCoords(const osg::BoundingBox& bb)
     {
-        if (!worldbb.valid())
-            return osg::Vec4f();
-        osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
-        float min_x = 1.0f, max_x = 0.0f, min_y = 1.0f, max_y = 0.0f;
-        for (int i = 0; i < 8; ++i)
+        if (bb.valid())
         {
-            osg::Vec3f corner = worldbb.corner(i);
-            corner = corner * viewProj;
-
-            float x = (corner.x() + 1.f) * 0.5f;
-            float y = (corner.y() - 1.f) * (-0.5f);
-
-            if (x < min_x)
-                min_x = x;
-
-            if (x > max_x)
-                max_x = x;
-
-            if (y < min_y)
-                min_y = y;
-
-            if (y > max_y)
-                max_y = y;
+            const osg::Matrix viewProj
+                = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
+            const osg::Vec3f worldPoint((bb.xMin() + bb.xMax()) * 0.5f, (bb.yMin() + bb.yMax()) * 0.5f, bb.zMax());
+            const osg::Vec4f clipPoint = osg::Vec4f(worldPoint, 1.0f) * viewProj;
+            if (clipPoint.w() > 0.f)
+            {
+                const float screenPointX = (clipPoint.x() / clipPoint.w() + 1.f) * 0.5f;
+                const float screenPointY = (clipPoint.y() / clipPoint.w() - 1.f) * (-0.5f);
+                if (screenPointX >= 0.f && screenPointX <= 1.f && screenPointY >= 0.f && screenPointY <= 1.f)
+                    return osg::Vec2f(screenPointX, screenPointY);
+            }
         }
 
-        return osg::Vec4f(min_x, min_y, max_x, max_y);
+        return osg::Vec2f(0.5f, 0.f);
     }
 
     RenderingManager::RayResult getIntersectionResult(osgUtil::LineSegmentIntersector* intersector,
@@ -1301,9 +1295,9 @@ namespace MWRender
     }
 
     void RenderingManager::spawnEffect(VFS::Path::NormalizedView model, std::string_view texture,
-        const osg::Vec3f& worldPosition, float scale, bool isMagicVFX)
+        const osg::Vec3f& worldPosition, float scale, bool isMagicVFX, bool useAmbientLight)
     {
-        mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX);
+        mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX, useAmbientLight);
     }
 
     void RenderingManager::notifyWorldSpaceChanged()
@@ -1769,6 +1763,10 @@ namespace MWRender
 
             const float refScale = ptr.getCellRef().getScale();
             rootNode->setScale({ refScale, refScale, refScale });
+            const auto& rotation = ptr.getCellRef().getPosition().rot;
+            if (!ptr.getClass().isActor())
+                rootNode->setAttitude(osg::Quat(rotation[0], osg::Vec3(-1, 0, 0))
+                    * osg::Quat(rotation[1], osg::Vec3(0, -1, 0)) * osg::Quat(rotation[2], osg::Vec3(0, 0, -1)));
             rootNode->setPosition(ptr.getCellRef().getPosition().asVec3());
 
             osg::ref_ptr<Animation> animation = nullptr;

@@ -204,7 +204,7 @@ namespace MWGui
         void changeCell(const MWWorld::CellStore* cell) override; ///< change the active cell
 
         void setFocusObject(const MWWorld::Ptr& focus) override;
-        void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y) override;
+        void setFocusObjectScreenCoords(float x, float y) override;
 
         void getMousePosition(int& x, int& y) override;
         void getMousePosition(float& x, float& y) override;
@@ -316,8 +316,6 @@ namespace MWGui
         std::size_t getMessagesCount() const override;
 
         const Translation::Storage& getTranslationDataStorage() const override;
-
-        void onSoulgemDialogButtonPressed(int button);
 
         bool getCursorVisible() override;
 

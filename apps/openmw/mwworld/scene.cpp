@@ -95,7 +95,7 @@ namespace
             rendering.rotateObject(ptr, rotation);
     }
 
-    std::string getModel(const MWWorld::Ptr& ptr)
+    VFS::Path::Normalized getModel(const MWWorld::Ptr& ptr)
     {
         if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId()))
             return {};
@@ -115,7 +115,7 @@ namespace
             return;
         }
 
-        std::string model = getModel(ptr);
+        const VFS::Path::Normalized model = getModel(ptr);
         const auto rotation = makeDirectNodeRotation(ptr);
 
         ESM::RefNum refnum = ptr.getCellRef().getRefNum();
@@ -706,7 +706,7 @@ namespace MWWorld
                     ptr.mRef->mData.mPhysicsPostponed = false;
                     if (ptr.mRef->mData.isEnabled() && ptr.mRef->mRef.getCount() > 0)
                     {
-                        std::string model = getModel(ptr);
+                        const VFS::Path::Normalized model = getModel(ptr);
                         if (!model.empty())
                         {
                             const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
@@ -1126,8 +1126,9 @@ namespace MWWorld
     void Scene::preload(const std::string& mesh, bool useAnim)
     {
         const VFS::Path::Normalized meshPath = useAnim
-            ? Misc::ResourceHelpers::correctActorModelPath(mesh, mRendering.getResourceSystem()->getVFS())
-            : mesh;
+            ? Misc::ResourceHelpers::correctActorModelPath(
+                VFS::Path::toNormalized(mesh), mRendering.getResourceSystem()->getVFS())
+            : VFS::Path::toNormalized(mesh);
 
         if (mRendering.getResourceSystem()->getSceneManager()->checkLoaded(meshPath, mRendering.getReferenceTime()))
             return;

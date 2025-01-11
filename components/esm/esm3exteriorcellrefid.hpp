@@ -28,7 +28,8 @@ namespace ESM
         int32_t getX() const { return mX; }
         int32_t getY() const { return mY; }
 
-        friend inline constexpr auto tie(const ESM3ExteriorCellRefId& value) noexcept
+        friend inline constexpr std::tuple<const int32_t&, const int32_t&> tie(
+            const ESM3ExteriorCellRefId& value) noexcept
         {
             return std::tie(value.mX, value.mY);
         }

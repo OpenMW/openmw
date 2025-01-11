@@ -131,7 +131,7 @@ namespace MWRender
                     if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                         return std::string();
                     if (!bodypart->mModel.empty())
-                        return Misc::ResourceHelpers::correctMeshPath(bodypart->mModel);
+                        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)).value();
                 }
             }
         }
@@ -365,10 +365,17 @@ namespace MWRender
         }
 
         mScabbard = attachMesh(scabbardName, boneName);
-        if (mScabbard && weaponClass == ESM::WeaponType::Ranged)
+
+        if (!mScabbard || !mScabbard->getNode())
+            return;
+
+        if (weaponClass == ESM::WeaponType::Ranged)
             resetControllers(mScabbard->getNode());
 
-        osg::Group* weaponNode = getBoneByName("Bip01 Weapon");
+        SceneUtil::FindByNameVisitor findVisitor("Bip01 Weapon");
+        mScabbard->getNode()->accept(findVisitor);
+        osg::Group* weaponNode = findVisitor.mFoundNode;
+
         if (!weaponNode)
             return;
 

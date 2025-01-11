@@ -78,7 +78,7 @@ namespace
         const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
         if (!bodyPart)
             return std::string();
-        return Misc::ResourceHelpers::correctMeshPath(bodyPart->mModel);
+        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodyPart->mModel)).value();
     }
 
 }
@@ -464,7 +464,7 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(headName);
             if (bp)
-                mHeadModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel);
+                mHeadModel = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bp->mModel));
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << headName << "'";
         }
@@ -473,7 +473,7 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(hairName);
             if (bp)
-                mHairModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel);
+                mHairModel = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bp->mModel));
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << hairName << "'";
         }
@@ -495,13 +495,14 @@ namespace MWRender
         }
 
         const std::string defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
-            getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf), mResourceSystem->getVFS());
+            VFS::Path::toNormalized(getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf)),
+            mResourceSystem->getVFS());
 
         std::string smodel = defaultSkeleton;
         bool isCustomModel = false;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         {
-            std::string model = Misc::ResourceHelpers::correctMeshPath(mNpc->mModel);
+            VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(mNpc->mModel));
             isCustomModel = !isDefaultActorSkeleton(model);
             smodel = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
         }
@@ -666,8 +667,7 @@ namespace MWRender
             {
                 const ESM::Light* light = part.get<ESM::Light>()->mBase;
                 addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(light->mModel)), false, nullptr,
-                    true);
+                    Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(light->mModel)), false, nullptr, true);
                 if (mObjectParts[ESM::PRT_Shield])
                     addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), SceneUtil::LightCommon(*light));
             }
@@ -687,7 +687,7 @@ namespace MWRender
             {
                 if (const ESM::BodyPart* bodypart = parts[part])
                     addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part), -1, 1,
-                        VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(bodypart->mModel)));
+                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)));
             }
         }
 
@@ -917,7 +917,7 @@ namespace MWRender
 
             if (bodypart)
                 addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part.mPart), group, priority,
-                    VFS::Path::toNormalized(Misc::ResourceHelpers::correctMeshPath(bodypart->mModel)), enchantedGlow,
+                    Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)), enchantedGlow,
                     glowColor);
             else
                 reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);

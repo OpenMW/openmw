@@ -403,6 +403,12 @@ namespace MWMechanics
             resetCurrentIdleState();
         }
 
+        if (!mPtr.getClass().isNpc() && mUpperBodyState > UpperBodyState::WeaponEquipped)
+        {
+            recovery = false;
+            stats.setHitRecovery(false);
+        }
+
         if (mHitState != CharState_None)
         {
             if (!mAnimation->isPlaying(mCurrentHit))
@@ -1341,10 +1347,14 @@ namespace MWMechanics
             }
         }
 
-        // For biped actors, blend weapon animations with lower body animations with higher priority
-        MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
+        MWRender::Animation::AnimPriority priorityWeapon(Priority_Default);
         if (cls.isBipedal(mPtr))
+        {
+            // For bipeds, blend weapon animations with lower body animations with higher priority
+            // For non-bipeds, movement takes priority
+            priorityWeapon = Priority_Weapon;
             priorityWeapon[MWRender::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+        }
 
         bool forcestateupdate = false;
 
@@ -1366,7 +1376,7 @@ namespace MWMechanics
         if (!isKnockedOut() && !isKnockedDown() && !isRecovery())
         {
             std::string weapgroup;
-            if ((!isWerewolf || mWeaponType != ESM::Weapon::Spell) && weaptype != mWeaponType
+            if (((!isWerewolf && cls.isBipedal(mPtr)) || mWeaponType != ESM::Weapon::Spell) && weaptype != mWeaponType
                 && mUpperBodyState <= UpperBodyState::AttackWindUp && mUpperBodyState != UpperBodyState::Unequipping
                 && !isStillWeapon)
             {
@@ -1387,6 +1397,7 @@ namespace MWMechanics
                     else if (mWeaponType == ESM::Weapon::HandToHand)
                         mAnimation->showCarriedLeft(false);
 
+                    mAnimation->disable(weapgroup);
                     playBlendedAnimation(
                         weapgroup, priorityWeapon, unequipMask, false, 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                     mUpperBodyState = UpperBodyState::Unequipping;
@@ -1441,8 +1452,11 @@ namespace MWMechanics
                                     "equip start", "equip stop", 0.0f, 0);
                             }
 
-                            playBlendedAnimation(
-                                weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start", "equip stop", 0.0f, 0);
+                            if (weaptype != ESM::Weapon::Spell || cls.isBipedal(mPtr))
+                            {
+                                playBlendedAnimation(weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start",
+                                    "equip stop", 0.0f, 0);
+                            }
                             mUpperBodyState = UpperBodyState::Equipping;
 
                             // If we do not have the "equip attach" key, show weapon manually.
@@ -1590,13 +1604,16 @@ namespace MWMechanics
                                 const ESM::Static* castStatic
                                     = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
 
+                                const VFS::Path::Normalized castStaticModel
+                                    = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
+
                                 if (mAnimation->getNode("Bip01 L Hand"))
-                                    mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
-                                        "", false, "Bip01 L Hand", effect->mParticle);
+                                    mAnimation->addEffect(
+                                        castStaticModel.value(), "", false, "Bip01 L Hand", effect->mParticle);
 
                                 if (mAnimation->getNode("Bip01 R Hand"))
-                                    mAnimation->addEffect(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel),
-                                        "", false, "Bip01 R Hand", effect->mParticle);
+                                    mAnimation->addEffect(
+                                        castStaticModel.value(), "", false, "Bip01 R Hand", effect->mParticle);
                             }
                             // first effect used for casting animation
                             const ESM::ENAMstruct& firstEffect = effects->front().mData;
@@ -1794,11 +1811,7 @@ namespace MWMechanics
 
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
-                MWRender::Animation::AnimPriority priorityFollow(priorityWeapon);
-                // Follow animations have lower priority than movement for non-biped creatures, logic be damned
-                if (!cls.isBipedal(mPtr))
-                    priorityFollow = Priority_Default;
-                playBlendedAnimation(mCurrentWeapon, priorityFollow, MWRender::BlendMask_All, false, weapSpeed,
+                playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, weapSpeed,
                     mAttackType + ' ' + start, mAttackType + ' ' + stop, 0.0f, 0);
                 mUpperBodyState = UpperBodyState::AttackEnd;
 
