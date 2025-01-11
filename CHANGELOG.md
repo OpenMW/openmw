@@ -311,6 +311,7 @@
     Feature #8109: Expose commitCrime to Lua API
     Feature #8130: Launcher: Add the ability to open a selected data directory in the file browser
     Feature #8145: Starter spell flag is not exposed
+    Feature #8286: Launcher: Preserve semantically identical openmw.cfg
     Feature #8287: Launcher: Special handling for comma in openmw.cfg entries is unintuitive and should be removed
     Task #5859: User openmw-cs.cfg has comment talking about settings.cfg
     Task #5896: Do not use deprecated MyGUI properties
