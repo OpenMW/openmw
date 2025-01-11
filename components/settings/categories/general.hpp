@@ -22,9 +22,9 @@ namespace Settings
         SettingValue<std::string> mScreenshotFormat{ mIndex, "General", "screenshot format",
             makeEnumSanitizerString({ "jpg", "png", "tga" }) };
         SettingValue<std::string> mTextureMagFilter{ mIndex, "General", "texture mag filter",
-            makeEnumSanitizerString({ "nearest", "linear" }) };
+            makeEnumSanitizerString({ "nearest", "linear", "cubic" }) };
         SettingValue<std::string> mTextureMinFilter{ mIndex, "General", "texture min filter",
-            makeEnumSanitizerString({ "nearest", "linear" }) };
+            makeEnumSanitizerString({ "nearest", "linear", "cubic" }) };
         SettingValue<std::string> mTextureMipmap{ mIndex, "General", "texture mipmap",
             makeEnumSanitizerString({ "none", "nearest", "linear" }) };
         SettingValue<bool> mNotifyOnSavedScreenshot{ mIndex, "General", "notify on saved screenshot" };

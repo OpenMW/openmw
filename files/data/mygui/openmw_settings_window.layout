@@ -380,8 +380,10 @@
                             <UserString key="HStretch" value="false"/>
                         </Widget>
                         <Widget type="ComboBox" align="Left Top" skin="MW_ComboBox" position="0 28 200 24" name="TextureFilteringButton">
+                            <Property key="AddItem" value="#{OMWEngine:TextureFilteringNearest}"/>
                             <Property key="AddItem" value="#{OMWEngine:TextureFilteringBilinear}"/>
                             <Property key="AddItem" value="#{OMWEngine:TextureFilteringTrilinear}"/>
+                            <Property key="AddItem" value="#{OMWEngine:TextureFilteringCubic}"/>
                         </Widget>
 
                         <Widget type="AutoSizedTextBox" skin="NormalText" position="0 58 200 18" name="AnisotropyLabel">

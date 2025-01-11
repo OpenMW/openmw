@@ -60,6 +60,8 @@ namespace
         }
         else if (magFilter == "nearest")
             return "#{OMWEngine:TextureFilteringNearest}";
+        else if (magFilter == "cubic")
+            return "#{OMWEngine:TextureFilteringCubic}";
 
         Log(Debug::Warning) << "Warning: Invalid texture filtering options: " << mipFilter << ", " << magFilter;
         return "#{OMWEngine:TextureFilteringOther}";
@@ -706,15 +708,25 @@ namespace MWGui
         auto& generalSettings = Settings::general();
         switch (pos)
         {
-            case 0: // Bilinear with mips
+            case 0: // Nearest with mips
+                generalSettings.mTextureMipmap.set("nearest");
+                generalSettings.mTextureMagFilter.set("nearest");
+                generalSettings.mTextureMinFilter.set("nearest");
+                break;
+            case 1: // Bilinear with mips
                 generalSettings.mTextureMipmap.set("nearest");
                 generalSettings.mTextureMagFilter.set("linear");
                 generalSettings.mTextureMinFilter.set("linear");
                 break;
-            case 1: // Trilinear with mips
+            case 2: // Trilinear with mips
                 generalSettings.mTextureMipmap.set("linear");
                 generalSettings.mTextureMagFilter.set("linear");
                 generalSettings.mTextureMinFilter.set("linear");
+                break;
+            case 3: // cubic with mips
+                generalSettings.mTextureMipmap.set("linear");
+                generalSettings.mTextureMagFilter.set("cubic");
+                generalSettings.mTextureMinFilter.set("cubic");
                 break;
             default:
                 Log(Debug::Warning) << "Unexpected texture filtering option pos " << pos;

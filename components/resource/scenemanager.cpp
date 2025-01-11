@@ -1127,11 +1127,15 @@ namespace Resource
 
         if (magfilter == "nearest")
             mag = osg::Texture::NEAREST;
+        else if (magfilter == "cubic")
+            mag = osg::Texture::CUBIC;
         else if (magfilter != "linear")
             Log(Debug::Warning) << "Warning: Invalid texture mag filter: " << magfilter;
 
         if (minfilter == "nearest")
             min = osg::Texture::NEAREST;
+        else if (minfilter == "cubic")
+            min = osg::Texture::CUBIC;
         else if (minfilter != "linear")
             Log(Debug::Warning) << "Warning: Invalid texture min filter: " << minfilter;
 
@@ -1139,6 +1143,8 @@ namespace Resource
         {
             if (min == osg::Texture::NEAREST)
                 min = osg::Texture::NEAREST_MIPMAP_NEAREST;
+            else if (min == osg::Texture::CUBIC)
+                min = osg::Texture::CUBIC_MIPMAP_NEAREST;
             else if (min == osg::Texture::LINEAR)
                 min = osg::Texture::LINEAR_MIPMAP_NEAREST;
         }
@@ -1148,6 +1154,8 @@ namespace Resource
                 Log(Debug::Warning) << "Warning: Invalid texture mipmap: " << mipmap;
             if (min == osg::Texture::NEAREST)
                 min = osg::Texture::NEAREST_MIPMAP_LINEAR;
+            else if (min == osg::Texture::CUBIC)
+                min = osg::Texture::CUBIC_MIPMAP_LINEAR;
             else if (min == osg::Texture::LINEAR)
                 min = osg::Texture::LINEAR_MIPMAP_LINEAR;
         }
@@ -1162,6 +1170,7 @@ namespace Resource
         mCache->accept(setFilterSettingsVisitor);
         mCache->accept(setFilterSettingsControllerVisitor);
     }
+
 
     void SceneManager::applyFilterSettings(osg::Texture* tex)
     {
