@@ -109,6 +109,14 @@ namespace fx
     {
         clear();
 
+        if (std::ranges::count(mFilePath.value(), '/') > 1)
+        {
+            Log(Debug::Error) << "Could not load technique, invalid location '" << mFilePath << "'";
+
+            mStatus = Status::File_Not_exists;
+            return false;
+        }
+
         if (!mVFS.exists(mFilePath))
         {
             Log(Debug::Error) << "Could not load technique, file does not exist '" << mFilePath << "'";

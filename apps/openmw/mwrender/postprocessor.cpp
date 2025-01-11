@@ -762,14 +762,18 @@ namespace MWRender
             if (Misc::StringUtils::ciEqual(technique->getName(), name))
                 return technique;
 
+        std::string realName = name;
+        auto fileIter = mTechniqueFileMap.find(name);
+        if (fileIter != mTechniqueFileMap.end())
+            realName = fileIter->first;
+
         auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
-            name, renderWidth(), renderHeight(), mUBO, mNormalsSupported);
+            std::move(realName), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
 
         technique->compile();
 
         if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
-            technique->setLastModificationTime(
-                std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
+            technique->setLastModificationTime(std::filesystem::last_write_time(fileIter->second));
 
         if (loadNextFrame)
         {
