@@ -53,7 +53,7 @@ namespace
             cell = cellOrName.as<MWLua::GCell>().mStore->getCell();
         else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
             cell = MWBase::Environment::get().getWorldModel()->getCell(cellOrName.as<std::string_view>()).getCell();
-        if (cell = nullptr)
+        if (cell == nullptr)
             throw std::runtime_error("Invalid cell");
         else if (!cell->isExterior())
             throw std::runtime_error("Cell cannot be interior");
