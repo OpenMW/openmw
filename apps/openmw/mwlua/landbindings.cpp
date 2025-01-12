@@ -51,6 +51,8 @@ namespace
         const MWWorld::Cell* cell = nullptr;
         if (cellOrName.is<MWLua::GCell>())
             cell = cellOrName.as<MWLua::GCell>().mStore->getCell();
+        else if (cellOrName.is<MWLua::LCell>())
+            cell = cellOrName.as<MWLua::LCell>().mStore->getCell();
         else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
             cell = MWBase::Environment::get().getWorldModel()->getCell(cellOrName.as<std::string_view>()).getCell();
         if (cell == nullptr)
