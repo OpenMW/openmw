@@ -464,7 +464,7 @@
 -- Get the terrain texture at a given location.
 -- @function [parent=#Land] getTextureAt
 -- @param openmw.util#Vector3 position
--- @param #any cellOrName (optional) cell or cell name in their exterior world space to query
+-- @param #any cellOrName cell or cell name in their exterior world space to query
 -- @return #nil, #string Texture path or nil if one isn't defined
 -- @return #nil, #string Plugin name or nil if failed to retrieve the texture
 

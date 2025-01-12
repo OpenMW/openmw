@@ -46,21 +46,19 @@ namespace
         return { tex, plugin };
     }
 
-    const ESM::RefId worldspaceAt(const osg::Vec3f& pos, sol::object cellOrName)
+    const ESM::RefId worldspaceAt(sol::object cellOrName)
     {
-        ESM::RefId worldspace;
+        const MWWorld::Cell* cell = nullptr;
         if (cellOrName.is<MWLua::GCell>())
-            worldspace = cellOrName.as<MWLua::GCell>().mStore->getCell()->getWorldSpace();
+            cell = cellOrName.as<MWLua::GCell>().mStore->getCell();
         else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
-            worldspace = MWBase::Environment::get()
-                             .getWorldModel()
-                             ->getCell(cellOrName.as<std::string_view>())
-                             .getCell()
-                             ->getWorldSpace();
-        else
-            worldspace = ESM::Cell::sDefaultWorldspaceId;
+            cell = MWBase::Environment::get().getWorldModel()->getCell(cellOrName.as<std::string_view>()).getCell();
+        if (cell = nullptr)
+            throw std::runtime_error("Invalid cell");
+        else if (!cell->isExterior())
+            throw std::runtime_error("Cell cannot be interior");
 
-        return worldspace;
+        return cell->getWorldSpace();
     }
 
     bool fillLandData(const MWWorld::Store<ESM::Land>& landStore, const osg::Vec3f& pos, const float cellSize,
@@ -91,7 +89,7 @@ namespace MWLua
         sol::table landApi(lua, sol::create);
 
         landApi["getHeightAt"] = [](const osg::Vec3f& pos, sol::object cellOrName) {
-            ESM::RefId worldspace = worldspaceAt(pos, cellOrName);
+            ESM::RefId worldspace = worldspaceAt(cellOrName);
             return MWBase::Environment::get().getWorld()->getTerrainHeightAt(pos, worldspace);
         };
 
@@ -100,7 +98,7 @@ namespace MWLua
             MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             const MWWorld::Store<ESM::Land>& landStore = store.get<ESM::Land>();
 
-            const float cellSize = ESM::getCellSize(worldspaceAt(pos, cellOrName));
+            const float cellSize = ESM::getCellSize(worldspaceAt(cellOrName));
             // We need to read land twice. Once to get the amount of texture samples per cell edge, and the second time
             // to get the actual data
             // This is because the visual land textures are offset with regards to quads that are rendered for terrain.
