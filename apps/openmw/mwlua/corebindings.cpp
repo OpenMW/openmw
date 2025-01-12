@@ -5,7 +5,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadfact.hpp>
-#include <components/esm3/loadltex.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/serialization.hpp>
