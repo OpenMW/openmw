@@ -53,6 +53,7 @@ namespace CSVRender
         std::vector<osg::Vec3> mObjectsAtDragStart;
         CSMWorld::IdTable* mSelectionGroups;
 
+        QString getTooltip();
         int getSubModeFromId(const std::string& id) const;
 
         osg::Vec3 quatToEuler(const osg::Quat& quat) const;
