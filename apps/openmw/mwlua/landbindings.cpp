@@ -97,8 +97,8 @@ namespace MWLua
 
         landApi["getTextureAt"] = [lua = lua](const osg::Vec3f& pos, sol::object cellOrName) {
             sol::variadic_results values;
-            Misc::NotNullPtr<MWWorld::ESMStore> store = MWBase::Environment::get().getESMStore();
-            const MWWorld::Store<ESM::Land>& landStore = store->get<ESM::Land>();
+            MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+            const MWWorld::Store<ESM::Land>& landStore = store.get<ESM::Land>();
 
             const float cellSize = ESM::getCellSize(worldspaceAt(pos, cellOrName));
             // We need to read land twice. Once to get the amount of texture samples per cell edge, and the second time
@@ -131,8 +131,8 @@ namespace MWLua
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
             if (textureId.first != 0)
             {
-                Misc::NotNullPtr<MWWorld::ESMStore> store = MWBase::Environment::get().getESMStore();
-                const MWWorld::Store<ESM::LandTexture>& textureStore = store->get<ESM::LandTexture>();
+                MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+                const MWWorld::Store<ESM::LandTexture>& textureStore = store.get<ESM::LandTexture>();
                 const std::string* textureString = textureStore.search(textureId.first - 1, textureId.second);
                 if (!textureString)
                     return values;
