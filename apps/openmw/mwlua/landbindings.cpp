@@ -97,7 +97,7 @@ namespace MWLua
 
         landApi["getTextureAt"] = [lua = lua](const osg::Vec3f& pos, sol::object cellOrName) {
             sol::variadic_results values;
-            MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             const MWWorld::Store<ESM::Land>& landStore = store.get<ESM::Land>();
 
             const float cellSize = ESM::getCellSize(worldspaceAt(cellOrName));
