@@ -129,7 +129,6 @@ namespace MWLua
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
             if (textureId.first != 0)
             {
-                MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                 const MWWorld::Store<ESM::LandTexture>& textureStore = store.get<ESM::LandTexture>();
                 const std::string* textureString = textureStore.search(textureId.first - 1, textureId.second);
                 if (!textureString)
