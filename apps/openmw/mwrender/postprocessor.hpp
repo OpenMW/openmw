@@ -18,6 +18,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/fx/stateupdater.hpp>
 #include <components/fx/technique.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "pingpongcanvas.hpp"
 #include "transparentpass.hpp"
@@ -229,7 +230,8 @@ namespace MWRender
         TechniqueList mQueuedTemplates;
         TechniqueList mInternalTechniques;
 
-        std::unordered_map<std::string, std::filesystem::path> mTechniqueFileMap;
+        std::unordered_map<std::string, std::filesystem::path, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
+            mTechniqueFileMap;
 
         RenderingManager& mRendering;
         osgViewer::Viewer* mViewer;
