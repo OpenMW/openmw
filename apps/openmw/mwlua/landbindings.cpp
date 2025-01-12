@@ -87,18 +87,18 @@ namespace MWLua
 {
     sol::table initCoreLandBindings(const Context& context)
     {
-        auto lua = context.sol();
+        sol::state_view lua = context.sol();
         sol::table landApi(lua, sol::create);
 
         landApi["getHeightAt"] = [](const osg::Vec3f& pos, sol::object cellOrName) {
-            auto worldspace = worldspaceAt(pos, cellOrName);
+            ESM::RefId worldspace = worldspaceAt(pos, cellOrName);
             return MWBase::Environment::get().getWorld()->getTerrainHeightAt(pos, worldspace);
         };
 
         landApi["getTextureAt"] = [lua = lua](const osg::Vec3f& pos, sol::object cellOrName) {
             sol::variadic_results values;
-            auto store = MWBase::Environment::get().getESMStore();
-            const auto& landStore = store->get<ESM::Land>();
+            Misc::NotNullPtr<MWWorld::ESMStore> store = MWBase::Environment::get().getESMStore();
+            const MWWorld::Store<ESM::Land>& landStore = store->get<ESM::Land>();
 
             const float cellSize = ESM::getCellSize(worldspaceAt(pos, cellOrName));
             // We need to read land twice. Once to get the amount of texture samples per cell edge, and the second time
@@ -131,14 +131,13 @@ namespace MWLua
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
             if (textureId.first != 0)
             {
-                auto store = MWBase::Environment::get().getESMStore();
-                const auto& textureStore = store->get<ESM::LandTexture>();
+                Misc::NotNullPtr<MWWorld::ESMStore> store = MWBase::Environment::get().getESMStore();
+                const MWWorld::Store<ESM::LandTexture>& textureStore = store->get<ESM::LandTexture>();
                 const std::string* textureString = textureStore.search(textureId.first - 1, textureId.second);
-                if (textureString)
-                    values.push_back(sol::make_object<std::string>(lua, *textureString));
-                else
+                if (!textureString)
                     return values;
 
+                values.push_back(sol::make_object<std::string>(lua, *textureString));
                 const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
                 if (textureId.second >= 0 && static_cast<size_t>(textureId.second) < contentList.size())
                     values.push_back(sol::make_object<std::string>(lua, contentList[textureId.second]));
