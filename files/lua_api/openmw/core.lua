@@ -453,11 +453,6 @@
 --- @{#Land}: Functions for interacting with land data
 -- @field [parent=#core] #Land land
 
-
---- @{#Magic}: spells and spell effects
--- @field [parent=#core] #Magic magic
-
-
 ---
 -- Get the terrain height at a given location.
 -- @function [parent=#Land] getHeightAt
@@ -472,6 +467,10 @@
 -- @param #any cellOrName (optional) cell or cell name in their exterior world space to query
 -- @return #nil, #string Texture path or nil if one isn't defined
 -- @return #nil, #string Plugin name or nil if failed to retrieve the texture
+
+
+--- @{#Magic}: spells and spell effects
+-- @field [parent=#core] #Magic magic
 
 --- Possible @{#SpellRange} values
 -- @field [parent=#Magic] #SpellRange RANGE
