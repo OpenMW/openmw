@@ -301,6 +301,25 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
     if (fileCopy.empty())
         return writeFile(stream);
 
+    QMultiMap<QString, SettingValue> existingSettings;
+    QString context = QFileInfo(file).absoluteDir().path();
+    if (readFile(stream, existingSettings, context))
+    {
+        // don't use QMultiMap operator== as mUserSettings may have blank context fields
+        // don't use one std::equal with custom predicate as (until Qt 6.4) there was no key-value iterator
+        if (std::equal(existingSettings.keyBegin(), existingSettings.keyEnd(), mUserSettings.keyBegin(),
+                mUserSettings.keyEnd())
+            && std::equal(existingSettings.cbegin(), existingSettings.cend(), mUserSettings.cbegin(),
+                [](const SettingValue& l, const SettingValue& r) {
+                    return l.originalRepresentation == r.originalRepresentation;
+                }))
+        {
+            // The existing file already contains what we need, don't risk scrambling comments and formatting
+            return true;
+        }
+    }
+    stream.seek(0);
+
     // start
     //   |
     //   |    +----------------------------------------------------------+
