@@ -63,7 +63,7 @@ namespace
         if (rec["type"] != sol::nil)
         {
             int weaponType = rec["type"].get<int>();
-            if (weaponType >= 0 && weaponType <= ESM::Weapon::MarksmanThrown)
+            if (weaponType >= 0 && weaponType <= ESM::Weapon::Last)
                 weapon.mData.mType = weaponType;
             else
                 throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
