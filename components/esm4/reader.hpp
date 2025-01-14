@@ -217,7 +217,7 @@ namespace ESM4
 
         // Methods added for updating loading progress bars
         inline std::size_t getFileSize() const { return mFileSize; }
-        inline std::size_t getFileOffset() const { return mStream->tellg(); }
+        inline std::size_t getFileOffset() const { return mSavedStream ? mSavedStream->tellg() : mStream->tellg(); }
 
         // Methods added for saving/restoring context
         ReaderContext getContext(); // WARN: must be called immediately after reading the record header

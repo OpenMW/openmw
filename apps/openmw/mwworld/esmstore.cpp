@@ -468,9 +468,16 @@ namespace MWWorld
         }
     }
 
-    void ESMStore::loadESM4(ESM4::Reader& reader)
+    void ESMStore::loadESM4(ESM4::Reader& reader, Loading::Listener* listener)
     {
-        auto visitorRec = [this](ESM4::Reader& reader) { return ESMStoreImp::readRecord(reader, *this); };
+        if (listener != nullptr)
+            listener->setProgressRange(::EsmLoader::fileProgress);
+        auto visitorRec = [this, listener](ESM4::Reader& reader) {
+            bool result = ESMStoreImp::readRecord(reader, *this);
+            if (listener != nullptr)
+                listener->setProgress(::EsmLoader::fileProgress * reader.getFileOffset() / reader.getFileSize());
+            return result;
+        };
         ESM4::ReaderUtils::readAll(reader, visitorRec, [](ESM4::Reader&) {});
     }
 
