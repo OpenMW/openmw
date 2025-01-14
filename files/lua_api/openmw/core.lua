@@ -1143,4 +1143,19 @@
 -- @field #number favouredSkillValue Secondary skill value required to get this rank.
 -- @field #number factionReaction Reaction of faction members if player is in this faction.
 
+--- @{#MWScripts}: MWScripts
+-- @field [parent=#core] #MWScript mwscripts
+
+---
+-- A read-only list of all @{#MWScriptRecord}s in the world database.
+-- @field [parent=#MWScripts] #list<#MWScriptRecord> records
+-- @usage local record = core.mwscripts.records['example_recordid']
+-- @usage local record = core.mwscripts.records[1]
+
+---
+-- MWScript data record
+-- @type MWScriptRecord
+-- @field #string id MWScript id
+-- @field #string text MWScript content
+
 return nil
