@@ -572,12 +572,8 @@ namespace MWClass
             weapon = *weaponslot;
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
-        const float fCombatDistance = store.find("fCombatDistance")->mValue.getFloat();
-        float dist = fCombatDistance
-            * (!weapon.isEmpty() ? weapon.get<ESM::Weapon>()->mBase->mData.mReach
-                                 : store.find("fHandToHandReach")->mValue.getFloat());
 
+        const float dist = MWMechanics::getMeleeWeaponReach(ptr, weapon);
         const std::pair<MWWorld::Ptr, osg::Vec3f> result = MWMechanics::getHitContact(ptr, dist);
         if (result.first.isEmpty()) // Didn't hit anything
             return true;
@@ -613,6 +609,9 @@ namespace MWClass
         const MWWorld::Class& othercls = victim.getClass();
         MWMechanics::CreatureStats& otherstats = othercls.getCreatureStats(victim);
         if (otherstats.isDead()) // Can't hit dead actors
+            return;
+
+        if (!MWMechanics::isInMeleeReach(ptr, victim, MWMechanics::getMeleeWeaponReach(ptr, weapon)))
             return;
 
         if (ptr == MWMechanics::getPlayer())
