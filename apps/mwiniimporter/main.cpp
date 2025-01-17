@@ -126,12 +126,20 @@ int wmain(int argc, wchar_t* wargv[])
         MwIniImporter importer;
         importer.setVerbose(vm.count("verbose") != 0);
 
+        MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
+
         // Font encoding settings
-        std::string encoding(vm["encoding"].as<std::string>());
+        std::string encoding;
+        if (vm["encoding"].defaulted() && cfg.contains("encoding") && !cfg["encoding"].empty())
+            encoding = cfg["encoding"].back();
+        else
+        {
+            encoding = vm["encoding"].as<std::string>();
+            cfg["encoding"] = {encoding};
+        }
         importer.setInputEncoding(ToUTF8::calculateEncoding(encoding));
 
         MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
-        MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
 
         if (!vm.count("fonts"))
         {
