@@ -135,7 +135,7 @@ int wmain(int argc, wchar_t* wargv[])
         else
         {
             encoding = vm["encoding"].as<std::string>();
-            cfg["encoding"] = {encoding};
+            cfg["encoding"] = { encoding };
         }
         importer.setInputEncoding(ToUTF8::calculateEncoding(encoding));
 
