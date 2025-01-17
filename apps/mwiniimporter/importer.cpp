@@ -352,12 +352,10 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::pat
     std::string line;
     while (std::getline(file, line))
     {
-
-        // we cant say comment by only looking at first char anymore
-        int comment_pos = static_cast<int>(line.find('#'));
-        if (comment_pos > 0)
+        // ignore comments - keep in sync with configfileparser.cpp
+        if (line.find('#') == line.find_first_not_of(" \t\r\n"))
         {
-            line = line.substr(0, comment_pos);
+            continue;
         }
 
         if (line.empty())
