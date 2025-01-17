@@ -183,15 +183,15 @@ namespace MWLua
             return shader;
         };
 
-        api["getChain"] = []() {
-            std::vector<Shader> chain;
+        api["getChain"] = [context]() {
+            sol::table chain(context.sol(), sol::create);
 
             for (const auto& shader : MWBase::Environment::get().getWorld()->getPostProcessor()->getChain())
             {
                 // Don't expose internal shaders to the API, they should be invisible to the user
                 if (shader->getInternal())
                     continue;
-                chain.emplace_back(shader);
+                chain.add(Shader(shader));
             }
 
             return chain;
