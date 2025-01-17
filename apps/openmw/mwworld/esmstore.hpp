@@ -219,7 +219,7 @@ namespace MWWorld
         void validateDynamic();
 
         void load(ESM::ESMReader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
-        void loadESM4(ESM4::Reader& esm);
+        void loadESM4(ESM4::Reader& esm, Loading::Listener* listener);
 
         template <class T>
         const Store<T>& get() const
