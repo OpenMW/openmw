@@ -472,6 +472,7 @@
 --- @{#Magic}: spells and spell effects
 -- @field [parent=#core] #Magic magic
 
+
 --- Possible @{#SpellRange} values
 -- @field [parent=#Magic] #SpellRange RANGE
 
