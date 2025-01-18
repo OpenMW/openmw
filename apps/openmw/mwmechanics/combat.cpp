@@ -578,6 +578,24 @@ namespace MWMechanics
         return dist;
     }
 
+    float getMeleeWeaponReach(const MWWorld::Ptr& actor, const MWWorld::Ptr& weapon)
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
+        const float fCombatDistance = store.find("fCombatDistance")->mValue.getFloat();
+        if (!weapon.isEmpty())
+            return fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
+        if (actor.getClass().isNpc())
+            return fCombatDistance * store.find("fHandToHandReach")->mValue.getFloat();
+        return fCombatDistance;
+    }
+
+    bool isInMeleeReach(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const float reach)
+    {
+        const float heightDiff = actor.getRefData().getPosition().pos[2] - target.getRefData().getPosition().pos[2];
+        return std::abs(heightDiff) < reach && getDistanceToBounds(actor, target) < reach;
+    }
+
     std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor, float reach)
     {
         // Lasciate ogne speranza, voi ch'entrate
@@ -614,10 +632,12 @@ namespace MWMechanics
         {
             if (actor == target || target.getClass().getCreatureStats(target).isDead())
                 continue;
+
             const float dist = getDistanceToBounds(actor, target);
-            const osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
-            if (dist >= reach || dist >= minDist || std::abs(targetPos.z() - actorPos.z()) >= reach)
+            if (dist >= minDist || !isInMeleeReach(actor, target, reach))
                 continue;
+
+            const osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
 
             // Horizontal angle checks.
             osg::Vec2f actorToTargetXY{ targetPos.x() - actorPos.x(), targetPos.y() - actorPos.y() };
