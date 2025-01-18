@@ -5,7 +5,6 @@
 #include <apps/openmw/mwworld/worldmodel.hpp>
 
 #include <components/esm/util.hpp>
-#include <components/esm3/landrecorddata.hpp>
 #include <components/esmterrain/storage.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -16,7 +15,7 @@ namespace
 {
     // Takes in a corrected world pos to match the visuals.
     ESMTerrain::UniqueTextureId getTextureAt(const std::span<const std::uint16_t> landData, const int plugin,
-        const int textureSize, const osg::Vec3f& correctedWorldPos, const float cellSize)
+        const osg::Vec3f& correctedWorldPos, const float cellSize)
     {
         int cellX = static_cast<int>(std::floor(correctedWorldPos.x() / cellSize));
         int cellY = static_cast<int>(std::floor(correctedWorldPos.y() / cellSize));
@@ -25,8 +24,8 @@ namespace
         float nX = (correctedWorldPos.x() - (cellX * cellSize)) / cellSize;
         float nY = (correctedWorldPos.y() - (cellY * cellSize)) / cellSize;
 
-        int startX = static_cast<int>(nX * textureSize);
-        int startY = static_cast<int>(nY * textureSize);
+        int startX = static_cast<int>(nX * ESM::Land::LAND_TEXTURE_SIZE);
+        int startY = static_cast<int>(nY * ESM::Land::LAND_TEXTURE_SIZE);
 
         assert(startX < ESM::Land::LAND_TEXTURE_SIZE);
         assert(startY < ESM::Land::LAND_TEXTURE_SIZE);
@@ -51,29 +50,8 @@ namespace
             throw std::runtime_error("Invalid cell");
         else if (!cell->isExterior())
             throw std::runtime_error("Cell cannot be interior");
-        else if (cell->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId)
-            throw std::runtime_error("Only default exterior worldspace is supported");
 
         return cell->getWorldSpace();
-    }
-
-    bool fillLandData(const MWWorld::Store<ESM::Land>& landStore, const osg::Vec3f& pos, const float cellSize,
-        const ESM::Land*& land, const ESM::Land::LandData*& landData)
-    {
-        int cellX = static_cast<int>(std::floor(pos.x() / cellSize));
-        int cellY = static_cast<int>(std::floor(pos.y() / cellSize));
-
-        land = landStore.search(cellX, cellY);
-
-        if (land != nullptr)
-            landData = land->getLandData(ESM::Land::DATA_VTEX);
-
-        // If we fail to preload land data, return, we need to be able to get *any* land to know how to correct
-        // the position used to sample terrain
-        if (landData == nullptr)
-            return false;
-
-        return true;
     }
 }
 
@@ -93,19 +71,33 @@ namespace MWLua
             sol::variadic_results values;
             const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             const MWWorld::Store<ESM::Land>& landStore = store.get<ESM::Land>();
+            ESM::RefId worldspace = worldspaceAt(cellOrName);
 
-            const float cellSize = ESM::getCellSize(worldspaceAt(cellOrName));
+            if (worldspace != ESM::Cell::sDefaultWorldspaceId)
+                return values;
+
+            const float cellSize = ESM::getCellSize(worldspace);
             const float offset = (cellSize / ESM::LandRecordData::sLandTextureSize) * 0.25;
             const osg::Vec3f correctedPos = pos + osg::Vec3f{ -offset, +offset, 0.0f };
 
             const ESM::Land* land = nullptr;
             const ESM::Land::LandData* landData = nullptr;
 
-            if (!fillLandData(landStore, correctedPos, cellSize, land, landData))
+            int cellX = static_cast<int>(std::floor(correctedPos.x() / cellSize));
+            int cellY = static_cast<int>(std::floor(correctedPos.y() / cellSize));
+
+            land = landStore.search(cellX, cellY);
+
+            if (land != nullptr)
+                landData = land->getLandData(ESM::Land::DATA_VTEX);
+
+            // If we fail to preload land data, return, we need to be able to get *any* land to know how to correct
+            // the position used to sample terrain
+            if (landData == nullptr)
                 return values;
 
             const ESMTerrain::UniqueTextureId textureId = getTextureAt(
-                landData->mTextures, land->getPlugin(), ESM::LandRecordData::sLandTextureSize, correctedPos, cellSize);
+                landData->mTextures, land->getPlugin(), correctedPos, cellSize);
 
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
             if (textureId.first != 0)
