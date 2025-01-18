@@ -96,8 +96,8 @@ namespace MWLua
             if (landData == nullptr)
                 return values;
 
-            const ESMTerrain::UniqueTextureId textureId = getTextureAt(
-                landData->mTextures, land->getPlugin(), correctedPos, cellSize);
+            const ESMTerrain::UniqueTextureId textureId
+                = getTextureAt(landData->mTextures, land->getPlugin(), correctedPos, cellSize);
 
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
             if (textureId.first != 0)
