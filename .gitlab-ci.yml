@@ -540,7 +540,7 @@ macOS14_Xcode15_arm64:
   script:
     - apt-get update
     - apt-get install -y curl gcab unzip
-    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscli-exe-linux-x86_64.zip
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.22.35.zip" -o awscli-exe-linux-x86_64.zip
     - unzip -d awscli-exe-linux-x86_64 awscli-exe-linux-x86_64.zip
     - pushd awscli-exe-linux-x86_64
     - ./aws/install
