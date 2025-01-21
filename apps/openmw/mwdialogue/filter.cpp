@@ -301,9 +301,13 @@ bool MWDialogue::Filter::testSelectStructNumeric(const SelectWrapper& select) co
     switch (select.getFunction())
     {
         case ESM::DialogueCondition::Function_Global:
-
+        {
+            const auto& world = MWBase::Environment::get().getWorld();
+            if (world->getGlobalVariableType(select.getName()) == ' ')
+                return true; // ignore this filter if the global doesn't exist
             // internally all globals are float :(
-            return select.selectCompare(MWBase::Environment::get().getWorld()->getGlobalFloat(select.getName()));
+            return select.selectCompare(world->getGlobalFloat(select.getName()));
+        }
 
         case ESM::DialogueCondition::Function_Local:
         {
