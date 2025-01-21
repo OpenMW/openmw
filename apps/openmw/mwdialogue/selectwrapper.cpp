@@ -247,29 +247,6 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     };
 }
 
-bool MWDialogue::SelectWrapper::isNpcOnly() const
-{
-    switch (mSelect.mFunction)
-    {
-        case ESM::DialogueCondition::Function_NotFaction:
-        case ESM::DialogueCondition::Function_NotClass:
-        case ESM::DialogueCondition::Function_NotRace:
-        case ESM::DialogueCondition::Function_SameSex:
-        case ESM::DialogueCondition::Function_SameRace:
-        case ESM::DialogueCondition::Function_SameFaction:
-        case ESM::DialogueCondition::Function_RankRequirement:
-        case ESM::DialogueCondition::Function_Reputation:
-        case ESM::DialogueCondition::Function_FactionRankDifference:
-        case ESM::DialogueCondition::Function_Werewolf:
-        case ESM::DialogueCondition::Function_PcWerewolfKills:
-        case ESM::DialogueCondition::Function_FacReactionLowest:
-        case ESM::DialogueCondition::Function_FacReactionHighest:
-            return true;
-        default:
-            return false;
-    }
-}
-
 bool MWDialogue::SelectWrapper::selectCompare(int value) const
 {
     return selectCompareImp(mSelect, value);
