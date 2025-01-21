@@ -589,7 +589,7 @@ macOS14_Xcode15_arm64:
   - choco install vswhere -y
   - choco install ninja -y
   - choco install python -y
-  - choco install awscli -y
+  - choco install awscli -y --version=2.22.35
   - refreshenv
   - |
     function Make-SafeFileName {
@@ -741,7 +741,7 @@ macOS14_Xcode15_arm64:
   - choco install 7zip -y
   - choco install vswhere -y
   - choco install python -y
-  - choco install awscli -y
+  - choco install awscli -y --version=2.22.35
   - refreshenv
   - |
     function Make-SafeFileName {
