@@ -503,6 +503,7 @@ Ubuntu_GCC_integration_tests_asan:
     - ccache/
   script:
     - CI/before_install.osx.sh
+    - brew install awscli@2.22.35
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
