@@ -1198,4 +1198,95 @@
 -- @field #string id MWScript id
 -- @field #string text MWScript content
 
+
+--- @{#Weather}: Weather
+-- @field [parent=#core] #Weather weather
+
+--- List of all @{#WeatherRecord}s.
+-- @field [parent=#Weather] #list<#WeatherRecord> records A read-only list of all @{#WeatherRecord}s in the world database, may be indexed by recordId.
+-- Implements [iterables#List](iterables.html#List) of #WeatherRecord.
+-- @usage local weather = core.weather.records.records['Cloudy']  -- get by id
+-- @usage local weather = core.weather.records.records[1]  -- get by index
+-- @usage -- Print all storms
+-- for _, weather in pairs(core.weather.records) do
+--     if weather.isStorm then
+--         print(weather.name)
+--     end
+-- end
+
+---
+-- Get the current weather
+-- @function [parent=#Weather] getCurrent
+-- @return #WeatherData
+
+---
+-- Get the next weather if any
+-- @function [parent=#Weather] getNext
+-- @return #any can be nil
+
+---
+-- Get current weather transition value
+-- @function [parent=#Weather] getTransition
+-- @return #number
+
+---
+-- Change the weather
+-- @function [parent=#Weather] changeWeather
+-- @param #string regionId
+-- @param #WeatherData The weather to change to
+
+---
+-- Get the current sun visibility taking weather transition into account.
+-- @function [parent=#Weather] getCurrentSunVisibility
+-- @return #number
+
+---
+-- Get the current sun percentage taking weather transition into account.
+-- @function [parent=#Weather] getCurrentSunPercentage
+-- @return #number
+
+---
+-- Get the current wind speed taking weather transition into account.
+-- @function [parent=#Weather] getCurrentWindSpeed
+-- @return #number
+
+---
+-- Get the current storm direction taking weather transition into account.
+-- @function [parent=#Weather] getCurrentStormDirection
+-- @return openmw.util#Vector3
+
+---
+-- Weather data
+-- @type WeatherRecord
+-- @extends #userdata
+-- @field #string recordId
+-- @field #number scriptId
+-- @field #string name
+-- @field #number windSpeed
+-- @field #number cloudSpeed
+-- @field #string cloudTexture
+-- @field #number cloudsMaximumPercent
+-- @field #boolean isStorm
+-- @field openmw.util#Vector3 stormDirection
+-- @field #number glareView
+-- @field #number rainSpeed
+-- @field #number rainEntranceSpeed
+-- @field #string rainEffect
+-- @field #number rainMaxRaindrops
+-- @field #number rainDiameter
+-- @field #number rainMaxHeight
+-- @field #number rainMinHeight
+-- @field #string rainLoopSoundID
+-- @field #table  thunderSoundID An array containing the recordIds of the thunder sounds
+-- @field #string ambientLoopSoundID
+-- @field #number particleEffect
+-- @field #number distantLandFogFactor
+-- @field #number distantLandFogOffset
+-- @field openmw.util#Vector4 sunDiscSunsetColor
+-- @field #table landFogDepth A table with the keys "sunrise", "day", "sunset" and "night"
+-- @field #table skyColor A table with the keys "sunrise", "day", "sunset" and "night"
+-- @field #table ambientColor A table with the keys "sunrise", "day", "sunset" and "night"
+-- @field #table fogColor A table with the keys "sunrise", "day", "sunset" and "night"
+-- @field #table sunColor A table with the keys "sunrise", "day", "sunset" and "night"
+
 return nil

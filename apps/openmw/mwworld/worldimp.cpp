@@ -1,6 +1,7 @@
 #include "worldimp.hpp"
 
 #include <charconv>
+#include <functional>
 #include <vector>
 
 #include <osg/ComputeBoundsVisitor>
@@ -1868,14 +1869,29 @@ namespace MWWorld
         return ESM::Cell::sDefaultWorldspaceId;
     }
 
-    int World::getCurrentWeather() const
+    const std::vector<MWWorld::Weather>& World::getAllWeather() const
     {
-        return mWeatherManager->getWeatherID();
+        return mWeatherManager->getAllWeather();
     }
 
-    int World::getNextWeather() const
+    const MWWorld::Weather& World::getCurrentWeather() const
     {
-        return mWeatherManager->getNextWeatherID();
+        return mWeatherManager->getWeather();
+    }
+
+    const MWWorld::Weather* World::getWeather(size_t index) const
+    {
+        return mWeatherManager->getWeather(index);
+    }
+
+    const MWWorld::Weather* World::getWeather(const ESM::RefId& id) const
+    {
+        return mWeatherManager->getWeather(id);
+    }
+
+    const MWWorld::Weather* World::getNextWeather() const
+    {
+        return mWeatherManager->getNextWeather();
     }
 
     float World::getWeatherTransition() const
@@ -1889,6 +1905,11 @@ namespace MWWorld
     }
 
     void World::changeWeather(const ESM::RefId& region, const unsigned int id)
+    {
+        mWeatherManager->changeWeather(region, id);
+    }
+
+    void World::changeWeather(const ESM::RefId& region, const ESM::RefId& id)
     {
         mWeatherManager->changeWeather(region, id);
     }

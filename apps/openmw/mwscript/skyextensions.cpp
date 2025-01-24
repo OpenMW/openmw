@@ -71,7 +71,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                runtime.push(MWBase::Environment::get().getWorld()->getCurrentWeather());
+                runtime.push(MWBase::Environment::get().getWorld()->getCurrentWeather().mScriptId);
             }
         };
 

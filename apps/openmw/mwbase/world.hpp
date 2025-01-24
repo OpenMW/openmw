@@ -16,6 +16,7 @@
 #include "../mwworld/globalvariablename.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/spellcaststate.hpp"
+#include "../mwworld/weather.hpp"
 
 #include "../mwrender/rendermode.hpp"
 
@@ -216,9 +217,17 @@ namespace MWBase
 
         virtual void changeWeather(const ESM::RefId& region, const unsigned int id) = 0;
 
-        virtual int getCurrentWeather() const = 0;
+        virtual void changeWeather(const ESM::RefId& region, const ESM::RefId& id) = 0;
 
-        virtual int getNextWeather() const = 0;
+        virtual const std::vector<MWWorld::Weather>& getAllWeather() const = 0;
+
+        virtual const MWWorld::Weather& getCurrentWeather() const = 0;
+
+        virtual const MWWorld::Weather* getWeather(size_t index) const = 0;
+
+        virtual const MWWorld::Weather* getWeather(const ESM::RefId& id) const = 0;
+
+        virtual const MWWorld::Weather* getNextWeather() const = 0;
 
         virtual float getWeatherTransition() const = 0;
 
