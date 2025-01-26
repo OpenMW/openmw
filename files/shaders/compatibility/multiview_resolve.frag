@@ -1,4 +1,4 @@
-#version 330
+#version 120
 #extension GL_EXT_texture_array : require
 
 varying vec2 uv;
