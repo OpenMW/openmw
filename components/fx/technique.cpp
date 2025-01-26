@@ -85,7 +85,7 @@ namespace fx
         mDescription = {};
         mVersion = {};
         mGLSLExtensions.clear();
-        mGLSLVersion = mUBO ? 330 : 120;
+        mGLSLVersion = (mUBO || Stereo::getMultiview()) ? 330 : 120;
         mGLSLProfile.clear();
         mDynamic = false;
     }

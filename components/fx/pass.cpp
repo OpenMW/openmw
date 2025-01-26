@@ -81,6 +81,7 @@ namespace fx
 #define omw_Position @position
 #define omw_Texture1D @texture1D
 #define omw_Texture2D @texture2D
+#define omw_Texture2DArray @texture2DArray
 #define omw_Texture3D @texture3D
 #define omw_Vertex @vertex
 #define omw_FragColor @fragColor
@@ -154,7 +155,7 @@ mat4 omw_InvProjectionMatrix()
     float omw_GetDepth(vec2 uv)
     {
 #if OMW_MULTIVIEW
-        float depth = omw_Texture2D(omw_SamplerDepth, vec3(uv, gl_ViewID_OVR)).r;
+        float depth = omw_Texture2DArray(omw_SamplerDepth, vec3(uv, gl_ViewID_OVR)).r;
 #else
         float depth = omw_Texture2D(omw_SamplerDepth, uv).r;
 #endif
@@ -165,10 +166,19 @@ mat4 omw_InvProjectionMatrix()
 #endif
     }
 
+    vec4 omw_GetDistortion(vec2 uv)
+    {
+#if OMW_MULTIVIEW
+        return omw_Texture2DArray(omw_SamplerDistortion, vec3(uv, gl_ViewID_OVR));
+#else
+        return omw_Texture2D(omw_SamplerDistortion, uv);
+#endif
+    }
+
     vec4 omw_GetLastShader(vec2 uv)
     {
 #if OMW_MULTIVIEW
-        return omw_Texture2D(omw_SamplerLastShader, vec3(uv, gl_ViewID_OVR));
+        return omw_Texture2DArray(omw_SamplerLastShader, vec3(uv, gl_ViewID_OVR));
 #else
         return omw_Texture2D(omw_SamplerLastShader, uv);
 #endif
@@ -177,7 +187,7 @@ mat4 omw_InvProjectionMatrix()
     vec4 omw_GetLastPass(vec2 uv)
     {
 #if OMW_MULTIVIEW
-        return omw_Texture2D(omw_SamplerLastPass, vec3(uv, gl_ViewID_OVR));
+        return omw_Texture2DArray(omw_SamplerLastPass, vec3(uv, gl_ViewID_OVR));
 #else
         return omw_Texture2D(omw_SamplerLastPass, uv);
 #endif
@@ -186,7 +196,7 @@ mat4 omw_InvProjectionMatrix()
     vec3 omw_GetNormals(vec2 uv)
     {
 #if OMW_MULTIVIEW
-        return omw_Texture2D(omw_SamplerNormals, vec3(uv, gl_ViewID_OVR)).rgb * 2.0 - 1.0;
+        return omw_Texture2DArray(omw_SamplerNormals, vec3(uv, gl_ViewID_OVR)).rgb * 2.0 - 1.0;
 #else
         return omw_Texture2D(omw_SamplerNormals, uv).rgb * 2.0 - 1.0;
 #endif
@@ -275,6 +285,9 @@ float omw_EstimateFogCoverageFromUV(vec2 uv)
                   { "@hdr", technique.getHDR() ? "1" : "0" }, { "@in", mLegacyGLSL ? "varying" : "in" },
                   { "@out", mLegacyGLSL ? "varying" : "out" }, { "@position", "gl_Position" },
                   { "@texture1D", mLegacyGLSL ? "texture1D" : "texture" },
+                  // Note, @texture2DArray must be defined before @texture2D since @texture2D is a perfect prefix of
+                  // texture2DArray
+                  { "@texture2DArray", mLegacyGLSL ? "texture2DArray" : "texture" },
                   { "@texture2D", mLegacyGLSL ? "texture2D" : "texture" },
                   { "@texture3D", mLegacyGLSL ? "texture3D" : "texture" },
                   { "@vertex", mLegacyGLSL ? "gl_Vertex" : "_omw_Vertex" },

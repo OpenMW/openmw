@@ -50,5 +50,5 @@ uniform sampler2DArray opaqueDepthTex;
 
 vec4 sampleOpaqueDepthTex(vec2 uv)
 {
-    return texture2DArray(opaqueDepthTex, vec3((uv), gl_ViewID_OVR));
+    return texture(opaqueDepthTex, vec3((uv), gl_ViewID_OVR));
 }
