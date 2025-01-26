@@ -8,7 +8,6 @@
 #include <osg/LightSource>
 #include <osg/PolygonMode>
 #include <osg/Texture2D>
-#include <osg/Texture2DArray>
 
 #include <osgDB/ReadFile>
 

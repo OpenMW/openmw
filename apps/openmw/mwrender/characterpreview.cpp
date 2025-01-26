@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include <osg/BlendFunc>
-#include <osg/Texture2DArray>
 #include <osg/Camera>
 #include <osg/Fog>
 #include <osg/LightModel>
@@ -259,7 +258,8 @@ namespace MWRender
 
         // TODO: Clean up this mess of loose uniforms that shaders depend on.
         // turn off sky blending
-        int skyTextureSlot = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::SkyTexture);
+        int skyTextureSlot = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
+            Shader::ShaderManager::Slot::SkyTexture);
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
         stateset->addUniform(new osg::Uniform("sky", skyTextureSlot));
