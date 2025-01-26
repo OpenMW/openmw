@@ -1007,7 +1007,6 @@ void SceneUtil::MWShadowTechnique::copyShadowStateSettings(osgUtil::CullVisitor&
 {
     for (const auto& sd : vdd->getShadowDataList())
     {
-        //assignTexGenSettings(&cv, sd->_camera, sd->_textureUnit, sd->_texgen);
         assignValidRegionSettings(cv, sd->_camera, sd->_sm_i, vdd->_uniforms[cv.getTraversalNumber()%2]);
         assignShadowStateSettings(cv, sd->_camera, sd->_sm_i, vdd->_uniforms[cv.getTraversalNumber()%2]);
     }

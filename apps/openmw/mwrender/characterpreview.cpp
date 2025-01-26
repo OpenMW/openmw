@@ -266,8 +266,7 @@ namespace MWRender
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
         if (Stereo::getMultiview())
         {
-            // The above set the sky texture unit to 0. Normally this is fine since texture unit 0 is the sampler2d diffuseMap, which will be set.
-            // However, in multiview the sky texture is a sampler2darray, and so needs to be set separately with a dummy texture
+            // Multiview needs a texture2DArray dummy texture applied here
             osg::Texture2DArray* textureArray = new osg::Texture2DArray;
             textureArray->setTextureSize(1, 1, 2);
             textureArray->setName("fakeSkyTexture");
@@ -280,7 +279,6 @@ namespace MWRender
         }
 
         stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
-        
 
         // Opaque stuff must have 1 as its fragment alpha as the FBO is translucent, so having blending off isn't enough
         osg::ref_ptr<osg::TexEnvCombine> noBlendAlphaEnv = new osg::TexEnvCombine();

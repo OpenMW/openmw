@@ -5,10 +5,10 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Fog>
 #include <osg/LightModel>
-#include <osg/Texture2DArray>
 #include <osg/LightSource>
 #include <osg/PolygonMode>
 #include <osg/Texture2D>
+#include <osg/Texture2DArray>
 
 #include <osgDB/ReadFile>
 
@@ -17,6 +17,8 @@
 #include <components/esm3/loadcell.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/misc/constants.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
@@ -735,25 +737,29 @@ namespace MWRender
         stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
 
         // turn of sky blending
-        int skyTextureSlot = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::SkyTexture);
+        int skyTextureSlot = MWBase::Environment::get()
+                                 .getResourceSystem()
+                                 ->getSceneManager()
+                                 ->getShaderManager()
+                                 .reserveGlobalTextureUnits(Shader::ShaderManager::Slot::SkyTexture);
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
         stateset->addUniform(new osg::Uniform("sky", skyTextureSlot));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
-    if (Stereo::getMultiview())
-    {
-        // The above set the sky texture unit to 0. Normally this is fine since texture unit 0 is the sampler2d diffuseMap, which will be set.
-        // However, in multiview the sky texture is a sampler2darray, and so needs to be set separately with a dummy texture
-        osg::Texture2DArray* textureArray = new osg::Texture2DArray;
-        textureArray->setTextureSize(1, 1, 2);
-        textureArray->setName("fakeSkyTexture");
-        textureArray->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-        textureArray->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        textureArray->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-        textureArray->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        textureArray->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
-        stateset->setTextureAttributeAndModes(skyTextureSlot, textureArray, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
-    }
+        if (Stereo::getMultiview())
+        {
+            // Multiview needs a texture2DArray dummy texture applied here
+            osg::Texture2DArray* textureArray = new osg::Texture2DArray;
+            textureArray->setTextureSize(1, 1, 2);
+            textureArray->setName("fakeSkyTexture");
+            textureArray->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+            textureArray->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+            textureArray->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            textureArray->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            textureArray->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
+            stateset->setTextureAttributeAndModes(skyTextureSlot, textureArray,
+                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+        }
 
         osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
         lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
