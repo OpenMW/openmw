@@ -746,20 +746,6 @@ namespace MWRender
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
         stateset->addUniform(new osg::Uniform("sky", skyTextureSlot));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
-        if (Stereo::getMultiview())
-        {
-            // Multiview needs a texture2DArray dummy texture applied here
-            osg::Texture2DArray* textureArray = new osg::Texture2DArray;
-            textureArray->setTextureSize(1, 1, 2);
-            textureArray->setName("fakeSkyTexture");
-            textureArray->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-            textureArray->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-            textureArray->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-            textureArray->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-            textureArray->setWrap(osg::Texture::WRAP_R, osg::Texture::CLAMP_TO_EDGE);
-            stateset->setTextureAttributeAndModes(skyTextureSlot, textureArray,
-                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
-        }
 
         osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
         lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
