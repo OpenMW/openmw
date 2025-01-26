@@ -17,4 +17,6 @@ vec4 samplerLastShader(vec2 uv);
 vec3 sampleSkyColor(vec2 uv);
 #endif
 
+vec4 sampleOpaqueDepthTex(vec2 uv);
+
 #endif  // OPENMW_FRAGMENT_H_GLSL

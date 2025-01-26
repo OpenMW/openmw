@@ -113,8 +113,6 @@ uniform sampler2D orthoDepthMap;
 varying vec3 orthoDepthMapCoord;
 #endif
 
-uniform sampler2D opaqueDepthTex;
-
 void main()
 {
 #if @particleOcclusion
@@ -143,7 +141,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 
 #if defined(DISTORTION) && DISTORTION
     gl_FragData[0].a *= getDiffuseColor().a;
-    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords / @distorionRTRatio).x);
+    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, sampleOpaqueDepthTex(screenCoords / @distorionRTRatio).x);
     return;
 #endif
 
@@ -258,7 +256,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
         viewNormal,
         near,
         far,
-        texture2D(opaqueDepthTex, screenCoords).x,
+        sampleOpaqueDepthTex(screenCoords).x,
         particleSize,
         particleFade,
         softFalloffDepth
