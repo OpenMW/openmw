@@ -177,9 +177,6 @@ namespace MWLua
             if (!shader.mShader || !shader.mShader->isValid())
                 throw std::runtime_error(Misc::StringUtils::format("Failed loading shader '%s'", name));
 
-            if (!shader.mShader->getDynamic())
-                throw std::runtime_error(Misc::StringUtils::format("Shader '%s' is not marked as dynamic", name));
-
             return shader;
         };
 
