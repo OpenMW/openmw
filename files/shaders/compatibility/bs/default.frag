@@ -40,6 +40,7 @@ uniform float specStrength;
 uniform bool useTreeAnim;
 uniform float distortionStrength;
 
+#include "lib/core/fragment.h.glsl"
 #include "lib/light/lighting.glsl"
 #include "lib/material/alpha.glsl"
 #include "lib/util/distortion.glsl"

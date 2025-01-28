@@ -26,6 +26,7 @@ uniform float far;
 uniform float near;
 uniform float alphaRef;
 
+#include "lib/core/fragment.h.glsl"
 #include "lib/material/alpha.glsl"
 
 #include "compatibility/vertexcolors.glsl"
