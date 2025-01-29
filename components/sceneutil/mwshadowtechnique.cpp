@@ -1511,7 +1511,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
             cv.popStateSet();
 
-
             if (!orthographicViewFrustum && settings->getShadowMapProjectionHint()==ShadowSettings::PERSPECTIVE_SHADOW_MAP)
             {
                 assignValidRegionSettings(cv, camera, sm_i, vddUniforms);
@@ -3077,7 +3076,6 @@ void MWShadowTechnique::assignShadowStateSettings(osgUtil::CullVisitor& cv, osg:
     }
 
     shadowSpaceUniform->set(shadowSpaceMatrix);
-    return;
 }
 
 void SceneUtil::MWShadowTechnique::assignValidRegionSettings(osgUtil::CullVisitor & cv, osg::Camera* camera, unsigned int sm_i, Uniforms & uniforms)
