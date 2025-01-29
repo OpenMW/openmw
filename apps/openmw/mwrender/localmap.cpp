@@ -736,14 +736,8 @@ namespace MWRender
         stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
 
         // turn of sky blending
-        int skyTextureSlot = MWBase::Environment::get()
-                                 .getResourceSystem()
-                                 ->getSceneManager()
-                                 ->getShaderManager()
-                                 .reserveGlobalTextureUnits(Shader::ShaderManager::Slot::SkyTexture);
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
-        stateset->addUniform(new osg::Uniform("sky", skyTextureSlot));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
 
         osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
