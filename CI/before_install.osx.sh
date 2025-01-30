@@ -7,7 +7,7 @@ export HOMEBREW_AUTOREMOVE=1
 brew tap --repair
 brew update --quiet
 
-brew install curl xquartz gd fontconfig freetype harfbuzz brotli
+brew install curl xquartz gd fontconfig freetype harfbuzz brotli s3cmd
 
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake

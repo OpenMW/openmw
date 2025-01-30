@@ -510,7 +510,6 @@ Ubuntu_GCC_integration_tests_asan:
     - CI/before_script.osx.sh
     - cd build; make -j $(sysctl -n hw.logicalcpu) package
     - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
-    - brew install s3cmd
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
         echo "[default]" > ~/.s3cfg
@@ -522,7 +521,7 @@ Ubuntu_GCC_integration_tests_asan:
 
         artifactDirectory="${CI_PROJECT_NAMESPACE//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_REF_NAME//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_SHORT_SHA//[\"<>|$'\t'\/\\?*]/_}-${CI_JOB_ID//[\"<>|$'\t'\/\\?*]/_}/"
         for dmg in *.dmg; do
-          s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}/
+          s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
     - ccache -s
