@@ -503,7 +503,6 @@ Ubuntu_GCC_integration_tests_asan:
     - ccache/
   script:
     - CI/before_install.osx.sh
-    - brew install awscli@2.22.35
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
@@ -511,12 +510,23 @@ Ubuntu_GCC_integration_tests_asan:
     - CI/before_script.osx.sh
     - cd build; make -j $(sysctl -n hw.logicalcpu) package
     - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
-    - aws --version
+    - brew install s3cmd
+    - s3cmd --version
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
+        # Configure s3cmd
+        cat > ~/.s3cfg << EOF
+        [default]
+        access_key = ${AWS_ACCESS_KEY_ID}
+        secret_key = ${AWS_SECRET_ACCESS_KEY}
+        host_base = rgw.ctrl-c.liu.se
+        host_bucket = %(bucket)s.rgw.ctrl-c.liu.se
+        use_https = True
+        EOF
+
         artifactDirectory="${CI_PROJECT_NAMESPACE//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_REF_NAME//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_SHORT_SHA//[\"<>|$'\t'\/\\?*]/_}-${CI_JOB_ID//[\"<>|$'\t'\/\\?*]/_}/"
         for dmg in *.dmg; do
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "${dmg}" s3://openmw-artifacts/${artifactDirectory}
+          s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}/
         done
       fi
     - ccache -s
