@@ -203,7 +203,8 @@ jobs:
       if: ${{ env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' && inputs.package }}
       working-directory: ${{ github.workspace }}/SymStore
       run: |
-        choco upgrade awscli -y --version=2.22.35 --allow-downgrade
+        choco uninstall awscli -y
+        choco install awscli -y --version=2.22.35
         aws --version
         aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only --exclude * --include *.ex_ --include *.dl_ --include *.pd_ . s3://openmw-sym
 
