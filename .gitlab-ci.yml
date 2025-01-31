@@ -512,9 +512,16 @@ Ubuntu_GCC_integration_tests_asan:
     - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
+        echo "[default]" > ~/.s3cfg
+        echo "access_key = ${AWS_ACCESS_KEY_ID}" >> ~/.s3cfg
+        echo "secret_key = ${AWS_SECRET_ACCESS_KEY}" >> ~/.s3cfg
+        echo "host_base = rgw.ctrl-c.liu.se" >> ~/.s3cfg
+        echo "host_bucket = %(bucket)s.rgw.ctrl-c.liu.se" >> ~/.s3cfg
+        echo "use_https = True" >> ~/.s3cfg
+
         artifactDirectory="${CI_PROJECT_NAMESPACE//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_REF_NAME//[\"<>|$'\t'\/\\?*]/_}/${CI_COMMIT_SHORT_SHA//[\"<>|$'\t'\/\\?*]/_}-${CI_JOB_ID//[\"<>|$'\t'\/\\?*]/_}/"
         for dmg in *.dmg; do
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "${dmg}" s3://openmw-artifacts/${artifactDirectory}
+          s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
     - ccache -s
@@ -540,7 +547,7 @@ macOS14_Xcode15_arm64:
   script:
     - apt-get update
     - apt-get install -y curl gcab unzip
-    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscli-exe-linux-x86_64.zip
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.22.35.zip" -o awscli-exe-linux-x86_64.zip
     - unzip -d awscli-exe-linux-x86_64 awscli-exe-linux-x86_64.zip
     - pushd awscli-exe-linux-x86_64
     - ./aws/install
@@ -587,7 +594,7 @@ macOS14_Xcode15_arm64:
   - choco install vswhere -y
   - choco install ninja -y
   - choco install python -y
-  - choco install awscli -y
+  - choco install awscli -y --version=2.22.35
   - refreshenv
   - |
     function Make-SafeFileName {
@@ -621,6 +628,7 @@ macOS14_Xcode15_arm64:
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
+    - aws --version
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
@@ -738,7 +746,7 @@ macOS14_Xcode15_arm64:
   - choco install 7zip -y
   - choco install vswhere -y
   - choco install python -y
-  - choco install awscli -y
+  - choco install awscli -y --version=2.22.35
   - refreshenv
   - |
     function Make-SafeFileName {
@@ -767,6 +775,7 @@ macOS14_Xcode15_arm64:
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
+    - aws --version
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
