@@ -1,17 +1,13 @@
 #include "animblendrules.hpp"
 
 #include <iterator>
-#include <map>
+#include <utility>
 
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include <components/debug/debuglog.hpp>
-#include <components/files/configfileparser.hpp>
-#include <components/files/conversion.hpp>
-#include <components/sceneutil/controller.hpp>
-#include <components/sceneutil/textkeymap.hpp>
 
 #include <stdexcept>
 #include <yaml-cpp/yaml.h>
