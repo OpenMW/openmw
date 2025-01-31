@@ -736,7 +736,6 @@ namespace MWRender
         // turn of sky blending
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
-        stateset->addUniform(new osg::Uniform("sky", 0));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
 
         osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;

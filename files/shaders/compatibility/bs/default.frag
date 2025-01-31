@@ -26,8 +26,6 @@ uniform sampler2D normalMap;
 varying vec2 normalMapUV;
 #endif
 
-uniform sampler2D opaqueDepthTex;
-
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -42,6 +40,7 @@ uniform float specStrength;
 uniform bool useTreeAnim;
 uniform float distortionStrength;
 
+#include "lib/core/fragment.h.glsl"
 #include "lib/light/lighting.glsl"
 #include "lib/material/alpha.glsl"
 #include "lib/util/distortion.glsl"
@@ -59,7 +58,7 @@ void main()
 #if defined(DISTORTION) && DISTORTION
     vec2 screenCoords = gl_FragCoord.xy / (screenRes * @distorionRTRatio);
     gl_FragData[0].a *= getDiffuseColor().a;
-    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords).x);
+    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, sampleOpaqueDepthTex(screenCoords).x);
 
     return;
 #endif

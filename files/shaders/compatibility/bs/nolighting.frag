@@ -26,6 +26,7 @@ uniform float far;
 uniform float near;
 uniform float alphaRef;
 
+#include "lib/core/fragment.h.glsl"
 #include "lib/material/alpha.glsl"
 
 #include "compatibility/vertexcolors.glsl"
@@ -35,7 +36,6 @@ uniform float alphaRef;
 #if @softParticles
 #include "lib/particle/soft.glsl"
 
-uniform sampler2D opaqueDepthTex;
 uniform float particleSize;
 uniform bool particleFade;
 uniform float softFalloffDepth;
@@ -70,7 +70,7 @@ void main()
         viewNormal,
         near,
         far,
-        texture2D(opaqueDepthTex, screenCoords).x,
+        sampleOpaqueDepthTex(screenCoords).x,
         particleSize,
         particleFade,
         softFalloffDepth
