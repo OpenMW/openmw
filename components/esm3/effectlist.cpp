@@ -58,4 +58,18 @@ namespace ESM
             || mData.mMagnMax != rhs.mData.mMagnMax || mData.mDuration != rhs.mData.mDuration;
     }
 
+    // Initialize a default, blank effect
+    void IndexedENAMstruct::blank()
+    {
+        mData.mEffectID = 0;
+        mData.mArea = 0;
+        mData.mRange = 0;
+        mData.mSkill = -1;
+        mData.mAttribute = -1;
+        mData.mMagnMax = 0;
+        mData.mMagnMin = 0;
+        mData.mDuration = 0;
+        mIndex = 0;
+    }
+
 } // end namespace

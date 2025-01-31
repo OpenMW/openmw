@@ -137,6 +137,119 @@ namespace MWLua
     using ActorActiveSpells = ActorStore<MWMechanics::ActiveSpells>;
 }
 
+namespace
+{
+    static ESM::IndexedENAMstruct tableToEffectParam(const sol::table& effectTable)
+    {
+        ESM::IndexedENAMstruct effect;
+        effect.blank();
+        if (effectTable["id"] != sol::nil)
+            effect.mData.mEffectID = ESM::MagicEffect::indexNameToIndex(effectTable["id"].get<std::string_view>());
+        if (effectTable["affectedSkill"] != sol::nil)
+            effect.mData.mSkill = ESM::Skill::refIdToIndex(
+                ESM::RefId::deserializeText(effectTable["affectedSkill"].get<std::string_view>()));
+        if (effectTable["affectedAttribute"] != sol::nil)
+            effect.mData.mAttribute = ESM::Attribute::refIdToIndex(
+                ESM::RefId::deserializeText(effectTable["affectedAttribute"].get<std::string_view>()));
+        if (effectTable["range"] != sol::nil)
+            effect.mData.mRange = effectTable["range"].get<int32_t>();
+        if (effectTable["area"] != sol::nil)
+            effect.mData.mArea = effectTable["area"].get<int32_t>();
+        if (effectTable["duration"] != sol::nil)
+            effect.mData.mDuration = effectTable["duration"].get<int32_t>();
+        if (effectTable["magnitudeMin"] != sol::nil)
+            effect.mData.mMagnMin = effectTable["magnitudeMin"].get<int32_t>();
+        if (effectTable["magnitudeMax"] != sol::nil)
+            effect.mData.mMagnMax = effectTable["magnitudeMax"].get<int32_t>();
+        return effect;
+    }
+
+    // Populates an enchantment struct from a Lua table.
+    ESM::Enchantment tableToEnchantment(const sol::table& rec)
+    {
+        ESM::Enchantment enchantment;
+        if (rec["template"] != sol::nil)
+            enchantment = LuaUtil::cast<ESM::Enchantment>(rec["template"]);
+        else
+            enchantment.blank();
+        if (rec["autocalcFlag"] != sol::nil)
+            rec["autocalcFlag"] 
+                     ? (enchantment.mData.mFlags | ESM::Enchantment::Autocalc) 
+                     : (enchantment.mData.mFlags & ~ESM::Enchantment::Autocalc);
+        if (rec["charge"] != sol::nil)
+            enchantment.mData.mCharge = rec["charge"];
+        if (rec["cost"] != sol::nil)
+            enchantment.mData.mCost = rec["cost"];
+        if (rec["effects"] != sol::nil)
+        { // Copied from tableToPotion, which should, i guess, work the same way.
+            sol::table effectsTable = rec["effects"];
+            size_t numEffects = effectsTable.size();
+            enchantment.mEffects.mList.resize(numEffects);
+            for (size_t i = 0; i < numEffects; ++i)
+            {
+                enchantment.mEffects.mList[i] = tableToEffectParam(effectsTable[LuaUtil::toLuaIndex(i)]);
+            }
+            enchantment.mEffects.updateIndexes();
+        }
+        if (rec["type"] != sol::nil)
+        {
+            int enchType = rec["type"].get<int>();
+            if (enchType >= 0 && enchType <= ESM::Enchantment::Type::ConstantEffect)
+                enchantment.mData.mType = enchType;
+            else
+                throw std::runtime_error("Invalid Enchantment Type provided: " + std::to_string(enchType));
+        }
+
+        return enchantment;
+    }
+    
+    // Populates a spell struct from a Lua table.
+    ESM::Spell tableToSpell(const sol::table& rec)
+    {
+        ESM::Spell spell;
+        if (rec["template"] != sol::nil)
+            spell = LuaUtil::cast<ESM::Spell>(rec["template"]);
+        else
+            spell.blank();
+        if (rec["alwaysSucceedFlag"] != sol::nil)
+            rec["alwaysSucceedFlag"] 
+                     ? (spell.mData.mFlags | ESM::Spell::F_Always) 
+                     : (spell.mData.mFlags & ~ESM::Spell::F_Always);
+        if (rec["autocalcFlag"] != sol::nil)
+            rec["autocalcFlag"] 
+                     ? (spell.mData.mFlags | ESM::Spell::F_Autocalc) 
+                     : (spell.mData.mFlags & ~ESM::Spell::F_Autocalc);
+        if (rec["starterSpellFlag"] != sol::nil)
+            rec["starterSpellFlag"] 
+                     ? (spell.mData.mFlags | ESM::Spell::F_PCStart) 
+                     : (spell.mData.mFlags & ~ESM::Spell::F_PCStart);
+        if (rec["cost"] != sol::nil)
+            spell.mData.mCost = rec["cost"];
+        if (rec["name"] != sol::nil)
+            spell.mName = rec["name"];
+        if (rec["effects"] != sol::nil)
+        { // Copied from tableToPotion, which should, i guess, work the same way.
+            sol::table effectsTable = rec["effects"];
+            size_t numEffects = effectsTable.size();
+            spell.mEffects.mList.resize(numEffects);
+            for (size_t i = 0; i < numEffects; ++i)
+            {
+                spell.mEffects.mList[i] = tableToEffectParam(effectsTable[LuaUtil::toLuaIndex(i)]);
+            }
+            spell.mEffects.updateIndexes();
+        }
+        if (rec["type"] != sol::nil)
+        {
+            int spellType = rec["type"].get<int>();
+            if (spellType >= 0 && spellType <= ESM::Spell::ST_Power)
+                spell.mData.mType = spellType;
+            else
+                throw std::runtime_error("Invalid Spell Type provided: " + std::to_string(spellType));
+        }
+        return spell;
+    }
+}
+
 namespace sol
 {
     template <>
@@ -253,11 +366,13 @@ namespace MWLua
         // Spell store
         sol::table spells(lua, sol::create);
         addRecordFunctionBinding<ESM::Spell>(spells, context);
+        spells["createRecordDraft"] = tableToSpell;
         magicApi["spells"] = LuaUtil::makeReadOnly(spells);
 
         // Enchantment store
         sol::table enchantments(lua, sol::create);
         addRecordFunctionBinding<ESM::Enchantment>(enchantments, context);
+        enchantments["createRecordDraft"] = tableToEnchantment;
         magicApi["enchantments"] = LuaUtil::makeReadOnly(enchantments);
 
         // MagicEffect store

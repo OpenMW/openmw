@@ -9,6 +9,8 @@
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadench.hpp>
 #include <components/lua/luastate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -192,6 +194,14 @@ namespace MWLua
             [lua = context.mLua](const ESM::Light& light) -> const ESM::Light* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(light);
+            },
+            [lua = context.mLua](const ESM::Enchantment& ench) -> const ESM::Enchantment* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(ench);
+            },
+            [lua = context.mLua](const ESM::Spell& spell) -> const ESM::Spell* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(spell);
             });
 
         api["_runStandardActivationAction"] = [context](const GObject& object, const GObject& actor) {

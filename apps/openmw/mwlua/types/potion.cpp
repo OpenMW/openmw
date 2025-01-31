@@ -3,6 +3,7 @@
 #include "modelproperty.hpp"
 
 #include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -50,8 +51,38 @@ namespace
             potion.mEffects.mList.resize(numEffects);
             for (size_t i = 0; i < numEffects; ++i)
             {
-                potion.mEffects.mList[i] = LuaUtil::cast<ESM::IndexedENAMstruct>(effectsTable[LuaUtil::toLuaIndex(i)]);
-            }
+                sol::object element = effectsTable[LuaUtil::toLuaIndex(i)];
+                if (element.is<ESM::IndexedENAMstruct>()) // It can be casted (extracted from another magic thing)
+                {
+                    potion.mEffects.mList[i]
+                        = LuaUtil::cast<ESM::IndexedENAMstruct>(effectsTable[LuaUtil::toLuaIndex(i)]);
+                }
+                else // Recreate from a table
+                {
+                    ESM::IndexedENAMstruct effect;
+                    effect.blank();
+                    sol::table effectTable = effectsTable[LuaUtil::toLuaIndex(i)];
+                    if (effectTable["id"] != sol::nil)
+                        effect.mData.mEffectID = ESM::MagicEffect::indexNameToIndex(effectTable["id"].get<std::string_view>());
+                    if (effectTable["affectedSkill"] != sol::nil)
+                        effect.mData.mSkill = ESM::Skill::refIdToIndex(
+                            ESM::RefId::deserializeText(effectTable["affectedSkill"].get<std::string_view>()));
+                    if (effectTable["affectedAttribute"] != sol::nil)
+                        effect.mData.mAttribute = ESM::Attribute::refIdToIndex(
+                            ESM::RefId::deserializeText(effectTable["affectedAttribute"].get<std::string_view>()));
+                    if (effectTable["range"] != sol::nil)
+                        effect.mData.mRange = effectTable["range"].get<int32_t>();
+                    if (effectTable["area"] != sol::nil)
+                        effect.mData.mArea = effectTable["area"].get<int32_t>();
+                    if (effectTable["duration"] != sol::nil)
+                        effect.mData.mDuration = effectTable["duration"].get<int32_t>();
+                    if (effectTable["magnitudeMin"] != sol::nil)
+                        effect.mData.mMagnMin = effectTable["magnitudeMin"].get<int32_t>();
+                    if (effectTable["magnitudeMax"] != sol::nil)
+                        effect.mData.mMagnMax = effectTable["magnitudeMax"].get<int32_t>();
+                    potion.mEffects.mList[i] = effect;
+                }
+            } // Indexes are updated automatically so we do not care when creating a new table
             potion.mEffects.updateIndexes();
         }
         return potion;

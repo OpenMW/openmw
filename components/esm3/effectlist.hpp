@@ -30,6 +30,7 @@ namespace ESM
     {
         bool operator!=(const IndexedENAMstruct& rhs) const;
         bool operator==(const IndexedENAMstruct& rhs) const { return !(this->operator!=(rhs)); }
+        void blank();
         ENAMstruct mData;
         uint32_t mIndex;
     };
