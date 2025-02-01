@@ -1,5 +1,6 @@
 #include "types.hpp"
 
+#include <apps/openmw/mwbase/dialoguemanager.hpp>
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadfact.hpp>
 
@@ -194,6 +195,18 @@ namespace MWLua
             if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
                 throw std::runtime_error("Only player and global scripts can toggle teleportation.");
             MWBase::Environment::get().getWorld()->enableTeleporting(state);
+        };
+        player["addTopic"] = [](const Object& player, std::string topicId) {
+            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+                throw std::runtime_error("Only player and global scripts may add topics.");
+
+            ESM::RefId topic = ESM::RefId::stringRefId(topicId);
+            if (!MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topic))
+            {
+                throw std::runtime_error("Failed to add topic " + topicId + ": topic record not found");
+            }
+
+            MWBase::Environment::get().getDialogueManager()->addTopic(topic);
         };
         player["sendMenuEvent"] = [context](const Object& player, std::string eventName, const sol::object& eventData) {
             verifyPlayer(player);
