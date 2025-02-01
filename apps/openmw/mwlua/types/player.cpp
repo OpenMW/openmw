@@ -201,11 +201,15 @@ namespace MWLua
             verifyPlayer(player);
 
             ESM::RefId topic = ESM::RefId::deserializeText(topicId);
-            if (!MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topic))
-            {
+            const ESM::Dialogue* dialogueRecord
+                = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topic);
+
+            if (!dialogueRecord)
                 throw std::runtime_error(
                     Misc::StringUtils::format("Failed to add topic ", topicId, ": topic record not found"));
-            }
+            else if (dialogueRecord->mType != ESM::Dialogue::Topic)
+                throw std::runtime_error(
+                    Misc::StringUtils::format("Failed to add topic ", topicId, ": record is not a topic"));
 
             MWBase::Environment::get().getDialogueManager()->addTopic(topic);
         };
