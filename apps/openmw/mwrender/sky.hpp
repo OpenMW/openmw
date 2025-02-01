@@ -118,7 +118,8 @@ namespace MWRender
 
         osg::Camera* mCamera;
 
-        osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<CameraRelativeTransform> mSkyRootNode;
+        osg::ref_ptr<osg::Group> mSkyNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;

@@ -262,15 +262,15 @@ namespace MWRender
         , mPrecipitationAlpha(0.f)
         , mDirtyParticlesEffect(false)
     {
-        osg::ref_ptr<CameraRelativeTransform> skyroot = new CameraRelativeTransform;
-        skyroot->setName("Sky Root");
+        mSkyRootNode = new CameraRelativeTransform;
+        mSkyRootNode->setName("Sky Root");
         // Assign empty program to specify we don't want shaders when we are rendering in FFP pipeline
         if (!mSceneManager->getForceShaders())
-            skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
+            mSkyRootNode->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
                 osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED | osg::StateAttribute::ON);
-        mSceneManager->setUpNormalsRTForStateSet(skyroot->getOrCreateStateSet(), false);
-        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*skyroot->getOrCreateStateSet());
-        parentNode->addChild(skyroot);
+        mSceneManager->setUpNormalsRTForStateSet(mSkyRootNode->getOrCreateStateSet(), false);
+        SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*mSkyRootNode->getOrCreateStateSet());
+        parentNode->addChild(mSkyRootNode);
 
         mEarlyRenderBinRoot = new osg::Group;
         // render before the world is rendered
@@ -281,19 +281,18 @@ namespace MWRender
         if (enableSkyRTT)
         {
             mSkyRTT = new SkyRTT(Settings::fog().mSkyRttResolution, mEarlyRenderBinRoot);
-            skyroot->addChild(mSkyRTT);
-            mRootNode = new osg::Group;
-            skyroot->addChild(mRootNode);
+            mSkyRootNode->addChild(mSkyRTT);
         }
-        else
-            mRootNode = skyroot;
 
-        mRootNode->setNodeMask(Mask_Sky);
-        mRootNode->addChild(mEarlyRenderBinRoot);
-        mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
+        mSkyNode = new osg::Group;
+        mSkyNode->setNodeMask(Mask_Sky);
+        mSkyNode->addChild(mEarlyRenderBinRoot);
+        mSkyRootNode->addChild(mSkyNode);
+
+        mUnderwaterSwitch = new UnderwaterSwitchCallback(mSkyRootNode);
 
         mPrecipitationOcclusion = Settings::shaders().mWeatherParticleOcclusion;
-        mPrecipitationOccluder = std::make_unique<PrecipitationOccluder>(skyroot, parentNode, rootNode, camera);
+        mPrecipitationOccluder = std::make_unique<PrecipitationOccluder>(mSkyRootNode, parentNode, rootNode, camera);
     }
 
     void SkyManager::create()
@@ -464,7 +463,7 @@ namespace MWRender
         mRainParticleSystem->setUserValue("particleOcclusion", true);
         mSceneManager->recreateShaders(mRainNode);
 
-        mRootNode->addChild(mRainNode);
+        mSkyNode->addChild(mRainNode);
         if (mPrecipitationOcclusion)
             mPrecipitationOccluder->enable();
     }
@@ -474,7 +473,7 @@ namespace MWRender
         if (!mRainNode)
             return;
 
-        mRootNode->removeChild(mRainNode);
+        mSkyNode->removeChild(mRainNode);
         mRainNode = nullptr;
         mPlacer = nullptr;
         mCounter = nullptr;
@@ -485,10 +484,10 @@ namespace MWRender
 
     SkyManager::~SkyManager()
     {
-        if (mRootNode)
+        if (mSkyRootNode)
         {
-            mRootNode->getParent(0)->removeChild(mRootNode);
-            mRootNode = nullptr;
+            mSkyRootNode->getParent(0)->removeChild(mSkyRootNode);
+            mSkyRootNode = nullptr;
         }
     }
 
@@ -595,7 +594,7 @@ namespace MWRender
         const osg::Node::NodeMask mask = enabled ? Mask_Sky : 0u;
 
         mEarlyRenderBinRoot->setNodeMask(mask);
-        mRootNode->setNodeMask(mask);
+        mSkyNode->setNodeMask(mask);
 
         if (!enabled && mParticleNode && mParticleEffect)
         {
@@ -691,7 +690,7 @@ namespace MWRender
             {
                 if (mParticleNode)
                 {
-                    mRootNode->removeChild(mParticleNode);
+                    mSkyNode->removeChild(mParticleNode);
                     mParticleNode = nullptr;
                 }
                 if (mRainEffect.empty())
@@ -706,7 +705,7 @@ namespace MWRender
                     mParticleNode = new osg::PositionAttitudeTransform;
                     mParticleNode->addCullCallback(mUnderwaterSwitch);
                     mParticleNode->setNodeMask(Mask_WeatherParticles);
-                    mRootNode->addChild(mParticleNode);
+                    mSkyNode->addChild(mParticleNode);
                 }
 
                 mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleNode);
