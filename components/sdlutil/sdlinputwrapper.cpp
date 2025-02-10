@@ -76,6 +76,18 @@ namespace SDLUtil
 
         while (SDL_PollEvent(&evt))
         {
+#if SDL_VERSION_ATLEAST(2, 30, 50)
+            // SDL2-compat may pass us SDL3 display and window events alongside the SDL2 events for funsies
+            // Until we are ready to move to SDL3, we'll want to prevent the noise
+
+            // Silence 0x151 to 0x1FF range
+            if (evt.type > SDL_DISPLAYEVENT && evt.type < SDL_WINDOWEVENT)
+                continue;
+
+            // Silence 0x202 to 0x2FF range
+            if (evt.type > SDL_SYSWMEVENT && evt.type < SDL_KEYDOWN)
+                continue;
+#endif
             switch (evt.type)
             {
                 case SDL_MOUSEMOTION:
