@@ -228,13 +228,17 @@ namespace Nif
     {
         if (getVersion() < generateVersion(4, 1, 0, 0))
         {
-            for (bool& value : std::span(dest, size))
-                value = get<int32_t>() != 0;
+            std::vector<int32_t> buf(size);
+            read(buf.data(), size);
+            for (size_t i = 0; i < size; ++i)
+                dest[i] = buf[i] != 0;
         }
         else
         {
-            for (bool& value : std::span(dest, size))
-                value = get<int8_t>() != 0;
+            std::vector<int8_t> buf(size);
+            read(buf.data(), size);
+            for (size_t i = 0; i < size; ++i)
+                dest[i] = buf[i] != 0;
         }
     }
 
