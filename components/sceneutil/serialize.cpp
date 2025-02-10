@@ -208,6 +208,7 @@ namespace SceneUtil
                 "SceneUtil::TextKeyMapHolder",
                 "Shader::AddedState",
                 "Shader::RemovedAlphaFunc",
+                "NifOsg::BillboardCallback",
                 "NifOsg::FlipController",
                 "NifOsg::KeyframeController",
                 "NifOsg::Emitter",
