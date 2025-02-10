@@ -343,6 +343,7 @@ namespace MWLua
         mPlayerStorage.clearTemporaryAndRemoveCallbacks();
         mInputActions.clear();
         mInputTriggers.clear();
+        mQueuedAutoStartedScripts.clear();
         for (int i = 0; i < 5; ++i)
             lua_gc(mLua.unsafeState(), LUA_GCCOLLECT, 0);
     }
