@@ -43,7 +43,7 @@ namespace MWLua
             [](const ESM::CreatureLevList& rec) -> std::string { return rec.mId.serializeText(); });
         record["chanceNone"] = sol::readonly_property(
             [](const ESM::CreatureLevList& rec) -> float { return std::clamp(rec.mChanceNone / 100.f, 0.f, 1.f); });
-        record["creatures"] = sol::readonly_property([&](const ESM::CreatureLevList& rec) -> sol::table {
+        record["creatures"] = sol::readonly_property([state](const ESM::CreatureLevList& rec) -> sol::table {
             sol::table res(state, sol::create);
             for (size_t i = 0; i < rec.mList.size(); ++i)
                 res[LuaUtil::toLuaIndex(i)] = rec.mList[i];
