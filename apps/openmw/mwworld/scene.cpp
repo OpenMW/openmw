@@ -367,7 +367,7 @@ namespace MWWorld
 
         ListAndResetObjectsVisitor visitor;
 
-        cell->forEach(visitor);
+        cell->forEach(visitor, true); // Include objects being teleported by Lua
         for (const auto& ptr : visitor.mObjects)
         {
             if (const auto object = mPhysics->getObject(ptr))
