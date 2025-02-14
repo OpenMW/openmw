@@ -4,6 +4,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/misc/strings/conversion.hpp>
@@ -124,11 +125,17 @@ namespace MWGui
             bool interior = true;
             const ESM::ExteriorCellLocation cellIndex
                 = ESM::positionToExteriorCellLocation(dest.mPos.pos[0], dest.mPos.pos[1]);
+            const MWWorld::WorldModel& worldModel = *MWBase::Environment::get().getWorldModel();
             if (cellname.empty())
             {
-                MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
+                MWWorld::CellStore& cell = worldModel.getExterior(cellIndex);
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
+            }
+            else if (worldModel.findCell(cellname, false) == nullptr)
+            {
+                Log(Debug::Error) << "Failed to add travel destination: unknown cell (" << cellname << ")";
+                continue;
             }
             addDestination(ESM::RefId::stringRefId(cellname), dest.mPos, interior);
         }
