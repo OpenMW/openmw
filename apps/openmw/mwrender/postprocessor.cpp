@@ -196,10 +196,6 @@ namespace MWRender
         if (!ext->glDisablei && ext->glDisableIndexedEXT)
             ext->glDisablei = ext->glDisableIndexedEXT;
 
-#ifdef ANDROID
-        ext->glDisablei = nullptr;
-#endif
-
         if (ext->glDisablei)
             mNormalsSupported = true;
         else
