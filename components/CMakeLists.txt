@@ -591,7 +591,7 @@ target_link_libraries(components
     Boost::program_options
     Boost::iostreams
 
-    SDL2::SDL2
+    ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
     ${LUA_LIBRARIES}
