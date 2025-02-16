@@ -344,7 +344,7 @@ namespace MWRender
             auto primaryFBO = postProcessor->getPrimaryFbo(frameId);
             primaryFBO->apply(*state);
 
-            postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
+    //        postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
 
             // depth accumulation pass
             osg::ref_ptr<osg::StateSet> restore = bin->getStateSet();

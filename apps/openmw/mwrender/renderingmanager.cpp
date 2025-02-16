@@ -518,8 +518,8 @@ namespace MWRender
 
         mPostProcessor = new PostProcessor(*this, viewer, mRootNode, resourceSystem->getVFS());
         resourceSystem->getSceneManager()->setOpaqueDepthTex(
-            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 0),
-            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
+            mPostProcessor->getTexture(PostProcessor::Tex_Depth/*Tex_OpaqueDepth*/, 0),
+            mPostProcessor->getTexture(PostProcessor::Tex_Depth/*Tex_OpaqueDepth*/, 1));
         resourceSystem->getSceneManager()->setSoftParticles(Settings::shaders().mSoftParticles);
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
         resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);

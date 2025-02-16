@@ -297,7 +297,7 @@ namespace MWRender
         mCanvases[frameId]->setCalculateAvgLum(mHDR);
 
         mCanvases[frameId]->setTextureScene(getTexture(Tex_Scene, frameId));
-        mCanvases[frameId]->setTextureDepth(getTexture(Tex_OpaqueDepth, frameId));
+        mCanvases[frameId]->setTextureDepth(getTexture(Tex_Depth/*Tex_OpaqueDepth*/, frameId));
         mCanvases[frameId]->setTextureDistortion(getTexture(Tex_Distortion, frameId));
 
         mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
