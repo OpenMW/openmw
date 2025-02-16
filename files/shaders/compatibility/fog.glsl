@@ -16,7 +16,7 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
 #else
     float fogValue = clamp((dist - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
-#ifdef ADDITIVE_BLENDING
+#if defined(ADDITIVE_BLENDING)
     color.xyz *= 1.0 - fogValue;
 #else
     color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
@@ -25,7 +25,7 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
 #if @skyBlending
     float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
     fadeValue *= fadeValue;
-#ifdef ADDITIVE_BLENDING
+#if defined(ADDITIVE_BLENDING)
     color.xyz *= fadeValue;
 #else
     color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);

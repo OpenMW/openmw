@@ -408,11 +408,15 @@ namespace MWRender
 
             if (mNormalsSupported)
             {
+// Crashing with gl4es, use OSG define instead
+/*
                 auto& shaderManager
                     = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
                 auto defines = shaderManager.getGlobalDefines();
                 defines["disableNormals"] = mNormals ? "0" : "1";
                 shaderManager.setGlobalDefines(defines);
+*/
+                mRendering.setWriteNormals(mNormals);
             }
 
             mRendering.getLightRoot()->setCollectPPLights(mPassLights);

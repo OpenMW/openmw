@@ -6,7 +6,7 @@ uniform vec3 color;
 uniform vec3 trans;
 uniform vec3 scale;
 uniform bool useNormalAsColor;
-uniform bool useAdvancedShader = false;
+uniform bool useAdvancedShader;
 
 centroid varying vec4 passColor;
 varying vec3 vertexNormal;
