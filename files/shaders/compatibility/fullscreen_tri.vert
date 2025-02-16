@@ -1,6 +1,6 @@
 #version 120
 
-uniform vec2 scaling = vec2(1.0, 1.0);
+uniform vec2 scaling;
 
 varying vec2 uv;
 
