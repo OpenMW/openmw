@@ -1,12 +1,5 @@
 #version 120
-
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
-#if @useGPUShader4
-    #extension GL_EXT_gpu_shader4: require
-#endif
+#pragma import_defines(WRITE_NORMALS)
 
 varying vec2 uv;
 
@@ -97,7 +90,7 @@ void main()
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
 
-#if !@disableNormals && @writeNormals
+#if defined(WRITE_NORMALS) && WRITE_NORMALS && @writeNormals
     gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
 #endif
 

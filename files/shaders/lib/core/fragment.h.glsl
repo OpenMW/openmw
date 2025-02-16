@@ -1,22 +1,50 @@
 #ifndef OPENMW_FRAGMENT_H_GLSL
 #define OPENMW_FRAGMENT_H_GLSL
 
-@link "lib/core/fragment.glsl" if !@useOVR_multiview
-@link "lib/core/fragment_multiview.glsl" if @useOVR_multiview
+uniform sampler2D reflectionMap;
 
-vec4 sampleReflectionMap(vec2 uv);
+vec4 sampleReflectionMap(vec2 uv)
+{
+    return texture2D(reflectionMap, uv);
+}
 
 #if @waterRefraction
-vec4 sampleRefractionMap(vec2 uv);
-float sampleRefractionDepthMap(vec2 uv);
+uniform sampler2D refractionMap;
+uniform highp sampler2D refractionDepthMap;
+
+vec4 sampleRefractionMap(vec2 uv)
+{
+    return texture2D(refractionMap, uv);
+}
+
+float sampleRefractionDepthMap(vec2 uv)
+{
+    return texture2D(refractionDepthMap, uv).x;
+}
+
 #endif
 
-vec4 samplerLastShader(vec2 uv);
+uniform sampler2D lastShader;
+
+vec4 samplerLastShader(vec2 uv)
+{
+    return texture2D(lastShader, uv);
+}
 
 #if @skyBlending
-vec3 sampleSkyColor(vec2 uv);
+uniform sampler2D sky;
+
+vec3 sampleSkyColor(vec2 uv)
+{
+    return texture2D(sky, uv).xyz;
+}
 #endif
 
-vec4 sampleOpaqueDepthTex(vec2 uv);
+uniform sampler2D opaqueDepthTex;
+
+vec4 sampleOpaqueDepthTex(vec2 uv)
+{
+    return texture2D(opaqueDepthTex, uv);
+}
 
 #endif  // OPENMW_FRAGMENT_H_GLSL
