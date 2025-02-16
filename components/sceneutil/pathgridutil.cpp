@@ -126,9 +126,9 @@ namespace SceneUtil
 
             gridGeometry->setVertexArray(vertices);
             gridGeometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
-            if (pointIndexCount)
+            if (!pointIndices->empty())
                 gridGeometry->addPrimitiveSet(pointIndices);
-            if (edgeIndexCount)
+            if (!lineIndices->empty())
                 gridGeometry->addPrimitiveSet(lineIndices);
             gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         }
