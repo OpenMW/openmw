@@ -1164,23 +1164,31 @@ void CSVDoc::View::onRequestFocus(const std::string& id)
 QScreen* CSVDoc::View::getWidgetScreen(const QPoint& position)
 {
     QScreen* screen = QApplication::screenAt(position);
-    if (screen == nullptr)
+    if (screen)
+        return screen;
+
+    const QList<QScreen*> screens = QApplication::screens();
+    if (screens.isEmpty())
+        throw std::runtime_error("No screens available");
+
+    int closestDistance = std::numeric_limits<int>::max();
+    for (QScreen* candidate : screens)
     {
-        QPoint clampedPosition = position;
+        const QRect geometry = candidate->geometry();
+        const int dx = position.x() - std::clamp(position.x(), geometry.left(), geometry.right());
+        const int dy = position.y() - std::clamp(position.y(), geometry.top(), geometry.bottom());
+        const int distance = dx * dx + dy * dy;
 
-        // If we failed to find the screen,
-        // clamp negative positions and try again
-        if (clampedPosition.x() <= 0)
-            clampedPosition.setX(0);
-        if (clampedPosition.y() <= 0)
-            clampedPosition.setY(0);
-
-        screen = QApplication::screenAt(clampedPosition);
+        if (distance < closestDistance)
+        {
+            closestDistance = distance;
+            screen = candidate;
+        }
     }
 
     if (screen == nullptr)
         throw std::runtime_error(
-            Misc::StringUtils::format("Can not detect the screen for position [%d, %d]", position.x(), position.y()));
+            Misc::StringUtils::format("Cannot detect the screen for position [%d, %d]", position.x(), position.y()));
 
     return screen;
 }
