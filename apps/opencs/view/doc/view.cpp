@@ -1187,8 +1187,7 @@ QScreen* CSVDoc::View::getWidgetScreen(const QPoint& position)
     }
 
     if (screen == nullptr)
-        throw std::runtime_error(
-            Misc::StringUtils::format("Cannot detect the screen for position [%d, %d]", position.x(), position.y()));
+        screen = screens.first();
 
     return screen;
 }
