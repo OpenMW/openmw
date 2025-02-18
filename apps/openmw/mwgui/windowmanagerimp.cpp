@@ -2406,6 +2406,11 @@ namespace MWGui
         updateVisible();
     }
 
+    bool WindowManager::isWindowVisible(std::string_view windowId) const
+    {
+        return mLuaIdToWindow.at(windowId)->isVisible();
+    }
+
     std::vector<std::string_view> WindowManager::getAllWindowIds() const
     {
         std::vector<std::string_view> res;

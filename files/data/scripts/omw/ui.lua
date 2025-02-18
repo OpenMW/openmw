@@ -240,6 +240,13 @@ return {
         -- @return #boolean
         isHudVisible = function() return ui._isHudVisible() end,
 
+        ---
+        -- Returns if the given window is visible or not
+        -- @function [parent=#UI] isWindowVisible
+        -- @param #string windowName
+        -- @return #boolean
+        isWindowVisible = ui._isWindowVisible,
+
         -- TODO
         -- registerHudElement = function(name, showFn, hideFn) end,
         -- showHudElement = function(name, bool) end,
