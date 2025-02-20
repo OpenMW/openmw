@@ -246,6 +246,8 @@ namespace MWGui
 
         if (mItemSelectionDialog)
             mItemSelectionDialog->setVisible(false);
+
+        MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
     }
 
     void QuickKeysMenu::onAssignItemCancel()
