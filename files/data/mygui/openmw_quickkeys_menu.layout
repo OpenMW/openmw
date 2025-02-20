@@ -12,7 +12,6 @@
             <Property key="MultiLine" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="Static" value="true"/>
-            <Property key="TextAlign" value="Center"/>
         </Widget>
 
         <Widget type="Widget" skin="" position="15 55 332 128" align="Left Bottom HCenter">
