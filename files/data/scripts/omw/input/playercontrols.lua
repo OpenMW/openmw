@@ -89,7 +89,7 @@ local function processMovement()
     local sideMovement = input.getRangeActionValue('MoveRight') - input.getRangeActionValue('MoveLeft')
     local run = input.getBooleanActionValue('Run') ~= settings:get('alwaysRun')
 
-    if movement ~= 0 or not Actor.canMove(self) then
+    if movement ~= 0 then
         autoMove = false
     elseif autoMove then
         movement = 1
