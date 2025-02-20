@@ -279,7 +279,7 @@ namespace MWGui
             && !base.get<ESM::Book>()->mBase->mData.mIsScroll)
             return false;
 
-        if ((mFilter & Filter_OnlyUsableItems) && base.getClass().getScript(base).empty())
+        if ((mFilter & Filter_OnlyUsableItems))
         {
             std::unique_ptr<MWWorld::Action> actionOnUse = base.getClass().use(base);
             if (!actionOnUse || actionOnUse->isNullAction())
