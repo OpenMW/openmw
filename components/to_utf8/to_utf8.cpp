@@ -52,7 +52,7 @@ namespace
         return std::find_if(input.begin(), input.end(), [](unsigned char v) { return v == 0 || v >= 128; });
     }
 
-    std::basic_string_view<signed char> getTranslationArray(FromType sourceEncoding)
+    std::span<const signed char> getTranslationArray(FromType sourceEncoding)
     {
         switch (sourceEncoding)
         {
