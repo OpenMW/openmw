@@ -21,24 +21,17 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_DEPRECATE_HPP
-#define SOL_DEPRECATE_HPP
+#ifndef SOL_UNREACHABLE_HPP
+#define SOL_UNREACHABLE_HPP
 
-#ifndef SOL_DEPRECATED
-#ifdef _MSC_VER
-#define SOL_DEPRECATED __declspec(deprecated)
-#elif __GNUC__
-#define SOL_DEPRECATED __attribute__((deprecated))
+#include <sol/version.hpp>
+
+#if SOL_HAS_BUILTIN_I_(__builtin_unreachable)
+#define SOL_UNREACHABLE() __builtin_unreachable();
+#elif SOL_IS_ON(SOL_COMPILER_VCXX)
+#define SOL_UNREACHABLE() __assume(false);
 #else
-#define SOL_DEPRECATED [[deprecated]]
-#endif // compilers
-#endif // SOL_DEPRECATED
+#define SOL_UNREACHABLE() __builtin_unreachable();
+#endif
 
-namespace sol { namespace detail {
-	template <typename T>
-	struct SOL_DEPRECATED deprecate_type {
-		using type = T;
-	};
-}} // namespace sol::detail
-
-#endif // SOL_DEPRECATE_HPP
+#endif

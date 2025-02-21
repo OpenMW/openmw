@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -35,7 +35,7 @@ namespace sol { namespace function_detail {
 		using traits_type = meta::bind_traits<function_type>;
 
 		static int real_call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -70,7 +70,7 @@ namespace sol { namespace function_detail {
 		typedef lua_bind_traits<function_type> traits_type;
 
 		static int real_call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -88,7 +88,7 @@ namespace sol { namespace function_detail {
 
 		template <bool is_yielding, bool no_trampoline>
 		static int call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -110,7 +110,7 @@ namespace sol { namespace function_detail {
 		}
 
 		int operator()(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -126,7 +126,7 @@ namespace sol { namespace function_detail {
 		typedef lua_bind_traits<function_type> traits_type;
 
 		static int real_call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -153,7 +153,7 @@ namespace sol { namespace function_detail {
 
 		template <bool is_yielding, bool no_trampoline>
 		static int call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -175,7 +175,7 @@ namespace sol { namespace function_detail {
 		}
 
 		int operator()(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -191,7 +191,7 @@ namespace sol { namespace function_detail {
 		typedef lua_bind_traits<function_type> traits_type;
 
 		static int real_call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -216,7 +216,7 @@ namespace sol { namespace function_detail {
 
 		template <bool is_yielding, bool no_trampoline>
 		static int call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -238,7 +238,7 @@ namespace sol { namespace function_detail {
 		}
 
 		int operator()(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -254,7 +254,7 @@ namespace sol { namespace function_detail {
 		typedef lua_bind_traits<function_type> traits_type;
 
 		static int real_call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -268,7 +268,7 @@ namespace sol { namespace function_detail {
 
 		template <bool is_yielding, bool no_trampoline>
 		static int call(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -290,7 +290,7 @@ namespace sol { namespace function_detail {
 		}
 
 		int operator()(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)

@@ -21,24 +21,27 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_DEPRECATE_HPP
-#define SOL_DEPRECATE_HPP
+#ifndef SOL_ABORT_HPP
+#define SOL_ABORT_HPP
 
-#ifndef SOL_DEPRECATED
-#ifdef _MSC_VER
-#define SOL_DEPRECATED __declspec(deprecated)
-#elif __GNUC__
-#define SOL_DEPRECATED __attribute__((deprecated))
+#include <sol/version.hpp>
+
+#include <sol/base_traits.hpp>
+
+#include <cstdlib>
+
+// clang-format off
+#if SOL_IS_ON(SOL_DEBUG_BUILD)
+	#if SOL_IS_ON(SOL_COMPILER_VCXX)
+		#define SOL_DEBUG_ABORT() \
+			if (true) { ::std::abort(); } \
+			static_assert(true, "")
+	#else
+		#define SOL_DEBUG_ABORT() ::std::abort()
+	#endif
 #else
-#define SOL_DEPRECATED [[deprecated]]
-#endif // compilers
-#endif // SOL_DEPRECATED
+	#define SOL_DEBUG_ABORT() static_assert(true, "")
+#endif
+// clang-format on
 
-namespace sol { namespace detail {
-	template <typename T>
-	struct SOL_DEPRECATED deprecate_type {
-		using type = T;
-	};
-}} // namespace sol::detail
-
-#endif // SOL_DEPRECATE_HPP
+#endif // SOL_ABORT_HPP

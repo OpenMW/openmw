@@ -11,7 +11,7 @@
 // the Software, and to permit persons to whom the Software is furnished to do so,
 // subject to the following conditions:
 
-// The above copyright notice and this permission notice shall be included in all
+// The above copyright notice and this Spermission notice shall be included in all
 // copies or substantial portions of the Software.
 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -21,24 +21,23 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_DEPRECATE_HPP
-#define SOL_DEPRECATE_HPP
+#ifndef SOL_IS_INTEGER_HPP
+#define SOL_IS_INTEGER_HPP
 
-#ifndef SOL_DEPRECATED
-#ifdef _MSC_VER
-#define SOL_DEPRECATED __declspec(deprecated)
-#elif __GNUC__
-#define SOL_DEPRECATED __attribute__((deprecated))
-#else
-#define SOL_DEPRECATED [[deprecated]]
-#endif // compilers
-#endif // SOL_DEPRECATED
+#include <sol/object.hpp>
 
-namespace sol { namespace detail {
-	template <typename T>
-	struct SOL_DEPRECATED deprecate_type {
-		using type = T;
-	};
-}} // namespace sol::detail
+namespace sol::utility {
 
-#endif // SOL_DEPRECATE_HPP
+	// Returns true if the object is represented by an integer,
+	// not a floating point number or any other type.
+	inline bool is_integer(const sol::object& object) {
+		auto pp = stack::push_pop(object);
+		return lua_isinteger(object.lua_state(), -1);
+	}
+	inline bool is_integer(const sol::stack_object& object) {
+		return lua_isinteger(object.lua_state(), object.stack_index());
+	}
+
+} // namespace sol::utility
+
+#endif // SOL_IS_INTEGER_HPP

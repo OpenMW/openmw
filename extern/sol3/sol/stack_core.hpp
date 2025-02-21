@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -127,7 +127,7 @@ namespace sol {
 
 		inline void* align_usertype_pointer(void* ptr) {
 			using use_align = std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of<void*>::value > 1)
@@ -143,7 +143,7 @@ namespace sol {
 		template <bool pre_aligned = false, bool pre_shifted = false>
 		void* align_usertype_unique_destructor(void* ptr) {
 			using use_align = std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of<unique_destructor>::value > 1)
@@ -165,7 +165,7 @@ namespace sol {
 		template <bool pre_aligned = false, bool pre_shifted = false>
 		void* align_usertype_unique_tag(void* ptr) {
 			using use_align = std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of<unique_tag>::value > 1)
@@ -187,7 +187,7 @@ namespace sol {
 		template <typename T, bool pre_aligned = false, bool pre_shifted = false>
 		void* align_usertype_unique(void* ptr) {
 			typedef std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of_v<T> > 1)
@@ -210,7 +210,7 @@ namespace sol {
 		template <typename T>
 		void* align_user(void* ptr) {
 			typedef std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of_v<T> > 1)
@@ -227,7 +227,7 @@ namespace sol {
 		template <typename T>
 		T** usertype_allocate_pointer(lua_State* L) {
 			typedef std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of<T*>::value > 1)
@@ -311,7 +311,7 @@ namespace sol {
 		template <typename T>
 		T* usertype_allocate(lua_State* L) {
 			typedef std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of<T*>::value > 1 || std::alignment_of_v<T> > 1)
@@ -352,7 +352,7 @@ namespace sol {
 		template <typename T, typename Real>
 		Real* usertype_unique_allocate(lua_State* L, T**& pref, unique_destructor*& dx, unique_tag*& id) {
 			typedef std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of<T*>::value > 1 || std::alignment_of<unique_tag>::value > 1 || std::alignment_of<unique_destructor>::value > 1
@@ -370,10 +370,10 @@ namespace sol {
 
 			constexpr std::size_t initial_size = aligned_space_for<T*, unique_destructor, unique_tag, Real>();
 
-			void* pointer_adjusted;
-			void* dx_adjusted;
-			void* id_adjusted;
-			void* data_adjusted;
+			void* pointer_adjusted = nullptr;
+			void* dx_adjusted = nullptr;
+			void* id_adjusted = nullptr;
+			void* data_adjusted = nullptr;
 			bool result = attempt_alloc_unique(L,
 			     std::alignment_of_v<T*>,
 			     sizeof(T*),
@@ -406,7 +406,7 @@ namespace sol {
 		template <typename T>
 		T* user_allocate(lua_State* L) {
 			typedef std::integral_constant<bool,
-#if SOL_IS_OFF(SOL_ALIGN_MEMORY_I_)
+#if SOL_IS_OFF(SOL_ALIGN_MEMORY)
 			     false
 #else
 			     (std::alignment_of_v<T> > 1)
@@ -709,7 +709,6 @@ namespace sol {
 				}
 				else {
 					unqualified_getter<Tu> g {};
-					(void)g;
 					return g.get(L, index, tracking);
 				}
 			}
@@ -721,7 +720,6 @@ namespace sol {
 				}
 				else {
 					qualified_getter<T> g {};
-					(void)g;
 					return g.get(L, index, tracking);
 				}
 			}
@@ -877,7 +875,6 @@ namespace sol {
 			}
 			else {
 				unqualified_pusher<Tu> p {};
-				(void)p;
 				return p.push(L, std::forward<T>(t), std::forward<Args>(args)...);
 			}
 		}
@@ -897,7 +894,6 @@ namespace sol {
 			}
 			else {
 				unqualified_pusher<Tu> p {};
-				(void)p;
 				return p.push(L, std::forward<Arg>(arg), std::forward<Args>(args)...);
 			}
 		}
@@ -928,7 +924,7 @@ namespace sol {
 				using use_reference_tag =
 				meta::all<
 					meta::neg<is_value_semantic_for_function<T>>
-#if SOL_IS_OFF(SOL_FUNCTION_CALL_VALUE_SEMANTICS_I_)
+#if SOL_IS_OFF(SOL_FUNCTION_CALL_VALUE_SEMANTICS)
 					, std::is_lvalue_reference<T>,
 					meta::neg<std::is_const<std::remove_reference_t<T>>>,
 					meta::neg<is_lua_primitive<meta::unqualified_t<T>>>,
@@ -983,9 +979,7 @@ namespace sol {
 				return sol_lua_check(types<Tu>(), L, index, std::forward<Handler>(handler), tracking);
 			}
 			else {
-				unqualified_checker<Tu, lua_type_of_v<Tu>> c;
-				// VC++ has a bad warning here: shut it up
-				(void)c;
+				unqualified_checker<Tu, lua_type_of_v<Tu>> c{};
 				return c.check(L, index, std::forward<Handler>(handler), tracking);
 			}
 		}
@@ -1009,9 +1003,7 @@ namespace sol {
 			}
 			else {
 				using Tu = meta::unqualified_t<T>;
-				qualified_checker<T, lua_type_of_v<Tu>> c;
-				// VC++ has a bad warning here: shut it up
-				(void)c;
+				qualified_checker<T, lua_type_of_v<Tu>> c{};
 				return c.check(L, index, std::forward<Handler>(handler), tracking);
 			}
 		}
@@ -1065,7 +1057,6 @@ namespace sol {
 			}
 			else {
 				unqualified_check_getter<Tu> cg {};
-				(void)cg;
 				return cg.get(L, index, std::forward<Handler>(handler), tracking);
 			}
 		}
@@ -1089,7 +1080,6 @@ namespace sol {
 			}
 			else {
 				qualified_check_getter<T> cg {};
-				(void)cg;
 				return cg.get(L, index, std::forward<Handler>(handler), tracking);
 			}
 		}
@@ -1145,7 +1135,7 @@ namespace sol {
 
 		template <typename T>
 		auto unqualified_get(lua_State* L, int index, record& tracking) -> decltype(stack_detail::unchecked_unqualified_get<T>(L, index, tracking)) {
-#if SOL_IS_ON(SOL_SAFE_GETTER_I_)
+#if SOL_IS_ON(SOL_SAFE_GETTER)
 			static constexpr bool is_op = meta::is_optional_v<T>;
 			if constexpr (is_op) {
 				return stack_detail::unchecked_unqualified_get<T>(L, index, tracking);
@@ -1170,7 +1160,7 @@ namespace sol {
 
 		template <typename T>
 		auto get(lua_State* L, int index, record& tracking) -> decltype(stack_detail::unchecked_get<T>(L, index, tracking)) {
-#if SOL_IS_ON(SOL_SAFE_GETTER_I_)
+#if SOL_IS_ON(SOL_SAFE_GETTER)
 			static constexpr bool is_op = meta::is_optional_v<T>;
 			if constexpr (is_op) {
 				return stack_detail::unchecked_get<T>(L, index, tracking);

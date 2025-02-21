@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -129,7 +129,7 @@ namespace sol {
 
 				for (auto&& library : libraries) {
 					switch (library) {
-#if SOL_LUA_VERSION_I_ <= 501 && SOL_IS_ON(SOL_USE_LUAJIT_I_)
+#if SOL_LUA_VERSION_I_ <= 501 && SOL_IS_ON(SOL_USE_LUAJIT)
 					case lib::coroutine:
 #endif // luajit opens coroutine base stuff
 					case lib::base:
@@ -140,7 +140,7 @@ namespace sol {
 						luaL_requiref(L, "package", luaopen_package, 1);
 						lua_pop(L, 1);
 						break;
-#if SOL_IS_OFF(SOL_USE_LUAJIT_I_)
+#if SOL_IS_OFF(SOL_USE_LUAJIT)
 					case lib::coroutine:
 #if SOL_LUA_VERSION_I_ > 501
 						luaL_requiref(L, "coroutine", luaopen_coroutine, 1);
@@ -161,10 +161,10 @@ namespace sol {
 						lua_pop(L, 1);
 						break;
 					case lib::bit32:
-#if SOL_IS_ON(SOL_USE_LUAJIT_I_)
+#if SOL_IS_ON(SOL_USE_LUAJIT)
 						luaL_requiref(L, "bit32", luaopen_bit, 1);
 						lua_pop(L, 1);
-#elif SOL_IS_ON(SOL_LUA_BIT32_LIB_I_)
+#elif SOL_IS_ON(SOL_LUA_BIT32_LIB)
 						luaL_requiref(L, "bit32", luaopen_bit32, 1);
 						lua_pop(L, 1);
 #else
@@ -183,19 +183,19 @@ namespace sol {
 						lua_pop(L, 1);
 						break;
 					case lib::utf8:
-#if SOL_LUA_VERSION_I_ > 502 && SOL_IS_OFF(SOL_USE_LUAJIT_I_)
+#if SOL_LUA_VERSION_I_ > 502 && SOL_IS_OFF(SOL_USE_LUAJIT)
 						luaL_requiref(L, "utf8", luaopen_utf8, 1);
 						lua_pop(L, 1);
 #endif // Lua 5.3+ only
 						break;
 					case lib::ffi:
-#if SOL_IS_ON(SOL_USE_LUAJIT_I_) && SOL_IS_OFF(SOL_LUAJIT_FFI_DISABLED_I_)
+#if SOL_IS_ON(SOL_USE_LUAJIT) && SOL_IS_OFF(SOL_LUAJIT_FFI_DISABLED)
 						luaL_requiref(L, "ffi", luaopen_ffi, 1);
 						lua_pop(L, 1);
 #endif // LuaJIT only
 						break;
 					case lib::jit:
-#if SOL_IS_ON(SOL_USE_LUAJIT_I_)
+#if SOL_IS_ON(SOL_USE_LUAJIT)
 						luaL_requiref(L, "jit", luaopen_jit, 0);
 						lua_pop(L, 1);
 #endif // LuaJIT Only
@@ -551,7 +551,7 @@ namespace sol {
 			return safe_script_file(filename, env, script_default_on_error, mode);
 		}
 
-#if SOL_IS_ON(SOL_SAFE_FUNCTION_OBJECTS_I_)
+#if SOL_IS_ON(SOL_SAFE_FUNCTION_OBJECTS)
 		protected_function_result script(
 		     lua_Reader reader, void* data, const std::string& chunkname = detail::default_chunk_name(), load_mode mode = load_mode::any) {
 			return safe_script(reader, data, chunkname, mode);

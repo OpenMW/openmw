@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -50,7 +50,7 @@ namespace sol {
 		}
 		template <typename T, meta::enable_any<is_lua_reference<meta::unqualified_t<T>>> = meta::enabler>
 		basic_lua_table(lua_State* L, T&& r) : base_t(L, std::forward<T>(r)) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			auto pp = stack::push_pop(*this);
 			constructor_handler handler {};
 			stack::check<basic_lua_table>(lua_state(), -1, handler);
@@ -62,13 +62,13 @@ namespace sol {
 			}
 		}
 		basic_lua_table(lua_State* L, int index = -1) : base_t(detail::no_safety, L, index) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			constructor_handler handler {};
 			stack::check<basic_lua_table>(L, index, handler);
 #endif // Safety
 		}
 		basic_lua_table(lua_State* L, ref_index index) : base_t(detail::no_safety, L, index) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			auto pp = stack::push_pop(*this);
 			constructor_handler handler {};
 			stack::check<basic_lua_table>(lua_state(), -1, handler);
@@ -78,7 +78,7 @@ namespace sol {
 		     meta::enable<meta::neg<meta::any_same<meta::unqualified_t<T>, basic_lua_table>>, meta::neg<std::is_same<ref_t, stack_reference>>,
 		          meta::neg<std::is_same<lua_nil_t, meta::unqualified_t<T>>>, is_lua_reference<meta::unqualified_t<T>>> = meta::enabler>
 		basic_lua_table(T&& r) noexcept : basic_lua_table(detail::no_safety, std::forward<T>(r)) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			if (!is_table<meta::unqualified_t<T>>::value) {
 				auto pp = stack::push_pop(*this);
 				constructor_handler handler {};

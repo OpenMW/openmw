@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -400,6 +400,7 @@ namespace sol {
 
 		public:
 			typedef lua_nil_t iterator;
+			typedef iterator sentinel;
 			typedef lua_nil_t value_type;
 
 			static int at(lua_State* L_) {
@@ -472,7 +473,7 @@ namespace sol {
 				return lua_nil;
 			}
 
-			static iterator end(lua_State* L_, T&) {
+			static sentinel end(lua_State* L_, T&) {
 				luaL_error(L_, "sol: cannot call 'end' on type '%s': it is not recognized as a container", detail::demangle<T>().c_str());
 				return lua_nil;
 			}
@@ -492,6 +493,7 @@ namespace sol {
 			using is_ordered = meta::is_ordered<T>;
 			using is_matched_lookup = meta::is_matched_lookup<T>;
 			using iterator = typename T::iterator;
+			using sentinel = meta::sentinel_or_t<T, iterator>;
 			using value_type = typename T::value_type;
 			typedef meta::conditional_t<is_matched_lookup::value, std::pair<value_type, value_type>,
 			     meta::conditional_t<is_associative::value || is_lookup::value, value_type, std::pair<std::ptrdiff_t, value_type>>>
@@ -511,21 +513,35 @@ namespace sol {
 			typedef meta::unqualified_t<decltype(get_key(is_associative(), std::declval<std::add_lvalue_reference_t<value_type>>()))> key_type;
 			typedef meta::all<std::is_integral<K>, meta::neg<meta::any<is_associative, is_lookup>>> is_linear_integral;
 
-			struct iter {
-				reference keep_alive;
-				T& source;
-				iterator it;
+			struct iter : detail::ebco<iterator, 0>, detail::ebco<sentinel, 1> {
+				using it_base = detail::ebco<iterator, 0>;
+				using sen_base = detail::ebco<sentinel, 1>;
+				main_reference keep_alive;
 				std::size_t index;
 
-				iter(lua_State* L_, int stack_index, T& source_, iterator it_) : keep_alive(L_, stack_index), source(source_), it(std::move(it_)), index(0) {
+				iter(lua_State* L_, int stack_index_, iterator it_, sentinel sen_) noexcept
+				: it_base(std::move(it_)), sen_base(std::move(sen_)), keep_alive(L_, stack_index_), index(0) {
 				}
 
-				~iter() {
+				iterator& it() noexcept {
+					return it_base::value();
+				}
+
+				const iterator& it() const noexcept {
+					return it_base::value();
+				}
+
+				sentinel& sen() noexcept {
+					return sen_base::value();
+				}
+
+				const sentinel& sen() const noexcept {
+					return sen_base::value();
 				}
 			};
 
 			static auto& get_src(lua_State* L_) {
-#if SOL_IS_ON(SOL_SAFE_USERTYPE_I_)
+#if SOL_IS_ON(SOL_SAFE_USERTYPE)
 				auto p = stack::unqualified_check_get<T*>(L_, 1);
 				if (!p) {
 					luaL_error(L_,
@@ -1172,9 +1188,9 @@ namespace sol {
 			template <bool ip>
 			static int next_associative(std::true_type, lua_State* L_) {
 				iter& i = stack::unqualified_get<user<iter>>(L_, 1);
-				auto& source = i.source;
-				auto& it = i.it;
-				if (it == deferred_uc::end(L_, source)) {
+				auto& it = i.it();
+				auto& end = i.end();
+				if (it == end) {
 					return stack::push(L_, lua_nil);
 				}
 				int p;
@@ -1193,10 +1209,10 @@ namespace sol {
 			template <bool>
 			static int next_associative(std::false_type, lua_State* L_) {
 				iter& i = stack::unqualified_get<user<iter>>(L_, 1);
-				auto& source = i.source;
-				auto& it = i.it;
+				auto& it = i.it();
+				auto& end = i.sen();
 				next_K k = stack::unqualified_get<next_K>(L_, 2);
-				if (it == deferred_uc::end(L_, source)) {
+				if (it == end) {
 					return stack::push(L_, lua_nil);
 				}
 				int p;
@@ -1221,7 +1237,7 @@ namespace sol {
 			static int pairs_associative(std::true_type, lua_State* L_) {
 				auto& src = get_src(L_);
 				stack::push(L_, next_iter<ip>);
-				stack::push<user<iter>>(L_, L_, 1, src, deferred_uc::begin(L_, src));
+				stack::push<user<iter>>(L_, L_, 1, deferred_uc::begin(L_, src), deferred_uc::begin(L_, src));
 				stack::push(L_, lua_nil);
 				return 3;
 			}
@@ -1230,7 +1246,7 @@ namespace sol {
 			static int pairs_associative(std::false_type, lua_State* L_) {
 				auto& src = get_src(L_);
 				stack::push(L_, next_iter<ip>);
-				stack::push<user<iter>>(L_, L_, 1, src, deferred_uc::begin(L_, src));
+				stack::push<user<iter>>(L_, L_, 1, deferred_uc::begin(L_, src), deferred_uc::end(L_, src));
 				stack::push(L_, 0);
 				return 3;
 			}
@@ -1322,7 +1338,7 @@ namespace sol {
 				}
 			}
 
-			static iterator end(lua_State*, T& self) {
+			static sentinel end(lua_State*, T& self) {
 				if constexpr (meta::has_begin_end_v<T>) {
 					return self.end();
 				}
@@ -1387,24 +1403,38 @@ namespace sol {
 		public:
 			typedef std::remove_extent_t<T> value_type;
 			typedef value_type* iterator;
+			typedef iterator sentinel;
 
 		private:
-			struct iter {
+			struct iter : detail::ebco<iterator, 0>, detail::ebco<sentinel, 1> {
+				using it_base = detail::ebco<iterator, 0>;
+				using sen_base = detail::ebco<sentinel, 1>;
 				reference keep_alive;
-				T& source;
-				iterator it;
-
-				iter(lua_State* L_, int stack_index, T& source, iterator it) noexcept : keep_alive(L_, stack_index), source(source), it(std::move(it)) {
+				
+				iter(lua_State* L_, int stack_index_, iterator it_, sentinel sen_) noexcept
+				: it_base(std::move(it_)), sen_base(std::move(sen_)), keep_alive(sol::main_thread(L_, L_), stack_index_) {
 				}
 
-				~iter () {
+				iterator& it() noexcept {
+					return it_base::value();
+				}
 
+				const iterator& it() const noexcept {
+					return it_base::value();
+				}
+
+				sentinel& sen() noexcept {
+					return sen_base::value();
+				}
+
+				const sentinel& sen() const noexcept {
+					return sen_base::value();
 				}
 			};
 
 			static auto& get_src(lua_State* L_) {
 				auto p = stack::unqualified_check_get<T*>(L_, 1);
-#if SOL_IS_ON(SOL_SAFE_USERTYPE_I_)
+#if SOL_IS_ON(SOL_SAFE_USERTYPE)
 				if (!p) {
 					luaL_error(L_,
 					     "sol: 'self' is not of type '%s' (pass 'self' as first argument with ':' or call on proper type)",
@@ -1439,10 +1469,10 @@ namespace sol {
 
 			static int next_iter(lua_State* L_) {
 				iter& i = stack::unqualified_get<user<iter>>(L_, 1);
-				auto& source = i.source;
-				auto& it = i.it;
+				auto& it = i.it();
+				auto& end = i.sen();
 				std::size_t k = stack::unqualified_get<std::size_t>(L_, 2);
-				if (it == deferred_uc::end(L_, source)) {
+				if (it == end) {
 					return 0;
 				}
 				int p;
@@ -1524,7 +1554,7 @@ namespace sol {
 			static int pairs(lua_State* L_) {
 				auto& src = get_src(L_);
 				stack::push(L_, next_iter);
-				stack::push<user<iter>>(L_, L_, 1, src, deferred_uc::begin(L_, src));
+				stack::push<user<iter>>(L_, L_, 1, deferred_uc::begin(L_, src), deferred_uc::end(L_, src));
 				stack::push(L_, 0);
 				return 3;
 			}
@@ -1545,7 +1575,7 @@ namespace sol {
 				return std::addressof(self[0]);
 			}
 
-			static iterator end(lua_State*, T& self) {
+			static sentinel end(lua_State*, T& self) {
 				return std::addressof(self[0]) + std::extent<T>::value;
 			}
 		};

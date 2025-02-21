@@ -11,7 +11,7 @@
 // the Software, and to permit persons to whom the Software is furnished to do so,
 // subject to the following conditions:
 
-// The above copyright notice and this permission notice shall be included in all
+// The above copyright notice and this Spermission notice shall be included in all
 // copies or substantial portions of the Software.
 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -21,24 +21,39 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_DEPRECATE_HPP
-#define SOL_DEPRECATE_HPP
+#ifndef SOL_TO_STRING_HPP
+#define SOL_TO_STRING_HPP
 
-#ifndef SOL_DEPRECATED
-#ifdef _MSC_VER
-#define SOL_DEPRECATED __declspec(deprecated)
-#elif __GNUC__
-#define SOL_DEPRECATED __attribute__((deprecated))
-#else
-#define SOL_DEPRECATED [[deprecated]]
-#endif // compilers
-#endif // SOL_DEPRECATED
+#include <sol/forward.hpp>
+#include <sol/object.hpp>
 
-namespace sol { namespace detail {
-	template <typename T>
-	struct SOL_DEPRECATED deprecate_type {
-		using type = T;
-	};
-}} // namespace sol::detail
+#include <cstddef>
+#include <string>
 
-#endif // SOL_DEPRECATE_HPP
+namespace sol::utility {
+
+	// Converts any object into a string using luaL_tolstring.
+	//
+	// Note: Uses the metamethod __tostring if available.
+	inline std::string to_string(const sol::stack_object& object) {
+		std::size_t len;
+		const char* str = luaL_tolstring(object.lua_state(), object.stack_index(), &len);
+
+		auto result = std::string(str, len);
+
+		// luaL_tolstring pushes the string onto the stack, but since
+		// we have copied it into our std::string by now we should
+		// remove it from the stack.
+		lua_pop(object.lua_state(), 1);
+
+		return result;
+	}
+
+	inline std::string to_string(const sol::object& object) {
+		auto pp = sol::stack::push_pop(object);
+		return to_string(sol::stack_object(object.lua_state(), -1));
+	}
+
+} // namespace sol::utility
+
+#endif // SOL_IS_INTEGER_HPP

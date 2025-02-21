@@ -21,24 +21,30 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_DEPRECATE_HPP
-#define SOL_DEPRECATE_HPP
+#ifndef SOL_CONFIG_HPP
+#define SOL_CONFIG_HPP
 
-#ifndef SOL_DEPRECATED
-#ifdef _MSC_VER
-#define SOL_DEPRECATED __declspec(deprecated)
-#elif __GNUC__
-#define SOL_DEPRECATED __attribute__((deprecated))
-#else
-#define SOL_DEPRECATED [[deprecated]]
-#endif // compilers
-#endif // SOL_DEPRECATED
+/* Base, empty configuration file!
 
-namespace sol { namespace detail {
-	template <typename T>
-	struct SOL_DEPRECATED deprecate_type {
-		using type = T;
-	};
-}} // namespace sol::detail
+     To override, place a file in your include paths of the form:
 
-#endif // SOL_DEPRECATE_HPP
+
+. (your include path here)
+| sol (directory, or equivalent)
+  | config.hpp (your config.hpp file)
+
+
+     So that when sol2 includes the file
+
+
+#include <sol/config.hpp>
+
+
+     it gives you the configuration values you desire. Configuration values can be
+seen in the safety.rst of the doc/src, or at
+https://sol2.readthedocs.io/en/latest/safety.html ! You can also pass them through
+the build system, or the command line options of your compiler.
+
+*/
+
+#endif // SOL_CONFIG_HPP

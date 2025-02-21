@@ -21,24 +21,24 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_DEPRECATE_HPP
-#define SOL_DEPRECATE_HPP
+#ifndef SOL_FORWARD_AS_HPP
+#define SOL_FORWARD_AS_HPP
 
-#ifndef SOL_DEPRECATED
-#ifdef _MSC_VER
-#define SOL_DEPRECATED __declspec(deprecated)
-#elif __GNUC__
-#define SOL_DEPRECATED __attribute__((deprecated))
-#else
-#define SOL_DEPRECATED [[deprecated]]
-#endif // compilers
-#endif // SOL_DEPRECATED
+#include <sol/version.hpp>
 
-namespace sol { namespace detail {
-	template <typename T>
-	struct SOL_DEPRECATED deprecate_type {
-		using type = T;
-	};
-}} // namespace sol::detail
+#include <utility>
+#include <type_traits>
 
-#endif // SOL_DEPRECATE_HPP
+namespace sol {
+	template <typename T, typename U>
+	constexpr decltype(auto) forward_as(U&& value) noexcept {
+		if constexpr (::std::is_lvalue_reference_v<T>) {
+			return value;
+		}
+		else {
+			return ::std::move(value);
+		}
+	}
+}
+
+#endif // SOL_FORWARD_AS_HPP
