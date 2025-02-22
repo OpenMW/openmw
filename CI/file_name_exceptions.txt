@@ -1,4 +1,3 @@
-apps/openmw/android_main.cpp
 apps/openmw/mwsound/efx-presets.h
 apps/openmw/mwsound/ffmpeg_decoder.cpp
 apps/openmw/mwsound/ffmpeg_decoder.hpp
