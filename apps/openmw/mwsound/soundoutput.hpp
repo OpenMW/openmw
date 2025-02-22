@@ -1,5 +1,5 @@
-#ifndef GAME_SOUND_SOUND_OUTPUT_H
-#define GAME_SOUND_SOUND_OUTPUT_H
+#ifndef GAME_SOUND_SOUNDOUTPUT_H
+#define GAME_SOUND_SOUNDOUTPUT_H
 
 #include <memory>
 #include <string>
@@ -13,7 +13,7 @@
 namespace MWSound
 {
     class SoundManager;
-    struct Sound_Decoder;
+    struct SoundDecoder;
     class Sound;
     class Stream;
 
@@ -30,7 +30,7 @@ namespace MWSound
 
     using HrtfMode = Settings::HrtfMode;
 
-    class Sound_Output
+    class SoundOutput
     {
         SoundManager& mManager;
 
@@ -71,24 +71,24 @@ namespace MWSound
         virtual void pauseActiveDevice() = 0;
         virtual void resumeActiveDevice() = 0;
 
-        Sound_Output& operator=(const Sound_Output& rhs);
-        Sound_Output(const Sound_Output& rhs);
+        SoundOutput& operator=(const SoundOutput& rhs);
+        SoundOutput(const SoundOutput& rhs);
 
     protected:
         bool mInitialized;
 
-        Sound_Output(SoundManager& mgr)
+        SoundOutput(SoundManager& mgr)
             : mManager(mgr)
             , mInitialized(false)
         {
         }
 
     public:
-        virtual ~Sound_Output() {}
+        virtual ~SoundOutput() {}
 
         bool isInitialized() const { return mInitialized; }
 
-        friend class OpenAL_Output;
+        friend class OpenALOutput;
         friend class SoundManager;
         friend class SoundBufferPool;
     };

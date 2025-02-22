@@ -1,5 +1,5 @@
-#ifndef GAME_SOUND_SOUND_DECODER_H
-#define GAME_SOUND_SOUND_DECODER_H
+#ifndef GAME_SOUND_SOUNDDECODER_H
+#define GAME_SOUND_SOUNDDECODER_H
 
 #include <components/vfs/pathutil.hpp>
 
@@ -34,7 +34,7 @@ namespace MWSound
     size_t framesToBytes(size_t frames, ChannelConfig config, SampleType type);
     size_t bytesToFrames(size_t bytes, ChannelConfig config, SampleType type);
 
-    struct Sound_Decoder
+    struct SoundDecoder
     {
         const VFS::Manager* mResourceMgr;
 
@@ -48,15 +48,15 @@ namespace MWSound
         virtual void readAll(std::vector<char>& output);
         virtual size_t getSampleOffset() = 0;
 
-        Sound_Decoder(const VFS::Manager* resourceMgr)
+        SoundDecoder(const VFS::Manager* resourceMgr)
             : mResourceMgr(resourceMgr)
         {
         }
-        virtual ~Sound_Decoder() {}
+        virtual ~SoundDecoder() {}
 
     private:
-        Sound_Decoder(const Sound_Decoder& rhs);
-        Sound_Decoder& operator=(const Sound_Decoder& rhs);
+        SoundDecoder(const SoundDecoder& rhs);
+        SoundDecoder& operator=(const SoundDecoder& rhs);
     };
 }
 

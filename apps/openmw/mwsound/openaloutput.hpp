@@ -1,5 +1,5 @@
-#ifndef GAME_SOUND_OPENAL_OUTPUT_H
-#define GAME_SOUND_OPENAL_OUTPUT_H
+#ifndef GAME_SOUND_OPENALOUTPUT_H
+#define GAME_SOUND_OPENALOUTPUT_H
 
 #include <deque>
 #include <map>
@@ -13,7 +13,7 @@
 #include "alc.h"
 #include "alext.h"
 
-#include "sound_output.hpp"
+#include "soundoutput.hpp"
 
 namespace MWSound
 {
@@ -22,7 +22,7 @@ namespace MWSound
     class Sound;
     class Stream;
 
-    class OpenAL_Output : public Sound_Output
+    class OpenALOutput : public SoundOutput
     {
         ALCdevice* mDevice;
         ALCcontext* mContext;
@@ -72,8 +72,8 @@ namespace MWSound
 
         float getTimeScaledPitch(SoundBase* sound);
 
-        OpenAL_Output& operator=(const OpenAL_Output& rhs);
-        OpenAL_Output(const OpenAL_Output& rhs);
+        OpenALOutput& operator=(const OpenALOutput& rhs);
+        OpenALOutput(const OpenALOutput& rhs);
 
         static void eventCallback(
             ALenum eventType, ALuint object, ALuint param, ALsizei length, const ALchar* message, void* userParam);
@@ -117,8 +117,8 @@ namespace MWSound
         void pauseActiveDevice() override;
         void resumeActiveDevice() override;
 
-        OpenAL_Output(SoundManager& mgr);
-        virtual ~OpenAL_Output();
+        OpenALOutput(SoundManager& mgr);
+        virtual ~OpenALOutput();
     };
 }
 

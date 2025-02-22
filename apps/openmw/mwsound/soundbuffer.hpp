@@ -1,13 +1,14 @@
-#ifndef GAME_SOUND_SOUND_BUFFER_H
-#define GAME_SOUND_SOUND_BUFFER_H
+#ifndef GAME_SOUND_SOUNDBUFFER_H
+#define GAME_SOUND_SOUNDBUFFER_H
 
 #include <algorithm>
 #include <deque>
 #include <string>
 #include <unordered_map>
 
-#include "sound_output.hpp"
 #include <components/esm/refid.hpp>
+
+#include "soundoutput.hpp"
 
 namespace ESM
 {
@@ -23,11 +24,11 @@ namespace MWSound
 {
     class SoundBufferPool;
 
-    class Sound_Buffer
+    class SoundBuffer
     {
     public:
         template <class T>
-        Sound_Buffer(T&& resname, float volume, float mindist, float maxdist)
+        SoundBuffer(T&& resname, float volume, float mindist, float maxdist)
             : mResourceName(std::forward<T>(resname))
             , mVolume(volume)
             , mMinDist(mindist)
@@ -59,7 +60,7 @@ namespace MWSound
     class SoundBufferPool
     {
     public:
-        SoundBufferPool(Sound_Output& output);
+        SoundBufferPool(SoundOutput& output);
 
         SoundBufferPool(const SoundBufferPool&) = delete;
 
@@ -67,20 +68,20 @@ namespace MWSound
 
         /// Lookup a soundId for its sound data (resource name, local volume,
         /// minRange, and maxRange)
-        Sound_Buffer* lookup(const ESM::RefId& soundId) const;
+        SoundBuffer* lookup(const ESM::RefId& soundId) const;
 
         /// Lookup a sound by file name for its sound data (resource name, local volume,
         /// minRange, and maxRange)
-        Sound_Buffer* lookup(std::string_view fileName) const;
+        SoundBuffer* lookup(std::string_view fileName) const;
 
         /// Lookup a soundId for its sound data (resource name, local volume,
         /// minRange, and maxRange), and ensure it's ready for use.
-        Sound_Buffer* load(const ESM::RefId& soundId);
+        SoundBuffer* load(const ESM::RefId& soundId);
 
         // Lookup for a sound by file name, and ensure it's ready for use.
-        Sound_Buffer* load(std::string_view fileName);
+        SoundBuffer* load(std::string_view fileName);
 
-        void use(Sound_Buffer& sfx)
+        void use(SoundBuffer& sfx)
         {
             if (sfx.mUses++ == 0)
             {
@@ -90,7 +91,7 @@ namespace MWSound
             }
         }
 
-        void release(Sound_Buffer& sfx)
+        void release(SoundBuffer& sfx)
         {
             if (--sfx.mUses == 0)
                 mUnusedBuffers.push_front(&sfx);
@@ -99,23 +100,23 @@ namespace MWSound
         void clear();
 
     private:
-        Sound_Buffer* loadSfx(Sound_Buffer* sfx);
+        SoundBuffer* loadSfx(SoundBuffer* sfx);
 
-        Sound_Output* mOutput;
-        std::deque<Sound_Buffer> mSoundBuffers;
-        std::unordered_map<ESM::RefId, Sound_Buffer*> mBufferNameMap;
-        std::unordered_map<std::string, Sound_Buffer*> mBufferFileNameMap;
+        SoundOutput* mOutput;
+        std::deque<SoundBuffer> mSoundBuffers;
+        std::unordered_map<ESM::RefId, SoundBuffer*> mBufferNameMap;
+        std::unordered_map<std::string, SoundBuffer*> mBufferFileNameMap;
         std::size_t mBufferCacheMax;
         std::size_t mBufferCacheMin;
         std::size_t mBufferCacheSize = 0;
         // NOTE: unused buffers are stored in front-newest order.
-        std::deque<Sound_Buffer*> mUnusedBuffers;
+        std::deque<SoundBuffer*> mUnusedBuffers;
 
-        inline Sound_Buffer* insertSound(const ESM::RefId& soundId, const ESM::Sound& sound);
-        inline Sound_Buffer* insertSound(std::string_view fileName);
+        inline SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM::Sound& sound);
+        inline SoundBuffer* insertSound(std::string_view fileName);
 
         inline void unloadUnused();
     };
 }
 
-#endif /* GAME_SOUND_SOUND_BUFFER_H */
+#endif /* GAME_SOUND_SOUNDBUFFER_H */

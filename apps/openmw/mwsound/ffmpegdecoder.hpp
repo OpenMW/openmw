@@ -1,5 +1,5 @@
-#ifndef GAME_SOUND_FFMPEG_DECODER_H
-#define GAME_SOUND_FFMPEG_DECODER_H
+#ifndef GAME_SOUND_FFMPEGDECODER_H
+#define GAME_SOUND_FFMPEGDECODER_H
 
 #include <cstdint>
 
@@ -31,7 +31,7 @@ extern "C"
 
 #include <string>
 
-#include "sound_decoder.hpp"
+#include "sounddecoder.hpp"
 
 namespace MWSound
 {
@@ -63,7 +63,7 @@ namespace MWSound
 
     using AVFramePtr = std::unique_ptr<AVFrame, AVFrameDeleter>;
 
-    class FFmpeg_Decoder final : public Sound_Decoder
+    class FFmpegDecoder final : public SoundDecoder
     {
         AVIOContextPtr mIoCtx;
         AVFormatContextPtr mFormatCtx;
@@ -114,13 +114,13 @@ namespace MWSound
         void readAll(std::vector<char>& output) override;
         size_t getSampleOffset() override;
 
-        FFmpeg_Decoder& operator=(const FFmpeg_Decoder& rhs);
-        FFmpeg_Decoder(const FFmpeg_Decoder& rhs);
+        FFmpegDecoder& operator=(const FFmpegDecoder& rhs);
+        FFmpegDecoder(const FFmpegDecoder& rhs);
 
     public:
-        explicit FFmpeg_Decoder(const VFS::Manager* vfs);
+        explicit FFmpegDecoder(const VFS::Manager* vfs);
 
-        virtual ~FFmpeg_Decoder();
+        virtual ~FFmpegDecoder();
 
         friend class SoundManager;
     };

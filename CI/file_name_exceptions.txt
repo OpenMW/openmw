@@ -1,9 +1,0 @@
-apps/openmw/mwsound/efx-presets.h
-apps/openmw/mwsound/ffmpeg_decoder.cpp
-apps/openmw/mwsound/ffmpeg_decoder.hpp
-apps/openmw/mwsound/openal_output.cpp
-apps/openmw/mwsound/openal_output.hpp
-apps/openmw/mwsound/sound_buffer.cpp
-apps/openmw/mwsound/sound_buffer.hpp
-apps/openmw/mwsound/sound_decoder.hpp
-apps/openmw/mwsound/sound_output.hpp

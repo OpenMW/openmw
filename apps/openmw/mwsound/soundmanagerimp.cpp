@@ -26,12 +26,12 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "constants.hpp"
-#include "ffmpeg_decoder.hpp"
-#include "openal_output.hpp"
+#include "ffmpegdecoder.hpp"
+#include "openaloutput.hpp"
 #include "sound.hpp"
-#include "sound_buffer.hpp"
-#include "sound_decoder.hpp"
-#include "sound_output.hpp"
+#include "soundbuffer.hpp"
+#include "sounddecoder.hpp"
+#include "soundoutput.hpp"
 
 namespace MWSound
 {
@@ -57,7 +57,7 @@ namespace MWSound
             return settings;
         }
 
-        float initialFadeVolume(float squaredDist, Sound_Buffer* sfx, Type type, PlayMode mode)
+        float initialFadeVolume(float squaredDist, SoundBuffer* sfx, Type type, PlayMode mode)
         {
             // If a sound is farther away than its maximum distance, start playing it with a zero fade volume.
             // It can still become audible once the player moves closer.
@@ -111,7 +111,7 @@ namespace MWSound
 
     SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
         : mVFS(vfs)
-        , mOutput(std::make_unique<OpenAL_Output>(*this))
+        , mOutput(std::make_unique<OpenALOutput>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*mOutput)
         , mMusicType(MWSound::MusicType::Normal)
@@ -169,7 +169,7 @@ namespace MWSound
     // Return a new decoder instance, used as needed by the output implementations
     DecoderPtr SoundManager::getDecoder()
     {
-        return std::make_shared<FFmpeg_Decoder>(mVFS);
+        return std::make_shared<FFmpegDecoder>(mVFS);
     }
 
     DecoderPtr SoundManager::loadVoice(VFS::Path::NormalizedView voicefile)
@@ -459,7 +459,7 @@ namespace MWSound
         return false;
     }
 
-    Sound* SoundManager::playSound(Sound_Buffer* sfx, float volume, float pitch, Type type, PlayMode mode, float offset)
+    Sound* SoundManager::playSound(SoundBuffer* sfx, float volume, float pitch, Type type, PlayMode mode, float offset)
     {
         if (!mOutput->isInitialized())
             return nullptr;
@@ -495,7 +495,7 @@ namespace MWSound
         if (!mVFS->exists(normalizedName))
             return nullptr;
 
-        Sound_Buffer* sfx = mSoundBuffers.load(normalizedName);
+        SoundBuffer* sfx = mSoundBuffers.load(normalizedName);
         if (!sfx)
             return nullptr;
 
@@ -508,14 +508,14 @@ namespace MWSound
         if (!mOutput->isInitialized())
             return nullptr;
 
-        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
+        SoundBuffer* sfx = mSoundBuffers.load(soundId);
         if (!sfx)
             return nullptr;
 
         return playSound(sfx, volume, pitch, type, mode, offset);
     }
 
-    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, Sound_Buffer* sfx, float volume, float pitch,
+    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, SoundBuffer* sfx, float volume, float pitch,
         Type type, PlayMode mode, float offset)
     {
         if (!mOutput->isInitialized())
@@ -576,7 +576,7 @@ namespace MWSound
             return nullptr;
 
         // Look up the sound in the ESM data
-        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
+        SoundBuffer* sfx = mSoundBuffers.load(soundId);
         if (!sfx)
             return nullptr;
 
@@ -594,7 +594,7 @@ namespace MWSound
         if (!mVFS->exists(normalizedName))
             return nullptr;
 
-        Sound_Buffer* sfx = mSoundBuffers.load(normalizedName);
+        SoundBuffer* sfx = mSoundBuffers.load(normalizedName);
         if (!sfx)
             return nullptr;
 
@@ -608,7 +608,7 @@ namespace MWSound
             return nullptr;
 
         // Look up the sound in the ESM data
-        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
+        SoundBuffer* sfx = mSoundBuffers.load(soundId);
         if (!sfx)
             return nullptr;
 
@@ -642,7 +642,7 @@ namespace MWSound
             mOutput->finishSound(sound);
     }
 
-    void SoundManager::stopSound(Sound_Buffer* sfx, const MWWorld::ConstPtr& ptr)
+    void SoundManager::stopSound(SoundBuffer* sfx, const MWWorld::ConstPtr& ptr)
     {
         SoundMap::iterator snditer = mActiveSounds.find(ptr.mRef);
         if (snditer != mActiveSounds.end())
@@ -660,7 +660,7 @@ namespace MWSound
         if (!mOutput->isInitialized())
             return;
 
-        Sound_Buffer* sfx = mSoundBuffers.lookup(soundId);
+        SoundBuffer* sfx = mSoundBuffers.lookup(soundId);
         if (!sfx)
             return;
 
@@ -673,7 +673,7 @@ namespace MWSound
             return;
 
         std::string normalizedName = VFS::Path::normalizeFilename(fileName);
-        Sound_Buffer* sfx = mSoundBuffers.lookup(normalizedName);
+        SoundBuffer* sfx = mSoundBuffers.lookup(normalizedName);
         if (!sfx)
             return;
 
@@ -725,7 +725,7 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.find(ptr.mRef);
         if (snditer != mActiveSounds.end())
         {
-            Sound_Buffer* sfx = mSoundBuffers.lookup(soundId);
+            SoundBuffer* sfx = mSoundBuffers.lookup(soundId);
             if (sfx == nullptr)
                 return;
             for (SoundBufferRefPair& sndbuf : snditer->second.mList)
@@ -743,7 +743,7 @@ namespace MWSound
         SoundMap::const_iterator snditer = mActiveSounds.find(ptr.mRef);
         if (snditer != mActiveSounds.end())
         {
-            Sound_Buffer* sfx = mSoundBuffers.lookup(normalizedName);
+            SoundBuffer* sfx = mSoundBuffers.lookup(normalizedName);
             if (!sfx)
                 return false;
 
@@ -761,7 +761,7 @@ namespace MWSound
         SoundMap::const_iterator snditer = mActiveSounds.find(ptr.mRef);
         if (snditer != mActiveSounds.end())
         {
-            Sound_Buffer* sfx = mSoundBuffers.lookup(soundId);
+            SoundBuffer* sfx = mSoundBuffers.lookup(soundId);
             if (!sfx)
                 return false;
 
@@ -846,7 +846,7 @@ namespace MWSound
         const auto update = mWaterSoundUpdater.update(player, *world);
 
         WaterSoundAction action;
-        Sound_Buffer* sfx;
+        SoundBuffer* sfx;
         std::tie(action, sfx) = getWaterSoundAction(update, curcell);
 
         switch (action)
@@ -870,7 +870,7 @@ namespace MWSound
         mLastCell = curcell;
     }
 
-    std::pair<SoundManager::WaterSoundAction, Sound_Buffer*> SoundManager::getWaterSoundAction(
+    std::pair<SoundManager::WaterSoundAction, SoundBuffer*> SoundManager::getWaterSoundAction(
         const WaterSoundUpdate& update, const MWWorld::Cell* cell) const
     {
         if (mNearWaterSound)
@@ -880,7 +880,7 @@ namespace MWSound
 
             bool soundIdChanged = false;
 
-            Sound_Buffer* sfx = mSoundBuffers.lookup(update.mId);
+            SoundBuffer* sfx = mSoundBuffers.lookup(update.mId);
             if (mLastCell != cell)
             {
                 const auto snditer = mActiveSounds.find(nullptr);
@@ -1168,7 +1168,7 @@ namespace MWSound
 
     // Default readAll implementation, for decoders that can't do anything
     // better
-    void Sound_Decoder::readAll(std::vector<char>& output)
+    void SoundDecoder::readAll(std::vector<char>& output)
     {
         size_t total = output.size();
         size_t got;

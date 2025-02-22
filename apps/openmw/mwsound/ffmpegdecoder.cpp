@@ -1,4 +1,4 @@
-#include "ffmpeg_decoder.hpp"
+#include "ffmpegdecoder.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -44,11 +44,11 @@ namespace MWSound
         av_frame_free(&ptr);
     }
 
-    int FFmpeg_Decoder::readPacket(void* user_data, uint8_t* buf, int buf_size)
+    int FFmpegDecoder::readPacket(void* user_data, uint8_t* buf, int buf_size)
     {
         try
         {
-            std::istream& stream = *static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
+            std::istream& stream = *static_cast<FFmpegDecoder*>(user_data)->mDataStream;
             stream.clear();
             stream.read((char*)buf, buf_size);
             std::streamsize count = stream.gcount();
@@ -65,18 +65,18 @@ namespace MWSound
     }
 
 #if OPENMW_FFMPEG_CONST_WRITEPACKET
-    int FFmpeg_Decoder::writePacket(void*, const uint8_t*, int)
+    int FFmpegDecoder::writePacket(void*, const uint8_t*, int)
 #else
-    int FFmpeg_Decoder::writePacket(void*, uint8_t*, int)
+    int FFmpegDecoder::writePacket(void*, uint8_t*, int)
 #endif
     {
         Log(Debug::Error) << "can't write to read-only stream";
         return -1;
     }
 
-    int64_t FFmpeg_Decoder::seek(void* user_data, int64_t offset, int whence)
+    int64_t FFmpegDecoder::seek(void* user_data, int64_t offset, int whence)
     {
-        std::istream& stream = *static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
+        std::istream& stream = *static_cast<FFmpegDecoder*>(user_data)->mDataStream;
 
         whence &= ~AVSEEK_FORCE;
 
@@ -106,7 +106,7 @@ namespace MWSound
     /* Used by getAV*Data to search for more compressed data, and buffer it in the
      * correct stream. It won't buffer data for streams that the app doesn't have a
      * handle for. */
-    bool FFmpeg_Decoder::getNextPacket()
+    bool FFmpegDecoder::getNextPacket()
     {
         if (!mStream)
             return false;
@@ -129,7 +129,7 @@ namespace MWSound
         return false;
     }
 
-    bool FFmpeg_Decoder::getAVAudioData()
+    bool FFmpegDecoder::getAVAudioData()
     {
         bool got_frame = false;
 
@@ -192,7 +192,7 @@ namespace MWSound
         return true;
     }
 
-    size_t FFmpeg_Decoder::readAVAudioData(void* data, size_t length)
+    size_t FFmpegDecoder::readAVAudioData(void* data, size_t length)
     {
         size_t dec = 0;
 
@@ -227,7 +227,7 @@ namespace MWSound
         return dec;
     }
 
-    void FFmpeg_Decoder::open(VFS::Path::NormalizedView fname)
+    void FFmpegDecoder::open(VFS::Path::NormalizedView fname)
     {
         close();
         mDataStream = mResourceMgr->get(fname);
@@ -317,7 +317,7 @@ namespace MWSound
         mStream = stream;
     }
 
-    void FFmpeg_Decoder::close()
+    void FFmpegDecoder::close()
     {
         mStream = nullptr;
         mCodecCtx.reset();
@@ -332,7 +332,7 @@ namespace MWSound
         mDataStream.reset();
     }
 
-    std::string FFmpeg_Decoder::getName()
+    std::string FFmpegDecoder::getName()
     {
 // In the FFMpeg 4.0 a "filename" field was replaced by "url"
 #if LIBAVCODEC_VERSION_INT < 3805796
@@ -342,7 +342,7 @@ namespace MWSound
 #endif
     }
 
-    void FFmpeg_Decoder::getInfo(int* samplerate, ChannelConfig* chans, SampleType* type)
+    void FFmpegDecoder::getInfo(int* samplerate, ChannelConfig* chans, SampleType* type)
     {
         if (!mStream)
             throw std::runtime_error("No audio stream info");
@@ -459,7 +459,7 @@ namespace MWSound
         }
     }
 
-    size_t FFmpeg_Decoder::read(char* buffer, size_t bytes)
+    size_t FFmpegDecoder::read(char* buffer, size_t bytes)
     {
         if (!mStream)
         {
@@ -469,7 +469,7 @@ namespace MWSound
         return readAVAudioData(buffer, bytes);
     }
 
-    void FFmpeg_Decoder::readAll(std::vector<char>& output)
+    void FFmpegDecoder::readAll(std::vector<char>& output)
     {
         if (!mStream)
         {
@@ -490,7 +490,7 @@ namespace MWSound
         }
     }
 
-    size_t FFmpeg_Decoder::getSampleOffset()
+    size_t FFmpegDecoder::getSampleOffset()
     {
 #if OPENMW_FFMPEG_5_OR_GREATER
         std::size_t delay = (mFrameSize - mFramePos) / mOutputChannelLayout.nb_channels
@@ -501,8 +501,8 @@ namespace MWSound
         return static_cast<std::size_t>(mNextPts * mCodecCtx->sample_rate) - delay;
     }
 
-    FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)
-        : Sound_Decoder(vfs)
+    FFmpegDecoder::FFmpegDecoder(const VFS::Manager* vfs)
+        : SoundDecoder(vfs)
         , mStream(nullptr)
         , mFrameSize(0)
         , mFramePos(0)
@@ -534,7 +534,7 @@ namespace MWSound
         }
     }
 
-    FFmpeg_Decoder::~FFmpeg_Decoder()
+    FFmpegDecoder::~FFmpegDecoder()
     {
         close();
     }
