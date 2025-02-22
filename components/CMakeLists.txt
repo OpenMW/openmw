@@ -155,9 +155,9 @@ add_component_dir (nifbullet
     bulletnifloader
     )
 
-add_component_dir (to_utf8
-    tables_gen
-    to_utf8
+add_component_dir (toutf8
+    tablesgen
+    toutf8
     )
 
 add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge esmterrain

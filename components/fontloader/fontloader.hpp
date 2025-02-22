@@ -5,7 +5,7 @@
 #include <MyGUI_XmlDocument.h>
 
 #include <components/myguiplatform/myguidatamanager.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 namespace VFS
 {
