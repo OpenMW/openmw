@@ -17,7 +17,7 @@
 #include <components/stereo/multiview.hpp>
 #include <components/vfs/manager.hpp>
 
-#include "parse_constants.hpp"
+#include "parseconstants.hpp"
 
 namespace
 {

@@ -6,7 +6,6 @@
 #include <string>
 #include <string_view>
 
-#include <components/fx/lexer_types.hpp>
 #include <components/misc/strings/format.hpp>
 
 namespace fx

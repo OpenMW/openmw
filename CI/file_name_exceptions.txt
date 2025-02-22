@@ -33,8 +33,6 @@ components/crashcatcher/windows_crashcatcher.hpp
 components/crashcatcher/windows_crashmonitor.cpp
 components/crashcatcher/windows_crashmonitor.hpp
 components/crashcatcher/windows_crashshm.hpp
-components/fx/lexer_types.hpp
-components/fx/parse_constants.hpp
 components/platform/file.posix.cpp
 components/platform/file.stdio.cpp
 components/platform/file.win32.cpp

@@ -173,7 +173,7 @@ add_component_dir(esm attr common defs esmcommon records util luascripts format 
     exteriorcelllocation
     )
 
-add_component_dir(fx pass technique lexer lexer_types parse_constants widgets stateupdater)
+add_component_dir(fx pass technique lexer lexertypes parseconstants widgets stateupdater)
 
 add_component_dir(std140 ubo)
 

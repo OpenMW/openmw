@@ -7,7 +7,7 @@
 #include <string>
 #include <string_view>
 
-#include "lexer_types.hpp"
+#include "lexertypes.hpp"
 
 namespace fx
 {
