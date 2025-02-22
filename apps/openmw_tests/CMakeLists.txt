@@ -6,14 +6,14 @@ file(GLOB UNITTEST_SRC_FILES
 
     options.cpp
 
-    mwworld/test_store.cpp
+    mwworld/teststore.cpp
     mwworld/testduration.cpp
     mwworld/testtimestamp.cpp
     mwworld/testptr.cpp
 
-    mwdialogue/test_keywordsearch.cpp
+    mwdialogue/testkeywordsearch.cpp
 
-    mwscript/test_scripts.cpp
+    mwscript/testscripts.cpp
 )
 
 source_group(apps\\openmw-tests FILES ${UNITTEST_SRC_FILES})
