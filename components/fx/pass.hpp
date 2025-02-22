@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_FX_PASS_H
-#define OPENMW_COMPONENTS_FX_PASS_H
+#ifndef OPENMW_COMPONENTS_FX_PASS_HPP
+#define OPENMW_COMPONENTS_FX_PASS_HPP
 
 #include <array>
 #include <optional>
