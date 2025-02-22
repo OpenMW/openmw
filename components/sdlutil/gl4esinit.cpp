@@ -1,7 +1,7 @@
 // EGL does not work reliably for feature detection.
 // Instead, we initialize gl4es manually.
 #ifdef OPENMW_GL4ES_MANUAL_INIT
-#include "gl4es_init.h"
+#include "gl4esinit.h"
 
 // For glHint
 #include <GL/gl.h>

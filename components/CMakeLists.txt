@@ -362,7 +362,7 @@ add_component_dir (fontloader
 
 add_component_dir (sdlutil
     events
-    gl4es_init
+    gl4esinit
     imagetosurface
     sdlcursormanager
     sdlgraphicswindow

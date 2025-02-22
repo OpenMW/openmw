@@ -36,8 +36,6 @@ components/crashcatcher/windows_crashshm.hpp
 components/platform/file.posix.cpp
 components/platform/file.stdio.cpp
 components/platform/file.win32.cpp
-components/sdlutil/gl4es_init.cpp
-components/sdlutil/gl4es_init.h
 components/to_utf8/gen_iconv.cpp
 components/to_utf8/tables_gen.hpp
 components/to_utf8/to_utf8.cpp
