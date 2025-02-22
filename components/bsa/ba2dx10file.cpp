@@ -24,12 +24,14 @@
 #endif
 
 #include <boost/iostreams/device/array.hpp>
-#include <components/bsa/ba2file.hpp>
-#include <components/bsa/memorystream.hpp>
+
 #include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
+
+#include "ba2file.hpp"
+#include "memorystream.hpp"
 
 namespace Bsa
 {

@@ -23,14 +23,14 @@
 
 #include "bsafile.hpp"
 
-#include <components/esm/fourcc.hpp>
-#include <components/files/constrainedfilestream.hpp>
-
 #include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+
+#include <components/esm/fourcc.hpp>
+#include <components/files/constrainedfilestream.hpp>
 
 using namespace Bsa;
 

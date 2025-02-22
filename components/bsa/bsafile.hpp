@@ -21,8 +21,8 @@
 
  */
 
-#ifndef BSA_BSA_FILE_H
-#define BSA_BSA_FILE_H
+#ifndef OPENMW_COMPONENTS_BSA_BSAFILE_HPP
+#define OPENMW_COMPONENTS_BSA_BSAFILE_HPP
 
 #include <cstdint>
 #include <filesystem>

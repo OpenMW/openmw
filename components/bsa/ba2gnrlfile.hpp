@@ -1,5 +1,5 @@
-#ifndef BSA_BA2_GNRL_FILE_H
-#define BSA_BA2_GNRL_FILE_H
+#ifndef OPENMW_COMPONENTS_BSA_BA2GNRLFILE_HPP
+#define OPENMW_COMPONENTS_BSA_BA2GNRLFILE_HPP
 
 #include <list>
 #include <map>
