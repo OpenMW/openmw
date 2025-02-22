@@ -1,5 +1,5 @@
-#ifndef WINDOWS_CRASHSHM_HPP
-#define WINDOWS_CRASHSHM_HPP
+#ifndef OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHSHM_HPP
+#define OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHSHM_HPP
 
 #include <components/misc/windows.hpp>
 
@@ -44,4 +44,4 @@ namespace Crash
 
 } // namespace Crash
 
-#endif // WINDOWS_CRASHSHM_HPP
+#endif

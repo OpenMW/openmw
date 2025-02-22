@@ -22,7 +22,7 @@
 #include <components/misc/strings/lower.hpp>
 
 #ifdef _WIN32
-#include <components/crashcatcher/windows_crashcatcher.hpp>
+#include <components/crashcatcher/windowscrashcatcher.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/windows.hpp>
 

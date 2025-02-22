@@ -1,5 +1,5 @@
-#ifndef WINDOWS_CRASHMONITOR_HPP
-#define WINDOWS_CRASHMONITOR_HPP
+#ifndef OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHMONITOR_HPP
+#define OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHMONITOR_HPP
 
 #include <components/misc/windows.hpp>
 
@@ -60,4 +60,4 @@ namespace Crash
 
 } // namespace Crash
 
-#endif // WINDOWS_CRASHMONITOR_HPP
+#endif

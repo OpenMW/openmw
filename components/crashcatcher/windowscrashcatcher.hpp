@@ -1,10 +1,11 @@
-#ifndef WINDOWS_CRASHCATCHER_HPP
-#define WINDOWS_CRASHCATCHER_HPP
+#ifndef OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHCATCHER_HPP
+#define OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHCATCHER_HPP
 
 #include <filesystem>
 
-#include <components/crashcatcher/crashcatcher.hpp>
 #include <components/misc/windows.hpp>
+
+#include "crashcatcher.hpp"
 
 namespace Crash
 {
@@ -78,4 +79,4 @@ namespace Crash
 
 } // namespace Crash
 
-#endif // WINDOWS_CRASHCATCHER_HPP
+#endif

@@ -390,10 +390,10 @@ copy_resource_file("lua_ui/content.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lu
 
 if(WIN32)
     add_component_dir (crashcatcher
-        windows_crashcatcher
-        windows_crashmonitor
-        windows_crashshm
+        windowscrashcatcher
         windowscrashdumppathhelpers
+        windowscrashmonitor
+        windowscrashshm
     )
 elseif(NOT ANDROID)
     add_component_dir (crashcatcher

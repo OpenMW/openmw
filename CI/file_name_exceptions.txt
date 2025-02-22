@@ -7,8 +7,3 @@ apps/openmw/mwsound/sound_buffer.cpp
 apps/openmw/mwsound/sound_buffer.hpp
 apps/openmw/mwsound/sound_decoder.hpp
 apps/openmw/mwsound/sound_output.hpp
-components/crashcatcher/windows_crashcatcher.cpp
-components/crashcatcher/windows_crashcatcher.hpp
-components/crashcatcher/windows_crashmonitor.cpp
-components/crashcatcher/windows_crashmonitor.hpp
-components/crashcatcher/windows_crashshm.hpp
