@@ -111,7 +111,7 @@ add_component_dir (bgsm
     )
 
 add_component_dir (bsa
-    bsa_file compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
+    bsafile compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
 
 add_component_dir (bullethelpers

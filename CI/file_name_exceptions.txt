@@ -28,8 +28,6 @@ apps/openmw_tests/mwdialogue/test_keywordsearch.cpp
 apps/openmw_tests/mwscript/test_scripts.cpp
 apps/openmw_tests/mwscript/test_utils.hpp
 apps/openmw_tests/mwworld/test_store.cpp
-components/bsa/bsa_file.cpp
-components/bsa/bsa_file.hpp
 components/crashcatcher/windows_crashcatcher.cpp
 components/crashcatcher/windows_crashcatcher.hpp
 components/crashcatcher/windows_crashmonitor.cpp

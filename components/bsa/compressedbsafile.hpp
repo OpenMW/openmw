@@ -26,11 +26,11 @@
 #ifndef BSA_COMPRESSED_BSA_FILE_H
 #define BSA_COMPRESSED_BSA_FILE_H
 
+#include <filesystem>
 #include <limits>
 #include <map>
 
-#include <components/bsa/bsa_file.hpp>
-#include <filesystem>
+#include "bsafile.hpp"
 
 namespace Bsa
 {

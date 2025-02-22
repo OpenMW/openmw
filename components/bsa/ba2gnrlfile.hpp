@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include <components/bsa/bsa_file.hpp>
+#include "bsafile.hpp"
 
 namespace Bsa
 {
