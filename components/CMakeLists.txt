@@ -500,15 +500,15 @@ add_component_dir(platform
 
 if (WIN32)
     add_component_dir(platform
-        file.win32
+        filewin32
         )
 elseif (UNIX)
     add_component_dir(platform
-        file.posix
+        fileposix
         )
 else ()
     add_component_dir(platform
-        file.stdio
+        filestdio
         )
 endif()
 
