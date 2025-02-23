@@ -239,6 +239,29 @@ namespace LuaUtil
                 }
             });
         }
+
+        void Registry::clear(bool force)
+        {
+            std::vector<Info> infoToKeep;
+            if (!force)
+            {
+                for (const Info& info : mInfo)
+                    if (info.mPersistent)
+                        infoToKeep.push_back(info);
+            }
+            mKeys.clear();
+            mIds.clear();
+            mInfo.clear();
+            mHandlers.clear();
+            mBindings.clear();
+            mValues.clear();
+            mBindingTree.clear();
+            if (!force)
+            {
+                for (const Info& i : infoToKeep)
+                    insert(i);
+            }
+        }
     }
 
     namespace InputTrigger
@@ -291,6 +314,25 @@ namespace LuaUtil
                                    return false;
                                }),
                 handlers.end());
+        }
+
+        void Registry::clear(bool force)
+        {
+            std::vector<Info> infoToKeep;
+            if (!force)
+            {
+                for (const Info& info : mInfo)
+                    if (info.mPersistent)
+                        infoToKeep.push_back(info);
+            }
+            mInfo.clear();
+            mHandlers.clear();
+            mIds.clear();
+            if (!force)
+            {
+                for (const Info& i : infoToKeep)
+                    insert(i);
+            }
         }
     }
 }
