@@ -4,7 +4,7 @@
     uniform float maximumShadowMapDistance;
     uniform float shadowFadeStart;
     @foreach shadow_texture_unit_index @shadow_texture_unit_list
-        uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
+        uniform sampler2D/*Shadow*/ shadowTexture@shadow_texture_unit_index;
         varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
 
 #if @perspectiveShadowMaps
@@ -32,7 +32,7 @@ float unshadowedLightRatio(float distance)
 #endif
             if (all(lessThan(shadowXYZ.xy, vec2(1.0, 1.0))) && all(greaterThan(shadowXYZ.xy, vec2(0.0, 0.0))))
             {
-                shadowing = min(shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index), shadowing);
+                shadowing = min(shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r, shadowing);
 
                 doneShadows = all(lessThan(shadowXYZ, vec3(0.95, 0.95, 1.0))) && all(greaterThan(shadowXYZ, vec3(0.05, 0.05, 0.0)));
 #if @perspectiveShadowMaps
