@@ -39,7 +39,7 @@ uniform int PointLightIndex[@maxLights];
 uniform int PointLightCount;
 
 // Defaults to shared layout. If we ever move to GLSL 140, std140 layout should be considered
-uniform LightBufferBinding
+layout(std140) uniform LightBufferBinding
 {
     LightData LightBuffer[@maxLightsInScene];
 };
