@@ -1061,7 +1061,7 @@ namespace MWLua
         };
 
         // types.Actor.activeEffects(o):removeEffect(id, ?arg)
-        activeEffectsT["remove"] = [getEffectKey](const ActorActiveEffects& effects, std::string_view idStr,
+        activeEffectsT["remove"] = [getEffectKey, context](const ActorActiveEffects& effects, std::string_view idStr,
                                        sol::optional<std::string_view> argStr) {
             if (!effects.isActor())
                 return;
@@ -1071,12 +1071,14 @@ namespace MWLua
 
             MWMechanics::EffectKey key = getEffectKey(idStr, argStr);
 
-            // Note that, although this is member method of ActorActiveEffects and we are removing an effect (not a
-            // spell), we still need to use the active spells store to purge this effect from active spells.
-            const auto& ptr = effects.mActor.ptr();
+            context.mLuaManager->addAction([key, effects]() {
+                // Note that, although this is member method of ActorActiveEffects and we are removing an effect (not a
+                // spell), we still need to use the active spells store to purge this effect from active spells.
+                const auto& ptr = effects.mActor.ptr();
 
-            auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
-            activeSpells.purgeEffect(ptr, key.mId, key.mArg);
+                auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
+                activeSpells.purgeEffect(ptr, key.mId, key.mArg);
+            });
         };
 
         // types.Actor.activeEffects(o):set(value, id, ?arg)
