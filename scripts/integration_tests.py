@@ -83,7 +83,7 @@ def run_test(test_name):
     test_success = True
     fatal_errors = list()
     with subprocess.Popen(
-        [openmw_binary, "--replace=config", "--config", config_dir, "--skip-menu", "--no-grab", "--no-sound"],
+        [openmw_binary, "--replace=config", "--config", config_dir, "--no-grab"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         encoding="utf-8",

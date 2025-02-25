@@ -7,7 +7,7 @@ local vfs = require('openmw.vfs')
 local world = require('openmw.world')
 local I = require('openmw.interfaces')
 
-testing.registerGlobalTest('testTimers', function()
+testing.registerGlobalTest('timers', function()
     testing.expectAlmostEqual(core.getGameTimeScale(), 30, 'incorrect getGameTimeScale() result')
     testing.expectAlmostEqual(core.getSimulationTimeScale(), 1, 'incorrect getSimulationTimeScale result')
 
@@ -41,7 +41,7 @@ testing.registerGlobalTest('testTimers', function()
     testing.expectGreaterOrEqual(ts2, 1, 'async:newUnsavableSimulationTimer failed')
 end)
 
-testing.registerGlobalTest('testTeleport', function()
+testing.registerGlobalTest('teleport', function()
     local player = world.players[1]
     player:teleport('', util.vector3(100, 50, 500), util.transform.rotateZ(math.rad(90)))
     coroutine.yield()
@@ -74,14 +74,14 @@ testing.registerGlobalTest('testTeleport', function()
     testing.expectEqualWithDelta(player.rotation:getYaw(), math.rad(-90), 0.05, 'teleporting changes rotation')
 end)
 
-testing.registerGlobalTest('testGetGMST', function()
+testing.registerGlobalTest('getGMST', function()
     testing.expectEqual(core.getGMST('non-existed gmst'), nil)
     testing.expectEqual(core.getGMST('Water_RippleFrameCount'), 4)
     testing.expectEqual(core.getGMST('Inventory_DirectionalDiffuseR'), 0.5)
     testing.expectEqual(core.getGMST('Level_Up_Level2'), 'something')
 end)
 
-testing.registerGlobalTest('testMWScript', function()
+testing.registerGlobalTest('MWScript', function()
     local variableStoreCount = 18
     local variableStore = world.mwscript.getGlobalVariables(player)
     testing.expectEqual(variableStoreCount, #variableStore)
@@ -122,7 +122,7 @@ local function testRecordStore(store, storeName, skipPairs)
     testing.expectEqual(status, true, storeName)
 end
 
-testing.registerGlobalTest('testRecordStores', function()
+testing.registerGlobalTest('record stores', function()
     for key, type in pairs(types) do
         if type.records then
             testRecordStore(type, key)
@@ -143,7 +143,7 @@ testing.registerGlobalTest('testRecordStores', function()
     testRecordStore(types.Player.birthSigns, "birthSigns")
 end)
 
-testing.registerGlobalTest('testRecordCreation', function()
+testing.registerGlobalTest('record creation', function()
     local newLight = {
         isCarriable = true,
         isDynamic = true,
@@ -168,7 +168,7 @@ testing.registerGlobalTest('testRecordCreation', function()
     end
 end)
 
-testing.registerGlobalTest('testUTF8Chars', function()
+testing.registerGlobalTest('UTF-8 characters', function()
     testing.expectEqual(utf8.codepoint("😀"), 0x1F600)
 
     local chars = {}
@@ -195,7 +195,7 @@ testing.registerGlobalTest('testUTF8Chars', function()
     end
 end)
 
-testing.registerGlobalTest('testUTF8Strings', function()
+testing.registerGlobalTest('UTF-8 strings', function()
     local utf8str = "Hello, 你好, 🌎!"
 
     local str = ""
@@ -208,7 +208,7 @@ testing.registerGlobalTest('testUTF8Strings', function()
     testing.expectEqual(utf8.offset(utf8str, 9), 11)
 end)
 
-testing.registerGlobalTest('testMemoryLimit', function()
+testing.registerGlobalTest('memory limit', function()
     local ok, err = pcall(function()
         local t = {}
         local n = 1
@@ -228,7 +228,7 @@ local function initPlayer()
     return player
 end
 
-testing.registerGlobalTest('testVFS', function()
+testing.registerGlobalTest('vfs', function()
     local file = 'test_vfs_dir/lines.txt'
     local nosuchfile = 'test_vfs_dir/nosuchfile'
     testing.expectEqual(vfs.fileExists(file), true, 'lines.txt should exist')
@@ -274,9 +274,9 @@ testing.registerGlobalTest('testVFS', function()
     end
 end)
 
-testing.registerGlobalTest('testCommitCrime', function()
+testing.registerGlobalTest('commit crime', function()
     local player = initPlayer()
-    testing.expectEqual(player == nil, false, 'A viable player reference should exist to run `testCommitCrime`')
+    testing.expectEqual(player == nil, false, 'A viable player reference should exist to run `commit crime`')
     testing.expectEqual(I.Crimes == nil, false, 'Crimes interface should be available in global contexts')
 
     -- Reset crime level to have a clean slate
@@ -296,8 +296,8 @@ testing.registerGlobalTest('testCommitCrime', function()
     testing.expectEqual(types.Player.getCrimeLevel(player), 0, "Crime level should not change if the victim's alarm value is low and there's no other witnesses")
 end)
 
-testing.registerGlobalTest('testRecordModelProperty', function()
-    local player = initPlayer()
+testing.registerGlobalTest('record model property', function()
+    local player = world.players[1]
     testing.expectEqual(types.NPC.record(player).model, 'meshes/basicplayer.dae')
 end)
 
@@ -308,27 +308,27 @@ local function registerPlayerTest(name)
     end)
 end
 
-registerPlayerTest('playerYawRotation')
-registerPlayerTest('playerPitchRotation')
-registerPlayerTest('playerPitchAndYawRotation')
-registerPlayerTest('playerRotation')
-registerPlayerTest('playerForwardRunning')
-registerPlayerTest('playerDiagonalWalking')
+registerPlayerTest('player yaw rotation')
+registerPlayerTest('player pitch rotation')
+registerPlayerTest('player pitch and yaw rotation')
+registerPlayerTest('player rotation')
+registerPlayerTest('player forward running')
+registerPlayerTest('player diagonal walking')
 registerPlayerTest('findPath')
 registerPlayerTest('findRandomPointAroundCircle')
 registerPlayerTest('castNavigationRay')
 registerPlayerTest('findNearestNavMeshPosition')
-registerPlayerTest('playerMemoryLimit')
+registerPlayerTest('player memory limit')
 
-testing.registerGlobalTest('playerWeaponAttack', function()
+testing.registerGlobalTest('player weapon attack', function()
     local player = initPlayer()
     world.createObject('basic_dagger1h', 1):moveInto(player)
-    testing.runLocalTest(player, 'playerWeaponAttack')
+    testing.runLocalTest(player, 'player weapon attack')
 end)
 
 return {
     engineHandlers = {
-        onUpdate = testing.makeUpdateGlobal(),
+        onUpdate = testing.updateGlobal,
     },
     eventHandlers = testing.globalEventHandlers,
 }

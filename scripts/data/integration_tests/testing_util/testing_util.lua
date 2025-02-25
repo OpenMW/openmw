@@ -3,29 +3,21 @@ local util = require('openmw.util')
 
 local M = {}
 
+local menuTestsOrder = {}
+local menuTests = {}
+
 local globalTestsOrder = {}
 local globalTests = {}
 local globalTestRunner = nil
+local currentGlobalTest = nil
+local currentGlobalTestError = nil
 
 local localTests = {}
 local localTestRunner = nil
 local currentLocalTest = nil
 local currentLocalTestError = nil
 
-function M.makeUpdateGlobal()
-    local fn = function()
-        for i, test in ipairs(globalTestsOrder) do
-            local name, fn = unpack(test)
-            print('TEST_START', i, name)
-            local status, err = pcall(fn)
-            if status then
-                print('TEST_OK', i, name)
-            else
-                print('TEST_FAILED', i, name, err)
-            end
-        end
-        core.quit()
-    end
+local function makeTestCoroutine(fn)
     local co = coroutine.create(fn)
     return function()
         if coroutine.status(co) ~= 'dead' then
@@ -34,9 +26,62 @@ function M.makeUpdateGlobal()
     end
 end
 
+local function runTests(tests)
+    for i, test in ipairs(tests) do
+        local name, fn = unpack(test)
+        print('TEST_START', i, name)
+        local status, err = pcall(fn)
+        if status then
+            print('TEST_OK', i, name)
+        else
+            print('TEST_FAILED', i, name, err)
+        end
+    end
+    core.quit()
+end
+
+function M.makeUpdateMenu()
+    return makeTestCoroutine(function()
+        print('Running menu tests...')
+        runTests(menuTestsOrder)
+    end)
+end
+
+function M.makeUpdateGlobal()
+    return makeTestCoroutine(function()
+        print('Running global tests...')
+        runTests(globalTestsOrder)
+    end)
+end
+
+function M.registerMenuTest(name, fn)
+    menuTests[name] = fn
+    table.insert(menuTestsOrder, {name, fn})
+end
+
+function M.runGlobalTest(name)
+    currentGlobalTest = name
+    currentGlobalTestError = nil
+    core.sendGlobalEvent('runGlobalTest', name)
+    while currentGlobalTest do
+        coroutine.yield()
+    end
+    if currentGlobalTestError then
+        error(currentGlobalTestError, 2)
+    end
+end
+
 function M.registerGlobalTest(name, fn)
     globalTests[name] = fn
     table.insert(globalTestsOrder, {name, fn})
+end
+
+function M.updateGlobal()
+    if globalTestRunner and coroutine.status(globalTestRunner) ~= 'dead' then
+        coroutine.resume(globalTestRunner)
+    else
+        globalTestRunner = nil
+    end
 end
 
 function M.runLocalTest(obj, name)
@@ -208,11 +253,38 @@ function M.formatActualExpected(actual, expected)
     return string.format('actual: %s, expected: %s', actual, expected)
 end
 
+-- used only in menu scripts
+M.menuEventHandlers = {
+    globalTestFinished = function(data)
+        if data.name ~= currentGlobalTest then
+            error(string.format('globalTestFinished with incorrect name %s, expected %s', data.name, currentGlobalTest), 2)
+        end
+        currentGlobalTest = nil
+        currentGlobalTestError = data.errMsg
+    end,
+}
+
 -- used only in global scripts
 M.globalEventHandlers = {
+    runGlobalTest = function(name)
+        fn = globalTests[name]
+        local types = require('openmw.types')
+        local world = require('openmw.world')
+        if not fn then
+            types.Player.sendMenuEvent(world.players[1], 'globalTestFinished', {name=name, errMsg='Global test is not found'})
+            return
+        end
+        globalTestRunner = coroutine.create(function()
+            local status, err = pcall(fn)
+            if status then
+                err = nil
+            end
+            types.Player.sendMenuEvent(world.players[1], 'globalTestFinished', {name=name, errMsg=err})
+        end)
+    end,
     localTestFinished = function(data)
         if data.name ~= currentLocalTest then
-            error(string.format('localTestFinished with incorrect name %s, expected %s', data.name, currentLocalTest))
+            error(string.format('localTestFinished with incorrect name %s, expected %s', data.name, currentLocalTest), 2)
         end
         currentLocalTest = nil
         currentLocalTestError = data.errMsg
