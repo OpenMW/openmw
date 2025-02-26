@@ -8,28 +8,13 @@ if not core.contentFiles.has('Morrowind.esm') then
     error('This test requires Morrowind.esm')
 end
 
-function makeTests(modules)
-    local tests = {}
-
-    for _, moduleName in ipairs(modules) do
-        local module = require(moduleName)
-        for _, v in ipairs(module) do
-            table.insert(tests, {string.format('[%s] %s', moduleName, v[1]), v[2]})
-        end
-    end
-
-    return tests
-end
-
-local testModules = {
-    'global_issues',
-    'global_dialogues',
-    'global_mwscript',
-}
+require('global_issues')
+require('global_dialogues')
+require('global_mwscript')
 
 return {
     engineHandlers = {
-        onUpdate = testing.testRunner(makeTests(testModules)),
+        onUpdate = testing.makeUpdateGlobal(),
     },
     eventHandlers = testing.eventHandlers,
 }

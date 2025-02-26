@@ -2,12 +2,19 @@ local core = require('openmw.core')
 local util = require('openmw.util')
 
 local M = {}
+
+local globalTestsOrder = {}
+local globalTests = {}
+local globalTestRunner = nil
+
+local localTests = {}
+local localTestRunner = nil
 local currentLocalTest = nil
 local currentLocalTestError = nil
 
-function M.testRunner(tests)
+function M.makeUpdateGlobal()
     local fn = function()
-        for i, test in ipairs(tests) do
+        for i, test in ipairs(globalTestsOrder) do
             local name, fn = unpack(test)
             print('TEST_START', i, name)
             local status, err = pcall(fn)
@@ -27,6 +34,11 @@ function M.testRunner(tests)
     end
 end
 
+function M.registerGlobalTest(name, fn)
+    globalTests[name] = fn
+    table.insert(globalTestsOrder, {name, fn})
+end
+
 function M.runLocalTest(obj, name)
     currentLocalTest = name
     currentLocalTestError = nil
@@ -39,7 +51,21 @@ function M.runLocalTest(obj, name)
     end
 end
 
-function M.expect(cond, delta, msg)
+function M.registerLocalTest(name, fn)
+    localTests[name] = fn
+end
+
+function M.updateLocal()
+    if localTestRunner and coroutine.status(localTestRunner) ~= 'dead' then
+        if not core.isWorldPaused() then
+            coroutine.resume(localTestRunner)
+        end
+    else
+        localTestRunner = nil
+    end
+end
+
+function M.expect(cond, msg)
     if not cond then
         error(msg or '"true" expected', 2)
     end
@@ -182,28 +208,11 @@ function M.formatActualExpected(actual, expected)
     return string.format('actual: %s, expected: %s', actual, expected)
 end
 
-local localTests = {}
-local localTestRunner = nil
-
-function M.registerLocalTest(name, fn)
-    localTests[name] = fn
-end
-
-function M.updateLocal()
-    if localTestRunner and coroutine.status(localTestRunner) ~= 'dead' then
-        if not core.isWorldPaused() then
-            coroutine.resume(localTestRunner)
-        end
-    else
-        localTestRunner = nil
-    end
-end
-
 M.eventHandlers = {
     runLocalTest = function(name)  -- used only in local scripts
         fn = localTests[name]
         if not fn then
-            core.sendGlobalEvent('localTestFinished', {name=name, errMsg='Test not found'})
+            core.sendGlobalEvent('localTestFinished', {name=name, errMsg='Local test is not found'})
             return
         end
         localTestRunner = coroutine.create(function()
