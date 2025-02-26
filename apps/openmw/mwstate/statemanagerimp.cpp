@@ -757,12 +757,14 @@ void MWState::StateManager::update(float duration)
 
     if (mNewGameRequest)
     {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_MainMenu);
         newGame();
         mNewGameRequest = false;
     }
 
     if (mLoadRequest)
     {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_MainMenu);
         loadGame(*mLoadRequest);
         mLoadRequest = std::nullopt;
     }
