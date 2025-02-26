@@ -42,6 +42,7 @@ local function testTimers()
 end
 
 local function testTeleport()
+    local player = world.players[1]
     player:teleport('', util.vector3(100, 50, 500), util.transform.rotateZ(math.rad(90)))
     coroutine.yield()
     testing.expect(player.cell.isExterior, 'teleport to exterior failed')
@@ -221,8 +222,10 @@ local function testMemoryLimit()
 end
 
 local function initPlayer()
+    local player = world.players[1]
     player:teleport('', util.vector3(4096, 4096, 1745), util.transform.identity)
     coroutine.yield()
+    return player
 end
 
 local function testVFS()
@@ -272,8 +275,7 @@ local function testVFS()
 end
 
 local function testCommitCrime()
-    initPlayer()
-    local player = world.players[1]
+    local player = initPlayer()
     testing.expectEqual(player == nil, false, 'A viable player reference should exist to run `testCommitCrime`')
     testing.expectEqual(I.Crimes == nil, false, 'Crimes interface should be available in global contexts')
 
@@ -295,51 +297,50 @@ local function testCommitCrime()
 end
 
 local function testRecordModelProperty()
-    initPlayer()
-    local player = world.players[1]
+    local player = initPlayer()
     testing.expectEqual(types.NPC.record(player).model, 'meshes/basicplayer.dae')
 end
 
 tests = {
     {'timers', testTimers},
     {'rotating player with controls.yawChange should change rotation', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'playerYawRotation')
     end},
     {'rotating player with controls.pitchChange should change rotation', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'playerPitchRotation')
     end},
     {'rotating player with controls.pitchChange and controls.yawChange should change rotation', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'playerPitchAndYawRotation')
     end},
     {'rotating player should not lead to nan rotation', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'playerRotation')
     end},
     {'playerForwardRunning', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'playerForwardRunning')
     end},
     {'playerDiagonalWalking', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'playerDiagonalWalking')
     end},
     {'findPath', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'findPath')
     end},
     {'findRandomPointAroundCircle', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'findRandomPointAroundCircle')
     end},
     {'castNavigationRay', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'castNavigationRay')
     end},
     {'findNearestNavMeshPosition', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'findNearestNavMeshPosition')
     end},
     {'teleport', testTeleport},
@@ -351,11 +352,11 @@ tests = {
     {'mwscript', testMWScript},
     {'testMemoryLimit', testMemoryLimit},
     {'playerMemoryLimit', function()
-        initPlayer()
+        local player = initPlayer()
         testing.runLocalTest(player, 'playerMemoryLimit')
     end},
     {'player with equipped weapon on attack should damage health of other actors', function()
-        initPlayer()
+        local player = initPlayer()
         world.createObject('basic_dagger1h', 1):moveInto(player)
         testing.runLocalTest(player, 'playerWeaponAttack')
     end},
@@ -367,7 +368,6 @@ tests = {
 return {
     engineHandlers = {
         onUpdate = testing.testRunner(tests),
-        onPlayerAdded = function(p) player = p end,
     },
     eventHandlers = testing.eventHandlers,
 }
