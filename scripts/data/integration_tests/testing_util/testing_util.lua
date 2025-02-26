@@ -208,8 +208,20 @@ function M.formatActualExpected(actual, expected)
     return string.format('actual: %s, expected: %s', actual, expected)
 end
 
-M.eventHandlers = {
-    runLocalTest = function(name)  -- used only in local scripts
+-- used only in global scripts
+M.globalEventHandlers = {
+    localTestFinished = function(data)
+        if data.name ~= currentLocalTest then
+            error(string.format('localTestFinished with incorrect name %s, expected %s', data.name, currentLocalTest))
+        end
+        currentLocalTest = nil
+        currentLocalTestError = data.errMsg
+    end,
+}
+
+-- used only in local scripts
+M.localEventHandlers = {
+    runLocalTest = function(name)
         fn = localTests[name]
         if not fn then
             core.sendGlobalEvent('localTestFinished', {name=name, errMsg='Local test is not found'})
@@ -222,13 +234,6 @@ M.eventHandlers = {
             end
             core.sendGlobalEvent('localTestFinished', {name=name, errMsg=err})
         end)
-    end,
-    localTestFinished = function(data)  -- used only in global scripts
-        if data.name ~= currentLocalTest then
-            error(string.format('localTestFinished with incorrect name %s, expected %s', data.name, currentLocalTest))
-        end
-        currentLocalTest = nil
-        currentLocalTestError = data.errMsg
     end,
 }
 

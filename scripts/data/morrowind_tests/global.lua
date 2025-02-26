@@ -16,5 +16,5 @@ return {
     engineHandlers = {
         onUpdate = testing.makeUpdateGlobal(),
     },
-    eventHandlers = testing.eventHandlers,
+    eventHandlers = testing.globalEventHandlers,
 }

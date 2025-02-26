@@ -346,5 +346,5 @@ return {
     engineHandlers = {
         onFrame = testing.updateLocal,
     },
-    eventHandlers = testing.eventHandlers
+    eventHandlers = testing.localEventHandlers,
 }
