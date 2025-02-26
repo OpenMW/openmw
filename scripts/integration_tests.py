@@ -58,10 +58,8 @@ def runTest(name):
         )
         for path in content_paths:
             omw_cfg.write(f'content={path.name}\n')
-        if (test_dir / "openmw.cfg").exists():
-            omw_cfg.write(open(test_dir / "openmw.cfg").read())
-        elif (test_dir / "test.omwscripts").exists():
-            omw_cfg.write("content=test.omwscripts\n")
+        with open(test_dir / "openmw.cfg") as stream:
+            omw_cfg.write(stream.read())
     with open(config_dir / "settings.cfg", "a", encoding="utf-8") as settings_cfg:
         settings_cfg.write(
             "[Video]\n"
