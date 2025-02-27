@@ -35,7 +35,6 @@
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6025: Subrecords cannot overlap records
     Bug #6027: Collisionshape becomes spiderweb-like when the mesh is too complex
-    Bug #6097: Level Progress Tooltip Sometimes Not Updated
     Bug #6146: Lua command `actor:setEquipment` doesn't trigger mwscripts when equipping or unequipping a scripted item
     Bug #6156: 1ft Charm or Sound magic effect vfx doesn't work properly
     Bug #6190: Unintuitive sun specularity time of day dependence
@@ -228,6 +227,7 @@
     Bug #8252: Plugin dependencies are not required to be loaded
     Bug #8295: Post-processing chain is case-sensitive
     Bug #8299: Crash while smoothing landscape
+    Bug #8364: Crash when clicking scrollbar without handle (divide by zero)
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
@@ -392,6 +392,7 @@
     Bug #6066: Addtopic "return" does not work from within script. No errors thrown
     Bug #6067: ESP loader fails for certain subrecord orders
     Bug #6087: Bound items added directly to the inventory disappear if their corresponding spell effect ends
+    Bug #6097: Level Progress Tooltip Sometimes Not Updated
     Bug #6101: Disarming trapped unlocked owned objects isn't considered a crime
     Bug #6107: Fatigue is incorrectly recalculated when fortify effect is applied or removed
     Bug #6109: Crash when playing a custom made menu_background file
