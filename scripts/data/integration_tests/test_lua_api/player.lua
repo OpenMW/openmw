@@ -6,6 +6,7 @@ local input = require('openmw.input')
 local types = require('openmw.types')
 local nearby = require('openmw.nearby')
 local camera = require('openmw.camera')
+local matchers = require('matchers')
 
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Controls, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Fighting, false)
@@ -113,13 +114,13 @@ testing.registerLocalTest('player rotation',
             coroutine.yield()
 
             local alpha1, gamma1 = self.rotation:getAnglesXZ()
-            testing.expectThat(alpha1, testing.isNotNan(), 'Alpha rotation in XZ convention is nan')
-            testing.expectThat(gamma1, testing.isNotNan(), 'Gamma rotation in XZ convention is nan')
+            testing.expectThat(alpha1, matchers.isNotNan(), 'Alpha rotation in XZ convention is nan')
+            testing.expectThat(gamma1, matchers.isNotNan(), 'Gamma rotation in XZ convention is nan')
 
             local alpha2, beta2, gamma2 = self.rotation:getAnglesZYX()
-            testing.expectThat(alpha2, testing.isNotNan(), 'Alpha rotation in ZYX convention is nan')
-            testing.expectThat(beta2, testing.isNotNan(), 'Beta rotation in ZYX convention is nan')
-            testing.expectThat(gamma2, testing.isNotNan(), 'Gamma rotation in ZYX convention is nan')
+            testing.expectThat(alpha2, matchers.isNotNan(), 'Alpha rotation in ZYX convention is nan')
+            testing.expectThat(beta2, matchers.isNotNan(), 'Beta rotation in ZYX convention is nan')
+            testing.expectThat(gamma2, matchers.isNotNan(), 'Gamma rotation in ZYX convention is nan')
         end
     end)
 
