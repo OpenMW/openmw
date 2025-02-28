@@ -68,7 +68,7 @@ namespace MWLua
             Log(Debug::Verbose) << "Read a large data chunk (" << size << " bytes) from '" << file.mFileName << "'.";
         }
 
-        sol::object readFile(sol::this_state lua, FileHandle& file)
+        sol::object readFile(lua_State* lua, FileHandle& file)
         {
             std::ostringstream os;
             if (file.mFilePtr && file.mFilePtr->peek() != EOF)
@@ -79,7 +79,7 @@ namespace MWLua
             return sol::make_object<std::string>(lua, std::move(result));
         }
 
-        sol::object readLineFromFile(sol::this_state lua, FileHandle& file)
+        sol::object readLineFromFile(lua_State* lua, FileHandle& file)
         {
             std::string result;
             if (file.mFilePtr && std::getline(*file.mFilePtr, result))
@@ -91,7 +91,7 @@ namespace MWLua
             return sol::nil;
         }
 
-        sol::object readNumberFromFile(sol::this_state lua, Files::IStreamPtr& file)
+        sol::object readNumberFromFile(lua_State* lua, Files::IStreamPtr& file)
         {
             double number = 0;
             if (file && *file >> number)
@@ -100,7 +100,7 @@ namespace MWLua
             return sol::nil;
         }
 
-        sol::object readCharactersFromFile(sol::this_state lua, FileHandle& file, size_t count)
+        sol::object readCharactersFromFile(lua_State* lua, FileHandle& file, size_t count)
         {
             if (count <= 0 && file.mFilePtr->peek() != EOF)
                 return sol::make_object<std::string>(lua, std::string());
@@ -189,7 +189,7 @@ namespace MWLua
 
                 return seek(lua, self, std::ios_base::cur, off);
             });
-        handle["lines"] = [](sol::this_state lua, sol::object self) {
+        handle["lines"] = [](sol::this_main_state lua, sol::main_object self) {
             if (!self.is<FileHandle*>())
                 throw std::runtime_error("self should be a file handle");
             return sol::as_function([lua, self]() -> sol::object {
@@ -199,7 +199,7 @@ namespace MWLua
             });
         };
 
-        api["lines"] = [vfs](sol::this_state lua, std::string_view fileName) {
+        api["lines"] = [vfs](sol::this_main_state lua, std::string_view fileName) {
             auto normalizedName = VFS::Path::normalizeFilename(fileName);
             return sol::as_function(
                 [lua, file = FileHandle(vfs->getNormalized(normalizedName), normalizedName)]() mutable {
