@@ -363,8 +363,8 @@ namespace Gui
         Point bottom_right;
         float width;
         float height;
-        float u2; // appears unused, always 0
-        float kerning;
+        float kerningLeft;
+        float kerningRight;
         float ascent;
     } GlyphInfo;
 
@@ -564,6 +564,12 @@ namespace Gui
         additional.emplace(69, 0x0401); // Ё (Cyrillic Capital Letter Io) => E (latin capital E)
         additional.emplace(137, 0x0451); // ё (Cyrillic Small Letter Io) => ë (latin small E-diaeresis)
 
+        // ASCII vertical bar, use this as text input cursor
+        additional.emplace(124, MyGUI::FontCodeType::Cursor);
+
+        // Underscore, use for NotDefined marker (used for glyphs not existing in the font)
+        additional.emplace(95, MyGUI::FontCodeType::NotDefined);
+
         for (int i = 0; i < 256; i++)
         {
             float x1 = data[i].top_left.x * width;
@@ -573,64 +579,31 @@ namespace Gui
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
             unsigned long unicodeVal = getUnicode(i, encoder, mEncoding);
+            const std::string coord = MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
+                + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h);
+            float advance = data[i].width + data[i].kerningRight;
+            // Yes MyGUI, we really do want an advance of 0 sometimes, thank you.
+            if (advance == 0.f && data[i].width != 0.f)
+                advance = std::numeric_limits<float>::min();
+            const std::string bearing = MyGUI::utility::toString(data[i].kerningLeft) + ' '
+                + MyGUI::utility::toString((fontSize - data[i].ascent));
+            const MyGUI::IntSize size(static_cast<int>(data[i].width), static_cast<int>(data[i].height));
 
             MyGUI::xml::ElementPtr code = codes->createChild("Code");
             code->addAttribute("index", unicodeVal);
-            code->addAttribute("coord",
-                MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " " + MyGUI::utility::toString(w)
-                    + " " + MyGUI::utility::toString(h));
-            code->addAttribute("advance", data[i].width);
-            code->addAttribute("bearing",
-                MyGUI::utility::toString(data[i].kerning) + " "
-                    + MyGUI::utility::toString((fontSize - data[i].ascent)));
-            code->addAttribute(
-                "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+            code->addAttribute("coord", coord);
+            code->addAttribute("advance", advance);
+            code->addAttribute("bearing", bearing);
+            code->addAttribute("size", size);
 
             for (auto [it, end] = additional.equal_range(i); it != end; ++it)
             {
                 code = codes->createChild("Code");
                 code->addAttribute("index", it->second);
-                code->addAttribute("coord",
-                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
-                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
-                code->addAttribute("advance", data[i].width);
-                code->addAttribute("bearing",
-                    MyGUI::utility::toString(data[i].kerning) + " "
-                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
-                code->addAttribute(
-                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
-            }
-
-            // ASCII vertical bar, use this as text input cursor
-            if (i == 124)
-            {
-                MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
-                cursorCode->addAttribute("index", MyGUI::FontCodeType::Cursor);
-                cursorCode->addAttribute("coord",
-                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
-                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
-                cursorCode->addAttribute("advance", data[i].width);
-                cursorCode->addAttribute("bearing",
-                    MyGUI::utility::toString(data[i].kerning) + " "
-                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
-                cursorCode->addAttribute(
-                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
-            }
-
-            // Underscore, use for NotDefined marker (used for glyphs not existing in the font)
-            if (i == 95)
-            {
-                MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
-                cursorCode->addAttribute("index", MyGUI::FontCodeType::NotDefined);
-                cursorCode->addAttribute("coord",
-                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
-                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
-                cursorCode->addAttribute("advance", data[i].width);
-                cursorCode->addAttribute("bearing",
-                    MyGUI::utility::toString(data[i].kerning) + " "
-                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
-                cursorCode->addAttribute(
-                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+                code->addAttribute("coord", coord);
+                code->addAttribute("advance", advance);
+                code->addAttribute("bearing", bearing);
+                code->addAttribute("size", size);
             }
         }
 
@@ -639,12 +612,12 @@ namespace Gui
         omitted.push_back(MyGUI::FontCodeType::SelectedBack);
         for (const UnicodeIndex index : omitted)
         {
-            MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
-            cursorCode->addAttribute("index", index);
-            cursorCode->addAttribute("coord", "0 0 0 0");
-            cursorCode->addAttribute("advance", "0");
-            cursorCode->addAttribute("bearing", "0 0");
-            cursorCode->addAttribute("size", "0 0");
+            MyGUI::xml::ElementPtr code = codes->createChild("Code");
+            code->addAttribute("index", index);
+            code->addAttribute("coord", "0 0 0 0");
+            code->addAttribute("advance", "0");
+            code->addAttribute("bearing", "0 0");
+            code->addAttribute("size", "0 0");
         }
 
         // Register the font with MyGUI
