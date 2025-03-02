@@ -373,6 +373,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mScriptConsoleMode(false)
     , mActivationDistanceOverride(-1)
     , mGrab(true)
+    , mExportFonts(false)
     , mRandomSeed(0)
     , mNewGame(false)
     , mCfgMgr(configurationManager)
@@ -807,7 +808,7 @@ void OMW::Engine::prepareEngine()
     rootNode->addChild(guiRoot);
 
     mWindowManager = std::make_unique<MWGui::WindowManager>(mWindow, mViewer, guiRoot, mResourceSystem.get(),
-        mWorkQueue.get(), mCfgMgr.getLogPath(), mScriptConsoleMode, mTranslationDataStorage, mEncoding,
+        mWorkQueue.get(), mCfgMgr.getLogPath(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
         Version::getOpenmwVersionDescription(), shadersSupported, mCfgMgr);
     mEnvironment.setWindowManager(*mWindowManager);
 
@@ -1107,6 +1108,11 @@ void OMW::Engine::setActivationDistanceOverride(int distance)
 void OMW::Engine::setWarningsMode(int mode)
 {
     mWarningsMode = mode;
+}
+
+void OMW::Engine::enableFontExport(bool exportFonts)
+{
+    mExportFonts = exportFonts;
 }
 
 void OMW::Engine::setSaveGameFile(const std::filesystem::path& savegame)

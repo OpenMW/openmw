@@ -155,6 +155,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
+    engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
 
     return true;

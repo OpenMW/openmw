@@ -227,9 +227,10 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor, bool exportFonts)
         : mVFS(vfs)
         , mScalingFactor(scalingFactor)
+        , mExportFonts(exportFonts)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
@@ -407,7 +408,8 @@ namespace Gui
         file.reset();
 
         // Create the font texture
-        std::string bitmapFilename = "fonts/" + std::string(name_) + ".tex";
+        const std::string name(name_);
+        const std::string bitmapFilename = "fonts/" + name + ".tex";
 
         Files::IStreamPtr bitmapFile = mVFS->get(bitmapFilename);
 
@@ -427,6 +429,19 @@ namespace Gui
         if (!bitmapFile->good())
             fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
         bitmapFile.reset();
+
+        if (mExportFonts)
+        {
+            osg::ref_ptr<osg::Image> image = new osg::Image;
+            image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+            assert(image->isDataContiguous());
+            memcpy(image->data(), textureData.data(), textureData.size());
+            // Convert to OpenGL origin for sensible output
+            image->flipVertical();
+
+            Log(Debug::Info) << "Writing " << name + ".png";
+            osgDB::writeImageFile(*image, name + ".png");
+        }
 
         MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture(bitmapFilename);
         tex->createManual(width, height, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
@@ -645,6 +660,13 @@ namespace Gui
             cursorCode->addAttribute("advance", "0");
             cursorCode->addAttribute("bearing", "0 0");
             cursorCode->addAttribute("size", "0 0");
+        }
+
+        if (mExportFonts)
+        {
+            Log(Debug::Info) << "Writing " << name + ".xml";
+            xmlDocument.createDeclaration();
+            xmlDocument.save(name + ".xml");
         }
 
         // Register the font with MyGUI
