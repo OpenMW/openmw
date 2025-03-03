@@ -139,16 +139,18 @@ namespace MWLua
                 }));
 
         api["actions"] = std::ref(context.mLuaManager->inputActions());
-        api["registerAction"] = [manager = context.mLuaManager](sol::table options) {
-            LuaUtil::InputAction::Info parsedOptions;
-            parsedOptions.mKey = options["key"].get<std::string_view>();
-            parsedOptions.mType = options["type"].get<LuaUtil::InputAction::Type>();
-            parsedOptions.mL10n = options["l10n"].get<std::string_view>();
-            parsedOptions.mName = options["name"].get<std::string_view>();
-            parsedOptions.mDescription = options["description"].get<std::string_view>();
-            parsedOptions.mDefaultValue = options["defaultValue"].get<sol::main_object>();
-            manager->inputActions().insert(std::move(parsedOptions));
-        };
+        api["registerAction"]
+            = [manager = context.mLuaManager, persistent = context.mType == Context::Menu](sol::table options) {
+                  LuaUtil::InputAction::Info parsedOptions;
+                  parsedOptions.mKey = options["key"].get<std::string_view>();
+                  parsedOptions.mType = options["type"].get<LuaUtil::InputAction::Type>();
+                  parsedOptions.mL10n = options["l10n"].get<std::string_view>();
+                  parsedOptions.mName = options["name"].get<std::string_view>();
+                  parsedOptions.mDescription = options["description"].get<std::string_view>();
+                  parsedOptions.mDefaultValue = options["defaultValue"].get<sol::main_object>();
+                  parsedOptions.mPersistent = persistent;
+                  manager->inputActions().insert(std::move(parsedOptions));
+              };
         api["bindAction"] = [manager = context.mLuaManager](
                                 std::string_view key, const sol::table& callback, sol::table dependencies) {
             std::vector<std::string_view> parsedDependencies;
@@ -178,14 +180,16 @@ namespace MWLua
         };
 
         api["triggers"] = std::ref(context.mLuaManager->inputTriggers());
-        api["registerTrigger"] = [manager = context.mLuaManager](sol::table options) {
-            LuaUtil::InputTrigger::Info parsedOptions;
-            parsedOptions.mKey = options["key"].get<std::string_view>();
-            parsedOptions.mL10n = options["l10n"].get<std::string_view>();
-            parsedOptions.mName = options["name"].get<std::string_view>();
-            parsedOptions.mDescription = options["description"].get<std::string_view>();
-            manager->inputTriggers().insert(std::move(parsedOptions));
-        };
+        api["registerTrigger"]
+            = [manager = context.mLuaManager, persistent = context.mType == Context::Menu](sol::table options) {
+                  LuaUtil::InputTrigger::Info parsedOptions;
+                  parsedOptions.mKey = options["key"].get<std::string_view>();
+                  parsedOptions.mL10n = options["l10n"].get<std::string_view>();
+                  parsedOptions.mName = options["name"].get<std::string_view>();
+                  parsedOptions.mDescription = options["description"].get<std::string_view>();
+                  parsedOptions.mPersistent = persistent;
+                  manager->inputTriggers().insert(std::move(parsedOptions));
+              };
         api["registerTriggerHandler"]
             = [manager = context.mLuaManager](std::string_view key, const sol::table& callback) {
                   manager->inputTriggers().registerHandler(key, LuaUtil::Callback::fromLua(callback));

@@ -38,10 +38,10 @@ namespace
         sol::state lua;
         LuaUtil::InputAction::Registry registry;
         LuaUtil::InputAction::Info a({ "a", LuaUtil::InputAction::Type::Boolean, "test", "a_name", "a_description",
-            sol::make_object(lua, false) });
+            sol::make_object(lua, false), false });
         registry.insert(a);
         LuaUtil::InputAction::Info b({ "b", LuaUtil::InputAction::Type::Boolean, "test", "b_name", "b_description",
-            sol::make_object(lua, false) });
+            sol::make_object(lua, false), false });
         registry.insert(b);
         LuaUtil::Callback bindA({ lua.load("return function() return true end")(), sol::table(lua, sol::create) });
         LuaUtil::Callback bindBToA(

@@ -654,8 +654,8 @@ namespace MWLua
         MWBase::Environment::get().getL10nManager()->dropCache();
         mUiResourceManager.clear();
         mLua.dropScriptCache();
-        mInputActions.clear();
-        mInputTriggers.clear();
+        mInputActions.clear(true);
+        mInputTriggers.clear(true);
         initConfiguration();
 
         ESM::LuaScripts globalData;
