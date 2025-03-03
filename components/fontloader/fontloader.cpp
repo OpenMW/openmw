@@ -465,7 +465,7 @@ namespace Gui
         // € (Euro Sign, 0x80/U+20AC) is replaced with underscore
         // 0x81 (unused) is replaced with underscore
         additional.emplace(44, 0x201A); // ‚ (Single Low-9 Quotation Mark, 0x82) => , (comma)
-        additional.emplace(102, 0x0192); // ƒ (Latin Small Letter F with Hook, 0x83) => f (latin small F) (custom)
+        // ƒ (Latin Small Letter F with Hook, 0x83) is unavailable, not replaced
         additional.emplace(44, 0x201E); // „ (Double Low-9 Quotation Mark, 0x84) => , (comma)
         additional.emplace(46, 0x2026); // … (Horizontal Ellipsis, 0x85) => . (period)
         additional.emplace(43, 0x2020); // † (Dagger, 0x86) => + (plus sign)
@@ -512,7 +512,7 @@ namespace Gui
         additional.emplace(95, 0x00AF); // ¯ (Macron) => _ (underscore)
         // ° (Degree Sign, 0xB0) is unavailable, not replaced
         // ± (Plus-Minus Sign, 0xB1) is unavailable, not replaced
-        additional.emplace(50, 0x00B2); // ² (Superscript Two) => 2 (two digit) (custom)
+        // ² (Superscript Two, 0xB2) is unavailable, not replaced
         additional.emplace(51, 0x00B3); // ³ (Superscript Three) => 3 (three digit)
         additional.emplace(39, 0x00B4); // ´ (Acute Accent) => ' (apostrophe)
         // µ (Micro Sign, 0xB5) is unavailable, not replaced
@@ -532,7 +532,7 @@ namespace Gui
         additional.emplace(65, 0x00C3); // Ã (Latin Capital Letter A with Tilde) => A (latin capital A)
         // Ä (Latin Capital Letter A with Diaeresis, 0xC4) is available
         // Å (Latin Capital Letter A with Ring Above, 0xC5) is available
-        additional.emplace(65, 0x00C6); // Æ (Latin Capital Letter Ae) => A (latin capital A) (custom)
+        // Æ (Latin Capital Letter Ae, 0xC6) is unavailable, not replaced
         // Ç (Latin Capital Letter C with Cedilla, 0xC7) is available
         additional.emplace(69, 0x00C8); // È (Latin Capital Letter E with Grave) => E (latin capital E)
         // É (Latin Capital Letter E with Acute, 0xC9) is available
@@ -543,7 +543,7 @@ namespace Gui
         additional.emplace(73, 0x00CE); // Î (Latin Capital Letter I with Circumflex) => I (latin capital I)
         additional.emplace(73, 0x00CF); // Ï (Latin Capital Letter I with Diaeresis) => I (latin capital I)
         additional.emplace(68, 0x00D0); // Ð (Latin Capital Letter Eth) => D (latin capital D)
-        additional.emplace(78, 0x00D1); // Ñ (Latin Capital Letter N with Tilde) => N (latin capital N) (custom)
+        // Ñ (Latin Capital Letter N with Tilde, 0xD1) is unavailable, not replaced
         additional.emplace(79, 0x00D2); // Ò (Latin Capital Letter O with Grave) => O (latin capital O)
         additional.emplace(79, 0x00D3); // Ó (Latin Capital Letter O with Acute) => O (latin capital O)
         additional.emplace(79, 0x00D4); // Ô (Latin Capital Letter O with Circumflex) => O (latin capital O)
