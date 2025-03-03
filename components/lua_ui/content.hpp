@@ -18,7 +18,7 @@ namespace LuaUi
     {
     public:
         // accepts only Lua tables returned by ui.content
-        explicit ContentView(sol::table table)
+        explicit ContentView(sol::main_table table)
             : mTable(std::move(table))
         {
             if (!isValidContent(mTable))
@@ -94,7 +94,7 @@ namespace LuaUi
         sol::table getMetatable() const { return mTable[sol::metatable_key].get<sol::table>(); }
 
     private:
-        sol::table mTable;
+        sol::main_table mTable;
 
         template <typename... Arg>
         sol::object callMethod(std::string_view name, Arg&&... arg) const

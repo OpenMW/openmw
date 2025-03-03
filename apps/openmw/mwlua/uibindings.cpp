@@ -310,7 +310,7 @@ namespace MWLua
                 return res.str();
             };
             element["layout"] = sol::property([](const LuaUi::Element& element) { return element.mLayout; },
-                [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
+                [](LuaUi::Element& element, const sol::main_table& layout) { element.mLayout = layout; });
             element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
                 if (element->mState != LuaUi::Element::Created)
                     return;

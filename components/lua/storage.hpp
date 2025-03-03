@@ -74,7 +74,7 @@ namespace LuaUtil
 
         private:
             std::string mSerializedValue;
-            mutable sol::object mReadOnlyValue = sol::nil;
+            mutable sol::main_object mReadOnlyValue = sol::nil;
         };
 
         struct Section
