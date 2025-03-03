@@ -500,7 +500,7 @@ namespace Gui
         // £ (Pound Sign, 0xA3) is available but its glyph looks like œ (small oe ligature)
         omitted.push_back(0x00A4); // ¤ (Currency Sign)
         // ¥ (Yen Sign, 0xA5) is unavailable, not replaced
-        // ¦ (Broken Bar, 0xA6) is unavailable, not replaced
+        additional.emplace(221, 0x00A6); // ¦ (Broken Bar, 0xA6) => ▌
         omitted.push_back(0x00A7); // § (Section Sign)
         additional.emplace(34, 0x00A8); // ¨ (Diaeresis) => " (double quote mark)
         additional.emplace(99, 0x00A9); // © (Copyright Sign) => c (latin small C)
@@ -556,7 +556,12 @@ namespace Gui
         additional.emplace(85, 0x00DB); // Û (Latin Capital Letter U with Circumflex) => U (latin capital U)
         // Ü (Latin Capital Letter U with Diaeresis, 0xDC) is available
         additional.emplace(89, 0x00DD); // Ý (Latin Capital Letter Y with Acute) => Y (latin capital Y)
-        // 0xDE to 0xFF are not replaced
+        // 0xDE to 0xFF are generally not replaced with certain exceptions
+        additional.emplace(97, 0x00E3); // ã (Latin Small Letter A with Tilde) => a (latin small A)
+        additional.emplace(100, 0x00F0); // ð (Latin Small Letter Eth) => d (latin small D)
+        additional.emplace(111, 0x00F5); // õ (Latin Small Letter O with Tilde) => o (latin small O)
+        additional.emplace(111, 0x00F8); // ø (Latin Small Letter O with Stroke) => o (latin small O)
+        additional.emplace(121, 0x00FD); // ý (Latin Small Letter Y with Acute) => y (latin small Y)
 
         // Russian Morrowind which uses Win-1251 encoding only does equivalent (often garbage) Win-1252 replacements
         // However, we'll provide custom replacements for Cyrillic io letters
