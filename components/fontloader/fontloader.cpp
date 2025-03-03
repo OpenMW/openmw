@@ -425,7 +425,8 @@ namespace Gui
         textureData.resize(width * height * 4);
         bitmapFile->read(textureData.data(), width * height * 4);
         if (!bitmapFile->good())
-            fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+            Log(Debug::Warning) << "Font bitmap " << bitmapFilename << " ended prematurely, using partial data ("
+                                << bitmapFile->gcount() << "/" << (width * height * 4) << " bytes)";
         bitmapFile.reset();
 
         MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture(bitmapFilename);
