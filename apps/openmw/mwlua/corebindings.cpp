@@ -148,7 +148,7 @@ namespace MWLua
             };
         }
 
-        sol::table readOnly = LuaUtil::makeReadOnly(api);
-        return context.setTypePackage(readOnly, "openmw_core");
+        sol::table readOnlyApi = LuaUtil::makeReadOnly(api);
+        return context.setTypePackage(readOnlyApi, "openmw_core");
     }
 }
