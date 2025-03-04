@@ -33,15 +33,9 @@ namespace MWGui
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
-        getWidget(mSelect, "Select");
-        getWidget(mDestinations, "Travel");
         getWidget(mDestinationsView, "DestinationsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onCancelButtonClicked);
-
-        mDestinations->setCoord(450 / 2 - mDestinations->getTextSize().width / 2, mDestinations->getTop(),
-            mDestinations->getTextSize().width, mDestinations->getHeight());
-        mSelect->setCoord(8, mSelect->getTop(), mSelect->getTextSize().width, mSelect->getHeight());
     }
 
     void TravelWindow::addDestination(const ESM::RefId& name, const ESM::Position& pos, bool interior)
