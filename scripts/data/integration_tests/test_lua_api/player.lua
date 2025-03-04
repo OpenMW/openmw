@@ -315,7 +315,8 @@ testing.registerLocalTest('playerWeaponAttack',
                 self.controls.run = true
                 self.controls.movement = 1
             else
-                destination = targetActor.position
+                local halfExtents = types.Actor.getPathfindingAgentBounds(targetActor).halfExtents
+                destination = targetActor.position - util.vector3(0, 0, halfExtents.z)
 
                 if nextTime < time then
                     if use == 0 then
