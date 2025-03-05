@@ -192,10 +192,7 @@ namespace
             newItem = *it;
 
         if (newItem.isEmpty() || boundPtr != newItem)
-        {
-            store.remove(boundPtr, 1);
             return false;
-        }
 
         if (actor == MWMechanics::getPlayer())
         {
@@ -641,7 +638,7 @@ namespace MWMechanics
                 const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
                 const ESM::RefId itemId = ESM::RefId::stringRefId(gmst.find(item)->mValue.getString());
                 if (!addBoundItem(itemId, target))
-                    invalid = true;
+                    effect.mTimeLeft = 0.f;
                 break;
             }
             case ESM::MagicEffect::FireDamage:
