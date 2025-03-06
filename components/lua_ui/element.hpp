@@ -19,7 +19,7 @@ namespace LuaUi
         }
 
         WidgetExtension* mRoot;
-        sol::object mLayout;
+        sol::main_object mLayout;
         std::string mLayer;
 
         enum State

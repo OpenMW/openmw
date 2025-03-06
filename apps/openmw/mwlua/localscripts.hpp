@@ -54,7 +54,7 @@ namespace MWLua
         {
         }
         MWBase::LuaManager::ActorControls mControls;
-        std::map<CachedStat, sol::object> mStatsCache;
+        std::map<CachedStat, sol::main_object> mStatsCache;
         bool mIsActive;
     };
 

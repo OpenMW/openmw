@@ -90,7 +90,7 @@ namespace LuaUtil
 
         // Adds package that will be available (via `require`) for all scripts in the container.
         // Automatically applies LuaUtil::makeReadOnly to the package.
-        void addPackage(std::string packageName, sol::object package);
+        void addPackage(std::string packageName, sol::main_object package);
 
         // Gets script with given id from ScriptsConfiguration, finds the source in the virtual file system, starts as a
         // new script, adds it to the container, and calls onInit for this script. Returns `true` if the script was
@@ -168,7 +168,7 @@ namespace LuaUtil
         struct Handler
         {
             int mScriptId;
-            sol::function mFn;
+            sol::main_function mFn;
         };
 
         struct EngineHandlerList
@@ -212,11 +212,11 @@ namespace LuaUtil
     private:
         struct Script
         {
-            std::optional<sol::function> mOnSave;
-            std::optional<sol::function> mOnOverride;
-            std::optional<sol::table> mInterface;
+            std::optional<sol::main_function> mOnSave;
+            std::optional<sol::main_function> mOnOverride;
+            std::optional<sol::main_table> mInterface;
             std::string mInterfaceName;
-            sol::table mHiddenData;
+            sol::main_table mHiddenData;
             std::map<std::string, sol::main_protected_function> mRegisteredCallbacks;
             std::map<int64_t, sol::main_protected_function> mTemporaryCallbacks;
             VFS::Path::Normalized mPath;
@@ -268,11 +268,11 @@ namespace LuaUtil
         const UserdataSerializer* mSerializer = nullptr;
         const UserdataSerializer* mSavedDataDeserializer = nullptr;
 
-        std::map<std::string, sol::object> mAPI;
+        std::map<std::string, sol::main_object> mAPI;
         struct LoadedData
         {
             std::map<int, Script> mScripts;
-            sol::table mPublicInterfaces;
+            sol::main_table mPublicInterfaces;
 
             std::map<std::string, EventHandlerList, std::less<>> mEventHandlers;
 

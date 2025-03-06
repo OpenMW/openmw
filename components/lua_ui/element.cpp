@@ -324,7 +324,7 @@ namespace LuaUi
                 destroyRoot(mRoot);
                 mRoot = nullptr;
             }
-            mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
+            mLayout.reset();
         }
         mState = Destroyed;
     }

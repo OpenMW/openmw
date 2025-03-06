@@ -343,7 +343,8 @@ namespace LuaUtil
     }
 
     sol::protected_function_result LuaState::runInNewSandbox(const VFS::Path::Normalized& path,
-        const std::string& envName, const std::map<std::string, sol::object>& packages, const sol::object& hiddenData)
+        const std::string& envName, const std::map<std::string, sol::main_object>& packages,
+        const sol::main_object& hiddenData)
     {
         // TODO
         sol::protected_function script = loadScriptAndCache(path);

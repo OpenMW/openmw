@@ -168,7 +168,8 @@ namespace MWLua
             if (index == LuaUi::Layer::count())
                 throw std::logic_error(std::string("Layer not found"));
             index++;
-            context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
+            context.mLuaManager->addAction(
+                [=, name = std::string(name)]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
         layersTable["insertBefore"] = [context](
                                           std::string_view beforename, std::string_view name, const sol::object& opt) {
@@ -177,7 +178,8 @@ namespace MWLua
             size_t index = LuaUi::Layer::indexOf(beforename);
             if (index == LuaUi::Layer::count())
                 throw std::logic_error(std::string("Layer not found"));
-            context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
+            context.mLuaManager->addAction(
+                [=, name = std::string(name)]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
         sol::table layers = LuaUtil::makeReadOnly(layersTable);
         sol::table layersMeta = layers[sol::metatable_key];
@@ -285,8 +287,9 @@ namespace MWLua
             return res;
         };
         api["_setWindowDisabled"]
-            = [windowManager, luaManager = context.mLuaManager](std::string_view window, bool disabled) {
-                  luaManager->addAction([=]() { windowManager->setDisabledByLua(window, disabled); });
+            = [windowManager, luaManager = context.mLuaManager](std::string window, bool disabled) {
+                  luaManager->addAction(
+                      [=, window = std::move(window)]() { windowManager->setDisabledByLua(window, disabled); });
               };
 
         // TODO
@@ -308,7 +311,7 @@ namespace MWLua
                 return res.str();
             };
             element["layout"] = sol::property([](const LuaUi::Element& element) { return element.mLayout; },
-                [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
+                [](LuaUi::Element& element, const sol::main_table& layout) { element.mLayout = layout; });
             element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
                 if (element->mState != LuaUi::Element::Created)
                     return;

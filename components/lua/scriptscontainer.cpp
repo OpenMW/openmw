@@ -52,7 +52,7 @@ namespace LuaUtil
         Log(Debug::Error) << mNamePrefix << "[" << scriptPath(scriptId) << "] " << msg << ": " << e.what();
     }
 
-    void ScriptsContainer::addPackage(std::string packageName, sol::object package)
+    void ScriptsContainer::addPackage(std::string packageName, sol::main_object package)
     {
         if (!package.is<sol::userdata>())
             throw std::logic_error("Expected package to be read-only: " + packageName);
@@ -312,7 +312,7 @@ namespace LuaUtil
         {
             if (next->mOnOverride)
             {
-                sol::object prevInterface = sol::nil;
+                sol::main_object prevInterface = sol::nil;
                 if (prev)
                     prevInterface = *prev->mInterface;
                 try
