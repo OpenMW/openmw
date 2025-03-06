@@ -288,7 +288,8 @@ namespace MWLua
         };
         api["_setWindowDisabled"]
             = [windowManager, luaManager = context.mLuaManager](std::string window, bool disabled) {
-                  luaManager->addAction([=]() { windowManager->setDisabledByLua(window, disabled); });
+                  luaManager->addAction(
+                      [=, window = std::move(window)]() { windowManager->setDisabledByLua(window, disabled); });
               };
 
         // TODO
