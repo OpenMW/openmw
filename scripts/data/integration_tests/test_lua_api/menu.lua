@@ -35,6 +35,23 @@ testing.registerMenuTest('save and load', function()
     testing.expectThat(menu.getAllSaves(), matchers.equalTo({}))
 end)
 
+testing.registerMenuTest('load while teleporting', function()
+    menu.newGame()
+    coroutine.yield()
+
+    testing.runGlobalTest('load while teleporting - init player')
+
+    menu.saveGame('load while teleporting')
+    coroutine.yield()
+
+    testing.runGlobalTest('load while teleporting - teleport')
+
+    menu.loadGame(' - 1', 'load_while_teleporting.omwsave')
+    coroutine.yield()
+
+    menu.deleteGame(' - 1', 'load_while_teleporting.omwsave')
+end)
+
 local function registerGlobalTest(name, description)
    testing.registerMenuTest(description or name, function()
        menu.newGame()
