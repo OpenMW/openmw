@@ -706,10 +706,10 @@ void MWState::StateManager::quickLoad()
 void MWState::StateManager::deleteGame(const MWState::Character* character, const MWState::Slot* slot)
 {
     const std::filesystem::path savePath = slot->mPath;
-    mCharacterManager.deleteSlot(character, slot);
+    mCharacterManager.deleteSlot(slot, character);
     if (mLastSavegame == savePath)
     {
-        if (character->begin() != character->end())
+        if (character != nullptr)
             mLastSavegame = character->begin()->mPath;
         else
             mLastSavegame.clear();
