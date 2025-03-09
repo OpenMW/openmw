@@ -38,7 +38,7 @@ MWState::Character* MWState::CharacterManager::getCurrentCharacter()
     return mCurrent;
 }
 
-void MWState::CharacterManager::deleteSlot(const MWState::Character* character, const MWState::Slot* slot)
+void MWState::CharacterManager::deleteSlot(const MWState::Slot* slot, const MWState::Character*& character)
 {
     std::list<Character>::iterator it = findCharacter(character);
 
@@ -51,6 +51,7 @@ void MWState::CharacterManager::deleteSlot(const MWState::Character* character, 
         if (character == mCurrent)
             mCurrent = nullptr;
         mCharacters.erase(it);
+        character = nullptr;
     }
 }
 
