@@ -588,10 +588,13 @@ namespace MWGui
         if (mTopicsList->getItemCount() > 0)
             mTopicsList->addSeparator();
 
+        // Morrowind uses 3 px invisible borders for padding topics
+        constexpr int verticalPadding = 3;
+
         for (const auto& keyword : mKeywords)
         {
             std::string topicId = Misc::StringUtils::lowerCase(keyword);
-            mTopicsList->addItem(keyword);
+            mTopicsList->addItem(keyword, verticalPadding);
 
             auto t = std::make_unique<Topic>(keyword);
             mKeywordSearch.seed(topicId, intptr_t(t.get()));
