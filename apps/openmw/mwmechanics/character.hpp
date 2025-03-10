@@ -172,6 +172,7 @@ namespace MWMechanics
         std::string mCurrentWeapon;
 
         float mAttackStrength{ -1.f };
+        bool mReadyToHit{ false };
         MWWorld::Ptr mAttackVictim;
         osg::Vec3f mAttackHitPos;
         bool mAttackSuccess{ false };

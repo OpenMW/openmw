@@ -1104,10 +1104,10 @@ namespace MWMechanics
                 attackType = ESM::Weapon::AT_Thrust;
             // We want to avoid hit keys that come out of nowhere (e.g. in the follow animation)
             // and processing multiple hit keys for a single attack
-            if (mAttackStrength != -1.f)
+            if (mReadyToHit)
             {
                 charClass.hit(mPtr, mAttackStrength, attackType, mAttackVictim, mAttackHitPos, mAttackSuccess);
-                mAttackStrength = -1.f;
+                mReadyToHit = false;
             }
         }
         else if (isRandomAttackAnimation(groupname) && action == "start")
@@ -1153,10 +1153,10 @@ namespace MWMechanics
         else if (action == "shoot release")
         {
             // See notes for melee release above
-            if (mAttackStrength != -1.f)
+            if (mReadyToHit)
             {
                 mAnimation->releaseArrow(mAttackStrength);
-                mAttackStrength = -1.f;
+                mReadyToHit = false;
             }
         }
         else if (action == "shoot follow attach")
@@ -1246,7 +1246,7 @@ namespace MWMechanics
 
     void CharacterController::prepareHit()
     {
-        if (mAttackStrength != -1.f)
+        if (mReadyToHit)
             return;
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
@@ -1261,6 +1261,8 @@ namespace MWMechanics
                 mAttackStrength = 0.f;
             playSwishSound();
         }
+
+        mReadyToHit = true;
     }
 
     bool CharacterController::updateWeaponState()
@@ -1520,6 +1522,7 @@ namespace MWMechanics
                 && (mHitState == CharState_None || mHitState == CharState_Block))
             {
                 mAttackStrength = -1.f;
+                mReadyToHit = false;
 
                 // Randomize attacks for non-bipedal creatures
                 if (!cls.isBipedal(mPtr)
@@ -1806,8 +1809,7 @@ namespace MWMechanics
                     stop = strength + ' ' + stop;
                 }
 
-                // Reset attack strength to make extra sure hits that come out of nowhere aren't processed
-                mAttackStrength = -1.f;
+                mReadyToHit = false;
 
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
