@@ -32,7 +32,8 @@ namespace
 
             // Argument names
             const auto str = LuaUtil::cast<std::string>(key);
-            argNames.push_back(icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.size())));
+            argNames.push_back(
+                icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), static_cast<int32_t>(str.size()))));
         }
     }
 }

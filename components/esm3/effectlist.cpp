@@ -32,7 +32,7 @@ namespace ESM
     void EffectList::updateIndexes()
     {
         for (size_t i = 0; i < mList.size(); i++)
-            mList[i].mIndex = i;
+            mList[i].mIndex = static_cast<uint32_t>(i);
     }
 
     void EffectList::add(ESMReader& esm)

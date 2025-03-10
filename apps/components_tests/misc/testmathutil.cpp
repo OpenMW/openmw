@@ -51,7 +51,7 @@ namespace Misc
         const std::pair<osg::Quat, osg::Vec3f> eulerAnglesXZQuat[] = {
             {
                 osg::Quat(1, 0, 0, 0),
-                osg::Vec3f(0, 0, osg::PI),
+                osg::Vec3f(0, 0, osg::PIf),
             },
             {
                 osg::Quat(0, 1, 0, 0),
@@ -59,7 +59,7 @@ namespace Misc
             },
             {
                 osg::Quat(0, 0, 1, 0),
-                osg::Vec3f(0, 0, osg::PI),
+                osg::Vec3f(0, 0, osg::PIf),
             },
             {
                 osg::Quat(0, 0, 0, 1),
@@ -128,15 +128,15 @@ namespace Misc
         const std::pair<osg::Quat, osg::Vec3f> eulerAnglesZYXQuat[] = {
             {
                 osg::Quat(1, 0, 0, 0),
-                osg::Vec3f(osg::PI, 0, 0),
+                osg::Vec3f(osg::PIf, 0, 0),
             },
             {
                 osg::Quat(0, 1, 0, 0),
-                osg::Vec3f(osg::PI, 0, osg::PI),
+                osg::Vec3f(osg::PIf, 0, osg::PIf),
             },
             {
                 osg::Quat(0, 0, 1, 0),
-                osg::Vec3f(0, 0, osg::PI),
+                osg::Vec3f(0, 0, osg::PIf),
             },
             {
                 osg::Quat(0, 0, 0, 1),
