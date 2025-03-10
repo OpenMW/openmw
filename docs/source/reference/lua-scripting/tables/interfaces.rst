@@ -21,7 +21,7 @@
     - by player scripts
     - | Allows to alter behavior of the built-in script
       | that handles player controls.
-  * - :ref:`Controls <Interface GamepadControls>`
+  * - :ref:`GamepadControls <Interface GamepadControls>`
     - by player scripts
     - | Allows to alter behavior of the built-in script
       | that handles player gamepad controls.

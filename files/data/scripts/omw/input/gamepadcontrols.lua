@@ -6,7 +6,7 @@ return {
     ---
     -- Gamepad control interface
     -- @module GamepadControls
-
+    -- @usage require('openmw.interfaces').GamepadControls
     interface = {
         --- Interface version
         -- @field [parent=#GamepadControls] #number version
