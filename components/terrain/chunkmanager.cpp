@@ -19,6 +19,23 @@
 namespace Terrain
 {
 
+    struct UpdateTextureFilteringFunctor
+    {
+        UpdateTextureFilteringFunctor(Resource::SceneManager* sceneMgr)
+            : mSceneManager(sceneMgr)
+        {
+        }
+        Resource::SceneManager* mSceneManager;
+
+        void operator()(ChunkKey, osg::Object* obj)
+        {
+            TerrainDrawable* drawable = static_cast<TerrainDrawable*>(obj);
+            CompositeMap* composite = drawable->getCompositeMap();
+            if (composite && composite->mTexture)
+                mSceneManager->applyFilterSettings(composite->mTexture);
+        }
+    };
+
     ChunkManager::ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager,
         CompositeMapRenderer* renderer, ESM::RefId worldspace, double expiryDelay)
         : GenericResourceManager<ChunkKey>(nullptr, expiryDelay)
@@ -61,6 +78,12 @@ namespace Terrain
         return node;
     }
 
+    void ChunkManager::updateTextureFiltering()
+    {
+        UpdateTextureFilteringFunctor f(mSceneManager);
+        mCache->call(f);
+    }
+
     void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
         Resource::reportStats("Terrain Chunk", frameNumber, mCache->getStats(), *stats);
@@ -85,10 +108,9 @@ namespace Terrain
         texture->setTextureWidth(mCompositeMapSize);
         texture->setTextureHeight(mCompositeMapSize);
         texture->setInternalFormat(GL_RGB);
-        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mSceneManager->applyFilterSettings(texture);
 
         return texture;
     }
