@@ -44,8 +44,8 @@
         <Widget type="Button" skin="" position="82 146 36 41" align="Left Bottom" name="WeapBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
                 <Property key="NeedMouse" value="false"/>
-                <Widget type="ItemWidget" skin="MW_ItemIconNoShadow" position="-3 -3 42 42" align="Left Top" name="WeapImage">
-                    <Property key="NeedMouse" value="false"/>
+                <Widget type="Widget" skin="" position="2 2 32 32">
+                    <Widget type="ItemWidget" skin="MW_ItemIconNoShadow" position="-5 -5 42 42" align="Left Top" name="WeapImage"/>
                 </Widget>
             </Widget>
             <Widget type="ProgressBar" skin="MW_EnergyBar_Weapon" position="0 36 36 6" align="Left Bottom" name="WeapStatus">
@@ -56,7 +56,9 @@
         <!-- Selected spell box -->
         <Widget type="Button" position="122 146 36 41" align="Left Bottom" name="SpellBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
-                <Widget type="SpellWidget" skin="MW_ItemIconNoShadow" position="-3 -3 42 42" align="Left Top" name="SpellImage"/>
+                <Widget type="Widget" skin="" position="2 2 32 32">
+                    <Widget type="SpellWidget" skin="MW_ItemIconNoShadow" position="-5 -5 42 42" align="Left Top" name="SpellImage"/>
+                </Widget>
                 <Property key="NeedMouse" value="false"/>
             </Widget>
             <Widget type="ProgressBar" skin="MW_EnergyBar_Magic" position="0 36 36 6" align="Left Bottom" name="SpellStatus">
