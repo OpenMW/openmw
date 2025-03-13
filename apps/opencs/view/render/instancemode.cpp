@@ -171,16 +171,18 @@ osg::Vec3f CSVRender::InstanceMode::getProjectionSpaceCoords(const osg::Vec3f& p
 
 osg::Vec3f CSVRender::InstanceMode::getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart)
 {
-    osg::Matrix viewMatrix;
-    viewMatrix.invert(getWorldspaceWidget().getCamera()->getViewMatrix());
-    osg::Matrix projMatrix;
-    projMatrix.invert(getWorldspaceWidget().getCamera()->getProjectionMatrix());
-    osg::Matrix combined = projMatrix * viewMatrix;
+    const osg::Matrix viewMatrix = getWorldspaceWidget().getCamera()->getViewMatrix();
+    const osg::Matrix projMatrix = getWorldspaceWidget().getCamera()->getProjectionMatrix();
+    const osg::Matrix combined = osg::Matrix::inverse(viewMatrix * projMatrix);
 
     /* calculate viewport normalized coordinates
        note: is there a reason to use getCamera()->getViewport()->computeWindowMatrix() instead? */
-    float x = (point.x() * 2) / getWorldspaceWidget().getCamera()->getViewport()->width() - 1.0f;
-    float y = 1.0f - (point.y() * 2) / getWorldspaceWidget().getCamera()->getViewport()->height();
+    const float scale = getWorldspaceWidget().devicePixelRatioF();
+    const osg::Viewport* viewport = getWorldspaceWidget().getCamera()->getViewport();
+    float x = point.x() * scale / viewport->width();
+    float y = point.y() * scale / viewport->height();
+    x = x * 2.0f - 1.0f;
+    y = 1.0f - y * 2.0f;
 
     osg::Vec3f mousePlanePoint = osg::Vec3f(x, y, dragStart.z()) * combined;
 
