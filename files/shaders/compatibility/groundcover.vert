@@ -1,4 +1,5 @@
 #version 120
+#pragma import_defines(CLASSIC_FALLOFF, MAX_LIGHTS)
 
 #include "lib/core/vertex.h.glsl"
 

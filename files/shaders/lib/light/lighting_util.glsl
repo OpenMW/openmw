@@ -35,7 +35,12 @@ struct LightData
     vec4 attenuation;
 };
 
+#if defined(MAX_LIGHTS)
+uniform int PointLightIndex[MAX_LIGHTS];
+#else
 uniform int PointLightIndex[@maxLights];
+#endif
+
 uniform int PointLightCount;
 
 // Defaults to shared layout. If we ever move to GLSL 140, std140 layout should be considered
@@ -54,7 +59,12 @@ layout(std140) uniform LightBufferBinding
 |  att_c  |  att_l   |  att_q   |  radius/spec_a  |
  --------------------------------------------------
 */
+#if defined(MAX_LIGHTS)
+uniform mat4 LightBuffer[MAX_LIGHTS];
+#else
 uniform mat4 LightBuffer[@maxLights];
+#endif
+
 uniform int PointLightCount;
 
 #endif
@@ -106,7 +116,7 @@ float lcalcRadius(int lightIndex)
 float lcalcIllumination(int lightIndex, float dist)
 {
     float illumination = 1.0 / (lcalcConstantAttenuation(lightIndex) + lcalcLinearAttenuation(lightIndex) * dist + lcalcQuadraticAttenuation(lightIndex) * dist * dist);
-#if !@classicFalloff && !@lightingMethodFFP
+#if defined(CLASSIC_FALLOFF) && !CLASSIC_FALLOFF && !@lightingMethodFFP
     // Fade illumination between the radius and the radius doubled to diminish pop-in
     illumination *= 1.0 - quickstep((dist / lcalcRadius(lightIndex)) - 1.0);
 #endif
