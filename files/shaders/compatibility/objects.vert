@@ -1,5 +1,7 @@
 #version 120
 
+#pragma import_defines(FORCE_PPL, CLASSIC_FALLOFF, MAX_LIGHTS)
+
 #include "lib/core/vertex.h.glsl"
 #if @diffuseMap
 varying vec2 diffuseMapUV;
@@ -41,7 +43,11 @@ varying vec2 specularMapUV;
 varying vec2 glossMapUV;
 #endif
 
+#if defined(FORCE_PPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || FORCE_PPL)
+#else
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
+#endif
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;

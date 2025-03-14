@@ -1,5 +1,5 @@
 #version 120
-#pragma import_defines(WRITE_NORMALS)
+#pragma import_defines(WRITE_NORMALS, CLASSIC_FALLOFF, MAX_LIGHTS)
 
 #define GROUNDCOVER
 

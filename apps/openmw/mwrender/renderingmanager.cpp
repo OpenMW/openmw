@@ -233,6 +233,10 @@ namespace MWRender
             else
                 stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
 
+            stateset->setDefine("FORCE_PPL", (Settings::shaders().mForcePerPixelLighting == true) ? "1" : "0", osg::StateAttribute::ON);
+            stateset->setDefine("CLASSIC_FALLOFF", (Settings::shaders().mClassicFalloff == true) ? "1" : "0", osg::StateAttribute::ON);
+            stateset->setDefine("MAX_LIGHTS", std::to_string(Settings::shaders().mMaxLights), osg::StateAttribute::ON);
+
             stateset->setDefine("WRITE_NORMALS", (mWriteNormals) ? "1" : "0", osg::StateAttribute::ON);
         }
 
@@ -1549,17 +1553,21 @@ namespace MWRender
             else if (it->first == "Shaders"
                 && (it->second == "force per pixel lighting" || it->second == "classic falloff"))
             {
+/*
                 mViewer->stopThreading();
 
                 auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                 defines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
                 defines["classicFalloff"] = Settings::shaders().mClassicFalloff ? "1" : "0";
                 mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+*/
 
                 if (MWMechanics::getPlayer().isInCell() && it->second == "classic falloff")
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
-                mViewer->startThreading();
+                mStateUpdater->reset();
+
+//                mViewer->startThreading();
             }
             else if (it->first == "Shaders"
                 && (it->second == "light bounds multiplier" || it->second == "maximum light distance"
@@ -1575,12 +1583,12 @@ namespace MWRender
                     mViewer->stopThreading();
 
                     lightManager->updateMaxLights(Settings::shaders().mMaxLights);
-
+/*
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                     for (const auto& [name, key] : lightManager->getLightDefines())
                         defines[name] = key;
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
-
+*/
                     mStateUpdater->reset();
 
                     mViewer->startThreading();

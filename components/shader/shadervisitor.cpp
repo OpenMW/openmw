@@ -713,7 +713,10 @@ namespace Shader
             defineMap["endLight"] = "0";
 
         if (simpleLighting || dynamic_cast<osgParticle::ParticleSystem*>(&node))
+        {
             defineMap["forcePPL"] = "0";
+            writableStateSet->setDefine("FORCE_PPL", "0", osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+        }
 
         bool particleOcclusion = false;
         node.getUserValue("particleOcclusion", particleOcclusion);
