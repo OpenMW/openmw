@@ -1,13 +1,5 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE)
-
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
-#if @useGPUShader4
-    #extension GL_EXT_gpu_shader4: require
-#endif
+#pragma import_defines(FORCE_OPAQUE, WRITE_NORMALS)
 
 #if @diffuseMap
 uniform sampler2D diffuseMap;
@@ -81,7 +73,7 @@ void main()
     gl_FragData[0].a = 1.0;
 #endif
 
-#if !defined(FORCE_OPAQUE) && !@disableNormals
+#if !defined(FORCE_OPAQUE) && defined(WRITE_NORMALS) && WRITE_NORMALS
     vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
     gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
 #endif
