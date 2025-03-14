@@ -49,10 +49,17 @@ namespace MWRender
             && exts.glslLanguageVersion >= minimumGLVersionRequiredForCompute;
 #endif
 
-        if (mUseCompute)
-            Log(Debug::Info) << "Initialized compute shader pipeline for water ripples";
-        else
-            Log(Debug::Info) << "Initialized fallback fragment shader pipeline for water ripples";
+        static bool pipelineLogged = false;
+
+        if (!pipelineLogged)
+        {
+            if (mUseCompute)
+                Log(Debug::Info) << "Initialized compute shader pipeline for water ripples";
+            else
+                Log(Debug::Info) << "Initialized fallback fragment shader pipeline for water ripples";
+
+            pipelineLogged = true;
+        }
 
         for (size_t i = 0; i < mState.size(); ++i)
         {
