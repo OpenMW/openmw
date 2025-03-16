@@ -729,6 +729,9 @@ namespace MWGui
             return;
         }
 
+        if (mGuiModes.empty())
+            return;
+
         GuiModeState& state = mGuiModeStates[mGuiModes.back()];
         for (const auto& window : state.mWindows)
         {
