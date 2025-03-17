@@ -1343,12 +1343,13 @@ namespace MWGui
         return codePoint == '\r';
     }
 
+    // Normal no-break space (0x00A0) is ignored here
+    // because Morrowind compatibility requires us to render its glyph
     static bool ucsSpace(int codePoint)
     {
         switch (codePoint)
         {
             case 0x0020: // SPACE
-            case 0x00A0: // NO-BREAK SPACE
             case 0x1680: // OGHAM SPACE MARK
             case 0x180E: // MONGOLIAN VOWEL SEPARATOR
             case 0x2000: // EN QUAD
@@ -1373,12 +1374,13 @@ namespace MWGui
         }
     }
 
+    // No-break spaces (0x00A0, 0x202F, 0xFEFF - normal, narrow, zero width)
+    // are ignored here for obvious reasons
     static bool ucsBreakingSpace(int codePoint)
     {
         switch (codePoint)
         {
             case 0x0020: // SPACE
-                         // case 0x00A0: // NO-BREAK SPACE
             case 0x1680: // OGHAM SPACE MARK
             case 0x180E: // MONGOLIAN VOWEL SEPARATOR
             case 0x2000: // EN QUAD
@@ -1393,10 +1395,8 @@ namespace MWGui
             case 0x2009: // THIN SPACE
             case 0x200A: // HAIR SPACE
             case 0x200B: // ZERO WIDTH SPACE
-            case 0x202F: // NARROW NO-BREAK SPACE
             case 0x205F: // MEDIUM MATHEMATICAL SPACE
             case 0x3000: // IDEOGRAPHIC SPACE
-                // case 0xFEFF: // ZERO WIDTH NO-BREAK SPACE
                 return true;
             default:
                 return false;
