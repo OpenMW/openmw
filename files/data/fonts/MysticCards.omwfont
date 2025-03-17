@@ -8,7 +8,7 @@
         <Property key="Resolution" value="70"/>
         <Codes>
             <Code range="33 126"/>
-            <Code range="161"/>
+            <Code range="160 161"/>
             <Code range="173"/>
             <Code range="175 177"/>
             <Code range="180"/>
