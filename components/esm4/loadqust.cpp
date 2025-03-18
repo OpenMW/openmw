@@ -114,6 +114,9 @@ void ESM4::Quest::load(ESM4::Reader& reader)
             case ESM::fourCC("NNAM"): // FO3
             case ESM::fourCC("QOBJ"): // FO3
             case ESM::fourCC("NAM0"): // FO3
+            case ESM::fourCC("SLSD"): // FO3
+            case ESM::fourCC("SCVR"): // FO3
+            case ESM::fourCC("SCRV"): // FO3
             case ESM::fourCC("ANAM"): // TES5
             case ESM::fourCC("DNAM"): // TES5
             case ESM::fourCC("ENAM"): // TES5
