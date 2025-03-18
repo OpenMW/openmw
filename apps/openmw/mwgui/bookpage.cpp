@@ -1376,6 +1376,7 @@ namespace MWGui
 
     // No-break spaces (0x00A0, 0x202F, 0xFEFF - normal, narrow, zero width)
     // are ignored here for obvious reasons
+    // Figure space (0x2007) is not a breaking space either
     static bool ucsBreakingSpace(int codePoint)
     {
         switch (codePoint)
@@ -1390,7 +1391,6 @@ namespace MWGui
             case 0x2004: // THREE-PER-EM SPACE
             case 0x2005: // FOUR-PER-EM SPACE
             case 0x2006: // SIX-PER-EM SPACE
-            case 0x2007: // FIGURE SPACE
             case 0x2008: // PUNCTUATION SPACE
             case 0x2009: // THIN SPACE
             case 0x200A: // HAIR SPACE
