@@ -197,7 +197,8 @@ namespace MWGui
                 title << " (#{OMWEngine:Level} " << signature.mPlayerLevel << " "
                       << MyGUI::TextIterator::toTagsString(MyGUI::UString(className)) << ")";
 
-                mCharacterSelection->addItem(MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
+                const MyGUI::UString playerDesc = MyGUI::LanguageManager::getInstance().replaceTags(title.str());
+                mCharacterSelection->addItem(playerDesc, signature.mPlayerName);
 
                 if (mCurrentCharacter == &*it
                     || (!mCurrentCharacter && !mSaving
@@ -413,9 +414,11 @@ namespace MWGui
 
         std::stringstream text;
 
-        const std::string& playerName = mCurrentSlot->mProfile.mPlayerName;
-        if (!playerName.empty())
-            text << playerName << "\n";
+        const size_t profileIndex = mCharacterSelection->getIndexSelected();
+        const std::string& slotPlayerName = mCurrentSlot->mProfile.mPlayerName;
+        const std::string& profilePlayerName = *mCharacterSelection->getItemDataAt<std::string>(profileIndex);
+        if (slotPlayerName != profilePlayerName)
+            text << slotPlayerName << "\n";
 
         text << "#{OMWEngine:Level} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
 
