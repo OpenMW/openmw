@@ -44,7 +44,7 @@ namespace DetourNavigator
             };
         }
 
-        RecastSettings makeRecastSettingsFromSettingsManager()
+        RecastSettings makeRecastSettingsFromSettingsManager(Debug::Level maxLogLevel)
         {
             RecastSettings result;
 
@@ -63,6 +63,7 @@ namespace DetourNavigator
             result.mRegionMergeArea = ::Settings::navigator().mRegionMergeArea;
             result.mRegionMinArea = ::Settings::navigator().mRegionMinArea;
             result.mTileSize = ::Settings::navigator().mTileSize;
+            result.mMaxLogLevel = maxLogLevel;
 
             return result;
         }
@@ -80,11 +81,11 @@ namespace DetourNavigator
         }
     }
 
-    Settings makeSettingsFromSettingsManager()
+    Settings makeSettingsFromSettingsManager(Debug::Level maxLogLevel)
     {
         Settings result;
 
-        result.mRecast = makeRecastSettingsFromSettingsManager();
+        result.mRecast = makeRecastSettingsFromSettingsManager(maxLogLevel);
         result.mDetour = makeDetourSettingsFromSettingsManager();
 
         const NavMeshLimits limits = getNavMeshTileLimits(result.mDetour);

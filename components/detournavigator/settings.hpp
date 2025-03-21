@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 
+#include <components/debug/debuglog.hpp>
+
 #include <chrono>
 #include <string>
 
@@ -23,6 +25,7 @@ namespace DetourNavigator
         int mRegionMergeArea = 0;
         int mRegionMinArea = 0;
         int mTileSize = 0;
+        Debug::Level mMaxLogLevel = Debug::Error;
     };
 
     struct DetourSettings
@@ -55,7 +58,7 @@ namespace DetourNavigator
 
     inline constexpr std::int64_t navMeshFormatVersion = 2;
 
-    Settings makeSettingsFromSettingsManager();
+    Settings makeSettingsFromSettingsManager(Debug::Level maxLogLevel);
 }
 
 #endif

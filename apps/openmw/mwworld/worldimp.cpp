@@ -290,14 +290,14 @@ namespace MWWorld
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
     }
 
-    void World::init(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, SceneUtil::WorkQueue* workQueue,
-        SceneUtil::UnrefQueue& unrefQueue)
+    void World::init(Debug::Level maxRecastLogLevel, osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+        SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue)
     {
         mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(mResourceSystem, rootNode);
 
         if (Settings::navigator().mEnable)
         {
-            auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
+            auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager(maxRecastLogLevel);
             navigatorSettings.mRecast.mSwimHeightScale = mSwimHeightScale;
             mNavigator = DetourNavigator::makeNavigator(navigatorSettings, mUserDataPath);
         }

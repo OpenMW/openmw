@@ -1,7 +1,7 @@
 #include "recastcontext.hpp"
 #include "debug.hpp"
 
-#include "components/debug/debuglog.hpp"
+#include <components/debug/debuglog.hpp>
 
 #include <sstream>
 
@@ -33,15 +33,20 @@ namespace DetourNavigator
         }
     }
 
-    RecastContext::RecastContext(
-        ESM::RefId worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds)
-        : mPrefix(formatPrefix(worldspace, tilePosition, agentBounds))
+    RecastContext::RecastContext(ESM::RefId worldspace, const TilePosition& tilePosition,
+        const AgentBounds& agentBounds, Debug::Level maxLogLevel)
+        : mMaxLogLevel(maxLogLevel)
+        , mPrefix(formatPrefix(worldspace, tilePosition, agentBounds))
     {
     }
 
     void RecastContext::doLog(const rcLogCategory category, const char* msg, const int len)
     {
-        if (len > 0)
-            Log(getLogLevel(category)) << mPrefix << std::string_view(msg, static_cast<std::size_t>(len));
+        if (msg == nullptr || len <= 0)
+            return;
+        const Debug::Level level = getLogLevel(category);
+        if (level > mMaxLogLevel)
+            return;
+        Log(level) << mPrefix << std::string_view(msg, static_cast<std::size_t>(len));
     }
 }
