@@ -13,12 +13,13 @@
 namespace DetourNavigator
 {
     struct AgentBounds;
+    struct Version;
 
     class RecastContext final : public rcContext
     {
     public:
         explicit RecastContext(ESM::RefId worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds,
-            Debug::Level maxLogLevel);
+            const Version& version, Debug::Level maxLogLevel);
 
         const std::string& getPrefix() const { return mPrefix; }
 
