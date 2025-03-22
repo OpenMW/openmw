@@ -1123,7 +1123,7 @@
 -- @field #string id The record ID of the NPC
 -- @field #string name
 -- @field #string race
--- @field #string class Name of the NPC's class (e. g. Acrobat)
+-- @field #string class ID of the NPC's class (e.g. acrobat)
 -- @field #string model Path to the model associated with this NPC, used for animations.
 -- @field #string mwscript MWScript on this NPC (can be nil)
 -- @field #string hair Path to the hair body part model
