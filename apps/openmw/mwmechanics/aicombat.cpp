@@ -178,11 +178,16 @@ namespace MWMechanics
             currentCell = actor.getCell();
         }
 
+        const MWWorld::Class& actorClass = actor.getClass();
+        MWMechanics::CreatureStats& stats = actorClass.getCreatureStats(actor);
+        if (stats.isParalyzed() || stats.getKnockedDown())
+            return false;
+
         bool forceFlee = false;
         if (!canFight(actor, target))
         {
             storage.stopAttack();
-            actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
+            stats.setAttackingOrSpell(false);
             storage.mActionCooldown = 0.f;
             // Continue combat if target is player or player follower/escorter and an attack has been attempted
             const auto& playerFollowersAndEscorters
@@ -191,18 +196,14 @@ namespace MWMechanics
                 = (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), target)
                     != playerFollowersAndEscorters.end());
             if ((target == MWMechanics::getPlayer() || targetSidesWithPlayer)
-                && ((actor.getClass().getCreatureStats(actor).getHitAttemptActorId()
-                        == target.getClass().getCreatureStats(target).getActorId())
-                    || (target.getClass().getCreatureStats(target).getHitAttemptActorId()
-                        == actor.getClass().getCreatureStats(actor).getActorId())))
+                && ((stats.getHitAttemptActorId() == target.getClass().getCreatureStats(target).getActorId())
+                    || (target.getClass().getCreatureStats(target).getHitAttemptActorId() == stats.getActorId())))
                 forceFlee = true;
             else // Otherwise end combat
                 return true;
         }
 
-        const MWWorld::Class& actorClass = actor.getClass();
-        actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
-
+        stats.setMovementFlag(CreatureStats::Flag_Run, true);
         float& actionCooldown = storage.mActionCooldown;
         std::unique_ptr<Action>& currentAction = storage.mCurrentAction;
 
@@ -330,7 +331,7 @@ namespace MWMechanics
                 {
                     storage.mUseCustomDestination = false;
                     storage.stopAttack();
-                    actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
+                    stats.setAttackingOrSpell(false);
                     currentAction = std::make_unique<ActionFlee>();
                     actionCooldown = currentAction->getActionCooldown();
                     storage.startFleeing();
