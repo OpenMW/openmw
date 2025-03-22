@@ -244,7 +244,7 @@ namespace DetourNavigator
         inline JobStatus handleUpdateNavMeshStatus(UpdateNavMeshStatus status, const Job& job,
             const GuardedNavMeshCacheItem& navMeshCacheItem, const RecastMesh& recastMesh);
 
-        JobIt getNextJob();
+        inline JobIt getNextJob() noexcept;
 
         void postThreadJob(JobIt job, std::deque<JobIt>& queue);
 
@@ -254,7 +254,7 @@ namespace DetourNavigator
 
         inline std::size_t getTotalJobs() const;
 
-        void cleanupLastUpdates();
+        inline void cleanupLastUpdates() noexcept;
 
         inline void waitUntilJobsDoneForNotPresentTiles(Loading::Listener* listener);
 
