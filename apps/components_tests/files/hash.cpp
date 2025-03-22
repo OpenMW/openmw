@@ -30,7 +30,7 @@ namespace
 
     TEST(FilesGetHash, shouldClearErrors)
     {
-        const auto fileName = temporaryFilePath("fileName");
+        const auto fileName = outputFilePath("fileName");
         std::string content;
         std::fill_n(std::back_inserter(content), 1, 'a');
         std::istringstream stream(content);
@@ -41,7 +41,7 @@ namespace
 
     TEST_P(FilesGetHash, shouldReturnHashForStringStream)
     {
-        const auto fileName = temporaryFilePath("fileName");
+        const auto fileName = outputFilePath("fileName");
         std::string content;
         std::fill_n(std::back_inserter(content), GetParam().mSize, 'a');
         std::istringstream stream(content);
