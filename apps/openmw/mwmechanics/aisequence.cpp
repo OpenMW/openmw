@@ -432,14 +432,8 @@ namespace MWMechanics
         }
 
         // insert new package in correct place depending on priority
-        bool resetInitialPositions = false;
         for (auto it = mPackages.begin(); it != mPackages.end(); ++it)
         {
-            if (resetInitialPositions)
-            {
-                (*it)->resetInitialPosition();
-                continue;
-            }
             // We should override current AiCast package, if we try to add a new one.
             if ((*it)->getTypeId() == MWMechanics::AiPackageTypeId::Cast
                 && package.getTypeId() == MWMechanics::AiPackageTypeId::Cast)
@@ -455,13 +449,13 @@ namespace MWMechanics
                 onPackageAdded(package);
                 it = mPackages.insert(it, package.clone());
                 if (newTypeId == MWMechanics::AiPackageTypeId::Follow)
-                    resetInitialPositions = true;
-                else
-                    return;
+                {
+                    for (++it; it != mPackages.end(); ++it)
+                        (*it)->resetInitialPosition();
+                }
+                return;
             }
         }
-        if (resetInitialPositions)
-            return;
 
         onPackageAdded(package);
         mPackages.push_back(package.clone());
