@@ -400,7 +400,7 @@ namespace MWMechanics
         const auto newTypeId = package.getTypeId();
         if (currentTypeId <= MWMechanics::AiPackageTypeId::Wander
             && !hasPackage(MWMechanics::AiPackageTypeId::InternalTravel)
-            && (newTypeId <= MWMechanics::AiPackageTypeId::Combat || newTypeId == MWMechanics::AiPackageTypeId::Pursue
+            && (newTypeId == MWMechanics::AiPackageTypeId::Combat || newTypeId == MWMechanics::AiPackageTypeId::Pursue
                 || newTypeId == MWMechanics::AiPackageTypeId::Cast))
         {
             osg::Vec3f dest;
@@ -432,8 +432,14 @@ namespace MWMechanics
         }
 
         // insert new package in correct place depending on priority
+        bool resetInitialPositions = false;
         for (auto it = mPackages.begin(); it != mPackages.end(); ++it)
         {
+            if (resetInitialPositions)
+            {
+                (*it)->resetInitialPosition();
+                continue;
+            }
             // We should override current AiCast package, if we try to add a new one.
             if ((*it)->getTypeId() == MWMechanics::AiPackageTypeId::Cast
                 && package.getTypeId() == MWMechanics::AiPackageTypeId::Cast)
@@ -444,22 +450,25 @@ namespace MWMechanics
 
             if ((*it)->getPriority() <= package.getPriority())
             {
+                if (cancelOther && isActualAiPackage((*it)->getTypeId()))
+                    mAiState.reset();
                 onPackageAdded(package);
-                mPackages.insert(it, package.clone());
-                return;
+                it = mPackages.insert(it, package.clone());
+                if (newTypeId == MWMechanics::AiPackageTypeId::Follow)
+                    resetInitialPositions = true;
+                else
+                    return;
             }
         }
+        if (resetInitialPositions)
+            return;
 
         onPackageAdded(package);
         mPackages.push_back(package.clone());
 
         // Make sure that temporary storage is empty
         if (cancelOther)
-        {
-            mAiState.moveIn(std::make_unique<AiCombatStorage>());
-            mAiState.moveIn(std::make_unique<AiFollowStorage>());
-            mAiState.moveIn(std::make_unique<AiWanderStorage>());
-        }
+            mAiState.reset();
     }
 
     bool MWMechanics::AiSequence::isEmpty() const

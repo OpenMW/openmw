@@ -676,6 +676,13 @@ namespace MWMechanics
         stopMovement(actor);
     }
 
+    void AiWander::resetInitialPosition()
+    {
+        mStoredInitialActorPosition = false;
+        mPathFinder.clearPath();
+        mHasDestination = false;
+    }
+
     bool AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
     {
         if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
@@ -804,7 +811,7 @@ namespace MWMechanics
 
         converter.toWorld(dest);
 
-        state.moveIn(std::make_unique<AiWanderStorage>());
+        state.reset();
 
         osg::Vec3f pos(static_cast<float>(dest.mX), static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         MWBase::Environment::get().getWorld()->moveObject(actor, pos);
