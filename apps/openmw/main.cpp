@@ -220,6 +220,8 @@ int runApplication(int argc, char* argv[])
     Files::ConfigurationManager cfgMgr;
     std::unique_ptr<OMW::Engine> engine = std::make_unique<OMW::Engine>(cfgMgr);
 
+    engine->setRecastMaxLogLevel(Debug::getRecastMaxLogLevel());
+
     if (parseOptions(argc, argv, *engine, cfgMgr))
     {
         if (!Misc::checkRequiredOSGPluginsArePresent())

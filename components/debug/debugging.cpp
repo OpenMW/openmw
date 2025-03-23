@@ -324,6 +324,22 @@ namespace Debug
             First mFirst;
             Second mSecond;
         };
+
+        Level toLevel(std::string_view value)
+        {
+            if (value == "ERROR")
+                return Error;
+            if (value == "WARNING")
+                return Warning;
+            if (value == "INFO")
+                return Info;
+            if (value == "VERBOSE")
+                return Verbose;
+            if (value == "DEBUG")
+                return Debug;
+
+            return Verbose;
+        }
     }
 #endif
 
@@ -359,21 +375,17 @@ namespace Debug
     Level getDebugLevel()
     {
         if (const char* env = getenv("OPENMW_DEBUG_LEVEL"))
-        {
-            const std::string_view value(env);
-            if (value == "ERROR")
-                return Error;
-            if (value == "WARNING")
-                return Warning;
-            if (value == "INFO")
-                return Info;
-            if (value == "VERBOSE")
-                return Verbose;
-            if (value == "DEBUG")
-                return Debug;
-        }
+            return toLevel(env);
 
         return Verbose;
+    }
+
+    Level getRecastMaxLogLevel()
+    {
+        if (const char* env = getenv("OPENMW_RECAST_MAX_LOG_LEVEL"))
+            return toLevel(env);
+
+        return Error;
     }
 
     void setupLogging(const std::filesystem::path& logDir, std::string_view appName)
