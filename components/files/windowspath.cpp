@@ -36,12 +36,14 @@ namespace Files
     {
         std::filesystem::path userPath = std::filesystem::current_path();
 
-        WCHAR path[MAX_PATH + 1] = {};
+        PWSTR cString;
+        HRESULT result = SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &cString);
+        if (SUCCEEDED(result))
+            userPath = std::filesystem::path(cString);
+        else
+            Log(Debug::Error) << "Error " << result << " when getting Documents path";
 
-        if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, nullptr, 0, path)))
-        {
-            userPath = std::filesystem::path(path);
-        }
+        CoTaskMemFree(cString);
 
         return userPath / "My Games" / mName;
     }
@@ -54,14 +56,19 @@ namespace Files
 
     std::filesystem::path WindowsPath::getGlobalConfigPath() const
     {
+        // The concept of a global config path is absurd on Windows.
+        // Always use local config instead.
+        // The virtual base class requires that we provide this, though.
         std::filesystem::path globalPath = std::filesystem::current_path();
 
-        WCHAR path[MAX_PATH + 1] = {};
+        PWSTR cString;
+        HRESULT result = SHGetKnownFolderPath(FOLDERID_ProgramFiles, 0, nullptr, &cString);
+        if (SUCCEEDED(result))
+            globalPath = std::filesystem::path(cString);
+        else
+            Log(Debug::Error) << "Error " << result << " when getting Program Files path";
 
-        if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, nullptr, 0, path)))
-        {
-            globalPath = std::filesystem::path(path);
-        }
+        CoTaskMemFree(cString);
 
         return globalPath / mName;
     }
