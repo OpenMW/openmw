@@ -2,6 +2,7 @@
 #include <components/misc/strings/conversion.hpp>
 #include <components/settings/parser.hpp>
 #include <components/settings/values.hpp>
+#include <components/testing/util.hpp>
 
 #include <gtest/gtest.h>
 
@@ -24,5 +25,9 @@ int main(int argc, char* argv[])
     Settings::StaticValues::init();
 
     testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+
+    const int result = RUN_ALL_TESTS();
+    if (result == 0)
+        std::filesystem::remove_all(TestingOpenMW::outputDir());
+    return result;
 }
