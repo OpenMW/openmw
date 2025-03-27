@@ -326,6 +326,24 @@ testing.registerGlobalTest('player weapon attack', function()
     testing.runLocalTest(player, 'player weapon attack')
 end)
 
+testing.registerGlobalTest('load while teleporting - init player', function()
+    local player = world.players[1]
+    player:teleport('Museum of Wonders', util.vector3(0, -1500, 111), util.transform.rotateZ(math.rad(180)))
+end)
+
+testing.registerGlobalTest('load while teleporting - teleport', function()
+    local player = world.players[1]
+    local landracer = world.createObject('landracer')
+    landracer:teleport(player.cell, player.position + util.vector3(0, 500, 0))
+    coroutine.yield()
+
+    local door = world.getObjectByFormId(core.getFormId('the_hub.omwaddon', 26))
+    door:activateBy(player)
+    coroutine.yield()
+
+    landracer:teleport(player.cell, player.position)
+end)
+
 return {
     engineHandlers = {
         onUpdate = testing.updateGlobal,
