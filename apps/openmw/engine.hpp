@@ -172,6 +172,7 @@ namespace OMW
         // Grab mouse?
         bool mGrab;
 
+        bool mExportFonts;
         unsigned int mRandomSeed;
         Debug::Level mMaxRecastLogLevel = Debug::Error;
 
@@ -255,6 +256,8 @@ namespace OMW
         void setActivationDistanceOverride(int distance);
 
         void setWarningsMode(int mode);
+
+        void enableFontExport(bool exportFonts);
 
         /// Set the save game file to load after initialising the engine.
         void setSaveGameFile(const std::filesystem::path& savegame);
