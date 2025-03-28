@@ -28,8 +28,8 @@ A `Launchpad PPA <https://launchpad.net/~openmw/+archive/openmw>`_ is available.
 Add it and install OpenMW::
 
 	$ sudo add-apt-repository ppa:openmw/openmw
-	$ sudo apt-get update
-	$ sudo apt-get install openmw
+	$ sudo apt update
+	$ sudo apt install openmw
 
 The Arch Linux Way
 ==================
