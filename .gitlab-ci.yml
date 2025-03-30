@@ -94,10 +94,10 @@ Ubuntu_GCC_preprocess:
 Coverity:
   tags:
     - saas-linux-medium-amd64
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   stage: build
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+  # rules:
+  #   - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
     key: Coverity.ubuntu_24.04.v1
     paths:
@@ -105,8 +105,8 @@ Coverity:
     - ccache/
   variables:
     CCACHE_SIZE: 2G
-    CC: clang-12
-    CXX: clang++-12
+    CC: clang-14
+    CXX: clang++-14
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:
