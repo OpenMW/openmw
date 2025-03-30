@@ -24,7 +24,7 @@ float calcShadowing(sampler2DShadow shadowTexture, vec4 LightSpacePos)
     for (float y = -1.0 * mult; y <= mult; y+=1.0) {
         for (float x = -1.0 * mult; x <= mult; x+=1.0) {
             vec4 Offsets = vec4(float(x) * Offset, float(y) * Offset, -0.001, 0.0);
-                shadowing += min(shadow2DProj(shadowTexture, LightSpacePos + (Offsets * vec4(LightSpacePos.w, LightSpacePos,w, 1.0, 1.0))), 1.0);
+                shadowing += min(shadow2DProj(shadowTexture, LightSpacePos + (Offsets * vec4(LightSpacePos.w, LightSpacePos.w, 1.0, 1.0))), 1.0);
         }
     }
     shadowing = shadowing / (numPixels * numPixels);
