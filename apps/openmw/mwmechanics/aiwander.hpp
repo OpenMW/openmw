@@ -182,8 +182,6 @@ namespace MWMechanics
 
         /// lookup table for converting idleSelect value to groupName
         static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
-
-        static int OffsetToPreventOvercrowding();
     };
 }
 
