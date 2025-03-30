@@ -1,6 +1,5 @@
 Checks: >
   -*,
-  boost-*,
   portability-*,
   clang-analyzer-*,
   -clang-analyzer-optin*,
@@ -9,7 +8,6 @@ Checks: >
   -modernize-avoid-bind
 WarningsAsErrors: >
   -*,
-  boost-*,
   portability-*,
   clang-analyzer-*,
   -clang-analyzer-optin*,
