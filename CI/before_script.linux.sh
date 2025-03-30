@@ -38,7 +38,7 @@ fi
 
 if [[ $CI_CLANG_TIDY ]]; then
     CMAKE_CONF_OPTS+=(
-        -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
+        -DCMAKE_CXX_CLANG_TIDY=clang-tidy
         -DBUILD_COMPONENTS_TESTS=ON
         -DBUILD_OPENMW_TESTS=ON
         -DBUILD_OPENCS_TESTS=ON

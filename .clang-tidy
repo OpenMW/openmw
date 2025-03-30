@@ -6,11 +6,5 @@ Checks: >
   -clang-analyzer-cplusplus.NewDeleteLeaks,
   -clang-analyzer-core.CallAndMessage,
   -modernize-avoid-bind
-WarningsAsErrors: >
-  -*,
-  portability-*,
-  clang-analyzer-*,
-  -clang-analyzer-optin*,
-  -clang-analyzer-cplusplus.NewDeleteLeaks,
-  -clang-analyzer-core.CallAndMessage
+WarningsAsErrors: '*'
 HeaderFilterRegex: '(apps|components)/'
