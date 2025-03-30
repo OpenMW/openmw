@@ -23,6 +23,7 @@ declare -rA GROUPED_DEPS=(
     libclang-dev
     ninja-build
     python3-clang
+    python3-click
     python3-pip
     unzip
   "
@@ -57,42 +58,47 @@ declare -rA GROUPED_DEPS=(
     libsdl2-dev libboost-system-dev libboost-filesystem-dev libgl-dev
   "
 
-  [openmw-coverage]="gcovr"
+  [openmw-coverage]="
+    python3-pip
+  "
 
   [openmw-integration-tests]="
     ca-certificates
     gdb
     git
     git-lfs
-    libavcodec58
-    libavformat58
-    libavutil56
-    libboost-iostreams1.74.0
-    libboost-program-options1.74.0
-    libboost-system1.74.0
-    libbullet3.24
+    libavcodec60
+    libavformat60
+    libavutil58
+    libboost-iostreams1.83.0
+    libboost-program-options1.83.0
+    libboost-system1.83.0
+    libbullet3.24t64
     libcollada-dom2.5-dp0
-    libicu70
+    libicu74
     libjpeg8
     libluajit-5.1-2
     liblz4-1
     libmyguiengine3debian1v5
     libopenal1
     libopenscenegraph161
-    libpng16-16
-    libqt5opengl5
+    libpng16-16t64
+    libqt5opengl5t64
     librecast1
     libsdl2-2.0-0
     libsqlite3-0
-    libswresample3
-    libswscale5
+    libswresample4
+    libswscale7
     libtinyxml2.6.2v5
     libyaml-cpp0.8
+    python3-click
+    python3-matplotlib
+    python3-numpy
     python3-pip
     xvfb
   "
 
-  [libasan6]="libasan6"
+  [libasan8]="libasan8"
 
   [android]="binutils build-essential cmake ccache curl unzip git pkg-config"
 
