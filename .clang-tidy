@@ -6,6 +6,10 @@ Checks: >
   -clang-analyzer-cplusplus.NewDeleteLeaks,
   -clang-analyzer-cplusplus.NewDelete,
   -clang-analyzer-core.CallAndMessage,
-  modernize-avoid-bind
+  modernize-avoid-bind,
+  readability-identifier-naming
 WarningsAsErrors: '*'
 HeaderFilterRegex: '(apps|components)/'
+CheckOptions:
+- key: readability-identifier-naming.ConceptCase
+  value: CamelCase
