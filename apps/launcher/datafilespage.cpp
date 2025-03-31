@@ -765,7 +765,7 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
         return;
 
     QString rootPath = QFileDialog::getExistingDirectory(
-        this, tr("Select Directory"), QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::Option::ReadOnly);
+        this, tr("Select Directory"), {}, QFileDialog::ShowDirsOnly | QFileDialog::Option::ReadOnly);
 
     if (rootPath.isEmpty())
         return;
