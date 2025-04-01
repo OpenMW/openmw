@@ -160,8 +160,12 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
         setTitle(container.getClass().getName(container));
-
         mPtr.getClass().getContainerStore(mPtr).setContListener(this);
+    }
+
+    void ContainerWindow::updateItemView()
+    {
+        mItemView->update();
     }
 
     void ContainerWindow::resetReference()
@@ -321,10 +325,5 @@ namespace MWGui
     {
         if (mModel && mModel->usesContainer(ptr))
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
-    }
-
-    void ContainerWindow::updateItemView()
-    {
-        mItemView->update();
     }
 }
