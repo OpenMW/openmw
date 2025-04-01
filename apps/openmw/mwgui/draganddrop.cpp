@@ -91,6 +91,8 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setDragDrop(true);
 
         mIsOnDragAndDrop = true;
+
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
     }
 
     void DragAndDrop::drop(ItemModel* targetModel, ItemView* targetView)

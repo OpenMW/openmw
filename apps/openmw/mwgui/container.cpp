@@ -160,6 +160,12 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
         setTitle(container.getClass().getName(container));
+        mPtr.getClass().getContainerStore(mPtr).setContListener(this);
+    }
+
+    void ContainerWindow::updateItemView()
+    {
+        mItemView->update();
     }
 
     void ContainerWindow::resetReference()
