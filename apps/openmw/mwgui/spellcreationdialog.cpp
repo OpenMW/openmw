@@ -83,7 +83,7 @@ namespace MWGui
         getWidget(mDurationBox, "DurationBox");
         getWidget(mAreaBox, "AreaBox");
         getWidget(mMagnitudeBox, "MagnitudeBox");
-
+        
         mRangeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onRangeButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onOkButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onCancelButtonClicked);
@@ -352,6 +352,7 @@ namespace MWGui
         getWidget(mAvailableEffectsList, "AvailableEffects");
         getWidget(mUsedEffectsView, "UsedEffects");
         getWidget(mPriceLabel, "PriceLabel");
+        getWidget(mPlayerGold, "PlayerGold");
         getWidget(mBuyButton, "BuyButton");
         getWidget(mCancelButton, "CancelButton");
 
@@ -369,9 +370,13 @@ namespace MWGui
 
         mPtr = actor;
         mNameEdit->setCaption({});
-
+        
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
+        
         startEditing();
-    }
+    }    
 
     void SpellCreationDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
