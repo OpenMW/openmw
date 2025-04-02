@@ -45,6 +45,7 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
         MyGUI::Button* mOkButton;
         MyGUI::Button* mDeleteButton;
+       
 
         MyGUI::Button* mRangeButton;
 
@@ -106,11 +107,14 @@ namespace MWGui
 
         void setConstantEffect(bool constant);
 
+        
+
     protected:
         std::map<int, short> mButtonMapping; // maps button ID to effect ID
 
         Gui::MWList* mAvailableEffectsList;
         MyGUI::ScrollView* mUsedEffectsView;
+       
 
         EditEffectDialog mAddEffectDialog;
         std::unique_ptr<SelectAttributeDialog> mSelectAttributeDialog;
@@ -158,6 +162,8 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& actor) override;
 
+        void updateLabels();
+
         std::string_view getWindowIdForLua() const override { return "SpellCreationDialog"; }
 
     protected:
@@ -175,7 +181,8 @@ namespace MWGui
         MyGUI::Button* mBuyButton;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
-
+        MyGUI::TextBox* mPlayerGold;
+        
         ESM::Spell mSpell;
     };
 
