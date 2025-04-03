@@ -30,7 +30,6 @@
 
 namespace
 {
-
     bool sortMagicEffects(short id1, short id2)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
@@ -556,10 +555,10 @@ namespace MWGui
         for (const short effectId : knownEffects)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get()
-                    .getESMStore()
-                    ->get<ESM::GameSetting>()
-                    .find(ESM::MagicEffect::indexToGmstString(effectId))
-                    ->mValue.getString());
+                                               .getESMStore()
+                                               ->get<ESM::GameSetting>()
+                                               .find(ESM::MagicEffect::indexToGmstString(effectId))
+                                               ->mValue.getString());
             mButtonMapping[i] = effectId;
             ++i;
         }
