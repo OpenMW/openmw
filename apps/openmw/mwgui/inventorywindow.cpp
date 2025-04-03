@@ -206,7 +206,7 @@ namespace MWGui
     {
         mGuiMode = mode;
         const WindowSettingValues settings = getModeSettings(mGuiMode);
-        setPinButtonVisible(mode == GM_Inventory);
+        setPinButtonVisible(mode != GM_Container && mode != GM_Companion && mode != GM_Barter);
 
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
 
