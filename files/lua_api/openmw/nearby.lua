@@ -59,7 +59,7 @@
 -- @field [parent=#nearby] #COLLISION_TYPE COLLISION_TYPE
 
 ---
--- Result of raycasing
+-- Result of raycasting
 -- @type RayCastingResult
 -- @field [parent=#RayCastingResult] #boolean hit Is there a collision? (true/false)
 -- @field [parent=#RayCastingResult] openmw.util#Vector3 hitPos Position of the collision point (nil if no collision)
@@ -69,7 +69,7 @@
 ---
 -- A table of parameters for @{#nearby.castRay}
 -- @type CastRayOptions
--- @field openmw.core#GameObject ignore An object to ignore (specify here the source of the ray)
+-- @field openmw.core#ObjectList ignore An array of objects to ignore (specify here the source of the ray, or other objects which should not collide)
 -- @field #number collisionType Object types to work with (see @{openmw.nearby#COLLISION_TYPE})
 -- @field #number radius The radius of the ray (zero by default). If not zero then castRay actually casts a sphere with given radius.
 --  NOTE: currently `ignore` is not supported if `radius>0`.
@@ -92,7 +92,7 @@
 ---
 -- A table of parameters for @{#nearby.castRenderingRay} and @{#nearby.asyncCastRenderingRay}
 -- @type CastRenderingRayOptions
--- @field #table ignore A list of @{openmw.core#GameObject} to ignore while doing the ray cast
+-- @field openmw.core#ObjectList ignore A list of @{openmw.core#GameObject} to ignore while doing the ray cast
 
 ---
 -- Cast ray from one point to another and find the first visual intersection with anything in the scene.
