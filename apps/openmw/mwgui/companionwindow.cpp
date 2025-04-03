@@ -134,6 +134,8 @@ namespace MWGui
         mItemView->resetScrollBars();
 
         setTitle(actor.getClass().getName(actor));
+
+        mPtr.getClass().getContainerStore(mPtr).setContListener(this);
     }
 
     void CompanionWindow::onFrame(float dt)
@@ -200,6 +202,11 @@ namespace MWGui
         mItemView->setModel(nullptr);
         mModel = nullptr;
         mSortModel = nullptr;
+    }
+
+    void CompanionWindow::updateItemView()
+    {
+        mItemView->update();
     }
 
 }

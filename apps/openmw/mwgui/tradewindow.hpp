@@ -4,6 +4,8 @@
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
+#include "../mwworld/containerstore.hpp"
+
 namespace Gui
 {
     class NumericEditBox;
@@ -20,7 +22,7 @@ namespace MWGui
     class SortFilterItemModel;
     class TradeItemModel;
 
-    class TradeWindow : public WindowBase, public ReferenceInterface
+    class TradeWindow : public WindowBase, public ReferenceInterface, public MWWorld::ContainerStoreListener
     {
     public:
         TradeWindow();
@@ -41,6 +43,11 @@ namespace MWGui
         void resetReference() override;
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
+
+        void updateItemView();
+
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
 
         typedef MyGUI::delegates::MultiDelegate<> EventHandle_TradeDone;
         EventHandle_TradeDone eventTradeDone;

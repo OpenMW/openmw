@@ -4,6 +4,8 @@
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
+#include "../mwworld/containerstore.hpp"
+
 namespace MWGui
 {
     namespace Widgets
@@ -17,7 +19,7 @@ namespace MWGui
     class SortFilterItemModel;
     class CompanionItemModel;
 
-    class CompanionWindow : public WindowBase, public ReferenceInterface
+    class CompanionWindow : public WindowBase, public ReferenceInterface, public MWWorld::ContainerStoreListener
     {
     public:
         CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager);
@@ -29,6 +31,11 @@ namespace MWGui
         void setPtr(const MWWorld::Ptr& actor) override;
         void onFrame(float dt) override;
         void clear() override { resetReference(); }
+
+        void updateItemView();
+
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
 
         std::string_view getWindowIdForLua() const override { return "Companion"; }
 

@@ -201,6 +201,9 @@ namespace MWGui
 
         onFilterChanged(mFilterAll);
         mFilterEdit->setCaption({});
+
+        for (const auto& source : itemSources)
+            source.getClass().getContainerStore(source).setContListener(this);
     }
 
     void TradeWindow::onFrame(float dt)
@@ -642,5 +645,10 @@ namespace MWGui
     {
         if (mTradeModel && mTradeModel->usesContainer(ptr))
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+    }
+
+    void TradeWindow::updateItemView()
+    {
+        mItemView->update();
     }
 }
