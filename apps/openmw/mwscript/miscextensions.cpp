@@ -1223,6 +1223,50 @@ namespace MWScript
                 runtime.getContext().report(str.str());
             }
 
+            void printGlobalScriptsVars(Interpreter::Runtime& runtime)
+            {
+                std::stringstream str;
+                str << std::endl << "Global Scripts:";
+
+                const auto& scripts = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getScripts();
+
+                // sort for user convenience
+                std::map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> globalScripts(scripts.begin(), scripts.end());
+
+                auto printVariables = [&str](std::string_view scptName, const auto& names, const auto& values,
+                                          std::string_view type) {
+                    size_t size = std::min(names.size(), values.size());
+                    for (size_t i = 0; i < size; ++i)
+                    {
+                        str << std::endl << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
+                    }
+                };
+
+                for (const auto& [refId, script] : globalScripts)
+                {
+                    // Skip dormant global scripts
+                    if (!script->mRunning)
+                        continue;
+
+                    const std::string scptName = refId.serializeText();
+                    const Compiler::Locals& complocals
+                        = MWBase::Environment::get().getScriptManager()->getLocals(refId);
+                    const Locals& locals
+                        = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocals(refId);
+
+                    if (locals.isEmpty())
+                        str << std::endl << "No variables in script " << scptName;
+                    else
+                    {
+                        printVariables(scptName, complocals.get('s'), locals.mShorts, "short");
+                        printVariables(scptName, complocals.get('l'), locals.mLongs, "long");
+                        printVariables(scptName, complocals.get('f'), locals.mFloats, "float");
+                    }
+                }
+
+                runtime.getContext().report(str.str());
+            }
+
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
@@ -1233,6 +1277,7 @@ namespace MWScript
                 {
                     // No reference, no problem.
                     printGlobalVars(runtime);
+                    printGlobalScriptsVars(runtime)
                 }
             }
         };
