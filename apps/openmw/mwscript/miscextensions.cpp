@@ -1146,9 +1146,18 @@ namespace MWScript
         {
             void printLocalVars(Interpreter::Runtime& runtime, const MWWorld::Ptr& ptr)
             {
-                std::stringstream str;
+                std::ostringstream str;
 
                 const ESM::RefId& script = ptr.getClass().getScript(ptr);
+
+                auto printVariables = [&str](const auto& names, const auto& values, std::string_view type) {
+                    size_t size = std::min(names.size(), values.size());
+                    for (size_t i = 0; i < size; ++i)
+                    {
+                        str << "\n  " << names[i] << " = " << values[i] << " (" << type << ")";
+                    }
+                };
+
                 if (script.empty())
                     str << ptr.getCellRef().getRefId() << " does not have a script.";
                 else
@@ -1159,27 +1168,9 @@ namespace MWScript
                     const Compiler::Locals& complocals
                         = MWBase::Environment::get().getScriptManager()->getLocals(script);
 
-                    const std::vector<std::string>* names = &complocals.get('s');
-                    for (size_t i = 0; i < names->size(); ++i)
-                    {
-                        if (i >= locals.mShorts.size())
-                            break;
-                        str << std::endl << "  " << (*names)[i] << " = " << locals.mShorts[i] << " (short)";
-                    }
-                    names = &complocals.get('l');
-                    for (size_t i = 0; i < names->size(); ++i)
-                    {
-                        if (i >= locals.mLongs.size())
-                            break;
-                        str << std::endl << "  " << (*names)[i] << " = " << locals.mLongs[i] << " (long)";
-                    }
-                    names = &complocals.get('f');
-                    for (size_t i = 0; i < names->size(); ++i)
-                    {
-                        if (i >= locals.mFloats.size())
-                            break;
-                        str << std::endl << "  " << (*names)[i] << " = " << locals.mFloats[i] << " (float)";
-                    }
+                    printVariables(complocals.get('s'), locals.mShorts, "short");
+                    printVariables(complocals.get('l'), locals.mLongs, "long");
+                    printVariables(complocals.get('f'), locals.mFloats, "float");
                 }
 
                 runtime.getContext().report(str.str());
@@ -1187,50 +1178,43 @@ namespace MWScript
 
             void printGlobalVars(Interpreter::Runtime& runtime)
             {
-                std::stringstream str;
-                str << "Global variables:";
+                std::ostringstream str;
+                str << "Global Variables:";
 
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                std::vector<std::string> names = runtime.getContext().getGlobals();
+                auto& context = runtime.getContext();
+                std::vector<std::string> names = context.getGlobals();
 
-                // sort for user convenience
-                std::sort(names.begin(), names.end());
+                std::sort(names.begin(), names.end(), ::Misc::StringUtils::ciLess);
 
-                for (size_t i = 0; i < names.size(); ++i)
-                {
-                    char type = world->getGlobalVariableType(names[i]);
-                    str << std::endl << " " << names[i] << " = ";
-
+                auto printVariable = [&str, &context](const std::string& name, char type) {
+                    str << "\n " << name << " = ";
                     switch (type)
                     {
                         case 's':
-
-                            str << runtime.getContext().getGlobalShort(names[i]) << " (short)";
+                            str << context.getGlobalShort(name) << " (short)";
                             break;
-
                         case 'l':
-
-                            str << runtime.getContext().getGlobalLong(names[i]) << " (long)";
+                            str << context.getGlobalLong(name) << " (long)";
                             break;
-
                         case 'f':
-
-                            str << runtime.getContext().getGlobalFloat(names[i]) << " (float)";
+                            str << context.getGlobalFloat(name) << " (float)";
                             break;
-
                         default:
-
                             str << "<unknown type>";
                     }
-                }
+                };
 
-                runtime.getContext().report(str.str());
+                for (const auto& name : names)
+                    printVariable(name, world->getGlobalVariableType(name));
+
+                context.report(str.str());
             }
 
             void printGlobalScriptsVars(Interpreter::Runtime& runtime)
             {
-                std::stringstream str;
-                str << std::endl << "Global Scripts:";
+                std::ostringstream str;
+                str << "\nGlobal Scripts:";
 
                 const auto& scripts = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getScripts();
 
@@ -1238,12 +1222,11 @@ namespace MWScript
                 std::map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> globalScripts(scripts.begin(), scripts.end());
 
                 auto printVariables
-                    = [&str](const ESM::RefId& scptName, const auto& names, const auto& values, std::string_view type) {
+                    = [&str](std::string_view scptName, const auto& names, const auto& values, std::string_view type) {
                           size_t size = std::min(names.size(), values.size());
                           for (size_t i = 0; i < size; ++i)
                           {
-                              str << std::endl
-                                  << " " << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
+                              str << "\n " << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
                           }
                       };
 
@@ -1253,18 +1236,20 @@ namespace MWScript
                     if (!script->mRunning)
                         continue;
 
+                    std::string_view scptName = refId.getRefIdString();
+
                     const Compiler::Locals& complocals
                         = MWBase::Environment::get().getScriptManager()->getLocals(refId);
                     const Locals& locals
                         = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocals(refId);
 
                     if (locals.isEmpty())
-                        str << std::endl << " No variables in script " << refId;
+                        str << "\n No variables in script " << scptName;
                     else
                     {
-                        printVariables(refId, complocals.get('s'), locals.mShorts, "short");
-                        printVariables(refId, complocals.get('l'), locals.mLongs, "long");
-                        printVariables(refId, complocals.get('f'), locals.mFloats, "float");
+                        printVariables(scptName, complocals.get('s'), locals.mShorts, "short");
+                        printVariables(scptName, complocals.get('l'), locals.mLongs, "long");
+                        printVariables(scptName, complocals.get('f'), locals.mFloats, "float");
                     }
                 }
 
