@@ -1192,6 +1192,10 @@ namespace MWScript
 
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 std::vector<std::string> names = runtime.getContext().getGlobals();
+
+                // sort for user convenience
+                std::sort(names.begin(), names.end());
+
                 for (size_t i = 0; i < names.size(); ++i)
                 {
                     char type = world->getGlobalVariableType(names[i]);
@@ -1238,7 +1242,7 @@ namespace MWScript
                     size_t size = std::min(names.size(), values.size());
                     for (size_t i = 0; i < size; ++i)
                     {
-                        str << std::endl << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
+                        str << std::endl << " " << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
                     }
                 };
 
@@ -1255,7 +1259,7 @@ namespace MWScript
                         = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocals(refId);
 
                     if (locals.isEmpty())
-                        str << std::endl << "No variables in script " << scptName;
+                        str << std::endl << " No variables in script " << scptName;
                     else
                     {
                         printVariables(scptName, complocals.get('s'), locals.mShorts, "short");
@@ -1277,7 +1281,7 @@ namespace MWScript
                 {
                     // No reference, no problem.
                     printGlobalVars(runtime);
-                    printGlobalScriptsVars(runtime)
+                    printGlobalScriptsVars(runtime);
                 }
             }
         };
