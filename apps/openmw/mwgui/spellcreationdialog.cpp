@@ -30,7 +30,6 @@
 
 namespace
 {
-    
     bool sortMagicEffects(short id1, short id2)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
