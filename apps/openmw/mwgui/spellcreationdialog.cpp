@@ -30,6 +30,7 @@
 
 namespace
 {
+    
     bool sortMagicEffects(short id1, short id2)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
@@ -372,7 +373,7 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
+        mPlayerGold->setCaptionWithReplacing(MyGUI::utility::toString(playerGold));
 
         startEditing();
     }
