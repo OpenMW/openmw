@@ -42,11 +42,6 @@
             <Property key="NeedMouse" value="false"/>
         </Widget>
 	
-	<Widget type="TextBox" skin="SandText" position="12 12 100 710" name="PlayerGold" align="Right Top">
-	        <Property key="TextAlign" value="Left"/>
-        	<Property key="NeedMouse" value="false"/>
-	</Widget>
-
         <!-- Available effects -->
         <Widget type="TextBox" skin="NormalText" position="12 48 300 24">
             <Property key="Caption" value="#{sMagicEffects}"/>
@@ -73,6 +68,15 @@
         <Widget type="HBox" position="0 336 558 60">
             <Property key="Padding" value="16"/>
 
+            <Widget type="AutoSizedTextBox" skin="NormalText">
+                <Property key="Caption" value="#{sGold}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sYourGold}"/>
+            </Widget>
+            <Widget type="AutoSizedTextBox" skin="SandText" name="PlayerGold">
+	        </Widget>
+            
             <Widget type="Spacer"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
@@ -83,7 +87,6 @@
             </Widget>
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
             </Widget>
-
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="BuyButton">
                 <Property key="Caption" value="#{sBuy}"/>
