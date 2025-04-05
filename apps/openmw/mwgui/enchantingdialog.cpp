@@ -50,7 +50,7 @@ namespace MWGui
         getWidget(mBuyButton, "BuyButton");
         getWidget(mPrice, "PriceLabel");
         getWidget(mPriceText, "PriceTextLabel");
-
+        getWidget(mPlayerGold, "PlayerGold");
         setWidgets(mAvailableEffectsList, mUsedEffectsView);
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onCancelButtonClicked);
@@ -65,6 +65,10 @@ namespace MWGui
     {
         center();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mName);
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        mPlayerGold->setCaptionWithReplacing(MyGUI::utility::toString(playerGold));
     }
 
     void EnchantingDialog::setSoulGem(const MWWorld::Ptr& gem)
