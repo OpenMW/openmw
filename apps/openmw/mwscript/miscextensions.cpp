@@ -1237,14 +1237,15 @@ namespace MWScript
                 // sort for user convenience
                 std::map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> globalScripts(scripts.begin(), scripts.end());
 
-                auto printVariables = [&str](std::string_view scptName, const auto& names, const auto& values,
-                                          std::string_view type) {
-                    size_t size = std::min(names.size(), values.size());
-                    for (size_t i = 0; i < size; ++i)
-                    {
-                        str << std::endl << " " << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
-                    }
-                };
+                auto printVariables
+                    = [&str](std::string_view scptName, const auto& names, const auto& values, std::string_view type) {
+                          size_t size = std::min(names.size(), values.size());
+                          for (size_t i = 0; i < size; ++i)
+                          {
+                              str << std::endl
+                                  << " " << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
+                          }
+                      };
 
                 for (const auto& [refId, script] : globalScripts)
                 {
