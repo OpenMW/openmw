@@ -860,7 +860,6 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
         include(BundleUtilities)
-        cmake_minimum_required(VERSION 3.1)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")
