@@ -138,6 +138,14 @@
                 <UserString key="ToolTipLayout" value="TextToolTip"/>
                 <UserString key="Caption_Text" value="#{sEnchantmentHelp7}"/>
             </Widget>
+            
+            <Widget type="AutoSizedTextBox" skin="NormalText" name="GoldTextLabel">
+                <Property key="Caption" value="#{sGold}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+            </Widget>
+            <Widget type="AutoSizedTextBox" skin="SandText" name="PlayerGold">
+                <Property key="Caption" value="0"/>
+            </Widget>
 
             <Widget type="Spacer"/>
 
