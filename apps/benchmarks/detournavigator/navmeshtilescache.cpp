@@ -179,7 +179,7 @@ namespace
         generateKeys(std::back_inserter(keys), keys.size() * (100 - hitPercentage) / 100, random);
         std::size_t n = 0;
 
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             const auto& key = keys[n++ % keys.size()];
             auto result = cache.get(key.mAgentBounds, key.mTilePosition, key.mRecastMesh);

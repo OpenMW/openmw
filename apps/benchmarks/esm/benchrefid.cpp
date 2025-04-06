@@ -104,7 +104,7 @@ namespace
         std::minstd_rand random;
         std::vector<ESM::RefId> refIds = generateStringRefIds(state.range(0), random);
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(refIds[i].serialize());
             if (++i >= refIds.size())
@@ -118,7 +118,7 @@ namespace
         std::vector<std::string> serializedRefIds
             = generateSerializedStringRefIds(state.range(0), random, [](ESM::RefId v) { return v.serialize(); });
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(ESM::RefId::deserialize(serializedRefIds[i]));
             if (++i >= serializedRefIds.size())
@@ -131,7 +131,7 @@ namespace
         std::minstd_rand random;
         std::vector<ESM::RefId> refIds = generateStringRefIds(state.range(0), random);
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(refIds[i].serializeText());
             if (++i >= refIds.size())
@@ -145,7 +145,7 @@ namespace
         std::vector<std::string> serializedRefIds
             = generateSerializedStringRefIds(state.range(0), random, [](ESM::RefId v) { return v.serializeText(); });
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(ESM::RefId::deserializeText(serializedRefIds[i]));
             if (++i >= serializedRefIds.size())
@@ -158,7 +158,7 @@ namespace
         std::minstd_rand random;
         std::vector<ESM::RefId> refIds = generateGeneratedRefIds(random);
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(refIds[i].serializeText());
             if (++i >= refIds.size())
@@ -172,7 +172,7 @@ namespace
         std::vector<std::string> serializedRefIds
             = generateSerializedGeneratedRefIds(random, [](ESM::RefId v) { return v.serializeText(); });
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(ESM::RefId::deserializeText(serializedRefIds[i]));
             if (++i >= serializedRefIds.size())
@@ -185,7 +185,7 @@ namespace
         std::minstd_rand random;
         std::vector<ESM::RefId> refIds = generateIndexRefIds(random);
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(refIds[i].serializeText());
             if (++i >= refIds.size())
@@ -199,7 +199,7 @@ namespace
         std::vector<std::string> serializedRefIds
             = generateSerializedIndexRefIds(random, [](ESM::RefId v) { return v.serializeText(); });
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(ESM::RefId::deserializeText(serializedRefIds[i]));
             if (++i >= serializedRefIds.size())
@@ -212,7 +212,7 @@ namespace
         std::minstd_rand random;
         std::vector<ESM::RefId> refIds = generateESM3ExteriorCellRefIds(random);
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(refIds[i].serializeText());
             if (++i >= refIds.size())
@@ -226,7 +226,7 @@ namespace
         std::vector<std::string> serializedRefIds
             = generateSerializedESM3ExteriorCellRefIds(random, [](ESM::RefId v) { return v.serializeText(); });
         std::size_t i = 0;
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(ESM::RefId::deserializeText(serializedRefIds[i]));
             if (++i >= serializedRefIds.size())
