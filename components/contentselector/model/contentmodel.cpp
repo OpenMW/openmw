@@ -725,7 +725,6 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
             if (filePosition < previousPosition)
             {
                 mFiles.move(filePosition, previousPosition);
-                emit dataChanged(index(filePosition, 0, QModelIndex()), index(previousPosition, 0, QModelIndex()));
             }
             else
             {
@@ -734,6 +733,7 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
         }
     }
     checkForLoadOrderErrors();
+    emit dataChanged(index(0, 0), index(rowCount(), columnCount()));
 }
 
 void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
@@ -900,7 +900,6 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
 
 void ContentSelectorModel::ContentModel::uncheckAll()
 {
-    emit layoutAboutToBeChanged();
     mCheckedFiles.clear();
-    emit layoutChanged();
+    emit dataChanged(index(0, 0), index(rowCount(), columnCount()), { Qt::CheckStateRole, Qt::UserRole + 1 });
 }
