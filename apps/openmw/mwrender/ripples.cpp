@@ -49,18 +49,6 @@ namespace MWRender
             && exts.glslLanguageVersion >= minimumGLVersionRequiredForCompute;
 #endif
 
-        static bool pipelineLogged = false;
-
-        if (!pipelineLogged)
-        {
-            if (mUseCompute)
-                Log(Debug::Info) << "Initialized compute shader pipeline for water ripples";
-            else
-                Log(Debug::Info) << "Initialized fallback fragment shader pipeline for water ripples";
-
-            pipelineLogged = true;
-        }
-
         for (size_t i = 0; i < mState.size(); ++i)
         {
             osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
@@ -98,6 +86,18 @@ namespace MWRender
         else
             setupFragmentPipeline();
 
+        if (mProgramBlobber != nullptr)
+        {
+            static bool pipelineLogged = [&] {
+                if (mUseCompute)
+                    Log(Debug::Info) << "Initialized compute shader pipeline for water ripples";
+                else
+                    Log(Debug::Info) << "Initialized fallback fragment shader pipeline for water ripples";
+                return true;
+            }();
+            (void)pipelineLogged;
+        }
+
         setCullCallback(new osg::NodeCallback);
         setUpdateCallback(new osg::NodeCallback);
     }
@@ -109,21 +109,36 @@ namespace MWRender
         Shader::ShaderManager::DefineMap defineMap = { { "rippleMapSize", std::to_string(sRTTSize) + ".0" } };
 
         osg::ref_ptr<osg::Shader> vertex = shaderManager.getShader("fullscreen_tri.vert", {}, osg::Shader::VERTEX);
+        osg::ref_ptr<osg::Shader> blobber
+            = shaderManager.getShader("ripples_blobber.frag", defineMap, osg::Shader::FRAGMENT);
+        osg::ref_ptr<osg::Shader> simulate
+            = shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT);
+        if (vertex == nullptr || blobber == nullptr || simulate == nullptr)
+        {
+            Log(Debug::Error) << "Failed to load shaders required for fragment shader ripple pipeline";
+            return;
+        }
 
-        mProgramBlobber = shaderManager.getProgram(
-            vertex, shaderManager.getShader("ripples_blobber.frag", defineMap, osg::Shader::FRAGMENT));
-        mProgramSimulation = shaderManager.getProgram(
-            std::move(vertex), shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT));
+        mProgramBlobber = shaderManager.getProgram(vertex, std::move(blobber));
+        mProgramSimulation = shaderManager.getProgram(std::move(vertex), std::move(simulate));
     }
 
     void RipplesSurface::setupComputePipeline()
     {
         auto& shaderManager = mResourceSystem->getSceneManager()->getShaderManager();
 
-        mProgramBlobber = shaderManager.getProgram(
-            nullptr, shaderManager.getShader("core/ripples_blobber.comp", {}, osg::Shader::COMPUTE));
-        mProgramSimulation = shaderManager.getProgram(
-            nullptr, shaderManager.getShader("core/ripples_simulate.comp", {}, osg::Shader::COMPUTE));
+        osg::ref_ptr<osg::Shader> blobber
+            = shaderManager.getShader("core/ripples_blobber.comp", {}, osg::Shader::COMPUTE);
+        osg::ref_ptr<osg::Shader> simulate
+            = shaderManager.getShader("core/ripples_simulate.comp", {}, osg::Shader::COMPUTE);
+        if (blobber == nullptr || simulate == nullptr)
+        {
+            Log(Debug::Error) << "Failed to load shaders required for compute shader ripple pipeline";
+            return;
+        }
+
+        mProgramBlobber = shaderManager.getProgram(nullptr, std::move(blobber));
+        mProgramSimulation = shaderManager.getProgram(nullptr, std::move(simulate));
     }
 
     void RipplesSurface::updateState(const osg::FrameStamp& frameStamp, State& state)
@@ -191,6 +206,9 @@ namespace MWRender
 
     void RipplesSurface::drawImplementation(osg::RenderInfo& renderInfo) const
     {
+        if (mProgramBlobber == nullptr || mProgramSimulation == nullptr)
+            return;
+
         osg::State& state = *renderInfo.getState();
         const std::size_t currentFrame = state.getFrameStamp()->getFrameNumber() % 2;
         const State& frameState = mState[currentFrame];
