@@ -42,7 +42,7 @@ return {
                 "faction id passed to commitCrime must be a string or nil")
             assert(type(options.arg) == "number" or options.arg == nil,
                 "arg value passed to commitCrime must be a number or nil")
-            assert(type(options.victimAware) == "number" or options.victimAware == nil,
+            assert(type(options.victimAware) == "boolean" or options.victimAware == nil,
                 "victimAware value passed to commitCrime must be a boolean or nil")
 
             assert(options.type ~= nil, "crime type passed to commitCrime cannot be nil")
