@@ -78,14 +78,10 @@ ContentSelectorModel::EsmFile* ContentSelectorModel::ContentModel::item(int row)
 }
 const ContentSelectorModel::EsmFile* ContentSelectorModel::ContentModel::item(const QString& name) const
 {
-    EsmFile::FileProperty fp = EsmFile::FileProperty_FileName;
-
-    if (name.contains('/'))
-        fp = EsmFile::FileProperty_FilePath;
-
+    bool path = name.contains('/');
     for (const EsmFile* file : mFiles)
     {
-        if (name.compare(file->fileProperty(fp).toString(), Qt::CaseInsensitive) == 0)
+        if (name.compare(path ? file->filePath() : file->fileName(), Qt::CaseInsensitive) == 0)
             return file;
     }
     return nullptr;
