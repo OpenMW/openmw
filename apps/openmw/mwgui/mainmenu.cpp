@@ -29,11 +29,26 @@ namespace MWGui
     {
         Misc::FrameRateLimiter frameRateLimiter
             = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
+        const MWBase::WindowManager& windowManager = *MWBase::Environment::get().getWindowManager();
+        bool paused = false;
         while (mRunning)
         {
-            // If finished playing, start again
-            if (!mVideo->update())
-                mVideo->playVideo("video\\menu_background.bik");
+            if (windowManager.isWindowVisible())
+            {
+                if (paused)
+                {
+                    mVideo->resume();
+                    paused = false;
+                }
+                // If finished playing, start again
+                if (!mVideo->update())
+                    mVideo->playVideo("video\\menu_background.bik");
+            }
+            else if (!paused)
+            {
+                paused = true;
+                mVideo->pause();
+            }
             frameRateLimiter.limit();
         }
     }
