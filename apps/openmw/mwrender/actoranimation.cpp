@@ -161,7 +161,7 @@ namespace MWRender
 
     bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
     {
-        if (Settings::game().mShieldSheathing)
+        if (Settings::game().mShieldSheathing && mObjectRoot)
         {
             const MWWorld::Class& cls = mPtr.getClass();
             MWMechanics::CreatureStats& stats = cls.getCreatureStats(mPtr);

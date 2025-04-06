@@ -259,7 +259,8 @@ namespace MWRender
     void CreatureWeaponAnimation::addControllers()
     {
         Animation::addControllers();
-        WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
+        if (mObjectRoot)
+            WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
     }
 
     osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration)
