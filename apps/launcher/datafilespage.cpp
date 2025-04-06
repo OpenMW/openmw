@@ -351,6 +351,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!resourcesVfs.isEmpty())
         directories.insert(0, { resourcesVfs });
 
+    QIcon containsDataIcon(":/images/openmw-plugin.png");
+
     std::unordered_set<QString> visitedDirectories;
     for (const Config::SettingValue& currentDir : directories)
     {
@@ -402,7 +404,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         // Add a "data file" icon if the directory contains a content file
         if (mSelector->containsDataFiles(currentDir.value))
         {
-            item->setIcon(QIcon(":/images/openmw-plugin.png"));
+            item->setIcon(containsDataIcon);
 
             tooltip << tr("Contains content file(s)");
         }
