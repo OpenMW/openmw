@@ -289,8 +289,9 @@ namespace MWMechanics
                     const ESM::RefId& enchantmentId = slot->getClass().getEnchantment(*slot);
                     if (enchantmentId.empty())
                         continue;
-                    const ESM::Enchantment* enchantment = world->getStore().get<ESM::Enchantment>().find(enchantmentId);
-                    if (enchantment->mData.mType != ESM::Enchantment::ConstantEffect)
+                    const ESM::Enchantment* enchantment
+                        = world->getStore().get<ESM::Enchantment>().search(enchantmentId);
+                    if (enchantment == nullptr || enchantment->mData.mType != ESM::Enchantment::ConstantEffect)
                         continue;
                     if (std::find_if(mSpells.begin(), mSpells.end(),
                             [&](const ActiveSpellParams& params) {
