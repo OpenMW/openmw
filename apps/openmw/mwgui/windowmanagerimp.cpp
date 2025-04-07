@@ -1218,7 +1218,7 @@ namespace MWGui
         // TODO: check if any windows are now off-screen and move them back if so
     }
 
-    bool WindowManager::isWindowVisible()
+    bool WindowManager::isWindowVisible() const
     {
         return mWindowVisible;
     }

@@ -290,7 +290,7 @@ namespace MWGui
         void windowVisibilityChange(bool visible) override;
         void windowResized(int x, int y) override;
         void windowClosed() override;
-        bool isWindowVisible() override;
+        bool isWindowVisible() const override;
 
         void watchActor(const MWWorld::Ptr& ptr) override;
         MWWorld::Ptr getWatchedActor() const override;
