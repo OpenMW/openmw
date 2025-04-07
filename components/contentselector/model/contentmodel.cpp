@@ -10,6 +10,7 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QFont>
 #include <QIODevice>
 
@@ -548,15 +549,13 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
 
 bool ContentSelectorModel::ContentModel::containsDataFiles(const QString& path)
 {
-    QDir dir(path);
     QStringList filters;
     filters << "*.esp"
             << "*.esm"
             << "*.omwgame"
             << "*.omwaddon";
-    dir.setNameFilters(filters);
-
-    return dir.entryList().count() != 0;
+    QDirIterator it(path, filters, QDir::Files | QDir::NoDotAndDotDot);
+    return it.hasNext();
 }
 
 void ContentSelectorModel::ContentModel::clearFiles()
