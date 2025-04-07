@@ -391,6 +391,7 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
                 skel->setStateSet(created->getStateSet());
                 skel->setName(created->getName());
+                skel->setUserDataContainer(created->getUserDataContainer());
                 for (unsigned int i = 0; i < created->getNumChildren(); ++i)
                     skel->addChild(created->getChild(i));
                 created->removeChildren(0, created->getNumChildren());

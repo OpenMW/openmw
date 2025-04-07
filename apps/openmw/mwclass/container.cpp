@@ -237,7 +237,12 @@ namespace MWClass
     bool Container::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
-            return !canBeHarvested(ptr) || data->asContainerCustomData().mStore.hasVisibleItems();
+        {
+            if (!canBeHarvested(ptr))
+                return true;
+            const MWWorld::ContainerStore& store = data->asContainerCustomData().mStore;
+            return !store.isResolved() || store.hasVisibleItems();
+        }
         return true;
     }
 
