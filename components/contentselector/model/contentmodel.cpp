@@ -307,7 +307,6 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
             {
                 setCheckState(file->filePath(), success);
                 emit dataChanged(index, index);
-                checkForLoadOrderErrors();
             }
             else
                 return success;
@@ -422,7 +421,6 @@ bool ContentSelectorModel::ContentModel::dropMimeData(
 
     dataChanged(index(minRow, 0), index(maxRow, 0));
     // at this point we know that drag and drop has finished.
-    checkForLoadOrderErrors();
 
     return true;
 }
@@ -702,12 +700,13 @@ void ContentSelectorModel::ContentModel::setNonUserContent(const QStringList& fi
 
 bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) const
 {
-    return mPluginsWithLoadOrderError.contains(file->filePath());
+    int index = indexFromItem(file).row();
+    auto errors = checkForLoadOrderErrors(file, index);
+    return !errors.empty();
 }
 
 void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileList)
 {
-    mPluginsWithLoadOrderError.clear();
     int previousPosition = -1;
     for (const QString& filepath : fileList)
     {
@@ -727,25 +726,7 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
             }
         }
     }
-    checkForLoadOrderErrors();
     emit dataChanged(index(0, 0), index(rowCount(), columnCount()));
-}
-
-void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
-{
-    for (int row = 0; row < mFiles.count(); ++row)
-    {
-        EsmFile* file = mFiles.at(row);
-        bool isRowInError = checkForLoadOrderErrors(file, row).count() != 0;
-        if (isRowInError)
-        {
-            mPluginsWithLoadOrderError.insert(file->filePath());
-        }
-        else
-        {
-            mPluginsWithLoadOrderError.remove(file->filePath());
-        }
-    }
 }
 
 QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(
@@ -786,11 +767,12 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
 
 QString ContentSelectorModel::ContentModel::toolTip(const EsmFile* file) const
 {
-    if (isLoadOrderError(file))
+    int index = indexFromItem(file).row();
+    auto errors = checkForLoadOrderErrors(file, index);
+    if (!errors.empty())
     {
         QString text("<b>");
-        int index = indexFromItem(item(file->filePath())).row();
-        for (const LoadOrderError& error : checkForLoadOrderErrors(file, index))
+        for (const LoadOrderError& error : errors)
         {
             assert(error.errorCode() != LoadOrderError::ErrorCode::ErrorCode_None);
 

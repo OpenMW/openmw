@@ -211,7 +211,6 @@ void ContentSelectorView::ContentSelector::addFiles(const QString& path, bool ne
         ui->gameFileView->setCurrentIndex(0);
 
     mContentModel->uncheckAll();
-    mContentModel->checkForLoadOrderErrors();
 }
 
 void ContentSelectorView::ContentSelector::sortFiles()
@@ -254,7 +253,6 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
         oldIndex = index;
 
         setGameFileSelected(index, true);
-        mContentModel->checkForLoadOrderErrors();
     }
 
     emit signalCurrentGamefileIndexChanged(index);
