@@ -10,6 +10,7 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QFont>
 #include <QIODevice>
 
@@ -78,14 +79,10 @@ ContentSelectorModel::EsmFile* ContentSelectorModel::ContentModel::item(int row)
 }
 const ContentSelectorModel::EsmFile* ContentSelectorModel::ContentModel::item(const QString& name) const
 {
-    EsmFile::FileProperty fp = EsmFile::FileProperty_FileName;
-
-    if (name.contains('/'))
-        fp = EsmFile::FileProperty_FilePath;
-
+    bool path = name.contains('/');
     for (const EsmFile* file : mFiles)
     {
-        if (name.compare(file->fileProperty(fp).toString(), Qt::CaseInsensitive) == 0)
+        if (name.compare(path ? file->filePath() : file->fileName(), Qt::CaseInsensitive) == 0)
             return file;
     }
     return nullptr;
@@ -310,7 +307,6 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
             {
                 setCheckState(file->filePath(), success);
                 emit dataChanged(index, index);
-                checkForLoadOrderErrors();
             }
             else
                 return success;
@@ -425,7 +421,6 @@ bool ContentSelectorModel::ContentModel::dropMimeData(
 
     dataChanged(index(minRow, 0), index(maxRow, 0));
     // at this point we know that drag and drop has finished.
-    checkForLoadOrderErrors();
 
     return true;
 }
@@ -552,15 +547,13 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
 
 bool ContentSelectorModel::ContentModel::containsDataFiles(const QString& path)
 {
-    QDir dir(path);
     QStringList filters;
     filters << "*.esp"
             << "*.esm"
             << "*.omwgame"
             << "*.omwaddon";
-    dir.setNameFilters(filters);
-
-    return dir.entryList().count() != 0;
+    QDirIterator it(path, filters, QDir::Files | QDir::NoDotAndDotDot);
+    return it.hasNext();
 }
 
 void ContentSelectorModel::ContentModel::clearFiles()
@@ -707,12 +700,13 @@ void ContentSelectorModel::ContentModel::setNonUserContent(const QStringList& fi
 
 bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) const
 {
-    return mPluginsWithLoadOrderError.contains(file->filePath());
+    int index = indexFromItem(file).row();
+    auto errors = checkForLoadOrderErrors(file, index);
+    return !errors.empty();
 }
 
 void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileList)
 {
-    mPluginsWithLoadOrderError.clear();
     int previousPosition = -1;
     for (const QString& filepath : fileList)
     {
@@ -725,7 +719,6 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
             if (filePosition < previousPosition)
             {
                 mFiles.move(filePosition, previousPosition);
-                emit dataChanged(index(filePosition, 0, QModelIndex()), index(previousPosition, 0, QModelIndex()));
             }
             else
             {
@@ -733,24 +726,7 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
             }
         }
     }
-    checkForLoadOrderErrors();
-}
-
-void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
-{
-    for (int row = 0; row < mFiles.count(); ++row)
-    {
-        EsmFile* file = mFiles.at(row);
-        bool isRowInError = checkForLoadOrderErrors(file, row).count() != 0;
-        if (isRowInError)
-        {
-            mPluginsWithLoadOrderError.insert(file->filePath());
-        }
-        else
-        {
-            mPluginsWithLoadOrderError.remove(file->filePath());
-        }
-    }
+    emit dataChanged(index(0, 0), index(rowCount(), columnCount()));
 }
 
 QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(
@@ -791,11 +767,12 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
 
 QString ContentSelectorModel::ContentModel::toolTip(const EsmFile* file) const
 {
-    if (isLoadOrderError(file))
+    int index = indexFromItem(file).row();
+    auto errors = checkForLoadOrderErrors(file, index);
+    if (!errors.empty())
     {
         QString text("<b>");
-        int index = indexFromItem(item(file->filePath())).row();
-        for (const LoadOrderError& error : checkForLoadOrderErrors(file, index))
+        for (const LoadOrderError& error : errors)
         {
             assert(error.errorCode() != LoadOrderError::ErrorCode::ErrorCode_None);
 
@@ -900,7 +877,6 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
 
 void ContentSelectorModel::ContentModel::uncheckAll()
 {
-    emit layoutAboutToBeChanged();
     mCheckedFiles.clear();
-    emit layoutChanged();
+    emit dataChanged(index(0, 0), index(rowCount(), columnCount()), { Qt::CheckStateRole, Qt::UserRole + 1 });
 }

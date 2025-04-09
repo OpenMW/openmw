@@ -48,18 +48,18 @@ namespace ContentSelectorModel
         void addGameFile(const QString& name) { mGameFiles.append(name); }
         QVariant fileProperty(const FileProperty prop) const;
 
-        QString fileName() const { return mFileName; }
-        QString author() const { return mAuthor; }
+        const QString& fileName() const { return mFileName; }
+        const QString& author() const { return mAuthor; }
         QDateTime modified() const { return mModified; }
-        QString formatVersion() const { return mVersion; }
-        QString filePath() const { return mPath; }
+        const QString& formatVersion() const { return mVersion; }
+        const QString& filePath() const { return mPath; }
         bool builtIn() const { return mBuiltIn; }
         bool fromAnotherConfigFile() const { return mFromAnotherConfigFile; }
         bool isMissing() const { return mPath.isEmpty(); }
 
         /// @note Contains file names, not paths.
         const QStringList& gameFiles() const { return mGameFiles; }
-        QString description() const { return mDescription; }
+        const QString& description() const { return mDescription; }
         QString toolTip() const
         {
             if (isMissing())
