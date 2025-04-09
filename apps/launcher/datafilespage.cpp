@@ -8,6 +8,7 @@
 #include <QList>
 #include <QMessageBox>
 #include <QPair>
+#include <QProgressDialog>
 #include <QPushButton>
 
 #include <algorithm>
@@ -353,9 +354,15 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     QIcon containsDataIcon(":/images/openmw-plugin.png");
 
+    QProgressDialog progressBar("Adding data directories", {}, 0, directories.count(), this);
+    progressBar.setWindowModality(Qt::WindowModal);
+    progressBar.setValue(0);
+
     std::unordered_set<QString> visitedDirectories;
     for (const Config::SettingValue& currentDir : directories)
     {
+        progressBar.setValue(progressBar.value() + 1);
+
         if (!visitedDirectories.insert(currentDir.value).second)
             continue;
 

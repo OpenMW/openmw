@@ -1,6 +1,7 @@
 #include "gamesettings.hpp"
 
 #include <QDir>
+#include <QProgressDialog>
 #include <QRegularExpression>
 
 #include <components/files/configurationmanager.hpp>
@@ -37,8 +38,13 @@ void Config::GameSettings::validatePaths()
 
     mDataDirs.clear();
 
+    QProgressDialog progressBar("Validating paths", {}, 0, paths.count() + 1);
+    progressBar.setWindowModality(Qt::WindowModal);
+    progressBar.setValue(0);
+
     for (const auto& dataDir : paths)
     {
+        progressBar.setValue(progressBar.value() + 1);
         if (QDir(dataDir.value).exists())
         {
             SettingValue copy = dataDir;
@@ -49,6 +55,8 @@ void Config::GameSettings::validatePaths()
 
     // Do the same for data-local
     const QString& local = mSettings.value(QString("data-local")).value;
+
+    progressBar.setValue(progressBar.value() + 1);
 
     if (!local.isEmpty() && QDir(local).exists())
     {
