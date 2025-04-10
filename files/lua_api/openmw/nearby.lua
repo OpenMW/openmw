@@ -102,7 +102,7 @@
 -- @function [parent=#nearby] castRenderingRay
 -- @param openmw.util#Vector3 from Start point of the ray.
 -- @param openmw.util#Vector3 to End point of the ray.
--- @param #CastRenderingRayOptions
+-- @param #CastRenderingRayOptions options An optional table with additional optional arguments
 -- @return #RayCastingResult
 
 ---
