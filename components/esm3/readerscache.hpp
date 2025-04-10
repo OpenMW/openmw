@@ -26,6 +26,7 @@ namespace ESM
             State mState = State::Busy;
             ESMReader mReader;
             std::optional<std::filesystem::path> mName;
+            std::optional<std::size_t> mFileSize;
 
             Item() = default;
         };
@@ -54,6 +55,10 @@ namespace ESM
         explicit ReadersCache(std::size_t capacity = 100);
 
         BusyItem get(std::size_t index);
+
+        const std::filesystem::path& getName(std::size_t index) const;
+
+        std::size_t getFileSize(std::size_t index);
 
         void clear();
 
