@@ -221,7 +221,7 @@
 -- Can be used only in local scripts on self. Can also be evoked by sending an AddVfx event to the target actor.
 -- @function [parent=#animation] addVfx
 -- @param openmw.core#GameObject actor
--- @param #string model #string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
+-- @param #string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
 -- @param #table options optional table of parameters. Can contain:
 --
 --   * `loop` - boolean, if true the effect will loop until removed (default: 0).
