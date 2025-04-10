@@ -228,7 +228,7 @@
 --   * `boneName` - name of the bone to attach the vfx to. (default: "")
 --   * `particleTextureOverride` - name of the particle texture to use. (default: "")
 --   * `vfxId` - a string ID that can be used to remove the effect later, using #removeVfx, and to avoid duplicate effects. The default value of "" can have duplicates. To avoid interaction with the engine, use unique identifiers unrelated to magic effect IDs. The engine uses this identifier to add and remove magic effects based on what effects are active on the actor. If this is set equal to the @{openmw.core#MagicEffectId} identifier of the magic effect being added, for example core.magic.EFFECT_TYPE.FireDamage, then the engine will remove it once the fire damage effect on the actor reaches 0. (Default: "").
---   * `useAmbientLighting` - boolean, vfx get a white ambient light attached in Morrowind. If false don't attach this. (default: 1)
+--   * `useAmbientLighting` - boolean, vfx get a white ambient light attached in Morrowind. If false don't attach this. (default: true)
 --
 -- @usage local mgef = core.magic.effects.records[myEffectName]
 -- anim.addVfx(self, 'VFX_Hands', {boneName = 'Bip01 L Hand', particleTextureOverride = mgef.particle, loop = mgef.continuousVfx, vfxId = mgef.id..'_myuniquenamehere'})
