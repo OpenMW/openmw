@@ -73,9 +73,8 @@ namespace ESM
                 case State::Closed:
                     if (indexIt->second->mName)
                         return *indexIt->second->mName;
-                    else
-                        throw std::logic_error(
-                            "ESMReader at index " + std::to_string(index) + " has forgotten its filename");
+                    throw std::logic_error(
+                        "ESMReader at index " + std::to_string(index) + " has forgotten its filename");
                 default:
                     throw std::logic_error("ESMReader at index " + std::to_string(index) + " in unknown state");
             }
@@ -95,15 +94,12 @@ namespace ESM
                 case State::Free:
                     if (!indexIt->second->mReader.getName().empty())
                         return indexIt->second->mReader.getFileSize();
-                    else
-                        throw std::logic_error(
-                            "ESMReader at index " + std::to_string(index) + " has not been opened yet");
+                    throw std::logic_error("ESMReader at index " + std::to_string(index) + " has not been opened yet");
                 case State::Closed:
                     if (indexIt->second->mFileSize)
                         return *indexIt->second->mFileSize;
-                    else
-                        throw std::logic_error(
-                            "ESMReader at index " + std::to_string(index) + " has forgotten its file size");
+                    throw std::logic_error(
+                        "ESMReader at index " + std::to_string(index) + " has forgotten its file size");
                 default:
                     throw std::logic_error("ESMReader at index " + std::to_string(index) + " in unknown state");
             }
