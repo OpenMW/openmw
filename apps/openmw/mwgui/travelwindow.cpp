@@ -70,15 +70,15 @@ namespace MWGui
                 price = static_cast<int>(d);
         }
 
-        price = std::max(1, price);
-        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
-
         // Add price for the travelling followers
         std::set<MWWorld::Ptr> followers;
         MWWorld::ActionTeleport::getFollowers(player, followers, !interior);
 
         // Apply followers cost, unlike vanilla the first follower doesn't travel for free
         price *= 1 + static_cast<int>(followers.size());
+
+        price = std::max(1, price);
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         const int lineHeight = Settings::gui().mFontSize + 2;
 
