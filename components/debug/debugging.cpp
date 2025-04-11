@@ -139,7 +139,8 @@ namespace Debug
 #endif
                     prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", &time_info) + 1;
                     char levelLetter = " EWIVD*"[int(level)];
-                    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+                    const auto ms
+                        = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
                     prefixSize += snprintf(prefix + prefixSize, sizeof(prefix) - prefixSize, ".%03u %c] ",
                         static_cast<unsigned>(ms % 1000), levelLetter);
                 }
@@ -154,7 +155,8 @@ namespace Debug
                     writeImpl(prefix, prefixSize, level);
                     writeImpl(msg.data(), lineSize, level);
                     if (logListener)
-                        logListener(level, std::string_view(prefix, prefixSize), std::string_view(msg.data(), lineSize));
+                        logListener(
+                            level, std::string_view(prefix, prefixSize), std::string_view(msg.data(), lineSize));
                     msg = msg.substr(lineSize);
                 }
 
@@ -171,10 +173,7 @@ namespace Debug
                 return All;
             }
 
-            virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
-            {
-                return size;
-            }
+            virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) { return size; }
         };
 
 #if defined _WIN32 && defined _DEBUG
