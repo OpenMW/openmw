@@ -10,7 +10,7 @@
 namespace MWPhysics
 {
     // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
-    bool testAabbAgainstSphere(
+    inline bool testAabbAgainstSphere(
         const btVector3& aabbMin, const btVector3& aabbMax, const btVector3& position, const btScalar radius)
     {
         const btVector3 nearest(std::clamp(position.x(), aabbMin.x(), aabbMax.x()),
@@ -18,35 +18,29 @@ namespace MWPhysics
         return nearest.distance(position) < radius;
     }
 
-    template <class Ignore, class OnCollision>
+    template <class Ignore>
     class HasSphereCollisionCallback final : public btBroadphaseAabbCallback
     {
     public:
-        HasSphereCollisionCallback(const btVector3& position, const btScalar radius, const int mask, const int group,
-            const Ignore& ignore, OnCollision* onCollision)
+        explicit HasSphereCollisionCallback(
+            const btVector3& position, const btScalar radius, const int mask, const int group, const Ignore& ignore)
             : mPosition(position)
             , mRadius(radius)
             , mIgnore(ignore)
             , mCollisionFilterMask(mask)
             , mCollisionFilterGroup(group)
-            , mOnCollision(onCollision)
         {
         }
 
         bool process(const btBroadphaseProxy* proxy) override
         {
-            if (mResult && mOnCollision == nullptr)
+            if (mResult)
                 return false;
             const auto collisionObject = static_cast<btCollisionObject*>(proxy->m_clientObject);
             if (mIgnore(collisionObject) || !needsCollision(*proxy)
                 || !testAabbAgainstSphere(proxy->m_aabbMin, proxy->m_aabbMax, mPosition, mRadius))
                 return true;
             mResult = true;
-            if (mOnCollision != nullptr)
-            {
-                (*mOnCollision)(collisionObject);
-                return true;
-            }
             return !mResult;
         }
 
@@ -58,7 +52,6 @@ namespace MWPhysics
         Ignore mIgnore;
         int mCollisionFilterMask;
         int mCollisionFilterGroup;
-        OnCollision* mOnCollision;
         bool mResult = false;
 
         bool needsCollision(const btBroadphaseProxy& proxy) const

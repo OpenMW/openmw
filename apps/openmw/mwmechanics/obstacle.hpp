@@ -5,8 +5,6 @@
 
 #include <osg/Vec3f>
 
-#include <vector>
-
 namespace MWWorld
 {
     class Ptr;
@@ -24,8 +22,7 @@ namespace MWMechanics
     /** \return Pointer to the door, or empty pointer if none exists **/
     const MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist);
 
-    bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& destination,
-        bool ignorePlayer = false, std::vector<MWWorld::Ptr>* occupyingActors = nullptr);
+    bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& destination);
 
     class ObstacleCheck
     {

@@ -849,8 +849,8 @@ namespace MWPhysics
             mWaterCollisionObject.get(), CollisionType_Water, CollisionType_Actor | CollisionType_Projectile);
     }
 
-    bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-        std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
+    bool PhysicsSystem::isAreaOccupiedByOtherActor(
+        const osg::Vec3f& position, const float radius, std::span<const MWWorld::ConstPtr> ignore) const
     {
         std::vector<const btCollisionObject*> ignoredObjects;
         ignoredObjects.reserve(ignore.size());
@@ -867,18 +867,7 @@ namespace MWPhysics
         const auto aabbMax = bulletPosition + btVector3(radius, radius, radius);
         const int mask = MWPhysics::CollisionType_Actor;
         const int group = MWPhysics::CollisionType_AnyPhysical;
-        if (occupyingActors == nullptr)
-        {
-            HasSphereCollisionCallback callback(bulletPosition, radius, mask, group, ignoreFilter,
-                static_cast<void (*)(const btCollisionObject*)>(nullptr));
-            mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
-            return callback.getResult();
-        }
-        const auto onCollision = [&](const btCollisionObject* object) {
-            if (PtrHolder* holder = static_cast<PtrHolder*>(object->getUserPointer()))
-                occupyingActors->push_back(holder->getPtr());
-        };
-        HasSphereCollisionCallback callback(bulletPosition, radius, mask, group, ignoreFilter, &onCollision);
+        HasSphereCollisionCallback callback(bulletPosition, radius, mask, group, ignoreFilter);
         mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
         return callback.getResult();
     }
