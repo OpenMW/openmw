@@ -147,8 +147,8 @@ namespace MWMechanics
         void completeManualWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
         bool isNearAllowedNode(const MWWorld::Ptr& actor, const AiWanderStorage& storage, float distance) const;
 
-        const int mDistance; // how far the actor can wander from the spawn point
-        const int mDuration;
+        const unsigned mDistance; // how far the actor can wander from the spawn point
+        const unsigned mDuration;
         float mRemainingDuration;
         const int mTimeOfDay;
         const std::vector<unsigned char> mIdle;

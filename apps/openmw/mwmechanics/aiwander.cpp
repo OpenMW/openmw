@@ -46,10 +46,10 @@ namespace MWMechanics
         constexpr float idlePositionCheckInterval = 1.5f;
 
         // to prevent overcrowding
-        constexpr int destinationTolerance = 64;
+        constexpr unsigned destinationTolerance = 64;
 
         // distance must be long enough that NPC will need to move to get there.
-        constexpr int minimumWanderDistance = destinationTolerance * 2;
+        constexpr unsigned minimumWanderDistance = destinationTolerance * 2;
 
         constexpr std::size_t maxIdleSize = 8;
 
@@ -128,8 +128,8 @@ namespace MWMechanics
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat)
         : TypedAiPackage<AiWander>(repeat)
-        , mDistance(std::max(0, distance))
-        , mDuration(std::max(0, duration))
+        , mDistance(static_cast<unsigned>(std::max(0, distance)))
+        , mDuration(static_cast<unsigned>(std::max(0, duration)))
         , mRemainingDuration(duration)
         , mTimeOfDay(timeOfDay)
         , mIdle(getInitialIdle(idle))
@@ -259,9 +259,6 @@ namespace MWMechanics
 
     bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
     {
-        if (mDistance <= 0)
-            storage.mCanWanderAlongPathGrid = false;
-
         if (isPackageCompleted())
         {
             stopWalking(actor);
@@ -915,10 +912,10 @@ namespace MWMechanics
         float length = delta.length();
         delta.normalize();
 
-        int distance = std::max(mDistance / 2, minimumWanderDistance);
+        unsigned distance = std::max(mDistance / 2, minimumWanderDistance);
 
         // must not travel longer than distance between waypoints or NPC goes past waypoint
-        distance = std::min(distance, static_cast<int>(length));
+        distance = std::min(distance, static_cast<unsigned>(length));
         delta *= distance;
         storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(vectorStart + delta));
     }
@@ -970,8 +967,8 @@ namespace MWMechanics
 
     AiWander::AiWander(const ESM::AiSequence::AiWander* wander)
         : TypedAiPackage<AiWander>(makeDefaultOptions().withRepeat(wander->mData.mShouldRepeat != 0))
-        , mDistance(std::max(static_cast<short>(0), wander->mData.mDistance))
-        , mDuration(std::max(static_cast<short>(0), wander->mData.mDuration))
+        , mDistance(static_cast<unsigned>(std::max(static_cast<short>(0), wander->mData.mDistance)))
+        , mDuration(static_cast<unsigned>(std::max(static_cast<short>(0), wander->mData.mDuration)))
         , mRemainingDuration(wander->mDurationData.mRemainingDuration)
         , mTimeOfDay(wander->mData.mTimeOfDay)
         , mIdle(getInitialIdle(wander->mData.mIdle))
