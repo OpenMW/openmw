@@ -253,8 +253,8 @@ namespace MWMechanics
                 constexpr float endTolerance = 0;
                 const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
                 const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
-                mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(pathgrid),
-                    agentBounds, navigatorFlags, areaCosts, endTolerance, PathType::Full);
+                mPathFinder.buildPath(actor, pos.asVec3(), mDestination, getPathGridGraph(pathgrid), agentBounds,
+                    navigatorFlags, areaCosts, endTolerance, PathType::Full);
             }
 
             if (mPathFinder.isPathConstructed())

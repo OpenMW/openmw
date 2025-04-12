@@ -391,12 +391,12 @@ namespace MWMechanics
     }
 
     void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
-        const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType)
+        const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
+        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+        PathType pathType)
     {
         mPath.clear();
-        mCell = cell;
+        mCell = actor.getCell();
 
         DetourNavigator::Status status = DetourNavigator::Status::NavMeshNotFound;
 
@@ -452,9 +452,9 @@ namespace MWMechanics
     }
 
     void PathFinder::buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
-        const osg::Vec3f& endPoint, const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
-        const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType)
+        const osg::Vec3f& endPoint, const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
+        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+        PathType pathType)
     {
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         const auto maxDistance
@@ -462,9 +462,9 @@ namespace MWMechanics
         const auto startToEnd = endPoint - startPoint;
         const auto distance = startToEnd.length();
         if (distance <= maxDistance)
-            return buildPath(actor, startPoint, endPoint, cell, pathgridGraph, agentBounds, flags, areaCosts,
-                endTolerance, pathType);
+            return buildPath(
+                actor, startPoint, endPoint, pathgridGraph, agentBounds, flags, areaCosts, endTolerance, pathType);
         const auto end = startPoint + startToEnd * maxDistance / distance;
-        buildPath(actor, startPoint, end, cell, pathgridGraph, agentBounds, flags, areaCosts, endTolerance, pathType);
+        buildPath(actor, startPoint, end, pathgridGraph, agentBounds, flags, areaCosts, endTolerance, pathType);
     }
 }

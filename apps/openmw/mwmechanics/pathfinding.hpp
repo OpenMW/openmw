@@ -111,14 +111,14 @@ namespace MWMechanics
             PathType pathType);
 
         void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
-            const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-            const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType);
+            const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
+            const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+            PathType pathType);
 
         void buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
-            const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-            const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType);
+            const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
+            const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+            PathType pathType);
 
         /// Remove front point if exist and within tolerance
         void update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,

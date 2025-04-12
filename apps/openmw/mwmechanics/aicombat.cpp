@@ -300,8 +300,8 @@ namespace MWMechanics
             const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
             const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
             const auto& pathGridGraph = getPathGridGraph(pathgrid);
-            mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, agentBounds,
-                navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
+            mPathFinder.buildPath(actor, vActorPos, vTargetPos, pathGridGraph, agentBounds, navigatorFlags, areaCosts,
+                storage.mAttackRange, PathType::Full);
 
             if (!mPathFinder.isPathConstructed())
             {
@@ -314,8 +314,8 @@ namespace MWMechanics
                 if (hit.has_value() && (*hit - vTargetPos).length() <= rangeAttack)
                 {
                     // If the point is close enough, try to find a path to that point.
-                    mPathFinder.buildPath(actor, vActorPos, *hit, actor.getCell(), pathGridGraph, agentBounds,
-                        navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
+                    mPathFinder.buildPath(actor, vActorPos, *hit, pathGridGraph, agentBounds, navigatorFlags, areaCosts,
+                        storage.mAttackRange, PathType::Full);
                     if (mPathFinder.isPathConstructed())
                     {
                         // If path to that point is found use it as custom destination.
