@@ -3832,10 +3832,11 @@ namespace MWWorld
         return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
     }
 
-    bool World::isAreaOccupiedByOtherActor(
-        const osg::Vec3f& position, const float radius, std::span<const MWWorld::ConstPtr> ignore) const
+    bool World::isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const
     {
-        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
+        const osg::Vec3f halfExtents = getPathfindingAgentBounds(actor).mHalfExtents;
+        const float maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+        return mPhysics->isAreaOccupiedByOtherActor(actor.mRef, position, 2 * maxHalfExtent);
     }
 
     void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const

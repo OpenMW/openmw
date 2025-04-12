@@ -22,8 +22,6 @@ namespace MWMechanics
     /** \return Pointer to the door, or empty pointer if none exists **/
     const MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist);
 
-    bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& destination);
-
     class ObstacleCheck
     {
     public:

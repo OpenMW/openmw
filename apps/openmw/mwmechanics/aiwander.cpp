@@ -279,7 +279,9 @@ namespace MWMechanics
             getAllowedNodes(actor, storage);
         }
 
-        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        MWBase::World& world = *MWBase::Environment::get().getWorld();
+
+        auto& prng = world.getPrng();
         if (canActorMoveByZAxis(actor) && mDistance > 0)
         {
             // Typically want to idle for a short time before the next wander
@@ -333,7 +335,7 @@ namespace MWMechanics
 
         if (storage.mIsWanderingManually && storage.mState == AiWanderStorage::Wander_Walking
             && (mPathFinder.getPathSize() == 0 || isDestinationHidden(actor, mPathFinder.getPath().back())
-                || isAreaOccupiedByOtherActor(actor, mPathFinder.getPath().back())))
+                || world.isAreaOccupiedByOtherActor(actor, mPathFinder.getPath().back())))
             completeManualWalking(actor, storage);
 
         return false; // AiWander package not yet completed
@@ -363,12 +365,12 @@ namespace MWMechanics
         std::size_t attempts = 10; // If a unit can't wander out of water, don't want to hang here
         const bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
         const bool isFlyingCreature = actor.getClass().isPureFlyingCreature(actor);
-        const auto world = MWBase::Environment::get().getWorld();
-        const auto agentBounds = world->getPathfindingAgentBounds(actor);
-        const auto navigator = world->getNavigator();
+        MWBase::World& world = *MWBase::Environment::get().getWorld();
+        const auto agentBounds = world.getPathfindingAgentBounds(actor);
+        const auto navigator = world.getNavigator();
         const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
         const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
-        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        Misc::Rng::Generator& prng = world.getPrng();
 
         do
         {
@@ -408,7 +410,7 @@ namespace MWMechanics
             if (isDestinationHidden(actor, mDestination))
                 continue;
 
-            if (isAreaOccupiedByOtherActor(actor, mDestination))
+            if (world.isAreaOccupiedByOtherActor(actor, mDestination))
                 continue;
 
             constexpr float endTolerance = 0;

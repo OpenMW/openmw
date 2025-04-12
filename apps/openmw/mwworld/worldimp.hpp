@@ -656,8 +656,7 @@ namespace MWWorld
         bool hasCollisionWithDoor(
             const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
 
-        bool isAreaOccupiedByOtherActor(
-            const osg::Vec3f& position, float radius, std::span<const MWWorld::ConstPtr> ignore) const override;
+        bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const override;
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 

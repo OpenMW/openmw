@@ -282,7 +282,7 @@ namespace MWPhysics
         }
 
         bool isAreaOccupiedByOtherActor(
-            const osg::Vec3f& position, float radius, std::span<const MWWorld::ConstPtr> ignore) const;
+            const MWWorld::LiveCellRefBase* actor, const osg::Vec3f& position, float radius) const;
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
         void reportCollision(const btVector3& position, const btVector3& normal);
