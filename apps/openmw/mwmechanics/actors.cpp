@@ -2028,7 +2028,7 @@ namespace MWMechanics
             iter->second->getCharacterController().skipAnim();
     }
 
-    bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) const
+    bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, std::string_view groupName) const
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
