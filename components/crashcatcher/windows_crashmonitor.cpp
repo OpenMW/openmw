@@ -87,9 +87,10 @@ namespace Crash
         SetEvent(mSignalAppEvent);
     }
 
-    bool CrashMonitor::waitApp() const
+    bool CrashMonitor::waitApp(bool thawMode) const
     {
-        return WaitForSingleObject(mSignalMonitorEvent, CrashCatcherTimeout) == WAIT_OBJECT_0;
+        return WaitForSingleObject(mSignalMonitorEvent, thawMode ? CrashCatcherThawTimeout : CrashCatcherTimeout)
+            == WAIT_OBJECT_0;
     }
 
     bool CrashMonitor::isAppAlive() const
@@ -185,7 +186,7 @@ namespace Crash
                     frozen = false;
                 }
 
-                if (!mFreezeAbort && waitApp())
+                if (!mFreezeAbort && waitApp(frozen))
                 {
                     shmLock();
 
@@ -215,7 +216,7 @@ namespace Crash
             {
                 handleCrash(true);
                 TerminateProcess(mAppProcessHandle, 0xDEAD);
-                std::string message = "OpenMW appears to have frozen.\nCrash log saved to '"
+                std::string message = "OpenMW has frozen.\nCrash dump saved to '"
                     + Misc::StringUtils::u8StringToString(getFreezeDumpPath(*mShm).u8string())
                     + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
                 SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
@@ -289,10 +290,10 @@ namespace Crash
     {
         std::thread messageBoxThread([&]() {
             SDL_MessageBoxButtonData button = { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Abort" };
-            SDL_MessageBoxData messageBoxData = { SDL_MESSAGEBOX_ERROR, nullptr, "OpenMW appears to have frozen",
-                "OpenMW appears to have frozen. Press Abort to terminate it and generate a crash dump.\nIf OpenMW "
-                "hasn't actually frozen, this message box will disappear a within a few seconds of it becoming "
-                "responsive.",
+            SDL_MessageBoxData messageBoxData = { SDL_MESSAGEBOX_ERROR, nullptr, "OpenMW has frozen",
+                "OpenMW has frozen. This should never happen. Press Abort to terminate it and generate a crash dump to "
+                "help diagnose the problem.\nOpenMW may unfreeze if you wait, and this message box will disappear "
+                "after it becomes responsive.",
                 1, &button, nullptr };
 
             int buttonId;
