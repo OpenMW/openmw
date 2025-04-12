@@ -29,17 +29,6 @@
 
 namespace MWMechanics
 {
-    static const int COUNT_BEFORE_RESET = 10;
-    static const float IDLE_POSITION_CHECK_INTERVAL = 1.5f;
-
-    // to prevent overcrowding
-    static const int DESTINATION_TOLERANCE = 64;
-
-    // distance must be long enough that NPC will need to move to get there.
-    static const int MINIMUM_WANDER_DISTANCE = DESTINATION_TOLERANCE * 2;
-
-    static const std::size_t MAX_IDLE_SIZE = 8;
-
     const std::string_view AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] = {
         "idle2",
         "idle3",
@@ -53,11 +42,22 @@ namespace MWMechanics
 
     namespace
     {
+        constexpr int countBeforeReset = 10;
+        constexpr float idlePositionCheckInterval = 1.5f;
+
+        // to prevent overcrowding
+        constexpr int destinationTolerance = 64;
+
+        // distance must be long enough that NPC will need to move to get there.
+        constexpr int minimumWanderDistance = destinationTolerance * 2;
+
+        constexpr std::size_t maxIdleSize = 8;
+
         inline int getCountBeforeReset(const MWWorld::ConstPtr& actor)
         {
             if (actor.getClass().isPureWaterCreature(actor) || actor.getClass().isPureFlyingCreature(actor))
                 return 1;
-            return COUNT_BEFORE_RESET;
+            return countBeforeReset;
         }
 
         osg::Vec3f getRandomPointAround(const osg::Vec3f& position, const float distance)
@@ -99,12 +99,12 @@ namespace MWMechanics
 
         std::vector<unsigned char> getInitialIdle(const std::vector<unsigned char>& idle)
         {
-            std::vector<unsigned char> result(MAX_IDLE_SIZE, 0);
-            std::copy_n(idle.begin(), std::min(MAX_IDLE_SIZE, idle.size()), result.begin());
+            std::vector<unsigned char> result(maxIdleSize, 0);
+            std::copy_n(idle.begin(), std::min(maxIdleSize, idle.size()), result.begin());
             return result;
         }
 
-        std::vector<unsigned char> getInitialIdle(const unsigned char (&idle)[MAX_IDLE_SIZE])
+        std::vector<unsigned char> getInitialIdle(const unsigned char (&idle)[maxIdleSize])
         {
             return std::vector<unsigned char>(std::begin(idle), std::end(idle));
         }
@@ -494,7 +494,7 @@ namespace MWMechanics
         // Check if an idle actor is too far from all allowed nodes or too close to a door - if so start walking.
         storage.mCheckIdlePositionTimer += duration;
 
-        if (storage.mCheckIdlePositionTimer >= IDLE_POSITION_CHECK_INTERVAL && !isStationary())
+        if (storage.mCheckIdlePositionTimer >= idlePositionCheckInterval && !isStationary())
         {
             storage.mCheckIdlePositionTimer = 0; // restart timer
             static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance() * 1.6f;
@@ -535,7 +535,7 @@ namespace MWMechanics
         // Is there no destination or are we there yet?
         if ((!mPathFinder.isPathConstructed())
             || pathTo(actor, osg::Vec3f(mPathFinder.getPath().back()), duration, supportedMovementDirections,
-                DESTINATION_TOLERANCE))
+                destinationTolerance))
         {
             stopWalking(actor);
             storage.setState(AiWanderStorage::Wander_ChooseAction);
@@ -915,7 +915,7 @@ namespace MWMechanics
         float length = delta.length();
         delta.normalize();
 
-        int distance = std::max(mDistance / 2, MINIMUM_WANDER_DISTANCE);
+        int distance = std::max(mDistance / 2, minimumWanderDistance);
 
         // must not travel longer than distance between waypoints or NPC goes past waypoint
         distance = std::min(distance, static_cast<int>(length));
