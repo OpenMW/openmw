@@ -24,7 +24,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#Crimes] #number version
-        version = 1,
+        version = 2,
 
         ---
         -- Commits a crime as if done through an in-game action. Can only be used in global context.
