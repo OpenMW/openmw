@@ -41,7 +41,7 @@ namespace Crash
 
         void signalApp() const;
 
-        bool waitApp() const;
+        bool waitApp(bool thawMode) const;
 
         bool isAppAlive() const;
 

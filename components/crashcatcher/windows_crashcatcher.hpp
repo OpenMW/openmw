@@ -21,6 +21,7 @@ namespace Crash
     // the main openmw process in task manager.
 
     static constexpr const int CrashCatcherTimeout = 2500;
+    static constexpr const int CrashCatcherThawTimeout = 250;
 
     struct CrashSHM;
 

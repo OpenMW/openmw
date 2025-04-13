@@ -237,7 +237,7 @@ namespace Crash
         // must remain until monitor has finished
         waitMonitor();
 
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '"
+        std::string message = "OpenMW has encountered a fatal error.\nCrash dump saved to '"
             + Misc::StringUtils::u8StringToString(getCrashDumpPath(*mShm).u8string())
             + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
         SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
