@@ -24,7 +24,7 @@ namespace osgViewer
     class Viewer;
 }
 
-namespace usgUtil
+namespace osgUtil
 {
     class CullVisitor;
 }
