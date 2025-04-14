@@ -73,10 +73,10 @@ namespace ESM
             int index = getIndex();
             for (int i = 0; i < getIndex(); i++)
             {
-                const ESM::ReadersCache::BusyItem reader = readers.get(static_cast<std::size_t>(i));
-                if (reader->getFileSize() == 0)
+                if (readers.getFileSize(static_cast<std::size_t>(i)) == 0)
                     continue; // Content file in non-ESM format
-                const auto fnamecandidate = Files::pathToUnicodeString(reader->getName().filename());
+                const auto fnamecandidate
+                    = Files::pathToUnicodeString(readers.getName(static_cast<std::size_t>(i)).filename());
                 if (Misc::StringUtils::ciEqual(fname, fnamecandidate))
                 {
                     index = i;
