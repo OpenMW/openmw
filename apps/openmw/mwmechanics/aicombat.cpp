@@ -104,10 +104,10 @@ namespace MWMechanics
     bool AiCombat::execute(
         const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
-        // get or create temporary storage
+        // Get or create temporary storage
         AiCombatStorage& storage = state.get<AiCombatStorage>();
 
-        // General description
+        // No combat for dead creatures
         if (actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
@@ -245,7 +245,9 @@ namespace MWMechanics
 
         float distToTarget = getDistanceToBounds(actor, target);
 
-        storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS);
+        // Must be attacking, within range, have line of sight, and not be immobile
+        storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS
+            && actor.getClass().isMobile(actor));
 
         if (isRangedCombat)
         {
