@@ -184,7 +184,7 @@ namespace
                 MWWorld::ContainerStoreIterator gem = container.end();
                 float gemCapacity = std::numeric_limits<float>::max();
                 for (auto it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous); it != container.end();
-                    ++it)
+                     ++it)
                 {
                     if (it->getClass().isSoulGem(*it))
                     {
@@ -1149,7 +1149,8 @@ namespace MWMechanics
                 if (playerStats.getBounty() >= cutoff * iCrimeThresholdMultiplier)
                 {
                     mechanicsManager->startCombat(ptr, player, &cachedAllies.getActorsSidingWith(player));
-                    creatureStats.setHitAttemptActorId(playerClass.getCreatureStats(player)
+                    creatureStats.setHitAttemptActorId(
+                        playerClass.getCreatureStats(player)
                             .getActorId()); // Stops the guard from quitting combat if player is unreachable
                 }
                 else
