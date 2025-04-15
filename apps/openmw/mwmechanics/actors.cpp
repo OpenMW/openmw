@@ -184,7 +184,7 @@ namespace
                 MWWorld::ContainerStoreIterator gem = container.end();
                 float gemCapacity = std::numeric_limits<float>::max();
                 for (auto it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous); it != container.end();
-                     ++it)
+                    ++it)
                 {
                     if (it->getClass().isSoulGem(*it))
                     {
@@ -605,10 +605,6 @@ namespace MWMechanics
     void Actors::engageCombat(
         const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, SidingCache& cachedAllies, bool againstPlayer) const
     {
-        // No combat for totally static creatures
-        if (!actor1.getClass().isMobile(actor1))
-            return;
-
         CreatureStats& creatureStats1 = actor1.getClass().getCreatureStats(actor1);
         if (creatureStats1.isDead() || creatureStats1.getAiSequence().isInCombat(actor2))
             return;
@@ -1153,8 +1149,7 @@ namespace MWMechanics
                 if (playerStats.getBounty() >= cutoff * iCrimeThresholdMultiplier)
                 {
                     mechanicsManager->startCombat(ptr, player, &cachedAllies.getActorsSidingWith(player));
-                    creatureStats.setHitAttemptActorId(
-                        playerClass.getCreatureStats(player)
+                    creatureStats.setHitAttemptActorId(playerClass.getCreatureStats(player)
                             .getActorId()); // Stops the guard from quitting combat if player is unreachable
                 }
                 else
