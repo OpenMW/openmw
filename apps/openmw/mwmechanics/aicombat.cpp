@@ -231,6 +231,10 @@ namespace MWMechanics
                 storage.stopFleeing();
         }
 
+        // No attack actions for totally static creatures
+        if (!actor.getClass().isMobile(actor))
+            return false;
+
         bool isRangedCombat = false;
         float& rangeAttack = storage.mAttackRange;
 
@@ -245,9 +249,7 @@ namespace MWMechanics
 
         float distToTarget = getDistanceToBounds(actor, target);
 
-        // Must be attacking, within range, have line of sight, and not be immobile
-        storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS
-            && actor.getClass().isMobile(actor));
+        storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS);
 
         if (isRangedCombat)
         {
