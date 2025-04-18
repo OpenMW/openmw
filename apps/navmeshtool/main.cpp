@@ -62,8 +62,6 @@ namespace NavMeshTool
 
         bpo::options_description makeOptionsDescription()
         {
-            using Fallback::FallbackMap;
-
             bpo::options_description result;
             auto addOption = result.add_options();
             addOption("help", "print help message");
