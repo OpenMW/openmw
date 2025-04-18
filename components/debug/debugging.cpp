@@ -131,13 +131,13 @@ namespace Debug
                     prefix[0] = '[';
                     const auto now = std::chrono::system_clock::now();
                     const auto time = std::chrono::system_clock::to_time_t(now);
-                    tm time_info{};
+                    tm timeInfo{};
 #ifdef _WIN32
-                    (void)localtime_s(&time_info, &time);
+                    (void)localtime_s(&timeInfo, &time);
 #else
-                    (void)localtime_r(&time, &time_info);
+                    (void)localtime_r(&time, &timeInfo);
 #endif
-                    prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", &time_info) + 1;
+                    prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", &timeInfo) + 1;
                     char levelLetter = " EWIVD*"[int(level)];
                     const auto ms
                         = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();

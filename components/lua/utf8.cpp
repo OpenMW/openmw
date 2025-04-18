@@ -137,13 +137,13 @@ namespace LuaUtf8
 
         utf8["codes"] = [](std::string_view s) {
             return sol::as_function(
-                [s, pos_byte = std::vector<int64_t>{ 1 }]() mutable -> sol::optional<std::pair<int64_t, int64_t>> {
-                    if (pos_byte.back() <= static_cast<int64_t>(s.size()))
+                [s, posByte = std::vector<int64_t>{ 1 }]() mutable -> sol::optional<std::pair<int64_t, int64_t>> {
+                    if (posByte.back() <= static_cast<int64_t>(s.size()))
                     {
-                        const auto pair = decodeNextUTF8Character(s, pos_byte);
+                        const auto pair = decodeNextUTF8Character(s, posByte);
                         if (pair.second == -1)
                             throw std::runtime_error(
-                                "Invalid UTF-8 code at position " + std::to_string(pos_byte.size()));
+                                "Invalid UTF-8 code at position " + std::to_string(posByte.size()));
 
                         return pair;
                     }
@@ -168,14 +168,14 @@ namespace LuaUtf8
             if (len == 0)
                 return len;
 
-            std::vector<int64_t> pos_byte = { iv };
+            std::vector<int64_t> posByte = { iv };
 
-            while (pos_byte.back() <= fv)
+            while (posByte.back() <= fv)
             {
-                if (decodeNextUTF8Character(s, pos_byte).second == -1)
-                    return std::pair(sol::lua_nil, pos_byte.back());
+                if (decodeNextUTF8Character(s, posByte).second == -1)
+                    return std::pair(sol::lua_nil, posByte.back());
             }
-            return pos_byte.size() - 1;
+            return posByte.size() - 1;
         };
 
         utf8["codepoint"]
@@ -195,14 +195,14 @@ namespace LuaUtf8
             if (iv > fv)
                 return sol::as_returns(std::vector<int64_t>{}); /* empty interval; return nothing */
 
-            std::vector<int64_t> pos_byte = { iv };
+            std::vector<int64_t> posByte = { iv };
             std::vector<int64_t> codepoints;
 
-            while (pos_byte.back() <= fv)
+            while (posByte.back() <= fv)
             {
-                codepoints.push_back(decodeNextUTF8Character(s, pos_byte).second);
+                codepoints.push_back(decodeNextUTF8Character(s, posByte).second);
                 if (codepoints.back() == -1)
-                    throw std::runtime_error("Invalid UTF-8 code at position " + std::to_string(pos_byte.size()));
+                    throw std::runtime_error("Invalid UTF-8 code at position " + std::to_string(posByte.size()));
             }
 
             return sol::as_returns(std::move(codepoints));
@@ -223,23 +223,23 @@ namespace LuaUtf8
             else
                 iv = getInteger(args[0], 3, "offset");
 
-            std::vector<int64_t> pos_byte = { 1 };
+            std::vector<int64_t> posByte = { 1 };
 
             relativePosition(iv, len);
 
             if (iv > static_cast<int64_t>(len) + 1)
                 throw std::runtime_error("bad argument #3 to 'offset' (position out of bounds)");
 
-            while (pos_byte.back() <= static_cast<int64_t>(len))
-                decodeNextUTF8Character(s, pos_byte);
+            while (posByte.back() <= static_cast<int64_t>(len))
+                decodeNextUTF8Character(s, posByte);
 
-            for (auto it = pos_byte.begin(); it != pos_byte.end(); ++it)
+            for (auto it = posByte.begin(); it != posByte.end(); ++it)
             {
                 if (*it == iv)
                 {
-                    if (n <= 0 && it + n >= pos_byte.begin())
+                    if (n <= 0 && it + n >= posByte.begin())
                         return *(it + n);
-                    if (n > 0 && it + n - 1 < pos_byte.end())
+                    if (n > 0 && it + n - 1 < posByte.end())
                         return *(it + n - 1);
                     break;
                 }

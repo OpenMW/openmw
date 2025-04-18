@@ -186,10 +186,10 @@ namespace MWGui
                 else
                 {
                     // Find the localised name for this class from the store
-                    const ESM::Class* class_
+                    const ESM::Class* playerClass
                         = MWBase::Environment::get().getESMStore()->get<ESM::Class>().search(signature.mPlayerClassId);
-                    if (class_)
-                        className = class_->mName;
+                    if (playerClass)
+                        className = playerClass->mName;
                     else
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }

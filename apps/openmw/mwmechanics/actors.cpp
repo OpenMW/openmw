@@ -762,9 +762,9 @@ namespace MWMechanics
         // start combat with actor2.
         if (aggressive)
         {
-            bool LOS = world->getLOS(actor1, actor2) && mechanicsManager->awarenessCheck(actor2, actor1);
+            const bool los = world->getLOS(actor1, actor2) && mechanicsManager->awarenessCheck(actor2, actor1);
 
-            if (LOS)
+            if (los)
                 mechanicsManager->startCombat(actor1, actor2, &cachedAllies.getActorsSidingWith(actor2));
         }
     }
@@ -1441,10 +1441,10 @@ namespace MWMechanics
                 // Find the earliest `t` when |relPos + relSpeed * t| == collisionDist.
                 const float vr = relPos.x() * relSpeed.x() + relPos.y() * relSpeed.y();
                 const float v2 = relSpeed.length2();
-                const float Dh = vr * vr - v2 * (relPos.length2() - collisionDist * collisionDist);
-                if (Dh <= 0 || v2 == 0)
+                const float dh = vr * vr - v2 * (relPos.length2() - collisionDist * collisionDist);
+                if (dh <= 0 || v2 == 0)
                     continue; // No solution; distance is always >= collisionDist.
-                const float t = (-vr - std::sqrt(Dh)) / v2;
+                const float t = (-vr - std::sqrt(dh)) / v2;
 
                 if (t < 0 || t > timeToCollision)
                     continue;

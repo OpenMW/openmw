@@ -900,9 +900,9 @@ QString Wizard::UnshieldWorker::findFile(const QString& fileName, const QString&
 QStringList Wizard::UnshieldWorker::findFiles(
     const QString& fileName, const QString& path, int depth, bool recursive, bool directories, Qt::MatchFlags flags)
 {
-    static const int MAXIMUM_DEPTH = 10;
+    constexpr int maximumDepth = 10;
 
-    if (depth >= MAXIMUM_DEPTH)
+    if (depth >= maximumDepth)
     {
         qWarning("Maximum directory depth limit reached.");
         return QStringList();

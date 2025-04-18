@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     {
         bpo::options_description desc(R"(Syntax: openmw-essimporter <options> infile.ess outfile.omwsave
 Allowed options)");
-        bpo::positional_options_description p_desc;
+        bpo::positional_options_description positionalDesc;
         auto addOption = desc.add_options();
         addOption("help,h", "produce help message");
         addOption("mwsave,m", bpo::value<Files::MaybeQuotedPath>(), "morrowind .ess save file");
@@ -23,12 +23,13 @@ Allowed options)");
         addOption("compare,c", "compare two .ess files");
         addOption("encoding", boost::program_options::value<std::string>()->default_value("win1252"),
             "encoding of the save file");
-        p_desc.add("mwsave", 1).add("output", 1);
+        positionalDesc.add("mwsave", 1).add("output", 1);
         Files::ConfigurationManager::addCommonOptions(desc);
 
         bpo::variables_map variables;
 
-        bpo::parsed_options parsed = bpo::command_line_parser(argc, argv).options(desc).positional(p_desc).run();
+        bpo::parsed_options parsed
+            = bpo::command_line_parser(argc, argv).options(desc).positional(positionalDesc).run();
         bpo::store(parsed, variables);
 
         if (variables.count("help") || !variables.count("mwsave") || !variables.count("output"))

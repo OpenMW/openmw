@@ -11,23 +11,23 @@ namespace MWGui
 {
     void Layout::initialise(std::string_view _layout)
     {
-        const auto MAIN_WINDOW = "_Main";
+        constexpr char mainWindow[] = "_Main";
         mLayoutName = _layout;
 
         mPrefix = MyGUI::utility::toString(this, "_");
         mListWindowRoot = MyGUI::LayoutManager::getInstance().loadLayout(mLayoutName, mPrefix);
 
-        const std::string main_name = mPrefix + MAIN_WINDOW;
+        const std::string mainName = mPrefix + mainWindow;
         for (MyGUI::Widget* widget : mListWindowRoot)
         {
-            if (widget->getName() == main_name)
+            if (widget->getName() == mainName)
                 mMainWidget = widget;
 
             // Force the alignment to update immediately
             widget->_setAlign(widget->getSize(), widget->getParentSize());
         }
         MYGUI_ASSERT(
-            mMainWidget, "root widget name '" << MAIN_WINDOW << "' in layout '" << mLayoutName << "' not found.");
+            mMainWidget, "root widget name '" << mainWindow << "' in layout '" << mLayoutName << "' not found.");
     }
 
     void Layout::shutdown()

@@ -105,16 +105,16 @@ namespace MWGui
 
                     utf8text = getText();
 
-                    size_t pos_end = 0;
+                    size_t posEnd = 0;
                     for (;;)
                     {
-                        size_t pos_begin = utf8text.find('@');
-                        if (pos_begin != std::string::npos)
-                            pos_end = utf8text.find('#', pos_begin);
+                        const size_t posBegin = utf8text.find('@');
+                        if (posBegin != std::string::npos)
+                            posEnd = utf8text.find('#', posBegin);
 
-                        if (pos_begin != std::string::npos && pos_end != std::string::npos)
+                        if (posBegin != std::string::npos && posEnd != std::string::npos)
                         {
-                            std::string link = utf8text.substr(pos_begin + 1, pos_end - pos_begin - 1);
+                            std::string link = utf8text.substr(posBegin + 1, posEnd - posBegin - 1);
                             const char specialPseudoAsteriskCharacter = 127;
                             std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
                             std::string_view topicName = MWBase::Environment::get()
@@ -126,11 +126,11 @@ namespace MWGui
                             while (displayName[displayName.size() - 1] == '*')
                                 displayName.erase(displayName.size() - 1, 1);
 
-                            utf8text.replace(pos_begin, pos_end + 1 - pos_begin, displayName);
+                            utf8text.replace(posBegin, posEnd + 1 - posBegin, displayName);
 
                             intptr_t value = 0;
                             if (mModel->mKeywordSearch.containsKeyword(topicName, value))
-                                mHyperLinks[std::make_pair(pos_begin, pos_begin + displayName.size())] = value;
+                                mHyperLinks[std::make_pair(posBegin, posBegin + displayName.size())] = value;
                         }
                         else
                             break;

@@ -138,13 +138,13 @@ namespace CSVRender
 
     void CellWater::recreate()
     {
-        const int InteriorScalar = 20;
-        const int SegmentsPerCell = 1;
-        const int TextureRepeatsPerCell = 6;
+        const int interiorScalar = 20;
+        const int segmentsPerCell = 1;
+        const int textureRepeatsPerCell = 6;
 
-        const float Alpha = 0.5f;
+        const float alpha = 0.5f;
 
-        const int RenderBin = osg::StateSet::TRANSPARENT_BIN - 1;
+        const int renderBin = osg::StateSet::TRANSPARENT_BIN - 1;
 
         if (mWaterGeometry)
         {
@@ -162,18 +162,18 @@ namespace CSVRender
         if (mExterior)
         {
             size = CellSize;
-            segments = SegmentsPerCell;
-            textureRepeats = TextureRepeatsPerCell;
+            segments = segmentsPerCell;
+            textureRepeats = textureRepeatsPerCell;
         }
         else
         {
-            size = CellSize * InteriorScalar;
-            segments = SegmentsPerCell * InteriorScalar;
-            textureRepeats = TextureRepeatsPerCell * InteriorScalar;
+            size = CellSize * interiorScalar;
+            segments = segmentsPerCell * interiorScalar;
+            textureRepeats = textureRepeatsPerCell * interiorScalar;
         }
 
         mWaterGeometry = SceneUtil::createWaterGeometry(size, segments, textureRepeats);
-        mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin));
+        mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(alpha, renderBin));
 
         // Add water texture
         constexpr VFS::Path::NormalizedView prefix("textures/water");

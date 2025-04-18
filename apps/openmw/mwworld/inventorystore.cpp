@@ -39,10 +39,10 @@ void MWWorld::InventoryStore::copySlots(const InventoryStore& store)
     mSelectedEnchantItem = slot;
 }
 
-void MWWorld::InventoryStore::initSlots(TSlots& slots_)
+void MWWorld::InventoryStore::initSlots(TSlots& slots)
 {
     for (int i = 0; i < Slots; ++i)
-        slots_.push_back(end());
+        slots.push_back(end());
 }
 
 void MWWorld::InventoryStore::storeEquipmentState(
@@ -159,18 +159,18 @@ void MWWorld::InventoryStore::equip(int slot, const ContainerStoreIterator& iter
     if (iterator.getContainerStore() != this)
         throw std::runtime_error("attempt to equip an item that is not in the inventory");
 
-    std::pair<std::vector<int>, bool> slots_;
+    std::pair<std::vector<int>, bool> slots;
 
-    slots_ = iterator->getClass().getEquipmentSlots(*iterator);
+    slots = iterator->getClass().getEquipmentSlots(*iterator);
 
-    if (std::find(slots_.first.begin(), slots_.first.end(), slot) == slots_.first.end())
+    if (std::find(slots.first.begin(), slots.first.end(), slot) == slots.first.end())
         throw std::runtime_error("invalid slot");
 
     if (mSlots[slot] != end())
         unequipSlot(slot);
 
     // unstack item pointed to by iterator if required
-    if (iterator != end() && !slots_.second
+    if (iterator != end() && !slots.second
         && iterator->getCellRef().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
     {
         unstack(*iterator);
@@ -219,7 +219,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot(int slot) cons
     return mSlots[slot];
 }
 
-void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
+void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots)
 {
     const Ptr& actor = getPtr();
     if (!actor.getClass().isNpc())
@@ -337,14 +337,14 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
                 if (arrow == end())
                     hasAmmo = false;
                 else
-                    slots_[Slot_Ammunition] = arrow;
+                    slots[Slot_Ammunition] = arrow;
             }
             else if (ammotype == ESM::Weapon::Bolt)
             {
                 if (bolt == end())
                     hasAmmo = false;
                 else
-                    slots_[Slot_Ammunition] = bolt;
+                    slots[Slot_Ammunition] = bolt;
             }
 
             if (hasAmmo)
@@ -362,10 +362,10 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
                     }
 
                     int slot = itemsSlots.first.front();
-                    slots_[slot] = weapon;
+                    slots[slot] = weapon;
 
                     if (ammotype == ESM::Weapon::None)
-                        slots_[Slot_Ammunition] = end();
+                        slots[Slot_Ammunition] = end();
                 }
 
                 break;
@@ -376,7 +376,7 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
     }
 }
 
-void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
+void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots)
 {
     const Ptr& actor = getPtr();
 
@@ -428,9 +428,9 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
         for (const int slot : itemSlots)
         {
             // check if slot may require swapping if current item is more valuable
-            if (slots_.at(slot) != end())
+            if (slots.at(slot) != end())
             {
-                Ptr old = *slots_.at(slot);
+                Ptr old = *slots.at(slot);
                 const MWWorld::Class& oldCls = old.getClass();
                 unsigned int oldType = old.getType();
 
@@ -443,10 +443,10 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
                     // If the left ring slot is filled, don't swap if the right ring is cheaper
                     if (slot == Slot_LeftRing)
                     {
-                        if (slots_.at(Slot_RightRing) == end())
+                        if (slots.at(Slot_RightRing) == end())
                             continue;
 
-                        Ptr rightRing = *slots_.at(Slot_RightRing);
+                        Ptr rightRing = *slots.at(Slot_RightRing);
                         if (rightRing.getClass().getValue(rightRing) <= oldCls.getValue(old))
                             continue;
                     }
@@ -486,7 +486,7 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
             }
 
             // if we are here it means item can be equipped or swapped
-            slots_[slot] = iter;
+            slots[slot] = iter;
             break;
         }
     }
@@ -494,22 +494,22 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
 
 void MWWorld::InventoryStore::autoEquip()
 {
-    TSlots slots_;
-    initSlots(slots_);
+    TSlots slots;
+    initSlots(slots);
 
     // Disable model update during auto-equip
     mUpdatesEnabled = false;
 
     // Autoequip clothing, armor and weapons.
     // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-    autoEquipWeapon(slots_);
-    autoEquipArmor(slots_);
+    autoEquipWeapon(slots);
+    autoEquipArmor(slots);
 
     bool changed = false;
 
-    for (std::size_t i = 0; i < slots_.size(); ++i)
+    for (std::size_t i = 0; i < slots.size(); ++i)
     {
-        if (slots_[i] != mSlots[i])
+        if (slots[i] != mSlots[i])
         {
             changed = true;
             break;
@@ -519,7 +519,7 @@ void MWWorld::InventoryStore::autoEquip()
 
     if (changed)
     {
-        mSlots.swap(slots_);
+        mSlots.swap(slots);
         fireEquipmentChangedEvent();
         flagAsModified();
     }

@@ -177,9 +177,9 @@ namespace Gui
     void HBox::align()
     {
         unsigned int count = getChildCount();
-        size_t h_stretched_count = 0;
-        int total_width = 0;
-        int total_height = 0;
+        size_t hStretchedCount = 0;
+        int totalWidth = 0;
+        int totalHeight = 0;
         std::vector<std::pair<MyGUI::IntSize, bool>> sizes;
         sizes.resize(count);
 
@@ -190,33 +190,33 @@ namespace Gui
             bool hidden = w->getUserString("Hidden") == "true";
             if (hidden)
                 continue;
-            h_stretched_count += hstretch;
+            hStretchedCount += hstretch;
             AutoSizedWidget* aw = dynamic_cast<AutoSizedWidget*>(w);
             if (aw)
             {
                 sizes[i] = std::make_pair(aw->getRequestedSize(), hstretch);
-                total_width += aw->getRequestedSize().width;
-                total_height = std::max(total_height, aw->getRequestedSize().height);
+                totalWidth += aw->getRequestedSize().width;
+                totalHeight = std::max(totalHeight, aw->getRequestedSize().height);
             }
             else
             {
                 sizes[i] = std::make_pair(w->getSize(), hstretch);
-                total_width += w->getSize().width;
+                totalWidth += w->getSize().width;
                 if (!(w->getUserString("VStretch") == "true"))
-                    total_height = std::max(total_height, w->getSize().height);
+                    totalHeight = std::max(totalHeight, w->getSize().height);
             }
 
             if (i != count - 1)
-                total_width += mSpacing;
+                totalWidth += mSpacing;
         }
 
         if (mAutoResize
-            && (total_width + mPadding * 2 != getClientCoord().width
-                || total_height + mPadding * 2 != getClientCoord().height))
+            && (totalWidth + mPadding * 2 != getClientCoord().width
+                || totalHeight + mPadding * 2 != getClientCoord().height))
         {
             int xmargin = getSize().width - getClientCoord().width;
             int ymargin = getSize().height - getClientCoord().height;
-            setSize(MyGUI::IntSize(total_width + mPadding * 2 + xmargin, total_height + mPadding * 2 + ymargin));
+            setSize(MyGUI::IntSize(totalWidth + mPadding * 2 + xmargin, totalHeight + mPadding * 2 + ymargin));
             return;
         }
 
@@ -233,8 +233,8 @@ namespace Gui
                 continue;
 
             bool vstretch = w->getUserString("VStretch") == "true";
-            int max_height = getClientCoord().height - mPadding * 2;
-            int height = vstretch ? max_height : sizes[i].first.height;
+            int maxHeight = getClientCoord().height - mPadding * 2;
+            int height = vstretch ? maxHeight : sizes[i].first.height;
 
             MyGUI::IntCoord widgetCoord;
             widgetCoord.left = curX;
@@ -243,10 +243,9 @@ namespace Gui
             int width = 0;
             if (sizes[i].second)
             {
-                if (h_stretched_count == 0)
+                if (hStretchedCount == 0)
                     throw std::logic_error("unexpected");
-                width
-                    = sizes[i].first.width + (getClientCoord().width - mPadding * 2 - total_width) / h_stretched_count;
+                width = sizes[i].first.width + (getClientCoord().width - mPadding * 2 - totalWidth) / hStretchedCount;
             }
             else
                 width = sizes[i].first.width;
@@ -330,9 +329,9 @@ namespace Gui
     void VBox::align()
     {
         unsigned int count = getChildCount();
-        size_t v_stretched_count = 0;
-        int total_height = 0;
-        int total_width = 0;
+        size_t vStretchedCount = 0;
+        int totalHeight = 0;
+        int totalWidth = 0;
         std::vector<std::pair<MyGUI::IntSize, bool>> sizes;
         sizes.resize(count);
         for (unsigned int i = 0; i < count; ++i)
@@ -344,34 +343,34 @@ namespace Gui
                 continue;
 
             bool vstretch = w->getUserString("VStretch") == "true";
-            v_stretched_count += vstretch;
+            vStretchedCount += vstretch;
             AutoSizedWidget* aw = dynamic_cast<AutoSizedWidget*>(w);
             if (aw)
             {
                 sizes[i] = std::make_pair(aw->getRequestedSize(), vstretch);
-                total_height += aw->getRequestedSize().height;
-                total_width = std::max(total_width, aw->getRequestedSize().width);
+                totalHeight += aw->getRequestedSize().height;
+                totalWidth = std::max(totalWidth, aw->getRequestedSize().width);
             }
             else
             {
                 sizes[i] = std::make_pair(w->getSize(), vstretch);
-                total_height += w->getSize().height;
+                totalHeight += w->getSize().height;
 
                 if (!(w->getUserString("HStretch") == "true"))
-                    total_width = std::max(total_width, w->getSize().width);
+                    totalWidth = std::max(totalWidth, w->getSize().width);
             }
 
             if (i != count - 1)
-                total_height += mSpacing;
+                totalHeight += mSpacing;
         }
 
         if (mAutoResize
-            && (total_width + mPadding * 2 != getClientCoord().width
-                || total_height + mPadding * 2 != getClientCoord().height))
+            && (totalWidth + mPadding * 2 != getClientCoord().width
+                || totalHeight + mPadding * 2 != getClientCoord().height))
         {
             int xmargin = getSize().width - getClientCoord().width;
             int ymargin = getSize().height - getClientCoord().height;
-            setSize(MyGUI::IntSize(total_width + mPadding * 2 + xmargin, total_height + mPadding * 2 + ymargin));
+            setSize(MyGUI::IntSize(totalWidth + mPadding * 2 + xmargin, totalHeight + mPadding * 2 + ymargin));
             return;
         }
 
@@ -398,10 +397,10 @@ namespace Gui
             int height = 0;
             if (sizes[i].second)
             {
-                if (v_stretched_count == 0)
+                if (vStretchedCount == 0)
                     throw std::logic_error("unexpected");
-                height = sizes[i].first.height
-                    + (getClientCoord().height - mPadding * 2 - total_height) / v_stretched_count;
+                height
+                    = sizes[i].first.height + (getClientCoord().height - mPadding * 2 - totalHeight) / vStretchedCount;
             }
             else
                 height = sizes[i].first.height;

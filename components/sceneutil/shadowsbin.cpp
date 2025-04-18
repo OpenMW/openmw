@@ -66,18 +66,18 @@ namespace SceneUtil
     StateGraph* ShadowsBin::cullStateGraph(
         StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache, bool cullFaceOverridden)
     {
-        std::vector<StateGraph*> return_path;
+        std::vector<StateGraph*> returnPath;
         State state;
-        StateGraph* sg_new = sg;
+        StateGraph* sgNew = sg;
         do
         {
-            if (uninterestingCache.find(sg_new) != uninterestingCache.end())
+            if (uninterestingCache.find(sgNew) != uninterestingCache.end())
                 break;
-            return_path.push_back(sg_new);
-            sg_new = sg_new->_parent;
-        } while (sg_new && sg_new != root);
+            returnPath.push_back(sgNew);
+            sgNew = sgNew->_parent;
+        } while (sgNew && sgNew != root);
 
-        for (auto itr = return_path.rbegin(); itr != return_path.rend(); ++itr)
+        for (auto itr = returnPath.rbegin(); itr != returnPath.rend(); ++itr)
         {
             const osg::StateSet* ss = (*itr)->getStateSet();
             if (!ss)
@@ -134,21 +134,21 @@ namespace SceneUtil
 
         if (state.mAlphaBlend)
         {
-            sg_new = sg->find_or_insert(mShaderAlphaTestStateSet);
-            sg_new->_leaves = std::move(sg->_leaves);
-            for (RenderLeaf* leaf : sg_new->_leaves)
-                leaf->_parent = sg_new;
-            sg = sg_new;
+            sgNew = sg->find_or_insert(mShaderAlphaTestStateSet);
+            sgNew->_leaves = std::move(sg->_leaves);
+            for (RenderLeaf* leaf : sgNew->_leaves)
+                leaf->_parent = sgNew;
+            sg = sgNew;
         }
 
         // GL_ALWAYS is set by default by mwshadowtechnique
         if (state.mAlphaFunc && state.mAlphaFunc->getFunction() != GL_ALWAYS)
         {
-            sg_new = sg->find_or_insert(mAlphaFuncShaders[state.mAlphaFunc->getFunction() - GL_NEVER]);
-            sg_new->_leaves = std::move(sg->_leaves);
-            for (RenderLeaf* leaf : sg_new->_leaves)
-                leaf->_parent = sg_new;
-            sg = sg_new;
+            sgNew = sg->find_or_insert(mAlphaFuncShaders[state.mAlphaFunc->getFunction() - GL_NEVER]);
+            sgNew->_leaves = std::move(sg->_leaves);
+            for (RenderLeaf* leaf : sgNew->_leaves)
+                leaf->_parent = sgNew;
+            sg = sgNew;
         }
 
         return sg;

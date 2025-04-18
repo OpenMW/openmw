@@ -60,81 +60,81 @@ namespace
 
     std::string ruleString(const ESM::DialogueCondition& ss)
     {
-        std::string_view type_str = "INVALID";
-        std::string_view func_str;
+        std::string_view typeStr = "INVALID";
+        std::string_view funcStr;
 
         switch (ss.mFunction)
         {
             case ESM::DialogueCondition::Function_Global:
-                type_str = "Global";
-                func_str = ss.mVariable;
+                typeStr = "Global";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Local:
-                type_str = "Local";
-                func_str = ss.mVariable;
+                typeStr = "Local";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Journal:
-                type_str = "Journal";
-                func_str = ss.mVariable;
+                typeStr = "Journal";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Item:
-                type_str = "Item count";
-                func_str = ss.mVariable;
+                typeStr = "Item count";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Dead:
-                type_str = "Dead";
-                func_str = ss.mVariable;
+                typeStr = "Dead";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotId:
-                type_str = "Not ID";
-                func_str = ss.mVariable;
+                typeStr = "Not ID";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotFaction:
-                type_str = "Not Faction";
-                func_str = ss.mVariable;
+                typeStr = "Not Faction";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotClass:
-                type_str = "Not Class";
-                func_str = ss.mVariable;
+                typeStr = "Not Class";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotRace:
-                type_str = "Not Race";
-                func_str = ss.mVariable;
+                typeStr = "Not Race";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotCell:
-                type_str = "Not Cell";
-                func_str = ss.mVariable;
+                typeStr = "Not Cell";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotLocal:
-                type_str = "Not Local";
-                func_str = ss.mVariable;
+                typeStr = "Not Local";
+                funcStr = ss.mVariable;
                 break;
             default:
-                type_str = "Function";
-                func_str = ruleFunction(ss.mFunction);
+                typeStr = "Function";
+                funcStr = ruleFunction(ss.mFunction);
                 break;
         }
 
-        std::string_view oper_str = "??";
+        std::string_view operStr = "??";
         switch (ss.mComparison)
         {
             case ESM::DialogueCondition::Comp_Eq:
-                oper_str = "==";
+                operStr = "==";
                 break;
             case ESM::DialogueCondition::Comp_Ne:
-                oper_str = "!=";
+                operStr = "!=";
                 break;
             case ESM::DialogueCondition::Comp_Gt:
-                oper_str = "> ";
+                operStr = "> ";
                 break;
             case ESM::DialogueCondition::Comp_Ge:
-                oper_str = ">=";
+                operStr = ">=";
                 break;
             case ESM::DialogueCondition::Comp_Ls:
-                oper_str = "< ";
+                operStr = "< ";
                 break;
             case ESM::DialogueCondition::Comp_Le:
-                oper_str = "<=";
+                operStr = "<=";
                 break;
             default:
                 break;
@@ -143,8 +143,7 @@ namespace
         std::ostringstream stream;
         std::visit([&](auto value) { stream << value; }, ss.mValue);
 
-        std::string result
-            = Misc::StringUtils::format("%-12s %-32s %2s %s", type_str, func_str, oper_str, stream.str());
+        std::string result = Misc::StringUtils::format("%-12s %-32s %2s %s", typeStr, funcStr, operStr, stream.str());
         return result;
     }
 

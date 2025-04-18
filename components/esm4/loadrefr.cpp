@@ -54,9 +54,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("NAME"):
             {
-                ESM::FormId BaseId;
-                reader.getFormId(BaseId);
-                mBaseObj = BaseId;
+                ESM::FormId baseId;
+                reader.getFormId(baseId);
+                mBaseObj = baseId;
                 break;
             }
             case ESM::fourCC("DATA"):

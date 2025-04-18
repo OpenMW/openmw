@@ -28,6 +28,8 @@
 #include <set>
 #include <mutex>
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 namespace osgDB
 {
     class SharedStateManager;
@@ -478,6 +480,8 @@ inline bool BaseOptimizerVisitor::isOperationPermissibleForObject(const osg::Nod
 }
 
 }
+
+// NOLINTEND(readability-identifier-naming)
 
 #endif
 // clang-format on

@@ -330,11 +330,10 @@ namespace MWInput
     float ControllerManager::getAxisValue(SDL_GameControllerAxis axis) const
     {
         SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
-        constexpr int AXIS_MAX_ABSOLUTE_VALUE = 32768;
-        if (cntrl)
-            return SDL_GameControllerGetAxis(cntrl, axis) / static_cast<float>(AXIS_MAX_ABSOLUTE_VALUE);
-        else
-            return 0;
+        constexpr float axisMaxAbsoluteValue = 32768;
+        if (cntrl != nullptr)
+            return SDL_GameControllerGetAxis(cntrl, axis) / axisMaxAbsoluteValue;
+        return 0;
     }
 
     bool ControllerManager::isButtonPressed(SDL_GameControllerButton button) const

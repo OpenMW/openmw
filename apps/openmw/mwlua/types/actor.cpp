@@ -31,14 +31,14 @@ namespace MWLua
     static std::pair<MWWorld::ContainerStoreIterator, bool> findInInventory(
         MWWorld::InventoryStore& store, const EquipmentItem& item, int slot = sAnySlot)
     {
-        auto old_it = slot != sAnySlot ? store.getSlot(slot) : store.end();
+        auto oldIt = slot != sAnySlot ? store.getSlot(slot) : store.end();
         MWWorld::Ptr itemPtr;
 
         if (std::holds_alternative<ObjectId>(item))
         {
             itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(std::get<ObjectId>(item));
-            if (old_it != store.end() && *old_it == itemPtr)
-                return { old_it, true }; // already equipped
+            if (oldIt != store.end() && *oldIt == itemPtr)
+                return { oldIt, true }; // already equipped
             if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0
                 || itemPtr.getContainerStore() != static_cast<const MWWorld::ContainerStore*>(&store))
             {
@@ -50,8 +50,8 @@ namespace MWLua
         {
             const auto& stringId = std::get<std::string>(item);
             ESM::RefId recordId = ESM::RefId::deserializeText(stringId);
-            if (old_it != store.end() && old_it->getCellRef().getRefId() == recordId)
-                return { old_it, true }; // already equipped
+            if (oldIt != store.end() && oldIt->getCellRef().getRefId() == recordId)
+                return { oldIt, true }; // already equipped
             itemPtr = store.search(recordId);
             if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0)
             {
@@ -119,15 +119,15 @@ namespace MWLua
 
         for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
-            auto old_it = store.getSlot(slot);
-            auto new_it = equipment.find(slot);
-            if (new_it == equipment.end())
+            auto oldIt = store.getSlot(slot);
+            auto newIt = equipment.find(slot);
+            if (newIt == equipment.end())
             {
-                if (old_it != store.end())
+                if (oldIt != store.end())
                     store.unequipSlot(slot);
                 continue;
             }
-            if (tryEquipToSlot(slot, new_it->second))
+            if (tryEquipToSlot(slot, newIt->second))
                 usedSlots[slot] = true;
         }
         for (const auto& [slot, item] : equipment)

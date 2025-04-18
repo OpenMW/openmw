@@ -135,7 +135,7 @@ namespace Compiler
 
         bool peek(std::istream& in)
         {
-            std::streampos p_orig = in.tellg();
+            std::streampos pOrig = in.tellg();
 
             char ch = static_cast<char>(in.peek());
 
@@ -158,7 +158,7 @@ namespace Compiler
 
             mLength = length;
 
-            in.seekg(p_orig);
+            in.seekg(pOrig);
             return true;
         }
 

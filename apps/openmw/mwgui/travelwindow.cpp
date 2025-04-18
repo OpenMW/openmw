@@ -55,9 +55,9 @@ namespace MWGui
         }
         else
         {
-            ESM::Position PlayerPos = player.getRefData().getPosition();
-            float d = sqrt(pow(pos.pos[0] - PlayerPos.pos[0], 2) + pow(pos.pos[1] - PlayerPos.pos[1], 2)
-                + pow(pos.pos[2] - PlayerPos.pos[2], 2));
+            const ESM::Position playerPos = player.getRefData().getPosition();
+            float d = sqrt(pow(pos.pos[0] - playerPos.pos[0], 2) + pow(pos.pos[1] - playerPos.pos[1], 2)
+                + pow(pos.pos[2] - playerPos.pos[2], 2));
             float fTravelMult = gmst.find("fTravelMult")->mValue.getFloat();
             if (fTravelMult != 0)
                 price = static_cast<int>(d / fTravelMult);

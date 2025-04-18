@@ -1078,13 +1078,13 @@ namespace MWGui
             MapMarkerType mapMarkerWidget = { osg::Vec2f(x, y), createMarker(name, x, y, 0) };
             mGlobalMapMarkers.emplace(mapMarkerWidget, std::vector<MapMarkerType>());
 
-            std::string name_ = name.substr(0, name.find(','));
-            auto& entry = mGlobalMapMarkersByName[name_];
+            const std::string markerName = name.substr(0, name.find(','));
+            auto& entry = mGlobalMapMarkersByName[markerName];
             if (!entry.widget)
             {
                 entry = { osg::Vec2f(x, y), entry.widget }; // update the coords
 
-                entry.widget = createMarker(name_, entry.position.x(), entry.position.y(), 1);
+                entry.widget = createMarker(markerName, entry.position.x(), entry.position.y(), 1);
                 mGlobalMapMarkers.emplace(entry, std::vector<MapMarkerType>{ entry });
             }
             else

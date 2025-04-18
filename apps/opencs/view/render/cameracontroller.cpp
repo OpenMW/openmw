@@ -355,7 +355,7 @@ namespace CSVRender
 
     void FreeCameraController::pitch(double value)
     {
-        const double Constraint = osg::PI / 2 - 0.1;
+        const double constraint = osg::PI / 2 - 0.1;
 
         if (mLockUpright)
         {
@@ -369,8 +369,8 @@ namespace CSVRender
             if ((mUp ^ up) * left < 0)
                 pitchAngle *= -1;
 
-            if (std::abs(pitchAngle + value) > Constraint)
-                value = (pitchAngle > 0 ? 1 : -1) * Constraint - pitchAngle;
+            if (std::abs(pitchAngle + value) > constraint)
+                value = (pitchAngle > 0 ? 1 : -1) * constraint - pitchAngle;
         }
 
         getCamera()->getViewMatrix() *= osg::Matrixd::rotate(value, LocalLeft);
@@ -651,7 +651,7 @@ namespace CSVRender
 
     void OrbitCameraController::initialize()
     {
-        static const int DefaultStartDistance = 10000.f;
+        const int defaultStartDistance = 10000.f;
 
         // Try to intelligently pick focus object
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector(
@@ -665,7 +665,7 @@ namespace CSVRender
         getCamera()->accept(visitor);
 
         osg::Vec3d eye, center, up;
-        getCamera()->getViewMatrixAsLookAt(eye, center, up, DefaultStartDistance);
+        getCamera()->getViewMatrixAsLookAt(eye, center, up, defaultStartDistance);
 
         if (intersector->getIntersections().begin() != intersector->getIntersections().end())
         {
@@ -675,7 +675,7 @@ namespace CSVRender
         else
         {
             mCenter = center;
-            mDistance = DefaultStartDistance;
+            mDistance = defaultStartDistance;
         }
 
         mInitialized = true;

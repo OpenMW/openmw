@@ -58,12 +58,13 @@ public:
 
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
     {
-        static const QString ContentTypeAddon = QString::number((int)ContentSelectorModel::ContentType_Addon);
+        static const QString contentTypeAddon
+            = QString::number(static_cast<int>(ContentSelectorModel::ContentType_Addon));
 
         QModelIndex nameIndex = sourceModel()->index(sourceRow, 0, sourceParent);
         const QString userRole = sourceModel()->data(nameIndex, Qt::UserRole).toString();
 
-        return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent) && userRole == ContentTypeAddon;
+        return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent) && userRole == contentTypeAddon;
     }
 };
 

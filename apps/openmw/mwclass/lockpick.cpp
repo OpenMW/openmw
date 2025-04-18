@@ -63,11 +63,11 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Lockpick::getEquipmentSlots(const MWWorld::ConstPtr& ptr) const
     {
-        std::vector<int> slots_;
+        std::vector<int> slots;
 
-        slots_.push_back(int(MWWorld::InventoryStore::Slot_CarriedRight));
+        slots.push_back(static_cast<int>(MWWorld::InventoryStore::Slot_CarriedRight));
 
-        return std::make_pair(slots_, false);
+        return std::make_pair(slots, false);
     }
 
     int Lockpick::getValue(const MWWorld::ConstPtr& ptr) const

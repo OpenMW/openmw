@@ -462,12 +462,11 @@ namespace MWPhysics
         resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
 
         const btQuaternion btrot = btQuaternion::getIdentity();
-        btTransform from_(btrot, btFrom);
-        btTransform to_(btrot, btTo);
 
         const btCollisionShape* shape = projectile.mCollisionObject->getCollisionShape();
         assert(shape->isConvex());
-        collisionWorld->convexSweepTest(static_cast<const btConvexShape*>(shape), from_, to_, resultCallback);
+        collisionWorld->convexSweepTest(static_cast<const btConvexShape*>(shape), btTransform(btrot, btFrom),
+            btTransform(btrot, btTo), resultCallback);
 
         projectile.mPosition
             = Misc::Convert::toOsg(projectile.mProjectile->isActive() ? btTo : resultCallback.m_hitPointWorld);

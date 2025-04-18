@@ -42,6 +42,8 @@
 
 #include <components/sceneutil/depth.hpp>
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 using namespace osgUtil;
 
 namespace SceneUtil
@@ -2057,4 +2059,7 @@ void Optimizer::MergeGroupsVisitor::apply(osg::Group &group)
 }
 
 }
+
+// NOLINTEND(readability-identifier-naming)
+
 // clang-format on

@@ -604,17 +604,17 @@ namespace MWGui
             {
                 mHorizontalScrollIndex = -totalSize.width;
             }
-            int horizontal_scroll = mHorizontalScrollIndex;
-            if (horizontal_scroll < 40)
+            int horizontalScroll = mHorizontalScrollIndex;
+            if (horizontalScroll < 40)
             {
-                horizontal_scroll = 40;
+                horizontalScroll = 40;
             }
             else
             {
-                horizontal_scroll = 80 - mHorizontalScrollIndex;
+                horizontalScroll = 80 - mHorizontalScrollIndex;
             }
             captionWidget->setPosition(
-                MyGUI::IntPoint(horizontal_scroll, captionWidget->getPosition().top + padding.top));
+                MyGUI::IntPoint(horizontalScroll, captionWidget->getPosition().top + padding.top));
         }
         else
         {

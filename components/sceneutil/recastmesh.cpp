@@ -22,12 +22,12 @@ namespace
         std::vector<float> result(indices.size());
         for (std::size_t i = 0, n = indices.size(); i < n; i += 3)
         {
-            const float* v0_ptr = &vertices[indices[i] * 3];
-            const float* v1_ptr = &vertices[indices[i + 1] * 3];
-            const float* v2_ptr = &vertices[indices[i + 2] * 3];
-            const osg::Vec3f v0(v0_ptr[0], v0_ptr[1], v0_ptr[2]);
-            const osg::Vec3f v1(v1_ptr[0], v1_ptr[1], v1_ptr[2]);
-            const osg::Vec3f v2(v2_ptr[0], v2_ptr[1], v2_ptr[2]);
+            const float* v0Ptr = &vertices[indices[i] * 3];
+            const float* v1Ptr = &vertices[indices[i + 1] * 3];
+            const float* v2Ptr = &vertices[indices[i + 2] * 3];
+            const osg::Vec3f v0(v0Ptr[0], v0Ptr[1], v0Ptr[2]);
+            const osg::Vec3f v1(v1Ptr[0], v1Ptr[1], v1Ptr[2]);
+            const osg::Vec3f v2(v2Ptr[0], v2Ptr[1], v2Ptr[2]);
             const osg::Vec3f e0 = v1 - v0;
             const osg::Vec3f e1 = v2 - v0;
             osg::Vec3f normal = e0 ^ e1;

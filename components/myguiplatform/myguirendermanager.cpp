@@ -473,13 +473,13 @@ namespace MyGUIPlatform
     void RenderManager::update()
     {
         static MyGUI::Timer timer;
-        static unsigned long last_time = timer.getMilliseconds();
-        unsigned long now_time = timer.getMilliseconds();
-        unsigned long time = now_time - last_time;
+        static unsigned long lastLime = timer.getMilliseconds();
+        unsigned long nowTime = timer.getMilliseconds();
+        unsigned long time = nowTime - lastLime;
 
-        onFrameEvent((float)((double)(time) / (double)1000));
+        onFrameEvent(static_cast<float>(static_cast<double>(time) / 1000));
 
-        last_time = now_time;
+        lastLime = nowTime;
     }
 
     void RenderManager::collectDrawCalls()

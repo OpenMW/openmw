@@ -37,23 +37,23 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    const ESM::Class& class_ = record.get();
+    const ESM::Class& classRecord = record.get();
 
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Class, class_.mId);
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Class, classRecord.mId);
 
     // A class should have a name
-    if (class_.mName.empty())
+    if (classRecord.mName.empty())
         messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     // A playable class should have a description
-    if (class_.mData.mIsPlayable != 0 && class_.mDescription.empty())
+    if (classRecord.mData.mIsPlayable != 0 && classRecord.mDescription.empty())
         messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
     std::map<int, int> attributeCount;
-    for (size_t i = 0; i < class_.mData.mAttribute.size(); ++i)
+    for (size_t i = 0; i < classRecord.mData.mAttribute.size(); ++i)
     {
-        int attribute = class_.mData.mAttribute[i];
+        int attribute = classRecord.mData.mAttribute[i];
         if (attribute == -1)
             messages.add(id, "Attribute #" + std::to_string(i) + " is not set", {}, CSMDoc::Message::Severity_Error);
         else
@@ -73,7 +73,7 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
     // test for non-unique skill
     std::map<int, int> skills; // ID, number of occurrences
 
-    for (const auto& s : class_.mData.mSkills)
+    for (const auto& s : classRecord.mData.mSkills)
         for (int skill : s)
             ++skills[skill];
 

@@ -66,12 +66,12 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
-        std::vector<int> slots_;
+        std::vector<int> slots;
 
         if (ref->mBase->mData.mType == ESM::Clothing::Ring)
         {
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_LeftRing));
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_RightRing));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_LeftRing));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_RightRing));
         }
         else
         {
@@ -90,12 +90,12 @@ namespace MWClass
             for (int i = 0; i < size; ++i)
                 if (sMapping[i][0] == ref->mBase->mData.mType)
                 {
-                    slots_.push_back(int(sMapping[i][1]));
+                    slots.push_back(int(sMapping[i][1]));
                     break;
                 }
         }
 
-        return std::make_pair(slots_, false);
+        return std::make_pair(slots, false);
     }
 
     ESM::RefId Clothing::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
@@ -200,9 +200,9 @@ namespace MWClass
         const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots = getEquipmentSlots(ptr);
 
-        if (slots_.first.empty())
+        if (slots.first.empty())
             return { 0, {} };
 
         if (npc.getClass().isNpc())

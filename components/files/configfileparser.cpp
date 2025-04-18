@@ -11,6 +11,8 @@
 #include <boost/program_options/detail/config_file.hpp>
 #include <boost/program_options/detail/convert.hpp>
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 namespace Files
 {
     namespace
@@ -289,3 +291,5 @@ namespace Files
     template bpo::basic_parsed_options<char> parse_config_file(
         std::basic_istream<char>& is, const bpo::options_description& desc, bool allow_unregistered);
 }
+
+// NOLINTEND(readability-identifier-naming)

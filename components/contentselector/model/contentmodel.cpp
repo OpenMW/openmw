@@ -92,10 +92,10 @@ const ContentSelectorModel::EsmFile* ContentSelectorModel::ContentModel::item(co
 QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile* item) const
 {
     // workaround: non-const pointer cast for calls from outside contentmodel/contentselector
-    EsmFile* non_const_file_ptr = const_cast<EsmFile*>(item);
+    EsmFile* const nonConstFilePtr = const_cast<EsmFile*>(item);
 
     if (item)
-        return index(mFiles.indexOf(non_const_file_ptr), 0);
+        return index(mFiles.indexOf(nonConstFilePtr), 0);
 
     return QModelIndex();
 }

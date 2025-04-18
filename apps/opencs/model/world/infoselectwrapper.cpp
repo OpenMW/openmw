@@ -345,9 +345,9 @@ void CSMWorld::ConstInfoSelectWrapper::updateComparisonType()
 
 std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getConditionIntRange() const
 {
-    const int IntMax = std::numeric_limits<int>::max();
-    const int IntMin = std::numeric_limits<int>::min();
-    const std::pair<int, int> InvalidRange(IntMax, IntMin);
+    const int intMax = std::numeric_limits<int>::max();
+    const int intMin = std::numeric_limits<int>::min();
+    const std::pair<int, int> invalidRange(intMax, intMin);
 
     int value = std::get<int>(mConstSelect.mValue);
 
@@ -358,31 +358,31 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getConditionIntRange() con
             return std::pair<int, int>(value, value);
 
         case ESM::DialogueCondition::Comp_Gt:
-            if (value == IntMax)
+            if (value == intMax)
             {
-                return InvalidRange;
+                return invalidRange;
             }
             else
             {
-                return std::pair<int, int>(value + 1, IntMax);
+                return std::pair<int, int>(value + 1, intMax);
             }
             break;
 
         case ESM::DialogueCondition::Comp_Ge:
-            return std::pair<int, int>(value, IntMax);
+            return std::pair<int, int>(value, intMax);
 
         case ESM::DialogueCondition::Comp_Ls:
-            if (value == IntMin)
+            if (value == intMin)
             {
-                return InvalidRange;
+                return invalidRange;
             }
             else
             {
-                return std::pair<int, int>(IntMin, value - 1);
+                return std::pair<int, int>(intMin, value - 1);
             }
 
         case ESM::DialogueCondition::Comp_Le:
-            return std::pair<int, int>(IntMin, value);
+            return std::pair<int, int>(intMin, value);
 
         default:
             throw std::logic_error("InfoSelectWrapper: relation does not have a range");
@@ -391,9 +391,9 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getConditionIntRange() con
 
 std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getConditionFloatRange() const
 {
-    const float FloatMax = std::numeric_limits<float>::infinity();
-    const float FloatMin = -std::numeric_limits<float>::infinity();
-    const float Epsilon = std::numeric_limits<float>::epsilon();
+    const float floatMax = std::numeric_limits<float>::infinity();
+    const float floatMin = -std::numeric_limits<float>::infinity();
+    const float epsilon = std::numeric_limits<float>::epsilon();
 
     float value = std::get<float>(mConstSelect.mValue);
 
@@ -404,16 +404,16 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getConditionFloatRange
             return std::pair<float, float>(value, value);
 
         case ESM::DialogueCondition::Comp_Gt:
-            return std::pair<float, float>(value + Epsilon, FloatMax);
+            return std::pair<float, float>(value + epsilon, floatMax);
 
         case ESM::DialogueCondition::Comp_Ge:
-            return std::pair<float, float>(value, FloatMax);
+            return std::pair<float, float>(value, floatMax);
 
         case ESM::DialogueCondition::Comp_Ls:
-            return std::pair<float, float>(FloatMin, value - Epsilon);
+            return std::pair<float, float>(floatMin, value - epsilon);
 
         case ESM::DialogueCondition::Comp_Le:
-            return std::pair<float, float>(FloatMin, value);
+            return std::pair<float, float>(floatMin, value);
 
         default:
             throw std::logic_error("InfoSelectWrapper: given relation does not have a range");
@@ -422,8 +422,8 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getConditionFloatRange
 
 std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
 {
-    const int IntMax = std::numeric_limits<int>::max();
-    const int IntMin = std::numeric_limits<int>::min();
+    const int intMax = std::numeric_limits<int>::max();
+    const int intMin = std::numeric_limits<int>::min();
 
     switch (getFunctionName())
     {
@@ -455,7 +455,7 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case ESM::DialogueCondition::Function_Reputation:
         case ESM::DialogueCondition::Function_PcReputation:
         case ESM::DialogueCondition::Function_Journal:
-            return std::pair<int, int>(IntMin, IntMax);
+            return std::pair<int, int>(intMin, intMax);
 
         case ESM::DialogueCondition::Function_Item:
         case ESM::DialogueCondition::Function_Dead:
@@ -500,7 +500,7 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case ESM::DialogueCondition::Function_PcLuck:
         case ESM::DialogueCondition::Function_Level:
         case ESM::DialogueCondition::Function_PcWerewolfKills:
-            return std::pair<int, int>(0, IntMax);
+            return std::pair<int, int>(0, intMax);
 
         case ESM::DialogueCondition::Function_Fight:
         case ESM::DialogueCondition::Function_Hello:
@@ -530,12 +530,12 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case ESM::DialogueCondition::Function_Global:
         case ESM::DialogueCondition::Function_Local:
         case ESM::DialogueCondition::Function_NotLocal:
-            return std::pair<int, int>(IntMin, IntMax);
+            return std::pair<int, int>(intMin, intMax);
 
         case ESM::DialogueCondition::Function_PcMagicka:
         case ESM::DialogueCondition::Function_PcFatigue:
         case ESM::DialogueCondition::Function_PcHealth:
-            return std::pair<int, int>(0, IntMax);
+            return std::pair<int, int>(0, intMax);
 
         case ESM::DialogueCondition::Function_Health_Percent:
         case ESM::DialogueCondition::Function_PcHealthPercent:
@@ -548,8 +548,8 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
 
 std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getValidFloatRange() const
 {
-    const float FloatMax = std::numeric_limits<float>::infinity();
-    const float FloatMin = -std::numeric_limits<float>::infinity();
+    const float floatMax = std::numeric_limits<float>::infinity();
+    const float floatMin = -std::numeric_limits<float>::infinity();
 
     switch (getFunctionName())
     {
@@ -557,12 +557,12 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getValidFloatRange() c
         case ESM::DialogueCondition::Function_Global:
         case ESM::DialogueCondition::Function_Local:
         case ESM::DialogueCondition::Function_NotLocal:
-            return std::pair<float, float>(FloatMin, FloatMax);
+            return std::pair<float, float>(floatMin, floatMax);
 
         case ESM::DialogueCondition::Function_PcMagicka:
         case ESM::DialogueCondition::Function_PcFatigue:
         case ESM::DialogueCondition::Function_PcHealth:
-            return std::pair<float, float>(0, FloatMax);
+            return std::pair<float, float>(0, floatMax);
 
         case ESM::DialogueCondition::Function_Health_Percent:
         case ESM::DialogueCondition::Function_PcHealthPercent:

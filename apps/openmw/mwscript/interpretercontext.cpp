@@ -295,8 +295,8 @@ namespace MWScript
     std::string_view InterpreterContext::getNPCClass() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
-        return class_->mName;
+        const ESM::Class* npcClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
+        return npcClass->mName;
     }
 
     std::string_view InterpreterContext::getNPCFaction() const
@@ -356,8 +356,8 @@ namespace MWScript
     std::string_view InterpreterContext::getPCClass() const
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        const ESM::RefId& class_ = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
-        return world->getStore().get<ESM::Class>().find(class_)->mName;
+        const ESM::RefId& playerClass = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
+        return world->getStore().get<ESM::Class>().find(playerClass)->mName;
     }
 
     std::string_view InterpreterContext::getPCRank() const

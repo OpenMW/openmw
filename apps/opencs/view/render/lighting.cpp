@@ -27,9 +27,9 @@ public:
 
     void apply(osg::Switch& switchNode) override
     {
-        constexpr int NoIndex = -1;
+        constexpr int noIndex = -1;
 
-        int initialIndex = NoIndex;
+        int initialIndex = noIndex;
         if (!switchNode.getUserValue("initialIndex", initialIndex))
         {
             for (size_t i = 0; i < switchNode.getValueList().size(); ++i)
@@ -41,7 +41,7 @@ public:
                 }
             }
 
-            if (initialIndex != NoIndex)
+            if (initialIndex != noIndex)
                 switchNode.setUserValue("initialIndex", initialIndex);
         }
 
@@ -50,7 +50,7 @@ public:
             if (switchNode.getName() == Constants::NightDayLabel)
                 switchNode.setSingleChildOn(mIndex);
         }
-        else if (initialIndex != NoIndex)
+        else if (initialIndex != noIndex)
         {
             switchNode.setSingleChildOn(initialIndex);
         }

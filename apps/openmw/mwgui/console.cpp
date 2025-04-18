@@ -634,7 +634,7 @@ namespace MWGui
     {
         std::string output = input;
         std::string tmp = input;
-        bool has_front_quote = false;
+        bool hasFrontQuote = false;
 
         /* Does the input string contain things that don't have to be completed? If yes erase them. */
 
@@ -659,7 +659,7 @@ namespace MWGui
             if (numquotes % 2)
             {
                 tmp.erase(0, tmp.rfind('"') + 1);
-                has_front_quote = true;
+                hasFrontQuote = true;
             }
             else
             {
@@ -672,7 +672,7 @@ namespace MWGui
                 {
                     tmp.clear();
                 }
-                has_front_quote = false;
+                hasFrontQuote = false;
             }
         }
         /* No quotation marks. Are there spaces?*/
@@ -706,7 +706,7 @@ namespace MWGui
         /* Iterate through the vector. */
         for (std::string& name : mNames)
         {
-            bool string_different = false;
+            bool stringDifferent = false;
 
             /* Is the string shorter than the input string? If yes skip it. */
             if (name.length() < tmp.length())
@@ -717,12 +717,12 @@ namespace MWGui
             {
                 if (Misc::StringUtils::toLower(*iter) != Misc::StringUtils::toLower(*iter2))
                 {
-                    string_different = true;
+                    stringDifferent = true;
                     break;
                 }
             }
 
-            if (string_different)
+            if (stringDifferent)
                 continue;
 
             /* The beginning of the string matches the input string, save it for the next test. */
@@ -741,11 +741,11 @@ namespace MWGui
             /* Adding quotation marks when the input string started with a quotation mark or has spaces in it*/
             if ((matches.front().find(' ') != std::string::npos))
             {
-                if (!has_front_quote)
+                if (!hasFrontQuote)
                     output += '"';
                 return output.append(matches.front() + std::string("\" "));
             }
-            else if (has_front_quote)
+            else if (hasFrontQuote)
             {
                 return output.append(matches.front() + std::string("\" "));
             }

@@ -181,16 +181,16 @@ namespace MWGui
         // We need this copy for when @# hyperlinks are replaced
         std::string text = mText;
 
-        size_t pos_end = std::string::npos;
+        size_t posEnd = std::string::npos;
         for (;;)
         {
-            size_t pos_begin = text.find('@');
-            if (pos_begin != std::string::npos)
-                pos_end = text.find('#', pos_begin);
+            const size_t posBegin = text.find('@');
+            if (posBegin != std::string::npos)
+                posEnd = text.find('#', posBegin);
 
-            if (pos_begin != std::string::npos && pos_end != std::string::npos)
+            if (posBegin != std::string::npos && posEnd != std::string::npos)
             {
-                std::string link = text.substr(pos_begin + 1, pos_end - pos_begin - 1);
+                std::string link = text.substr(posBegin + 1, posEnd - posBegin - 1);
                 const char specialPseudoAsteriskCharacter = 127;
                 std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
                 std::string topicName
@@ -200,10 +200,10 @@ namespace MWGui
                 while (displayName[displayName.size() - 1] == '*')
                     displayName.erase(displayName.size() - 1, 1);
 
-                text.replace(pos_begin, pos_end + 1 - pos_begin, displayName);
+                text.replace(posBegin, posEnd + 1 - posBegin, displayName);
 
                 if (topicLinks.find(topicName) != topicLinks.end())
-                    hyperLinks[std::make_pair(pos_begin, pos_begin + displayName.size())]
+                    hyperLinks[std::make_pair(posBegin, posBegin + displayName.size())]
                         = intptr_t(topicLinks[topicName].get());
             }
             else

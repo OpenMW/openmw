@@ -81,7 +81,7 @@ namespace MWBase
         virtual void setPlayerClass(const ESM::RefId& id) = 0;
         ///< Set player class to stock class.
 
-        virtual void setPlayerClass(const ESM::Class& class_) = 0;
+        virtual void setPlayerClass(const ESM::Class& value) = 0;
         ///< Set player class to custom class.
 
         virtual void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) = 0;

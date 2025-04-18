@@ -34,6 +34,8 @@
 
 #include <components/shader/shadermanager.hpp>
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 namespace SceneUtil {
 
     /** ViewDependentShadowMap provides an base implementation of view dependent shadow mapping techniques.*/
@@ -338,6 +340,8 @@ namespace SceneUtil {
     };
 
 }
+
+// NOLINTEND(readability-identifier-naming)
 
 #endif
 // clang-format on

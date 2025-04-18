@@ -493,12 +493,13 @@ void OMW::Engine::createWindow()
     const SDLUtil::VSyncMode vsync = Settings::video().mVsyncMode;
     unsigned antialiasing = static_cast<unsigned>(Settings::video().mAntialiasing);
 
-    int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen), pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
+    int posX = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
+    int posY = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
 
     if (windowMode == Settings::WindowMode::Fullscreen || windowMode == Settings::WindowMode::WindowedFullscreen)
     {
-        pos_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
-        pos_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
+        posX = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
+        posY = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
     }
 
     Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
@@ -535,7 +536,7 @@ void OMW::Engine::createWindow()
     {
         while (!mWindow)
         {
-            mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
+            mWindow = SDL_CreateWindow("OpenMW", posX, posY, width, height, flags);
             if (!mWindow)
             {
                 // Try with a lower AA
@@ -961,14 +962,14 @@ void OMW::Engine::go()
     prepareEngine();
 
 #ifdef _WIN32
-    const auto* stats_file = _wgetenv(L"OPENMW_OSG_STATS_FILE");
+    const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
 #else
-    const auto* stats_file = std::getenv("OPENMW_OSG_STATS_FILE");
+    const auto* statsFile = std::getenv("OPENMW_OSG_STATS_FILE");
 #endif
 
     std::filesystem::path path;
-    if (stats_file != nullptr)
-        path = stats_file;
+    if (statsFile != nullptr)
+        path = statsFile;
 
     std::ofstream stats;
     if (!path.empty())

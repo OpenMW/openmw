@@ -750,9 +750,9 @@ namespace MWSound
             if (!hrtfname.empty())
             {
                 ALCint index = -1;
-                ALCint num_hrtf;
-                alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
-                for (ALCint i = 0; i < num_hrtf; ++i)
+                ALCint numHrtf;
+                alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &numHrtf);
+                for (ALCint i = 0; i < numHrtf; ++i)
                 {
                     const ALCchar* entry = alcGetStringiSOFT(mDevice, ALC_HRTF_SPECIFIER_SOFT, i);
                     if (hrtfname == entry)
@@ -818,9 +818,9 @@ namespace MWSound
             Log(Debug::Warning) << "HRTF status unavailable";
         else
         {
-            ALCint hrtf_state;
-            alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtf_state);
-            if (!hrtf_state)
+            ALCint hrtfState;
+            alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtfState);
+            if (!hrtfState)
                 Log(Debug::Info) << "HRTF disabled";
             else
             {
@@ -1015,10 +1015,10 @@ namespace MWSound
         LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
         getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
 
-        ALCint num_hrtf;
-        alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
-        ret.reserve(num_hrtf);
-        for (ALCint i = 0; i < num_hrtf; ++i)
+        ALCint numHrtf;
+        alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &numHrtf);
+        ret.reserve(numHrtf);
+        for (ALCint i = 0; i < numHrtf; ++i)
         {
             const ALCchar* entry = alcGetStringiSOFT(mDevice, ALC_HRTF_SPECIFIER_SOFT, i);
             ret.emplace_back(entry);
