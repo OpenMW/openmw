@@ -287,8 +287,8 @@ namespace Shader
         addedState->setName("addedState");
     }
 
-    const char* defaultTextures[] = { "diffuseMap", "normalMap", "normalHeightMap", "emissiveMap", "darkMap", "detailMap", "envMap",
-        "specularMap", "decalMap", "bumpMap", "glossMap" };
+    const char* defaultTextures[] = { "diffuseMap", "normalMap", "normalHeightMap", "emissiveMap", "darkMap",
+        "detailMap", "envMap", "specularMap", "decalMap", "bumpMap", "glossMap" };
     bool isTextureNameRecognized(std::string_view name)
     {
         return std::find(std::begin(defaultTextures), std::end(defaultTextures), name) != std::end(defaultTextures);
@@ -439,8 +439,9 @@ namespace Shader
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
                     writableStateSet->setTextureAttributeAndModes(unit, normalMapTex, osg::StateAttribute::ON);
-                    writableStateSet->setTextureAttributeAndModes(
-                        unit, new SceneUtil::TextureType(normalHeight ? "normalHeightMap" : "normalMap"), osg::StateAttribute::ON);
+                    writableStateSet->setTextureAttributeAndModes(unit,
+                        new SceneUtil::TextureType(normalHeight ? "normalHeightMap" : "normalMap"),
+                        osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "normalMap";
                     mRequirements.back().mTexStageRequiringTangents = unit;
                     mRequirements.back().mShaderRequired = true;
