@@ -287,11 +287,17 @@ namespace Shader
         addedState->setName("addedState");
     }
 
-    const char* defaultTextures[] = { "diffuseMap", "normalMap", "normalHeightMap", "emissiveMap", "darkMap",
-        "detailMap", "envMap", "specularMap", "decalMap", "bumpMap", "glossMap" };
+    // This list is used both for detecting known texture types (including added normal maps etc.) and setting the
+    // shader defines. Normal maps and normal height maps both get sent to the shader as a normal map, so the latter
+    // must be detected separately.
+    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap",
+        "specularMap", "decalMap", "bumpMap", "glossMap" };
     bool isTextureNameRecognized(std::string_view name)
     {
-        return std::find(std::begin(defaultTextures), std::end(defaultTextures), name) != std::end(defaultTextures);
+        if (std::find(std::begin(defaultTextures), std::end(defaultTextures), name) != std::end(defaultTextures))
+            return true;
+        else
+            return name == "normalHeightMap";
     }
 
     void ShaderVisitor::applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node)
