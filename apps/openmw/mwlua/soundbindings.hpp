@@ -3,11 +3,11 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    sol::table initCoreSoundBindings(const Context&);
+    struct Context;
+
+    sol::table initCoreSoundBindings(const Context& context);
 
     sol::table initAmbientPackage(const Context& context);
 }

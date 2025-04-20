@@ -12,6 +12,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/worldimp.hpp"
 
+#include "context.hpp"
 #include "object.hpp"
 
 #include <stdexcept>

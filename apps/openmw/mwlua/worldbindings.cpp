@@ -26,6 +26,7 @@
 #include "luamanagerimp.hpp"
 
 #include "animationbindings.hpp"
+#include "context.hpp"
 #include "corebindings.hpp"
 #include "mwscriptbindings.hpp"
 

@@ -19,6 +19,7 @@
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "context.hpp"
 #include "coremwscriptbindings.hpp"
 #include "dialoguebindings.hpp"
 #include "factionbindings.hpp"
