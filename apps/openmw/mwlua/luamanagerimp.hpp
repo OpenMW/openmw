@@ -3,8 +3,9 @@
 
 #include <filesystem>
 #include <map>
-#include <osg/Stats>
 #include <set>
+
+#include <osg/Stats>
 
 #include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>

@@ -16,6 +16,8 @@
 #include "luamanagerimp.hpp"
 #include "objectlists.hpp"
 
+#include <vector>
+
 namespace
 {
     template <class T = MWWorld::Ptr>

@@ -1,9 +1,5 @@
 #include "localscripts.hpp"
 
-#include <components/esm3/loadcell.hpp>
-#include <components/esm3/loadweap.hpp>
-#include <components/misc/strings/lower.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwmechanics/aicombat.hpp"

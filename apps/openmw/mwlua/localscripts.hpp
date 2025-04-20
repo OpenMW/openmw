@@ -1,9 +1,7 @@
 #ifndef MWLUA_LOCALSCRIPTS_H
 #define MWLUA_LOCALSCRIPTS_H
 
-#include <memory>
-#include <set>
-#include <string>
+#include <string_view>
 #include <utility>
 
 #include <components/lua/luastate.hpp>

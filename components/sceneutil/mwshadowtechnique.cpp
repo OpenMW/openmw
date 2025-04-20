@@ -27,7 +27,6 @@
 #include <osg/ClipControl>
 
 #include <sstream>
-#include <deque>
 #include <vector>
 
 #include "glextensions.hpp"

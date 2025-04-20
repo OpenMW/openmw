@@ -1,10 +1,16 @@
 #ifndef MWLUA_RECORDSTORE_H
 #define MWLUA_RECORDSTORE_H
 
-#include <sol/sol.hpp>
+#include <type_traits>
 
-#include <components/esm/defs.hpp>
-#include <components/lua/luastate.hpp>
+#include <sol/forward.hpp>
+#include <sol/overload.hpp>
+#include <sol/state_view.hpp>
+#include <sol/table.hpp>
+#include <sol/types.hpp>
+#include <sol/unsafe_function.hpp>
+#include <sol/usertype.hpp>
+
 #include <components/lua/util.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
