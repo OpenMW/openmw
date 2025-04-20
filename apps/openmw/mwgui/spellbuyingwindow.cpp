@@ -44,8 +44,8 @@ namespace MWGui
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         int price = std::max(1,
-            static_cast<int>(
-                MWMechanics::calcSpellCost(spell) * store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
+            static_cast<int>(MWMechanics::calcSpellCost(spell)
+                * store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
