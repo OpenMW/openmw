@@ -19,6 +19,7 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 namespace MWGui
 {
@@ -44,7 +45,7 @@ namespace MWGui
 
         int price = std::max(1,
             static_cast<int>(
-                spell.mData.mCost * store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
+                MWMechanics::calcSpellCost(spell) * store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
