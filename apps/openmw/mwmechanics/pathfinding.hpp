@@ -145,19 +145,6 @@ namespace MWMechanics
             mPath.push_back(point);
         }
 
-        /// utility function to convert a osg::Vec3f to a Pathgrid::Point
-        static ESM::Pathgrid::Point makePathgridPoint(const osg::Vec3f& v)
-        {
-            return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
-        }
-
-        /// utility function to convert an ESM::Position to a Pathgrid::Point
-        static ESM::Pathgrid::Point makePathgridPoint(const ESM::Position& p)
-        {
-            return ESM::Pathgrid::Point(
-                static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
-        }
-
         static osg::Vec3f makeOsgVec3(const ESM::Pathgrid::Point& p)
         {
             return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));

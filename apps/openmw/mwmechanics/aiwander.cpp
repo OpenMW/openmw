@@ -109,24 +109,25 @@ namespace MWMechanics
             return std::vector<unsigned char>(std::begin(idle), std::end(idle));
         }
 
-        void trimAllowedNodes(const std::deque<osg::Vec3f>& path, std::vector<ESM::Pathgrid::Point>& nodes)
+        void trimAllowedPositions(const std::deque<osg::Vec3f>& path, std::vector<osg::Vec3f>& allowedPositions)
         {
             // TODO: how to add these back in once the door opens?
             // Idea: keep a list of detected closed doors (see aicombat.cpp)
             // Every now and then check whether one of the doors is opened. (maybe
             // at the end of playing idle?) If the door is opened then re-calculate
-            // allowed nodes starting from the spawn point.
+            // allowed positions starting from the spawn point.
             std::vector<osg::Vec3f> points(path.begin(), path.end());
             while (points.size() >= 2)
             {
                 const osg::Vec3f point = points.back();
-                for (std::size_t j = 0; j < nodes.size(); j++)
+                for (std::size_t j = 0; j < allowedPositions.size(); j++)
                 {
                     // FIXME: doesn't handle a door with the same X/Y
                     //        coordinates but with a different Z
-                    if (std::abs(nodes[j].mX - point.x()) <= 0.5 && std::abs(nodes[j].mY - point.y()) <= 0.5)
+                    if (std::abs(allowedPositions[j].x() - point.x()) <= 0.5
+                        && std::abs(allowedPositions[j].y() - point.y()) <= 0.5)
                     {
-                        nodes.erase(nodes.begin() + j);
+                        allowedPositions.erase(allowedPositions.begin() + j);
                         break;
                     }
                 }
@@ -143,9 +144,9 @@ namespace MWMechanics
         , mCanWanderAlongPathGrid(true)
         , mIdleAnimation(0)
         , mBadIdles()
-        , mPopulateAvailableNodes(true)
-        , mAllowedNodes()
-        , mTrimCurrentNode(false)
+        , mPopulateAvailablePositions(true)
+        , mAllowedPositions()
+        , mTrimCurrentPosition(false)
         , mCheckIdlePositionTimer(0)
         , mStuckCount(0)
     {
@@ -298,10 +299,10 @@ namespace MWMechanics
             mStoredInitialActorPosition = true;
         }
 
-        // Initialization to discover & store allowed node points for this actor.
-        if (storage.mPopulateAvailableNodes)
+        // Initialization to discover & store allowed positions points for this actor.
+        if (storage.mPopulateAvailablePositions)
         {
-            getAllowedNodes(actor, storage);
+            fillAllowedPositions(actor, storage);
         }
 
         MWBase::World& world = *MWBase::Environment::get().getWorld();
@@ -319,7 +320,7 @@ namespace MWMechanics
         }
         // If the package has a wander distance but no pathgrid is available,
         // randomly idle or wander near spawn point
-        else if (storage.mAllowedNodes.empty() && mDistance > 0 && !storage.mIsWanderingManually)
+        else if (storage.mAllowedPositions.empty() && mDistance > 0 && !storage.mIsWanderingManually)
         {
             // Typically want to idle for a short time before the next wander
             if (Misc::Rng::rollDice(100, prng) >= 96)
@@ -331,7 +332,7 @@ namespace MWMechanics
                 storage.setState(AiWanderStorage::Wander_IdleNow);
             }
         }
-        else if (storage.mAllowedNodes.empty() && !storage.mIsWanderingManually)
+        else if (storage.mAllowedPositions.empty() && !storage.mIsWanderingManually)
         {
             storage.mCanWanderAlongPathGrid = false;
         }
@@ -347,9 +348,9 @@ namespace MWMechanics
             // Construct a new path if there isn't one
             if (!mPathFinder.isPathConstructed())
             {
-                if (!storage.mAllowedNodes.empty())
+                if (!storage.mAllowedPositions.empty())
                 {
-                    setPathToAnAllowedNode(actor, storage, pos);
+                    setPathToAnAllowedPosition(actor, storage, pos);
                 }
             }
         }
@@ -515,17 +516,17 @@ namespace MWMechanics
 
     void AiWander::onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
     {
-        // Check if an idle actor is too far from all allowed nodes or too close to a door - if so start walking.
+        // Check if an idle actor is too far from all allowed positions or too close to a door - if so start walking.
         storage.mCheckIdlePositionTimer += duration;
 
         if (storage.mCheckIdlePositionTimer >= idlePositionCheckInterval && !isStationary())
         {
             storage.mCheckIdlePositionTimer = 0; // restart timer
             static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance() * 1.6f;
-            if (proximityToDoor(actor, distance) || !isNearAllowedNode(actor, storage, distance))
+            if (proximityToDoor(actor, distance) || !isNearAllowedPosition(actor, storage, distance))
             {
                 storage.setState(AiWanderStorage::Wander_MoveNow);
-                storage.mTrimCurrentNode = false; // just in case
+                storage.mTrimCurrentPosition = false; // just in case
                 return;
             }
         }
@@ -541,16 +542,14 @@ namespace MWMechanics
         }
     }
 
-    bool AiWander::isNearAllowedNode(const MWWorld::Ptr& actor, const AiWanderStorage& storage, float distance) const
+    bool AiWander::isNearAllowedPosition(
+        const MWWorld::Ptr& actor, const AiWanderStorage& storage, float distance) const
     {
         const osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
-        for (const ESM::Pathgrid::Point& node : storage.mAllowedNodes)
-        {
-            osg::Vec3f point(node.mX, node.mY, node.mZ);
-            if ((actorPos - point).length2() < distance * distance)
-                return true;
-        }
-        return false;
+        const float squaredDistance = distance * distance;
+        return std::ranges::find_if(storage.mAllowedPositions, [&](const osg::Vec3& v) {
+            return (actorPos - v).length2() < squaredDistance;
+        }) != storage.mAllowedPositions.end();
     }
 
     void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration,
@@ -610,8 +609,8 @@ namespace MWMechanics
             if (proximityToDoor(actor, distance))
             {
                 // remove allowed points then select another random destination
-                storage.mTrimCurrentNode = true;
-                trimAllowedNodes(mPathFinder.getPath(), storage.mAllowedNodes);
+                storage.mTrimCurrentPosition = true;
+                trimAllowedPositions(mPathFinder.getPath(), storage.mAllowedPositions);
                 mObstacleCheck.clear();
                 stopWalking(actor);
                 storage.setState(AiWanderStorage::Wander_MoveNow);
@@ -630,42 +629,41 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::setPathToAnAllowedNode(
+    void AiWander::setPathToAnAllowedPosition(
         const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
     {
         auto world = MWBase::Environment::get().getWorld();
         auto& prng = world->getPrng();
-        unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size(), prng);
-        const ESM::Pathgrid::Point& dest = storage.mAllowedNodes[randNode];
+        const std::size_t randomAllowedPositionIndex
+            = static_cast<std::size_t>(Misc::Rng::rollDice(storage.mAllowedPositions.size(), prng));
+        const osg::Vec3f randomAllowedPosition = storage.mAllowedPositions[randomAllowedPositionIndex];
 
         const osg::Vec3f start = actorPos.asVec3();
 
         // don't take shortcuts for wandering
         const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
-        const osg::Vec3f destVec3f = PathFinder::makeOsgVec3(dest);
-        mPathFinder.buildPathByPathgrid(start, destVec3f, actor.getCell(), getPathGridGraph(pathgrid));
+        mPathFinder.buildPathByPathgrid(start, randomAllowedPosition, actor.getCell(), getPathGridGraph(pathgrid));
 
         if (mPathFinder.isPathConstructed())
         {
-            mDestination = destVec3f;
+            mDestination = randomAllowedPosition;
             mHasDestination = true;
             mUsePathgrid = true;
-            // Remove this node as an option and add back the previously used node (stops NPC from picking the same
-            // node):
-            ESM::Pathgrid::Point temp = storage.mAllowedNodes[randNode];
-            storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + randNode);
-            // check if mCurrentNode was taken out of mAllowedNodes
-            if (storage.mTrimCurrentNode && storage.mAllowedNodes.size() > 1)
-                storage.mTrimCurrentNode = false;
+            // Remove this position as an option and add back the previously used position (stops NPC from picking the
+            // same position):
+            storage.mAllowedPositions.erase(storage.mAllowedPositions.begin() + randomAllowedPositionIndex);
+            // check if mCurrentPosition was taken out of mAllowedPositions
+            if (storage.mTrimCurrentPosition && storage.mAllowedPositions.size() > 1)
+                storage.mTrimCurrentPosition = false;
             else
-                storage.mAllowedNodes.push_back(storage.mCurrentNode);
-            storage.mCurrentNode = temp;
+                storage.mAllowedPositions.push_back(storage.mCurrentPosition);
+            storage.mCurrentPosition = randomAllowedPosition;
 
             storage.setState(AiWanderStorage::Wander_Walking);
         }
-        // Choose a different node and delete this one from possible nodes because it is uncreachable:
+        // Choose a different position and delete this one from possible positions because it is uncreachable:
         else
-            storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + randNode);
+            storage.mAllowedPositions.erase(storage.mAllowedPositions.begin() + randomAllowedPositionIndex);
     }
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor)
@@ -741,20 +739,20 @@ namespace MWMechanics
             return;
 
         AiWanderStorage& storage = state.get<AiWanderStorage>();
-        if (storage.mPopulateAvailableNodes)
-            getAllowedNodes(actor, storage);
+        if (storage.mPopulateAvailablePositions)
+            fillAllowedPositions(actor, storage);
 
-        if (storage.mAllowedNodes.empty())
+        if (storage.mAllowedPositions.empty())
             return;
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        int index = Misc::Rng::rollDice(storage.mAllowedNodes.size(), prng);
-        ESM::Pathgrid::Point worldDest = storage.mAllowedNodes[index];
+        int index = Misc::Rng::rollDice(storage.mAllowedPositions.size(), prng);
+        const osg::Vec3f worldDest = storage.mAllowedPositions[index];
         const Misc::CoordinateConverter converter = Misc::makeCoordinateConverter(*actor.getCell()->getCell());
-        ESM::Pathgrid::Point dest = converter.toLocalPoint(worldDest);
+        osg::Vec3f dest = converter.toLocalVec3(worldDest);
 
-        bool isPathGridOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(
-            PathFinder::makeOsgVec3(worldDest), 60);
+        const bool isPathGridOccupied
+            = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(worldDest, 60);
 
         // add offset only if the selected pathgrid is occupied by another actor
         if (isPathGridOccupied)
@@ -774,19 +772,17 @@ namespace MWMechanics
                 const ESM::Pathgrid::Point& connDest = points[randomIndex];
 
                 // add an offset towards random neighboring node
-                osg::Vec3f dir = PathFinder::makeOsgVec3(connDest) - PathFinder::makeOsgVec3(dest);
-                float length = dir.length();
+                osg::Vec3f dir = PathFinder::makeOsgVec3(connDest) - dest;
+                const float length = dir.length();
                 dir.normalize();
 
                 for (int j = 1; j <= 3; j++)
                 {
                     // move for 5-15% towards random neighboring node
-                    dest
-                        = PathFinder::makePathgridPoint(PathFinder::makeOsgVec3(dest) + dir * (j * 5 * length / 100.f));
-                    worldDest = converter.toWorldPoint(dest);
+                    dest = dest + dir * (j * 5 * length / 100.f);
 
                     isOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(
-                        PathFinder::makeOsgVec3(worldDest), 60);
+                        converter.toWorldVec3(dest), 60);
 
                     if (!isOccupied)
                         break;
@@ -806,19 +802,18 @@ namespace MWMechanics
 
         // place above to prevent moving inside objects, e.g. stairs, because a vector between pathgrids can be
         // underground. Adding 20 in adjustPosition() is not enough.
-        dest.mZ += 60;
+        dest.z() += 60;
 
         converter.toWorld(dest);
 
         state.reset();
 
-        osg::Vec3f pos(static_cast<float>(dest.mX), static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
-        MWBase::Environment::get().getWorld()->moveObject(actor, pos);
+        MWBase::Environment::get().getWorld()->moveObject(actor, dest);
         actor.getClass().adjustPosition(actor, false);
     }
 
     void AiWander::getNeighbouringNodes(
-        ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
+        const osg::Vec3f& dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
     {
         const ESM::Pathgrid* pathgrid
             = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*currentCell->getCell());
@@ -826,19 +821,19 @@ namespace MWMechanics
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;
 
-        size_t index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
+        const size_t index = PathFinder::getClosestPoint(pathgrid, dest);
 
         getPathGridGraph(pathgrid).getNeighbouringPoints(index, points);
     }
 
-    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    void AiWander::fillAllowedPositions(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
         // infrequently used, therefore no benefit in caching it as a member
         const MWWorld::CellStore* cellStore = actor.getCell();
         const ESM::Pathgrid* pathgrid
             = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*cellStore->getCell());
 
-        storage.mAllowedNodes.clear();
+        storage.mAllowedPositions.clear();
 
         // If there is no path this actor doesn't go anywhere. See:
         // https://forum.openmw.org/viewtopic.php?t=1556
@@ -861,32 +856,33 @@ namespace MWMechanics
             // Find closest pathgrid point
             size_t closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);
 
-            // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+            // mAllowedPositions for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point
             // NOTE: mPoints is in local coordinates
             size_t pointIndex = 0;
             for (size_t counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
-                osg::Vec3f nodePos(PathFinder::makeOsgVec3(pathgrid->mPoints[counter]));
+                const osg::Vec3f nodePos = PathFinder::makeOsgVec3(pathgrid->mPoints[counter]);
                 if ((npcPos - nodePos).length2() <= mDistance * mDistance
                     && getPathGridGraph(pathgrid).isPointConnected(closestPointIndex, counter))
                 {
-                    storage.mAllowedNodes.push_back(converter.toWorldPoint(pathgrid->mPoints[counter]));
+                    storage.mAllowedPositions.push_back(
+                        Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid->mPoints[counter])));
                     pointIndex = counter;
                 }
             }
-            if (storage.mAllowedNodes.size() == 1)
+            if (storage.mAllowedPositions.size() == 1)
             {
-                storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(mInitialActorPosition));
+                storage.mAllowedPositions.push_back(mInitialActorPosition);
                 addNonPathGridAllowedPoints(pathgrid, pointIndex, storage, converter);
             }
-            if (!storage.mAllowedNodes.empty())
+            if (!storage.mAllowedPositions.empty())
             {
-                setCurrentNodeToClosestAllowedNode(storage);
+                setCurrentPositionToClosestAllowedPosition(storage);
             }
         }
 
-        storage.mPopulateAvailableNodes = false;
+        storage.mPopulateAvailablePositions = false;
     }
 
     // When only one path grid point in wander distance,
@@ -900,13 +896,13 @@ namespace MWMechanics
         {
             if (edge.mV0 == pointIndex)
             {
-                AddPointBetweenPathGridPoints(converter.toWorldPoint(pathGrid->mPoints[edge.mV0]),
+                addPositionBetweenPathgridPoints(converter.toWorldPoint(pathGrid->mPoints[edge.mV0]),
                     converter.toWorldPoint(pathGrid->mPoints[edge.mV1]), storage);
             }
         }
     }
 
-    void AiWander::AddPointBetweenPathGridPoints(
+    void AiWander::addPositionBetweenPathgridPoints(
         const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage)
     {
         osg::Vec3f vectorStart = PathFinder::makeOsgVec3(start);
@@ -919,25 +915,25 @@ namespace MWMechanics
         // must not travel longer than distance between waypoints or NPC goes past waypoint
         distance = std::min(distance, static_cast<unsigned>(length));
         delta *= distance;
-        storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(vectorStart + delta));
+        storage.mAllowedPositions.push_back(vectorStart + delta);
     }
 
-    void AiWander::setCurrentNodeToClosestAllowedNode(AiWanderStorage& storage)
+    void AiWander::setCurrentPositionToClosestAllowedPosition(AiWanderStorage& storage)
     {
-        float distanceToClosestNode = std::numeric_limits<float>::max();
+        float distanceToClosestPosition = std::numeric_limits<float>::max();
         size_t index = 0;
-        for (size_t i = 0; i < storage.mAllowedNodes.size(); ++i)
+        for (size_t i = 0; i < storage.mAllowedPositions.size(); ++i)
         {
-            osg::Vec3f nodePos(PathFinder::makeOsgVec3(storage.mAllowedNodes[i]));
-            float tempDist = (mInitialActorPosition - nodePos).length2();
-            if (tempDist < distanceToClosestNode)
+            const osg::Vec3f position = storage.mAllowedPositions[i];
+            const float tempDist = (mInitialActorPosition - position).length2();
+            if (tempDist < distanceToClosestPosition)
             {
                 index = i;
-                distanceToClosestNode = tempDist;
+                distanceToClosestPosition = tempDist;
             }
         }
-        storage.mCurrentNode = storage.mAllowedNodes[index];
-        storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + index);
+        storage.mCurrentPosition = storage.mAllowedPositions[index];
+        storage.mAllowedPositions.erase(storage.mAllowedPositions.begin() + index);
     }
 
     void AiWander::writeState(ESM::AiSequence::AiSequence& sequence) const
