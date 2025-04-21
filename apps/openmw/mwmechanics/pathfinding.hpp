@@ -10,6 +10,7 @@
 #include <components/detournavigator/status.hpp>
 #include <components/esm/position.hpp>
 #include <components/esm3/loadpgrd.hpp>
+#include <components/misc/convert.hpp>
 
 namespace MWWorld
 {
@@ -145,18 +146,13 @@ namespace MWMechanics
             mPath.push_back(point);
         }
 
-        static osg::Vec3f makeOsgVec3(const ESM::Pathgrid::Point& p)
-        {
-            return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
-        }
-
         // Slightly cheaper version for comparisons.
         // Caller needs to be careful for very short distances (i.e. less than 1)
         // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
         //
         static float distanceSquared(const ESM::Pathgrid::Point& point, const osg::Vec3f& pos)
         {
-            return (MWMechanics::PathFinder::makeOsgVec3(point) - pos).length2();
+            return (Misc::Convert::makeOsgVec3f(point) - pos).length2();
         }
 
         // Return the closest pathgrid point index from the specified position

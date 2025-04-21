@@ -455,7 +455,8 @@ namespace MWMechanics
                 float dist
                     = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                 if ((dist > fFleeDistance && !storage.mLOS)
-                    || pathTo(actor, PathFinder::makeOsgVec3(storage.mFleeDest), duration, supportedMovementDirections))
+                    || pathTo(
+                        actor, Misc::Convert::makeOsgVec3f(storage.mFleeDest), duration, supportedMovementDirections))
                 {
                     state = AiCombatStorage::FleeState_Idle;
                 }

@@ -223,7 +223,7 @@ namespace MWMechanics
         {
             ESM::Pathgrid::Point temp(pathgrid->mPoints[startNode]);
             converter.toWorld(temp);
-            *out++ = makeOsgVec3(temp);
+            *out++ = Misc::Convert::makeOsgVec3f(temp);
         }
         else
         {
@@ -234,8 +234,8 @@ namespace MWMechanics
             if (path.size() > 1)
             {
                 ESM::Pathgrid::Point secondNode = *(++path.begin());
-                osg::Vec3f firstNodeVec3f = makeOsgVec3(pathgrid->mPoints[startNode]);
-                osg::Vec3f secondNodeVec3f = makeOsgVec3(secondNode);
+                osg::Vec3f firstNodeVec3f = Misc::Convert::makeOsgVec3f(pathgrid->mPoints[startNode]);
+                osg::Vec3f secondNodeVec3f = Misc::Convert::makeOsgVec3f(secondNode);
                 osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
                 osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
                 if (toSecondNodeVec3f * toStartPointVec3f > 0)
@@ -259,7 +259,7 @@ namespace MWMechanics
             // convert supplied path to world coordinates
             std::transform(path.begin(), path.end(), out, [&](ESM::Pathgrid::Point& point) {
                 converter.toWorld(point);
-                return makeOsgVec3(point);
+                return Misc::Convert::makeOsgVec3f(point);
             });
         }
 

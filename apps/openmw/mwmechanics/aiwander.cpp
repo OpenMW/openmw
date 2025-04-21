@@ -772,7 +772,7 @@ namespace MWMechanics
                 const ESM::Pathgrid::Point& connDest = points[randomIndex];
 
                 // add an offset towards random neighboring node
-                osg::Vec3f dir = PathFinder::makeOsgVec3(connDest) - dest;
+                osg::Vec3f dir = Misc::Convert::makeOsgVec3f(connDest) - dest;
                 const float length = dir.length();
                 dir.normalize();
 
@@ -862,7 +862,7 @@ namespace MWMechanics
             size_t pointIndex = 0;
             for (size_t counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
-                const osg::Vec3f nodePos = PathFinder::makeOsgVec3(pathgrid->mPoints[counter]);
+                const osg::Vec3f nodePos = Misc::Convert::makeOsgVec3f(pathgrid->mPoints[counter]);
                 if ((npcPos - nodePos).length2() <= mDistance * mDistance
                     && getPathGridGraph(pathgrid).isPointConnected(closestPointIndex, counter))
                 {
@@ -905,8 +905,8 @@ namespace MWMechanics
     void AiWander::addPositionBetweenPathgridPoints(
         const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage)
     {
-        osg::Vec3f vectorStart = PathFinder::makeOsgVec3(start);
-        osg::Vec3f delta = PathFinder::makeOsgVec3(end) - vectorStart;
+        osg::Vec3f vectorStart = Misc::Convert::makeOsgVec3f(start);
+        osg::Vec3f delta = Misc::Convert::makeOsgVec3f(end) - vectorStart;
         float length = delta.length();
         delta.normalize();
 
