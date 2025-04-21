@@ -406,8 +406,7 @@ namespace MWWorld
         template <class T>
         ContainerStoreIteratorBase(const ContainerStoreIteratorBase<T>& other)
         {
-            char CANNOT_CONVERT_CONST_ITERATOR_TO_ITERATOR[IsConvertible<T, PtrType, void>::value ? 1 : -1];
-            ((void)CANNOT_CONVERT_CONST_ITERATOR_TO_ITERATOR);
+            static_assert(IsConvertible<T, PtrType, void>::value);
             copy(other);
         }
 
