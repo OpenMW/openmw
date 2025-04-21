@@ -53,8 +53,6 @@ namespace
 
     bpo::options_description makeOptionsDescription()
     {
-        using Fallback::FallbackMap;
-
         bpo::options_description result;
         auto addOption = result.add_options();
         addOption("help", "print help message");
@@ -87,7 +85,8 @@ namespace
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default");
 
-        addOption("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")->multitoken()->composing(),
+        addOption("fallback",
+            bpo::value<Fallback::FallbackMap>()->default_value(Fallback::FallbackMap(), "")->multitoken()->composing(),
             "fallback values");
 
         Files::ConfigurationManager::addCommonOptions(result);

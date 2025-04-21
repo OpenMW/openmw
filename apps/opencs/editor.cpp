@@ -38,8 +38,6 @@
 
 #include "view/doc/viewmanager.hpp"
 
-using namespace Fallback;
-
 CS::Editor::Editor(int argc, char** argv)
     : mConfigVariables(readConfiguration())
     , mSettingsState(mCfgMgr)
@@ -124,7 +122,10 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
             ->default_value(std::vector<std::string>(), "fallback-archive")
             ->multitoken());
     addOption("fallback",
-        boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")->multitoken()->composing(),
+        boost::program_options::value<Fallback::FallbackMap>()
+            ->default_value(Fallback::FallbackMap(), "")
+            ->multitoken()
+            ->composing(),
         "fallback values");
     Files::ConfigurationManager::addCommonOptions(desc);
 
@@ -141,7 +142,7 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
 {
     boost::program_options::variables_map& variables = mConfigVariables;
 
-    Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
+    Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
 
     mEncodingName = variables["encoding"].as<std::string>();
     mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
