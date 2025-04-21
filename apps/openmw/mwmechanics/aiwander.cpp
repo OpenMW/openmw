@@ -109,6 +109,31 @@ namespace MWMechanics
             return std::vector<unsigned char>(std::begin(idle), std::end(idle));
         }
 
+        void trimAllowedNodes(const std::deque<osg::Vec3f>& path, std::vector<ESM::Pathgrid::Point>& nodes)
+        {
+            // TODO: how to add these back in once the door opens?
+            // Idea: keep a list of detected closed doors (see aicombat.cpp)
+            // Every now and then check whether one of the doors is opened. (maybe
+            // at the end of playing idle?) If the door is opened then re-calculate
+            // allowed nodes starting from the spawn point.
+            std::vector<osg::Vec3f> points(path.begin(), path.end());
+            while (points.size() >= 2)
+            {
+                const osg::Vec3f point = points.back();
+                for (std::size_t j = 0; j < nodes.size(); j++)
+                {
+                    // FIXME: doesn't handle a door with the same X/Y
+                    //        coordinates but with a different Z
+                    if (std::abs(nodes[j].mX - point.x()) <= 0.5 && std::abs(nodes[j].mY - point.y()) <= 0.5)
+                    {
+                        nodes.erase(nodes.begin() + j);
+                        break;
+                    }
+                }
+                points.pop_back();
+            }
+        }
+
     }
 
     AiWanderStorage::AiWanderStorage()
@@ -586,7 +611,7 @@ namespace MWMechanics
             {
                 // remove allowed points then select another random destination
                 storage.mTrimCurrentNode = true;
-                trimAllowedNodes(storage.mAllowedNodes, mPathFinder);
+                trimAllowedNodes(mPathFinder.getPath(), storage.mAllowedNodes);
                 mObstacleCheck.clear();
                 stopWalking(actor);
                 storage.setState(AiWanderStorage::Wander_MoveNow);
@@ -641,31 +666,6 @@ namespace MWMechanics
         // Choose a different node and delete this one from possible nodes because it is uncreachable:
         else
             storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + randNode);
-    }
-
-    void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes, const PathFinder& pathfinder)
-    {
-        // TODO: how to add these back in once the door opens?
-        // Idea: keep a list of detected closed doors (see aicombat.cpp)
-        // Every now and then check whether one of the doors is opened. (maybe
-        // at the end of playing idle?) If the door is opened then re-calculate
-        // allowed nodes starting from the spawn point.
-        auto paths = pathfinder.getPath();
-        while (paths.size() >= 2)
-        {
-            const auto pt = paths.back();
-            for (unsigned int j = 0; j < nodes.size(); j++)
-            {
-                // FIXME: doesn't handle a door with the same X/Y
-                //        coordinates but with a different Z
-                if (std::abs(nodes[j].mX - pt.x()) <= 0.5 && std::abs(nodes[j].mY - pt.y()) <= 0.5)
-                {
-                    nodes.erase(nodes.begin() + j);
-                    break;
-                }
-            }
-            paths.pop_back();
-        }
     }
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor)

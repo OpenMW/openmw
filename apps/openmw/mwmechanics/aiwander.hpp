@@ -166,8 +166,6 @@ namespace MWMechanics
 
         void getAllowedNodes(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
-        void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes, const PathFinder& pathfinder);
-
         // constants for converting idleSelect values into groupNames
         enum GroupIndex
         {
