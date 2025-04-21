@@ -4,6 +4,7 @@
 #include <cassert>
 #include <deque>
 #include <iterator>
+#include <span>
 
 #include <osg/Vec3f>
 
@@ -102,18 +103,15 @@ namespace MWMechanics
 
         void buildStraightPath(const osg::Vec3f& endPoint);
 
-        void buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
-
         void buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
             const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds,
             const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
-            PathType pathType);
+            PathType pathType, std::span<const osg::Vec3f> checkpoints = {});
 
         void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
             const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
             const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
-            PathType pathType);
+            PathType pathType, std::span<const osg::Vec3f> checkpoints = {});
 
         void buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
             const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
@@ -156,7 +154,8 @@ namespace MWMechanics
         [[nodiscard]] DetourNavigator::Status buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor,
             const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds,
             const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
-            PathType pathType, std::back_insert_iterator<std::deque<osg::Vec3f>> out);
+            PathType pathType, std::span<const osg::Vec3f> checkpoints,
+            std::back_insert_iterator<std::deque<osg::Vec3f>> out);
     };
 }
 

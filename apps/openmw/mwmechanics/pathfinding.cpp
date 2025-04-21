@@ -360,26 +360,16 @@ namespace MWMechanics
         mConstructed = true;
     }
 
-    void PathFinder::buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
-    {
-        mPath.clear();
-        mCell = cell;
-
-        buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
-
-        mConstructed = !mPath.empty();
-    }
-
     void PathFinder::buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
         const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType)
+        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType,
+        std::span<const osg::Vec3f> checkpoints)
     {
         mPath.clear();
 
         // If it's not possible to build path over navmesh due to disabled navmesh generation fallback to straight path
         DetourNavigator::Status status = buildPathByNavigatorImpl(actor, startPoint, endPoint, agentBounds, flags,
-            areaCosts, endTolerance, pathType, std::back_inserter(mPath));
+            areaCosts, endTolerance, pathType, checkpoints, std::back_inserter(mPath));
 
         if (status != DetourNavigator::Status::Success)
             mPath.clear();
@@ -393,7 +383,7 @@ namespace MWMechanics
     void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
         const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
-        PathType pathType)
+        PathType pathType, std::span<const osg::Vec3f> checkpoints)
     {
         mPath.clear();
         mCell = actor.getCell();
@@ -403,7 +393,7 @@ namespace MWMechanics
         if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
         {
             status = buildPathByNavigatorImpl(actor, startPoint, endPoint, agentBounds, flags, areaCosts, endTolerance,
-                pathType, std::back_inserter(mPath));
+                pathType, checkpoints, std::back_inserter(mPath));
             if (status != DetourNavigator::Status::Success)
                 mPath.clear();
         }
@@ -412,7 +402,7 @@ namespace MWMechanics
             && (flags & DetourNavigator::Flag_usePathgrid) == 0)
         {
             status = buildPathByNavigatorImpl(actor, startPoint, endPoint, agentBounds,
-                flags | DetourNavigator::Flag_usePathgrid, areaCosts, endTolerance, pathType,
+                flags | DetourNavigator::Flag_usePathgrid, areaCosts, endTolerance, pathType, checkpoints,
                 std::back_inserter(mPath));
             if (status != DetourNavigator::Status::Success)
                 mPath.clear();
@@ -430,12 +420,13 @@ namespace MWMechanics
     DetourNavigator::Status PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor,
         const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds,
         const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
-        PathType pathType, std::back_insert_iterator<std::deque<osg::Vec3f>> out)
+        PathType pathType, std::span<const osg::Vec3f> checkpoints,
+        std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
-        const auto world = MWBase::Environment::get().getWorld();
-        const auto navigator = world->getNavigator();
-        const auto status = DetourNavigator::findPath(
-            *navigator, agentBounds, startPoint, endPoint, flags, areaCosts, endTolerance, out);
+        const MWBase::World& world = *MWBase::Environment::get().getWorld();
+        const DetourNavigator::Navigator& navigator = *world.getNavigator();
+        const DetourNavigator::Status status = DetourNavigator::findPath(
+            navigator, agentBounds, startPoint, endPoint, flags, areaCosts, endTolerance, checkpoints, out);
 
         if (pathType == PathType::Partial && status == DetourNavigator::Status::PartialPath)
             return DetourNavigator::Status::Success;

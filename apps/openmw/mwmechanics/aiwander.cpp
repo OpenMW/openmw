@@ -242,20 +242,12 @@ namespace MWMechanics
         {
             const ESM::Pathgrid* pathgrid
                 = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
-            if (mUsePathgrid)
-            {
-                mPathFinder.buildPathByPathgrid(
-                    pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(pathgrid));
-            }
-            else
-            {
-                const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
-                constexpr float endTolerance = 0;
-                const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
-                const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
-                mPathFinder.buildPath(actor, pos.asVec3(), mDestination, getPathGridGraph(pathgrid), agentBounds,
-                    navigatorFlags, areaCosts, endTolerance, PathType::Full);
-            }
+            const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
+            constexpr float endTolerance = 0;
+            const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
+            const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
+            mPathFinder.buildPath(actor, pos.asVec3(), mDestination, getPathGridGraph(pathgrid), agentBounds,
+                navigatorFlags, areaCosts, endTolerance, PathType::Full);
 
             if (mPathFinder.isPathConstructed())
                 storage.setState(AiWanderStorage::Wander_Walking, !mUsePathgrid);
@@ -633,38 +625,64 @@ namespace MWMechanics
     void AiWander::setPathToAnAllowedPosition(
         const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
     {
-        auto world = MWBase::Environment::get().getWorld();
-        auto& prng = world->getPrng();
+        MWBase::World& world = *MWBase::Environment::get().getWorld();
+        Misc::Rng::Generator& prng = world.getPrng();
         const std::size_t randomAllowedPositionIndex
             = static_cast<std::size_t>(Misc::Rng::rollDice(storage.mAllowedPositions.size(), prng));
         const osg::Vec3f randomAllowedPosition = storage.mAllowedPositions[randomAllowedPositionIndex];
 
         const osg::Vec3f start = actorPos.asVec3();
 
-        // don't take shortcuts for wandering
-        const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
-        mPathFinder.buildPathByPathgrid(start, randomAllowedPosition, actor.getCell(), getPathGridGraph(pathgrid));
+        const MWWorld::Cell& cell = *actor.getCell()->getCell();
+        const ESM::Pathgrid* pathgrid = world.getStore().get<ESM::Pathgrid>().search(cell);
+        const PathgridGraph& pathgridGraph = getPathGridGraph(pathgrid);
 
-        if (mPathFinder.isPathConstructed())
-        {
-            mDestination = randomAllowedPosition;
-            mHasDestination = true;
-            mUsePathgrid = true;
-            // Remove this position as an option and add back the previously used position (stops NPC from picking the
-            // same position):
-            storage.mAllowedPositions.erase(storage.mAllowedPositions.begin() + randomAllowedPositionIndex);
-            // check if mCurrentPosition was taken out of mAllowedPositions
-            if (storage.mTrimCurrentPosition && storage.mAllowedPositions.size() > 1)
-                storage.mTrimCurrentPosition = false;
-            else
-                storage.mAllowedPositions.push_back(storage.mCurrentPosition);
-            storage.mCurrentPosition = randomAllowedPosition;
+        const Misc::CoordinateConverter converter = Misc::makeCoordinateConverter(cell);
+        std::deque<ESM::Pathgrid::Point> path
+            = pathgridGraph.aStarSearch(Misc::getClosestPoint(*pathgrid, converter.toLocalVec3(start)),
+                Misc::getClosestPoint(*pathgrid, converter.toLocalVec3(randomAllowedPosition)));
 
-            storage.setState(AiWanderStorage::Wander_Walking);
-        }
         // Choose a different position and delete this one from possible positions because it is uncreachable:
-        else
+        if (path.empty())
+        {
             storage.mAllowedPositions.erase(storage.mAllowedPositions.begin() + randomAllowedPositionIndex);
+            return;
+        }
+
+        // Drop nearest pathgrid point.
+        path.pop_front();
+
+        std::vector<osg::Vec3f> checkpoints(path.size());
+        for (std::size_t i = 0; i < path.size(); ++i)
+            checkpoints[i] = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(path[i]));
+
+        const DetourNavigator::AgentBounds agentBounds = world.getPathfindingAgentBounds(actor);
+        const DetourNavigator::Flags flags = getNavigatorFlags(actor);
+        const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, flags);
+        constexpr float endTolerance = 0;
+        mPathFinder.buildPath(actor, start, randomAllowedPosition, pathgridGraph, agentBounds, flags, areaCosts,
+            endTolerance, PathType::Full, checkpoints);
+
+        if (!mPathFinder.isPathConstructed())
+        {
+            storage.mAllowedPositions.erase(storage.mAllowedPositions.begin() + randomAllowedPositionIndex);
+            return;
+        }
+
+        mDestination = randomAllowedPosition;
+        mHasDestination = true;
+        mUsePathgrid = true;
+        // Remove this position as an option and add back the previously used position (stops NPC from picking the
+        // same position):
+        storage.mAllowedPositions.erase(storage.mAllowedPositions.begin() + randomAllowedPositionIndex);
+        // check if mCurrentPosition was taken out of mAllowedPositions
+        if (storage.mTrimCurrentPosition && storage.mAllowedPositions.size() > 1)
+            storage.mTrimCurrentPosition = false;
+        else
+            storage.mAllowedPositions.push_back(storage.mCurrentPosition);
+        storage.mCurrentPosition = randomAllowedPosition;
+
+        storage.setState(AiWanderStorage::Wander_Walking);
     }
 
     void AiWander::stopWalking(const MWWorld::Ptr& actor)
