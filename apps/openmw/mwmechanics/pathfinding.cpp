@@ -10,6 +10,7 @@
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/misc/coordinateconverter.hpp>
 #include <components/misc/math.hpp>
+#include <components/misc/pathgridutils.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -38,7 +39,7 @@ namespace
         //       points to a quadtree may help
         for (size_t counter = 0; counter < grid->mPoints.size(); counter++)
         {
-            float potentialDistBetween = MWMechanics::PathFinder::distanceSquared(grid->mPoints[counter], pos);
+            float potentialDistBetween = Misc::distanceSquared(grid->mPoints[counter], pos);
             if (potentialDistBetween < closestDistanceReachable)
             {
                 // found a closer one
@@ -197,7 +198,7 @@ namespace MWMechanics
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         osg::Vec3f startPointInLocalCoords(converter.toLocalVec3(startPoint));
-        size_t startNode = getClosestPoint(pathgrid, startPointInLocalCoords);
+        const size_t startNode = Misc::getClosestPoint(*pathgrid, startPointInLocalCoords);
 
         osg::Vec3f endPointInLocalCoords(converter.toLocalVec3(endPoint));
         std::pair<size_t, bool> endNode
@@ -206,8 +207,8 @@ namespace MWMechanics
         // if it's shorter for actor to travel from start to end, than to travel from either
         // start or end to nearest pathgrid point, just travel from start to end.
         float startToEndLength2 = (endPointInLocalCoords - startPointInLocalCoords).length2();
-        float endTolastNodeLength2 = distanceSquared(pathgrid->mPoints[endNode.first], endPointInLocalCoords);
-        float startTo1stNodeLength2 = distanceSquared(pathgrid->mPoints[startNode], startPointInLocalCoords);
+        float endTolastNodeLength2 = Misc::distanceSquared(pathgrid->mPoints[endNode.first], endPointInLocalCoords);
+        float startTo1stNodeLength2 = Misc::distanceSquared(pathgrid->mPoints[startNode], startPointInLocalCoords);
         if ((startToEndLength2 < startTo1stNodeLength2) || (startToEndLength2 < endTolastNodeLength2))
         {
             *out++ = endPoint;

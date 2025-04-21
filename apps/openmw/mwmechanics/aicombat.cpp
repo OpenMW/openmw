@@ -1,13 +1,11 @@
 #include "aicombat.hpp"
 
-#include <components/misc/coordinateconverter.hpp>
-#include <components/misc/rng.hpp>
-
-#include <components/esm3/aisequence.hpp>
-
-#include <components/misc/mathutil.hpp>
-
 #include <components/detournavigator/navigatorutils.hpp>
+#include <components/esm3/aisequence.hpp>
+#include <components/misc/coordinateconverter.hpp>
+#include <components/misc/mathutil.hpp>
+#include <components/misc/pathgridutils.hpp>
+#include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwphysics/raycasting.hpp"
@@ -393,8 +391,8 @@ namespace MWMechanics
                         osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
                         coords.toLocal(localPos);
 
-                        size_t closestPointIndex = PathFinder::getClosestPoint(pathgrid, localPos);
-                        for (size_t i = 0; i < pathgrid->mPoints.size(); i++)
+                        const std::size_t closestPointIndex = Misc::getClosestPoint(*pathgrid, localPos);
+                        for (std::size_t i = 0; i < pathgrid->mPoints.size(); i++)
                         {
                             if (i != closestPointIndex
                                 && getPathGridGraph(pathgrid).isPointConnected(closestPointIndex, i))

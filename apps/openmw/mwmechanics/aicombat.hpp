@@ -2,12 +2,13 @@
 #define GAME_MWMECHANICS_AICOMBAT_H
 
 #include "aitemporarybase.hpp"
+#include "aitimer.hpp"
+#include "movement.hpp"
 #include "typedaipackage.hpp"
 
 #include "../mwworld/cellstore.hpp" // for Doors
 
-#include "aitimer.hpp"
-#include "movement.hpp"
+#include <components/esm3/loadpgrd.hpp>
 
 namespace ESM
 {

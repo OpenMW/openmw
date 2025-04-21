@@ -8,6 +8,7 @@
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/esm3/aisequence.hpp>
 #include <components/misc/coordinateconverter.hpp>
+#include <components/misc/pathgridutils.hpp>
 #include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -821,7 +822,7 @@ namespace MWMechanics
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;
 
-        const size_t index = PathFinder::getClosestPoint(pathgrid, dest);
+        const size_t index = Misc::getClosestPoint(*pathgrid, dest);
 
         getPathGridGraph(pathgrid).getNeighbouringPoints(index, points);
     }
@@ -854,7 +855,7 @@ namespace MWMechanics
             const osg::Vec3f npcPos = converter.toLocalVec3(mInitialActorPosition);
 
             // Find closest pathgrid point
-            size_t closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);
+            const std::size_t closestPointIndex = Misc::getClosestPoint(*pathgrid, npcPos);
 
             // mAllowedPositions for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point
