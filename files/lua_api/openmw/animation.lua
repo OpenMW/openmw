@@ -224,7 +224,7 @@
 -- @param #string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
 -- @param #table options optional table of parameters. Can contain:
 --
---   * `loop` - boolean, if true the effect will loop until removed (default: 0).
+--   * `loop` - boolean, if true the effect will loop until removed (default: false).
 --   * `boneName` - name of the bone to attach the vfx to. (default: "")
 --   * `particleTextureOverride` - name of the particle texture to use. (default: "")
 --   * `vfxId` - a string ID that can be used to remove the effect later, using #removeVfx, and to avoid duplicate effects. The default value of "" can have duplicates. To avoid interaction with the engine, use unique identifiers unrelated to magic effect IDs. The engine uses this identifier to add and remove magic effects based on what effects are active on the actor. If this is set equal to the @{openmw.core#MagicEffectId} identifier of the magic effect being added, for example core.magic.EFFECT_TYPE.FireDamage, then the engine will remove it once the fire damage effect on the actor reaches 0. (Default: "").
