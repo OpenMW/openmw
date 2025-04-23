@@ -10,6 +10,7 @@
 #include <components/vfs/pathutil.hpp>
 
 #include "configuration.hpp"
+#include "luastateptr.hpp"
 
 namespace VFS
 {
@@ -188,7 +189,7 @@ namespace LuaUtil
         static void countHook(lua_State* L, lua_Debug* ar);
         static void* trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 
-        lua_State* createLuaRuntime(LuaState* luaState);
+        static LuaStatePtr createLuaRuntime(LuaState* luaState);
 
         struct AllocOwner
         {
@@ -206,25 +207,8 @@ namespace LuaUtil
         uint64_t mSmallAllocMemoryUsage = 0;
         std::vector<int64_t> mMemoryUsage;
 
-        class LuaStateHolder
-        {
-        public:
-            LuaStateHolder(lua_State* L)
-                : L(L)
-            {
-                sol::set_default_state(L);
-            }
-            ~LuaStateHolder() { lua_close(L); }
-            LuaStateHolder(const LuaStateHolder&) = delete;
-            LuaStateHolder(LuaStateHolder&&) = delete;
-            lua_State* get() { return L; }
-
-        private:
-            lua_State* L;
-        };
-
         // Must be declared before mSol and all sol-related objects. Then on exit it will be destructed the last.
-        LuaStateHolder mLuaHolder;
+        LuaStatePtr mLuaState;
 
         sol::state_view mSol;
         const ScriptsConfiguration* mConf;
