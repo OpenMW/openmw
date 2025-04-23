@@ -64,7 +64,7 @@ namespace MWGui
         void setGuiMode(GuiMode mode);
 
         void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
-        void itemRemoved(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         /// Cycle to previous/next weapon
         void cycle(bool next);

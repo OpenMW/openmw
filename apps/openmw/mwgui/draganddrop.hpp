@@ -2,6 +2,7 @@
 #define OPENMW_MWGUI_DRAGANDDROP_H
 
 #include "itemmodel.hpp"
+#include "itemwidget.hpp"
 
 namespace MyGUI
 {
@@ -18,7 +19,7 @@ namespace MWGui
     {
     public:
         bool mIsOnDragAndDrop;
-        MyGUI::Widget* mDraggedWidget;
+        ItemWidget* mDraggedWidget;
         ItemModel* mSourceModel;
         ItemView* mSourceView;
         SortFilterItemModel* mSourceSortModel;
@@ -30,6 +31,7 @@ namespace MWGui
         void startDrag(
             int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count);
         void drop(ItemModel* targetModel, ItemView* targetView);
+        void update();
         void onFrame();
 
         void finish();

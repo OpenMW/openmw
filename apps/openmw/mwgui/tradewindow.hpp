@@ -44,10 +44,12 @@ namespace MWGui
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
 
+        TradeItemModel* getTradeModel() { return mTradeModel; };
+
         void updateItemView();
 
         void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
-        void itemRemoved(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         typedef MyGUI::delegates::MultiDelegate<> EventHandle_TradeDone;
         EventHandle_TradeDone eventTradeDone;

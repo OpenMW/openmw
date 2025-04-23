@@ -113,6 +113,25 @@ namespace MWGui
         encumbrance = std::max(0.f, encumbrance);
     }
 
+    void TradeItemModel::updateBorrowed()
+    {
+        auto update = [](std::vector<ItemStack>& list) {
+            for (auto it = list.begin(); it != list.end();)
+            {
+                int actualCount = it->mBase.getCellRef().getCount();
+                if (actualCount < it->mCount)
+                    it->mCount = actualCount;
+                if (it->mCount == 0)
+                    it = list.erase(it);
+                else
+                    ++it;
+            }
+        };
+
+        update(mBorrowedFromUs);
+        update(mBorrowedToUs);
+    }
+
     void TradeItemModel::abort()
     {
         mBorrowedFromUs.clear();

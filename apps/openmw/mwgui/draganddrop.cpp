@@ -11,7 +11,6 @@
 #include "controllers.hpp"
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
-#include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
 
 namespace MWGui
@@ -72,19 +71,18 @@ namespace MWGui
             mSourceSortModel->addDragItem(mItem.mBase, count);
         }
 
-        ItemWidget* baseWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>(
+        mDraggedWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>(
             "MW_ItemIcon", 0, 0, 42, 42, MyGUI::Align::Default, "DragAndDrop");
 
         Controllers::ControllerFollowMouse* controller
             = MyGUI::ControllerManager::getInstance()
                   .createItem(Controllers::ControllerFollowMouse::getClassTypeName())
                   ->castType<Controllers::ControllerFollowMouse>();
-        MyGUI::ControllerManager::getInstance().addItem(baseWidget, controller);
+        MyGUI::ControllerManager::getInstance().addItem(mDraggedWidget, controller);
 
-        mDraggedWidget = baseWidget;
-        baseWidget->setItem(mItem.mBase);
-        baseWidget->setNeedMouseFocus(false);
-        baseWidget->setCount(count);
+        mDraggedWidget->setItem(mItem.mBase);
+        mDraggedWidget->setNeedMouseFocus(false);
+        mDraggedWidget->setCount(count);
 
         sourceView->update();
 
@@ -124,6 +122,22 @@ namespace MWGui
 
         // We need to update the view since an other item could be auto-equipped.
         mSourceView->update();
+    }
+
+    void DragAndDrop::update()
+    {
+        if (mIsOnDragAndDrop)
+        {
+            int count = mItem.mBase.getCellRef().getCount();
+            if (count < mDraggedCount)
+            {
+                mItem.mCount = count;
+                mDraggedCount = count;
+                mDraggedWidget->setCount(mDraggedCount);
+                mSourceSortModel->clearDragItems();
+                mSourceSortModel->addDragItem(mItem.mBase, mDraggedCount);
+            }
+        }
     }
 
     void DragAndDrop::onFrame()

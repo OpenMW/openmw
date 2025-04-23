@@ -651,4 +651,13 @@ namespace MWGui
     {
         mItemView->update();
     }
+
+    void TradeWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
+    {
+        mTradeModel->updateBorrowed();
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->updateBorrowed();
+
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+        updateItemView();
+    }
 }

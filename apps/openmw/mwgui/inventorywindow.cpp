@@ -850,6 +850,21 @@ namespace MWGui
         mPreview->rebuild();
     }
 
+    void InventoryWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
+    {
+        if (mDragAndDrop->mIsOnDragAndDrop && mDragAndDrop->mItem.mBase == item)
+            mDragAndDrop->update();
+
+        if (mTrading)
+        {
+            mTradeModel->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->getTradeModel()->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateItemView();
+        }
+
+        updateItemView();
+    }
+
     MyGUI::IntSize InventoryWindow::getPreviewViewportSize() const
     {
         const MyGUI::IntSize previewWindowSize = mAvatarImage->getSize();
