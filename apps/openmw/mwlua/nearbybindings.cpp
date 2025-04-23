@@ -213,6 +213,7 @@ namespace MWLua
                     { "NavMeshNotFound", DetourNavigator::Status::NavMeshNotFound },
                     { "StartPolygonNotFound", DetourNavigator::Status::StartPolygonNotFound },
                     { "EndPolygonNotFound", DetourNavigator::Status::EndPolygonNotFound },
+                    { "TargetPolygonNotFound", DetourNavigator::Status::TargetPolygonNotFound },
                     { "MoveAlongSurfaceFailed", DetourNavigator::Status::MoveAlongSurfaceFailed },
                     { "FindPathOverPolygonsFailed", DetourNavigator::Status::FindPathOverPolygonsFailed },
                     { "InitNavMeshQueryFailed", DetourNavigator::Status::InitNavMeshQueryFailed },
