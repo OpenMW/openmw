@@ -118,7 +118,7 @@ namespace MWGui
         auto update = [](std::vector<ItemStack>& list) {
             for (auto it = list.begin(); it != list.end();)
             {
-                int actualCount = it->mBase.getCellRef().getCount();
+                size_t actualCount = it->mBase.getCellRef().getCount();
                 if (actualCount < it->mCount)
                     it->mCount = actualCount;
                 if (it->mCount == 0)

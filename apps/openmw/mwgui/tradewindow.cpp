@@ -659,5 +659,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
         updateItemView();
+
+        updateOffer();
     }
 }

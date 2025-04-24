@@ -44,7 +44,7 @@ namespace MWGui
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
 
-        TradeItemModel* getTradeModel() { return mTradeModel; };
+        TradeItemModel* getTradeModel() { return mTradeModel; }
 
         void updateItemView();
 
