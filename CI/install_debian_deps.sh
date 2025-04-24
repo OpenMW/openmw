@@ -95,7 +95,7 @@ declare -rA GROUPED_DEPS=(
   [libasan6]="libasan6"
 
   [android]="binutils build-essential cmake ccache curl unzip git pkg-config"
-  
+
   [openmw-clang-format]="
     clang-format-14
     git-core
@@ -126,10 +126,24 @@ export APT_CACHE_DIR="${PWD}/apt-cache"
 export DEBIAN_FRONTEND=noninteractive
 set -x
 mkdir -pv "$APT_CACHE_DIR"
-apt-get update -yqq
+
+while true; do
+  apt-get update -yqq && break
+done
+
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends software-properties-common gnupg >/dev/null
-add-apt-repository -y ppa:openmw/openmw
-add-apt-repository -y ppa:openmw/openmw-daily
-add-apt-repository -y ppa:openmw/staging
+
+while true; do
+  add-apt-repository -y ppa:openmw/openmw && break
+done
+
+while true; do
+  add-apt-repository -y ppa:openmw/openmw-daily && break
+done
+
+while true; do
+  add-apt-repository -y ppa:openmw/staging && break
+done
+
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}" >/dev/null
 apt list --installed
