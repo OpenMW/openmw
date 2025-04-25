@@ -74,19 +74,20 @@ namespace
 
     TEST(EsmFixedString, empty_strings)
     {
+        constexpr std::string_view someStr = "some string";
         {
             SCOPED_TRACE("4 bytes");
             ESM::NAME empty = ESM::NAME();
             EXPECT_TRUE(empty == "");
             EXPECT_TRUE(empty == static_cast<uint32_t>(0));
-            EXPECT_TRUE(empty != "some string");
+            EXPECT_TRUE(empty != someStr);
             EXPECT_TRUE(empty != static_cast<uint32_t>(42));
         }
         {
             SCOPED_TRACE("32 bytes");
             ESM::NAME32 empty = ESM::NAME32();
             EXPECT_TRUE(empty == "");
-            EXPECT_TRUE(empty != "some string");
+            EXPECT_TRUE(empty != someStr);
         }
     }
 
