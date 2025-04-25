@@ -594,6 +594,11 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
 
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105438
+        set(OPENMW_CXX_FLAGS "-Wno-array-bounds ${OPENMW_CXX_FLAGS}")
+    endif()
+
     if (APPLE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
