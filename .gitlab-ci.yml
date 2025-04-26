@@ -316,7 +316,7 @@ Ubuntu_GCC_tests_coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
