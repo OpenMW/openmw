@@ -21,7 +21,7 @@ declare -a CMAKE_CONF_OPTS=(
 )
 
 if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then
-    CMAKE_CXX_FLAGS_DEBUG="${CMAKE_CXX_FLAGS_DEBUG} --coverage"
+    CMAKE_CXX_FLAGS_DEBUG="${CMAKE_CXX_FLAGS_DEBUG} --coverage -fprofile-update=atomic"
     CMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS} --coverage"
 fi
 
