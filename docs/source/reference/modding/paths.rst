@@ -166,44 +166,45 @@ Relative paths are **relative to the** ``openmw.cfg`` **file they're in**, or th
 
 Tokens are used to access platform-dependent paths where OpenMW can store specific kinds of data.
 The available tokens are ``?local?``, ``?userconfig?``, ``?userdata?`` and ``?global?``.
+Tokens are used in the `Default paths`_.
 
-``?local?`` is the directory where the OpenMW binary is installed, except on MacOS, where it's the ``Resources`` directory inside the bundle.
+:``?local?``: The directory where the OpenMW binary is installed, except on MacOS, where it's the ``Resources`` directory inside the bundle.
 
-``?userconfig?`` depends on the platform:
+:``?userconfig?``: Platform-dependent:
 
-+--------------+-----------------------------------------------------------+
-| OS           | Location                                                  |
-+==============+===========================================================+
-| Linux        | ``$XDG_CONFIG_HOME/openmw/`` or ``$HOME/.config/openmw/`` |
-+--------------+-----------------------------------------------------------+
-| Mac          | ``$HOME/Library/Preferences/openmw/``                     |
-+--------------+-----------------------------------------------------------+
-| Windows      | ``Documents\My Games\OpenMW\``                            |
-+--------------+-----------------------------------------------------------+
+    +--------------+-----------------------------------------------------------+
+    | OS           | Location                                                  |
+    +==============+===========================================================+
+    | Linux        | ``$XDG_CONFIG_HOME/openmw/`` or ``$HOME/.config/openmw/`` |
+    +--------------+-----------------------------------------------------------+
+    | Mac          | ``$HOME/Library/Preferences/openmw/``                     |
+    +--------------+-----------------------------------------------------------+
+    | Windows      | ``Documents\My Games\OpenMW\``                            |
+    +--------------+-----------------------------------------------------------+
 
-``?userdata?`` depends on the platform:
+:``?userdata?``: Platform-dependent:
 
-+--------------+--------------------------------------------------------------+
-| OS           | Location                                                     |
-+==============+==============================================================+
-| Linux        | ``$XDG_DATA_HOME/openmw/`` or ``$HOME/.local/share/openmw/`` |
-+--------------+--------------------------------------------------------------+
-| Mac          | ``$HOME/Library/Application Support/openmw/``                |
-+--------------+--------------------------------------------------------------+
-| Windows      | ``Documents\My Games\OpenMW\``                               |
-+--------------+--------------------------------------------------------------+
+    +--------------+--------------------------------------------------------------+
+    | OS           | Location                                                     |
+    +==============+==============================================================+
+    | Linux        | ``$XDG_DATA_HOME/openmw/`` or ``$HOME/.local/share/openmw/`` |
+    +--------------+--------------------------------------------------------------+
+    | Mac          | ``$HOME/Library/Application Support/openmw/``                |
+    +--------------+--------------------------------------------------------------+
+    | Windows      | ``Documents\My Games\OpenMW\``                               |
+    +--------------+--------------------------------------------------------------+
 
-``?global?`` depends on the platform:
+:``?global?``: Platform-dependent:
 
-+--------------+-------------------------------------------------------------------+
-| OS           | Location                                                          |
-+==============+===================================================================+
-| Linux        | Chosen by the downstream packager, typically ``/usr/share/games`` |
-+--------------+-------------------------------------------------------------------+
-| Mac          | ``/Library/Application Support/``                                 |
-+--------------+-------------------------------------------------------------------+
-| Windows      | Not applicable                                                    |
-+--------------+-------------------------------------------------------------------+
+    +--------------+-------------------------------------------------------------------+
+    | OS           | Location                                                          |
+    +==============+===================================================================+
+    | Linux        | Chosen by the downstream packager, typically ``/usr/share/games`` |
+    +--------------+-------------------------------------------------------------------+
+    | Mac          | ``/Library/Application Support/``                                 |
+    +--------------+-------------------------------------------------------------------+
+    | Windows      | Not applicable                                                    |
+    +--------------+-------------------------------------------------------------------+
 
 Examples
 --------
