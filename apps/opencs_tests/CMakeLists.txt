@@ -21,11 +21,6 @@ if (UNIX AND NOT APPLE)
     target_link_libraries(openmw-cs-tests PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(openmw-cs-tests PRIVATE --coverage)
-    target_link_libraries(openmw-cs-tests PRIVATE gcov)
-endif()
-
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-cs-tests PRIVATE
         <gtest/gtest.h>

@@ -106,11 +106,6 @@ if (UNIX AND NOT APPLE)
     target_link_libraries(components-tests ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(components-tests PRIVATE --coverage)
-    target_link_libraries(components-tests gcov)
-endif()
-
 file(DOWNLOAD
     https://gitlab.com/OpenMW/example-suite/-/raw/8966dab24692555eec720c854fb0f73d108070cd/data/template.omwgame
     ${CMAKE_CURRENT_BINARY_DIR}/data/template.omwgame

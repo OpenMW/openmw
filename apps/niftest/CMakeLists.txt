@@ -12,11 +12,6 @@ target_link_libraries(niftest
     components
 )
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(niftest PRIVATE --coverage)
-    target_link_libraries(niftest gcov)
-endif()
-
 if (WIN32)
     install(TARGETS niftest RUNTIME DESTINATION ".")
 endif()

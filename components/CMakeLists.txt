@@ -621,11 +621,6 @@ if (USE_QT)
     if (BUILD_LAUNCHER OR BUILD_WIZARD)
         add_dependencies(components_qt qm-files)
     endif()
-
-    if (BUILD_WITH_CODE_COVERAGE)
-        target_compile_options(components_qt PRIVATE --coverage)
-        target_link_libraries(components_qt gcov)
-    endif()
 endif()
 
 if (OSG_STATIC AND CMAKE_SYSTEM_NAME MATCHES "Linux")
@@ -645,12 +640,6 @@ endif()
 if (UNIX AND NOT APPLE)
     target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
 endif()
-
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(components PRIVATE --coverage)
-    target_link_libraries(components gcov)
-endif()
-
 
 # Make the variable accessible for other subdirectories
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)

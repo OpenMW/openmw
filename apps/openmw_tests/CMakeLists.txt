@@ -31,11 +31,6 @@ if (UNIX AND NOT APPLE)
     target_link_libraries(openmw-tests ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(openmw-tests PRIVATE --coverage)
-    target_link_libraries(openmw-tests gcov)
-endif()
-
 target_compile_definitions(openmw-tests
     PRIVATE OPENMW_DATA_DIR=u8"${CMAKE_CURRENT_BINARY_DIR}/data"
             OPENMW_PROJECT_SOURCE_DIR=u8"${PROJECT_SOURCE_DIR}")

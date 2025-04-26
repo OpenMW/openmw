@@ -10,11 +10,6 @@ target_link_libraries(openmw-bulletobjecttool
     components
 )
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(openmw-bulletobjecttool PRIVATE --coverage)
-    target_link_libraries(openmw-bulletobjecttool gcov)
-endif()
-
 if (WIN32)
     install(TARGETS openmw-bulletobjecttool RUNTIME DESTINATION ".")
 endif()

@@ -184,11 +184,6 @@ if(BUILD_OPENCS)
     set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
     set_property(TARGET openmw-cs PROPERTY AUTOUIC_SEARCH_PATHS ui)
     set_property(TARGET openmw-cs PROPERTY AUTOUIC ON)
-
-    if (BUILD_WITH_CODE_COVERAGE)
-        target_compile_options(openmw-cs PRIVATE --coverage)
-        target_link_libraries(openmw-cs gcov)
-    endif()
 endif()
 
 if(APPLE AND BUILD_OPENCS)
@@ -279,11 +274,6 @@ if(USE_QT)
     set_property(TARGET openmw-cs-lib PROPERTY AUTOUIC_SEARCH_PATHS ui)
     set_property(TARGET openmw-cs-lib PROPERTY AUTOUIC ON)
 endif(USE_QT)
-
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(openmw-cs-lib PRIVATE --coverage)
-    target_link_libraries(openmw-cs-lib gcov)
-endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-cs-lib PRIVATE

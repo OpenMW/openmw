@@ -13,11 +13,6 @@ target_link_libraries(bsatool
     components
 )
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(bsatool PRIVATE --coverage)
-    target_link_libraries(bsatool gcov)
-endif()
-
 if (WIN32)
     install(TARGETS bsatool RUNTIME DESTINATION ".")
 endif()

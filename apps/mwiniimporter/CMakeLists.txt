@@ -26,11 +26,6 @@ if (MINGW)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
 endif()
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(openmw-iniimporter PRIVATE --coverage)
-    target_link_libraries(openmw-iniimporter gcov)
-endif()
-
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     target_precompile_headers(openmw-iniimporter PRIVATE
         <string>

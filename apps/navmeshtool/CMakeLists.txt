@@ -20,11 +20,6 @@ target_link_libraries(openmw-navmeshtool-lib
     components
 )
 
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(openmw-navmeshtool PRIVATE --coverage)
-    target_link_libraries(openmw-navmeshtool gcov)
-endif()
-
 if (WIN32)
     install(TARGETS openmw-navmeshtool RUNTIME DESTINATION ".")
 endif()

@@ -20,6 +20,11 @@ declare -a CMAKE_CONF_OPTS=(
     -DOPENMW_CXX_FLAGS="${OPENMW_CXX_FLAGS}"  # flags specific to OpenMW project
 )
 
+if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then
+    CMAKE_CXX_FLAGS_DEBUG="${CMAKE_CXX_FLAGS_DEBUG} --coverage"
+    CMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS} --coverage"
+fi
+
 if [[ "${CMAKE_EXE_LINKER_FLAGS}" ]]; then
     CMAKE_CONF_OPTS+=(
         -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}"
@@ -59,12 +64,6 @@ fi
 if [[ "${CMAKE_CXX_FLAGS_DEBUG}" ]]; then
     CMAKE_CONF_OPTS+=(
         -DCMAKE_CXX_FLAGS_DEBUG="${CMAKE_CXX_FLAGS_DEBUG}"
-    )
-fi
-
-if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then
-    CMAKE_CONF_OPTS+=(
-        -DBUILD_WITH_CODE_COVERAGE="${BUILD_WITH_CODE_COVERAGE}"
     )
 fi
 
