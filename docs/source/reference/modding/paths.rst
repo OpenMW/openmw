@@ -74,9 +74,13 @@ Configuration sources
 ^^^^^^^^^^^^^^^^^^^^^
 
 Configuration for OpenMW is composed from several sources.
-First comes the local or global ``openmw.cfg``.
-After that, any ``openmw.cfg`` files in any other directories specified with the ``config`` option are added.
-Finally, options specified on the command line are used – any option that can be specified as ``option=value`` in ``openmw.cfg`` can also be specified as ``--option=value`` or ``--option value`` on the command line for the engine (but not other OpenMW tools).
+From lowest to highest priority, these are:
+* The local or global ``openmw.cfg``.
+* Any ``openmw.cfg`` files in any other directories specified with the ``config`` option.
+* Options specified on the command line.
+
+.. tip::
+    Any option that can be specified as ``option=value`` in ``openmw.cfg`` can also be specified as ``--option=value`` or ``--option value`` on the command line for the engine (but not other OpenMW tools).
 
 The command line is always the highest-priority source, even if it specifies extra configuration directories with ``--config``.
 This lets you quickly test with extra options even if you're not using your normal configuration directories.
