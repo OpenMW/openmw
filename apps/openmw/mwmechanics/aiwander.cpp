@@ -40,15 +40,15 @@ namespace MWMechanics
 
     static const std::size_t MAX_IDLE_SIZE = 8;
 
-    const std::string AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] = {
-        std::string("idle2"),
-        std::string("idle3"),
-        std::string("idle4"),
-        std::string("idle5"),
-        std::string("idle6"),
-        std::string("idle7"),
-        std::string("idle8"),
-        std::string("idle9"),
+    const std::string_view AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] = {
+        "idle2",
+        "idle3",
+        "idle4",
+        "idle5",
+        "idle6",
+        "idle7",
+        "idle8",
+        "idle9",
     };
 
     namespace
@@ -680,7 +680,7 @@ namespace MWMechanics
     {
         if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
         {
-            const std::string& groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
+            const std::string_view groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
             return MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, groupName, 0, 1);
         }
         else
@@ -695,7 +695,7 @@ namespace MWMechanics
     {
         if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
         {
-            const std::string& groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
+            const std::string_view groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
             return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, groupName);
         }
         else

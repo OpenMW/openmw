@@ -200,7 +200,7 @@ namespace MWBase
         ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
         /// references that are currently not in the scene should be ignored.
 
-        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
+        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, std::string_view groupName) = 0;
 
         virtual bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const = 0;
 
