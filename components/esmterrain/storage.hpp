@@ -117,6 +117,12 @@ namespace ESMTerrain
         static float getHeightAt(
             const std::span<const float> data, const int landSize, const osg::Vec3f& worldPos, const float cellSize);
 
+        static osg::Vec3f getTextureCorrectedWorldPos(
+            const osg::Vec3f& uncorrectedWorldPos, const int textureSize, const float cellSize);
+
+        static UniqueTextureId getLandTextureAt(const std::span<const std::uint16_t> landData, const int plugin,
+            const int textureSize, const osg::Vec3f& worldPos, const float cellSize);
+
         /// Get the transformation factor for mapping cell units to world units.
         float getCellWorldSize(ESM::RefId worldspace) override;
 

@@ -70,6 +70,15 @@
 -- @return #number
 
 ---
+-- Get the terrain texture at a given location.
+-- @function [parent=#core] getLandTextureAt
+-- @param openmw.util#Vector3 position
+-- @param #any cellOrName (optional) cell or cell name in their exterior world space to query
+-- @return #nil, #number Land texture index or nil if failed to retrieve the texture
+-- @return #nil, #number Plugin id or nil if failed to retrieve the texture
+-- @return #nil, #string Texture path or nil if one isn't defined
+
+---
 -- Return l10n formatting function for the given context.
 -- Localisation files (containing the message names and translations) should be stored in
 -- VFS as files of the form `l10n/<ContextName>/<Locale>.yaml`.

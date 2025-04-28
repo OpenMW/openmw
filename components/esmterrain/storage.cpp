@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <osg/Vec3f>
 #include <stdexcept>
 
 #include <osg/Image>
@@ -22,6 +23,19 @@ namespace ESMTerrain
 {
     namespace
     {
+        UniqueTextureId getTextureIdAt(
+            const std::span<const std::uint16_t> data, const int plugin, const std::size_t x, const std::size_t y)
+        {
+            assert(x < ESM::Land::LAND_TEXTURE_SIZE);
+            assert(y < ESM::Land::LAND_TEXTURE_SIZE);
+
+            const std::uint16_t tex = data[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+            if (tex == 0)
+                return { 0, 0 }; // vtex 0 is always the base texture, regardless of plugin
+
+            return { tex, plugin };
+        }
+
         UniqueTextureId getTextureIdAt(const LandObject* land, std::size_t x, std::size_t y)
         {
             assert(x < ESM::Land::LAND_TEXTURE_SIZE);
@@ -34,11 +48,7 @@ namespace ESMTerrain
             if (data == nullptr)
                 return { 0, 0 };
 
-            const std::uint16_t tex = data->getTextures()[y * ESM::Land::LAND_TEXTURE_SIZE + x];
-            if (tex == 0)
-                return { 0, 0 }; // vtex 0 is always the base texture, regardless of plugin
-
-            return { tex, land->getPlugin() };
+            return getTextureIdAt(data->getTextures(), land->getPlugin(), x, y);
         }
     }
 
@@ -463,6 +473,73 @@ namespace ESMTerrain
 
         if (blendmaps.size() == 1)
             blendmaps.clear(); // If a single texture fills the whole terrain, there is no need to blend
+    }
+
+    osg::Vec3f Storage::getTextureCorrectedWorldPos(
+        const osg::Vec3f& uncorrectedWorldPos, const int textureSize, const float cellSize)
+    {
+        // the offset is [-0.25, +0.25] of a single texture's size
+        // TODO: verify whether or not this works in TES4 and beyond
+        float offset = (cellSize / textureSize) * 0.25;
+        return uncorrectedWorldPos + osg::Vec3f{ -offset, +offset, 0.0f };
+    }
+
+    // Takes in a corrected world pos to match the visuals.
+    UniqueTextureId Storage::getLandTextureAt(const std::span<const std::uint16_t> landData, const int plugin,
+        const int textureSize, const osg::Vec3f& correctedWorldPos, const float cellSize)
+    {
+        int cellX = static_cast<int>(std::floor(correctedWorldPos.x() / cellSize));
+        int cellY = static_cast<int>(std::floor(correctedWorldPos.y() / cellSize));
+
+        // Normalized position in the cell
+        float nX = (correctedWorldPos.x() - (cellX * cellSize)) / cellSize;
+        float nY = (correctedWorldPos.y() - (cellY * cellSize)) / cellSize;
+
+        int startX = static_cast<int>(nX * textureSize);
+        int startY = static_cast<int>(nY * textureSize);
+
+        int endX = startX + 1;
+        int endY = startY + 1;
+        endX = std::min(endX, textureSize - 1);
+        endY = std::min(endY, textureSize - 1);
+
+        float fractionX = std::clamp(nX * textureSize - startX, 0.0f, 1.0f);
+        float fractionY = std::clamp(nY * textureSize - startY, 0.0f, 1.0f);
+
+        /* For even / odd tri strip rows, triangles are this shape:
+        even     odd
+        3---2   3---2
+        | / |   | \ |
+        0---1   0---1
+        */
+        return getTextureIdAt(landData, plugin, startX, startY);
+
+        if (fractionX <= 0.5f)
+        {
+            if (fractionY <= 0.5)
+            {
+                // 0
+                return getTextureIdAt(landData, plugin, startX, startY);
+            }
+            else
+            {
+                // 3
+                return getTextureIdAt(landData, plugin, startX, endY);
+            }
+        }
+        else
+        {
+            if (fractionY <= 0.5)
+            {
+                // 1
+                return getTextureIdAt(landData, plugin, endX, startY);
+            }
+            else
+            {
+                // 2
+                return getTextureIdAt(landData, plugin, endX, endY);
+            }
+        }
     }
 
     float Storage::getHeightAt(
