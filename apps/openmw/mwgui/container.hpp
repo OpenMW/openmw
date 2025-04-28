@@ -32,7 +32,7 @@ namespace MWGui
         void onClose() override;
         void clear() override { resetReference(); }
 
-        void onFrame(float dt) override { checkReferenceAvailable(); }
+        void onFrame(float dt) override;
 
         void resetReference() override;
 
@@ -40,10 +40,8 @@ namespace MWGui
 
         void treatNextOpenAsLoot() { mTreatNextOpenAsLoot = true; }
 
-        void updateItemView();
-
-        void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
-        void itemRemoved(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         std::string_view getWindowIdForLua() const override { return "Container"; }
 
@@ -54,6 +52,7 @@ namespace MWGui
         SortFilterItemModel* mSortModel;
         ItemModel* mModel;
         int mSelectedItem;
+        bool mUpdateNextFrame;
         bool mTreatNextOpenAsLoot;
         MyGUI::Button* mDisposeCorpseButton;
         MyGUI::Button* mTakeButton;

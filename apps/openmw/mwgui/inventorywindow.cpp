@@ -86,7 +86,7 @@ namespace MWGui
         , mLastYSize(0)
         , mPreview(std::make_unique<MWRender::InventoryPreview>(parent, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
-        , mUpdateTimer(0.f)
+        , mUpdateNextFrame(false)
     {
         mPreviewTexture
             = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
@@ -683,22 +683,21 @@ namespace MWGui
 
     void InventoryWindow::onFrame(float dt)
     {
-        updateEncumbranceBar();
-
-        if (mPinned)
+        if (mUpdateNextFrame)
         {
-            mUpdateTimer += dt;
-            if (0.1f < mUpdateTimer)
+            if (mTrading)
             {
-                mUpdateTimer = 0;
-
-                // Update pinned inventory in-game
-                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-                {
-                    mItemView->update();
-                    notifyContentChanged();
-                }
+                mTradeModel->updateBorrowed();
+                MWBase::Environment::get().getWindowManager()->getTradeWindow()->mTradeModel->updateBorrowed();
+                MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateItemView();
+                MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateOffer();
             }
+
+            updateEncumbranceBar();
+            mDragAndDrop->update();
+            mItemView->update();
+            notifyContentChanged();
+            mUpdateNextFrame = false;
         }
     }
 
@@ -850,19 +849,14 @@ namespace MWGui
         mPreview->rebuild();
     }
 
+    void InventoryWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
+    }
+
     void InventoryWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
     {
-        if (mDragAndDrop->mIsOnDragAndDrop && mDragAndDrop->mItem.mBase == item)
-            mDragAndDrop->update();
-
-        if (mTrading)
-        {
-            mTradeModel->updateBorrowed();
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->getTradeModel()->updateBorrowed();
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateItemView();
-        }
-
-        updateItemView();
+        mUpdateNextFrame = true;
     }
 
     MyGUI::IntSize InventoryWindow::getPreviewViewportSize() const

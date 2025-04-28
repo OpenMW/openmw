@@ -32,10 +32,8 @@ namespace MWGui
         void onFrame(float dt) override;
         void clear() override { resetReference(); }
 
-        void updateItemView();
-
-        void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
-        void itemRemoved(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         std::string_view getWindowIdForLua() const override { return "Companion"; }
 
@@ -44,6 +42,7 @@ namespace MWGui
         SortFilterItemModel* mSortModel;
         CompanionItemModel* mModel;
         int mSelectedItem;
+        bool mUpdateNextFrame;
 
         DragAndDrop* mDragAndDrop;
 

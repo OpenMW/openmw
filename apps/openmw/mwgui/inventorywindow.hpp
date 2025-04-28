@@ -63,7 +63,7 @@ namespace MWGui
 
         void setGuiMode(GuiMode mode);
 
-        void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
         void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         /// Cycle to previous/next weapon
@@ -111,7 +111,7 @@ namespace MWGui
         std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
         bool mTrading;
-        float mUpdateTimer;
+        bool mUpdateNextFrame;
 
         void toggleMaximized();
 

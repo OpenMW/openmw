@@ -84,13 +84,12 @@ namespace MWGui
         mDraggedWidget->setNeedMouseFocus(false);
         mDraggedWidget->setCount(count);
 
-        sourceView->update();
-
         MWBase::Environment::get().getWindowManager()->setDragDrop(true);
 
         mIsOnDragAndDrop = true;
 
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+        // Update item view after completing drag-and-drop setup
+        mSourceView->update();
     }
 
     void DragAndDrop::drop(ItemModel* targetModel, ItemView* targetView)
@@ -153,8 +152,12 @@ namespace MWGui
         // since mSourceView doesn't get updated in drag()
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
 
-        MyGUI::Gui::getInstance().destroyWidget(mDraggedWidget);
-        mDraggedWidget = nullptr;
+        if (mDraggedWidget)
+        {
+            MyGUI::Gui::getInstance().destroyWidget(mDraggedWidget);
+            mDraggedWidget = nullptr;
+        }
+
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
     }
 

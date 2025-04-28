@@ -33,22 +33,15 @@ namespace MWGui
         void onFrame(float dt) override;
         void clear() override { resetReference(); }
 
-        void borrowItem(int index, size_t count);
-        void returnItem(int index, size_t count);
-
-        int getMerchantServices();
-
         bool exit() override;
 
         void resetReference() override;
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
 
-        TradeItemModel* getTradeModel() { return mTradeModel; }
-
         void updateItemView();
 
-        void itemAdded(const MWWorld::ConstPtr& item, int count) override { updateItemView(); }
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
         void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         typedef MyGUI::delegates::MultiDelegate<> EventHandle_TradeDone;
@@ -57,6 +50,8 @@ namespace MWGui
         std::string_view getWindowIdForLua() const override { return "Trade"; }
 
     private:
+        friend class InventoryWindow;
+
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
         TradeItemModel* mTradeModel;
@@ -90,6 +85,8 @@ namespace MWGui
         int mCurrentBalance;
         int mCurrentMerchantOffer;
 
+        bool mUpdateNextFrame;
+
         void sellToNpc(
             const MWWorld::Ptr& item, int count, bool boughtItem); ///< only used for adjusting the gold balance
         void buyFromNpc(
@@ -99,6 +96,11 @@ namespace MWGui
 
         void onItemSelected(int index);
         void sellItem(MyGUI::Widget* sender, int count);
+
+        void borrowItem(int index, size_t count);
+        void returnItem(int index, size_t count);
+
+        int getMerchantServices();
 
         void onFilterChanged(MyGUI::Widget* _sender);
         void onNameFilterChanged(MyGUI::EditBox* _sender);

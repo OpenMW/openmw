@@ -123,6 +123,7 @@ namespace MWGui
         , mItemToSell(-1)
         , mCurrentBalance(0)
         , mCurrentMerchantOffer(0)
+        , mUpdateNextFrame(false)
     {
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");
@@ -209,6 +210,16 @@ namespace MWGui
     void TradeWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
+
+        if (isVisible() && mUpdateNextFrame)
+        {
+            mTradeModel->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+            mItemView->update();
+            updateOffer();
+            mUpdateNextFrame = false;
+        }
     }
 
     void TradeWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
@@ -652,14 +663,13 @@ namespace MWGui
         mItemView->update();
     }
 
+    void TradeWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
+    }
+
     void TradeWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
     {
-        mTradeModel->updateBorrowed();
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->updateBorrowed();
-
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
-        updateItemView();
-
-        updateOffer();
+        mUpdateNextFrame = true;
     }
 }
