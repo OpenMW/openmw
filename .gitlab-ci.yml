@@ -228,7 +228,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
@@ -244,7 +244,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
@@ -262,7 +262,7 @@ Ubuntu_GCC_tests_asan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -279,7 +279,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -297,7 +297,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
@@ -316,7 +316,7 @@ Ubuntu_GCC_tests_coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -357,7 +357,7 @@ Ubuntu_GCC_tests_coverage:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_Clang:
   extends: .Ubuntu
@@ -440,7 +440,7 @@ Ubuntu_Clang_Tidy_other:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
@@ -455,7 +455,7 @@ Ubuntu_Clang_tests_Debug:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_integration_tests_base:
   extends: .Ubuntu_Image
