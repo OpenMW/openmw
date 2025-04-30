@@ -56,6 +56,7 @@ Ubuntu_GCC_preprocess:
   stage: build
   variables:
     CMAKE_EXE_LINKER_FLAGS: -fuse-ld=mold
+    OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
   script:
     - df -h
     - export CCACHE_BASEDIR="`pwd`"
@@ -156,6 +157,8 @@ Ubuntu_GCC_asan:
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
     CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
     BUILD_OPENMW_ONLY: 1
+    # Disable -Werror due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105562
+    OPENMW_CXX_FLAGS: ""
 
 Clang_Format:
   extends: .Ubuntu_Image
@@ -257,6 +260,8 @@ Ubuntu_GCC_tests_asan:
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
     CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
+    # Disable -Werror due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105562
+    OPENMW_CXX_FLAGS: ""
   artifacts:
     paths: []
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
