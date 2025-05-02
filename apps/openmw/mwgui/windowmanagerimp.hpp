@@ -8,7 +8,6 @@
 **/
 
 #include <memory>
-#include <stack>
 #include <vector>
 
 #include <osg/ref_ptr>
@@ -118,6 +117,7 @@ namespace MWGui
     class PostProcessorHud;
     class JailScreen;
     class KeyboardNavigation;
+    class ItemTransfer;
 
     class WindowManager : public MWBase::WindowManager
     {
@@ -433,6 +433,7 @@ namespace MWGui
         Console* mConsole;
         DialogueWindow* mDialogueWindow;
         std::unique_ptr<DragAndDrop> mDragAndDrop;
+        std::unique_ptr<ItemTransfer> mItemTransfer;
         InventoryWindow* mInventoryWindow;
         ScrollWindow* mScrollWindow;
         BookWindow* mBookWindow;

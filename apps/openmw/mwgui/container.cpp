@@ -18,12 +18,12 @@
 
 #include "../mwscript/interpretercontext.hpp"
 
-#include "countdialog.hpp"
-#include "inventorywindow.hpp"
-
 #include "containeritemmodel.hpp"
+#include "countdialog.hpp"
 #include "draganddrop.hpp"
 #include "inventoryitemmodel.hpp"
+#include "inventorywindow.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "pickpocketitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -32,9 +32,10 @@
 namespace MWGui
 {
 
-    ContainerWindow::ContainerWindow(DragAndDrop* dragAndDrop)
+    ContainerWindow::ContainerWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer)
         : WindowBase("openmw_container_window.layout")
-        , mDragAndDrop(dragAndDrop)
+        , mDragAndDrop(&dragAndDrop)
+        , mItemTransfer(&itemTransfer)
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
@@ -89,15 +90,21 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
-            dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
+
+            if (MyGUI::InputManager::getInstance().isAltPressed())
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::transferItem);
+            else
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
+        else if (MyGUI::InputManager::getInstance().isAltPressed())
+            transferItem(nullptr, count);
         else
             dragItem(nullptr, count);
     }
 
     void ContainerWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
-        if (!mModel)
+        if (mModel == nullptr)
             return;
 
         const ItemStack item = mModel->getItem(mSelectedItem);
@@ -108,9 +115,22 @@ namespace MWGui
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }
 
+    void ContainerWindow::transferItem(MyGUI::Widget* /*sender*/, std::size_t count)
+    {
+        if (mModel == nullptr)
+            return;
+
+        const ItemStack item = mModel->getItem(mSelectedItem);
+
+        if (!mModel->onTakeItem(item.mBase, count))
+            return;
+
+        mItemTransfer->apply(item, count, *mItemView);
+    }
+
     void ContainerWindow::dropItem()
     {
-        if (!mModel)
+        if (mModel == nullptr)
             return;
 
         bool success = mModel->onDropItem(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount);
@@ -175,10 +195,13 @@ namespace MWGui
         mSortModel = nullptr;
     }
 
+    void ContainerWindow::onOpen()
+    {
+        mItemTransfer->addTarget(*mItemView);
+    }
+
     void ContainerWindow::onClose()
     {
-        WindowBase::onClose();
-
         // Make sure the window was actually closed and not temporarily hidden.
         if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Container))
             return;
@@ -189,6 +212,8 @@ namespace MWGui
         if (!mPtr.isEmpty())
             MWBase::Environment::get().getMechanicsManager()->onClose(mPtr);
         resetReference();
+
+        mItemTransfer->removeTarget(*mItemView);
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

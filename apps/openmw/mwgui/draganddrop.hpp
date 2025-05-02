@@ -4,6 +4,8 @@
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
 
+#include <cstddef>
+
 namespace MyGUI
 {
     class Widget;
@@ -29,7 +31,7 @@ namespace MWGui
         DragAndDrop();
 
         void startDrag(
-                int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, std::size_t count);
+            int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, std::size_t count);
         void drop(ItemModel* targetModel, ItemView* targetView);
         void update();
         void onFrame();

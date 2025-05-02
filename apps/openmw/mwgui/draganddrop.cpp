@@ -125,18 +125,18 @@ namespace MWGui
 
     void DragAndDrop::update()
     {
-        if (mIsOnDragAndDrop)
-        {
-            int count = mItem.mBase.getCellRef().getCount();
-            if (count < mDraggedCount)
-            {
-                mItem.mCount = count;
-                mDraggedCount = count;
-                mDraggedWidget->setCount(mDraggedCount);
-                mSourceSortModel->clearDragItems();
-                mSourceSortModel->addDragItem(mItem.mBase, mDraggedCount);
-            }
-        }
+        if (!mIsOnDragAndDrop)
+            return;
+
+        const unsigned count = mItem.mBase.getCellRef().getAbsCount();
+        if (count >= mDraggedCount)
+            return;
+
+        mItem.mCount = count;
+        mDraggedCount = count;
+        mDraggedWidget->setCount(mDraggedCount);
+        mSourceSortModel->clearDragItems();
+        mSourceSortModel->addDragItem(mItem.mBase, mDraggedCount);
     }
 
     void DragAndDrop::onFrame()
