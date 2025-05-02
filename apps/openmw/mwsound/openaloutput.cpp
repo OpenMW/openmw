@@ -15,6 +15,7 @@
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/thread.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "efxpresets.h"
@@ -1137,12 +1138,13 @@ namespace MWSound
 
         alSourcef(source, AL_GAIN, gain);
         alSourcef(source, AL_PITCH, pitch);
+        alSourcef(source, AL_DOPPLER_FACTOR, 0.0f);
         alSourcefv(source, AL_POSITION, pos.ptr());
         alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     }
 
-    void OpenALOutput::initCommon3D(ALuint source, const osg::Vec3f& pos, ALfloat mindist, ALfloat maxdist,
+    void OpenALOutput::initCommon3D(ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat mindist, ALfloat maxdist,
         ALfloat gain, ALfloat pitch, bool loop, bool useenv)
     {
         alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
@@ -1177,13 +1179,14 @@ namespace MWSound
 
         alSourcef(source, AL_GAIN, gain);
         alSourcef(source, AL_PITCH, pitch);
+        alSourcef(source, AL_DOPPLER_FACTOR, Settings::sound().mDopplerFactor);
         alSourcefv(source, AL_POSITION, pos.ptr());
         alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+        alSourcefv(source, AL_VELOCITY, vel.ptr());
     }
 
     void OpenALOutput::updateCommon(
-        ALuint source, const osg::Vec3f& pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv)
+        ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv)
     {
         if (useenv && mListenerEnv == Env_Underwater && !mWaterFilter)
         {
@@ -1195,7 +1198,7 @@ namespace MWSound
         alSourcef(source, AL_PITCH, pitch);
         alSourcefv(source, AL_POSITION, pos.ptr());
         alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+        alSourcefv(source, AL_VELOCITY, vel.ptr());
     }
 
     bool OpenALOutput::playSound(Sound* sound, Sound_Handle data, float offset)
@@ -1248,7 +1251,7 @@ namespace MWSound
         }
         source = mFreeSources.front();
 
-        initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
+        initCommon3D(source, sound->getPosition(), sound->getVelocity(), sound->getMinDistance(), sound->getMaxDistance(),
             sound->getRealVolume(), getTimeScaledPitch(sound), sound->getIsLooping(), sound->getUseEnv());
         alSourcei(source, AL_BUFFER, GET_PTRID(data));
         alSourcef(source, AL_SEC_OFFSET, offset);
@@ -1312,7 +1315,7 @@ namespace MWSound
             return;
         ALuint source = GET_PTRID(sound->mHandle);
 
-        updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
+        updateCommon(source, sound->getPosition(), sound->getVelocity(), sound->getMaxDistance(), sound->getRealVolume(),
             getTimeScaledPitch(sound), sound->getUseEnv());
         getALError();
     }
@@ -1360,7 +1363,7 @@ namespace MWSound
         if (sound->getIsLooping())
             Log(Debug::Warning) << "Warning: cannot loop stream \"" << decoder->getName() << "\"";
 
-        initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
+        initCommon3D(source, sound->getPosition(), sound->getVelocity(), sound->getMinDistance(), sound->getMaxDistance(),
             sound->getRealVolume(), getTimeScaledPitch(sound), false, sound->getUseEnv());
         if (getALError() != AL_NO_ERROR)
             return false;
@@ -1443,7 +1446,7 @@ namespace MWSound
         OpenAL_SoundStream* stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
         ALuint source = stream->mSource;
 
-        updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
+        updateCommon(source, sound->getPosition(), sound->getVelocity(), sound->getMaxDistance(), sound->getRealVolume(),
             getTimeScaledPitch(sound), sound->getUseEnv());
         getALError();
     }
@@ -1459,12 +1462,13 @@ namespace MWSound
     }
 
     void OpenALOutput::updateListener(
-        const osg::Vec3f& pos, const osg::Vec3f& atdir, const osg::Vec3f& updir, Environment env)
+        const osg::Vec3f& pos, const osg::Vec3f& atdir, const osg::Vec3f& updir, const osg::Vec3f& vel, Environment env)
     {
         if (mContext)
         {
             ALfloat orient[6] = { atdir.x(), atdir.y(), atdir.z(), updir.x(), updir.y(), updir.z() };
             alListenerfv(AL_POSITION, pos.ptr());
+            alListenerfv(AL_VELOCITY, vel.ptr());
             alListenerfv(AL_ORIENTATION, orient);
 
             if (env != mListenerEnv)
@@ -1497,6 +1501,7 @@ namespace MWSound
         }
 
         mListenerPos = pos;
+        mListenerVel = vel;
         mListenerEnv = env;
     }
 
@@ -1583,6 +1588,7 @@ namespace MWSound
         , mDevice(nullptr)
         , mContext(nullptr)
         , mListenerPos(0.0f, 0.0f, 0.0f)
+        , mListenerVel(0.0f, 0.0f, 0.0f)
         , mListenerEnv(Env_Normal)
         , mWaterFilter(0)
         , mWaterEffect(0)

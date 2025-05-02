@@ -461,6 +461,11 @@ namespace MWWorld
 
             update(magicBoltState, duration);
 
+            for (const auto& sound : magicBoltState.mSounds)
+            {
+                sound->setVelocity(direction * speed);
+            }
+
             // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit
             // result.
             std::vector<MWWorld::Ptr> targetActors;

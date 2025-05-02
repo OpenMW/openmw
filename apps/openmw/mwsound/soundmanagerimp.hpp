@@ -92,6 +92,7 @@ namespace MWSound
         osg::Vec3f mListenerPos;
         osg::Vec3f mListenerDir;
         osg::Vec3f mListenerUp;
+        osg::Vec3f mListenerVel;
 
         int mPausedSoundTypes[BlockerType::MaxCount] = {};
 
@@ -282,6 +283,8 @@ namespace MWSound
 
         void setListenerPosDir(
             const osg::Vec3f& pos, const osg::Vec3f& dir, const osg::Vec3f& up, bool underwater) override;
+
+        void setListenerVel(const osg::Vec3f& vel) override;
 
         void updatePtr(const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated) override;
 
