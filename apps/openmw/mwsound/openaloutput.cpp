@@ -1185,8 +1185,8 @@ namespace MWSound
         alSourcefv(source, AL_VELOCITY, vel.ptr());
     }
 
-    void OpenALOutput::updateCommon(
-        ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv)
+    void OpenALOutput::updateCommon(ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat maxdist,
+        ALfloat gain, ALfloat pitch, bool useenv)
     {
         if (useenv && mListenerEnv == Env_Underwater && !mWaterFilter)
         {
@@ -1315,8 +1315,8 @@ namespace MWSound
             return;
         ALuint source = GET_PTRID(sound->mHandle);
 
-        updateCommon(source, sound->getPosition(), sound->getVelocity(), sound->getMaxDistance(), sound->getRealVolume(),
-            getTimeScaledPitch(sound), sound->getUseEnv());
+        updateCommon(source, sound->getPosition(), sound->getVelocity(), sound->getMaxDistance(),
+            sound->getRealVolume(), getTimeScaledPitch(sound), sound->getUseEnv());
         getALError();
     }
 
@@ -1363,8 +1363,8 @@ namespace MWSound
         if (sound->getIsLooping())
             Log(Debug::Warning) << "Warning: cannot loop stream \"" << decoder->getName() << "\"";
 
-        initCommon3D(source, sound->getPosition(), sound->getVelocity(), sound->getMinDistance(), sound->getMaxDistance(),
-            sound->getRealVolume(), getTimeScaledPitch(sound), false, sound->getUseEnv());
+        initCommon3D(source, sound->getPosition(), sound->getVelocity(), sound->getMinDistance(),
+            sound->getMaxDistance(), sound->getRealVolume(), getTimeScaledPitch(sound), false, sound->getUseEnv());
         if (getALError() != AL_NO_ERROR)
             return false;
 
@@ -1446,8 +1446,8 @@ namespace MWSound
         OpenAL_SoundStream* stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
         ALuint source = stream->mSource;
 
-        updateCommon(source, sound->getPosition(), sound->getVelocity(), sound->getMaxDistance(), sound->getRealVolume(),
-            getTimeScaledPitch(sound), sound->getUseEnv());
+        updateCommon(source, sound->getPosition(), sound->getVelocity(), sound->getMaxDistance(),
+            sound->getRealVolume(), getTimeScaledPitch(sound), sound->getUseEnv());
         getALError();
     }
 

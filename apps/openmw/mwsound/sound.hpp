@@ -155,7 +155,7 @@ namespace MWSound
 
         const osg::Vec3f& getPosition() const { return mParams.mPos; }
         const osg::Vec3f& getLastPosition() const { return mParams.mLastPos; }
-        const osg::Vec3f& getVelocity() const {return mParams.mVel; }
+        const osg::Vec3f& getVelocity() const { return mParams.mVel; }
         float getRealVolume() const { return mParams.mVolume * mParams.mBaseVolume * mParams.mFadeVolume; }
         float getPitch() const { return mParams.mPitch; }
         float getMinDistance() const { return mParams.mMinDistance; }

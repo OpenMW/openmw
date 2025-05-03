@@ -121,3 +121,13 @@ Sound Settings
    When true, uses the camera position and direction for audio instead of the player position.
    This makes audio in third person sound relative to camera instead of the player.
    False is vanilla Morrowind behaviour.
+
+.. omw-setting::
+   :title: doppler factor
+   :type: float32
+   :range: 0.0 (disabled), 1.0 (maximum strength)
+   :default: 0.25
+   :location: :bdg-success:`Launcher > Settings > Audio`
+
+   This setting controls the strength of the doppler effect. Doppler effect increases or decreases the pitch of sounds
+   relative to the velocity of the source and the listener.

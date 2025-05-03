@@ -65,11 +65,11 @@ namespace MWSound
         std::unique_ptr<DefaultDeviceThread> mDefaultDeviceThread;
 
         void initCommon2D(ALuint source, const osg::Vec3f& pos, ALfloat gain, ALfloat pitch, bool loop, bool useenv);
-        void initCommon3D(ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat mindist, ALfloat maxdist, ALfloat gain,
-            ALfloat pitch, bool loop, bool useenv);
+        void initCommon3D(ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat mindist, ALfloat maxdist,
+            ALfloat gain, ALfloat pitch, bool loop, bool useenv);
 
-        void updateCommon(
-            ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv);
+        void updateCommon(ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat maxdist, ALfloat gain,
+            ALfloat pitch, bool useenv);
 
         float getTimeScaledPitch(SoundBase* sound);
 
@@ -109,8 +109,8 @@ namespace MWSound
         void startUpdate() override;
         void finishUpdate() override;
 
-        void updateListener(
-            const osg::Vec3f& pos, const osg::Vec3f& atdir, const osg::Vec3f& updir, const osg::Vec3f& vel, Environment env) override;
+        void updateListener(const osg::Vec3f& pos, const osg::Vec3f& atdir, const osg::Vec3f& updir,
+            const osg::Vec3f& vel, Environment env) override;
 
         void pauseSounds(int types) override;
         void resumeSounds(int types) override;
