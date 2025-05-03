@@ -55,7 +55,7 @@ namespace MWGui
         void onItemSelected(int index);
         void onNameFilterChanged(MyGUI::EditBox* _sender);
         void onBackgroundSelected();
-        void dragItem(MyGUI::Widget* sender, int count);
+        void dragItem(MyGUI::Widget* sender, std::size_t count);
 
         void onMessageBoxButtonClicked(int button);
 

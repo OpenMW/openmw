@@ -106,7 +106,7 @@ namespace MWGui
         mItemView->update();
     }
 
-    void CompanionWindow::dragItem(MyGUI::Widget* sender, int count)
+    void CompanionWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }

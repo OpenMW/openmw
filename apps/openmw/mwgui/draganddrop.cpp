@@ -27,7 +27,7 @@ namespace MWGui
     }
 
     void DragAndDrop::startDrag(
-        int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count)
+        int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, std::size_t count)
     {
         mItem = sourceModel->getItem(index);
         mDraggedCount = count;

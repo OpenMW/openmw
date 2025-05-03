@@ -95,7 +95,7 @@ namespace MWGui
             dragItem(nullptr, count);
     }
 
-    void ContainerWindow::dragItem(MyGUI::Widget* sender, int count)
+    void ContainerWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         if (!mModel)
             return;

@@ -60,7 +60,7 @@ namespace MWGui
 
         void onItemSelected(int index);
         void onBackgroundSelected();
-        void dragItem(MyGUI::Widget* sender, int count);
+        void dragItem(MyGUI::Widget*, std::size_t count);
         void dropItem();
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);

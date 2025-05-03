@@ -361,14 +361,14 @@ namespace MWGui
         }
     }
 
-    void InventoryWindow::dragItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         ensureSelectedItemUnequipped(count);
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
         notifyContentChanged();
     }
 
-    void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::sellItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);

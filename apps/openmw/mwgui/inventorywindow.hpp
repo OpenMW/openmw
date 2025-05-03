@@ -120,8 +120,8 @@ namespace MWGui
 
         void onBackgroundSelected();
 
-        void sellItem(MyGUI::Widget* sender, int count);
-        void dragItem(MyGUI::Widget* sender, int count);
+        void sellItem(MyGUI::Widget* sender, std::size_t count);
+        void dragItem(MyGUI::Widget* sender, std::size_t count);
 
         void onWindowResize(MyGUI::Window* _sender);
         void onFilterChanged(MyGUI::Widget* _sender);
