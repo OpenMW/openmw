@@ -81,7 +81,7 @@ Builtin Uniforms
 +-------------+------------------------------+--------------------------------------------------+
 | vec2        | ``omw.rcpResolution``        | Reciprocal of the render target resolution       |
 +-------------+------------------------------+--------------------------------------------------+
-| vec2        | ``omw.fogNear``              | The units at which the fog begins to render      |
+| float       | ``omw.fogNear``              | The units at which the fog begins to render      |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.fogFar``               | The units at which the fog ends                  |
 +-------------+------------------------------+--------------------------------------------------+
