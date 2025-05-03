@@ -878,27 +878,27 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Interface</source>
-        <translation>Interface</translation>
+        <translation type="vanished">Interface</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting scales GUI windows. A value of 1.0 results in the normal scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Cette option agrandit ou diminue l&apos;interface utilisateur. Une valeur de 1 correspond à sa taille nominale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Cette option agrandit ou diminue l&apos;interface utilisateur. Une valeur de 1 correspond à sa taille nominale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Cette option permet d&apos;activer la durée de vie restante des effets magiques et des lampes. Cette durée restante s&apos;affiche en passant la souris au-dessus de l&apos;icône de l&apos;effet magique.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Cette option permet d&apos;activer la durée de vie restante des effets magiques et des lampes. Cette durée restante s&apos;affiche en passant la souris au-dessus de l&apos;icône de l&apos;effet magique.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, dialogue topics will have a different color if the topic is specific to the NPC you&apos;re talking to or the topic was previously seen. Color can be changed in settings.cfg.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, les sujets de conversation de la fenêtre de dialogue auront des couleurs différentes si ceux-ci sont spécifiques au PNJ ou qu&apos;ils ont déjà été lus autre part. Ces couleurs peuvent être changées dans le fichier settings.cfg.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, les sujets de conversation de la fenêtre de dialogue auront des couleurs différentes si ceux-ci sont spécifiques au PNJ ou qu&apos;ils ont déjà été lus autre part. Ces couleurs peuvent être changées dans le fichier settings.cfg.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Size of characters in game texts.</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Taille des caractères des textes du jeu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Taille des caractères des textes du jeu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable zooming on local and global maps.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Cette option permet de zoomer en jeu sur la carte (carte locale et carte du monde).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Cette option permet de zoomer en jeu sur la carte (carte locale et carte du monde).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, containers supporting graphic herbalism will do so instead of opening the menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -906,19 +906,19 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, damage bonus of arrows and bolts will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, les bonus de dommages des flèches et des carreaux apparaissent dans l&apos;infobulle de l&apos;objet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, les bonus de dommages des flèches et des carreaux apparaissent dans l&apos;infobulle de l&apos;objet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, la portée et la rapidité d&apos;attaque des armes de mêlées apparaissent dans l&apos;infobulle de l&apos;objet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, la portée et la rapidité d&apos;attaque des armes de mêlées apparaissent dans l&apos;infobulle de l&apos;objet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stretch menus, load screens, etc. to the window aspect ratio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Étends les menus, les écrans de chargement et autres éléments d&apos;interface aux formats d&apos;image du jeu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Étends les menus, les écrans de chargement et autres éléments d&apos;interface aux formats d&apos;image du jeu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque l&apos;option est activée, affiche les chances de succès d&apos;un enchantement dans le menu des enchantements.&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque l&apos;option est activée, affiche les chances de succès d&apos;un enchantement dans le menu des enchantements.&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prevents merchants from equipping items that are sold to them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -930,39 +930,39 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Miscellaneous</source>
-        <translation>Divers</translation>
+        <translation type="vanished">Divers</translation>
     </message>
     <message>
         <source>Saves</source>
-        <translation>Sauvegardes</translation>
+        <translation type="vanished">Sauvegardes</translation>
     </message>
     <message>
         <source>JPG</source>
-        <translation>JPG</translation>
+        <translation type="vanished">JPG</translation>
     </message>
     <message>
         <source>PNG</source>
-        <translation>PNG</translation>
+        <translation type="vanished">PNG</translation>
     </message>
     <message>
         <source>TGA</source>
-        <translation>TGA</translation>
+        <translation type="vanished">TGA</translation>
     </message>
     <message>
         <source>Testing</source>
-        <translation>Testeurs</translation>
+        <translation type="vanished">Testeurs</translation>
     </message>
     <message>
         <source>These settings are intended for testing mods and will cause issues if used for normal gameplay.</source>
-        <translation>Ces options sont destinées aux testeurs de contenus additionnels (mods). Ils poseront problème lors d&apos;une partie normale.</translation>
+        <translation type="vanished">Ces options sont destinées aux testeurs de contenus additionnels (mods). Ils poseront problème lors d&apos;une partie normale.</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW will capture control of the cursor if this setting is true.&lt;/p&gt;&lt;p&gt;In “look mode”, OpenMW will center the cursor regardless of the value of this setting (since the cursor/crosshair is always centered in the OpenMW window). However, in GUI mode, this setting determines the behavior when the cursor is moved outside the OpenMW window. If true, the cursor movement stops at the edge of the window preventing access to other applications. If false, the cursor is allowed to move freely on the desktop.&lt;/p&gt;&lt;p&gt;This setting does not apply to the screen where escape has been pressed, where the cursor is never captured. Regardless of this setting “Alt-Tab” or some other operating system dependent key sequence can be used to allow the operating system to regain control of the mouse cursor. This setting interacts with the minimize on focus loss setting by affecting what counts as a focus loss. Specifically on a two-screen configuration it may be more convenient to access the second screen with setting disabled.&lt;/p&gt;&lt;p&gt;Note for developers: it’s desirable to have this setting disabled when running the game in a debugger, to prevent the mouse cursor from becoming unusable when the game pauses on a breakpoint.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, OpenMW capture le curseur de la souris.&lt;/p&gt;&lt;p&gt;Lorsque le jeu est en mode &quot;Regard/Déplacement&quot;, OpenMW centre le curseur au milieu de l&apos;écran; sans tenir compte de cette option (le curseur/viseur est toujours au centre de la fenêtre d&apos;OpenMW).  Néanmoins, lorsqu&apos;un menu est ouvert, cette option permet de récupérer le contrôle de la souris. En effet, lorsque l&apos;option est active, le mouvement du curseur s&apos;arrête aux bords de la fenêtre et empêche d&apos;accéder à d&apos;autres applications. Tandis que, lorsque l&apos;option est désactivée, le curseur peut sortir librement de la fenêtre et accéder au bureau.&lt;/p&gt;&lt;p&gt;Cette option ne s&apos;applique pas à l&apos;écran lorsque la touche Échap a été enfoncée, dans ce cas, le curseur n&apos;est jamais capturé. Cette option n&apos;agit pas non plus sur &quot;Atl-Tab&quot; ou toute autre séquence de touches utilisée par le système d&apos;exploitation pour récupérer le contrôle du curseur de la souris. &lt;/p&gt;&lt;p&gt;Cette option interagit avec l&apos;option de minimisation de la fenêtre lors de la perte de focus en modifiant ce qui est considéré comme une perte de focus. Par exemple, avec une configuration à doubles écrans, il peut être plus agréable d&apos;accéder au second écran avec cette option désactivée.&lt;/p&gt;&lt;p&gt;Note aux développeurs : Il est préférable de désactiver cette option lorsque le jeu tourne dans un débogueur, ceci afin d&apos;empêcher le curseur de la souris de devenir inutilisable lorsque le jeu s&apos;arrête sur un breakpoint.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, OpenMW capture le curseur de la souris.&lt;/p&gt;&lt;p&gt;Lorsque le jeu est en mode &quot;Regard/Déplacement&quot;, OpenMW centre le curseur au milieu de l&apos;écran; sans tenir compte de cette option (le curseur/viseur est toujours au centre de la fenêtre d&apos;OpenMW).  Néanmoins, lorsqu&apos;un menu est ouvert, cette option permet de récupérer le contrôle de la souris. En effet, lorsque l&apos;option est active, le mouvement du curseur s&apos;arrête aux bords de la fenêtre et empêche d&apos;accéder à d&apos;autres applications. Tandis que, lorsque l&apos;option est désactivée, le curseur peut sortir librement de la fenêtre et accéder au bureau.&lt;/p&gt;&lt;p&gt;Cette option ne s&apos;applique pas à l&apos;écran lorsque la touche Échap a été enfoncée, dans ce cas, le curseur n&apos;est jamais capturé. Cette option n&apos;agit pas non plus sur &quot;Atl-Tab&quot; ou toute autre séquence de touches utilisée par le système d&apos;exploitation pour récupérer le contrôle du curseur de la souris. &lt;/p&gt;&lt;p&gt;Cette option interagit avec l&apos;option de minimisation de la fenêtre lors de la perte de focus en modifiant ce qui est considéré comme une perte de focus. Par exemple, avec une configuration à doubles écrans, il peut être plus agréable d&apos;accéder au second écran avec cette option désactivée.&lt;/p&gt;&lt;p&gt;Note aux développeurs : Il est préférable de désactiver cette option lorsque le jeu tourne dans un débogueur, ceci afin d&apos;empêcher le curseur de la souris de devenir inutilisable lorsque le jeu s&apos;arrête sur un breakpoint.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Browse…</source>
-        <translation>Parcourir...</translation>
+        <translation type="vanished">Parcourir...</translation>
     </message>
     <message>
         <source>Collision is used for both physics simulation and navigation mesh generation for pathfinding. Cylinder gives the best consistency between available navigation paths and ability to move by them. Changing this value affects navigation mesh generation therefore navigation mesh disk cache generated for one value will not be useful with another.</source>
@@ -1054,15 +1054,15 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Tooltip</source>
-        <translation>Infobulles</translation>
+        <translation type="vanished">Infobulles</translation>
     </message>
     <message>
         <source>Crosshair</source>
-        <translation>Réticule de visée</translation>
+        <translation type="vanished">Réticule de visée</translation>
     </message>
     <message>
         <source>Screenshots</source>
-        <translation>Captures d&apos;écran</translation>
+        <translation type="vanished">Captures d&apos;écran</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Give actors an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1324,59 +1324,59 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Tooltip and Crosshair</source>
-        <translation>Infobulles et réticule de visée</translation>
+        <translation type="vanished">Infobulles et réticule de visée</translation>
     </message>
     <message>
         <source>GUI Scaling Factor</source>
-        <translation>Échelle de l&apos;interface</translation>
+        <translation type="vanished">Échelle de l&apos;interface</translation>
     </message>
     <message>
         <source>Show Effect Duration</source>
-        <translation>Afficher la durée des effets</translation>
+        <translation type="vanished">Afficher la durée des effets</translation>
     </message>
     <message>
         <source>Change Dialogue Topic Color</source>
-        <translation>Changer la couleur des sujets de conversation</translation>
+        <translation type="vanished">Changer la couleur des sujets de conversation</translation>
     </message>
     <message>
         <source>Font Size</source>
-        <translation>Taille des polices</translation>
+        <translation type="vanished">Taille des polices</translation>
     </message>
     <message>
         <source>Show Projectile Damage</source>
-        <translation>Afficher les dommages des projectiles</translation>
+        <translation type="vanished">Afficher les dommages des projectiles</translation>
     </message>
     <message>
         <source>Show Melee Info</source>
-        <translation>Afficher les infos de mêlée</translation>
+        <translation type="vanished">Afficher les infos de mêlée</translation>
     </message>
     <message>
         <source>Stretch Menu Background</source>
-        <translation>Étendre les arrière-plans</translation>
+        <translation type="vanished">Étendre les arrière-plans</translation>
     </message>
     <message>
         <source>Show Owned Objects</source>
-        <translation>Afficher la possession des objets</translation>
+        <translation type="vanished">Afficher la possession des objets</translation>
     </message>
     <message>
         <source>Show Enchant Chance</source>
-        <translation>Afficher les chances d&apos;enchantement</translation>
+        <translation type="vanished">Afficher les chances d&apos;enchantement</translation>
     </message>
     <message>
         <source>Maximum Quicksaves</source>
-        <translation>Nombre maximum de sauvegardes rapides</translation>
+        <translation type="vanished">Nombre maximum de sauvegardes rapides</translation>
     </message>
     <message>
         <source>Screenshot Format</source>
-        <translation>Format des captures</translation>
+        <translation type="vanished">Format des captures</translation>
     </message>
     <message>
         <source>Grab Cursor</source>
-        <translation>Capturer le curseur</translation>
+        <translation type="vanished">Capturer le curseur</translation>
     </message>
     <message>
         <source>Default Cell</source>
-        <translation>la cellule par défaut</translation>
+        <translation type="vanished">la cellule par défaut</translation>
     </message>
     <message>
         <source>Bounds</source>
@@ -1432,23 +1432,31 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Can Zoom on Maps</source>
-        <translation>Permettre le zoom sur la carte</translation>
+        <translation type="vanished">Permettre le zoom sur la carte</translation>
     </message>
     <message>
         <source>Notify on Saved Screenshot</source>
-        <translation>Notifier l&apos;enregistrement des captures d&apos;écran</translation>
+        <translation type="vanished">Notifier l&apos;enregistrement des captures d&apos;écran</translation>
     </message>
     <message>
         <source>Skip Menu and Generate Default Character</source>
-        <translation>Passer le menu principal et générer un personnage standard</translation>
+        <translation type="vanished">Passer le menu principal et générer un personnage standard</translation>
     </message>
     <message>
         <source>Start Default Character at</source>
-        <translation>Placer le personnage par défaut dans</translation>
+        <translation type="vanished">Placer le personnage par défaut dans</translation>
     </message>
     <message>
         <source>Run Script After Startup:</source>
-        <translation>Script à lancer après démarrage :</translation>
+        <translation type="vanished">Script à lancer après démarrage :</translation>
+    </message>
+    <message>
+        <source>Controls the strength of the doppler effect. Zero means it is completely disabled.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Doppler Factor</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
