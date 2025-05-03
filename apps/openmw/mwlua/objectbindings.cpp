@@ -100,7 +100,8 @@ namespace MWLua
             stats.land(true);
             stats.setTeleported(true);
             world->getPlayer().setTeleported(true);
-            world->changeToCell(destCell->getCell()->getId(), toPos(pos, rot), false);
+            bool differentCell = ptr.getCell() != destCell;
+            world->changeToCell(destCell->getCell()->getId(), toPos(pos, rot), false, differentCell);
             MWWorld::Ptr newPtr = world->getPlayerPtr();
             world->moveObject(newPtr, pos);
             world->rotateObject(newPtr, rot);
