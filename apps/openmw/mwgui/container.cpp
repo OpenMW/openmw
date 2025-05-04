@@ -100,7 +100,9 @@ namespace MWGui
         if (!mModel)
             return;
 
-        if (!onTakeItem(mModel->getItem(mSelectedItem), count))
+        const ItemStack item = mModel->getItem(mSelectedItem);
+
+        if (!mModel->onTakeItem(item.mBase, count))
             return;
 
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
@@ -234,9 +236,9 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->playSound(sound);
             }
 
-            const ItemStack& item = mModel->getItem(i);
+            const ItemStack item = mModel->getItem(i);
 
-            if (!onTakeItem(item, item.mCount))
+            if (!mModel->onTakeItem(item.mBase, item.mCount))
                 break;
 
             mModel->moveItem(item, item.mCount, playerModel);
@@ -311,11 +313,6 @@ namespace MWGui
     void ContainerWindow::onReferenceUnavailable()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
-    }
-
-    bool ContainerWindow::onTakeItem(const ItemStack& item, int count)
-    {
-        return mModel->onTakeItem(item.mBase, count);
     }
 
     void ContainerWindow::onDeleteCustomData(const MWWorld::Ptr& ptr)

@@ -66,9 +66,6 @@ namespace MWGui
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
         void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
 
-        /// @return is taking the item allowed?
-        bool onTakeItem(const ItemStack& item, int count);
-
         void onReferenceUnavailable() override;
     };
 }
