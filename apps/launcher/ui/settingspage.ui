@@ -1279,6 +1279,7 @@
          </item>
         </layout>
        </item>
+       <item>
         <spacer>
          <property name="orientation">
           <enum>Qt::Vertical</enum>

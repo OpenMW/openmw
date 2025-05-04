@@ -1276,6 +1276,170 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation></translation>
     </message>
     <message>
+        <source>Interface</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Tooltip</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Crosshair</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Tooltip and Crosshair</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting scales GUI windows. A value of 1.0 results in the normal scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>GUI Scaling Factor</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Show Effect Duration</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, dialogue topics will have a different color if the topic is specific to the NPC you&apos;re talking to or the topic was previously seen. Color can be changed in settings.cfg.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Change Dialogue Topic Color</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Size of characters in game texts.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Font Size</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable zooming on local and global maps.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Can Zoom on Maps</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, damage bonus of arrows and bolts will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Show Projectile Damage</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Show Melee Info</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stretch menus, load screens, etc. to the window aspect ratio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Stretch Menu Background</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Show Owned Objects</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Show Enchant Chance</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Miscellaneous</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Saves</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Maximum Quicksaves</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Screenshots</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Screenshot Format</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>JPG</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>PNG</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>TGA</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Notify on Saved Screenshot</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Testing</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>These settings are intended for testing mods and will cause issues if used for normal gameplay.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW will capture control of the cursor if this setting is true.&lt;/p&gt;&lt;p&gt;In “look mode”, OpenMW will center the cursor regardless of the value of this setting (since the cursor/crosshair is always centered in the OpenMW window). However, in GUI mode, this setting determines the behavior when the cursor is moved outside the OpenMW window. If true, the cursor movement stops at the edge of the window preventing access to other applications. If false, the cursor is allowed to move freely on the desktop.&lt;/p&gt;&lt;p&gt;This setting does not apply to the screen where escape has been pressed, where the cursor is never captured. Regardless of this setting “Alt-Tab” or some other operating system dependent key sequence can be used to allow the operating system to regain control of the mouse cursor. This setting interacts with the minimize on focus loss setting by affecting what counts as a focus loss. Specifically on a two-screen configuration it may be more convenient to access the second screen with setting disabled.&lt;/p&gt;&lt;p&gt;Note for developers: it’s desirable to have this setting disabled when running the game in a debugger, to prevent the mouse cursor from becoming unusable when the game pauses on a breakpoint.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Grab Cursor</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Skip Menu and Generate Default Character</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Start Default Character at</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Default Cell</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Run Script After Startup:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Browse…</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>Smooth Animation Transitions</source>
         <translation></translation>
     </message>

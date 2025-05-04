@@ -883,27 +883,27 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Interface</source>
-        <translation type="vanished">Gränssnitt</translation>
+        <translation>Gränssnitt</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting scales GUI windows. A value of 1.0 results in the normal scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Denna inställning skalar grafiska fönster i gränssnittet. Ett värde på 1.0 ger den normala skalan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Denna inställning skalar grafiska fönster i gränssnittet. Ett värde på 1.0 ger den normala skalan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Visar den återstående tiden för magiska effekter och ljus om denna inställning är på. Den återstående tiden visas som en inforuta när muspekaren befinner sig över den magiska effekten. &lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Visar den återstående tiden för magiska effekter och ljus om denna inställning är på. Den återstående tiden visas som en inforuta när muspekaren befinner sig över den magiska effekten. &lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, dialogue topics will have a different color if the topic is specific to the NPC you&apos;re talking to or the topic was previously seen. Color can be changed in settings.cfg.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer dialogämnen ha en annan färg om ämnet är specifikt till den icke-spelbara figur du pratar med eller om ämnet redan har setts. Färger kan ändras i settings.cfg.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer dialogämnen ha en annan färg om ämnet är specifikt till den icke-spelbara figur du pratar med eller om ämnet redan har setts. Färger kan ändras i settings.cfg.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Size of characters in game texts.</source>
-        <translation type="vanished">Storlek på tecken i speltext.</translation>
+        <translation>Storlek på tecken i speltext.</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable zooming on local and global maps.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera zoomning på lokala och globala kartor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera zoomning på lokala och globala kartor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, containers supporting graphic herbalism will do so instead of opening the menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -911,19 +911,19 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, damage bonus of arrows and bolts will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer skadebonus från pilar visas på föremålens inforuta.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer skadebonus från pilar visas på föremålens inforuta.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer närstridsvapens räckvidd och hastighet att visas på föremåls inforuta.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer närstridsvapens räckvidd och hastighet att visas på föremåls inforuta.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stretch menus, load screens, etc. to the window aspect ratio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sträck ut menyer, laddskärmar o.s.v. till fönstrets aspektratio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sträck ut menyer, laddskärmar o.s.v. till fönstrets aspektratio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Huruvida chansen att lyckas kommer visas i förtrollningsmenyn.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Huruvida chansen att lyckas kommer visas i förtrollningsmenyn.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prevents merchants from equipping items that are sold to them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -935,39 +935,39 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Miscellaneous</source>
-        <translation type="vanished">Diverse</translation>
+        <translation>Diverse</translation>
     </message>
     <message>
         <source>Saves</source>
-        <translation type="vanished">Sparfiler</translation>
+        <translation>Sparfiler</translation>
     </message>
     <message>
         <source>JPG</source>
-        <translation type="vanished">JPG</translation>
+        <translation>JPG</translation>
     </message>
     <message>
         <source>PNG</source>
-        <translation type="vanished">PNG</translation>
+        <translation>PNG</translation>
     </message>
     <message>
         <source>TGA</source>
-        <translation type="vanished">TGA</translation>
+        <translation>TGA</translation>
     </message>
     <message>
         <source>Testing</source>
-        <translation type="vanished">Testning</translation>
+        <translation>Testning</translation>
     </message>
     <message>
         <source>These settings are intended for testing mods and will cause issues if used for normal gameplay.</source>
-        <translation type="vanished">Dessa inställningar är avsedda för att testa moddar och kommer orsaka problem vid normalt spelande.</translation>
+        <translation>Dessa inställningar är avsedda för att testa moddar och kommer orsaka problem vid normalt spelande.</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW will capture control of the cursor if this setting is true.&lt;/p&gt;&lt;p&gt;In “look mode”, OpenMW will center the cursor regardless of the value of this setting (since the cursor/crosshair is always centered in the OpenMW window). However, in GUI mode, this setting determines the behavior when the cursor is moved outside the OpenMW window. If true, the cursor movement stops at the edge of the window preventing access to other applications. If false, the cursor is allowed to move freely on the desktop.&lt;/p&gt;&lt;p&gt;This setting does not apply to the screen where escape has been pressed, where the cursor is never captured. Regardless of this setting “Alt-Tab” or some other operating system dependent key sequence can be used to allow the operating system to regain control of the mouse cursor. This setting interacts with the minimize on focus loss setting by affecting what counts as a focus loss. Specifically on a two-screen configuration it may be more convenient to access the second screen with setting disabled.&lt;/p&gt;&lt;p&gt;Note for developers: it’s desirable to have this setting disabled when running the game in a debugger, to prevent the mouse cursor from becoming unusable when the game pauses on a breakpoint.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW kommer ta kontroll av muspekaren om denna inställning är aktiverad.&lt;/p&gt;&lt;p&gt;I ”tittläge” kommer OpenMW centrera muspekaren oavsett värdet på denna inställning (eftersom muspekaren/hårkorset alltid är centrerat i OpenMW-fönstret). I gränssnittsläge däremot kommer denna inställning bedöma beteendet när muspekaren flyttas utanför OpenMW-fönstret. Om på kommer muspekarrörelsen stanna vid kanten av fönstret, vilket förhindrar tillgång till  andra applikationer. Om av tillåts muspekaren att röras fritt över skrivbordet.&lt;/p&gt;&lt;p&gt;Denna inställning appliceras inte på skärmen där Escape har blivit tryckt, då muspekaren aldrig tas över. Oavsett denna inställning kan ”Alt-Tab” eller annan operativsystemberoende knappsekvens användas för att ge operativsystemet åter tillgång till muspekaren. Denna inställning interagerar med minimera vid fokusförlust-inställningen genom att påverka vad som räknas som en fokusförlust. Specifikt på en tvåskärmskonfiguration kan det vara mer smidigt att få tillgång till den andra skärmen med inställningen inaktiverad.&lt;/p&gt;&lt;p&gt;Notis för utvecklare: det är önskvärt att ha denna inställning inaktiverad när OpenMW körs i debug-läge för att förhindra att musen blir oanvändbar när spelet pausar vid en brytpunkt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW kommer ta kontroll av muspekaren om denna inställning är aktiverad.&lt;/p&gt;&lt;p&gt;I ”tittläge” kommer OpenMW centrera muspekaren oavsett värdet på denna inställning (eftersom muspekaren/hårkorset alltid är centrerat i OpenMW-fönstret). I gränssnittsläge däremot kommer denna inställning bedöma beteendet när muspekaren flyttas utanför OpenMW-fönstret. Om på kommer muspekarrörelsen stanna vid kanten av fönstret, vilket förhindrar tillgång till  andra applikationer. Om av tillåts muspekaren att röras fritt över skrivbordet.&lt;/p&gt;&lt;p&gt;Denna inställning appliceras inte på skärmen där Escape har blivit tryckt, då muspekaren aldrig tas över. Oavsett denna inställning kan ”Alt-Tab” eller annan operativsystemberoende knappsekvens användas för att ge operativsystemet åter tillgång till muspekaren. Denna inställning interagerar med minimera vid fokusförlust-inställningen genom att påverka vad som räknas som en fokusförlust. Specifikt på en tvåskärmskonfiguration kan det vara mer smidigt att få tillgång till den andra skärmen med inställningen inaktiverad.&lt;/p&gt;&lt;p&gt;Notis för utvecklare: det är önskvärt att ha denna inställning inaktiverad när OpenMW körs i debug-läge för att förhindra att musen blir oanvändbar när spelet pausar vid en brytpunkt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Browse…</source>
-        <translation type="vanished">Bläddra…</translation>
+        <translation>Bläddra…</translation>
     </message>
     <message>
         <source>Collision is used for both physics simulation and navigation mesh generation for pathfinding. Cylinder gives the best consistency between available navigation paths and ability to move by them. Changing this value affects navigation mesh generation therefore navigation mesh disk cache generated for one value will not be useful with another.</source>
@@ -1059,15 +1059,15 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Tooltip</source>
-        <translation type="vanished">Inforuta</translation>
+        <translation>Inforuta</translation>
     </message>
     <message>
         <source>Crosshair</source>
-        <translation type="vanished">Hårkors</translation>
+        <translation>Hårkors</translation>
     </message>
     <message>
         <source>Screenshots</source>
-        <translation type="vanished">Skärmdumpar</translation>
+        <translation>Skärmdumpar</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Give actors an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1332,59 +1332,59 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Tooltip and Crosshair</source>
-        <translation type="vanished">Inforuta och hårkors</translation>
+        <translation>Inforuta och hårkors</translation>
     </message>
     <message>
         <source>GUI Scaling Factor</source>
-        <translation type="vanished">Skalningsfaktor för gränssnitt</translation>
+        <translation>Skalningsfaktor för gränssnitt</translation>
     </message>
     <message>
         <source>Show Effect Duration</source>
-        <translation type="vanished">Visa effektvaraktighet</translation>
+        <translation>Visa effektvaraktighet</translation>
     </message>
     <message>
         <source>Change Dialogue Topic Color</source>
-        <translation type="vanished">Ändra färg på dialogämnen</translation>
+        <translation>Ändra färg på dialogämnen</translation>
     </message>
     <message>
         <source>Font Size</source>
-        <translation type="vanished">Fontstorlek</translation>
+        <translation>Fontstorlek</translation>
     </message>
     <message>
         <source>Show Projectile Damage</source>
-        <translation type="vanished">Visa projektilskada</translation>
+        <translation>Visa projektilskada</translation>
     </message>
     <message>
         <source>Show Melee Info</source>
-        <translation type="vanished">Visa närstridsinfo</translation>
+        <translation>Visa närstridsinfo</translation>
     </message>
     <message>
         <source>Stretch Menu Background</source>
-        <translation type="vanished">Sträck ut menybakgrund</translation>
+        <translation>Sträck ut menybakgrund</translation>
     </message>
     <message>
         <source>Show Owned Objects</source>
-        <translation type="vanished">Visa ägda objekt</translation>
+        <translation>Visa ägda objekt</translation>
     </message>
     <message>
         <source>Show Enchant Chance</source>
-        <translation type="vanished">Visa chans för &quot;Enchant&quot;</translation>
+        <translation>Visa chans för &quot;Enchant&quot;</translation>
     </message>
     <message>
         <source>Maximum Quicksaves</source>
-        <translation type="vanished">Max snabbsparfiler</translation>
+        <translation>Max snabbsparfiler</translation>
     </message>
     <message>
         <source>Screenshot Format</source>
-        <translation type="vanished">Skärmdumpformat</translation>
+        <translation>Skärmdumpformat</translation>
     </message>
     <message>
         <source>Grab Cursor</source>
-        <translation type="vanished">Ta över muspekaren</translation>
+        <translation>Ta över muspekaren</translation>
     </message>
     <message>
         <source>Default Cell</source>
-        <translation type="vanished">Förinställd cell</translation>
+        <translation>Förinställd cell</translation>
     </message>
     <message>
         <source>Bounds</source>
@@ -1440,23 +1440,23 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Can Zoom on Maps</source>
-        <translation type="vanished">Kan zooma på kartor</translation>
+        <translation>Kan zooma på kartor</translation>
     </message>
     <message>
         <source>Notify on Saved Screenshot</source>
-        <translation type="vanished">Ge notis vid sparad skärmdump</translation>
+        <translation>Ge notis vid sparad skärmdump</translation>
     </message>
     <message>
         <source>Skip Menu and Generate Default Character</source>
-        <translation type="vanished">Hoppa över meny och generera förinställd rollfigur</translation>
+        <translation>Hoppa över meny och generera förinställd rollfigur</translation>
     </message>
     <message>
         <source>Start Default Character at</source>
-        <translation type="vanished">Starta förinställd rollfigur vid</translation>
+        <translation>Starta förinställd rollfigur vid</translation>
     </message>
     <message>
         <source>Run Script After Startup:</source>
-        <translation type="vanished">Kör skript efter uppstart:</translation>
+        <translation>Kör skript efter uppstart:</translation>
     </message>
     <message>
         <source>Smooth Animation Transitions</source>

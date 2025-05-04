@@ -1054,47 +1054,47 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Interface</source>
-        <translation type="vanished">Интерфейс</translation>
+        <translation>Интерфейс</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting scales GUI windows. A value of 1.0 results in the normal scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта настройка отвечает за масштабирование окон внутриигрового интерфейса. Значение 1.0 соответствует нормальному размеру интерфейса.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта настройка отвечает за масштабирование окон внутриигрового интерфейса. Значение 1.0 соответствует нормальному размеру интерфейса.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>GUI Scaling Factor</source>
-        <translation type="vanished">Масштаб интерфейса</translation>
+        <translation>Масштаб интерфейса</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда настройка включена, в подсказке, всплывающей при наведении курсора на иконку магического эффекта, будет отображаться оставшаяся длительность магического эффекта или источника света.&lt;/p&gt;&lt;p&gt;По умолчанию настройка отключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда настройка включена, в подсказке, всплывающей при наведении курсора на иконку магического эффекта, будет отображаться оставшаяся длительность магического эффекта или источника света.&lt;/p&gt;&lt;p&gt;По умолчанию настройка отключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Effect Duration</source>
-        <translation type="vanished">Показывать длительность эффектов</translation>
+        <translation>Показывать длительность эффектов</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, dialogue topics will have a different color if the topic is specific to the NPC you&apos;re talking to or the topic was previously seen. Color can be changed in settings.cfg.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, у тем диалогов будет другой цвет, если у вашего собеседника есть уникальная реплика по заданной теме, или же если вы уже видели текст темы. Цвета могут быть настроены через settings.cfg.&lt;/p&gt;&lt;p&gt;По умолчанию настройка отключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, у тем диалогов будет другой цвет, если у вашего собеседника есть уникальная реплика по заданной теме, или же если вы уже видели текст темы. Цвета могут быть настроены через settings.cfg.&lt;/p&gt;&lt;p&gt;По умолчанию настройка отключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Change Dialogue Topic Color</source>
-        <translation type="vanished">Смена цвета тем для диалогов</translation>
+        <translation>Смена цвета тем для диалогов</translation>
     </message>
     <message>
         <source>Size of characters in game texts.</source>
-        <translation type="vanished">Размер символов в текстах.</translation>
+        <translation>Размер символов в текстах.</translation>
     </message>
     <message>
         <source>Font Size</source>
-        <translation type="vanished">Размер шрифтов</translation>
+        <translation>Размер шрифтов</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable zooming on local and global maps.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включить возможность масштабирования на локальной и глобальной картах.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Включить возможность масштабирования на локальной и глобальной картах.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Can Zoom on Maps</source>
-        <translation type="vanished">Включить масштабирование карты</translation>
+        <translation>Включить масштабирование карты</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, containers supporting graphic herbalism will do so instead of opening the menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1102,39 +1102,39 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, damage bonus of arrows and bolts will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, на всплывающих подсказках стрел и болтов будет показан их бонус к урону.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, на всплывающих подсказках стрел и болтов будет показан их бонус к урону.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Projectile Damage</source>
-        <translation type="vanished">Показывать урон снарядов</translation>
+        <translation>Показывать урон снарядов</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, на всплывающих подсказках оружия ближнего боя будут показаны его дальность и скорость атаки.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если эта настройка включена, на всплывающих подсказках оружия ближнего боя будут показаны его дальность и скорость атаки.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Melee Info</source>
-        <translation type="vanished">Показывать информацию об оружии</translation>
+        <translation>Показывать информацию об оружии</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stretch menus, load screens, etc. to the window aspect ratio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Растягивать фон меню, экранов загрузки и т.д., чтобы изображение соответствовало соотношению сторон выбранного разрешения экрана.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Растягивать фон меню, экранов загрузки и т.д., чтобы изображение соответствовало соотношению сторон выбранного разрешения экрана.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Stretch Menu Background</source>
-        <translation type="vanished">Растягивать фон меню</translation>
+        <translation>Растягивать фон меню</translation>
     </message>
     <message>
         <source>Show Owned Objects</source>
-        <translation type="vanished">Выделять объекты с владельцами</translation>
+        <translation>Выделять объекты с владельцами</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Показывать шанс успеха в меню зачарования, или же нет.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Показывать шанс успеха в меню зачарования, или же нет.&lt;/p&gt;&lt;p&gt;По умолчанию настройка выключена.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Enchant Chance</source>
-        <translation type="vanished">Показывать шанс успеха зачарования</translation>
+        <translation>Показывать шанс успеха зачарования</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prevents merchants from equipping items that are sold to them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1150,63 +1150,63 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Miscellaneous</source>
-        <translation type="vanished">Разное</translation>
+        <translation>Разное</translation>
     </message>
     <message>
         <source>Saves</source>
-        <translation type="vanished">Сохранения</translation>
+        <translation>Сохранения</translation>
     </message>
     <message>
         <source>JPG</source>
-        <translation type="vanished">JPG</translation>
+        <translation>JPG</translation>
     </message>
     <message>
         <source>PNG</source>
-        <translation type="vanished">PNG</translation>
+        <translation>PNG</translation>
     </message>
     <message>
         <source>TGA</source>
-        <translation type="vanished">TGA</translation>
+        <translation>TGA</translation>
     </message>
     <message>
         <source>Notify on Saved Screenshot</source>
-        <translation type="vanished">Уведомление при сохранении снимка</translation>
+        <translation>Уведомление при сохранении снимка</translation>
     </message>
     <message>
         <source>Testing</source>
-        <translation type="vanished">Отладка</translation>
+        <translation>Отладка</translation>
     </message>
     <message>
         <source>These settings are intended for testing mods and will cause issues if used for normal gameplay.</source>
-        <translation type="vanished">Эти настройки предназначены для отладки модов, и при их использовании для нормального игрового процесса возникнут проблемы.</translation>
+        <translation>Эти настройки предназначены для отладки модов, и при их использовании для нормального игрового процесса возникнут проблемы.</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW will capture control of the cursor if this setting is true.&lt;/p&gt;&lt;p&gt;In “look mode”, OpenMW will center the cursor regardless of the value of this setting (since the cursor/crosshair is always centered in the OpenMW window). However, in GUI mode, this setting determines the behavior when the cursor is moved outside the OpenMW window. If true, the cursor movement stops at the edge of the window preventing access to other applications. If false, the cursor is allowed to move freely on the desktop.&lt;/p&gt;&lt;p&gt;This setting does not apply to the screen where escape has been pressed, where the cursor is never captured. Regardless of this setting “Alt-Tab” or some other operating system dependent key sequence can be used to allow the operating system to regain control of the mouse cursor. This setting interacts with the minimize on focus loss setting by affecting what counts as a focus loss. Specifically on a two-screen configuration it may be more convenient to access the second screen with setting disabled.&lt;/p&gt;&lt;p&gt;Note for developers: it’s desirable to have this setting disabled when running the game in a debugger, to prevent the mouse cursor from becoming unusable when the game pauses on a breakpoint.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда эта настройка включена, OpenMW будет управлять курсором мыши.&lt;/p&gt;&lt;p&gt;В “режиме обзора”, OpenMW будет захватывать курсор в центре экрана вне зависимости от значения этой настройки (потому что курсор всегда расположен по центру в окне OpenMW). Однако в режиме меню эта настройка определяет поведение выхода курсора за пределы окна OpenMW. Если настройка включена, курсор остановится на краю окна, предотвращая доступ к другим приложениям. Если выключена, курсор может свободно перемещаться по рабочему столу.&lt;/p&gt;&lt;p&gt;Эта настройка не применяется к экрану, на котором нажата клавиша “Escape” (там курсор никогда не захватывается). Вне зависимости от значения этой настройки “Alt-Tab” и некоторые другие зависимые от операционной системы комбинации клавиш могут быть использованы, чтобы вернуть управление курсором операционной системе. Эта настройка также взаимодействует с настройкой &quot;minimize on focus loss&quot;, определяя, что именно считать потерей фокуса. На системах с двумя экранами может быть проще получить доступ ко второму экрану, если настройка выключена.&lt;/p&gt;&lt;p&gt;Замечание для разработчиков: лучше запускать игру с отключенной настройкой при запуске игры через отладчик, чтобы курсор не становился недоступен, когда игра останавливается на точке останова.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Когда эта настройка включена, OpenMW будет управлять курсором мыши.&lt;/p&gt;&lt;p&gt;В “режиме обзора”, OpenMW будет захватывать курсор в центре экрана вне зависимости от значения этой настройки (потому что курсор всегда расположен по центру в окне OpenMW). Однако в режиме меню эта настройка определяет поведение выхода курсора за пределы окна OpenMW. Если настройка включена, курсор остановится на краю окна, предотвращая доступ к другим приложениям. Если выключена, курсор может свободно перемещаться по рабочему столу.&lt;/p&gt;&lt;p&gt;Эта настройка не применяется к экрану, на котором нажата клавиша “Escape” (там курсор никогда не захватывается). Вне зависимости от значения этой настройки “Alt-Tab” и некоторые другие зависимые от операционной системы комбинации клавиш могут быть использованы, чтобы вернуть управление курсором операционной системе. Эта настройка также взаимодействует с настройкой &quot;minimize on focus loss&quot;, определяя, что именно считать потерей фокуса. На системах с двумя экранами может быть проще получить доступ ко второму экрану, если настройка выключена.&lt;/p&gt;&lt;p&gt;Замечание для разработчиков: лучше запускать игру с отключенной настройкой при запуске игры через отладчик, чтобы курсор не становился недоступен, когда игра останавливается на точке останова.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Grab Cursor</source>
-        <translation type="vanished">Захватывать курсор</translation>
+        <translation>Захватывать курсор</translation>
     </message>
     <message>
         <source>Skip Menu and Generate Default Character</source>
-        <translation type="vanished">Пропустить меню и создать персонажа по умолчанию</translation>
+        <translation>Пропустить меню и создать персонажа по умолчанию</translation>
     </message>
     <message>
         <source>Start Default Character at</source>
-        <translation type="vanished">Запустить с персонажем по умолчанию в локации</translation>
+        <translation>Запустить с персонажем по умолчанию в локации</translation>
     </message>
     <message>
         <source>Default Cell</source>
-        <translation type="vanished">по умолчанию</translation>
+        <translation>по умолчанию</translation>
     </message>
     <message>
         <source>Run Script After Startup:</source>
-        <translation type="vanished">Запустить скрипт после запуска:</translation>
+        <translation>Запустить скрипт после запуска:</translation>
     </message>
     <message>
         <source>Browse…</source>
-        <translation type="vanished">Выбрать…</translation>
+        <translation>Выбрать…</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;When enabled, a navigation mesh is built in the background for world geometry to be used for pathfinding. When disabled only the path grid is used to build paths. Single-core CPU systems may have a big performance impact on existing interior location and moving across the exterior world. May slightly affect performance on multi-core CPU systems. Multi-core CPU systems may have different latency for nav mesh update depending on other settings and system performance. Moving across external world, entering/exiting location produce nav mesh update. NPC and creatures may not be able to find path before nav mesh is built around them. Try to disable this if you want to have old fashioned AI which doesn&apos;t know where to go when you stand behind that stone and cast a firebolt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1414,27 +1414,27 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Tooltip</source>
-        <translation type="vanished">Всплывающая подсказка</translation>
+        <translation>Всплывающая подсказка</translation>
     </message>
     <message>
         <source>Crosshair</source>
-        <translation type="vanished">Прицел</translation>
+        <translation>Прицел</translation>
     </message>
     <message>
         <source>Tooltip and Crosshair</source>
-        <translation type="vanished">Всплывающая подсказка и прицел</translation>
+        <translation>Всплывающая подсказка и прицел</translation>
     </message>
     <message>
         <source>Maximum Quicksaves</source>
-        <translation type="vanished">Количество быстрых сохранений</translation>
+        <translation>Количество быстрых сохранений</translation>
     </message>
     <message>
         <source>Screenshots</source>
-        <translation type="vanished">Снимки экрана</translation>
+        <translation>Снимки экрана</translation>
     </message>
     <message>
         <source>Screenshot Format</source>
-        <translation type="vanished">Формат снимков экрана</translation>
+        <translation>Формат снимков экрана</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
