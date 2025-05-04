@@ -964,6 +964,7 @@ namespace MWSound
         // Speed of sound is in units per second. Take the sound speed in air (assumed
         // meters per second), multiply by the units per meter to get the speed in u/s.
         alSpeedOfSound(Constants::SoundSpeedInAir * Constants::UnitsPerMeter);
+        alDopplerFactor(Settings::sound().mDopplerFactor);
         alGetError();
 
         mInitialized = true;
@@ -1138,7 +1139,6 @@ namespace MWSound
 
         alSourcef(source, AL_GAIN, gain);
         alSourcef(source, AL_PITCH, pitch);
-        alSourcef(source, AL_DOPPLER_FACTOR, 0.0f);
         alSourcefv(source, AL_POSITION, pos.ptr());
         alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
@@ -1179,7 +1179,6 @@ namespace MWSound
 
         alSourcef(source, AL_GAIN, gain);
         alSourcef(source, AL_PITCH, pitch);
-        alSourcef(source, AL_DOPPLER_FACTOR, Settings::sound().mDopplerFactor);
         alSourcefv(source, AL_POSITION, pos.ptr());
         alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
         alSourcefv(source, AL_VELOCITY, vel.ptr());
