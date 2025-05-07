@@ -245,11 +245,7 @@ namespace fx
             else if (key == "author")
                 mAuthor = parseString();
             else if (key == "glsl_version")
-            {
-                int version = parseInteger();
-                if (mUBO && version > 330)
-                    mGLSLVersion = version;
-            }
+                mGLSLVersion = std::max(mGLSLVersion, parseInteger());
             else if (key == "flags")
                 mFlags = parseFlags();
             else if (key == "hdr")
