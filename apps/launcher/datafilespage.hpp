@@ -17,6 +17,7 @@
 class QSortFilterProxyModel;
 class QAbstractItemModel;
 class QMenu;
+class QTimer;
 
 namespace Files
 {
@@ -137,6 +138,7 @@ namespace Launcher
         std::mutex mReloadCellsMutex;
         std::condition_variable mStartReloadCells;
         std::thread mReloadCellsThread;
+        QTimer* mReloadCellsTimer;
 
         void addArchive(const QString& name, Qt::CheckState selected, int row = -1);
         void addArchivesFromDir(const QString& dir);
@@ -151,6 +153,7 @@ namespace Launcher
         void addProfile(const QString& profile, bool setAsCurrent);
         void checkForDefaultProfile();
         void populateFileViews(const QString& contentModelName);
+        void onReloadCellsTimerTimeout();
         void reloadCells();
         void refreshDataFilesView();
         void updateNavMeshProgress(int minDataSize);
