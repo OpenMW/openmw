@@ -222,7 +222,6 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
     lighting = passDiffuseLighting * diffuseColor.xyz + passLighting;
-    clampLightingResult(lighting);
     lighting += shadowDiffuseLighting * diffuseColor.xyz * shadowing;
     specular = passSpecular + shadowSpecularLighting * shadowing;
 #else
