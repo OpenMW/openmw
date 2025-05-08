@@ -232,6 +232,7 @@ Programmers
     Tess (tescoShoppah)
     thegriglat
     Thomas Luppi (Digmaster)
+    Tim Hagberg (hazardMan)
     tlmullis
     trav
     tri4ng1e
