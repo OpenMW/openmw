@@ -43,6 +43,8 @@ namespace MWSound
         constexpr float sSfxFadeOutDuration = 1.0f;
         constexpr float sSoundCullDistance = 2000.f;
 
+        float physicsFramerate = 60.f;
+
         WaterSoundUpdaterSettings makeWaterSoundUpdaterSettings()
         {
             WaterSoundUpdaterSettings settings;
@@ -138,6 +140,13 @@ namespace MWSound
         {
             Log(Debug::Error) << "Failed to initialize audio output, sound disabled";
             return;
+        }
+
+        if (const char* env = getenv("OPENMW_PHYSICS_FPS"))
+        {
+            if (const auto physFramerate = Misc::StringUtils::toNumeric<float>(env);
+                physFramerate.has_value() && *physFramerate > 0)
+                physicsFramerate = *physFramerate;
         }
 
         std::vector<std::string> names = mOutput->enumerate();
@@ -959,14 +968,6 @@ namespace MWSound
         {
             mOutput->finishSound(mUnderwaterSound);
             mUnderwaterSound = nullptr;
-        }
-
-        float physicsFramerate = 60.f;
-        if (const char* env = getenv("OPENMW_PHYSICS_FPS"))
-        {
-            if (const auto physFramerate = Misc::StringUtils::toNumeric<float>(env);
-                physFramerate.has_value() && *physFramerate > 0)
-                physicsFramerate = *physFramerate;
         }
 
         mOutput->startUpdate();
