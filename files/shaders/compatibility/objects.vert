@@ -53,6 +53,7 @@ varying vec2 glossMapUV;
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
+centroid varying vec3 passDiffuseLighting;
 centroid varying vec3 passSpecular;
 centroid varying vec3 shadowDiffuseLighting;
 centroid varying vec3 shadowSpecularLighting;
@@ -150,10 +151,11 @@ void main(void)
 #if !PER_PIXEL_LIGHTING
     vec3 diffuseLight, ambientLight, specularLight;
     doLighting(viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, shadowSpecularLighting);
-    passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
+    passLighting = getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
+    passDiffuseLighting = diffuseLight;
     passSpecular = getSpecularColor().xyz * specularLight * specStrength;
     clampLightingResult(passLighting);
-    shadowDiffuseLighting *= getDiffuseColor().xyz;
+    clampLightingResult(passDiffuseLighting);
     shadowSpecularLighting *= getSpecularColor().xyz * specStrength;
 #endif
 

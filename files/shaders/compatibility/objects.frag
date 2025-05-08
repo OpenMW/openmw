@@ -72,6 +72,7 @@ uniform float distortionStrength;
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
+centroid varying vec3 passDiffuseLighting;
 centroid varying vec3 passSpecular;
 centroid varying vec3 shadowDiffuseLighting;
 centroid varying vec3 shadowSpecularLighting;
@@ -220,7 +221,9 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     float shadowing = unshadowedLightRatio(-passViewPos.z);
     vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
-    lighting = passLighting + shadowDiffuseLighting * shadowing;
+    lighting = passDiffuseLighting * diffuseColor.xyz + passLighting;
+    clampLightingResult(lighting);
+    lighting += shadowDiffuseLighting * diffuseColor.xyz * shadowing;
     specular = passSpecular + shadowSpecularLighting * shadowing;
 #else
 #if @specularMap
