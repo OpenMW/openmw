@@ -64,7 +64,7 @@ namespace MWLua
             = [](SelfObject& self) { return "openmw.self[" + self.toString() + "]"; };
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
-        selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
+        selfAPI["isActive"] = [](SelfObject& self) -> bool { return self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
         selfAPI["ATTACK_TYPE"]
             = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWMechanics::AttackType>(lua,
