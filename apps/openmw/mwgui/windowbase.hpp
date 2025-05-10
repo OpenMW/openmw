@@ -1,6 +1,8 @@
 #ifndef MWGUI_WINDOW_BASE_H
 #define MWGUI_WINDOW_BASE_H
 
+#include <SDL.h>
+
 #include "layout.hpp"
 
 namespace MWWorld
@@ -54,13 +56,26 @@ namespace MWGui
 
         static void clampWindowCoordinates(MyGUI::Window* window);
 
+        /// Called by controllermanager to handle controller events
+        virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) { return true; };
+        virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) { return true; };
+        // REMOVEME
+        // virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) = 0;
+        // virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) = 0;
+
     protected:
         virtual void onTitleDoubleClicked();
+
+        MyGUI::Widget* mMouseFocus = nullptr;
+        void trackFocusEvents(MyGUI::Widget* widget);
 
     private:
         void onDoubleClick(MyGUI::Widget* _sender);
 
         bool mDisabledByLua = false;
+
+        void focusGain(MyGUI::Widget* _new, MyGUI::Widget* _old);
+        void focusLoss(MyGUI::Widget* _old, MyGUI::Widget* _new);
     };
 
     /*

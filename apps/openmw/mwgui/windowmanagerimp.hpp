@@ -387,6 +387,8 @@ namespace MWGui
 
         void asyncPrepareSaveMap() override;
 
+        WindowBase* getTopWindow() override;
+
         // Used in Lua bindings
         const std::vector<GuiMode>& getGuiModeStack() const override { return mGuiModes; }
         void setDisabledByLua(std::string_view windowId, bool disabled) override;

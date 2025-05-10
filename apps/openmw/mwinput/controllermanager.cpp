@@ -241,6 +241,12 @@ namespace MWInput
 
     bool ControllerManager::gamepadToGuiControl(const SDL_ControllerButtonEvent& arg)
     {
+        if (Settings::gui().mControllerMenus)
+        {
+            MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getTopWindow();
+            return topWin && topWin->onControllerButtonEvent(arg);
+        }
+
         // Presumption of GUI mode will be removed in the future.
         // MyGUI KeyCodes *may* change.
         MyGUI::KeyCode key = MyGUI::KeyCode::None;
@@ -302,6 +308,12 @@ namespace MWInput
 
     bool ControllerManager::gamepadToGuiControl(const SDL_ControllerAxisEvent& arg)
     {
+        if (Settings::gui().mControllerMenus)
+        {
+            MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getTopWindow();
+            return topWin && topWin->onControllerThumbstickEvent(arg);
+        }
+
         switch (arg.axis)
         {
             case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:

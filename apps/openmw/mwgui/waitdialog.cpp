@@ -80,6 +80,10 @@ namespace MWGui
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &WaitDialog::onWaitingProgressChanged);
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
+
+        trackFocusEvents(mUntilHealedButton);
+        trackFocusEvents(mWaitButton);
+        trackFocusEvents(mCancelButton);
     }
 
     void WaitDialog::setPtr(const MWWorld::Ptr& ptr)
@@ -324,6 +328,27 @@ namespace MWGui
             mProgressBar.setVisible(true);
             mTimeAdvancer.run(mHours, mInterruptAt);
         }
+    }
+
+    bool WaitDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            onWaitButtonClicked(mWaitButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancelButtonClicked(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X && mUntilHealedButton->getVisible())
+            onUntilHealedButtonClicked(mUntilHealedButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+
+        return true;
     }
 
     void WaitDialog::stopWaiting()

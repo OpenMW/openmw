@@ -7,6 +7,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include <components/settings/values.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "draganddrop.hpp"
@@ -103,6 +104,30 @@ void WindowBase::clampWindowCoordinates(MyGUI::Window* window)
 
     if (window->getPosition().left != left || window->getPosition().top != top)
         window->setPosition(left, top);
+}
+
+void WindowBase::focusGain(MyGUI::Widget* _new, MyGUI::Widget* _old)
+{
+    // REMOVEME
+    Log(Debug::Verbose) << "WindowBase::focusGain new=" << _new << ", old=" << _old;
+    mMouseFocus = _new;
+}
+
+void WindowBase::focusLoss(MyGUI::Widget* _old, MyGUI::Widget* _new)
+{
+    // REMOVEME
+    Log(Debug::Verbose) << "WindowBase::focusLoss old=" << _old << ", new=" << _new;
+    if (mMouseFocus == _old)
+        mMouseFocus = nullptr;
+}
+
+void WindowBase::trackFocusEvents(MyGUI::Widget* widget)
+{
+    if (!Settings::gui().mControllerMenus)
+        return;
+
+    widget->eventMouseSetFocus += MyGUI::newDelegate(this, &WindowBase::focusGain);
+    widget->eventMouseLostFocus += MyGUI::newDelegate(this, &WindowBase::focusLoss);
 }
 
 WindowModal::WindowModal(const std::string& parLayout)

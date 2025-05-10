@@ -17,6 +17,8 @@ namespace MWGui
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ConfirmationDialog::onCancelButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ConfirmationDialog::onOkButtonClicked);
+
+        trackFocusEvents(mCancelButton);
     }
 
     void ConfirmationDialog::askForConfirmation(const std::string& message)
@@ -55,5 +57,20 @@ namespace MWGui
         setVisible(false);
 
         eventOkClicked();
+    }
+
+    bool ConfirmationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            onOkButtonClicked(mOkButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancelButtonClicked(mCancelButton);
+
+        return true;
     }
 }

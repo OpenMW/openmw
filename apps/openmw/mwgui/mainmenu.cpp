@@ -1,6 +1,7 @@
 #include "mainmenu.hpp"
 
 #include <MyGUI_Gui.h>
+#include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_TextBox.h>
 
@@ -163,9 +164,7 @@ namespace MWGui
         const std::string& name = *sender->getUserData<std::string>();
         winMgr->playSound(ESM::RefId::stringRefId("Menu Click"));
         if (name == "return")
-        {
             winMgr->removeGuiMode(GM_MainMenu);
-        }
         else if (name == "credits")
             winMgr->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
@@ -206,6 +205,34 @@ namespace MWGui
         {
             winMgr->toggleSettingsWindow();
         }
+    }
+
+    bool MainMenu::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        // REMOVEME
+        Log(Debug::Verbose) << "MainMenu::onControllerButtonEvent " << arg.button;
+
+        MyGUI::KeyCode key = MyGUI::KeyCode::None;
+        switch (arg.button)
+        {
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::LeftShift);
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
+                MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::LeftShift);
+                return true;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                key = MyGUI::KeyCode::Tab;
+                break;
+            case SDL_CONTROLLER_BUTTON_A:
+                key = MyGUI::KeyCode::Space;
+                break;
+            case SDL_CONTROLLER_BUTTON_B:
+            case SDL_CONTROLLER_BUTTON_START:
+                onButtonClicked(mButtons["return"]);
+                return true;
+        }
+        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
+        return true;
     }
 
     void MainMenu::showBackground(bool show)

@@ -12,6 +12,7 @@
 #include <MyGUI_KeyCode.h>
 
 #include "../mwgui/mode.hpp"
+#include "../mwgui/windowbase.hpp"
 
 #include <components/sdlutil/events.hpp>
 
@@ -380,6 +381,8 @@ namespace MWBase
 
         /// Same as viewer->getCamera()->getCullMask(), provided for consistency.
         virtual uint32_t getCullMask() = 0;
+
+        virtual MWGui::WindowBase* getTopWindow() = 0;
 
         // Used in Lua bindings
         virtual const std::vector<MWGui::GuiMode>& getGuiModeStack() const = 0;

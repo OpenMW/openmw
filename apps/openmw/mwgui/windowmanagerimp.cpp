@@ -859,6 +859,40 @@ namespace MWGui
         mHud->setPlayerPos(x, y, u, v);
     }
 
+    WindowBase* WindowManager::getTopWindow()
+    {
+        if (!mCurrentModals.empty())
+            return mCurrentModals.back();
+
+        if (isSettingsWindowVisible())
+            return mSettingsWindow;
+
+        if (!mGuiModes.empty())
+        {
+            GuiModeState& state = mGuiModeStates[mGuiModes.back()];
+            // REMOVEME
+            Log(Debug::Error) << "getTopWindow: " << state.mWindows.size() << " windows in state " << mGuiModes.back();
+            // find the topmost window
+            for (WindowBase* window : state.mWindows)
+                if (window->isVisible())
+                    return window;
+                else
+                    Log(Debug::Error) << "-- Skipping hidden window " << window;
+        }
+        else
+        {
+            // return pinned windows if visible
+            // REMOVEME
+            Log(Debug::Error) << "getTopWindow: " << mGuiModeStates[GM_Inventory].mWindows.size() << " pinned windows";
+            for (WindowBase* window : mGuiModeStates[GM_Inventory].mWindows)
+                if (window->isVisible())
+                    return window;
+                else
+                    Log(Debug::Error) << "-- Skipping hidden window " << window;
+        }
+        return nullptr;
+    }
+
     void WindowManager::update(float frameDuration)
     {
         handleScheduledMessageBoxes();
