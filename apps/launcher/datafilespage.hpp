@@ -10,6 +10,10 @@
 #include <QStringList>
 #include <QWidget>
 
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+
 class QSortFilterProxyModel;
 class QAbstractItemModel;
 class QMenu;
@@ -47,6 +51,7 @@ namespace Launcher
     public:
         explicit DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
             Config::LauncherSettings& launcherSettings, MainDialog* parent = nullptr);
+        ~DataFilesPage();
 
         QAbstractItemModel* profilesModel() const;
 
@@ -119,13 +124,19 @@ namespace Launcher
         Config::LauncherSettings& mLauncherSettings;
 
         QString mPreviousProfile;
-        QStringList previousSelectedFiles;
+        QStringList mSelectedFiles;
         QString mDataLocal;
         QStringList mKnownArchives;
         QStringList mNewDataDirs;
 
         Process::ProcessInvoker* mNavMeshToolInvoker;
         NavMeshToolProgress mNavMeshToolProgress;
+
+        bool mReloadCells = false;
+        bool mAbortReloadCells = false;
+        std::mutex mReloadCellsMutex;
+        std::condition_variable mStartReloadCells;
+        std::thread mReloadCellsThread;
 
         void addArchive(const QString& name, Qt::CheckState selected, int row = -1);
         void addArchivesFromDir(const QString& dir);
@@ -140,7 +151,7 @@ namespace Launcher
         void addProfile(const QString& profile, bool setAsCurrent);
         void checkForDefaultProfile();
         void populateFileViews(const QString& contentModelName);
-        void reloadCells(QStringList selectedFiles);
+        void reloadCells();
         void refreshDataFilesView();
         void updateNavMeshProgress(int minDataSize);
         void slotCopySelectedItemsPaths();

@@ -231,7 +231,9 @@
     Bug #8378: Korean bitmap fonts are unusable
     Bug #8439: Creatures without models can crash the game
     Bug #8441: Freeze when using video main menu replacers
+    Bug #8445: Launcher crashes on exit when cell name loading thread is still running
     Bug #8462: Crashes when resizing the window on macOS
+    Bug #8465: Blue screen w/ antialiasing and post-processing on macOS
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking

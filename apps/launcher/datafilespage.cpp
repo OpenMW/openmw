@@ -159,6 +159,7 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
     , mNavMeshToolInvoker(new Process::ProcessInvoker(this))
+    , mReloadCellsThread(&DataFilesPage::reloadCells, this)
 {
     ui.setupUi(this);
     setObjectName("DataFilesPage");
@@ -203,6 +204,16 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
         &DataFilesPage::slotAddonDataChanged);
     // Call manually to indicate all changes to addon data during startup.
     slotAddonDataChanged();
+}
+
+Launcher::DataFilesPage::~DataFilesPage()
+{
+    {
+        const std::lock_guard lock(mReloadCellsMutex);
+        mAbortReloadCells = true;
+        mStartReloadCells.notify_one();
+    }
+    mReloadCellsThread.join();
 }
 
 void Launcher::DataFilesPage::buildView()
@@ -991,31 +1002,45 @@ bool Launcher::DataFilesPage::showDeleteMessageBox(const QString& text)
 void Launcher::DataFilesPage::slotAddonDataChanged()
 {
     QStringList selectedFiles = selectedFilePaths();
-    if (previousSelectedFiles != selectedFiles)
+    if (mSelectedFiles != selectedFiles)
     {
-        previousSelectedFiles = selectedFiles;
-        // Loading cells for core Morrowind + Expansions takes about 0.2 seconds, which is enough to cause a
-        // barely perceptible UI lag. Splitting into its own thread to alleviate that.
-        std::thread loadCellsThread(&DataFilesPage::reloadCells, this, selectedFiles);
-        loadCellsThread.detach();
+        const std::lock_guard lock(mReloadCellsMutex);
+        mSelectedFiles = std::move(selectedFiles);
+        mReloadCells = true;
+        mStartReloadCells.notify_one();
     }
 }
 
-// Mutex lock to run reloadCells synchronously.
-static std::mutex reloadCellsMutex;
-
-void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
+void Launcher::DataFilesPage::reloadCells()
 {
-    // Use a mutex lock so that we can prevent two threads from executing the rest of this code at the same time
-    // Based on https://stackoverflow.com/a/5429695/531762
-    std::unique_lock<std::mutex> lock(reloadCellsMutex);
+    std::unique_lock lock(mReloadCellsMutex);
 
-    // The following code will run only if there is not another thread currently running it
-    CellNameLoader cellNameLoader;
-    QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
-    QStringList cellNamesList(set.begin(), set.end());
-    std::sort(cellNamesList.begin(), cellNamesList.end());
-    emit signalLoadedCellsChanged(cellNamesList);
+    while (true)
+    {
+        mStartReloadCells.wait(lock);
+
+        if (mAbortReloadCells)
+            return;
+
+        if (!std::exchange(mReloadCells, false))
+            continue;
+
+        QStringList selectedFiles = mSelectedFiles;
+
+        lock.unlock();
+
+        CellNameLoader cellNameLoader;
+        QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
+        QStringList cellNamesList(set.begin(), set.end());
+        std::sort(cellNamesList.begin(), cellNamesList.end());
+
+        emit signalLoadedCellsChanged(std::move(cellNamesList));
+
+        lock.lock();
+
+        if (mAbortReloadCells)
+            return;
+    }
 }
 
 void Launcher::DataFilesPage::startNavMeshTool()
