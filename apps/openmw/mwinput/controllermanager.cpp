@@ -244,7 +244,8 @@ namespace MWInput
         if (Settings::gui().mControllerMenus)
         {
             MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getTopWindow();
-            return topWin && topWin->onControllerButtonEvent(arg);
+            if (topWin && topWin->onControllerButtonEvent(arg))
+                return true;
         }
 
         // Presumption of GUI mode will be removed in the future.
@@ -311,7 +312,8 @@ namespace MWInput
         if (Settings::gui().mControllerMenus)
         {
             MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getTopWindow();
-            return topWin && topWin->onControllerThumbstickEvent(arg);
+            if (topWin && topWin->onControllerThumbstickEvent(arg))
+                return true;
         }
 
         switch (arg.axis)

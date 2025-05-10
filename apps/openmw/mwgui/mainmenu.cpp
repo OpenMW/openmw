@@ -228,8 +228,14 @@ namespace MWGui
                 break;
             case SDL_CONTROLLER_BUTTON_B:
             case SDL_CONTROLLER_BUTTON_START:
-                onButtonClicked(mButtons["return"]);
-                return true;
+                if (mButtons["return"]->getVisible())
+                {
+                    onButtonClicked(mButtons["return"]);
+                    return true;
+                }
+                else
+                    key = MyGUI::KeyCode::Escape;
+                break;
         }
         MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
         return true;
