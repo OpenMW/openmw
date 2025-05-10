@@ -2,6 +2,7 @@
 #define DATAFILESPAGE_H
 
 #include "ui_datafilespage.h"
+#include "ui_directorypicker.h"
 
 #include <components/process/processinvoker.hpp>
 
@@ -45,8 +46,11 @@ namespace Launcher
 
         ContentSelectorView::ContentSelector* mSelector;
         Ui::DataFilesPage ui;
+        QDialog* mDirectoryPickerDialog;
+        Ui::SelectSubdirs mDirectoryPicker;
         QMenu* mArchiveContextMenu;
         QMenu* mDataFilesContextMenu;
+        QMenu* mDirectoryPickerMenu;
 
     public:
         explicit DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
@@ -86,8 +90,7 @@ namespace Launcher
 
         void slotShowArchiveContextMenu(const QPoint& pos);
         void slotShowDataFilesContextMenu(const QPoint& pos);
-        void slotCheckMultiSelectedItems();
-        void slotUncheckMultiSelectedItems();
+        void slotShowDirectoryPickerContextMenu(const QPoint& pos);
 
         void on_newProfileAction_triggered();
         void on_cloneProfileAction_triggered();
@@ -143,7 +146,9 @@ namespace Launcher
         void buildView();
         void buildArchiveContextMenu();
         void buildDataFilesContextMenu();
-        void setCheckStateForMultiSelectedItems(bool checked);
+        void buildDirectoryPickerContextMenu();
+        void showContextMenu(QMenu* menu, QListWidget* list, const QPoint& pos);
+        void setCheckStateForMultiSelectedItems(QListWidget* list, Qt::CheckState checkState);
         void setProfile(int index, bool savePrevious);
         void setProfile(const QString& previous, const QString& current, bool savePrevious);
         void removeProfile(const QString& profile);
