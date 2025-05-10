@@ -63,6 +63,9 @@ namespace MWGui
 
         // To avoid accidental deletions
         mDeleteButton->setNeedKeyFocus(false);
+
+        trackFocusEvents(mCancelButton);
+        trackFocusEvents(mDeleteButton);
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox* sender, size_t pos)
@@ -486,5 +489,60 @@ namespace MWGui
 
         mScreenshotTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
+    }
+
+    bool SaveGameDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            onOkButtonClicked(mOkButton);
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelButtonClicked(mCancelButton);
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mSaveList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mSaveList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            uint32_t index = mCharacterSelection->getIndexSelected();
+            if (index <= 0)
+                index = mCharacterSelection->getItemCount() - 1;
+            else
+                index--;
+            mCharacterSelection->setIndexSelected(index);
+
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            uint32_t index = mCharacterSelection->getIndexSelected();
+            if (index >= mCharacterSelection->getItemCount() - 1)
+                index = 0;
+            else
+                index++;
+            mCharacterSelection->setIndexSelected(index);
+
+            return true;
+        }
+
+        return false;
     }
 }

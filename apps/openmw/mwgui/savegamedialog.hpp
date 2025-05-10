@@ -24,6 +24,8 @@ namespace MWGui
 
         void setLoadOrSave(bool load);
 
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+
     private:
         void confirmDeleteSave();
 
