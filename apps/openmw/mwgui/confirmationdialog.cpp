@@ -3,6 +3,8 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 
+#include <components/settings/values.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -18,7 +20,12 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ConfirmationDialog::onCancelButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ConfirmationDialog::onOkButtonClicked);
 
-        trackFocusEvents(mCancelButton);
+        if (Settings::gui().mControllerMenus)
+        {
+            mOkButton->setStateSelected(true);
+            trackFocusEvents(mOkButton);
+            trackFocusEvents(mCancelButton);
+        }
     }
 
     void ConfirmationDialog::askForConfirmation(const std::string& message)
@@ -66,10 +73,22 @@ namespace MWGui
             if (mMouseFocus != nullptr)
                 return false;
 
-            onOkButtonClicked(mOkButton);
+            if (mOkButtonFocus)
+                onOkButtonClicked(mOkButton);
+            else
+                onCancelButtonClicked(mCancelButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
             onCancelButtonClicked(mCancelButton);
+        }
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && !mOkButtonFocus) ||
+            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mOkButtonFocus))
+        {
+            mOkButtonFocus = !mOkButtonFocus;
+            mOkButton->setStateSelected(mOkButtonFocus);
+            mCancelButton->setStateSelected(!mOkButtonFocus);
+        }
 
         return true;
     }
