@@ -462,6 +462,61 @@ namespace MWGui
         }
     }
 
+    bool RaceDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            // Have A button do nothing so mouse controller still works.
+            return false;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
+        {
+            onOkClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onSelectNextGender(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            onSelectNextHair(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            onSelectNextFace(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mRaceList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mRaceList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        }
+
+        return true;
+    }
+
+    bool RaceDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
+    {
+        if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTX)
+        {
+            if (arg.value < -1000 || arg.value > 1000)
+                onPreviewScroll(nullptr, arg.value < 0 ? 1 : -1);
+            return true;
+        }
+
+        return false;
+    }
+
     const ESM::NPC& RaceDialog::getResult() const
     {
         return mPreview->getPrototype();
