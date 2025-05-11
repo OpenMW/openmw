@@ -224,6 +224,8 @@ namespace MWGui
                 key = MyGUI::KeyCode::Tab;
                 break;
             case SDL_CONTROLLER_BUTTON_A:
+                if (mMouseFocus != nullptr)
+                    return false;
                 key = MyGUI::KeyCode::Space;
                 break;
             case SDL_CONTROLLER_BUTTON_B:
@@ -341,6 +343,7 @@ namespace MWGui
                 button->setProperty("ImagePushed", "textures\\menu_" + buttonId + "_pressed.dds");
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::onButtonClicked);
                 button->setUserData(buttonId);
+                trackFocusEvents(button);
             }
         }
 
