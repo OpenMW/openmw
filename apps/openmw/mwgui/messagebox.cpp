@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -259,6 +260,7 @@ namespace MWGui
             button->setCaptionWithReplacing(buttonId);
 
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed);
+            trackFocusEvents(button);
 
             mButtons.push_back(button);
 
@@ -278,6 +280,12 @@ namespace MWGui
             {
                 biggestButtonWidth = buttonWidth;
             }
+        }
+
+        if (Settings::gui().mControllerMenus && mButtons.size() > 1)
+        {
+            // If we have more than one button, we need to set the focus to the first one.
+            mButtons[0]->setStateSelected(true);
         }
 
         MyGUI::IntSize mainWidgetSize;
@@ -431,4 +439,46 @@ namespace MWGui
         return mButtonPressed;
     }
 
+    bool InteractiveMessageBox::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            buttonActivated(mButtons[mControllerFocus]);
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            if (mButtons.size() == 1)
+                buttonActivated(mButtons[0]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            if (mButtons.size() > 1)
+            {
+                mButtons[mControllerFocus]->setStateSelected(false);
+                if (mControllerFocus == 0)
+                    mControllerFocus = mButtons.size() - 1;
+                else
+                    mControllerFocus--;
+                mButtons[mControllerFocus]->setStateSelected(true);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            if (mButtons.size() > 1)
+            {
+                mButtons[mControllerFocus]->setStateSelected(false);
+                if (mControllerFocus == mButtons.size() - 1)
+                    mControllerFocus = 0;
+                else
+                    mControllerFocus++;
+                mButtons[mControllerFocus]->setStateSelected(true);
+            }
+        }
+
+        return true;
+    }
 }
