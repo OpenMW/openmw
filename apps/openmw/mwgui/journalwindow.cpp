@@ -639,6 +639,67 @@ namespace
                 }
             }
         }
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override
+        {
+            if (arg.button == SDL_CONTROLLER_BUTTON_A)
+            {
+                // Fall through to mouse click
+                return false;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            {
+                if (mOptionsMode)
+                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
+                else if (mStates.size() > 1)
+                    notifyJournal(getWidget<MyGUI::Widget>(JournalBTN));
+                else
+                    notifyClose(getWidget<MyGUI::Widget>(CloseBTN));
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+            {
+                if (mQuestMode)
+                {
+                    if (!mOptionsMode)
+                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
+                    notifyTopics(getWidget<MyGUI::Widget>(TopicsBTN));
+                }
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
+            {
+                if (!mQuestMode)
+                {
+                    if (!mOptionsMode)
+                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
+                    notifyQuests(getWidget<MyGUI::Widget>(QuestsBTN));
+                }
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+            {
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            {
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER ||
+                     arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            {
+                notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER ||
+                     arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            {
+                notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
+                return true;
+            }
+
+            return false;
+        }
     };
 }
 
