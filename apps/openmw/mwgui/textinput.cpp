@@ -83,4 +83,14 @@ namespace MWGui
         mTextEdit->setCaption(text);
     }
 
+    bool TextInputDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            onOkClicked(nullptr);
+            return true;
+        }
+
+        return false;
+    }
 }
