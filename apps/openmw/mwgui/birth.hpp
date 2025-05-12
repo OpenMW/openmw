@@ -53,10 +53,15 @@ namespace MWGui
         MyGUI::ScrollView* mSpellArea;
         MyGUI::ImageBox* mBirthImage;
         std::vector<MyGUI::Widget*> mSpellItems;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
 
         ESM::RefId mCurrentBirthId;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
+        bool mOkButtonFocus = true;
+        bool mUsingGamepadGuiCursor = false;
     };
 }
 #endif

@@ -102,6 +102,8 @@ namespace MWGui
         MyGUI::ImageBox* mPreviewImage;
         MyGUI::ListBox* mRaceList;
         Gui::ScrollBar* mHeadRotate;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
 
         MyGUI::Widget* mSkillList;
         std::vector<MyGUI::Widget*> mSkillItems;
@@ -122,6 +124,8 @@ namespace MWGui
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
+        bool mOkButtonFocus = true;
+        bool mUsingGamepadGuiCursor = false;
     };
 }
 #endif

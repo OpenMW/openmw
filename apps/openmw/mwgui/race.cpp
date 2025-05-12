@@ -108,15 +108,16 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu7", "Specials"));
         getWidget(mSpellPowerList, "SpellPowerList");
 
-        MyGUI::Button* backButton;
-        getWidget(backButton, "BackButton");
-        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
+        getWidget(mBackButton, "BackButton");
+        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-        okButton->setCaption(
+        getWidget(mOkButton, "OKButton");
+        mOkButton->setCaption(
             MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
-        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
+        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
+
+        if (Settings::gui().mControllerMenus)
+            mOkButton->setStateSelected(true);
 
         updateRaces();
         updateSkills();
@@ -467,15 +468,17 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
             // Have A button do nothing so mouse controller still works.
-            return false;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
-        {
-            onOkClicked(nullptr);
+            if (mUsingGamepadGuiCursor)
+                return false;
+
+            if (mOkButtonFocus)
+                onOkClicked(mOkButton);
+            else
+                onBackClicked(mBackButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
-            onBackClicked(nullptr);
+            onBackClicked(mBackButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_X)
         {
@@ -494,20 +497,22 @@ namespace MWGui
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mRaceList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mRaceList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+            mUsingGamepadGuiCursor = false;
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus) ||
+            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
         {
-            onPreviewScroll(nullptr, 5);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
-            onPreviewScroll(nullptr, -5);
+            mOkButtonFocus = !mOkButtonFocus;
+            mOkButton->setStateSelected(mOkButtonFocus);
+            mBackButton->setStateSelected(!mOkButtonFocus);
+            mUsingGamepadGuiCursor = false;
         }
 
         return true;
@@ -515,7 +520,11 @@ namespace MWGui
 
     bool RaceDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
     {
-        if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTX)
+        if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
+        {
+            mUsingGamepadGuiCursor = true;
+        }
+        else if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTX)
         {
             if (arg.value < -1000 || arg.value > 1000)
                 onPreviewScroll(nullptr, arg.value < 0 ? 1 : -1);

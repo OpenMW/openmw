@@ -143,13 +143,14 @@ namespace MWGui
 
         getWidget(mClassImage, "ClassImage");
 
-        MyGUI::Button* backButton;
-        getWidget(backButton, "BackButton");
-        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
+        getWidget(mBackButton, "BackButton");
+        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
+        getWidget(mOkButton, "OKButton");
+        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
+
+        if (Settings::gui().mControllerMenus)
+            mOkButton->setStateSelected(true);
 
         updateClasses();
         updateStats();
@@ -316,30 +317,51 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
             // Have A button do nothing so mouse controller still works.
-            return false;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
-        {
-            onOkClicked(nullptr);
+            if (mUsingGamepadGuiCursor)
+                return false;
+
+            if (mOkButtonFocus)
+                onOkClicked(mOkButton);
+            else
+                onBackClicked(mBackButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
-            onBackClicked(nullptr);
+            onBackClicked(mBackButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mClassList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mClassList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+            mUsingGamepadGuiCursor = false;
+        }
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus) ||
+            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
+        {
+            mOkButtonFocus = !mOkButtonFocus;
+            mOkButton->setStateSelected(mOkButtonFocus);
+            mBackButton->setStateSelected(!mOkButtonFocus);
+            mUsingGamepadGuiCursor = false;
         }
 
         return true;
+    }
+
+    bool PickClassDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
+    {
+        if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
+        {
+            mUsingGamepadGuiCursor = true;
+        }
+        return false;
     }
 
     /* InfoBoxDialog */
@@ -569,14 +591,20 @@ namespace MWGui
         MyGUI::Button* descriptionButton;
         getWidget(descriptionButton, "DescriptionButton");
         descriptionButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionClicked);
+        mButtons.push_back(descriptionButton);
 
         MyGUI::Button* backButton;
         getWidget(backButton, "BackButton");
         backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onBackClicked);
+        mButtons.push_back(backButton);
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onOkClicked);
+        mButtons.push_back(okButton);
+
+        if (Settings::gui().mControllerMenus)
+            okButton->setStateSelected(true);
 
         // Set default skills, attributes
 
@@ -676,17 +704,55 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
             // Have A button do nothing so mouse controller still works.
-            return false;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
-        {
-            onOkClicked(nullptr);
+            if (mUsingGamepadGuiCursor)
+                return false;
+
+            if (mControllerFocus == 0)
+                onDescriptionClicked(mButtons[0]);
+            else if (mControllerFocus == 1)
+                onBackClicked(mButtons[1]);
+            else
+                onOkClicked(mButtons[2]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
-            onBackClicked(nullptr);
+            onBackClicked(mButtons[1]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
+            arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            mUsingGamepadGuiCursor = false;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == 0)
+                mControllerFocus = mButtons.size() - 1;
+            else
+                mControllerFocus--;
+            mButtons[mControllerFocus]->setStateSelected(true);
+            mUsingGamepadGuiCursor = false;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == mButtons.size() - 1)
+                mControllerFocus = 0;
+            else
+                mControllerFocus++;
+            mButtons[mControllerFocus]->setStateSelected(true);
+            mUsingGamepadGuiCursor = false;
         }
         return true;
+    }
+
+    bool CreateClassDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
+    {
+        if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
+        {
+            mUsingGamepadGuiCursor = true;
+        }
+        return false;
     }
 
     // widget controls

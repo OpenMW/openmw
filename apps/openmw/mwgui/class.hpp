@@ -138,7 +138,6 @@ namespace MWGui
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void updateClasses();
@@ -147,11 +146,18 @@ namespace MWGui
         MyGUI::ImageBox* mClassImage;
         MyGUI::ListBox* mClassList;
         MyGUI::TextBox* mSpecializationName;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
         Widgets::MWAttributePtr mFavoriteAttribute[2];
         Widgets::MWSkillPtr mMajorSkill[5];
         Widgets::MWSkillPtr mMinorSkill[5];
 
         ESM::RefId mCurrentClassId;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
+        bool mOkButtonFocus = true;
+        bool mUsingGamepadGuiCursor = false;
     };
 
     class SelectSpecializationDialog : public WindowModal
@@ -325,6 +331,7 @@ namespace MWGui
     private:
         MyGUI::EditBox* mEditName;
         MyGUI::TextBox* mSpecializationName;
+        std::vector<MyGUI::Button*> mButtons;
         Widgets::MWAttributePtr mFavoriteAttribute0, mFavoriteAttribute1;
         std::array<Widgets::MWSkillPtr, 5> mMajorSkill;
         std::array<Widgets::MWSkillPtr, 5> mMinorSkill;
@@ -342,6 +349,9 @@ namespace MWGui
         Widgets::MWSkillPtr mAffectedSkill;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
+        int mControllerFocus = 2;
+        bool mUsingGamepadGuiCursor = false;
     };
 }
 #endif

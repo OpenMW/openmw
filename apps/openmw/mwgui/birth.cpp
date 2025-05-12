@@ -50,15 +50,16 @@ namespace MWGui
         mBirthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onAccept);
         mBirthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
-        MyGUI::Button* backButton;
-        getWidget(backButton, "BackButton");
-        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
+        getWidget(mBackButton, "BackButton");
+        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-        okButton->setCaption(
+        getWidget(mOkButton, "OKButton");
+        mOkButton->setCaption(
             MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
-        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
+        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
+
+        if (Settings::gui().mControllerMenus)
+            mOkButton->setStateSelected(true);
 
         updateBirths();
         updateSpells();
@@ -277,29 +278,50 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
             // Have A button do nothing so mouse controller still works.
-            return false;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
-        {
-            onOkClicked(nullptr);
+            if (mUsingGamepadGuiCursor)
+                return false;
+
+            if (mOkButtonFocus)
+                onOkClicked(mOkButton);
+            else
+                onBackClicked(mBackButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
-            onBackClicked(nullptr);
+            onBackClicked(mBackButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mBirthList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mBirthList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+            mUsingGamepadGuiCursor = false;
+        }
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus) ||
+            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
+        {
+            mOkButtonFocus = !mOkButtonFocus;
+            mOkButton->setStateSelected(mOkButtonFocus);
+            mBackButton->setStateSelected(!mOkButtonFocus);
+            mUsingGamepadGuiCursor = false;
         }
 
         return true;
+    }
+
+    bool BirthDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
+    {
+        if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
+        {
+            mUsingGamepadGuiCursor = true;
+        }
+        return false;
     }
 }
