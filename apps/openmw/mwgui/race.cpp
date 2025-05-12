@@ -501,6 +501,14 @@ namespace MWGui
             winMgr->setKeyFocusWidget(mRaceList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
         }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            onPreviewScroll(nullptr, 5);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            onPreviewScroll(nullptr, -5);
+        }
 
         return true;
     }

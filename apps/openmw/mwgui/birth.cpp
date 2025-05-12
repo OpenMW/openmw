@@ -271,4 +271,35 @@ namespace MWGui
         mSpellArea->setVisibleVScroll(true);
         mSpellArea->setViewOffset(MyGUI::IntPoint(0, 0));
     }
+
+    bool BirthDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            // Have A button do nothing so mouse controller still works.
+            return false;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
+        {
+            onOkClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mBirthList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mBirthList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        }
+
+        return true;
+    }
 }

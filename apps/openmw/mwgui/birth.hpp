@@ -55,6 +55,8 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mSpellItems;
 
         ESM::RefId mCurrentBirthId;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 }
 #endif

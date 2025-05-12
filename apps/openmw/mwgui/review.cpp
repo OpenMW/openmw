@@ -46,21 +46,29 @@ namespace MWGui
         getWidget(button, "NameButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);
+        trackFocusEvents(button);
+        mButtons.push_back(button);
 
         getWidget(mRaceWidget, "RaceText");
         getWidget(button, "RaceButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);
+        trackFocusEvents(button);
+        mButtons.push_back(button);
 
         getWidget(mClassWidget, "ClassText");
         getWidget(button, "ClassButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);
+        trackFocusEvents(button);
+        mButtons.push_back(button);
 
         getWidget(mBirthSignWidget, "SignText");
         getWidget(button, "SignButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);
+        trackFocusEvents(button);
+        mButtons.push_back(button);
 
         // Setup dynamic stats
         getWidget(mHealth, "Health");
@@ -108,10 +116,17 @@ namespace MWGui
         MyGUI::Button* backButton;
         getWidget(backButton, "BackButton");
         backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
+        trackFocusEvents(backButton);
+        mButtons.push_back(backButton);
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
+        trackFocusEvents(okButton);
+        mButtons.push_back(okButton);
+
+        if (Settings::gui().mControllerMenus)
+            mButtons[mControllerFocus]->setStateSelected(true);
     }
 
     void ReviewDialog::onOpen()
@@ -522,4 +537,65 @@ namespace MWGui
                 MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
     }
 
+    bool ReviewDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            switch(mControllerFocus)
+            {
+                case 0:
+                    onNameClicked(mButtons[0]);
+                    break;
+                case 1:
+                    onRaceClicked(mButtons[1]);
+                    break;
+                case 2:
+                    onClassClicked(mButtons[2]);
+                    break;
+                case 3:
+                    onBirthSignClicked(mButtons[3]);
+                    break;
+                case 4:
+                    onBackClicked(mButtons[4]);
+                    break;
+                case 5:
+                    onOkClicked(mButtons[5]);
+                    break;
+            }
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
+        {
+            onOkClicked(mButtons[5]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(mButtons[4]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
+            arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == 0)
+                mControllerFocus = mButtons.size() - 1;
+            else
+                mControllerFocus--;
+            mButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN ||
+            arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == mButtons.size() - 1)
+                mControllerFocus = 0;
+            else
+                mControllerFocus++;
+            mButtons[mControllerFocus]->setStateSelected(true);
+        }
+
+        return true;
+    }
 }

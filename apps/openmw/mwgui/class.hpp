@@ -42,6 +42,7 @@ namespace MWGui
 
     protected:
         void onButtonClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void fitToText(MyGUI::TextBox* widget);
@@ -50,6 +51,7 @@ namespace MWGui
         MyGUI::TextBox* mText;
         MyGUI::Widget* mButtonBar;
         std::vector<MyGUI::Button*> mButtons;
+        int mControllerFocus = 0;
     };
 
     // Lets the player choose between 3 ways of creating a class
@@ -92,10 +94,14 @@ namespace MWGui
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool mOkButtonFocus = true;
 
     private:
         MyGUI::ImageBox* mClassImage;
         MyGUI::TextBox* mClassName;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
 
         ESM::RefId mCurrentClassId;
     };
@@ -132,6 +138,7 @@ namespace MWGui
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void updateClasses();
@@ -173,6 +180,7 @@ namespace MWGui
     protected:
         void onSpecializationClicked(MyGUI::Widget* _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         MyGUI::TextBox *mSpecialization0, *mSpecialization1, *mSpecialization2;
@@ -206,6 +214,7 @@ namespace MWGui
     protected:
         void onAttributeClicked(Widgets::MWAttributePtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         ESM::RefId mAttributeId;
@@ -237,6 +246,7 @@ namespace MWGui
     protected:
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         ESM::RefId mSkillId;
@@ -258,6 +268,7 @@ namespace MWGui
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         MyGUI::EditBox* mTextEdit;
@@ -329,6 +340,8 @@ namespace MWGui
 
         Widgets::MWAttributePtr mAffectedAttribute;
         Widgets::MWSkillPtr mAffectedSkill;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 }
 #endif

@@ -29,7 +29,7 @@ namespace MWGui
         void onOkButtonClicked(MyGUI::Widget* _sender);
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mOkButtonFocus = true;
+        bool mOkButtonFocus = true;
     };
 
 }

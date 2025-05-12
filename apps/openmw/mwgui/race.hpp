@@ -3,6 +3,7 @@
 
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
+#include <components/widgets/scrollbar.hpp>
 #include <memory>
 
 namespace MWRender
@@ -100,7 +101,7 @@ namespace MWGui
 
         MyGUI::ImageBox* mPreviewImage;
         MyGUI::ListBox* mRaceList;
-        MyGUI::ScrollBar* mHeadRotate;
+        Gui::ScrollBar* mHeadRotate;
 
         MyGUI::Widget* mSkillList;
         std::vector<MyGUI::Widget*> mSkillItems;

@@ -18,6 +18,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "tooltips.hpp"
@@ -46,15 +47,20 @@ namespace MWGui
         getWidget(mClassImage, "ClassImage");
         getWidget(mClassName, "ClassName");
 
-        MyGUI::Button* backButton;
-        getWidget(backButton, "BackButton");
-        backButton->setCaptionWithReplacing("#{sMessageQuestionAnswer3}");
-        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
+        getWidget(mBackButton, "BackButton");
+        mBackButton->setCaptionWithReplacing("#{sMessageQuestionAnswer3}");
+        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-        okButton->setCaptionWithReplacing("#{sMessageQuestionAnswer2}");
-        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
+        getWidget(mOkButton, "OKButton");
+        mOkButton->setCaptionWithReplacing("#{sMessageQuestionAnswer2}");
+        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mOkButton->setStateSelected(true);
+            trackFocusEvents(mBackButton);
+            trackFocusEvents(mOkButton);
+        }
 
         center();
     }
@@ -69,6 +75,33 @@ namespace MWGui
             MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(mCurrentClassId)->mName);
 
         center();
+    }
+
+    bool GenerateClassResultDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            if (mOkButtonFocus)
+                onOkClicked(mOkButton);
+            else
+                onBackClicked(mBackButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(mBackButton);
+        }
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus) ||
+            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
+        {
+            mOkButtonFocus = !mOkButtonFocus;
+            mOkButton->setStateSelected(mOkButtonFocus);
+            mBackButton->setStateSelected(!mOkButtonFocus);
+        }
+
+        return true;
     }
 
     // widget controls
@@ -278,6 +311,37 @@ namespace MWGui
         setClassImage(mClassImage, mCurrentClassId);
     }
 
+    bool PickClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            // Have A button do nothing so mouse controller still works.
+            return false;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
+        {
+            onOkClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mClassList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mClassList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        }
+
+        return true;
+    }
+
     /* InfoBoxDialog */
 
     void InfoBoxDialog::fitToText(MyGUI::TextBox* widget)
@@ -353,6 +417,14 @@ namespace MWGui
             fitToText(button);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &InfoBoxDialog::onButtonClicked);
             coord.top += button->getHeight();
+
+            if (Settings::gui().mControllerMenus && buttons.size() > 1 && this->mButtons.empty())
+            {
+                // First button is selected by default
+                button->setStateSelected(true);
+            }
+            trackFocusEvents(button);
+
             this->mButtons.push_back(button);
         }
     }
@@ -380,6 +452,53 @@ namespace MWGui
             }
             ++i;
         }
+    }
+
+    bool InfoBoxDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            onButtonClicked(mButtons[mControllerFocus]);
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            if (mButtons.size() == 1)
+                onButtonClicked(mButtons[0]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+            if (mButtons.size() == 2 && mControllerFocus == 0)
+                return true;
+
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == 0)
+                mControllerFocus = mButtons.size() - 1;
+            else
+                mControllerFocus--;
+            mButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+            if (mButtons.size() == 2 && mControllerFocus == mButtons.size() - 1)
+                return true;
+
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == mButtons.size() - 1)
+                mControllerFocus = 0;
+            else
+                mControllerFocus++;
+            mButtons[mControllerFocus]->setStateSelected(true);
+        }
+
+        return true;
     }
 
     /* ClassChoiceDialog */
@@ -550,6 +669,24 @@ namespace MWGui
         else
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+    }
+
+    bool CreateClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            // Have A button do nothing so mouse controller still works.
+            return false;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
+        {
+            onOkClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(nullptr);
+        }
+        return true;
     }
 
     // widget controls
@@ -739,6 +876,16 @@ namespace MWGui
         return true;
     }
 
+    bool SelectSpecializationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelClicked(nullptr);
+            return true;
+        }
+        return false;
+    }
+
     /* SelectAttributeDialog */
 
     SelectAttributeDialog::SelectAttributeDialog()
@@ -789,6 +936,16 @@ namespace MWGui
     {
         eventCancel();
         return true;
+    }
+
+    bool SelectAttributeDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelClicked(nullptr);
+            return true;
+        }
+        return false;
     }
 
     /* SelectSkillDialog */
@@ -855,6 +1012,16 @@ namespace MWGui
         return true;
     }
 
+    bool SelectSkillDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelClicked(nullptr);
+            return true;
+        }
+        return false;
+    }
+
     /* DescriptionDialog */
 
     DescriptionDialog::DescriptionDialog()
@@ -904,4 +1071,13 @@ namespace MWGui
         imageBox->setImageTexture(classImage);
     }
 
+    bool DescriptionDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onOkClicked(nullptr);
+            return true;
+        }
+        return false;
+    }
 }
