@@ -84,6 +84,8 @@ namespace MWGui
         trackFocusEvents(mUntilHealedButton);
         trackFocusEvents(mWaitButton);
         trackFocusEvents(mCancelButton);
+        for (MyGUI::Widget* widget : mHourSlider->getAllWidgets())
+           trackFocusEvents(widget);
     }
 
     void WaitDialog::setPtr(const MWWorld::Ptr& ptr)

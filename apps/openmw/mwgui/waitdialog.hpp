@@ -4,6 +4,7 @@
 #include "timeadvancer.hpp"
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
+#include <components/widgets/scrollbar.hpp>
 
 namespace MWGui
 {
@@ -53,7 +54,7 @@ namespace MWGui
         MyGUI::Button* mUntilHealedButton;
         MyGUI::Button* mWaitButton;
         MyGUI::Button* mCancelButton;
-        MyGUI::ScrollBar* mHourSlider;
+        Gui::ScrollBar* mHourSlider;
 
         TimeAdvancer mTimeAdvancer;
         bool mSleeping;
