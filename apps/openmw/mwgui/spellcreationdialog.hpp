@@ -5,6 +5,7 @@
 
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
+#include <components/widgets/scrollbar.hpp>
 
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
@@ -57,10 +58,10 @@ namespace MWGui
         MyGUI::TextBox* mDurationValue;
         MyGUI::TextBox* mAreaValue;
 
-        MyGUI::ScrollBar* mMagnitudeMinSlider;
-        MyGUI::ScrollBar* mMagnitudeMaxSlider;
-        MyGUI::ScrollBar* mDurationSlider;
-        MyGUI::ScrollBar* mAreaSlider;
+        Gui::ScrollBar* mMagnitudeMinSlider;
+        Gui::ScrollBar* mMagnitudeMaxSlider;
+        Gui::ScrollBar* mDurationSlider;
+        Gui::ScrollBar* mAreaSlider;
 
         MyGUI::TextBox* mAreaText;
 

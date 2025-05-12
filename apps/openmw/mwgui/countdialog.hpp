@@ -3,6 +3,8 @@
 
 #include "windowbase.hpp"
 
+#include <components/widgets/scrollbar.hpp>
+
 namespace Gui
 {
     class NumericEditBox;
@@ -24,7 +26,7 @@ namespace MWGui
         EventHandle_WidgetInt eventOkClicked;
 
     private:
-        MyGUI::ScrollBar* mSlider;
+        Gui::ScrollBar* mSlider;
         Gui::NumericEditBox* mItemEdit;
         MyGUI::TextBox* mItemText;
         MyGUI::TextBox* mLabelText;
