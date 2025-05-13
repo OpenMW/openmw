@@ -248,6 +248,8 @@ namespace
             }
             updateShowingPages();
 
+            mSelectedQuest = 0;
+
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(getWidget<MyGUI::Widget>(CloseBTN));
         }
 
@@ -469,6 +471,20 @@ namespace
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
+        void addControllerButtons(Gui::MWList* _list, int _selectedIndex)
+        {
+            mButtons.clear();
+            for (int i = 0; i < _list->getItemCount(); i++)
+            {
+                MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
+                if (listItem)
+                {
+                    listItem->setStateSelected(mButtons.size() == _selectedIndex);
+                    mButtons.push_back(listItem);
+                }
+            }
+        }
+
         void notifyIndexLinkClicked(MWGui::TypesetBook::InteractiveId index)
         {
             setVisible(LeftTopicIndex, false);
@@ -486,6 +502,9 @@ namespace
             mModel->visitTopicNamesStartingWith(index, add);
 
             list->adjustSize();
+
+            if (Settings::gui().mControllerMenus)
+                addControllerButtons(list, mSelectedQuest);
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
@@ -553,6 +572,9 @@ namespace
 
             list->sort();
             list->adjustSize();
+
+            if (Settings::gui().mControllerMenus)
+                addControllerButtons(list, mSelectedQuest);
 
             if (mAllQuests)
             {
@@ -642,62 +664,147 @@ namespace
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override
         {
-            if (arg.button == SDL_CONTROLLER_BUTTON_A)
+            if (arg.button == SDL_CONTROLLER_BUTTON_A) // A: Mouse click or Select
             {
                 // Fall through to mouse click
-                return false;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-            {
-                if (mOptionsMode)
-                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
-                else if (mStates.size() > 1)
-                    notifyJournal(getWidget<MyGUI::Widget>(JournalBTN));
-                else
-                    notifyClose(getWidget<MyGUI::Widget>(CloseBTN));
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_X)
-            {
-                if (mQuestMode)
+                if (mUsingGamepadGuiCursor)
+                    return false;
+
+                if (mOptionsMode && mQuestMode)
                 {
-                    if (!mOptionsMode)
-                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
-                    notifyTopics(getWidget<MyGUI::Widget>(TopicsBTN));
+                    // Choose a quest
+                    Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
+                    notifyQuestClicked(list->getItemNameAt(mSelectedQuest), 0);
+                }
+                else if (mOptionsMode && mTopicsMode)
+                {
+                    // Choose a topic
+                    Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
+                    notifyTopicSelected(list->getItemNameAt(mSelectedQuest), 0);
                 }
                 return true;
             }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
+            else if (arg.button == SDL_CONTROLLER_BUTTON_B) // B: Back
             {
-                if (!mQuestMode)
+                if (mOptionsMode)
                 {
+                    // Hide the options overlay
+                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
+                    mQuestMode = false;
+                }
+                else if (mStates.size() > 1)
+                {
+                    // Pop the current book. If in quest mode, reopen the quest list.
+                    notifyJournal(getWidget<MyGUI::Widget>(JournalBTN));
+                    if (mQuestMode)
+                    {
+                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
+                        notifyQuests(getWidget<MyGUI::Widget>(QuestsBTN));
+                    }
+                }
+                else
+                {
+                    // Close the journal window
+                    notifyClose(getWidget<MyGUI::Widget>(CloseBTN));
+                }
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_Y) // Y: Quests
+            {
+                if (mOptionsMode && mQuestMode)
+                {
+                    // Hide the quest overlay if visible
+                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
+                    mQuestMode = false;
+                }
+                else {
+                    // Show the quest overlay if viewing a journal entry or the topics
                     if (!mOptionsMode)
                         notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
-                    notifyQuests(getWidget<MyGUI::Widget>(QuestsBTN));
+                    if (!mQuestMode)
+                        notifyQuests(getWidget<MyGUI::Widget>(QuestsBTN));
+                }
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_X) // X: Topics
+            {
+                if (mOptionsMode && !mQuestMode)
+                {
+                    // Hide the topics overlay if visible
+                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
+                    mQuestMode = false;
+                }
+                else {
+                    // Show the topics overlay if viewing a journal entry or the quest list
+                    if (!mOptionsMode)
+                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
+                    if (mQuestMode)
+                        notifyTopics(getWidget<MyGUI::Widget>(TopicsBTN));
                 }
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
             {
+                if (mOptionsMode && (mQuestMode || mTopicsMode))
+                {
+                    // Scroll through the list of quests or topics
+                    mButtons[mSelectedQuest]->setStateSelected(false);
+                    mSelectedQuest--;
+                    if (mSelectedQuest < 0)
+                        mSelectedQuest = mButtons.size() - 1;
+                    mButtons[mSelectedQuest]->setStateSelected(true);
+                }
+                mUsingGamepadGuiCursor = false;
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
             {
+                if (mOptionsMode && (mQuestMode || mTopicsMode))
+                {
+                    // Scroll through the list of quests or topics
+                    mButtons[mSelectedQuest]->setStateSelected(false);
+                    mSelectedQuest++;
+                    if (mSelectedQuest > mButtons.size() - 1)
+                        mSelectedQuest = 0;
+                    mButtons[mSelectedQuest]->setStateSelected(true);
+                }
+                mUsingGamepadGuiCursor = false;
                 return true;
             }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER ||
-                     arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
             {
-                notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
+                if (!mOptionsMode)
+                    notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
+                mUsingGamepadGuiCursor = false;
                 return true;
             }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER ||
-                     arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
             {
-                notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
+                if (!mOptionsMode)
+                    notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
+                mUsingGamepadGuiCursor = false;
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) // LB: Previous Page
+            {
+                if (!mOptionsMode)
+                    notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
+                return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) // RB: Next Page
+            {
+                if (!mOptionsMode)
+                    notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
                 return true;
             }
 
+            return false;
+        }
+
+        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override
+        {
+            if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
+                mUsingGamepadGuiCursor = true;
             return false;
         }
     };
