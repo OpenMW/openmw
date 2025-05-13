@@ -7,6 +7,7 @@
 #include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -28,9 +29,11 @@ namespace MWGui
 
         getWidget(mCloseButton, "CloseButton");
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onCloseButtonClicked);
+        trackFocusEvents(mCloseButton);
 
         getWidget(mTakeButton, "TakeButton");
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onTakeButtonClicked);
+        trackFocusEvents(mTakeButton);
 
         adjustButton("CloseButton");
         adjustButton("TakeButton");
@@ -114,5 +117,45 @@ namespace MWGui
         take.execute(MWMechanics::getPlayer());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
+    }
+
+    void ScrollWindow::onClose()
+    {
+        if (Settings::gui().mControllerMenus)
+            MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(true);
+        BookWindowBase::onClose();
+    }
+
+    bool ScrollWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mMouseFocus != nullptr)
+                return false;
+
+            if (mTakeButton->getVisible())
+                onTakeButtonClicked(mTakeButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCloseButtonClicked(mCloseButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+            onKeyButtonPressed(nullptr, MyGUI::KeyCode::ArrowUp, 0);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            onKeyButtonPressed(nullptr, MyGUI::KeyCode::ArrowDown, 0);
+
+        return true;
+    }
+
+    bool ScrollWindow::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
+    {
+        if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY)
+        {
+            MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(false);
+
+            int scroll = -30.0f * arg.value / 32767;
+            mTextView->setViewOffset(mTextView->getViewOffset() + MyGUI::IntPoint(0, scroll));
+            return true;
+        }
+        return false;
     }
 }
