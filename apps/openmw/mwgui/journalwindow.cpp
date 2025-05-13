@@ -709,7 +709,7 @@ namespace
                 }
                 return true;
             }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_Y) // Y: Quests
+            else if (arg.button == SDL_CONTROLLER_BUTTON_X) // X: Quests
             {
                 if (mOptionsMode && mQuestMode)
                 {
@@ -726,7 +726,7 @@ namespace
                 }
                 return true;
             }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_X) // X: Topics
+            else if (arg.button == SDL_CONTROLLER_BUTTON_Y) // Y: Topics
             {
                 if (mOptionsMode && !mQuestMode)
                 {
