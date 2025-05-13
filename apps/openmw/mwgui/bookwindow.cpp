@@ -231,31 +231,14 @@ namespace MWGui
 
             if (mTakeButton->getVisible())
                 onTakeButtonClicked(mTakeButton);
-            return true;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
             onCloseButtonClicked(mCloseButton);
-            return true;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            return true;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER ||
-                    arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
-        {
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
             prevPage();
-            return true;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER ||
-                    arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
             nextPage();
-            return true;
-        }
 
-        return false;
+        return true;
     }
 }
