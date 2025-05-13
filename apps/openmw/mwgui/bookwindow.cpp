@@ -231,8 +231,6 @@ namespace MWGui
 
             if (mTakeButton->getVisible())
                 onTakeButtonClicked(mTakeButton);
-            else
-                onCloseButtonClicked(mCloseButton);
             return true;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
