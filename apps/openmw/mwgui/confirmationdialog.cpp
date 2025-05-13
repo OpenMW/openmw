@@ -22,7 +22,6 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mOkButton->setStateSelected(true);
             trackFocusEvents(mOkButton);
             trackFocusEvents(mCancelButton);
         }
@@ -43,6 +42,13 @@ namespace MWGui
         mMessage->setSize(mMessage->getWidth(), mMessage->getTextSize().height + 24);
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mOkButtonFocus = true;
+            mOkButton->setStateSelected(true);
+            mCancelButton->setStateSelected(false);
+        }
 
         center();
     }
