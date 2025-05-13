@@ -161,6 +161,13 @@ namespace MWGui
         mSaveList->removeAllItems();
         onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
 
+        if (Settings::gui().mControllerMenus)
+        {
+            mOkButtonFocus = true;
+            mOkButton->setStateSelected(true);
+            mCancelButton->setStateSelected(false);
+        }
+
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
         if (mgr->characterBegin() == mgr->characterEnd())
             return;
@@ -501,30 +508,40 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
+            // Have A button do nothing so mouse controller still works.
+            if (mUsingGamepadGuiCursor)
                 return false;
 
-            onOkButtonClicked(mOkButton);
-            return true;
+            if (mOkButtonFocus)
+                onOkButtonClicked(mOkButton);
+            else
+                onCancelButtonClicked(mCancelButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onCancelButtonClicked(mCancelButton);
-            return true;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mSaveList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
-            return true;
+            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mSaveList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
-            return true;
+            mUsingGamepadGuiCursor = false;
+        }
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && !mOkButtonFocus) ||
+            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mOkButtonFocus))
+        {
+            mOkButtonFocus = !mOkButtonFocus;
+            mOkButton->setStateSelected(mOkButtonFocus);
+            mCancelButton->setStateSelected(!mOkButtonFocus);
+            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
         {
@@ -534,8 +551,7 @@ namespace MWGui
             else
                 index--;
             mCharacterSelection->setIndexSelected(index);
-
-            return true;
+            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
         {
@@ -545,10 +561,18 @@ namespace MWGui
             else
                 index++;
             mCharacterSelection->setIndexSelected(index);
-
-            return true;
+            mUsingGamepadGuiCursor = false;
         }
 
+        return true;
+    }
+
+    bool SaveGameDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
+    {
+        if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
+        {
+            mUsingGamepadGuiCursor = true;
+        }
         return false;
     }
 }

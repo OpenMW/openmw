@@ -24,8 +24,6 @@ namespace MWGui
 
         void setLoadOrSave(bool load);
 
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-
     private:
         void confirmDeleteSave();
 
@@ -68,6 +66,11 @@ namespace MWGui
 
         const MWState::Character* mCurrentCharacter;
         const MWState::Slot* mCurrentSlot;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
+        bool mOkButtonFocus = true;
+        bool mUsingGamepadGuiCursor = false;
     };
 
 }
