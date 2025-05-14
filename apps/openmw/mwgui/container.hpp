@@ -55,6 +55,7 @@ namespace MWGui
         void onItemSelected(int index);
         void onBackgroundSelected();
         void dragItem(MyGUI::Widget* sender, int count);
+        void takeItem(MyGUI::Widget* sender, int count);
         void dropItem();
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
@@ -64,6 +65,10 @@ namespace MWGui
         bool onTakeItem(const ItemStack& item, int count);
 
         void onReferenceUnavailable() override;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
+        bool mUsingGamepadGuiCursor = false;
     };
 }
 #endif // CONTAINER_H

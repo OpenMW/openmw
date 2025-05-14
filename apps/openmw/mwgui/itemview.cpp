@@ -7,6 +7,8 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/settings/values.hpp>
+
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
 
@@ -46,13 +48,14 @@ namespace MWGui
         MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
         int maxHeight = mScrollView->getHeight();
 
-        int rows = maxHeight / 42;
-        rows = std::max(rows, 1);
-        bool showScrollbar = int(std::ceil(dragArea->getChildCount() / float(rows))) > mScrollView->getWidth() / 42;
+        mRows = maxHeight / 42;
+        mRows = std::max(mRows, 1);
+        mItemCount = dragArea->getChildCount();
+        bool showScrollbar = int(std::ceil(mItemCount / float(mRows))) > mScrollView->getWidth() / 42;
         if (showScrollbar)
             maxHeight -= 18;
 
-        for (unsigned int i = 0; i < dragArea->getChildCount(); ++i)
+        for (unsigned int i = 0; i < mItemCount; ++i)
         {
             MyGUI::Widget* w = dragArea->getChildAt(i);
 
@@ -60,7 +63,7 @@ namespace MWGui
 
             y += 42;
 
-            if (y > maxHeight - 42 && i < dragArea->getChildCount() - 1)
+            if (y > maxHeight - 42 && i < mItemCount - 1)
             {
                 x += 42;
                 y = 0;
@@ -69,6 +72,13 @@ namespace MWGui
         x += 42;
 
         MyGUI::IntSize size = MyGUI::IntSize(std::max(mScrollView->getSize().width, x), mScrollView->getSize().height);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            if (mControllerFocus >= mItemCount)
+                mControllerFocus = mItemCount - 1;
+            updateControllerFocus(-1, mControllerFocus);
+        }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
         // scrollbar is hidden
@@ -122,6 +132,11 @@ namespace MWGui
     void ItemView::resetScrollBars()
     {
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+        if (Settings::gui().mControllerMenus)
+        {
+            updateControllerFocus(mControllerFocus, 0);
+            mControllerFocus = 0;
+        }
     }
 
     void ItemView::onSelectedItem(MyGUI::Widget* sender)
@@ -165,4 +180,50 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ItemView>("Widget");
     }
 
+    void ItemView::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (!mItemCount)
+            return;
+
+        int prevFocus = mControllerFocus;
+
+        if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP && mControllerFocus % mRows != 0)
+            mControllerFocus--;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN && mControllerFocus % mRows != mRows - 1)
+            mControllerFocus++;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mControllerFocus >= mRows)
+            mControllerFocus -= mRows;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mControllerFocus + mRows < mItemCount)
+            mControllerFocus += mRows;
+
+        if (mControllerFocus < 0)
+            mControllerFocus = 0;
+        else if (mControllerFocus >= mItemCount - 1)
+            mControllerFocus = mItemCount - 1;
+
+        if (prevFocus != mControllerFocus)
+            updateControllerFocus(prevFocus, mControllerFocus);
+    }
+
+    void ItemView::updateControllerFocus(int _prevFocus, int _newFocus)
+    {
+        if (!mItemCount)
+            return;
+
+        MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+
+        if (_prevFocus >= 0 && _prevFocus < mItemCount)
+        {
+            ItemWidget* prev = (ItemWidget *)dragArea->getChildAt(_prevFocus);
+            if (prev)
+                prev->setControllerFocus(false);
+        }
+
+        if (_newFocus >= 0 && _newFocus < mItemCount)
+        {
+            ItemWidget* focused = (ItemWidget *)dragArea->getChildAt(_newFocus);
+            if (focused)
+                focused->setControllerFocus(true);
+        }
+    }
 }

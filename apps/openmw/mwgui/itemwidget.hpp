@@ -40,12 +40,15 @@ namespace MWGui
         void setIcon(const MWWorld::Ptr& ptr);
         void setFrame(const std::string& frame, const MyGUI::IntCoord& coord);
 
+        void setControllerFocus(bool focus);
+
     protected:
         void initialiseOverride() override;
 
         MyGUI::ImageBox* mItem;
         MyGUI::ImageBox* mItemShadow;
         MyGUI::ImageBox* mFrame;
+        MyGUI::ImageBox* mControllerBorder;
         MyGUI::TextBox* mText;
 
         std::string mCurrentIcon;
