@@ -116,6 +116,7 @@ namespace MWScript
                         {
                             MWBase::Environment::get().getJournal()->addTopic(topic, info->mId, ptr);
                         }
+                        MWBase::Environment::get().getDialogueManager()->addTopic(topic);
                     }
                 }
             }
