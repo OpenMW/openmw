@@ -156,7 +156,7 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString& filename)
         index = ui->gameFileView->findText(file->fileName());
 
         // verify that the current index is also checked in the model
-        if (!mContentModel->setCheckState(filename, true))
+        if (!mContentModel->setCheckState(file, true))
         {
             // throw error in case file not found?
             return;
