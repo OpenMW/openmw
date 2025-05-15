@@ -91,27 +91,23 @@ namespace MWScript
                     = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
                 MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-                for (auto it = dialogues.begin(); it != dialogues.end(); ++it)
+                for (const auto& dialogue : dialogues)
                 {
-                    const ESM::Dialogue::Type type = it->mType;
-                    if (type == ESM::Dialogue::Type::Journal)
+                    if (dialogue.mType == ESM::Dialogue::Type::Journal)
                     {
-                        ESM::RefId quest = ESM::RefId::stringRefId(it->mStringId);
-                        const std::list<ESM::DialInfo> orderedInfo = it->mInfoOrder.getOrderedInfo();
-                        for (auto info = orderedInfo.begin(); info != orderedInfo.end(); ++info)
+                        for (const auto& journalInfo : dialogue.mInfoOrder.getOrderedInfo())
                         {
-                            MWBase::Environment::get().getJournal()->addEntry(quest, info->mData.mJournalIndex, ptr);
+                            MWBase::Environment::get().getJournal()->addEntry(dialogue.mId,
+                                journalInfo.mData.mJournalIndex, ptr);
                         }
                     }
-                    else if (type == ESM::Dialogue::Type::Topic)
+                    else if (dialogue.mType == ESM::Dialogue::Type::Topic)
                     {
-                        ESM::RefId topic = ESM::RefId::stringRefId(it->mStringId);
-                        const std::list<ESM::DialInfo> orderedInfo = it->mInfoOrder.getOrderedInfo();
-                        for (auto info = orderedInfo.begin(); info != orderedInfo.end(); ++info)
+                        for (const auto& topicInfo : dialogue.mInfoOrder.getOrderedInfo())
                         {
-                            MWBase::Environment::get().getJournal()->addTopic(topic, info->mId, ptr);
+                            MWBase::Environment::get().getJournal()->addTopic(dialogue.mId, topicInfo.mId, ptr);
                         }
-                        MWBase::Environment::get().getDialogueManager()->addTopic(topic);
+                        MWBase::Environment::get().getDialogueManager()->addTopic(dialogue.mId);
                     }
                 }
             }
