@@ -726,7 +726,7 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
             }
         }
     }
-    emit dataChanged(index(0, 0), index(rowCount(), columnCount()));
+    refreshModel();
 }
 
 QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(
@@ -790,9 +790,9 @@ QString ContentSelectorModel::ContentModel::toolTip(const EsmFile* file) const
     }
 }
 
-void ContentSelectorModel::ContentModel::refreshModel()
+void ContentSelectorModel::ContentModel::refreshModel(std::initializer_list<int> roles)
 {
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
+    emit dataChanged(index(0, 0), index(rowCount() - 1, 0), roles);
 }
 
 bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, bool checkState)
@@ -878,5 +878,5 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
 void ContentSelectorModel::ContentModel::uncheckAll()
 {
     mCheckedFiles.clear();
-    emit dataChanged(index(0, 0), index(rowCount(), columnCount()), { Qt::CheckStateRole, Qt::UserRole + 1 });
+    refreshModel({ Qt::CheckStateRole, Qt::UserRole + 1 });
 }
