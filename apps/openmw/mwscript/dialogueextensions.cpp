@@ -22,6 +22,20 @@
 
 namespace MWScript
 {
+    static void addJournalEntry(ESM::RefId quest, int index, MWWorld::Ptr ptr)
+    {
+        // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
+        try
+        {
+            MWBase::Environment::get().getJournal()->addEntry(quest, index, ptr);
+        }
+        catch (...)
+        {
+            if (MWBase::Environment::get().getJournal()->getJournalIndex(quest) < index)
+                MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
+        }
+    }
+
     namespace Dialogue
     {
         template <class R>
@@ -40,16 +54,7 @@ namespace MWScript
                 Interpreter::Type_Integer index = runtime[0].mInteger;
                 runtime.pop();
 
-                // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
-                try
-                {
-                    MWBase::Environment::get().getJournal()->addEntry(quest, index, ptr);
-                }
-                catch (...)
-                {
-                    if (MWBase::Environment::get().getJournal()->getJournalIndex(quest) < index)
-                        MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
-                }
+                addJournalEntry(quest, index, ptr);
             }
         };
 
@@ -79,6 +84,39 @@ namespace MWScript
                 int index = MWBase::Environment::get().getJournal()->getJournalIndex(quest);
 
                 runtime.push(index);
+            }
+        };
+
+        class OpFillJournal : public Interpreter::Opcode0
+        {
+        public:
+            void execute(Interpreter::Runtime& runtime) override
+            {
+                const MWWorld::Store<ESM::Dialogue>& dialogues = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
+                MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+                for (auto it = dialogues.begin(); it != dialogues.end(); ++it)
+                {
+                    const ESM::Dialogue::Type type = it->mType;
+                    if (type == ESM::Dialogue::Type::Journal)
+                    {
+                        ESM::RefId quest = ESM::RefId::stringRefId(it->mStringId);
+                        const std::list<ESM::DialInfo> orderedInfo = it->mInfoOrder.getOrderedInfo();
+                        for (auto info = orderedInfo.begin(); info != orderedInfo.end(); ++info)
+                        {
+                            addJournalEntry(quest, info->mData.mJournalIndex, ptr);
+                        }
+                    }
+                    else if (type == ESM::Dialogue::Type::Topic)
+                    {
+                        ESM::RefId topic = ESM::RefId::stringRefId(it->mStringId);
+                        const std::list<ESM::DialInfo> orderedInfo = it->mInfoOrder.getOrderedInfo();
+                        for (auto info = orderedInfo.begin(); info != orderedInfo.end(); ++info)
+                        {
+                            MWBase::Environment::get().getJournal()->addTopic(topic, info->mId, ptr);
+                        }
+                    }
+                }
             }
         };
 
@@ -288,6 +326,7 @@ namespace MWScript
             interpreter.installSegment5<OpJournal<ExplicitRef>>(Compiler::Dialogue::opcodeJournalExplicit);
             interpreter.installSegment5<OpSetJournalIndex>(Compiler::Dialogue::opcodeSetJournalIndex);
             interpreter.installSegment5<OpGetJournalIndex>(Compiler::Dialogue::opcodeGetJournalIndex);
+            interpreter.installSegment5<OpFillJournal>(Compiler::Dialogue::opcodeFillJournal);
             interpreter.installSegment5<OpAddTopic>(Compiler::Dialogue::opcodeAddTopic);
             interpreter.installSegment3<OpChoice>(Compiler::Dialogue::opcodeChoice);
             interpreter.installSegment5<OpForceGreeting<ImplicitRef>>(Compiler::Dialogue::opcodeForceGreeting);
