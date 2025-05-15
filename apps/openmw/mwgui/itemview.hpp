@@ -32,6 +32,7 @@ namespace MWGui
 
         void resetScrollBars();
 
+        void setActiveControllerWindow(bool active);
         int getControllerFocus() { return mControllerFocus; }
         int getItemCount() { return mItemCount; }
         void onControllerButtonEvent(const SDL_ControllerButtonEvent& arg);

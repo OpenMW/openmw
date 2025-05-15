@@ -382,7 +382,10 @@ namespace MWBase
         /// Same as viewer->getCamera()->getCullMask(), provided for consistency.
         virtual uint32_t getCullMask() = 0;
 
-        virtual MWGui::WindowBase* getTopWindow() = 0;
+        /// Return the window that should receive controller events
+        virtual MWGui::WindowBase* getActiveControllerWindow() = 0;
+        /// Cycle to the next window to receive controller events
+        virtual void cycleActiveControllerWindow(bool next) = 0;
 
         // Used in Lua bindings
         virtual const std::vector<MWGui::GuiMode>& getGuiModeStack() const = 0;

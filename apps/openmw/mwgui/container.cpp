@@ -398,4 +398,10 @@ namespace MWGui
         }
         return false;
     }
+
+    void ContainerWindow::setActiveControllerWindow(bool active)
+    {
+        mItemView->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
+    }
 }

@@ -859,7 +859,7 @@ namespace MWGui
         mHud->setPlayerPos(x, y, u, v);
     }
 
-    WindowBase* WindowManager::getTopWindow()
+    WindowBase* WindowManager::getActiveControllerWindow()
     {
         if (!mCurrentModals.empty())
             return mCurrentModals.back();
@@ -869,15 +869,18 @@ namespace MWGui
 
         if (!mGuiModes.empty())
         {
-            GuiModeState& state = mGuiModeStates[mGuiModes.back()];
+            GuiMode mode = mGuiModes.back();
+            GuiModeState& state = mGuiModeStates[mode];
+            int activeIndex = std::clamp(mActiveControllerWindows[mode], 0, (int)state.mWindows.size() - 1);
+
             // REMOVEME
-            Log(Debug::Error) << "getTopWindow: " << state.mWindows.size() << " windows in state " << mGuiModes.back();
-            // find the topmost window
-            for (WindowBase* window : state.mWindows)
-                if (window->isVisible())
-                    return window;
-                else
-                    Log(Debug::Error) << "-- Skipping hidden window " << window;
+            Log(Debug::Error) << "getActiveControllerWindow: " << state.mWindows.size() << " windows in state, mActiveControllerWindows[mode] = " << mActiveControllerWindows[mode];
+
+            // If the active window is no longer visible, find the next visible window.
+            if (!state.mWindows[activeIndex]->isVisible())
+                cycleActiveControllerWindow(true);
+
+            return state.mWindows[activeIndex];
         }
         else
         {
@@ -891,6 +894,48 @@ namespace MWGui
                     Log(Debug::Error) << "-- Skipping hidden window " << window;
         }
         return nullptr;
+    }
+
+    void WindowManager::cycleActiveControllerWindow(bool next)
+    {
+        if (mGuiModes.empty())
+            return;
+
+        GuiMode mode = mGuiModes.back();
+        int winCount = mGuiModeStates[mode].mWindows.size();
+
+        int activeIndex = 0;
+        if (winCount > 1)
+        {
+            // Find next/previous visible window
+            activeIndex = mActiveControllerWindows[mode];
+            int delta = next ? 1 : -1;
+
+            for (int i = 0; i < winCount; i++)
+            {
+                activeIndex += delta;
+                if (activeIndex < 0)
+                    activeIndex = winCount - 1;
+                else if (activeIndex >= winCount)
+                    activeIndex = 0;
+
+                if (mGuiModeStates[mode].mWindows[activeIndex]->isVisible())
+                    break;
+            }
+        }
+
+        // REMOVEME
+        Log(Debug::Error) << "focusNextWindow: mode=" << mode << ", activeIndex=" << activeIndex;
+
+        if (mActiveControllerWindows[mode] != activeIndex)
+        {
+            mActiveControllerWindows[mode] = activeIndex;
+            for (int i = 0; i < winCount; i++)
+            {
+                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(i == activeIndex);
+            }
+            playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
     }
 
     void WindowManager::update(float frameDuration)
@@ -1316,6 +1361,13 @@ namespace MWGui
         {
             for (WindowBase* window : mGuiModeStates[mode].mWindows)
                 window->setPtr(arg);
+
+            // Activate first visible window
+            mActiveControllerWindows[mode] = -1;
+            cycleActiveControllerWindow(true);
+
+            // REMOVEME
+            Log(Debug::Error) << "pushGuiMode: mode=" << mode << ", activeIndex=" << mActiveControllerWindows[mode];
         }
         catch (...)
         {

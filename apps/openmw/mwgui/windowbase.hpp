@@ -62,11 +62,13 @@ namespace MWGui
         // REMOVEME
         // virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) = 0;
         // virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) = 0;
+        virtual void setActiveControllerWindow(bool active) { mActiveControllerWindow = active; }
 
     protected:
         virtual void onTitleDoubleClicked();
 
         MyGUI::Widget* mMouseFocus = nullptr;
+        bool mActiveControllerWindow = false;
         void trackFocusEvents(MyGUI::Widget* widget);
 
     private:

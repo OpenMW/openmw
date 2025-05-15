@@ -243,7 +243,7 @@ namespace MWInput
     {
         if (Settings::gui().mControllerMenus)
         {
-            MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getTopWindow();
+            MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getActiveControllerWindow();
             if (topWin && topWin->onControllerButtonEvent(arg))
                 return true;
         }
@@ -311,7 +311,20 @@ namespace MWInput
     {
         if (Settings::gui().mControllerMenus)
         {
-            MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getTopWindow();
+            // Left and right triggers toggle through open GUI windows.
+            if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+            {
+                if (arg.value == 32767) // Treat like a button.
+                    MWBase::Environment::get().getWindowManager()->cycleActiveControllerWindow(true);
+                return true;
+            }
+            else if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+            {
+                if (arg.value == 32767) // Treat like a button.
+                    MWBase::Environment::get().getWindowManager()->cycleActiveControllerWindow(false);
+                return true;
+            }
+            MWGui::WindowBase* topWin = MWBase::Environment::get().getWindowManager()->getActiveControllerWindow();
             if (topWin && topWin->onControllerThumbstickEvent(arg))
                 return true;
         }

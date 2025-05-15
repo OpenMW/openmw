@@ -180,6 +180,14 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ItemView>("Widget");
     }
 
+    void ItemView::setActiveControllerWindow(bool active)
+    {
+        if (active)
+            updateControllerFocus(-1, mControllerFocus);
+        else
+            updateControllerFocus(mControllerFocus, -1);
+    }
+
     void ItemView::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (!mItemCount)

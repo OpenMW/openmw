@@ -387,7 +387,8 @@ namespace MWGui
 
         void asyncPrepareSaveMap() override;
 
-        WindowBase* getTopWindow() override;
+        WindowBase* getActiveControllerWindow() override;
+        void cycleActiveControllerWindow(bool next) override;
 
         // Used in Lua bindings
         const std::vector<GuiMode>& getGuiModeStack() const override { return mGuiModes; }
@@ -495,6 +496,8 @@ namespace MWGui
         std::map<GuiMode, GuiModeState> mGuiModeStates;
         // The currently active stack of GUI modes (top mode is the one we are in).
         std::vector<GuiMode> mGuiModes;
+        // The active window for controller mode for each GUI mode.
+        std::map<GuiMode, int> mActiveControllerWindows;
 
         std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
 
