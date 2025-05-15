@@ -22,20 +22,6 @@
 
 namespace MWScript
 {
-    static void addJournalEntry(ESM::RefId quest, int index, MWWorld::Ptr ptr)
-    {
-        // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
-        try
-        {
-            MWBase::Environment::get().getJournal()->addEntry(quest, index, ptr);
-        }
-        catch (...)
-        {
-            if (MWBase::Environment::get().getJournal()->getJournalIndex(quest) < index)
-                MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
-        }
-    }
-
     namespace Dialogue
     {
         template <class R>
@@ -54,7 +40,16 @@ namespace MWScript
                 Interpreter::Type_Integer index = runtime[0].mInteger;
                 runtime.pop();
 
-                addJournalEntry(quest, index, ptr);
+                // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
+                try
+                {
+                    MWBase::Environment::get().getJournal()->addEntry(quest, index, ptr);
+                }
+                catch (...)
+                {
+                    if (MWBase::Environment::get().getJournal()->getJournalIndex(quest) < index)
+                        MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
+                }
             }
         };
 
@@ -105,7 +100,7 @@ namespace MWScript
                         const std::list<ESM::DialInfo> orderedInfo = it->mInfoOrder.getOrderedInfo();
                         for (auto info = orderedInfo.begin(); info != orderedInfo.end(); ++info)
                         {
-                            addJournalEntry(quest, info->mData.mJournalIndex, ptr);
+                            MWBase::Environment::get().getJournal()->addEntry(quest, info->mData.mJournalIndex, ptr);
                         }
                     }
                     else if (type == ESM::Dialogue::Type::Topic)
