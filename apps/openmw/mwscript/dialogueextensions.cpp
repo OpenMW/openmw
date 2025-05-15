@@ -92,7 +92,8 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                const MWWorld::Store<ESM::Dialogue>& dialogues = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
+                const MWWorld::Store<ESM::Dialogue>& dialogues
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
                 MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                 for (auto it = dialogues.begin(); it != dialogues.end(); ++it)
