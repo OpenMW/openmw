@@ -99,8 +99,7 @@ namespace MWScript
                     {
                         for (const auto& journalInfo : dialogue.mInfoOrder.getOrderedInfo())
                         {
-                            journal->addEntry(
-                                dialogue.mId, journalInfo.mData.mJournalIndex, playerPtr);
+                            journal->addEntry(dialogue.mId, journalInfo.mData.mJournalIndex, playerPtr);
                         }
                     }
                     else if (dialogue.mType == ESM::Dialogue::Type::Topic)
