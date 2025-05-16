@@ -90,6 +90,7 @@ namespace MWScript
                 const MWWorld::Store<ESM::Dialogue>& dialogues
                     = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
                 MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
                 for (const auto& dialogue : dialogues)
                 {
@@ -97,7 +98,7 @@ namespace MWScript
                     {
                         for (const auto& journalInfo : dialogue.mInfoOrder.getOrderedInfo())
                         {
-                            MWBase::Environment::get().getJournal()->addEntry(
+                            journal->addEntry(
                                 dialogue.mId, journalInfo.mData.mJournalIndex, ptr);
                         }
                     }
@@ -105,7 +106,7 @@ namespace MWScript
                     {
                         for (const auto& topicInfo : dialogue.mInfoOrder.getOrderedInfo())
                         {
-                            MWBase::Environment::get().getJournal()->addTopic(dialogue.mId, topicInfo.mId, ptr);
+                            journal->addTopic(dialogue.mId, topicInfo.mId, ptr);
                         }
                         MWBase::Environment::get().getDialogueManager()->addTopic(dialogue.mId);
                     }
