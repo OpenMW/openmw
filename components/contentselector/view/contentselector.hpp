@@ -69,7 +69,7 @@ namespace ContentSelectorView
         void buildAddonView();
         void buildContextMenu();
         void setGameFileSelected(int index, bool selected);
-        void setCheckStateForMultiSelectedItems(bool checked);
+        void setCheckStateForMultiSelectedItems(Qt::CheckState checkState);
 
     signals:
         void signalCurrentGamefileIndexChanged(int);
