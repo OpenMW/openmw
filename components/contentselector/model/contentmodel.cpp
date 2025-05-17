@@ -835,10 +835,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
     {
         for (const EsmFile* downstreamFile : mFiles)
         {
-            QFileInfo fileInfo(filepath);
-            QString filename = fileInfo.fileName();
-
-            if (downstreamFile->gameFiles().contains(filename, Qt::CaseInsensitive))
+            if (downstreamFile->gameFiles().contains(file->fileName(), Qt::CaseInsensitive))
             {
                 mCheckedFiles.erase(downstreamFile);
 
