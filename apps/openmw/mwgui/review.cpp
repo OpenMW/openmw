@@ -537,6 +537,11 @@ namespace MWGui
                 MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
     }
 
+    std::string ReviewDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sBack}";
+    }
+
     bool ReviewDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -567,13 +572,13 @@ namespace MWGui
             }
             return true;
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_START)
-        {
-            onOkClicked(mButtons[5]);
-        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onBackClicked(mButtons[4]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkClicked(mButtons[5]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)

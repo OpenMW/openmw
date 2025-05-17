@@ -352,6 +352,14 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 
+    std::string ContainerWindow::getButtonStr()
+    {
+        if (mDisposeCorpseButton->getVisible())
+            return "(A) #{sTake}    (X) #{sTakeAll}    (LB) #{sDisposeofCorpse}    (Y) #{sInfo}    [LT] #{sInventory}    (B) #{sClose}";
+        else
+            return "(A) #{sTake}    (X) #{sTakeAll}    (Y) #{sInfo}    [LT] #{sInventory}    (B) #{sClose}";
+    }
+
     bool ContainerWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)

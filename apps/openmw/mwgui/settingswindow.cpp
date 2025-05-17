@@ -468,7 +468,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        setVisible(false);
+        MWBase::Environment::get().getWindowManager()->toggleSettingsWindow();
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -1127,6 +1127,11 @@ namespace MWGui
     {
         mResolutionList->setScrollPosition(0);
         mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
+
+    std::string SettingsWindow::getButtonStr()
+    {
+        return "(A) #{sSelect}    (LB) #{sPrev} Tab    (RB) #{sNext} Tab    (B) #{sOk}";
     }
 
     bool SettingsWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

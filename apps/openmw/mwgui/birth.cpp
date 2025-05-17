@@ -273,6 +273,11 @@ namespace MWGui
         mSpellArea->setViewOffset(MyGUI::IntPoint(0, 0));
     }
 
+    std::string BirthDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sBack}";
+    }
+
     bool BirthDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -289,6 +294,10 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onBackClicked(mBackButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkClicked(mOkButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {

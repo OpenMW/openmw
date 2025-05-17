@@ -83,6 +83,11 @@ namespace MWGui
         mTextEdit->setCaption(text);
     }
 
+    std::string TextInputDialog::getButtonStr()
+    {
+        return "(A) #{sOk}";
+    }
+
     bool TextInputDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)

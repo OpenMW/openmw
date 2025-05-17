@@ -126,6 +126,14 @@ namespace MWGui
         BookWindowBase::onClose();
     }
 
+    std::string ScrollWindow::getButtonStr()
+    {
+        if (mTakeButton->getVisible())
+            return "(A) #{sTake}    (RS) #{sScrolldown}    (B) #{sClose}";
+        else
+            return "(A) #{sTake}    (RS) #{sScrolldown}    (B) #{sClose}";
+    }
+
     bool ScrollWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)

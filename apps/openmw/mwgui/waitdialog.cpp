@@ -332,6 +332,19 @@ namespace MWGui
         }
     }
 
+    std::string WaitDialog::getButtonStr()
+    {
+        if (mSleeping)
+        {
+            if (mUntilHealedButton->getVisible())
+                return "(X) #{sUntilHealed}    (A) #{sRest}    (B) #{sCancel}";
+            else
+                return "(A) #{sRest}    (B) #{sCancel}";
+        }
+        else
+            return "(A) #{sWait}    (B) #{sCancel}";
+    }
+
     bool WaitDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)

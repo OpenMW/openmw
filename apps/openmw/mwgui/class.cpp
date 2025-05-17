@@ -77,6 +77,11 @@ namespace MWGui
         center();
     }
 
+    std::string GenerateClassResultDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (B) #{sBack}";
+    }
+
     bool GenerateClassResultDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -312,6 +317,11 @@ namespace MWGui
         setClassImage(mClassImage, mCurrentClassId);
     }
 
+    std::string PickClassDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sBack}";
+    }
+
     bool PickClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -328,6 +338,10 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onBackClicked(mBackButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkClicked(mOkButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
@@ -474,6 +488,11 @@ namespace MWGui
             }
             ++i;
         }
+    }
+
+    std::string InfoBoxDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}";
     }
 
     bool InfoBoxDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
@@ -699,6 +718,11 @@ namespace MWGui
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
     }
 
+    std::string CreateClassDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sCancel}";
+    }
+
     bool CreateClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -717,6 +741,10 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onBackClicked(mButtons[1]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkClicked(mButtons[2]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
@@ -942,6 +970,11 @@ namespace MWGui
         return true;
     }
 
+    std::string SelectSpecializationDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (B) #{sCancel}";
+    }
+
     bool SelectSpecializationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -1002,6 +1035,11 @@ namespace MWGui
     {
         eventCancel();
         return true;
+    }
+
+    std::string SelectAttributeDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (B) #{sCancel}";
     }
 
     bool SelectAttributeDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
@@ -1076,6 +1114,11 @@ namespace MWGui
     {
         eventCancel();
         return true;
+    }
+
+    std::string SelectSkillDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (B) #{sCancel}";
     }
 
     bool SelectSkillDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

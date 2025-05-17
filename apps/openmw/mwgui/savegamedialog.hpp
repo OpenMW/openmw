@@ -24,6 +24,8 @@ namespace MWGui
 
         void setLoadOrSave(bool load);
 
+        std::string getButtonStr() override;
+
     private:
         void confirmDeleteSave();
 

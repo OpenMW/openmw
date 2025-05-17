@@ -181,6 +181,7 @@ namespace MWGui
         , mPostProcessorHud(nullptr)
         , mJailScreen(nullptr)
         , mContainerWindow(nullptr)
+        , mControllerButtonsOverlay(nullptr)
         , mTranslationDataStorage(translationDataStorage)
         , mInputBlocker(nullptr)
         , mHudEnabled(true)
@@ -505,6 +506,10 @@ namespace MWGui
         mWindows.push_back(std::move(postProcessorHud));
         trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
 
+        auto controllerButtonsOverlay = std::make_unique<ControllerButtonsOverlay>();
+        mControllerButtonsOverlay = controllerButtonsOverlay.get();
+        mWindows.push_back(std::move(controllerButtonsOverlay));
+
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
             {}, 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
 
@@ -662,6 +667,9 @@ namespace MWGui
                 && !(mForceHidden & GW_Inventory) && (mAllowed & GW_Inventory));
             mSpellWindow->setVisible(
                 mSpellWindow->pinned() && !isConsoleMode() && !(mForceHidden & GW_Magic) && (mAllowed & GW_Magic));
+
+            if (Settings::gui().mControllerMenus && mControllerButtonsOverlay)
+                mControllerButtonsOverlay->setVisible(false);
             return;
         }
         else if (getMode() != GM_Inventory)
@@ -690,6 +698,8 @@ namespace MWGui
             mSpellWindow->setVisible(eff & GW_Magic);
             mStatsWindow->setVisible(eff & GW_Stats);
         }
+
+        updateControllerButtonsOverlay();
 
         switch (mode)
         {
@@ -720,6 +730,7 @@ namespace MWGui
             return;
         dialog->setVisible(false);
         mGarbageDialogs.push_back(std::move(dialog));
+        updateControllerButtonsOverlay();
     }
 
     void WindowManager::exitCurrentGuiMode()
@@ -871,10 +882,13 @@ namespace MWGui
         {
             GuiMode mode = mGuiModes.back();
             GuiModeState& state = mGuiModeStates[mode];
+            if (state.mWindows.size() == 0)
+                return nullptr;
+
             int activeIndex = std::clamp(mActiveControllerWindows[mode], 0, (int)state.mWindows.size() - 1);
 
             // REMOVEME
-            Log(Debug::Error) << "getActiveControllerWindow: " << state.mWindows.size() << " windows in state, mActiveControllerWindows[mode] = " << mActiveControllerWindows[mode];
+            Log(Debug::Error) << "getActiveControllerWindow: " << state.mWindows.size() << " windows in state, mActiveControllerWindows[mode] = " << mActiveControllerWindows[mode] << ", activeIndex=" << activeIndex;
 
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())
@@ -1000,6 +1014,9 @@ namespace MWGui
 
         if (isSettingsWindowVisible())
             mSettingsWindow->onFrame(frameDuration);
+
+        if (mControllerButtonsOverlay && mControllerButtonsOverlay->isVisible())
+            mControllerButtonsOverlay->onFrame(frameDuration);
 
         if (!gameRunning)
             return;
@@ -2046,6 +2063,7 @@ namespace MWGui
             if (!window->exit())
                 return;
             window->setVisible(false);
+            updateControllerButtonsOverlay();
         }
     }
 
@@ -2059,6 +2077,8 @@ namespace MWGui
 
         mKeyboardNavigation->setModalWindow(input->mMainWidget);
         mKeyboardNavigation->setDefaultFocus(input->mMainWidget, input->getDefaultKeyFocus());
+
+        updateControllerButtonsOverlay();
     }
 
     void WindowManager::removeCurrentModal(WindowModal* input)
@@ -2525,5 +2545,35 @@ namespace MWGui
             }
         }
         return res;
+    }
+
+    void WindowManager::updateControllerButtonsOverlay()
+    {
+        if (!Settings::gui().mControllerMenus ||!mControllerButtonsOverlay)
+            return;
+
+        WindowBase* topWin = this->getActiveControllerWindow();
+        if (!topWin || !topWin->isVisible())
+        {
+            // REMOVEME
+            Log(Debug::Error) << "WindowManager::updateControllerButtonsOverlay: hiding overlay";
+            mControllerButtonsOverlay->setVisible(false);
+            return;
+        }
+
+        std::string buttonStr = topWin->getButtonStr();
+        // REMOVEME
+        Log(Debug::Error) << "WindowManager::updateControllerButtonsOverlay: showing overlay: " << buttonStr;
+        if (buttonStr.length() > 0)
+        {
+            mControllerButtonsOverlay->setButtonStr(buttonStr);
+            mControllerButtonsOverlay->setVisible(true);
+        }
+        else
+        {
+            // REMOVEME
+            Log(Debug::Error) << "WindowManager::updateControllerButtonsOverlay: ...psych, hiding it";
+            mControllerButtonsOverlay->setVisible(false);
+        }
     }
 }

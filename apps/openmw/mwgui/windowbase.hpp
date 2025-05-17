@@ -62,6 +62,7 @@ namespace MWGui
         // REMOVEME
         // virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) = 0;
         // virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) = 0;
+        virtual std::string getButtonStr() { return ""; }
         virtual void setActiveControllerWindow(bool active) { mActiveControllerWindow = active; }
 
     protected:

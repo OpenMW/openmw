@@ -207,6 +207,11 @@ namespace MWGui
         }
     }
 
+    std::string MainMenu::getButtonStr()
+    {
+        return "";
+    }
+
     bool MainMenu::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         // REMOVEME

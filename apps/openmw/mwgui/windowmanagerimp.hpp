@@ -25,6 +25,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "charactercreation.hpp"
+#include "controllerbuttonsoverlay.hpp"
 #include "draganddrop.hpp"
 #include "mapwindow.hpp"
 #include "messagebox.hpp"
@@ -118,6 +119,7 @@ namespace MWGui
     class PostProcessorHud;
     class JailScreen;
     class KeyboardNavigation;
+    class ControllerButtonsOverlay;
 
     class WindowManager : public MWBase::WindowManager
     {
@@ -389,6 +391,7 @@ namespace MWGui
 
         WindowBase* getActiveControllerWindow() override;
         void cycleActiveControllerWindow(bool next) override;
+        void updateControllerButtonsOverlay() override;
 
         // Used in Lua bindings
         const std::vector<GuiMode>& getGuiModeStack() const override { return mGuiModes; }
@@ -457,6 +460,7 @@ namespace MWGui
         PostProcessorHud* mPostProcessorHud;
         JailScreen* mJailScreen;
         ContainerWindow* mContainerWindow;
+        ControllerButtonsOverlay* mControllerButtonsOverlay;
 
         std::vector<std::unique_ptr<WindowBase>> mWindows;
 

@@ -463,6 +463,11 @@ namespace MWGui
         }
     }
 
+    std::string RaceDialog::getButtonStr()
+    {
+        return "(A) #{sSelect}    (Y) #{sSex}    (LB) #{sHair}    (RB) #{sFace}    (X) #{sDone}    (B) #{sBack}";
+    }
+
     bool RaceDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -481,6 +486,10 @@ namespace MWGui
             onBackClicked(mBackButton);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkClicked(mOkButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
         {
             onSelectNextGender(nullptr);
         }

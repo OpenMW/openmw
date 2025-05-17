@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="BlackBG" layer="ControllerButtons" position="0 0 800 48" align="HStretch Bottom" name="_Main">
+        <Property key="Visible" value="false"/>
+
+        <Widget type="HBox" position="0 0 800 48" align="Center Bottom">
+            <Widget type="Spacer"/>
+            <Widget type="TextBox" skin="HeaderText" position="0 0 800 48" name="ButtonStr" align="HStretch">
+                <Property key="Caption" value="[LT] #{sMenuPrevXbox}    (LB) #{sPrev}    (A) #{sSelect}    (B) #{sBack}    (RB) #{sNext}    [RT] #{sMenuNextXbox}"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+            <Widget type="Spacer"/>
+        </Widget>
+    </Widget>
+</MyGUI>

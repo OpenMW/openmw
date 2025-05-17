@@ -222,6 +222,14 @@ namespace MWGui
         }
     }
 
+    std::string BookWindow::getButtonStr()
+    {
+        if (mTakeButton->getVisible())
+            return "(A) #{sTake}    (LB) #{sPrev}    (RB) #{sNext}    (B) #{sClose}";
+        else
+            return "(LB) #{sPrev}    (RB) #{sNext}    (B) #{sClose}";
+    }
+
     bool BookWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)

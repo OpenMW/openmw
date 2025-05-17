@@ -504,6 +504,14 @@ namespace MWGui
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
     }
 
+    std::string SaveGameDialog::getButtonStr()
+    {
+        if (mSaving)
+            return "(A) #{sSelect}    (B) #{sClose}";
+        else
+            return "(A) #{sSelect}    (Y) Select Character    (B) #{sClose}";
+    }
+
     bool SaveGameDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -520,6 +528,16 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onCancelButtonClicked(mCancelButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
+        {
+            uint32_t index = mCharacterSelection->getIndexSelected();
+            if (index >= mCharacterSelection->getItemCount() - 1)
+                index = 0;
+            else
+                index++;
+            mCharacterSelection->setIndexSelected(index);
+            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
@@ -541,26 +559,6 @@ namespace MWGui
             mOkButtonFocus = !mOkButtonFocus;
             mOkButton->setStateSelected(mOkButtonFocus);
             mCancelButton->setStateSelected(!mOkButtonFocus);
-            mUsingGamepadGuiCursor = false;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
-        {
-            uint32_t index = mCharacterSelection->getIndexSelected();
-            if (index <= 0)
-                index = mCharacterSelection->getItemCount() - 1;
-            else
-                index--;
-            mCharacterSelection->setIndexSelected(index);
-            mUsingGamepadGuiCursor = false;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-        {
-            uint32_t index = mCharacterSelection->getIndexSelected();
-            if (index >= mCharacterSelection->getItemCount() - 1)
-                index = 0;
-            else
-                index++;
-            mCharacterSelection->setIndexSelected(index);
             mUsingGamepadGuiCursor = false;
         }
 

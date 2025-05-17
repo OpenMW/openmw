@@ -309,6 +309,8 @@ namespace
                 notifyQuests(getWidget<MyGUI::Widget>(QuestsList));
             else
                 notifyTopics(getWidget<MyGUI::Widget>(TopicsList));
+
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void pushBook(Book& book, unsigned int page)
@@ -340,6 +342,7 @@ namespace
         {
             setVisible(CloseBTN, mStates.size() < 2);
             setVisible(JournalBTN, mStates.size() >= 2);
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void updateShowingPages()
@@ -382,6 +385,8 @@ namespace
 
             setText(PageOneNum, page + 1);
             setText(PageTwoNum, page + 2);
+
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyKeyPress(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
@@ -409,6 +414,7 @@ namespace
             mTopicsMode = false;
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyTopicSelected(const std::string& topicIdString, int id)
@@ -441,6 +447,7 @@ namespace
             mOptionsMode = false;
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -660,6 +667,16 @@ namespace
                     updateShowingPages();
                 }
             }
+        }
+
+        std::string getButtonStr() override
+        {
+            if (mOptionsMode)
+                return "(A) #{sSelect}    (X) Quests    (Y) #{sTopics}    (B) #{sBack}";
+            else if (mStates.size() > 1)
+                return "(A) #{sSelect}    (LB) #{sPrev}    (RB) #{sNext}    (X) Quests    (Y) #{sTopics}    (B) #{sBack}";
+            else
+                return "(A) #{sSelect}    (LB) #{sPrev}    (RB) #{sNext}    (X) Quests    (Y) #{sTopics}    (B) #{sClose}";
         }
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override

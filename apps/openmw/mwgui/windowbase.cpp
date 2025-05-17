@@ -147,6 +147,7 @@ void WindowModal::onOpen()
 void WindowModal::onClose()
 {
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
+    MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
 
     MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }

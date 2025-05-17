@@ -26,6 +26,7 @@ namespace MWGui
 
         void onResChange(int, int) override;
 
+        std::string getButtonStr() override;
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     protected:

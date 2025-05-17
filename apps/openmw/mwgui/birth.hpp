@@ -38,6 +38,8 @@ namespace MWGui
         */
         EventHandle_WindowBase eventDone;
 
+        std::string getButtonStr() override;
+
     protected:
         void onSelectBirth(MyGUI::ListBox* _sender, size_t _index);
 

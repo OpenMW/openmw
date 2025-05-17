@@ -439,6 +439,11 @@ namespace MWGui
         return mButtonPressed;
     }
 
+    std::string InteractiveMessageBox::getButtonStr()
+    {
+        return "InteractiveMessageBox (A) #{sOk}";
+    }
+
     bool InteractiveMessageBox::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)

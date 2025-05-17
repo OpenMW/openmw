@@ -20,6 +20,7 @@
     <Layer name="Console" overlapped="true" pick="true"/>
     <Layer name="Modal" overlapped="true" pick="true"/>
     <Layer name="Popup" overlapped="true" pick="true"/>
+    <Layer name="ControllerButtons" overlapped="true" pick="false"/>
     <Layer name="Notification" overlapped="false" pick="false"/>
     <Layer name="Video" overlapped="false" pick="true"/>
     <Layer name="InputBlocker" overlapped="false" pick="true"/>

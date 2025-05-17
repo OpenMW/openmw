@@ -55,6 +55,8 @@ namespace MWGui
 
         bool exit() override;
 
+        std::string getButtonStr() override;
+
     private:
         const VFS::Manager* mVFS;
 

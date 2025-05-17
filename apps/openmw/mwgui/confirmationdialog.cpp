@@ -72,6 +72,11 @@ namespace MWGui
         eventOkClicked();
     }
 
+    std::string ConfirmationDialog::getButtonStr()
+    {
+        return "(A) #{sOk}    (B) #{sCancel}";
+    }
+
     bool ConfirmationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
