@@ -67,7 +67,7 @@ namespace ContentSelectorModel
         ContentFileList checkedItems() const;
         void uncheckAll();
 
-        void refreshModel();
+        void refreshModel(std::initializer_list<int> roles = {});
 
     private:
         void addFile(EsmFile* file);
