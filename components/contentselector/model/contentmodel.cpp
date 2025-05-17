@@ -116,37 +116,26 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
     if (file == mGameFile)
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
 
-    Qt::ItemFlags returnFlags;
+    // files with no dependencies can always be checked
+    if (file->gameFiles().empty())
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
 
-    // addon can be checked if its gamefile is
-    // ... special case, addon with no dependency can be used with any gamefile.
-    bool gamefileChecked = false;
-    bool noGameFiles = true;
-    for (const QString& fileName : file->gameFiles())
+    // Show the file if the game it is for is enabled.
+    // NB: The file may theoretically depend on multiple games.
+    // Early exit means that a file is visible only if its earliest found game dependency is enabled.
+    // This can be counterintuitive, but it is okay for non-bizarre content setups. And also faster.
+    for (const EsmFile* depFile : mFiles)
     {
-        for (QListIterator<EsmFile*> dependencyIter(mFiles); dependencyIter.hasNext(); dependencyIter.next())
+        if (depFile->isGameFile() && file->gameFiles().contains(depFile->fileName(), Qt::CaseInsensitive))
         {
-            // compare filenames only.  Multiple instances
-            // of the filename (with different paths) is not relevant here.
-            EsmFile* depFile = dependencyIter.peekNext();
-            if (!depFile->isGameFile() || depFile->fileName().compare(fileName, Qt::CaseInsensitive) != 0)
-                continue;
-
-            noGameFiles = false;
-            if (depFile->builtIn() || depFile->fromAnotherConfigFile() || mCheckedFiles.contains(depFile))
-            {
-                gamefileChecked = true;
+            if (!depFile->builtIn() && !depFile->fromAnotherConfigFile() && !mCheckedFiles.contains(depFile))
                 break;
-            }
+
+            return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
         }
     }
 
-    if (gamefileChecked || noGameFiles)
-    {
-        returnFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
-    }
-
-    return returnFlags;
+    return Qt::NoItemFlags;
 }
 
 QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int role) const
