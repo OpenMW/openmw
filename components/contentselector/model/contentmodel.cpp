@@ -278,7 +278,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
 
             if (success)
             {
-                success = setCheckState(file->filePath(), value.toBool());
+                success = setCheckState(file, value.toBool());
                 emit dataChanged(index, index);
             }
         }
@@ -305,7 +305,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
 
             if (setState)
             {
-                setCheckState(file->filePath(), success);
+                setCheckState(file, success);
                 emit dataChanged(index, index);
             }
             else
@@ -710,11 +710,11 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
     int previousPosition = -1;
     for (const QString& filepath : fileList)
     {
-        if (setCheckState(filepath, true))
+        const EsmFile* file = item(filepath);
+        if (setCheckState(file, true))
         {
             // setCheckState already gracefully handles builtIn and fromAnotherConfigFile
             // as necessary, move plug-ins in visible list to match sequence of supplied filelist
-            const EsmFile* file = item(filepath);
             int filePosition = indexFromItem(file).row();
             if (filePosition < previousPosition)
             {
@@ -795,13 +795,8 @@ void ContentSelectorModel::ContentModel::refreshModel(std::initializer_list<int>
     emit dataChanged(index(0, 0), index(rowCount() - 1, 0), roles);
 }
 
-bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, bool checkState)
+bool ContentSelectorModel::ContentModel::setCheckState(const EsmFile* file, bool checkState)
 {
-    if (filepath.isEmpty())
-        return false;
-
-    const EsmFile* file = item(filepath);
-
     if (!file || file->builtIn() || file->fromAnotherConfigFile())
         return false;
 
@@ -810,7 +805,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString& filepath, 
     else
         mCheckedFiles.erase(file);
 
-    emit dataChanged(indexFromItem(item(filepath)), indexFromItem(item(filepath)));
+    emit dataChanged(indexFromItem(file), indexFromItem(file));
 
     if (file->isGameFile())
         refreshModel();
