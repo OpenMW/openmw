@@ -70,6 +70,10 @@ namespace MWGui
                 MyGUI::IntCoord(0, 0, (64 - 7) * scale, mNextPageButton->getSize().height * scale));
         }
 
+        mControllerButtons.l1 = "#{sPrev}";
+        mControllerButtons.r1 = "#{sNext}";
+        mControllerButtons.b = "#{sClose}";
+
         center();
     }
 
@@ -222,12 +226,10 @@ namespace MWGui
         }
     }
 
-    std::string BookWindow::getButtonStr()
+    ControllerButtonStr* BookWindow::getControllerButtons()
     {
-        if (mTakeButton->getVisible())
-            return "(A) #{sTake}    (LB) #{sPrev}    (RB) #{sNext}    (B) #{sClose}";
-        else
-            return "(LB) #{sPrev}    (RB) #{sNext}    (B) #{sClose}";
+        mControllerButtons.a = mTakeButton->getVisible() ? "#{sTake}" : "";
+        return &mControllerButtons;
     }
 
     bool BookWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

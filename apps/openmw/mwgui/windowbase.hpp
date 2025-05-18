@@ -14,6 +14,24 @@ namespace MWGui
 {
     class DragAndDrop;
 
+    struct ControllerButtonStr
+    {
+        std::string a;
+        std::string b;
+        std::string l1;
+        std::string l2;
+        std::string l3;
+        std::string lStick;
+        std::string menu;
+        std::string r1;
+        std::string r2;
+        std::string r3;
+        std::string rStick;
+        std::string view;
+        std::string x;
+        std::string y;
+    };
+
     class WindowBase : public Layout
     {
     public:
@@ -62,12 +80,13 @@ namespace MWGui
         // REMOVEME
         // virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) = 0;
         // virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) = 0;
-        virtual std::string getButtonStr() { return ""; }
+        virtual ControllerButtonStr* getControllerButtons() { return &mControllerButtons; }
         virtual void setActiveControllerWindow(bool active) { mActiveControllerWindow = active; }
 
     protected:
         virtual void onTitleDoubleClicked();
 
+        ControllerButtonStr mControllerButtons;
         MyGUI::Widget* mMouseFocus = nullptr;
         bool mActiveControllerWindow = false;
         void trackFocusEvents(MyGUI::Widget* widget);

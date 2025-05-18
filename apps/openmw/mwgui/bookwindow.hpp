@@ -21,7 +21,7 @@ namespace MWGui
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         std::string_view getWindowIdForLua() const override { return "Book"; }
-        std::string getButtonStr() override;
+        ControllerButtonStr* getControllerButtons() override;
 
     protected:
         void onNextPageButtonClicked(MyGUI::Widget* sender);

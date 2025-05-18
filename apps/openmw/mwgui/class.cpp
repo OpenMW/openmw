@@ -60,6 +60,8 @@ namespace MWGui
             mOkButton->setStateSelected(true);
             trackFocusEvents(mBackButton);
             trackFocusEvents(mOkButton);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
         }
 
         center();
@@ -75,11 +77,6 @@ namespace MWGui
             MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(mCurrentClassId)->mName);
 
         center();
-    }
-
-    std::string GenerateClassResultDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (B) #{sBack}";
     }
 
     bool GenerateClassResultDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
@@ -155,7 +152,12 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
 
         if (Settings::gui().mControllerMenus)
+        {
             mOkButton->setStateSelected(true);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.x = "#{sDone}";
+        }
 
         updateClasses();
         updateStats();
@@ -317,11 +319,6 @@ namespace MWGui
         setClassImage(mClassImage, mCurrentClassId);
     }
 
-    std::string PickClassDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sBack}";
-    }
-
     bool PickClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -419,6 +416,8 @@ namespace MWGui
         getWidget(mButtonBar, "ButtonBar");
 
         center();
+
+        mControllerButtons.a = "#{sSelect}";
     }
 
     void InfoBoxDialog::setText(const std::string& str)
@@ -488,11 +487,6 @@ namespace MWGui
             }
             ++i;
         }
-    }
-
-    std::string InfoBoxDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}";
     }
 
     bool InfoBoxDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
@@ -623,7 +617,12 @@ namespace MWGui
         mButtons.push_back(okButton);
 
         if (Settings::gui().mControllerMenus)
+        {
             okButton->setStateSelected(true);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.x = "#{sDone}";
+        }
 
         // Set default skills, attributes
 
@@ -716,11 +715,6 @@ namespace MWGui
         else
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
-    }
-
-    std::string CreateClassDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sCancel}";
     }
 
     bool CreateClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
@@ -939,6 +933,9 @@ namespace MWGui
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
+
+        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.b = "#{sCancel}";
     }
 
     SelectSpecializationDialog::~SelectSpecializationDialog() {}
@@ -968,11 +965,6 @@ namespace MWGui
     {
         eventCancel();
         return true;
-    }
-
-    std::string SelectSpecializationDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (B) #{sCancel}";
     }
 
     bool SelectSpecializationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
@@ -1016,6 +1008,9 @@ namespace MWGui
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
+
+        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.b = "#{sCancel}";
     }
 
     // widget controls
@@ -1035,11 +1030,6 @@ namespace MWGui
     {
         eventCancel();
         return true;
-    }
-
-    std::string SelectAttributeDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (B) #{sCancel}";
     }
 
     bool SelectAttributeDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
@@ -1093,6 +1083,9 @@ namespace MWGui
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
+
+        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.b = "#{sCancel}";
     }
 
     SelectSkillDialog::~SelectSkillDialog() {}
@@ -1114,11 +1107,6 @@ namespace MWGui
     {
         eventCancel();
         return true;
-    }
-
-    std::string SelectSkillDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (B) #{sCancel}";
     }
 
     bool SelectSkillDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

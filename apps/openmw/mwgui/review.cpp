@@ -126,7 +126,12 @@ namespace MWGui
         mButtons.push_back(okButton);
 
         if (Settings::gui().mControllerMenus)
+        {
             mButtons[mControllerFocus]->setStateSelected(true);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.x = "#{sDone}";
+        }
     }
 
     void ReviewDialog::onOpen()
@@ -535,11 +540,6 @@ namespace MWGui
         else
             mSkillView->setViewOffset(
                 MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
-    }
-
-    std::string ReviewDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sBack}";
     }
 
     bool ReviewDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

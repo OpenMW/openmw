@@ -41,6 +41,9 @@ namespace MWGui
         mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
         mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
 
+        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.rStick = "#{sScrolldown}";
+
         center();
     }
 
@@ -126,12 +129,10 @@ namespace MWGui
         BookWindowBase::onClose();
     }
 
-    std::string ScrollWindow::getButtonStr()
+    ControllerButtonStr* ScrollWindow::getControllerButtons()
     {
-        if (mTakeButton->getVisible())
-            return "(A) #{sTake}    (RS) #{sScrolldown}    (B) #{sClose}";
-        else
-            return "(A) #{sTake}    (RS) #{sScrolldown}    (B) #{sClose}";
+        mControllerButtons.a = mTakeButton->getVisible() ? "#{sTake}" : "";
+        return &mControllerButtons;
     }
 
     bool ScrollWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

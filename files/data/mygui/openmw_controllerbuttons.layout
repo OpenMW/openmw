@@ -4,15 +4,194 @@
     <Widget type="Window" skin="BlackBG" layer="ControllerButtons" position="0 0 800 48" align="HStretch Bottom" name="_Main">
         <Property key="Visible" value="false"/>
 
-        <Widget type="HBox" position="0 0 800 48" align="Center Bottom">
+        <Widget type="HBox" position="0 0 800 48" align="Center Bottom" name="ButtonBox">
+            <Property key="Padding" value="0"/>
+            <Property key="Spacing" value="0"/>
+
             <Widget type="Spacer"/>
-            <Widget type="TextBox" skin="HeaderText" position="0 0 800 48" name="ButtonStr" align="HStretch">
-                <Property key="Caption" value="[LT] #{sMenuPrevXbox}    (LB) #{sPrev}    (A) #{sSelect}    (B) #{sBack}    (RB) #{sNext}    [RT] #{sMenuNextXbox}"/>
-                <Property key="TextAlign" value="Center"/>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnLStickImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_lstick.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnLStickText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
                 <Property key="TextShadow" value="true"/>
                 <Property key="TextShadowColour" value="0 0 0"/>
                 <Property key="ReadOnly" value="true"/>
             </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnRStickImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_rstick.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnRStickText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnAImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_a.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnAText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnMenuImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_menu.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnMenuText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnViewImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_view.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnViewText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnL1Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_l1.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnL1Text">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnR1Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_r1.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnR1Text">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnXImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_x.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnXText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnYImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_y.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnYText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnL3Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_l3.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnL3Text">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnR3Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_r3.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnR3Text">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnL2Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_l2.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnL2Text">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnR2Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_r2.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnR2Text">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnBImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_b.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnBText">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
             <Widget type="Spacer"/>
         </Widget>
     </Widget>

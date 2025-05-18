@@ -24,8 +24,6 @@ namespace MWGui
         */
         EventHandle_WindowBase eventDone;
 
-        std::string getButtonStr() override;
-
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onTextAccepted(MyGUI::EditBox* _sender);

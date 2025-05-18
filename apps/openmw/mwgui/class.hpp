@@ -40,8 +40,6 @@ namespace MWGui
         */
         EventHandle_Int eventButtonSelected;
 
-        std::string getButtonStr() override;
-
     protected:
         void onButtonClicked(MyGUI::Widget* _sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
@@ -93,8 +91,6 @@ namespace MWGui
         */
         EventHandle_WindowBase eventDone;
 
-        std::string getButtonStr() override;
-
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -135,8 +131,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_WindowBase eventDone;
-
-        std::string getButtonStr() override;
 
     protected:
         void onSelectClass(MyGUI::ListBox* _sender, size_t _index);
@@ -189,8 +183,6 @@ namespace MWGui
         */
         EventHandle_Void eventItemSelected;
 
-        std::string getButtonStr() override;
-
     protected:
         void onSpecializationClicked(MyGUI::Widget* _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
@@ -225,8 +217,6 @@ namespace MWGui
         */
         EventHandle_Void eventItemSelected;
 
-        std::string getButtonStr() override;
-
     protected:
         void onAttributeClicked(Widgets::MWAttributePtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
@@ -258,8 +248,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventItemSelected;
-
-        std::string getButtonStr() override;
 
     protected:
         void onSkillClicked(Widgets::MWSkillPtr _sender);
@@ -321,8 +309,6 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_WindowBase eventDone;
-
-        std::string getButtonStr() override;
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);

@@ -25,7 +25,7 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Scroll"; }
 
-        std::string getButtonStr() override;
+        ControllerButtonStr* getControllerButtons() override;
 
     protected:
         void onCloseButtonClicked(MyGUI::Widget* _sender);

@@ -86,6 +86,8 @@ namespace MWGui
         trackFocusEvents(mCancelButton);
         for (MyGUI::Widget* widget : mHourSlider->getAllWidgets())
            trackFocusEvents(widget);
+
+        mControllerButtons.b = "#{sCancel}";
     }
 
     void WaitDialog::setPtr(const MWWorld::Ptr& ptr)
@@ -332,17 +334,11 @@ namespace MWGui
         }
     }
 
-    std::string WaitDialog::getButtonStr()
+    ControllerButtonStr* WaitDialog::getControllerButtons()
     {
-        if (mSleeping)
-        {
-            if (mUntilHealedButton->getVisible())
-                return "(X) #{sUntilHealed}    (A) #{sRest}    (B) #{sCancel}";
-            else
-                return "(A) #{sRest}    (B) #{sCancel}";
-        }
-        else
-            return "(A) #{sWait}    (B) #{sCancel}";
+        mControllerButtons.a = mSleeping ? "#{sRest}" : "#{sWait}";
+        mControllerButtons.x = mSleeping && mUntilHealedButton->getVisible() ? "#{sUntilHealed}" : "";
+        return &mControllerButtons;
     }
 
     bool WaitDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

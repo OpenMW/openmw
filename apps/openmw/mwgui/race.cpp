@@ -117,7 +117,15 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
         if (Settings::gui().mControllerMenus)
+        {
             mOkButton->setStateSelected(true);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.x = "#{sDone}";
+            mControllerButtons.y = "#{sSex}";
+            mControllerButtons.l1 = "#{sHair}";
+            mControllerButtons.r1 = "#{sFace}";
+        }
 
         updateRaces();
         updateSkills();
@@ -461,11 +469,6 @@ namespace MWGui
             coord.top += lineHeight;
             ++i;
         }
-    }
-
-    std::string RaceDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (Y) #{sSex}    (LB) #{sHair}    (RB) #{sFace}    (X) #{sDone}    (B) #{sBack}";
     }
 
     bool RaceDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

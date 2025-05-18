@@ -66,6 +66,8 @@ namespace MWGui
 
         trackFocusEvents(mCancelButton);
         trackFocusEvents(mDeleteButton);
+        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.b = "#{sClose}";
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox* sender, size_t pos)
@@ -504,12 +506,10 @@ namespace MWGui
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
     }
 
-    std::string SaveGameDialog::getButtonStr()
+    ControllerButtonStr* SaveGameDialog::getControllerButtons()
     {
-        if (mSaving)
-            return "(A) #{sSelect}    (B) #{sClose}";
-        else
-            return "(A) #{sSelect}    (Y) Select Character    (B) #{sClose}";
+        mControllerButtons.y = mSaving ? "" : "Select Character";
+        return &mControllerButtons;
     }
 
     bool SaveGameDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

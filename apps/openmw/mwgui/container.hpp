@@ -40,7 +40,7 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Container"; }
 
-        std::string getButtonStr() override;
+        ControllerButtonStr* getControllerButtons() override;
         void setActiveControllerWindow(bool active) override;
 
     private:

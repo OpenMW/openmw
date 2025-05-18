@@ -59,7 +59,12 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
 
         if (Settings::gui().mControllerMenus)
+        {
             mOkButton->setStateSelected(true);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.x = "#{sDone}";
+        }
 
         updateBirths();
         updateSpells();
@@ -271,11 +276,6 @@ namespace MWGui
         mSpellArea->setCanvasSize(MyGUI::IntSize(mSpellArea->getWidth(), std::max(mSpellArea->getHeight(), coord.top)));
         mSpellArea->setVisibleVScroll(true);
         mSpellArea->setViewOffset(MyGUI::IntPoint(0, 0));
-    }
-
-    std::string BirthDialog::getButtonStr()
-    {
-        return "(A) #{sSelect}    (X) #{sDone}    (B) #{sBack}";
     }
 
     bool BirthDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

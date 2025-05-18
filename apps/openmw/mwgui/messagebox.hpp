@@ -103,7 +103,6 @@ namespace MWGui
 
         bool mMarkedToDelete;
 
-        std::string getButtonStr() override;
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:

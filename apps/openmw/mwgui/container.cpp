@@ -56,6 +56,12 @@ namespace MWGui
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
 
         setCoord(200, 0, 600, 300);
+
+        mControllerButtons.a = "#{sTake}";
+        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.x = "#{sTakeAll}";
+        mControllerButtons.y = "#{sInfo}";
+        mControllerButtons.l2 = "#{sInventory}";
     }
 
     void ContainerWindow::onItemSelected(int index)
@@ -352,12 +358,10 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 
-    std::string ContainerWindow::getButtonStr()
+    ControllerButtonStr* ContainerWindow::getControllerButtons()
     {
-        if (mDisposeCorpseButton->getVisible())
-            return "(A) #{sTake}    (X) #{sTakeAll}    (LB) #{sDisposeofCorpse}    (Y) #{sInfo}    [LT] #{sInventory}    (B) #{sClose}";
-        else
-            return "(A) #{sTake}    (X) #{sTakeAll}    (Y) #{sInfo}    [LT] #{sInventory}    (B) #{sClose}";
+        mControllerButtons.l1 = mDisposeCorpseButton->getVisible() ? "#{sDisposeofCorpse}" : "";
+        return &mControllerButtons;
     }
 
     bool ContainerWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

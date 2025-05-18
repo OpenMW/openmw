@@ -20,8 +20,6 @@ namespace MWGui
         EventHandle_Void eventOkClicked;
         EventHandle_Void eventCancelClicked;
 
-        std::string getButtonStr() override;
-
     private:
         MyGUI::EditBox* mMessage;
         MyGUI::Button* mOkButton;

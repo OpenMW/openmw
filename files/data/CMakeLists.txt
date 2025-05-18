@@ -10,6 +10,20 @@ set(BUILTIN_DATA_FILES
     textures/omw_menu_scroll_center_h.dds
     textures/omw_menu_scroll_center_v.dds
     textures/omw_menu_icon_active.dds
+    textures/omw_steam_button_a.dds
+    textures/omw_steam_button_b.dds
+    textures/omw_steam_button_l1.dds
+    textures/omw_steam_button_l2.dds
+    textures/omw_steam_button_l3.dds
+    textures/omw_steam_button_lstick.dds
+    textures/omw_steam_button_menu.dds
+    textures/omw_steam_button_r1.dds
+    textures/omw_steam_button_r2.dds
+    textures/omw_steam_button_r3.dds
+    textures/omw_steam_button_rstick.dds
+    textures/omw_steam_button_view.dds
+    textures/omw_steam_button_x.dds
+    textures/omw_steam_button_y.dds
     textures/omw/water_nm.png
 
     fonts/DejaVuFontLicense.txt

@@ -62,8 +62,6 @@ namespace MWGui
 
         EventHandle_Int eventActivateDialog;
 
-        std::string getButtonStr() override;
-
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);

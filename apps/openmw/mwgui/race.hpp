@@ -65,8 +65,6 @@ namespace MWGui
         */
         EventHandle_WindowBase eventDone;
 
-        std::string getButtonStr() override;
-
     protected:
         void onPreviewScroll(MyGUI::Widget* _sender, int _delta);
         void onHeadRotate(MyGUI::ScrollBar* _sender, size_t _position);

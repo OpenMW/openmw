@@ -24,6 +24,8 @@ namespace MWGui
         {
             trackFocusEvents(mOkButton);
             trackFocusEvents(mCancelButton);
+            mControllerButtons.a = "#{sOk}";
+            mControllerButtons.b = "#{sCancel}";
         }
     }
 
@@ -70,11 +72,6 @@ namespace MWGui
         setVisible(false);
 
         eventOkClicked();
-    }
-
-    std::string ConfirmationDialog::getButtonStr()
-    {
-        return "(A) #{sOk}    (B) #{sCancel}";
     }
 
     bool ConfirmationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

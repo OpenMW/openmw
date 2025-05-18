@@ -218,6 +218,10 @@ namespace
                 }
             }
 
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.x = "Quests";
+            mControllerButtons.y = "#{sTopics}";
+
             mQuestMode = false;
             mAllQuests = false;
             mOptionsMode = false;
@@ -669,14 +673,12 @@ namespace
             }
         }
 
-        std::string getButtonStr() override
+        MWGui::ControllerButtonStr* getControllerButtons() override
         {
-            if (mOptionsMode)
-                return "(A) #{sSelect}    (X) Quests    (Y) #{sTopics}    (B) #{sBack}";
-            else if (mStates.size() > 1)
-                return "(A) #{sSelect}    (LB) #{sPrev}    (RB) #{sNext}    (X) Quests    (Y) #{sTopics}    (B) #{sBack}";
-            else
-                return "(A) #{sSelect}    (LB) #{sPrev}    (RB) #{sNext}    (X) Quests    (Y) #{sTopics}    (B) #{sClose}";
+            mControllerButtons.b = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{sClose}";
+            mControllerButtons.l1 = mOptionsMode ? "" : "#{sPrev}";
+            mControllerButtons.r1 = mOptionsMode ? "" : "#{sNext}";
+            return &mControllerButtons;
         }
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override

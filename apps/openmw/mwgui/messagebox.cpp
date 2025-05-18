@@ -282,10 +282,13 @@ namespace MWGui
             }
         }
 
-        if (Settings::gui().mControllerMenus && mButtons.size() > 1)
+        if (Settings::gui().mControllerMenus)
         {
+            mControllerButtons.a = "#{sOk}";
+
             // If we have more than one button, we need to set the focus to the first one.
-            mButtons[0]->setStateSelected(true);
+            if (mButtons.size() > 1)
+                mButtons[0]->setStateSelected(true);
         }
 
         MyGUI::IntSize mainWidgetSize;
@@ -437,11 +440,6 @@ namespace MWGui
     int InteractiveMessageBox::readPressedButton()
     {
         return mButtonPressed;
-    }
-
-    std::string InteractiveMessageBox::getButtonStr()
-    {
-        return "InteractiveMessageBox (A) #{sOk}";
     }
 
     bool InteractiveMessageBox::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

@@ -459,6 +459,11 @@ namespace MWGui
 
             i++;
         }
+
+        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.b = "#{sOk}";
+        mControllerButtons.l1 = "#{sPrev} Tab";
+        mControllerButtons.r1 = "#{sNext} Tab";
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -1127,11 +1132,6 @@ namespace MWGui
     {
         mResolutionList->setScrollPosition(0);
         mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
-    }
-
-    std::string SettingsWindow::getButtonStr()
-    {
-        return "(A) #{sSelect}    (LB) #{sPrev} Tab    (RB) #{sNext} Tab    (B) #{sOk}";
     }
 
     bool SettingsWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

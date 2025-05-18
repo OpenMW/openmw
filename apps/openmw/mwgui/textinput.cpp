@@ -25,6 +25,8 @@ namespace MWGui
 
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
+
+        mControllerButtons.a = "#{sOk}";
     }
 
     void TextInputDialog::setNextButtonShow(bool shown)
@@ -81,11 +83,6 @@ namespace MWGui
     void TextInputDialog::setTextInput(const std::string& text)
     {
         mTextEdit->setCaption(text);
-    }
-
-    std::string TextInputDialog::getButtonStr()
-    {
-        return "(A) #{sOk}";
     }
 
     bool TextInputDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

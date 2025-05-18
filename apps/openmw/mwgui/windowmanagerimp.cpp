@@ -2561,19 +2561,7 @@ namespace MWGui
             return;
         }
 
-        std::string buttonStr = topWin->getButtonStr();
-        // REMOVEME
-        Log(Debug::Error) << "WindowManager::updateControllerButtonsOverlay: showing overlay: " << buttonStr;
-        if (buttonStr.length() > 0)
-        {
-            mControllerButtonsOverlay->setButtonStr(buttonStr);
-            mControllerButtonsOverlay->setVisible(true);
-        }
-        else
-        {
-            // REMOVEME
-            Log(Debug::Error) << "WindowManager::updateControllerButtonsOverlay: ...psych, hiding it";
-            mControllerButtonsOverlay->setVisible(false);
-        }
+        // setButtons will handle setting visibility based on if any buttons are defined.
+        mControllerButtonsOverlay->setButtons(topWin->getControllerButtons());
     }
 }
