@@ -38,6 +38,7 @@ namespace MWGui
         void onEditValueChanged(int value);
         void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
         void onEnterKeyPressed(MyGUI::EditBox* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 
 }

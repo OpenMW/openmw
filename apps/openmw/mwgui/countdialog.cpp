@@ -27,6 +27,9 @@ namespace MWGui
         mSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &CountDialog::onSliderMoved);
         // make sure we read the enter key being pressed to accept multiple items
         mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
+
+        mControllerButtons.a = "#{sOk}";
+        mControllerButtons.b = "#{sCancel}";
     }
 
     void CountDialog::openCountDialog(const std::string& item, const std::string& message, const int maxCount)
@@ -85,5 +88,19 @@ namespace MWGui
     void CountDialog::onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position)
     {
         mItemEdit->setValue(_position + 1);
+    }
+
+    bool CountDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+            onOkButtonClicked(mOkButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancelButtonClicked(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+
+        return true;
     }
 }
