@@ -685,10 +685,6 @@ namespace
         {
             if (arg.button == SDL_CONTROLLER_BUTTON_A) // A: Mouse click or Select
             {
-                // Fall through to mouse click
-                if (mUsingGamepadGuiCursor)
-                    return false;
-
                 if (mOptionsMode && mQuestMode)
                 {
                     // Choose a quest
@@ -773,7 +769,6 @@ namespace
                         mSelectedQuest = mButtons.size() - 1;
                     mButtons[mSelectedQuest]->setStateSelected(true);
                 }
-                mUsingGamepadGuiCursor = false;
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
@@ -787,21 +782,18 @@ namespace
                         mSelectedQuest = 0;
                     mButtons[mSelectedQuest]->setStateSelected(true);
                 }
-                mUsingGamepadGuiCursor = false;
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
             {
                 if (!mOptionsMode)
                     notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
-                mUsingGamepadGuiCursor = false;
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
             {
                 if (!mOptionsMode)
                     notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
-                mUsingGamepadGuiCursor = false;
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) // LB: Previous Page
@@ -817,13 +809,6 @@ namespace
                 return true;
             }
 
-            return false;
-        }
-
-        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override
-        {
-            if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
-                mUsingGamepadGuiCursor = true;
             return false;
         }
     };

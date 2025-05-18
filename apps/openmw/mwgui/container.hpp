@@ -70,8 +70,6 @@ namespace MWGui
         void onReferenceUnavailable() override;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
-        bool mUsingGamepadGuiCursor = false;
     };
 }
 #endif // CONTAINER_H

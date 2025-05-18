@@ -155,9 +155,7 @@ namespace MWGui
         ESM::RefId mCurrentClassId;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
         bool mOkButtonFocus = true;
-        bool mUsingGamepadGuiCursor = false;
     };
 
     class SelectSpecializationDialog : public WindowModal
@@ -349,9 +347,7 @@ namespace MWGui
         Widgets::MWSkillPtr mAffectedSkill;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
         int mControllerFocus = 2;
-        bool mUsingGamepadGuiCursor = false;
     };
 }
 #endif

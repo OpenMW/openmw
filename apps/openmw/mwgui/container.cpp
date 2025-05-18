@@ -96,12 +96,12 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
-            if (Settings::gui().mControllerMenus && !mUsingGamepadGuiCursor)
+            if (Settings::gui().mControllerMenus)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::takeItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
-        else if (Settings::gui().mControllerMenus && !mUsingGamepadGuiCursor)
+        else if (Settings::gui().mControllerMenus)
             takeItem(nullptr, count);
         else
             dragItem(nullptr, count);
@@ -368,14 +368,9 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mUsingGamepadGuiCursor)
-                return false;
-
             int index = mItemView->getControllerFocus();
             if (index >= 0 && index < mItemView->getItemCount())
-            {
                 onItemSelected(index);
-            }
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
@@ -396,19 +391,9 @@ namespace MWGui
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             mItemView->onControllerButtonEvent(arg);
-            mUsingGamepadGuiCursor = false;
         }
 
         return true;
-    }
-
-    bool ContainerWindow::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
-    {
-        if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
-        {
-            mUsingGamepadGuiCursor = true;
-        }
-        return false;
     }
 
     void ContainerWindow::setActiveControllerWindow(bool active)

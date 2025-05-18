@@ -88,6 +88,7 @@ namespace MWGui
            trackFocusEvents(widget);
 
         mControllerButtons.b = "#{sCancel}";
+        mDisableGamepadCursor = Settings::gui().mControllerMenus;
     }
 
     void WaitDialog::setPtr(const MWWorld::Ptr& ptr)

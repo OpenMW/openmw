@@ -22,6 +22,7 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
+            mDisableGamepadCursor = true;
             trackFocusEvents(mOkButton);
             trackFocusEvents(mCancelButton);
             mControllerButtons.a = "#{sOk}";

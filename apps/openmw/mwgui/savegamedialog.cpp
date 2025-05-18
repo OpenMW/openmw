@@ -516,10 +516,6 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            // Have A button do nothing so mouse controller still works.
-            if (mUsingGamepadGuiCursor)
-                return false;
-
             if (mOkButtonFocus)
                 onOkButtonClicked(mOkButton);
             else
@@ -537,21 +533,18 @@ namespace MWGui
             else
                 index++;
             mCharacterSelection->setIndexSelected(index);
-            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mSaveList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
-            mUsingGamepadGuiCursor = false;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mSaveList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
-            mUsingGamepadGuiCursor = false;
         }
         else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && !mOkButtonFocus) ||
             (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mOkButtonFocus))
@@ -559,18 +552,8 @@ namespace MWGui
             mOkButtonFocus = !mOkButtonFocus;
             mOkButton->setStateSelected(mOkButtonFocus);
             mCancelButton->setStateSelected(!mOkButtonFocus);
-            mUsingGamepadGuiCursor = false;
         }
 
         return true;
-    }
-
-    bool SaveGameDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
-    {
-        if (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY)
-        {
-            mUsingGamepadGuiCursor = true;
-        }
-        return false;
     }
 }

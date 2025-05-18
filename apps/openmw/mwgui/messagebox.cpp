@@ -284,6 +284,7 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
+            mDisableGamepadCursor = true;
             mControllerButtons.a = "#{sOk}";
 
             // If we have more than one button, we need to set the focus to the first one.

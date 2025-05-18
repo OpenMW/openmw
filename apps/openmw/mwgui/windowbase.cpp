@@ -109,25 +109,25 @@ void WindowBase::clampWindowCoordinates(MyGUI::Window* window)
 void WindowBase::focusGain(MyGUI::Widget* _new, MyGUI::Widget* _old)
 {
     // REMOVEME
-    Log(Debug::Verbose) << "WindowBase::focusGain new=" << _new << ", old=" << _old;
-    mMouseFocus = _new;
+    //Log(Debug::Verbose) << "WindowBase::focusGain new=" << _new << ", old=" << _old;
+    //mMouseFocus = _new;
 }
 
 void WindowBase::focusLoss(MyGUI::Widget* _old, MyGUI::Widget* _new)
 {
     // REMOVEME
-    Log(Debug::Verbose) << "WindowBase::focusLoss old=" << _old << ", new=" << _new;
-    if (mMouseFocus == _old)
-        mMouseFocus = nullptr;
+    //Log(Debug::Verbose) << "WindowBase::focusLoss old=" << _old << ", new=" << _new;
+    //if (mMouseFocus == _old)
+    //    mMouseFocus = nullptr;
 }
 
 void WindowBase::trackFocusEvents(MyGUI::Widget* widget)
 {
-    if (!Settings::gui().mControllerMenus)
-        return;
+    // if (!Settings::gui().mControllerMenus)
+    //     return;
 
-    widget->eventMouseSetFocus += MyGUI::newDelegate(this, &WindowBase::focusGain);
-    widget->eventMouseLostFocus += MyGUI::newDelegate(this, &WindowBase::focusLoss);
+    // widget->eventMouseSetFocus += MyGUI::newDelegate(this, &WindowBase::focusGain);
+    // widget->eventMouseLostFocus += MyGUI::newDelegate(this, &WindowBase::focusLoss);
 }
 
 WindowModal::WindowModal(const std::string& parLayout)

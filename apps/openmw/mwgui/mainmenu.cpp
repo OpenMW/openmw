@@ -106,6 +106,7 @@ namespace MWGui
         constexpr VFS::Path::NormalizedView menuBackgroundVideo("video/menu_background.bik");
 
         mHasAnimatedMenu = mVFS->exists(menuBackgroundVideo);
+        mDisableGamepadCursor = Settings::gui().mControllerMenus;
 
         updateMenu();
     }

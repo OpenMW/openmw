@@ -74,28 +74,30 @@ namespace MWGui
 
         static void clampWindowCoordinates(MyGUI::Window* window);
 
-        /// Called by controllermanager to handle controller events
+        virtual ControllerButtonStr* getControllerButtons() { return &mControllerButtons; }
+        bool isGamepadCursorAllowed() { return !mDisableGamepadCursor; }
         virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) { return true; };
         virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) { return true; };
-        // REMOVEME
-        // virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) = 0;
-        // virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) = 0;
-        virtual ControllerButtonStr* getControllerButtons() { return &mControllerButtons; }
         virtual void setActiveControllerWindow(bool active) { mActiveControllerWindow = active; }
 
     protected:
         virtual void onTitleDoubleClicked();
 
         ControllerButtonStr mControllerButtons;
-        MyGUI::Widget* mMouseFocus = nullptr;
         bool mActiveControllerWindow = false;
+        bool mDisableGamepadCursor = false;
+
+        // REMOVEME
         void trackFocusEvents(MyGUI::Widget* widget);
+        // REMOVEME
+        MyGUI::Widget* mMouseFocus = nullptr;
 
     private:
         void onDoubleClick(MyGUI::Widget* _sender);
 
         bool mDisabledByLua = false;
 
+        // REMOVEME
         void focusGain(MyGUI::Widget* _new, MyGUI::Widget* _old);
         void focusLoss(MyGUI::Widget* _old, MyGUI::Widget* _new);
     };

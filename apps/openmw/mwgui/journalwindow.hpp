@@ -34,7 +34,6 @@ namespace MWGui
 
         std::vector<MyGUI::Button*> mButtons;
         int mSelectedQuest = 0;
-        bool mUsingGamepadGuiCursor = false;
     };
 }
 
