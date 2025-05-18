@@ -23,8 +23,6 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mDisableGamepadCursor = true;
-            trackFocusEvents(mOkButton);
-            trackFocusEvents(mCancelButton);
             mControllerButtons.a = "#{sOk}";
             mControllerButtons.b = "#{sCancel}";
         }
@@ -79,9 +77,6 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
-                return false;
-
             if (mOkButtonFocus)
                 onOkButtonClicked(mOkButton);
             else

@@ -46,28 +46,24 @@ namespace MWGui
         getWidget(button, "NameButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);
-        trackFocusEvents(button);
         mButtons.push_back(button);
 
         getWidget(mRaceWidget, "RaceText");
         getWidget(button, "RaceButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);
-        trackFocusEvents(button);
         mButtons.push_back(button);
 
         getWidget(mClassWidget, "ClassText");
         getWidget(button, "ClassButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);
-        trackFocusEvents(button);
         mButtons.push_back(button);
 
         getWidget(mBirthSignWidget, "SignText");
         getWidget(button, "SignButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);
-        trackFocusEvents(button);
         mButtons.push_back(button);
 
         // Setup dynamic stats
@@ -116,13 +112,11 @@ namespace MWGui
         MyGUI::Button* backButton;
         getWidget(backButton, "BackButton");
         backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
-        trackFocusEvents(backButton);
         mButtons.push_back(backButton);
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
-        trackFocusEvents(okButton);
         mButtons.push_back(okButton);
 
         if (Settings::gui().mControllerMenus)
@@ -546,9 +540,6 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
-                return false;
-
             switch(mControllerFocus)
             {
                 case 0:

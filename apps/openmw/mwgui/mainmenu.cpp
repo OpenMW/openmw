@@ -210,37 +210,27 @@ namespace MWGui
 
     bool MainMenu::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
-        // REMOVEME
-        Log(Debug::Verbose) << "MainMenu::onControllerButtonEvent " << arg.button;
-
-        MyGUI::KeyCode key = MyGUI::KeyCode::None;
-        switch (arg.button)
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            case SDL_CONTROLLER_BUTTON_DPAD_UP:
-                MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::LeftShift);
-                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
-                MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::LeftShift);
-                return true;
-            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-                key = MyGUI::KeyCode::Tab;
-                break;
-            case SDL_CONTROLLER_BUTTON_A:
-                if (mMouseFocus != nullptr)
-                    return false;
-                key = MyGUI::KeyCode::Space;
-                break;
-            case SDL_CONTROLLER_BUTTON_B:
-            case SDL_CONTROLLER_BUTTON_START:
-                if (mButtons["return"]->getVisible())
-                {
-                    onButtonClicked(mButtons["return"]);
-                    return true;
-                }
-                else
-                    key = MyGUI::KeyCode::Escape;
-                break;
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Space, 0, false);
         }
-        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B || arg.button == SDL_CONTROLLER_BUTTON_START)
+        {
+            if (mButtons["return"]->getVisible())
+                onButtonClicked(mButtons["return"]);
+            else
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Escape, 0, false);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::LeftShift);
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
+            MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::LeftShift);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
+        }
         return true;
     }
 
@@ -344,7 +334,6 @@ namespace MWGui
                 button->setProperty("ImagePushed", "textures\\menu_" + buttonId + "_pressed.dds");
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::onButtonClicked);
                 button->setUserData(buttonId);
-                trackFocusEvents(button);
             }
         }
 

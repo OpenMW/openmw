@@ -87,19 +87,10 @@ namespace MWGui
         bool mActiveControllerWindow = false;
         bool mDisableGamepadCursor = false;
 
-        // REMOVEME
-        void trackFocusEvents(MyGUI::Widget* widget);
-        // REMOVEME
-        MyGUI::Widget* mMouseFocus = nullptr;
-
     private:
         void onDoubleClick(MyGUI::Widget* _sender);
 
         bool mDisabledByLua = false;
-
-        // REMOVEME
-        void focusGain(MyGUI::Widget* _new, MyGUI::Widget* _old);
-        void focusLoss(MyGUI::Widget* _old, MyGUI::Widget* _new);
     };
 
     /*

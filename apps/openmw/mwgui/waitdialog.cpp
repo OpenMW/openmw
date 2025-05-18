@@ -81,12 +81,6 @@ namespace MWGui
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
 
-        trackFocusEvents(mUntilHealedButton);
-        trackFocusEvents(mWaitButton);
-        trackFocusEvents(mCancelButton);
-        for (MyGUI::Widget* widget : mHourSlider->getAllWidgets())
-           trackFocusEvents(widget);
-
         mControllerButtons.b = "#{sCancel}";
         mDisableGamepadCursor = Settings::gui().mControllerMenus;
     }
@@ -345,12 +339,7 @@ namespace MWGui
     bool WaitDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            if (mMouseFocus != nullptr)
-                return false;
-
             onWaitButtonClicked(mWaitButton);
-        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCancelButtonClicked(mCancelButton);
         else if (arg.button == SDL_CONTROLLER_BUTTON_X && mUntilHealedButton->getVisible())

@@ -59,8 +59,6 @@ namespace MWGui
         {
             mOkButton->setStateSelected(true);
             mDisableGamepadCursor = true;
-            trackFocusEvents(mBackButton);
-            trackFocusEvents(mOkButton);
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.b = "#{sBack}";
         }
@@ -84,9 +82,6 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
-                return false;
-
             if (mOkButtonFocus)
                 onOkClicked(mOkButton);
             else
@@ -444,7 +439,6 @@ namespace MWGui
                 // First button is selected by default
                 button->setStateSelected(true);
             }
-            trackFocusEvents(button);
 
             this->mButtons.push_back(button);
         }
@@ -479,11 +473,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
-                return false;
-
             onButtonClicked(mButtons[mControllerFocus]);
-            return true;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {

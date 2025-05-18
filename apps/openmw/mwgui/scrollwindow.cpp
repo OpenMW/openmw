@@ -29,11 +29,9 @@ namespace MWGui
 
         getWidget(mCloseButton, "CloseButton");
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onCloseButtonClicked);
-        trackFocusEvents(mCloseButton);
 
         getWidget(mTakeButton, "TakeButton");
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onTakeButtonClicked);
-        trackFocusEvents(mTakeButton);
 
         adjustButton("CloseButton");
         adjustButton("TakeButton");
@@ -139,9 +137,6 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
-                return false;
-
             if (mTakeButton->getVisible())
                 onTakeButtonClicked(mTakeButton);
         }

@@ -27,19 +27,15 @@ namespace MWGui
     {
         getWidget(mCloseButton, "CloseButton");
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onCloseButtonClicked);
-        trackFocusEvents(mCloseButton);
 
         getWidget(mTakeButton, "TakeButton");
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onTakeButtonClicked);
-        trackFocusEvents(mTakeButton);
 
         getWidget(mNextPageButton, "NextPageBTN");
         mNextPageButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onNextPageButtonClicked);
-        trackFocusEvents(mNextPageButton);
 
         getWidget(mPrevPageButton, "PrevPageBTN");
         mPrevPageButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onPrevPageButtonClicked);
-        trackFocusEvents(mPrevPageButton);
 
         getWidget(mLeftPageNumber, "LeftPageNumber");
         getWidget(mRightPageNumber, "RightPageNumber");
@@ -236,9 +232,6 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
-                return false;
-
             if (mTakeButton->getVisible())
                 onTakeButtonClicked(mTakeButton);
         }

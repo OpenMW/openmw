@@ -64,8 +64,6 @@ namespace MWGui
         // To avoid accidental deletions
         mDeleteButton->setNeedKeyFocus(false);
 
-        trackFocusEvents(mCancelButton);
-        trackFocusEvents(mDeleteButton);
         mControllerButtons.a = "#{sSelect}";
         mControllerButtons.b = "#{sClose}";
     }
@@ -371,12 +369,6 @@ namespace MWGui
         }
         else
             onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
-
-        if (Settings::gui().mControllerMenus)
-        {
-            for (int i = 0; i < mSaveList->getItemCount(); i++)
-                trackFocusEvents(mSaveList->getWidgetByIndex(i));
-        }
     }
 
     std::string formatTimeplayed(const double timeInSeconds)

@@ -260,7 +260,6 @@ namespace MWGui
             button->setCaptionWithReplacing(buttonId);
 
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed);
-            trackFocusEvents(button);
 
             mButtons.push_back(button);
 
@@ -447,11 +446,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mMouseFocus != nullptr)
-                return false;
-
             buttonActivated(mButtons[mControllerFocus]);
-            return true;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
