@@ -34,10 +34,10 @@
     - | Control, extend, and override skill progression of the 
       | player.
   * - :ref:`Settings <Interface Settings>`
-    - by player and global scripts
+    - by player, menu, and global scripts
     - Save, display and track changes of setting values.
   * - :ref:`MWUI <Interface MWUI>`
-    - by player scripts
+    - by player and menu scripts
     - Morrowind-style UI templates.
   * - :ref:`UI <Interface UI>`
     - by player scripts
