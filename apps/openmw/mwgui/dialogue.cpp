@@ -88,6 +88,10 @@ namespace MWGui
         mBribe10Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
         mBribe100Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
         mBribe1000Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+
+        mDisableGamepadCursor = Settings::gui().mControllerMenus;
+        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.b = "#{sBack}";
     }
 
     void PersuasionDialog::adjustAction(MyGUI::Widget* action, int& totalHeight)
@@ -144,12 +148,58 @@ namespace MWGui
         else
             mMainWidget->setSize(mInitialMainWidgetWidth, mMainWidget->getSize().height);
 
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            mButtons.clear();
+            mButtons.push_back(mAdmireButton);
+            mButtons.push_back(mIntimidateButton);
+            mButtons.push_back(mTauntButton);
+            if (mBribe10Button->getEnabled())
+                mButtons.push_back(mBribe10Button);
+            if (mBribe100Button->getEnabled())
+                mButtons.push_back(mBribe100Button);
+            if (mBribe1000Button->getEnabled())
+                mButtons.push_back(mBribe1000Button);
+
+            for (int i = 0; i < mButtons.size(); i++)
+                mButtons[i]->setStateSelected(i == 0);
+        }
+
         WindowModal::onOpen();
     }
 
     MyGUI::Widget* PersuasionDialog::getDefaultKeyFocus()
     {
         return mAdmireButton;
+    }
+
+    bool PersuasionDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+            onPersuade(mButtons[mControllerFocus]);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancel(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == 0)
+                mControllerFocus = mButtons.size() - 1;
+            else
+                mControllerFocus--;
+            mButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            mButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus == mButtons.size() - 1)
+                mControllerFocus = 0;
+            else
+                mControllerFocus++;
+            mButtons[mControllerFocus]->setStateSelected(true);
+        }
+
+        return true;
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -335,6 +385,9 @@ namespace MWGui
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
             += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
+
+        mControllerButtons.a = "#{sAsk}";
+        mControllerButtons.b = "#{sGoodbye}";
     }
 
     void DialogueWindow::onTradeComplete()
@@ -488,6 +541,14 @@ namespace MWGui
         updateTopics();
         updateTopicsPane(); // force update for new services
 
+        if (Settings::gui().mControllerMenus && !sameActor)
+        {
+            setControllerFocus(mControllerFocus, false);
+            // Reset focus to very top. Maybe change this to mTopicsList->getItemCount() - mKeywords.size()?
+            mControllerFocus = 0;
+            setControllerFocus(mControllerFocus, true);
+        }
+
         updateDisposition();
         restock();
     }
@@ -601,6 +662,9 @@ namespace MWGui
 
         redrawTopicsList();
         updateHistory();
+
+        if (Settings::gui().mControllerMenus)
+            setControllerFocus(mControllerFocus, true);
     }
 
     void DialogueWindow::updateHistory(bool scrollbar)
@@ -847,4 +911,75 @@ namespace MWGui
             && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }
 
+    void DialogueWindow::setControllerFocus(int index, bool focused)
+    {
+        // List is mTopicsList + "Goodbye" button below the list.
+        if (index < 0 || index > mTopicsList->getItemCount())
+            return;
+
+        if (index == mTopicsList->getItemCount())
+        {
+            mGoodbyeButton->setStateSelected(focused);
+        }
+        else {
+            std::string keyword = mTopicsList->getItemNameAt(mControllerFocus);
+            if (keyword.length() == 0)
+                return;
+
+            MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
+            button->setStateSelected(focused);
+        }
+
+        if (focused)
+        {
+            // Scroll the side bar to keep the active item in view
+            if (index <= 5)
+                mTopicsList->setViewOffset(0);
+            else
+                mTopicsList->setViewOffset(-20 * (index - 5));
+        }
+    }
+
+    bool DialogueWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus == mTopicsList->getItemCount())
+                onGoodbyeActivated();
+            else
+                onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onGoodbyeActivated();
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            // Number of items is mTopicsList.length+1 because of "Goodbye" button.
+            setControllerFocus(mControllerFocus, false);
+            if (mControllerFocus <= 0)
+                mControllerFocus = mTopicsList->getItemCount();
+            else if (mTopicsList->getItemNameAt(mControllerFocus - 1).length() == 0)
+                mControllerFocus -= 2; // Skip separator
+            else
+                mControllerFocus--;
+            setControllerFocus(mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            // Number of items is mTopicsList.length+1 because of "Goodbye" button.
+            setControllerFocus(mControllerFocus, false);
+            if (mControllerFocus >= mTopicsList->getItemCount())
+                mControllerFocus = 0;
+            else if (mControllerFocus == mTopicsList->getItemCount() - 1)
+                mControllerFocus = mTopicsList->getItemCount();
+            else if (mTopicsList->getItemNameAt(mControllerFocus + 1).length() == 0)
+                mControllerFocus += 2; // Skip separator
+            else
+                mControllerFocus++;
+            setControllerFocus(mControllerFocus, true);
+        }
+
+        return true;
+    }
 }
