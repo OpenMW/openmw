@@ -525,6 +525,7 @@ namespace MWGui
             else
                 index++;
             mCharacterSelection->setIndexSelected(index);
+            onCharacterSelected(mCharacterSelection, index);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
