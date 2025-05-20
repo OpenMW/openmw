@@ -36,6 +36,8 @@ namespace Debug
 
     Level getDebugLevel();
 
+    Level getRecastMaxLogLevel();
+
     // Redirect cout and cerr to the log file
     void setupLogging(const std::filesystem::path& logDir, std::string_view appName);
 

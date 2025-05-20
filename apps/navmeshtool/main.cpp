@@ -62,8 +62,6 @@ namespace NavMeshTool
 
         bpo::options_description makeOptionsDescription()
         {
-            using Fallback::FallbackMap;
-
             bpo::options_description result;
             auto addOption = result.add_options();
             addOption("help", "print help message");
@@ -225,7 +223,8 @@ namespace NavMeshTool
             Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, &bgsmFileManager, expiryDelay);
             Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
             DetourNavigator::RecastGlobalAllocator::init();
-            DetourNavigator::Settings navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
+            DetourNavigator::Settings navigatorSettings
+                = DetourNavigator::makeSettingsFromSettingsManager(Debug::getRecastMaxLogLevel());
             navigatorSettings.mRecast.mSwimHeightScale
                 = EsmLoader::getGameSetting(esmData.mGameSettings, "fSwimHeightScale").getFloat();
 

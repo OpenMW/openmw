@@ -71,7 +71,8 @@ namespace MWLua
             {
                 SelfObject* obj = mObject.asSelfObject();
                 addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &ItemData::setValue, std::monostate{}, prop }] = value;
+                obj->mStatsCache[SelfObject::CachedStat{ &ItemData::setValue, std::monostate{}, prop }]
+                    = sol::main_object(value);
             }
             else
                 throw std::runtime_error("Only global or self scripts can set the value");

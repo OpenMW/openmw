@@ -219,7 +219,7 @@ namespace MWWorld
                 return false;
 
             if (mMergedRefsNeedsUpdate)
-                updateMergedRefs();
+                updateMergedRefs(includeDeleted);
             if (mMergedRefs.empty())
                 return true;
 
@@ -248,7 +248,7 @@ namespace MWWorld
                 return false;
 
             if (mMergedRefsNeedsUpdate)
-                updateMergedRefs();
+                updateMergedRefs(includeDeleted);
 
             for (const LiveCellRefBase* mergedRef : mMergedRefs)
             {
@@ -273,7 +273,7 @@ namespace MWWorld
                 return false;
 
             if (mMergedRefsNeedsUpdate)
-                updateMergedRefs();
+                updateMergedRefs(includeDeleted);
             if (mMergedRefs.empty())
                 return true;
 
@@ -403,7 +403,7 @@ namespace MWWorld
 
         /// Repopulate mMergedRefs.
         void requestMergedRefsUpdate();
-        void updateMergedRefs() const;
+        void updateMergedRefs(bool includeDeleted = false) const;
 
         // (item, max charge)
         typedef std::vector<std::pair<LiveCellRefBase*, float>> TRechargingItems;

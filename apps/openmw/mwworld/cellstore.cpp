@@ -337,13 +337,13 @@ namespace
 
     // helper function for forEachInternal
     template <class Visitor, class List>
-    bool forEachImp(Visitor& visitor, List& list, MWWorld::CellStore* cellStore)
+    bool forEachImp(Visitor& visitor, List& list, MWWorld::CellStore& cellStore, bool includeDeleted)
     {
-        for (typename List::List::iterator iter(list.mList.begin()); iter != list.mList.end(); ++iter)
+        for (auto& v : list.mList)
         {
-            if (!MWWorld::CellStore::isAccessible(iter->mData, iter->mRef))
+            if (!includeDeleted && !MWWorld::CellStore::isAccessible(v.mData, v.mRef))
                 continue;
-            if (!visitor(MWWorld::Ptr(&*iter, cellStore)))
+            if (!visitor(MWWorld::Ptr(&v, &cellStore)))
                 return false;
         }
         return true;
@@ -399,12 +399,12 @@ namespace MWWorld
         // listing only objects owned by this cell. Internal use only, you probably want to use forEach() so that moved
         // objects are accounted for.
         template <class Visitor>
-        static bool forEachInternal(Visitor& visitor, MWWorld::CellStore& cellStore)
+        static bool forEachInternal(Visitor& visitor, MWWorld::CellStore& cellStore, bool includeDeleted)
         {
             bool returnValue = true;
 
-            Misc::tupleForEach(cellStore.mCellStoreImp->mRefLists, [&visitor, &returnValue, &cellStore](auto& store) {
-                returnValue = returnValue && forEachImp(visitor, store, &cellStore);
+            Misc::tupleForEach(cellStore.mCellStoreImp->mRefLists, [&](auto& store) {
+                returnValue = returnValue && forEachImp(visitor, store, cellStore, includeDeleted);
             });
 
             return returnValue;
@@ -583,11 +583,11 @@ namespace MWWorld
         mMergedRefsNeedsUpdate = true;
     }
 
-    void CellStore::updateMergedRefs() const
+    void CellStore::updateMergedRefs(bool includeDeleted) const
     {
         mMergedRefs.clear();
         MergeVisitor visitor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
-        CellStoreImp::forEachInternal(visitor, const_cast<CellStore&>(*this));
+        CellStoreImp::forEachInternal(visitor, const_cast<CellStore&>(*this), includeDeleted);
         visitor.merge();
         mMergedRefsNeedsUpdate = false;
     }

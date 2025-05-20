@@ -106,94 +106,96 @@ namespace Debug
         logListener = std::move(listener);
     }
 
-    class DebugOutputBase : public boost::iostreams::sink
-    {
-    public:
-        virtual std::streamsize write(const char* str, std::streamsize size)
-        {
-            if (size <= 0)
-                return size;
-            std::string_view msg{ str, static_cast<size_t>(size) };
-
-            // Skip debug level marker
-            Level level = All;
-            if (Log::sWriteLevel)
-            {
-                level = getLevelMarker(msg[0]);
-                msg = msg.substr(1);
-            }
-
-            char prefix[32];
-            std::size_t prefixSize;
-            {
-                prefix[0] = '[';
-                const auto now = std::chrono::system_clock::now();
-                const auto time = std::chrono::system_clock::to_time_t(now);
-                tm time_info{};
-#ifdef _WIN32
-                (void)localtime_s(&time_info, &time);
-#else
-                (void)localtime_r(&time, &time_info);
-#endif
-                prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", &time_info) + 1;
-                char levelLetter = " EWIVD*"[int(level)];
-                const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-                prefixSize += snprintf(prefix + prefixSize, sizeof(prefix) - prefixSize, ".%03u %c] ",
-                    static_cast<unsigned>(ms % 1000), levelLetter);
-            }
-
-            while (!msg.empty())
-            {
-                if (msg[0] == 0)
-                    break;
-                size_t lineSize = 1;
-                while (lineSize < msg.size() && msg[lineSize - 1] != '\n')
-                    lineSize++;
-                writeImpl(prefix, prefixSize, level);
-                writeImpl(msg.data(), lineSize, level);
-                if (logListener)
-                    logListener(level, std::string_view(prefix, prefixSize), std::string_view(msg.data(), lineSize));
-                msg = msg.substr(lineSize);
-            }
-
-            return size;
-        }
-
-        virtual ~DebugOutputBase() = default;
-
-    protected:
-        static Level getLevelMarker(char marker)
-        {
-            if (0 <= marker && static_cast<unsigned>(marker) < static_cast<unsigned>(All))
-                return static_cast<Level>(marker);
-            return All;
-        }
-
-        virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
-        {
-            return size;
-        }
-    };
-
-#if defined _WIN32 && defined _DEBUG
-    class DebugOutput : public DebugOutputBase
-    {
-    public:
-        std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
-        {
-            // Make a copy for null termination
-            std::string tmp(str, static_cast<unsigned int>(size));
-            // Write string to Visual Studio Debug output
-            OutputDebugString(tmp.c_str());
-            return size;
-        }
-
-        virtual ~DebugOutput() = default;
-    };
-#else
-
     namespace
     {
+        class DebugOutputBase : public boost::iostreams::sink
+        {
+        public:
+            virtual std::streamsize write(const char* str, std::streamsize size)
+            {
+                if (size <= 0)
+                    return size;
+                std::string_view msg{ str, static_cast<size_t>(size) };
+
+                // Skip debug level marker
+                Level level = All;
+                if (Log::sWriteLevel)
+                {
+                    level = getLevelMarker(msg[0]);
+                    msg = msg.substr(1);
+                }
+
+                char prefix[32];
+                std::size_t prefixSize;
+                {
+                    prefix[0] = '[';
+                    const auto now = std::chrono::system_clock::now();
+                    const auto time = std::chrono::system_clock::to_time_t(now);
+                    tm time_info{};
+#ifdef _WIN32
+                    (void)localtime_s(&time_info, &time);
+#else
+                    (void)localtime_r(&time, &time_info);
+#endif
+                    prefixSize = std::strftime(prefix + 1, sizeof(prefix) - 1, "%T", &time_info) + 1;
+                    char levelLetter = " EWIVD*"[int(level)];
+                    const auto ms
+                        = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+                    prefixSize += snprintf(prefix + prefixSize, sizeof(prefix) - prefixSize, ".%03u %c] ",
+                        static_cast<unsigned>(ms % 1000), levelLetter);
+                }
+
+                while (!msg.empty())
+                {
+                    if (msg[0] == 0)
+                        break;
+                    size_t lineSize = 1;
+                    while (lineSize < msg.size() && msg[lineSize - 1] != '\n')
+                        lineSize++;
+                    writeImpl(prefix, prefixSize, level);
+                    writeImpl(msg.data(), lineSize, level);
+                    if (logListener)
+                        logListener(
+                            level, std::string_view(prefix, prefixSize), std::string_view(msg.data(), lineSize));
+                    msg = msg.substr(lineSize);
+                }
+
+                return size;
+            }
+
+            virtual ~DebugOutputBase() = default;
+
+        protected:
+            static Level getLevelMarker(char marker)
+            {
+                if (0 <= marker && static_cast<unsigned>(marker) < static_cast<unsigned>(All))
+                    return static_cast<Level>(marker);
+                return All;
+            }
+
+            virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
+            {
+                return size;
+            }
+        };
+
+#if defined _WIN32 && defined _DEBUG
+        class DebugOutput : public DebugOutputBase
+        {
+        public:
+            std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
+            {
+                // Make a copy for null termination
+                std::string tmp(str, static_cast<unsigned int>(size));
+                // Write string to Visual Studio Debug output
+                OutputDebugString(tmp.c_str());
+                return size;
+            }
+
+            virtual ~DebugOutput() = default;
+        };
+#else
+
         struct Record
         {
             std::string mValue;
@@ -324,22 +326,38 @@ namespace Debug
             First mFirst;
             Second mSecond;
         };
-    }
 #endif
 
-    static std::unique_ptr<std::ostream> rawStdout = nullptr;
-    static std::unique_ptr<std::ostream> rawStderr = nullptr;
-    static std::unique_ptr<std::mutex> rawStderrMutex = nullptr;
-    static std::ofstream logfile;
+        Level toLevel(std::string_view value)
+        {
+            if (value == "ERROR")
+                return Error;
+            if (value == "WARNING")
+                return Warning;
+            if (value == "INFO")
+                return Info;
+            if (value == "VERBOSE")
+                return Verbose;
+            if (value == "DEBUG")
+                return Debug;
+
+            return Verbose;
+        }
+
+        static std::unique_ptr<std::ostream> rawStdout = nullptr;
+        static std::unique_ptr<std::ostream> rawStderr = nullptr;
+        static std::unique_ptr<std::mutex> rawStderrMutex = nullptr;
+        static std::ofstream logfile;
 
 #if defined(_WIN32) && defined(_DEBUG)
-    static boost::iostreams::stream_buffer<DebugOutput> sb;
+        static boost::iostreams::stream_buffer<DebugOutput> sb;
 #else
-    static boost::iostreams::stream_buffer<Tee<Identity, Coloured>> standardOut;
-    static boost::iostreams::stream_buffer<Tee<Identity, Coloured>> standardErr;
-    static boost::iostreams::stream_buffer<Tee<Buffer, Coloured>> bufferedOut;
-    static boost::iostreams::stream_buffer<Tee<Buffer, Coloured>> bufferedErr;
+        static boost::iostreams::stream_buffer<Tee<Identity, Coloured>> standardOut;
+        static boost::iostreams::stream_buffer<Tee<Identity, Coloured>> standardErr;
+        static boost::iostreams::stream_buffer<Tee<Buffer, Coloured>> bufferedOut;
+        static boost::iostreams::stream_buffer<Tee<Buffer, Coloured>> bufferedErr;
 #endif
+    }
 
     std::ostream& getRawStdout()
     {
@@ -359,21 +377,17 @@ namespace Debug
     Level getDebugLevel()
     {
         if (const char* env = getenv("OPENMW_DEBUG_LEVEL"))
-        {
-            const std::string_view value(env);
-            if (value == "ERROR")
-                return Error;
-            if (value == "WARNING")
-                return Warning;
-            if (value == "INFO")
-                return Info;
-            if (value == "VERBOSE")
-                return Verbose;
-            if (value == "DEBUG")
-                return Debug;
-        }
+            return toLevel(env);
 
         return Verbose;
+    }
+
+    Level getRecastMaxLogLevel()
+    {
+        if (const char* env = getenv("OPENMW_RECAST_MAX_LOG_LEVEL"))
+            return toLevel(env);
+
+        return Error;
     }
 
     void setupLogging(const std::filesystem::path& logDir, std::string_view appName)

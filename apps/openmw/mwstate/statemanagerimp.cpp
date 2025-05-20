@@ -706,10 +706,10 @@ void MWState::StateManager::quickLoad()
 void MWState::StateManager::deleteGame(const MWState::Character* character, const MWState::Slot* slot)
 {
     const std::filesystem::path savePath = slot->mPath;
-    mCharacterManager.deleteSlot(character, slot);
+    mCharacterManager.deleteSlot(slot, character);
     if (mLastSavegame == savePath)
     {
-        if (character->begin() != character->end())
+        if (character != nullptr)
             mLastSavegame = character->begin()->mPath;
         else
             mLastSavegame.clear();
@@ -757,12 +757,14 @@ void MWState::StateManager::update(float duration)
 
     if (mNewGameRequest)
     {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_MainMenu);
         newGame();
         mNewGameRequest = false;
     }
 
     if (mLoadRequest)
     {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_MainMenu);
         loadGame(*mLoadRequest);
         mLoadRequest = std::nullopt;
     }

@@ -88,4 +88,31 @@ namespace
             EXPECT_EQ(reader->getFileOffset(), sInitialOffset);
         }
     }
+
+    TEST_F(ESM3ReadersCacheWithContentFile, CachedSizeAndName)
+    {
+        ESM::ReadersCache readers(2);
+        {
+            readers.get(0)->openRaw(std::make_unique<std::istringstream>("123"), "closed0.omwaddon");
+            readers.get(1)->openRaw(std::make_unique<std::istringstream>("12345"), "closed1.omwaddon");
+            readers.get(2)->openRaw(std::make_unique<std::istringstream>("1234567"), "free.omwaddon");
+        }
+        auto busy = readers.get(3);
+        busy->openRaw(std::make_unique<std::istringstream>("123456789"), "busy.omwaddon");
+
+        EXPECT_EQ(readers.getFileSize(0), 3);
+        EXPECT_EQ(readers.getName(0), "closed0.omwaddon");
+
+        EXPECT_EQ(readers.getFileSize(1), 5);
+        EXPECT_EQ(readers.getName(1), "closed1.omwaddon");
+
+        EXPECT_EQ(readers.getFileSize(2), 7);
+        EXPECT_EQ(readers.getName(2), "free.omwaddon");
+
+        EXPECT_EQ(readers.getFileSize(3), 9);
+        EXPECT_EQ(readers.getName(3), "busy.omwaddon");
+
+        // not-yet-seen indices give zero for their size
+        EXPECT_EQ(readers.getFileSize(4), 0);
+    }
 }

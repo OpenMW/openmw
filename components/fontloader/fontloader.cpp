@@ -227,9 +227,10 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor, bool exportFonts)
         : mVFS(vfs)
         , mScalingFactor(scalingFactor)
+        , mExportFonts(exportFonts)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
@@ -363,8 +364,8 @@ namespace Gui
         Point bottom_right;
         float width;
         float height;
-        float u2; // appears unused, always 0
-        float kerning;
+        float kerningLeft;
+        float kerningRight;
         float ascent;
     } GlyphInfo;
 
@@ -407,7 +408,8 @@ namespace Gui
         file.reset();
 
         // Create the font texture
-        std::string bitmapFilename = "fonts/" + std::string(name_) + ".tex";
+        const std::string name(name_);
+        const std::string bitmapFilename = "fonts/" + name + ".tex";
 
         Files::IStreamPtr bitmapFile = mVFS->get(bitmapFilename);
 
@@ -425,8 +427,22 @@ namespace Gui
         textureData.resize(width * height * 4);
         bitmapFile->read(textureData.data(), width * height * 4);
         if (!bitmapFile->good())
-            fail(*bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+            Log(Debug::Warning) << "Font bitmap " << bitmapFilename << " ended prematurely, using partial data ("
+                                << bitmapFile->gcount() << "/" << (width * height * 4) << " bytes)";
         bitmapFile.reset();
+
+        if (mExportFonts)
+        {
+            osg::ref_ptr<osg::Image> image = new osg::Image;
+            image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+            assert(image->isDataContiguous());
+            memcpy(image->data(), textureData.data(), textureData.size());
+            // Convert to OpenGL origin for sensible output
+            image->flipVertical();
+
+            Log(Debug::Info) << "Writing " << name + ".png";
+            osgDB::writeImageFile(*image, name + ".png");
+        }
 
         MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture(bitmapFilename);
         tex->createManual(width, height, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
@@ -465,7 +481,7 @@ namespace Gui
         // € (Euro Sign, 0x80/U+20AC) is replaced with underscore
         // 0x81 (unused) is replaced with underscore
         additional.emplace(44, 0x201A); // ‚ (Single Low-9 Quotation Mark, 0x82) => , (comma)
-        additional.emplace(102, 0x0192); // ƒ (Latin Small Letter F with Hook, 0x83) => f (latin small F) (custom)
+        // ƒ (Latin Small Letter F with Hook, 0x83) is unavailable, not replaced
         additional.emplace(44, 0x201E); // „ (Double Low-9 Quotation Mark, 0x84) => , (comma)
         additional.emplace(46, 0x2026); // … (Horizontal Ellipsis, 0x85) => . (period)
         additional.emplace(43, 0x2020); // † (Dagger, 0x86) => + (plus sign)
@@ -500,7 +516,7 @@ namespace Gui
         // £ (Pound Sign, 0xA3) is available but its glyph looks like œ (small oe ligature)
         omitted.push_back(0x00A4); // ¤ (Currency Sign)
         // ¥ (Yen Sign, 0xA5) is unavailable, not replaced
-        // ¦ (Broken Bar, 0xA6) is unavailable, not replaced
+        additional.emplace(221, 0x00A6); // ¦ (Broken Bar, 0xA6) => ▌
         omitted.push_back(0x00A7); // § (Section Sign)
         additional.emplace(34, 0x00A8); // ¨ (Diaeresis) => " (double quote mark)
         additional.emplace(99, 0x00A9); // © (Copyright Sign) => c (latin small C)
@@ -512,7 +528,7 @@ namespace Gui
         additional.emplace(95, 0x00AF); // ¯ (Macron) => _ (underscore)
         // ° (Degree Sign, 0xB0) is unavailable, not replaced
         // ± (Plus-Minus Sign, 0xB1) is unavailable, not replaced
-        additional.emplace(50, 0x00B2); // ² (Superscript Two) => 2 (two digit) (custom)
+        // ² (Superscript Two, 0xB2) is unavailable, not replaced
         additional.emplace(51, 0x00B3); // ³ (Superscript Three) => 3 (three digit)
         additional.emplace(39, 0x00B4); // ´ (Acute Accent) => ' (apostrophe)
         // µ (Micro Sign, 0xB5) is unavailable, not replaced
@@ -532,7 +548,7 @@ namespace Gui
         additional.emplace(65, 0x00C3); // Ã (Latin Capital Letter A with Tilde) => A (latin capital A)
         // Ä (Latin Capital Letter A with Diaeresis, 0xC4) is available
         // Å (Latin Capital Letter A with Ring Above, 0xC5) is available
-        additional.emplace(65, 0x00C6); // Æ (Latin Capital Letter Ae) => A (latin capital A) (custom)
+        // Æ (Latin Capital Letter Ae, 0xC6) is unavailable, not replaced
         // Ç (Latin Capital Letter C with Cedilla, 0xC7) is available
         additional.emplace(69, 0x00C8); // È (Latin Capital Letter E with Grave) => E (latin capital E)
         // É (Latin Capital Letter E with Acute, 0xC9) is available
@@ -543,7 +559,7 @@ namespace Gui
         additional.emplace(73, 0x00CE); // Î (Latin Capital Letter I with Circumflex) => I (latin capital I)
         additional.emplace(73, 0x00CF); // Ï (Latin Capital Letter I with Diaeresis) => I (latin capital I)
         additional.emplace(68, 0x00D0); // Ð (Latin Capital Letter Eth) => D (latin capital D)
-        additional.emplace(78, 0x00D1); // Ñ (Latin Capital Letter N with Tilde) => N (latin capital N) (custom)
+        // Ñ (Latin Capital Letter N with Tilde, 0xD1) is unavailable, not replaced
         additional.emplace(79, 0x00D2); // Ò (Latin Capital Letter O with Grave) => O (latin capital O)
         additional.emplace(79, 0x00D3); // Ó (Latin Capital Letter O with Acute) => O (latin capital O)
         additional.emplace(79, 0x00D4); // Ô (Latin Capital Letter O with Circumflex) => O (latin capital O)
@@ -556,13 +572,24 @@ namespace Gui
         additional.emplace(85, 0x00DB); // Û (Latin Capital Letter U with Circumflex) => U (latin capital U)
         // Ü (Latin Capital Letter U with Diaeresis, 0xDC) is available
         additional.emplace(89, 0x00DD); // Ý (Latin Capital Letter Y with Acute) => Y (latin capital Y)
-        // 0xDE to 0xFF are not replaced
+        // 0xDE to 0xFF are generally not replaced with certain exceptions
+        additional.emplace(97, 0x00E3); // ã (Latin Small Letter A with Tilde) => a (latin small A)
+        additional.emplace(100, 0x00F0); // ð (Latin Small Letter Eth) => d (latin small D)
+        additional.emplace(111, 0x00F5); // õ (Latin Small Letter O with Tilde) => o (latin small O)
+        additional.emplace(111, 0x00F8); // ø (Latin Small Letter O with Stroke) => o (latin small O)
+        additional.emplace(121, 0x00FD); // ý (Latin Small Letter Y with Acute) => y (latin small Y)
 
         // Russian Morrowind which uses Win-1251 encoding only does equivalent (often garbage) Win-1252 replacements
         // However, we'll provide custom replacements for Cyrillic io letters
         // These letters aren't a part of any content but they are printable
         additional.emplace(69, 0x0401); // Ё (Cyrillic Capital Letter Io) => E (latin capital E)
         additional.emplace(137, 0x0451); // ё (Cyrillic Small Letter Io) => ë (latin small E-diaeresis)
+
+        // ASCII vertical bar, use this as text input cursor
+        additional.emplace(124, MyGUI::FontCodeType::Cursor);
+
+        // Underscore, use for NotDefined marker (used for glyphs not existing in the font)
+        additional.emplace(95, MyGUI::FontCodeType::NotDefined);
 
         for (int i = 0; i < 256; i++)
         {
@@ -573,64 +600,31 @@ namespace Gui
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
             unsigned long unicodeVal = getUnicode(i, encoder, mEncoding);
+            const std::string coord = MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
+                + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h);
+            float advance = data[i].width + data[i].kerningRight;
+            // Yes MyGUI, we really do want an advance of 0 sometimes, thank you.
+            if (advance == 0.f && data[i].width != 0.f)
+                advance = std::numeric_limits<float>::min();
+            const std::string bearing = MyGUI::utility::toString(data[i].kerningLeft) + ' '
+                + MyGUI::utility::toString((fontSize - data[i].ascent));
+            const MyGUI::IntSize size(static_cast<int>(data[i].width), static_cast<int>(data[i].height));
 
             MyGUI::xml::ElementPtr code = codes->createChild("Code");
             code->addAttribute("index", unicodeVal);
-            code->addAttribute("coord",
-                MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " " + MyGUI::utility::toString(w)
-                    + " " + MyGUI::utility::toString(h));
-            code->addAttribute("advance", data[i].width);
-            code->addAttribute("bearing",
-                MyGUI::utility::toString(data[i].kerning) + " "
-                    + MyGUI::utility::toString((fontSize - data[i].ascent)));
-            code->addAttribute(
-                "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+            code->addAttribute("coord", coord);
+            code->addAttribute("advance", advance);
+            code->addAttribute("bearing", bearing);
+            code->addAttribute("size", size);
 
             for (auto [it, end] = additional.equal_range(i); it != end; ++it)
             {
                 code = codes->createChild("Code");
                 code->addAttribute("index", it->second);
-                code->addAttribute("coord",
-                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
-                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
-                code->addAttribute("advance", data[i].width);
-                code->addAttribute("bearing",
-                    MyGUI::utility::toString(data[i].kerning) + " "
-                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
-                code->addAttribute(
-                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
-            }
-
-            // ASCII vertical bar, use this as text input cursor
-            if (i == 124)
-            {
-                MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
-                cursorCode->addAttribute("index", MyGUI::FontCodeType::Cursor);
-                cursorCode->addAttribute("coord",
-                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
-                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
-                cursorCode->addAttribute("advance", data[i].width);
-                cursorCode->addAttribute("bearing",
-                    MyGUI::utility::toString(data[i].kerning) + " "
-                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
-                cursorCode->addAttribute(
-                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
-            }
-
-            // Underscore, use for NotDefined marker (used for glyphs not existing in the font)
-            if (i == 95)
-            {
-                MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
-                cursorCode->addAttribute("index", MyGUI::FontCodeType::NotDefined);
-                cursorCode->addAttribute("coord",
-                    MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
-                        + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h));
-                cursorCode->addAttribute("advance", data[i].width);
-                cursorCode->addAttribute("bearing",
-                    MyGUI::utility::toString(data[i].kerning) + " "
-                        + MyGUI::utility::toString((fontSize - data[i].ascent)));
-                cursorCode->addAttribute(
-                    "size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
+                code->addAttribute("coord", coord);
+                code->addAttribute("advance", advance);
+                code->addAttribute("bearing", bearing);
+                code->addAttribute("size", size);
             }
         }
 
@@ -639,12 +633,19 @@ namespace Gui
         omitted.push_back(MyGUI::FontCodeType::SelectedBack);
         for (const UnicodeIndex index : omitted)
         {
-            MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");
-            cursorCode->addAttribute("index", index);
-            cursorCode->addAttribute("coord", "0 0 0 0");
-            cursorCode->addAttribute("advance", "0");
-            cursorCode->addAttribute("bearing", "0 0");
-            cursorCode->addAttribute("size", "0 0");
+            MyGUI::xml::ElementPtr code = codes->createChild("Code");
+            code->addAttribute("index", index);
+            code->addAttribute("coord", "0 0 0 0");
+            code->addAttribute("advance", "0");
+            code->addAttribute("bearing", "0 0");
+            code->addAttribute("size", "0 0");
+        }
+
+        if (mExportFonts)
+        {
+            Log(Debug::Info) << "Writing " << name + ".xml";
+            xmlDocument.createDeclaration();
+            xmlDocument.save(name + ".xml");
         }
 
         // Register the font with MyGUI

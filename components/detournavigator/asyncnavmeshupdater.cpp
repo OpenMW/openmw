@@ -453,9 +453,9 @@ namespace DetourNavigator
         Misc::setCurrentThreadIdlePriority();
         while (!mShouldStop)
         {
-            try
+            if (JobIt job = getNextJob(); job != mJobs.end())
             {
-                if (JobIt job = getNextJob(); job != mJobs.end())
+                try
                 {
                     const JobStatus status = processJob(*job);
                     Log(Debug::Debug) << "Processed job " << job->mId << " with status=" << status
@@ -480,12 +480,20 @@ namespace DetourNavigator
                         }
                     }
                 }
-                else
-                    cleanupLastUpdates();
+                catch (const std::exception& e)
+                {
+                    Log(Debug::Warning) << "Failed to process navmesh job " << job->mId
+                                        << " for worldspace=" << job->mWorldspace << " agent=" << job->mAgentBounds
+                                        << " changedTile=(" << job->mChangedTile << ")"
+                                        << " changeType=" << job->mChangeType
+                                        << " by thread=" << std::this_thread::get_id() << ": " << e.what();
+                    unlockTile(job->mId, job->mAgentBounds, job->mChangedTile);
+                    removeJob(job);
+                }
             }
-            catch (const std::exception& e)
+            else
             {
-                Log(Debug::Error) << "AsyncNavMeshUpdater::process exception: " << e.what();
+                cleanupLastUpdates();
             }
         }
         Log(Debug::Debug) << "Stop navigator jobs processing by thread=" << std::this_thread::get_id();
@@ -493,7 +501,8 @@ namespace DetourNavigator
 
     JobStatus AsyncNavMeshUpdater::processJob(Job& job)
     {
-        Log(Debug::Debug) << "Processing job " << job.mId << " for agent=(" << job.mAgentBounds << ")"
+        Log(Debug::Debug) << "Processing job " << job.mId << "  for worldspace=" << job.mWorldspace
+                          << " agent=" << job.mAgentBounds << ""
                           << " changedTile=(" << job.mChangedTile << ")"
                           << " changeType=" << job.mChangeType << " by thread=" << std::this_thread::get_id();
 
@@ -543,7 +552,14 @@ namespace DetourNavigator
             return JobStatus::Done;
         }
 
-        writeDebugRecastMesh(mSettings, job.mChangedTile, *recastMesh);
+        try
+        {
+            writeDebugRecastMesh(mSettings, job.mChangedTile, *recastMesh);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Warning) << "Failed to write debug recast mesh: " << e.what();
+        }
 
         NavMeshTilesCache::Value cachedNavMeshData
             = mNavMeshTilesCache.get(job.mAgentBounds, job.mChangedTile, *recastMesh);
@@ -666,12 +682,19 @@ namespace DetourNavigator
             mPresentTiles.insert(std::make_tuple(job.mAgentBounds, job.mChangedTile));
         }
 
-        writeDebugNavMesh(mSettings, navMeshCacheItem, navMeshVersion);
+        try
+        {
+            writeDebugNavMesh(mSettings, navMeshCacheItem, navMeshVersion);
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Warning) << "Failed to write debug navmesh: " << e.what();
+        }
 
         return isSuccess(status) ? JobStatus::Done : JobStatus::Fail;
     }
 
-    JobIt AsyncNavMeshUpdater::getNextJob()
+    JobIt AsyncNavMeshUpdater::getNextJob() noexcept
     {
         std::unique_lock<std::mutex> lock(mMutex);
 
@@ -746,7 +769,7 @@ namespace DetourNavigator
         return mJobs.size();
     }
 
-    void AsyncNavMeshUpdater::cleanupLastUpdates()
+    void AsyncNavMeshUpdater::cleanupLastUpdates() noexcept
     {
         const auto now = std::chrono::steady_clock::now();
 

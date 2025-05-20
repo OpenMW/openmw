@@ -10,6 +10,7 @@
 #include <components/vfs/pathutil.hpp>
 
 #include "configuration.hpp"
+#include "luastateptr.hpp"
 
 namespace VFS
 {
@@ -148,8 +149,8 @@ namespace LuaUtil
         //         should be either a sol::table or a sol::function. If it is a function, it will be evaluated
         //         (once per sandbox) with the argument 'hiddenData' the first time when requested.
         sol::protected_function_result runInNewSandbox(const VFS::Path::Normalized& path,
-            const std::string& envName = "unnamed", const std::map<std::string, sol::object>& packages = {},
-            const sol::object& hiddenData = sol::nil);
+            const std::string& envName = "unnamed", const std::map<std::string, sol::main_object>& packages = {},
+            const sol::main_object& hiddenData = sol::nil);
 
         void dropScriptCache() { mCompiledScripts.clear(); }
 
@@ -188,7 +189,7 @@ namespace LuaUtil
         static void countHook(lua_State* L, lua_Debug* ar);
         static void* trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 
-        lua_State* createLuaRuntime(LuaState* luaState);
+        static LuaStatePtr createLuaRuntime(LuaState* luaState);
 
         struct AllocOwner
         {
@@ -206,25 +207,8 @@ namespace LuaUtil
         uint64_t mSmallAllocMemoryUsage = 0;
         std::vector<int64_t> mMemoryUsage;
 
-        class LuaStateHolder
-        {
-        public:
-            LuaStateHolder(lua_State* L)
-                : L(L)
-            {
-                sol::set_default_state(L);
-            }
-            ~LuaStateHolder() { lua_close(L); }
-            LuaStateHolder(const LuaStateHolder&) = delete;
-            LuaStateHolder(LuaStateHolder&&) = delete;
-            lua_State* get() { return L; }
-
-        private:
-            lua_State* L;
-        };
-
         // Must be declared before mSol and all sol-related objects. Then on exit it will be destructed the last.
-        LuaStateHolder mLuaHolder;
+        LuaStatePtr mLuaState;
 
         sol::state_view mSol;
         const ScriptsConfiguration* mConf;

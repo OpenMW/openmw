@@ -50,10 +50,10 @@ namespace LuaUi
         void setCallback(const std::string&, const LuaUtil::Callback&);
         void clearCallbacks();
 
-        void setProperties(const sol::object& props);
-        void setTemplateProperties(const sol::object& props) { mTemplateProperties = props; }
+        void setProperties(const sol::main_object& props);
+        void setTemplateProperties(const sol::main_object& props) { mTemplateProperties = props; }
 
-        void setExternal(const sol::object& external) { mExternal = external; }
+        void setExternal(const sol::main_object& external) { mExternal = external; }
 
         MyGUI::IntCoord forcedCoord();
         void forceCoord(const MyGUI::IntCoord& offset);
@@ -63,7 +63,7 @@ namespace LuaUi
 
         virtual void updateCoord();
 
-        const sol::table& getLayout() { return mLayout; }
+        const sol::main_table& getLayout() { return mLayout; }
         void setLayout(const sol::table& layout) { mLayout = layout; }
 
         template <typename T>
@@ -150,10 +150,10 @@ namespace LuaUi
         std::vector<WidgetExtension*> mTemplateChildren;
         WidgetExtension* mSlot;
         std::map<std::string, LuaUtil::Callback, std::less<>> mCallbacks;
-        sol::table mLayout;
-        sol::object mProperties;
-        sol::object mTemplateProperties;
-        sol::object mExternal;
+        sol::main_table mLayout;
+        sol::main_object mProperties;
+        sol::main_object mTemplateProperties;
+        sol::main_object mExternal;
         WidgetExtension* mParent;
         bool mTemplateChild;
         bool mElementRoot;

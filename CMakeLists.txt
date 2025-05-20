@@ -82,7 +82,7 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 49)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 71)
+set(OPENMW_LUA_API_REVISION 73)
 set(OPENMW_POSTPROCESSING_API_REVISION 2)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -595,6 +595,11 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
 
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105438
+        set(OPENMW_CXX_FLAGS "-Wno-array-bounds ${OPENMW_CXX_FLAGS}")
+    endif()
+
     if (APPLE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
@@ -861,7 +866,6 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
         include(BundleUtilities)
-        cmake_minimum_required(VERSION 3.1)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")

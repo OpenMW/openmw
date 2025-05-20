@@ -47,6 +47,7 @@ namespace ESM
                     {
                         it->mReader.open(*it->mName);
                         it->mName.reset();
+                        it->mFileSize.reset();
                     }
                     mBusyItems.splice(mBusyItems.end(), mClosedItems, it);
                     break;
@@ -57,6 +58,46 @@ namespace ESM
         return BusyItem(*this, it);
     }
 
+    const std::filesystem::path& ReadersCache::getName(std::size_t index) const
+    {
+        const auto indexIt = mIndex.find(index);
+        if (indexIt == mIndex.end())
+            throw std::logic_error("ESMReader at index " + std::to_string(index) + " has not been created yet");
+        switch (indexIt->second->mState)
+        {
+            case State::Busy:
+            case State::Free:
+                return indexIt->second->mReader.getName();
+            case State::Closed:
+                if (indexIt->second->mName)
+                    return *indexIt->second->mName;
+                throw std::logic_error("ESMReader at index " + std::to_string(index) + " has forgotten its filename");
+            default:
+                throw std::logic_error("ESMReader at index " + std::to_string(index) + " in unknown state");
+        }
+    }
+
+    std::size_t ReadersCache::getFileSize(std::size_t index)
+    {
+        const auto indexIt = mIndex.find(index);
+        if (indexIt == mIndex.end())
+            return 0;
+        switch (indexIt->second->mState)
+        {
+            case State::Busy:
+            case State::Free:
+                if (!indexIt->second->mReader.getName().empty())
+                    return indexIt->second->mReader.getFileSize();
+                throw std::logic_error("ESMReader at index " + std::to_string(index) + " has not been opened yet");
+            case State::Closed:
+                if (indexIt->second->mFileSize)
+                    return *indexIt->second->mFileSize;
+                throw std::logic_error("ESMReader at index " + std::to_string(index) + " has forgotten its file size");
+            default:
+                throw std::logic_error("ESMReader at index " + std::to_string(index) + " in unknown state");
+        }
+    }
+
     void ReadersCache::closeExtraReaders()
     {
         while (!mFreeItems.empty() && mBusyItems.size() + mFreeItems.size() + 1 > mCapacity)
@@ -65,6 +106,7 @@ namespace ESM
             if (it->mReader.isOpen())
             {
                 it->mName = it->mReader.getName();
+                it->mFileSize = it->mReader.getFileSize();
                 it->mReader.close();
             }
             mClosedItems.splice(mClosedItems.end(), mFreeItems, it);

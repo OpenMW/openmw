@@ -28,8 +28,6 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x
 #include <unistd.h>
 #endif
 
-using namespace Fallback;
-
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
  * to parse configuration files.
@@ -152,9 +150,10 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     engine.setSaveGameFile(variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
 
     // other settings
-    Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
+    Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
+    engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
 
     return true;
@@ -219,6 +218,8 @@ int runApplication(int argc, char* argv[])
     osg::setNotifyHandler(new OSGLogHandler());
     Files::ConfigurationManager cfgMgr;
     std::unique_ptr<OMW::Engine> engine = std::make_unique<OMW::Engine>(cfgMgr);
+
+    engine->setRecastMaxLogLevel(Debug::getRecastMaxLogLevel());
 
     if (parseOptions(argc, argv, *engine, cfgMgr))
     {

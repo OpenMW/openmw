@@ -6,6 +6,7 @@ local input = require('openmw.input')
 local types = require('openmw.types')
 local nearby = require('openmw.nearby')
 local camera = require('openmw.camera')
+local matchers = require('matchers')
 
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Controls, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Fighting, false)
@@ -40,7 +41,7 @@ local function rotateByPitch(object, target)
     rotate(object, target, nil)
 end
 
-testing.registerLocalTest('playerYawRotation',
+testing.registerLocalTest('player yaw rotation',
     function()
         local initialAlphaXZ, initialGammaXZ = self.rotation:getAnglesXZ()
         local initialAlphaZYX, initialBetaZYX, initialGammaZYX = self.rotation:getAnglesZYX()
@@ -60,7 +61,7 @@ testing.registerLocalTest('playerYawRotation',
         testing.expectEqualWithDelta(gamma2, initialGammaZYX, 0.05, 'Gamma rotation in ZYX convention should not change')
     end)
 
-testing.registerLocalTest('playerPitchRotation',
+testing.registerLocalTest('player pitch rotation',
     function()
         local initialAlphaXZ, initialGammaXZ = self.rotation:getAnglesXZ()
         local initialAlphaZYX, initialBetaZYX, initialGammaZYX = self.rotation:getAnglesZYX()
@@ -80,7 +81,7 @@ testing.registerLocalTest('playerPitchRotation',
         testing.expectEqualWithDelta(gamma2, targetPitch, 0.05, 'Incorrect gamma rotation in ZYX convention')
     end)
 
-testing.registerLocalTest('playerPitchAndYawRotation',
+testing.registerLocalTest('player pitch and yaw rotation',
     function()
         local targetPitch = math.rad(-30)
         local targetYaw = math.rad(-60)
@@ -99,7 +100,7 @@ testing.registerLocalTest('playerPitchAndYawRotation',
         testing.expectEqualWithDelta(gamma2, math.rad(-16), 0.05, 'Incorrect gamma rotation in ZYX convention')
     end)
 
-testing.registerLocalTest('playerRotation',
+testing.registerLocalTest('player rotation',
     function()
         local rotation = math.sqrt(2)
         local endTime = core.getSimulationTime() + 3
@@ -113,17 +114,17 @@ testing.registerLocalTest('playerRotation',
             coroutine.yield()
 
             local alpha1, gamma1 = self.rotation:getAnglesXZ()
-            testing.expectThat(alpha1, testing.isNotNan(), 'Alpha rotation in XZ convention is nan')
-            testing.expectThat(gamma1, testing.isNotNan(), 'Gamma rotation in XZ convention is nan')
+            testing.expectThat(alpha1, matchers.isNotNan(), 'Alpha rotation in XZ convention is nan')
+            testing.expectThat(gamma1, matchers.isNotNan(), 'Gamma rotation in XZ convention is nan')
 
             local alpha2, beta2, gamma2 = self.rotation:getAnglesZYX()
-            testing.expectThat(alpha2, testing.isNotNan(), 'Alpha rotation in ZYX convention is nan')
-            testing.expectThat(beta2, testing.isNotNan(), 'Beta rotation in ZYX convention is nan')
-            testing.expectThat(gamma2, testing.isNotNan(), 'Gamma rotation in ZYX convention is nan')
+            testing.expectThat(alpha2, matchers.isNotNan(), 'Alpha rotation in ZYX convention is nan')
+            testing.expectThat(beta2, matchers.isNotNan(), 'Beta rotation in ZYX convention is nan')
+            testing.expectThat(gamma2, matchers.isNotNan(), 'Gamma rotation in ZYX convention is nan')
         end
     end)
 
-testing.registerLocalTest('playerForwardRunning',
+testing.registerLocalTest('player forward running',
     function()
         local startPos = self.position
         local endTime = core.getSimulationTime() + 1
@@ -141,7 +142,7 @@ testing.registerLocalTest('playerForwardRunning',
         testing.expectEqualWithDelta(direction.y, 1, 0.1, 'Run forward, Y coord')
     end)
 
-testing.registerLocalTest('playerDiagonalWalking',
+testing.registerLocalTest('player diagonal walking',
     function()
         local startPos = self.position
         local endTime = core.getSimulationTime() + 1
@@ -220,7 +221,7 @@ testing.registerLocalTest('findNearestNavMeshPosition',
             'Navigation mesh position ' .. testing.formatActualExpected(result, expected))
     end)
 
-testing.registerLocalTest('playerMemoryLimit',
+testing.registerLocalTest('player memory limit',
     function()
         local ok, err = pcall(function()
             local str = 'a'
@@ -232,7 +233,7 @@ testing.registerLocalTest('playerMemoryLimit',
         testing.expectEqual(err, 'not enough memory')
     end)
 
-testing.registerLocalTest('playerWeaponAttack',
+testing.registerLocalTest('player weapon attack',
     function()
         camera.setMode(camera.MODE.ThirdPerson)
 
@@ -315,7 +316,8 @@ testing.registerLocalTest('playerWeaponAttack',
                 self.controls.run = true
                 self.controls.movement = 1
             else
-                destination = targetActor.position
+                local halfExtents = types.Actor.getPathfindingAgentBounds(targetActor).halfExtents
+                destination = targetActor.position - util.vector3(0, 0, halfExtents.z)
 
                 if nextTime < time then
                     if use == 0 then
@@ -345,5 +347,5 @@ return {
     engineHandlers = {
         onFrame = testing.updateLocal,
     },
-    eventHandlers = testing.eventHandlers
+    eventHandlers = testing.localEventHandlers,
 }

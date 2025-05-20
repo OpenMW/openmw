@@ -1695,7 +1695,7 @@ namespace MWRender
                 mGlowUpdater->setColor(color);
                 mGlowUpdater->setDuration(glowDuration);
             }
-            else
+            else if (mObjectRoot)
                 mGlowUpdater = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, color, glowDuration);
         }
     }
@@ -1869,7 +1869,7 @@ namespace MWRender
 
     void Animation::setAlpha(float alpha)
     {
-        if (alpha == mAlpha)
+        if (alpha == mAlpha || !mObjectRoot)
             return;
         mAlpha = alpha;
 

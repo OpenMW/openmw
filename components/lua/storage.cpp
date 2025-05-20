@@ -37,7 +37,7 @@ namespace LuaUtil
     sol::object LuaStorage::Value::getReadOnly(lua_State* L) const
     {
         if (mReadOnlyValue == sol::nil && !mSerializedValue.empty())
-            mReadOnlyValue = deserialize(L, mSerializedValue, nullptr, true);
+            mReadOnlyValue = sol::main_object(deserialize(L, mSerializedValue, nullptr, true));
         return mReadOnlyValue;
     }
 

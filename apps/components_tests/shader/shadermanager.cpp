@@ -16,7 +16,7 @@ namespace
         ShaderManager mManager;
         ShaderManager::DefineMap mDefines;
 
-        ShaderManagerTest() { mManager.setShaderPath("tests_output"); }
+        ShaderManagerTest() { mManager.setShaderPath(TestingOpenMW::outputDir()); }
 
         template <class F>
         void withShaderFile(const std::string& content, F&& f)

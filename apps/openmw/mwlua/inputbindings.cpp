@@ -38,94 +38,116 @@ namespace MWLua
 
     sol::table initInputPackage(const Context& context)
     {
+        sol::object cached = context.getTypePackage("openmw_input");
+        if (cached != sol::nil)
+            return cached;
         sol::state_view lua = context.sol();
-        {
-            if (lua["openmw_input"] != sol::nil)
-                return lua["openmw_input"];
-        }
 
-        sol::usertype<SDL_Keysym> keyEvent = lua.new_usertype<SDL_Keysym>("KeyEvent");
-        keyEvent["symbol"] = sol::readonly_property([](const SDL_Keysym& e) {
-            if (e.sym > 0 && e.sym <= 255)
-                return std::string(1, static_cast<char>(e.sym));
-            else
-                return std::string();
+        context.cachePackage("openmw_input_keyevent", [&lua]() {
+            sol::usertype<SDL_Keysym> keyEvent = lua.new_usertype<SDL_Keysym>("KeyEvent");
+            keyEvent["symbol"] = sol::readonly_property([](const SDL_Keysym& e) {
+                if (e.sym > 0 && e.sym <= 255)
+                    return std::string(1, static_cast<char>(e.sym));
+                else
+                    return std::string();
+            });
+            keyEvent["code"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.scancode; });
+            keyEvent["withShift"]
+                = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_SHIFT; });
+            keyEvent["withCtrl"]
+                = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_CTRL; });
+            keyEvent["withAlt"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_ALT; });
+            keyEvent["withSuper"]
+                = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_GUI; });
+
+            return sol::table(lua, sol::create);
         });
-        keyEvent["code"] = sol::readonly_property([](const SDL_Keysym& e) -> int { return e.scancode; });
-        keyEvent["withShift"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_SHIFT; });
-        keyEvent["withCtrl"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_CTRL; });
-        keyEvent["withAlt"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_ALT; });
-        keyEvent["withSuper"] = sol::readonly_property([](const SDL_Keysym& e) -> bool { return e.mod & KMOD_GUI; });
 
-        auto touchpadEvent = lua.new_usertype<SDLUtil::TouchEvent>("TouchpadEvent");
-        touchpadEvent["device"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mDevice; });
-        touchpadEvent["finger"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mFinger; });
-        touchpadEvent["position"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> osg::Vec2f {
-            return { e.mX, e.mY };
+        context.cachePackage("openmw_input_touchpadevent", [&lua]() {
+            auto touchpadEvent = lua.new_usertype<SDLUtil::TouchEvent>("TouchpadEvent");
+            touchpadEvent["device"]
+                = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mDevice; });
+            touchpadEvent["finger"]
+                = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mFinger; });
+            touchpadEvent["position"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> osg::Vec2f {
+                return { e.mX, e.mY };
+            });
+            touchpadEvent["pressure"]
+                = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> float { return e.mPressure; });
+            return sol::table(lua, sol::create);
         });
-        touchpadEvent["pressure"]
-            = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> float { return e.mPressure; });
 
-        auto inputActions = lua.new_usertype<LuaUtil::InputAction::Registry>("InputActions");
-        inputActions[sol::meta_function::index]
-            = [](LuaUtil::InputAction::Registry& registry, std::string_view key) { return registry[key]; };
-        {
-            auto pairs = [](LuaUtil::InputAction::Registry& registry) {
-                auto next
-                    = [](LuaUtil::InputAction::Registry& registry,
-                          std::string_view key) -> sol::optional<std::tuple<std::string, LuaUtil::InputAction::Info>> {
-                    std::optional<std::string> nextKey(registry.nextKey(key));
-                    if (!nextKey.has_value())
-                        return sol::nullopt;
-                    else
-                        return std::make_tuple(*nextKey, registry[*nextKey].value());
+        context.cachePackage("openmw_input_inputactions", [&lua]() {
+            auto inputActions = lua.new_usertype<LuaUtil::InputAction::Registry>("InputActions");
+            inputActions[sol::meta_function::index]
+                = [](LuaUtil::InputAction::Registry& registry, std::string_view key) { return registry[key]; };
+            {
+                auto pairs = [](LuaUtil::InputAction::Registry& registry) {
+                    auto next = [](LuaUtil::InputAction::Registry& registry, std::string_view key)
+                        -> sol::optional<std::tuple<std::string, LuaUtil::InputAction::Info>> {
+                        std::optional<std::string> nextKey(registry.nextKey(key));
+                        if (!nextKey.has_value())
+                            return sol::nullopt;
+                        else
+                            return std::make_tuple(*nextKey, registry[*nextKey].value());
+                    };
+                    return std::make_tuple(next, registry, registry.firstKey());
                 };
-                return std::make_tuple(next, registry, registry.firstKey());
-            };
-            inputActions[sol::meta_function::pairs] = pairs;
-        }
+                inputActions[sol::meta_function::pairs] = pairs;
+            }
+            return sol::table(lua, sol::create);
+        });
 
-        auto actionInfo = lua.new_usertype<LuaUtil::InputAction::Info>("ActionInfo");
-        actionInfo["key"] = sol::readonly_property(
-            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mKey; });
-        actionInfo["name"] = sol::readonly_property(
-            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mName; });
-        actionInfo["description"] = sol::readonly_property(
-            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mDescription; });
-        actionInfo["l10n"] = sol::readonly_property(
-            [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mL10n; });
-        actionInfo["type"] = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mType; });
-        actionInfo["defaultValue"]
-            = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mDefaultValue; });
+        context.cachePackage("openmw_input_actioninfo", [&lua]() {
+            auto actionInfo = lua.new_usertype<LuaUtil::InputAction::Info>("ActionInfo");
+            actionInfo["key"] = sol::readonly_property(
+                [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mKey; });
+            actionInfo["name"] = sol::readonly_property(
+                [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mName; });
+            actionInfo["description"] = sol::readonly_property(
+                [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mDescription; });
+            actionInfo["l10n"] = sol::readonly_property(
+                [](const LuaUtil::InputAction::Info& info) -> std::string_view { return info.mL10n; });
+            actionInfo["type"]
+                = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mType; });
+            actionInfo["defaultValue"]
+                = sol::readonly_property([](const LuaUtil::InputAction::Info& info) { return info.mDefaultValue; });
+            return sol::table(lua, sol::create);
+        });
 
-        auto inputTriggers = lua.new_usertype<LuaUtil::InputTrigger::Registry>("InputTriggers");
-        inputTriggers[sol::meta_function::index]
-            = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key) { return registry[key]; };
-        {
-            auto pairs = [](LuaUtil::InputTrigger::Registry& registry) {
-                auto next
-                    = [](LuaUtil::InputTrigger::Registry& registry,
-                          std::string_view key) -> sol::optional<std::tuple<std::string, LuaUtil::InputTrigger::Info>> {
-                    std::optional<std::string> nextKey(registry.nextKey(key));
-                    if (!nextKey.has_value())
-                        return sol::nullopt;
-                    else
-                        return std::make_tuple(*nextKey, registry[*nextKey].value());
+        context.cachePackage("openmw_input_inputtriggers", [&lua]() {
+            auto inputTriggers = lua.new_usertype<LuaUtil::InputTrigger::Registry>("InputTriggers");
+            inputTriggers[sol::meta_function::index]
+                = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key) { return registry[key]; };
+            {
+                auto pairs = [](LuaUtil::InputTrigger::Registry& registry) {
+                    auto next = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key)
+                        -> sol::optional<std::tuple<std::string, LuaUtil::InputTrigger::Info>> {
+                        std::optional<std::string> nextKey(registry.nextKey(key));
+                        if (!nextKey.has_value())
+                            return sol::nullopt;
+                        else
+                            return std::make_tuple(*nextKey, registry[*nextKey].value());
+                    };
+                    return std::make_tuple(next, registry, registry.firstKey());
                 };
-                return std::make_tuple(next, registry, registry.firstKey());
-            };
-            inputTriggers[sol::meta_function::pairs] = pairs;
-        }
+                inputTriggers[sol::meta_function::pairs] = pairs;
+            }
+            return sol::table(lua, sol::create);
+        });
 
-        auto triggerInfo = lua.new_usertype<LuaUtil::InputTrigger::Info>("TriggerInfo");
-        triggerInfo["key"] = sol::readonly_property(
-            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mKey; });
-        triggerInfo["name"] = sol::readonly_property(
-            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mName; });
-        triggerInfo["description"] = sol::readonly_property(
-            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mDescription; });
-        triggerInfo["l10n"] = sol::readonly_property(
-            [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mL10n; });
+        context.cachePackage("openmw_input_triggerinfo", [&lua]() {
+            auto triggerInfo = lua.new_usertype<LuaUtil::InputTrigger::Info>("TriggerInfo");
+            triggerInfo["key"] = sol::readonly_property(
+                [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mKey; });
+            triggerInfo["name"] = sol::readonly_property(
+                [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mName; });
+            triggerInfo["description"] = sol::readonly_property(
+                [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mDescription; });
+            triggerInfo["l10n"] = sol::readonly_property(
+                [](const LuaUtil::InputTrigger::Info& info) -> std::string_view { return info.mL10n; });
+            return sol::table(lua, sol::create);
+        });
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         sol::table api(lua, sol::create);
@@ -139,16 +161,18 @@ namespace MWLua
                 }));
 
         api["actions"] = std::ref(context.mLuaManager->inputActions());
-        api["registerAction"] = [manager = context.mLuaManager](sol::table options) {
-            LuaUtil::InputAction::Info parsedOptions;
-            parsedOptions.mKey = options["key"].get<std::string_view>();
-            parsedOptions.mType = options["type"].get<LuaUtil::InputAction::Type>();
-            parsedOptions.mL10n = options["l10n"].get<std::string_view>();
-            parsedOptions.mName = options["name"].get<std::string_view>();
-            parsedOptions.mDescription = options["description"].get<std::string_view>();
-            parsedOptions.mDefaultValue = options["defaultValue"].get<sol::main_object>();
-            manager->inputActions().insert(std::move(parsedOptions));
-        };
+        api["registerAction"]
+            = [manager = context.mLuaManager, persistent = context.mType == Context::Menu](sol::table options) {
+                  LuaUtil::InputAction::Info parsedOptions;
+                  parsedOptions.mKey = options["key"].get<std::string_view>();
+                  parsedOptions.mType = options["type"].get<LuaUtil::InputAction::Type>();
+                  parsedOptions.mL10n = options["l10n"].get<std::string_view>();
+                  parsedOptions.mName = options["name"].get<std::string_view>();
+                  parsedOptions.mDescription = options["description"].get<std::string_view>();
+                  parsedOptions.mDefaultValue = options["defaultValue"].get<sol::main_object>();
+                  parsedOptions.mPersistent = persistent;
+                  manager->inputActions().insert(std::move(parsedOptions));
+              };
         api["bindAction"] = [manager = context.mLuaManager](
                                 std::string_view key, const sol::table& callback, sol::table dependencies) {
             std::vector<std::string_view> parsedDependencies;
@@ -178,14 +202,16 @@ namespace MWLua
         };
 
         api["triggers"] = std::ref(context.mLuaManager->inputTriggers());
-        api["registerTrigger"] = [manager = context.mLuaManager](sol::table options) {
-            LuaUtil::InputTrigger::Info parsedOptions;
-            parsedOptions.mKey = options["key"].get<std::string_view>();
-            parsedOptions.mL10n = options["l10n"].get<std::string_view>();
-            parsedOptions.mName = options["name"].get<std::string_view>();
-            parsedOptions.mDescription = options["description"].get<std::string_view>();
-            manager->inputTriggers().insert(std::move(parsedOptions));
-        };
+        api["registerTrigger"]
+            = [manager = context.mLuaManager, persistent = context.mType == Context::Menu](sol::table options) {
+                  LuaUtil::InputTrigger::Info parsedOptions;
+                  parsedOptions.mKey = options["key"].get<std::string_view>();
+                  parsedOptions.mL10n = options["l10n"].get<std::string_view>();
+                  parsedOptions.mName = options["name"].get<std::string_view>();
+                  parsedOptions.mDescription = options["description"].get<std::string_view>();
+                  parsedOptions.mPersistent = persistent;
+                  manager->inputTriggers().insert(std::move(parsedOptions));
+              };
         api["registerTriggerHandler"]
             = [manager = context.mLuaManager](std::string_view key, const sol::table& callback) {
                   manager->inputTriggers().registerHandler(key, LuaUtil::Callback::fromLua(callback));
@@ -445,8 +471,8 @@ namespace MWLua
                 { "Tab", SDL_SCANCODE_TAB },
             }));
 
-        lua["openmw_input"] = LuaUtil::makeReadOnly(api);
-        return lua["openmw_input"];
+        sol::table readOnlyApi = LuaUtil::makeReadOnly(api);
+        return context.setTypePackage(readOnlyApi, "openmw_input");
     }
 
 }

@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include <components/compiler/extensions.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/esm/refid.hpp>
 #include <components/files/collections.hpp>
 #include <components/settings/settings.hpp>
@@ -171,7 +172,9 @@ namespace OMW
         // Grab mouse?
         bool mGrab;
 
+        bool mExportFonts;
         unsigned int mRandomSeed;
+        Debug::Level mMaxRecastLogLevel = Debug::Error;
 
         Compiler::Extensions mExtensions;
         std::unique_ptr<Compiler::Context> mScriptContext;
@@ -179,6 +182,9 @@ namespace OMW
         Files::Collections mFileCollections;
         Translation::Storage mTranslationDataStorage;
         bool mNewGame;
+
+        Files::ConfigurationManager& mCfgMgr;
+        int mGlMaxTextureImageUnits;
 
         // not implemented
         Engine(const Engine&);
@@ -251,14 +257,14 @@ namespace OMW
 
         void setWarningsMode(int mode);
 
+        void enableFontExport(bool exportFonts);
+
         /// Set the save game file to load after initialising the engine.
         void setSaveGameFile(const std::filesystem::path& savegame);
 
         void setRandomSeed(unsigned int seed);
 
-    private:
-        Files::ConfigurationManager& mCfgMgr;
-        int mGlMaxTextureImageUnits;
+        void setRecastMaxLogLevel(Debug::Level value) { mMaxRecastLogLevel = value; }
     };
 }
 

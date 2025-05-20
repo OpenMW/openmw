@@ -128,7 +128,7 @@ namespace MWGui
         WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot,
             Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::filesystem::path& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-            ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders,
+            ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, bool useShaders,
             Files::ConfigurationManager& cfgMgr);
         virtual ~WindowManager();
 
@@ -290,7 +290,7 @@ namespace MWGui
         void windowVisibilityChange(bool visible) override;
         void windowResized(int x, int y) override;
         void windowClosed() override;
-        bool isWindowVisible() override;
+        bool isWindowVisible() const override;
 
         void watchActor(const MWWorld::Ptr& ptr) override;
         MWWorld::Ptr getWatchedActor() const override;

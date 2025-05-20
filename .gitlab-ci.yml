@@ -56,6 +56,7 @@ Ubuntu_GCC_preprocess:
   stage: build
   variables:
     CMAKE_EXE_LINKER_FLAGS: -fuse-ld=mold
+    OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
   script:
     - df -h
     - export CCACHE_BASEDIR="`pwd`"
@@ -156,6 +157,8 @@ Ubuntu_GCC_asan:
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
     CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
     BUILD_OPENMW_ONLY: 1
+    # Disable -Werror due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105562
+    OPENMW_CXX_FLAGS: ""
 
 Clang_Format:
   extends: .Ubuntu_Image
@@ -228,7 +231,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
@@ -244,7 +247,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
@@ -257,12 +260,14 @@ Ubuntu_GCC_tests_asan:
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
     CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
+    # Disable -Werror due to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105562
+    OPENMW_CXX_FLAGS: ""
   artifacts:
     paths: []
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -279,7 +284,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -297,7 +302,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
@@ -316,7 +321,7 @@ Ubuntu_GCC_tests_coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -357,7 +362,7 @@ Ubuntu_GCC_tests_coverage:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_Clang:
   extends: .Ubuntu
@@ -440,7 +445,7 @@ Ubuntu_Clang_Tidy_other:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
@@ -455,7 +460,7 @@ Ubuntu_Clang_tests_Debug:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/*_tests.xml
+      junit: build/*-tests.xml
 
 .Ubuntu_integration_tests_base:
   extends: .Ubuntu_Image
@@ -632,12 +637,16 @@ macOS14_Xcode15_arm64:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        if(!$?) { Exit $LASTEXITCODE }
         if (Test-Path env:AWS_ACCESS_KEY_ID) {
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
+          if(!$?) { Exit $LASTEXITCODE }
         }
         Push-Location ..
         ..\CI\Store-Symbols.ps1 -SkipCompress
+        if(!$?) { Exit $LASTEXITCODE }
         7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        if(!$?) { Exit $LASTEXITCODE }
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
@@ -645,13 +654,20 @@ macOS14_Xcode15_arm64:
     - |
       if (Test-Path env:AWS_ACCESS_KEY_ID) {
         aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
+        if(!$?) { Exit $LASTEXITCODE }
       }
-    - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
+    - |
+      if ($executables) {
+        foreach ($exe in $executables.Split(',')) {
+          & .\$exe
+          if(!$?) { Exit $LASTEXITCODE }
+        }
+      }
   after_script:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-2022-v11
+    key: ninja-2022-v12
     paths:
     - ccache
     - deps
@@ -779,12 +795,16 @@ macOS14_Xcode15_arm64:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        if(!$?) { Exit $LASTEXITCODE }
         if (Test-Path env:AWS_ACCESS_KEY_ID) {
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
+          if(!$?) { Exit $LASTEXITCODE }
         }
         Push-Location ..
         ..\CI\Store-Symbols.ps1 -SkipCompress
+        if(!$?) { Exit $LASTEXITCODE }
         7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        if(!$?) { Exit $LASTEXITCODE }
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
@@ -792,13 +812,20 @@ macOS14_Xcode15_arm64:
     - |
       if (Test-Path env:AWS_ACCESS_KEY_ID) {
         aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
+        if(!$?) { Exit $LASTEXITCODE }
       }
-    - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
+    - |
+      if ($executables) {
+        foreach ($exe in $executables.Split(',')) {
+          & .\$exe
+          if(!$?) { Exit $LASTEXITCODE }
+        }
+      }
   after_script:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-2022-v11
+    key: msbuild-2022-v12
     paths:
     - deps
     - MSVC2022_64/deps/Qt

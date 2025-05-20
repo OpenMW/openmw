@@ -7,7 +7,7 @@ local vfs = require('openmw.vfs')
 local world = require('openmw.world')
 local I = require('openmw.interfaces')
 
-local function testTimers()
+testing.registerGlobalTest('timers', function()
     testing.expectAlmostEqual(core.getGameTimeScale(), 30, 'incorrect getGameTimeScale() result')
     testing.expectAlmostEqual(core.getSimulationTimeScale(), 1, 'incorrect getSimulationTimeScale result')
 
@@ -39,9 +39,10 @@ local function testTimers()
     testing.expectGreaterOrEqual(ts1, 0.5, 'async:newSimulationTimer failed')
     testing.expectGreaterOrEqual(th2, 72, 'async:newUnsavableGameTimer failed')
     testing.expectGreaterOrEqual(ts2, 1, 'async:newUnsavableSimulationTimer failed')
-end
+end)
 
-local function testTeleport()
+testing.registerGlobalTest('teleport', function()
+    local player = world.players[1]
     player:teleport('', util.vector3(100, 50, 500), util.transform.rotateZ(math.rad(90)))
     coroutine.yield()
     testing.expect(player.cell.isExterior, 'teleport to exterior failed')
@@ -71,16 +72,16 @@ local function testTeleport()
     testing.expectEqualWithDelta(player.position.x, 50, 1, 'incorrect position after teleporting')
     testing.expectEqualWithDelta(player.position.y, -100, 1, 'incorrect position after teleporting')
     testing.expectEqualWithDelta(player.rotation:getYaw(), math.rad(-90), 0.05, 'teleporting changes rotation')
-end
+end)
 
-local function testGetGMST()
+testing.registerGlobalTest('getGMST', function()
     testing.expectEqual(core.getGMST('non-existed gmst'), nil)
     testing.expectEqual(core.getGMST('Water_RippleFrameCount'), 4)
     testing.expectEqual(core.getGMST('Inventory_DirectionalDiffuseR'), 0.5)
     testing.expectEqual(core.getGMST('Level_Up_Level2'), 'something')
-end
+end)
 
-local function testMWScript()
+testing.registerGlobalTest('MWScript', function()
     local variableStoreCount = 18
     local variableStore = world.mwscript.getGlobalVariables(player)
     testing.expectEqual(variableStoreCount, #variableStore)
@@ -100,7 +101,7 @@ local function testMWScript()
         indexCheck = indexCheck + 1
     end
     testing.expectEqual(variableStoreCount, indexCheck)
-end
+end)
 
 local function testRecordStore(store, storeName, skipPairs)
     testing.expect(store.records)
@@ -121,7 +122,7 @@ local function testRecordStore(store, storeName, skipPairs)
     testing.expectEqual(status, true, storeName)
 end
 
-local function testRecordStores()
+testing.registerGlobalTest('record stores', function()
     for key, type in pairs(types) do
         if type.records then
             testRecordStore(type, key)
@@ -140,9 +141,9 @@ local function testRecordStores()
     testRecordStore(types.NPC.classes, "classes")
     testRecordStore(types.NPC.races, "races")
     testRecordStore(types.Player.birthSigns, "birthSigns")
-end
+end)
 
-local function testRecordCreation()
+testing.registerGlobalTest('record creation', function()
     local newLight = {
         isCarriable = true,
         isDynamic = true,
@@ -165,9 +166,9 @@ local function testRecordCreation()
     for key, value in pairs(newLight) do
         testing.expectEqual(record[key], value)
     end
-end
+end)
 
-local function testUTF8Chars()
+testing.registerGlobalTest('UTF-8 characters', function()
     testing.expectEqual(utf8.codepoint("😀"), 0x1F600)
 
     local chars = {}
@@ -192,9 +193,9 @@ local function testUTF8Chars()
         testing.expectEqual(utf8.codepoint(char), codepoint)
         testing.expectEqual(utf8.len(char), 1)
     end
-end
+end)
 
-local function testUTF8Strings()
+testing.registerGlobalTest('UTF-8 strings', function()
     local utf8str = "Hello, 你好, 🌎!"
 
     local str = ""
@@ -205,9 +206,9 @@ local function testUTF8Strings()
 
     testing.expectEqual(utf8.len(utf8str), 13)
     testing.expectEqual(utf8.offset(utf8str, 9), 11)
-end
+end)
 
-local function testMemoryLimit()
+testing.registerGlobalTest('memory limit', function()
     local ok, err = pcall(function()
         local t = {}
         local n = 1
@@ -218,14 +219,16 @@ local function testMemoryLimit()
     end)
     testing.expectEqual(ok, false, 'Script reaching memory limit should fail')
     testing.expectEqual(err, 'not enough memory')
-end
+end)
 
 local function initPlayer()
+    local player = world.players[1]
     player:teleport('', util.vector3(4096, 4096, 1745), util.transform.identity)
     coroutine.yield()
+    return player
 end
 
-local function testVFS()
+testing.registerGlobalTest('vfs', function()
     local file = 'test_vfs_dir/lines.txt'
     local nosuchfile = 'test_vfs_dir/nosuchfile'
     testing.expectEqual(vfs.fileExists(file), true, 'lines.txt should exist')
@@ -269,12 +272,11 @@ local function testVFS()
     for _,v in pairs(expectedLines) do
         testing.expectEqual(getLine(), v)
     end
-end
+end)
 
-local function testCommitCrime()
-    initPlayer()
-    local player = world.players[1]
-    testing.expectEqual(player == nil, false, 'A viable player reference should exist to run `testCommitCrime`')
+testing.registerGlobalTest('commit crime', function()
+    local player = initPlayer()
+    testing.expectEqual(player == nil, false, 'A viable player reference should exist to run `commit crime`')
     testing.expectEqual(I.Crimes == nil, false, 'Crimes interface should be available in global contexts')
 
     -- Reset crime level to have a clean slate
@@ -292,82 +294,59 @@ local function testCommitCrime()
     types.Player.setCrimeLevel(player, 0)
     testing.expectEqual(I.Crimes.commitCrime(player, { victim = victim, type = types.Player.OFFENSE_TYPE.Theft, arg = 50 }).wasCrimeSeen, true, "Running a crime with a valid victim should notify them when the player is not sneaking, even if it's not explicitly passed in")
     testing.expectEqual(types.Player.getCrimeLevel(player), 0, "Crime level should not change if the victim's alarm value is low and there's no other witnesses")
-end
+end)
 
-local function testRecordModelProperty()
-    initPlayer()
+testing.registerGlobalTest('record model property', function()
     local player = world.players[1]
     testing.expectEqual(types.NPC.record(player).model, 'meshes/basicplayer.dae')
+end)
+
+local function registerPlayerTest(name)
+    testing.registerGlobalTest(name, function()
+        local player = initPlayer()
+        testing.runLocalTest(player, name)
+    end)
 end
 
-tests = {
-    {'timers', testTimers},
-    {'rotating player with controls.yawChange should change rotation', function()
-        initPlayer()
-        testing.runLocalTest(player, 'playerYawRotation')
-    end},
-    {'rotating player with controls.pitchChange should change rotation', function()
-        initPlayer()
-        testing.runLocalTest(player, 'playerPitchRotation')
-    end},
-    {'rotating player with controls.pitchChange and controls.yawChange should change rotation', function()
-        initPlayer()
-        testing.runLocalTest(player, 'playerPitchAndYawRotation')
-    end},
-    {'rotating player should not lead to nan rotation', function()
-        initPlayer()
-        testing.runLocalTest(player, 'playerRotation')
-    end},
-    {'playerForwardRunning', function()
-        initPlayer()
-        testing.runLocalTest(player, 'playerForwardRunning')
-    end},
-    {'playerDiagonalWalking', function()
-        initPlayer()
-        testing.runLocalTest(player, 'playerDiagonalWalking')
-    end},
-    {'findPath', function()
-        initPlayer()
-        testing.runLocalTest(player, 'findPath')
-    end},
-    {'findRandomPointAroundCircle', function()
-        initPlayer()
-        testing.runLocalTest(player, 'findRandomPointAroundCircle')
-    end},
-    {'castNavigationRay', function()
-        initPlayer()
-        testing.runLocalTest(player, 'castNavigationRay')
-    end},
-    {'findNearestNavMeshPosition', function()
-        initPlayer()
-        testing.runLocalTest(player, 'findNearestNavMeshPosition')
-    end},
-    {'teleport', testTeleport},
-    {'getGMST', testGetGMST},
-    {'recordStores', testRecordStores},
-    {'recordCreation', testRecordCreation},
-    {'utf8Chars', testUTF8Chars},
-    {'utf8Strings', testUTF8Strings},
-    {'mwscript', testMWScript},
-    {'testMemoryLimit', testMemoryLimit},
-    {'playerMemoryLimit', function()
-        initPlayer()
-        testing.runLocalTest(player, 'playerMemoryLimit')
-    end},
-    {'player with equipped weapon on attack should damage health of other actors', function()
-        initPlayer()
-        world.createObject('basic_dagger1h', 1):moveInto(player)
-        testing.runLocalTest(player, 'playerWeaponAttack')
-    end},
-    {'vfs', testVFS},
-    {'testCommitCrime', testCommitCrime},
-    {'recordModelProperty', testRecordModelProperty},
-}
+registerPlayerTest('player yaw rotation')
+registerPlayerTest('player pitch rotation')
+registerPlayerTest('player pitch and yaw rotation')
+registerPlayerTest('player rotation')
+registerPlayerTest('player forward running')
+registerPlayerTest('player diagonal walking')
+registerPlayerTest('findPath')
+registerPlayerTest('findRandomPointAroundCircle')
+registerPlayerTest('castNavigationRay')
+registerPlayerTest('findNearestNavMeshPosition')
+registerPlayerTest('player memory limit')
+
+testing.registerGlobalTest('player weapon attack', function()
+    local player = initPlayer()
+    world.createObject('basic_dagger1h', 1):moveInto(player)
+    testing.runLocalTest(player, 'player weapon attack')
+end)
+
+testing.registerGlobalTest('load while teleporting - init player', function()
+    local player = world.players[1]
+    player:teleport('Museum of Wonders', util.vector3(0, -1500, 111), util.transform.rotateZ(math.rad(180)))
+end)
+
+testing.registerGlobalTest('load while teleporting - teleport', function()
+    local player = world.players[1]
+    local landracer = world.createObject('landracer')
+    landracer:teleport(player.cell, player.position + util.vector3(0, 500, 0))
+    coroutine.yield()
+
+    local door = world.getObjectByFormId(core.getFormId('the_hub.omwaddon', 26))
+    door:activateBy(player)
+    coroutine.yield()
+
+    landracer:teleport(player.cell, player.position)
+end)
 
 return {
     engineHandlers = {
-        onUpdate = testing.testRunner(tests),
-        onPlayerAdded = function(p) player = p end,
+        onUpdate = testing.updateGlobal,
     },
-    eventHandlers = testing.eventHandlers,
+    eventHandlers = testing.globalEventHandlers,
 }

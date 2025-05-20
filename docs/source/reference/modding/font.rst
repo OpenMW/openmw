@@ -15,6 +15,8 @@ Morrowind .fnt fonts
 Morrowind uses a custom ``.fnt`` file format. It is not compatible with the Windows Font File ``.fnt`` format.
 To our knowledge, the format is undocumented. OpenMW can load this format and convert it on the fly into something usable
 (see font loader `source code <https://gitlab.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp>`_).
+You can use --export-fonts command line option to write the converted font
+(a PNG image and an XML file describing the position of each glyph in the image) to the current directory.
 
 They can be used instead of TrueType fonts if needed by specifying their ``.fnt`` files names in the ``openmw.cfg``. For example:
 

@@ -2,6 +2,7 @@
 #define COMPONENTS_TOUTF8_H
 
 #include <cstring>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -50,7 +51,7 @@ namespace ToUTF8
         inline void copyFromArrayLegacyEnc(
             std::string_view::iterator& chp, std::string_view::iterator end, char*& out) const;
 
-        const std::basic_string_view<signed char> mTranslationArray;
+        const std::span<const signed char> mTranslationArray;
     };
 
     class Utf8Encoder

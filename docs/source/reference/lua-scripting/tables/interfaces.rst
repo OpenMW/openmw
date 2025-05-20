@@ -21,7 +21,7 @@
     - by player scripts
     - | Allows to alter behavior of the built-in script
       | that handles player controls.
-  * - :ref:`Controls <Interface GamepadControls>`
+  * - :ref:`GamepadControls <Interface GamepadControls>`
     - by player scripts
     - | Allows to alter behavior of the built-in script
       | that handles player gamepad controls.
@@ -34,10 +34,10 @@
     - | Control, extend, and override skill progression of the 
       | player.
   * - :ref:`Settings <Interface Settings>`
-    - by player and global scripts
+    - by player, menu, and global scripts
     - Save, display and track changes of setting values.
   * - :ref:`MWUI <Interface MWUI>`
-    - by player scripts
+    - by player and menu scripts
     - Morrowind-style UI templates.
   * - :ref:`UI <Interface UI>`
     - by player scripts

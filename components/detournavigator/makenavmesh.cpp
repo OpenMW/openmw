@@ -523,7 +523,7 @@ namespace DetourNavigator
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh, ESM::RefId worldspace,
         const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings)
     {
-        RecastContext context(worldspace, tilePosition, agentBounds);
+        RecastContext context(worldspace, tilePosition, agentBounds, recastMesh.getVersion(), settings.mMaxLogLevel);
 
         const auto [minZ, maxZ] = getBoundsByZ(recastMesh, agentBounds.mHalfExtents.z(), settings);
 

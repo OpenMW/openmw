@@ -1,18 +1,15 @@
 Checks: >
   -*,
-  boost-*,
   portability-*,
   clang-analyzer-*,
-  -clang-analyzer-optin*,
+  -clang-analyzer-optin.*,
   -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-cplusplus.NewDelete,
   -clang-analyzer-core.CallAndMessage,
-  -modernize-avoid-bind
-WarningsAsErrors: >
-  -*,
-  boost-*,
-  portability-*,
-  clang-analyzer-*,
-  -clang-analyzer-optin*,
-  -clang-analyzer-cplusplus.NewDeleteLeaks,
-  -clang-analyzer-core.CallAndMessage
-HeaderFilterRegex: '^(apps|components)'
+  modernize-avoid-bind,
+  readability-identifier-naming
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(apps|components)/'
+CheckOptions:
+- key: readability-identifier-naming.ConceptCase
+  value: CamelCase

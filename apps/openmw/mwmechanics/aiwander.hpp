@@ -3,6 +3,7 @@
 
 #include "typedaipackage.hpp"
 
+#include <string_view>
 #include <vector>
 
 #include "aitemporarybase.hpp"
@@ -181,9 +182,7 @@ namespace MWMechanics
             const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage);
 
         /// lookup table for converting idleSelect value to groupName
-        static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
-
-        static int OffsetToPreventOvercrowding();
+        static const std::string_view sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
     };
 }
 

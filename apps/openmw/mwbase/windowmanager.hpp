@@ -363,7 +363,7 @@ namespace MWBase
         void windowVisibilityChange(bool visible) override = 0;
         void windowResized(int x, int y) override = 0;
         void windowClosed() override = 0;
-        virtual bool isWindowVisible() = 0;
+        virtual bool isWindowVisible() const = 0;
 
         virtual void watchActor(const MWWorld::Ptr& ptr) = 0;
         virtual MWWorld::Ptr getWatchedActor() const = 0;
