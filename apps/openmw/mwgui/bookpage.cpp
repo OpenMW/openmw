@@ -1288,6 +1288,12 @@ namespace MWGui
 
         void unadviseLinkClicked() override { mPageDisplay->mLinkClicked = std::function<void(InteractiveId)>(); }
 
+        void setFocusItem(BookTypesetter::Style* itemStyle) override
+        {
+            mPageDisplay->mFocusItem = (TypesetBookImpl::StyleImpl*)itemStyle;
+            mPageDisplay->dirtyFocusItem();
+        }
+
     protected:
         void initialiseOverride() override
         {

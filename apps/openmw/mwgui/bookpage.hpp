@@ -164,6 +164,8 @@ namespace MWGui
         /// Register the widget and associated sub-widget with MyGUI. Should be
         /// called once near the beginning of the program.
         static void registerMyGUIComponents();
+
+        virtual void setFocusItem(BookTypesetter::Style* itemStyle) = 0;
     };
 }
 

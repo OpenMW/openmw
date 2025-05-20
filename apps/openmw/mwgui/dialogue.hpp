@@ -205,6 +205,7 @@ namespace MWGui
 
         std::vector<std::unique_ptr<DialogueText>> mHistoryContents;
         std::vector<std::pair<std::string, int>> mChoices;
+        std::vector<BookTypesetter::Style*> mChoiceStyles;
         bool mGoodbye;
 
         std::vector<std::unique_ptr<Link>> mLinks;
@@ -230,6 +231,7 @@ namespace MWGui
 
         void setControllerFocus(int index, bool focused);
         int mControllerFocus = 0;
+        int mControllerChoice = -1;
 
         void updateTopicFormat();
     };

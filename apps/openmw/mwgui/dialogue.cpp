@@ -691,6 +691,8 @@ namespace MWGui
         // choices
         const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         mChoices = MWBase::Environment::get().getDialogueManager()->getChoices();
+        mChoiceStyles.clear();
+        mControllerChoice = -1; // -1 so you must make a choice (and can't accidentally pick the first answer)
         for (std::pair<std::string, int>& choice : mChoices)
         {
             auto link = std::make_unique<Choice>(choice.second);
@@ -702,6 +704,7 @@ namespace MWGui
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
                 body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
             typesetter->write(questionStyle, to_utf8_span(choice.first));
+            mChoiceStyles.push_back(questionStyle);
         }
 
         mGoodbye = MWBase::Environment::get().getDialogueManager()->isGoodbye();
@@ -944,7 +947,12 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus == mTopicsList->getItemCount())
+            if (mChoices.size() > 0)
+            {
+                if (mControllerChoice >= 0 && mControllerChoice < mChoices.size())
+                    onChoiceActivated(mControllerChoice + 1); // +1 because choices are indexed starting at 1
+            }
+            else if (mControllerFocus == mTopicsList->getItemCount())
                 onGoodbyeActivated();
             else
                 onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
@@ -955,29 +963,47 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
-            // Number of items is mTopicsList.length+1 because of "Goodbye" button.
-            setControllerFocus(mControllerFocus, false);
-            if (mControllerFocus <= 0)
-                mControllerFocus = mTopicsList->getItemCount();
-            else if (mTopicsList->getItemNameAt(mControllerFocus - 1).length() == 0)
-                mControllerFocus -= 2; // Skip separator
+            if (mChoices.size() > 0)
+            {
+                // In-dialogue choice (red text)
+                mControllerChoice = std::clamp(mControllerChoice - 1, 0, (int)mChoices.size() - 1);
+                mHistory->setFocusItem(mChoiceStyles.at(mControllerChoice));
+            }
             else
-                mControllerFocus--;
-            setControllerFocus(mControllerFocus, true);
+            {
+                // Number of items is mTopicsList.length+1 because of "Goodbye" button.
+                setControllerFocus(mControllerFocus, false);
+                if (mControllerFocus <= 0)
+                    mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
+                else if (mTopicsList->getItemNameAt(mControllerFocus - 1).length() == 0)
+                    mControllerFocus -= 2; // Skip separator
+                else
+                    mControllerFocus--;
+                setControllerFocus(mControllerFocus, true);
+            }
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
-            // Number of items is mTopicsList.length+1 because of "Goodbye" button.
-            setControllerFocus(mControllerFocus, false);
-            if (mControllerFocus >= mTopicsList->getItemCount())
-                mControllerFocus = 0;
-            else if (mControllerFocus == mTopicsList->getItemCount() - 1)
-                mControllerFocus = mTopicsList->getItemCount();
-            else if (mTopicsList->getItemNameAt(mControllerFocus + 1).length() == 0)
-                mControllerFocus += 2; // Skip separator
+            if (mChoices.size() > 0)
+            {
+                // In-dialogue choice (red text)
+                mControllerChoice = std::clamp(mControllerChoice + 1, 0, (int)mChoices.size() - 1);
+                mHistory->setFocusItem(mChoiceStyles.at(mControllerChoice));
+            }
             else
-                mControllerFocus++;
-            setControllerFocus(mControllerFocus, true);
+            {
+                // Number of items is mTopicsList.length+1 because of "Goodbye" button.
+                setControllerFocus(mControllerFocus, false);
+                if (mControllerFocus >= mTopicsList->getItemCount())
+                    mControllerFocus = 0;
+                else if (mControllerFocus == mTopicsList->getItemCount() - 1)
+                    mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
+                else if (mTopicsList->getItemNameAt(mControllerFocus + 1).length() == 0)
+                    mControllerFocus += 2; // Skip separator
+                else
+                    mControllerFocus++;
+                setControllerFocus(mControllerFocus, true);
+            }
         }
 
         return true;
