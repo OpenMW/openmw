@@ -15,6 +15,16 @@
 
 using namespace MWGui;
 
+int MWGui::wrap(int index, int max)
+{
+    if (index < 0)
+        return max - 1;
+    else if (index >= max)
+        return 0;
+    else
+        return index;
+}
+
 WindowBase::WindowBase(std::string_view parLayout)
     : Layout(parLayout)
 {

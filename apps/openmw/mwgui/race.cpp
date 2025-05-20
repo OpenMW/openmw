@@ -23,16 +23,6 @@
 
 namespace
 {
-    int wrap(int index, int max)
-    {
-        if (index < 0)
-            return max - 1;
-        else if (index >= max)
-            return 0;
-        else
-            return index;
-    }
-
     bool sortRaces(const std::pair<ESM::RefId, std::string>& left, const std::pair<ESM::RefId, std::string>& right)
     {
         return left.second.compare(right.second) < 0;

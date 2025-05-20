@@ -14,6 +14,8 @@ namespace MWGui
 {
     class DragAndDrop;
 
+    int wrap(int index, int max);
+
     struct ControllerButtonStr
     {
         std::string a;
