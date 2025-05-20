@@ -1144,10 +1144,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
         {
             uint32_t index = mSettingsTab->getIndexSelected();
-            if (index <= 0)
-                index = mSettingsTab->getItemCount() - 1;
-            else
-                index--;
+            index = wrap(index - 1, mSettingsTab->getItemCount());
             mSettingsTab->setIndexSelected(index);
 
             return true;
@@ -1155,10 +1152,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
         {
             uint32_t index = mSettingsTab->getIndexSelected();
-            if (index >= mSettingsTab->getItemCount() - 1)
-                index = 0;
-            else
-                index++;
+            index = wrap(index + 1, mSettingsTab->getItemCount());
             mSettingsTab->setIndexSelected(index);
 
             return true;

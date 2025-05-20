@@ -520,10 +520,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
         {
             uint32_t index = mCharacterSelection->getIndexSelected();
-            if (index >= mCharacterSelection->getItemCount() - 1)
-                index = 0;
-            else
-                index++;
+            index = wrap(index + 1, mCharacterSelection->getItemCount());
             mCharacterSelection->setIndexSelected(index);
             onCharacterSelected(mCharacterSelection, index);
         }

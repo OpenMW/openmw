@@ -764,9 +764,7 @@ namespace
                 {
                     // Scroll through the list of quests or topics
                     mButtons[mSelectedQuest]->setStateSelected(false);
-                    mSelectedQuest--;
-                    if (mSelectedQuest < 0)
-                        mSelectedQuest = mButtons.size() - 1;
+                    mSelectedQuest = MWGui::wrap(mSelectedQuest - 1, mButtons.size());
                     mButtons[mSelectedQuest]->setStateSelected(true);
                 }
                 return true;
@@ -777,9 +775,7 @@ namespace
                 {
                     // Scroll through the list of quests or topics
                     mButtons[mSelectedQuest]->setStateSelected(false);
-                    mSelectedQuest++;
-                    if (mSelectedQuest > mButtons.size() - 1)
-                        mSelectedQuest = 0;
+                    mSelectedQuest = MWGui::wrap(mSelectedQuest + 1, mButtons.size());
                     mButtons[mSelectedQuest]->setStateSelected(true);
                 }
                 return true;
