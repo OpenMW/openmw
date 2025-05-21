@@ -13,6 +13,7 @@
 #include <QDirIterator>
 #include <QFont>
 #include <QIODevice>
+#include <QProgressDialog>
 
 #include <components/esm/format.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -707,10 +708,14 @@ bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) c
 
 void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileList)
 {
+    QProgressDialog progressDialog("Setting content list", {}, 0, static_cast<int>(fileList.size()));
+    progressDialog.setWindowModality(Qt::WindowModal);
+    progressDialog.setValue(0);
+
     int previousPosition = -1;
-    for (const QString& filepath : fileList)
+    for (qsizetype i = 0, n = fileList.size(); i < n; ++i)
     {
-        const EsmFile* file = item(filepath);
+        const EsmFile* file = item(fileList[i]);
         if (setCheckState(file, true))
         {
             // setCheckState already gracefully handles builtIn and fromAnotherConfigFile
@@ -725,7 +730,10 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
                 previousPosition = filePosition;
             }
         }
+
+        progressDialog.setValue(static_cast<int>(i + 1));
     }
+
     refreshModel();
 }
 
