@@ -77,6 +77,7 @@ namespace MWGui
         static void clampWindowCoordinates(MyGUI::Window* window);
 
         virtual ControllerButtonStr* getControllerButtons() { return &mControllerButtons; }
+        MyGUI::Widget* getControllerScrollWidget() { return mControllerScrollWidget; }
         bool isGamepadCursorAllowed() { return !mDisableGamepadCursor; }
         virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) { return true; };
         virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) { return true; };
@@ -88,6 +89,7 @@ namespace MWGui
         ControllerButtonStr mControllerButtons;
         bool mActiveControllerWindow = false;
         bool mDisableGamepadCursor = false;
+        MyGUI::Widget* mControllerScrollWidget = nullptr;
 
     private:
         void onDoubleClick(MyGUI::Widget* _sender);

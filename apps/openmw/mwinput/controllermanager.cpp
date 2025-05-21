@@ -353,10 +353,15 @@ namespace MWInput
                 if (mGamepadGuiCursorEnabled
                     && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
                 {
-                    // Treat the left stick like a cursor. Fall through.
+                    // Treat the left stick like a cursor, which is the default behavior.
                     return false;
                 }
-                else if (topWin->onControllerThumbstickEvent(arg))
+
+                // On some windows, treat right stick like a scroll wheel.
+                if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY && topWin->getControllerScrollWidget() != nullptr)
+                    mMouseManager->warpMouseToWidget(topWin->getControllerScrollWidget());
+
+                if (topWin->onControllerThumbstickEvent(arg))
                 {
                     // Window handled the event.
                     return true;

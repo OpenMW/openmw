@@ -380,8 +380,10 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
             += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
 
+        mControllerScrollWidget = mHistory->getParent();
         mControllerButtons.a = "#{sAsk}";
         mControllerButtons.b = "#{sGoodbye}";
+        mControllerButtons.rStick = "#{sScrollup}";
     }
 
     void DialogueWindow::onTradeComplete()

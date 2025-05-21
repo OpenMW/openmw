@@ -39,6 +39,7 @@ namespace MWGui
         mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
         mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
 
+        mControllerScrollWidget = mTextView;
         mControllerButtons.b = "#{sClose}";
         mControllerButtons.rStick = "#{sScrolldown}";
 
