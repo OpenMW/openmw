@@ -351,8 +351,8 @@ namespace MWLua
                     throw std::runtime_error(
                         "The argument of `activateBy` must be an actor who activates the object. Got: "
                         + actor.toString());
-                if (objPtr.getRefData().activate())
-                    MWBase::Environment::get().getLuaManager()->objectActivated(objPtr, actorPtr);
+
+                MWBase::Environment::get().getLuaManager()->objectActivated(objPtr, actorPtr);
             };
 
             auto isEnabled = [](const ObjectT& o) { return o.ptr().getRefData().isEnabled(); };
