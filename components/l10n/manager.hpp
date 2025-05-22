@@ -27,20 +27,20 @@ namespace L10n
         void setGmstLoader(std::function<std::string(std::string_view)> fn) { mGmstLoader = std::move(fn); }
 
         std::shared_ptr<const MessageBundles> getContext(
-            const std::string& contextName, const std::string& fallbackLocale = "en");
+            std::string_view contextName, const std::string& fallbackLocale = "en");
 
-        std::string getMessage(const std::string& contextName, std::string_view key)
+        std::string getMessage(std::string_view contextName, std::string_view key)
         {
             return getContext(contextName)->formatMessage(key, {}, {});
         }
 
     private:
-        void readLangData(const std::string& name, MessageBundles& ctx, const icu::Locale& lang);
-        void updateContext(const std::string& name, MessageBundles& ctx);
+        void readLangData(std::string_view name, MessageBundles& ctx, const icu::Locale& lang);
+        void updateContext(std::string_view name, MessageBundles& ctx);
 
         const VFS::Manager* mVFS;
         std::vector<icu::Locale> mPreferredLocales;
-        std::map<std::pair<std::string, std::string>, std::shared_ptr<MessageBundles>> mCache;
+        std::map<std::pair<std::string, std::string>, std::shared_ptr<MessageBundles>, std::less<>> mCache;
         std::function<std::string(std::string_view)> mGmstLoader;
     };
 

@@ -615,7 +615,7 @@ namespace MWScript
 
                 long key;
 
-                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effect.data());
+                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effect);
                     k.has_value() && *k >= 0 && *k <= 32767)
                     key = *k;
                 else
