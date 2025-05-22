@@ -1001,7 +1001,11 @@ bool Launcher::DataFilesPage::showDeleteMessageBox(const QString& text)
 
 void Launcher::DataFilesPage::slotAddonDataChanged()
 {
-    QStringList selectedFiles = selectedFilePaths();
+    const ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
+    QStringList selectedFiles;
+    for (const ContentSelectorModel::EsmFile* item : items)
+        selectedFiles.append(item->filePath());
+
     if (mSelectedFiles != selectedFiles)
     {
         const std::lock_guard lock(mReloadCellsMutex);
@@ -1013,6 +1017,7 @@ void Launcher::DataFilesPage::slotAddonDataChanged()
 
 void Launcher::DataFilesPage::reloadCells()
 {
+    QStringList selectedFiles;
     std::unique_lock lock(mReloadCellsMutex);
 
     while (true)
@@ -1025,16 +1030,26 @@ void Launcher::DataFilesPage::reloadCells()
         if (!std::exchange(mReloadCells, false))
             continue;
 
-        QStringList selectedFiles = mSelectedFiles;
+        const QStringList newSelectedFiles = mSelectedFiles;
 
         lock.unlock();
 
-        CellNameLoader cellNameLoader;
-        QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
-        QStringList cellNamesList(set.begin(), set.end());
-        std::sort(cellNamesList.begin(), cellNamesList.end());
+        QStringList filteredFiles;
+        for (const QString& v : newSelectedFiles)
+            if (QFile::exists(v))
+                filteredFiles.append(v);
 
-        emit signalLoadedCellsChanged(std::move(cellNamesList));
+        if (selectedFiles != filteredFiles)
+        {
+            selectedFiles = std::move(filteredFiles);
+
+            CellNameLoader cellNameLoader;
+            QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
+            QStringList cellNamesList(set.begin(), set.end());
+            std::sort(cellNamesList.begin(), cellNamesList.end());
+
+            emit signalLoadedCellsChanged(std::move(cellNamesList));
+        }
 
         lock.lock();
 
