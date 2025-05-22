@@ -129,8 +129,8 @@ namespace MWGui
         {
             MWBase::Environment::get().getMechanicsManager()->commitCrime(
                 player, mActor, MWBase::MechanicsManager::OT_Pickpocket, ESM::RefId(), 0, true);
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
             mPickpocketDetected = true;
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
             return false;
         }
         else
