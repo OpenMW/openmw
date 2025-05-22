@@ -102,6 +102,7 @@ namespace ContentSelectorModel
         QString mToolTip;
         bool mBuiltIn = false;
         bool mFromAnotherConfigFile = false;
+        bool mHasGameExtension = false;
     };
 }
 
