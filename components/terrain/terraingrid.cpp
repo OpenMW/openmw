@@ -95,7 +95,7 @@ namespace Terrain
         if (!terrainNode)
             return; // no terrain defined
 
-        TerrainGrid::World::loadCell(x, y);
+        Terrain::World::loadCell(x, y);
 
         mTerrainRoot->addChild(terrainNode);
 
