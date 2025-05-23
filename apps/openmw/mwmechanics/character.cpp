@@ -1388,6 +1388,7 @@ namespace MWMechanics
                     // Note: we do not disable unequipping animation automatically to avoid body desync
                     weapgroup = getWeaponAnimation(mWeaponType);
                     int unequipMask = MWRender::BlendMask_All;
+                    mUpperBodyState = UpperBodyState::Unequipping;
                     bool useShieldAnims = mAnimation->useShieldAnimations();
                     if (useShieldAnims && mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell
                         && !(mWeaponType == ESM::Weapon::None && weaptype == ESM::Weapon::Spell))
@@ -1402,7 +1403,6 @@ namespace MWMechanics
                     mAnimation->disable(weapgroup);
                     playBlendedAnimation(
                         weapgroup, priorityWeapon, unequipMask, false, 1.0f, "unequip start", "unequip stop", 0.0f, 0);
-                    mUpperBodyState = UpperBodyState::Unequipping;
 
                     mAnimation->detachArrow();
 
@@ -1447,6 +1447,7 @@ namespace MWMechanics
                         {
                             mAnimation->showWeapons(false);
                             int equipMask = MWRender::BlendMask_All;
+                            mUpperBodyState = UpperBodyState::Equipping;
                             if (useShieldAnims && weaptype != ESM::Weapon::Spell)
                             {
                                 equipMask = equipMask | ~MWRender::BlendMask_LeftArm;
@@ -1459,7 +1460,6 @@ namespace MWMechanics
                                 playBlendedAnimation(weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start",
                                     "equip stop", 0.0f, 0);
                             }
-                            mUpperBodyState = UpperBodyState::Equipping;
 
                             // If we do not have the "equip attach" key, show weapon manually.
                             if (weaptype != ESM::Weapon::Spell
