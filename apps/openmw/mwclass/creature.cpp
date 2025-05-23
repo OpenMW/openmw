@@ -871,7 +871,8 @@ namespace MWClass
                 ptr.getRefData().setCustomData(nullptr);
 
                 // Reset to original position
-                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().asVec3());
+                MWBase::Environment::get().getWorld()->moveObject(
+                    ptr, ptr.getCell()->getOriginCell(ptr), ptr.getCellRef().getPosition().asVec3());
                 MWBase::Environment::get().getWorld()->rotateObject(
                     ptr, ptr.getCellRef().getPosition().asRotationVec3(), MWBase::RotationFlag_none);
             }
