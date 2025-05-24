@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 800 48" align="HStretch Top" name="_Main">
+        <Property key="Visible" value="true"/>
+
+        <Widget type="HBox" position="0 0 800 48" align="Center Center" name="TabBox">
+            <Property key="Padding" value="0"/>
+            <Property key="Spacing" value="0"/>
+
+            <Widget type="Spacer"/>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24">
+                <Property key="ImageTexture" value="textures\omw_steam_button_l2.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="Button" skin="SandTextButton" align="Center" position="0 0 100 48" name="TabMap">
+                <Property key="Caption" value="#{sMap}"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+            </Widget>
+            <Widget type="Button" skin="SandTextButton" align="Center" position="0 0 100 48" name="TabInventory">
+                <Property key="Caption" value="#{sInventory}"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+            </Widget>
+            <Widget type="Button" skin="SandTextButton" align="Center" position="0 0 100 48" name="TabSpells">
+                <Property key="Caption" value="#{sMagicMenu}"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+            </Widget>
+            <Widget type="Button" skin="SandTextButton" align="Center" position="0 0 100 48" name="TabStats">
+                <Property key="Caption" value="#{sStats}"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+            </Widget>
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24">
+                <Property key="ImageTexture" value="textures\omw_steam_button_r2.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+
+            <Widget type="Spacer"/>
+        </Widget>
+    </Widget>
+</MyGUI>

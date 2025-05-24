@@ -172,6 +172,7 @@ set(BUILTIN_DATA_FILES
     mygui/openmw_infobox.layout
     mygui/openmw_interactive_messagebox.layout
     mygui/openmw_interactive_messagebox_notransp.layout
+    mygui/openmw_inventory_tabs.layout
     mygui/openmw_inventory_window.layout
     mygui/openmw_journal.layout
     mygui/openmw_journal.skin.xml

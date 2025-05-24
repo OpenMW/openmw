@@ -389,6 +389,7 @@ namespace MWBase
         virtual MWGui::WindowBase* getActiveControllerWindow() = 0;
         /// Cycle to the next window to receive controller events
         virtual void cycleActiveControllerWindow(bool next) = 0;
+        virtual void setActiveControllerWindow(MWGui::GuiMode mode, int activeIndex) = 0;
         virtual void updateControllerButtonsOverlay() = 0;
 
         // Used in Lua bindings

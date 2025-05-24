@@ -1012,7 +1012,7 @@ namespace MWGui
         {
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
             MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
-            window->setCoord(0, active ? 0 : viewSize.height + 1, viewSize.width, viewSize.height - 48);
+            window->setCoord(0, active ? 48 : viewSize.height + 49, viewSize.width, viewSize.height - 48 - 48);
 
             adjustPanes();
             updatePreviewSize();
