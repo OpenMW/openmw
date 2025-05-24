@@ -6,6 +6,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextIterator.h>
 #include <MyGUI_Window.h>
@@ -79,6 +80,11 @@ namespace MWGui
 
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
         t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.b = "#{sBack}";
+        }
 
         onWindowResize(t);
     }
@@ -722,5 +728,24 @@ namespace MWGui
         }
         else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
+    }
+
+    bool StatsWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+
+        return true;
+    }
+
+    void StatsWindow::setActiveControllerWindow(bool active)
+    {
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+        window->setCoord(0, active ? 0 : viewSize.height + 1, viewSize.width, viewSize.height - 48);
+
+        onWindowResize(window);
+
+        WindowBase::setActiveControllerWindow(active);
     }
 }

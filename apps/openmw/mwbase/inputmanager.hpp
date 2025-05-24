@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <MyGUI_Widget.h>
 #include <SDL_gamecontroller.h>
 #include <cstdint>
 
@@ -61,6 +62,7 @@ namespace MWBase
         virtual float getControllerAxisValue(SDL_GameControllerAxis axis) const = 0; // returns value in range [-1, 1]
         virtual int getMouseMoveX() const = 0;
         virtual int getMouseMoveY() const = 0;
+        virtual void warpMouseToWidget(MyGUI::Widget* widget) = 0;
 
         /// Actions available for binding to keyboard buttons
         virtual const std::initializer_list<int>& getActionKeySorting() = 0;

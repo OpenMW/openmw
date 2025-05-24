@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWGUI_COMPANIONWINDOW_H
 #define OPENMW_MWGUI_COMPANIONWINDOW_H
 
+#include "companionitemmodel.hpp"
+#include "itemmodel.hpp"
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
@@ -31,6 +33,9 @@ namespace MWGui
         void clear() override { resetReference(); }
 
         std::string_view getWindowIdForLua() const override { return "Companion"; }
+
+        MWGui::ItemView* getItemView() { return mItemView; }
+        ItemModel* getModel() { return mModel; }
 
     private:
         ItemView* mItemView;

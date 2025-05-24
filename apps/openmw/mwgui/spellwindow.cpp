@@ -2,6 +2,8 @@
 
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Window.h>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -55,6 +57,13 @@ namespace MWGui
         // Adjust the spell filtering widget size because of MyGUI limitations.
         int filterWidth = mSpellView->getSize().width - deleteButton->getSize().width - 3;
         mFilterEdit->setSize(filterWidth, mFilterEdit->getSize().height);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.r3 = "#{sInfo}";
+        }
     }
 
     void SpellWindow::onPinToggled()
@@ -258,5 +267,24 @@ namespace MWGui
             onEnchantedItemSelected(spell.mItem, spell.mActive);
         else
             onSpellSelected(spell.mId);
+    }
+
+    bool SpellWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+        else
+            mSpellView->onControllerButtonEvent(arg);
+
+        return true;
+    }
+
+    void SpellWindow::setActiveControllerWindow(bool active)
+    {
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+        window->setCoord(0, active ? 0 : viewSize.height + 1, viewSize.width, viewSize.height - 48);
+
+        WindowBase::setActiveControllerWindow(active);
     }
 }

@@ -9,6 +9,9 @@
 #include <components/widgets/box.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
+
 #include "tooltips.hpp"
 
 namespace MWGui
@@ -88,6 +91,9 @@ namespace MWGui
         const int spellHeight = Settings::gui().mFontSize + 2;
 
         mLines.clear();
+        mButtons.clear();
+        mGroupIndices.clear();
+        mControllerTooltip = false;
 
         while (mScrollView->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mScrollView->getChildAt(0));
@@ -115,6 +121,7 @@ namespace MWGui
             t->setCaption(spell.mName + captionSuffix);
             t->setTextAlign(MyGUI::Align::Left);
             adjustSpellWidget(spell, i, t);
+            mButtons.emplace_back(t);
 
             if (!spell.mCostColumn.empty() && mShowCostColumn)
             {
@@ -256,6 +263,8 @@ namespace MWGui
         }
         else
             mLines.emplace_back(groupWidget, (MyGUI::Widget*)nullptr, NoSpellIndex);
+
+        mGroupIndices.push_back(mButtons.size());
     }
 
     void SpellView::setSize(const MyGUI::IntSize& _value)
@@ -315,5 +324,88 @@ namespace MWGui
     void SpellView::resetScrollbars()
     {
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
+
+    void SpellView::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (mButtons.empty())
+            return;
+
+        int prevFocus = mControllerFocus;
+
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            // Select the focused item, if any.
+            if (mControllerFocus >= 0 && mControllerFocus < mButtons.size())
+                onSpellSelected(mButtons.at(mControllerFocus));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+        {
+            // Toggle info tooltip
+            mControllerTooltip = !mControllerTooltip;
+            if (mControllerTooltip && mControllerFocus >= 0 && mControllerFocus < mButtons.size())
+                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mButtons.at(mControllerFocus));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+            mControllerFocus--;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            mControllerFocus++;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            // Jump to first item in previous group
+            int prevGroupIndex = 0;
+            for (int groupIndex : mGroupIndices)
+            {
+                if (groupIndex >= mControllerFocus)
+                    break;
+                else
+                    prevGroupIndex = groupIndex;
+            }
+            mControllerFocus = prevGroupIndex;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            // Jump to first item in next group
+            for (int groupIndex : mGroupIndices)
+            {
+                if (groupIndex > mControllerFocus)
+                {
+                    mControllerFocus = groupIndex;
+                    break;
+                }
+            }
+        }
+
+        if (mControllerFocus < 0)
+            mControllerFocus = mButtons.size() - 1;
+        else if (mControllerFocus >= mButtons.size())
+            mControllerFocus = 0;
+
+        if (prevFocus != mControllerFocus)
+            updateControllerFocus(prevFocus, mControllerFocus);
+    }
+
+    void SpellView::updateControllerFocus(int prevFocus, int newFocus)
+    {
+        if (mButtons.empty())
+           return;
+
+        if (prevFocus >= 0 && prevFocus < mButtons.size())
+        {
+            Gui::SharedStateButton* prev = mButtons.at(prevFocus);
+            if (prev)
+                prev->onMouseLostFocus(nullptr);
+        }
+
+        if (newFocus >= 0 && newFocus < mButtons.size())
+        {
+            Gui::SharedStateButton* focused = mButtons.at(newFocus);
+            if (focused)
+            {
+                focused->onMouseSetFocus(nullptr);
+                if (mControllerTooltip)
+                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
+            }
+        }
     }
 }

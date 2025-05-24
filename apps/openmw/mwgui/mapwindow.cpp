@@ -12,6 +12,7 @@
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextIterator.h>
+#include <MyGUI_Window.h>
 
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/globalmap.hpp>
@@ -832,6 +833,14 @@ namespace MWGui
 
         mGlobalMap->setVisible(global);
         mLocalMap->setVisible(!global);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.x = global ? "#{sLocal}" : "#{sWorld}";
+            mControllerButtons.y = "#{sCenter}";
+            mControllerButtons.rStick = "#{sMove}";
+        }
     }
 
     void MapWindow::onNoteEditOk()
@@ -1208,6 +1217,8 @@ namespace MWGui
         mLocalMap->setVisible(!global);
 
         mButton->setCaptionWithReplacing(global ? "#{sLocal}" : "#{sWorld}");
+        mControllerButtons.x = global ? "#{sLocal}" : "#{sWorld}";
+        MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
     }
 
     void MapWindow::onPinToggled()
@@ -1366,6 +1377,49 @@ namespace MWGui
     void MapWindow::asyncPrepareSaveMap()
     {
         mGlobalMapRender->asyncWritePng();
+    }
+
+    bool MapWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+            onWorldButtonClicked(mButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
+            centerView();
+
+        return true;
+    }
+
+    bool MapWindow::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
+    {
+        int dx = arg.axis == SDL_CONTROLLER_AXIS_RIGHTX ? -10.0f * arg.value / 32767 : 0;
+        int dy = arg.axis == SDL_CONTROLLER_AXIS_RIGHTY ? -10.0f * arg.value / 32767 : 0;
+        if (dx == 0 && dy == 0)
+            return true;
+        else if (!Settings::map().mGlobal)
+        {
+            mNeedDoorMarkersUpdate = true;
+            mLocalMap->setViewOffset(
+                MyGUI::IntPoint(
+                    mLocalMap->getViewOffset().left + dx, mLocalMap->getViewOffset().top + dy));
+        }
+        else
+        {
+            mGlobalMap->setViewOffset(
+                MyGUI::IntPoint(
+                    mGlobalMap->getViewOffset().left + dx, mGlobalMap->getViewOffset().top + dy));
+        }
+        return true;
+    }
+
+    void MapWindow::setActiveControllerWindow(bool active)
+    {
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+        window->setCoord(0, active ? 0 : viewSize.height + 1, viewSize.width, viewSize.height - 48);
+
+        WindowBase::setActiveControllerWindow(active);
     }
 
     // -------------------------------------------------------------------

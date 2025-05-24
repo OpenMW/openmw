@@ -265,6 +265,11 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Map"; }
 
+    protected:
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
+
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

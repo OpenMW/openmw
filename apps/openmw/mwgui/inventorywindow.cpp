@@ -31,8 +31,11 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "companionwindow.hpp"
+#include "container.hpp"
 #include "countdialog.hpp"
 #include "draganddrop.hpp"
+#include "hud.hpp"
 #include "inventoryitemmodel.hpp"
 #include "itemview.hpp"
 #include "settings.hpp"
@@ -126,6 +129,13 @@ namespace MWGui
         mFilterAll->setStateSelected(true);
 
         setGuiMode(mGuiMode);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.r1 = "Filter";
+            mControllerButtons.r3 = "#{sInfo}";
+        }
 
         adjustPanes();
     }
@@ -302,7 +312,9 @@ namespace MWGui
             }
         }
 
-        if (count > 1 && !shift)
+        // Show a dialog to select a count of items, but not when using an item from the inventory
+        // in controller mode. In that case, we skip the dialog and just use one item immediately.
+        if (count > 1 && !shift && !(Settings::gui().mControllerMenus && mGuiMode == MWGui::GM_Inventory))
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
@@ -865,5 +877,148 @@ namespace MWGui
 
         const MyGUI::IntSize viewport = getPreviewViewportSize();
         return osg::Vec2f(normalisedX * float(viewport.width - 1), (1.0 - normalisedY) * float(viewport.height - 1));
+    }
+
+    ControllerButtonStr* InventoryWindow::getControllerButtons()
+    {
+        switch (mGuiMode)
+        {
+            case MWGui::GM_Companion:
+            case MWGui::GM_Container:
+                mControllerButtons.a = "Put";
+                mControllerButtons.x = "#{sTakeAll}";
+                mControllerButtons.y = "";
+                mControllerButtons.r2 = "#{sContainer}";
+                break;
+            case MWGui::GM_Barter:
+                mControllerButtons.a = "#{sSell}";
+                mControllerButtons.x = "";
+                mControllerButtons.y = "";
+                mControllerButtons.r2 = "#{sBarter}";
+                break;
+            case MWGui::GM_Inventory:
+            default:
+                mControllerButtons.a = "#{sEquip}";
+                mControllerButtons.x = "#{sDrop}";
+                mControllerButtons.y = "#{sUnequip}";
+                mControllerButtons.r2 = "";
+                break;
+        }
+        return &mControllerButtons;
+    }
+
+    bool InventoryWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            mItemView->onControllerButtonEvent(SDL_CONTROLLER_BUTTON_A);
+            // The following actions are done here, not in onItemSelectedFromSourceModel, because we
+            // want the mouse to work even in controller mode.
+            if (mGuiMode == MWGui::GM_Inventory && mDragAndDrop->mIsOnDragAndDrop)
+            {
+                // Drag and drop the item on the avatar to activate it.
+                onAvatarClicked(nullptr); // Equip or use
+                // Drop any remaining items back in inventory. This is needed when clicking on a
+                // stack of items; we only want to use the first item.
+                onBackgroundSelected();
+            }
+            else if (mGuiMode == MWGui::GM_Companion && mDragAndDrop->mIsOnDragAndDrop)
+            {
+                // Drag and drop the item on the companion's window.
+                MWGui::CompanionWindow* companionWindow =
+                    (MWGui::CompanionWindow *)MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0);
+                mDragAndDrop->drop(companionWindow->getModel(), companionWindow->getItemView());
+            }
+            else if (mGuiMode == MWGui::GM_Container && mDragAndDrop->mIsOnDragAndDrop)
+            {
+                // Drag and drop the item on the container window.
+                MWGui::ContainerWindow* containerWindow =
+                    (MWGui::ContainerWindow *)MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0);
+                mDragAndDrop->drop(containerWindow->getModel(), containerWindow->getItemView());
+            }
+            // GM_Barter is handled by onControllerButtonEvent. No other steps are necessary.
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            if (mGuiMode == MWGui::GM_Inventory)
+            {
+                // Drop the item into the gameworld
+                mItemView->onControllerButtonEvent(SDL_CONTROLLER_BUTTON_A);
+                if (mDragAndDrop->mIsOnDragAndDrop)
+                    MWBase::Environment::get().getWindowManager()->getHud()->dropDraggedItem(0.5f, 0.5f);
+            }
+            else if (mGuiMode == MWGui::GM_Container)
+            {
+                // Take all. Pass the button press to the container window and let it do the
+                // logic of taking all.
+                MWGui::ContainerWindow* containerWindow =
+                    (MWGui::ContainerWindow *)MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0);
+                containerWindow->onControllerButtonEvent(arg);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
+        {
+            if (mGuiMode == MWGui::GM_Inventory)
+            {
+                // Unequip an item.
+                mItemView->onControllerButtonEvent(SDL_CONTROLLER_BUTTON_A);
+                onBackgroundSelected(); // Drop on inventory background to unequip
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            if (mFilterAll->getStateSelected())
+                onFilterChanged(mFilterMisc);
+            else if (mFilterWeapon->getStateSelected())
+                onFilterChanged(mFilterAll);
+            else if (mFilterApparel->getStateSelected())
+                onFilterChanged(mFilterWeapon);
+            else if (mFilterMagic->getStateSelected())
+                onFilterChanged(mFilterApparel);
+            else if (mFilterMisc->getStateSelected())
+                onFilterChanged(mFilterMagic);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            if (mFilterAll->getStateSelected())
+                onFilterChanged(mFilterWeapon);
+            else if (mFilterWeapon->getStateSelected())
+                onFilterChanged(mFilterApparel);
+            else if (mFilterApparel->getStateSelected())
+                onFilterChanged(mFilterMagic);
+            else if (mFilterMagic->getStateSelected())
+                onFilterChanged(mFilterMisc);
+            else if (mFilterMisc->getStateSelected())
+                onFilterChanged(mFilterAll);
+        }
+        else
+        {
+            mItemView->onControllerButtonEvent(arg.button);
+        }
+
+        return true;
+    }
+
+    void InventoryWindow::setActiveControllerWindow(bool active)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Inventory)
+        {
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(0, active ? 0 : viewSize.height + 1, viewSize.width, viewSize.height - 48);
+
+            adjustPanes();
+            updatePreviewSize();
+        }
+
+        mItemView->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
     }
 }

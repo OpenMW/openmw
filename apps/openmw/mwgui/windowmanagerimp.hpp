@@ -185,7 +185,9 @@ namespace MWGui
         MWGui::CountDialog* getCountDialog() override;
         MWGui::ConfirmationDialog* getConfirmationDialog() override;
         MWGui::TradeWindow* getTradeWindow() override;
+        MWGui::HUD* getHud() override;
         MWGui::PostProcessorHud* getPostProcessorHud() override;
+        std::vector<MWGui::WindowBase*> getGuiModeWindows(GuiMode mode) override;
 
         /// Make the player use an item, while updating GUI state accordingly
         void useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions = false) override;

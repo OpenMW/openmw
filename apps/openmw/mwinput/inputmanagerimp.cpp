@@ -189,6 +189,13 @@ namespace MWInput
         return mMouseManager->getMouseMoveY();
     }
 
+    void InputManager::warpMouseToWidget(MyGUI::Widget* widget)
+    {
+        mMouseManager->warpMouseToWidget(widget);
+        mMouseManager->injectMouseMove(1, 0, 0);
+        MWBase::Environment::get().getWindowManager()->setCursorActive(true);
+    }
+
     const std::initializer_list<int>& InputManager::getActionKeySorting()
     {
         return mBindingsManager->getActionKeySorting();

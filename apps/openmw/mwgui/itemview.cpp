@@ -9,6 +9,10 @@
 
 #include <components/settings/values.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
 
@@ -75,8 +79,8 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            if (mControllerFocus >= mItemCount)
-                mControllerFocus = mItemCount - 1;
+            mControllerTooltip = false;
+            mControllerFocus = std::clamp(mControllerFocus, 0, mItemCount - 1);
             updateControllerFocus(-1, mControllerFocus);
         }
 
@@ -182,26 +186,49 @@ namespace MWGui
 
     void ItemView::setActiveControllerWindow(bool active)
     {
+        mControllerActiveWindow = active;
+
+        if (mControllerTooltip)
+        {
+            MWBase::Environment::get().getWindowManager()->setCursorActive(false);
+            mControllerTooltip = false;
+        }
+
         if (active)
             updateControllerFocus(-1, mControllerFocus);
         else
             updateControllerFocus(mControllerFocus, -1);
     }
 
-    void ItemView::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    void ItemView::onControllerButtonEvent(const unsigned char button)
     {
         if (!mItemCount)
             return;
 
         int prevFocus = mControllerFocus;
 
-        if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP && mControllerFocus % mRows != 0)
+        if (button == SDL_CONTROLLER_BUTTON_A)
+        {
+            // Select the focused item, if any.
+            if (mControllerFocus >= 0 && mControllerFocus < mItemCount)
+            {
+                MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+                onSelectedItem(dragArea->getChildAt(mControllerFocus));
+            }
+        }
+        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+        {
+            // Toggle info tooltip
+            mControllerTooltip = !mControllerTooltip;
+            updateControllerFocus(-1, mControllerFocus);
+        }
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP && mControllerFocus % mRows != 0)
             mControllerFocus--;
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN && mControllerFocus % mRows != mRows - 1)
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN && mControllerFocus % mRows != mRows - 1)
             mControllerFocus++;
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mControllerFocus >= mRows)
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mControllerFocus >= mRows)
             mControllerFocus -= mRows;
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mControllerFocus + mRows < mItemCount)
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mControllerFocus + mRows < mItemCount)
             mControllerFocus += mRows;
 
         if (mControllerFocus < 0)
@@ -213,25 +240,29 @@ namespace MWGui
             updateControllerFocus(prevFocus, mControllerFocus);
     }
 
-    void ItemView::updateControllerFocus(int _prevFocus, int _newFocus)
+    void ItemView::updateControllerFocus(int prevFocus, int newFocus)
     {
         if (!mItemCount)
             return;
 
         MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
 
-        if (_prevFocus >= 0 && _prevFocus < mItemCount)
+        if (prevFocus >= 0 && prevFocus < mItemCount)
         {
-            ItemWidget* prev = (ItemWidget *)dragArea->getChildAt(_prevFocus);
+            ItemWidget* prev = (ItemWidget *)dragArea->getChildAt(prevFocus);
             if (prev)
                 prev->setControllerFocus(false);
         }
 
-        if (_newFocus >= 0 && _newFocus < mItemCount)
+        if (mControllerActiveWindow && newFocus >= 0 && newFocus < mItemCount)
         {
-            ItemWidget* focused = (ItemWidget *)dragArea->getChildAt(_newFocus);
+            ItemWidget* focused = (ItemWidget *)dragArea->getChildAt(newFocus);
             if (focused)
+            {
                 focused->setControllerFocus(true);
+                if (mControllerTooltip)
+                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
+            }
         }
     }
 }

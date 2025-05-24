@@ -11,6 +11,7 @@
 
 #include <MyGUI_KeyCode.h>
 
+#include "../mwgui/hud.hpp"
 #include "../mwgui/mode.hpp"
 #include "../mwgui/windowbase.hpp"
 
@@ -158,7 +159,9 @@ namespace MWBase
         virtual MWGui::CountDialog* getCountDialog() = 0;
         virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
         virtual MWGui::TradeWindow* getTradeWindow() = 0;
+        virtual MWGui::HUD* getHud() = 0;
         virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
+        virtual std::vector<MWGui::WindowBase*> getGuiModeWindows(MWGui::GuiMode mode) = 0;
 
         /// Make the player use an item, while updating GUI state accordingly
         virtual void useItem(const MWWorld::Ptr& item, bool force = false) = 0;

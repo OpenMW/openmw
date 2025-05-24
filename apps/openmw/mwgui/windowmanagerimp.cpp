@@ -896,23 +896,13 @@ namespace MWGui
 
             return state.mWindows[activeIndex];
         }
-        else
-        {
-            // return pinned windows if visible
-            // REMOVEME
-            Log(Debug::Error) << "getTopWindow: " << mGuiModeStates[GM_Inventory].mWindows.size() << " pinned windows";
-            for (WindowBase* window : mGuiModeStates[GM_Inventory].mWindows)
-                if (window->isVisible())
-                    return window;
-                else
-                    Log(Debug::Error) << "-- Skipping hidden window " << window;
-        }
+
         return nullptr;
     }
 
     void WindowManager::cycleActiveControllerWindow(bool next)
     {
-        if (mGuiModes.empty())
+        if (!Settings::gui().mControllerMenus || mGuiModes.empty())
             return;
 
         GuiMode mode = mGuiModes.back();
@@ -1380,13 +1370,6 @@ namespace MWGui
         {
             for (WindowBase* window : mGuiModeStates[mode].mWindows)
                 window->setPtr(arg);
-
-            // Activate first visible window
-            mActiveControllerWindows[mode] = -1;
-            cycleActiveControllerWindow(true);
-
-            // REMOVEME
-            Log(Debug::Error) << "pushGuiMode: mode=" << mode << ", activeIndex=" << mActiveControllerWindows[mode];
         }
         catch (...)
         {
@@ -1398,6 +1381,13 @@ namespace MWGui
 
         updateVisible();
         MWBase::Environment::get().getLuaManager()->uiModeChanged(arg);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            // Activate first visible window. This needs to be called after updateVisible.
+            mActiveControllerWindows[mode] = std::max(mActiveControllerWindows[mode] - 1, -1);
+            cycleActiveControllerWindow(true);
+        }
     }
 
     void WindowManager::setCullMask(uint32_t mask)
@@ -1452,6 +1442,15 @@ namespace MWGui
         // To make sure that console window get focus again
         if (mConsole && mConsole->isVisible())
             mConsole->onOpen();
+
+        if (Settings::gui().mControllerMenus && !mGuiModes.empty())
+        {
+            // Re-apply any controller-specific window changes.
+            const GuiMode mode = mGuiModes.back();
+            int winCount = mGuiModeStates[mode].mWindows.size();
+            for (int i = 0; i < winCount; i++)
+                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(i == mActiveControllerWindows[mode]);
+        }
     }
 
     void WindowManager::removeGuiMode(GuiMode mode)
@@ -1577,6 +1576,10 @@ namespace MWGui
         mConsole->executeFile(path);
     }
 
+    std::vector<MWGui::WindowBase*> WindowManager::getGuiModeWindows(GuiMode mode)
+    {
+        return mGuiModeStates[mode].mWindows;
+    }
     MWGui::InventoryWindow* WindowManager::getInventoryWindow()
     {
         return mInventoryWindow;
@@ -1588,6 +1591,10 @@ namespace MWGui
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog()
     {
         return mConfirmationDialog;
+    }
+    MWGui::HUD* WindowManager::getHud()
+    {
+        return mHud;
     }
     MWGui::TradeWindow* WindowManager::getTradeWindow()
     {
@@ -2119,20 +2126,22 @@ namespace MWGui
     void WindowManager::updatePinnedWindows()
     {
         mInventoryWindow->setPinned(Settings::windows().mInventoryPin);
-        if (Settings::windows().mInventoryHidden)
-            mShown = (GuiWindow)(mShown ^ GW_Inventory);
-
         mMap->setPinned(Settings::windows().mMapPin);
-        if (Settings::windows().mMapHidden)
-            mShown = (GuiWindow)(mShown ^ GW_Map);
-
         mSpellWindow->setPinned(Settings::windows().mSpellsPin);
-        if (Settings::windows().mSpellsHidden)
-            mShown = (GuiWindow)(mShown ^ GW_Magic);
-
         mStatsWindow->setPinned(Settings::windows().mStatsPin);
-        if (Settings::windows().mStatsHidden)
-            mShown = (GuiWindow)(mShown ^ GW_Stats);
+
+        // Hide hidden inventory windows, but not in controller mode.
+        if (!Settings::gui().mControllerMenus)
+        {
+            if (Settings::windows().mInventoryHidden)
+                mShown = (GuiWindow)(mShown ^ GW_Inventory);
+            if (Settings::windows().mMapHidden)
+                mShown = (GuiWindow)(mShown ^ GW_Map);
+            if (Settings::windows().mSpellsHidden)
+                mShown = (GuiWindow)(mShown ^ GW_Magic);
+            if (Settings::windows().mStatsHidden)
+                mShown = (GuiWindow)(mShown ^ GW_Stats);
+        }
     }
 
     void WindowManager::pinWindow(GuiWindow window)

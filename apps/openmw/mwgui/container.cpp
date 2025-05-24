@@ -58,9 +58,9 @@ namespace MWGui
         setCoord(200, 0, 600, 300);
 
         mControllerButtons.a = "#{sTake}";
-        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.b = "#{sBack}";
         mControllerButtons.x = "#{sTakeAll}";
-        mControllerButtons.y = "#{sInfo}";
+        mControllerButtons.r3 = "#{sInfo}";
         mControllerButtons.l2 = "#{sInventory}";
     }
 
@@ -385,12 +385,13 @@ namespace MWGui
             if (mDisposeCorpseButton->getVisible())
                 onDisposeCorpseButtonClicked(mDisposeCorpseButton);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ||
+            arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
-            mItemView->onControllerButtonEvent(arg);
+            mItemView->onControllerButtonEvent(arg.button);
         }
 
         return true;

@@ -35,7 +35,7 @@ namespace MWGui
         void setActiveControllerWindow(bool active);
         int getControllerFocus() { return mControllerFocus; }
         int getItemCount() { return mItemCount; }
-        void onControllerButtonEvent(const SDL_ControllerButtonEvent& arg);
+        void onControllerButtonEvent(const unsigned char button);
 
     private:
         void initialiseOverride() override;
@@ -55,6 +55,8 @@ namespace MWGui
         int mItemCount = 0;
         int mRows;
         int mControllerFocus = 0;
+        bool mControllerTooltip;
+        bool mControllerActiveWindow;
         void updateControllerFocus(int prevFocus, int newFocus);
     };
 
