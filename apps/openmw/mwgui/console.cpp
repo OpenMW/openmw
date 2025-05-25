@@ -465,7 +465,6 @@ namespace MWGui
 
     void Console::findOccurrence(const SearchDirection direction)
     {
-
         if (mCurrentSearchTerm.empty())
         {
             return;
@@ -478,17 +477,16 @@ namespace MWGui
         size_t firstIndex{ 0 };
         size_t lastIndex{ historyText.length() };
 
-        // If search is not the first adjust the range based on the direction and previous occurrence.
+        // If this isn't the first search, adjust the range based on the previous occurrence.
         if (mCurrentOccurrenceIndex != std::string::npos)
         {
-            if (direction == SearchDirection::Forward && mCurrentOccurrenceIndex > 1)
+            if (direction == SearchDirection::Forward)
             {
                 firstIndex = mCurrentOccurrenceIndex + mCurrentOccurrenceLength;
             }
-            else if (direction == SearchDirection::Reverse
-                && (historyText.length() - mCurrentOccurrenceIndex) > mCurrentOccurrenceLength)
+            else if (direction == SearchDirection::Reverse)
             {
-                lastIndex = mCurrentOccurrenceIndex - 1;
+                lastIndex = mCurrentOccurrenceIndex;
             }
         }
 
@@ -523,6 +521,13 @@ namespace MWGui
     void Console::findInHistoryText(const std::string& historyText, const SearchDirection direction,
         const size_t firstIndex, const size_t lastIndex)
     {
+        if (lastIndex <= firstIndex)
+        {
+            mCurrentOccurrenceIndex = std::string::npos;
+            mCurrentOccurrenceLength = 0;
+            return;
+        }
+
         if (mRegExSearch)
         {
             findWithRegex(historyText, direction, firstIndex, lastIndex);
@@ -570,7 +575,7 @@ namespace MWGui
         const size_t firstIndex, const size_t lastIndex)
     {
         // Search in given text interval for search term
-        const size_t substringLength{ (lastIndex - firstIndex) + 1 };
+        const size_t substringLength = lastIndex - firstIndex;
         const std::string_view historyTextView((historyText.c_str() + firstIndex), substringLength);
         if (direction == SearchDirection::Forward)
         {
