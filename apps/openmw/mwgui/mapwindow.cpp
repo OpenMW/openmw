@@ -1415,9 +1415,16 @@ namespace MWGui
 
     void MapWindow::setActiveControllerWindow(bool active)
     {
+        // Fill the screen, or limit to a certain size on large screens. Size chosen to
+        // show the entire local map without scrolling.
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        int width = std::min(viewSize.width, 1552);
+        int height = std::min(viewSize.height - 48 - 48, 1572);
+        int x = (viewSize.width - width) / 2;
+        int y = (viewSize.height - height) / 2;
+
         MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
-        window->setCoord(0, active ? 48 : viewSize.height + 49, viewSize.width, viewSize.height - 48 - 48);
+        window->setCoord(x, active ? y : viewSize.height + 1, width, height);
 
         WindowBase::setActiveControllerWindow(active);
     }
