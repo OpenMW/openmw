@@ -7,6 +7,7 @@
 #include <QClipboard>
 #include <QMenu>
 #include <QModelIndex>
+#include <QProgressDialog>
 #include <QSortFilterProxyModel>
 
 ContentSelectorView::ContentSelector::ContentSelector(QWidget* parent, bool showOMWScripts)
@@ -292,27 +293,33 @@ void ContentSelectorView::ContentSelector::slotShowContextMenu(const QPoint& pos
     mContextMenu->exec(globalPos);
 }
 
-void ContentSelectorView::ContentSelector::setCheckStateForMultiSelectedItems(bool checked)
+void ContentSelectorView::ContentSelector::setCheckStateForMultiSelectedItems(Qt::CheckState checkState)
 {
-    Qt::CheckState checkState = checked ? Qt::Checked : Qt::Unchecked;
-    for (const QModelIndex& index : ui->addonView->selectionModel()->selectedIndexes())
+    const QModelIndexList selectedIndexes = ui->addonView->selectionModel()->selectedIndexes();
+
+    QProgressDialog progressDialog("Updating content selection", {}, 0, static_cast<int>(selectedIndexes.size()));
+    progressDialog.setWindowModality(Qt::WindowModal);
+    progressDialog.setValue(0);
+
+    for (qsizetype i = 0, n = selectedIndexes.size(); i < n; ++i)
     {
-        QModelIndex sourceIndex = mAddonProxyModel->mapToSource(index);
+        const QModelIndex sourceIndex = mAddonProxyModel->mapToSource(selectedIndexes[i]);
+
         if (mContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() != checkState)
-        {
             mContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
-        }
+
+        progressDialog.setValue(static_cast<int>(i + 1));
     }
 }
 
 void ContentSelectorView::ContentSelector::slotUncheckMultiSelectedItems()
 {
-    setCheckStateForMultiSelectedItems(false);
+    setCheckStateForMultiSelectedItems(Qt::Unchecked);
 }
 
 void ContentSelectorView::ContentSelector::slotCheckMultiSelectedItems()
 {
-    setCheckStateForMultiSelectedItems(true);
+    setCheckStateForMultiSelectedItems(Qt::Checked);
 }
 
 void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()

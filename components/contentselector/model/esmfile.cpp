@@ -2,13 +2,15 @@
 
 ContentSelectorModel::EsmFile::EsmFile(const QString& fileName, ModelItem* parent)
     : ModelItem(parent)
-    , mFileName(fileName)
 {
+    setFileName(fileName);
 }
 
 void ContentSelectorModel::EsmFile::setFileName(const QString& fileName)
 {
     mFileName = fileName;
+    mHasGameExtension = (mFileName.endsWith(QLatin1String(".esm"), Qt::CaseInsensitive)
+        || mFileName.endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive));
 }
 
 void ContentSelectorModel::EsmFile::setAuthor(const QString& author)
@@ -53,9 +55,7 @@ void ContentSelectorModel::EsmFile::setFromAnotherConfigFile(bool fromAnotherCon
 
 bool ContentSelectorModel::EsmFile::isGameFile() const
 {
-    return (mGameFiles.size() == 0)
-        && (mFileName.endsWith(QLatin1String(".esm"), Qt::CaseInsensitive)
-            || mFileName.endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive));
+    return mHasGameExtension && mGameFiles.empty();
 }
 
 QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) const
@@ -108,7 +108,7 @@ void ContentSelectorModel::EsmFile::setFileProperty(const FileProperty prop, con
     switch (prop)
     {
         case FileProperty_FileName:
-            mFileName = value;
+            setFileName(value);
             break;
 
         case FileProperty_Author:

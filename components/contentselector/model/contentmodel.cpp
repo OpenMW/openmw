@@ -13,6 +13,7 @@
 #include <QDirIterator>
 #include <QFont>
 #include <QIODevice>
+#include <QProgressDialog>
 
 #include <components/esm/format.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -116,37 +117,26 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
     if (file == mGameFile)
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
 
-    Qt::ItemFlags returnFlags;
+    // files with no dependencies can always be checked
+    if (file->gameFiles().empty())
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
 
-    // addon can be checked if its gamefile is
-    // ... special case, addon with no dependency can be used with any gamefile.
-    bool gamefileChecked = false;
-    bool noGameFiles = true;
-    for (const QString& fileName : file->gameFiles())
+    // Show the file if the game it is for is enabled.
+    // NB: The file may theoretically depend on multiple games.
+    // Early exit means that a file is visible only if its earliest found game dependency is enabled.
+    // This can be counterintuitive, but it is okay for non-bizarre content setups. And also faster.
+    for (const EsmFile* depFile : mFiles)
     {
-        for (QListIterator<EsmFile*> dependencyIter(mFiles); dependencyIter.hasNext(); dependencyIter.next())
+        if (depFile->isGameFile() && file->gameFiles().contains(depFile->fileName(), Qt::CaseInsensitive))
         {
-            // compare filenames only.  Multiple instances
-            // of the filename (with different paths) is not relevant here.
-            EsmFile* depFile = dependencyIter.peekNext();
-            if (!depFile->isGameFile() || depFile->fileName().compare(fileName, Qt::CaseInsensitive) != 0)
-                continue;
-
-            noGameFiles = false;
-            if (depFile->builtIn() || depFile->fromAnotherConfigFile() || mCheckedFiles.contains(depFile))
-            {
-                gamefileChecked = true;
+            if (!depFile->builtIn() && !depFile->fromAnotherConfigFile() && !mCheckedFiles.contains(depFile))
                 break;
-            }
+
+            return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
         }
     }
 
-    if (gamefileChecked || noGameFiles)
-    {
-        returnFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
-    }
-
-    return returnFlags;
+    return Qt::NoItemFlags;
 }
 
 QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int role) const
@@ -707,10 +697,14 @@ bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) c
 
 void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileList)
 {
+    QProgressDialog progressDialog("Setting content list", {}, 0, static_cast<int>(fileList.size()));
+    progressDialog.setWindowModality(Qt::WindowModal);
+    progressDialog.setValue(0);
+
     int previousPosition = -1;
-    for (const QString& filepath : fileList)
+    for (qsizetype i = 0, n = fileList.size(); i < n; ++i)
     {
-        const EsmFile* file = item(filepath);
+        const EsmFile* file = item(fileList[i]);
         if (setCheckState(file, true))
         {
             // setCheckState already gracefully handles builtIn and fromAnotherConfigFile
@@ -725,7 +719,10 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
                 previousPosition = filePosition;
             }
         }
+
+        progressDialog.setValue(static_cast<int>(i + 1));
     }
+
     refreshModel();
 }
 
