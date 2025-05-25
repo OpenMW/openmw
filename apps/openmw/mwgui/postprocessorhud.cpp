@@ -31,6 +31,10 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+
+#include <components/files/configurationmanager.hpp>
+extern Files::ConfigurationManager *g_cfgMgr;
+
 namespace MWGui
 {
     namespace
@@ -243,6 +247,8 @@ namespace MWGui
 
     void PostProcessorHud::onClose()
     {
+        Settings::ShaderManager::get().save();
+        Settings::Manager::saveUser(g_cfgMgr->getUserConfigPath() / "settings.cfg");
         toggleMode(Settings::ShaderManager::Mode::Normal);
     }
 
