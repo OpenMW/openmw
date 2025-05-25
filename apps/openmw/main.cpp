@@ -207,6 +207,8 @@ namespace
     };
 }
 
+Files::ConfigurationManager *g_cfgMgr;
+
 int runApplication(int argc, char* argv[])
 {
     Platform::init();
@@ -217,6 +219,7 @@ int runApplication(int argc, char* argv[])
 
     osg::setNotifyHandler(new OSGLogHandler());
     Files::ConfigurationManager cfgMgr;
+    g_cfgMgr = &cfgMgr;
     std::unique_ptr<OMW::Engine> engine = std::make_unique<OMW::Engine>(cfgMgr);
 
     engine->setRecastMaxLogLevel(Debug::getRecastMaxLogLevel());
