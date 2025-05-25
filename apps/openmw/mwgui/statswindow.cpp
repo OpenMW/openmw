@@ -83,6 +83,7 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
+            setPinButtonVisible(false);
             mControllerButtons.lStick = "#{sInfo}";
             mControllerButtons.rStick = "#{sScrolldown}";
             mControllerButtons.b = "#{sBack}";
@@ -742,19 +743,22 @@ namespace MWGui
 
     void StatsWindow::setActiveControllerWindow(bool active)
     {
-        // Fill the screen, or limit to a certain size on large screens. Size chosen to
-        // show all stats.
-        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        int width = std::min(viewSize.width, 600);
-        int height = std::min(viewSize.height - 48 - 48, 750);
-        int x = (viewSize.width - width) / 2;
-        int y = (viewSize.height - height) / 2;
+        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // show all stats.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, 600);
+            int height = std::min(viewSize.height - 48 - 48, 750);
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
 
-        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
-        window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
 
-        if (active)
-            onWindowResize(window);
+            if (active)
+                onWindowResize(window);
+        }
 
         WindowBase::setActiveControllerWindow(active);
     }

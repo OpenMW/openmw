@@ -60,6 +60,7 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
+            setPinButtonVisible(false);
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.b = "#{sBack}";
             mControllerButtons.r3 = "#{sInfo}";
@@ -281,16 +282,19 @@ namespace MWGui
 
     void SpellWindow::setActiveControllerWindow(bool active)
     {
-        // Fill the screen, or limit to a certain size on large screens. Size chosen to
-        // match the size of the stats window.
-        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        int width = std::min(viewSize.width, 600);
-        int height = std::min(viewSize.height - 48 - 48, 750);
-        int x = (viewSize.width - width) / 2;
-        int y = (viewSize.height - height) / 2;
+        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // match the size of the stats window.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, 600);
+            int height = std::min(viewSize.height - 48 - 48, 750);
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
 
-        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
-        window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+        }
 
         if (active)
             mSpellView->update();

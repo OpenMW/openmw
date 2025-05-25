@@ -1029,7 +1029,20 @@ namespace MWGui
     void MapWindow::setVisible(bool visible)
     {
         WindowBase::setVisible(visible);
-        mButton->setVisible(visible && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_None);
+        MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+        mButton->setVisible(visible && mode != MWGui::GM_None);
+
+        if (Settings::gui().mControllerMenus && mode == MWGui::GM_None && pinned() && visible)
+        {
+            // Restore the window to pinned size.
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            const float x = Settings::windows().mMapX * viewSize.width;
+            const float y = Settings::windows().mMapY * viewSize.height;
+            const float w = Settings::windows().mMapW * viewSize.width;
+            const float h = Settings::windows().mMapH * viewSize.height;
+            window->setCoord(x, y, w, h);
+        }
     }
 
     void MapWindow::renderGlobalMap()
@@ -1436,16 +1449,19 @@ namespace MWGui
 
     void MapWindow::setActiveControllerWindow(bool active)
     {
-        // Fill the screen, or limit to a certain size on large screens. Size chosen to
-        // show the entire local map without scrolling.
-        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        int width = std::min(viewSize.width, 1552);
-        int height = std::min(viewSize.height - 48 - 48, 1572);
-        int x = (viewSize.width - width) / 2;
-        int y = (viewSize.height - height) / 2;
+        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // show the entire local map without scrolling.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, 1552);
+            int height = std::min(viewSize.height - 48 - 48, 1572);
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
 
-        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
-        window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+        }
 
         WindowBase::setActiveControllerWindow(active);
     }

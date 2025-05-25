@@ -216,7 +216,7 @@ namespace MWGui
     {
         mGuiMode = mode;
         const WindowSettingValues settings = getModeSettings(mGuiMode);
-        setPinButtonVisible(mode == GM_Inventory);
+        setPinButtonVisible(mode == GM_Inventory && !Settings::gui().mControllerMenus);
 
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
 

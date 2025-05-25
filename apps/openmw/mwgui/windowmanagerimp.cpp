@@ -1901,6 +1901,11 @@ namespace MWGui
 
     void WindowManager::onWindowChangeCoord(MyGUI::Window* window)
     {
+        // If using controller menus, don't persist changes to size of the stats or magic
+        // windows.
+        if (Settings::gui().mControllerMenus && (window == (MyGUI::Window*)mStatsWindow || window == (MyGUI::Window*)mSpellWindow))
+            return;
+
         const auto it = mTrackedWindows.find(window);
         if (it == mTrackedWindows.end())
             return;
@@ -2147,23 +2152,31 @@ namespace MWGui
 
     void WindowManager::updatePinnedWindows()
     {
-        mInventoryWindow->setPinned(Settings::windows().mInventoryPin);
-        mMap->setPinned(Settings::windows().mMapPin);
-        mSpellWindow->setPinned(Settings::windows().mSpellsPin);
-        mStatsWindow->setPinned(Settings::windows().mStatsPin);
-
-        // Hide hidden inventory windows, but not in controller mode.
-        if (!Settings::gui().mControllerMenus)
+        if (Settings::gui().mControllerMenus)
         {
-            if (Settings::windows().mInventoryHidden)
-                mShown = (GuiWindow)(mShown ^ GW_Inventory);
-            if (Settings::windows().mMapHidden)
-                mShown = (GuiWindow)(mShown ^ GW_Map);
-            if (Settings::windows().mSpellsHidden)
-                mShown = (GuiWindow)(mShown ^ GW_Magic);
-            if (Settings::windows().mStatsHidden)
-                mShown = (GuiWindow)(mShown ^ GW_Stats);
+            // In controller mode, don't hide any menus and only allow pinning the map.
+            mInventoryWindow->setPinned(false);
+            mMap->setPinned(Settings::windows().mMapPin);
+            mSpellWindow->setPinned(false);
+            mStatsWindow->setPinned(false);
+            return;
         }
+
+        mInventoryWindow->setPinned(Settings::windows().mInventoryPin);
+        if (Settings::windows().mInventoryHidden)
+            mShown = (GuiWindow)(mShown ^ GW_Inventory);
+
+        mMap->setPinned(Settings::windows().mMapPin);
+        if (Settings::windows().mMapHidden)
+            mShown = (GuiWindow)(mShown ^ GW_Map);
+
+        mSpellWindow->setPinned(Settings::windows().mSpellsPin);
+        if (Settings::windows().mSpellsHidden)
+            mShown = (GuiWindow)(mShown ^ GW_Magic);
+
+        mStatsWindow->setPinned(Settings::windows().mStatsPin);
+        if (Settings::windows().mStatsHidden)
+            mShown = (GuiWindow)(mShown ^ GW_Stats);
     }
 
     void WindowManager::pinWindow(GuiWindow window)
