@@ -83,6 +83,8 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
+            mControllerButtons.lStick = "#{sInfo}";
+            mControllerButtons.rStick = "#{sScrolldown}";
             mControllerButtons.b = "#{sBack}";
         }
 
@@ -751,7 +753,8 @@ namespace MWGui
         MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
         window->setCoord(x, active ? y : viewSize.height + 1, width, height);
 
-        onWindowResize(window);
+        if (active)
+            onWindowResize(window);
 
         WindowBase::setActiveControllerWindow(active);
     }

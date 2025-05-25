@@ -292,6 +292,9 @@ namespace MWGui
         MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
         window->setCoord(x, active ? y : viewSize.height + 1, width, height);
 
+        if (active)
+            mSpellView->update();
+
         WindowBase::setActiveControllerWindow(active);
     }
 }

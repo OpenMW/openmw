@@ -11,6 +11,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "tooltips.hpp"
 
@@ -337,7 +338,10 @@ namespace MWGui
         {
             // Select the focused item, if any.
             if (mControllerFocus >= 0 && mControllerFocus < mButtons.size())
+            {
                 onSpellSelected(mButtons.at(mControllerFocus));
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+            }
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
         {

@@ -957,6 +957,7 @@ namespace MWGui
             mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(i == activeIndex);
 
         updateControllerButtonsOverlay();
+        setCursorActive(false);
 
         if (winCount > 1)
             playSound(ESM::RefId::stringRefId("Menu Size"));

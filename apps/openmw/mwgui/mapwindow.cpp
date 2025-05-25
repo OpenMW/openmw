@@ -1384,20 +1384,42 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
         else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
             onWorldButtonClicked(mButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
+        {
             centerView();
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+            shiftMap(0, 100);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            shiftMap(0, -100);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            shiftMap(100, 0);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            shiftMap(-100, 0);
 
         return true;
     }
 
     bool MapWindow::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
     {
-        int dx = arg.axis == SDL_CONTROLLER_AXIS_RIGHTX ? -10.0f * arg.value / 32767 : 0;
-        int dy = arg.axis == SDL_CONTROLLER_AXIS_RIGHTY ? -10.0f * arg.value / 32767 : 0;
+        int dx = arg.axis == SDL_CONTROLLER_AXIS_RIGHTX ? -30.0f * arg.value / 32767 : 0;
+        int dy = arg.axis == SDL_CONTROLLER_AXIS_RIGHTY ? -30.0f * arg.value / 32767 : 0;
+        shiftMap(dx, dy);
+
+        return true;
+    }
+
+    void MapWindow::shiftMap(int dx, int dy)
+    {
         if (dx == 0 && dy == 0)
-            return true;
-        else if (!Settings::map().mGlobal)
+            return;
+
+        if (!Settings::map().mGlobal)
         {
             mNeedDoorMarkersUpdate = true;
             mLocalMap->setViewOffset(
@@ -1410,7 +1432,6 @@ namespace MWGui
                 MyGUI::IntPoint(
                     mGlobalMap->getViewOffset().left + dx, mGlobalMap->getViewOffset().top + dy));
         }
-        return true;
     }
 
     void MapWindow::setActiveControllerWindow(bool active)
