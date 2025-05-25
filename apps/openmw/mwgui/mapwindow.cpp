@@ -1463,6 +1463,12 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditNoteDialog::onCancelButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditNoteDialog::onOkButtonClicked);
         mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditNoteDialog::onDeleteButtonClicked);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.a = "#{sOk}";
+            mControllerButtons.b = "#{sCancel}";
+        }
     }
 
     void EditNoteDialog::showDeleteButton(bool show)
@@ -1490,6 +1496,13 @@ namespace MWGui
         WindowModal::onOpen();
         center();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = getDeleteButtonShown() ? 1 : 0;
+            mOkButton->setStateSelected(true);
+            mCancelButton->setStateSelected(false);
+        }
     }
 
     void EditNoteDialog::onCancelButtonClicked(MyGUI::Widget* sender)
@@ -1505,6 +1518,78 @@ namespace MWGui
     void EditNoteDialog::onDeleteButtonClicked(MyGUI::Widget* sender)
     {
         eventDeleteClicked();
+    }
+
+    ControllerButtonStr* EditNoteDialog::getControllerButtons()
+    {
+        mControllerButtons.x = getDeleteButtonShown() ? "#{sDelete}" : "";
+        return &mControllerButtons;
+    }
+
+    bool EditNoteDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (getDeleteButtonShown())
+            {
+                if (mControllerFocus == 0)
+                    onDeleteButtonClicked(mDeleteButton);
+                else if (mControllerFocus == 1)
+                    onOkButtonClicked(mOkButton);
+                else
+                    onCancelButtonClicked(mCancelButton);
+            }
+            else
+            {
+                if (mControllerFocus == 0)
+                    onOkButtonClicked(mOkButton);
+                else
+                    onCancelButtonClicked(mCancelButton);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelButtonClicked(mCancelButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            if (getDeleteButtonShown())
+                onDeleteButtonClicked(mDeleteButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            if (getDeleteButtonShown())
+            {
+                mControllerFocus = wrap(mControllerFocus - 1, 3);
+                mDeleteButton->setStateSelected(mControllerFocus == 0);
+                mOkButton->setStateSelected(mControllerFocus == 1);
+                mCancelButton->setStateSelected(mControllerFocus == 2);
+            }
+            else
+            {
+                mControllerFocus = 0;
+                mOkButton->setStateSelected(mControllerFocus == 0);
+                mCancelButton->setStateSelected(mControllerFocus == 1);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            if (getDeleteButtonShown())
+            {
+                mControllerFocus = wrap(mControllerFocus + 1, 3);
+                mDeleteButton->setStateSelected(mControllerFocus == 0);
+                mOkButton->setStateSelected(mControllerFocus == 1);
+                mCancelButton->setStateSelected(mControllerFocus == 2);
+            }
+            else
+            {
+                mControllerFocus = 1;
+                mOkButton->setStateSelected(mControllerFocus == 0);
+                mCancelButton->setStateSelected(mControllerFocus == 1);
+            }
+        }
+
+        return true;
     }
 
     bool LocalMapBase::MarkerUserData::isPositionExplored() const
