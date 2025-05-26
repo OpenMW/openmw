@@ -84,9 +84,8 @@ namespace MWGui
             case ESM::QuickKeys::Type::MagicItem:
             {
                 MWWorld::Ptr item = *mKey[index].button->getUserData<MWWorld::Ptr>();
-                // Make sure the item is available and is not broken
-                if (item.isEmpty() || item.getCellRef().getCount() < 1
-                    || (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
+                // Make sure the item is available
+                if (item.isEmpty() || item.getCellRef().getCount() < 1)
                 {
                     // Try searching for a compatible replacement
                     item = store.findReplacement(mKey[index].id);
@@ -382,18 +381,29 @@ namespace MWGui
             if (it == store.end())
                 item = nullptr;
 
-            // check the item is available and not broken
-            if (item.isEmpty() || item.getCellRef().getCount() < 1
-                || (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
+            // check the quickkey item is available
+            if (item.isEmpty() || item.getCellRef().getCount() < 1)
             {
-                item = store.findReplacement(key->id);
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
+                return;
+            }
 
-                if (item.isEmpty() || item.getCellRef().getCount() < 1)
+            // check the quickkey item is not broken
+            if (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0)
+            {
+                const std::vector<int>& equipmentSlots = item.getClass().getEquipmentSlots(item).first;
+                if (!equipmentSlots.empty())
                 {
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
-
-                    return;
+                    const auto& itSlot = store.getSlot(equipmentSlots.front());
+                    // Morrowind.exe behaviour:
+                    // Only display item broken message if;
+                    // no item in the to-be-equipped slot
+                    // or broken quickkey item and currently equipped item id is different
+                    // It doesn't find a replacement
+                    if (itSlot == store.end() || (item.getCellRef().getRefId() != itSlot->getCellRef().getRefId()))
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
                 }
+                return;
             }
 
             if (key->type == ESM::QuickKeys::Type::Item)
