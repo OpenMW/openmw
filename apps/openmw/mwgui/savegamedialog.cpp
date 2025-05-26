@@ -17,6 +17,7 @@
 #include <components/files/conversion.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/l10n/manager.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/misc/timeconvert.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
@@ -28,6 +29,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/timestamp.hpp"
 
 #include "../mwstate/character.hpp"
 
@@ -147,6 +149,27 @@ namespace MWGui
         WindowModal::onOpen();
 
         mSaveNameEdit->setCaption({});
+        if (Settings::gui().mControllerMenus && mSaving)
+        {
+            // For controller mode, set a default save file name. The format is
+            // "Day 24 - Last Steed 7 p.m."
+            const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
+            std::string_view month = timeManager.getMonthName();
+            int hour = static_cast<int>(timeManager.getTimeStamp().getHour());
+            bool pm = hour >= 12;
+            if (hour >= 13)
+                hour -= 12;
+            if (hour == 0)
+                hour = 12;
+
+            ESM::EpochTimeStamp currentDate = timeManager.getEpochTimeStamp();
+            std::string daysPassed = Misc::StringUtils::format("#{Calendar:day} %i", timeManager.getTimeStamp().getDay());
+            std::string_view formattedHour(pm ? "#{Calendar:pm}" : "#{Calendar:am}");
+            std::string autoFilename
+                = Misc::StringUtils::format("%s - %i %s %i %s", daysPassed, currentDate.mDay, month, hour, formattedHour);
+
+            mSaveNameEdit->setCaptionWithReplacing(autoFilename);
+        }
         if (mSaving)
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveNameEdit);
         else
