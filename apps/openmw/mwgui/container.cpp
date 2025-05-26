@@ -360,7 +360,7 @@ namespace MWGui
 
     ControllerButtonStr* ContainerWindow::getControllerButtons()
     {
-        mControllerButtons.l1 = mDisposeCorpseButton->getVisible() ? "#{sDisposeofCorpse}" : "";
+        mControllerButtons.r1 = mDisposeCorpseButton->getVisible() ? "#{sDisposeofCorpse}" : "";
         return &mControllerButtons;
     }
 
@@ -380,7 +380,7 @@ namespace MWGui
         {
             onTakeAllButtonClicked(mTakeButton);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
         {
             if (mDisposeCorpseButton->getVisible())
                 onDisposeCorpseButtonClicked(mDisposeCorpseButton);

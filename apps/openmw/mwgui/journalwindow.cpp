@@ -281,6 +281,8 @@ namespace
 
             updateShowingPages();
             updateCloseJournalButton();
+
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void setOptionsMode()
@@ -480,6 +482,7 @@ namespace
             popBook();
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void addControllerButtons(Gui::MWList* _list, int _selectedIndex)
@@ -518,6 +521,7 @@ namespace
                 addControllerButtons(list, mSelectedQuest);
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
@@ -533,6 +537,7 @@ namespace
             setVisible(ShowActiveBTN, false);
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         struct AddNamesToList
@@ -594,6 +599,7 @@ namespace
             }
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
@@ -678,6 +684,7 @@ namespace
             mControllerButtons.b = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{sClose}";
             mControllerButtons.l1 = mOptionsMode ? "" : "#{sPrev}";
             mControllerButtons.r1 = mOptionsMode ? "" : "#{sNext}";
+            mControllerButtons.r3 = mOptionsMode && mQuestMode ? "Show All" : "";
             return &mControllerButtons;
         }
 
@@ -757,6 +764,13 @@ namespace
                         notifyTopics(getWidget<MyGUI::Widget>(TopicsBTN));
                 }
                 return true;
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK) // R3: Show All/Some
+            {
+                if (mAllQuests)
+                    notifyShowActive(getWidget<MyGUI::Widget>(ShowActiveBTN));
+                else
+                    notifyShowAll(getWidget<MyGUI::Widget>(ShowAllBTN));
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
             {
