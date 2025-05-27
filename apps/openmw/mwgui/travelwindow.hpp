@@ -26,6 +26,7 @@ namespace MWGui
         MyGUI::TextBox* mPlayerGold;
         MyGUI::TextBox* mDestinations;
         MyGUI::TextBox* mSelect;
+        std::vector<MyGUI::Button*> mDestinationButtons;
 
         MyGUI::ScrollView* mDestinationsView;
 
@@ -39,6 +40,10 @@ namespace MWGui
         void updateLabels();
 
         void onReferenceUnavailable() override;
+
+    private:
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        int mControllerFocus;
     };
 }
 

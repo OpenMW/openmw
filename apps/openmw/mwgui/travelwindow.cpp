@@ -42,6 +42,13 @@ namespace MWGui
         mDestinations->setCoord(450 / 2 - mDestinations->getTextSize().width / 2, mDestinations->getTop(),
             mDestinations->getTextSize().width, mDestinations->getHeight());
         mSelect->setCoord(8, mSelect->getTop(), mSelect->getTextSize().width, mSelect->getHeight());
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mControllerButtons.a = "#{sTravel}";
+            mControllerButtons.b = "#{sBack}";
+        }
     }
 
     void TravelWindow::addDestination(const ESM::RefId& name, const ESM::Position& pos, bool interior)
@@ -100,6 +107,8 @@ namespace MWGui
         toAdd->setUserString("Destination", nameString);
         toAdd->setUserData(pos);
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onTravelButtonClick);
+        if (price <= playerGold)
+            mDestinationButtons.emplace_back(toAdd);
     }
 
     void TravelWindow::clearDestinations()
@@ -108,6 +117,7 @@ namespace MWGui
         mCurrentY = 0;
         while (mDestinationsView->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mDestinationsView->getChildAt(0));
+        mDestinationButtons.clear();
     }
 
     void TravelWindow::setPtr(const MWWorld::Ptr& actor)
@@ -141,6 +151,14 @@ namespace MWGui
         }
 
         updateLabels();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mDestinationButtons.size() > 0)
+                mDestinationButtons[0]->setStateSelected(true);
+        }
+
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
         // scrollbar is hidden
         mDestinationsView->setVisibleVScroll(false);
@@ -234,5 +252,46 @@ namespace MWGui
         else
             mDestinationsView->setViewOffset(
                 MyGUI::IntPoint(0, static_cast<int>(mDestinationsView->getViewOffset().top + _rel * 0.3f)));
+    }
+
+    bool TravelWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            onTravelButtonClick(mDestinationButtons[mControllerFocus]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelButtonClicked(mCancelButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mDestinationButtons.size() <= 1)
+                return true;
+
+            mDestinationButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus - 1, mDestinationButtons.size());
+            mDestinationButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mDestinationButtons.size() <= 1)
+                return true;
+
+            mDestinationButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus + 1, mDestinationButtons.size());
+            mDestinationButtons[mControllerFocus]->setStateSelected(true);
+        }
+
+        // Scroll the list to keep the active item in view
+        if (mControllerFocus <= 5)
+            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, 0));
+        else
+        {
+            const int lineHeight = Settings::gui().mFontSize + 2;
+            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (mControllerFocus - 5)));
+        }
+
+        return true;
     }
 }
