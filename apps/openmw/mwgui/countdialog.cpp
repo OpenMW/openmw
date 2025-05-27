@@ -41,7 +41,7 @@ namespace MWGui
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
         mSlider->setScrollRange(maxCount);
-        mItemText->setCaption(item);
+        mItemText->setCaptionWithReplacing(item);
 
         int width = std::max(mItemText->getTextSize().width + 160, 320);
         setCoord(viewSize.width / 2 - width / 2, viewSize.height / 2 - mMainWidget->getHeight() / 2, width,
@@ -55,6 +55,13 @@ namespace MWGui
         mItemEdit->setMinValue(1);
         mItemEdit->setMaxValue(maxCount);
         mItemEdit->setValue(maxCount);
+    }
+
+    void CountDialog::setCount(int count)
+    {
+        count = std::clamp(count, 1, (int)mSlider->getScrollRange());
+        mSlider->setScrollPosition(count - 1);
+        mItemEdit->setValue(count);
     }
 
     void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)

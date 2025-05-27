@@ -52,12 +52,14 @@ namespace MWGui
         MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
         int maxHeight = mScrollView->getHeight();
 
-        mRows = maxHeight / 42;
-        mRows = std::max(mRows, 1);
+        mRows = std::max(maxHeight / 42, 1);
         mItemCount = dragArea->getChildCount();
         bool showScrollbar = int(std::ceil(mItemCount / float(mRows))) > mScrollView->getWidth() / 42;
         if (showScrollbar)
+        {
             maxHeight -= 18;
+            mRows = std::max(maxHeight / 42, 1);
+        }
 
         for (unsigned int i = 0; i < mItemCount; ++i)
         {
@@ -262,6 +264,13 @@ namespace MWGui
                 focused->setControllerFocus(true);
                 if (mControllerTooltip)
                     MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
+
+                // Scroll the list to keep the active item in view
+                int column = newFocus / mRows;
+                if (column <= 3)
+                    mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+                else
+                    mScrollView->setViewOffset(MyGUI::IntPoint(-42 * (column - 3), 0));
             }
         }
     }
