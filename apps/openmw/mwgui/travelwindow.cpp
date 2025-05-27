@@ -258,7 +258,8 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            onTravelButtonClick(mDestinationButtons[mControllerFocus]);
+            if (mControllerFocus >= 0 && mControllerFocus < mDestinationButtons.size())
+                onTravelButtonClick(mDestinationButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {

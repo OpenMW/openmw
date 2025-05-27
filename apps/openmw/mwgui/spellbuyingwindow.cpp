@@ -78,7 +78,7 @@ namespace MWGui
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onSpellButtonClick);
         mSpellsWidgetMap.insert(std::make_pair(toAdd, spell.mId));
         if (price <= playerGold)
-            mSpellButtons.emplace_back(toAdd);
+            mSpellButtons.emplace_back(std::make_pair(toAdd, mSpellsWidgetMap.size()));
     }
 
     void SpellBuyingWindow::clearSpells()
@@ -143,7 +143,7 @@ namespace MWGui
         {
             mControllerFocus = 0;
             if (mSpellButtons.size() > 0)
-                mSpellButtons[0]->setStateSelected(true);
+                mSpellButtons[0].first->setStateSelected(true);
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
@@ -221,7 +221,8 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            onSpellButtonClick(mSpellButtons[mControllerFocus]);
+            if (mControllerFocus >= 0 && mControllerFocus < mSpellButtons.size())
+                onSpellButtonClick(mSpellButtons[mControllerFocus].first);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
@@ -232,25 +233,29 @@ namespace MWGui
             if (mSpellButtons.size() <= 1)
                 return true;
 
-            mSpellButtons[mControllerFocus]->setStateSelected(false);
+            mSpellButtons[mControllerFocus].first->setStateSelected(false);
             mControllerFocus = wrap(mControllerFocus - 1, mSpellButtons.size());
-            mSpellButtons[mControllerFocus]->setStateSelected(true);
+            mSpellButtons[mControllerFocus].first->setStateSelected(true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             if (mSpellButtons.size() <= 1)
                 return true;
 
-            mSpellButtons[mControllerFocus]->setStateSelected(false);
+            mSpellButtons[mControllerFocus].first->setStateSelected(false);
             mControllerFocus = wrap(mControllerFocus + 1, mSpellButtons.size());
-            mSpellButtons[mControllerFocus]->setStateSelected(true);
+            mSpellButtons[mControllerFocus].first->setStateSelected(true);
         }
 
         // Scroll the list to keep the active item in view
-        if (mControllerFocus <= 5)
+        int line = mSpellButtons[mControllerFocus].second;
+        if (line <= 5)
             mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSpellsView->setViewOffset(MyGUI::IntPoint(0, -10 * (mControllerFocus - 5)));
+        {
+            const int lineHeight = Settings::gui().mFontSize + 2;
+            mSpellsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+        }
 
         return true;
     }

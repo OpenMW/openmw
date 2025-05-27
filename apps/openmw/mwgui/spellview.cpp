@@ -122,7 +122,7 @@ namespace MWGui
             t->setCaption(spell.mName + captionSuffix);
             t->setTextAlign(MyGUI::Align::Left);
             adjustSpellWidget(spell, i, t);
-            mButtons.emplace_back(t);
+            mButtons.emplace_back(std::make_pair(t, i));
 
             if (!spell.mCostColumn.empty() && mShowCostColumn)
             {
@@ -339,7 +339,7 @@ namespace MWGui
             // Select the focused item, if any.
             if (mControllerFocus >= 0 && mControllerFocus < mButtons.size())
             {
-                onSpellSelected(mButtons.at(mControllerFocus));
+                onSpellSelected(mButtons[mControllerFocus].first);
                 MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
         }
@@ -348,12 +348,16 @@ namespace MWGui
             // Toggle info tooltip
             mControllerTooltip = !mControllerTooltip;
             if (mControllerTooltip && mControllerFocus >= 0 && mControllerFocus < mButtons.size())
-                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mButtons.at(mControllerFocus));
+                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mButtons[mControllerFocus].first);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
             mControllerFocus--;
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
             mControllerFocus++;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            mControllerFocus = std::max(0, mControllerFocus - 10);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            mControllerFocus = std::min(mControllerFocus + 10, (int)mButtons.size() - 1);
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
         {
             // Jump to first item in previous group
@@ -380,10 +384,7 @@ namespace MWGui
             }
         }
 
-        if (mControllerFocus < 0)
-            mControllerFocus = mButtons.size() - 1;
-        else if (mControllerFocus >= mButtons.size())
-            mControllerFocus = 0;
+        mControllerFocus = wrap(mControllerFocus, mButtons.size());
 
         if (prevFocus != mControllerFocus)
             updateControllerFocus(prevFocus, mControllerFocus);
@@ -396,19 +397,29 @@ namespace MWGui
 
         if (prevFocus >= 0 && prevFocus < mButtons.size())
         {
-            Gui::SharedStateButton* prev = mButtons.at(prevFocus);
+            Gui::SharedStateButton* prev = mButtons[prevFocus].first;
             if (prev)
                 prev->onMouseLostFocus(nullptr);
         }
 
         if (newFocus >= 0 && newFocus < mButtons.size())
         {
-            Gui::SharedStateButton* focused = mButtons.at(newFocus);
+            Gui::SharedStateButton* focused = mButtons[newFocus].first;
             if (focused)
             {
                 focused->onMouseSetFocus(nullptr);
                 if (mControllerTooltip)
                     MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
+
+                // Scroll the list to keep the active item in view
+                int line = mButtons[newFocus].second;
+                if (line <= 5)
+                    mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+                else
+                {
+                    const int lineHeight = focused->getHeight();
+                    mScrollView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+                }
             }
         }
     }

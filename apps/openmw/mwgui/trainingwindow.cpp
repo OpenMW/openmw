@@ -251,7 +251,8 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            onTrainingSelected(mTrainingButtons[mControllerFocus]);
+            if (mControllerFocus >= 0 && mControllerFocus < mTrainingButtons.size())
+                onTrainingSelected(mTrainingButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {

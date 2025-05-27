@@ -446,6 +446,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
+            mControllerFocus = std::clamp(mControllerFocus, 0, (int)mButtons.size() - 1);
             buttonActivated(mButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
