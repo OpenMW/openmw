@@ -182,7 +182,7 @@ namespace MWLua
                     if (index == LuaUi::Layer::count())
                         throw std::logic_error(
                             Misc::StringUtils::format("Couldn't insert before non-existent layer %s", beforeName));
-                    LuaUi::Layer::insert(index - 1, name, options);
+                    LuaUi::Layer::insert(index, name, options);
                 },
                 "Insert before UI layer");
         };
