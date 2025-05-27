@@ -522,18 +522,25 @@ namespace MWGui
         }
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        bool canUse = true;
+        auto type = ptr.getType();
+        bool isWeaponOrArmor = type == ESM::Weapon::sRecordId || type == ESM::Armor::sRecordId;
+        bool isBroken = ptr.getClass().hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0;
 
-        // We don't want to set OnPcEquip for items that need to be equipped; but cannot be equipped;
-        if (!ptr.getClass().getEquipmentSlots(ptr).first.empty()
-            && ptr.getClass().canBeEquipped(ptr, player).first == 0)
-            canUse = force && ptr.getClass().hasItemHealth(ptr) && ptr.getCellRef().getCharge() != 0;
+        // In vanilla, broken armor or weapons cannot be equipped
+        // tools with 0 charges is equippable
+        if (isBroken && isWeaponOrArmor)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
+            return;
+        }
+
+        bool canEquip = ptr.getClass().canBeEquipped(ptr, mPtr).first != 0;
+        bool shouldSetOnPcEquip = canEquip || force;
 
         // If the item has a script, set OnPCEquip or PCSkipEquip to 1
-        if (!script.empty() && canUse)
+        if (!script.empty() && shouldSetOnPcEquip)
         {
             // Ingredients, books and repair hammers must not have OnPCEquip set to 1 here
-            auto type = ptr.getType();
             bool isBook = type == ESM::Book::sRecordId;
             if (!isBook && type != ESM::Ingredient::sRecordId && type != ESM::Repair::sRecordId)
                 ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
@@ -543,25 +550,7 @@ namespace MWGui
         }
 
         std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
-
-        action->execute(player, !canUse);
-
-        if (mDragAndDrop->mIsOnDragAndDrop && mDragAndDrop->mItem.mBase == ptr)
-        {
-            if (canUse)
-            {
-                mDragAndDrop->finish();
-                // If item is ingredient or potion don't stop drag and drop
-                if ((ptr.getType() == ESM::Potion::sRecordId || ptr.getType() == ESM::Ingredient::sRecordId)
-                    && mDragAndDrop->mDraggedCount > 1)
-                {
-                    mSelectedItem = getModel()->getIndex(mDragAndDrop->mItem);
-                    dragItem(nullptr, mDragAndDrop->mDraggedCount - 1);
-                }
-            }
-            else
-                mDragAndDrop->drop(mTradeModel, mItemView);
-        }
+        action->execute(player);
 
         // Handles partial equipping (final part)
         if (mEquippedStackableCount.has_value())
@@ -592,6 +581,16 @@ namespace MWGui
         {
             MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
 
+            auto canEquip = ptr.getClass().canBeEquipped(ptr, mPtr);
+            if (canEquip.first == 0) // cannot equip
+            {
+                mDragAndDrop->drop(mTradeModel, mItemView); // also plays down sound
+                MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                return;
+            }
+
+            mDragAndDrop->finish();
+
             if (mDragAndDrop->mSourceModel != mTradeModel)
             {
                 // Move item to the player's inventory
@@ -615,6 +614,17 @@ namespace MWGui
             }
 
             MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
+
+            // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
+            // item
+            if ((ptr.getType() == ESM::Potion::sRecordId || ptr.getType() == ESM::Ingredient::sRecordId)
+                && mDragAndDrop->mDraggedCount > 1)
+            {
+                // Item can be provided from other window for example container.
+                // But after DragAndDrop::startDrag item automaticly always gets to player inventory.
+                mSelectedItem = getModel()->getIndex(mDragAndDrop->mItem);
+                dragItem(nullptr, mDragAndDrop->mDraggedCount - 1);
+            }
         }
         else
         {

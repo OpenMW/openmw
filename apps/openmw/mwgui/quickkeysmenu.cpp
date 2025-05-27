@@ -395,11 +395,10 @@ namespace MWGui
                 if (!equipmentSlots.empty())
                 {
                     const auto& itSlot = store.getSlot(equipmentSlots.front());
-                    // Morrowind.exe behaviour:
-                    // Only display item broken message if;
-                    // no item in the to-be-equipped slot
-                    // or broken quickkey item and currently equipped item id is different
-                    // It doesn't find a replacement
+                    // Morrowind.exe behavior:
+                    // Only display the "item is broken" message if:
+                    // - There is no item in the target equipment slot, or
+                    // - The quickkey item is broken and the currently equipped item has a different ID
                     if (itSlot == store.end() || (item.getCellRef().getRefId() != itSlot->getCellRef().getRefId()))
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
                 }
