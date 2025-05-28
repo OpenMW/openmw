@@ -219,6 +219,8 @@ namespace MWGui
         void onAttributeClicked(Widgets::MWAttributePtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        int mControllerFocus;
+        std::vector<Widgets::MWAttribute*> mAttributeButtons;
 
     private:
         ESM::RefId mAttributeId;
@@ -251,6 +253,8 @@ namespace MWGui
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        int mControllerFocus;
+        std::vector<Widgets::MWSkill*> mSkillButtons;
 
     private:
         ESM::RefId mSkillId;

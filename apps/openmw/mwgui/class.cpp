@@ -943,6 +943,7 @@ namespace MWGui
             widget->setAttributeId(attribute.mId);
             widget->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
             ToolTips::createAttributeToolTip(widget, attribute.mId);
+            mAttributeButtons.emplace_back(widget);
         }
 
         attributes->setVisibleVScroll(false);
@@ -954,8 +955,15 @@ namespace MWGui
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
 
-        mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sCancel}";
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mAttributeButtons.size() > 0)
+                mAttributeButtons[0]->setStateSelected(true);
+
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sCancel}";
+        }
     }
 
     // widget controls
@@ -979,12 +987,29 @@ namespace MWGui
 
     bool SelectAttributeDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
-        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus >= 0 && mControllerFocus < mAttributeButtons.size())
+                onAttributeClicked(mAttributeButtons[mControllerFocus]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onCancelClicked(nullptr);
-            return true;
         }
-        return false;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            mAttributeButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus - 1, mAttributeButtons.size());
+            mAttributeButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            mAttributeButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus + 1, mAttributeButtons.size());
+            mAttributeButtons[mControllerFocus]->setStateSelected(true);
+        }
+
+        return true;
     }
 
     /* SelectSkillDialog */
@@ -1016,6 +1041,7 @@ namespace MWGui
             skillWidget->setSkillId(skill.mId);
             skillWidget->eventClicked += MyGUI::newDelegate(this, &SelectSkillDialog::onSkillClicked);
             ToolTips::createSkillToolTip(skillWidget, skill.mId);
+            mSkillButtons.emplace_back(skillWidget);
         }
         for (const auto& [widget, coord] : specializations)
         {
@@ -1029,8 +1055,15 @@ namespace MWGui
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
 
-        mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sCancel}";
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mSkillButtons.size() > 0)
+                mSkillButtons[0]->setStateSelected(true);
+
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sCancel}";
+        }
     }
 
     SelectSkillDialog::~SelectSkillDialog() {}
@@ -1056,12 +1089,47 @@ namespace MWGui
 
     bool SelectSkillDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
-        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus >= 0 && mControllerFocus < mSkillButtons.size())
+                onSkillClicked(mSkillButtons[mControllerFocus]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onCancelClicked(nullptr);
-            return true;
         }
-        return false;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            mSkillButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus - 1, mSkillButtons.size());
+            mSkillButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            mSkillButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus + 1, mSkillButtons.size());
+            mSkillButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            mSkillButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus < 9)
+                mControllerFocus += 18;
+            else
+                mControllerFocus -= 9;
+            mSkillButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mSkillButtons[mControllerFocus]->setStateSelected(false);
+            if (mControllerFocus >= 18)
+                mControllerFocus -= 18;
+            else
+                mControllerFocus += 9;
+            mSkillButtons[mControllerFocus]->setStateSelected(true);
+        }
+
+        return true;
     }
 
     /* DescriptionDialog */
