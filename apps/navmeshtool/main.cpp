@@ -52,8 +52,8 @@
 
 namespace NavMeshTool
 {
-    namespace
-    {
+//    namespace
+//    {
         namespace bpo = boost::program_options;
 
         using StringsVector = std::vector<std::string>;
@@ -254,9 +254,9 @@ namespace NavMeshTool
 
             return 0;
         }
-    }
+//    }
 }
-
+/*
 #ifdef ANDROID
 extern "C" int SDL_main(int argc, char* argv[])
 #else
@@ -265,3 +265,4 @@ int main(int argc, char* argv[])
 {
     return Debug::wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
 }
+*/
