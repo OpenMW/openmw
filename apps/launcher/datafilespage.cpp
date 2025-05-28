@@ -365,15 +365,15 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     QIcon containsDataIcon(":/images/openmw-plugin.png");
 
-    QProgressDialog progressBar("Adding data directories", {}, 0, directories.count(), this);
+    QProgressDialog progressBar("Adding data directories", {}, 0, static_cast<int>(directories.size()), this);
     progressBar.setWindowModality(Qt::WindowModal);
-    progressBar.setValue(0);
 
     std::unordered_set<QString> visitedDirectories;
-    for (const Config::SettingValue& currentDir : directories)
+    for (qsizetype i = 0; i < directories.size(); ++i)
     {
-        progressBar.setValue(progressBar.value() + 1);
+        progressBar.setValue(static_cast<int>(i));
 
+        const Config::SettingValue& currentDir = directories.at(i);
         if (!visitedDirectories.insert(currentDir.value).second)
             continue;
 
@@ -436,6 +436,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         }
         item->setToolTip(tooltip.join('\n'));
     }
+    progressBar.setValue(progressBar.maximum());
     mSelector->sortFiles();
 
     QList<Config::SettingValue> selectedArchives = mGameSettings.getArchiveList();
