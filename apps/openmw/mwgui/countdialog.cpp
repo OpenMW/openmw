@@ -103,6 +103,10 @@ namespace MWGui
             onOkButtonClicked(mOkButton);
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCancelButtonClicked(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+            setCount(1);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+            setCount((int)mSlider->getScrollRange());
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
             MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
