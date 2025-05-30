@@ -38,19 +38,19 @@ void Config::GameSettings::validatePaths()
 
     mDataDirs.clear();
 
-    QProgressDialog progressBar("Validating paths", {}, 0, paths.count() + 1);
+    QProgressDialog progressBar("Validating paths", {}, 0, static_cast<int>(paths.size() + 1));
     progressBar.setWindowModality(Qt::WindowModal);
     progressBar.setValue(0);
 
     for (const auto& dataDir : paths)
     {
-        progressBar.setValue(progressBar.value() + 1);
         if (QDir(dataDir.value).exists())
         {
             SettingValue copy = dataDir;
             copy.value = QDir(dataDir.value).canonicalPath();
             mDataDirs.append(copy);
         }
+        progressBar.setValue(progressBar.value() + 1);
     }
 
     // Do the same for data-local
