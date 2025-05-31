@@ -726,7 +726,7 @@ namespace MWGui
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
-            mItemView->onControllerButtonEvent(arg.button);
+            mItemView->onControllerButton(arg.button);
         }
 
         return true;

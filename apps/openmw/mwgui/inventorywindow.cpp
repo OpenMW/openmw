@@ -914,7 +914,7 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            mItemView->onControllerButtonEvent(SDL_CONTROLLER_BUTTON_A);
+            mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
             // The following actions are done here, not in onItemSelectedFromSourceModel, because we
             // want the mouse to work even in controller mode.
             if (mGuiMode == MWGui::GM_Inventory && mDragAndDrop->mIsOnDragAndDrop)
@@ -946,7 +946,7 @@ namespace MWGui
             if (mGuiMode == MWGui::GM_Inventory)
             {
                 // Drop the item into the gameworld
-                mItemView->onControllerButtonEvent(SDL_CONTROLLER_BUTTON_A);
+                mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
                 if (mDragAndDrop->mIsOnDragAndDrop)
                     MWBase::Environment::get().getWindowManager()->getHud()->dropDraggedItem(0.5f, 0.5f);
             }
@@ -972,7 +972,7 @@ namespace MWGui
             if (mGuiMode == MWGui::GM_Inventory)
             {
                 // Unequip an item.
-                mItemView->onControllerButtonEvent(SDL_CONTROLLER_BUTTON_A);
+                mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
                 onBackgroundSelected(); // Drop on inventory background to unequip
             }
         }
@@ -1004,7 +1004,7 @@ namespace MWGui
         }
         else
         {
-            mItemView->onControllerButtonEvent(arg.button);
+            mItemView->onControllerButton(arg.button);
         }
 
         return true;

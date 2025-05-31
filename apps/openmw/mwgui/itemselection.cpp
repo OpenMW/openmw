@@ -77,7 +77,7 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCancelButtonClicked(nullptr);
         else
-            mItemView->onControllerButtonEvent(arg.button);
+            mItemView->onControllerButton(arg.button);
 
         return true;
     }

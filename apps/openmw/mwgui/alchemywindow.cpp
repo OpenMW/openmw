@@ -616,7 +616,7 @@ namespace MWGui
             else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
                 onIncreaseButtonTriggered();
             else
-                mItemView->onControllerButtonEvent(arg.button);
+                mItemView->onControllerButton(arg.button);
         }
 
         return true;

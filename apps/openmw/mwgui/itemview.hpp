@@ -35,7 +35,7 @@ namespace MWGui
         void setActiveControllerWindow(bool active);
         int getControllerFocus() { return mControllerFocus; }
         int getItemCount() { return mItemCount; }
-        void onControllerButtonEvent(const unsigned char button);
+        void onControllerButton(const unsigned char button);
 
     private:
         void initialiseOverride() override;

@@ -202,7 +202,7 @@ namespace MWGui
             updateControllerFocus(mControllerFocus, -1);
     }
 
-    void ItemView::onControllerButtonEvent(const unsigned char button)
+    void ItemView::onControllerButton(const unsigned char button)
     {
         if (!mItemCount)
             return;
