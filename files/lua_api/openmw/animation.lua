@@ -56,7 +56,7 @@
 
 ---
 -- Skips animations for one frame, equivalent to mwscript's SkipAnim.
--- Can be used only in local scripts on self.
+-- Can only be used on self.
 -- @function [parent=#animation] skipAnimationThisFrame
 -- @param openmw.core#GameObject actor
 
@@ -99,14 +99,14 @@
 
 ---
 -- Cancels and removes the animation group from the list of active animations.
--- Can be used only in local scripts on self.
+-- Can only be used on self.
 -- @function [parent=#animation] cancel
 -- @param openmw.core#GameObject actor
 -- @param #string groupName
 
 ---
 -- Enables or disables looping for the given animation group. Looping is enabled by default.
--- Can be used only in local scripts on self.
+-- Can only be used on self.
 -- @function [parent=#animation] setLoopingEnabled
 -- @param openmw.core#GameObject actor
 -- @param #string groupName
@@ -136,7 +136,7 @@
 ---
 -- Modifies the playback speed of an animation group.
 -- Note that this is not sticky and only affects the speed until the currently playing sequence ends.
--- Can be used only in local scripts on self.
+-- Can only be used on self.
 -- @function [parent=#animation] setSpeed
 -- @param openmw.core#GameObject actor
 -- @param #string groupName
@@ -144,7 +144,7 @@
 
 ---
 -- Clears all animations currently in the animation queue. This affects animations played by mwscript, @{openmw.animation#playQueued}, and ai packages, but does not affect animations played using @{openmw.animation#playBlended}.
--- Can be used only in local scripts on self.
+-- Can only be used on self.
 -- @function [parent=#animation] clearAnimationQueue
 -- @param openmw.core#GameObject actor
 -- @param #boolean clearScripted whether to keep animation with priority Scripted or not.
@@ -153,7 +153,7 @@
 -- Acts as a slightly extended version of MWScript's LoopGroup. Plays this animation exclusively
 -- until it ends, or the queue is cleared using #clearAnimationQueue. Use #clearAnimationQueue and the `startkey` option
 -- to imitate the behavior of LoopGroup's play modes.
--- Can be used only in local scripts on self.
+-- Can only be used on self.
 -- @function [parent=#animation] playQueued
 -- @param openmw.core#GameObject actor
 -- @param #string groupName
@@ -179,7 +179,7 @@
 -- instead of calling this directly. Note that the still hardcoded character controller may at any time and for any reason alter
 -- or cancel currently playing animations, so making your own calls to this function either directly or through the [AnimationController](interface_animation.html)
 -- interface may be of limited utility. For now, use openmw.animation#playQueued to script your own animations.
--- Can be used only in local scripts on self.
+-- Can only be used on self.
 -- @function [parent=#animation] playBlended
 -- @param openmw.core#GameObject actor
 -- @param #string groupName
@@ -218,7 +218,7 @@
 
 ---
 -- Plays a VFX on the actor.
--- Can be used only in local scripts on self. Can also be evoked by sending an AddVfx event to the target actor.
+-- Can only be used on self. Can also be evoked by sending an AddVfx event to the target actor.
 -- @function [parent=#animation] addVfx
 -- @param openmw.core#GameObject actor
 -- @param #string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
@@ -249,15 +249,15 @@
 
 
 ---
--- Removes a specific VFX
--- Can be used only in local scripts on self.
+-- Removes a specific VFX.
+-- Can only be used on self.
 -- @function [parent=#animation] removeVfx
 -- @param openmw.core#GameObject actor
 -- @param #number vfxId an integer ID that uniquely identifies the VFX to remove
 
 ---
--- Removes all vfx from the actor
--- Can be used only in local scripts on self.
+-- Removes all vfx from the actor.
+-- Can only be used on self.
 -- @function [parent=#animation] removeAllVfx
 -- @param openmw.core#GameObject actor
 

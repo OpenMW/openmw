@@ -46,7 +46,6 @@ namespace MWLua
         initObjectBindingsForGlobalScripts(context);
         initCellBindingsForGlobalScripts(context);
         return {
-            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.core", initCorePackage(context) },
             { "openmw.types", initTypesPackage(context) },
             { "openmw.world", initWorldPackage(context) },
