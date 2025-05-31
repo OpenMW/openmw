@@ -29,13 +29,15 @@ namespace MWGui
 
     void InventoryTabsOverlay::onTabClicked(MyGUI::Widget* sender)
     {
+        if (!MWBase::Environment::get().getWindowManager()->getJournalAllowed())
+            return;
+
         for (int i = 0; i < mTabs.size(); i++)
         {
             if (mTabs[i] == sender)
             {
-                Log(Debug::Verbose) << "InventoryTabsOverlay::onTabClicked " << i;
                 MWBase::Environment::get().getWindowManager()->setActiveControllerWindow(GM_Inventory, i);
-                //setTab(i);
+                setTab(i);
                 break;
             }
         }

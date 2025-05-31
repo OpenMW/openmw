@@ -514,6 +514,7 @@ namespace MWGui
         auto inventoryTabsOverlay = std::make_unique<InventoryTabsOverlay>();
         mInventoryTabsOverlay = inventoryTabsOverlay.get();
         mWindows.push_back(std::move(inventoryTabsOverlay));
+        mActiveControllerWindows[GM_Inventory] = 1; // Start on Inventory page
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
             {}, 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
@@ -927,12 +928,7 @@ namespace MWGui
 
             for (int i = 0; i < winCount; i++)
             {
-                activeIndex += delta;
-                if (activeIndex < 0)
-                    activeIndex = winCount - 1;
-                else if (activeIndex >= winCount)
-                    activeIndex = 0;
-
+                activeIndex = wrap(activeIndex + delta, winCount);
                 if (mGuiModeStates[mode].mWindows[activeIndex]->isVisible())
                     break;
             }
