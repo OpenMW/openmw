@@ -59,6 +59,12 @@ namespace MWGui
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onBuyButtonClicked);
         mTypeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onTypeButtonClicked);
         mName->eventEditSelectAccept += MyGUI::newDelegate(this, &EnchantingDialog::onAccept);
+
+        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.b = "#{sBack}";
+        mControllerButtons.y = "Cast Type";
+        mControllerButtons.l1 = "#{sItem}";
+        mControllerButtons.r1 = "#{sSoulGem}";
     }
 
     void EnchantingDialog::onOpen()
@@ -152,6 +158,7 @@ namespace MWGui
             mEnchanting.setSelfEnchanting(false);
             mEnchanting.setEnchanter(ptr);
             mBuyButton->setCaptionWithReplacing("#{sBuy}");
+            mControllerButtons.x = "#{sBuy}";
             mChanceLayout->setVisible(false);
             mPtr = ptr;
             setSoulGem(MWWorld::Ptr());
@@ -163,6 +170,7 @@ namespace MWGui
             mEnchanting.setSelfEnchanting(true);
             mEnchanting.setEnchanter(MWMechanics::getPlayer());
             mBuyButton->setCaptionWithReplacing("#{sCreate}");
+            mControllerButtons.x = "#{sCreate}";
             mChanceLayout->setVisible(Settings::game().mShowEnchantChance);
             mPtr = MWMechanics::getPlayer();
             setSoulGem(ptr);
@@ -381,5 +389,23 @@ namespace MWGui
                 updateEffectsView();
             }
         }
+    }
+
+    bool EnchantingDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancelButtonClicked(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+            onBuyButtonClicked(mBuyButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
+            onTypeButtonClicked(mTypeButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+            onSelectItem(mItemBox);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+            onSelectSoul(mSoulBox);
+        else
+            return EffectEditorBase::onControllerButtonEvent(arg);
+
+        return true;
     }
 }
