@@ -104,6 +104,8 @@ namespace SceneUtil
                 ("shadowTexture" + std::to_string(i - mShadowSettings->getBaseShadowTextureUnit())).c_str(),
                 static_cast<int>(i)));
         }
+        stateset.addUniform(new osg::Uniform("maximumShadowMapDistance", 0.00001f));
+        stateset.addUniform(new osg::Uniform("shadowFadeStart", 0.0f));
     }
 
     ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode,

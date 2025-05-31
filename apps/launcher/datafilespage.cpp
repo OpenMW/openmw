@@ -365,15 +365,15 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     QIcon containsDataIcon(":/images/openmw-plugin.png");
 
-    QProgressDialog progressBar("Adding data directories", {}, 0, directories.count(), this);
+    QProgressDialog progressBar("Adding data directories", {}, 0, static_cast<int>(directories.size()), this);
     progressBar.setWindowModality(Qt::WindowModal);
-    progressBar.setValue(0);
 
     std::unordered_set<QString> visitedDirectories;
-    for (const Config::SettingValue& currentDir : directories)
+    for (qsizetype i = 0; i < directories.size(); ++i)
     {
-        progressBar.setValue(progressBar.value() + 1);
+        progressBar.setValue(static_cast<int>(i));
 
+        const Config::SettingValue& currentDir = directories.at(i);
         if (!visitedDirectories.insert(currentDir.value).second)
             continue;
 
@@ -436,6 +436,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         }
         item->setToolTip(tooltip.join('\n'));
     }
+    progressBar.setValue(progressBar.maximum());
     mSelector->sortFiles();
 
     QList<Config::SettingValue> selectedArchives = mGameSettings.getArchiveList();
@@ -1001,7 +1002,11 @@ bool Launcher::DataFilesPage::showDeleteMessageBox(const QString& text)
 
 void Launcher::DataFilesPage::slotAddonDataChanged()
 {
-    QStringList selectedFiles = selectedFilePaths();
+    const ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
+    QStringList selectedFiles;
+    for (const ContentSelectorModel::EsmFile* item : items)
+        selectedFiles.append(item->filePath());
+
     if (mSelectedFiles != selectedFiles)
     {
         const std::lock_guard lock(mReloadCellsMutex);
@@ -1013,6 +1018,7 @@ void Launcher::DataFilesPage::slotAddonDataChanged()
 
 void Launcher::DataFilesPage::reloadCells()
 {
+    QStringList selectedFiles;
     std::unique_lock lock(mReloadCellsMutex);
 
     while (true)
@@ -1025,16 +1031,26 @@ void Launcher::DataFilesPage::reloadCells()
         if (!std::exchange(mReloadCells, false))
             continue;
 
-        QStringList selectedFiles = mSelectedFiles;
+        const QStringList newSelectedFiles = mSelectedFiles;
 
         lock.unlock();
 
-        CellNameLoader cellNameLoader;
-        QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
-        QStringList cellNamesList(set.begin(), set.end());
-        std::sort(cellNamesList.begin(), cellNamesList.end());
+        QStringList filteredFiles;
+        for (const QString& v : newSelectedFiles)
+            if (QFile::exists(v))
+                filteredFiles.append(v);
 
-        emit signalLoadedCellsChanged(std::move(cellNamesList));
+        if (selectedFiles != filteredFiles)
+        {
+            selectedFiles = std::move(filteredFiles);
+
+            CellNameLoader cellNameLoader;
+            QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
+            QStringList cellNamesList(set.begin(), set.end());
+            std::sort(cellNamesList.begin(), cellNamesList.end());
+
+            emit signalLoadedCellsChanged(std::move(cellNamesList));
+        }
 
         lock.lock();
 

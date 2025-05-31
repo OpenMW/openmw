@@ -160,26 +160,31 @@ namespace MWLua
             else
                 return LuaUtil::toLuaIndex(index);
         };
-        layersTable["insertAfter"] = [context](
-                                         std::string_view afterName, std::string_view name, const sol::object& opt) {
+        layersTable["insertAfter"] = [context](std::string afterName, std::string_view name, const sol::object& opt) {
             LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
-            size_t index = LuaUi::Layer::indexOf(afterName);
-            if (index == LuaUi::Layer::count())
-                throw std::logic_error(std::string("Layer not found"));
-            index++;
             context.mLuaManager->addAction(
-                [=, name = std::string(name)]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
+                [=]() {
+                    size_t index = LuaUi::Layer::indexOf(afterName);
+                    if (index == LuaUi::Layer::count())
+                        throw std::logic_error(
+                            Misc::StringUtils::format("Couldn't insert after non-existent layer %s", afterName));
+                    LuaUi::Layer::insert(index + 1, name, options);
+                },
+                "Insert after UI layer");
         };
-        layersTable["insertBefore"] = [context](
-                                          std::string_view beforename, std::string_view name, const sol::object& opt) {
+        layersTable["insertBefore"] = [context](std::string beforeName, std::string_view name, const sol::object& opt) {
             LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
-            size_t index = LuaUi::Layer::indexOf(beforename);
-            if (index == LuaUi::Layer::count())
-                throw std::logic_error(std::string("Layer not found"));
             context.mLuaManager->addAction(
-                [=, name = std::string(name)]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
+                [=]() {
+                    size_t index = LuaUi::Layer::indexOf(beforeName);
+                    if (index == LuaUi::Layer::count())
+                        throw std::logic_error(
+                            Misc::StringUtils::format("Couldn't insert before non-existent layer %s", beforeName));
+                    LuaUi::Layer::insert(index, name, options);
+                },
+                "Insert before UI layer");
         };
         sol::table layers = LuaUtil::makeReadOnly(layersTable);
         sol::table layersMeta = layers[sol::metatable_key];
