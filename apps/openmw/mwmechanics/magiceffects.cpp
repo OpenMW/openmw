@@ -121,11 +121,6 @@ namespace MWMechanics
         return *this;
     }
 
-    void MagicEffects::remove(const EffectKey& key)
-    {
-        mCollection.erase(key);
-    }
-
     void MagicEffects::add(const EffectKey& key, const EffectParam& param)
     {
         Collection::iterator iter = mCollection.find(key);
@@ -145,19 +140,6 @@ namespace MWMechanics
         mCollection[key].modifyBase(diff);
     }
 
-    void MagicEffects::setModifiers(const MagicEffects& effects)
-    {
-        for (Collection::iterator it = mCollection.begin(); it != mCollection.end(); ++it)
-        {
-            it->second.setModifier(effects.getOrDefault(it->first).getModifier());
-        }
-
-        for (Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
-        {
-            mCollection[it->first].setModifier(it->second.getModifier());
-        }
-    }
-
     EffectParam MagicEffects::getOrDefault(const EffectKey& key) const
     {
         return get(key).value_or(EffectParam());
@@ -172,40 +154,6 @@ namespace MWMechanics
             return iter->second;
         }
         return std::nullopt;
-    }
-
-    MagicEffects MagicEffects::diff(const MagicEffects& prev, const MagicEffects& now)
-    {
-        MagicEffects result;
-
-        // adding/changing
-        for (Collection::const_iterator iter(now.begin()); iter != now.end(); ++iter)
-        {
-            Collection::const_iterator other = prev.mCollection.find(iter->first);
-
-            if (other == prev.end())
-            {
-                // adding
-                result.add(iter->first, iter->second);
-            }
-            else
-            {
-                // changing
-                result.add(iter->first, iter->second - other->second);
-            }
-        }
-
-        // removing
-        for (Collection::const_iterator iter(prev.begin()); iter != prev.end(); ++iter)
-        {
-            Collection::const_iterator other = now.mCollection.find(iter->first);
-            if (other == now.end())
-            {
-                result.add(iter->first, EffectParam() - iter->second);
-            }
-        }
-
-        return result;
     }
 
     void MagicEffects::writeState(ESM::MagicEffects& state) const

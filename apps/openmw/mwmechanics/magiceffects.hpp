@@ -103,19 +103,12 @@ namespace MWMechanics
         void writeState(ESM::MagicEffects& state) const;
 
         void add(const EffectKey& key, const EffectParam& param);
-        void remove(const EffectKey& key);
 
         void modifyBase(const EffectKey& key, int diff);
-
-        /// Copy Modifier values from \a effects, but keep original mBase values.
-        void setModifiers(const MagicEffects& effects);
 
         EffectParam getOrDefault(const EffectKey& key) const;
         std::optional<EffectParam> get(const EffectKey& key) const;
         ///< This function can safely be used for keys that are not present.
-
-        static MagicEffects diff(const MagicEffects& prev, const MagicEffects& now);
-        ///< Return changes from \a prev to \a now.
     };
 
     std::string getMagicEffectString(
