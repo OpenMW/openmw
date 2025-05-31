@@ -6,6 +6,7 @@
 #include <MyGUI_ControllerRepeatClick.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_InputManager.h>
 #include <MyGUI_UString.h>
 
 #include <components/esm3/loadappa.hpp>
@@ -91,6 +92,15 @@ namespace MWGui
         mFilterValue->eventEditTextChange += MyGUI::newDelegate(this, &AlchemyWindow::onFilterEdited);
         mFilterType->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::switchFilterType);
 
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.x = "#{sCreate}";
+            mControllerButtons.y = "#{sMagicEffects}";
+            mControllerButtons.r3 = "#{sInfo}";
+        }
+
         center();
     }
 
@@ -109,6 +119,8 @@ namespace MWGui
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
+        if (Settings::gui().mControllerMenus && mNameEdit->getCaption().length() == 0)
+            mNameEdit->setCaption("Unknown potion");
         mAlchemy->setPotionName(mNameEdit->getCaption());
         int count = mAlchemy->countPotionsToBrew();
         count = std::min(count, mBrewCountEdit->getValue());
@@ -165,7 +177,12 @@ namespace MWGui
         std::string_view ingredient = wm->getGameSettingString("sIngredients", "Ingredients");
 
         if (mFilterType->getCaption() == ingredient)
-            mCurrentFilter = FilterType::ByName;
+        {
+            if (Settings::gui().mControllerMenus)
+                switchFilterType(mFilterType);
+            else
+                mCurrentFilter = FilterType::ByName;
+        }
         else
             mCurrentFilter = FilterType::ByEffect;
         updateFilters();
@@ -291,6 +308,9 @@ namespace MWGui
         initFilter();
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
+
+        if (Settings::gui().mControllerMenus)
+            mItemView->setActiveControllerWindow(true);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
@@ -527,5 +547,78 @@ namespace MWGui
         int currentCount = mBrewCountEdit->getValue();
         if (currentCount > 1)
             mBrewCountEdit->setValue(currentCount - 1);
+    }
+
+    bool AlchemyWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        bool isFilterListOpen = focus != nullptr && focus->getParent() != nullptr && focus->getParent()->getParent() == mFilterValue;
+
+        if (isFilterListOpen)
+        {
+            // When the filter list combo box is open, send all inputs to it.
+            if (arg.button == SDL_CONTROLLER_BUTTON_A)
+            {
+                // Select the highlighted entry in the combo box and close it.
+                int index = mFilterValue->getIndexSelected();
+                mFilterValue->setIndexSelected(index);
+                onFilterChanged(mFilterValue, index);
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit); // Close list
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_B || arg.button == SDL_CONTROLLER_BUTTON_Y)
+            {
+                // Close the list without selecting anything
+                mFilterValue->clearIndexSelected();
+                onFilterEdited(mFilterValue);
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit); // Close list
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        }
+        else
+        {
+            if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            {
+                // Remove active ingredients or close the window
+                if (mIngredients[3]->isUserString("ToolTipType"))
+                    onIngredientSelected(mIngredients[3]);
+                else if (mIngredients[2]->isUserString("ToolTipType"))
+                    onIngredientSelected(mIngredients[2]);
+                else if (mIngredients[1]->isUserString("ToolTipType"))
+                    onIngredientSelected(mIngredients[1]);
+                else if (mIngredients[0]->isUserString("ToolTipType"))
+                    onIngredientSelected(mIngredients[0]);
+                else
+                    onCancelButtonClicked(mCancelButton);
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+                onCreateButtonClicked(mCreateButton);
+            else if (arg.button == SDL_CONTROLLER_BUTTON_Y && mFilterValue->getItemCount() > 0)
+            {
+                // Magical effects/ingredients filter
+                if (mFilterValue->getIndexSelected() != MyGUI::ITEM_NONE)
+                {
+                    // Clear the active filter
+                    mFilterValue->clearIndexSelected();
+                    onFilterEdited(mFilterValue);
+                }
+                else
+                {
+                    // Open the combo box to choose the a filter
+                    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mFilterValue);
+                    MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+                }
+            }
+            else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+                onDecreaseButtonTriggered();
+            else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+                onIncreaseButtonTriggered();
+            else
+                mItemView->onControllerButtonEvent(arg.button);
+        }
+
+        return true;
     }
 }
