@@ -241,9 +241,6 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
         return false;
 
     EsmFile* file = item(index.row());
-    QString fileName = file->fileName();
-    bool success = false;
-
     switch (role)
     {
         case Qt::EditRole:
@@ -257,65 +254,23 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
                 file->setFileProperty(EsmFile::FileProperty_GameFile, list.at(i));
 
             emit dataChanged(index, index);
-
-            success = true;
+            return true;
         }
-        break;
-
         case Qt::UserRole + 1:
         {
-            success = (flags(index) & Qt::ItemIsEnabled);
-
-            if (success)
-            {
-                success = setCheckState(file, value.toBool());
-                emit dataChanged(index, index);
-            }
+            return isEnabled(index) && setCheckState(file, value.toBool());
         }
-        break;
-
         case Qt::CheckStateRole:
         {
             int checkValue = value.toInt();
-            bool setState = false;
-            if (file->builtIn() || file->fromAnotherConfigFile())
-            {
-                setState = false;
-                success = false;
-            }
-            else if (checkValue == Qt::Checked && !mCheckedFiles.contains(file))
-            {
-                setState = true;
-                success = true;
-            }
-            else if (checkValue == Qt::Checked && mCheckedFiles.contains(file))
-                setState = true;
-            else if (checkValue == Qt::Unchecked)
-                setState = true;
-
-            if (setState)
-            {
-                setCheckState(file, success);
-                emit dataChanged(index, index);
-            }
-            else
-                return success;
-
-            for (EsmFile* file2 : mFiles)
-            {
-                if (file2->gameFiles().contains(fileName, Qt::CaseInsensitive))
-                {
-                    QModelIndex idx = indexFromItem(file2);
-                    emit dataChanged(idx, idx);
-                }
-            }
-
-            success = true;
+            if (checkValue == Qt::Checked)
+                return mCheckedFiles.contains(file) || setCheckState(file, true);
+            if (checkValue == Qt::Unchecked)
+                return !mCheckedFiles.contains(file) || setCheckState(file, false);
         }
-        break;
     }
 
-    return success;
+    return false;
 }
 
 bool ContentSelectorModel::ContentModel::insertRows(int position, int rows, const QModelIndex& parent)
@@ -709,6 +664,7 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
         {
             // setCheckState already gracefully handles builtIn and fromAnotherConfigFile
             // as necessary, move plug-ins in visible list to match sequence of supplied filelist
+            // FIXME: setCheckState also does tons of other things which we don't want to happen
             int filePosition = indexFromItem(file).row();
             if (filePosition < previousPosition)
             {
@@ -802,38 +758,37 @@ bool ContentSelectorModel::ContentModel::setCheckState(const EsmFile* file, bool
     else
         mCheckedFiles.erase(file);
 
-    emit dataChanged(indexFromItem(file), indexFromItem(file));
+    QModelIndex fileIndex = indexFromItem(file);
+    emit dataChanged(fileIndex, fileIndex);
 
+    // FIXME: this should not happen per-file.
+    // Consider not hiding files if their game is disabled so that this is completely unnecessary.
     if (file->isGameFile())
         refreshModel();
 
-    // if we're checking an item, ensure all "upstream" files (dependencies) are checked as well.
+    // Check "upstream" files (dependencies) if the file is checked,
+    // uncheck downstream files if the file is unchecked.
+    // Update the data for downstream files unconditionally (load order warnings).
+    // FIXME: downstream files of toggled upstream/downstream files should be updated, but that would be slow.
     if (checkState)
     {
         for (const QString& upstreamName : file->gameFiles())
         {
             const EsmFile* upstreamFile = item(upstreamName);
-
-            if (!upstreamFile)
+            if (upstreamFile == nullptr || !mCheckedFiles.insert(upstreamFile).second)
                 continue;
-
-            mCheckedFiles.insert(upstreamFile);
-
-            emit dataChanged(indexFromItem(upstreamFile), indexFromItem(upstreamFile));
+            QModelIndex upstreamIndex = indexFromItem(upstreamFile);
+            emit dataChanged(upstreamIndex, upstreamIndex);
         }
     }
-    // otherwise, if we're unchecking an item (or the file is a game file) ensure all downstream files are unchecked.
-    else
+    for (const EsmFile* otherFile : mFiles)
     {
-        for (const EsmFile* downstreamFile : mFiles)
-        {
-            if (downstreamFile->gameFiles().contains(file->fileName(), Qt::CaseInsensitive))
-            {
-                mCheckedFiles.erase(downstreamFile);
-
-                emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
-            }
-        }
+        if (!otherFile->gameFiles().contains(file->fileName(), Qt::CaseInsensitive))
+            continue;
+        if (!checkState)
+            mCheckedFiles.erase(otherFile);
+        QModelIndex otherIndex = indexFromItem(otherFile);
+        emit dataChanged(otherIndex, otherIndex);
     }
 
     // Need to manually let Bloodmoon entry know if Tribunal is checked/unchecked
