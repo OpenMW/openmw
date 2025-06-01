@@ -722,6 +722,7 @@ namespace MWRender
 
         mAnimSources.push_back(animsrc);
 
+        mSupportedDirections.clear();
         for (const std::string& group : mAnimSources.back()->getTextKeys().getGroups())
             mSupportedAnimations.insert(group);
 
@@ -795,6 +796,7 @@ namespace MWRender
         mAccumCtrl = nullptr;
 
         mSupportedAnimations.clear();
+        mSupportedDirections.clear();
         mAnimSources.clear();
 
         mAnimVelocities.clear();
@@ -2012,20 +2014,29 @@ namespace MWRender
         std::span<const std::string_view> prefixes) const
     {
         MWWorld::MovementDirectionFlags result = 0;
-        for (const std::string_view animation : mSupportedAnimations)
+        for (const std::string_view prefix : prefixes)
         {
-            if (std::find_if(
-                    prefixes.begin(), prefixes.end(), [&](std::string_view v) { return animation.starts_with(v); })
-                == prefixes.end())
-                continue;
-            if (animation.ends_with("forward"))
-                result |= MWWorld::MovementDirectionFlag_Forward;
-            else if (animation.ends_with("back"))
-                result |= MWWorld::MovementDirectionFlag_Back;
-            else if (animation.ends_with("left"))
-                result |= MWWorld::MovementDirectionFlag_Left;
-            else if (animation.ends_with("right"))
-                result |= MWWorld::MovementDirectionFlag_Right;
+            auto it = std::find_if(mSupportedDirections.begin(), mSupportedDirections.end(),
+                [prefix](const auto& direction) { return direction.first == prefix; });
+            if (it == mSupportedDirections.end())
+            {
+                mSupportedDirections.emplace_back(prefix, 0);
+                it = mSupportedDirections.end() - 1;
+                for (const std::string_view animation : mSupportedAnimations)
+                {
+                    if (!animation.starts_with(prefix))
+                        continue;
+                    if (animation.ends_with("forward"))
+                        it->second |= MWWorld::MovementDirectionFlag_Forward;
+                    else if (animation.ends_with("back"))
+                        it->second |= MWWorld::MovementDirectionFlag_Back;
+                    else if (animation.ends_with("left"))
+                        it->second |= MWWorld::MovementDirectionFlag_Left;
+                    else if (animation.ends_with("right"))
+                        it->second |= MWWorld::MovementDirectionFlag_Right;
+                }
+            }
+            result |= it->second;
         }
         return result;
     }
