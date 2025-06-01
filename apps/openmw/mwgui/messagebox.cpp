@@ -461,9 +461,9 @@ namespace MWGui
             if (mButtons.size() == 2 && mControllerFocus == 0)
                 return true;
 
-            mButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
-            mButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
@@ -472,9 +472,9 @@ namespace MWGui
             if (mButtons.size() == 2 && mControllerFocus == mButtons.size() - 1)
                 return true;
 
-            mButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
-            mButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mButtons, mControllerFocus, true);
         }
 
         return true;

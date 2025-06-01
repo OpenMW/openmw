@@ -182,15 +182,15 @@ namespace MWGui
             onCancel(mCancelButton);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
-            mButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
-            mButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
-            mButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
-            mButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mButtons, mControllerFocus, true);
         }
 
         return true;

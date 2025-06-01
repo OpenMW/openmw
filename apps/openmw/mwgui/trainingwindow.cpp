@@ -263,18 +263,18 @@ namespace MWGui
             if (mTrainingButtons.size() <= 1)
                 return true;
 
-            mTrainingButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mTrainingButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus - 1, mTrainingButtons.size());
-            mTrainingButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mTrainingButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             if (mTrainingButtons.size() <= 1)
                 return true;
 
-            mTrainingButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mTrainingButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus + 1, mTrainingButtons.size());
-            mTrainingButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mTrainingButtons, mControllerFocus, true);
         }
 
         return true;

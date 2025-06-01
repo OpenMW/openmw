@@ -121,7 +121,7 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mButtons, mControllerFocus, true);
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.b = "#{sBack}";
             mControllerButtons.x = "#{sDone}";
@@ -574,22 +574,16 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
         {
-            mButtons[mControllerFocus]->setStateSelected(false);
-            if (mControllerFocus == 0)
-                mControllerFocus = mButtons.size() - 1;
-            else
-                mControllerFocus--;
-            mButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN ||
             arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
-            mButtons[mControllerFocus]->setStateSelected(false);
-            if (mControllerFocus == mButtons.size() - 1)
-                mControllerFocus = 0;
-            else
-                mControllerFocus++;
-            mButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
         }
 
         return true;

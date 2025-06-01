@@ -270,18 +270,18 @@ namespace MWGui
             if (mDestinationButtons.size() <= 1)
                 return true;
 
-            mDestinationButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mDestinationButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus - 1, mDestinationButtons.size());
-            mDestinationButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mDestinationButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             if (mDestinationButtons.size() <= 1)
                 return true;
 
-            mDestinationButtons[mControllerFocus]->setStateSelected(false);
+            setControllerFocus(mDestinationButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus + 1, mDestinationButtons.size());
-            mDestinationButtons[mControllerFocus]->setStateSelected(true);
+            setControllerFocus(mDestinationButtons, mControllerFocus, true);
         }
 
         // Scroll the list to keep the active item in view

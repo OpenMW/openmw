@@ -15,6 +15,7 @@ namespace MWGui
     class DragAndDrop;
 
     int wrap(int index, int max);
+    void setControllerFocus(std::vector<MyGUI::Button*> buttons, int index, bool selected);
 
     struct ControllerButtonStr
     {

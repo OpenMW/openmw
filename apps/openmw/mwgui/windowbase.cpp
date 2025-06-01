@@ -25,6 +25,12 @@ int MWGui::wrap(int index, int max)
         return index;
 }
 
+void MWGui::setControllerFocus(std::vector<MyGUI::Button*> buttons, int index, bool focused)
+{
+    if (index >= 0 && index < buttons.size())
+        buttons[index]->setStateSelected(focused);
+}
+
 WindowBase::WindowBase(std::string_view parLayout)
     : Layout(parLayout)
 {
