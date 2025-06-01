@@ -10,6 +10,7 @@
 #include <QPair>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QTimer>
 
 #include <algorithm>
 #include <mutex>
@@ -202,8 +203,14 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     // the addons and don't want to get signals of the system doing it during startup.
     connect(mSelector, &ContentSelectorView::ContentSelector::signalAddonDataChanged, this,
         &DataFilesPage::slotAddonDataChanged);
+
+    mReloadCellsTimer = new QTimer(this);
+    mReloadCellsTimer->setSingleShot(true);
+    mReloadCellsTimer->setInterval(200);
+    connect(mReloadCellsTimer, &QTimer::timeout, this, &DataFilesPage::onReloadCellsTimerTimeout);
+
     // Call manually to indicate all changes to addon data during startup.
-    slotAddonDataChanged();
+    onReloadCellsTimerTimeout();
 }
 
 Launcher::DataFilesPage::~DataFilesPage()
@@ -1001,6 +1008,11 @@ bool Launcher::DataFilesPage::showDeleteMessageBox(const QString& text)
 }
 
 void Launcher::DataFilesPage::slotAddonDataChanged()
+{
+    mReloadCellsTimer->start();
+}
+
+void Launcher::DataFilesPage::onReloadCellsTimerTimeout()
 {
     const ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
     QStringList selectedFiles;
