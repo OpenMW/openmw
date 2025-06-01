@@ -28,6 +28,13 @@ namespace MWGui
         getWidget(mGoldLabel, "PlayerGold");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onOkButtonClick);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mControllerButtons.a = "#{sRepair}";
+            mControllerButtons.b = "#{sBack}";
+        }
     }
 
     void MerchantRepair::setPtr(const MWWorld::Ptr& actor)
@@ -38,6 +45,7 @@ namespace MWGui
 
         while (mList->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mList->getChildAt(0));
+        mButtons.clear();
 
         const int lineHeight = Settings::gui().mFontSize + 2;
         int currentY = 0;
@@ -101,6 +109,15 @@ namespace MWGui
             button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);
             button->setUserString("ToolTipType", "ItemPtr");
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
+            if (price <= playerGold)
+                mButtons.emplace_back(std::make_pair(button, mButtons.size()));
+        }
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mButtons.size() > 0)
+                mButtons[0].first->setStateSelected(true);
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
@@ -157,4 +174,46 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
     }
 
+    bool MerchantRepair::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus >= 0 && mControllerFocus < mButtons.size())
+                onRepairButtonClick(mButtons[mControllerFocus].first);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onOkButtonClick(mOkButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+
+            mButtons[mControllerFocus].first->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            mButtons[mControllerFocus].first->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+
+            mButtons[mControllerFocus].first->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            mButtons[mControllerFocus].first->setStateSelected(true);
+        }
+
+        // Scroll the list to keep the active item in view
+        int line = mButtons[mControllerFocus].second;
+        if (line <= 5)
+            mList->setViewOffset(MyGUI::IntPoint(0, 0));
+        else
+        {
+            const int lineHeight = Settings::gui().mFontSize + 2;
+            mList->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+        }
+
+        return true;
+    }
 }
