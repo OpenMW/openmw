@@ -352,16 +352,14 @@ namespace LuaUtil
             return std::make_tuple(angles.z(), angles.y(), angles.x());
         };
 
+        sol::function luaUtilLoader = lua["loadInternalLib"]("util");
+        sol::table utils = luaUtilLoader();
+        for (const auto& [key, value] : utils)
+            util[key.as<std::string>()] = value;
+
         // Utility functions
-        util["clamp"] = [](double value, double from, double to) { return std::clamp(value, from, to); };
-        // NOTE: `util["clamp"] = std::clamp<float>` causes error 'AddressSanitizer: stack-use-after-scope'
-        util["normalizeAngle"] = &Misc::normalizeAngle;
         util["makeReadOnly"] = [](const sol::table& tbl) { return makeReadOnly(tbl, /*strictIndex=*/false); };
         util["makeStrictReadOnly"] = [](const sol::table& tbl) { return makeReadOnly(tbl, /*strictIndex=*/true); };
-        util["remap"] = [](double value, double min, double max, double newMin, double newMax) {
-            return newMin + (value - min) * (newMax - newMin) / (max - min);
-        };
-        util["round"] = [](double value) { return round(value); };
 
         if (lua["bit32"] != sol::nil)
         {
