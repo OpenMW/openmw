@@ -469,7 +469,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
             file->setFilePath(info.absoluteFilePath());
             if (add)
                 addFile(newFile.release());
-            setNew(file->fileName(), newfiles);
+            setNew(file, newfiles);
             continue;
         }
 
@@ -525,7 +525,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
             // Put the file in the table
             if (add)
                 addFile(newFile.release());
-            setNew(file->fileName(), newfiles);
+            setNew(file, newfiles);
         }
         catch (std::runtime_error& e)
         {
@@ -664,17 +664,12 @@ bool ContentSelectorModel::ContentModel::isNew(const QString& filepath) const
     return it.value();
 }
 
-void ContentSelectorModel::ContentModel::setNew(const QString& filepath, bool isNew)
+void ContentSelectorModel::ContentModel::setNew(const EsmFile* file, bool isNew)
 {
-    if (filepath.isEmpty())
-        return;
-
-    const EsmFile* file = item(filepath);
-
     if (!file)
         return;
 
-    mNewFiles[filepath] = isNew;
+    mNewFiles[file->fileName()] = isNew;
 }
 
 void ContentSelectorModel::ContentModel::setNonUserContent(const QStringList& fileList)
