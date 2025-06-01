@@ -213,6 +213,9 @@ namespace MWGui
 
     void InventoryWindow::setGuiMode(GuiMode mode)
     {
+        if (Settings::gui().mControllerMenus && mGuiMode == mode && isVisible())
+            return;
+
         mGuiMode = mode;
         const WindowSettingValues settings = getModeSettings(mGuiMode);
         setPinButtonVisible(mode == GM_Inventory && !Settings::gui().mControllerMenus);
