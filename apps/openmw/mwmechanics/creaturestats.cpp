@@ -193,15 +193,6 @@ namespace MWMechanics
         mLevel = level;
     }
 
-    void CreatureStats::modifyMagicEffects(const MagicEffects& effects)
-    {
-        bool recalc = effects.getOrDefault(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
-            != mMagicEffects.getOrDefault(ESM::MagicEffect::FortifyMaximumMagicka).getModifier();
-        mMagicEffects.setModifiers(effects);
-        if (recalc)
-            recalculateMagicka();
-    }
-
     void CreatureStats::setAiSetting(AiSetting index, Stat<int> value)
     {
         mAiSettings[static_cast<std::underlying_type_t<AiSetting>>(index)] = value;
