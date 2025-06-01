@@ -454,7 +454,7 @@ namespace MWGui
             if (mButtons.size() == 1)
                 buttonActivated(mButtons[0]);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
         {
             if (mButtons.size() <= 1)
                 return true;
@@ -465,7 +465,7 @@ namespace MWGui
             mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
             mButtons[mControllerFocus]->setStateSelected(true);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             if (mButtons.size() <= 1)
                 return true;

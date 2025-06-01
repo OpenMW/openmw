@@ -952,6 +952,9 @@ namespace MWGui
         for (int i = 0; i < winCount; i++)
             mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(i == activeIndex);
 
+        MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(
+            mGuiModeStates[mode].mWindows[activeIndex]->isGamepadCursorAllowed());
+
         updateControllerButtonsOverlay();
         setCursorActive(false);
 

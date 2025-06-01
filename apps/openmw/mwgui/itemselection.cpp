@@ -31,6 +31,7 @@ namespace MWGui
 
         mControllerButtons.a = "#{sSelect}";
         mControllerButtons.b = "#{sBack}";
+        mControllerButtons.r3 = "#{sInfo}";
     }
 
     bool ItemSelectionDialog::exit()
