@@ -125,6 +125,8 @@ namespace MWGui
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.b = "#{sBack}";
             mControllerButtons.x = "#{sDone}";
+            okButton->setCaption(
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
         }
     }
 

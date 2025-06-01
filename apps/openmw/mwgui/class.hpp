@@ -155,7 +155,6 @@ namespace MWGui
         ESM::RefId mCurrentClassId;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool mOkButtonFocus = true;
     };
 
     class SelectSpecializationDialog : public WindowModal

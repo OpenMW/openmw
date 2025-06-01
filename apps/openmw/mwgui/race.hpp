@@ -124,7 +124,6 @@ namespace MWGui
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
-        bool mOkButtonFocus = true;
     };
 }
 #endif

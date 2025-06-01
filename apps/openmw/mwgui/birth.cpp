@@ -60,10 +60,9 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mOkButton->setStateSelected(true);
+            mControllerButtons.lStick = "#{sMouse}";
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.b = "#{sBack}";
-            mControllerButtons.x = "#{sDone}";
         }
 
         updateBirths();
@@ -76,8 +75,17 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
+        {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+            mControllerButtons.x = "#{sNext}";
+        }
+        else if (Settings::gui().mControllerMenus)
+        {
+            okButton->setCaption(
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
+            mControllerButtons.x = "#{sDone}";
+        }
         else
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
@@ -280,14 +288,7 @@ namespace MWGui
 
     bool BirthDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            if (mOkButtonFocus)
-                onOkClicked(mOkButton);
-            else
-                onBackClicked(mBackButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onBackClicked(mBackButton);
         }
@@ -306,13 +307,6 @@ namespace MWGui
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->setKeyFocusWidget(mBirthList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
-        }
-        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus) ||
-            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
-        {
-            mOkButtonFocus = !mOkButtonFocus;
-            mOkButton->setStateSelected(mOkButtonFocus);
-            mBackButton->setStateSelected(!mOkButtonFocus);
         }
 
         return true;
