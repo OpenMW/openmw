@@ -105,6 +105,18 @@ namespace MWGui
         Styles mStyles;
         MyGUI::IntRect mRect;
 
+        void setColour(int section, int line, int run, MyGUI::Colour colour) const override
+        {
+            if (section < 0 || section >= mSections.size())
+                return;
+            if (line < 0 || line >= mSections[section].mLines.size())
+                return;
+            if (run < 0 || run >= mSections[section].mLines[line].mRuns.size())
+                return;
+
+            mSections[section].mLines[line].mRuns[run].mStyle->mNormalColour = colour;
+        }
+
         virtual ~TypesetBookImpl() {}
 
         Range addContent(const BookTypesetter::Utf8Span& text)

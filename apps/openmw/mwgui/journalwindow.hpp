@@ -34,6 +34,8 @@ namespace MWGui
 
         std::vector<MyGUI::Button*> mButtons;
         int mSelectedQuest = 0;
+        int mSelectedIndex = 0;
+        void setIndexControllerFocus(int index, bool focused);
     };
 }
 

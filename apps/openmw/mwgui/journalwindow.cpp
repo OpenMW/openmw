@@ -474,6 +474,9 @@ namespace
                 getPage(LeftTopicIndex)->showPage(mTopicIndexBook, 0);
                 getPage(RightTopicIndex)->showPage(mTopicIndexBook, 1);
             }
+
+            if (Settings::gui().mControllerMenus)
+                setIndexControllerFocus(mSelectedIndex, true);
         }
 
         void notifyJournal(MyGUI::Widget* _sender)
@@ -493,7 +496,7 @@ namespace
                 MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
                 if (listItem)
                 {
-                    listItem->setStateSelected(mButtons.size() == _selectedIndex);
+                    listItem->setTextColour(mButtons.size() == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
                     mButtons.push_back(listItem);
                 }
             }
@@ -518,7 +521,10 @@ namespace
             list->adjustSize();
 
             if (Settings::gui().mControllerMenus)
+            {
+                mSelectedQuest = 0;
                 addControllerButtons(list, mSelectedQuest);
+            }
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
@@ -688,8 +694,30 @@ namespace
             return &mControllerButtons;
         }
 
+        void setIndexControllerFocus(int index, bool focused)
+        {
+            int col, row;
+            bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
+            if (isRussian)
+            {
+                // Cyrillic = 30 (10 + 10 + 10)
+                col = index / 10;
+                row = index % 10;
+            }
+            else
+            {
+                // Latin = 26 (13 + 13)
+                col = index / 13;
+                row = index % 13;
+            }
+
+            mTopicIndexBook->setColour(col, row, 0, focused ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
+        }
+
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override
         {
+            bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
+
             if (arg.button == SDL_CONTROLLER_BUTTON_A) // A: Mouse click or Select
             {
                 if (mOptionsMode && mQuestMode)
@@ -703,6 +731,15 @@ namespace
                     // Choose a topic
                     Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
                     notifyTopicSelected(list->getItemNameAt(mSelectedQuest), 0);
+                }
+                else if (mOptionsMode)
+                {
+                    // Choose an index. Cyrillic capital A is a 0xd090 in UTF-8.
+                    // Words can not be started with characters 26 or 28.
+                    int russianOffset = 0xd090;
+                    if (mSelectedIndex >= 26) russianOffset++;
+                    if (mSelectedIndex >= 27) russianOffset++; // 27, not 28, because of skipping char 26
+                    notifyIndexLinkClicked(isRussian ? mSelectedIndex + russianOffset : mSelectedIndex + 'A');
                 }
                 return true;
             }
@@ -776,10 +813,41 @@ namespace
             {
                 if (mOptionsMode && (mQuestMode || mTopicsMode))
                 {
+                    if (mButtons.size() <= 1)
+                        return true;
+
                     // Scroll through the list of quests or topics
-                    mButtons[mSelectedQuest]->setStateSelected(false);
+                    mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
                     mSelectedQuest = MWGui::wrap(mSelectedQuest - 1, mButtons.size());
-                    mButtons[mSelectedQuest]->setStateSelected(true);
+                    mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
+                }
+                else if (mOptionsMode)
+                {
+                    setIndexControllerFocus(mSelectedIndex, false);
+                    if (isRussian)
+                    {
+                        // Cyrillic = 30 (10 + 10 + 10)
+                        if (mSelectedIndex == 0)
+                            mSelectedIndex = 9;
+                        else if (mSelectedIndex == 10)
+                            mSelectedIndex = 19;
+                        else if (mSelectedIndex == 20)
+                            mSelectedIndex = 29;
+                        else
+                            mSelectedIndex--;
+                    }
+                    else
+                    {
+                        // Latin = 26 (13 + 13)
+                        if (mSelectedIndex == 0)
+                            mSelectedIndex = 12;
+                        else if (mSelectedIndex == 13)
+                            mSelectedIndex = 25;
+                        else
+                            mSelectedIndex--;
+                    }
+                    setIndexControllerFocus(mSelectedIndex, true);
+                    setText(PageOneNum, 1); // Redraw the list
                 }
                 return true;
             }
@@ -787,10 +855,41 @@ namespace
             {
                 if (mOptionsMode && (mQuestMode || mTopicsMode))
                 {
+                    if (mButtons.size() <= 1)
+                        return true;
+
                     // Scroll through the list of quests or topics
-                    mButtons[mSelectedQuest]->setStateSelected(false);
+                    mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
                     mSelectedQuest = MWGui::wrap(mSelectedQuest + 1, mButtons.size());
-                    mButtons[mSelectedQuest]->setStateSelected(true);
+                    mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
+                }
+                else if (mOptionsMode)
+                {
+                    setIndexControllerFocus(mSelectedIndex, false);
+                    if (isRussian)
+                    {
+                        // Cyrillic = 30 (10 + 10 + 10)
+                        if (mSelectedIndex == 9)
+                            mSelectedIndex = 0;
+                        else if (mSelectedIndex == 19)
+                            mSelectedIndex = 10;
+                        else if (mSelectedIndex == 29)
+                            mSelectedIndex = 20;
+                        else
+                            mSelectedIndex++;
+                    }
+                    else
+                    {
+                        // Latin = 26 (13 + 13)
+                        if (mSelectedIndex == 12)
+                            mSelectedIndex = 0;
+                        else if (mSelectedIndex == 25)
+                            mSelectedIndex = 13;
+                        else
+                            mSelectedIndex++;
+                    }
+                    setIndexControllerFocus(mSelectedIndex, true);
+                    setText(PageOneNum, 1); // Redraw the list
                 }
                 return true;
             }
@@ -798,12 +897,44 @@ namespace
             {
                 if (!mOptionsMode)
                     notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
+                else if (mOptionsMode && !mQuestMode && !mTopicsMode)
+                {
+                    setIndexControllerFocus(mSelectedIndex, false);
+                    if (isRussian)
+                    {
+                        // Cyrillic = 30 (10 + 10 + 10)
+                        mSelectedIndex = (mSelectedIndex + 20) % 30;
+                    }
+                    else
+                    {
+                        // Latin = 26 (13 + 13)
+                        mSelectedIndex = (mSelectedIndex + 13) % 26;
+                    }
+                    setIndexControllerFocus(mSelectedIndex, true);
+                    setText(PageOneNum, 1); // Redraw the list
+                }
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
             {
                 if (!mOptionsMode)
                     notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
+                else if (mOptionsMode && !mQuestMode && !mTopicsMode)
+                {
+                    setIndexControllerFocus(mSelectedIndex, false);
+                    if (isRussian)
+                    {
+                        // Cyrillic = 30 (10 + 10 + 10)
+                        mSelectedIndex = (mSelectedIndex + 10) % 30;
+                    }
+                    else
+                    {
+                        // Latin = 26 (13 + 13)
+                        mSelectedIndex = (mSelectedIndex + 13) % 26;
+                    }
+                    setIndexControllerFocus(mSelectedIndex, true);
+                    setText(PageOneNum, 1); // Redraw the list
+                }
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) // LB: Previous Page

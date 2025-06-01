@@ -31,6 +31,9 @@ namespace MWGui
         /// text combined prior to pagination.
         virtual std::pair<unsigned int, unsigned int> getSize() const = 0;
 
+        /// Used to highlight journal indices
+        virtual void setColour(int section, int line, int run, MyGUI::Colour colour) const = 0;
+
         virtual ~TypesetBook() = default;
     };
 
