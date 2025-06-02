@@ -898,8 +898,7 @@ namespace MWGui
 
             int activeIndex = std::clamp(mActiveControllerWindows[mode], 0, (int)state.mWindows.size() - 1);
 
-            // REMOVEME
-            Log(Debug::Error) << "getActiveControllerWindow: " << state.mWindows.size() << " windows in state, mActiveControllerWindows[mode] = " << mActiveControllerWindows[mode] << ", activeIndex=" << activeIndex;
+            Log(Debug::Debug) << "Getting active controller window: mode=" << mode << ", " << state.mWindows.size() << " window(s), activeIndex=" << activeIndex;
 
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())
@@ -934,8 +933,7 @@ namespace MWGui
             }
         }
 
-        // REMOVEME
-        Log(Debug::Error) << "cycleActiveControllerWindow: mode=" << mode << ", activeIndex=" << activeIndex;
+        Log(Debug::Debug) << "Cycling active controller window: mode=" << mode << ", activeIndex=" << activeIndex;
 
         if (mActiveControllerWindows[mode] != activeIndex)
             setActiveControllerWindow(mode, activeIndex);
