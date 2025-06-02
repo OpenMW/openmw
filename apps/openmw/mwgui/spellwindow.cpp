@@ -275,7 +275,7 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
         else
-            mSpellView->onControllerButtonEvent(arg);
+            mSpellView->onControllerButton(arg.button);
 
         return true;
     }

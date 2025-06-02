@@ -57,7 +57,7 @@ namespace MWGui
 
         void resetScrollbars();
 
-        void onControllerButtonEvent(const SDL_ControllerButtonEvent& arg);
+        void onControllerButton(const unsigned char button);
 
     private:
         MyGUI::ScrollView* mScrollView;

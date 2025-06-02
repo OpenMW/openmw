@@ -327,14 +327,14 @@ namespace MWGui
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
     }
 
-    void SpellView::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    void SpellView::onControllerButton(const unsigned char button)
     {
         if (mButtons.empty())
             return;
 
         int prevFocus = mControllerFocus;
 
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        if (button == SDL_CONTROLLER_BUTTON_A)
         {
             // Select the focused item, if any.
             if (mControllerFocus >= 0 && mControllerFocus < mButtons.size())
@@ -343,22 +343,22 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
         {
             // Toggle info tooltip
             mControllerTooltip = !mControllerTooltip;
             if (mControllerTooltip && mControllerFocus >= 0 && mControllerFocus < mButtons.size())
                 MWBase::Environment::get().getInputManager()->warpMouseToWidget(mButtons[mControllerFocus].first);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
             mControllerFocus--;
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
             mControllerFocus++;
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
             mControllerFocus = std::max(0, mControllerFocus - 10);
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
             mControllerFocus = std::min(mControllerFocus + 10, (int)mButtons.size() - 1);
-        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        else if (button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
         {
             // Jump to first item in previous group
             int prevGroupIndex = 0;
@@ -371,7 +371,7 @@ namespace MWGui
             }
             mControllerFocus = prevGroupIndex;
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
         {
             // Jump to first item in next group
             for (int groupIndex : mGroupIndices)
