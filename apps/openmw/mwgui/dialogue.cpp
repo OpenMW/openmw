@@ -600,6 +600,11 @@ namespace MWGui
 
     void DialogueWindow::updateTopicsPane()
     {
+        const std::string focusedTopic =
+            Settings::gui().mControllerMenus && mControllerFocus < mTopicsList->getItemCount()
+                ? mTopicsList->getItemNameAt(mControllerFocus)
+                : "";
+
         mTopicsList->clear();
         for (auto& linkPair : mTopicLinks)
             mDeleteLater.push_back(std::move(linkPair.second));
@@ -654,6 +659,9 @@ namespace MWGui
             mKeywordSearch.seed(topicId, intptr_t(t.get()));
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
             mTopicLinks[topicId] = std::move(t);
+
+            if (keyword == focusedTopic)
+                mControllerFocus = mTopicsList->getItemCount() - 1;
         }
 
         redrawTopicsList();
