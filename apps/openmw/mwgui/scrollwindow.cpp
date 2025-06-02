@@ -143,10 +143,8 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCloseButtonClicked(mCloseButton);
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-            onKeyButtonPressed(nullptr, MyGUI::KeyCode::ArrowUp, 0);
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-            onKeyButtonPressed(nullptr, MyGUI::KeyCode::ArrowDown, 0);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            return false; // Fall through to keyboard
 
         return true;
     }
