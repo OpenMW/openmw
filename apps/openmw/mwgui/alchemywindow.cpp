@@ -95,7 +95,7 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.b = "#{sCancel}";
             mControllerButtons.x = "#{sCreate}";
             mControllerButtons.y = "#{sMagicEffects}";
             mControllerButtons.r3 = "#{sInfo}";

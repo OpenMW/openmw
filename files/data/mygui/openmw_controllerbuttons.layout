@@ -101,19 +101,6 @@
                 <Property key="ReadOnly" value="true"/>
             </Widget>
 
-            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnXImage">
-                <Property key="ImageTexture" value="textures\omw_steam_button_x.dds"/>
-                <Property key="Colour" value="#ccb589"/>
-                <Property key="Alpha" value="0.7"/>
-            </Widget>
-            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnXText">
-                <Property key="Caption" value=""/>
-                <Property key="TextAlign" value="Left"/>
-                <Property key="TextShadow" value="true"/>
-                <Property key="TextShadowColour" value="0 0 0"/>
-                <Property key="ReadOnly" value="true"/>
-            </Widget>
-
             <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnYImage">
                 <Property key="ImageTexture" value="textures\omw_steam_button_y.dds"/>
                 <Property key="Colour" value="#ccb589"/>
@@ -172,6 +159,19 @@
                 <Property key="Alpha" value="0.7"/>
             </Widget>
             <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnR2Text">
+                <Property key="Caption" value=""/>
+                <Property key="TextAlign" value="Left"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+                <Property key="ReadOnly" value="true"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnXImage">
+                <Property key="ImageTexture" value="textures\omw_steam_button_x.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+            </Widget>
+            <Widget type="TextBox" skin="HeaderText" align="Center" position="0 0 0 48" name="BtnXText">
                 <Property key="Caption" value=""/>
                 <Property key="TextAlign" value="Left"/>
                 <Property key="TextShadow" value="true"/>

@@ -170,7 +170,7 @@ namespace MWGui
         setCoord(400, 0, 400, 300);
 
         mControllerButtons.a = "#{sBuy}";
-        mControllerButtons.b = "#{sBack}";
+        mControllerButtons.b = "#{sCancel}";
         mControllerButtons.x = "#{sOffer}";
         mControllerButtons.r3 = "#{sInfo}";
         mControllerButtons.l2 = "#{sInventory}";

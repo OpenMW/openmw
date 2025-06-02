@@ -30,7 +30,7 @@ namespace MWGui
         center();
 
         mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sBack}";
+        mControllerButtons.b = "#{sCancel}";
         mControllerButtons.r3 = "#{sInfo}";
     }
 

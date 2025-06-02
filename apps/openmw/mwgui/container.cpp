@@ -58,7 +58,7 @@ namespace MWGui
         setCoord(200, 0, 600, 300);
 
         mControllerButtons.a = "#{sTake}";
-        mControllerButtons.b = "#{sBack}";
+        mControllerButtons.b = "#{sClose}";
         mControllerButtons.x = "#{sTakeAll}";
         mControllerButtons.r3 = "#{sInfo}";
         mControllerButtons.l2 = "#{sInventory}";

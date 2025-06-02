@@ -67,7 +67,7 @@ namespace MWGui
         mDeleteButton->setNeedKeyFocus(false);
 
         mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.b = "#{sCancel}";
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox* sender, size_t pos)

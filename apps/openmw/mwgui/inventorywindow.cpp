@@ -132,7 +132,6 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.b = "#{sBack}";
             mControllerButtons.r3 = "#{sInfo}";
         }
 
@@ -888,12 +887,14 @@ namespace MWGui
             case MWGui::GM_Companion:
             case MWGui::GM_Container:
                 mControllerButtons.a = "Put";
+                mControllerButtons.b = "#{sClose}";
                 mControllerButtons.x = "#{sTakeAll}";
                 mControllerButtons.y = "";
                 mControllerButtons.r2 = "#{sContainer}";
                 break;
             case MWGui::GM_Barter:
                 mControllerButtons.a = "#{sSell}";
+                mControllerButtons.b = "#{sCancel}";
                 mControllerButtons.x = "#{sOffer}";
                 mControllerButtons.y = "";
                 mControllerButtons.r2 = "#{sBarter}";
@@ -901,6 +902,7 @@ namespace MWGui
             case MWGui::GM_Inventory:
             default:
                 mControllerButtons.a = "#{sEquip}";
+                mControllerButtons.b = "#{sBack}";
                 mControllerButtons.x = "#{sDrop}";
                 mControllerButtons.y = "#{sUnequip}";
                 mControllerButtons.r2 = "";
