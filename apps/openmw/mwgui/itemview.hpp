@@ -35,6 +35,7 @@ namespace MWGui
         void setActiveControllerWindow(bool active);
         int getControllerFocus() { return mControllerFocus; }
         int getItemCount() { return mItemCount; }
+        bool isControllerTooltipVisible() { return mControllerTooltip; }
         void onControllerButton(const unsigned char button);
 
     private:

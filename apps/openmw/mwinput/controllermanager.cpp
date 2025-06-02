@@ -16,6 +16,7 @@
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwgui/inventorywindow.hpp"
 
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
@@ -252,6 +253,14 @@ namespace MWInput
             MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
             if (topWin)
             {
+                // When the inventory tooltip is visible, we don't actually want the A button to
+                // act like a mouse button; it should act normally.
+                if (treatAsMouse
+                        && arg.button == SDL_CONTROLLER_BUTTON_A
+                        && (MWGui::InventoryWindow *)topWin == winMgr->getInventoryWindow()
+                        && ((MWGui::InventoryWindow *)topWin)->isControllerTooltipVisible())
+                    treatAsMouse = false;
+
                 mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
 
                 // Fall through to mouse click
