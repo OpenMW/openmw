@@ -1326,19 +1326,37 @@ namespace MWMechanics
 
         const MWWorld::Ptr player = getPlayer();
         const MWBase::World* const world = MWBase::Environment::get().getWorld();
+
+        struct CacheEntry
+        {
+            MWWorld::Ptr mPtr;
+            float mMaxSpeed;
+            osg::Vec3f mHalfExtents;
+            Movement& mMovement;
+        };
+
+        std::vector<CacheEntry> cache;
+        cache.reserve(mActors.size());
         for (const Actor& actor : mActors)
         {
             if (actor.isInvalid())
                 continue;
             const MWWorld::Ptr& ptr = actor.getPtr();
+            const MWWorld::Class& cls = ptr.getClass();
+            cache.push_back({ ptr, cls.getMaxSpeed(ptr), world->getHalfExtents(ptr), cls.getMovementSettings(ptr) });
+        }
+
+        for (const CacheEntry& cached : cache)
+        {
+            const MWWorld::Ptr& ptr = cached.mPtr;
             if (ptr == player)
                 continue; // Don't interfere with player controls.
 
-            const float maxSpeed = ptr.getClass().getMaxSpeed(ptr);
+            const float maxSpeed = cached.mMaxSpeed;
             if (maxSpeed == 0.0)
                 continue; // Can't move, so there is no sense to predict collisions.
 
-            Movement& movement = ptr.getClass().getMovementSettings(ptr);
+            Movement& movement = cached.mMovement;
             const osg::Vec2f origMovement(movement.mPosition[0], movement.mPosition[1]);
             const bool isMoving = origMovement.length2() > 0.01;
             if (movement.mPosition[1] < 0)
@@ -1379,7 +1397,7 @@ namespace MWMechanics
             const osg::Vec2f baseSpeed = origMovement * maxSpeed;
             const osg::Vec3f basePos = ptr.getRefData().getPosition().asVec3();
             const float baseRotZ = ptr.getRefData().getPosition().rot[2];
-            const osg::Vec3f halfExtents = world->getHalfExtents(ptr);
+            const osg::Vec3f& halfExtents = cached.mHalfExtents;
             const float maxDistToCheck = isMoving ? maxDistForPartialAvoiding : maxDistForStrictAvoiding;
 
             float timeToCheck = maxTimeToCheck;
@@ -1392,15 +1410,13 @@ namespace MWMechanics
             float angleToApproachingActor = 0;
 
             // Iterate through all other actors and predict collisions.
-            for (const Actor& otherActor : mActors)
+            for (const CacheEntry& otherCached : cache)
             {
-                if (otherActor.isInvalid())
-                    continue;
-                const MWWorld::Ptr& otherPtr = otherActor.getPtr();
+                const MWWorld::Ptr& otherPtr = otherCached.mPtr;
                 if (otherPtr == ptr || otherPtr == currentTarget)
                     continue;
 
-                const osg::Vec3f otherHalfExtents = world->getHalfExtents(otherPtr);
+                const osg::Vec3f& otherHalfExtents = otherCached.mHalfExtents;
                 const osg::Vec3f deltaPos = otherPtr.getRefData().getPosition().asVec3() - basePos;
                 const osg::Vec2f relPos = Misc::rotateVec2f(osg::Vec2f(deltaPos.x(), deltaPos.y()), baseRotZ);
                 const float dist = deltaPos.length();
@@ -1413,8 +1429,7 @@ namespace MWMechanics
                 if (deltaPos.z() > halfExtents.z() * 2 || deltaPos.z() < -otherHalfExtents.z() * 2)
                     continue;
 
-                const osg::Vec3f speed = otherPtr.getClass().getMovementSettings(otherPtr).asVec3()
-                    * otherPtr.getClass().getMaxSpeed(otherPtr);
+                const osg::Vec3f speed = otherCached.mMovement.asVec3() * otherCached.mMaxSpeed;
                 const float rotZ = otherPtr.getRefData().getPosition().rot[2];
                 const osg::Vec2f relSpeed
                     = Misc::rotateVec2f(osg::Vec2f(speed.x(), speed.y()), baseRotZ - rotZ) - baseSpeed;
