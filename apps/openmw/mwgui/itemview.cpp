@@ -224,19 +224,29 @@ namespace MWGui
             mControllerTooltip = !mControllerTooltip;
             updateControllerFocus(-1, mControllerFocus);
         }
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP && mControllerFocus % mRows != 0)
-            mControllerFocus--;
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN && mControllerFocus % mRows != mRows - 1)
-            mControllerFocus++;
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mControllerFocus % mRows == 0)
+                mControllerFocus = std::min(mControllerFocus + mRows - 1, mItemCount - 1);
+            else
+                mControllerFocus--;
+        }
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mControllerFocus % mRows == mRows - 1 || mControllerFocus == mItemCount - 1)
+                mControllerFocus -= mControllerFocus % mRows;
+            else
+                mControllerFocus++;
+        }
         else if (button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mControllerFocus >= mRows)
             mControllerFocus -= mRows;
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mControllerFocus + mRows < mItemCount)
-            mControllerFocus += mRows;
-
-        if (mControllerFocus < 0)
-            mControllerFocus = 0;
-        else if (mControllerFocus >= mItemCount - 1)
-            mControllerFocus = mItemCount - 1;
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            if (mControllerFocus + mRows < mItemCount)
+                mControllerFocus += mRows;
+            else if (mControllerFocus / mRows != (mItemCount - 1) / mRows)
+                mControllerFocus = mItemCount - 1;
+        }
 
         if (prevFocus != mControllerFocus)
             updateControllerFocus(prevFocus, mControllerFocus);
