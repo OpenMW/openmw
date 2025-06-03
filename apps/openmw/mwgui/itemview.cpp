@@ -81,7 +81,7 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerTooltip = false;
+            MWBase::Environment::get().getWindowManager()->setControllerTooltip(false);
             mControllerFocus = std::clamp(mControllerFocus, 0, mItemCount - 1);
             updateControllerFocus(-1, mControllerFocus);
         }
@@ -190,10 +190,11 @@ namespace MWGui
     {
         mControllerActiveWindow = active;
 
-        if (mControllerTooltip)
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getControllerTooltip())
         {
-            MWBase::Environment::get().getWindowManager()->setCursorActive(false);
-            mControllerTooltip = false;
+            winMgr->setCursorActive(false);
+            winMgr->setControllerTooltip(false);
         }
 
         if (active)
@@ -221,7 +222,8 @@ namespace MWGui
         else if (button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
         {
             // Toggle info tooltip
-            mControllerTooltip = !mControllerTooltip;
+            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
             updateControllerFocus(-1, mControllerFocus);
         }
         else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
@@ -250,10 +252,15 @@ namespace MWGui
 
         if (prevFocus != mControllerFocus)
             updateControllerFocus(prevFocus, mControllerFocus);
+        else
+            updateControllerFocus(-1, mControllerFocus);
     }
 
     void ItemView::updateControllerFocus(int prevFocus, int newFocus)
     {
+        MWBase::Environment::get().getWindowManager()->setCursorVisible(
+            !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+
         if (!mItemCount)
             return;
 
@@ -272,8 +279,6 @@ namespace MWGui
             if (focused)
             {
                 focused->setControllerFocus(true);
-                if (mControllerTooltip)
-                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
 
                 // Scroll the list to keep the active item in view
                 int column = newFocus / mRows;
@@ -281,6 +286,9 @@ namespace MWGui
                     mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
                 else
                     mScrollView->setViewOffset(MyGUI::IntPoint(-42 * (column - 3), 0));
+
+                if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
+                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
             }
         }
     }

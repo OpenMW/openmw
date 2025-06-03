@@ -941,6 +941,9 @@ namespace MWGui
 
     void WindowManager::setActiveControllerWindow(GuiMode mode, int activeIndex)
     {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
         int winCount = mGuiModeStates[mode].mWindows.size();
         if (winCount == 0)
             return;
@@ -2588,6 +2591,14 @@ namespace MWGui
             }
         }
         return res;
+    }
+
+    void WindowManager::setControllerTooltip(bool enabled)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        mControllerTooltip = enabled;
     }
 
     void WindowManager::updateControllerButtonsOverlay()

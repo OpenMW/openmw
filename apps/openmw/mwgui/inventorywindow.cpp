@@ -880,11 +880,6 @@ namespace MWGui
         return osg::Vec2f(normalisedX * float(viewport.width - 1), (1.0 - normalisedY) * float(viewport.height - 1));
     }
 
-    bool InventoryWindow::isControllerTooltipVisible()
-    {
-        return mItemView->isControllerTooltipVisible();
-    }
-
     ControllerButtonStr* InventoryWindow::getControllerButtons()
     {
         switch (mGuiMode)

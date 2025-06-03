@@ -35,7 +35,6 @@ namespace MWGui
         void setActiveControllerWindow(bool active);
         int getControllerFocus() { return mControllerFocus; }
         int getItemCount() { return mItemCount; }
-        bool isControllerTooltipVisible() { return mControllerTooltip; }
         void onControllerButton(const unsigned char button);
 
     private:
@@ -56,7 +55,6 @@ namespace MWGui
         int mItemCount = 0;
         int mRows;
         int mControllerFocus = 0;
-        bool mControllerTooltip;
         bool mControllerActiveWindow;
         void updateControllerFocus(int prevFocus, int newFocus);
     };

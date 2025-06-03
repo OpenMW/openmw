@@ -396,6 +396,8 @@ namespace MWGui
         WindowBase* getActiveControllerWindow() override;
         void cycleActiveControllerWindow(bool next) override;
         void setActiveControllerWindow(GuiMode mode, int activeIndex) override;
+        const bool getControllerTooltip() const override { return mControllerTooltip; }
+        void setControllerTooltip(bool enabled) override;
         void updateControllerButtonsOverlay() override;
 
         // Used in Lua bindings
@@ -508,6 +510,7 @@ namespace MWGui
         std::vector<GuiMode> mGuiModes;
         // The active window for controller mode for each GUI mode.
         std::map<GuiMode, int> mActiveControllerWindows;
+        bool mControllerTooltip;
 
         std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
 

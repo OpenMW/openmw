@@ -257,8 +257,7 @@ namespace MWInput
                 // act like a mouse button; it should act normally.
                 if (treatAsMouse
                         && arg.button == SDL_CONTROLLER_BUTTON_A
-                        && (MWGui::InventoryWindow *)topWin == winMgr->getInventoryWindow()
-                        && ((MWGui::InventoryWindow *)topWin)->isControllerTooltipVisible())
+                        && winMgr->getControllerTooltip())
                     treatAsMouse = false;
 
                 mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
@@ -363,6 +362,11 @@ namespace MWInput
                     && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
                 {
                     // Treat the left stick like a cursor, which is the default behavior.
+                    if (winMgr->getControllerTooltip())
+                    {
+                        winMgr->setControllerTooltip(false);
+                        winMgr->setCursorVisible(true);
+                    }
                     return false;
                 }
 
