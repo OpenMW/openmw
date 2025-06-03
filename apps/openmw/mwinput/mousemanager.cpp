@@ -267,7 +267,7 @@ namespace MWInput
     void MouseManager::warpMouseToWidget(MyGUI::Widget* widget)
     {
         float widgetX = widget->getAbsoluteCoord().left + widget->getWidth() / 2;
-        float widgetY = widget->getAbsoluteCoord().top + widget->getHeight() - 30;
+        float widgetY = widget->getAbsoluteCoord().top + widget->getHeight() / 4;
         if (std::abs(mGuiCursorX - widgetX) > 1 || std::abs(mGuiCursorY - widgetY) > 1)
         {
             mGuiCursorX = widgetX;
